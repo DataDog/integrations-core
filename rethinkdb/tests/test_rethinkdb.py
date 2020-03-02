@@ -5,11 +5,11 @@ import copy
 from typing import Iterator, Set
 
 import pytest
-import rethinkdb
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.rethinkdb import RethinkDBCheck
+from datadog_checks.rethinkdb._exceptions import CouldNotConnect
 from datadog_checks.rethinkdb._types import Instance, Metric
 
 from ._types import ServerName
@@ -27,13 +27,13 @@ from .common import (
     SERVER_STATISTICS_METRICS,
     SERVER_STATUS_METRICS,
     SERVER_TAGS,
-    TLS_SERVER,
-    TLS_CLIENT_CERT,
     SERVERS,
     TABLE_STATISTICS_METRICS,
     TABLE_STATUS_METRICS,
     TABLE_STATUS_SERVICE_CHECKS,
     TABLE_STATUS_SHARDS_METRICS,
+    TLS_CLIENT_CERT,
+    TLS_SERVER,
 )
 
 
@@ -216,7 +216,7 @@ def test_cannot_connect_unknown_host(aggregator, instance):
 
     check = RethinkDBCheck('rethinkdb', {}, [instance])
 
-    with pytest.raises(rethinkdb.errors.ReqlDriverError):
+    with pytest.raises(CouldNotConnect):
         check.check(instance)
 
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.CRITICAL, count=1, tags=[])

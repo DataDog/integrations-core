@@ -9,6 +9,8 @@ import rethinkdb
 
 from datadog_checks.base import ConfigurationError
 
+from ._connections import Connection, RethinkDBConnection
+from ._exceptions import CouldNotConnect
 from ._metrics.config import collect_config_totals
 from ._metrics.current_issues import collect_current_issues
 from ._metrics.statistics import (
@@ -54,7 +56,8 @@ class Config:
         self._password = password  # type: Optional[str]
         self._tls_ca_cert = tls_ca_cert  # type: Optional[str]
 
-        self._query_engine = QueryEngine(r=rethinkdb.r)
+        self._r = rethinkdb.r
+        self._query_engine = QueryEngine(r=self._r)
 
         self._collect_funcs = [
             collect_config_totals,
@@ -66,7 +69,7 @@ class Config:
             collect_table_status,
             collect_system_jobs,
             collect_current_issues,
-        ]  # type: List[Callable[[QueryEngine, rethinkdb.net.Connection], Iterator[Metric]]]
+        ]  # type: List[Callable[[QueryEngine, Connection], Iterator[Metric]]]
 
     @property
     def host(self):
@@ -79,23 +82,28 @@ class Config:
         return self._port
 
     def connect(self):
-        # type: () -> rethinkdb.net.Connection
+        # type: () -> Connection
         host = self._host
         port = self._port
         user = self._user
         password = self._password
-        tls_ca_cert = self._tls_ca_cert
+        ssl = {'ca_certs': self._tls_ca_cert} if self._tls_ca_cert is not None else None
 
-        return self._query_engine.connect(host, port, user=user, password=password, tls_ca_cert=tls_ca_cert)
+        try:
+            conn = self._r.connect(host=host, port=port, user=user, password=password, ssl=ssl)
+        except rethinkdb.errors.ReqlDriverError as exc:
+            raise CouldNotConnect(exc)
+
+        return RethinkDBConnection(conn)
 
     def collect_metrics(self, conn):
-        # type: (rethinkdb.net.Connection) -> Iterator[Metric]
+        # type: (Connection) -> Iterator[Metric]
         for collect in self._collect_funcs:
             for metric in collect(self._query_engine, conn):
                 yield metric
 
     def get_connected_server_version(self, conn):
-        # type: (rethinkdb.net.Connection) -> str
+        # type: (Connection) -> str
         """
         Return the version of RethinkDB run by the server at the other end of the connection, in SemVer format.
 

@@ -8,12 +8,12 @@ from __future__ import absolute_import
 from contextlib import contextmanager
 from typing import Any, Callable, Iterator
 
-import rethinkdb
-
 from datadog_checks.base import AgentCheck
 
 from ._config import Config
-from ._types import ConnectionServer, Instance, Metric
+from ._connections import Connection, ConnectionServer
+from ._exceptions import CouldNotConnect
+from ._types import Instance, Metric
 
 SERVICE_CHECK_CONNECT = 'rethinkdb.can_connect'
 
@@ -32,7 +32,7 @@ class RethinkDBCheck(AgentCheck):
 
     @contextmanager
     def connect_submitting_service_checks(self, config):
-        # type: (Config) -> Iterator[rethinkdb.net.Connection]
+        # type: (Config) -> Iterator[Connection]
         try:
             with config.connect() as conn:
                 server = conn.server()  # type: ConnectionServer
@@ -49,7 +49,7 @@ class RethinkDBCheck(AgentCheck):
                 else:
                     self.service_check(SERVICE_CHECK_CONNECT, self.OK, tags=tags)
 
-        except rethinkdb.errors.ReqlDriverError as exc:
+        except CouldNotConnect as exc:
             message = 'Could not connect to RethinkDB server: {!r}'.format(exc)
             self.log.error(message)
             self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, message=message)

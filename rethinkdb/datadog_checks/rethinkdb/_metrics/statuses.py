@@ -1,17 +1,14 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from __future__ import absolute_import
-
 import datetime as dt
 import logging
 import time
 from typing import Iterator
 
-import rethinkdb
-
 from datadog_checks.base import AgentCheck
 
+from .._connections import Connection
 from .._queries import QueryEngine
 from .._types import Metric
 
@@ -19,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def collect_table_status(engine, conn):
-    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
+    # type: (QueryEngine, Connection) -> Iterator[Metric]
     """
     Collect metrics about table statuses.
 
@@ -89,7 +86,7 @@ def collect_table_status(engine, conn):
 
 
 def collect_server_status(engine, conn):
-    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
+    # type: (QueryEngine, Connection) -> Iterator[Metric]
     """
     Collect metrics about server statuses.
 

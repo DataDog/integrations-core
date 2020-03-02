@@ -1,13 +1,10 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from __future__ import absolute_import
-
 import logging
 from typing import Iterator
 
-import rethinkdb
-
+from .._connections import Connection
 from .._queries import QueryEngine
 from .._types import Metric
 
@@ -15,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def collect_config_totals(engine, conn):
-    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
+    # type: (QueryEngine, Connection) -> Iterator[Metric]
     """
     Collect aggregated metrics about cluster configuration.
 

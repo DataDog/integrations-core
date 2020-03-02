@@ -6,13 +6,10 @@ Collect metrics about system statistics.
 
 See: https://rethinkdb.com/docs/system-stats/
 """
-from __future__ import absolute_import
-
 import logging
 from typing import Iterator
 
-import rethinkdb
-
+from .._connections import Connection
 from .._queries import QueryEngine
 from .._types import Metric
 
@@ -20,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def collect_cluster_statistics(engine, conn):
-    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
+    # type: (QueryEngine, Connection) -> Iterator[Metric]
     logger.debug('collect_cluster_statistics')
 
     stats = engine.query_cluster_stats(conn)
@@ -51,7 +48,7 @@ def collect_cluster_statistics(engine, conn):
 
 
 def collect_server_statistics(engine, conn):
-    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
+    # type: (QueryEngine, Connection) -> Iterator[Metric]
     logger.debug('collect_server_statistics')
 
     for server, stats in engine.query_servers_with_stats(conn):
@@ -121,7 +118,7 @@ def collect_server_statistics(engine, conn):
 
 
 def collect_table_statistics(engine, conn):
-    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
+    # type: (QueryEngine, Connection) -> Iterator[Metric]
     logger.debug('collect_table_statistics')
 
     for table, stats in engine.query_tables_with_stats(conn):
@@ -149,7 +146,7 @@ def collect_table_statistics(engine, conn):
 
 
 def collect_replica_statistics(engine, conn):
-    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
+    # type: (QueryEngine, Connection) -> Iterator[Metric]
     logger.debug('collect_replica_statistics')
 
     for table, server, replica, stats in engine.query_replicas_with_stats(conn):

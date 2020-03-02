@@ -10,7 +10,7 @@ from datadog_checks.rethinkdb._metrics.system_jobs import collect_system_jobs
 from datadog_checks.rethinkdb._queries import QueryEngine
 from datadog_checks.rethinkdb._types import BackfillJob, IndexConstructionJob
 
-from .utils import MockConnection, MockRethinkDB
+from .utils import MockConnection
 
 pytestmark = pytest.mark.unit
 
@@ -51,9 +51,9 @@ def test_jobs_metrics():
 
     mock_rows = [mock_backfill_job_row, mock_index_construction_job_row, mock_unknown_job_row]
 
-    mock_engine = QueryEngine(r=MockRethinkDB(connection_type=MockConnection))
-    conn = mock_engine.connect(host='testserver', port=28015, rows=mock_rows)
-    metrics = list(collect_system_jobs(mock_engine, conn))
+    engine = QueryEngine()
+    conn = MockConnection(rows=mock_rows)
+    metrics = list(collect_system_jobs(engine, conn))
 
     assert metrics == [
         {
