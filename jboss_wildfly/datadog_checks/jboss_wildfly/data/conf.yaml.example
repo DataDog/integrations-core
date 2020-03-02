@@ -25,7 +25,8 @@ instances:
     password: <PASSWORD>
 
     ## @param process_name_regex - string - optional
-    ## XXXXXXXXXXX
+    ## Instead of specifying a host and port, the Agent can connect using the attach API.
+    ## This requires the JDK to be installed and the path to tools.jar to be set below in tools_jar_path parameter.
     #
     # process_name_regex: .*process_name.*
 
@@ -37,7 +38,7 @@ instances:
     # tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
 
     ## @param name - string - optional
-    ## XXXXXXXXXXX
+    ## Set your instance name.
     #
     # name: jboss_instance
 
