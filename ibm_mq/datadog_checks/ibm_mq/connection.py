@@ -4,8 +4,9 @@
 
 import logging
 
-from datadog_checks.ibm_mq.config import IBMMQConfig
 from pymqi import QueueManager
+
+from datadog_checks.ibm_mq.config import IBMMQConfig
 
 try:
     import pymqi
