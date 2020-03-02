@@ -29,7 +29,7 @@ def test_cisco(aggregator):
         pytest.param({'password': common.PASSWORD}, id='login with password'),
         pytest.param(
             {'cert_name': 'foo', 'cert_key': open(os.path.join(common.CERTIFICATE_DIR, 'cert.pem'), 'rb').read()},
-            id= 'login with cert',
+            id='login with cert',
         ),
     ],
 )
@@ -91,5 +91,5 @@ def test_config(aggregator, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = CiscoACICheck(common.CHECK_NAME, {}, [instance])
 
-    actual_options = {k:v for k,v in check.http.options.items() if k in expected_http_kwargs}
+    actual_options = {k: v for k, v in check.http.options.items() if k in expected_http_kwargs}
     assert expected_http_kwargs == actual_options
