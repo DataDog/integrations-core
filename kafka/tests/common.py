@@ -36,7 +36,7 @@ Rate type metrics that do not work in our e2e:
 
 KAFKA_E2E_METRICS = [
     "kafka.net.handler.avg.idle.pct.rate",
-    # Request metrics :
+    # Request metrics:
     "kafka.request.channel.queue.size",
     "kafka.request.fetch_consumer.time.99percentile",
     "kafka.request.fetch_consumer.time.avg",
@@ -58,7 +58,7 @@ KAFKA_E2E_METRICS = [
     "kafka.replication.offline_partitions_count",
     "kafka.replication.partition_count",
     "kafka.replication.under_replicated_partitions",
-    # At this time JVM metrics cannot be excluded from JMX integrations:
+    # JVM metrics:
     "jvm.buffer_pool.direct.capacity",
     "jvm.buffer_pool.direct.count",
     "jvm.buffer_pool.direct.used",

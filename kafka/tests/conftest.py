@@ -24,6 +24,4 @@ def dd_environment():
             'KAFKA_HOST': HOST_IP
         },
     ):
-        config = load_jmx_config()
-        config['init_config']['collect_default_metrics'] = False
-        yield config, {'use_jmx': True}
+        yield load_jmx_config(), {'use_jmx': True}
