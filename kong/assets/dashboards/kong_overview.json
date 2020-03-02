@@ -15,7 +15,7 @@
         "title": null, 
         "verified": true
     }, 
-    "description": "## Kong\n\nThis dashboard provides a high-level overview of your Kong instances so you can monitor metrics related to connections, table counts, and total requests.\n\nFor further reading on monitoring Airflow, see:\n[Official Kong integration docs](https://docs.datadoghq.com/integrations/kong/)\n\nClone this template to make changes and add your own graphs and widgets.", 
+    "description": "## Kong\n\nThis dashboard provides a high-level overview of your Kong instances so you can monitor metrics related to connections, table counts, and total requests.\n\nFor further reading on monitoring Kong, see:\n[Official Kong integration docs](https://docs.datadoghq.com/integrations/kong/)\n\nClone this template to make changes and add your own graphs and widgets.", 
     "disableCog": false, 
     "disableEditing": false, 
     "id": 959028, 
