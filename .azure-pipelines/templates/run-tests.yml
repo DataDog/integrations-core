@@ -5,6 +5,9 @@ parameters:
   test_e2e: false
   benchmark: false
 
+variables:
+  buildConfiguration: 'Release'
+
 steps:
 - ${{ if eq(parameters.test, 'true') }}:
   - script: ddev test --cov --junit ${{ parameters.check }}
