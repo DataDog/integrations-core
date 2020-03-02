@@ -25,7 +25,7 @@ from datadog_checks.base.errors import CheckException
 
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
 from .config import InstanceConfig, ParsedMetric, ParsedMetricTag, ParsedTableMetric
-from .utils import get_profile_definition, oid_pattern_specificity, recursively_expand_base_profiles
+from .utils import OIDPrinter, get_profile_definition, oid_pattern_specificity, recursively_expand_base_profiles
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
 CounterBasedGauge64, ZeroBasedCounter64 = builder.MibBuilder().importSymbols(
@@ -226,7 +226,7 @@ class SnmpCheck(AgentCheck):
         for result_oid, value in all_binds:
             metric, indexes = config.resolve_oid(result_oid)
             results[metric][indexes] = value
-        self.log.debug('Raw results: %s', results)
+        self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
         # Freeze the result
         results.default_factory = None
         return results, error
@@ -245,11 +245,11 @@ class SnmpCheck(AgentCheck):
         while first_oid < len(oids):
             try:
                 oids_batch = oids[first_oid : first_oid + self.oid_batch_size]
-                self.log.debug('Running SNMP command get on OIDS %s', oids_batch)
+                self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
                 error_indication, error_status, _, var_binds = next(
                     config.call_cmd(hlapi.getCmd, *oids_batch, lookupMib=enforce_constraints)
                 )
-                self.log.debug('Returned vars: %s', var_binds)
+                self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
 
                 self.raise_on_error_indication(error_indication, config.ip_address)
 
@@ -266,7 +266,9 @@ class SnmpCheck(AgentCheck):
                 if missing_results:
                     # If we didn't catch the metric using snmpget, try snmpnext
                     # Don't walk through the entire MIB, stop at end of table
-                    self.log.debug('Running SNMP command getNext on OIDS %s', missing_results)
+                    self.log.debug(
+                        'Running SNMP command getNext on OIDS: %s', OIDPrinter(missing_results, with_values=False)
+                    )
                     binds_iterator = config.call_cmd(
                         hlapi.nextCmd,
                         *missing_results,
@@ -293,10 +295,10 @@ class SnmpCheck(AgentCheck):
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
         oid = hlapi.ObjectType(hlapi.ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2)))
-        self.log.debug('Running SNMP command on OID %r', oid)
+        self.log.debug('Running SNMP command on OID: %r', OIDPrinter((oid,), with_values=False))
         error_indication, _, _, var_binds = next(config.call_cmd(hlapi.nextCmd, oid, lookupMib=False))
         self.raise_on_error_indication(error_indication, config.ip_address)
-        self.log.debug('Returned vars: %s', var_binds)
+        self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
         return var_binds[0][1].prettyPrint()
 
     def _profile_for_sysobject_oid(self, sys_object_oid):
@@ -319,7 +321,7 @@ class SnmpCheck(AgentCheck):
         error = None  # type: Optional[str]
 
         for error_indication, error_status, _, var_binds_table in binds_iterator:
-            self.log.debug('Returned vars: %s', var_binds_table)
+            self.log.debug('Returned vars: %s', OIDPrinter(var_binds_table, with_values=True))
 
             self.raise_on_error_indication(error_indication, config.ip_address)
 

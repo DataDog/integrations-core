@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 
 import csv
+import io
 import os
 import tempfile
 
@@ -41,12 +42,14 @@ DOGWEB_DASHBOARDS = ('sqlserver', 'tomcat', 'pusher', 'sigsci', 'marathon', 'ibm
     required=False,
     help='Output to file (it will be overwritten), you can pass "tmp" to generate a temporary file',
 )
-def catalog(checks, out_file):
+@click.option('--markdown', '-m', is_flag=True, help='Output to markdown instead of CSV')
+def catalog(checks, out_file, markdown):
     if not out_file:
-        fd = None
+        fd = io.StringIO()
     elif out_file == 'tmp':
         # Default w+b mode does not work with CSV writer in python 3
-        tmp = tempfile.NamedTemporaryFile(prefix='integration_catalog', suffix='.csv', delete=False, mode='w')
+        suffix = '.md' if markdown else '.csv'
+        tmp = tempfile.NamedTemporaryFile(prefix='integration_catalog', suffix=suffix, delete=False, mode='w')
         fd = tmp.file
         echo_info(f"Catalog is being saved to `{tmp.name}`")
     else:
@@ -66,7 +69,7 @@ def catalog(checks, out_file):
 
     integration_catalog = []
 
-    for check in checks:
+    for check in sorted(checks):
         has_logs = False
         is_prometheus = False
         is_http = False
@@ -103,16 +106,32 @@ def catalog(checks, out_file):
         }
         integration_catalog.append(entry)
 
-    if not fd:
-        for entry in integration_catalog:
-            echo_info(str(entry))
+    if markdown:
+        dict_to_markdown(fd, integration_catalog)
     else:
         dict_to_csv(fd, integration_catalog)
 
+    if not out_file:
+        print(fd.getvalue())
 
-def dict_to_csv(csvfile, contents: list):
-    writer = csv.DictWriter(csvfile, fieldnames=CSV_COLUMNS)
+    fd.close()
+
+
+def dict_to_csv(buffer, contents: list):
+    writer = csv.DictWriter(buffer, fieldnames=CSV_COLUMNS)
     writer.writeheader()
     for entry in contents:
         writer.writerow(entry)
-    csvfile.close()
+
+
+def dict_to_markdown(buffer, contents: list):
+    def write_line(row: list):
+        return '| {} |\n'.format(' | '.join(row))
+
+    buffer.write(write_line(CSV_COLUMNS))
+    border = ['-' * len(name) for name in CSV_COLUMNS]
+    buffer.write(write_line(border))
+
+    for row in contents:
+        ordered = [str(row.get(elem, '')) for elem in CSV_COLUMNS]
+        buffer.write(write_line(ordered))

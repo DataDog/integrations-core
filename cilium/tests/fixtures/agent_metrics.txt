@@ -1082,3 +1082,6 @@ cilium_unreachable_health_endpoints 0
 # HELP cilium_unreachable_nodes Number of nodes that cannot be reached
 # TYPE cilium_unreachable_nodes gauge
 cilium_unreachable_nodes 1
+# HELP cilium_version Cilium version
+# TYPE cilium_version gauge
+cilium_version{version="1.6.90"} 0
