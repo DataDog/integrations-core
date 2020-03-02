@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
+from copy import deepcopy
 
 import pytest
 from mock import MagicMock
@@ -23,16 +24,16 @@ def test_cisco(aggregator):
 
 
 @pytest.mark.parametrize(
-    'case, api_kwargs',
+    ' api_kwargs',
     [
-        ('login with password', {'password': common.PASSWORD}),
-        (
-            'login with cert',
+        pytest.param({'password': common.PASSWORD}, id='login with password'),
+        pytest.param(
             {'cert_name': 'foo', 'cert_key': open(os.path.join(common.CERTIFICATE_DIR, 'cert.pem'), 'rb').read()},
+            id='login with cert',
         ),
     ],
 )
-def test_recover_from_expired_token(aggregator, case, api_kwargs):
+def test_recover_from_expired_token(aggregator, api_kwargs):
     # First api answers with 403 to force the check to re-authenticate
     unauthentified_response = MagicMock(status_code=403)
     # Api answer when a request is being made to the login endpoint
@@ -75,3 +76,20 @@ def test_recover_from_expired_token(aggregator, case, api_kwargs):
     # Assert cookie to check the session changed
     assert get_calls[0].kwargs['headers']['Cookie'] == 'cookie'
     assert get_calls[1].kwargs['headers']['Cookie'] != 'cookie'
+
+
+@pytest.mark.parametrize(
+    'extra_config, expected_http_kwargs',
+    [
+        pytest.param({'pwd': 'foobar'}, {'auth': (common.USERNAME, 'foobar'), 'verify': True}, id='new auth config'),
+        pytest.param({'ssl_verify': True}, {'verify': True}, id='legacy ssl verify config True'),
+        pytest.param({'ssl_verify': False}, {'verify': False}, id='legacy ssl verify config False'),
+    ],
+)
+def test_config(aggregator, extra_config, expected_http_kwargs):
+    instance = deepcopy(common.CONFIG_WITH_TAGS)
+    instance.update(extra_config)
+    check = CiscoACICheck(common.CHECK_NAME, {}, [instance])
+
+    actual_options = {k: v for k, v in check.http.options.items() if k in expected_http_kwargs}
+    assert expected_http_kwargs == actual_options
