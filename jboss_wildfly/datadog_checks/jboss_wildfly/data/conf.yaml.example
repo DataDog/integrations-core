@@ -25,7 +25,7 @@ instances:
     password: <PASSWORD>
 
     ## @param process_name_regex - string - optional
-    ## Instead of specifying a host, and port. The agent can connect using the attach api.
+    ## Instead of specifying a host and port, the Agent can connect using the attach API.
     ## This requires the JDK to be installed and the path to tools.jar to be set below in tools_jar_path parameter.
     #
     # process_name_regex: .*process_name.*

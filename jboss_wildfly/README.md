@@ -8,7 +8,7 @@ This check monitors [JBoss][1] and [WildFly][2] applications.
 
 ### Installation
 
-The JBoss/WildFly check is included in the [Datadog Agent][3] package. Depending on your server setup (particularly when using the `remote+http` JMX scheme), you may need to specify a custom jar to connect to the server. Place the jar on the same machine as your agent, and add the path to the `custom_jar_paths` option.
+The JBoss/WildFly check is included in the [Datadog Agent][3] package. Depending on your server setup (particularly when using the `remote+http` JMX scheme), you may need to specify a custom JAR to connect to the server. Place the JAR on the same machine as your Agent, and add the path to the `custom_jar_paths` option.
 
 ### Configuration
 
