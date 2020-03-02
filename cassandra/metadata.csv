@@ -31,6 +31,8 @@ cassandra.max_partition_size,gauge,10,byte,,The size of the largest compacted pa
 cassandra.max_row_size,gauge,10,byte,,The size of the largest compacted row.,0,cassandra,max row
 cassandra.mean_partition_size,gauge,10,byte,,The average size of compacted partition.,0,cassandra,mean partition
 cassandra.mean_row_size,gauge,10,byte,,The average size of compacted rows.,0,cassandra,mean row
+cassandra.net.down_endpoint_count,gauge,10,node,,The number of unhealthy nodes in the cluster.,-1,cassandra,down endpoint count
+cassandra.net.up_endpoint_count,gauge,10,node,,The number of healthy nodes in the cluster.,1,cassandra,up endpoint count
 cassandra.pending_compactions,gauge,10,task,,The number of pending compactions.,-1,cassandra,pending compactions
 cassandra.pending_flushes.count,gauge,10,flush,,The number of pending flushes.,-1,cassandra,pending flushes
 cassandra.pending_tasks,gauge,10,task,,The number of pending tasks for the thread pool.,-1,cassandra,pending tasks
