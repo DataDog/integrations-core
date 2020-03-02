@@ -1,5 +1,5 @@
 {
-  "display_name": "Tenable Nessus",
+  "display_name": "Tenable",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "tenable",
