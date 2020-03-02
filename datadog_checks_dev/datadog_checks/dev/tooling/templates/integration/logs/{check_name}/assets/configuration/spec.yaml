@@ -1,0 +1,10 @@
+name: {integration_name}
+files:
+- name: {integration_name}.yaml
+  options:
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/{integration_name}.log
+      source: {integration_name}
+      service: <SERVICE>
