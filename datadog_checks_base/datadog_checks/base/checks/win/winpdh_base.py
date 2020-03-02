@@ -35,7 +35,6 @@ class PDHBaseCheck(AgentCheck):
         self._metrics = {}
         self._tags = {}
         self.refresh_counters = is_affirmative(self.instance.get('refresh_counters', True))
-        self.key = hash_mutable(self.instance)
         self._metrics = []
         # TODO Remove once signature is restored to (self, name, init_config, instances, counter_list)
         counter_list = kwargs.get('counter_list', args[-1])
@@ -101,7 +100,7 @@ class PDHBaseCheck(AgentCheck):
             self.log.debug("Exception in PDH init: %s", str(e))
             raise
 
-        if self.key is None or not self._metrics:
+        if not self._metrics or not hash_mutable(self.instance):
             raise AttributeError('No valid counters to collect')
 
     def _get_netresource(self, remote_machine):
