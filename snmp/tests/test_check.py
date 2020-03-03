@@ -1841,10 +1841,7 @@ def test_generic_host_resources(aggregator):
         'snmp.hrSystemMaxProcesses',
     ]
     for metric in sys_metrics:
-        aggregator.assert_metric(metric,
-                                 metric_type=aggregator.GAUGE,
-                                 tags=common_tags,
-                                 count=1)
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
     aggregator.assert_metric('snmp.hrStorageAllocationUnits', count=2)
     aggregator.assert_metric('snmp.hrStorageSize', count=2)
@@ -1895,4 +1892,3 @@ def test_palo_alto(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
-
