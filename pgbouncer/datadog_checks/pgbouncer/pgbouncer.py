@@ -7,7 +7,7 @@ from six.moves.urllib.parse import urlparse
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
-from datadog_checks.errors import ConfigurationError
+from datadog_checks.base import ConfigurationError
 from datadog_checks.pgbouncer.metrics import DATABASES_METRICS, POOLS_METRICS, STATS_METRICS
 
 
@@ -22,7 +22,7 @@ class PgBouncer(AgentCheck):
     SERVICE_CHECK_NAME = 'pgbouncer.can_connect'
 
     def __init__(self, name, init_config, instances):
-        AgentCheck.__init__(self, name, init_config, instances)
+        super(PgBouncer, self).__init__(name, init_config, instances)
         self.host = self.instance.get('host', '')
         self.port = self.instance.get('port', '')
         self.user = self.instance.get('username', '')

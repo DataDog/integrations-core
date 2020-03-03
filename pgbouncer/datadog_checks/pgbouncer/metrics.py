@@ -1,4 +1,4 @@
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 RATE = AgentCheck.rate
 GAUGE = AgentCheck.gauge
