@@ -1003,6 +1003,17 @@ def test_metadata(aggregator, datadog_agent):
         datadog_agent.assert_metadata('test:123', version_metadata)
 
 
+def test_do_not_crash_on_version_collection_failure():
+    running_apps = {'foo': ('bar', 'http://foo.bar/'), 'foo2': ('bar', 'http://foo.bar/')}
+    rest_requests_to_json = mock.MagicMock(side_effect=[RequestException, []])
+
+    c = SparkCheck('spark', {}, [INSTANCE_STANDALONE])
+
+    with mock.patch.object(c, '_rest_request_to_json', rest_requests_to_json):
+        # ensure no exception is raised by calling collect_version
+        assert not c._collect_version(running_apps, [])
+
+
 @pytest.mark.unit
 def test_ssl():
     run_ssl_server()
