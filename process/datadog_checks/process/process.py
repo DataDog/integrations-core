@@ -19,7 +19,7 @@ from datadog_checks.utils.platform import Platform
 
 DEFAULT_AD_CACHE_DURATION = 120
 DEFAULT_PID_CACHE_DURATION = 120
-DEFAULT_PROC_LIST_CACHE_DURATION = 120
+DEFAULT_SHARED_PROCESS_LIST_CACHE_DURATION = 120
 
 
 ATTR_TO_METRIC = {
@@ -137,7 +137,7 @@ class ProcessListCache(object):
     elements = []
     lock = ReadWriteLock()
     last_ts = 0
-    cache_duration = DEFAULT_PROC_LIST_CACHE_DURATION
+    cache_duration = DEFAULT_SHARED_PROCESS_LIST_CACHE_DURATION
 
     @staticmethod
     def read_lock():
@@ -186,7 +186,7 @@ class ProcessCheck(AgentCheck):
         self.process_cache = defaultdict(dict)
 
         self.process_list.cache_duration = int(
-            init_config.get('proc_list_cache_duration', DEFAULT_PROC_LIST_CACHE_DURATION)
+            init_config.get('shared_process_list_cache_duration', DEFAULT_SHARED_PROCESS_LIST_CACHE_DURATION)
         )
 
     def should_refresh_proclist(self):
