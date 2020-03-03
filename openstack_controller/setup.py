@@ -18,7 +18,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 
-CHECKS_BASE_REQ = 'datadog-checks-base>=6.1.0'
+CHECKS_BASE_REQ = 'datadog-checks-base>=11.0.0'
 
 
 setup(

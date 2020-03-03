@@ -1,5 +1,25 @@
 # CHANGELOG - vsphere
 
+## 5.0.2 / 2020-02-29
+
+* [Fixed] Disconnect vSphere connection to the server on refresh. See [#5929](https://github.com/DataDog/integrations-core/pull/5929).
+
+## 5.0.1 / 2020-02-28
+
+* [Fixed] Remove some unnecessary warnings. See [#5916](https://github.com/DataDog/integrations-core/pull/5916).
+* [Fixed] Add tags section in conf.yaml. See [#5911](https://github.com/DataDog/integrations-core/pull/5911).
+
+## 5.0.0 / 2020-02-22
+
+* [Added] Add `tls_ignore_warning` option. See [#5777](https://github.com/DataDog/integrations-core/pull/5777).
+* [Fixed] Submit collected vsphere tags as host tags for realtime resources. See [#5776](https://github.com/DataDog/integrations-core/pull/5776).
+* [Fixed] Renaming vsphere_tags_prefix config to tags_prefix. See [#5771](https://github.com/DataDog/integrations-core/pull/5771).
+* [Added] Submit resource count metrics with their tags. See [#5681](https://github.com/DataDog/integrations-core/pull/5681).
+* [Added] Add tags support v2 using requests. See [#5729](https://github.com/DataDog/integrations-core/pull/5729).
+* [Fixed] Do not collect max, min and sum aggregates as they are the same as avg. See [#5638](https://github.com/DataDog/integrations-core/pull/5638).
+* [Added] Add per instance values as tag. See [#5584](https://github.com/DataDog/integrations-core/pull/5584).
+* [Changed] vSphere new implementation. See [#5251](https://github.com/DataDog/integrations-core/pull/5251).
+
 ## 4.3.0 / 2019-12-13
 
 * [Added] Add ability to exclude specific host tags from host metadata. See [#5201](https://github.com/DataDog/integrations-core/pull/5201).

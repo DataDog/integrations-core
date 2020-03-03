@@ -1,5 +1,9 @@
 # CHANGELOG - oracle
 
+## 2.0.0 / 2020-02-22
+
+* [Changed] Migrate to QueryManager. See [#5529](https://github.com/DataDog/integrations-core/pull/5529).
+
 ## 1.12.0 / 2020-02-04
 
 * [Added] Add ability to only collect data defined in `custom_queries`. See [#5217](https://github.com/DataDog/integrations-core/pull/5217). Thanks [nowhammies](https://github.com/nowhammies).
