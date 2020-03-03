@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Tenable Integration",
+  "public_title": "Datadog-Tenable Nessus Integration",
   "categories": [
     "log collection"
   ],

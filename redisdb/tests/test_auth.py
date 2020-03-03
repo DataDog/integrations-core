@@ -12,7 +12,6 @@ from datadog_checks.redisdb import Redis
 from .common import HOST, PASSWORD, PORT
 
 
-@pytest.mark.integration
 def test_redis_auth_ok(aggregator, redis_auth):
     """
     Test the check can authenticate and connect
@@ -23,7 +22,6 @@ def test_redis_auth_ok(aggregator, redis_auth):
     assert aggregator.metric_names, "No metrics returned"
 
 
-@pytest.mark.integration
 def test_redis_auth_empty_pass(redis_auth):
     """
     Test the check providing an empty password
@@ -35,7 +33,6 @@ def test_redis_auth_empty_pass(redis_auth):
         redis.check(instance)
 
 
-@pytest.mark.integration
 def test_redis_auth_wrong_pass(redis_auth):
     """
     Test the check providing the wrong password
