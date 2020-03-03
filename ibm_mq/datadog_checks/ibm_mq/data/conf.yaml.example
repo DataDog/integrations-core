@@ -85,11 +85,6 @@ instances:
     #
     # auto_discover_queues: false
 
-    ## @param mqcd_version - integer - optional - default: 6
-    ## Which API version to use. Supported values are 1 to 9 including.
-    #
-    # mqcd_version: 6
-
     ## @param ssl_auth - string - optional
     ## Whether or not to use SSL auth while connecting to the channel.
     #
