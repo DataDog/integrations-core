@@ -1895,7 +1895,7 @@ def test_cisco_asa_5525(aggregator):
 
     check.check(instance)
     
-    common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-asa-5525']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-asa-5525', 'snmp_host:kept']
 
     tcp_counts = [
         'tcpActiveOpens',
@@ -1925,7 +1925,7 @@ def test_cisco_asa_5525(aggregator):
         )
 
     fru_metrics = ["cefcFRUPowerAdminStatus", "cefcFRUPowerOperStatus", "cefcFRUCurrent"]
-    frus = [6, 7, 15, 16, 19, 27, 30, 31]
+    frus = [3, 4, 5, 7, 16, 17, 24, 25]
     for fru in frus:
         tags = ['fru:{}'.format(fru)] + common_tags
         for metric in fru_metrics:
