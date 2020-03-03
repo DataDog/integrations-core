@@ -19,7 +19,7 @@ steps:
       if [ "${{ parameters.repo }}" == "core" ]; then
           ENV_TEST_OPTS='--base'
       fi
-      ddev env test $ENV_TEST_OPTS --new-env --junit ${{ parameters.check }}
+      ddev --${{ parameters.repo }} env test $ENV_TEST_OPTS --new-env --junit ${{ parameters.check }}
     displayName: 'Run E2E tests'
     env:
       DD_API_KEY: $(DD_API_KEY)
