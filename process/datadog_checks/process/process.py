@@ -153,7 +153,7 @@ class ProcessCheck(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
         # Shared process list
-        self.process_list = ProcessListCache()
+        self.process_list_cache = ProcessListCache()
 
         # ad stands for access denied
         # We cache the PIDs getting this error and don't iterate on them more often than `access_denied_cache_duration``
@@ -185,13 +185,13 @@ class ProcessCheck(AgentCheck):
         # Process cache, indexed by instance
         self.process_cache = defaultdict(dict)
 
-        self.process_list.cache_duration = int(
+        self.process_list_cache.cache_duration = int(
             init_config.get('shared_process_list_cache_duration', DEFAULT_SHARED_PROCESS_LIST_CACHE_DURATION)
         )
 
     def should_refresh_proclist(self):
         now = time.time()
-        return now - self.process_list.last_ts > self.process_list.cache_duration
+        return now - self.process_list_cache.last_ts > self.process_list_cache.cache_duration
 
     def should_refresh_ad_cache(self, name):
         now = time.time()
@@ -220,17 +220,17 @@ class ProcessCheck(AgentCheck):
         # Acquire the write lock to check whether to refresh because we're
         # going to keep it to do the refresh, AND, we don't want multiple
         # threads getting a `yes` result at once
-        with self.process_list.write_lock():
+        with self.process_list_cache.write_lock():
             if self.should_refresh_proclist():
                 self.log.debug("Refreshing process list")
-                self.process_list.elements = [proc for proc in psutil.process_iter(attrs=['pid', 'name'])]
-                self.process_list.last_ts = time.time()
-                self.log.debug("Set last ts to %s", self.process_list.last_ts)
+                self.process_list_cache.elements = [proc for proc in psutil.process_iter(attrs=['pid', 'name'])]
+                self.process_list_cache.last_ts = time.time()
+                self.log.debug("Set last ts to %s", self.process_list_cache.last_ts)
             else:
                 self.log.debug("Using process list cache")
 
-        with self.process_list.read_lock():
-            for proc in self.process_list.elements:
+        with self.process_list_cache.read_lock():
+            for proc in self.process_list_cache.elements:
                 # Skip access denied processes
                 if not refresh_ad_cache and proc.pid in self.ad_cache:
                     continue
@@ -279,7 +279,7 @@ class ProcessCheck(AgentCheck):
                 self.log.debug(
                     "Unable to find process named %s among processes: %s",
                     search_string,
-                    ', '.join(sorted(proc.name() for proc in self.process_list.elements)),
+                    ', '.join(sorted(proc.name() for proc in self.process_list_cache.elements)),
                 )
 
         self.pid_cache[name] = matching_pids
