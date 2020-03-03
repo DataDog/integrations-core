@@ -358,9 +358,7 @@ class SnmpCheck(AgentCheck):
             message = 'discovery_interval could not be parsed as a number: {!r}'.format(raw_discovery_interval)
             raise ConfigurationError(message)
 
-        self._thread = threading.Thread(
-            target=functools.partial(self.discover_instances, interval=discovery_interval), name=self.name
-        )
+        self._thread = threading.Thread(target=self.discover_instances, args=(discovery_interval,), name=self.name)
         self._thread.daemon = True
         self._thread.start()
         self._executor = futures.ThreadPoolExecutor(max_workers=self._config.workers)
