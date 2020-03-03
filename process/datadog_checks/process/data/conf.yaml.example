@@ -18,8 +18,9 @@ init_config:
   # access_denied_cache_duration: 120
 
   ## @param shared_process_list_cache_duration - integer - optional - default: 120
-  ## The check maintains a list of running processes shared among all instances, that is used to generate the matching pid list
-  ## on each instance. It won't try to look at them again for the duration in seconds specified by shared_process_list_cache_duration.
+  ## The check maintains a list of running processes shared among all instances, that is used to generate the
+  ## matching pid list on each instance. It won't try to look at them again for the duration in seconds
+  ## specified by shared_process_list_cache_duration.
   #
   # shared_process_list_cache_duration: 120
 
