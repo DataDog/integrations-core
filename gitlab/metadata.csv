@@ -1,38 +1,38 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 gitlab.banzai_cached_render_real_duration_seconds_count,count,,second,,Count of duration of rendering Markdown into HTML when cached output exists,0,gitlab,cached render duration count
 gitlab.banzai_cached_render_real_duration_seconds_sum,gauge,,second,,Sum of duration of rendering Markdown into HTML when cached output exists,0,gitlab,cached render duration sum
-gitlab.banzai_cacheless_render_real_duration_seconds_count,,count,,second,,Count of duration of rendering Markdown into HTML when cached output does not exist,0,gitlab,cachless render duration count
-gitlab.banzai_cacheless_render_real_duration_seconds,gauge,,second,,Sum of duration of rendering Markdown into HTML when cached output does not exist,0,gitlab,cachless render duration sum
+gitlab.banzai_cacheless_render_real_duration_seconds_count,count,,second,,Count of duration of rendering Markdown into HTML when cached output does not exist,0,gitlab,cachless render duration count
+gitlab.banzai_cacheless_render_real_duration_seconds_sum,gauge,,second,,Sum of duration of rendering Markdown into HTML when cached output does not exist,0,gitlab,cachless render duration sum
 gitlab.cache_misses_total,count,,second,,Cache read miss count,0,gitlab,cache read miss
-gitlab.cache_operation_duration_seconds_count,,count,,second,,Count of cache access time,0,gitlab,cache access time count
-gitlab.cache_operation_duration_seconds_sum,,gauge,,second,,Sum of cache access time,0,gitlab,cache access time sum
+gitlab.cache_operation_duration_seconds_count,count,,second,,Count of cache access time,0,gitlab,cache access time count
+gitlab.cache_operation_duration_seconds_sum,gauge,,second,,Sum of cache access time,0,gitlab,cache access time sum
 gitlab.cache_operations_total,count,,,,Count of cache operations by controller/action,0,gitlab,cache operations total
-gitlab.database_transaction_seconds_count,count,,seconds,,Count of cache operations by controller/action,0,gitlab,cache operations total count
-gitlab.database_transaction_seconds_sum,gauge,,seconds,,Sum of cache operations by controller/action,0,gitlab,cache operations total sum
-gitlab.method_call_duration_seconds_count,count,,seconds,,Count of method calls real duration,0,gitlab,method call count
-gitlab.method_call_duration_seconds_sum,gauge,,seconds,,Sum of method calls real duration,0,gitlab,method call sum
+gitlab.database_transaction_seconds_count,count,,second,,Count of cache operations by controller/action,0,gitlab,cache operations total count
+gitlab.database_transaction_seconds_sum,gauge,,second,,Sum of cache operations by controller/action,0,gitlab,cache operations total sum
+gitlab.method_call_duration_seconds_count,count,,second,,Count of method calls real duration,0,gitlab,method call count
+gitlab.method_call_duration_seconds_sum,gauge,,second,,Sum of method calls real duration,0,gitlab,method call sum
 gitlab.page_out_of_bounds,count,,,,Counter for the PageLimiter pagination limit being hit,-1,gitlab,page out of bounds
-gitlab.rails_queue_duration_seconds_count,count,,seconds,,Counter for latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue duration count
-gitlab.rails_queue_duration_seconds_sum,gauge,,seconds,,Sum of latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue duration sum
-gitlab.sql_duration_seconds_count,count,,seconds,,Total SQL execution time, excluding SCHEMA operations and BEGIN / COMMIT,0,gitlab,sql duration count
-gitlab.sql_duration_seconds_sum,gauge,,seconds,,Sum of SQL execution time, excluding SCHEMA operations and BEGIN / COMMIT,0,gitlab,sql duration sum
-gitlab.transaction_allocated_memory_bytes_count,count,,bytes,,Count of allocated memory for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction allocated memory count
-gitlab.transaction_allocated_memory_bytes_sum,gauge,,bytes,,Sum of allocated memory for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction allocated memory sum
+gitlab.rails_queue_duration_seconds_count,count,,second,,Counter for latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue duration count
+gitlab.rails_queue_duration_seconds_sum,gauge,,second,,Sum of latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue duration sum
+gitlab.sql_duration_seconds_count,count,,second,,"Total SQL execution time, excluding SCHEMA operations and BEGIN / COMMIT",0,gitlab,sql duration count
+gitlab.sql_duration_seconds_sum,gauge,,second,,"Sum of SQL execution time, excluding SCHEMA operations and BEGIN / COMMIT",0,gitlab,sql duration sum
+gitlab.transaction_allocated_memory_bytes_count,count,,byte,,Count of allocated memory for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction allocated memory count
+gitlab.transaction_allocated_memory_bytes_sum,gauge,,byte,,Sum of allocated memory for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction allocated memory sum
 gitlab.transaction_cache_count_total,count,,,,Counter for total Rails cache calls (aggregate),0,gitlab,transaction cache calls
-gitlab.transaction_cache_duration_total,count,,seconds,,Counter for total time (seconds) spent in Rails cache calls (aggregate),0,gitlab,transaction cache duration
-gitlab.transaction_cache_read_hit_count_total,count,,,,Counter for cache hits for Rails cache calls,0,gitlab,transaction cache hits
-gitlab.transaction_cache_read_miss_count_total,count,,,,Counter for cache misses for Rails cache calls,0,gitlab,transaction cache misses
-gitlab.transaction_duration_seconds_count,count,,,,Count of Duration for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction duration count
-gitlab.transaction_duration_seconds_sum,gauge,,,,Sum of Duration for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction duration sum
+gitlab.transaction_cache_duration_total,count,,second,,Counter for total time (seconds) spent in Rails cache calls (aggregate),0,gitlab,transaction cache duration
+gitlab.transaction_cache_read_hit_count_total,count,,hit,,Counter for cache hits for Rails cache calls,0,gitlab,transaction cache hits
+gitlab.transaction_cache_read_miss_count_total,count,,miss,,Counter for cache misses for Rails cache calls,0,gitlab,transaction cache misses
+gitlab.transaction_duration_seconds_count,count,,second,,Count of Duration for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction duration count
+gitlab.transaction_duration_seconds_sum,gauge,,second,,Sum of Duration for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction duration sum
 gitlab.transaction_event_build_found_total,count,,,,Counter for build found for API /jobs/request,0,gitlab,build found count
 gitlab.transaction_event_build_invalid_total,count,,,,Counter for build invalid due to concurrency conflict for API /jobs/request,-1,gitlab,build invalid count
 gitlab.transaction_event_build_not_found_cached_total,count,,,,Counter for build invalid due to concurrency conflict for API /jobs/request,-1,gitlab,build not found cached
 gitlab.transaction_event_build_not_found_total,count,,,,Counter for build not found for API /jobs/request,-1,gitlab,build not found total
 gitlab.transaction_event_change_default_branch_total,count,,,,Counter when default branch is changed for any repository,0,gitlab,change default branch
 gitlab.transaction_event_create_repository_total,count,,,,Counter when any repository is created,0,gitlab,create repository total
-gitlab.transaction_event_etag_caching_cache_hit_total,count,,,,Counter for etag cache hit.,0,gitlab,etag cache hit
-gitlab.transaction_event_etag_caching_header_missing_total,count,,,,Counter for etag cache miss - header missing,0,gitlab,etag cache hit missing header
-gitlab.transaction_event_etag_caching_key_not_found_total,count,,,,Counter for etag cache miss - key not found,0,gitlab,etag cache hit key
+gitlab.transaction_event_etag_caching_cache_hit_total,count,,hit,,Counter for etag cache hit.,0,gitlab,etag cache hit
+gitlab.transaction_event_etag_caching_header_missing_total,count,,miss,,Counter for etag cache miss - header missing,0,gitlab,etag cache hit missing header
+gitlab.transaction_event_etag_caching_key_not_found_total,count,,miss,,Counter for etag cache miss - key not found,0,gitlab,etag cache hit key
 gitlab.transaction_event_etag_caching_middleware_used_total,count,,,,Counter for etag middleware accessed,0,gitlab,etag middleware
 gitlab.transaction_event_etag_caching_resource_changed_total,count,,,,Counter for etag cache miss - resource changed,0,gitlab,etag cache miss
 gitlab.transaction_event_fork_repository_total,count,,,,Counter for repository forks (RepositoryForkWorker). Only incremented when source repository exists,0,gitlab,repo fork
@@ -41,7 +41,7 @@ gitlab.transaction_event_push_branch_total,count,,,,Counter for all branch pushe
 gitlab.transaction_event_push_commit_total,count,,,,Counter for commits,0,gitlab,commits pushes
 gitlab.transaction_event_push_tag_total,count,,,,Counter for tag pushes,0,gitlab,tags pushes
 gitlab.transaction_event_rails_exception_total,count,,,,Counter for number of rails exceptions,-1,gitlab,rails exceptions
-gitlab.transaction_event_receive_email_total,count,,,,Counter for received emails,0,gitlab,recieved emails
+gitlab.transaction_event_receive_email_total,count,,email,,Counter for received emails,0,gitlab,recieved emails
 gitlab.transaction_event_remote_mirrors_failed_total,count,,,,Counter for failed remote mirrors,0,gitlab,remote mirrors failed
 gitlab.transaction_event_remote_mirrors_finished_total,count,,,,Counter for finished remote mirrors,0,gitlab,remote mirrors finished
 gitlab.transaction_event_remote_mirrors_running_total,count,,,,Counter for running remote mirrors,0,gitlab,remote mirrors running
@@ -51,99 +51,113 @@ gitlab.transaction_event_remove_tag_total,count,,,,Counter when a tag is remove 
 gitlab.transaction_event_sidekiq_exception_total,count,,,,Counter of Sidekiq exceptions,-1,gitlab,sidekiq exceptions
 gitlab.transaction_event_stuck_import_jobs_total,count,,,,Count of stuck import jobs,-1,gitlab,stuck import jobs
 gitlab.transaction_event_update_build_total,count,,,,Counter for update build for API /jobs/request/:id,0,gitlab,update build
-gitlab.transaction_new_redis_connections_total,count,,,,Counter for new Redis connections,0,gitlab,new redis connections
+gitlab.transaction_new_redis_connections_total,count,,connection,,Counter for new Redis connections,0,gitlab,new redis connections
 gitlab.transaction_queue_duration_total,count,,,,Duration jobs were enqueued before processing,0,gitlab,jobs enqueued processing
 gitlab.transaction_rails_queue_duration_total,count,,,,Measures latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue duration
 gitlab.transaction_view_duration_total,count,,,,Duration for views,0,gitlab,view duration
 gitlab.transaction_view_duration_total_sum,count,,,,Sum of duration for views,0,gitlab,view duration sum
-gitlab.view_rendering_duration_seconds_count,count,,,,Count of duration for views (histogram),0,gitlab,rendering duration count
-gitlab.view_rendering_duration_seconds_sum,count,,,,Sum of duration for views (histogram),0,gitlab,rendering duration sum
-gitlab.http_requests_total.sum,count,,,,Rack request count,0,gitlab,rack request count
-gitlab.http_request_duration_seconds_sum,count,,,,Sum of HTTP response time from rack middleware,0,gitlab,http request dur sum
-gitlab.http_request_duration_seconds_count,count,,,,Count of HTTP response time from rack middleware,0,gitlab,http request dur sum
-
+gitlab.view_rendering_duration_seconds_count,count,,second,,Count of duration for views (histogram),0,gitlab,rendering duration count
+gitlab.view_rendering_duration_seconds_sum,count,,second,,Sum of duration for views (histogram),0,gitlab,rendering duration sum
+gitlab.http_requests_total.sum,count,,request,,Rack request count,0,gitlab,rack request count
+gitlab.http_request_duration_seconds_sum,count,,second,,Sum of HTTP response time from rack middleware,0,gitlab,http request dur sum
+gitlab.http_request_duration_seconds_count,count,,second,,Count of HTTP response time from rack middleware,0,gitlab,http request dur sum
 gitlab.pipelines_created_total,count,,,,Counter of pipelines created,0,gitlab,pipelines created total
-gitlab.rack_uncaught_errors_total,count,,,,Rack connections handling uncaught errors count,-1,gitlab,rack uncaught errors
+gitlab.rack_uncaught_errors_total,count,,connection,,Rack connections handling uncaught errors count,-1,gitlab,rack uncaught errors
 gitlab.user_session_logins_total,count,,,,Counter of how many users have logged in,0,gitlab,user logins
-gitlab.upload_file_does_not_exist,count,,,,Number of times an upload record could not find its file,0,no upload file
-gitlab.failed_login_captcha_total,gauge,,,,Counter of failed CAPTCHA attempts during login,-1,failed captchas
-gitlab.successful_login_captcha_total,gauge,,,,Counter of successful CAPTCHA attempts during login,0,successful captchas
-gitlab.auto_devops_pipelines_completed_total,count,,,,"Counter of completed Auto DevOps pipelines, labeled by status",0,completed auto pipelines
-gitlab.sidekiq_jobs_cpu_seconds_count,count,,second,,Count of seconds of cpu time to run Sidekiq job,0,cpu sidekiq count
-gitlab.sidekiq_jobs_cpu_seconds_sum,count,,second,,Sum of seconds of cpu time to run Sidekiq job,0,sidekiq cpu sum
-gitlab.sidekiq_jobs_completion_seconds_count,count,,second,,Count of seconds to complete Sidekiq job,0,sidekiq completion count
-gitlab.sidekiq_jobs_completion_seconds_sum,count,,second,,Sum of seconds to complete Sidekiq job,0,sidekiq completion sum
-gitlab.sidekiq_jobs_queue_duration_seconds_count,count,,second,,Count of duration in seconds that a Sidekiq job was queued before being executed,0,sidekiq queue count
-gitlab.sidekiq_jobs_queue_duration_seconds_sum,count,,second,,Sum of duration in seconds that a Sidekiq job was queued before being executed,0,sidekiq queue sum
-gitlab.sidekiq_jobs_failed_total,count,,job,,Sidekiq jobs failed,-1,sidekiq jobs failed
-gitlab.sidekiq_jobs_retried_total,count,,job,,Sidekiq jobs retired,0,sidekiq jobs retried
-gitlab.sidekiq_running_jobs,gauge,,job,,Number of Sidekiq jobs running,0,sidekiq jobs running
-gitlab.sidekiq_concurrency,gauge,,job,,Maximum number of Sidekiq jobs,0,sidekiq jobs max
-gitlab.ruby_gc_duration_seconds,gauge,,second,,Time spent by Ruby in GC,0,ruby gc dur
-gitlab.ruby_file_descriptors,gauge,,,,File descriptors per process,0,ruby file descriptors
-gitlab.ruby_memory_bytes,gauge,,byte,,Memory usage by process,0,ruby memory process
-gitlab.ruby_sampler_duration_seconds,count,,second,,Time spent collecting stats,0,ruby sampler dur
-gitlab.ruby_process_cpu_seconds_total,gauge,,second,,Total amount of CPU time per process,0,ruby cpu process
-gitlab.ruby_process_max_fds,gauge,,,,Maximum number of open file descriptors per process,0,ruby max fds
-gitlab.ruby_process_resident_memory_bytes,gauge,,byte,,Memory usage by process,0,ruby memory
-gitlab.ruby_process_start_time_seconds,gauge,,second,,UNIX timestamp of process start time,0,ruby start
-gitlab.ruby_gc_stat_count,gauge,,,,Number of ruby garbage collectors,0,ruby gc count
-gitlab.ruby_gc_stat_heap_allocated_pages,gauge,,page,,Number of currently allocated heap pages,0,ruby gc allocated pages
-gitlab.ruby_gc_stat_heap_sorted_length,gauge,,,,Length of the heap in memory,0,ruby gc heap length
-gitlab.ruby_gc_stat_heap_allocatable_pages,gauge,,page,,Number malloced pages that can be used,0,ruby gc heap allocatable
-gitlab.ruby_gc_stat_heap_available_slots,gauge,,,,Number of slots in heap pages,0,ruby gc heap slots
-gitlab.ruby_gc_stat_heap_live_slots,gauge,,,,Number of live slots in heap,0,ruby gc heap live slots
-gitlab.ruby_gc_stat_heap_free_slots,gauge,,,,Number of empty slots in heap,0,ruby gc heap live slots
-gitlab.ruby_gc_stat_heap_final_slots,gauge,,,,Number of slots in heap with finalizers,0,ruby gc heap final slots
-gitlab.ruby_gc_stat_heap_marked_slots,gauge,,page,,Number of slots that are marked, or old,0,ruby gc heap marked slots
-gitlab.ruby_gc_stat_heap_eden_pages,gauge,,page,,Number of heap pages that contain a live object,0,ruby gc heap eden pages
-gitlab.ruby_gc_stat_heap_tomb_pages,gauge,,page,,Number of heap pages that do not contain a live object,0,ruby gc heap tomb pages
-gitlab.ruby_gc_stat_total_allocated_pages,gauge,,page,,Number of pages allocated,0,ruby gc heap allocated pages
-gitlab.ruby_gc_stat_total_freed_pages,gauge,,page,,Number of pages freed,0,ruby gc heap freed pages
-gitlab.ruby_gc_stat_total_allocated_objects,gauge,,,,Number of allocated objects,0,ruby gc allocated objects
-gitlab.ruby_gc_stat_total_freed_objects,gauge,,,,Number of freed objects,0,ruby gc freed objects
-gitlab.ruby_gc_stat_malloc_increase_bytes,gauge,,byte,,Number of bytes allocated outside of the heap,0,ruby gc malloc increase
-gitlab.ruby_gc_stat_malloc_increase_bytes_limit,gauge,,byte,,The limit to how many bytes can be allocated outside of the heap,0,ruby gc malloc increase lim
-gitlab.ruby_gc_stat_minor_gc_count,gauge,,garbage collection,,Number of minor garbage collectors,0,ruby gc minor
-gitlab.ruby_gc_stat_major_gc_count,gauge,,garbage collection,,Number of major garbage collectors,0,ruby gc major
-gitlab.ruby_gc_stat_remembered_wb_unprotected_objects,gauge,,,,Number of old objects that reference new objects,0,ruby gc wb objects
-gitlab.ruby_gc_stat_remembered_wb_unprotected_objects_limit,gauge,,,,The limit of wb ubprotected objects,0,ruby gc wb objects lim
-gitlab.ruby_gc_stat_old_objects,gauge,,,,The number of old objects,0,ruby gc old objects
-gitlab.ruby_gc_stat_old_objects_limit,gauge,,,,The limit of number of old objects,0,ruby gc old objects lim
-gitlab.ruby_gc_stat_oldmalloc_increase_bytes,gauge,,byte,,Number of bytes allocated outside of the heap for old objects,0,ruby gc old increase
-gitlab.ruby_gc_stat_oldmalloc_increase_bytes_limit,gauge,,byte,,The limit of how many bytes can be allocated outside of the heap for old objects,0,ruby gc old increase lim
-gitlab.geo_db_replication_lag_seconds,gauge,,second,,Database replication lag (seconds),-1,db replication lag
-gitlab.geo_repositories,gauge,,,,Total number of repositories available on primary,0,db repos
-gitlab.geo_repositories_synced,gauge,,,,Number of repositories synced on secondary,0,db repos synced
-gitlab.geo_repositories_failed,gauge,,,,Number of repositories failed to sync on secondary,-1,db repos failed
-gitlab.geo_lfs_objects,gauge,,,,Total number of LFS objects available on primary,0,db lfs objects
-gitlab.geo_lfs_objects_synced,gauge,,,,Number of LFS objects synced on secondary,0,db lfs objects synced
-gitlab.geo_lfs_objects_failed,gauge,,,,Number of LFS objects failed to sync on secondary,0,db lfs objects failed
-gitlab.geo_attachments,gauge,,,,Total number of file attachments available on primary,0,db attachments
-gitlab.geo_attachments_synced,gauge,,,,Number of attachments synced on secondary,0,db attachments synced
-gitlab.geo_attachments_failed,gauge,,,,Number of attachments failed to sync on secondary,0,db attachments failed
-gitlab.geo_last_event_id,gauge,,,,Database ID of the latest event log entry on the primary,0,db last id
-gitlab.geo_last_event_timestamp,gauge,,,,UNIX timestamp of the latest event log entry on the primary,0,db last timestamp
-gitlab.geo_cursor_last_event_id,gauge,,,,Last database ID of the event log processed by the secondary,0,db last curser id
-gitlab.geo_cursor_last_event_timestamp,gauge,,,,Last UNIX timestamp of the event log processed by the secondary,0,db last curser timestamp
-gitlab.geo_status_failed_total,count,,,,Number of times retrieving the status from the Geo Node failed,-1,db fail status
-gitlab.geo_last_successful_status_check_timestamp,gauge,,,,Last timestamp when the status was successfully updated,0,db success last timestamp
-gitlab.geo_lfs_objects_synced_missing_on_primary,gauge,,,,Number of LFS objects marked as synced due to the file missing on the primary,-1,db lfs object missing
-gitlab.geo_job_artifacts_synced_missing_on_primary,gauge,,,,Number of job artifacts marked as synced due to the file missing on the primary,-1,db lfs artifact missing
-gitlab.geo_attachments_synced_missing_on_primary,gauge,,,,Number of attachments marked as synced due to the file missing on the primary,-1,db lfs attachment missing
-gitlab.geo_repositories_checksummed_count,gauge,,,,Number of repositories checksummed on primary,0,db repos checksummed
-gitlab.geo_repositories_checksum_failed_count,gauge,,,,Number of repositories failed to calculate the checksum on primary,0,db repos checksum failed
-gitlab.geo_wikis_checksummed_count,gauge,,,,Number of wikis checksummed on primary,0,db wikis checksummed
-gitlab.geo_wikis_checksum_failed_count,gauge,,,,Number of wikis failed to calculate the checksum on primary,0,db wikis checksum failed
-gitlab.geo_repositories_verified_count,gauge,,,,Number of repositories verified on secondary,0,db repos verified
-gitlab.geo_repositories_verification_failed_count,gauge,,,,Number of repositories failed to verify on secondary,0,db repos failed
-gitlab.geo_repositories_checksum_mismatch_count,gauge,,,,Number of repositories that checksum mismatch on secondary,0,db repos checksum mismatch
-gitlab.geo_wikis_verified_count,gauge,,,,Number of wikis verified on secondary,0,db wikis verified
-gitlab.geo_wikis_verification_failed_count,gauge,,,,Number of wikis failed to verify on secondary,-1,db wikis verified failed
-gitlab.geo_wikis_checksum_mismatch_count,gauge,,,,Number of wikis that checksum mismatch on secondary,-1,db wikis checksum mismatch
-gitlab.geo_repositories_checked_count,gauge,,,,Number of repositories that have been checked via git fsck,-1,db repos checked
-gitlab.geo_repositories_checked_failed_count,gauge,,,,Number of repositories that have been checked via git fsck,-1,db repos checked
-
+gitlab.upload_file_does_not_exist,count,,,,Number of times an upload record could not find its file,0,gitlab,no upload file
+gitlab.failed_login_captcha_total,gauge,,,,Counter of failed CAPTCHA attempts during login,-1,gitlab,failed captchas
+gitlab.successful_login_captcha_total,gauge,,,,Counter of successful CAPTCHA attempts during login,0,gitlab,successful captchas
+gitlab.auto_devops_pipelines_completed_total,count,,,,"Counter of completed Auto DevOps pipelines, labeled by status",0,gitlab,completed auto pipelines
+gitlab.sidekiq_jobs_cpu_seconds_count,count,,second,,Count of seconds of cpu time to run Sidekiq job,0,gitlab,cpu sidekiq count
+gitlab.sidekiq_jobs_cpu_seconds_sum,count,,second,,Sum of seconds of cpu time to run Sidekiq job,0,gitlab,sidekiq cpu sum
+gitlab.sidekiq_jobs_completion_seconds_count,count,,second,,Count of seconds to complete Sidekiq job,0,gitlab,sidekiq completion count
+gitlab.sidekiq_jobs_completion_seconds_sum,count,,second,,Sum of seconds to complete Sidekiq job,0,gitlab,sidekiq completion sum
+gitlab.sidekiq_jobs_queue_duration_seconds_count,count,,second,,Count of duration in seconds that a Sidekiq job was queued before being executed,0,gitlab,sidekiq queue count
+gitlab.sidekiq_jobs_queue_duration_seconds_sum,count,,second,,Sum of duration in seconds that a Sidekiq job was queued before being executed,0,gitlab,sidekiq queue sum
+gitlab.sidekiq_jobs_failed_total,count,,job,,Sidekiq jobs failed,-1,gitlab,sidekiq jobs failed
+gitlab.sidekiq_jobs_retried_total,count,,job,,Sidekiq jobs retired,0,gitlab,sidekiq jobs retried
+gitlab.sidekiq_running_jobs,gauge,,job,,Number of Sidekiq jobs running,0,gitlab,sidekiq jobs running
+gitlab.sidekiq_concurrency,gauge,,job,,Maximum number of Sidekiq jobs,0,gitlab,sidekiq jobs max
+gitlab.ruby_gc_duration_seconds,gauge,,second,,Time spent by Ruby in GC,0,gitlab,ruby gc dur
+gitlab.ruby_file_descriptors,gauge,,,,File descriptors per process,0,gitlab,ruby file descriptors
+gitlab.ruby_memory_bytes,gauge,,byte,,Memory usage by process,0,gitlab,ruby memory process
+gitlab.ruby_sampler_duration_seconds,count,,second,,Time spent collecting stats,0,gitlab,ruby sampler dur
+gitlab.ruby_process_cpu_seconds_total,gauge,,second,,Total amount of CPU time per process,0,gitlab,ruby cpu process
+gitlab.ruby_process_max_fds,gauge,,,,Maximum number of open file descriptors per process,0,gitlab,ruby max fds
+gitlab.ruby_process_resident_memory_bytes,gauge,,byte,,Memory usage by process,0,gitlab,ruby memory
+gitlab.ruby_process_start_time_seconds,gauge,,second,,UNIX timestamp of process start time,0,gitlab,ruby start
+gitlab.ruby_gc_stat_count,gauge,,,,Number of ruby garbage collectors,0,gitlab,ruby gc count
+gitlab.ruby_gc_stat_heap_allocated_pages,gauge,,page,,Number of currently allocated heap pages,0,gitlab,ruby gc allocated pages
+gitlab.ruby_gc_stat_heap_sorted_length,gauge,,,,Length of the heap in memory,0,gitlab,ruby gc heap length
+gitlab.ruby_gc_stat_heap_allocatable_pages,gauge,,page,,Number malloced pages that can be used,0,gitlab,ruby gc heap allocatable
+gitlab.ruby_gc_stat_heap_available_slots,gauge,,,,Number of slots in heap pages,0,gitlab,ruby gc heap slots
+gitlab.ruby_gc_stat_heap_live_slots,gauge,,,,Number of live slots in heap,0,gitlab,ruby gc heap live slots
+gitlab.ruby_gc_stat_heap_free_slots,gauge,,,,Number of empty slots in heap,0,gitlab,ruby gc heap live slots
+gitlab.ruby_gc_stat_heap_final_slots,gauge,,,,Number of slots in heap with finalizers,0,gitlab,ruby gc heap final slots
+gitlab.ruby_gc_stat_heap_marked_slots,gauge,,page,,"Number of slots that are marked, or old",0,gitlab,ruby gc heap marked slots
+gitlab.ruby_gc_stat_heap_eden_pages,gauge,,page,,Number of heap pages that contain a live object,0,gitlab,ruby gc heap eden pages
+gitlab.ruby_gc_stat_heap_tomb_pages,gauge,,page,,Number of heap pages that do not contain a live object,0,gitlab,ruby gc heap tomb pages
+gitlab.ruby_gc_stat_total_allocated_pages,gauge,,page,,Number of pages allocated,0,gitlab,ruby gc heap allocated pages
+gitlab.ruby_gc_stat_total_freed_pages,gauge,,page,,Number of pages freed,0,gitlab,ruby gc heap freed pages
+gitlab.ruby_gc_stat_total_allocated_objects,gauge,,,,Number of allocated objects,0,gitlab,ruby gc allocated objects
+gitlab.ruby_gc_stat_total_freed_objects,gauge,,,,Number of freed objects,0,gitlab,ruby gc freed objects
+gitlab.ruby_gc_stat_malloc_increase_bytes,gauge,,byte,,Number of bytes allocated outside of the heap,0,gitlab,ruby gc malloc increase
+gitlab.ruby_gc_stat_malloc_increase_bytes_limit,gauge,,byte,,The limit to how many bytes can be allocated outside of the heap,0,gitlab,ruby gc malloc increase lim
+gitlab.ruby_gc_stat_minor_gc_count,gauge,,garbage collection,,Number of minor garbage collectors,0,gitlab,ruby gc minor
+gitlab.ruby_gc_stat_major_gc_count,gauge,,garbage collection,,Number of major garbage collectors,0,gitlab,ruby gc major
+gitlab.ruby_gc_stat_remembered_wb_unprotected_objects,gauge,,,,Number of old objects that reference new objects,0,gitlab,ruby gc wb objects
+gitlab.ruby_gc_stat_remembered_wb_unprotected_objects_limit,gauge,,,,The limit of wb ubprotected objects,0,gitlab,ruby gc wb objects lim
+gitlab.ruby_gc_stat_old_objects,gauge,,,,The number of old objects,0,gitlab,ruby gc old objects
+gitlab.ruby_gc_stat_old_objects_limit,gauge,,,,The limit of number of old objects,0,gitlab,ruby gc old objects lim
+gitlab.ruby_gc_stat_oldmalloc_increase_bytes,gauge,,byte,,Number of bytes allocated outside of the heap for old objects,0,gitlab,ruby gc old increase
+gitlab.ruby_gc_stat_oldmalloc_increase_bytes_limit,gauge,,byte,,The limit of how many bytes can be allocated outside of the heap for old objects,0,gitlab,ruby gc old increase lim
+gitlab.geo_db_replication_lag_seconds,gauge,,second,,Database replication lag (seconds),-1,gitlab,db replication lag
+gitlab.geo_repositories,gauge,,,,Total number of repositories available on primary,0,gitlab,db repos
+gitlab.geo_repositories_synced,gauge,,,,Number of repositories synced on secondary,0,gitlab,db repos synced
+gitlab.geo_repositories_failed,gauge,,,,Number of repositories failed to sync on secondary,-1,gitlab,db repos failed
+gitlab.geo_lfs_objects,gauge,,,,Total number of LFS objects available on primary,0,gitlab,db lfs objects
+gitlab.geo_lfs_objects_synced,gauge,,,,Number of LFS objects synced on secondary,0,gitlab,db lfs objects synced
+gitlab.geo_lfs_objects_failed,gauge,,,,Number of LFS objects failed to sync on secondary,0,gitlab,db lfs objects failed
+gitlab.geo_attachments,gauge,,,,Total number of file attachments available on primary,0,gitlab,db attachments
+gitlab.geo_attachments_synced,gauge,,,,Number of attachments synced on secondary,0,gitlab,db attachments synced
+gitlab.geo_attachments_failed,gauge,,,,Number of attachments failed to sync on secondary,0,gitlab,db attachments failed
+gitlab.geo_last_event_id,gauge,,,,Database ID of the latest event log entry on the primary,0,gitlab,db last id
+gitlab.geo_last_event_timestamp,gauge,,,,UNIX timestamp of the latest event log entry on the primary,0,gitlab,db last timestamp
+gitlab.geo_cursor_last_event_id,gauge,,,,Last database ID of the event log processed by the secondary,0,gitlab,db last curser id
+gitlab.geo_cursor_last_event_timestamp,gauge,,,,Last UNIX timestamp of the event log processed by the secondary,0,gitlab,db last curser timestamp
+gitlab.geo_status_failed_total,count,,,,Number of times retrieving the status from the Geo Node failed,-1,gitlab,db fail status
+gitlab.geo_last_successful_status_check_timestamp,gauge,,,,Last timestamp when the status was successfully updated,0,gitlab,db success last timestamp
+gitlab.geo_lfs_objects_synced_missing_on_primary,gauge,,,,Number of LFS objects marked as synced due to the file missing on the primary,-1,gitlab,db lfs object missing
+gitlab.geo_job_artifacts_synced_missing_on_primary,gauge,,,,Number of job artifacts marked as synced due to the file missing on the primary,-1,gitlab,db lfs artifact missing
+gitlab.geo_attachments_synced_missing_on_primary,gauge,,,,Number of attachments marked as synced due to the file missing on the primary,-1,gitlab,db lfs attachment missing
+gitlab.geo_repositories_checksummed_count,gauge,,,,Number of repositories checksummed on primary,0,gitlab,db repos checksummed
+gitlab.geo_repositories_checksum_failed_count,gauge,,,,Number of repositories failed to calculate the checksum on primary,-1,gitlab,db repos checksum failed
+gitlab.geo_wikis_checksummed_count,gauge,,,,Number of wikis checksummed on primary,0,gitlab,db wikis checksummed
+gitlab.geo_wikis_checksum_failed_count,gauge,,,,Number of wikis failed to calculate the checksum on primary,-1,gitlab,db wikis checksum failed
+gitlab.geo_repositories_verified_count,gauge,,,,Number of repositories verified on secondary,0,gitlab,db repos verified
+gitlab.geo_repositories_verification_failed_count,gauge,,,,Number of repositories failed to verify on secondary,-1,gitlab,db repos failed
+gitlab.geo_repositories_checksum_mismatch_count,gauge,,,,Number of repositories that checksum mismatch on secondary,-1,gitlab,db repos checksum mismatch
+gitlab.geo_wikis_verified_count,gauge,,,,Number of wikis verified on secondary,0,gitlab,db wikis verified
+gitlab.geo_wikis_verification_failed_count,gauge,,,,Number of wikis failed to verify on secondary,-1,gitlab,db wikis verified failed
+gitlab.geo_wikis_checksum_mismatch_count,gauge,,,,Number of wikis that checksum mismatch on secondary,-1,gitlab,db wikis checksum mismatch
+gitlab.geo_repositories_checked_count,gauge,,,,Number of repositories that have been checked via git fsck,0,gitlab,db repos checked
+gitlab.geo_repositories_checked_failed_count,gauge,,,,Number of repositories that have a failure from git fsck,-1,gitlab,db repos checked failed
+gitlab.geo_repositories_retrying_verification_count,gauge,,,,Number of repositories verification failures that Geo is actively trying to correct on secondary,0,gitlab,db repos retry
+gitlab.geo_wikis_retrying_verification_count,gauge,,,,Number of wikis verification failures that Geo is actively trying to correct on secondary,0,gitlab,db wikis retry
+gitlab.db_load_balancing_hosts,gauge,,host,,Current number of load balancing hosts,0,gitlab,db load balancing
+gitlab.unicorn_active_connections,gauge,,connection,,The number of active Unicorn connections (workers),0,gitlab,unicorn active conn
+gitlab.unicorn_queued_connections,gauge,,connection,,The number of queued Unicorn connections,0,gitlab,unicorn queued conn
+gitlab.unicorn_workers,gauge,,worker,,The number of Unicorn workers,0,gitlab,unicorn workers
+gitlab.puma_workers,gauge,,worker,,Total number of puma workers,0,gitlab,puma workers
+gitlab.puma_running_workers,gauge,,worker,,Number of booted puma workers,0,gitlab,puma running workers
+gitlab.puma_stale_workers,gauge,,worker,,Number of old puma workers,0,gitlab,puma old workers
+gitlab.puma_running,gauge,,thread,,Number of running puma threads,0,gitlab,puma run
+gitlab.puma_queued_connections,gauge,,connection,,Number of connections in that puma worker’s “todo” set waiting for a worker thread,0,gitlab,puma queued conn
+gitlab.puma_active_connections,gauge,,thread,,Number of puma threads processing a request,0,gitlab,puma active conn
+gitlab.puma_pool_capacity,gauge,,request,,Number of requests the puma worker is capable of taking right now,0,gitlab,puma pool cap
+gitlab.puma_max_threads,gauge,,thread,,Maximum number of puma worker threads,0,gitlab,puma worker max
+gitlab.puma_idle_threads,gauge,,thread,,Number of spawned puma threads which are not processing a request,0,gitlab,puma idle threads
+gitlab.puma_killer_terminations_total,gauge,,worker,,Number of workers terminated by PumaWorkerKiller,0,gitlab,puma terminations
 
 gitlab.go_gc_duration_seconds,gauge,,request,second,A summary of the GC invocation durations,0,gitlab,gc duration
 gitlab.go_gc_duration_seconds_sum,gauge,,request,second,Sum of the GC invocation durations,0,gitlab,sum gc duration
