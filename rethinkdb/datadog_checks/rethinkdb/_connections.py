@@ -13,6 +13,8 @@ import rethinkdb
 # See: https://rethinkdb.com/api/python/server
 ConnectionServer = TypedDict('ConnectionServer', {'id': str, 'name': str, 'proxy': bool})
 
+ConnectionTags = TypedDict('ConnectionTags', {'server': str, 'host': str, 'port': int, 'proxy': bool})
+
 
 class Connection:
     """
@@ -27,13 +29,23 @@ class Connection:
         # type: (*Any) -> None
         pass
 
+    @property
+    def host(self):
+        # type: () -> str
+        raise NotImplementedError  # pragma: no cover
+
+    @property
+    def port(self):
+        # type: () -> int
+        raise NotImplementedError  # pragma: no cover
+
     def server(self):
         # type: () -> ConnectionServer
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def run(self, query):
         # type: (rethinkdb.RqlQuery) -> Any
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
 
 class RethinkDBConnection(Connection):
@@ -53,6 +65,16 @@ class RethinkDBConnection(Connection):
     def __exit__(self, *args):
         # type: (*Any) -> Any
         return self._conn.__exit__(*args)
+
+    @property
+    def host(self):
+        # type: () -> str
+        return self._conn.host
+
+    @property
+    def port(self):
+        # type: () -> int
+        return self._conn.port
 
     def server(self):
         # type: () -> ConnectionServer

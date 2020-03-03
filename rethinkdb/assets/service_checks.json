@@ -4,7 +4,9 @@
         "integration": "RethinkDB",
         "groups": [
             "host",
-            "endpoint"
+            "port",
+            "server",
+            "proxy"
         ],
         "check": "rethinkdb.can_connect",
         "statuses": [
@@ -18,8 +20,8 @@
         "agent_version": "6.19.0",
         "integration": "RethinkDB",
         "groups": [
-            "host",
-            "endpoint"
+            "database",
+            "table"
         ],
         "check": "rethinkdb.table_status.ready_for_outdated_reads",
         "statuses": [
@@ -33,8 +35,8 @@
         "agent_version": "6.19.0",
         "integration": "RethinkDB",
         "groups": [
-            "host",
-            "endpoint"
+            "database",
+            "table"
         ],
         "check": "rethinkdb.table_status.ready_for_reads",
         "statuses": [
@@ -48,8 +50,8 @@
         "agent_version": "6.19.0",
         "integration": "RethinkDB",
         "groups": [
-            "host",
-            "endpoint"
+            "database",
+            "table"
         ],
         "check": "rethinkdb.table_status.ready_for_writes",
         "statuses": [
@@ -63,8 +65,8 @@
         "agent_version": "6.19.0",
         "integration": "RethinkDB",
         "groups": [
-            "host",
-            "endpoint"
+            "database",
+            "table"
         ],
         "check": "rethinkdb.table_status.all_replicas_ready",
         "statuses": [

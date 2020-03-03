@@ -11,7 +11,7 @@ from typing import Any, Callable, Iterator, List
 from datadog_checks.base import AgentCheck
 
 from ._config import Config
-from ._connections import Connection, ConnectionServer
+from ._connections import Connection
 from ._exceptions import CouldNotConnect
 from ._types import Instance, Metric
 
@@ -35,10 +35,20 @@ class RethinkDBCheck(AgentCheck):
 
         try:
             with config.connect() as conn:
-                server = conn.server()  # type: ConnectionServer
-                self.log.debug('connected server=%r', server)
-                tags.append('server:{}'.format(server['name']))
+                server = conn.server()
+
+                connection_tags = [
+                    'host:{}'.format(conn.host),
+                    'port:{}'.format(conn.port),
+                    'server:{}'.format(server['name']),
+                    'proxy:{}'.format('true' if server['proxy'] else 'false'),
+                ]
+
+                self.log.debug('connected connection_tags=%r', connection_tags)
+                tags.extend(connection_tags)
+
                 yield conn
+
         except CouldNotConnect as exc:
             message = 'Could not connect to RethinkDB server: {!r}'.format(exc)
             self.log.error(message)
