@@ -1,0 +1,87 @@
+version: "3"
+
+services:
+  hazelcast1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        HAZELCAST_VERSION: ${HAZELCAST_VERSION}
+    container_name: hazelcast1
+    environment:
+      CLASSPATH: /tmp/log4j2/*
+      JAVA_OPTS: >-
+        -Dhazelcast.jmx=true
+        -Dhazelcast.metrics.enabled=true
+        -Dhazelcast.metrics.jmx.enabled=true
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.port=1098
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.rmi.port=1098
+        -Djava.rmi.server.hostname=localhost
+        -Dhazelcast.logging.type=log4j2
+        -Dlog4j.configurationFile=/tmp/log4j2.properties
+    ports:
+      - "5701:5701"
+      - "1098:1098"
+    volumes:
+      - ./log4j2.properties:/tmp/log4j2.properties
+      - ${DD_LOG_1}:/var/log/hazelcast.log
+    networks:
+      - dd_hazelcast
+
+  hazelcast2:
+    image: hazelcast/hazelcast:${HAZELCAST_VERSION}
+    container_name: hazelcast2
+    environment:
+      JAVA_OPTS: >-
+        -Dhazelcast.jmx=true
+        -Dhazelcast.metrics.enabled=true
+        -Dhazelcast.metrics.jmx.enabled=true
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.port=1099
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.rmi.port=1099
+        -Djava.rmi.server.hostname=localhost
+    ports:
+      - "5702:5701"
+      - "1099:1099"
+    networks:
+      - dd_hazelcast
+
+  hazelcast_management_center:
+    image: hazelcast/management-center:${HAZELCAST_VERSION}
+    container_name: hazelcast_management_center
+    environment:
+      MC_CONTEXT_PATH: /
+      MC_INIT_CMD: "./mc-conf.sh cluster add -H=/data -ma hazelcast1:5701 -cn dev"
+      JAVA_OPTS: >-
+        -Dhazelcast.metrics.enabled=true
+        -Dhazelcast.metrics.jmx.enabled=true
+        -Dhazelcast.metrics.mc.enabled=true
+        -Dhazelcast.client.metrics.enabled=true
+        -Dhazelcast.client.metrics.jmx.enabled=true
+        -Dhazelcast.diagnostics.enabled=true
+        -Dhazelcast.mc.rest.enabled=true
+        -Dhazelcast.mc.healthCheck.enable=true
+        -Dhazelcast.mc.jmx.enabled=true
+        -Dhazelcast.mc.jmx.port=9999
+        -Dhazelcast.mc.jmx.rmi.port=9999
+        -Dhazelcast.mc.jmx.host=localhost
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Djava.rmi.server.hostname=localhost
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "9999:9999"
+    depends_on:
+      - hazelcast1
+      - hazelcast2
+    networks:
+      - dd_hazelcast
+
+networks:
+  dd_hazelcast:
