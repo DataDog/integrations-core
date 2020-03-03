@@ -1,4 +1,4 @@
-CQL="DROP keyspace name;
+CQL="DROP keyspace trek;
 CREATE KEYSPACE trek WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'} AND durable_writes = true;
 CREATE TABLE trek.crew (search_hash text, PRIMARY KEY (search_hash));"
 
