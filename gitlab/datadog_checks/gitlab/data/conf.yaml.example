@@ -1,7 +1,7 @@
 init_config:
 
-  ## @param allowed_metrics - list of strings - required
-  ## List of metrics to extract from Prometheus
+  ## @param allowed_metrics - list of strings - optional
+  ## List of legacy metrics to extract from Prometheus.
   #
   allowed_metrics:
     - go_gc_duration_seconds

@@ -24,7 +24,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 1. Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to the Gitlab's Prometheus metrics endpoint. See the [sample gitlab.d/conf.yaml][4] for all available configuration options.
 
-    **Note**: The `allowed_metrics` item in the `init_config` section allows to specify the metrics that should be extracted.
+    **Note**: The metrics in [metrics.py][11] are collected by default. The `allowed_metrics` item in the `init_config` section allows to specify the legacy metrics that should be extracted.
 
 2. [Restart the Agent][5]
 
@@ -113,3 +113,5 @@ Need help? Contact [Datadog support][10].
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/gitlab/metadata.csv
 [10]: https://docs.datadoghq.com/help
+[11]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/metrics.py
+

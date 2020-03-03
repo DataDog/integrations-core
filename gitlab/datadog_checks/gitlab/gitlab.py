@@ -6,6 +6,7 @@ from copy import deepcopy
 import requests
 from six.moves.urllib.parse import urlparse
 
+from .metrics import METRICS_MAP
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
 
@@ -68,10 +69,10 @@ class GitlabCheck(OpenMetricsBaseCheck):
         Set up the gitlab instance so it can be used in OpenMetricsBaseCheck
         """
         # Mapping from Prometheus metrics names to Datadog ones
-        # For now it's a 1:1 mapping
-        allowed_metrics = init_config.get('allowed_metrics')
-        if allowed_metrics is None:
-            raise CheckException("At least one metric must be whitelisted in `allowed_metrics`.")
+        metrics = [METRICS_MAP]
+
+        # Add allowed legacy metrics
+        metrics.extend(init_config.get('allowed_metrics', []))
 
         gitlab_instance = deepcopy(instance)
         # gitlab uses 'prometheus_endpoint' and not 'prometheus_url', so we have to rename the key
@@ -80,7 +81,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
         gitlab_instance.update(
             {
                 'namespace': 'gitlab',
-                'metrics': allowed_metrics,
+                'metrics': metrics,
                 # Defaults that were set when gitlab was based on PrometheusCheck
                 'send_monotonic_counter': instance.get('send_monotonic_counter', False),
                 'health_service_check': instance.get('health_service_check', False),
