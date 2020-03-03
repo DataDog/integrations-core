@@ -836,6 +836,14 @@ class MongoDb(AgentCheck):
                 connectTimeoutMS=timeout,
                 serverSelectionTimeoutMS=timeout,
                 read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,
+                # Note about Read Concern:
+                # `majority` Read Concern is needed to have `monotonic reads` guarantee,
+                #   that is necessary to avoid collecting metrics values that might be inconsistent between reads.
+                #   Source Read Concern: https://docs.mongodb.com/manual/core/causal-consistency-read-write-concerns/
+                # Monotonic reads ensures that if a process performs read r1, then r2, then r2 cannot observe a state
+                #   prior to the writes which were reflected in r1; intuitively, reads cannot go backwards.
+                #   Source Monotonic Read: http://jepsen.io/consistency/models/monotonic-reads
+                readConcernLevel='majority',
                 **ssl_params
             )
             # some commands can only go against the admin DB
