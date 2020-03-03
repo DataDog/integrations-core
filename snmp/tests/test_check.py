@@ -1909,6 +1909,8 @@ def test_cisco_asa_5525(aggregator):
         'tcpOutRsts',
     ]
     tcp_gauges = ['tcpCurrEstab']
+    udp_counts = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
+
     for metric in tcp_counts:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
@@ -1917,8 +1919,11 @@ def test_cisco_asa_5525(aggregator):
     for metric in tcp_gauges:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
+    for metric in udp_counts:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+        )
 """
-    udp_counts = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
     if_counts = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards']
     ifx_counts = [
         'ifHCInOctets',
@@ -1956,10 +1961,6 @@ def test_cisco_asa_5525(aggregator):
             )
 
 
-    for metric in udp_counts:
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
-        )
 
     sensors = [1, 9, 11, 12, 12, 14, 17, 26, 29, 31]
     for sensor in sensors:
