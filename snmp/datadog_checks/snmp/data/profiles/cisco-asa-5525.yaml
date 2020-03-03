@@ -5,8 +5,8 @@ sysobjectid: 1.3.6.1.4.1.9.1.1408
 # 5555 1.3.6.1.4.1.9.1.1410
 
 extends:
-#  - _base.yaml
+  - _base.yaml
 #  - _generic-router-if.yaml
   - _generic-router-tcp.yaml
-#  - _generic-router-udp.yaml
+  - _generic-router-udp.yaml
 
