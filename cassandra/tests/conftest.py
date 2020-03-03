@@ -18,8 +18,4 @@ def dd_environment():
     with docker_run(
         os.path.join(HERE, 'compose', 'docker-compose.yml')
     ):
-        config = load_jmx_config()
-
-        config['init_config']['collect_default_metrics'] = False
-
-        yield config, {'use_jmx': True}
+        yield load_jmx_config(), {'use_jmx': True}
