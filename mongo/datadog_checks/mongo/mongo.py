@@ -893,7 +893,17 @@ class MongoDb(AgentCheck):
             try:
                 data = {}
 
-                replSet = admindb.command('replSetGetStatus')
+                replSet = admindb.command(
+                    # From https://docs.mongodb.com/manual/reference/command/replSetGetStatus/#dbcmd.replSetGetStatus:
+                    # "replSetGetStatus returns status of replica set from POV of server that processed the command."
+                    'replSetGetStatus',
+                    # We override the default read preference so that the command is run by the current node (i.e. the
+                    # node the Agent is connected to).
+                    # If we didn't, we wouldn't be able to detect state changes on the current node.
+                    # See: https://docs.mongodb.com/manual/core/read-preference/index.html#nearest
+                    read_preference=pymongo.ReadPreference.NEAREST,
+                )
+
                 if replSet:
                     primary = None
                     current = None
