@@ -4,6 +4,7 @@
 
 import os
 import time
+from concurrent import futures
 from typing import List
 
 import mock
@@ -196,6 +197,8 @@ def test_removing_host():
     check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance)
     msg = 'No SNMP response received before timeout for instance 1.1.1.1'
 
+    check._start_discovery = lambda: None
+    check._executor = futures.ThreadPoolExecutor(max_workers=1)
     check.check(instance)
     assert warnings == [msg]
 
@@ -220,6 +223,7 @@ def test_cache_discovered_host(read_mock):
 
     read_mock.return_value = '["192.168.0.1"]'
     check = SnmpCheck('snmp', {}, [instance])
+    check.discover_instances = lambda: None
     check.check(instance)
 
     assert '192.168.0.1' in check._config.discovered_instances
@@ -233,6 +237,7 @@ def test_cache_corrupted(write_mock, read_mock):
     instance['network_address'] = '192.168.0.0/24'
     read_mock.return_value = '["192.168.0."]'
     check = SnmpCheck('snmp', {}, [instance])
+    check.discover_instances = lambda: None
     check.check(instance)
 
     assert not check._config.discovered_instances

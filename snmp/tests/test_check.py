@@ -659,12 +659,16 @@ def test_profile_sys_object_unknown(aggregator, caplog):
         'network_address': network,
         'port': common.PORT,
         'community_string': 'public',
+        'retries': 0,
+        'discovery_interval': 0,
     }
 
     check = SnmpCheck('snmp', init_config, [instance])
     check._start_discovery()
     time.sleep(2)  # Give discovery a chance to fail finding a matching profile.
     check.check(instance)
+    check._running = False
+    check._thread.join()
 
     for record in caplog.records:
         if "Host {} didn't match a profile".format(host) in record.message:
@@ -690,6 +694,8 @@ def test_discovery(aggregator):
         'network_address': network.encode('utf-8'),
         'port': common.PORT,
         'community_string': 'public',
+        'retries': 0,
+        'discovery_interval': 0,
     }
     init_config = {
         'profiles': {
@@ -706,6 +712,7 @@ def test_discovery(aggregator):
             aggregator.reset()
     finally:
         check._running = False
+        check._thread.join()
 
     for metric in common.SUPPORTED_METRIC_TYPES:
         metric_name = "snmp." + metric['name']
@@ -1492,7 +1499,12 @@ def test_dell_poweredge(aggregator):
         'operatingSystemMemoryTotalVirtualSize',
         'operatingSystemMemoryAvailableVirtualSize',
     ]
-    power_supply_gauges = ['powerSupplyStatus', 'powerSupplyOutputWatts', 'powerSupplyMaximumInputVoltage']
+    power_supply_gauges = [
+        'powerSupplyStatus',
+        'powerSupplyOutputWatts',
+        'powerSupplyMaximumInputVoltage',
+        'powerSupplyCurrentInputVoltage',
+    ]
 
     temperature_probe_gauges = ['temperatureProbeStatus', 'temperatureProbeReading']
 

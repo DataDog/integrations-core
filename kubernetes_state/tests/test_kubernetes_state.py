@@ -214,6 +214,7 @@ class MockResponse:
     def __init__(self, content, content_type):
         self.content = content
         self.headers = {'Content-Type': content_type}
+        self.encoding = 'utf-8'
 
     def iter_lines(self, **_):
         for elt in self.content.split(b"\n"):

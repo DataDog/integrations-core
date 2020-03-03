@@ -4,6 +4,7 @@ parameters:
   test: false
   test_e2e: false
   benchmark: false
+  repo: ''
 
 steps:
 - ${{ if eq(parameters.test, 'true') }}:
@@ -13,10 +14,12 @@ steps:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
 
 - ${{ if eq(parameters.test_e2e, 'true') }}:
-  - ${{ if eq(parameters.repo, 'core') }}
-    - script: ddev env test --base --new-env --junit ${{ parameters.check }}
-  - ${{ if neq(parameters.repo, 'core') }}
-      - script: ddev --${{ parameters.repo }} env test --new-env --junit ${{ parameters.check }}
+  - script: |
+      ENV_TEST_OPTS=''
+      if [ "${{ parameters.repo }}" == "core" ]; then
+          ENV_TEST_OPTS='--base'
+      fi
+      ddev env test $ENV_TEST_OPTS --new-env --junit ${{ parameters.check }}
     displayName: 'Run E2E tests'
     env:
       DD_API_KEY: $(DD_API_KEY)
