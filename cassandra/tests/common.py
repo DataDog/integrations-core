@@ -8,9 +8,11 @@ CHECK_NAME = "cassandra"
 HERE = get_here()
 HOST = get_docker_hostname()
 
-
+"""
 # not all metrics will be available in our E2E environment, specifically:
-
+    "cassandra.net.up_endpoint_count",
+    "cassanra.net.down_endpoint_count",
+"""
 
 CASSANDRA_E2E_METRICS = [
     "cassandra.currently_blocked_tasks.count",
