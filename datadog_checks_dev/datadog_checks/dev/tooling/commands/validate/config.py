@@ -51,6 +51,8 @@ def config(ctx, check, sync):
         spec_path = get_config_spec(check)
         if not file_exists(spec_path):
             validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter)
+            if check_display_queue:
+                echo_info(f'{check}:')
             for display in check_display_queue:
                 display()
             continue
@@ -138,7 +140,6 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
     config_files = get_config_files(check)
     for config_file in config_files:
         file_counter.append(None)
-        file_display_queue = []
         file_name = basepath(config_file)
         try:
             file_data = read_file(config_file)
@@ -154,6 +155,7 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
             check_display_queue.append(lambda: echo_info(error, indent=FILE_INDENT * 2))
             continue
 
+        file_display_queue = []
         errors = validate_config(file_data)
         for err in errors:
             err_msg = str(err)

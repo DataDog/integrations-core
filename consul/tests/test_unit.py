@@ -7,7 +7,7 @@ import mock
 import pytest
 
 from datadog_checks.consul import ConsulCheck
-from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.consul.common import MAX_SERVICES
 
 from . import common, consul_mocks
 
@@ -17,14 +17,15 @@ log = logging.getLogger(__file__)
 
 
 def test_get_nodes_with_service(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
     consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
-    consul_check.check(consul_mocks.MOCK_CONFIG)
+    consul_check.check(None)
 
     expected_tags = [
         'consul_datacenter:dc1',
         'consul_service_id:service-1',
         'consul_service-1_service_tag:az-us-east-1a',
+        'consul_service_tag:az-us-east-1a',
     ]
 
     aggregator.assert_metric('consul.catalog.nodes_up', value=1, tags=expected_tags)
@@ -42,40 +43,41 @@ def test_get_nodes_with_service(aggregator):
 
 def test_get_peers_in_cluster(aggregator):
     my_mocks = consul_mocks._get_consul_mocks()
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
     consul_mocks.mock_check(consul_check, my_mocks)
-    consul_check.check(consul_mocks.MOCK_CONFIG)
+    consul_check.check(None)
 
     # When node is leader
     aggregator.assert_metric('consul.peers', value=3, tags=['consul_datacenter:dc1', 'mode:leader'])
 
     my_mocks['_get_cluster_leader'] = consul_mocks.mock_get_cluster_leader_B
     consul_mocks.mock_check(consul_check, my_mocks)
-    consul_check.check(consul_mocks.MOCK_CONFIG)
+    consul_check.check(None)
 
     aggregator.assert_metric('consul.peers', value=3, tags=['consul_datacenter:dc1', 'mode:follower'])
 
 
 def test_count_all_nodes(aggregator):
     my_mocks = consul_mocks._get_consul_mocks()
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
     consul_mocks.mock_check(consul_check, my_mocks)
-    consul_check.check(consul_mocks.MOCK_CONFIG)
+    consul_check.check(None)
 
     aggregator.assert_metric('consul.catalog.total_nodes', value=2, tags=['consul_datacenter:dc1'])
 
 
 def test_get_nodes_with_service_warning(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['get_nodes_with_service'] = consul_mocks.mock_get_nodes_with_service_warning
     consul_mocks.mock_check(consul_check, my_mocks)
-    consul_check.check(consul_mocks.MOCK_CONFIG)
+    consul_check.check(None)
 
     expected_tags = [
         'consul_datacenter:dc1',
         'consul_service_id:service-1',
         'consul_service-1_service_tag:az-us-east-1a',
+        'consul_service_tag:az-us-east-1a',
     ]
     aggregator.assert_metric('consul.catalog.nodes_up', value=1, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_passing', value=0, tags=expected_tags)
@@ -90,16 +92,17 @@ def test_get_nodes_with_service_warning(aggregator):
 
 
 def test_get_nodes_with_service_critical(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['get_nodes_with_service'] = consul_mocks.mock_get_nodes_with_service_critical
     consul_mocks.mock_check(consul_check, my_mocks)
-    consul_check.check(consul_mocks.MOCK_CONFIG)
+    consul_check.check(None)
 
     expected_tags = [
         'consul_datacenter:dc1',
         'consul_service_id:service-1',
         'consul_service-1_service_tag:az-us-east-1a',
+        'consul_service_tag:az-us-east-1a',
     ]
     aggregator.assert_metric('consul.catalog.nodes_up', value=1, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_passing', value=0, tags=expected_tags)
@@ -114,16 +117,16 @@ def test_get_nodes_with_service_critical(aggregator):
 
 
 def test_consul_request(aggregator, instance):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
     with mock.patch("datadog_checks.consul.consul.requests.get") as mock_requests_get:
-        consul_check.consul_request(instance, "foo")
+        consul_check.consul_request("foo")
         url = "{}/{}".format(instance["url"], "foo")
         aggregator.assert_service_check("consul.can_connect", ConsulCheck.OK, tags=["url:{}".format(url)], count=1)
 
         aggregator.reset()
         mock_requests_get.side_effect = Exception("message")
         with pytest.raises(Exception):
-            consul_check.consul_request(instance, "foo")
+            consul_check.consul_request("foo")
         aggregator.assert_service_check(
             "consul.can_connect",
             ConsulCheck.CRITICAL,
@@ -134,11 +137,11 @@ def test_consul_request(aggregator, instance):
 
 
 def test_service_checks(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['consul_request'] = consul_mocks.mock_get_health_check
     consul_mocks.mock_check(consul_check, my_mocks)
-    consul_check.check(consul_mocks.MOCK_CONFIG)
+    consul_check.check(None)
 
     expected_tags = [
         "consul_datacenter:dc1",
@@ -182,11 +185,11 @@ def test_service_checks(aggregator):
 
 
 def test_service_checks_disable_service_tag(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_DISABLE_SERVICE_TAG])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['consul_request'] = consul_mocks.mock_get_health_check
     consul_mocks.mock_check(consul_check, my_mocks)
-    consul_check.check(consul_mocks.MOCK_CONFIG_DISABLE_SERVICE_TAG)
+    consul_check.check(None)
 
     expected_tags = [
         'consul_datacenter:dc1',
@@ -222,71 +225,72 @@ def test_service_checks_disable_service_tag(aggregator):
 
 
 def test_cull_services_list():
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_LEADER_CHECK])
     my_mocks = consul_mocks._get_consul_mocks()
     consul_mocks.mock_check(consul_check, my_mocks)
-    consul_check.check(consul_mocks.MOCK_CONFIG_LEADER_CHECK)
 
     # Pad num_services to kick in truncation logic
-    num_services = consul_check.MAX_SERVICES + 20
+    num_services = MAX_SERVICES + 20
 
     # Max services parameter (from consul.yaml) set to be bigger than MAX_SERVICES and smaller than total of services
     max_services = num_services - 10
 
     # Big whitelist
     services = consul_mocks.mock_get_n_services_in_cluster(num_services)
-    whitelist = ['service_{}'.format(k) for k in range(num_services)]
-    assert len(consul_check._cull_services_list(services, whitelist)) == consul_check.MAX_SERVICES
+    consul_check.service_whitelist = ['service_{}'.format(k) for k in range(num_services)]
+    assert len(consul_check._cull_services_list(services)) == MAX_SERVICES
 
     # Big whitelist with max_services
-    assert len(consul_check._cull_services_list(services, whitelist, max_services)) == max_services
+    consul_check.max_services = max_services
+    assert len(consul_check._cull_services_list(services)) == max_services
 
     # Whitelist < MAX_SERVICES should spit out the whitelist
-    whitelist = ['service_{}'.format(k) for k in range(consul_check.MAX_SERVICES - 1)]
-    assert set(consul_check._cull_services_list(services, whitelist)) == set(whitelist)
+    consul_check.service_whitelist = ['service_{}'.format(k) for k in range(MAX_SERVICES - 1)]
+    assert set(consul_check._cull_services_list(services)) == set(consul_check.service_whitelist)
 
     # Whitelist < max_services param should spit out the whitelist
-    whitelist = ['service_{}'.format(k) for k in range(max_services - 1)]
-    assert set(consul_check._cull_services_list(services, whitelist, max_services)) == set(whitelist)
+    consul_check.service_whitelist = ['service_{}'.format(k) for k in range(max_services - 1)]
+    assert set(consul_check._cull_services_list(services)) == set(consul_check.service_whitelist)
 
     # No whitelist, still triggers truncation
-    whitelist = []
-    assert len(consul_check._cull_services_list(services, whitelist)) == consul_check.MAX_SERVICES
+    consul_check.service_whitelist = []
+    consul_check.max_services = MAX_SERVICES
+    assert len(consul_check._cull_services_list(services)) == MAX_SERVICES
 
     # No whitelist with max_services set, also triggers truncation
-    whitelist = []
-    assert len(consul_check._cull_services_list(services, whitelist, max_services)) == max_services
+    consul_check.service_whitelist = []
+    consul_check.max_services = max_services
+    assert len(consul_check._cull_services_list(services)) == max_services
 
     # Num. services < MAX_SERVICES should be no-op in absence of whitelist
-    num_services = consul_check.MAX_SERVICES - 1
+    num_services = MAX_SERVICES - 1
     services = consul_mocks.mock_get_n_services_in_cluster(num_services)
-    assert len(consul_check._cull_services_list(services, whitelist)) == num_services
+    assert len(consul_check._cull_services_list(services,)) == num_services
 
     # Num. services < MAX_SERVICES should spit out only the whitelist when one is defined
-    whitelist = ['service_1', 'service_2', 'service_3']
-    assert set(consul_check._cull_services_list(services, whitelist)) == set(whitelist)
+    consul_check.service_whitelist = ['service_1', 'service_2', 'service_3']
+    assert set(consul_check._cull_services_list(services)) == set(consul_check.service_whitelist)
 
     # Num. services < max_services (from consul.yaml) should be no-op in absence of whitelist
     num_services = max_services - 1
-    whitelist = []
+    consul_check.service_whitelist = []
     services = consul_mocks.mock_get_n_services_in_cluster(num_services)
-    assert len(consul_check._cull_services_list(services, whitelist, max_services)) == num_services
+    assert len(consul_check._cull_services_list(services)) == num_services
 
     # Num. services < max_services should spit out only the whitelist when one is defined
-    whitelist = ['service_1', 'service_2', 'service_3']
-    assert set(consul_check._cull_services_list(services, whitelist, max_services)) == set(whitelist)
+    consul_check.service_whitelist = ['service_1', 'service_2', 'service_3']
+    assert set(consul_check._cull_services_list(services)) == set(consul_check.service_whitelist)
 
 
 def test_new_leader_event(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_LEADER_CHECK])
     my_mocks = consul_mocks._get_consul_mocks()
     my_mocks['_get_cluster_leader'] = consul_mocks.mock_get_cluster_leader_B
     consul_mocks.mock_check(consul_check, my_mocks)
 
-    instance_hash = hash_mutable(consul_mocks.MOCK_CONFIG_LEADER_CHECK)
-    consul_check._instance_states[instance_hash].last_known_leader = 'My Old Leader'
+    consul_check._last_known_leader = 'My Old Leader'
 
-    consul_check.check(consul_mocks.MOCK_CONFIG_LEADER_CHECK)
+    consul_check.check(None)
     assert len(aggregator.events) == 1
 
     event = aggregator.events[0]
@@ -299,18 +303,17 @@ def test_self_leader_event(aggregator):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_SELF_LEADER_CHECK])
     my_mocks = consul_mocks._get_consul_mocks()
 
-    instance_hash = hash_mutable(consul_mocks.MOCK_CONFIG_SELF_LEADER_CHECK)
-    consul_check._instance_states[instance_hash].last_known_leader = 'My Old Leader'
+    consul_check._last_known_leader = 'My Old Leader'
 
-    our_url = consul_mocks.mock_get_cluster_leader_A(None)
-    other_url = consul_mocks.mock_get_cluster_leader_B(None)
+    our_url = consul_mocks.mock_get_cluster_leader_A()
+    other_url = consul_mocks.mock_get_cluster_leader_B()
 
     # We become the leader
     my_mocks['_get_cluster_leader'] = consul_mocks.mock_get_cluster_leader_A
     consul_mocks.mock_check(consul_check, my_mocks)
-    consul_check.check(consul_mocks.MOCK_CONFIG_SELF_LEADER_CHECK)
+    consul_check.check(None)
     assert len(aggregator.events) == 1
-    assert our_url == consul_check._instance_states[instance_hash].last_known_leader
+    assert our_url == consul_check._last_known_leader
     event = aggregator.events[0]
     assert event['event_type'] == 'consul.new_leader'
     assert 'prev_consul_leader:My Old Leader' in event['tags']
@@ -318,24 +321,24 @@ def test_self_leader_event(aggregator):
 
     # We are already the leader, no new events
     aggregator.reset()
-    consul_check.check(consul_mocks.MOCK_CONFIG_SELF_LEADER_CHECK)
+    consul_check.check(None)
     assert len(aggregator.events) == 0
 
     # We lose the leader, no new events
     my_mocks['_get_cluster_leader'] = consul_mocks.mock_get_cluster_leader_B
     consul_mocks.mock_check(consul_check, my_mocks)
     aggregator.reset()
-    consul_check.check(consul_mocks.MOCK_CONFIG_SELF_LEADER_CHECK)
+    consul_check.check(None)
     assert len(aggregator.events) == 0
-    assert other_url == consul_check._instance_states[instance_hash].last_known_leader
+    assert other_url == consul_check._last_known_leader
 
     # We regain the leadership
     my_mocks['_get_cluster_leader'] = consul_mocks.mock_get_cluster_leader_A
     consul_mocks.mock_check(consul_check, my_mocks)
     aggregator.reset()
-    consul_check.check(consul_mocks.MOCK_CONFIG_SELF_LEADER_CHECK)
+    consul_check.check(None)
     assert len(aggregator.events) == 1
-    assert our_url == consul_check._instance_states[instance_hash].last_known_leader
+    assert our_url == consul_check._last_known_leader
     event = aggregator.events[0]
     assert event['event_type'] == 'consul.new_leader'
     assert 'prev_consul_leader:{}'.format(other_url) in event['tags']
@@ -343,15 +346,14 @@ def test_self_leader_event(aggregator):
 
 
 def test_network_latency_checks(aggregator):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [{}])
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_NETWORK_LATENCY_CHECKS])
     my_mocks = consul_mocks._get_consul_mocks()
     consul_mocks.mock_check(consul_check, my_mocks)
 
     # We start out as the leader, and stay that way
-    instance_hash = hash_mutable(consul_mocks.MOCK_CONFIG_NETWORK_LATENCY_CHECKS)
-    consul_check._instance_states[instance_hash].last_known_leader = consul_mocks.mock_get_cluster_leader_A(None)
+    consul_check._last_known_leader = consul_mocks.mock_get_cluster_leader_A()
 
-    consul_check.check(consul_mocks.MOCK_CONFIG_NETWORK_LATENCY_CHECKS)
+    consul_check.check(None)
 
     latency = []
     for m_name, metrics in aggregator._metrics.items():
@@ -414,7 +416,7 @@ def test_config(test_case, extra_config, expected_http_kwargs):
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.return_value = mock.MagicMock(status_code=200)
 
-        check.check(instance)
+        check.check(None)
 
         http_wargs = dict(
             auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY

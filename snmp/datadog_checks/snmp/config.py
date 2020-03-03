@@ -12,11 +12,7 @@ from pysnmp.smi import builder, view
 from datadog_checks.base import ConfigurationError, is_affirmative
 
 from .resolver import OIDResolver
-
-
-def to_oid_tuple(oid_string):
-    """Return a OID tuple from a OID string."""
-    return tuple(map(int, oid_string.lstrip('.').split('.')))
+from .utils import to_oid_tuple
 
 
 class ParsedMetric(object):
@@ -72,6 +68,7 @@ class InstanceConfig:
     DEFAULT_TIMEOUT = 1
     DEFAULT_ALLOWED_FAILURES = 3
     DEFAULT_BULK_THRESHOLD = 0
+    DEFAULT_WORKERS = 5
 
     def __init__(
         self,
@@ -108,6 +105,7 @@ class InstanceConfig:
         self.discovered_instances = {}  # type: Dict[str, InstanceConfig]
         self.failing_instances = defaultdict(int)  # type: DefaultDict[str, int]
         self.allowed_failures = int(instance.get('discovery_allowed_failures', self.DEFAULT_ALLOWED_FAILURES))
+        self.workers = int(instance.get('workers', self.DEFAULT_WORKERS))
 
         self.bulk_threshold = int(instance.get('bulk_threshold', self.DEFAULT_BULK_THRESHOLD))
 
@@ -169,7 +167,7 @@ class InstanceConfig:
 
     def refresh_with_profile(self, profile, warning, log):
         # type: (Dict[str, Any], Callable[..., None], Callable[..., None]) -> None
-        metrics = profile['definition']['metrics']
+        metrics = profile['definition'].get('metrics', [])
         all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics, warning, log)
 
         metric_tags = profile['definition'].get('metric_tags', [])

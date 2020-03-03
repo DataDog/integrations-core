@@ -1,5 +1,9 @@
 # CHANGELOG - hdfs_namenode
 
+## 1.11.0 / 2020-02-22
+
+* [Added] Add log section to hdfs integrations. See [#4632](https://github.com/DataDog/integrations-core/pull/4632).
+
 ## 1.10.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).

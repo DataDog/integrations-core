@@ -188,8 +188,11 @@ def dd_agent_check(request, aggregator):
         collector_output = collector_output.strip()
         if not collector_output.endswith(']'):
             # JMX needs some additional cleanup
-            collector_output = collector_output[: collector_output.rfind(']') + 1]
-        collector = json.loads(collector_output)
+            collector_output = collector_output[: collector_output.rfind('} ]\n') + 3]
+        try:
+            collector = json.loads(collector_output)
+        except json.decoder.JSONDecodeError as e:
+            raise Exception("Error loading json: {}\nCollector Json Output:\n{}".format(e, collector_output))
 
         replay_check_run(collector, aggregator)
 

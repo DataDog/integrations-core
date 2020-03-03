@@ -1,5 +1,9 @@
 # CHANGELOG - lighttpd
 
+## 1.8.0 / 2020-02-22
+
+* [Added] Add version metadata. See [#5600](https://github.com/DataDog/integrations-core/pull/5600).
+
 ## 1.7.0 / 2019-12-02
 
 * [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).

@@ -96,7 +96,7 @@ init_config:
   ## @param profiles - object - optional
   ## Specify profiles to be able to reference a set of metrics by name.
   ## One of definition_file or definition needs to be defined.
-  ## definition_file points to a file with a prfile, whereas definition inlines
+  ## definition_file points to a file with a profile, whereas definition inlines
   ## it directly here.
   ## When using a profile present on the profiles directory of the
   ## configuration, you can directly pass the filename.
@@ -118,6 +118,8 @@ init_config:
       definition_file: dell-poweredge.yaml
     hp-ilo4:
       definition_file: hp-ilo4.yaml
+    hpe-proliant:
+      definition_file: hpe-proliant.yaml
 
 instances:
   -
@@ -174,6 +176,11 @@ instances:
     ## Number of times a discovered host can fail before we remove it from the discovered list.
     #
     # discovery_allowed_failures: 3
+
+    ## @param workers - integer - optional - default: 5
+    ## Number of workers used for check when using discovery.
+    #
+    # workers: 5
 
     ## @param enforce_mib_constraints - boolean - optional - default: true
     ## If set to false we will not check the values returned meet the MIB constraints.

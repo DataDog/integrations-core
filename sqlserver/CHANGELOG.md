@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 1.16.1 / 2020-02-22
+
+* [Fixed] Fix small capitalization error in log. See [#5509](https://github.com/DataDog/integrations-core/pull/5509).
+
 ## 1.16.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).

@@ -25,6 +25,16 @@ CONFIG = {
     'exchanges': ['test1'],
 }
 
+CONFIG_NO_NODES = {
+    'rabbitmq_api_url': URL,
+    'rabbitmq_user': 'guest',
+    'rabbitmq_pass': 'guest',
+    'queues': ['test1'],
+    'tags': ["tag1:1", "tag2"],
+    'exchanges': ['test1'],
+    'collect_node_metrics': False,
+}
+
 CONFIG_REGEX = {
     'rabbitmq_api_url': URL,
     'rabbitmq_user': 'guest',

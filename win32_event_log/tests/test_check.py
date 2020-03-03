@@ -48,7 +48,9 @@ class FakeWmiSampler:
 
 @pytest.fixture
 def mock_get_wmi_sampler():
-    with patch("datadog_checks.win32_event_log.Win32EventLogWMI._get_wmi_sampler", return_value=FakeWmiSampler()):
+    with patch(
+        "datadog_checks.win32_event_log.Win32EventLogWMI._get_running_wmi_sampler", return_value=FakeWmiSampler()
+    ):
         yield
 
 

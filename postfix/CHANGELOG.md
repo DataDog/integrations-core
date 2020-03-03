@@ -1,5 +1,9 @@
 # CHANGELOG - postfix
 
+## 1.6.1 / 2020-02-22
+
+* [Fixed] Fix possible IndexError. See [#5494](https://github.com/DataDog/integrations-core/pull/5494).
+
 ## 1.6.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
