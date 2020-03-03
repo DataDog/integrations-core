@@ -222,7 +222,7 @@ def test_invalid_discovery_interval():
     instance.pop('ip_address')
     instance['network_address'] = '192.168.0.0/24'
 
-    instance['discovery_interval'] = 'not_parsable_as_an_int'
+    instance['discovery_interval'] = 'not_parsable_as_a_float'
 
     check = SnmpCheck('snmp', {}, [instance])
     with pytest.raises(ConfigurationError):
@@ -360,7 +360,6 @@ def test_discovery_tags():
     instance.pop('ip_address')
 
     instance['network_address'] = '192.168.0.0/29'
-    instance['discovery_interval'] = 0
     instance['tags'] = ['test:check']
 
     check = SnmpCheck('snmp', {}, [instance])
@@ -375,7 +374,7 @@ def test_discovery_tags():
 
     check.fetch_sysobject_oid = mock_fetch
 
-    check.discover_instances()
+    check.discover_instances(interval=0)
 
     config = check._config.discovered_instances['192.168.0.2']
     assert set(config.tags) == {'snmp_device:192.168.0.2', 'test:check'}

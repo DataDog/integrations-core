@@ -130,7 +130,7 @@ class SnmpCheck(AgentCheck):
             return None
 
     def discover_instances(self, interval):
-        # type: (int) -> None
+        # type: (float) -> None
         config = self._config
 
         while self._running:
@@ -351,10 +351,12 @@ class SnmpCheck(AgentCheck):
                 host_config = self._build_config(instance)
                 self._config.discovered_instances[host] = host_config
 
+        raw_discovery_interval = self._config.instance.get('discovery_interval', 3600)
         try:
-            discovery_interval = int(self._config.instance.get('discovery_interval', 3600))
+            discovery_interval = float(raw_discovery_interval)
         except (ValueError, TypeError):
-            raise ConfigurationError('discovery_interval could not be parsed as an integer')
+            message = 'discovery_interval could not be parsed as a number: {!r}'.format(raw_discovery_interval)
+            raise ConfigurationError(message)
 
         self._thread = threading.Thread(
             target=functools.partial(self.discover_instances, interval=discovery_interval), name=self.name
