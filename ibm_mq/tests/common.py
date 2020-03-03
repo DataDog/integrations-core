@@ -89,8 +89,9 @@ E2E_METADATA = {
         'apt-get update',
         'apt-get install gcc -y',  # Needed when bumping pymqi to be able to build it on the E2E
         'mkdir /opt/mqm',
-        'curl -o /opt/mqm/mq-client.tar.gz '
-        'https://dd-agent-tarball-mirror.s3.amazonaws.com/9.0.0.6-IBM-MQC-Redist-LinuxX64.tar.gz',
+        'curl -L -o /opt/mqm/mq-client.tar.gz '
+        # TODO: change to S3
+        'https://www.dropbox.com/s/9wmhpwq8blb1na3/9.1.0.4-IBM-MQC-Redist-LinuxX64.tar.gz\?dl\=0',
         'tar -C /opt/mqm -xf /opt/mqm/mq-client.tar.gz',
     ],
     'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib', 'C_INCLUDE_PATH': '/opt/mqm/inc'},
