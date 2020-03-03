@@ -55,55 +55,105 @@ ATTR_TO_METRIC_RATE = {
 }
 
 
-# taken verbatim from o'reilly python cookbook
-class ReadWriteLock:
-    """ A lock object that allows many simultaneous "read locks", but
+class ReadLock(object):
+    """Context manager for a read lock attached to a given condition."""
+
+    def __init__(self, condition):
+        self._condition = condition
+
+    def __enter__(self):
+        self._condition.add_reader()
+
+    def __exit__(self, type, value, traceback):
+        self._condition.remove_reader()
+
+
+class WriteLock(object):
+    """Context manager for a write lock attached to a given condition."""
+
+    def __init__(self, condition):
+        self._condition = condition
+
+    def __enter__(self):
+        self._condition.add_writer()
+
+    def __exit__(self, type, value, traceback):
+        self._condition.remove_writer()
+
+
+class ReadWriteCondition(object):
+    def __init__(self):
+        self._condition = threading.Condition(threading.Lock())
+        self._readers = 0  # Number of readers: as long as it's not zero, it's not possible to write.
+
+    def add_reader(self):
+        """Takes the condition, then increments the reader count and releases the condition."""
+        with self._condition:
+            self._readers += 1
+
+    def remove_reader(self):
+        """Takes the condition, then decrements the reader count.
+        If no readers are left, notifies all threads waiting on the condition.
+        Then releases the condition."""
+        with self._condition:
+            self._readers -= 1
+            if self._is_free():
+                self._condition.notify_all()
+
+    def add_writer(self):
+        """Takes the condition, and waits until all current readers release the condition.
+        Then it's safe to write on the underlying object."""
+        self._condition.acquire()
+        while not self._is_free():
+            self._condition.wait()
+
+    def remove_writer(self):
+        """Releases the condition, making the underlying object available for
+        read or write operations."""
+        self._condition.release()
+
+    def _is_free(self):
+        return self._readers == 0
+
+
+class ReadWriteLock(object):
+    """A lock object that allows many simultaneous "read locks", but
     only one "write lock." """
 
     def __init__(self):
-        self._read_ready = threading.Condition(threading.Lock())
-        self._readers = 0
+        self._condition = ReadWriteCondition()
 
-    def acquire_read(self):
-        """ Acquire a read lock. Blocks only if a thread has
-        acquired the write lock. """
-        self._read_ready.acquire()
-        try:
-            self._readers += 1
-        finally:
-            self._read_ready.release()
+    def read_lock(self):
+        """Generates a read lock context manager based on the shared condition."""
+        return ReadLock(self._condition)
 
-    def release_read(self):
-        """ Release a read lock. """
-        self._read_ready.acquire()
-        try:
-            self._readers -= 1
-            if not self._readers:
-                self._read_ready.notifyAll()
-        finally:
-            self._read_ready.release()
+    def write_lock(self):
+        """Generates a write lock context manager based on the shared condition."""
+        return WriteLock(self._condition)
 
-    def acquire_write(self):
-        """ Acquire a write lock. Blocks until there are no
-        acquired read or write locks. """
-        self._read_ready.acquire()
-        while self._readers > 0:
-            self._read_ready.wait()
 
-    def release_write(self):
-        """ Release a write lock. """
-        self._read_ready.release()
+class ProcessListCache(object):
+    # Process list to be shared among all instances
+    elements = []
+    lock = ReadWriteLock()
+    last_ts = 0
+    cache_duration = DEFAULT_PROC_LIST_CACHE_DURATION
+
+    @staticmethod
+    def read_lock():
+        return ProcessListCache.lock.read_lock()
+
+    @staticmethod
+    def write_lock():
+        return ProcessListCache.lock.write_lock()
 
 
 class ProcessCheck(AgentCheck):
-    # process list, shared among all instances
-    process_list = []
-    process_list_lock = ReadWriteLock()
-    last_proc_list_ts = 0
-    proc_list_cache_duration = DEFAULT_PROC_LIST_CACHE_DURATION
-
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+
+        # Shared process list
+        self.process_list = ProcessListCache()
 
         # ad stands for access denied
         # We cache the PIDs getting this error and don't iterate on them more often than `access_denied_cache_duration``
@@ -135,13 +185,13 @@ class ProcessCheck(AgentCheck):
         # Process cache, indexed by instance
         self.process_cache = defaultdict(dict)
 
-        ProcessCheck.proc_list_cache_duration = int(
+        self.process_list.cache_duration = int(
             init_config.get('proc_list_cache_duration', DEFAULT_PROC_LIST_CACHE_DURATION)
         )
 
     def should_refresh_proclist(self):
         now = time.time()
-        return now - ProcessCheck.last_proc_list_ts > ProcessCheck.proc_list_cache_duration
+        return now - self.process_list.last_ts > self.process_list.cache_duration
 
     def should_refresh_ad_cache(self, name):
         now = time.time()
@@ -170,19 +220,17 @@ class ProcessCheck(AgentCheck):
         # Acquire the write lock to check whether to refresh because we're
         # going to keep it to do the refresh, AND, we don't want multiple
         # threads getting a `yes` result at once
-        ProcessCheck.process_list_lock.acquire_write()
-        if self.should_refresh_proclist():
-            self.log.debug("Refreshing process list")
-            ProcessCheck.process_list = [proc for proc in psutil.process_iter(attrs=['pid', 'name'])]
-            ProcessCheck.last_proc_list_ts = time.time()
-            self.log.debug("Set last ts to %s", ProcessCheck.last_proc_list_ts)
-        else:
-            self.log.debug("Using process list cache")
-        ProcessCheck.process_list_lock.release_write()
+        with self.process_list.write_lock():
+            if self.should_refresh_proclist():
+                self.log.debug("Refreshing process list")
+                self.process_list.elements = [proc for proc in psutil.process_iter(attrs=['pid', 'name'])]
+                self.process_list.last_ts = time.time()
+                self.log.debug("Set last ts to %s", self.process_list.last_ts)
+            else:
+                self.log.debug("Using process list cache")
 
-        ProcessCheck.process_list_lock.acquire_read()
-        try:
-            for proc in ProcessCheck.process_list:
+        with self.process_list.read_lock():
+            for proc in self.process_list.elements:
                 # Skip access denied processes
                 if not refresh_ad_cache and proc.pid in self.ad_cache:
                     continue
@@ -231,10 +279,8 @@ class ProcessCheck(AgentCheck):
                 self.log.debug(
                     "Unable to find process named %s among processes: %s",
                     search_string,
-                    ', '.join(sorted(proc.name() for proc in ProcessCheck.process_list)),
+                    ', '.join(sorted(proc.name() for proc in self.process_list.elements)),
                 )
-        finally:
-            ProcessCheck.process_list_lock.release_read()
 
         self.pid_cache[name] = matching_pids
         self.last_pid_cache_ts[name] = time.time()
