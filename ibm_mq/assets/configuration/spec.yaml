@@ -20,13 +20,11 @@ files:
           example: 'datadog'
           type: string
       - name: host
-        default: localhost
         value:
           example: 'localhost'
           type: string
         description: The host IBM MQ is running on.
       - name: port
-        default: 1414
         value:
           example: 1414
           type: integer
@@ -41,8 +39,6 @@ files:
           type: string
         description: <PASSWORD> of the IBMMQ Channel to connect to.
       - name: queues
-        items:
-            type: string
         description: The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
         value:
           example: ['<QUEUE_NAME>']
@@ -97,7 +93,6 @@ files:
           type: object
           properties: []
       - name: auto_discover_queues
-        default: false
         description: |
           Autodiscover the queues to monitor
           Warning: this will lead to some warnings in your logs
@@ -105,21 +100,17 @@ files:
           example: false
           type: boolean
       - name: ssl_auth
-        type: string
         description: Whether or not to use SSL auth while connecting to the channel.
         value:
           example: 'no'
           type: string
       - name: ssl_cipher_spec
         type: string
-        default: 'TLS_RSA_WITH_AES_256_CBC_SHA'
         description: The ssl cipher to use.
         value:
           example: 'TLS_RSA_WITH_AES_256_CBC_SHA'
           type: string
       - name: ssl_key_repository_location
-        type: string
-        default: /var/mqm/ssl-db/client/KeyringClient
         description: The location of the ssl keyring.
         value:
           example: '/var/mqm/ssl-db/client/KeyringClient'
