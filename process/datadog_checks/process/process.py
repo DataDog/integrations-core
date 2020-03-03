@@ -101,7 +101,7 @@ class ReadWriteCondition(object):
                 self._condition.notify_all()
 
     def add_writer(self):
-        """Takes the condition, and waits until all current readers release the condition.
+        """Takes the condition, and waits until all current readers remove themselves.
         Then it's safe to write on the underlying object."""
         self._condition.acquire()
         while not self._is_free():
