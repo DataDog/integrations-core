@@ -91,7 +91,6 @@ E2E_METADATA = {
         'apt-get install gcc -y',
         'mkdir /opt/mqm',
         'curl -L -o /opt/mqm/mq-client.tar.gz '
-        # TODO: change to S3
         'https://ddintegrations.blob.core.windows.net/ibm-mq/9.1.0.4-IBM-MQC-Redist-LinuxX64.tar.gz',
         'tar -C /opt/mqm -xf /opt/mqm/mq-client.tar.gz',
     ],
