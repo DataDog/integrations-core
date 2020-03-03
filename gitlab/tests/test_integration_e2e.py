@@ -25,7 +25,7 @@ def assert_check(aggregator):
     )
 
     for metric in METRICS_TO_TEST:
-        aggregator.assert_metric("gitlab.{}".format(metric), tags=CUSTOM_TAGS, count=2)
+        aggregator.assert_metric("gitlab.{}".format(metric))
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -34,11 +34,12 @@ def test_check_integration(aggregator):
     init_config = CONFIG['init_config']
 
     gitlab = GitlabCheck('gitlab', init_config, instances=[instance])
-
     gitlab.check(instance)
     gitlab.check(instance)
 
     assert_check(aggregator)
+    for metric in METRICS_TO_TEST:
+        aggregator.assert_metric("gitlab.{}".format(metric), count=2)
 
 
 @pytest.mark.e2e

@@ -27,7 +27,7 @@ gitlab.transaction.duration_seconds.sum,gauge,,second,,Sum of Duration for all t
 gitlab.transaction.event_build_found_total,count,,,,Counter for build found for API /jobs/request,0,gitlab,build found count
 gitlab.transaction.event_build_invalid_total,count,,,,Counter for build invalid due to concurrency conflict for API /jobs/request,-1,gitlab,build invalid count
 gitlab.transaction.event_build_not_found_cached_total,count,,,,Counter for build invalid due to concurrency conflict for API /jobs/request,-1,gitlab,build not found cached
-gitlab.transactionevent_build_not_found_total,count,,,,Counter for build not found for API /jobs/request,-1,gitlab,build not found total
+gitlab.transaction.event_build_not_found_total,count,,,,Counter for build not found for API /jobs/request,-1,gitlab,build not found total
 gitlab.transaction.event_change_default_branch_total,count,,,,Counter when default branch is changed for any repository,0,gitlab,change default branch
 gitlab.transaction.event_create_repository_total,count,,,,Counter when any repository is created,0,gitlab,create repository total
 gitlab.transaction.event_etag_caching_cache_hit_total,count,,hit,,Counter for etag cache hit.,0,gitlab,etag cache hit
@@ -54,8 +54,7 @@ gitlab.transaction.event_update_build_total,count,,,,Counter for update build fo
 gitlab.transaction.new_redis_connections_total,count,,connection,,Counter for new Redis connections,0,gitlab,new redis connections
 gitlab.transaction.queue_duration_total,count,,,,Duration jobs were enqueued before processing,0,gitlab,jobs enqueued processing
 gitlab.transaction.rails_queue_duration_total,count,,,,Measures latency between GitLab Workhorse forwarding a request to Rails,0,gitlab,rails queue duration
-gitlab.transaction.view_duration_total,count,,,,Duration for views,0,gitlab,view duration
-gitlab.transaction.view_duration_total_sum,count,,,,Sum of duration for views,0,gitlab,view duration sum
+gitlab.transaction.view_duration_total,count,,,,Duration for views,0,gitlab,view duration count
 gitlab.view_rendering_duration_seconds.count,count,,second,,Count of duration for views (histogram),0,gitlab,rendering duration count
 gitlab.view_rendering_duration_seconds.sum,count,,second,,Sum of duration for views (histogram),0,gitlab,rendering duration sum
 gitlab.http_requests_total.sum,count,,request,,Rack request count,0,gitlab,rack request count

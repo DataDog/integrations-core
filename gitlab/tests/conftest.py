@@ -18,8 +18,7 @@ from .common import (
     GITLAB_PROMETHEUS_ENDPOINT,
     GITLAB_TEST_PASSWORD,
     GITLAB_URL,
-    HERE,
-    PROMETHEUS_ENDPOINT,
+    HERE
 )
 
 
