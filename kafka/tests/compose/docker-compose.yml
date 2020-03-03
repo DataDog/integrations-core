@@ -13,8 +13,8 @@ services:
       - 9999:9999
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_HOST: ${KAFKA_HOST}
-      KAFKA_ADVERTISED_HOST_NAME: ${KAFKA_HOST}
+      KAFKA_HOST: localhost
+      KAFKA_ADVERTISED_HOST_NAME: localhost
       KAFKA_ADVERTISED_PORT: "9092"
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_CREATE_TOPICS: "marvel:2:1,dc:2:1"
