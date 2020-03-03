@@ -19,6 +19,7 @@ class DummyCheck(AgentCheck):
         self.gauge('dummy.metric', 10)
 
 
+# TODO - update tests for threading futures
 @pytest.mark.parametrize(
     'agent_config, init_config, called',
     [

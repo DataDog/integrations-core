@@ -8,7 +8,12 @@ try:
     if datadog_agent.get_config('integration_tracing'):
         from ddtrace import patch
 
-        patch(requests=True)
+        # handle thread monitoring as an additional option
+        if datadog_agent.get_config('integration_tracing_futures'):
+            patch(requests=True, futures=True)
+        else:
+            patch(requests=True)
+
 except ImportError:
     # Tracing Integrations is only available with Agent 6
     pass
