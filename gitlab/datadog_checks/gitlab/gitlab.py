@@ -6,9 +6,10 @@ from copy import deepcopy
 import requests
 from six.moves.urllib.parse import urlparse
 
-from .metrics import METRICS_MAP
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.errors import CheckException
+
+from .metrics import METRICS_MAP
 
 
 class GitlabCheck(OpenMetricsBaseCheck):

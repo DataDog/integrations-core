@@ -15,6 +15,7 @@ from .common import (
     CONFIG,
     GITLAB_LOCAL_PORT,
     GITLAB_LOCAL_PROMETHEUS_PORT,
+    GITLAB_PROMETHEUS_ENDPOINT,
     GITLAB_TEST_PASSWORD,
     GITLAB_URL,
     HERE,
@@ -38,7 +39,10 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'),
         env_vars=env,
-        conditions=[CheckEndpoints(GITLAB_URL, attempts=200), CheckEndpoints(PROMETHEUS_ENDPOINT)],
+        conditions=[
+            CheckEndpoints(GITLAB_URL, attempts=200),
+            CheckEndpoints(GITLAB_PROMETHEUS_ENDPOINT),
+        ],
     ):
         # run pre-test commands
         for _ in range(100):

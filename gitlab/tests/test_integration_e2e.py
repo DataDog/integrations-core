@@ -6,7 +6,7 @@ import pytest
 
 from datadog_checks.gitlab import GitlabCheck
 
-from .common import ALLOWED_METRICS, CONFIG, CUSTOM_TAGS, GITLAB_TAGS
+from .common import ALLOWED_METRICS, CONFIG, CUSTOM_TAGS, GITLAB_TAGS, LEGACY_CONFIG, METRICS_TO_TEST
 
 
 def assert_check(aggregator):
@@ -24,7 +24,7 @@ def assert_check(aggregator):
         GitlabCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabCheck.OK, tags=CUSTOM_TAGS, count=2
     )
 
-    for metric in ALLOWED_METRICS:
+    for metric in METRICS_TO_TEST:
         aggregator.assert_metric("gitlab.{}".format(metric), tags=CUSTOM_TAGS, count=2)
 
 
@@ -43,6 +43,7 @@ def test_check_integration(aggregator):
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
-    aggregator = dd_agent_check(CONFIG, rate=True)
+    aggregator = dd_agent_check(LEGACY_CONFIG, rate=True)
+    for metric in ALLOWED_METRICS:
+        aggregator.assert_metric("gitlab.{}".format(metric), tags=CUSTOM_TAGS, count=2)
 
-    assert_check(aggregator)

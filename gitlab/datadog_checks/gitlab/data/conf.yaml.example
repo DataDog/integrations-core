@@ -153,9 +153,9 @@ instances:
   - gitlab_url: <GITLAB_URL>
 
     ## @param prometheus_endpoint - string - required
-    ## URL of the metrics endpoint of prometheus
+    ## URL of the Prometheus metrics endpoint of gitlab
     #
-    prometheus_endpoint: http://<PROMETHEUS_ENDPOINT>:<PROMETHEUS_PORT>/metrics
+    prometheus_endpoint: http://<GITLAB_URL>/-/metrics
 
     ## @param send_histograms_buckets - boolean - optional - default: true
     ## The histogram buckets can be noisy and generate a lot of tags.

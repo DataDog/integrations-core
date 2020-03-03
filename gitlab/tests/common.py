@@ -16,6 +16,7 @@ GITLAB_LOCAL_PORT = 8086
 GITLAB_LOCAL_PROMETHEUS_PORT = 8088
 
 PROMETHEUS_ENDPOINT = "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_PROMETHEUS_PORT)
+GITLAB_PROMETHEUS_ENDPOINT = "http://{}:{}/-/metrics".format(HOST, GITLAB_LOCAL_PORT)
 GITLAB_URL = "http://{}:{}".format(HOST, GITLAB_LOCAL_PORT)
 GITLAB_TAGS = ['gitlab_host:{}'.format(HOST), 'gitlab_port:{}'.format(GITLAB_LOCAL_PORT)]
 
@@ -32,7 +33,25 @@ ALLOWED_METRICS = [
     'process_virtual_memory_bytes',
 ]
 
-CONFIG = {
+METRICS_TO_TEST = [
+    "transaction.new_redis_connections_total",
+    "transaction.queue_duration_total",
+    "transaction.rails_queue_duration_total",
+    "transaction.view_duration_total",
+    "transaction.view_duration_total.sum",
+    "view_rendering_duration_seconds.count",
+    "view_rendering_duration_seconds_sum",
+    "http_requests_total",
+    "http_request_duration_seconds.sum",
+    "http_request_duration_seconds.count",
+    "pipelines_created_total",
+    "rack_uncaught_errors_total",
+    "user_session_logins_total",
+    "upload_file_does_not_exist",
+    "failed_login_captcha_total",
+]
+
+LEGACY_CONFIG = {
     'init_config': {'allowed_metrics': ALLOWED_METRICS},
     'instances': [
         {
@@ -44,11 +63,23 @@ CONFIG = {
     ],
 }
 
+CONFIG = {
+    'init_config': [],
+    'instances': [
+        {
+            'prometheus_endpoint': GITLAB_PROMETHEUS_ENDPOINT,
+            'gitlab_url': GITLAB_URL,
+            'disable_ssl_validation': True,
+            'tags': list(CUSTOM_TAGS),
+        }
+    ],
+}
+
 BAD_CONFIG = {
     'init_config': {'allowed_metrics': ALLOWED_METRICS},
     'instances': [
         {
-            'prometheus_endpoint': 'http://{}:1234/metrics'.format(HOST),
+            'prometheus_endpoint': 'http://{}:1234/-/metrics'.format(HOST),
             'gitlab_url': 'http://{}:1234/ci'.format(HOST),
             'disable_ssl_validation': True,
             'tags': list(CUSTOM_TAGS),
