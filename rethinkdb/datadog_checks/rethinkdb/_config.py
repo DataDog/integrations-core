@@ -26,7 +26,7 @@ from ._types import Instance, Metric
 from ._version import parse_version
 
 
-class Config:
+class Config(object):
     """
     Hold instance configuration for a RethinkDB check.
 
@@ -102,17 +102,12 @@ class Config:
             for metric in collect(self._query_engine, conn):
                 yield metric
 
-    def get_connected_server_version(self, conn):
+    def collect_connected_server_version(self, conn):
         # type: (Connection) -> str
         """
         Return the version of RethinkDB run by the server at the other end of the connection, in SemVer format.
-
-        Example:
-
-        >>> config.get_version(conn)
-        '2.4.0~0bionic'
         """
-        version_string = self._query_engine.get_connected_server_version_string(conn)
+        version_string = self._query_engine.query_connected_server_version_string(conn)
         return parse_version(version_string)
 
     def __repr__(self):

@@ -12,7 +12,7 @@ from datadog_checks.base import AgentCheck
 
 from ._config import Config
 from ._connections import Connection
-from ._exceptions import CouldNotConnect
+from ._exceptions import CouldNotConnect, VersionCollectionFailed
 from ._types import Instance, Metric
 
 SERVICE_CHECK_CONNECT = 'rethinkdb.can_connect'
@@ -81,5 +81,9 @@ class RethinkDBCheck(AgentCheck):
             for metric in config.collect_metrics(conn):
                 self.submit_metric(metric)
 
-            version = config.get_connected_server_version(conn)
-            self.set_metadata('version', version)
+            try:
+                version = config.collect_connected_server_version(conn)
+            except VersionCollectionFailed as exc:
+                self.log.error(exc)
+            else:
+                self.set_metadata('version', version)

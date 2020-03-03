@@ -3,8 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
+from ._exceptions import VersionCollectionFailed
+
 # See: https://github.com/rethinkdb/rethinkdb/blob/95cfed8a62f08e3198ac25417c9b6900be8b6877/src/utils.hpp#L117
-_RETHINKDB_VERSION_STR_REGEX = re.compile(r'^rethinkdb\s+(?P<rethinkdb_version>(?:\S+|[^\(]+))')
+_RETHINKDB_VERSION_STR_REGEX = re.compile(r'^rethinkdb\s+(?P<rethinkdb_version>\S+)\s\(.*')
 
 
 def parse_version(rethinkdb_version_string):
@@ -24,6 +26,6 @@ def parse_version(rethinkdb_version_string):
         message = 'Version string did not match pattern (version_string={!r} pattern={!r})'.format(
             rethinkdb_version_string, _RETHINKDB_VERSION_STR_REGEX
         )
-        raise ValueError(message)
+        raise VersionCollectionFailed(message)
 
     return match.group('rethinkdb_version')

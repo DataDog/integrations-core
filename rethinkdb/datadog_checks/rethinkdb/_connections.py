@@ -16,7 +16,7 @@ ConnectionServer = TypedDict('ConnectionServer', {'id': str, 'name': str, 'proxy
 ConnectionTags = TypedDict('ConnectionTags', {'server': str, 'host': str, 'port': int, 'proxy': bool})
 
 
-class Connection:
+class Connection(object):
     """
     Base class and interface for connection objects.
     """

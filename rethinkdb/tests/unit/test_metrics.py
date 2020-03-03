@@ -52,8 +52,8 @@ def test_jobs_metrics():
     mock_rows = [mock_backfill_job_row, mock_index_construction_job_row, mock_unknown_job_row]
 
     engine = QueryEngine()
-    conn = MockConnection(rows=mock_rows)
-    metrics = list(collect_system_jobs(engine, conn))
+    with MockConnection(rows=lambda: mock_rows) as conn:
+        metrics = list(collect_system_jobs(engine, conn))
 
     assert metrics == [
         {

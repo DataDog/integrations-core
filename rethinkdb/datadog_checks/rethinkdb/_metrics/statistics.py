@@ -167,12 +167,6 @@ def collect_replica_statistics(engine, conn):
     for table, server, replica, stats in engine.query_replicas_with_stats(conn):
         logger.debug('replica_statistics table=%r server=%r replica=%r stats=%r', table, server, replica, stats)
 
-        state = replica['state']
-
-        if state == 'disconnected':
-            # TODO: submit service checks?
-            continue
-
         database = table['db']
         server_name = server['name']
         table_name = table['name']

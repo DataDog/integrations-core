@@ -25,7 +25,7 @@ from ._types import (
 )
 
 
-class QueryEngine:
+class QueryEngine(object):
     """
     Definition of RethinkDB queries used by the RethinkDB check.
 
@@ -36,7 +36,7 @@ class QueryEngine:
         # type: (rethinkdb.RethinkDB) -> None
         self._r = rethinkdb.r if r is None else r
 
-    def get_connected_server_version_string(self, conn):
+    def query_connected_server_version_string(self, conn):
         # type: (Connection) -> str
         """
         Return the raw string of the RethinkDB version used by the server at the other end of the connection.

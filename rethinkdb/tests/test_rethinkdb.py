@@ -2,13 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-from typing import Iterator, List, Set
+from typing import Any, Iterator, List, Set
 
 import pytest
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.rethinkdb import RethinkDBCheck
+from datadog_checks.rethinkdb._config import Config
+from datadog_checks.rethinkdb._connections import Connection
 from datadog_checks.rethinkdb._exceptions import CouldNotConnect
 from datadog_checks.rethinkdb._types import Instance, Metric
 
@@ -39,6 +41,8 @@ from .common import (
     TLS_CLIENT_CERT,
     TLS_SERVER,
 )
+from .unit.common import MALFORMED_VERSION_STRING_PARAMS
+from .unit.utils import MockConnection
 
 
 def _get_connect_service_check_tags(server='server0'):
@@ -278,8 +282,8 @@ def test_connected_but_check_failed_unexpectedly(aggregator, instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_version_metadata(aggregator, instance, datadog_agent):
-    # type: (AggregatorStub, Instance, DatadogAgentStub) -> None
+def test_version_metadata(instance, datadog_agent):
+    # type: (Instance, DatadogAgentStub) -> None
     check_id = 'test'
 
     check = RethinkDBCheck('rethinkdb', {}, [instance])
@@ -299,3 +303,33 @@ def test_version_metadata(aggregator, instance, datadog_agent):
     }
 
     datadog_agent.assert_metadata(check_id, version_metadata)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('malformed_version_string', MALFORMED_VERSION_STRING_PARAMS)
+def test_version_metadata_failure(monkeypatch, instance, datadog_agent, malformed_version_string):
+    # type: (Any, Instance, DatadogAgentStub, str) -> None
+    """
+    Verify that check still runs to completion if version provided by RethinkDB is malformed.
+    """
+
+    class FakeConfig(Config):
+        def __init__(self, *args, **kwargs):
+            # type: (*Any, **Any) -> None
+            super(FakeConfig, self).__init__(*args, **kwargs)
+            self._collect_funcs = []  # Skip metrics as we only provide a row for server version.
+
+        def connect(self):
+            # type: () -> Connection
+            server_status = {'process': {'version': malformed_version_string}}
+            return MockConnection(rows=lambda: server_status)
+
+    check_id = 'test'
+
+    check = RethinkDBCheck('rethinkdb', {}, [instance])
+    check.check_id = check_id
+    check.config = FakeConfig(instance)
+
+    check.check(instance)
+
+    datadog_agent.assert_metadata(check_id, {})

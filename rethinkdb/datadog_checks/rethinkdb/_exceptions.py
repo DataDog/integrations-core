@@ -9,3 +9,7 @@ class RethinkDBError(Exception):
 
 class CouldNotConnect(RethinkDBError):
     """Failed to connect to a RethinkDB server."""
+
+
+class VersionCollectionFailed(RethinkDBError):
+    """Failed to collect or parse the RethinkDB version from a server."""
