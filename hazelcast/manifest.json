@@ -1,0 +1,38 @@
+{
+  "display_name": "Hazelcast",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "hazelcast",
+  "metric_prefix": "hazelcast.",
+  "metric_to_check": [
+    "hazelcast.mc.license_expiration_time",
+    "hazelcast.instance.running"
+  ],
+  "creates_events": false,
+  "short_description": "Monitor Hazelcast members and the Management Center.",
+  "guid": "b2c63c99-f955-4494-a171-494f9dcf7d1f",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Hazelcast Integration",
+  "categories": [
+    "data store",
+    "caching",
+    "log collection"
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "hazelcast",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json"
+  }
+}

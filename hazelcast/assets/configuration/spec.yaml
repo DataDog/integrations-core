@@ -1,0 +1,26 @@
+name: Hazelcast
+files:
+- name: hazelcast.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/jmx
+      overrides:
+        is_jmx.value.example: false
+  - template: instances
+    options:
+    - template: instances/jmx
+      overrides:
+        host.description: Hazelcast or Hazelcast Management Center server with which to connect.
+        port.description: Hazelcast or Hazelcast Management Center port with which to connect.
+        port.value.example: 1099
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/hazelcast.log
+      source: hazelcast
+      service: <SERVICE>
+      log_processing_rules:
+      - type: multi_line
+        name: log_start_with_date
+        pattern: \d{4}\.\d{2}\.\d{2}

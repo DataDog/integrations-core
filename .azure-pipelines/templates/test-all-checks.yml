@@ -1,6 +1,5 @@
 parameters:
   pip_cache_config: null
-
 jobs:
 - template: ./test-all.yml
   parameters:
@@ -155,6 +154,9 @@ jobs:
       os: linux
     - checkName: harbor
       displayName: Harbor
+      os: linux
+    - checkName: hazelcast
+      displayName: Hazelcast
       os: linux
     - checkName: hdfs_datanode
       displayName: HDFS Datanode
