@@ -11,9 +11,12 @@ pytestmark = pytest.mark.integration
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_integration(aggregator, check, instance, datadog_agent):
+    datadog_agent.enable_metadata_collection()
+
     check = check(instance)
     check.check_id = 'test:123'
     check.check(instance)
+
     for metric in common.ELAPSED_TIME_METRICS:
         aggregator.assert_metric(metric)
     assert_metrics_covered(aggregator)

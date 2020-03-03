@@ -6,6 +6,7 @@
 class DatadogAgentStub(object):
     def __init__(self):
         self._metadata = {}
+        self._config = {}
 
     def reset(self):
         self._metadata.clear()
@@ -24,8 +25,11 @@ class DatadogAgentStub(object):
     def get_hostname(self):
         return 'stubbed.hostname'
 
-    def get_config(self, *args, **kwargs):
-        return ''
+    def get_config(self, config_option):
+        return self._config.get(config_option)
+
+    def enable_metadata_collection(self):
+        self._config['enable_metadata_collection'] = True
 
     def get_version(self):
         return '0.0.0'
