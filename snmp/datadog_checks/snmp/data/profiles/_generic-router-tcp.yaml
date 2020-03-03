@@ -15,6 +15,7 @@ metrics:
     forced_type: monotonic_count
   - MIB: TCP-MIB
     symbol: tcpCurrEstab
+    forced_type: monotonic_count
   - MIB: TCP-MIB
     symbol: tcpHCInSegs
     forced_type: monotonic_count

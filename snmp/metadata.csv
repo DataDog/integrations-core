@@ -151,7 +151,7 @@ snmp.sysUdpStatConnfails,count,,,,[F5 BIG-IP] The number of connection failures.
 snmp.sysUdpStatOpen,gauge,,,,[F5 BIG-IP] The number of current open connections.,0,snmp,
 snmp.tcpActiveOpens,count,,,,[Generic router] [Cisco c3850] [Cisco Nexus] The number of times that TCP connections have made a direct transition to the SYN-SENT state from the CLOSED state.,0,snmp,
 snmp.tcpAttemptFails,count,,,,"[Generic router] [Cisco c3850] [Cisco Nexus] The number of times that TCP connections have made a direct transition to the CLOSED state from either the SYN-SENT state or the SYN-RCVD state, plus the number of times that TCP connections have made a direct transition to the LISTEN state from the SYN-RCVD state.",0,snmp,
-snmp.tcpCurrEstab,gauge,,,,[Generic router] [Cisco c3850] [Cisco Nexus] The number of TCP connections for which the current state is either ESTABLISHED or CLOSE-WAIT.,0,snmp,
+snmp.tcpCurrEstab,count,,,,[Generic router] [Cisco c3850] [Cisco Nexus] The number of TCP connections for which the current state is either ESTABLISHED or CLOSE-WAIT.,0,snmp,
 snmp.tcpEstabResets,count,,,,[Generic router] [Cisco c3850] [Cisco Nexus] The number of times that TCP connections have made a direct transition to the CLOSED state from either the ESTABLISHED state or the CLOSE-WAIT state.,0,snmp,
 snmp.tcpHCInSegs,count,,segment,,"[Generic router] [Cisco c3850] [Cisco Nexus] The total number of segments received, including those received in error.",0,snmp,
 snmp.tcpHCOutSegs,count,,segment,,"[Generic router] [Cisco c3850] [Cisco Nexus] The total number of segments sent, including those on current connections but excluding those containing only retransmitted octets.",0,snmp,
