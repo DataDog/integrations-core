@@ -1884,3 +1884,102 @@ def test_palo_alto(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+def test_cisco_asa_5525(aggregator):
+    instance = common.generate_instance_config([])
+    instance['community_string'] = 'cisco_asa_5525'
+    instance['profile'] = 'cisco-asa-5525'
+    instance['enforce_mib_constraints'] = False
+
+    init_config = {'profiles': {'cisco-asa-5525': {'definition_file': 'cisco-asa-5525.yaml'}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+    
+    common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-asa-5525']
+
+    tcp_counts = [
+        'tcpActiveOpens',
+        'tcpPassiveOpens',
+        'tcpAttemptFails',
+        'tcpEstabResets',
+        'tcpHCInSegs',
+        'tcpHCOutSegs',
+        'tcpRetransSegs',
+        'tcpInErrs',
+        'tcpOutRsts',
+    ]
+    tcp_gauges = ['tcpCurrEstab']
+    for metric in tcp_counts:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+        )
+
+    for metric in tcp_gauges:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+
+"""
+    udp_counts = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
+    if_counts = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards']
+    ifx_counts = [
+        'ifHCInOctets',
+        'ifHCInUcastPkts',
+        'ifHCInMulticastPkts',
+        'ifHCInBroadcastPkts',
+        'ifHCOutOctets',
+        'ifHCOutUcastPkts',
+        'ifHCOutMulticastPkts',
+        'ifHCOutBroadcastPkts',
+    ]
+    if_gauges = ['ifAdminStatus', 'ifOperStatus']
+
+    interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
+
+
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface)] + common_tags
+        aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
+
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface)] + common_tags
+        for metric in if_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+        for metric in if_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface)] + common_tags
+        for metric in ifx_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+
+
+    for metric in udp_counts:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+        )
+
+    sensors = [1, 9, 11, 12, 12, 14, 17, 26, 29, 31]
+    for sensor in sensors:
+        tags = ['sensor_id:{}'.format(sensor), 'sensor_type:8'] + common_tags
+        aggregator.assert_metric('snmp.entSensorValue', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    fru_metrics = ["cefcFRUPowerAdminStatus", "cefcFRUPowerOperStatus", "cefcFRUCurrent"]
+    frus = [6, 7, 15, 16, 19, 27, 30, 31]
+    for fru in frus:
+        tags = ['fru:{}'.format(fru)] + common_tags
+        for metric in fru_metrics:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    cpus = [3173, 6692, 11571, 19529, 30674, 38253, 52063, 54474, 55946, 63960]
+    cpu_metrics = ["cpmCPUTotalMonIntervalValue", "cpmCPUMemoryUsed", "cpmCPUMemoryFree"]
+    for cpu in cpus:
+        tags = ['cpu:{}'.format(cpu)] + common_tags
+        for metric in cpu_metrics:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+    aggregator.assert_all_metrics_covered()
+    """

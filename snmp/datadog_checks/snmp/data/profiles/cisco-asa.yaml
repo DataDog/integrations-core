@@ -1,6 +1,0 @@
-# Profile for Cisco ASA 5500 devices
-extends:
-  - _base.yaml
-  - _generic-router-if.yaml
-  - _generic-router-tcp.yaml
-  - _generic-router-udp.yaml
