@@ -1,5 +1,10 @@
 # CHANGELOG - snmp
 
+## 2.5.0 / 2020-02-27
+
+* [Added] Query discovered devices in threads. See [#5462](https://github.com/DataDog/integrations-core/pull/5462).
+* [Fixed] Fix issue with tags leaking between discovered instances. See [#5899](https://github.com/DataDog/integrations-core/pull/5899).
+
 ## 2.4.1 / 2020-02-25
 
 * [Fixed] Handle case when servers report two values for entries in `metric_tags`. See [#5853](https://github.com/DataDog/integrations-core/pull/5853).

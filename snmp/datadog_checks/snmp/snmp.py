@@ -1,12 +1,15 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
 import fnmatch
+import functools
 import ipaddress
 import json
 import threading
 import time
 from collections import defaultdict
+from concurrent import futures
 from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Tuple, Union
 
 import pysnmp.proto.rfc1902 as snmp_type
@@ -22,7 +25,7 @@ from datadog_checks.base.errors import CheckException
 
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
 from .config import InstanceConfig, ParsedMetric, ParsedMetricTag, ParsedTableMetric
-from .utils import get_profile_definition, oid_pattern_specificity, recursively_expand_base_profiles
+from .utils import OIDPrinter, get_profile_definition, oid_pattern_specificity, recursively_expand_base_profiles
 
 # Additional types that are not part of the SNMP protocol. cf RFC 2856
 CounterBasedGauge64, ZeroBasedCounter64 = builder.MibBuilder().importSymbols(
@@ -54,6 +57,7 @@ class SnmpCheck(AgentCheck):
     SC_STATUS = 'snmp.can_check'
     _running = True
     _thread = None
+    _executor = None
     _NON_REPEATERS = 0
     _MAX_REPETITIONS = 25
 
@@ -137,7 +141,7 @@ class SnmpCheck(AgentCheck):
         while self._running:
             start_time = time.time()
             for host in config.network_hosts():
-                instance = config.instance.copy()
+                instance = copy.deepcopy(config.instance)
                 instance.pop('network_address')
                 instance['ip_address'] = host
 
@@ -222,7 +226,7 @@ class SnmpCheck(AgentCheck):
         for result_oid, value in all_binds:
             metric, indexes = config.resolve_oid(result_oid)
             results[metric][indexes] = value
-        self.log.debug('Raw results: %s', results)
+        self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
         # Freeze the result
         results.default_factory = None
         return results, error
@@ -241,11 +245,11 @@ class SnmpCheck(AgentCheck):
         while first_oid < len(oids):
             try:
                 oids_batch = oids[first_oid : first_oid + self.oid_batch_size]
-                self.log.debug('Running SNMP command get on OIDS %s', oids_batch)
+                self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
                 error_indication, error_status, _, var_binds = next(
                     config.call_cmd(hlapi.getCmd, *oids_batch, lookupMib=enforce_constraints)
                 )
-                self.log.debug('Returned vars: %s', var_binds)
+                self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
 
                 self.raise_on_error_indication(error_indication, config.ip_address)
 
@@ -262,7 +266,9 @@ class SnmpCheck(AgentCheck):
                 if missing_results:
                     # If we didn't catch the metric using snmpget, try snmpnext
                     # Don't walk through the entire MIB, stop at end of table
-                    self.log.debug('Running SNMP command getNext on OIDS %s', missing_results)
+                    self.log.debug(
+                        'Running SNMP command getNext on OIDS: %s', OIDPrinter(missing_results, with_values=False)
+                    )
                     binds_iterator = config.call_cmd(
                         hlapi.nextCmd,
                         *missing_results,
@@ -289,10 +295,10 @@ class SnmpCheck(AgentCheck):
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
         oid = hlapi.ObjectType(hlapi.ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2)))
-        self.log.debug('Running SNMP command on OID %r', oid)
+        self.log.debug('Running SNMP command on OID: %r', OIDPrinter((oid,), with_values=False))
         error_indication, _, _, var_binds = next(config.call_cmd(hlapi.nextCmd, oid, lookupMib=False))
         self.raise_on_error_indication(error_indication, config.ip_address)
-        self.log.debug('Returned vars: %s', var_binds)
+        self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
         return var_binds[0][1].prettyPrint()
 
     def _profile_for_sysobject_oid(self, sys_object_oid):
@@ -315,7 +321,7 @@ class SnmpCheck(AgentCheck):
         error = None  # type: Optional[str]
 
         for error_indication, error_status, _, var_binds_table in binds_iterator:
-            self.log.debug('Returned vars: %s', var_binds_table)
+            self.log.debug('Returned vars: %s', OIDPrinter(var_binds_table, with_values=True))
 
             self.raise_on_error_indication(error_indication, config.ip_address)
 
@@ -343,7 +349,7 @@ class SnmpCheck(AgentCheck):
                 except ValueError:
                     write_persistent_cache(self.check_id, json.dumps([]))
                     break
-                instance = self.instance.copy()
+                instance = copy.deepcopy(self.instance)
                 instance.pop('network_address')
                 instance['ip_address'] = host
 
@@ -353,6 +359,7 @@ class SnmpCheck(AgentCheck):
         self._thread = threading.Thread(target=self.discover_instances, name=self.name)
         self._thread.daemon = True
         self._thread.start()
+        self._executor = futures.ThreadPoolExecutor(max_workers=self._config.workers)
 
     def check(self, instance):
         # type: (Dict[str, Any]) -> None
@@ -360,22 +367,32 @@ class SnmpCheck(AgentCheck):
         if config.ip_network:
             if self._thread is None:
                 self._start_discovery()
+
+            sent = []
             for host, discovered in list(config.discovered_instances.items()):
-                if self._check_with_config(discovered):
-                    config.failing_instances[host] += 1
-                    if config.failing_instances[host] >= config.allowed_failures:
-                        # Remove it from discovered instances, we'll re-discover it later if it reappears
-                        config.discovered_instances.pop(host)
-                        # Reset the failure counter as well
-                        config.failing_instances.pop(host)
-                else:
-                    # Reset the counter if not's failing
-                    config.failing_instances.pop(host, None)
+                future = self._executor.submit(self._check_with_config, discovered)
+                sent.append(future)
+                future.add_done_callback(functools.partial(self._check_config_done, host))
+            futures.wait(sent)
+
             tags = ['network:{}'.format(config.ip_network)]
             tags.extend(config.tags)
             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
             self._check_with_config(config)
+
+    def _check_config_done(self, host, future):
+        config = self._config
+        if future.result():
+            config.failing_instances[host] += 1
+            if config.failing_instances[host] >= config.allowed_failures:
+                # Remove it from discovered instances, we'll re-discover it later if it reappears
+                config.discovered_instances.pop(host)
+                # Reset the failure counter as well
+                config.failing_instances.pop(host)
+        else:
+            # Reset the counter if not's failing
+            config.failing_instances.pop(host, None)
 
     def _check_with_config(self, config):
         # type: (InstanceConfig) -> Optional[str]
