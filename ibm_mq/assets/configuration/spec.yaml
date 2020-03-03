@@ -102,8 +102,8 @@ files:
       - name: ssl_auth
         description: Whether or not to use SSL auth while connecting to the channel.
         value:
-          example: 'no'
-          type: string
+          example: False
+          type: boolean
       - name: ssl_cipher_spec
         type: string
         description: The ssl cipher to use.

@@ -95,10 +95,10 @@ instances:
     #
     # auto_discover_queues: false
 
-    ## @param ssl_auth - string - optional - default: no
+    ## @param ssl_auth - boolean - optional - default: false
     ## Whether or not to use SSL auth while connecting to the channel.
     #
-    # ssl_auth: 'no'
+    # ssl_auth: false
 
     ## @param ssl_cipher_spec - string - optional - default: TLS_RSA_WITH_AES_256_CBC_SHA
     ## The ssl cipher to use.
