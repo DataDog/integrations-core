@@ -10,9 +10,8 @@ HOST = get_docker_hostname()
 
 """
 # not all metrics will be available in our E2E environment
-# specifically rate and count metrics:
-    "cassandra.net.up_endpoint_count",
-    "cassanra.net.down_endpoint_count",
+# it looks like total blocked is not in the `metrics.yaml` file.
+# https://blog.pythian.com/guide-to-cassandra-thread-pools
     "cassandra.total_blocked_tasks",
     "cassandra.total_blocked_tasks.count"
 """
@@ -51,6 +50,8 @@ CASSANDRA_E2E_METRICS = [
     "cassandra.max_row_size",
     "cassandra.mean_partition_size",
     "cassandra.mean_row_size",
+    "cassandra.net.up_endpoint_count",
+    "cassandra.net.down_endpoint_count",
     "cassandra.pending_compactions",
     "cassandra.pending_flushes.count",
     "cassandra.range_latency.75th_percentile",
