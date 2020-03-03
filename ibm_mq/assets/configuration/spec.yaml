@@ -28,8 +28,8 @@ files:
       - name: port
         default: 1414
         value:
-          example: '1414'
-          type: string
+          example: 1414
+          type: integer
         description: The port IBM MQ is listening on.
       - name: username
         value:
