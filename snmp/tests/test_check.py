@@ -1894,7 +1894,7 @@ def test_cisco_asa_5525(aggregator):
     check = SnmpCheck('snmp', init_config, [instance])
 
     check.check(instance)
-    
+
     common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-asa-5525', 'snmp_host:kept']
 
     tcp_counts = [
@@ -1929,4 +1929,11 @@ def test_cisco_asa_5525(aggregator):
     for fru in frus:
         tags = ['fru:{}'.format(fru)] + common_tags
         for metric in fru_metrics:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    cpus = [7746]
+    cpu_metrics = ["cpmCPUTotalMonIntervalValue", "cpmCPUMemoryUsed", "cpmCPUMemoryFree"]
+    for cpu in cpus:
+        tags = ['cpu:{}'.format(cpu)] + common_tags
+        for metric in cpu_metrics:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
