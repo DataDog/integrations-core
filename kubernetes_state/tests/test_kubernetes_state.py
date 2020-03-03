@@ -214,6 +214,7 @@ class MockResponse:
     def __init__(self, content, content_type):
         self.content = content
         self.headers = {'Content-Type': content_type}
+        self.encoding = 'utf-8'
 
     def iter_lines(self, **_):
         for elt in self.content.split(b"\n"):
@@ -588,6 +589,7 @@ def test_experimental_labels(aggregator, instance):
 
 def test_telemetry(aggregator, instance):
     instance['telemetry'] = True
+    instance['experimental_metrics'] = True
 
     check = KubernetesState(CHECK_NAME, {}, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))

@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
-import re
 import socket
 from contextlib import closing
 
@@ -367,9 +366,9 @@ class PostgreSql(AgentCheck):
             results = cursor.fetchall()
         except psycopg2.errors.FeatureNotSupported as e:
             # This happens for example when trying to get replication metrics
-            # from readers in Aurora. Let's ignote it.
+            # from readers in Aurora. Let's ignore it.
             log_func(e)
-            return
+            self.db.rollback()
         except psycopg2.errors.UndefinedFunction as e:
             log_func(e)
             log_func(
@@ -414,30 +413,6 @@ class PostgreSql(AgentCheck):
 
             # build a map of descriptors and their values
             desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values)}
-
-            # if relations *and* schemas are set, filter out table not
-            # matching the schema in the configuration
-            if scope['relation'] and len(relations_config) > 0 and 'schema' in desc_map and 'table' in desc_map:
-                table = desc_map['table']
-                schema = desc_map['schema']
-
-                if table in relations_config:
-                    config_table_objects = [relations_config[table]]
-                else:
-                    # Find all matching regexes. Required if the same table matches two different regex
-                    regex_configs = (v for v in relations_config.values() if 'relation_regex' in v)
-                    config_table_objects = [r for r in regex_configs if re.match(r['relation_regex'], table)]
-
-                if not config_table_objects:
-                    self.log.info("Got row %s.%s, but not relation", schema, table)
-                else:
-                    # Create set of all schemas by flattening and removing duplicates
-                    config_schemas = {s for r in config_table_objects for s in r['schemas']}
-                    if ALL_SCHEMAS in config_schemas:
-                        self.log.debug("All schemas are allowed for table %s.%s", schema, table)
-                    elif schema not in config_schemas:
-                        self.log.debug("Skipping non matched schema %s for table %s", schema, table)
-                        continue
 
             # Build tags.
 

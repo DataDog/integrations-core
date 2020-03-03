@@ -259,6 +259,69 @@ def test_section_example_indent():
     )
 
 
+@pytest.mark.skipif(PY2, reason='Dictionary key order is not guaranteed in Python 2')
+def test_section_example_indent_required():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: init_config
+            options:
+            - name: foo
+              description: foo words
+              value:
+                type: string
+          - template: logs
+            required: true
+            example:
+            - type: file
+              path: /var/log/apache2/access.log
+              source: apache
+              service: apache
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## All options defined here are available to all instances.
+        #
+        init_config:
+
+            ## @param foo - string - optional
+            ## foo words
+            #
+            # foo: <FOO>
+
+        ## Log Section
+        ##
+        ## type - required - Type of log input source (tcp / udp / file / windows_event)
+        ## port / path / channel_path - required - Set port if type is tcp or udp.
+        ##                                         Set path if type is file.
+        ##                                         Set channel_path if type is windows_event.
+        ## source  - required - Attribute that defines which Integration sent the logs
+        ## service - required - The name of the service that generates the log.
+        ##                      Overrides any `service` defined in the `init_config` section.
+        ## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
+        ## tags - optional - Add tags to the collected logs
+        ##
+        ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+        #
+        logs:
+          - type: file
+            path: /var/log/apache2/access.log
+            source: apache
+            service: apache
+        """
+    )
+
+
 def test_section_multiple_required():
     consumer = get_example_consumer(
         """

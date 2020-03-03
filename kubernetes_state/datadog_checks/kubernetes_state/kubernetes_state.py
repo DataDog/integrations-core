@@ -7,7 +7,7 @@ import time
 from collections import Counter, defaultdict
 from copy import deepcopy
 
-from six import iteritems, iterkeys
+from six import iteritems
 
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.config import is_affirmative
@@ -356,7 +356,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         if experimental_metrics:
             ksm_instance['metrics'].append(experimental_metrics_mapping)
         else:
-            ksm_instance['ignore_metrics'].append(iterkeys(experimental_metrics_mapping))
+            ksm_instance['ignore_metrics'].extend(experimental_metrics_mapping.keys())
 
         ksm_instance['prometheus_url'] = endpoint
         ksm_instance['label_joins'].update(extra_labels)

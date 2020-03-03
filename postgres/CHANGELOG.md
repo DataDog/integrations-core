@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 3.5.3 / 2020-02-26
+
+* [Fixed] Rollback db connection when we get a 'FeatureNotSupported' exception. See [#5882](https://github.com/DataDog/integrations-core/pull/5882).
+
 ## 3.5.2 / 2020-02-22
 
 * [Fixed] Handle FeatureNotSupported errors in queries. See [#5749](https://github.com/DataDog/integrations-core/pull/5749).

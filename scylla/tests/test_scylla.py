@@ -8,7 +8,13 @@ import pytest
 from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.scylla import ScyllaCheck
 
-from .common import INSTANCE_DEFAULT_GROUPS, INSTANCE_DEFAULT_METRICS, get_metrics
+from .common import (
+    INSTANCE_ADDITIONAL_GROUPS,
+    INSTANCE_ADDITIONAL_METRICS,
+    INSTANCE_DEFAULT_GROUPS,
+    INSTANCE_DEFAULT_METRICS,
+    get_metrics,
+)
 
 
 @pytest.mark.unit
@@ -35,6 +41,23 @@ def test_instance_additional_check(aggregator, db_instance, mock_db_data):
     c.check(instance)
 
     metrics_to_check = get_metrics(INSTANCE_DEFAULT_GROUPS + additional_metric_groups)
+
+    for m in metrics_to_check:
+        aggregator.assert_metric(m)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_service_check('scylla.prometheus.health', count=1)
+
+
+@pytest.mark.unit
+def test_instance_full_additional_check(aggregator, db_instance, mock_db_data):
+    instance = deepcopy(db_instance)
+    instance['metric_groups'] = INSTANCE_ADDITIONAL_GROUPS
+
+    c = ScyllaCheck('scylla', {}, [instance])
+
+    c.check(instance)
+
+    metrics_to_check = INSTANCE_DEFAULT_METRICS + INSTANCE_ADDITIONAL_METRICS
 
     for m in metrics_to_check:
         aggregator.assert_metric(m)

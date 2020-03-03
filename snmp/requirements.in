@@ -1,4 +1,5 @@
 ipaddress==1.0.22; python_version < '3.0'
+futures==3.3.0; python_version < '3.0'
 ply==3.10
 # Can't upgrade until https://github.com/etingof/pyasn1/issues/178 is fixed
 pyasn1==0.4.6
