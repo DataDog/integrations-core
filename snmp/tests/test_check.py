@@ -1923,3 +1923,10 @@ def test_cisco_asa_5525(aggregator):
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
         )
+
+    fru_metrics = ["cefcFRUPowerAdminStatus", "cefcFRUPowerOperStatus", "cefcFRUCurrent"]
+    frus = [6, 7, 15, 16, 19, 27, 30, 31]
+    for fru in frus:
+        tags = ['fru:{}'.format(fru)] + common_tags
+        for metric in fru_metrics:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
