@@ -33,6 +33,7 @@ def test_check_integration(aggregator, mock_data):
 
     gitlab = GitlabCheck('gitlab', init_config, instances=[instance])
     gitlab.check(instance)
+    gitlab.check(instance)
 
     assert_check(aggregator)
     for metric in METRICS:
@@ -48,5 +49,5 @@ def test_e2e_legacy(dd_agent_check):
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
-    aggregator = dd_agent_check(CONFIG)
+    aggregator = dd_agent_check(CONFIG, rate=True)
     assert_check(aggregator)
