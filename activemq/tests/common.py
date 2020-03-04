@@ -8,6 +8,8 @@ CHECK_NAME = 'activemq'
 HERE = get_here()
 HOST = get_docker_hostname()
 
+JMX_PORT = 1616
+
 TEST_QUEUES = ('FOO_QUEUE', 'TEST_QUEUE')
 TEST_TOPICS = ('FOO_TOPIC', 'TEST_TOPIC')
 TEST_MESSAGE = {'body': 'test_message'}

@@ -5,6 +5,7 @@ from __future__ import absolute_import
 
 import json
 import os
+import re
 from base64 import urlsafe_b64encode
 
 import pytest
@@ -177,21 +178,23 @@ def dd_agent_check(request, aggregator):
                     check_command.append(str(value))
 
         result = run_command(check_command, capture=True)
-        if AGENT_COLLECTOR_SEPARATOR not in result.stdout:
+
+        matches = re.findall(AGENT_COLLECTOR_SEPARATOR + r'\n(.*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
+
+        if not matches:
             raise ValueError(
                 '{}{}\nCould not find `{}` in the output'.format(
                     result.stdout, result.stderr, AGENT_COLLECTOR_SEPARATOR
                 )
             )
 
-        _, _, collector_output = result.stdout.partition(AGENT_COLLECTOR_SEPARATOR)
-        collector_output = collector_output.strip()
-        if not collector_output.endswith(']'):
-            # JMX needs some additional cleanup
-            collector_output = collector_output[: collector_output.rfind(']') + 1]
-        collector = json.loads(collector_output)
+        for raw_json in matches:
+            try:
+                collector = json.loads(raw_json)
+            except Exception as e:
+                raise Exception("Error loading json: {}\nCollector Json Output:\n{}".format(e, raw_json))
 
-        replay_check_run(collector, aggregator)
+            replay_check_run(collector, aggregator)
 
         return aggregator
 

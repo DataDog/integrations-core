@@ -1,5 +1,9 @@
 # CHANGELOG - couch
 
+## 3.8.0 / 2020-02-22
+
+* [Added] Add version metadata. See [#5615](https://github.com/DataDog/integrations-core/pull/5615).
+
 ## 3.7.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).

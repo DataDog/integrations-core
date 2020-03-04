@@ -12,11 +12,7 @@ from pysnmp.smi import builder, view
 from datadog_checks.base import ConfigurationError, is_affirmative
 
 from .resolver import OIDResolver
-
-
-def to_oid_tuple(oid_string):
-    """Return a OID tuple from a OID string."""
-    return tuple(map(int, oid_string.lstrip('.').split('.')))
+from .utils import to_oid_tuple
 
 
 class ParsedMetric(object):
@@ -72,6 +68,7 @@ class InstanceConfig:
     DEFAULT_TIMEOUT = 1
     DEFAULT_ALLOWED_FAILURES = 3
     DEFAULT_BULK_THRESHOLD = 0
+    DEFAULT_WORKERS = 5
 
     def __init__(
         self,
@@ -98,12 +95,6 @@ class InstanceConfig:
         if is_affirmative(instance.get('use_global_metrics', True)):
             self.metrics.extend(global_metrics)
 
-        if profile:
-            if profile not in profiles:
-                raise ConfigurationError("Unknown profile '{}'".format(profile))
-            self.metrics.extend(profiles[profile]['definition']['metrics'])
-            metric_tags.extend(profiles[profile]['definition'].get('metric_tags', []))
-
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
         self._snmp_engine, mib_view_controller = self.create_snmp_engine(mibs_path)
         self._resolver = OIDResolver(mib_view_controller, self.enforce_constraints)
@@ -114,6 +105,7 @@ class InstanceConfig:
         self.discovered_instances = {}  # type: Dict[str, InstanceConfig]
         self.failing_instances = defaultdict(int)  # type: DefaultDict[str, int]
         self.allowed_failures = int(instance.get('discovery_allowed_failures', self.DEFAULT_ALLOWED_FAILURES))
+        self.workers = int(instance.get('workers', self.DEFAULT_WORKERS))
 
         self.bulk_threshold = int(instance.get('bulk_threshold', self.DEFAULT_BULK_THRESHOLD))
 
@@ -149,7 +141,7 @@ class InstanceConfig:
 
         self.ignored_ip_addresses = set(ignored_ip_addresses)  # type: Set[str]
 
-        if not self.metrics and not profiles_by_oid:
+        if not self.metrics and not profiles_by_oid and not profile:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
         self._auth_data = self.get_auth_data(instance)
@@ -158,6 +150,12 @@ class InstanceConfig:
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
             self.all_oids.append(tag_oids)
+
+        if profile:
+            if profile not in profiles:
+                raise ConfigurationError("Unknown profile '{}'".format(profile))
+            self.refresh_with_profile(profiles[profile], warning, log)
+            self.add_profile_tag(profile)
 
         self._context_data = hlapi.ContextData(*self.get_context_data(instance))
 
@@ -169,7 +167,7 @@ class InstanceConfig:
 
     def refresh_with_profile(self, profile, warning, log):
         # type: (Dict[str, Any], Callable[..., None], Callable[..., None]) -> None
-        metrics = profile['definition']['metrics']
+        metrics = profile['definition'].get('metrics', [])
         all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics, warning, log)
 
         metric_tags = profile['definition'].get('metric_tags', [])
@@ -189,6 +187,9 @@ class InstanceConfig:
             # NOTE: counter-intuitively, we must '.append()' the list of tag OIDs instead of '.extend()'ing,
             # because `.all_oids` is a list of lists of OIDs (batches).
             self.all_oids.append(tag_oids)
+
+    def add_profile_tag(self, profile_name):
+        self.tags.append('snmp_profile:{}'.format(profile_name))
 
     def call_cmd(self, cmd, *args, **kwargs):
         # type: (Any, *Any, **Any) -> Iterator[Any]

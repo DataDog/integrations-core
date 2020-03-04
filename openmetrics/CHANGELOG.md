@@ -1,5 +1,9 @@
 # CHANGELOG - OpenMetrics
 
+## 1.5.0 / 2020-02-22
+
+* [Added] Make `ignore_metrics` support `*` wildcard for OpenMetrics. See [#5759](https://github.com/DataDog/integrations-core/pull/5759).
+
 ## 1.4.0 / 2020-01-13
 
 * [Added] Make OpenMetrics use the RequestsWrapper. See [#5414](https://github.com/DataDog/integrations-core/pull/5414).

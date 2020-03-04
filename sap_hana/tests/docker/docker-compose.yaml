@@ -11,8 +11,6 @@ services:
     sysctls:
       kernel.shmmax: 1073741824
       net.ipv4.ip_local_port_range: "40000 60999"
-      kernel.shmmni: 524288
-      kernel.shmall: 8388608
     ports:
       - "39013:39013"
       - "39017:39017"

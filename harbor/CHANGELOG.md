@@ -1,5 +1,9 @@
 # CHANGELOG - Harbor
 
+## 1.3.1 / 2020-02-25
+
+* [Fixed] Update base dependency for harbor. See [#5841](https://github.com/DataDog/integrations-core/pull/5841).
+
 ## 1.3.0 / 2020-01-15
 
 * [Added] Refactor authentication to add support for Harbor 1.9 and 1.10. See [#5468](https://github.com/DataDog/integrations-core/pull/5468).

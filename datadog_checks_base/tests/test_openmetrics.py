@@ -4,6 +4,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
+import io
 import logging
 import math
 import os
@@ -15,6 +16,7 @@ from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, Histo
 from six import iteritems
 from urllib3.exceptions import InsecureRequestWarning
 
+from datadog_checks.base import ensure_bytes
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
 
@@ -29,6 +31,7 @@ class MockResponse:
     def __init__(self, content, content_type):
         self.content = content
         self.headers = {'Content-Type': content_type}
+        self.encoding = 'utf-8'
 
     def iter_lines(self, **_):
         for elt in self.content.split("\n"):
@@ -173,6 +176,21 @@ def test_poll_text_plain(mocked_prometheus_check, mocked_prometheus_scraper_conf
         messages.sort(key=lambda x: x.name)
         assert len(messages) == 40
         assert messages[-1].name == 'skydns_skydns_dns_response_size_bytes'
+
+
+def test_poll_octet_stream(mocked_prometheus_check, mocked_prometheus_scraper_config, text_data):
+    """Tests poll using the text format"""
+    check = mocked_prometheus_check
+
+    mock_response = requests.Response()
+    mock_response.raw = io.BytesIO(ensure_bytes(text_data))
+    mock_response.status_code = 200
+    mock_response.headers = {'Content-Type': 'application/octet-stream'}
+
+    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+        response = check.poll(mocked_prometheus_scraper_config)
+        messages = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
+        assert len(messages) == 40
 
 
 def test_submit_gauge_with_labels(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
@@ -1527,6 +1545,53 @@ def test_ignore_metrics_multiple_wildcards(
         aggregator.assert_all_metrics_covered()
 
 
+def test_match_metric_wildcard(aggregator, mocked_prometheus_check, ref_gauge):
+    """
+    Test that a matched metric is properly collected.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.process_metric(ref_gauge, config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', count=1)
+
+
+def test_match_metrics_multiple_wildcards(
+    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data
+):
+    """
+    Test that matched metric patterns are properly collected.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['_dry_run'] = False
+    instance['metrics'] = [
+        {'go_memstats_mcache_*': '', 'go_memstats_heap_released_bytes_total': 'go_memstats.heap.released.bytes_total'},
+        '*_lookups_total*',
+        'go_memstats_alloc*',
+    ]
+
+    config = check.create_scraper_configuration(instance)
+
+    mock_response = mock.MagicMock(
+        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
+    )
+    with mock.patch('requests.get', return_value=mock_response, __name__="get"):
+        check.process(config)
+
+        aggregator.assert_metric('prometheus.go_memstats_mcache_inuse_bytes', count=1)
+        aggregator.assert_metric('prometheus.go_memstats_mcache_sys_bytes', count=1)
+        aggregator.assert_metric('prometheus.go_memstats.heap.released.bytes_total', count=1)
+        aggregator.assert_metric('prometheus.go_memstats_alloc_bytes', count=1)
+        aggregator.assert_metric('prometheus.go_memstats_alloc_bytes_total', count=1)
+        aggregator.assert_metric('prometheus.go_memstats_lookups_total', count=1)
+        aggregator.assert_all_metrics_covered()
+
+
 def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
     """ Tests label join on text format """
     check = mocked_prometheus_check
@@ -2206,3 +2271,21 @@ def test_send_request_with_dynamic_prometheus_url(mocked_openmetrics_check_facto
 
     assert "httpbin.org" in resp.content.decode('utf-8')
     assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+
+def test_http_handler(mocked_openmetrics_check_factory):
+    instance = dict(
+        {
+            'prometheus_url': 'https://www.example.com',
+            'metrics': [{'foo': 'bar'}],
+            'namespace': 'openmetrics',
+            'ssl_verify': False,
+        }
+    )
+    check = mocked_openmetrics_check_factory(instance)
+    scraper_config = check.get_scraper_config(instance)
+
+    http_handler = check.get_http_handler(scraper_config)
+
+    assert http_handler.options['headers']['accept-encoding'] == 'gzip'
+    assert http_handler.options['headers']['accept'] == 'text/plain'

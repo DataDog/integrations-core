@@ -1,5 +1,9 @@
 # CHANGELOG - etcd
 
+## 2.2.1 / 2020-02-22
+
+* [Fixed] Update auto_conf yaml to default to preview. See [#5661](https://github.com/DataDog/integrations-core/pull/5661).
+
 ## 2.2.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).

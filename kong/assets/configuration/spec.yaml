@@ -1,0 +1,28 @@
+name: Kong
+files:
+- name: kong.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: kong_status_url
+      required: true
+      description: URL where Kong exposes its status.
+      value:
+        example: http://localhost:8001/status/
+        type: string
+    - template: instances/http
+    - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/nginx/access.log
+      source: kong
+      service: <SERVICE_NAME>
+    - type: file
+      path: /var/log/nginx/error.log
+      source: kong
+      service: <SERVICE_NAME>
