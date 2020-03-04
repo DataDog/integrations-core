@@ -6,7 +6,7 @@ Integration that allows to:
 
 - Visualize and monitor metrics collected via Gitlab through Prometheus
 
-See the [Gitlab documentation][1] for more information about Gitlab and its integration with Prometheus
+See the [Gitlab documentation][1] for more information about Gitlab and its integration with Prometheus.
 
 ## Setup
 
@@ -22,15 +22,13 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 ##### Metric collection
 
-1. Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to the Gitlab's Prometheus metrics endpoint. See the [sample gitlab.d/conf.yaml][4] for all available configuration options.
+1. Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to the Gitlab's metrics endpoint. See the [sample gitlab.d/conf.yaml][4] for all available configuration options.
 
-    **Note**: The metrics in [metrics.py][11] are collected by default. The `allowed_metrics` item in the `init_config` section allows to specify the legacy metrics that should be extracted.
+    **Note**: The metrics in [metrics.py][11] are collected by default. The `allowed_metrics` item in the `init_config` section allows to specify the legacy metrics that should be extracted. See [Gitlab's documentation][12] for further information about its metric collection
 
 2. [Restart the Agent][5]
 
 ##### Log collection
-
-_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
@@ -72,8 +70,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 ##### Log collection
 
-_Available for Agent versions >6.0_
-
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][7].
 
 | Parameter      | Value                                       |
@@ -96,8 +92,12 @@ The Gitlab check does not include any events.
 
 ### Service Checks
 
-The Gitlab check includes a readiness and a liveness service check.
-Moreover, it provides a service check to ensure that the local Prometheus endpoint is available.
+The Gitlab check includes health, readiness, and liveness service checks.
+
+`gitlab.prometheus_endpoint_up`: Returns `CRITICAL` if the check cannot access the Prometheus metrics endpoint of the Gitlab instance.
+`gitlab.health`: Returns `CRITICAL` if the check cannot access the Gitlab instance.
+`gitlab.liveness`: Returns `CRITICAL` if the check cannot access the Gitlab instance due to deadlock with Rails Controllers.
+`gitlab.readiness`: Returns `CRITICAL` if the Gitlab instance is able to accept traffic via Rails Controllers.
 
 ## Troubleshooting
 
@@ -114,4 +114,4 @@ Need help? Contact [Datadog support][10].
 [9]: https://github.com/DataDog/integrations-core/blob/master/gitlab/metadata.csv
 [10]: https://docs.datadoghq.com/help
 [11]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/metrics.py
-
+[12]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/gitlab_metrics.html

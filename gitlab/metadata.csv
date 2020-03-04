@@ -80,7 +80,7 @@ gitlab.sidekiq.concurrency,gauge,,job,,Maximum number of Sidekiq jobs,0,gitlab,s
 gitlab.ruby.gc_duration_seconds,gauge,,second,,Time spent by Ruby in GC,0,gitlab,ruby gc dur
 gitlab.ruby.file_descriptors,gauge,,,,File descriptors per process,0,gitlab,ruby file descriptors
 gitlab.ruby.memory_bytes,gauge,,byte,,Memory usage by process,0,gitlab,ruby memory process
-gitlab.ruby.sampler_duration_seconds,count,,second,,Time spent collecting stats,0,gitlab,ruby sampler dur
+gitlab.ruby.sampler_duration_seconds_total,count,,second,,Time spent collecting stats,0,gitlab,ruby sampler dur
 gitlab.ruby.process_cpu_seconds_total,gauge,,second,,Total amount of CPU time per process,0,gitlab,ruby cpu process
 gitlab.ruby.process_max_fds,gauge,,,,Maximum number of open file descriptors per process,0,gitlab,ruby max fds
 gitlab.ruby.process_resident_memory_bytes,gauge,,byte,,Memory usage by process,0,gitlab,ruby memory

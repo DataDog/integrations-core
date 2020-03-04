@@ -18,7 +18,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
     """
 
     # Readiness signals ability to serve traffic, liveness that Gitlab is healthy overall
-    ALLOWED_SERVICE_CHECKS = ['readiness', 'liveness']
+    ALLOWED_SERVICE_CHECKS = ['readiness', 'liveness', 'health']
     EVENT_TYPE = SOURCE_TYPE_NAME = 'gitlab'
     DEFAULT_CONNECT_TIMEOUT = 5
     DEFAULT_RECEIVE_TIMEOUT = 15
@@ -102,6 +102,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
     # Valid endpoints are:
     # - /-/readiness
     # - /-/liveness
+    # - /-/health
     #
     # https://docs.gitlab.com/ce/user/admin_area/monitoring/health_check.html
     def _check_health_endpoint(self, instance, check_type, tags):
