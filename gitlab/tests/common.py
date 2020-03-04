@@ -54,8 +54,6 @@ METRICS = [
     "http_requests_total",
     "http_request_duration_seconds.sum",
     "http_request_duration_seconds.count",
-    "ruby.gc_duration_seconds.count",
-    "ruby.gc_duration_seconds.sum",
     "ruby.file_descriptors",
     "ruby.memory_bytes",
     "ruby.sampler_duration_seconds_total",
