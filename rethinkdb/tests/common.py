@@ -82,6 +82,13 @@ HEROES_TABLE_INDEX_FIELD = 'appearances_count'
 
 # Metrics lists.
 
+CONFIG_TOTALS_METRICS = (
+    'rethinkdb.server.total',
+    'rethinkdb.database.total',
+    'rethinkdb.database.table.total',
+    'rethinkdb.table.secondary_index.total',
+)
+
 CLUSTER_STATISTICS_METRICS = (
     'rethinkdb.stats.cluster.queries_per_sec',
     'rethinkdb.stats.cluster.read_docs_per_sec',
@@ -178,14 +185,16 @@ assert set(CURRENT_ISSUES_METRICS).issuperset(CURRENT_ISSUES_METRICS_SUBMITTED_A
 assert set(CURRENT_ISSUES_METRICS).issuperset(CURRENT_ISSUES_METRICS_SUBMITTED_IF_DISCONNECTED_SERVERS)
 
 
-METRICS = (
-    CLUSTER_STATISTICS_METRICS
+E2E_METRICS = (
+    CONFIG_TOTALS_METRICS
+    + CLUSTER_STATISTICS_METRICS
     + SERVER_STATISTICS_METRICS
     + TABLE_STATISTICS_METRICS
     + REPLICA_STATISTICS_METRICS
     + TABLE_STATUS_METRICS
     + TABLE_STATUS_SHARDS_METRICS
     + SERVER_STATUS_METRICS
+    + CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS
 )
 
 

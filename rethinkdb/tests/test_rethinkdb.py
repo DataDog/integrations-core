@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-from typing import Any, Iterator, List, Set
+from typing import Any, Iterator, List
 
 import pytest
 
@@ -15,29 +15,16 @@ from datadog_checks.rethinkdb.exceptions import CouldNotConnect
 from datadog_checks.rethinkdb.types import Instance, Metric
 
 from ._types import ServerName
+from .assertions import assert_metrics
 from .cluster import temporarily_disconnect_server
 from .common import (
-    CLUSTER_STATISTICS_METRICS,
-    CURRENT_ISSUES_METRICS,
-    CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS,
-    CURRENT_ISSUES_METRICS_SUBMITTED_IF_DISCONNECTED_SERVERS,
     DATABASE,
     HEROES_TABLE,
-    HEROES_TABLE_PRIMARY_REPLICA,
-    HEROES_TABLE_REPLICAS_BY_SHARD,
     HEROES_TABLE_SERVERS,
     HOST,
-    REPLICA_STATISTICS_METRICS,
     RETHINKDB_VERSION,
     SERVER_PORTS,
-    SERVER_STATISTICS_METRICS,
-    SERVER_STATUS_METRICS,
-    SERVER_TAGS,
-    SERVERS,
-    TABLE_STATISTICS_METRICS,
-    TABLE_STATUS_METRICS,
     TABLE_STATUS_SERVICE_CHECKS,
-    TABLE_STATUS_SHARDS_METRICS,
     TLS_CLIENT_CERT,
     TLS_SERVER,
 )
@@ -62,7 +49,7 @@ def test_check(aggregator, instance):
     check = RethinkDBCheck('rethinkdb', {}, [instance])
     check.check(instance)
 
-    _assert_metrics(aggregator)
+    assert_metrics(aggregator)
     aggregator.assert_all_metrics_covered()
 
     service_check_tags = _get_connect_service_check_tags()
@@ -84,7 +71,7 @@ def test_check_as_admin(aggregator, instance):
     check = RethinkDBCheck('rethinkdb', {}, [instance])
     check.check(instance)
 
-    _assert_metrics(aggregator)
+    assert_metrics(aggregator)
     aggregator.assert_all_metrics_covered()
 
     service_check_tags = _get_connect_service_check_tags()
@@ -104,7 +91,7 @@ def test_check_connect_to_server_with_tls(aggregator, instance):
     check = RethinkDBCheck('rethinkdb', {}, [instance])
     check.check(instance)
 
-    _assert_metrics(aggregator)
+    assert_metrics(aggregator)
     aggregator.assert_all_metrics_covered()
 
     service_check_tags = _get_connect_service_check_tags(server=server)
@@ -127,7 +114,7 @@ def test_check_with_disconnected_server(aggregator, instance, server_with_data):
 
     disconnected_servers = {server_with_data}
 
-    _assert_metrics(aggregator, disconnected_servers=disconnected_servers)
+    assert_metrics(aggregator, disconnected_servers=disconnected_servers)
     aggregator.assert_all_metrics_covered()
 
     service_check_tags = _get_connect_service_check_tags()
@@ -147,100 +134,6 @@ def test_check_with_disconnected_server(aggregator, instance, server_with_data):
     aggregator.assert_service_check(
         'rethinkdb.table_status.all_replicas_ready', RethinkDBCheck.WARNING, count=1, tags=table_status_tags
     )
-
-
-def _assert_metrics(aggregator, disconnected_servers=None):
-    # type: (AggregatorStub, Set[ServerName]) -> None
-    if disconnected_servers is None:
-        disconnected_servers = set()
-
-    _assert_config_totals_metrics(aggregator, disconnected_servers=disconnected_servers)
-    _assert_statistics_metrics(aggregator, disconnected_servers=disconnected_servers)
-    _assert_table_status_metrics(aggregator)
-    _assert_server_status_metrics(aggregator, disconnected_servers=disconnected_servers)
-    _assert_current_issues_metrics(aggregator, disconnected_servers=disconnected_servers)
-
-    # NOTE: system jobs metrics are not asserted here because they are only emitted when the cluster is
-    # changing (eg. an index is being created, or data is being rebalanced across servers), which is hard to
-    # test without introducing flakiness.
-
-
-def _assert_config_totals_metrics(aggregator, disconnected_servers):
-    # type: (AggregatorStub, Set[ServerName]) -> None
-    aggregator.assert_metric('rethinkdb.server.total', count=1, value=len(SERVERS) - len(disconnected_servers))
-    aggregator.assert_metric('rethinkdb.database.total', count=1, value=1)
-    aggregator.assert_metric('rethinkdb.database.table.total', count=1, value=1, tags=['database:{}'.format(DATABASE)])
-    aggregator.assert_metric(
-        'rethinkdb.table.secondary_index.total', count=1, value=1, tags=['table:{}'.format(HEROES_TABLE)]
-    )
-
-
-def _assert_statistics_metrics(aggregator, disconnected_servers):
-    # type: (AggregatorStub, Set[ServerName]) -> None
-    for metric in CLUSTER_STATISTICS_METRICS:
-        aggregator.assert_metric(metric, count=1, tags=[])
-
-    for server in SERVERS:
-        tags = ['server:{}'.format(server)] + SERVER_TAGS[server]
-        for metric in SERVER_STATISTICS_METRICS:
-            count = 0 if server in disconnected_servers else 1
-            aggregator.assert_metric(metric, count=count, tags=tags)
-
-    for metric in TABLE_STATISTICS_METRICS:
-        tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
-        aggregator.assert_metric(metric, count=1, tags=tags)
-
-    for server in HEROES_TABLE_SERVERS:
-        tags = [
-            'table:{}'.format(HEROES_TABLE),
-            'database:{}'.format(DATABASE),
-            'server:{}'.format(server),
-        ] + SERVER_TAGS[server]
-
-        for metric in REPLICA_STATISTICS_METRICS:
-            if server in disconnected_servers:
-                aggregator.assert_metric(metric, count=0, tags=tags)
-                continue
-
-            # Assumption: cluster is stable (not currently rebalancing), so only these two states can exist.
-            state = 'waiting_for_primary' if HEROES_TABLE_PRIMARY_REPLICA in disconnected_servers else 'ready'
-            state_tag = 'state:{}'.format(state)
-            aggregator.assert_metric(metric, count=1, tags=tags + [state_tag])
-
-
-def _assert_table_status_metrics(aggregator):
-    # type: (AggregatorStub) -> None
-    for metric in TABLE_STATUS_METRICS:
-        tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
-        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=1, tags=tags)
-
-    for shard in HEROES_TABLE_REPLICAS_BY_SHARD:
-        tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE), 'shard:{}'.format(shard)]
-
-        for metric in TABLE_STATUS_SHARDS_METRICS:
-            aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=1, tags=tags)
-
-
-def _assert_server_status_metrics(aggregator, disconnected_servers):
-    # type: (AggregatorStub, Set[ServerName]) -> None
-    for metric in SERVER_STATUS_METRICS:
-        for server in SERVERS:
-            tags = ['server:{}'.format(server)]
-            count = 0 if server in disconnected_servers else 1
-            aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=count, tags=tags)
-
-
-def _assert_current_issues_metrics(aggregator, disconnected_servers):
-    # type: (AggregatorStub, Set[ServerName]) -> None
-    for metric in CURRENT_ISSUES_METRICS:
-        if metric in CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS:
-            count = 1
-        elif disconnected_servers and metric in CURRENT_ISSUES_METRICS_SUBMITTED_IF_DISCONNECTED_SERVERS:
-            count = 1
-        else:
-            count = 0
-
-        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=count, tags=[])
 
 
 @pytest.mark.integration

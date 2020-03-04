@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.rethinkdb import RethinkDBCheck
 
-from .common import METRICS
+from .common import E2E_METRICS
 
 
 @pytest.mark.e2e
@@ -16,7 +16,7 @@ def test_check_ok(dd_agent_check):
     # type: (Callable) -> None
     aggregator = dd_agent_check(rate=True)  # type: AggregatorStub
 
-    for metric in METRICS:
+    for metric in E2E_METRICS:
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
