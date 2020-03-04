@@ -1,2 +1,0 @@
--e ../datadog_checks_dev
-backports.functools_lru_cache==1.5.0

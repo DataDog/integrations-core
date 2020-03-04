@@ -1,9 +1,0 @@
-version: "3"
-
-services:
-  hadoop-single-node:
-    image: sequenceiq/hadoop-docker:${YARN_VERSION}
-    environment:
-      - CLUSTER_NAME=SparkCluster
-    ports:
-      - "8088:8088"

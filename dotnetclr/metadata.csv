@@ -1,5 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-dotnetclr.exceptions.thrown_persec,gauge,60,occurrence,second,"The number of exceptions thrown per second.",0,dotnetclr,exceptions_thrown_persec
-dotnetclr.memory.committed.heap_bytes,gauge,,byte,,"The number of total commited bytes.",0,dotnetclr,memory_committed_heap_bytes
-dotnetclr.memory.reserved.heap_bytes,gauge,,byte,,"The number of total reserved bytes.",0,dotnetclr,memory_reserved_heap_bytes
-dotnetclr.memory.time_in_gc,gauge,,percent,,"The percent of time in garbage collection.",0,dotnetclr,memory_time_in_gc

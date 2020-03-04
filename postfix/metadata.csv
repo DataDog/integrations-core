@@ -1,2 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-postfix.queue.size,gauge,,email,,"The number of messages in a given mail queue, tagged by queue name (e.g. 'queue:incoming') and directory (e.g. 'instance:/var/spool/postfix/incoming').",-1,postfix,queue size

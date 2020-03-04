@@ -1,3 +1,0 @@
-/dev/sda1: UUID="9RbyZC-LtBG-J6RS-EH7g-wYMT-wQP2-wftnVi" TYPE="LVM2_member" PARTUUID="1e4b9125-01"
-/dev/mapper/vagrant--vg-root: LABEL="DATA" UUID="5eea373d-db36-4ce2-8c71-12ce544e8559" TYPE="ext4"
-/dev/mapper/vagrant--vg-swap_1: UUID="1678c43d-0654-4c4a-87f1-90dffa21ed34" TYPE="swap"

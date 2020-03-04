@@ -1,6 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-cassandra.nodetool.status.replication_availability,gauge,,percent,,Percentage of data available per keyspace times replication factor,1,cassandra_nodetool,available data
-cassandra.nodetool.status.replication_factor,gauge,,,,Replication factor per keyspace,0,cassandra_nodetool,replication factor
-cassandra.nodetool.status.status,gauge,,,,Node status: up (1) or down (0),1,cassandra_nodetool,node status
-cassandra.nodetool.status.owns,gauge,,percent,,Percentage of the data owned by the node per datacenter times the replication factor,0,cassandra_nodetool,owns
-cassandra.nodetool.status.load,gauge,,byte,,Amount of file system data under the cassandra data directory without snapshot content,0,cassandra_nodetool,load

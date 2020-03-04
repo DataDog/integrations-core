@@ -1,9 +1,0 @@
-Backend default is Healthy
-Current states  good:  5 threshold:  3 window:  5
-Average responsetime of good probes: 0.016226
-Oldest                                                    Newest
-================================================================
-44444444444444444444444444444444444444444444--44----444444444444 Good IPv4
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX--XX----XXXXXXXXXXXX Good Xmit
-RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR--RR----RRRRRRRRRRRR Good Recv
-HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH--HH----HHHHHHHHHHHH Happy

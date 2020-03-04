@@ -1,8 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-crio.operations.count,count,,,,Counter of CRI-O operations ,0,cri-o,ops count
-crio.operations.latency.sum,gauge,,microsecond,,Sum of CRI-O operations latency,0,cri-o,ops time sum
-crio.operations.latency.count,gauge,,,,Count of CRI-O operations latency,0,cri-o,ops time count
-crio.operations.latency.quantile,gauge,,,,Quantiles of CRI-O operations latency,0,cri-o,ops time quantile
-crio.cpu.time,gauge,,second,,Total user and system CPU time spent in seconds,0,cri-o,cpu time
-crio.mem.resident,gauge,,byte,,Resident memory size in bytes,0,cri-o,resident memory
-crio.mem.virtual,gauge,,byte,,Virtual memory size in bytes,0,cri-o,virtual memory

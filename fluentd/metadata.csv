@@ -1,4 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-fluentd.retry_count,gauge,,time,,The number of retries for this plugin.,-1,fluentd,retry count
-fluentd.buffer_queue_length,gauge,,buffer,,The length of the buffer queue for this plugin.,-1,fluentd,buffer queue length
-fluentd.buffer_total_queued_size,gauge,,byte,,The size of the buffer queue for this plugin.,-1,fluentd,buffer queue size

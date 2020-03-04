@@ -1,4 +1,0 @@
-State      Recv-Q Send-Q      Local Address:Port       Peer Address:Port
-UNCONN     0      0           :::971                   :::*
-ESTAB      0      0           ::1:54906                ::1:54906
-UNCONN     0      0           :::49004                 :::*

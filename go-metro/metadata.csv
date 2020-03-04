@@ -1,4 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-system.net.tcp.rtt,gauge,10,millisecond,,The TCP round trip time. Available since Agent v5.7.0.,-1,system,tcp rtt
-system.net.tcp.rtt.avg,gauge,10,millisecond,,The average TCP round trip time as typically computed by the TCP stack. Available since Agent v5.7.0.,-1,system,tcp rtt avg
-system.net.tcp.rtt.jitter,gauge,10,millisecond,,The TCP round trip time jitter. Available since Agent v5.7.0.,-1,system,tcp rtt jitter

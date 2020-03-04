@@ -1,4 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-kafka.broker_offset,gauge,,offset,,Current message offset on broker.,0,kafka,broker offset
-kafka.consumer_lag,gauge,,offset,,Lag in messages between consumer and broker.,-1,kafka,consumer lag
-kafka.consumer_offset,gauge,,offset,,Current message offset on consumer.,0,kafka,consumer offset

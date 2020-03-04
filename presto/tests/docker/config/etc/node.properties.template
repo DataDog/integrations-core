@@ -1,3 +1,0 @@
-node.environment=development
-node.id={{ node_id }}
-node.data-dir=/var/presto/data

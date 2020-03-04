@@ -1,6 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-system.disk.btrfs.total,gauge,,byte,,The total amount of space on a device,0,btrfs,btrfs disk total
-system.disk.btrfs.used,gauge,,byte,,The used space on a device,-1,btrfs,btrfs disk used
-system.disk.btrfs.free,gauge,,byte,,The free space on a device,1,btrfs,btrfs disk free
-system.disk.btrfs.usage,gauge,,fraction,,The amount of space used on a device as a fraction of the total,-1,btrfs,btrfs disk usage
-system.disk.btrfs.unallocated,gauge,,byte,,The amount of unallocated space on a device,0,btrfs,btrfs unallocated

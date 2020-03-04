@@ -1,3 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-network.tcp.response_time,gauge,,second,,"The response time of a given host and TCP port, tagged with url, e.g. 'url:192.168.1.100:22'.",-1,network,tcp resp time
-network.tcp.can_connect,gauge,,,,"Value of 1 if the agent can successfully establish a connection to the URL, 0 otherwise",1,network,tcp can connect

@@ -1,4 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-statsd.counters.count,gauge,,,,The number of counter metrics currently seen by StatsD,0,statsd,num counters
-statsd.gauges.count,gauge,,,,The number of gauge metrics currently seen by StatsD,0,statsd,num gauges
-statsd.timers.count,gauge,,,,The number of timer metrics currently seen by StatsD,0,statsd,num timers

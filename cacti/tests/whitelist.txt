@@ -1,2 +1,0 @@
-*localhost_mem_swap*
-*localhost_mem_proc*

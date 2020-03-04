@@ -1,2 +1,0 @@
--e ../datadog_checks_dev
-requests-mock==1.4.0

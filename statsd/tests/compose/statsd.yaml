@@ -1,8 +1,0 @@
-version: '3.5'
-
-services:
-  statsd:
-    image: "jolexa/docker-statsd"
-    ports:
-      - "8125:8125"
-      - "8126:8126"

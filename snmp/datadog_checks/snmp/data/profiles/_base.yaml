@@ -1,6 +1,0 @@
-# Base profile that should only contain any items we want to provide for all profiles.
-
-metric_tags:
-  - MIB: SNMPv2-MIB
-    symbol: sysName
-    tag: snmp_host

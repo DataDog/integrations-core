@@ -1,6 +1,0 @@
-version: '3.5'
-services:
-  nagios:
-    build: .
-    volumes:
-      - ${NAGIOS_LOGS_PATH}:/opt/nagios/var/log/

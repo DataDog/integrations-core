@@ -1,4 +1,0 @@
-AdminApp.install('/opt/IBM/WebSphere/AppServer/installableApps/PerfServletApp.ear', '[-node DefaultNode01 -cell DefaultCell01 -server server1]')
-AdminConfig.save()
-
-AdminControl.invoke('WebSphere:name=ApplicationManager,process=server1,platform=proxy,node=DefaultNode01,version=8.5.5.14,type=ApplicationManager,mbeanIdentifier=ApplicationManager,cell=DefaultCell01,spec=1.0', 'startApplication', '[perfServletApp]')

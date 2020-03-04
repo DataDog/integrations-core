@@ -1,6 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-system.disk.directory.file.bytes,gauge,,byte,,Total size of the file,0,directory,file_size
-system.disk.directory.file.modified_sec_ago,gauge,,second,,Duration since last modification,0,directory,file_modif
-system.disk.directory.file.created_sec_ago,gauge,,second,,Duration since creation,0,directory,file_created
-system.disk.directory.files,gauge,,file,,Number of files in the directory,0,directory,file_number
-system.disk.directory.bytes,gauge,,byte,,Total size of the directory,0,directory,directory_size

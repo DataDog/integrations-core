@@ -1,5 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-cri.mem.rss,gauge,,byte,,The amount of working set memory in bytes ,0,cri,mem rss
-cri.cpu.usage,rate,,nanocore,,Cumulative CPU usage (sum across all cores) since object creation,0,cri,cpu
-cri.disk.used,gauge,,byte,,Represents the bytes used for images on the filesystem,0,cri,disk used
-cri.disk.inodes,gauge,,inode,,Represents the inodes used by the images,0,cri,disk inodes

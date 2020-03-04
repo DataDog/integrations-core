@@ -1,3 +1,0 @@
-include README.md
-include requirements.in
-graft datadog_test_libs

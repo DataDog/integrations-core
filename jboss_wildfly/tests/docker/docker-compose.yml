@@ -1,9 +1,0 @@
-version: '3'
-services:
-  jboss_wildfly:
-    image: jboss/wildfly:16.0.0.Final
-    command: ['/bin/sh', '-c', '/script.sh']
-    ports:
-     - 9990:9990
-    volumes:
-     - ./script.sh:/script.sh

@@ -1,3 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-system.swap.swapped_in,gauge,,,,Bytes of memory swapped in,-1,system,swap in
-system.swap.swapped_out,gauge,,,,Bytes of memory swapped out,-1,system,swap out

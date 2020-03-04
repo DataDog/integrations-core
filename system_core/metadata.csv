@@ -1,5 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-system.core.count,gauge,,core,,The number of CPU cores on the host,0,system,cpu cores
-system.core.user,gauge,,,,A given core's user-space CPU time,0,system,cpu user
-system.core.system,gauge,,,,A given core's system CPU time,0,system,cpu system
-system.core.idle,gauge,,,,A given core's idle CPU time,0,system,cpu idle

@@ -1,6 +1,0 @@
-State      Recv-Q Send-Q     Local Address:Port       Peer Address:Port
-LISTEN     0      128        127.0.0.1:8400           *:*
-LISTEN     0      128        *:6384                   *:*
-TIME-WAIT  0      0          10.0.2.15:38756          54.225.214.228:80
-ESTAB      0      0          10.0.2.15:22             10.0.2.2:49936
-TIME-WAIT  0      0          10.0.2.15:38706          54.225.214.228:80

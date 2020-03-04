@@ -1,2 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-sftp.response_time,gauge,,second,,The response time of SFTP,-1,ssh,response time

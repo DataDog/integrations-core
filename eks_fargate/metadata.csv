@@ -1,2 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-eks.fargate.pods.running,gauge,,,,Heartbeat of a pod running an Amazon Fargate workload on AWS EKS,0,eks_fargate,pods running

@@ -1,2 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-dns.response_time,gauge,,second,,"The response time for DNS query for a given record, tagged by hostname, e.g. 'hostname:example.com'.",-1,dns,dns resp time

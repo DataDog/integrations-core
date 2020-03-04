@@ -1,6 +1,0 @@
-version: '2'
-services:
-  gearman:
-    image: kendu/gearman
-    ports:
-      - 15440:4730

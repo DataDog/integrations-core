@@ -1,8 +1,0 @@
-metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-gearman.unique_tasks,gauge,,task,,The number of all functions registered with Gearman.,0,gearman,
-gearman.running,gauge,,task,,The total number of running Gearman jobs.,0,gearman,
-gearman.queued,gauge,,task,,The total number of jobs in the queue.,0,gearman,
-gearman.workers,gauge,,process,,The total number of capable Gearman workers.,0,gearman,workers
-gearman.running_by_task,gauge,,task,,The number of running Gearman jobs by task.,0,gearman,
-gearman.queued_by_task,gauge,,task,,The number of jobs in the queue by task.,0,gearman,
-gearman.workers_by_task,gauge,,process,,The number of capable Gearman workers by task.,0,gearman,workers

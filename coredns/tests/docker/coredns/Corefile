@@ -1,9 +1,0 @@
-.:53 {
-    errors
-    health
-    prometheus :9153
-    # forward runs before proxy, no matter the order here
-    forward example.com. /etc/resolv.conf
-    proxy . /etc/resolv.conf
-    cache 30
-}

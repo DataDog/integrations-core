@@ -1,1 +1,0 @@
-python-binary-memcached==0.26.1; sys_platform != 'win32'

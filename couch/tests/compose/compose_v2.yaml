@@ -1,8 +1,0 @@
-version: '3.5'
-
-services:
-  couch:
-    image: datadog/docker-library:couch_${COUCH_VERSION}
-    ports:
-      - ${COUCH_PORT}:5984
-    command: --admin=dduser:pawprint --with-haproxy

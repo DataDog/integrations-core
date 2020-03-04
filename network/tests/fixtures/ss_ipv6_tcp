@@ -1,5 +1,0 @@
-State      Recv-Q Send-Q     Local Address:Port       Peer Address:Port
-LISTEN     0      50         :::9200                  :::*
-TIME-WAIT  0      0          ::1:35048                ::1:17123
-ESTAB      0      0          ::ffff:127.0.0.1:2181    ::ffff:127.0.0.1:43874
-CLOSING    0      0          ::1:35056                ::1:17123

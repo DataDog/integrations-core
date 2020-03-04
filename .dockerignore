@@ -1,7 +1,0 @@
-*.egg-info/*
-*.pyc[cdo]
-.benchmarks/*
-.pytest_cache/*
-.tox/*
-build/*
-dist/*

@@ -1,9 +1,0 @@
-Backend name                   Admin      Probe
-boot.backend2                  probe      Healthy 4/4
-  Current states  good:  4 threshold:  3 window:  4
-  Average response time of good probes: 0.002504
-  Oldest ================================================== Newest
-  --------------------------------------------------------------44 Good IPv4
-  --------------------------------------------------------------XX Good Xmit
-  --------------------------------------------------------------RR Good Recv
-  ------------------------------------------------------------HHHH Happy

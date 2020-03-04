@@ -1,8 +1,0 @@
-version: '3'
-
-services:
-  aerospike:
-    container_name: aerospike
-    image: aerospike/aerospike-server:${AEROSPIKE_VERSION}
-    ports:
-      - "3000:3000"

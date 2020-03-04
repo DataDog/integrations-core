@@ -1,7 +1,0 @@
-version: '3.5'
-
-services:
-  supervisord:
-    image: datadog/docker-library:supervisord_${SUPERVISOR_VERSION}
-    ports:
-      - "19001:19001"

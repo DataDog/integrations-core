@@ -1,3 +1,0 @@
-State      Recv-Q Send-Q      Local Address:Port       Peer Address:Port
-ESTAB      0      0           127.0.0.1:32781          127.0.0.1:8125
-UNCONN     0      0           *:53                     *:*
