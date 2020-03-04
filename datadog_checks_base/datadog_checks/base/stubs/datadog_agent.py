@@ -32,9 +32,6 @@ class DatadogAgentStub(object):
     def get_config(self, config_option):
         return self._config.get(config_option, '')
 
-    def enable_metadata_collection(self):
-        self._config['enable_metadata_collection'] = True
-
     def get_version(self):
         return '0.0.0'
 
