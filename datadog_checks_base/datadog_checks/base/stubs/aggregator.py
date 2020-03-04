@@ -298,7 +298,7 @@ class AggregatorStub(object):
         if not condition:
             prefix = '\n\t- '
             msg = 'Some metrics are missing:'
-            msg += '\nMetrics Asserted:{}{}'.format(prefix, prefix.join(sorted(self._asserted)))
+            msg += '\nAsserted Metrics:{}{}'.format(prefix, prefix.join(sorted(self._asserted)))
             msg += '\nMissing Metrics:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
         assert condition, msg
 
