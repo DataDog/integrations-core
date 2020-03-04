@@ -2,7 +2,7 @@
 #
 extends:
   - _base.yaml
-  - _generic-router-if.yaml  # F5-specific variants of the other metrics are provided in this profile.
+  - _generic-router-if.yaml # F5-specific variants of the other metrics are provided in this profile.
 
 sysobjectid: 1.3.6.1.4.1.3375.2.1.3.4.*
 
@@ -165,3 +165,267 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.9.29
       name: sysClientsslStatHandshakeFailures
+
+  # -- Local Traffic Management (LTM) systems metrics --
+
+  # Virtual servers.
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.2.10.1.1
+      name: ltmVirtualServNumber
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.2.10.1.2
+      name: ltmVirtualServTable
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.2.10.1.2.1.9
+        name: ltmVirtualServEnabled
+    metric_tags:
+      - tag: virtual_server
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.10.1.2.1.1
+          name: ltmVirtualServName
+      - tag: virtual_address
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.10.1.2.1.29
+          name: ltmVirtualServVaName
+      - tag: port
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.10.1.2.1.6
+          name: ltmVirtualServPort
+      - tag: address
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.10.1.2.1.3
+          name: ltmVirtualServAddr
+
+  # Route domain stats.
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.2.15.2.2
+      name: ltmRouteDomainStatNumber
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.2.15.2.3
+      name: ltmRouteDomainStatTable
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.10
+        name: ltmRouteDomainStatClientCurConns
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.2
+        name: ltmRouteDomainStatConnLimit
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.1
+          name: ltmRouteDomainStatName
+        tag: route_domain
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.2.15.2.3
+      name: ltmRouteDomainStatTable
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.3
+        name: ltmRouteDomainStatConnectionFlowMiss
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.4
+        name: ltmRouteDomainStatClientPktsIn
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.5
+        name: ltmRouteDomainStatClientBytesIn
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.6
+        name: ltmRouteDomainStatClientPktsOut
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.7
+        name: ltmRouteDomainStatClientBytesOut
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.8
+        name: ltmRouteDomainStatClientMaxConns
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.9
+        name: ltmRouteDomainStatClientTotConns
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.11
+        name: ltmRouteDomainStatClientEvictedConns
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.12
+        name: ltmRouteDomainStatClientSlowKilled
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.13
+        name: ltmRouteDomainStatServerPktsIn
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.14
+        name: ltmRouteDomainStatServerBytesIn
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.15
+        name: ltmRouteDomainStatServerPktsOut
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.16
+        name: ltmRouteDomainStatServerBytesOut
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.17
+        name: ltmRouteDomainStatServerMaxConns
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.18
+        name: ltmRouteDomainStatServerTotConns
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.19
+        name: ltmRouteDomainStatServerCurConns
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.20
+        name: ltmRouteDomainStatServerEvictedConns
+      - OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.21
+        name: ltmRouteDomainStatServerSlowKilled
+    forced_type: monotonic_count
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.3375.2.2.15.2.3.1.1
+          name: ltmRouteDomainStatName
+        tag: route_domain
+
+  # Node addresses.
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.2.4.1.1
+      name: ltmNodeAddrNumber
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.2.4.1.2
+      name: ltmNodeAddrTable
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.2.4.1.2.1.10
+        name: ltmNodeAddrSessionStatus
+      - OID: 1.3.6.1.4.1.3375.2.2.4.1.2.1.3
+        name: ltmNodeAddrConnLimit
+      - OID: 1.3.6.1.4.1.3375.2.2.4.1.2.1.4
+        name: ltmNodeAddrRatio
+      - OID: 1.3.6.1.4.1.3375.2.2.4.1.2.1.5
+        name: ltmNodeAddrDynamicRatio
+      - OID: 1.3.6.1.4.1.3375.2.2.4.1.2.1.6
+        name: ltmNodeAddrMonitorState
+      - OID: 1.3.6.1.4.1.3375.2.2.4.1.2.1.7
+        name: ltmNodeAddrMonitorStatus
+    metric_tags:
+      - tag: node
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.4.1.2.1.17
+          name: ltmNodeAddrName
+      - tag: address_type
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.4.1.2.1.1
+          name: ltmNodeAddrAddrType
+      - tag: address
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.4.1.2.1.2
+          name: ltmNodeAddrAddr
+      - tag: monitor_rule
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.4.1.2.1.8
+          name: ltmNodeAddrMonitorRule
+
+  # Pools.
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.2.5.1.1
+      name: ltmPoolNumber
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.2.5.1.2
+      name: ltmPoolTable
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.10
+        name: ltmPoolDisallowNat
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.11
+        name: ltmPoolSimpleTimeout
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.12
+        name: ltmPoolIpTosToClient
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.13
+        name: ltmPoolIpTosToServer
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.14
+        name: ltmPoolLinkQosToClient
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.15
+        name: ltmPoolLinkQosToServer
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.16
+        name: ltmPoolDynamicRatioSum
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.22
+        name: ltmPoolSlowRampTime
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.23
+        name: ltmPoolMemberCnt
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.24
+        name: ltmPoolQueueOnConnectionLimit
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.25
+        name: ltmPoolQueueDepthLimit
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.26
+        name: ltmPoolQueueTimeLimit
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.3
+        name: ltmPoolActionOnServiceDown
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.4
+        name: ltmPoolMinUpMembers
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.5
+        name: ltmPoolMinUpMembersEnable
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.6
+        name: ltmPoolMinUpMemberAction
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.7
+        name: ltmPoolMinActiveMembers
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.8
+        name: ltmPoolActiveMemberCnt
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.9
+        name: ltmPoolDisallowSnat
+    metric_tags:
+      - tag: pool
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.1
+          name: ltmPoolName
+      - tag: lb_mode
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.2
+          name: ltmPoolLbMode
+      - tag: monitor_rule
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.17
+          name: ltmPoolMonitorRule
+
+  # Pool members.
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.2.5.3.1
+      name: ltmPoolMemberNumber
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.2.5.3.2
+      name: ltmPoolMemberTable
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.10
+        name: ltmPoolMemberMonitorState
+      - OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.11
+        name: ltmPoolMemberMonitorStatus
+      - OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.13
+        name: ltmPoolMemberSessionStatus
+      - OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.5
+        name: ltmPoolMemberConnLimit
+      - OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.6
+        name: ltmPoolMemberRatio
+      - OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.7
+        name: ltmPoolMemberWeight
+      - OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.8
+        name: ltmPoolMemberPriority
+      - OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.9
+        name: ltmPoolMemberDynamicRatio
+    metric_tags:
+      - tag: pool
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.1
+          name: ltmPoolMemberPoolName
+      - tag: monitor_rule
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.14
+          name: ltmPoolMemberMonitorRule
+      - tag: node
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.19
+          name: ltmPoolMemberNodeName
+      - tag: address_type
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.2
+          name: ltmPoolMemberAddrType
+      - tag: address
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.3
+          name: ltmPoolMemberAddr
+      - tag: port
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.4
+          name: ltmPoolMemberPort

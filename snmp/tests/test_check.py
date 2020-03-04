@@ -965,6 +965,76 @@ def test_f5(aggregator):
         'ifHCOutBroadcastPkts',
         'ifInDiscards',
     ]
+
+    ltm_totals = [
+        'ltmVirtualServNumber',
+        'ltmRouteDomainStatNumber',
+        'ltmNodeAddrNumber',
+        'ltmPoolNumber',
+        'ltmPoolMemberNumber',
+    ]
+
+    ltm_route_domain_gauges = [
+        'ltmRouteDomainStatClientCurConns',
+        'ltmRouteDomainStatConnLimit',
+    ]
+
+    ltm_gauges_without_simulation_data = [
+        'ltmVirtualServEnabled',
+        'ltmNodeAddrSessionStatus',
+        'ltmNodeAddrConnLimit',
+        'ltmNodeAddrRatio',
+        'ltmNodeAddrDynamicRatio',
+        'ltmNodeAddrMonitorState',
+        'ltmNodeAddrMonitorStatus',
+        'ltmPoolDisallowNat',
+        'ltmPoolSimpleTimeout',
+        'ltmPoolIpTosToClient',
+        'ltmPoolIpTosToServer',
+        'ltmPoolLinkQosToClient',
+        'ltmPoolLinkQosToServer',
+        'ltmPoolDynamicRatioSum',
+        'ltmPoolSlowRampTime',
+        'ltmPoolMemberCnt',
+        'ltmPoolQueueOnConnectionLimit',
+        'ltmPoolQueueDepthLimit',
+        'ltmPoolQueueTimeLimit',
+        'ltmPoolActionOnServiceDown',
+        'ltmPoolMinUpMembers' 'ltmPoolMinUpMembersEnable',
+        'ltmPoolMinUpMemberAction',
+        'ltmPoolMinActiveMembers' 'ltmPoolActiveMemberCnt',
+        'ltmPoolDisallowSnat',
+        'ltmPoolMemberMonitorState',
+        'ltmPoolMemberMonitorStatus',
+        'ltmPoolMemberSessionStatus',
+        'ltmPoolMemberConnLimit',
+        'ltmPoolMemberRatio',
+        'ltmPoolMemberWeight',
+        'ltmPoolMemberPriority',
+        'ltmPoolMemberDynamicRatio',
+    ]
+
+    ltm_route_domain_counts = [
+        'ltmRouteDomainStatConnectionFlowMiss',
+        'ltmRouteDomainStatClientPktsIn',
+        'ltmRouteDomainStatClientBytesIn',
+        'ltmRouteDomainStatClientPktsOut',
+        'ltmRouteDomainStatClientBytesOut',
+        'ltmRouteDomainStatClientMaxConns',
+        'ltmRouteDomainStatClientTotConns',
+        'ltmRouteDomainStatClientEvictedConns',
+        'ltmRouteDomainStatClientSlowKilled',
+        'ltmRouteDomainStatServerPktsIn',
+        'ltmRouteDomainStatServerBytesIn',
+        'ltmRouteDomainStatServerPktsOut',
+        'ltmRouteDomainStatServerBytesOut',
+        'ltmRouteDomainStatServerMaxConns',
+        'ltmRouteDomainStatServerTotConns',
+        'ltmRouteDomainStatServerCurConns',
+        'ltmRouteDomainStatServerEvictedConns',
+        'ltmRouteDomainStatServerSlowKilled',
+    ]
+
     interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
     tags = ['snmp_profile:f5-big-ip', 'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal']
     tags += common.CHECK_TAGS
@@ -992,6 +1062,26 @@ def test_f5(aggregator):
                 tags=['interface:{}'.format(interface)] + tags,
                 count=1,
             )
+
+    for metric in ltm_totals:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    for metric in ltm_route_domain_gauges:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags + ['route_domain:/Common/0'], count=1,
+        )
+
+    for metric in ltm_gauges_without_simulation_data:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=0)
+
+    for metric in ltm_route_domain_counts:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric),
+            metric_type=aggregator.MONOTONIC_COUNT,
+            tags=tags + ['route_domain:/Common/0'],
+            count=1,
+        )
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
