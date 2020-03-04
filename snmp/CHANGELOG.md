@@ -1,5 +1,29 @@
 # CHANGELOG - snmp
 
+## 2.5.0 / 2020-02-27
+
+* [Added] Query discovered devices in threads. See [#5462](https://github.com/DataDog/integrations-core/pull/5462).
+* [Fixed] Fix issue with tags leaking between discovered instances. See [#5899](https://github.com/DataDog/integrations-core/pull/5899).
+
+## 2.4.1 / 2020-02-25
+
+* [Fixed] Handle case when servers report two values for entries in `metric_tags`. See [#5853](https://github.com/DataDog/integrations-core/pull/5853).
+
+## 2.4.0 / 2020-02-22
+
+* [Added] Add extension mechanism for SNMP profiles. See [#5821](https://github.com/DataDog/integrations-core/pull/5821).
+* [Fixed] Switch back to most specific profile matching. See [#5813](https://github.com/DataDog/integrations-core/pull/5813).
+* [Added] Add snmp_host tag by default to profiles. See [#5812](https://github.com/DataDog/integrations-core/pull/5812).
+* [Added] Add hpe proliant profile. See [#5724](https://github.com/DataDog/integrations-core/pull/5724).
+* [Added] Tag metrics by profile. See [#5787](https://github.com/DataDog/integrations-core/pull/5787).
+* [Added] Add `ignored_ip_addresses` option to ignore specific IP addresses when scanning a network.. See [#5785](https://github.com/DataDog/integrations-core/pull/5785).
+* [Added] Add basic types to SNMP integration. See [#5782](https://github.com/DataDog/integrations-core/pull/5782).
+* [Added] Use all matching profiles instead of only the most specific one. See [#5768](https://github.com/DataDog/integrations-core/pull/5768).
+* [Added] Add a new metric_tags configuration. See [#5765](https://github.com/DataDog/integrations-core/pull/5765).
+* [Added] Add profile for HP iLO4 devices. See [#5637](https://github.com/DataDog/integrations-core/pull/5637).
+* [Added] Fetch sysUpTimeInstance automatically. See [#5752](https://github.com/DataDog/integrations-core/pull/5752).
+* [Added] Add Dell Poweredge profile. See [#5723](https://github.com/DataDog/integrations-core/pull/5723).
+
 ## 2.3.2 / 2020-01-15
 
 * [Fixed] Tweak behavior related to discovery. See [#5466](https://github.com/DataDog/integrations-core/pull/5466).

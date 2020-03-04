@@ -21,6 +21,15 @@ instances:
     #
     password: <PASSWORD>
 
+    ## @param tags - list of key:value element - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
     ## @param collection_level - integer - optional - default: 1
     ## A number between 1 and 4 to specify how many metrics will be sent
     ## 1: Only basic metrics - 4: every metric available.
@@ -60,6 +69,12 @@ instances:
     ## in PEM format
     #
     # ssl_capath: "<DIRECTORY_PATH>"
+
+    ## @param tls_ignore_warning - boolean - optional - default: false
+    ## If `ssl_verify ` is disabled, security warnings are logged by the check when making http requests.
+    ## Disable those by setting `tls_ignore_warning` to true.
+    #
+    # tls_ignore_warning: false
 
     ## @param resource_filters - list of objects - optional - default: no filter
     ## Each filter in the list is composed of three parameters.
@@ -120,8 +135,9 @@ instances:
     #     - <CLUSTER_REGEX>            # Only possible with "collection_type: historical"
 
     ## @param collect_per_instance_filters - object - optional - default: none
-    ## For each resource type (vm, host, datastore, datacenter, cluster) to collect,
-    ## you can choose which metric you want to collect the instance value using a list of regex.
+    ## Some vsphere metrics can be tagged with instance values.
+    ## For each resource type (vm, host, datastore, cluster) to collect,
+    ## you can choose which metrics you want to collect the instance value as tags using a list of regex.
     ## See https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/metrics.py
     ## for the list of collected metrics (do not prefix them with `vsphere`)
     ## /!\ Use with parsimony, collecting per-instance metrics might be very expensive for big environments.
@@ -133,10 +149,32 @@ instances:
     #     - <HOST_REGEX>               # Only possible with "collection_type: realtime"
     #   datastore:
     #     - <DATASTORE_REGEX>          # Only possible with "collection_type: historical"
-    #   datacenter:
-    #     - <DATACENTER_REGEX>         # Only possible with "collection_type: historical"
     #   cluster:
     #     - <CLUSTER_REGEX>            # Only possible with "collection_type: historical"
+
+    ## @param collect_tags - boolean - optional - default: false
+    ## If true, the vSphere Tags will be collected.
+    ## The final tag sent to Datadog is composed of the vSphere tags prefix + vSphere tag category as key and
+    ## vSphere tag name as value:
+    ##    <TAG_CATEGORY>:<TAG_NAME>
+    ## Examples:
+    ## - os_type:windows
+    ## - application_name:my_app
+    #
+    # collect_tags: false
+
+    ## @param tags_prefix - boolean - optional - default: ''
+    ## Custom tags attached to vSphere resources will be prefixed with this prefix when collected.
+    ## Example use cases:
+    ##   - You have vSphere tags that might conflict with tags added by this integration or the Datadog Agent
+    ##   - You want a prefix to better recognise tags coming from vSphere
+    ## Examples with using `vtag_` prefix:
+    ## - vtag_os_type:windows            # where `os_type` is the category name and `windows` the tag name
+    ## - vtag_application_name:my_app    # where `application_name` is the category name and `my_app` the tag name
+    ## It's not recommend to use `vsphere_` as prefix, since it's already used by this integration
+    ## e.g. vsphere_host, vsphere_type, etc.
+    #
+    # tags_prefix: ''
 
     ## @param use_guest_hostname - boolean - optional - default: false
     ## If true, the check will use the guest hostname for VMs instead of the VM name
@@ -197,6 +235,11 @@ instances:
     ## Consider increasing this value if your environment is large, as caching can take some time to complete.
     #
     # refresh_infrastructure_cache_interval: 300
+
+    ## @param refresh_tags_cache_interval - integer - optional - default: 300
+    ## Number of seconds between each refresh of the tags cache
+    #
+    # refresh_tags_cache_interval: 300
 
     ## @param refresh_metrics_metadata_cache_interval - integer - optional - default: 1800
     ## Number of seconds between each refresh of the metrics metadata cache

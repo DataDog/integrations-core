@@ -100,6 +100,7 @@ METRIC_MAP = {
     'vault_runtime_num_goroutines': 'vault.runtime.num_goroutines',
     'vault_runtime_sys_bytes': 'vault.runtime.sys.bytes',
     'vault_runtime_total_gc_pause_ns': 'vault.runtime.total.gc.pause_ns',
+    'vault_runtime_gc_pause_ns': 'vault.runtime.gc.pause_ns',
     'vault_runtime_total_gc_runs': 'vault.runtime.total.gc.runs',
     'vault_merkle_flushdirty': 'vault.merkle.flushdirty',
     'vault_merkle_savecheckpoint': 'vault.merkle.savecheckpoint',

@@ -8,8 +8,8 @@ from io import open
 
 import click
 
-from ...utils import get_metadata_file, get_metric_sources, load_manifest
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_warning
+from ...utils import complete_valid_checks, get_metadata_file, get_metric_sources, load_manifest
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
 
@@ -183,9 +183,28 @@ def normalize_metric_name(metric_name):
     return METRIC_DOTUNDERSCORE_CLEANUP.sub(".", metric_name).strip("_")
 
 
+def check_duplicate_values(current_check, line, row, header_name, duplicates, fail=None):
+    """Check if the given column value has been seen before.
+    Output a warning and return True if so.
+    """
+    if row[header_name] and row[header_name] not in duplicates:
+        duplicates.add(row[header_name])
+    elif row[header_name] != '':
+        message = f"{current_check}:{line} `{row[header_name]}` is a duplicate {header_name}"
+        if fail:
+            echo_failure(message)
+            return True
+        else:
+            echo_warning(message)
+    return False
+
+
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `metadata.csv` files')
-@click.argument('check', required=False)
-def metadata(check):
+@click.option(
+    '--check-duplicates', is_flag=True, help='Output warnings if there are duplicate short names and descriptions'
+)
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
+def metadata(check, check_duplicates):
     """Validates metadata.csv files
 
     If `check` is specified, only the check will be validated,
@@ -219,7 +238,10 @@ def metadata(check):
         metric_prefix_count = defaultdict(int)
         empty_count = defaultdict(int)
         empty_warning_count = defaultdict(int)
-        duplicate_set = set()
+        duplicate_name_set = set()
+        duplicate_short_name_set = set()
+        duplicate_description_set = set()
+
         metric_prefix_error_shown = False
 
         with open(metadata_file, 'r', encoding='utf-8') as f:
@@ -229,8 +251,8 @@ def metadata(check):
             reader._fieldnames = reader.fieldnames
 
             for line, row in enumerate(reader, 2):
-                # Number of rows is correct. Since metric is first in the list, should be safe to access
-                if len(row) != len(ALL_HEADERS):
+                # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
+                if None in row.values():
                     errors = True
                     echo_failure(f"{current_check}:{line} {row['metric_name']} Has the wrong amount of columns")
                     continue
@@ -250,20 +272,20 @@ def metadata(check):
 
                     continue
 
-                # duplicate metric_name
-                if row['metric_name'] and row['metric_name'] not in duplicate_set:
-                    duplicate_set.add(row['metric_name'])
-                else:
-                    errors = True
-                    echo_failure(f"{current_check}:{line} `{row['metric_name']}` is a duplicate metric_name")
+                errors = errors or check_duplicate_values(
+                    current_check, line, row, 'metric_name', duplicate_name_set, fail=True
+                )
+
+                if check_duplicates:
+                    check_duplicate_values(current_check, line, row, 'short_name', duplicate_short_name_set)
+                    check_duplicate_values(current_check, line, row, 'description', duplicate_description_set)
 
                 normalized_metric_name = normalize_metric_name(row['metric_name'])
                 if row['metric_name'] != normalized_metric_name:
                     errors = True
                     echo_failure(
-                        "Metric name '{}' is not valid, it should be normalized as {}".format(
-                            row['metric_name'], normalized_metric_name
-                        )
+                        f"Metric name '{row['metric_name']}' is not valid,"
+                        "it should be normalized as {normalized_metric_name}"
                     )
 
                 # metric_name header
@@ -304,13 +326,12 @@ def metadata(check):
                 elif len(row['description']) > MAX_DESCRIPTION_LENGTH:
                     errors = True
                     echo_failure(
-                        '{}:{} `{}` exceeds the max length: {} for descriptions.'.format(
-                            current_check, line, row['metric_name'], MAX_DESCRIPTION_LENGTH
-                        )
+                        f"{current_check}:{line} `{row['metric_name']}` exceeds the max length: "
+                        "{MAX_DESCRIPTION_LENGTH} for descriptions."
                     )
                 if row['interval'] and not row['interval'].isdigit():
                     errors = True
-                    echo_failure('{}: interval should be an int, found "{}"'.format(current_check, row['interval']))
+                    echo_failure(f"{current_check}: interval should be an int, found '{row['interval']}'")
 
         for header, count in empty_count.items():
             errors = True
@@ -323,9 +344,11 @@ def metadata(check):
             # Don't spam this warning when we're validating everything
             if check:
                 echo_warning(
-                    '{}: `{}` appears {} time(s) and does not match metric_prefix '
-                    'defined in the manifest.'.format(current_check, prefix, count)
+                    f"{current_check}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
+                    "defined in the manifest."
                 )
 
     if errors:
         abort()
+
+    echo_success('Validated!')

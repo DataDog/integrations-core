@@ -4,8 +4,8 @@
 
 This check monitors [Systemd][1] and the units it manages through the Datadog Agent.
 
-* Track the state and health of your Systemd
-* Monitor the units, services, sockets managed by Systemd
+- Track the state and health of your Systemd
+- Monitor the units, services, sockets managed by Systemd
 
 ## Setup
 

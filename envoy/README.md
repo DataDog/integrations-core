@@ -1,4 +1,5 @@
 # Agent Check: Envoy
+
 ## Overview
 
 This check collects distributed system observability metrics from [Envoy][1].
@@ -92,22 +93,20 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 1. Edit the `envoy.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][7] to start collecting your Envoy performance data. See the [sample envoy.d/conf.yaml][8] for all available configuration options.
 
-  ```yaml
+    ```yaml
     init_config:
 
     instances:
-
-        ## @param stats_url - string - required
-        ## The admin endpoint to connect to. It must be accessible:
-        ## https://www.envoyproxy.io/docs/envoy/latest/operations/admin
-        ## Add a `?usedonly` on the end if you wish to ignore
-        ## unused metrics instead of reporting them as `0`.
-        #
+      ## @param stats_url - string - required
+      ## The admin endpoint to connect to. It must be accessible:
+      ## https://www.envoyproxy.io/docs/envoy/latest/operations/admin
+      ## Add a `?usedonly` on the end if you wish to ignore
+      ## unused metrics instead of reporting them as `0`.
+      #
       - stats_url: http://localhost:80/stats
-  ```
+    ```
 
 2. Check if the Datadog Agent can access Envoy's [admin endpoint][4].
-
 3. [Restart the Agent][9].
 
 ###### Metric filtering
@@ -139,23 +138,23 @@ If you care only about the cluster name and grpc service, you would add this to 
 
 ##### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Next, edit `envoy.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your Envoy log files.
 
-    ```yaml
-      logs:
-        - type: file
-          path: /var/log/envoy.log
-          source: envoy
-          service: envoy
-    ```
+   ```yaml
+   logs:
+     - type: file
+       path: /var/log/envoy.log
+       source: envoy
+       service: envoy
+   ```
 
 3. [Restart the Agent][9].
 
@@ -166,19 +165,19 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 ##### Metric collection
 
 | Parameter            | Value                                      |
-|----------------------|--------------------------------------------|
+| -------------------- | ------------------------------------------ |
 | `<INTEGRATION_NAME>` | `envoy`                                    |
 | `<INIT_CONFIG>`      | blank or `{}`                              |
 | `<INSTANCE_CONFIG>`  | `{"stats_url": "http://%%host%%:80/stats}` |
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][12].
 
 | Parameter      | Value                                              |
-|----------------|----------------------------------------------------|
+| -------------- | -------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "envoy", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
@@ -186,6 +185,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 [Run the Agent's status subcommand][13] and look for `envoy` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][14] for a list of metrics provided by this integration.
@@ -204,7 +204,6 @@ Returns `CRITICAL` if the Agent cannot connect to Envoy to collect metrics, othe
 ## Troubleshooting
 
 Need help? Contact [Datadog support][15].
-
 
 [1]: https://www.envoyproxy.io
 [2]: https://app.datadoghq.com/account/settings#agent

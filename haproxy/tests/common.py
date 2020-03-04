@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from datadog_checks.dev.utils import ON_LINUX
+from datadog_checks.dev.utils import ON_LINUX, ON_MACOS
 from datadog_checks.utils.common import get_docker_hostname
 
 AGG_STATUSES_BY_SERVICE = (
@@ -53,10 +53,16 @@ USERNAME = 'datadog'
 PASSWORD = 'isdevops'
 HAPROXY_VERSION = os.getenv('HAPROXY_VERSION')
 
-platform_supports_sockets = ON_LINUX
+platform_supports_sockets = ON_LINUX or ON_MACOS
+platform_supports_sharing_unix_sockets_through_docker = ON_LINUX
 requires_socket_support = pytest.mark.skipif(
     not platform_supports_sockets, reason='Windows sockets are not file handles'
 )
+requires_shareable_unix_socket = pytest.mark.skipif(
+    not platform_supports_sharing_unix_sockets_through_docker,
+    reason='AF_UNIX sockets cannot be bind-mounted between a macOS host and a linux guest in docker',
+)
+haproxy_less_than_1_7 = os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '7']
 
 CONFIG_UNIXSOCKET = {'collect_aggregates_only': False}
 

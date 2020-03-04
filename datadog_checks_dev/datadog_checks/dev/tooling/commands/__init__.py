@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .agent import agent
+from .ci import ci
 from .clean import clean
 from .config import config
 from .create import create
@@ -13,4 +14,4 @@ from .run import run
 from .test import test
 from .validate import validate
 
-ALL_COMMANDS = (agent, clean, config, create, dep, env, meta, release, run, test, validate)
+ALL_COMMANDS = (agent, ci, clean, config, create, dep, env, meta, release, run, test, validate)

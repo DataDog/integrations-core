@@ -14,22 +14,23 @@ from ...constants import CHANGELOG_TYPE_NONE, get_root
 from ...git import get_commits_since
 from ...github import from_contributor, get_changelog_types, get_pr, parse_pr_numbers
 from ...release import get_release_tag_string
-from ...utils import get_valid_checks, get_version_string
+from ...utils import complete_testable_checks, get_valid_checks, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, validate_check_arg
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Update the changelog for a check')
-@click.argument('check', callback=validate_check_arg)
+@click.argument('check', autocompletion=complete_testable_checks, callback=validate_check_arg)
 @click.argument('version')
 @click.argument('old_version', required=False)
 @click.option('--initial', is_flag=True)
 @click.option('--quiet', '-q', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.option('--output-file', '-o', default='CHANGELOG.md', show_default=True)
+@click.option('--tag-prefix', '-tp', default='v', show_default=True)
 @click.pass_context
-def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_file):
+def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_file, tag_prefix):
     """Perform the operations needed to update the changelog.
 
     This method is supposed to be used by other tasks and not directly.
@@ -38,8 +39,10 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_
         abort(f'Check `{check}` is not an Agent-based Integration')
 
     # sanity check on the version provided
-    cur_version = old_version or get_version_string(check)
-    if parse_version_info(version.lstrip('v')) <= parse_version_info(cur_version.lstrip('v')):
+    cur_version = old_version or get_version_string(check, tag_prefix=tag_prefix)
+    if parse_version_info(version.replace(tag_prefix, '', 1)) <= parse_version_info(
+        cur_version.replace(tag_prefix, '', 1)
+    ):
         abort(f'Current version is {cur_version}, cannot bump to {version}')
 
     if not quiet:

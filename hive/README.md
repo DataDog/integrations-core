@@ -5,6 +5,7 @@
 This check monitors two parts of [Hive][1]: Hive Metastore and HiveServer2.
 
 ## Setup
+
 ### Installation
 
 The Hive check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
@@ -15,26 +16,26 @@ The Hive check is included in the [Datadog Agent][2] package. No additional inst
 
 1. Edit the Hive configuration file in [`HIVE_HOME/conf/hive-site.xml`][3] to enable the Hive Metastore and HiveServer2 metrics by adding these properties:
 
-    ```xml
-    <property>
-      <name>hive.metastore.metrics.enabled</name>
-      <value>true</value>
-    </property>
-    <property>
-      <name>hive.server2.metrics.enabled</name>
-      <value>true</value>
-    </property>
-    ```
+   ```xml
+   <property>
+     <name>hive.metastore.metrics.enabled</name>
+     <value>true</value>
+   </property>
+   <property>
+     <name>hive.server2.metrics.enabled</name>
+     <value>true</value>
+   </property>
+   ```
 
 2. Enable a JMX remote connection for the HiveServer2 and/or for the Hive Metastore. For example, set the `HADOOP_CLIENT_OPTS` environment variable:
 
-    ```conf
-    export HADOOP_CLIENT_OPTS="$HADOOP_CLIENT_OPTS -Dcom.sun.management.jmxremote \
-    -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false \
-    -Dcom.sun.management.jmxremote.port=8808"
-    ```
+   ```conf
+   export HADOOP_CLIENT_OPTS="$HADOOP_CLIENT_OPTS -Dcom.sun.management.jmxremote \
+   -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false \
+   -Dcom.sun.management.jmxremote.port=8808"
+   ```
 
-    Then restart the HiveServer2 or the Hive Metastore. Hive Metastore and HiveServer2 cannot share the same JMX connection.
+   Then restart the HiveServer2 or the Hive Metastore. Hive Metastore and HiveServer2 cannot share the same JMX connection.
 
 #### Host
 
@@ -51,27 +52,27 @@ Follow now the instructions below to configure this check for an Agent running o
 
 ##### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Add this configuration block to your `hive.d/conf.yaml` file to start collecting your Hive logs:
 
-    ```
-      logs:
-        - type: file
-          path: /tmp/<USER>/hive.log
-          source: hive
-          service: <SERVICE_NAME>
-          log_processing_rules:
-            - type: multi_line
-              name: new_log_start_with_date
-              pattern: \d{4}\-\d{2}\-\d{2}
-    ```
+   ```yaml
+     logs:
+       - type: file
+         path: /tmp/<USER>/hive.log
+         source: hive
+         service: '<SERVICE_NAME>'
+         log_processing_rules:
+           - type: multi_line
+             name: new_log_start_with_date
+             pattern: \d{4}\-\d{2}\-\d{2}
+   ```
 
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample hive.d/conf.yaml][4] for all available configuration options.
 
@@ -87,12 +88,12 @@ To collect metrics with the Datadog-Hive integration, see the [Autodiscovery wit
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][10].
 
 | Parameter      | Value                                                                                                                                                             |
-|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "hive", "service": "<SERVICE_NAME>", "log_processing_rules":{"type":"multi_line","name":"new_log_start_with_date", "pattern":"\d{4}\-\d{2}\-\d{2}"}}` |
 
 ### Validation

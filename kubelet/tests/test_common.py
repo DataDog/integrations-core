@@ -32,7 +32,7 @@ def test_container_filter(monkeypatch):
     pod_list_utils = PodListUtils(pods)
 
     assert pod_list_utils is not None
-    assert len(pod_list_utils.containers) == 8
+    assert len(pod_list_utils.containers) == 10
     assert long_cid in pod_list_utils.containers
     is_excluded.assert_not_called()
 

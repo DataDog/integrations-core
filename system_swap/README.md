@@ -5,9 +5,10 @@
 This check monitors the number of bytes a host has swapped in and out.
 
 ## Setup
+
 ### Installation
 
-The system swap check is included in the [Datadog Agent][1] package. No additional installation is needed on your server.
+The System Swap check is included in the [Datadog Agent][1] package. No additional installation is needed on your server.
 
 ### Configuration
 
@@ -20,17 +21,21 @@ The system swap check is included in the [Datadog Agent][1] package. No addition
 [Run the Agent's status subcommand][5] and look for `system_swap` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Events
+
 The System Swap check does not include any events.
 
 ### Service Checks
+
 The System Swap check does not include any service checks.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][7].
 
 [1]: https://app.datadoghq.com/account/settings#agent

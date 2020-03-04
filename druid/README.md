@@ -23,7 +23,6 @@ Both steps below are needed for Druid integration to work properly. Before you b
 Configure the Druid check included in the [Datadog Agent][5] package to collect health metrics and service checks.
 
 1. Edit the `druid.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your druid service checks. See the [sample druid.d/conf.yaml][6] for all available configuration options.
-
 2. [Restart the Agent][7].
 
 #### Step 2: Connect Druid to DogStatsD (included in the Datadog Agent) by using the extension `statsd-emitter` to collect metrics
@@ -32,39 +31,39 @@ Step to configure `statsd-emitter` extension to collect the majority of [Druid m
 
 1. Install the Druid extension [`statsd-emitter`][8].
 
-    ```shell
-    $ java \
-      -cp "lib/*" \
-      -Ddruid.extensions.directory="./extensions" \
-      -Ddruid.extensions.hadoopDependenciesDir="hadoop-dependencies" \
-      org.apache.druid.cli.Main tools pull-deps \
-      --no-default-hadoop \
-      -c "org.apache.druid.extensions.contrib:statsd-emitter:0.15.0-incubating"
-    ```
+   ```shell
+   $ java \
+     -cp "lib/*" \
+     -Ddruid.extensions.directory="./extensions" \
+     -Ddruid.extensions.hadoopDependenciesDir="hadoop-dependencies" \
+     org.apache.druid.cli.Main tools pull-deps \
+     --no-default-hadoop \
+     -c "org.apache.druid.extensions.contrib:statsd-emitter:0.15.0-incubating"
+   ```
 
     More info about this step can be found on the [official guide for loading Druid extensions][9]
 
 2. Update Druid java properties by adding the following configs:
 
-    ```conf
-    # Add `statsd-emitter` to the extensions list to be loaded
-    druid.extensions.loadList=[..., "statsd-emitter"]
+   ```conf
+   # Add `statsd-emitter` to the extensions list to be loaded
+   druid.extensions.loadList=[..., "statsd-emitter"]
 
-    # By default druid emission period is 1 minute (PT1M).
-    # We recommend using 15 seconds instead:
-    druid.monitoring.emissionPeriod=PT15S
+   # By default druid emission period is 1 minute (PT1M).
+   # We recommend using 15 seconds instead:
+   druid.monitoring.emissionPeriod=PT15S
 
-    # Use `statsd-emitter` extension as metric emitter
-    druid.emitter=statsd
+   # Use `statsd-emitter` extension as metric emitter
+   druid.emitter=statsd
 
-    # Configure `statsd-emitter` endpoint
-    druid.emitter.statsd.hostname=127.0.0.1
-    druid.emitter.statsd.port:8125
+   # Configure `statsd-emitter` endpoint
+   druid.emitter.statsd.hostname=127.0.0.1
+   druid.emitter.statsd.port:8125
 
-    # Configure `statsd-emitter` to use dogstatsd format. Must be set to true, otherwise tags are not reported correctly to Datadog.
-    druid.emitter.statsd.dogstatsd=true
-    druid.emitter.statsd.dogstatsdServiceAsTag=true
-    ```
+   # Configure `statsd-emitter` to use dogstatsd format. Must be set to true, otherwise tags are not reported correctly to Datadog.
+   druid.emitter.statsd.dogstatsd=true
+   druid.emitter.statsd.dogstatsdServiceAsTag=true
+   ```
 
 3. Restart Druid to start sending your Druid metrics to the Agent through DogStatsD.
 
@@ -74,27 +73,27 @@ Use the default configuration of your `druid.d/conf.yaml` file to activate the c
 
 #### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your datadog.yaml file:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Uncomment and edit this configuration block at the bottom of your `druid.d/conf.yaml`:
 
-    ```yaml
-      logs:
-        - type: file
-          path: <PATH_TO_DRUID_DIR>/var/sv/*.log
-          source: druid
-          service: <SERVICE_NAME>
-          log_processing_rules:
-            - type: multi_line
-              name: new_log_start_with_date
-              pattern: \d{4}\-\d{2}\-\d{2}
-    ```
+   ```yaml
+   logs:
+     - type: file
+       path: '<PATH_TO_DRUID_DIR>/var/sv/*.log'
+       source: druid
+       service: '<SERVICE_NAME>'
+       log_processing_rules:
+         - type: multi_line
+           name: new_log_start_with_date
+           pattern: \d{4}\-\d{2}\-\d{2}
+   ```
 
     Change the `path` and `service` parameter values and configure them for your environment.
 

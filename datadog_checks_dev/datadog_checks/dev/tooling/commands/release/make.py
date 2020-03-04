@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from contextlib import suppress
 
 import click
 from semver import finalize_version, parse_version_info
@@ -9,20 +10,21 @@ from semver import finalize_version, parse_version_info
 from ...constants import BETA_PACKAGES, NOT_CHECKS, VERSION_BUMP, get_agent_release_requirements
 from ...git import get_current_branch, git_commit
 from ...release import get_agent_requirement_line, update_agent_requirements, update_version_module
-from ...utils import get_bump_function, get_valid_checks, get_version_string
+from ...utils import complete_valid_checks, get_bump_function, get_valid_checks, get_version_string
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning
 from . import changelog
 from .show import changes
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Release one or more checks')
-@click.argument('checks', nargs=-1, required=True)
+@click.argument('checks', autocompletion=complete_valid_checks, nargs=-1, required=True)
 @click.option('--version')
 @click.option('--new', 'initial_release', is_flag=True, help='Ensure versions are at 1.0.0')
 @click.option('--skip-sign', is_flag=True, help='Skip the signing of release metadata')
 @click.option('--sign-only', is_flag=True, help='Only sign release metadata')
+@click.option('--exclude', help='Comma-separated list of checks to skip')
 @click.pass_context
-def make(ctx, checks, version, initial_release, skip_sign, sign_only):
+def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
     """Perform a set of operations needed to release checks:
 
     \b
@@ -60,6 +62,11 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only):
         checks = sorted(valid_checks)
     else:
         checks = sorted(checks)
+
+    if exclude:
+        for check in exclude.split(','):
+            with suppress(ValueError):
+                checks.remove(check)
 
     if initial_release:
         version = '1.0.0'

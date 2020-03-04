@@ -16,10 +16,10 @@ files:
       value:
         example: true
         type: boolean
+    - template: init_config/default
   - template: instances
     options:
-    - template: instances/tags
-    - template: instances/global
+    - template: instances/default
 - name: metrics.yaml
   example_name: metrics.yaml
   options:

@@ -8,12 +8,13 @@ The Datadog Agent collects one main metric about Gunicorn: the number of worker 
 
 Gunicorn itself can provide further metrics via DogStatsD, including those for:
 
-* Total request rate
-* Request rate by status code (2xx, 3xx, 4xx, 5xx)
-* Request duration (average, median, max, 95th percentile, etc.)
-* Log message rate by log level (critical, error, warning, exception)
+- Total request rate
+- Request rate by status code (2xx, 3xx, 4xx, 5xx)
+- Request duration (average, median, max, 95th percentile, etc.)
+- Log message rate by log level (critical, error, warning, exception)
 
 ## Setup
+
 ### Installation
 
 The Datadog Agent's Gunicorn check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Gunicorn servers.
@@ -27,19 +28,19 @@ See the [sample gunicorn.yaml][6] for all available configuration options.
 
 #### Metric collection
 
-* Add this configuration block to your `gunicorn.d/conf.yaml` file to start gathering your [Gunicorn metrics](#metrics):
+1. Add this configuration block to your `gunicorn.d/conf.yaml` file to start gathering your [Gunicorn metrics](#metrics):
 
-    ```yaml
-    init_config:
+```yaml
+init_config:
 
-    instances:
-        # as set
-        # 1) in your app's config.py (proc_name = <YOUR_APP_NAME>), OR
-        # 2) via CLI (gunicorn --name <YOUR_APP_NAME> your:app)
-        - proc_name: <YOUR_APP_NAME>
-    ```
+instances:
+  # as set
+  # 1) in your app's config.py (proc_name = <YOUR_APP_NAME>), OR
+  # 2) via CLI (gunicorn --name <YOUR_APP_NAME> your:app)
+  - proc_name: <YOUR_APP_NAME>
+```
 
-* [Restart the Agent][3] to begin sending Gunicorn metrics to Datadog.
+2. [Restart the Agent][3] to begin sending Gunicorn metrics to Datadog.
 
 #### Connect Gunicorn to DogStatsD
 
@@ -49,13 +50,13 @@ Since version 19.1, Gunicorn [provides an option][7] to send its metrics to a da
 
 #### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Use the following command to configure the path of the access log file as explained in the [Gunicorn Documentation][9]: `--access-logfile <MY_FILE_PATH>`
 
@@ -63,27 +64,26 @@ Since version 19.1, Gunicorn [provides an option][7] to send its metrics to a da
 
 4. Add this configuration block to your `gunicorn.d/conf.yaml` file to start collecting your Gunicorn logs:
 
-    ```
-      logs:
-        - type: file
-          path: /var/log/gunicorn/access.log
-          service: <MY_SERVICE>
-          source: gunicorn
-          sourcecategory: http_web_access
+   ```yaml
+   logs:
+     - type: file
+       path: /var/log/gunicorn/access.log
+       service: "<MY_SERVICE>"
+       source: gunicorn
+       sourcecategory: http_web_access
 
-        - type: file
-          path: /var/log/gunicorn/error.log
-          service: <MY_SERVICE>
-          source: gunicorn
-          sourcecategory: sourcecode
-          log_processing_rules:
-            - type: multi_line
-              name: log_start_with_date
-              pattern: \[\d{4}-\d{2}-\d{2}
-    ```
+     - type: file
+       path: /var/log/gunicorn/error.log
+       service: "<MY_SERVICE>"
+       source: gunicorn
+       sourcecategory: sourcecode
+       log_processing_rules:
+         - type: multi_line
+           name: log_start_with_date
+           pattern: \[\d{4}-\d{2}-\d{2}
+   ```
 
-    Change the `service` and `path` parameter values and configure them for your environment.
-    See the [sample gunicorn.yaml][6] for all available configuration options.
+    Change the `service` and `path` parameter values and configure them for your environment. See the [sample gunicorn.yaml][6] for all available configuration options.
 
 5. [Restart the Agent][3].
 
@@ -95,7 +95,7 @@ If the status is not `OK`, see the Troubleshooting section.
 
 Use `netstat` to verify that Gunicorn is sending _its_ metrics, too:
 
-```
+```text
 $ sudo netstat -nup | grep "127.0.0.1:8125.*ESTABLISHED"
 udp        0      0 127.0.0.1:38374         127.0.0.1:8125          ESTABLISHED 15500/gunicorn: mas
 ```
@@ -107,6 +107,7 @@ udp        0      0 127.0.0.1:38374         127.0.0.1:8125          ESTABLISHED 
 See [metadata.csv][12] for a list of metrics provided by this integration.
 
 ### Events
+
 The Gunicorn check does not include any events.
 
 ### Service Checks
@@ -117,7 +118,8 @@ Returns `CRITICAL` if the Agent cannot find a Gunicorn master process, or any wo
 ## Troubleshooting
 
 ### Agent cannot find Gunicorn process
-```
+
+```shell
   Checks
   ======
 
@@ -133,7 +135,7 @@ Either Gunicorn really isn't running, or your app's Python environment doesn't h
 
 If `setproctitle` is not installed, Gunicorn appears in the process table like so:
 
-```
+```text
 $ ps -ef | grep gunicorn
 ubuntu   18013 16695  2 20:23 pts/0    00:00:00 /usr/bin/python /usr/bin/gunicorn --config test-app-config.py gunicorn-test:app
 ubuntu   18018 18013  0 20:23 pts/0    00:00:00 /usr/bin/python /usr/bin/gunicorn --config test-app-config.py gunicorn-test:app
@@ -142,7 +144,7 @@ ubuntu   18019 18013  0 20:23 pts/0    00:00:00 /usr/bin/python /usr/bin/gunicor
 
 If it _is_ installed, `gunicorn` processes appear in the format the Datadog Agent expects:
 
-```
+```text
 $ ps -ef | grep gunicorn
 ubuntu   18457 16695  5 20:26 pts/0    00:00:00 gunicorn: master [my_app]
 ubuntu   18462 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
@@ -151,8 +153,7 @@ ubuntu   18463 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 
 ## Further Reading
 
-* [Monitor Gunicorn performance with Datadog][13]
-
+- [Monitor Gunicorn performance with Datadog][13]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/gunicorn/images/gunicorn-dash.png
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

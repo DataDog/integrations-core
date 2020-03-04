@@ -1403,8 +1403,8 @@
                         "lastTransitionTime": "2018-11-16T20:54:50Z"
                     }
                 ],
-                "hostIP": "10.132.0.14",
-                "podIP": "10.8.2.99",
+                "hostIP": "10.132.0.4",
+                "podIP": "10.8.2.6",
                 "startTime": "2018-11-16T20:54:50Z",
                 "containerStatuses": [
                     {
@@ -1426,6 +1426,275 @@
                         "containerID": "docker://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903"
                     }
                 ],
+                "qosClass": "Burstable"
+            }
+        }, {
+            "metadata": {
+                "name": "web-2",
+                "generateName": "web-",
+                "namespace": "default",
+                "selfLink": "/api/v1/namespaces/default/pods/web-2",
+                "uid": "639980e5-2e6c-11ea-8bb1-42010a800074",
+                "resourceVersion": "13213291",
+                "creationTimestamp": "2020-01-03T21:02:45Z",
+                "labels": {
+                    "app": "nginx",
+                    "controller-revision-hash": "web-7d57df7bfc",
+                    "statefulset.kubernetes.io/pod-name": "web-2"
+                },
+                "annotations": {
+                    "kubernetes.io/config.seen": "2020-01-03T21:02:47.494004542Z",
+                    "kubernetes.io/config.source": "api",
+                    "kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu request for container nginx"
+                },
+                "ownerReferences": [{
+                    "apiVersion": "apps/v1",
+                    "kind": "StatefulSet",
+                    "name": "web",
+                    "uid": "4aa8c6ef-2e6c-11ea-8bb1-42010a800074",
+                    "controller": true,
+                    "blockOwnerDeletion": true
+                }]
+            },
+            "spec": {
+                "volumes": [{
+                    "name": "www",
+                    "persistentVolumeClaim": {
+                        "claimName": "www-web-2"
+                    }
+                }, {
+                    "name": "default-token-s7dz6",
+                    "secret": {
+                        "secretName": "default-token-s7dz6",
+                        "defaultMode": 420
+                    }
+                }],
+                "containers": [{
+                    "name": "nginx",
+                    "image": "gcr.io/google_containers/nginx-slim:0.8",
+                    "ports": [{
+                        "name": "web",
+                        "containerPort": 80,
+                        "protocol": "TCP"
+                    }],
+                    "resources": {
+                        "requests": {
+                            "cpu": "100m"
+                        }
+                    },
+                    "volumeMounts": [{
+                        "name": "www",
+                        "mountPath": "/usr/share/nginx/html"
+                    }, {
+                        "name": "default-token-s7dz6",
+                        "readOnly": true,
+                        "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+                    }],
+                    "terminationMessagePath": "/dev/termination-log",
+                    "terminationMessagePolicy": "File",
+                    "imagePullPolicy": "IfNotPresent"
+                }],
+                "restartPolicy": "Always",
+                "terminationGracePeriodSeconds": 10,
+                "dnsPolicy": "ClusterFirst",
+                "serviceAccountName": "default",
+                "serviceAccount": "default",
+                "nodeName": "gke-haissam-default-pool-be5066f1-wnvn",
+                "securityContext": {},
+                "hostname": "web-2",
+                "subdomain": "nginx",
+                "schedulerName": "default-scheduler",
+                "tolerations": [{
+                    "key": "node.kubernetes.io/not-ready",
+                    "operator": "Exists",
+                    "effect": "NoExecute",
+                    "tolerationSeconds": 300
+                }, {
+                    "key": "node.kubernetes.io/unreachable",
+                    "operator": "Exists",
+                    "effect": "NoExecute",
+                    "tolerationSeconds": 300
+                }],
+                "priority": 0,
+                "enableServiceLinks": true
+            },
+            "status": {
+                "phase": "Running",
+                "conditions": [{
+                    "type": "Initialized",
+                    "status": "True",
+                    "lastProbeTime": null,
+                    "lastTransitionTime": "2020-01-03T21:02:47Z"
+                }, {
+                    "type": "Ready",
+                    "status": "True",
+                    "lastProbeTime": null,
+                    "lastTransitionTime": "2020-01-03T21:03:13Z"
+                }, {
+                    "type": "ContainersReady",
+                    "status": "True",
+                    "lastProbeTime": null,
+                    "lastTransitionTime": "2020-01-03T21:03:13Z"
+                }, {
+                    "type": "PodScheduled",
+                    "status": "True",
+                    "lastProbeTime": null,
+                    "lastTransitionTime": "2020-01-03T21:02:47Z"
+                }],
+                "hostIP": "10.132.0.4",
+                "podIP": "10.8.2.7",
+                "startTime": "2020-01-03T21:02:47Z",
+                "containerStatuses": [{
+                    "name": "nginx",
+                    "state": {
+                        "running": {
+                            "startedAt": "2020-01-03T21:03:12Z"
+                        }
+                    },
+                    "lastState": {},
+                    "ready": true,
+                    "restartCount": 0,
+                    "image": "gcr.io/google_containers/nginx-slim:0.8",
+                    "imageID": "docker-pullable://gcr.io/google_containers/nginx-slim@sha256:8b4501fe0fe221df663c22e16539f399e89594552f400408303c42f3dd8d0e52",
+                    "containerID": "docker://db494caafb4ef3120af2b550fe3e8b5bc2ab3dc5201fbdc34d8e238331b8e7b6"
+                }],
+                "qosClass": "Burstable"
+            }
+        }, {
+            "metadata": {
+                "name": "web-3",
+                "generateName": "web-",
+                "namespace": "default",
+                "selfLink": "/api/v1/namespaces/default/pods/web-3",
+                "uid": "639980e5-2e6c-11ea-8bb1-42010a800075",
+                "resourceVersion": "13213291",
+                "creationTimestamp": "2020-01-03T21:02:45Z",
+                "labels": {
+                    "app": "nginx",
+                    "controller-revision-hash": "web-7d57df7bfc",
+                    "statefulset.kubernetes.io/pod-name": "web-3"
+                },
+                "annotations": {
+                    "kubernetes.io/config.seen": "2020-01-03T21:02:47.494004542Z",
+                    "kubernetes.io/config.source": "api",
+                    "kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu request for container nginx"
+                },
+                "ownerReferences": [{
+                    "apiVersion": "apps/v1",
+                    "kind": "StatefulSet",
+                    "name": "web",
+                    "uid": "4aa8c6ef-2e6c-11ea-8bb1-42010a800074",
+                    "controller": true,
+                    "blockOwnerDeletion": true
+                }]
+            },
+            "spec": {
+                "volumes": [{
+                    "name": "www",
+                    "persistentVolumeClaim": {
+                        "claimName": "www-web-2"
+                    }
+                }, {
+                    "name": "www2",
+                    "persistentVolumeClaim": {
+                        "claimName": "www2-web-3"
+                    }
+                }, {
+                    "name": "default-token-s7dz6",
+                    "secret": {
+                        "secretName": "default-token-s7dz6",
+                        "defaultMode": 420
+                    }
+                }],
+                "containers": [{
+                    "name": "nginx",
+                    "image": "gcr.io/google_containers/nginx-slim:0.8",
+                    "ports": [{
+                        "name": "web",
+                        "containerPort": 80,
+                        "protocol": "TCP"
+                    }],
+                    "resources": {
+                        "requests": {
+                            "cpu": "100m"
+                        }
+                    },
+                    "volumeMounts": [{
+                        "name": "www",
+                        "mountPath": "/usr/share/nginx/html"
+                    }, {
+                        "name": "default-token-s7dz6",
+                        "readOnly": true,
+                        "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+                    }],
+                    "terminationMessagePath": "/dev/termination-log",
+                    "terminationMessagePolicy": "File",
+                    "imagePullPolicy": "IfNotPresent"
+                }],
+                "restartPolicy": "Always",
+                "terminationGracePeriodSeconds": 10,
+                "dnsPolicy": "ClusterFirst",
+                "serviceAccountName": "default",
+                "serviceAccount": "default",
+                "nodeName": "gke-haissam-default-pool-be5066f1-wnvn",
+                "securityContext": {},
+                "hostname": "web-3",
+                "subdomain": "nginx",
+                "schedulerName": "default-scheduler",
+                "tolerations": [{
+                    "key": "node.kubernetes.io/not-ready",
+                    "operator": "Exists",
+                    "effect": "NoExecute",
+                    "tolerationSeconds": 300
+                }, {
+                    "key": "node.kubernetes.io/unreachable",
+                    "operator": "Exists",
+                    "effect": "NoExecute",
+                    "tolerationSeconds": 300
+                }],
+                "priority": 0,
+                "enableServiceLinks": true
+            },
+            "status": {
+                "phase": "Running",
+                "conditions": [{
+                    "type": "Initialized",
+                    "status": "True",
+                    "lastProbeTime": null,
+                    "lastTransitionTime": "2020-01-03T21:02:47Z"
+                }, {
+                    "type": "Ready",
+                    "status": "True",
+                    "lastProbeTime": null,
+                    "lastTransitionTime": "2020-01-03T21:03:13Z"
+                }, {
+                    "type": "ContainersReady",
+                    "status": "True",
+                    "lastProbeTime": null,
+                    "lastTransitionTime": "2020-01-03T21:03:13Z"
+                }, {
+                    "type": "PodScheduled",
+                    "status": "True",
+                    "lastProbeTime": null,
+                    "lastTransitionTime": "2020-01-03T21:02:47Z"
+                }],
+                "hostIP": "10.132.0.4",
+                "podIP": "10.8.2.8",
+                "startTime": "2020-01-03T21:02:47Z",
+                "containerStatuses": [{
+                    "name": "nginx",
+                    "state": {
+                        "running": {
+                            "startedAt": "2020-01-03T21:03:12Z"
+                        }
+                    },
+                    "lastState": {},
+                    "ready": true,
+                    "restartCount": 0,
+                    "image": "gcr.io/google_containers/nginx-slim:0.8",
+                    "imageID": "docker-pullable://gcr.io/google_containers/nginx-slim@sha256:8b4501fe0fe221df663c22e16539f399e89594552f400408303c42f3dd8d0e52",
+                    "containerID": "docker://db494caafb4ef3120af2b550fe3e8b5bc2ab3dc5201fbdc34d8e238331b8e7b7"
+                }],
                 "qosClass": "Burstable"
             }
         }

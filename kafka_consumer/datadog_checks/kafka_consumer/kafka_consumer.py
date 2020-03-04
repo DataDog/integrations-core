@@ -4,9 +4,8 @@
 from collections import defaultdict
 from time import time
 
-from kafka import KafkaAdminClient
+from kafka import KafkaAdminClient, KafkaClient
 from kafka import errors as kafka_errors
-from kafka.client_async import KafkaClient
 from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
 from kafka.structs import TopicPartition
 from six import string_types
@@ -128,10 +127,7 @@ class KafkaCheck(AgentCheck):
             bootstrap_servers=kafka_connect_str,
             client_id='dd-agent',
             request_timeout_ms=self.init_config.get('kafka_timeout', DEFAULT_KAFKA_TIMEOUT) * 1000,
-            # There is a bug with kafka-python where pinning api_version for KafkaAdminClient raises an
-            # `IncompatibleBrokerVersion`. Change to `api_version=api_version` once fixed upstream.
-            # See linked issues in PR: https://github.com/dpkp/kafka-python/pull/1953
-            api_version=None,
+            api_version=api_version,
             # While we check for SASL/SSL params, if not present they will default to the kafka-python values for
             # plaintext connections
             security_protocol=self.instance.get('security_protocol', 'PLAINTEXT'),

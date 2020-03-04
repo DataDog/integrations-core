@@ -4,9 +4,9 @@
 
 Use the Datadog Agent to monitor how well Istio is performing.
 
-* Collect metrics on what apps are making what kinds of requests
-* Look at how applications are using bandwidth
-* Understand Istio's resource consumption
+- Collect metrics on what apps are making what kinds of requests
+- Look at how applications are using bandwidth
+- Understand Istio's resource consumption
 
 ## Setup
 
@@ -24,7 +24,7 @@ Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [
 
 Add this configuration block to your `istio.d/conf.yaml` file to start gathering your Istio Metrics:
 
-```
+```yaml
 init_config:
 
 instances:
@@ -44,20 +44,20 @@ If you are installing the [Datadog Agent in a container][10], Datadog recommends
 
 Add the `sidecar.istio.io/inject: "false"` annotation to the `datadog-agent` DaemonSet:
 
-```
+```yaml
 ...
 spec:
-  ...
+   ...
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
-    ...
+     ...
 ```
 
 This can also be done with the `kubectl patch` command.
 
-```
+```text
 kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"annotations":{"sidecar.istio.io/inject":"false"}}}}}'
 ```
 
@@ -65,25 +65,24 @@ kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"anno
 
 Istio contains two types of logs. Envoy access logs that are collected with the [Envoy integration][12] and [Istio logs][11].
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][4]:
 
-    ```
-      (...)
-        env:
-          (...)
-          - name: DD_LOGS_ENABLED
-              value: "true"
-          - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
-              value: "true"
-      (...)
-    ```
+   ```yaml
+       (...)
+       env:
+         # (...)
+         - name: DD_LOGS_ENABLED
+             value: "true"
+         - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+             value: "true"
+     # (...)
+   ```
 
 2. Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][5] or mount the `/var/log/pods` directory if you are not using docker.
 
 3. [Restart the Agent][13].
-
 
 ### Validation
 
@@ -96,15 +95,19 @@ Istio contains two types of logs. Envoy access logs that are collected with the 
 See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Events
+
 The Istio check does not include any events.
 
 ### Service Checks
+
 The Istio check does not include any service checks.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][8].
 
 ## Further Reading
+
 Additional helpful documentation, links, and articles:
 
 - [Monitor your Istio service mesh with Datadog][9]

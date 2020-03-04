@@ -1,2 +1,2 @@
-kafka-python==1.4.7; sys_platform != 'win32'
+kafka-python==2.0.0
 kazoo==2.6.1; sys_platform != 'win32'

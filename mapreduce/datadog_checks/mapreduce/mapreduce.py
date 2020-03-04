@@ -2,51 +2,21 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-"""
-MapReduce Job Metrics
----------------------
-mapreduce.job.elapsed_ime                The elapsed time since the application started (in ms)
-mapreduce.job.maps_total                 The total number of maps
-mapreduce.job.maps_completed             The number of completed maps
-mapreduce.job.reduces_total              The total number of reduces
-mapreduce.job.reduces_completed          The number of completed reduces
-mapreduce.job.maps_pending               The number of maps still to be run
-mapreduce.job.maps_running               The number of running maps
-mapreduce.job.reduces_pending            The number of reduces still to be run
-mapreduce.job.reduces_running            The number of running reduces
-mapreduce.job.new_reduce_attempts        The number of new reduce attempts
-mapreduce.job.running_reduce_attempts    The number of running reduce attempts
-mapreduce.job.failed_reduce_attempts     The number of failed reduce attempts
-mapreduce.job.killed_reduce_attempts     The number of killed reduce attempts
-mapreduce.job.successful_reduce_attempts The number of successful reduce attempts
-mapreduce.job.new_map_attempts           The number of new map attempts
-mapreduce.job.running_map_attempts       The number of running map attempts
-mapreduce.job.failed_map_attempts        The number of failed map attempts
-mapreduce.job.killed_map_attempts        The number of killed map attempts
-mapreduce.job.successful_map_attempts    The number of successful map attempts
-
-MapReduce Job Counter Metrics
------------------------------
-mapreduce.job.counter.reduce_counter_value   The counter value of reduce tasks
-mapreduce.job.counter.map_counter_value      The counter value of map tasks
-mapreduce.job.counter.total_counter_value    The counter value of all tasks
-
-MapReduce Map Task Metrics
---------------------------
-mapreduce.job.map.task.progress     The distribution of all map task progresses
-
-MapReduce Reduce Task Metrics
---------------------------
-mapreduce.job.reduce.task.progress      The distribution of all reduce task progresses
-"""
-
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
 from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.mapreduce.metrics import (
+    HISTOGRAM,
+    INCREMENT,
+    MAPREDUCE_JOB_COUNTER_METRICS,
+    MAPREDUCE_JOB_METRICS,
+    MAPREDUCE_MAP_TASK_METRICS,
+    MAPREDUCE_REDUCE_TASK_METRICS,
+)
 
 
 class MapReduceCheck(AgentCheck):
@@ -68,43 +38,6 @@ class MapReduceCheck(AgentCheck):
     YARN_APPLICATION_TYPES = 'MAPREDUCE'
     YARN_APPLICATION_STATES = 'RUNNING'
 
-    # Metric types
-    HISTOGRAM = 'histogram'
-    INCREMENT = 'increment'
-
-    # Metrics to collect
-    MAPREDUCE_JOB_METRICS = {
-        'elapsedTime': ('mapreduce.job.elapsed_time', HISTOGRAM),
-        'mapsTotal': ('mapreduce.job.maps_total', INCREMENT),
-        'mapsCompleted': ('mapreduce.job.maps_completed', INCREMENT),
-        'reducesTotal': ('mapreduce.job.reduces_total', INCREMENT),
-        'reducesCompleted': ('mapreduce.job.reduces_completed', INCREMENT),
-        'mapsPending': ('mapreduce.job.maps_pending', INCREMENT),
-        'mapsRunning': ('mapreduce.job.maps_running', INCREMENT),
-        'reducesPending': ('mapreduce.job.reduces_pending', INCREMENT),
-        'reducesRunning': ('mapreduce.job.reduces_running', INCREMENT),
-        'newReduceAttempts': ('mapreduce.job.new_reduce_attempts', INCREMENT),
-        'runningReduceAttempts': ('mapreduce.job.running_reduce_attempts', INCREMENT),
-        'failedReduceAttempts': ('mapreduce.job.failed_reduce_attempts', INCREMENT),
-        'killedReduceAttempts': ('mapreduce.job.killed_reduce_attempts', INCREMENT),
-        'successfulReduceAttempts': ('mapreduce.job.successful_reduce_attempts', INCREMENT),
-        'newMapAttempts': ('mapreduce.job.new_map_attempts', INCREMENT),
-        'runningMapAttempts': ('mapreduce.job.running_map_attempts', INCREMENT),
-        'failedMapAttempts': ('mapreduce.job.failed_map_attempts', INCREMENT),
-        'killedMapAttempts': ('mapreduce.job.killed_map_attempts', INCREMENT),
-        'successfulMapAttempts': ('mapreduce.job.successful_map_attempts', INCREMENT),
-    }
-
-    MAPREDUCE_JOB_COUNTER_METRICS = {
-        'reduceCounterValue': ('mapreduce.job.counter.reduce_counter_value', INCREMENT),
-        'mapCounterValue': ('mapreduce.job.counter.map_counter_value', INCREMENT),
-        'totalCounterValue': ('mapreduce.job.counter.total_counter_value', INCREMENT),
-    }
-
-    MAPREDUCE_MAP_TASK_METRICS = {'elapsedTime': ('mapreduce.job.map.task.elapsed_time', HISTOGRAM)}
-
-    MAPREDUCE_REDUCE_TASK_METRICS = {'elapsedTime': ('mapreduce.job.reduce.task.elapsed_time', HISTOGRAM)}
-
     def __init__(self, name, init_config, instances):
         super(MapReduceCheck, self).__init__(name, init_config, instances)
 
@@ -114,49 +47,46 @@ class MapReduceCheck(AgentCheck):
         # Parse job specific counters
         self.job_specific_counters = self._parse_job_specific_counters(init_config)
 
-    def check(self, instance):
         # Get properties from conf file
-        rm_address = instance.get('resourcemanager_uri')
-        if rm_address is None:
-            raise Exception("The ResourceManager URL must be specified in the instance configuration")
-
-        collect_task_metrics = is_affirmative(instance.get('collect_task_metrics', False))
+        self.rm_address = self.instance.get('resourcemanager_uri')
+        if self.rm_address is None:
+            raise ConfigurationError("The ResourceManager URL must be specified in the instance configuration")
+        self.collect_task_metrics = is_affirmative(self.instance.get('collect_task_metrics', False))
 
         # Get additional tags from the conf file
-        custom_tags = instance.get("tags", [])
-        tags = list(set(custom_tags))
+        self.custom_tags = list(set(self.instance.get("tags", [])))
 
         # Get the cluster name from the conf file
-        cluster_name = instance.get('cluster_name')
+        cluster_name = self.instance.get('cluster_name')
         if cluster_name is None:
             self.warning(
                 "The cluster_name must be specified in the instance configuration, defaulting to '%s'",
                 self.DEFAULT_CLUSTER_NAME,
             )
             cluster_name = self.DEFAULT_CLUSTER_NAME
+        self.metric_tags = self.custom_tags + ['cluster_name:{}'.format(cluster_name)]
 
-        tags.append('cluster_name:{}'.format(cluster_name))
-
+    def check(self, instance):
         # Get the running MR applications from YARN
-        running_apps = self._get_running_app_ids(rm_address)
+        running_apps = self._get_running_app_ids()
 
         # Report success after gathering all metrics from ResourceManaager
         self.service_check(
             self.YARN_SERVICE_CHECK,
             AgentCheck.OK,
-            tags=['url:{}'.format(rm_address)] + custom_tags,
-            message='Connection to ResourceManager "{}" was successful'.format(rm_address),
+            tags=['url:{}'.format(self.rm_address)] + self.custom_tags,
+            message='Connection to ResourceManager "{}" was successful'.format(self.rm_address),
         )
 
         # Get the applications from the application master
-        running_jobs = self._mapreduce_job_metrics(running_apps, tags)
+        running_jobs = self._mapreduce_job_metrics(running_apps, self.metric_tags)
 
         # # Get job counter metrics
-        self._mapreduce_job_counters_metrics(running_jobs, tags)
+        self._mapreduce_job_counters_metrics(running_jobs, self.metric_tags)
 
         # Get task metrics
-        if collect_task_metrics:
-            self._mapreduce_task_metrics(running_jobs, tags)
+        if self.collect_task_metrics:
+            self._mapreduce_task_metrics(running_jobs, self.metric_tags)
 
         # Report success after gathering all metrics from Application Master
         if running_jobs:
@@ -166,7 +96,7 @@ class MapReduceCheck(AgentCheck):
             self.service_check(
                 self.MAPREDUCE_SERVICE_CHECK,
                 AgentCheck.OK,
-                tags=['url:{}'.format(am_address)] + custom_tags,
+                tags=['url:{}'.format(am_address)] + self.custom_tags,
                 message='Connection to ApplicationManager "{}" was successful'.format(am_address),
             )
 
@@ -264,12 +194,12 @@ class MapReduceCheck(AgentCheck):
 
         return job_counter
 
-    def _get_running_app_ids(self, rm_address):
+    def _get_running_app_ids(self):
         """
         Return a dictionary of {app_id: (app_name, tracking_url)} for the running MapReduce applications
         """
         metrics_json = self._rest_request_to_json(
-            rm_address,
+            self.rm_address,
             self.YARN_APPS_PATH,
             self.YARN_SERVICE_CHECK,
             states=self.YARN_APPLICATION_STATES,
@@ -337,7 +267,7 @@ class MapReduceCheck(AgentCheck):
 
                             tags.extend(addl_tags)
 
-                            self._set_metrics_from_json(job_json, self.MAPREDUCE_JOB_METRICS, tags)
+                            self._set_metrics_from_json(job_json, MAPREDUCE_JOB_METRICS, tags)
 
         return running_jobs
 
@@ -392,7 +322,7 @@ class MapReduceCheck(AgentCheck):
                                                 tags.extend(addl_tags)
 
                                                 self._set_metrics_from_json(
-                                                    counter, self.MAPREDUCE_JOB_COUNTER_METRICS, tags
+                                                    counter, MAPREDUCE_JOB_COUNTER_METRICS, tags
                                                 )
 
     def _mapreduce_task_metrics(self, running_jobs, addl_tags):
@@ -423,10 +353,10 @@ class MapReduceCheck(AgentCheck):
                             tags.extend(addl_tags)
 
                             if task_type == 'MAP':
-                                self._set_metrics_from_json(task, self.MAPREDUCE_MAP_TASK_METRICS, tags)
+                                self._set_metrics_from_json(task, MAPREDUCE_MAP_TASK_METRICS, tags)
 
                             elif task_type == 'REDUCE':
-                                self._set_metrics_from_json(task, self.MAPREDUCE_REDUCE_TASK_METRICS, tags)
+                                self._set_metrics_from_json(task, MAPREDUCE_REDUCE_TASK_METRICS, tags)
 
     def _set_metrics_from_json(self, metrics_json, metrics, tags):
         """
@@ -442,9 +372,9 @@ class MapReduceCheck(AgentCheck):
         """
         Set a metric
         """
-        if metric_type == self.HISTOGRAM:
+        if metric_type == HISTOGRAM:
             self.histogram(metric_name, value, tags=tags, device_name=device_name)
-        elif metric_type == self.INCREMENT:
+        elif metric_type == INCREMENT:
             self.increment(metric_name, value, tags=tags, device_name=device_name)
         else:
             self.log.error('Metric type "%s" unknown', metric_type)

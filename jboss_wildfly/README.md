@@ -8,9 +8,10 @@ This check monitors [JBoss][1] and [WildFly][2] applications.
 
 ### Installation
 
-The JBoss/WildFly check is included in the [Datadog Agent][3] package. No additional installation is needed on your server.
+The JBoss/WildFly check is included in the [Datadog Agent][3] package. Depending on your server setup (particularly when using the `remote+http` JMX scheme), you may need to specify a custom JAR to connect to the server. Place the JAR on the same machine as your Agent, and add the path to the `custom_jar_paths` option.
 
 ### Configuration
+
 #### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
@@ -19,45 +20,46 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 1. Edit the `jboss_wildfly.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your JBoss or WildFly application server's performance data. See the [sample jboss_wildfly.d/conf.yaml][4] for all available configuration options.
 
-  **Note**:This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the collected metrics, visit the [JMX Checks documentation][5] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][6].
+    **Note**:This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page. You can specify the metrics you are interested in by editing the configuration below. To learn how to customize the collected metrics, visit the [JMX Checks documentation][5] for more detailed instructions. If you need to monitor more metrics, contact [Datadog support][6].
 
 2. [Restart the Agent][7].
 
 ##### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Next, edit `jboss_wildfly.d/conf.yaml` by uncommenting the `logs` lines at the bottom. Update the logs `path` with the correct path to your JBoss log files.
 
-    ```yaml
-      logs:
-        - type: file
-          path: /opt/jboss/wildfly/standalone/log/*.log
-          source: jboss_wildfly
-          service: <APPLICATION_NAME>
-    ```
+   ```yaml
+   logs:
+     - type: file
+       path: /opt/jboss/wildfly/standalone/log/*.log
+       source: jboss_wildfly
+       service: '<APPLICATION_NAME>'
+   ```
 
 3. [Restart the Agent][7].
 
 #### Containerized
+
 ##### Metric collection
 
 For containerized environments, see the [Autodiscovery with JMX][8] guide.
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][9].
 
 | Parameter      | Value                                                      |
-|----------------|------------------------------------------------------------|
+| -------------- | ---------------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "jboss_wildfly", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
@@ -76,7 +78,8 @@ The JBoss/WildFly integration does not include any events.
 
 ### Service Checks
 
-The JBoss/WildFly integration does not include any service checks.
+**jboss.can_connect**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored JBoss/WildFly instance, otherwise returns `OK`.
 
 ## Troubleshooting
 

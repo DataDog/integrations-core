@@ -3,9 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-from fnmatch import fnmatchcase
+from fnmatch import translate
 from math import isinf, isnan
 from os.path import isfile
+from re import compile
 
 import requests
 from prometheus_client.parser import text_fd_to_metric_families
@@ -97,8 +98,16 @@ class OpenMetricsScraperMixin(object):
 
         config['metrics_mapper'] = metrics_mapper
 
-        # `_metrics_wildcards` holds the potential wildcards to match for metrics
-        config['_metrics_wildcards'] = None
+        # `_wildcards_re` is a Pattern object used to match metric wildcards
+        config['_wildcards_re'] = None
+
+        wildcards = set()
+        for metric in config['metrics_mapper']:
+            if "*" in metric:
+                wildcards.add(translate(metric))
+
+        if wildcards:
+            config['_wildcards_re'] = compile('|'.join(wildcards))
 
         # `prometheus_metrics_prefix` allows to specify a prefix that all
         # prometheus metrics should have. This can be used when the prometheus
@@ -146,6 +155,21 @@ class OpenMetricsScraperMixin(object):
         # very high cardinality. Metrics included in this list will be silently
         # skipped without a 'Unable to handle metric' debug line in the logs
         config['ignore_metrics'] = instance.get('ignore_metrics', default_instance.get('ignore_metrics', []))
+        config['_ignored_metrics'] = set()
+
+        # `_ignored_re` is a Pattern object used to match ignored metric patterns
+        config['_ignored_re'] = None
+        ignored_patterns = set()
+
+        # Separate ignored metric names and ignored patterns in different sets for faster lookup later
+        for metric in config['ignore_metrics']:
+            if '*' in metric:
+                ignored_patterns.add(translate(metric))
+            else:
+                config['_ignored_metrics'].add(metric)
+
+        if ignored_patterns:
+            config['_ignored_re'] = compile('|'.join(ignored_patterns))
 
         # If you want to send the buckets as tagged values when dealing with histograms,
         # set send_histograms_buckets to True, set to False otherwise.
@@ -319,6 +343,9 @@ class OpenMetricsScraperMixin(object):
         # TODO: Determine if we really need this
         headers.setdefault('accept-encoding', 'gzip')
 
+        # Explicitly set the content type we accept
+        headers.setdefault('accept', 'text/plain')
+
         return http_handler
 
     def reset_http_config(self):
@@ -335,6 +362,8 @@ class OpenMetricsScraperMixin(object):
         :param response: requests.Response
         :return: core.Metric
         """
+        if response.encoding is None:
+            response.encoding = 'utf-8'
         input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE, decode_unicode=True)
         if scraper_config['_text_filter_blacklist']:
             input_gen = self._text_filter_input(input_gen, scraper_config)
@@ -506,11 +535,20 @@ class OpenMetricsScraperMixin(object):
         # If targeted metric, store labels
         self._store_labels(metric, scraper_config)
 
-        if metric.name in scraper_config['ignore_metrics']:
-            self._send_telemetry_counter(
-                self.TELEMETRY_COUNTER_METRICS_IGNORE_COUNT, len(metric.samples), scraper_config
-            )
-            return  # Ignore the metric
+        if scraper_config['ignore_metrics']:
+            if metric.name in scraper_config['_ignored_metrics']:
+                self._send_telemetry_counter(
+                    self.TELEMETRY_COUNTER_METRICS_IGNORE_COUNT, len(metric.samples), scraper_config
+                )
+                return  # Ignore the metric
+
+            if scraper_config['_ignored_re'] and scraper_config['_ignored_re'].search(metric.name):
+                # Metric must be ignored
+                scraper_config['_ignored_metrics'].add(metric.name)
+                self._send_telemetry_counter(
+                    self.TELEMETRY_COUNTER_METRICS_IGNORE_COUNT, len(metric.samples), scraper_config
+                )
+                return  # Ignore the metric
 
         self._send_telemetry_counter(self.TELEMETRY_COUNTER_METRICS_PROCESS_COUNT, len(metric.samples), scraper_config)
 
@@ -536,15 +574,10 @@ class OpenMetricsScraperMixin(object):
 
                 return
 
-            # build the wildcard list if first pass
-            if scraper_config['_metrics_wildcards'] is None:
-                scraper_config['_metrics_wildcards'] = [x for x in scraper_config['metrics_mapper'] if '*' in x]
-
-            # try matching wildcard
-            for wildcard in scraper_config['_metrics_wildcards']:
-                if fnmatchcase(metric.name, wildcard):
-                    self.submit_openmetric(metric.name, metric, scraper_config)
-                    return
+            # try matching wildcards
+            if scraper_config['_wildcards_re'] and scraper_config['_wildcards_re'].search(metric.name):
+                self.submit_openmetric(metric.name, metric, scraper_config)
+                return
 
             self.log.debug(
                 'Skipping metric `%s` as it is not defined in the metrics mapper, '

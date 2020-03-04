@@ -119,6 +119,30 @@ class TestHeaders:
 
         assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
 
+    def test_extra_headers_on_http_method_call(self):
+        instance = {'extra_headers': {'answer': 42}}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        extra_headers = {"foo": "bar"}
+        with mock.patch("requests.get") as get:
+            http.get("http://example.com/hello", extra_headers=extra_headers)
+
+            expected_options = {'foo': 'bar', 'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
+            get.assert_called_with(
+                "http://example.com/hello",
+                headers=expected_options,
+                auth=None,
+                cert=None,
+                proxies=None,
+                timeout=(10.0, 10.0),
+                verify=True,
+            )
+
+        # make sure the original headers are not modified
+        assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
+        assert extra_headers == {"foo": "bar"}
+
 
 class TestVerify:
     def test_config_default(self):
@@ -784,6 +808,22 @@ class TestIgnoreTLSWarning:
 
         assert http.ignore_tls_warning is True
 
+    def test_init_config_flag(self):
+        instance = {}
+        init_config = {'tls_ignore_warning': True}
+
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.ignore_tls_warning is True
+
+    def test_instance_and_init_flag(self):
+        instance = {'tls_ignore_warning': False}
+        init_config = {'tls_ignore_warning': True}
+
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.ignore_tls_warning is False
+
     def test_default_no_ignore(self):
         instance = {}
         init_config = {}
@@ -819,6 +859,42 @@ class TestIgnoreTLSWarning:
             http.get('https://www.google.com', verify=False)
 
         assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+    def test_init_ignore(self):
+        instance = {}
+        init_config = {'tls_ignore_warning': True}
+        http = RequestsWrapper(instance, init_config)
+
+        with pytest.warns(None) as record:
+            http.get('https://www.google.com', verify=False)
+
+        assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+    def test_default_init_no_ignore(self):
+        instance = {}
+        init_config = {'tls_ignore_warning': False}
+        http = RequestsWrapper(instance, init_config)
+
+        with pytest.warns(InsecureRequestWarning):
+            http.get('https://www.google.com', verify=False)
+
+    def test_instance_ignore(self):
+        instance = {'tls_ignore_warning': True}
+        init_config = {'tls_ignore_warning': False}
+        http = RequestsWrapper(instance, init_config)
+
+        with pytest.warns(None) as record:
+            http.get('https://www.google.com', verify=False)
+
+        assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+    def test_instance_no_ignore(self):
+        instance = {'tls_ignore_warning': False}
+        init_config = {'tls_ignore_warning': True}
+        http = RequestsWrapper(instance, init_config)
+
+        with pytest.warns(InsecureRequestWarning):
+            http.get('https://www.google.com', verify=False)
 
 
 class TestSession:

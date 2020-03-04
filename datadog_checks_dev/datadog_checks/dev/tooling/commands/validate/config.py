@@ -11,6 +11,7 @@ from datadog_checks.dev.tooling.configuration.consumers import ExampleConsumer
 
 from ....utils import basepath, file_exists, path_join, read_file, write_file
 from ...utils import (
+    complete_valid_checks,
     get_config_files,
     get_config_spec,
     get_data_directory,
@@ -26,7 +27,7 @@ IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbounc
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
-@click.argument('check', required=False)
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
 @click.option('--sync', is_flag=True, help='Generate example configuration files based on specifications')
 @click.pass_context
 def config(ctx, check, sync):
@@ -50,6 +51,8 @@ def config(ctx, check, sync):
         spec_path = get_config_spec(check)
         if not file_exists(spec_path):
             validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter)
+            if check_display_queue:
+                echo_info(f'{check}:')
             for display in check_display_queue:
                 display()
             continue
@@ -94,6 +97,7 @@ def config(ctx, check, sync):
                 else:
                     if not file_exists(example_file_path) or read_file(example_file_path) != contents:
                         if sync:
+                            echo_info(f"Writing config file to `{example_file_path}`")
                             write_file(example_file_path, contents)
                         else:
                             files_failed[example_file_path] = True
@@ -136,7 +140,6 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
     config_files = get_config_files(check)
     for config_file in config_files:
         file_counter.append(None)
-        file_display_queue = []
         file_name = basepath(config_file)
         try:
             file_data = read_file(config_file)
@@ -152,6 +155,7 @@ def validate_config_legacy(check, check_display_queue, files_failed, files_warne
             check_display_queue.append(lambda: echo_info(error, indent=FILE_INDENT * 2))
             continue
 
+        file_display_queue = []
         errors = validate_config(file_data)
         for err in errors:
             err_msg = str(err)

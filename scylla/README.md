@@ -42,7 +42,7 @@ The Scylla check does not include any events.
 
 Need help? Contact [Datadog support][7].
 
-[1]: https://scylla.io
+[1]: https://scylladb.com
 [2]: https://docs.datadoghq.com/agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/scylla/datadog_checks/scylla/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

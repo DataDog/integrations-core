@@ -1,5 +1,18 @@
 # CHANGELOG - postgres
 
+## 3.5.3 / 2020-02-26
+
+* [Fixed] Rollback db connection when we get a 'FeatureNotSupported' exception. See [#5882](https://github.com/DataDog/integrations-core/pull/5882).
+
+## 3.5.2 / 2020-02-22
+
+* [Fixed] Handle FeatureNotSupported errors in queries. See [#5749](https://github.com/DataDog/integrations-core/pull/5749).
+
+## 3.5.1 / 2020-02-13
+
+* [Fixed] Filter out schemas in the queries directly. See [#5710](https://github.com/DataDog/integrations-core/pull/5710).
+* [Fixed] Refactor query_scope utility method. See [#5433](https://github.com/DataDog/integrations-core/pull/5433).
+
 ## 3.5.0 / 2019-12-30
 
 * [Fixed] Handle connection closed. See [#5350](https://github.com/DataDog/integrations-core/pull/5350).

@@ -1,6 +1,7 @@
 # CoreDNS Integration
 
 ## Overview
+
 Get metrics from CoreDNS in real time to visualize and monitor DNS failures and cache hits/misses.
 
 ## Setup
@@ -19,22 +20,20 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 Edit the `coredns.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2], to point to your server and port and set the masters to monitor. See the [sample coredns.d/conf.yaml][3] for all available configuration options.
 
-#### Containerized 
+#### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
 
-| Parameter            | Value                                                                                             |
-|----------------------|---------------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `coredns`                                                                                        |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                                     |
+| Parameter            | Value                                                                            |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `<INTEGRATION_NAME>` | `coredns`                                                                        |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                    |
 | `<INSTANCE_CONFIG>`  | `{"prometheus_url":"http://%%host%%:9153/metrics", "tags":["dns-pod:%%host%%"]}` |
-
 
 **Note:**
 
- * The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the dd-agent that is polling the information using the service discovery.
- * The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
-
+- The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the dd-agent that is polling the information using the service discovery.
+- The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
 
 ### Validation
 

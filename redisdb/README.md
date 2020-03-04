@@ -5,11 +5,13 @@
 Whether you use Redis as a database, cache, or message queue, this integration helps you track problems with your Redis servers and the parts of your infrastructure that they serve. The Datadog Agent's Redis check collects metrics related to performance, memory usage, blocked clients, slave connections, disk persistence, expired and evicted keys, and many more.
 
 ## Setup
+
 ### Installation
 
 The Redis check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Redis servers.
 
 ### Configuration
+
 #### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
@@ -18,63 +20,64 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 1. Edit the `redisdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. The following parameters may require updating. See the [sample redisdb.d/conf.yaml][4] for all available configuration options.
 
-    ```yaml
-      init_config:
-      instances:
-        ## @param host - string - required
-        ## Enter the host to connect to.
-        - host: localhost
-          ## @param port - integer - required
-          ## Enter the port of the host to connect to.
-          port: 6379
-      ```
+   ```yaml
+   init_config:
+   instances:
+     ## @param host - string - required
+     ## Enter the host to connect to.
+     - host: localhost
+       ## @param port - integer - required
+       ## Enter the port of the host to connect to.
+       port: 6379
+   ```
 
 2. [Restart the Agent][5].
 
 ##### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Uncomment and edit this configuration block at the bottom of your `redisdb.d/conf.yaml`:
 
-    ```yaml
-      logs:
-          - type: file
-            path: /var/log/redis_6379.log
-            source: redis
-            sourcecategory: database
-            service: myapplication
-    ```
+   ```yaml
+   logs:
+     - type: file
+       path: /var/log/redis_6379.log
+       source: redis
+       sourcecategory: database
+       service: myapplication
+   ```
 
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample redisdb.yaml][4] for all available configuration options.
 
 3. [Restart the Agent][5].
 
 #### Containerized
+
 For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
 
 ##### Metric collection
 
-| Parameter            | Value                                                                                       |
-|----------------------|---------------------------------------------------------------------------------------------|
-| `<INTEGRATION_NAME>` | `redisdb`                                                                                   |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                               |
-| `<INSTANCE_CONFIG>`  | <pre>{"host": "%%host%%",<br> "port":"6379",<br> "password":"%%env_REDIS_PASSWORD%%"}</pre> |
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<INTEGRATION_NAME>` | `redisdb`                                                                  |
+| `<INIT_CONFIG>`      | blank or `{}`                                                              |
+| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port":"6379", "password":"%%env_REDIS_PASSWORD%%"}` |
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][11].
 
 | Parameter      | Value                                               |
-|----------------|-----------------------------------------------------|
+| -------------- | --------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "redis", "service": "<YOUR_APP_NAME>"}` |
 
 ### Validation
@@ -101,11 +104,11 @@ Returns `CRITICAL` if this Redis instance is unable to connect to its master ins
 
 ## Troubleshooting
 
-* [Redis Integration Error: "unknown command 'CONFIG'"][8]
+- [Redis Integration Error: "unknown command 'CONFIG'"][8]
 
 ### Agent cannot connect
 
-```
+```shell
     redisdb
     -------
       - instance #0 [ERROR]: 'Error 111 connecting to localhost:6379. Connection refused.'
@@ -116,7 +119,7 @@ Check that the connection info in `redisdb.yaml` is correct.
 
 ### Agent cannot authenticate
 
-```
+```shell
     redisdb
     -------
       - instance #0 [ERROR]: 'NOAUTH Authentication required.'
@@ -129,8 +132,7 @@ Configure a `password` in `redisdb.yaml`.
 
 Additional helpful documentation, links, and articles:
 
-* [How to monitor Redis performance metrics][10]
-
+- [How to monitor Redis performance metrics][10]
 
 [1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [2]: https://app.datadoghq.com/account/settings#agent

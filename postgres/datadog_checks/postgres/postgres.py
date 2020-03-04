@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
-import re
 import socket
 from contextlib import closing
 
@@ -19,6 +18,7 @@ from .util import (
     ACTIVITY_METRICS_LT_8_3,
     ACTIVITY_QUERY_10,
     ACTIVITY_QUERY_LT_10,
+    ALL_SCHEMAS,
     COMMON_ARCHIVER_METRICS,
     COMMON_BGW_METRICS,
     COMMON_METRICS,
@@ -38,14 +38,14 @@ from .util import (
     REPLICATION_METRICS_10,
     SIZE_METRICS,
     STATIO_METRICS,
+    build_relations_filter,
     fmt,
+    get_schema_field,
 )
 from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, get_raw_version, parse_version, transform_version
 
 MAX_CUSTOM_RESULTS = 100
 TABLE_COUNT_LIMIT = 200
-
-ALL_SCHEMAS = object()
 
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
@@ -346,21 +346,29 @@ class PostgreSql(AgentCheck):
         cols = list(scope['metrics'])  # list of metrics to query, in some order
         # we must remember that order to parse results
 
+        # A descriptor is the association of a Postgres column name (e.g. 'schemaname')
+        # to a tag name (e.g. 'schema').
+        descriptors = scope['descriptors']
+
         results = None
         try:
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
             # if this is a relation-specific query, we need to list all relations last
             if scope['relation'] and len(relations_config) > 0:
-                rel_names = ', '.join("'{0}'".format(k) for k, v in relations_config.items() if 'relation_name' in v)
-                rel_regex = ', '.join("'{0}'".format(k) for k, v in relations_config.items() if 'relation_regex' in v)
-                self.log.debug("Running query: %s with relations matching: %s", query, rel_names + rel_regex)
-                cursor.execute(query.format(relations_names=rel_names, relations_regexes=rel_regex))
+                schema_field = get_schema_field(descriptors)
+                relations_filter = build_relations_filter(relations_config, schema_field)
+                self.log.debug("Running query: %s with relations matching: %s", query, relations_filter)
+                cursor.execute(query.format(relations=relations_filter))
             else:
                 self.log.debug("Running query: %s", query)
                 cursor.execute(query.replace(r'%', r'%%'))
 
             results = cursor.fetchall()
-
+        except psycopg2.errors.FeatureNotSupported as e:
+            # This happens for example when trying to get replication metrics
+            # from readers in Aurora. Let's ignore it.
+            log_func(e)
+            self.db.rollback()
         except psycopg2.errors.UndefinedFunction as e:
             log_func(e)
             log_func(
@@ -381,10 +389,6 @@ class PostgreSql(AgentCheck):
                 "Query: %s returned more than %s results (%s). Truncating", query, MAX_CUSTOM_RESULTS, len(results)
             )
             results = results[:MAX_CUSTOM_RESULTS]
-
-        # A descriptor is the association of a Postgres column name (e.g. 'schemaname')
-        # to a tag name (e.g. 'schema').
-        descriptors = scope['descriptors']
 
         # Parse and submit results.
 
@@ -409,30 +413,6 @@ class PostgreSql(AgentCheck):
 
             # build a map of descriptors and their values
             desc_map = {name: value for (_, name), value in zip(descriptors, descriptor_values)}
-
-            # if relations *and* schemas are set, filter out table not
-            # matching the schema in the configuration
-            if scope['relation'] and len(relations_config) > 0 and 'schema' in desc_map and 'table' in desc_map:
-                table = desc_map['table']
-                schema = desc_map['schema']
-
-                if table in relations_config:
-                    config_table_objects = [relations_config[table]]
-                else:
-                    # Find all matching regexes. Required if the same table matches two different regex
-                    regex_configs = (v for v in relations_config.values() if 'relation_regex' in v)
-                    config_table_objects = [r for r in regex_configs if re.match(r['relation_regex'], table)]
-
-                if not config_table_objects:
-                    self.log.info("Got row %s.%s, but not relation", schema, table)
-                else:
-                    # Create set of all schemas by flattening and removing duplicates
-                    config_schemas = {s for r in config_table_objects for s in r['schemas']}
-                    if ALL_SCHEMAS in config_schemas:
-                        self.log.debug("All schemas are allowed for table %s.%s", schema, table)
-                    elif schema not in config_schemas:
-                        self.log.debug("Skipping non matched schema %s for table %s", schema, table)
-                        continue
 
             # Build tags.
 

@@ -13,7 +13,7 @@
   "metric_prefix": "ecs.",
   "metric_to_check": "ecs.fargate.cpu.user",
   "name": "ecs_fargate",
-  "public_title": "Datadog-ECS Fargate Integration",
+  "public_title": "Datadog-Amazon Fargate Integration",
   "short_description": "Track metrics for containers running with ECS Fargate",
   "support": "core",
   "supported_os": [
@@ -26,7 +26,7 @@
   "assets": {
     "monitors": {},
     "dashboards": {
-      "ECS-Fargate": "assets/dashboards/ecs_fargate_overview.json"
+      "Amazon Fargate": "assets/dashboards/amazon_fargate_overview.json"
     },
     "service_checks": "assets/service_checks.json"
   }

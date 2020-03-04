@@ -2,6 +2,7 @@
   "categories": [
     "processing",
     "os & system",
+    "log collection",
     "autodiscovery"
   ],
   "creates_events": false,

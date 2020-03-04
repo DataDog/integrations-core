@@ -20,18 +20,22 @@ If you want to configure the check with custom options, Edit the `disk.d/conf.ya
 [Run the Agent's `status` subcommand][4] and look for `disk` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
+
 The Disk check does not include any events.
 
 ### Service Checks
+
 **`disk.read_write`**:
 Returns `CRITICAL` if filesystem is in read-only mode.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][6].
 
 [1]: https://app.datadoghq.com/account/settings#agent

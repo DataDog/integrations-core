@@ -4,14 +4,15 @@
 
 Get metrics from the Agent Metrics service in real time to:
 
-* Visualize and monitor `agent_metrics` states
-* Be notified about `agent_metrics` failovers and events.
+- Visualize and monitor `agent_metrics` states.
+- Be notified about `agent_metrics` failovers and events.
 
 **NOTE**: The Agent Metrics check has been rewritten in Go for Agent v6 to take advantage of the new internal architecture. Hence it is still maintained but **only works with Agents prior to major version 6**.
 
-To collect Agent metrics for Agent v6+, use the [Go-expvar check][1] with [the `agent_stats.yaml ` configuration file][2] packaged with the Agent.
+To collect Agent metrics for Agent v6+, use the [Go-expvar check][1] with [the `agent_stats.yaml` configuration file][2] packaged with the Agent.
 
 ## Setup
+
 ### Installation
 
 The Agent Metrics check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your servers.
@@ -23,6 +24,7 @@ The Agent Metrics check is included in the [Datadog Agent][3] package, so you do
 2. [Restart the Agent][6].
 
 #### Metrics collection
+
 The Agent Metrics integration can potentially emit [custom metrics][7], which may impact your [billing][8].
 
 ### Validation
@@ -38,12 +40,15 @@ All data collected are only available for Agent v5.
 See [metadata.csv][10] for a list of metrics provided by this integration.
 
 ### Events
+
 The Agent Metrics check does not include any events.
 
 ### Service Checks
+
 The Agent Metrics check does not include any service checks.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][11].
 
 [1]: https://docs.datadoghq.com/integrations/go_expvar

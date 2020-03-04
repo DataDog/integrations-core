@@ -67,6 +67,7 @@ assets/               @DataDog/agent-integrations @DataDog/integrations-tools-an
 /openmetrics/                             @DataDog/container-integrations @DataDog/agent-integrations
 /openmetrics/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
 /openmetrics/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/tenable/                                 @anshumgargdd @DataDog/agent-integrations
 
 # System (and Process) checks
 /disk/                                    @DataDog/agent-integrations @DataDog/agent-platform

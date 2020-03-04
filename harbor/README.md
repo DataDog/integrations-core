@@ -5,11 +5,13 @@
 This check monitors [Harbor][1] through the Datadog Agent.
 
 ## Setup
+
 ### Installation
 
 The Harbor check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
 
 ### Configuration
+
 #### Host
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
@@ -17,29 +19,30 @@ Follow the instructions below to configure this check for an Agent running on a 
 ##### Metric Collection
 
 1. Edit the `harbor.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Harbor performance data. See the [sample harbor.d/conf.yaml][4] for all available configuration options.
-  **Note**: You can specify any type of user in the config but an account with admin permissions is required to fetch disk metrics. The metric `harbor.projects.count` only reflects the number of projects the provided user can access.
+
+    **Note**: You can specify any type of user in the config but an account with admin permissions is required to fetch disk metrics. The metric `harbor.projects.count` only reflects the number of projects the provided user can access.
 
 2. [Restart the Agent][5].
 
 ##### Log Collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
-    ```yaml
-    logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Add this configuration block to your `harbor.d/conf.yaml` file to start collecting your Harbor logs:
 
-    ```
-      logs:
-        - type: file
-          path: /var/log/harbor/*.log
-          source: harbor
-          service: <SERVICE_NAME>
-    ```
+   ```yaml
+     logs:
+       - type: file
+         path: /var/log/harbor/*.log
+         source: harbor
+         service: '<SERVICE_NAME>'
+   ```
 
 3. [Restart the Agent][5].
 
@@ -50,19 +53,19 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 ##### Metric collection
 
 | Parameter            | Value                                                                                 |
-|----------------------|---------------------------------------------------------------------------------------|
+| -------------------- | ------------------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `harbor`                                                                              |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                         |
 | `<INSTANCE_CONFIG>`  | `{"url": "https://%%host%%", "username": "<USER_ID>", "password": "<USER_PASSWORD>"}` |
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][7].
 
 | Parameter      | Value                                               |
-|----------------|-----------------------------------------------------|
+| -------------- | --------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "harbor", "service": "<SERVICE_NAME>"}` |
 
 ### Validation

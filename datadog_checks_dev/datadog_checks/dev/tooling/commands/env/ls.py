@@ -5,12 +5,12 @@ import click
 
 from ...e2e import get_configured_checks, get_configured_envs
 from ...testing import get_available_tox_envs
-from ...utils import get_testable_checks
+from ...utils import complete_testable_checks, get_testable_checks
 from ..console import CONTEXT_SETTINGS, echo_info, echo_success, echo_warning
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='List active or available environments')
-@click.argument('checks', nargs=-1)
+@click.argument('checks', nargs=-1, autocompletion=complete_testable_checks)
 def ls(checks):
     """List active or available environments."""
     if checks:

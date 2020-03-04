@@ -39,7 +39,7 @@ instances:
 
     ## @param health_service_check - boolean - optional - default: true
     ## Send a service check reporting about the health of the prometheus endpoint
-    ## It's named amazon_msk.prometheus.health
+    ## It's named aws.msk.prometheus.health
     #
     # health_service_check: true
 

@@ -214,6 +214,7 @@ class MockResponse:
     def __init__(self, content, content_type):
         self.content = content
         self.headers = {'Content-Type': content_type}
+        self.encoding = 'utf-8'
 
     def iter_lines(self, **_):
         for elt in self.content.split(b"\n"):
@@ -546,8 +547,49 @@ def test_job_counts(aggregator, instance):
     )
 
 
+def test_keep_ksm_labels_desactivated(aggregator, instance):
+    instance['keep_ksm_labels'] = False
+    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
+    check.check(instance)
+    for _ in range(2):
+        check.check(instance)
+    aggregator.assert_metric(
+        NAMESPACE + '.pod.status_phase', tags=['kube_namespace:default', 'pod_phase:running', 'optional:tag1'], value=3
+    )
+
+
+def test_experimental_labels(aggregator, instance):
+    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
+    for _ in range(2):
+        check.check(instance)
+
+    assert aggregator.metrics(NAMESPACE + '.hpa.spec_target_metric') == []
+
+    instance['experimental_metrics'] = True
+    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
+    for _ in range(2):
+        check.check(instance)
+
+    aggregator.assert_metric(
+        NAMESPACE + '.hpa.spec_target_metric',
+        tags=[
+            'hpa:dummy-nginx-ingress-controller',
+            'kube_namespace:default',
+            'metric_name:cpu',
+            'metric_target_type:utilization',
+            'namespace:default',
+            'optional:tag1',
+        ],
+        value=80.0,
+    )
+
+
 def test_telemetry(aggregator, instance):
     instance['telemetry'] = True
+    instance['experimental_metrics'] = True
 
     check = KubernetesState(CHECK_NAME, {}, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
@@ -558,9 +600,9 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=90397.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=912.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1286.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=90707.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=914.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1288.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=374.0)
     aggregator.assert_metric(
@@ -572,16 +614,4 @@ def test_telemetry(aggregator, instance):
         NAMESPACE + '.telemetry.collector.metrics.count',
         tags=['resource_name:hpa', 'resource_namespace:ns1', 'optional:tag1'],
         value=8.0,
-    )
-
-
-def test_keep_ksm_labels_desactivated(aggregator, instance):
-    instance['keep_ksm_labels'] = False
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
-    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
-    check.check(instance)
-    for _ in range(2):
-        check.check(instance)
-    aggregator.assert_metric(
-        NAMESPACE + '.pod.status_phase', tags=['kube_namespace:default', 'pod_phase:running', 'optional:tag1'], value=3
     )

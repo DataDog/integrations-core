@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
 
-import pytest
 import redis
 
 from datadog_checks.redisdb import Redis
@@ -17,7 +16,6 @@ REPLICA_METRICS = [
 ]
 
 
-@pytest.mark.integration
 def test_redis_replication_link_metric(aggregator, replica_instance, dd_environment):
     metric_name = 'redis.replication.master_link_down_since_seconds'
 
@@ -34,7 +32,6 @@ def test_redis_replication_link_metric(aggregator, replica_instance, dd_environm
     assert metrics[0].value > 0
 
 
-@pytest.mark.integration
 def test_redis_replication_service_check(aggregator, replica_instance, dd_environment):
     service_check_name = 'redis.replication.master_link_status'
     redis_check = Redis('redisdb', {}, {})
@@ -52,7 +49,6 @@ def test_redis_replication_service_check(aggregator, replica_instance, dd_enviro
     assert aggregator.service_checks(service_check_name)[0].status == Redis.CRITICAL
 
 
-@pytest.mark.integration
 def test_redis_repl(aggregator, dd_environment, master_instance):
     master_db = redis.Redis(port=MASTER_PORT, db=14, host=HOST)
     replica_db = redis.Redis(port=REPLICA_PORT, db=14, host=HOST)

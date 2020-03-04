@@ -144,10 +144,20 @@ def test_read_packages(catalog, package, tmp_path):
     if six.PY2:
         in_file = str(in_file)
 
-    another = Package("Bar", "4.0", None)
-    lines = ["{}\n".format(package), "{}\n".format(another), "# a comment\n", "   --hash fooBarBaz\n\n"]
+    lines = f'''
+        {package}
+        bar==4.0
+        git+https://github.com/vmware/vsphere-automation-sdk-python@efe345a21b4ab7b346b65e1cb58d56412edd1c10
+        git+https://github.com/foo/bar@efe345a#my-branch
+        # a comment
+           --hash fooBarBaz
+    '''
     write_file_lines(in_file, lines)
-    result = list(read_packages(in_file))
-    assert len(result) == 2
-    assert result[0].name == "foo"
-    assert result[1].name == "bar"
+    result = [str(p) for p in read_packages(in_file)]
+
+    assert result == [
+        "foo==3.0; sys_platform == 'win32'",
+        'bar==4.0',
+        'git+https://github.com/vmware/vsphere-automation-sdk-python@efe345a21b4ab7b346b65e1cb58d56412edd1c10',
+        'git+https://github.com/foo/bar@efe345a#my-branch',
+    ]

@@ -14,55 +14,61 @@ The Cilium check is included in the [Datadog Agent][3] package, but it requires 
 
 1. In order to enable Prometheus metrics in both the `cilium-agent` and `cilium-operator`, deploy Cilium with the `global.prometheus.enabled=true` Helm value set, or:
 
-2. Separately enable Prometheus metrics in the `cilium-agent`:
-    * Add `--prometheus-serve-addr=:9090` to the `args` section of the Cilium DaemonSet config.
-        ```
-        [...]
-            spec:
-                containers:
-                - args:
-                    - --prometheus-serve-addr=:9090
-        ```
-    or in the `cilium-operator`:
-    * Add `--enable-metrics` to the `args` section of the Cilium deployment config.
-        ```
-        [...]
-            spec:
-                containers:
-                - args:
-                    - --enable-metrics
-        ```
+2. Separately enable Prometheus metrics:
 
+   - In the `cilium-agent` add `--prometheus-serve-addr=:9090` to the `args` section of the Cilium DaemonSet config:
+
+     ```yaml
+     # [...]
+     spec:
+       containers:
+         - args:
+             - --prometheus-serve-addr=:9090
+     ```
+
+
+
+   - Or in the `cilium-operator` add `--enable-metrics` to the `args` section of the Cilium deployment config:
+
+     ```yaml
+     # [...]
+     spec:
+       containers:
+         - args:
+             - --enable-metrics
+     ```
 
 ### Configuration
 
 1. Edit the `cilium.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Cilium performance data. See the [sample cilium.d/conf.yaml][4] for all available configuration options.
-    * To collect `cilium-agent` metrics, enable the `agent_endpoint` option.
-    * To collect `cilium-operator` metrics, enable the `operator_endpoint` option.
+
+   - To collect `cilium-agent` metrics, enable the `agent_endpoint` option.
+   - To collect `cilium-operator` metrics, enable the `operator_endpoint` option.
 
 2. [Restart the Agent][5].
 
 #### Log Collection
+
 Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
 
 #### Available for Agent >6.0
+
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [DaemonSet configuration][4]:
 
-    ```
-      (...)
-        env:
-          (...)
-          - name: DD_LOGS_ENABLED
-              value: "true"
-          - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
-              value: "true"
-      (...)
-    ```
+   ```yaml
+     # (...)
+       env:
+       #  (...)
+         - name: DD_LOGS_ENABLED
+             value: "true"
+         - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+             value: "true"
+     # (...)
+   ```
 
 2. Mount the Docker socket to the Datadog Agent as done in [this manifest][9] or mount the `/var/log/pods` directory if you are not using Docker.
 
 3. [Restart the Agent][5].
-
 
 ### Validation
 

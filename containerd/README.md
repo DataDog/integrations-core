@@ -18,7 +18,7 @@ If you are using the Agent in a container, setting the `DD_CRI_SOCKET_PATH` envi
 
 For example, to install the integration on Kubernetes, edit your daemonset to mount the Containerd socket from the host node to the Agent container and set the `DD_CRI_SOCKET_PATH` env var to the daemonset mountPath:
 
-```
+```yaml
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -28,10 +28,10 @@ spec:
     spec:
       containers:
         - name: datadog-agent
-          ...
+          # ...
           env:
             - name: DD_CRI_SOCKET_PATH
-              value: "/var/run/containerd/containerd.sock"
+              value: /var/run/containerd/containerd.sock
           volumeMounts:
             - name: containerdsocket
               mountPath: /var/run/containerd/containerd.sock
@@ -51,9 +51,7 @@ spec:
 
 ### Configuration
 
-1. Edit the `containerd.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your Containerd performance data.
-   See the [sample containerd.d/conf.yaml][1] for all available configuration options.
+1. Edit the `containerd.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Containerd performance data. See the [sample containerd.d/conf.yaml][1] for all available configuration options.
 
 2. [Restart the Agent][2]
 

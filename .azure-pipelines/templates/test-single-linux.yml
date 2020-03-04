@@ -13,7 +13,7 @@ jobs:
   displayName: '${{ parameters.display }}'
 
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-18.04'
 
   steps:
   - template: './checkout-code.yml'
@@ -38,3 +38,4 @@ jobs:
       test: ${{ parameters.test }}
       test_e2e: ${{ parameters.test_e2e }}
       benchmark: ${{ parameters.benchmark }}
+      repo: ${{ parameters.repo }}

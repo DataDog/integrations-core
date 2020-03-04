@@ -20,17 +20,17 @@ In addition, install `mod_status` on your Lighttpd servers.
 
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
-1. Edit the  `lighttpd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample lighttpd.d/conf.yaml][4] for all available configuration options:
+1. Edit the `lighttpd.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3]. See the [sample lighttpd.d/conf.yaml][4] for all available configuration options:
 
-    ```yaml
-      init_config:
+   ```yaml
+   init_config:
 
-      instances:
-        ## @param lighttpd_status_url - string - required
-        ## Status url of your Lighttpd server.
-        #
-        - lighttpd_status_url: http://localhost/server-status?auto
-    ```
+   instances:
+     ## @param lighttpd_status_url - string - required
+     ## Status url of your Lighttpd server.
+     #
+     - lighttpd_status_url: http://localhost/server-status?auto
+   ```
 
 2. [Restart the Agent][5].
 
@@ -39,7 +39,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                           |
-|----------------------|-----------------------------------------------------------------|
+| -------------------- | --------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `lighttpd`                                                      |
 | `<INIT_CONFIG>`      | blank or `{}`                                                   |
 | `<INSTANCE_CONFIG>`  | `{"lighttpd_status_url": "http://%%host%%/server-status?auto"}` |
@@ -49,11 +49,13 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 [Run the Agent's `status` subcommand][7] and look for `lighttpd` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
+
 The Lighttpd check does not include any events.
 
 ### Service Checks
@@ -67,8 +69,8 @@ Returns CRITICAL if the Agent cannot connect to lighttpd to collect metrics, oth
 Need help? Contact [Datadog support][9].
 
 ## Further Reading
-To get a better idea of how (or why) to monitor Lighttpd web server metrics with Datadog, check out our [series of blog posts][10] about it.
 
+To get a better idea of how (or why) to monitor Lighttpd web server metrics with Datadog, check out our [series of blog posts][10] about it.
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/lighttpd/images/lighttpddashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent

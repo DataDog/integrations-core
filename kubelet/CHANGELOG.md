@@ -1,5 +1,9 @@
 # CHANGELOG - kubelet
 
+## 3.6.0 / 2020-02-22
+
+* [Added] Add pod tags to volume metrics. See [#5453](https://github.com/DataDog/integrations-core/pull/5453).
+
 ## 3.5.2 / 2020-01-31
 
 * [Fixed] Ignore insecure warnings for kubelet requests. See [#5607](https://github.com/DataDog/integrations-core/pull/5607).

@@ -1558,16 +1558,134 @@
         ]
     },
     {
-        "name": "vsphere.datastore.count",
-        "value": 6
-    },
-    {
-        "name": "vsphere.cluster.count",
-        "value": 3
+        "name": "vsphere.datacenter.count",
+        "value": 1.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_datacenter:Dätacenter",
+            "vsphere_folder:Datacenters",
+            "vsphere_type:datacenter"
+        ]
     },
     {
         "name": "vsphere.datacenter.count",
-        "value": 2
+        "value": 1.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:Datacenters",
+            "vsphere_type:datacenter"
+        ]
+    },
+    {
+        "name": "vsphere.datastore.count",
+        "value": 1.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_datastore:NFS Share",
+            "vsphere_folder:Datacenters",
+            "vsphere_datacenter:Dätacenter",
+            "vsphere_folder:datastore",
+            "vsphere_type:datastore"
+        ]
+    },
+    {
+        "name": "vsphere.datastore.count",
+        "value": 1.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_datastore:Datastore 1",
+            "vsphere_folder:Datacenters",
+            "vsphere_datacenter:Dätacenter",
+            "vsphere_folder:datastore",
+            "vsphere_folder:Datastores",
+            "vsphere_type:datastore"
+        ]
+    },
+    {
+        "name": "vsphere.datastore.count",
+        "value": 1.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_datastore:Datastore 2",
+            "vsphere_folder:Datacenters",
+            "vsphere_datacenter:Dätacenter",
+            "vsphere_folder:datastore",
+            "vsphere_folder:Datastores",
+            "vsphere_type:datastore"
+        ]
+    },
+    {
+        "name": "vsphere.datastore.count",
+        "value": 1.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_datastore:NFS Share",
+            "vsphere_folder:Datacenters",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:datastore",
+            "vsphere_type:datastore"
+        ]
+    },
+    {
+        "name": "vsphere.datastore.count",
+        "value": 1.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_datastore:Datastore 3",
+            "vsphere_folder:Datacenters",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:datastore",
+            "vsphere_type:datastore"
+        ]
+    },
+    {
+        "name": "vsphere.datastore.count",
+        "value": 1.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_datastore:Datastore 4",
+            "vsphere_folder:Datacenters",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:datastore",
+            "vsphere_type:datastore"
+        ]
+    },
+    {
+        "name": "vsphere.cluster.count",
+        "value": 1.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_folder:Datacenters",
+            "vsphere_datacenter:Dätacenter",
+            "vsphere_folder:host",
+            "vsphere_type:cluster"
+        ]
+    },
+    {
+        "name": "vsphere.cluster.count",
+        "value": 1.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:Cluster2",
+            "vsphere_folder:Datacenters",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:host",
+            "vsphere_type:cluster"
+        ]
+    },
+    {
+        "name": "vsphere.cluster.count",
+        "value": 1.0,
+        "tags": [
+            "vcenter_server:FAKE",
+            "vsphere_cluster:datastore-cluster",
+            "vsphere_folder:Datacenters",
+            "vsphere_datacenter:Datacenter2",
+            "vsphere_folder:host",
+            "vsphere_type:cluster"
+        ]
     },
     {
         "name": "datadog.vsphere.query_metrics.time"

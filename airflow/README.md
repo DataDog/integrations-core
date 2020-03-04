@@ -17,7 +17,7 @@ In addition to metrics, the Datadog Agent also sends service checks related to A
 
 ### Installation
 
-All three steps below are needed for the Airflow integration to work properly. Before you begin, you [install the Datadog Agent][9] version `>=6.17` or `>=7.17` that includes Statsd/DogStatsD Mapping feature. 
+All three steps below are needed for the Airflow integration to work properly. Before you begin, [install the Datadog Agent][9] version `>=6.17` or `>=7.17`, which includes the StatsD/DogStatsD mapping feature.
 
 #### Step 1: Configure Airflow to collect health metrics and service checks
 
@@ -29,110 +29,117 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
 
 1. Install the [Airflow StatsD plugin][1].
 
-    ```
-    pip install 'apache-airflow[statsd]'
-    ```
+   ```shell
+   pip install 'apache-airflow[statsd]'
+   ```
 
 2. Update the Airflow configuration file `airflow.cfg` by adding the following configs:
 
-    ```
-    [scheduler]
-    statsd_on = True
-    statsd_host = localhost
-    statsd_port = 8125
-    statsd_prefix = airflow
-    ```
+   ```conf
+   [scheduler]
+   statsd_on = True
+   statsd_host = localhost
+   statsd_port = 8125
+   statsd_prefix = airflow
+   ```
 
 3. Update the [Datadog Agent main configuration file][10] `datadog.yaml` by adding the following configs:
 
-    ```yaml
-    # dogstatsd_mapper_cache_size: 1000  # default to 1000
-    dogstatsd_mapper_profiles:
-      - name: airflow
-        prefix: 'airflow.'
-        mappings:
-          - match: 'airflow.*_start'
-            name: 'airflow.job.start'
-            tags:
-              job_name: '$1'
-          - match: 'airflow.*_end'
-            name: 'airflow.job.end'
-            tags:
-              job_name: '$1'
-          - match: 'airflow.operator_failures_*'
-            name: 'airflow.operator_failures'
-            tags:
-              operator_name: '$1'
-          - match: 'airflow.operator_successes_*'
-            name: 'airflow.operator_successes'
-            tags:
-              operator_name: '$1'
-          - match: 'airflow\.dag_processing\.last_runtime\.(.*)'
-            match_type: 'regex'
-            name: 'airflow.dag_processing.last_runtime'
-            tags:
-               dag_file: '$1'
-          - match: 'airflow\.dag_processing\.last_run\.seconds_ago\.(.*)'
-            match_type: 'regex'
-            name: 'airflow.dag_processing.last_run.seconds_ago'
-            tags:
-               dag_file: '$1'
-          - match: 'airflow\.dag\.loading-duration\.(.*)'
-            match_type: 'regex'
-            name: 'airflow.dag.loading_duration'
-            tags:
-               dag_file: '$1'
-          - match: 'airflow.pool.open_slots.*'
-            name: 'airflow.pool.open_slots'
-            tags:
-               pool_name: '$1'
-          - match: 'airflow.pool.used_slots.*'
-            name: 'airflow.pool.used_slots'
-            tags:
-               pool_name: '$1'
-          - match: 'airflow.pool.starving_tasks.*'
-            name: 'airflow.pool.starving_tasks'
-            tags:
-               pool_name: '$1'
-          - match: 'airflow.dagrun.dependency-check.*'
-            name: 'airflow.dagrun.dependency_check'
-            tags:
-               dag_id: '$1'
-          - match: 'airflow.dag.*.*.duration'
-            name: 'airflow.dag.task.duration'
-            tags:
-               dag_id: '$1'
-               task_id: '$2'
-          - match: 'airflow\.dag_processing\.last_duration\.(.*)'
-            match_type: 'regex'
-            name: 'airflow.dag_processing.last_duration'
-            tags:
-               dag_file: '$1'
-          - match: 'airflow.dagrun.duration.success.*'
-            name: 'airflow.dagrun.duration.success'
-            tags:
-               dag_id: '$1'
-          - match: 'airflow.dagrun.duration.failed.*'
-            name: 'airflow.dagrun.duration.failed'
-            tags:
-               dag_id: '$1'
-          - match: 'airflow.dagrun.schedule_delay.*'
-            name: 'airflow.dagrun.schedule_delay'
-            tags:
-               dag_id: '$1'
-          - match: 'airflow.task_removed_from_dag.*'
-            name: 'airflow.dag.task_removed'
-            tags:
-               dag_id: '$1'
-          - match: 'airflow.task_restored_to_dag.*'
-            name: 'airflow.dag.task_restored'
-            tags:
-               dag_id: '$1'
-          - match: 'airflow.task_instance_created-*'
-            name: 'airflow.task.instance_created'
-            tags:
-               task_class: '$1'
-    ```
+   ```yaml
+   # dogstatsd_mapper_cache_size: 1000  # default to 1000
+   dogstatsd_mapper_profiles:
+     - name: airflow
+       prefix: "airflow."
+       mappings:
+         - match: "airflow.*_start"
+           name: "airflow.job.start"
+           tags:
+             job_name: "$1"
+         - match: "airflow.*_end"
+           name: "airflow.job.end"
+           tags:
+             job_name: "$1"
+         - match: "airflow.operator_failures_*"
+           name: "airflow.operator_failures"
+           tags:
+             operator_name: "$1"
+         - match: "airflow.operator_successes_*"
+           name: "airflow.operator_successes"
+           tags:
+             operator_name: "$1"
+         - match: 'airflow\.dag_processing\.last_runtime\.(.*)'
+           match_type: "regex"
+           name: "airflow.dag_processing.last_runtime"
+           tags:
+             dag_file: "$1"
+         - match: 'airflow\.dag_processing\.last_run\.seconds_ago\.(.*)'
+           match_type: "regex"
+           name: "airflow.dag_processing.last_run.seconds_ago"
+           tags:
+             dag_file: "$1"
+         - match: 'airflow\.dag\.loading-duration\.(.*)'
+           match_type: "regex"
+           name: "airflow.dag.loading_duration"
+           tags:
+             dag_file: "$1"
+         - match: "airflow.pool.open_slots.*"
+           name: "airflow.pool.open_slots"
+           tags:
+             pool_name: "$1"
+         - match: "airflow.pool.used_slots.*"
+           name: "airflow.pool.used_slots"
+           tags:
+             pool_name: "$1"
+         - match: "airflow.pool.starving_tasks.*"
+           name: "airflow.pool.starving_tasks"
+           tags:
+             pool_name: "$1"
+         - match: 'airflow\.dagrun\.dependency-check\.(.*)'
+           match_type: "regex"
+           name: "airflow.dagrun.dependency_check"
+           tags:
+             dag_id: "$1"
+         - match: 'airflow\.dag\.(.*)\.([^.]*)\.duration'
+           match_type: "regex"
+           name: "airflow.dag.task.duration"
+           tags:
+             dag_id: "$1"
+             task_id: "$2"
+         - match: 'airflow\.dag_processing\.last_duration\.(.*)'
+           match_type: "regex"
+           name: "airflow.dag_processing.last_duration"
+           tags:
+             dag_file: "$1"
+         - match: 'airflow\.dagrun\.duration\.success\.(.*)'
+           match_type: "regex"
+           name: "airflow.dagrun.duration.success"
+           tags:
+             dag_id: "$1"
+         - match: 'airflow\.dagrun\.duration\.failed\.(.*)'
+           match_type: "regex"
+           name: "airflow.dagrun.duration.failed"
+           tags:
+             dag_id: "$1"
+         - match: 'airflow\.dagrun\.schedule_delay\.(.*)'
+           match_type: "regex"
+           name: "airflow.dagrun.schedule_delay"
+           tags:
+             dag_id: "$1"
+         - match: 'airflow\.task_removed_from_dag\.(.*)'
+           match_type: "regex"
+           name: "airflow.dag.task_removed"
+           tags:
+             dag_id: "$1"
+         - match: 'airflow\.task_restored_to_dag\.(.*)'
+           match_type: "regex"
+           name: "airflow.dag.task_restored"
+           tags:
+             dag_id: "$1"
+         - match: "airflow.task_instance_created-*"
+           name: "airflow.task.instance_created"
+           tags:
+             task_class: "$1"
+   ```
 
 #### Step 3: Restart Datadog Agent and Airflow
 
@@ -145,71 +152,71 @@ Use the default configuration of your `airflow.d/conf.yaml` file to activate the
 
 #### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Uncomment and edit this configuration block at the bottom of your `airflow.d/conf.yaml`:
 
-    Change the `path` and `service` parameter values and configure them for your environment.
+   Change the `path` and `service` parameter values and configure them for your environment.
 
-    a. Configuration for DAG processor manager and Scheduler logs:
+   a. Configuration for DAG processor manager and Scheduler logs:
 
-    ```yaml
-      logs:
-        - type: file
-          path: <PATH_TO_AIRFLOW>/logs/dag_processor_manager/dag_processor_manager.log
-          source: airflow
-          service: <SERVICE_NAME>
-          log_processing_rules:
-            - type: multi_line
-              name: new_log_start_with_date
-              pattern: \[\d{4}\-\d{2}\-\d{2}
-        - type: file
-          path: <PATH_TO_AIRFLOW>/logs/scheduler/*/*.log
-          source: airflow
-          service: <SERVICE_NAME>
-          log_processing_rules:
-            - type: multi_line
-              name: new_log_start_with_date
-              pattern: \[\d{4}\-\d{2}\-\d{2}
-    ```
-   
-    Regular clean up is recommended for scheduler logs with daily log rotation.
+     ```yaml
+     logs:
+       - type: file
+         path: '<PATH_TO_AIRFLOW>/logs/dag_processor_manager/dag_processor_manager.log'
+         source: airflow
+         service: '<SERVICE_NAME>'
+         log_processing_rules:
+           - type: multi_line
+             name: new_log_start_with_date
+             pattern: \[\d{4}\-\d{2}\-\d{2}
+       - type: file
+         path: '<PATH_TO_AIRFLOW>/logs/scheduler/*/*.log'
+         source: airflow
+         service: '<SERVICE_NAME>'
+         log_processing_rules:
+           - type: multi_line
+             name: new_log_start_with_date
+             pattern: \[\d{4}\-\d{2}\-\d{2}
+     ```
 
-    b. Additional configuration for DAG tasks logs:
+     Regular clean up is recommended for scheduler logs with daily log rotation.
 
-    ```yaml
-      logs:
-        - type: file
-          path: <PATH_TO_AIRFLOW>/logs/*/*/*/*.log
-          source: airflow
-          service: <SERVICE_NAME>
-          log_processing_rules:
-            - type: multi_line
-              name: new_log_start_with_date
-              pattern: \[\d{4}\-\d{2}\-\d{2}
-    ```
+   b. Additional configuration for DAG tasks logs:
 
-    Caveat: By default Airflow use this log file template for tasks: `log_filename_template = {{ ti.dag_id }}/{{ ti.task_id }}/{{ ts }}/{{ try_number }}.log`, the number of log files will grow quickly if not cleaned regularly. This pattern is used by Airflow UI to display logs individually for each executed task.
+     ```yaml
+     logs:
+       - type: file
+         path: '<PATH_TO_AIRFLOW>/logs/*/*/*/*.log'
+         source: airflow
+         service: '<SERVICE_NAME>'
+         log_processing_rules:
+           - type: multi_line
+             name: new_log_start_with_date
+             pattern: \[\d{4}\-\d{2}\-\d{2}
+     ```
 
-    If you do not view logs in Airflow UI, we recommend this configuration in `airflow.cfg`: `log_filename_template = dag_tasks.log`. Then log rotate this file and use this configuration:
+     Caveat: By default Airflow uses this log file template for tasks: `log_filename_template = {{ ti.dag_id }}/{{ ti.task_id }}/{{ ts }}/{{   try_number }}.log`. The number of log files will grow quickly if not cleaned regularly. This pattern is used by Airflow UI to display logs individually for each executed task.
 
-    ```yaml
-      logs:
-        - type: file
-          path: <PATH_TO_AIRFLOW>/logs/dag_tasks.log
-          source: airflow
-          service: <SERVICE_NAME>
-          log_processing_rules:
-            - type: multi_line
-              name: new_log_start_with_date
-              pattern: \[\d{4}\-\d{2}\-\d{2}
-    ```
+     If you do not view logs in Airflow UI, Datadog recommends this configuration in `airflow.cfg`: `log_filename_template = dag_tasks.log`. Then log rotate this file and use this configuration:
+
+     ```yaml
+     logs:
+       - type: file
+         path: '<PATH_TO_AIRFLOW>/logs/dag_tasks.log'
+         source: airflow
+         service: '<SERVICE_NAME>'
+         log_processing_rules:
+           - type: multi_line
+             name: new_log_start_with_date
+             pattern: \[\d{4}\-\d{2}\-\d{2}
+     ```
 
 3. [Restart the Agent][7].
 
@@ -241,7 +248,7 @@ The Airflow check does not include any events.
 
 ### Airflow DatadogHook
 
-In addition, [Airflow DatadogHook][11] can be used to interact with Datadog: 
+In addition, [Airflow DatadogHook][11] can be used to interact with Datadog:
 
 - Send Metric
 - Query Metric

@@ -345,12 +345,34 @@ INSTANCE_METRIC_GROUP_MAP = {
 
 INSTANCE_DEFAULT_GROUPS = [
     'scylla.cache',
+    'scylla.compaction_manager',
     'scylla.gossip',
     'scylla.node',
     'scylla.reactor',
     'scylla.storage',
     'scylla.streaming',
     'scylla.transport',
+]
+
+
+INSTANCE_ADDITIONAL_GROUPS = [
+    'scylla.alien',
+    'scylla.batchlog_manager',
+    'scylla.commitlog',
+    'scylla.cql',
+    'scylla.database',
+    'scylla.execution_stages',
+    'scylla.hints',
+    'scylla.httpd',
+    'scylla.io_queue',
+    'scylla.lsa',
+    'scylla.memory',
+    'scylla.memtables',
+    'scylla.query_processor',
+    'scylla.scheduler',
+    'scylla.sstables',
+    'scylla.thrift',
+    'scylla.tracing',
 ]
 
 
@@ -361,3 +383,4 @@ def get_metrics(metric_groups):
 
 
 INSTANCE_DEFAULT_METRICS = get_metrics(INSTANCE_DEFAULT_GROUPS)
+INSTANCE_ADDITIONAL_METRICS = get_metrics(INSTANCE_ADDITIONAL_GROUPS)

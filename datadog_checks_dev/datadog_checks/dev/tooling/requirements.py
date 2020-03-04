@@ -9,10 +9,18 @@ from ..subprocess import run_command
 from ..utils import chdir, resolve_path, stream_file_lines, write_file_lines
 from .constants import REQUIREMENTS_IN, get_root
 
-DEP_PATTERN = re.compile(r'([^=]+)(?:==([^;\s]+)(?:; *(.*))?)?')
+DEP_PATTERN = re.compile(r'^([^=@]+)(?:(?:==|@)([^;\s]+)(?:; *(.*))?)?')
 
 
 class Package:
+    """
+    Structure representing a Python dependency package
+
+    name: name of the package
+    version: version of the package: 1.2.3 or a hash like efe345a21b4a for git dependencies
+    marker: optional marker e.g. python_version < '3.0' or sys_platform == 'win32'
+    """
+
     def __init__(self, name, version, marker):
         if not name:
             raise ValueError("Package must have a valid name")
@@ -22,9 +30,10 @@ class Package:
         self.marker = marker.lower().replace('"', "'") if marker else ""
 
     def __str__(self):
+        version_sep = '@' if self.name.startswith('git+') else '=='
         return '{}{}{}'.format(
             self.name,
-            '=={}'.format(self.version) if self.version else '',
+            '{}{}'.format(version_sep, self.version) if self.version else '',
             '; {}'.format(self.marker) if self.marker else '',
         )
 

@@ -16,19 +16,18 @@ The Cassandra Nodetool check is included in the [Datadog Agent][113] package, so
 
 1. Edit the file `cassandra_nodetool.d/conf.yaml` in the `conf.d/` folder at the root of your [Agent's configuration directory][114]. See the [sample cassandra_nodetool.d/conf.yaml][115] for all available configuration options:
 
-    ```yaml
-      init_config:
+   ```yaml
+   init_config:
 
-      instances:
-
-          ## @param keyspaces - list of string - required
-          ## The list of keyspaces to monitor.
-          ## An empty list results in no metrics being sent.
-          #
-        - keyspaces:
-            - "<KEYSPACE_1>"
-            - "<KEYSPACE_2>"
-    ```
+   instances:
+     ## @param keyspaces - list of string - required
+     ## The list of keyspaces to monitor.
+     ## An empty list results in no metrics being sent.
+     #
+     - keyspaces:
+         - "<KEYSPACE_1>"
+         - "<KEYSPACE_2>"
+   ```
 
 2. [Restart the Agent][116].
 
@@ -57,9 +56,9 @@ Need help? Contact [Datadog support][119].
 
 ## Further Reading
 
-* [How to monitor Cassandra performance metrics][1110]
-* [How to collect Cassandra metrics][1111]
-* [Monitoring Cassandra with Datadog][1112]
+- [How to monitor Cassandra performance metrics][1110]
+- [How to collect Cassandra metrics][1111]
+- [Monitoring Cassandra with Datadog][1112]
 
 [111]: https://raw.githubusercontent.com/DataDog/integrations-core/master/cassandra_nodetool/images/cassandra_dashboard.png
 [112]: https://github.com/DataDog/integrations-core/tree/master/cassandra

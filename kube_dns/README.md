@@ -4,13 +4,14 @@
 
 Get metrics from kube-dns service in real time to:
 
-* Visualize and monitor dns metrics collected via Kubernetes' kube-dns addon
+- Visualize and monitor dns metrics collected via Kubernetes' kube-dns addon
   through Prometheus
 
 See https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/dns for
 more informations about kube-dns
 
 ## Setup
+
 ### Installation
 
 The Kube-dns check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
@@ -37,28 +38,29 @@ metadata:
 
 **Remarks:**
 
- - Notice the "dns-pod" tag that will keep track of the target dns
-   pod IP. The other tags will be related to the dd-agent that is polling the
-   informations using the service discovery.
- - The service discovery annotations need to be done on the pod. In case of a deployment,
-   add the annotations to the metadata of the template's spec.
-
+- Notice the "dns-pod" tag that will keep track of the target dns pod IP. The other tags will be related to the dd-agent that is polling the informations using the service discovery.
+- The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's spec.
 
 ### Validation
 
 [Run the Agent's `status` subcommand][4] and look for `kube_dns` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
+
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
+
 The Kube-DNS check does not include any events.
 
 ### Service Checks
+
 The Kube-DNS check does not include any service checks.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][6].
 
 [1]: https://app.datadoghq.com/account/settings#agent

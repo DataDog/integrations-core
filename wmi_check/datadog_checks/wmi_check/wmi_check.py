@@ -52,7 +52,7 @@ class WMICheck(WinWMICheck):
 
         metric_name_and_type_by_property, properties = self._get_wmi_properties(instance_key, metrics, tag_queries)
 
-        wmi_sampler = self._get_wmi_sampler(
+        wmi_sampler = self._get_running_wmi_sampler(
             instance_key,
             wmi_class,
             properties,

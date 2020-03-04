@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 from copy import deepcopy
 from distutils.version import StrictVersion
 
+import mock
 import pytest
 import redis
 
@@ -20,7 +21,40 @@ DB_TAGGED_METRICS = ['redis.persist.percent', 'redis.expires.percent', 'redis.pe
 STAT_METRICS = ['redis.command.calls', 'redis.command.usec_per_call']
 
 
-@pytest.mark.integration
+def test_aof_loading_metrics(aggregator, redis_instance):
+    """AOF loading metrics are only available when redis is loading an AOF file.
+    It is not possible to collect them using integration/e2e testing so let's mock
+    redis output to assert that they are collected correctly (assuming that the redis output is formatted
+    correctly)."""
+    with mock.patch("redis.Redis") as redis:
+        redis_check = Redis('redisdb', {}, {})
+        conn = redis.return_value
+        conn.config_get.return_value = {}
+        conn.info = (
+            lambda *args: []
+            if args
+            else {
+                'role': 'foo',
+                'total_commands_processed': 0,
+                'loading_total_bytes': 42,
+                'loading_loaded_bytes': 43,
+                'loading_loaded_perc': 44,
+                'loading_eta_seconds': 45,
+            }
+        )
+        redis_check._check_db(redis_instance, [])
+
+        aggregator.assert_metric('redis.info.latency_ms')
+        aggregator.assert_metric('redis.net.commands', 0)
+        aggregator.assert_metric('redis.key.length', 0)
+
+        aggregator.assert_metric('redis.aof.loading_total_bytes', 42)
+        aggregator.assert_metric('redis.aof.loading_loaded_bytes', 43)
+        aggregator.assert_metric('redis.aof.loading_loaded_perc', 44)
+        aggregator.assert_metric('redis.aof.loading_eta_seconds', 45)
+        aggregator.assert_all_metrics_covered()
+
+
 def test_redis_default(aggregator, redis_auth, redis_instance):
     db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=HOST)
     db.flushdb()
@@ -61,10 +95,20 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
     db.flushdb()
 
 
-@pytest.mark.integration
 def test_service_check(aggregator, redis_auth, redis_instance):
     redis_check = Redis('redisdb', {}, {})
     redis_check.check(redis_instance)
+
+    assert len(aggregator.service_checks('redis.can_connect')) == 1
+    sc = aggregator.service_checks('redis.can_connect')[0]
+    assert sc.tags == ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'redis_role:master']
+
+
+def test_disabled_config_get(aggregator, redis_auth, redis_instance):
+    redis_check = Redis('redisdb', {}, {})
+    with mock.patch.object(redis.client.Redis, 'config_get') as get:
+        get.side_effect = redis.ResponseError()
+        redis_check.check(redis_instance)
 
     assert len(aggregator.service_checks('redis.can_connect')) == 1
     sc = aggregator.service_checks('redis.can_connect')[0]
@@ -88,7 +132,6 @@ def test_metadata(master_instance, datadog_agent):
     datadog_agent.assert_metadata_count(len(version_metadata) + 2)
 
 
-@pytest.mark.integration
 def test_redis_command_stats(aggregator, redis_instance):
     db = redis.Redis(port=PORT, db=14, password=PASSWORD, host=HOST)
     version = db.info().get('redis_version')
@@ -114,7 +157,6 @@ def test_redis_command_stats(aggregator, redis_instance):
     assert found
 
 
-@pytest.mark.integration
 def test__check_key_lengths_misconfig(aggregator, redis_instance):
     """
     The check shouldn't send anything if misconfigured
@@ -138,7 +180,6 @@ def test__check_key_lengths_misconfig(aggregator, redis_instance):
     assert len(list(aggregator.metrics('redis.key.length'))) == 0
 
 
-@pytest.mark.integration
 def test__check_key_lengths_single_db(aggregator, redis_instance):
     """
     Keys are stored in multiple databases but we collect data from
@@ -172,7 +213,6 @@ def test__check_key_lengths_single_db(aggregator, redis_instance):
     aggregator.assert_metric('redis.key.length', value=2)
 
 
-@pytest.mark.integration
 def test__check_key_lengths_multi_db(aggregator, redis_instance):
     """
     Keys are stored across different databases

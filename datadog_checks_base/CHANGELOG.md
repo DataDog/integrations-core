@@ -1,5 +1,36 @@
 # CHANGELOG - datadog_checks_base
 
+## 11.1.0 / 2020-02-26
+
+* [Added] Bump securesystemslib to 0.14.2. See [#5890](https://github.com/DataDog/integrations-core/pull/5890).
+
+## 11.0.0 / 2020-02-22
+
+* [Fixed] Pin enum34 to 1.1.6. See [#5829](https://github.com/DataDog/integrations-core/pull/5829).
+* [Fixed] Fix thread leak in WMI sampler. See [#5659](https://github.com/DataDog/integrations-core/pull/5659). Thanks [rlaveycal](https://github.com/rlaveycal).
+* [Added] Improve performance of pattern matching in OpenMetrics. See [#5764](https://github.com/DataDog/integrations-core/pull/5764).
+* [Added] Add a utility method to check if metadata collection is enabled. See [#5748](https://github.com/DataDog/integrations-core/pull/5748).
+* [Added] Upgrade `aerospike` dependency. See [#5779](https://github.com/DataDog/integrations-core/pull/5779).
+* [Added] Capture python warnings as logs. See [#5730](https://github.com/DataDog/integrations-core/pull/5730).
+* [Added] Make `ignore_metrics` support `*` wildcard for OpenMetrics. See [#5759](https://github.com/DataDog/integrations-core/pull/5759).
+* [Added] Add extra_headers option to http method call. See [#5753](https://github.com/DataDog/integrations-core/pull/5753).
+* [Added] Upgrade kafka-python to 2.0.0. See [#5696](https://github.com/DataDog/integrations-core/pull/5696).
+* [Fixed] Refactor initialization of metric limits. See [#5566](https://github.com/DataDog/integrations-core/pull/5566).
+* [Added] Support `tls_ignore_warning` at init_config level. See [#5657](https://github.com/DataDog/integrations-core/pull/5657).
+* [Changed] vSphere new implementation. See [#5251](https://github.com/DataDog/integrations-core/pull/5251).
+* [Added] Upgrade supervisor dependency. See [#5627](https://github.com/DataDog/integrations-core/pull/5627).
+* [Added] Update in-toto and its deps. See [#5599](https://github.com/DataDog/integrations-core/pull/5599).
+* [Added] Refactor traced decorator and remove wrapt import. See [#5586](https://github.com/DataDog/integrations-core/pull/5586).
+* [Fixed] Change wmi_check to use lists instead of tuples for filters. See [#5510](https://github.com/DataDog/integrations-core/pull/5510).
+* [Added] Upgrade ddtrace to 0.32.2. See [#5491](https://github.com/DataDog/integrations-core/pull/5491).
+* [Fixed] Enforce lazy logging. See [#5554](https://github.com/DataDog/integrations-core/pull/5554).
+* [Fixed] Properly cast `max_returned_metrics` option to an integer. See [#5536](https://github.com/DataDog/integrations-core/pull/5536).
+* [Fixed] Install typing dep only for Python 2. See [#5543](https://github.com/DataDog/integrations-core/pull/5543).
+* [Added] Add new deprecation. See [#5539](https://github.com/DataDog/integrations-core/pull/5539).
+* [Added] Allow deprecation notice strings to be formatted. See [#5533](https://github.com/DataDog/integrations-core/pull/5533).
+* [Changed] Make deprecations apparent in UI. See [#5530](https://github.com/DataDog/integrations-core/pull/5530).
+* [Added] Add ability to submit time deltas to database query utility. See [#5524](https://github.com/DataDog/integrations-core/pull/5524).
+
 ## 10.3.0 / 2020-01-21
 
 * [Added] [pdh] Make the admin share configurable. See [#5485](https://github.com/DataDog/integrations-core/pull/5485).

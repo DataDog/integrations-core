@@ -96,7 +96,7 @@ init_config:
   ## @param profiles - object - optional
   ## Specify profiles to be able to reference a set of metrics by name.
   ## One of definition_file or definition needs to be defined.
-  ## definition_file points to a file with a prfile, whereas definition inlines
+  ## definition_file points to a file with a profile, whereas definition inlines
   ## it directly here.
   ## When using a profile present on the profiles directory of the
   ## configuration, you can directly pass the filename.
@@ -114,6 +114,12 @@ init_config:
       definition_file: idrac.yaml
     cisco-nexus:
       definition_file: cisco-nexus.yaml
+    dell-poweredge:
+      definition_file: dell-poweredge.yaml
+    hp-ilo4:
+      definition_file: hp-ilo4.yaml
+    hpe-proliant:
+      definition_file: hpe-proliant.yaml
 
 instances:
   -
@@ -127,6 +133,13 @@ instances:
     ## The network address of the devices to scan for monitor.
     #
     # network_address: <NETWORK_ADRESS>
+
+    ## @param ignored_ip_addresses - list of string - optional
+    ## A list of IP addresses to ignore when scanning the network.
+    #
+    # ignored_ip_addresses:
+    #   - <IP_ADDRESS_1>
+    #   - <IP_ADDRESS_2>
 
     ## @param port - integer - optional - default: 161
     ## Default SNMP port.
@@ -163,6 +176,11 @@ instances:
     ## Number of times a discovered host can fail before we remove it from the discovered list.
     #
     # discovery_allowed_failures: 3
+
+    ## @param workers - integer - optional - default: 5
+    ## Number of workers used for check when using discovery.
+    #
+    # workers: 5
 
     ## @param enforce_mib_constraints - boolean - optional - default: true
     ## If set to false we will not check the values returned meet the MIB constraints.
@@ -303,3 +321,16 @@ instances:
         name: tcpPassiveOpens
         metric_tags:
           - TCP
+
+    ## @param metric_tags - list of elements - optional
+    ## Specify tags that you want applied to all metrics. A tag can be applied from a symbol or an OID.
+    #
+    # metric_tags:
+    #  - # From a symbol
+    #    MIB: SNMPv2-MIB
+    #    symbol: sysName
+    #    tag: snmp_host
+    #  - # From an OID:
+    #    OID: 1.3.6.1.2.1.1.5
+    #    symbol: sysName
+    #    tag: snmp_host

@@ -6,7 +6,7 @@
   "metric_prefix": "scylla.",
   "metric_to_check": "scylla.node.operation_mode",
   "creates_events": false,
-  "short_description": "Collect per instance database metrics",
+  "short_description": "Track cluster resources, latencies, health, and much more.",
   "guid": "875e4d62-831b-4929-bea1-57e5c7016d65",
   "support": "core",
   "supported_os": [
@@ -22,7 +22,9 @@
   "is_public": false,
   "integration_id": "scylla",
   "assets": {
-    "dashboards": {},
+    "dashboards": {
+      "Scylla Overview": "assets/dashboards/overview.json"
+    },
     "saved_views": {},
     "monitors": {},
     "service_checks": "assets/service_checks.json"

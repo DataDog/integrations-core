@@ -12,37 +12,34 @@ The Agent's Active Directory check is included in the [Datadog Agent][1] package
 
 ### Configuration
 
-1. Edit the `active_directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting your Active Directory performance data.
-
 #### Metric collection
 
-The default setup should already collect metrics for the localhost.
-See the [sample active_directory.d/conf.yaml][3] for all available configuration options.
+1. Edit the `active_directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting your Active Directory performance data. The default setup should already collect metrics for the localhost. See the [sample active_directory.d/conf.yaml][3] for all available configuration options.
 
 2. [Restart the Agent][4]
 
 #### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Add this configuration block to your `active_directory.d/conf.yaml` file to start collecting your Active Directory Logs:
 
-    ```
-      logs:
-        - type: file
-          path: /path/to/my/directory/file.log
-          source: ruby
-          service: <MY_SERVICE>
-    ```
+   ```yaml
+   logs:
+     - type: file
+       path: /path/to/my/directory/file.log
+       source: ruby
+       service: "<MY_SERVICE>"
+   ```
 
-    Change the `path` and `service` parameter values and configure them for your environment.
-    See the [sample active_directory.d/conf.yaml][3] for all available configuration options.
+   Change the `path` and `service` parameter values and configure them for your environment.
+   See the [sample active_directory.d/conf.yaml][3] for all available configuration options.
 
 3. This integration is intended for the [Active Directory Module for Ruby][5]. If you are not using the Ruby module, change the below source value to `active_directory` and configure the `path` for your environment.
 
@@ -55,15 +52,19 @@ See the [sample active_directory.d/conf.yaml][3] for all available configuration
 ## Data Collected
 
 ### Metrics
+
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
+
 The Active Directory check does not include any events.
 
 ### Service Checks
+
 The Active Directory check does not include any service checks.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][8].
 
 [1]: https://app.datadoghq.com/account/settings#agent

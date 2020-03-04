@@ -13,9 +13,9 @@ git clone https://github.com/aerospike/aerospike-client-c.git /tmp/aerospike-cli
 cd /tmp/aerospike-client-c
 
 # This needs to be kept in sync with whatever the Python library was built with.
-# For example, version 3.7.2 was built with version 4.6.3 of the C library, see:
-# https://github.com/aerospike/aerospike-client-python/blob/3.7.2/setup.py#L32-L33
-git checkout 4.4.0
+# For example, version 3.10.0 was built with version 4.6.10 of the C library, see:
+# https://github.com/aerospike/aerospike-client-python/blob/3.10.0/setup.py#L32-L33
+git checkout 4.6.10
 
 git submodule update --init
 make clean

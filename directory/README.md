@@ -1,12 +1,13 @@
 # Directory Check
+
 ## Overview
 
 Capture metrics from directories and files of your choosing. The Agent collects:
 
-  * Number of files
-  * File size
-  * Age of the last modification
-  * Age of the creation
+- Number of files
+- File size
+- Age of the last modification
+- Age of the creation
 
 ## Setup
 
@@ -18,17 +19,16 @@ The Directory check is included in the [Datadog Agent][1] package, so you don't 
 
 1. Edit the `directory.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2] to start collecting Directory performance data. See the [sample directory.d/conf.yaml][3] for all available configuration options.
 
-    ```yaml
-      init_config:
+   ```yaml
+   init_config:
 
-      instances:
-        - directory: "/path/to/directory" # the only required option
-          name: "my_monitored_dir"        # What the Agent will tag this directory's metrics with. Defaults to "directory"
-          pattern: "*.log"                # defaults to "*" (all files)
-          recursive: True                 # default False
-          countonly: False                # set to True to only collect the number of files matching 'pattern'. Useful for very large directories.
-          ignore_missing: False           # set to True to not raise exceptions on missing or inaccessible directories
-    ```
+   instances:
+     ## @param directory - string - required
+     ## The directory to monitor. On windows, please make sure you escape back-slashes otherwise the YAML
+     ## parser fails (eg. - directory: "C:\\Users\\foo\\Downloads").
+     #
+     - directory: "<DIRECTORY_PATH>"
+   ```
 
     Ensure that the user running the Agent process (usually `datadog-agent`) has read access to the directories, subdirectories, and files you configure.
 
@@ -37,6 +37,7 @@ The Directory check is included in the [Datadog Agent][1] package, so you don't 
 2. [Restart the Agent][4].
 
 #### Metrics collection
+
 The Directory check can potentially emit [custom metrics][5], which may impact your [billing][6].
 
 ### Validation
@@ -44,17 +45,21 @@ The Directory check can potentially emit [custom metrics][5], which may impact y
 [Run the Agent's status subcommand][7] and look for `directory` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
+
 The Directory check does not include any events.
 
 ### Service Checks
+
 The Directory check does not include any service checks.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][9].
 
 [1]: https://app.datadoghq.com/account/settings#agent

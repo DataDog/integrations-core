@@ -6,9 +6,9 @@
 
 This check monitors [RabbitMQ][2] through the Datadog Agent. It allows you to:
 
-* Track queue-based stats: queue size, consumer count, unacknowledged messages, redelivered messages, etc
-* Track node-based stats: waiting processes, used sockets, used file descriptors, etc
-* Monitor vhosts for aliveness and number of connections
+- Track queue-based stats: queue size, consumer count, unacknowledged messages, redelivered messages, etc.
+- Track node-based stats: waiting processes, used sockets, used file descriptors, etc.
+- Monitor vhosts for aliveness and number of connections
 
 And more.
 
@@ -32,7 +32,7 @@ Enable the RabbitMQ management plugin. See [RabbitMQ's documentation][4] to enab
 
 Create an Agent user for your default vhost with the following commands:
 
-```
+```text
 rabbitmqctl add_user datadog <SECRET>
 rabbitmqctl set_permissions  -p / datadog "^aliveness-test$" "^amq\.default$" ".*"
 rabbitmqctl set_user_tags datadog monitoring
@@ -48,17 +48,16 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 1. Edit the `rabbitmq.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][6] to start collecting your RabbitMQ metrics. See the [sample rabbitmq.d/conf.yaml][7] for all available configuration options.
 
-    ```yaml
-      init_config:
+   ```yaml
+   init_config:
 
-      instances:
-
-          ## @param rabbit_api_url - string - required
-          ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
-          ## url of the RabbitMQ Managment Plugin (http://www.rabbitmq.com/management.html).
-          #
-        - rabbitmq_api_url: http://localhost:15672/api/
-    ```
+   instances:
+     ## @param rabbit_api_url - string - required
+     ## For every instance a 'rabbitmq_api_url' must be provided, pointing to the api
+     ## url of the RabbitMQ Managment Plugin (http://www.rabbitmq.com/management.html).
+     #
+     - rabbitmq_api_url: http://localhost:15672/api/
+   ```
 
     **Note**: The Agent checks all queues, vhosts, and nodes by default, but you can provide lists or regexes to limit this. See the [rabbitmq.d/conf.yaml][7] for examples.
 
@@ -66,34 +65,34 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 ##### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. To modify the default log file location either set the `RABBITMQ_LOGS` environment variable or add the following to your RabbitMQ configuration file (`/etc/rabbitmq/rabbitmq.conf`):
 
-    ```conf
-      log.dir = /var/log/rabbit
-      log.file = rabbit.log
-    ```
+   ```conf
+     log.dir = /var/log/rabbit
+     log.file = rabbit.log
+   ```
 
 2. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 3. Add this configuration block to your `rabbitmq.d/conf.yaml` file to start collecting your RabbitMQ logs:
 
-    ```yaml
-      logs:
-          - type: file
-            path: /var/log/rabbit/*.log
-            source: rabbitmq
-            service: myservice
-            log_processing_rules:
-              - type: multi_line
-                name: logs_starts_with_equal_sign
-                pattern: "="
-    ```
+   ```yaml
+   logs:
+     - type: file
+       path: /var/log/rabbit/*.log
+       source: rabbitmq
+       service: myservice
+       log_processing_rules:
+         - type: multi_line
+           name: logs_starts_with_equal_sign
+           pattern: "="
+   ```
 
 4. [Restart the Agent][8].
 
@@ -103,27 +102,28 @@ For containerized environments, see the [Autodiscovery Integration Templates][9]
 
 ##### Metric collection
 
-| Parameter            | Value                            |
-| -------------------- | -------------------------------- |
-| `<INTEGRATION_NAME>` | `rabbitmq`                       |
-| `<INIT_CONFIG>`      | blank or `{}`                    |
+| Parameter            | Value                                        |
+| -------------------- | -------------------------------------------- |
+| `<INTEGRATION_NAME>` | `rabbitmq`                                   |
+| `<INIT_CONFIG>`      | blank or `{}`                                |
 | `<INSTANCE_CONFIG>`  | `{"rabbitmq_api_url":"%%host%%:15672/api/"}` |
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection documentation][10].
 
 | Parameter      | Value                                                                                                                                               |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "rabbitmq", "service": "rabbitmq", "log_processing_rules": {"type":"multi_line","name":"logs_starts_with_equal_sign", "pattern": "="}}` |
+| `<LOG_CONFIG>` | `{"source": "rabbitmq", "service": "rabbitmq", "log_processing_rules": {"type":"multi_line","name":"logs_starts_with_equal_sign", "pattern": "="}}` |
 
 ### Validation
 
 [Run the Agent's status subcommand][11] and look for `rabbitmq` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][12] for a list of metrics provided by this integration.
@@ -149,16 +149,18 @@ Returns `CRITICAL` if the Agent cannot connect to RabbitMQ to collect metrics, o
 Need help? Contact [Datadog support][13].
 
 ## Further Reading
+
 Additional helpful documentation, links, and articles:
 
 ### Datadog Blog
-* [Key metrics for RabbitMQ monitoring][14]
-* [Collecting metrics with RabbitMQ monitoring tools][15]
-* [Monitoring RabbitMQ performance with Datadog][16]
+
+- [Key metrics for RabbitMQ monitoring][14]
+- [Collecting metrics with RabbitMQ monitoring tools][15]
+- [Monitoring RabbitMQ performance with Datadog][16]
 
 ### FAQ
-* [Tagging RabbitMQ queues by tag family][17]
 
+- [Tagging RabbitMQ queues by tag family][17]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/rabbitmq/images/rabbitmq_dashboard.png
 [2]: https://www.rabbitmq.com

@@ -8,18 +8,20 @@ This check collects metrics for Mesos masters. If you are looking for the the me
 
 This check collects metrics from Mesos masters for:
 
-* Cluster resources
-* Slaves registered, active, inactive, connected, disconnected, etc
-* Number of tasks failed, finished, staged, running, etc
-* Number of frameworks active, inactive, connected, and disconnected
+- Cluster resources
+- Slaves registered, active, inactive, connected, disconnected, etc
+- Number of tasks failed, finished, staged, running, etc
+- Number of frameworks active, inactive, connected, and disconnected
 
 And many more.
+
 ## Setup
 
 ### Installation
+
 The installation is the same on Mesos with and without DC/OS. Run the datadog-agent container on each of your Mesos master nodes:
 
-```
+```shell
 docker run -d --name datadog-agent \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v /proc/:/host/proc/:ro \
@@ -44,13 +46,13 @@ Datadog Agent >6.0 collects logs from containers. You can either collect all log
 
 Add these extra variables to the Datadog Agent run command to start collecting logs:
 
-* `-e DD_LOGS_ENABLED=true`: this enables the log collection when set to `true`. The Agent now looks for log instructions in configuration files or container labels
-* `-e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true`: this enables log collection for all containers
-* `-v /opt/datadog-agent/run:/opt/datadog-agent/run:rw`: this mounts the directory the Agent uses to store pointers on each container logs to track what have been sent to Datadog or not.
+- `-e DD_LOGS_ENABLED=true`: this enables the log collection when set to `true`. The Agent now looks for log instructions in configuration files or container labels
+- `-e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true`: this enables log collection for all containers
+- `-v /opt/datadog-agent/run:/opt/datadog-agent/run:rw`: this mounts the directory the Agent uses to store pointers on each container logs to track what have been sent to Datadog or not.
 
 This gives the following command:
 
-```
+```shell
 docker run -d --name datadog-agent \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v /proc/:/host/proc/:ro \
@@ -71,11 +73,13 @@ Use the [autodiscovery feature][4] for logs to override the `service` and `sourc
 In Datadog, search for `mesos.cluster` in the Metrics Explorer.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
+
 The Mesos-master check does not include any events.
 
 ### Service Checks
@@ -84,12 +88,12 @@ The Mesos-master check does not include any events.
 Returns `CRITICAL` if the Agent cannot connect to the Mesos Master API to collect metrics, otherwise returns `OK`.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][6].
 
 ## Further Reading
 
-* [Installing Datadog on Mesos with DC/OS][7]
-
+- [Installing Datadog on Mesos with DC/OS][7]
 
 [1]: https://docs.datadoghq.com/integrations/mesos/#mesos-slave-integration
 [2]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mesos_master/images/mesos_dashboard.png

@@ -24,10 +24,10 @@ Edit the `prometheus.d/conf.yaml` file to retrieve metrics from applications tha
 
 Each instance is at least composed of:
 
-| Setting          | Description                                                                                                      |
-|------------------|------------------------------------------------------------------------------------------------------------------|
-| `prometheus_url` | A URL that points to the metric route (**Note:** must be unique)                                                 |
-| `namespace`      | This namespace is prepended to all metrics (to avoid metrics name collision)                                     |
+| Setting          | Description                                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `prometheus_url` | A URL that points to the metric route (**Note:** must be unique)                                                    |
+| `namespace`      | This namespace is prepended to all metrics (to avoid metrics name collision)                                        |
 | `metrics`        | A list of metrics to retrieve as custom metrics in the form `- <METRIC_NAME>` or `- <METRIC_NAME>: <RENAME_METRIC>` |
 
 When listing metrics, it's possible to use the wildcard `*` like this `- <METRIC_NAME>*` to retrieve all matching metrics. **Note:** use wildcards with caution as it can potentially send a lot of custom metrics.
@@ -43,6 +43,7 @@ If `send_monotonic_counter: True`, the Agent sends the deltas of the values in q
 [Run the Agent's `status` subcommand][3] and look for `prometheus` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 All metrics collected by the prometheus check are forwarded to Datadog as custom metrics.
@@ -50,6 +51,7 @@ All metrics collected by the prometheus check are forwarded to Datadog as custom
 Note: Bucket data for a given `<HISTOGRAM_METRIC_NAME>` Prometheus histogram metric are stored in the `<HISTOGRAM_METRIC_NAME>.count` metric within Datadog with the tags `upper_bound` including the name of the buckets. To access the `+Inf` bucket, use `upper_bound:none`.
 
 ### Events
+
 The Prometheus check does not include any events.
 
 ### Service Checks
@@ -57,13 +59,14 @@ The Prometheus check does not include any events.
 The Prometheus check does not include any service checks.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][4].
 
 ## Further Reading
 
-* [Introducing Prometheus support for Datadog Agent 6][5]
-* [Configuring a Prometheus Check][6]
-* [Writing a custom Prometheus Check][7]
+- [Introducing Prometheus support for Datadog Agent 6][5]
+- [Configuring a Prometheus Check][6]
+- [Writing a custom Prometheus Check][7]
 
 [2]: https://github.com/DataDog/integrations-core/blob/master/prometheus/datadog_checks/prometheus/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

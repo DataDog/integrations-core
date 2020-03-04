@@ -27,6 +27,12 @@ def mock_fqdn():
 
 
 @pytest.fixture
+def mock_ticket_file_readable():
+    with mock.patch('os.access', return_value=True):
+        yield
+
+
+@pytest.fixture
 def mock_getconnection():
     def messages_iter():
         with open(os.path.join(common.HERE, 'fixtures', 'metrics.txt'), 'r') as f:

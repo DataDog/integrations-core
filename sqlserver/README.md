@@ -23,34 +23,34 @@ Make sure that your SQL Server instance supports SQL Server authentication by en
 
 1. Create a read-only login to connect to your server:
 
-    ```
-        CREATE LOGIN datadog WITH PASSWORD = '<PASSWORD>';
-        CREATE USER datadog FOR LOGIN datadog;
-        GRANT SELECT on sys.dm_os_performance_counters to datadog;
-        GRANT VIEW SERVER STATE to datadog;
-    ```
+   ```text
+       CREATE LOGIN datadog WITH PASSWORD = '<PASSWORD>';
+       CREATE USER datadog FOR LOGIN datadog;
+       GRANT SELECT on sys.dm_os_performance_counters to datadog;
+       GRANT VIEW SERVER STATE to datadog;
+   ```
 
 2. Create a file `sqlserver.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
-    See the [sample sqlserver.d/conf.yaml][5] for all available configuration options:
+   See the [sample sqlserver.d/conf.yaml][5] for all available configuration options:
 
-    ```yaml
-        init_config:
+   ```yaml
+   init_config:
 
-        instances:
-          - host: <SQL_HOST>,<SQL_PORT>
-            username: datadog
-            password: <YOUR_PASSWORD>
-            connector: odbc # alternative is 'adodbapi'
-            driver: SQL Server
-    ```
+   instances:
+     - host: "<SQL_HOST>,<SQL_PORT>"
+       username: datadog
+       password: "<YOUR_PASSWORD>"
+       connector: odbc # alternative is 'adodbapi'
+       driver: SQL Server
+   ```
 
     See the [example check configuration][5] for a comprehensive description of all options, including how to use custom queries to create your own metrics.
 
-    **Note**: The (default) provider `SQLOLEDB` is being deprecated. To use the newer `MSOLEDBSQL` provider, set the `adoprovider` variable to `MSOLEDBSQL` in your `sqlserver.d/conf.yaml` file after having downloaded the new provider from [Microsoft][6].
-    **Note**: It is also possible to use the Windows Authentication and not specify the username/password with
-    ```yaml
-    connection_string: "Trusted_Connection=yes"
-    ```
+    **Note**: The (default) provider `SQLOLEDB` is being deprecated. To use the newer `MSOLEDBSQL` provider, set the `adoprovider` variable to `MSOLEDBSQL` in your `sqlserver.d/conf.yaml` file after having downloaded the new provider from [Microsoft][6]. It is also possible to use the Windows Authentication and not specify the username/password with:
+
+      ```yaml
+      connection_string: "Trusted_Connection=yes"
+      ```
 
 3. [Restart the Agent][7] to start sending SQL Server metrics to Datadog.
 
@@ -67,6 +67,7 @@ Extra configuration steps are required to get the SQL Server integration running
 [Run the Agent's `status` subcommand][9] and look for `sqlserver` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][10] for a list of metrics provided by this check.
@@ -74,6 +75,7 @@ See [metadata.csv][10] for a list of metrics provided by this check.
 Most of these metrics come from your SQL Server's `sys.dm_os_performance_counters` table.
 
 ### Events
+
 The SQL server check does not include any events.
 
 ### Service Checks
@@ -83,6 +85,7 @@ The SQL server check does not include any events.
 Returns CRITICAL if the Agent cannot connect to SQL Server to collect metrics, otherwise OK.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][11].
 
 ## Development
@@ -99,7 +102,7 @@ To run the tests on Windows, an instance of MSSQL is expected to run on the host
 
 On Linux, a Docker container running a MSSQL instance is automatically started before running the tests. We use unixODBC and [FreeTDS][13] to talk to the database so, depending on the Linux distribution, you need to install additional dependencies on your local dev environment before running the tests. For example these are the installation steps for Ubuntu 14.04:
 
-```
+```shell
 sudo apt-get install unixodbc unixodbc-dev tdsodbc
 ```
 
@@ -107,18 +110,18 @@ sudo apt-get install unixodbc unixodbc-dev tdsodbc
 
 Same as Linux, MSSQL runs in a Docker container and we talk to the database through unixODBC and [FreeTDS][13]. You can use [homebrew][14] to install the required packages:
 
-```
+```shell
 brew install unixodbc
 brew install freetds --with-unixodbc
 ```
 
 ## Further Reading
 
-* [Monitor your Azure SQL Databases with Datadog][15]
-* [Key metrics for SQL Server monitoring][16]
-* [SQL Server monitoring tools][17]
-* [Monitor SQL Server performance with Datadog][18]
-* [Custom SQL Server metrics for detailed monitoring][19]
+- [Monitor your Azure SQL Databases with Datadog][15]
+- [Key metrics for SQL Server monitoring][16]
+- [SQL Server monitoring tools][17]
+- [Monitor SQL Server performance with Datadog][18]
+- [Custom SQL Server metrics for detailed monitoring][19]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard.png
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations

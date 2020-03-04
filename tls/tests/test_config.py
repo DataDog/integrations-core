@@ -78,14 +78,6 @@ def test_validation_data():
     assert isinstance(c.validation_data, tuple)
 
 
-def test_local_cert_loader():
-    c = TLSCheck('tls', {}, [{}])
-
-    assert c._local_cert_loader is None
-    assert c.local_cert_loader == c._local_cert_loader
-    assert callable(c.local_cert_loader)
-
-
 def test_tls_context():
     c = TLSCheck('tls', {}, [{}])
 

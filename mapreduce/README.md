@@ -6,8 +6,8 @@
 
 Get metrics from mapreduce service in real time to:
 
-* Visualize and monitor mapreduce states
-* Be notified about mapreduce failovers and events.
+- Visualize and monitor mapreduce states
+- Be notified about mapreduce failovers and events.
 
 ## Setup
 
@@ -30,7 +30,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
 
 | Parameter            | Value                                                                                         |
-|----------------------|-----------------------------------------------------------------------------------------------|
+| -------------------- | --------------------------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `mapreduce`                                                                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                 |
 | `<INSTANCE_CONFIG>`  | `{"resourcemanager_uri": "https://%%host%%:8088", "cluster_name":"<MAPREDUCE_CLUSTER_NAME>"}` |
@@ -40,13 +40,17 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 [Run the Agent's status subcommand][7] and look for `mapreduce` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
+
 See [metadata.csv][8] for a list of metrics provided by this integration.
 
 ### Events
+
 The Mapreduce check does not include any events.
 
 ### Service Checks
+
 **mapreduce.resource_manager.can_connect**
 
 Returns `CRITICAL` if the Agent is unable to connect to the Resource Manager.
@@ -58,15 +62,15 @@ Returns `CRITICAL` if the Agent is unable to connect to the Application Master.
 Returns `OK` otherwise.
 
 ## Troubleshooting
+
 Need help? Contact [Datadog support][9].
 
 ## Further Reading
 
-* [Hadoop architectural overview][10]
-* [How to monitor Hadoop metrics][11]
-* [How to collect Hadoop metrics][12]
-* [How to monitor Hadoop with Datadog][13]
-
+- [Hadoop architectural overview][10]
+- [How to monitor Hadoop metrics][11]
+- [How to collect Hadoop metrics][12]
+- [How to monitor Hadoop with Datadog][13]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mapreduce/images/mapreduce_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent

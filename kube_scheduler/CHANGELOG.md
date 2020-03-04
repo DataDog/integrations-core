@@ -1,5 +1,10 @@
 # CHANGELOG - Kube_scheduler
 
+## 1.3.0 / 2020-02-22
+
+* [Added] Add auto_conf.yaml files. See [#5678](https://github.com/DataDog/integrations-core/pull/5678).
+* [Fixed] Fix metric validation. See [#5581](https://github.com/DataDog/integrations-core/pull/5581).
+
 ## 1.2.0 / 2020-01-13
 
 * [Added] Make OpenMetrics use the RequestsWrapper. See [#5414](https://github.com/DataDog/integrations-core/pull/5414).

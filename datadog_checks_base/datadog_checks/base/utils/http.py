@@ -108,6 +108,9 @@ class RequestsWrapper(object):
         default_fields['log_requests'] = init_config.get('log_requests', default_fields['log_requests'])
         default_fields['skip_proxy'] = init_config.get('skip_proxy', default_fields['skip_proxy'])
         default_fields['timeout'] = init_config.get('timeout', default_fields['timeout'])
+        default_fields['tls_ignore_warning'] = init_config.get(
+            'tls_ignore_warning', default_fields['tls_ignore_warning']
+        )
 
         # Populate with the default values
         config = {field: instance.get(field, value) for field, value in iteritems(default_fields)}
@@ -299,14 +302,21 @@ class RequestsWrapper(object):
         if persist is None:
             persist = self.persist_connections
 
+        new_options = self.populate_options(options)
+
+        extra_headers = options.pop('extra_headers', None)
+        if extra_headers is not None:
+            new_options['headers'] = new_options['headers'].copy()
+            new_options['headers'].update(extra_headers)
+
         with ExitStack() as stack:
             for hook in self.request_hooks:
                 stack.enter_context(hook())
 
             if persist:
-                return getattr(self.session, method)(url, **self.populate_options(options))
+                return getattr(self.session, method)(url, **new_options)
             else:
-                return getattr(requests, method)(url, **self.populate_options(options))
+                return getattr(requests, method)(url, **new_options)
 
     def populate_options(self, options):
         # Avoid needless dictionary update if there are no options

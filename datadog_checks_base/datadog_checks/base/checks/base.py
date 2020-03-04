@@ -139,7 +139,6 @@ class AgentCheck(object):
         self.init_config = kwargs.get('init_config', {})
         self.agentConfig = kwargs.get('agentConfig', {})
         self.warnings = []
-        self.metric_limiter = None
 
         if len(args) > 0:
             self.name = args[0]
@@ -156,7 +155,8 @@ class AgentCheck(object):
                 # new-style init: the 3rd argument is `instances`
                 self.instances = args[2]
 
-        # Agent 6+ will only have one instance
+        # NOTE: Agent 6+ should pass exactly one instance... But we are not abiding by that rule on our side
+        # everywhere just yet. It's complicated... See: https://github.com/DataDog/integrations-core/pull/5573
         self.instance = self.instances[0] if self.instances else None
 
         # `self.hostname` is deprecated, use `datadog_agent.get_hostname()` instead
@@ -223,22 +223,51 @@ class AgentCheck(object):
         }
 
         # Setup metric limits
-        try:
-            metric_limit = int(self.instance.get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT))
-            # Do not allow to disable limiting if the class has set a non-zero default value
-            if metric_limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
-                metric_limit = self.DEFAULT_METRIC_LIMIT
-                self.warning(
-                    'Setting max_returned_metrics to zero is not allowed, reverting to the default of %s metrics',
-                    self.DEFAULT_METRIC_LIMIT,
-                )
-        except Exception:
-            metric_limit = self.DEFAULT_METRIC_LIMIT
-        if metric_limit > 0:
-            self.metric_limiter = Limiter(self.name, 'metrics', metric_limit, self.warning)
+        self.metric_limiter = self._get_metric_limiter(self.name, instance=self.instance)
 
         # Functions that will be called exactly once (if successful) before the first check run
         self.check_initializations = deque([self.send_config_metadata])
+
+    def _get_metric_limiter(self, name, instance=None):
+        limit = self._get_metric_limit(instance=instance)
+
+        if limit > 0:
+            return Limiter(name, 'metrics', limit, self.warning)
+
+        return None
+
+    def _get_metric_limit(self, instance=None):
+        if instance is None:
+            # NOTE: Agent 6+ will now always pass an instance when calling into a check, but we still need to
+            # account for this case due to some tests not always passing an instance on init.
+            self.log.debug(
+                "No instance provided (this is deprecated!). Reverting to the default metric limit: %s",
+                self.DEFAULT_METRIC_LIMIT,
+            )
+            return self.DEFAULT_METRIC_LIMIT
+
+        max_returned_metrics = instance.get('max_returned_metrics', self.DEFAULT_METRIC_LIMIT)
+
+        try:
+            limit = int(max_returned_metrics)
+        except (ValueError, TypeError):
+            self.warning(
+                "Configured 'max_returned_metrics' cannot be interpreted as an integer: %s. "
+                "Reverting to the default limit: %s",
+                max_returned_metrics,
+                self.DEFAULT_METRIC_LIMIT,
+            )
+            return self.DEFAULT_METRIC_LIMIT
+
+        # Do not allow to disable limiting if the class has set a non-zero default value.
+        if limit == 0 and self.DEFAULT_METRIC_LIMIT > 0:
+            self.warning(
+                "Setting 'max_returned_metrics' to zero is not allowed. Reverting to the default metric limit: %s",
+                self.DEFAULT_METRIC_LIMIT,
+            )
+            return self.DEFAULT_METRIC_LIMIT
+
+        return limit
 
     @staticmethod
     def load_config(yaml_str):
@@ -526,6 +555,9 @@ class AgentCheck(object):
         self.set_metadata(
             'config', self.init_config, section='init_config', whitelist=self.METADATA_DEFAULT_CONFIG_INIT_CONFIG
         )
+
+    def is_metadata_collection_enabled(self):
+        return is_affirmative(datadog_agent.get_config('enable_metadata_collection'))
 
     def set_external_tags(self, external_tags):
         # Example of external_tags format

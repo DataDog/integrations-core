@@ -6,11 +6,11 @@
 
 Identify busy buckets, track cache miss ratios, and more. This Agent check collects metrics like:
 
-* Hard disk and memory used by data
-* Current connections
-* Total objects
-* Operations per second
-* Disk write queue size
+- Hard disk and memory used by data
+- Current connections
+- Total objects
+- Operations per second
+- Disk write queue size
 
 And many more.
 
@@ -30,40 +30,39 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 1. Edit the `couchbase.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][3] to start collecting your Couchbase data. See the [sample couchbase.d/conf.yaml][4] for all available configuration options.
 
-    ```yaml
-      init_config:
+   ```yaml
+   init_config:
 
-      instances:
-          ## @param server - string - required
-          ## The server's url.
-          #
-        - server: http://localhost:8091
-    ```
+   instances:
+     ## @param server - string - required
+     ## The server's url.
+     #
+     - server: http://localhost:8091
+   ```
 
 2. [Restart the Agent][5].
 
 #### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
 
-    ```yaml
-      logs_enabled: true
-    ```
+   ```yaml
+   logs_enabled: true
+   ```
 
 2. Add this configuration block to your `couchbase.d/conf.yaml` file to start collecting your Apache Logs:
 
-    ```yaml
-      logs:
-          - type: file
-            path: /var/log/couchdb/couch.log
-            source: couchdb
-            service: couchbase
-    ```
+   ```yaml
+   logs:
+     - type: file
+       path: /var/log/couchdb/couch.log
+       source: couchdb
+       service: couchbase
+   ```
 
-    Change the `path` and `service` parameter values and configure them for your environment.
-    See the [sample couchbase.d/conf.yaml][4] for all available configuration options.
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample couchbase.d/conf.yaml][4] for all available configuration options.
 
 3. [Restart the Agent][5].
 
@@ -74,19 +73,19 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 ##### Metric collection
 
 | Parameter            | Value                                |
-|----------------------|--------------------------------------|
+| -------------------- | ------------------------------------ |
 | `<INTEGRATION_NAME>` | `couchbase`                          |
 | `<INIT_CONFIG>`      | blank or `{}`                        |
 | `<INSTANCE_CONFIG>`  | `{"server": "http://%%host%%:8091"}` |
 
 ##### Log collection
 
-**Available for Agent v6.5+**
+_Available for Agent versions >6.0_
 
 Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][7].
 
 | Parameter      | Value                                                  |
-|----------------|--------------------------------------------------------|
+| -------------- | ------------------------------------------------------ |
 | `<LOG_CONFIG>` | `{"source": "couchbase", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
@@ -94,6 +93,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 [Run the Agent's `status` subcommand][8] and look for `couchbase` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
 
 See [metadata.csv][9] for a list of metrics provided by this integration.
@@ -104,17 +104,17 @@ The Couchbase check emits an event to Datadog each time the cluster rebalances.
 
 ### Service Checks
 
-* `couchbase.can_connect`:
+- `couchbase.can_connect`:
 
 Returns `Critical` if the Agent cannot connect to Couchbase to collect metrics.
 
-* `couchbase.by_node.cluster_membership`:
+- `couchbase.by_node.cluster_membership`:
 
 Returns `Critical` if the node failed over.
 Returns `Warning` if the node is added to the cluster but is waiting for a rebalance.
 Returns `Ok` otherwise.
 
-* `couchbase.by_node.health_status`:
+- `couchbase.by_node.health`:
 
 Returns `Critical` if the node is unhealthy. Returns `Ok` otherwise.
 
@@ -124,7 +124,7 @@ Need help? Contact [Datadog support][10].
 
 ## Further Reading
 
-* [Monitor key Couchbase metrics][11].
+- [Monitor key Couchbase metrics][11].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/couchbase/images/couchbase_graph.png
 [2]: https://app.datadoghq.com/account/settings#agent

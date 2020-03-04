@@ -5,6 +5,7 @@
 This check monitors [Hyper-V][1] through the Datadog Agent.
 
 ## Setup
+
 ### Installation
 
 The Hyper-V check is included in the [Datadog Agent][3] package. No additional installation is needed on your server.
@@ -41,7 +42,7 @@ Need help? Contact [Datadog support][8].
 
 Additional helpful documentation, links, and articles:
 
-* [Monitor Microsoft Hyper-V with Datadog][9]
+- [Monitor Microsoft Hyper-V with Datadog][9]
 
 [1]: https://docs.microsoft.com/en-us/windows-server/virtualization/hyper-v/hyper-v-on-windows-server
 [3]: https://docs.datadoghq.com/agent/basic_agent_usage/windows

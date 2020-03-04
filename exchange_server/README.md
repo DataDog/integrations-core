@@ -4,7 +4,7 @@
 
 Get metrics from Microsoft Exchange Server
 
-* Visualize and monitor Exchange server performance
+- Visualize and monitor Exchange server performance
 
 ## Setup
 
@@ -23,13 +23,17 @@ The Exchange check is included in the [Datadog Agent][1] package, so you don't n
 [Run the Agent's status subcommand][4] and look for `exchange_server` under the Checks section.
 
 ## Data Collected
+
 ### Metrics
+
 See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Events
+
 The Exchange server check does not include any events.
 
 ### Service Checks
+
 The Exchange server check does not include any service checks.
 
 [1]: https://app.datadoghq.com/account/settings#agent

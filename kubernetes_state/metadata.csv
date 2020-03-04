@@ -63,6 +63,7 @@ kubernetes_state.pdb.pods_healthy,gauge,,,,Current number of healthy pods,1,kube
 kubernetes_state.pdb.pods_total,gauge,,,,Total number of pods counted by this disruption budget,0,kubernetes,k8s_state.pdb.pods_total
 kubernetes_state.pod.ready,gauge,,,,"In association with the `condition` tag, whether the pod is ready to serve requests, e.g. `condition:true` keeps the pods that are in a ready state",1,kubernetes,k8s_state.pod.ready
 kubernetes_state.pod.scheduled,gauge,,,,Reports the status of the scheduling process for the pod with its tags,0,kubernetes,k8s_state.pod.scheduled
+kubernetes_state.pod.unschedulable,gauge,,,,Reports PODs that Kube scheduler cannot schedule on any node,0,kubernetes,k8s_state.pod.unschedulable
 kubernetes_state.pod.status_phase,gauge,,,,"To sum by `phase` to get number of pods in a given phase, and `namespace` to break this down by namespace",0,kubernetes,k8s_state.pod.status_phase
 kubernetes_state.replicaset.replicas,gauge,,,,The number of replicas per ReplicaSet,0,kubernetes,k8s_state.rs.replicas
 kubernetes_state.replicaset.fully_labeled_replicas,gauge,,,,The number of fully labeled replicas per ReplicaSet,0,kubernetes,k8s_state.rs.fully_labeled

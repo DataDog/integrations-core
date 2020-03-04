@@ -1,0 +1,89 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+flink.jobmanager.Status.JVM.CPU.load,gauge,,percent,,The recent CPU usage of the JVM,0,flink,jobmanager cpu load
+flink.jobmanager.Status.JVM.CPU.time,gauge,,second,,The CPU time used by the JVM,0,flink,jobmanager cpu time
+flink.taskmanager.Status.JVM.CPU.load,gauge,,percent,,The recent CPU usage of the JVM,0,flink,taskmanager cpu load
+flink.taskmanager.Status.JVM.CPU.time,gauge,,second,,The CPU time used by the JVM,0,flink,taskmanager cpu time
+flink.jobmanager.Status.JVM.Memory.Heap.Used,gauge,,byte,,The amount of heap memory currently used,0,flink,jobmanager heap used
+flink.jobmanager.Status.JVM.Memory.Heap.Committed,gauge,,byte,,The amount of heap memory guaranteed to be available to the JVM,0,flink,jobmanager heap committed
+flink.jobmanager.Status.JVM.Memory.Heap.Max,gauge,,byte,,The maximum amount of heap memory that can be used for memory management,0,flink,jobmanager heap max
+flink.jobmanager.Status.JVM.Memory.NonHeap.Used,gauge,,byte,,The amount of non-heap memory currently used,0,flink,jobmanager nonheap used
+flink.jobmanager.Status.JVM.Memory.NonHeap.Committed,gauge,,byte,,The amount of non-heap memory guaranteed to be available to the JVM,0,flink,jobmanager nonheap committed
+flink.jobmanager.Status.JVM.Memory.NonHeap.Max,gauge,,byte,,The maximum amount of non-heap memory that can be used for memory management,0,flink,jobmanager nonheap max
+flink.jobmanager.Status.JVM.Memory.Direct.Count,count,,buffer,,The number of buffers in the direct buffer pool,0,flink,jobmanager direct buffers
+flink.jobmanager.Status.JVM.Memory.Direct.MemoryUsed,gauge,,byte,,The amount of memory used by the JVM for the direct buffer pool,0,flink,jobmanager direct used
+flink.jobmanager.Status.JVM.Memory.Direct.TotalCapacity,count,,byte,,The total capacity of all buffers in the direct buffer pool,0,flink,jobmanager direct capacity
+flink.jobmanager.Status.JVM.Memory.Mapped.Count,gauge,,buffer,,The number of buffers in the mapped buffer pool,0,flink,jobmanager mapped count
+flink.jobmanager.Status.JVM.Memory.Mapped.MemoryUsed,gauge,,byte,,The amount of memory used by the JVM for the mapped buffer pool,0,flink,jobmanager mapped used
+flink.jobmanager.Status.JVM.Memory.Mapped.TotalCapacity,count,,byte,,The number of buffers in the mapped buffer pool,0,flink,jobmanager mapped capacity
+flink.taskmanager.Status.JVM.Memory.Heap.Used,gauge,,byte,,The amount of heap memory currently used,0,flink,taskmanager heap used
+flink.taskmanager.Status.JVM.Memory.Heap.Committed,gauge,,byte,,The amount of heap memory guaranteed to be available to the JVM,0,flink,taskmanager heap committed
+flink.taskmanager.Status.JVM.Memory.Heap.Max,gauge,,byte,,The maximum amount of heap memory that can be used for memory management,0,flink,taskmanager heap max
+flink.taskmanager.Status.JVM.Memory.NonHeap.Used,gauge,,byte,,The amount of non-heap memory currently used,0,flink,taskmanager nonheap used
+flink.taskmanager.Status.JVM.Memory.NonHeap.Committed,gauge,,byte,,The amount of non-heap memory guaranteed to be available to the JVM,0,flink,taskmanager nonheap committed
+flink.taskmanager.Status.JVM.Memory.NonHeap.Max,gauge,,byte,,The maximum amount of non-heap memory that can be used for memory management,0,flink,taskmanager nonheap max
+flink.taskmanager.Status.JVM.Memory.Direct.Count,gauge,,buffer,,The number of buffers in the direct buffer pool,0,flink,taskmanager direct buffers
+flink.taskmanager.Status.JVM.Memory.Direct.MemoryUsed,gauge,,byte,,The amount of memory used by the JVM for the direct buffer pool,0,flink,taskmanager direct used
+flink.taskmanager.Status.JVM.Memory.Direct.TotalCapacity,count,,byte,,The total capacity of all buffers in the direct buffer pool,0,flink,taskmanager direct capacity
+flink.taskmanager.Status.JVM.Memory.Mapped.Count,gauge,,,,The number of buffers in the mapped buffer pool,0,flink,taskmanager mapped count
+flink.taskmanager.Status.JVM.Memory.Mapped.MemoryUsed,gauge,,byte,,The amount of memory used by the JVM for the mapped buffer pool,0,flink,taskmanager mapped used
+flink.taskmanager.Status.JVM.Memory.Mapped.TotalCapacity,count,,byte,,The number of buffers in the mapped buffer pool,0,flink,taskmanager mapped capacity
+flink.jobmanager.Status.JVM.Threads.Count,count,,thread,,The total number of live threads,0,flink,jobmanager live threads
+flink.taskmanager.Status.JVM.Threads.Count,count,,thread,,The total number of live threads,0,flink,taskmanager live threads
+flink.jobmanager.Status.JVM.ClassLoader.ClassesLoaded,count,,,,The total number of classes loaded since the start of the JVM,0,flink,jobmanager classes loaded
+flink.jobmanager.Status.JVM.ClassLoader.ClassesUnloaded,count,,,,The total number of classes unloaded since the start of the JVM,0,flink,jobmanager classes unloaded
+flink.taskmanager.Status.JVM.ClassLoader.ClassesLoaded,count,,,,The total number of classes loaded since the start of the JVM,0,flink,taskmanager classes loaded
+flink.taskmanager.Status.JVM.ClassLoader.ClassesUnloaded,count,,,,The total number of classes unloaded since the start of the JVM,0,flink,taskmanager classes unloaded
+flink.taskmanager.Status.Shuffle.Netty.AvailableMemorySegments,gauge,,,,The number of unused memory segments,0,flink,taskmanager shuffle available memory
+flink.taskmanager.Status.Shuffle.Netty.TotalMemorySegments,gauge,,,,The number of allocated memory segments,0,flink,taskmanager ahuffle allocated memory
+flink.task.Shuffle.Netty.Input.Buffers.inputQueueLength,gauge,,buffer,,The number of queued input buffers,0,flink,task input buffers queued
+flink.task.Shuffle.Netty.Input.Buffers.inPoolUsage,gauge,,,,An estimate of the input buffers usage,0,flink,task input buffers used
+flink.task.Shuffle.Netty.Output.Buffers.outputQueueLength,gauge,,buffer,,The number of queued output buffers,0,flink,task output buffers queued
+flink.task.Shuffle.Netty.Output.Buffers.outPoolUsage,gauge,,,,An estimate of the output buffers usage,0,flink,task output buffers used
+flink.task.Shuffle.Netty.Input.numBytesInLocal,count,,byte,,The total number of bytes this task has read from a local source,0,flink,task bytes read local
+flink.task.Shuffle.Netty.Input.numBytesInLocalPerSecond,gauge,,byte,second,The number of bytes this task reads from a local source per second,0,flink,task bytes read local per second
+flink.task.Shuffle.Netty.Input.numBytesInRemote,count,,byte,,The total number of bytes this task has read from a remote source,0,flink,task bytes read remote
+flink.task.Shuffle.Netty.Input.numBytesInRemotePerSecond,gauge,,byte,,The number of bytes this task reads from a remote source per second,0,flink,task bytes read remote per second
+flink.task.Shuffle.Netty.Input.numBuffersInLocal,count,,buffer,,The total number of network buffers this task has read from a local source,0,flink,task buffers read local
+flink.task.Shuffle.Netty.Input.numBuffersInLocalPerSecond,gauge,,,second,The number of network buffers this task reads from a local source per second,0,flink,task buffers read local per second
+flink.task.Shuffle.Netty.Input.numBuffersInRemote,count,,buffer,,The total number of network buffers this task has read from a remote source,0,flink,task buffers read remote
+flink.task.Shuffle.Netty.Input.numBuffersInRemotePerSecond,gauge,,buffer,second,The number of network buffers this task reads from a remote source per second,0,flink,task buffers read remote per numBuffersInLocalPerSecond
+flink.jobmanager.numRegisteredTaskManagers,gauge,,,,The number of registered taskmanagers,0,flink,jobmanager registered taskmanagers
+flink.jobmanager.numRunningJobs,gauge,,job,,The number of running jobs,0,flink,jobmanager running jobs
+flink.jobmanager.taskSlotsTotal,gauge,,,,The total number of task slots,0,flink,jobmanager task slots
+flink.jobmanager.job.restartingTime,gauge,,millisecond,,The time it took to restart the job or how long the current restart has been in progress,0,flink,jobmanager job restart time
+flink.jobmanager.job.uptime,gauge,,millisecond,,The time that the job has been running without interruption. Returns -1 for completed jobs,0,flink,jobmanager job uptime
+flink.jobmanager.job.downtime,gauge,,millisecond,,For jobs currently in a failing/recovering situation- the time elapsed during this outage. Returns 0 for running jobs and -1 for completed jobs,-1,flink,jobmanager job downtime
+flink.jobmanager.job.numRestarts,gauge,,,,"The total number of restarts since this job was submitted, including full restarts and fine-grained restarts",-1,flink,jobmanager job restarts
+flink.jobmanager.job.lastCheckpointDuration,gauge,,millisecond,,The time it took to complete the last checkpoint,0,flink,jobmanager job checkpointt duration
+flink.jobmanager.job.lastCheckpointSize,gauge,,byte,,The total size of the last checkpoint,0,flink,jobmanager job checkpoint size
+flink.jobmanager.job.lastCheckpointExternalPath,gauge,,,,The path where the last external checkpoint was stored,0,flink,jobmanager job checkpoint path
+flink.jobmanager.job.lastCheckpointRestoreTimestamp,gauge,,millisecond,,Timestamp when the last checkpoint was restored at the coordinator,0,flink,jobmanager job checkpoint restore
+flink.jobmanager.job.lastCheckpointAlignmentBuffered,gauge,,byte,,The number of buffered bytes during alignment over all subtasks for the last checkpoint,0,flink,jobmanager job checkpoint buffer alignment
+flink.jobmanager.job.numberOfInProgressCheckpoints,gauge,,,,The number of in progress checkpoints,0,flink,jobmanager job checkpoint progress
+flink.jobmanager.job.numberOfCompletedCheckpoints,count,,,,The number of successfully completed checkpoints,1,flink,jobmanager job checkpoint complete
+flink.jobmanager.job.numberOfFailedCheckpoints,count,,,,The number of failed checkpoints,-1,flink,jobmanager job checkpoint failed
+flink.jobmanager.job.totalNumberOfCheckpoints,count,,,,The number of total checkpoints (in progress completed and failed),0,flink,jobmanager job checkpoint total
+flink.task.checkpointAlignmentTime,gauge,,nanosecond,,The time in nanoseconds that the last barrier alignment took to complete or how long the current alignment has taken so far,0,flink,task checkpoint time
+flink.task.numBytesOut,count,,byte,,The total number of bytes this task has emitted,0,flink,task bytes out
+flink.task.numBytesOutPerSecond,gauge,,byte,second,The number of bytes this task emits per second,0,flink,task bytes out per second
+flink.task.numBuffersOut,count,,buffer,,The total number of network buffers this task has emitted,0,flink,task buffers out
+flink.task.numBuffersOutPerSecond,gauge,,buffer,second,The number of network buffers this task emits per second,0,flink,task buffers out per second
+flink.task.numRecordsIn,count,,record,,The total number of records this task has received,0,flink,task records in
+flink.task.numRecordsInPerSecond,gauge,,record,second,The number of records this task receives per second,0,flink,task records in per second
+flink.task.numRecordsOut,count,,record,,The total number of records this task has emitted,0,flink,task_records_out
+flink.task.numRecordsOutPerSec,gauge,,record,second,The total number of records this task has emitted per second,0,flink,task records out per second
+flink.task.numLateRecordsDropped,count,,record,,The number of records this task has dropped due to arriving late,-1,flink,task records dropped
+flink.task.currentInputWatermark,gauge,,millisecond,,The last watermark this task has received. For tasks with 2 inputs this is the minimum of the last received watermarks,0,flink,task input watermark
+flink.operator.numRecordsIn,count,,record,,The total number of records this operator has received,0,flink,operator records in
+flink.operator.numRecordsInPerSecond,gauge,,record,second,The number of records this operator receives per second,0,flink,operator records in per second
+flink.operator.numRecordsOut,count,,record,,The total number of records this operator has emitted,0,flink,operator records out
+flink.operator.numRecordsOutPerSec,gauge,,record,second,The total number of records this operator has emitted per second,0,flink,operator records out per second
+flink.operator.numLateRecordsDropped,count,,record,,The number of records this operator has dropped due to arriving late,-1,flink,operator records dropped
+flink.operator.currentInputWatermark,gauge,,millisecond,,The last watermark this operator has received. For tasks with 2 inputs this is the minimum of the last received watermarks,0,flink,operator input watermark
+flink.operator.currentInput1Watermark,gauge,,millisecond,,The last watermark this operator has received in its first input. Only for operators with 2 inputs,0,flink,operator input1 watermark
+flink.operator.currentInput2Watermark,gauge,,millisecond,,The last watermark this operator has received in its second input. Only for operators with 2 inputs,0,flink,operator input2 watermark
+flink.operator.currentOutputWatermark,gauge,,millisecond,,The last watermark this operator has emitted,0,flink,operator output watermark
+flink.operator.numSplitsProcessed,count,,,,The total number of InputSplits this data source has processed (if the operator is a data source),0,flink,operator splits proccessed
+flink.operator.commitsSucceeded,count,,commit,,The total number of successful offset commits to Kafka if offset committing is turned on and checkpointing is enabled,1,flink,operator commits succeeded
+flink.operator.commitsFailed,count,,commit,,The total number of offset commit failures to Kafka if offset committing is turned on and checkpointing is enabled. Note that committing offsets back to Kafka is only a means to expose consumer progress so a commit failure does not affect the integrity of Flink's checkpointed partition offsets,-1,flink,operator commits failed
+
