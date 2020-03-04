@@ -29,6 +29,13 @@ except Exception:
     _PSUTIL_MEM_SHARED = False
 
 
+@pytest.fixture
+def reset_process_list_cache():
+    # Force process list cache flush in the next check
+    # ProcessCheck.process_list_cache.last_ts = 0
+    pass
+
+
 class MockProcess(object):
     def __init__(self):
         self.pid = None
@@ -40,6 +47,18 @@ class MockProcess(object):
         return []
 
 
+class NamedMockProcess(object):
+    def __init__(self, name):
+        self.pid = None
+        self._name = name
+
+    def name(self):
+        return self._name
+
+    def cmdline(self):
+        return []
+
+
 def get_psutil_proc():
     return psutil.Process(os.getpid())
 
@@ -48,21 +67,21 @@ def noop_get_pagefault_stats(pid):
     return None
 
 
-def test_psutil_wrapper_simple(aggregator):
+def test_psutil_wrapper_simple(reset_process_list_cache, aggregator):
     # Load check with empty config
     process = ProcessCheck(common.CHECK_NAME, {}, {})
     name = process.psutil_wrapper(get_psutil_proc(), 'name', None, False)
     assert name is not None
 
 
-def test_psutil_wrapper_simple_fail(aggregator):
+def test_psutil_wrapper_simple_fail(reset_process_list_cache, aggregator):
     # Load check with empty config
     process = ProcessCheck(common.CHECK_NAME, {}, {})
     name = process.psutil_wrapper(get_psutil_proc(), 'blah', None, False)
     assert name is None
 
 
-def test_psutil_wrapper_accessors(aggregator):
+def test_psutil_wrapper_accessors(reset_process_list_cache, aggregator):
     # Load check with empty config
     process = ProcessCheck(common.CHECK_NAME, {}, {})
     meminfo = process.psutil_wrapper(get_psutil_proc(), 'memory_info', ['rss', 'vms', 'foo'], False)
@@ -71,7 +90,7 @@ def test_psutil_wrapper_accessors(aggregator):
     assert 'foo' not in meminfo
 
 
-def test_psutil_wrapper_accessors_fail(aggregator):
+def test_psutil_wrapper_accessors_fail(reset_process_list_cache, aggregator):
     # Load check with empty config
     process = ProcessCheck(common.CHECK_NAME, {}, {})
     meminfo = process.psutil_wrapper(get_psutil_proc(), 'memory_infoo', ['rss', 'vms'], False)
@@ -79,7 +98,24 @@ def test_psutil_wrapper_accessors_fail(aggregator):
     assert 'vms' not in meminfo
 
 
-def test_ad_cache(aggregator):
+@patch('psutil.process_iter', side_effect=[[NamedMockProcess("Process 1")], [NamedMockProcess("Process 2")]])
+def test_process_list_cache(reset_process_list_cache, aggregator):
+    config = {
+        'instances': [{'name': 'python', 'search_string': ['python']}, {'name': 'python', 'search_string': ['python']}]
+    }
+    process1 = ProcessCheck(common.CHECK_NAME, {}, {}, [config['instances'][0]])
+    process2 = ProcessCheck(common.CHECK_NAME, {}, {}, [config['instances'][1]])
+
+    process1.check(config['instances'][0])
+    process2.check(config['instances'][1])
+
+    # Should always succeed
+    assert process1.process_list_cache.elements[0].name() == "Process 1"
+    # Fails with 'assert "Process 2" == "Process 1"' if process list cache is not shared
+    assert process2.process_list_cache.elements[0].name() == "Process 1"
+
+
+def test_ad_cache(reset_process_list_cache, aggregator):
     config = {'instances': [{'name': 'python', 'search_string': ['python'], 'ignore_denied_access': 'false'}]}
     process = ProcessCheck(common.CHECK_NAME, {}, {}, config['instances'])
 
@@ -132,7 +168,7 @@ def generate_expected_tags(instance):
 
 
 @patch('psutil.Process', return_value=MockProcess())
-def test_check(mock_process, aggregator):
+def test_check(mock_process, reset_process_list_cache, aggregator):
     (minflt, cminflt, majflt, cmajflt) = [1, 2, 3, 4]
 
     def mock_get_pagefault_stats(pid):
@@ -160,7 +196,7 @@ def test_check(mock_process, aggregator):
 
 
 @patch('psutil.Process', return_value=MockProcess())
-def test_check_collect_children(mock_process, aggregator):
+def test_check_collect_children(mock_process, reset_process_list_cache, aggregator):
     instance = {'name': 'foo', 'pid': 1, 'collect_children': True}
     process = ProcessCheck(common.CHECK_NAME, {}, {})
     process.check(instance)
@@ -168,7 +204,7 @@ def test_check_collect_children(mock_process, aggregator):
 
 
 @patch('psutil.Process', return_value=MockProcess())
-def test_check_filter_user(mock_process, aggregator):
+def test_check_filter_user(mock_process, reset_process_list_cache, aggregator):
     instance = {'name': 'foo', 'pid': 1, 'user': 'Bob'}
     process = ProcessCheck(common.CHECK_NAME, {}, {})
     with patch('datadog_checks.process.ProcessCheck._filter_by_user', return_value={1, 2}):
@@ -177,14 +213,14 @@ def test_check_filter_user(mock_process, aggregator):
     aggregator.assert_metric('system.processes.number', value=2, tags=generate_expected_tags(instance))
 
 
-def test_check_missing_pid(aggregator):
+def test_check_missing_pid(reset_process_list_cache, aggregator):
     instance = {'name': 'foo', 'pid_file': '/foo/bar/baz'}
     process = ProcessCheck(common.CHECK_NAME, {}, {})
     process.check(instance)
     aggregator.assert_service_check('process.up', count=1, status=process.CRITICAL)
 
 
-def test_check_missing_process(aggregator, caplog):
+def test_check_missing_process(reset_process_list_cache, aggregator, caplog):
     caplog.set_level(logging.DEBUG)
     instance = {'name': 'foo', 'search_string': ['fooprocess', '/usr/bin/foo'], 'exact_match': False}
     process = ProcessCheck(common.CHECK_NAME, {}, {})
@@ -193,7 +229,7 @@ def test_check_missing_process(aggregator, caplog):
     assert "Unable to find process named ['fooprocess', '/usr/bin/foo'] among processes" in caplog.text
 
 
-def test_check_real_process(aggregator):
+def test_check_real_process(reset_process_list_cache, aggregator):
     "Check that we detect python running (at least this process)"
     from datadog_checks.utils.platform import Platform
 
@@ -233,7 +269,7 @@ def test_check_real_process(aggregator):
     aggregator.assert_metric('system.processes.cpu.normalized_pct', count=1, tags=expected_tags)
 
 
-def test_check_real_process_regex(aggregator):
+def test_check_real_process_regex(reset_process_list_cache, aggregator):
     "Check to specifically find this python pytest running process using regex."
     from datadog_checks.utils.platform import Platform
 
@@ -273,7 +309,7 @@ def test_check_real_process_regex(aggregator):
     aggregator.assert_metric('system.processes.cpu.normalized_pct', count=1, tags=expected_tags)
 
 
-def test_relocated_procfs(aggregator):
+def test_relocated_procfs(reset_process_list_cache, aggregator):
     import tempfile
     import shutil
     import uuid
@@ -341,7 +377,7 @@ def test_relocated_procfs(aggregator):
     aggregator.assert_service_check('process.up', count=1, tags=expected_tags)
 
 
-def test_process_service_check(aggregator):
+def test_process_service_check(reset_process_list_cache, aggregator):
     process = ProcessCheck(common.CHECK_NAME, {}, {})
 
     process._process_service_check('warning', 3, {'warning': [4, 6], 'critical': [2, 10]}, [])
