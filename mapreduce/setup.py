@@ -26,7 +26,7 @@ def get_requirements(fpath):
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base>=10.4.0'
+CHECKS_BASE_REQ = 'datadog_checks_base>=11.0.0'
 
 setup(
     name='datadog-mapreduce',
