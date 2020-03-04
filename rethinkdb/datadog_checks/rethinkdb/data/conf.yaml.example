@@ -64,7 +64,7 @@ instances:
     # password: <PASSWORD>
 
     ## @param tls_ca_cert - string - optional
-    ## Path to a TLS/SSL client certificate to use when connecting to the RethinkDB server.
+    ## Path to a TLS client certificate to use when connecting to the RethinkDB server.
     ## See also: https://rethinkdb.com/docs/security/#using-tls
     #
     # tls_ca_cert: <TLS_CA_CERT>

@@ -41,7 +41,7 @@ files:
           - name: tls_ca_cert
             required: false
             description: |
-              Path to a TLS/SSL client certificate to use when connecting to the RethinkDB server.
+              Path to a TLS client certificate to use when connecting to the RethinkDB server.
               See also: https://rethinkdb.com/docs/security/#using-tls
             value:
               type: string

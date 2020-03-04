@@ -18,7 +18,7 @@ from .utils import create_file, file_exists, find_check_root
 try:
     from contextlib import ExitStack
 except ImportError:
-    from contextlib2 import ExitStack  # type: ignore
+    from contextlib2 import ExitStack
 
 
 def get_docker_hostname():

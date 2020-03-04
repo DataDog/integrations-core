@@ -13,7 +13,6 @@ def parse_version(rethinkdb_version_string):
     # type: (str) -> str
     """
     Given a RethinkDB version string, extract the SemVer version.
-    https://github.com/rethinkdb/rethinkdb/blob/95cfed8a62f08e3198ac25417c9b6900be8b6877/src/utils.hpp#L117
 
     Example
     -------
@@ -23,7 +22,7 @@ def parse_version(rethinkdb_version_string):
     match = _RETHINKDB_VERSION_STR_REGEX.match(rethinkdb_version_string)
 
     if match is None:
-        message = 'Version string did not match pattern (version_string={!r} pattern={!r})'.format(
+        message = 'Version string {!r} did not match pattern {!r}'.format(
             rethinkdb_version_string, _RETHINKDB_VERSION_STR_REGEX
         )
         raise VersionCollectionFailed(message)

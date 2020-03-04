@@ -74,6 +74,6 @@
             "warning"
         ],
         "name": "Table All Replicas Ready",
-        "description": "Returns `WARNING` if some replicas aren't ready for reads of writes yet (e.g. if backfills are in progress), `OK` otherwise."
+        "description": "Returns `OK` if all replicas are ready for reads and writes, `WARNING` otherwise (e.g. if backfills are in progress)."
     }
 ]

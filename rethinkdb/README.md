@@ -2,9 +2,9 @@
 
 ## Overview
 
-This check monitors [RethinkDB][1] through the Datadog Agent and collects key performance, status and system infrastructure metrics.
+[RethinkDB][1] is a distributed documented-oriented NoSQL database, with first class support for realtime change feeds.
 
-RethinkDB is a distributed documented-oriented NoSQL database, with first class support for realtime change feeds.
+This check monitors a RethinkDB cluster through the Datadog Agent and collects metrics about performance, data availability, cluster configuration, and more.
 
 ## Setup
 
@@ -12,33 +12,32 @@ Follow the instructions below to install and configure this check for an Agent r
 
 ### Installation
 
-The RethinkDB check is included in the [Datadog Agent][3] package.
-No additional installation is needed on your server.
+The RethinkDB check is included in the [Datadog Agent][3] package. No additional installation is needed on your server.
 
 ### Configuration
 
-1. Add a `datadog-agent` user with read-only permissions on the `rethinkdb` database.
-
-    This can be done using the following ReQL commands (see [Permissions and user accounts][4] for details):
+1. Recommended: add a `datadog-agent` user with read-only permissions on the `rethinkdb` database. Use the following ReQL commands, referring to [Permissions and user accounts][4] for details:
 
     ```python
     r.db('rethinkdb').table('users').insert({'id': 'datadog-agent', 'password': '<PASSWORD>'})
     r.db('rethinkdb').grant('datadog-agent', {'read': True})
     ```
 
-2. Edit the `rethinkdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][5]:
+2. Edit the `rethinkdb.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][5]. See the [sample rethinkdb.d/conf.yaml][6] for all available configuration options.
 
     ```yaml
     init_config:
 
     instances:
-      - user: datadog-agent
+      - host: localhost
+        port: 28015
+        user: datadog-agent
         password: <PASSWORD>
     ```
 
-    See the [sample rethinkdb.d/conf.yaml][6] for all available configuration options.
-
 3. [Restart the Agent][7].
+
+**Note**: this integration collects metrics from all servers in the cluster, so you only need a single Agent.
 
 ### Validation
 
@@ -56,7 +55,7 @@ See [metadata.csv][9] for a list of metrics provided by this check.
 - `rethinkdb.table_status.ready_for_outdated_reads`: Returns `OK` if all shards of a table are ready to accept outdated read queries, `WARNING` otherwise.
 - `rethinkdb.table_status.ready_for_reads`: Returns `OK` if all shards of a table are ready to accept read queries, `WARNING` otherwise.
 - `rethinkdb.table_status.ready_for_writes`: Returns `OK` if all shards of a table are ready to accept write queries, `WARNING` otherwise.
-- `rethinkdb.table_status.all_replicas_ready`: Returns `WARNING` if some replicas aren't ready for reads of writes yet (e.g. if backfills are in progress), `OK` otherwise.
+- `rethinkdb.table_status.all_replicas_ready`: Returns `OK` if all replicas are ready for reads and writes, `WARNING` otherwise (e.g. if backfills are in progress).
 
 ### Events
 
