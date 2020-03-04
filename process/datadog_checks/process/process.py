@@ -139,21 +139,23 @@ class ProcessListCache(object):
     last_ts = 0
     cache_duration = DEFAULT_SHARED_PROCESS_LIST_CACHE_DURATION
 
-    @staticmethod
-    def read_lock():
-        return ProcessListCache.lock.read_lock()
+    def read_lock(self):
+        return self.lock.read_lock()
 
-    @staticmethod
-    def write_lock():
-        return ProcessListCache.lock.write_lock()
+    def write_lock(self):
+        return self.lock.write_lock()
+
+    def should_refresh_proclist(self):
+        now = time.time()
+        return now - self.last_ts > self.cache_duration
 
 
 class ProcessCheck(AgentCheck):
+    # Shared process list
+    process_list_cache = ProcessListCache()
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-
-        # Shared process list
-        self.process_list_cache = ProcessListCache()
 
         # ad stands for access denied
         # We cache the PIDs getting this error and don't iterate on them more often than `access_denied_cache_duration``
@@ -189,10 +191,6 @@ class ProcessCheck(AgentCheck):
             init_config.get('shared_process_list_cache_duration', DEFAULT_SHARED_PROCESS_LIST_CACHE_DURATION)
         )
 
-    def should_refresh_proclist(self):
-        now = time.time()
-        return now - self.process_list_cache.last_ts > self.process_list_cache.cache_duration
-
     def should_refresh_ad_cache(self, name):
         now = time.time()
         return now - self.last_ad_cache_ts.get(name, 0) > self.access_denied_cache_duration
@@ -221,7 +219,7 @@ class ProcessCheck(AgentCheck):
         # going to keep it to do the refresh, AND, we don't want multiple
         # threads getting a `yes` result at once
         with self.process_list_cache.write_lock():
-            if self.should_refresh_proclist():
+            if self.process_list_cache.should_refresh_proclist():
                 self.log.debug("Refreshing process list")
                 self.process_list_cache.elements = [proc for proc in psutil.process_iter(attrs=['pid', 'name'])]
                 self.process_list_cache.last_ts = time.time()

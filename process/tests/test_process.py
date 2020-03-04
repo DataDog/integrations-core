@@ -32,8 +32,7 @@ except Exception:
 @pytest.fixture
 def reset_process_list_cache():
     # Force process list cache flush in the next check
-    # ProcessCheck.process_list_cache.last_ts = 0
-    pass
+    ProcessCheck.process_list_cache.last_ts = -ProcessCheck.process_list_cache.cache_duration - 1
 
 
 class MockProcess(object):
