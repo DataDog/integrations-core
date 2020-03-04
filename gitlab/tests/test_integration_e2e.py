@@ -59,20 +59,20 @@ def assert_check(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_check_submit_metadata(aggregator, datadog_agent, raw_version, version_metadata, count):
     with mock.patch('datadog_checks.base.utils.http.requests.Response.json') as g:
-        with mock.patch('datadog_checks.base.AgentCheck.is_metadata_collection_enabled') as m:
-            # mock the api call so that it returns the given version
-            g.return_value = {"version": raw_version}
-            m.return_value = True
+        # mock the api call so that it returns the given version
+        g.return_value = {"version": raw_version}
 
-            instance = AUTH_CONFIG['instances'][0]
-            init_config = AUTH_CONFIG['init_config']
+        datadog_agent.reset()
 
-            gitlab = GitlabCheck('gitlab', init_config, instances=[instance])
-            gitlab.check_id = 'test:123'
+        instance = AUTH_CONFIG['instances'][0]
+        init_config = AUTH_CONFIG['init_config']
 
-            gitlab.check(instance)
-            datadog_agent.assert_metadata('test:123', version_metadata)
-            datadog_agent.assert_metadata_count(count)
+        gitlab = GitlabCheck('gitlab', init_config, instances=[instance])
+        gitlab.check_id = 'test:123'
+
+        gitlab.check(instance)
+        datadog_agent.assert_metadata('test:123', version_metadata)
+        datadog_agent.assert_metadata_count(count)
 
 
 @pytest.mark.usefixtures("dd_environment")
