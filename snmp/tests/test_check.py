@@ -1109,8 +1109,6 @@ def test_router(aggregator):
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
         )
-    for metric in tcp_gauges:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     for metric in udp_counts:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
@@ -1252,8 +1250,6 @@ def test_3850(aggregator):
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
         )
-    for metric in tcp_gauges:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     for metric in udp_counts:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
@@ -1448,9 +1444,6 @@ def test_cisco_nexus(aggregator):
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
         )
-
-    for metric in tcp_gauges:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
     for metric in udp_counts:
         aggregator.assert_metric(
