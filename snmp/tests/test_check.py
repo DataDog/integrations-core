@@ -1013,13 +1013,13 @@ def test_router(aggregator):
         'tcpPassiveOpens',
         'tcpAttemptFails',
         'tcpEstabResets',
+        'tcpCurrEstab',
         'tcpHCInSegs',
         'tcpHCOutSegs',
         'tcpRetransSegs',
         'tcpInErrs',
         'tcpOutRsts',
     ]
-    tcp_gauges = ['tcpCurrEstab']
     udp_counts = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
     if_counts = [
         'ifInErrors',
@@ -1210,13 +1210,13 @@ def test_3850(aggregator):
         'tcpPassiveOpens',
         'tcpAttemptFails',
         'tcpEstabResets',
+        'tcpCurrEstab',
         'tcpHCInSegs',
         'tcpHCOutSegs',
         'tcpRetransSegs',
         'tcpInErrs',
         'tcpOutRsts',
     ]
-    tcp_gauges = ['tcpCurrEstab']
     udp_counts = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
     if_counts = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards']
     ifx_counts = [
@@ -1399,13 +1399,13 @@ def test_cisco_nexus(aggregator):
         'tcpPassiveOpens',
         'tcpAttemptFails',
         'tcpEstabResets',
+        'tcpCurrEstab',
         'tcpHCInSegs',
         'tcpHCOutSegs',
         'tcpRetransSegs',
         'tcpInErrs',
         'tcpOutRsts',
     ]
-    tcp_gauges = ['tcpCurrEstab']
     udp_counts = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
     if_counts = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards']
     ifx_counts = [
