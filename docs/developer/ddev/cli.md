@@ -42,7 +42,7 @@ Flag                  |       Description
 [meta](#meta)         |  Collection of useful utilities
 [release](#release)   |  Manage the release of checks
 [run](#run)           |  Run commands in the proper repo
-[test](#test)         |  Run tests
+[test](#test_1)       |  Run tests
 [validate](#validate) |  Verify certain aspects of the repo
 
   </center>
@@ -59,6 +59,8 @@ Flag            |       Description
 
 
 #### Commands:
+###### [changelog](#changelog) | [integrations](#integrations) | [requirements](#requirements)
+***
 ##### changelog     
 Provide a list of updated checks on a given Datadog Agent version, in changelog form
 
@@ -81,6 +83,55 @@ Flag                  |       Description
 --------------------- | ----------------------------------
   -h, --help  | Show this message and exit.
 
+##### integrations
+
+```bash
+Usage: ddev agent integrations [OPTIONS]
+```
+
+<details><summary> Usage Details </summary>
+Generates a markdown file containing the list of integrations shipped in a
+given Agent release. Agent version numbers are derived inspecting tags on
+`integrations-core` so running this tool might provide unexpected results
+if the repo is not up to date with the Agent release process.
+
+If neither `--since` or `--to` are passed (the most common use case), the
+tool will generate the list for every Agent since version 6.3.0 (before
+that point we don't have enough information to build the log).
+</details>
+
+###### Options:
+Flag            |       Description
+--------------- | ----------------------------------
+--since TEXT    | Initial Agent version
+  --to TEXT     | Final Agent version
+  -w, --write   | Write to file, if omitted contents will be printed to stdout
+  -f, --force   | Replace an existing file
+  -h, --help | Show this message and exit.
+
+##### requirements
+Generate the list of integrations to ship with the Agent and save it to'requirements-agent-release.txt'
+
+```bash
+Usage: ddev agent integrations [OPTIONS]
+```
+
+<details><summary>Usage Details </summary>
+Generates a markdown file containing the list of integrations shipped in a
+given Agent release. Agent version numbers are derived inspecting tags on
+`integrations-core` so running this tool might provide unexpected results
+if the repo is not up to date with the Agent release process.
+
+If neither `--since` or `--to` are passed (the most common use case), the
+tool will generate the list for every Agent since version 6.3.0 (before
+that point we don't have enough information to build the log).
+</details>
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -h, --help  | Show this message and exit.
+
 ### **ci**        
 Collection of CI utilities
 
@@ -94,6 +145,8 @@ Flag            |       Description
   -h, --help | Show this message and exit.
 
 #### Commands:
+###### [setup](#setup) 
+***
 ##### setup  
 Run CI setup scripts
 
@@ -135,7 +188,8 @@ Flag                  |       Description
   -h, --help  | Show this message and exit.
 
 #### Commands:
-
+###### [explore](#explore) | [find](#find) | [restore](#restore)| [set](#set) | [show](#show) | [update](#update)
+***
 ##### explore
 Open the config location in your file manager
 
@@ -251,6 +305,8 @@ Flag                  |       Description
   -h, --help  | Show this message and exit.
 
 #### Commands:
+###### [freeze](#freeze) | [pin](#pin) | [resolve](#resolve)
+***
 ##### freeze   
 Combine all dependencies for the Agent's static environment
 
@@ -310,6 +366,8 @@ Flag                  |       Description
   -h, --help  | Show this message and exit.
 
 #### Commands:
+###### [build](#build) | [push](#push) | [serve](#serve)
+***
 ##### build  
 Build documentation
 
@@ -362,6 +420,8 @@ Flag                  |       Description
   -h, --help  | Show this message and exit.
 
 #### Commands:
+###### [check](#check) | [ls](#ls) | [prune](#prune)| [reload](#reload) | [start](#start) | [stop](#stop) | [test](#test)
+***
 ##### check   
 Run an Agent check
 
@@ -490,7 +550,8 @@ Flag                  |       Description
   -h, --help          | Show this message and exit.
 
 ### Commands:
-  
+###### [catalog](#catalog) | [changes](#changes) | [dash](#dash)| [prom](#prom) | [scripts](#scripts) | [snmo](#snmp)
+***
 #### catalog
 Create a catalog with information about integrations
 
@@ -668,6 +729,8 @@ Flag                  |       Description
 
 
 #### Commands:
+###### [build](#build) | [changelog](#changelog_1) | [make](#make)| [show](#show_1) | [tag](#tag) | [testable](#testable) | [upload](#upload)
+***
 ##### build
 Build a wheel for a check as it is on the repo `HEAD`
 
@@ -931,6 +994,8 @@ Flag                  |       Description
   -h, --help          | Show this message and exit.
 
 #### Commands:
+###### [agent-reqs](#agent-reqs) | [ci](#ci_1) | [config](#config_1)| [dashboard](#dashboards) | [dep](#dep) | [manifest](#manifest) | [metadata](#metadata) | [service-checks](#service-checks)
+***
 ##### agent-reqs      
 Verify that the checks versions are in sync with the requirements-agent-release.txt file
 
