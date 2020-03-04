@@ -20,9 +20,7 @@ def assert_check(aggregator):
         )
 
     # Make sure we're receiving prometheus service checks
-    aggregator.assert_service_check(
-        GitlabCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabCheck.OK, tags=CUSTOM_TAGS
-    )
+    aggregator.assert_service_check(GitlabCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabCheck.OK, tags=CUSTOM_TAGS)
 
     for metric in METRICS:
         aggregator.assert_metric("gitlab.{}".format(metric))

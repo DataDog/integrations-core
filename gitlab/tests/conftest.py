@@ -5,9 +5,9 @@
 import os
 from time import sleep
 
+import mock
 import pytest
 import requests
-import mock
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
@@ -19,7 +19,7 @@ from .common import (
     GITLAB_PROMETHEUS_ENDPOINT,
     GITLAB_TEST_PASSWORD,
     GITLAB_URL,
-    HERE
+    HERE,
 )
 
 
@@ -39,10 +39,7 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'),
         env_vars=env,
-        conditions=[
-            CheckEndpoints(GITLAB_URL, attempts=200),
-            CheckEndpoints(GITLAB_PROMETHEUS_ENDPOINT),
-        ],
+        conditions=[CheckEndpoints(GITLAB_URL, attempts=200), CheckEndpoints(GITLAB_PROMETHEUS_ENDPOINT)],
     ):
         # run pre-test commands
         for _ in range(100):

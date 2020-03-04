@@ -24,8 +24,8 @@ METRICS_MAP = {
     "gitlab_transaction_event_etag_caching_cache_hit_total": "transaction.event_etag_caching_cache_hit_total",
     "gitlab_transaction_event_etag_caching_header_missing_total": "transaction.event_etag_caching_header_missing_total",
     "gitlab_transaction_event_etag_caching_key_not_found_total": "transaction.event_etag_caching_key_not_found_total",
-    "gitlab_transaction_event_etag_caching_middleware_used_total": "transaction.event_etag_caching_middleware_used_total",
-    "gitlab_transaction_event_etag_caching_resource_changed_total": "transaction.event_etag_caching_resource_changed_total",
+    "gitlab_transaction_event_etag_caching_middleware_used_total": "transaction.event_etag_caching_middleware_used_total",  # noqa
+    "gitlab_transaction_event_etag_caching_resource_changed_total": "transaction.event_etag_caching_resource_changed_total",  # noqa
     "gitlab_transaction_event_fork_repository_total": "transaction.event_fork_repository_total",
     "gitlab_transaction_event_import_repository_total": "transaction.event_import_repository_total",
     "gitlab_transaction_event_push_branch_total": "transaction.event_push_branch_total",
