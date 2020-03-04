@@ -1910,7 +1910,8 @@ def test_cisco_asa_5525(aggregator):
     ]
     tcp_gauges = ['tcpCurrEstab']
     udp_counts = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
-
+    if_counts = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards']
+    if_gauges = ['ifAdminStatus', 'ifOperStatus']
     for metric in tcp_counts:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
@@ -1923,6 +1924,15 @@ def test_cisco_asa_5525(aggregator):
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
         )
+
+    tags = ['interface:0x42010aa40033'] + common_tags
+    for metric in if_counts:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+        )
+
+    for metric in if_gauges:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     fru_metrics = ["cefcFRUPowerAdminStatus", "cefcFRUPowerOperStatus", "cefcFRUCurrent"]
     frus = [3, 4, 5, 7, 16, 17, 24, 25]
