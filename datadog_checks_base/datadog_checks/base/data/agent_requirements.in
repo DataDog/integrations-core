@@ -41,7 +41,7 @@ pyasn1==0.4.6
 pycryptodomex==3.9.4
 pyhdb==0.3.4
 pymongo==3.8.0
-pymqi==1.8.0; sys_platform != 'win32' and sys_platform != 'darwin'
+pymqi==1.10.1; sys_platform != 'win32' and sys_platform != 'darwin'
 pymysql==0.9.3
 pyodbc==4.0.26; sys_platform != 'darwin'
 pyro4==4.73; sys_platform == 'win32'
