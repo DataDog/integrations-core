@@ -10,21 +10,51 @@ Follow the instructions below configure this integration for an Agent running on
 
 To install the Tenable integration configuration on your Agent:
 
-**Note**: This step will not be necessary in the next Agent version
+**Note**: This step will not be necessary for Agent version >= 7.18.0.
 
 1. [Install][2] the 1.0 release (`tenable==1.0.0`).
 
 ### Configuration
 
-1. Edit the `tenable.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Tenable nessus logs. See the [sample tenable.d/conf.yaml][3] for available configuration options.
+The Agent tails the Tenable Nessus `webserver` and `backend` logs to collect data on Nessus scans.
 
-2. [Restart the Agent][4].
+#### Log collection
 
-## Data Collected
+_Available for Agent versions >6.0_
 
-### Logs
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-The agent tails the Tenable nessus `webserver` and `backend` logs to collect data on nessus scans
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Uncomment and edit this configuration block at the bottom of your `tenable.d/conf.yaml`:
+
+   See the [sample tenable.d/conf.yaml][3] for available configuration options.
+
+   ```yaml
+      logs:
+       - type: file
+         path: /opt/nessus/var/nessus/logs/backend.log
+         service: nessus_backend
+         source: tenable
+
+       - type: file
+         path: /opt/nessus/var/nessus/logs/www_server.log
+         service: nessus_webserver
+         source: tenable
+   ```
+
+    Customize the `path` and `service` parameter values if necessary for your environment.
+
+3. [Restart the Agent][4].
+
+
+#### Log Data collected
+
+1. Nessus backend logs collect data on scan names, start time, stop time, durations, target(s)
+2. Nessus webserver logs collect data on access logs for neesus webserver including Client IPs, User agents, login attempt/success/failure.
+
 
 ### Metrics
 

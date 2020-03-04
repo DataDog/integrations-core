@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+
 import psycopg2
 import pytest
 
@@ -26,7 +27,7 @@ def test_check(instance, aggregator):
     cur.execute('SELECT * FROM persons;')
 
     # run the check
-    check = PgBouncer('pgbouncer', {}, {})
+    check = PgBouncer('pgbouncer', {}, [instance])
     check.check(instance)
 
     assert_metric_coverage(aggregator)
@@ -79,5 +80,5 @@ def assert_metric_coverage(aggregator):
 
     # Service checks
     sc_tags = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT), 'db:pgbouncer', 'optional:tag1']
-    aggregator.assert_service_check('pgbouncer.can_connect', status=PgBouncer.OK, tags=sc_tags)
+    aggregator.assert_service_check(PgBouncer.SERVICE_CHECK_NAME, status=PgBouncer.OK, tags=sc_tags)
     aggregator.assert_all_metrics_covered()

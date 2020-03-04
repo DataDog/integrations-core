@@ -177,6 +177,11 @@ instances:
     #
     # discovery_allowed_failures: 3
 
+    ## @param workers - integer - optional - default: 5
+    ## Number of workers used for check when using discovery.
+    #
+    # workers: 5
+
     ## @param enforce_mib_constraints - boolean - optional - default: true
     ## If set to false we will not check the values returned meet the MIB constraints.
     #

@@ -14,14 +14,17 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "postgresql.",
-  "metric_to_check": "postgresql.connections",
+  "metric_to_check": [
+    "postgresql.connections",
+    "postgresql.max_connections"
+  ],
   "name": "postgres",
   "process_signatures": [
     "postgres -D",
     "pg_ctl start -l logfile",
     "postgres -c 'pg_ctl start -D -l"
   ],
-  "public_title": "Datadog-Postgres SQL Integration",
+  "public_title": "Datadog-Postgres Integration",
   "short_description": "Collect a wealth of database performance and health metrics.",
   "support": "core",
   "supported_os": [
