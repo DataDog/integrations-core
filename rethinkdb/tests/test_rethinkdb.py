@@ -9,10 +9,10 @@ import pytest
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.rethinkdb import RethinkDBCheck
-from datadog_checks.rethinkdb._config import Config
-from datadog_checks.rethinkdb._connections import Connection
-from datadog_checks.rethinkdb._exceptions import CouldNotConnect
-from datadog_checks.rethinkdb._types import Instance, Metric
+from datadog_checks.rethinkdb.config import Config
+from datadog_checks.rethinkdb.connections import Connection
+from datadog_checks.rethinkdb.exceptions import CouldNotConnect
+from datadog_checks.rethinkdb.types import Instance, Metric
 
 from ._types import ServerName
 from .cluster import temporarily_disconnect_server

@@ -10,7 +10,7 @@ from rethinkdb import r
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.docker import temporarily_stop_service
 from datadog_checks.dev.structures import EnvVars
-from datadog_checks.rethinkdb._connections import Connection, RethinkDBConnection
+from datadog_checks.rethinkdb.connections import Connection, RethinkDBConnection
 
 from .common import (
     AGENT_PASSWORD,

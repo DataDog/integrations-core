@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.rethinkdb._exceptions import VersionCollectionFailed
-from datadog_checks.rethinkdb._version import parse_version
+from datadog_checks.rethinkdb.exceptions import VersionCollectionFailed
+from datadog_checks.rethinkdb.version import parse_version
 
 from .common import MALFORMED_VERSION_STRING_PARAMS
 

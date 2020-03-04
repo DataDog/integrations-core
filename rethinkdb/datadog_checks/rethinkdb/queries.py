@@ -7,8 +7,8 @@ from typing import Any, Iterator, Mapping, Tuple
 
 import rethinkdb
 
-from ._connections import Connection, ConnectionServer
-from ._types import (
+from .connections import Connection, ConnectionServer
+from .types import (
     ClusterStats,
     ConfigTotals,
     CurrentIssuesTotals,

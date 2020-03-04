@@ -6,8 +6,8 @@ from typing import Any
 import pytest
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.rethinkdb._config import Config
-from datadog_checks.rethinkdb._types import Instance
+from datadog_checks.rethinkdb.config import Config
+from datadog_checks.rethinkdb.types import Instance
 
 pytestmark = pytest.mark.unit
 

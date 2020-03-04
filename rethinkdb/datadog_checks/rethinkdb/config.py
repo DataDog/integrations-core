@@ -9,21 +9,21 @@ import rethinkdb
 
 from datadog_checks.base import ConfigurationError
 
-from ._connections import Connection, RethinkDBConnection
-from ._exceptions import CouldNotConnect
-from ._metrics.config import collect_config_totals
-from ._metrics.current_issues import collect_current_issues
-from ._metrics.statistics import (
+from .connections import Connection, RethinkDBConnection
+from .exceptions import CouldNotConnect
+from .metrics.config import collect_config_totals
+from .metrics.current_issues import collect_current_issues
+from .metrics.statistics import (
     collect_cluster_statistics,
     collect_replica_statistics,
     collect_server_statistics,
     collect_table_statistics,
 )
-from ._metrics.statuses import collect_server_status, collect_table_status
-from ._metrics.system_jobs import collect_system_jobs
-from ._queries import QueryEngine
-from ._types import Instance, Metric
-from ._version import parse_version
+from .metrics.statuses import collect_server_status, collect_table_status
+from .metrics.system_jobs import collect_system_jobs
+from .queries import QueryEngine
+from .types import Instance, Metric
+from .version import parse_version
 
 
 class Config(object):

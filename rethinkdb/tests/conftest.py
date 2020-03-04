@@ -6,7 +6,7 @@ from typing import Iterator
 import pytest
 
 from datadog_checks.dev import docker_run
-from datadog_checks.rethinkdb._types import Instance
+from datadog_checks.rethinkdb.types import Instance
 
 from .cluster import setup_cluster
 from .common import AGENT_PASSWORD, AGENT_USER, COMPOSE_ENV_VARS, COMPOSE_FILE, HOST, SERVER_PORTS

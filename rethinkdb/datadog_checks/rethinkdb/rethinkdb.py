@@ -10,10 +10,10 @@ from typing import Any, Callable, Iterator, List
 
 from datadog_checks.base import AgentCheck
 
-from ._config import Config
-from ._connections import Connection
-from ._exceptions import CouldNotConnect, VersionCollectionFailed
-from ._types import Instance, Metric
+from .config import Config
+from .connections import Connection
+from .exceptions import CouldNotConnect, VersionCollectionFailed
+from .types import Instance, Metric
 
 SERVICE_CHECK_CONNECT = 'rethinkdb.can_connect'
 

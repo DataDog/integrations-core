@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Callable
 
-from datadog_checks.rethinkdb._connections import Connection, ConnectionServer
+from datadog_checks.rethinkdb.connections import Connection, ConnectionServer
 
 
 class MockConnection(Connection):

@@ -8,9 +8,9 @@ from typing import Iterator
 
 from datadog_checks.base import AgentCheck
 
-from .._connections import Connection
-from .._queries import QueryEngine
-from .._types import Metric
+from ..connections import Connection
+from ..queries import QueryEngine
+from ..types import Metric
 
 logger = logging.getLogger(__name__)
 
