@@ -210,9 +210,17 @@ def load_jmx_config():
     root = find_check_root(depth=1)
 
     check = basepath(root)
-    jmx_config = path_join(root, 'datadog_checks', check, 'data', 'conf.yaml.example')
+    example_config_path = path_join(root, 'datadog_checks', check, 'data', 'conf.yaml.example')
+    metrics_config_path = path_join(root, 'datadog_checks', check, 'data', 'metrics.yaml')
 
-    return yaml.safe_load(read_file(jmx_config))
+    example_config = yaml.safe_load(read_file(example_config_path))
+    metrics_config = yaml.safe_load(read_file(metrics_config_path))
+
+    # Avoid having to potentially mount multiple files by putting the default metrics
+    # in the user-defined metric location.
+    example_config['init_config']['conf'] = metrics_config['jmx_metrics']
+
+    return example_config
 
 
 def find_check_root(depth=0):
