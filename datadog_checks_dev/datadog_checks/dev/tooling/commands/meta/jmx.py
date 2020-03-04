@@ -38,4 +38,4 @@ def query_endpoint(ctx, host, port, domain):
         info = connection.getMBeanInfo(javax.management.ObjectName(bean_name))
         attrs = info.getAttributes()
         for attr in list(attrs):
-            print("    {}:{}".format(attr.getName(), attr.getDescription()))
+            print("    {:20}: {}".format(attr.getName(), attr.getDescription()))
