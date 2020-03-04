@@ -119,7 +119,8 @@ class Gearman(AgentCheck):
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=str(e), tags=tags)
             raise
 
-        self._collect_metadata(client)
+        if self.is_metadata_collection_enabled():
+            self._collect_metadata(client)
 
     def _collect_metadata(self, client):
         try:
