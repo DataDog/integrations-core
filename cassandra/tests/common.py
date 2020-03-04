@@ -10,23 +10,13 @@ HOST = get_docker_hostname()
 
 """
 # not all metrics will be available in our E2E environment
-# it looks like total blocked is not in the `metrics.yaml` file.
+# it looks like total blocked was not in the `metrics.yaml` file.
 # https://blog.pythian.com/guide-to-cassandra-thread-pools
+    "cassandra.currently_blocked_tasks",
     "cassandra.total_blocked_tasks",
-    "cassandra.total_blocked_tasks.count"
 """
 
 CASSANDRA_E2E_METRICS = [
-    "cassandra.currently_blocked_tasks.count",
-    "cassandra.db.droppable_tombstone_ratio",
-    "cassandra.dropped.one_minute_rate",
-    "cassandra.exceptions.count",
-    "cassandra.latency.75th_percentile",
-    "cassandra.latency.95th_percentile",
-    "cassandra.latency.one_minute_rate",
-    "cassandra.load.count",
-    "cassandra.pending_tasks",
-    "cassandra.total_commit_log_size",
     "cassandra.bloom_filter_false_ratio",
     "cassandra.bytes_flushed.count",
     "cassandra.cas_commit_latency.75th_percentile",
@@ -43,17 +33,26 @@ CASSANDRA_E2E_METRICS = [
     "cassandra.col_update_time_delta_histogram.min",
     "cassandra.compaction_bytes_written.count",
     "cassandra.compression_ratio",
+    "cassandra.currently_blocked_tasks.count",
+    "cassandra.db.droppable_tombstone_ratio",
+    "cassandra.dropped.one_minute_rate",
+    "cassandra.exceptions.count",
     "cassandra.key_cache_hit_rate",
+    "cassandra.latency.75th_percentile",
+    "cassandra.latency.95th_percentile",
+    "cassandra.latency.one_minute_rate",
     "cassandra.live_disk_space_used.count",
     "cassandra.live_ss_table_count",
+    "cassandra.load.count",
     "cassandra.max_partition_size",
     "cassandra.max_row_size",
     "cassandra.mean_partition_size",
     "cassandra.mean_row_size",
-    "cassandra.net.up_endpoint_count",
     "cassandra.net.down_endpoint_count",
+    "cassandra.net.up_endpoint_count",
     "cassandra.pending_compactions",
     "cassandra.pending_flushes.count",
+    "cassandra.pending_tasks",
     "cassandra.range_latency.75th_percentile",
     "cassandra.range_latency.95th_percentile",
     "cassandra.range_latency.one_minute_rate",
@@ -69,6 +68,8 @@ CASSANDRA_E2E_METRICS = [
     "cassandra.ss_tables_per_read_histogram.95th_percentile",
     "cassandra.tombstone_scanned_histogram.75th_percentile",
     "cassandra.tombstone_scanned_histogram.95th_percentile",
+    "cassandra.total_blocked_tasks.count",
+    "cassandra.total_commit_log_size",
     "cassandra.total_disk_space_used.count",
     "cassandra.view_lock_acquire_time.75th_percentile",
     "cassandra.view_lock_acquire_time.95th_percentile",
@@ -82,7 +83,7 @@ CASSANDRA_E2E_METRICS = [
     "cassandra.write_latency.95th_percentile",
     "cassandra.write_latency.99th_percentile",
     "cassandra.write_latency.one_minute_rate",
-    # JVM Metrics -- At this time, collecting these default metrics cannot be excluded from this test
+    # JVM Metrics
     "jvm.buffer_pool.direct.capacity",
     "jvm.buffer_pool.direct.count",
     "jvm.buffer_pool.direct.used",

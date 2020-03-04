@@ -166,6 +166,7 @@ init_config:
         name:
           - PendingTasks
           - CurrentlyBlockedTasks
+          - TotalBlockedTasks
         path:
           - request
     - include:
@@ -181,6 +182,7 @@ init_config:
         name:
           - PendingTasks
           - CurrentlyBlockedTasks
+          - TotalBlockedTasks
         path:
           - internal
     - include:
