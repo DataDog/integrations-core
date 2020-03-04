@@ -42,9 +42,9 @@ class GitlabCheck(OpenMetricsBaseCheck):
 
     def check(self, instance):
         # Metrics collection
-        endpoint = instance.get('prometheus_endpoint')
+        endpoint = instance.get('prometheus_url', instance.get('prometheus_endpoint'))
         if endpoint is None:
-            raise CheckException("Unable to find prometheus_endpoint in config file.")
+            raise CheckException("Unable to find `prometheus_url` or `prometheus_endpoint` in config file.")
 
         scraper_config = self.config_map[endpoint]
         custom_tags = instance.get('tags', [])
@@ -77,7 +77,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
 
         gitlab_instance = deepcopy(instance)
         # gitlab uses 'prometheus_endpoint' and not 'prometheus_url', so we have to rename the key
-        gitlab_instance['prometheus_url'] = instance.get('prometheus_endpoint')
+        gitlab_instance['prometheus_url'] = instance.get('prometheus_url', instance.get('prometheus_endpoint'))
 
         gitlab_instance.update(
             {

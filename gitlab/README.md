@@ -22,9 +22,16 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 ##### Metric collection
 
-1. Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to the Gitlab's metrics endpoint. See the [sample gitlab.d/conf.yaml][4] for all available configuration options.
+1. Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to the Gitlab's metrics [endpoint][13]. See the [sample gitlab.d/conf.yaml][4] for all available configuration options.
 
-    **Note**: The metrics in [metrics.py][11] are collected by default. The `allowed_metrics` item in the `init_config` section allows to specify the legacy metrics that should be extracted. See [Gitlab's documentation][12] for further information about its metric collection
+    **Note**: The metrics in [metrics.py][11] are collected by default. The `allowed_metrics` configuration option in the `init_config` collects specific legacy metrics. See [Gitlab's documentation][12] for further information about its metric collection
+
+2. Allow access to monitoring endpoints by updating your `/etc/gitlab/gitlab.rb` to include the following line:
+
+    ```
+    gitlab_rails['monitoring_whitelist'] = ['127.0.0.0/8', '192.168.0.1']
+    ```
+    **Note** Save and reconfigure Gitlab to see the changes.
 
 2. [Restart the Agent][5]
 
@@ -66,7 +73,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | -------------------- | ------------------------------------------------------------------------------------------ |
 | `<INTEGRATION_NAME>` | `gitlab`                                                                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                              |
-| `<INSTANCE_CONFIG>`  | `{"gitlab_url":"http://%%host%%/", "prometheus_endpoint":"http://%%host%%:10055/metrics"}` |
+| `<INSTANCE_CONFIG>`  | `{"gitlab_url":"http://%%host%%/", "prometheus_endpoint":"http://%%host%%:10055/-/metrics"}` |
 
 ##### Log collection
 
@@ -115,3 +122,4 @@ Need help? Contact [Datadog support][10].
 [10]: https://docs.datadoghq.com/help
 [11]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/metrics.py
 [12]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/gitlab_metrics.html
+[13]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/gitlab_metrics.html#collecting-the-metrics
