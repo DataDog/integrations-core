@@ -213,6 +213,7 @@ Flag                  |       Description
 
 ##### update
 Update the config file with any new fields
+
 ```bash
 Usage: ddev config update [OPTIONS]
 ```
@@ -483,16 +484,176 @@ Collection of useful utilities. This `meta` namespace can be used for an arbitra
 Usage: ddev meta [OPTIONS] COMMAND [ARGS]...
 ```
 
-Options:
-  -h, --help  Show this message and exit.
+#### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -h, --help          | Show this message and exit.
 
-Commands:
-  catalog  Create a catalog with information about integrations
-  changes  Show changes since a specific date
-  dash     Dashboard utilities
-  prom     Prometheus utilities
-  scripts  Miscellaneous scripts that may be useful
-  snmp     SNMP utilities
+### Commands:
+  
+#### catalog
+Create a catalog with information about integrations
+
+```bash
+Usage: ddev meta catalog [OPTIONS] CHECKS...
+```
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -f, --file TEXT     | Output to file (it will be overwritten), you can pass "tmp" to generate a temporary file
+  -h, --help          | Show this message and exit.
+
+#### changes
+Show changes since a specific date
+
+```bash
+Usage: ddev meta changes [OPTIONS] SINCE
+```
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -o, --out           | Output to file
+  --eager             | Skip validation of commit subjects
+  -h, --help          | Show this message and exit.
+
+#### dash     
+Dashboard utilities
+
+```bash
+Usage: ddev meta dash [OPTIONS] COMMAND [ARGS]...
+```
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -h, --help          | Show this message and exit.
+
+##### Commands:
+
+###### export
+Export a Dashboard as JSON
+
+```bash
+Usage: ddev meta dash export [OPTIONS] URL [INTEGRATION]
+```
+#### prom     
+Prometheus utilities
+
+```bash
+Usage: ddev meta prom [OPTIONS] COMMAND [ARGS]...
+```
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -h, --help          | Show this message and exit.
+
+##### Commands:
+###### info   
+Show metric info from a Prometheus endpoint
+
+```bash
+Usage: ddev meta prom info [OPTIONS] ENDPOINT
+```
+
+!!! Example:
+    ```bash
+    $ ddev meta prom info :8080/_status/vars
+    ```
+
+###### parse  
+Interactively parse metric info from a Prometheus endpoint and write to metadata.csv
+
+```bash
+Usage: ddev meta prom parse [OPTIONS] ENDPOINT CHECK
+```
+###### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -x, --here          | Output to the current location
+  -h, --help          | Show this message and exit.
+
+#### scripts
+Miscellaneous scripts that may be useful
+
+```bash
+Usage: ddev meta scripts [OPTIONS] COMMAND [ARGS]...
+```
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -h, --help          | Show this message and exit.
+
+##### Commands:
+###### metrics2md      
+Convert metadata.csv files to Markdown tables
+
+```bash
+Usage: ddev meta scripts metrics2md [OPTIONS] CHECK [FIELDS]...
+```
+<details><summary> Usage Details </summary>
+  Convert a check's metadata.csv file to a Markdown table, which will be
+  copied to your clipboard.
+
+  By default it will be compact and only contain the most useful fields. If
+  you wish to use arbitrary metric data, you may set the check to `cb` to
+  target the current contents of your clipboard.
+</details>
+
+###### remove-labels   
+Remove all labels from an issue or pull request
+
+```bash
+Usage: ddev meta scripts remove-labels [OPTIONS] ISSUE_NUMBER
+```
+ 
+
+!!! tip
+    This is useful when there are too many labels and its state cannot be modified (known GitHub issue).
+    ```bash
+    $ ddev meta scripts remove-labels 5626
+    Success!
+    ```
+###### upgrade-python  
+Upgrade Python version of all test environments
+
+```bash
+Usage: ddev meta scripts upgrade-python [OPTIONS] NEW_VERSION [OLD_VERSION]
+```
+!!! Example 
+    ```bash
+    $ ddev meta scripts upgrade-python 3.8
+    Updated 125 files
+    ```
+
+#### snmp     
+SNMP utilities
+
+```bash
+Usage: ddev meta snmp [OPTIONS] COMMAND [ARGS]...
+```
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -h, --help          | Show this message and exit.
+
+#### Commands:
+
+##### translate-profile  
+Translate MIB name to OIDs in SNMP profiles.
+
+```bash
+Usage: ddev meta snmp translate-profile [OPTIONS] PROFILE_PATH
+```
+
+<details><summary> Usage Details </summary>
+Do OID translation in a SNMP profile. This isn't a plain replacement, as it doesn't preserve comments and indent, but it should automate most of the work.
+
+**You'll need to install pysnmp and pysnmp-mibs manually beforehand.**
+</details>
 
 ### **release**   
 Manage the release of checks
@@ -500,17 +661,215 @@ Manage the release of checks
 ```bash
 Usage: ddev release [OPTIONS] COMMAND [ARGS]...
 ```
-Options:
-  -h, --help  Show this message and exit.
+#### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -h, --help          | Show this message and exit.
 
-Commands:
-  build      Build a wheel for a check
-  changelog  Update the changelog for a check
-  make       Release one or more checks
-  show       Show components of to be released checks
-  tag        Tag the git repo with the current release of a check
-  testable   Create a Jira issue for each change that needs to be tested
-  upload     Build and upload a check to PyPI
+
+#### Commands:
+##### build
+Build a wheel for a check as it is on the repo `HEAD`
+
+```bash
+Usage: ddev release build [OPTIONS] CHECK
+```
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -s, --sdist         |
+  -h, --help          | Show this message and exit.
+
+##### changelog
+Update the changelog for a check
+
+```bash
+Usage: ddev release changelog [OPTIONS] CHECK VERSION [OLD_VERSION]
+```
+
+!!!note
+    Perform the operations needed to update the changelog.
+    This method is supposed to be used by other tasks and not directly.
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+--initial             |
+  -q, --quiet         |
+  -n, --dry-run       |
+  -o, --output-file TEXT | [default: CHANGELOG.md]
+  -tp, --tag-prefix TEXT | [default: v]
+  -h, --help          | Show this message and exit.
+
+##### make
+Release one or more checks
+
+```bash 
+Usage: ddev release make [OPTIONS] CHECKS...
+```
+Perform a set of operations needed to release checks:
+
+  * update the version in `__about__.py`
+  * update the changelog
+  * update the requirements-agent-release.txt file
+  * update in-toto metadata
+  * commit the above changes
+
+You can release everything at once by setting the check to `all`.
+
+!!! tip
+    If you run into issues signing:
+    
+    - Ensure you did `gpg --import <YOUR_KEY_ID>.gpg.pub`
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+--version TEXT        |
+  --new               |  Ensure versions are at 1.0.0
+  --skip-sign         |  Skip the signing of release metadata
+  --sign-only         |  Only sign release metadata
+  --exclude TEXT      |  Comma-separated list of checks to skip
+  -h, --help          |  Show this message and exit.
+
+##### show
+Show components of to be released checks
+
+```bash
+Usage: ddev release show [OPTIONS] COMMAND [ARGS]...
+```
+
+!!! warning
+     To avoid GitHub's public API rate limits, you need to set `github.user`/`github.token` in your config file or use the `DD_GITHUB_USER`/`DD_GITHUB_TOKEN` environment variables.
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -h, --help          | Show this message and exit.
+
+##### Commands:
+###### changes  
+Show all the pending PRs for a given check.
+
+```bash
+Usage: ddev release show changes [OPTIONS] CHECK
+```
+
+###### Options:
+
+ Flag                  |       Description
+---------------------- | ----------------------------------
+  -n, --dry-run |
+  -h, --help    | Show this message and exit.
+
+###### ready    
+Show all the checks that can be released.
+
+```bash
+Usage: ddev release show ready [OPTIONS]
+```
+
+###### Options:
+
+ Flag                  |       Description
+---------------------- | ----------------------------------
+  -q, --quiet   |
+  -h, --help    | Show this message and exit.
+
+##### tag
+ag the HEAD of the git repo with the current release number for a
+  specific check. The tag is pushed to origin by default.
+
+```bash
+Usage: ddev release tag [OPTIONS] CHECK [VERSION]
+```
+!!!tip
+    You can tag everything at once by setting the check to `all`.
+
+!!! note
+    Specifying a different version than the one in `__about__.py` is a maintenance task that should be run under very specific circumstances (e.g. re-align an old release performed on the wrong commit).
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+ --push / --no-push |
+  -n, --dry-run     |
+  -h, --help          | Show this message and exit.
+
+##### testable
+  Create a Jira issue for changes since a previous release (referenced by BASE_REF) that need to be tested for the next release (referenced by TARGET_REF).
+
+```bash
+Usage: ddev release testable [OPTIONS] BASE_REF TARGET_REF
+```
+
+Usage ----- BASE_REF and TARGET_REF can be any valid git references. In
+  practice, you should use either:
+
+  * A tag: `7.16.1`, `7.17.0-rc.4`, ...
+
+  * A release branch: `6.16.x`, `7.17.x`, ...
+
+  * The `master` branch.
+
+!!! error
+    using a minor version shorthand (e.g. `7.16`) is not supported, as it is ambiguous.
+
+!!!example
+    Example: assuming we are working on the release of 7.17.0, we can...
+    * Create cards for changes between a previous Agent release and `master` (useful when preparing an initial RC):
+
+    ```     bash
+    $ ddev release testable 7.16.1 origin/master
+    ```
+    * Create cards for changes between a previous RC and `master` (useful when preparing a new RC, and a separate release branch was not created yet):
+    ```   
+    $ ddev release testable 7.17.0-rc.2 origin/master
+    ```
+    * Create cards for changes between a previous RC and a release branch (useful to only review changes in a release branch that has diverged from `master`):
+    ```      
+    $ ddev release testable 7.17.0-rc.4 7.17.x
+    ```
+    * Create cards for changes between two arbitrary tags, e.g. between RCs:
+    ```
+        $ ddev release testable 7.17.0-rc.4 7.17.0-rc.5
+    ```
+  
+!!!tip 
+    run with `ddev -x release testable` to force the use of the current directory.
+
+!!!warning
+    To avoid GitHub's public API rate limits, you need to set `github.user`/`github.token` in your config file or use the `DD_GITHUB_USER` `DD_GITHUB_TOKEN` environment variables.
+
+###### **To use Jira:**
+    1. Go to `https://id.atlassian.com/manage/api-tokens` and create an API token.
+    2. Run `ddev config set jira.user` and enter your jira email.
+    3. Run `ddev config set jira.token` and paste your API token.
+</details>
+
+##### Options:
+
+Flag                  |       Description
+--------------------- | ----------------------------------
+  --milestone TEXT    | The PR milestone to filter by
+  -n, --dry-run       | Only show the changes
+  -h, --help          | Show this message and exit.
+
+##### upload
+Release a specific check to PyPI as it is on the repo HEAD.
+
+```bash
+Usage: ddev release upload [OPTIONS] CHECK  
+```
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -s, --sdist         |
+  -n, --dry-run       |
+  -h, --help          | Show this message and exit.
+
 
 ### **run**       
 Run commands in the proper repo
@@ -536,28 +895,28 @@ $ ddev test mysql:mysql57,maria10130
 ```
   </details>
 
-Options:
-  -fs, --format-style      Run only the code style formatter
-  -s, --style              Run only style checks
-  -b, --bench              Run only benchmarks
-  --e2e                    Run only end-to-end tests
-  -c, --cov                Measure code coverage
-  -cm, --cov-missing       Show line numbers of statements that were not
-                           executed
-  -j, --junit              Generate junit reports
-  -m, --marker TEXT        Only run tests matching given marker expression
-  -k, --filter TEXT        Only run tests matching given substring expression
-  --pdb                    Drop to PDB on first failure, then end test session
-  -d, --debug              Set the log level to debug
-  -v, --verbose            Increase verbosity (can be used additively)
-  -l, --list               List available test environments
-  --passenv TEXT           Additional environment variables to pass down
-  --changed                Only test changed checks
-  --cov-keep               Keep coverage reports
-  --skip-env               Skip environment creation and assume it is already
-                           running
-  -pa, --pytest-args TEXT  Additional arguments to pytest
-  -h, --help               Show this message and exit.
+#### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -fs, --format-style |     Run only the code style formatter
+  -s, --style         |     Run only style checks
+  -b, --bench         |    Run only benchmarks
+  --e2e               |    Run only end-to-end tests
+  -c, --cov           |    Measure code coverage
+  -cm, --cov-missing  |    Show line numbers of statements that were not executed
+  -j, --junit         |     Generate junit reports
+  -m, --marker TEXT   |     Only run tests matching given marker expression
+  -k, --filter TEXT   |    Only run tests matching given substring expression
+  --pdb               |    Drop to PDB on first failure, then end test session
+  -d, --debug         |    Set the log level to debug
+  -v, --verbose       |    Increase verbosity (can be used additively)
+  -l, --list          |    List available test environments
+  --passenv TEXT      |    Additional environment variables to pass down
+  --changed           |    Only test changed checks
+  --cov-keep          |    Keep coverage reports
+  --skip-env          |    Skip environment creation and assume it is already running
+  -pa, --pytest-args TEXT | Additional arguments to pytest
+  -h, --help          | Show this message and exit.
 
 ### **validate**  
 Verify certain aspects of the repo
@@ -566,15 +925,118 @@ Verify certain aspects of the repo
 Usage: ddev validate [OPTIONS] COMMAND [ARGS]...
 ```
 
-Options:
-  -h, --help  Show this message and exit.
+#### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -h, --help          | Show this message and exit.
 
-Commands:
-  agent-reqs      Verify that the checks versions are in sync with the requirements-agent-release.txt file
-  ci              Validate CI infrastructure configuration
-  config          Validate default configuration files
-  dashboards      Validate dashboard definition JSON files
-  dep             Verify dependencies across all checks
-  manifest        Validate `manifest.json` files
-  metadata        Validate `metadata.csv` files
-  service-checks  Validate `service_checks.json` files
+#### Commands:
+##### agent-reqs      
+Verify that the checks versions are in sync with the requirements-agent-release.txt file
+
+```bash
+Usage: ddev validate agent-reqs [OPTIONS]
+```
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -h, --help          | Show this message and exit.
+
+##### ci              
+Validate CI infrastructure configuration
+
+```bash
+Usage: ddev validate ci [OPTIONS]
+```
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  --fix               | Attempt to fix errors
+  -h, --help          | Show this message and exit.
+
+##### config          
+Validate default configuration files
+
+```bash
+Usage: ddev validate config [OPTIONS] [CHECK]
+```
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  --sync              |  Generate example configuration files based on specifications
+  -h, --help          | Show this message and exit.
+
+##### dashboards      
+Validate dashboard definition JSON files
+
+```bash
+Usage: ddev validate dashboards [OPTIONS]
+```
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -h, --help          | Show this message and exit.
+
+##### dep             
+Verify dependencies across all checks.
+
+```bash
+Usage: ddev validate dep [OPTIONS]
+```
+
+!!!note
+    This command will:
+
+    * Verify the uniqueness of dependency versions across all checks.
+    * Verify all the dependencies are pinned. 
+    * Verify the embedded Python environment defined in the base check and requirements listed in every integration are compatible. 
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -h, --help          | Show this message and exit.
+
+##### manifest        
+Validate `manifest.json` files
+
+```bash
+Usage: ddev validate manifest [OPTIONS]
+```
+
+##### Options:
+Flag                   |       Description
+---------------------- | ----------------------------------
+  --fix                | Attempt to fix errors
+  -i, --include-extras |   Include optional fields
+  -h, --help           | Show this message and exit.
+
+##### metadata        
+Validate `metadata.csv` files
+
+```bash
+Usage: ddev validate metadata [OPTIONS] [CHECK]
+```
+
+!!!note
+    If `check` is specified, only the check will be validated, otherwise all metadata files in the repo will be.
+
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  -h, --help          | Show this message and exit.
+
+
+##### service-checks  
+Validate all `service_checks.json` files
+
+```bash
+Usage: ddev validate service-checks [OPTIONS]
+```
+##### Options:
+Flag                  |       Description
+--------------------- | ----------------------------------
+  --sync              |   Generate example configuration files based on specifications
+  -h, --help          | Show this message and exit.
