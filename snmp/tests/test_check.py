@@ -1913,14 +1913,14 @@ def test_cisco_asa_5525(aggregator):
     if_counts = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards']
     if_gauges = ['ifAdminStatus', 'ifOperStatus']
     ifx_counts = [
-    'ifHCInOctets',
-    'ifHCInUcastPkts',
-    'ifHCInMulticastPkts',
-    'ifHCInBroadcastPkts',
-    'ifHCOutOctets',
-    'ifHCOutUcastPkts',
-    'ifHCOutMulticastPkts',
-    'ifHCOutBroadcastPkts',
+        'ifHCInOctets',
+        'ifHCInUcastPkts',
+        'ifHCInMulticastPkts',
+        'ifHCInBroadcastPkts',
+        'ifHCOutOctets',
+        'ifHCOutUcastPkts',
+        'ifHCOutMulticastPkts',
+        'ifHCOutBroadcastPkts',
     ]
     for metric in tcp_counts:
         aggregator.assert_metric(
@@ -1965,3 +1965,6 @@ def test_cisco_asa_5525(aggregator):
         tags = ['cpu:{}'.format(cpu)] + common_tags
         for metric in cpu_metrics:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+    aggregator.assert_all_metrics_covered()
