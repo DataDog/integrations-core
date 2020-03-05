@@ -20,6 +20,8 @@ SystemMetrics = Query(
                     'BackgroundMovePoolTask': {'name': 'background_pool.move.task.active', 'type': 'gauge'},
                     'BackgroundPoolTask': {'name': 'background_pool.processing.task.active', 'type': 'gauge'},
                     'BackgroundSchedulePoolTask': {'name': 'background_pool.schedule.task.active', 'type': 'gauge'},
+                    'CacheDictionaryUpdateQueueBatches': {'name': 'cache_dictionary.update_queue.batches', 'type': 'gauge'},
+                    'CacheDictionaryUpdateQueueKeys': {'name': 'cache_dictionary.update_queue.keys', 'type': 'gauge'},
                     'ContextLockWait': {'name': 'thread.lock.context.waiting', 'type': 'gauge'},
                     'DelayedInserts': {'name': 'query.insert.delayed', 'type': 'gauge'},
                     'DictCacheRequests': {'name': 'dictionary.request.cache', 'type': 'gauge'},
