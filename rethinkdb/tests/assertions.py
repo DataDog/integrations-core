@@ -5,7 +5,6 @@ from typing import Set
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 
-from ._types import ServerName
 from .common import (
     CLUSTER_STATISTICS_METRICS,
     CURRENT_ISSUES_METRICS,
@@ -25,6 +24,7 @@ from .common import (
     TABLE_STATUS_METRICS,
     TABLE_STATUS_SHARDS_METRICS,
 )
+from .types import ServerName
 
 
 def assert_metrics(aggregator, disconnected_servers=None):

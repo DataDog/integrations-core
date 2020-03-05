@@ -6,7 +6,7 @@ from typing import Dict, List, Set
 
 from datadog_checks.utils.common import get_docker_hostname
 
-from ._types import ServerName
+from .types import ServerName
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))

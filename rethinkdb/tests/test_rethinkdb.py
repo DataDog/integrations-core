@@ -14,7 +14,6 @@ from datadog_checks.rethinkdb.connections import Connection
 from datadog_checks.rethinkdb.exceptions import CouldNotConnect
 from datadog_checks.rethinkdb.types import Instance, Metric
 
-from ._types import ServerName
 from .assertions import assert_metrics
 from .cluster import temporarily_disconnect_server
 from .common import (
@@ -28,6 +27,7 @@ from .common import (
     TLS_CLIENT_CERT,
     TLS_SERVER,
 )
+from .types import ServerName
 from .unit.common import MALFORMED_VERSION_STRING_PARAMS
 from .unit.utils import MockConnection
 
