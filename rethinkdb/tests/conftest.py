@@ -9,7 +9,16 @@ from datadog_checks.dev import docker_run
 from datadog_checks.rethinkdb.types import Instance
 
 from .cluster import setup_cluster
-from .common import AGENT_PASSWORD, AGENT_USER, COMPOSE_ENV_VARS, COMPOSE_FILE, HOST, SERVER_PORTS
+from .common import (
+    AGENT_PASSWORD,
+    AGENT_USER,
+    BOOTSTRAP_SERVER,
+    COMPOSE_ENV_VARS,
+    COMPOSE_FILE,
+    HOST,
+    SERVER_PORTS,
+    SERVERS,
+)
 
 
 @pytest.fixture(scope='session')
@@ -28,12 +37,9 @@ def dd_environment(instance):
     # type: (Instance) -> Iterator
     conditions = [setup_cluster]
 
-    log_patterns = [
-        r'Server ready, "server0".*',
-        r'Connected to server "server1".*',
-        r'Connected to server "server2".*',
-        r'Connected to proxy.*',
-    ]
+    log_patterns = [r'Server ready, "{}".*'.format(BOOTSTRAP_SERVER)]
+    log_patterns += [r'Connected to server "{}".*'.format(server) for server in SERVERS - {BOOTSTRAP_SERVER}]
+    log_patterns += [r'Connected to proxy.*']
 
     with docker_run(COMPOSE_FILE, conditions=conditions, env_vars=COMPOSE_ENV_VARS, log_patterns=log_patterns):
         config = {'instances': [instance]}

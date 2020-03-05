@@ -24,14 +24,14 @@ HOST = get_docker_hostname()
 # Servers.
 # NOTE: server information is tightly coupled to the Docker Compose setup.
 
+SERVERS = {'server0', 'server1', 'server2'}  # type: Set[ServerName]
+BOOTSTRAP_SERVER = 'server0'  # type: ServerName
+SERVER_PORTS = {'server0': 28015, 'server1': 28016, 'server2': 28017, 'proxy': 28018}  # type: Dict[ServerName, int]
 SERVER_TAGS = {
     'server0': ['default', 'us'],
     'server1': ['default', 'us', 'primary'],
     'server2': ['default', 'eu'],
 }  # type: Dict[ServerName, List[str]]
-SERVERS = {'server0', 'server1', 'server2'}  # type: Set[ServerName]
-
-SERVER_PORTS = {'server0': 28015, 'server1': 28016, 'server2': 28017, 'proxy': 28018}  # type: Dict[ServerName, int]
 
 # Users.
 
