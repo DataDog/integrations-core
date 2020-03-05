@@ -1,5 +1,13 @@
 # CHANGELOG - apache
 
+## 1.10.1 / 2020-02-25
+
+* [Fixed] Update datadog_checks_base dependencies. See [#5846](https://github.com/DataDog/integrations-core/pull/5846).
+
+## 1.10.0 / 2020-02-22
+
+* [Added] Add `service` option to default configuration. See [#5805](https://github.com/DataDog/integrations-core/pull/5805).
+
 ## 1.9.5 / 2020-01-17
 
 * [Fixed] Add support for full server version. See [#5484](https://github.com/DataDog/integrations-core/pull/5484).

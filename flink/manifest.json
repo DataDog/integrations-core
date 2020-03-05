@@ -21,11 +21,14 @@
     "dataflow"
   ],
   "type": "check",
-  "is_public": true,
+  "is_public": false,
   "integration_id": "flink",
   "assets": {
     "dashboards": {
       "Flink Overview": "assets/dashboards/overview.json"
+    },
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
     },
     "saved_views": {},
     "monitors": {},

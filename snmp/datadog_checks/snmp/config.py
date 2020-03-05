@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
 from collections import defaultdict
+from typing import Any, Callable, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 from pyasn1.type.univ import OctetString
 from pysnmp import hlapi
@@ -11,11 +12,7 @@ from pysnmp.smi import builder, view
 from datadog_checks.base import ConfigurationError, is_affirmative
 
 from .resolver import OIDResolver
-
-
-def to_oid_tuple(oid_string):
-    """Return a OID tuple from a OID string."""
-    return tuple(map(int, oid_string.lstrip('.').split('.')))
+from .utils import to_oid_tuple
 
 
 class ParsedMetric(object):
@@ -33,7 +30,14 @@ class ParsedTableMetric(object):
 
     __slots__ = ('name', 'index_tags', 'column_tags', 'forced_type')
 
-    def __init__(self, name, index_tags, column_tags, forced_type):
+    def __init__(
+        self,
+        name,  # type: str
+        index_tags,  # type: List[Tuple[str, int]]
+        column_tags,  # type: List[Tuple[str, str]]
+        forced_type=None,  # type: str
+    ):
+        # type: (...) -> None
         self.name = name
         self.index_tags = index_tags
         self.column_tags = column_tags
@@ -49,6 +53,14 @@ class ParsedMetricTag(object):
         self.symbol = symbol
 
 
+def _no_op(*args, **kwargs):
+    # type: (*Any, **Any) -> None
+    """
+    A 'do-nothing' replacement for the `warning()` and `log()` AgentCheck functions, suitable for when those
+    functions are not available (e.g. in unit tests).
+    """
+
+
 class InstanceConfig:
     """Parse and hold configuration about a single instance."""
 
@@ -56,8 +68,23 @@ class InstanceConfig:
     DEFAULT_TIMEOUT = 1
     DEFAULT_ALLOWED_FAILURES = 3
     DEFAULT_BULK_THRESHOLD = 0
+    DEFAULT_WORKERS = 5
 
-    def __init__(self, instance, warning, log, global_metrics, mibs_path, profiles, profiles_by_oid):
+    def __init__(
+        self,
+        instance,  # type: dict
+        warning=_no_op,  # type: Callable[..., None]
+        log=_no_op,  # type: Callable[..., None]
+        global_metrics=None,  # type: List[dict]
+        mibs_path=None,  # type: str
+        profiles=None,  # type: Dict[str, dict]
+        profiles_by_oid=None,  # type: Dict[str, str]
+    ):
+        # type: (...) -> None
+        global_metrics = [] if global_metrics is None else global_metrics
+        profiles = {} if profiles is None else profiles
+        profiles_by_oid = {} if profiles_by_oid is None else profiles_by_oid
+
         self.instance = instance
         self.tags = instance.get('tags', [])
         self.metrics = instance.get('metrics', [])
@@ -68,12 +95,6 @@ class InstanceConfig:
         if is_affirmative(instance.get('use_global_metrics', True)):
             self.metrics.extend(global_metrics)
 
-        if profile:
-            if profile not in profiles:
-                raise ConfigurationError("Unknown profile '{}'".format(profile))
-            self.metrics.extend(profiles[profile]['definition']['metrics'])
-            metric_tags.extend(profiles[profile]['definition'].get('metric_tags', []))
-
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
         self._snmp_engine, mib_view_controller = self.create_snmp_engine(mibs_path)
         self._resolver = OIDResolver(mib_view_controller, self.enforce_constraints)
@@ -81,9 +102,10 @@ class InstanceConfig:
         self.ip_address = None
         self.ip_network = None
 
-        self.discovered_instances = {}
-        self.failing_instances = defaultdict(int)
+        self.discovered_instances = {}  # type: Dict[str, InstanceConfig]
+        self.failing_instances = defaultdict(int)  # type: DefaultDict[str, int]
         self.allowed_failures = int(instance.get('discovery_allowed_failures', self.DEFAULT_ALLOWED_FAILURES))
+        self.workers = int(instance.get('workers', self.DEFAULT_WORKERS))
 
         self.bulk_threshold = int(instance.get('bulk_threshold', self.DEFAULT_BULK_THRESHOLD))
 
@@ -110,7 +132,16 @@ class InstanceConfig:
                 network_address = network_address.decode('utf-8')
             self.ip_network = ipaddress.ip_network(network_address)
 
-        if not self.metrics and not profiles_by_oid:
+        ignored_ip_addresses = instance.get('ignored_ip_addresses', [])
+
+        if not isinstance(ignored_ip_addresses, list):
+            raise ConfigurationError(
+                'ignored_ip_addresses should be a list (got {})'.format(type(ignored_ip_addresses))
+            )
+
+        self.ignored_ip_addresses = set(ignored_ip_addresses)  # type: Set[str]
+
+        if not self.metrics and not profiles_by_oid and not profile:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
         self._auth_data = self.get_auth_data(instance)
@@ -120,15 +151,23 @@ class InstanceConfig:
         if tag_oids:
             self.all_oids.append(tag_oids)
 
+        if profile:
+            if profile not in profiles:
+                raise ConfigurationError("Unknown profile '{}'".format(profile))
+            self.refresh_with_profile(profiles[profile], warning, log)
+            self.add_profile_tag(profile)
+
         self._context_data = hlapi.ContextData(*self.get_context_data(instance))
 
         self._uptime_metric_added = False
 
     def resolve_oid(self, oid):
+        # type: (Any) -> Tuple[Any, Any]
         return self._resolver.resolve_oid(oid)
 
     def refresh_with_profile(self, profile, warning, log):
-        metrics = profile['definition']['metrics']
+        # type: (Dict[str, Any], Callable[..., None], Callable[..., None]) -> None
+        metrics = profile['definition'].get('metrics', [])
         all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics, warning, log)
 
         metric_tags = profile['definition'].get('metric_tags', [])
@@ -149,7 +188,11 @@ class InstanceConfig:
             # because `.all_oids` is a list of lists of OIDs (batches).
             self.all_oids.append(tag_oids)
 
+    def add_profile_tag(self, profile_name):
+        self.tags.append('snmp_profile:{}'.format(profile_name))
+
     def call_cmd(self, cmd, *args, **kwargs):
+        # type: (Any, *Any, **Any) -> Iterator[Any]
         return cmd(self._snmp_engine, self._auth_data, self._transport, self._context_data, *args, **kwargs)
 
     @staticmethod
@@ -171,6 +214,7 @@ class InstanceConfig:
 
     @staticmethod
     def get_transport_target(instance, timeout, retries):
+        # type: (Dict[str, Any], float, int) -> Any
         """
         Generate a Transport target object based on the instance's configuration
         """
@@ -180,6 +224,7 @@ class InstanceConfig:
 
     @staticmethod
     def get_auth_data(instance):
+        # type: (Dict[str, Any]) -> Any
         """
         Generate a Security Parameters object based on the instance's
         configuration.
@@ -220,6 +265,7 @@ class InstanceConfig:
 
     @staticmethod
     def get_context_data(instance):
+        # type: (Dict[str, Any]) -> Tuple[Optional[OctetString], str]
         """
         Generate a Context Parameters object based on the instance's
         configuration.
@@ -238,13 +284,35 @@ class InstanceConfig:
 
         return context_engine_id, context_name
 
-    def parse_metrics(self, metrics, warning, log):
+    def network_hosts(self):
+        # type: () -> Iterator[str]
+        if self.ip_network is None:
+            raise RuntimeError('Expected ip_network to be set to iterate over network hosts.')
+
+        for ip_address in self.ip_network.hosts():
+            host = str(ip_address)
+
+            if host in self.discovered_instances:
+                continue
+
+            if host in self.ignored_ip_addresses:
+                continue
+
+            yield host
+
+    def parse_metrics(
+        self,
+        metrics,  # type: List[Dict[str, Any]]
+        warning,  # type: Callable[..., None]
+        log,  # type: Callable[..., None]
+    ):
+        # type: (...) -> Tuple[list, list, List[Union[ParsedMetric, ParsedTableMetric]]]
         """Parse configuration and returns data to be used for SNMP queries.
 
         `oids` is a dictionnary of SNMP tables to symbols to query.
         """
-        table_oids = {}
-        parsed_metrics = []
+        table_oids = {}  # type: Dict[Tuple[str, str], Tuple[Any, List[Any]]]
+        parsed_metrics = []  # type: List[Union[ParsedMetric, ParsedTableMetric]]
 
         def extract_symbol(mib, symbol):
             if isinstance(symbol, dict):
@@ -354,8 +422,8 @@ class InstanceConfig:
                     except Exception as e:
                         warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
 
-                    parsed_metric = ParsedTableMetric(parsed_metric_name, index_tags, column_tags, forced_type)
-                    parsed_metrics.append(parsed_metric)
+                    parsed_table_metric = ParsedTableMetric(parsed_metric_name, index_tags, column_tags, forced_type)
+                    parsed_metrics.append(parsed_table_metric)
 
             elif 'OID' in metric:
                 oid_object = hlapi.ObjectType(hlapi.ObjectIdentity(metric['OID']))
@@ -391,6 +459,7 @@ class InstanceConfig:
         return all_oids, bulk_oids, parsed_metrics
 
     def parse_metric_tags(self, metric_tags):
+        # type: (List[Dict[str, Any]]) -> Tuple[List[Any], List[ParsedMetricTag]]
         """Parse configuration for global metric_tags."""
         oids = []
         parsed_metric_tags = []
@@ -414,6 +483,7 @@ class InstanceConfig:
         return oids, parsed_metric_tags
 
     def add_uptime_metric(self):
+        # type: () -> None
         if self._uptime_metric_added:
             return
         # Reference sysUpTimeInstance directly, see http://oidref.com/1.3.6.1.2.1.1.3.0

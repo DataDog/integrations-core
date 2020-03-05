@@ -1,3 +1,7 @@
+## Datadog Agent version [7.17.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7171)
+
+* Kubelet [3.5.2](https://github.com/DataDog/integrations-core/blob/master/kubelet/CHANGELOG.md)
+
 ## Datadog Agent version [7.17.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7170)
 
 * Aerospike [1.5.0](https://github.com/DataDog/integrations-core/blob/master/aerospike/CHANGELOG.md)

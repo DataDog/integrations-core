@@ -114,7 +114,7 @@ Returns `Critical` if the node failed over.
 Returns `Warning` if the node is added to the cluster but is waiting for a rebalance.
 Returns `Ok` otherwise.
 
-- `couchbase.by_node.health_status`:
+- `couchbase.by_node.health`:
 
 Returns `Critical` if the node is unhealthy. Returns `Ok` otherwise.
 

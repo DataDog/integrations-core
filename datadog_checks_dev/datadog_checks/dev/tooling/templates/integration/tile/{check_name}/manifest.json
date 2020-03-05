@@ -19,7 +19,7 @@
     ""
   ],
   "type": "check",
-  "is_public": true,
+  "is_public": false,
   "integration_id": "{check_name_kebab}",
   "assets": {{
     "dashboards": {{}},

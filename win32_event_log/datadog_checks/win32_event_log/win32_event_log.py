@@ -115,7 +115,7 @@ class Win32EventLogWMI(WinWMICheck):
 
         filters.append(query)
 
-        wmi_sampler = self._get_wmi_sampler(
+        wmi_sampler = self._get_running_wmi_sampler(
             instance_key,
             self.EVENT_CLASS,
             event_properties,
