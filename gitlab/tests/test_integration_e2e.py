@@ -48,6 +48,6 @@ def test_e2e_legacy(dd_agent_check):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, mock_data):
+def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(CONFIG, rate=True)
     assert_check(aggregator)
