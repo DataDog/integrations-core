@@ -59,7 +59,7 @@ _Available for Agent versions >6.0_
      - type: file
        path: /opt/couchbase/var/lib/couchbase/logs/*.log
        source: couchbase
-       service: couchbase
+       service: <SERVICE>
    ```
 
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample couchbase.d/conf.yaml][4] for all available configuration options.
