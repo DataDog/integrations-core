@@ -1,0 +1,79 @@
+- name: host
+  required: true
+  description: JMX hostname to connect to.
+  value:
+    example: localhost
+    type: string
+- name: port
+  required: true
+  description: JMX port to connect to.
+  value:
+    example: 31000
+    type: integer
+
+    ## @param user - string - optional
+    ## Username to use when connecting to HiveServer2 or Hive Metastore JMX.
+    #
+    # user: <USERNAME>
+
+    ## @param password - string - optional
+    ## Password to use when connecting to HiveServer2 or Hive Metastore JMX.
+    #
+    # password: <PASSWORD>
+
+    ## @param process_name_regex - string - optional
+    ## Instead of specifying a host, and port. The agent can connect using the attach api.
+    ## This requires the JDK to be installed and the path to tools.jar to be set below.
+    ## Note: It needs to be set when process_name_regex parameter is set
+    ##
+    #
+    # process_name_regex: .*process_name.*
+
+    ## @param tools_jar_path - string - optional
+    ## Path to the tool.jar file to use with `process_name_regex` parameter.
+    #
+    # tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+
+    ## @param name - string - optional
+    ## Set your instance name.
+    #
+    # name: hiveserver_instance
+
+    ## @param java_bin_path - string - optional
+    ## java_bin_path should be set if the agent cannot find your java executable
+    #
+    # java_bin_path: <JAVA_PATH>
+
+    ## @param java_options - string - optional
+    ## List of Java JVM options.
+    #
+    # java_options: "-Xmx200m -Xms50m"
+
+    ## @param trust_store_path - string - optional
+    ## trust_store_path should be set if ssl is enabled.
+    ## path to your trusted store
+    #
+    # trust_store_path: <TRUSTSTORE.JKS_PATH>
+
+    ## @param trust_store_password - string - optional
+    ## trust_store_password should be set if ssl is enabled
+    ## password for your TrustStore.jks file
+    #
+    # trust_store_password: <PASSWORD>
+
+    ## @param key_store_path - string - optional
+    ## key_store_path should be set if client authentication is enabled on the target JVM.
+    ## path to your key store
+    #
+    # key_store_path: <KEYSTORE.JKS_PATH>
+
+    ## @param key_store_password - string - optional
+    ## key_store_password should be set if client authentication is enabled on the target JVM.
+    ## password for your KeyStore.jks file
+    #
+    # key_store_password: <PASSWORD>
+
+    ## @param rmi_registry_ssl - boolean - optional - default: false
+    ## Whether or not the agent should connect to the rmi registry using ssl.
+    #
+    # rmi_registry_ssl: false
