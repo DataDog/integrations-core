@@ -15,7 +15,7 @@ def jmx():
 @jmx.command(context_settings=CONTEXT_SETTINGS, short_help='Query endpoint for JMX info')
 @click.argument('host')
 @click.argument('port')
-@click.argument('domain')
+@click.argument('domain', default="*")
 @click.pass_context
 def query_endpoint(ctx, host, port, domain):
     import jpype
@@ -38,4 +38,4 @@ def query_endpoint(ctx, host, port, domain):
         info = connection.getMBeanInfo(javax.management.ObjectName(bean_name))
         attrs = info.getAttributes()
         for attr in list(attrs):
-            print("    {:20}: {}".format(attr.getName(), attr.getDescription()))
+            print("    {:20}: {}".format(str(attr.getName()), attr.getDescription()))
