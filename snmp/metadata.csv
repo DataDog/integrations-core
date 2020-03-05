@@ -163,3 +163,4 @@ snmp.udpHCInDatagrams,count,,datagram,,"[Generic router] [Cisco Nexus] The total
 snmp.udpHCOutDatagrams,count,,datagram,,"[Generic router] [Cisco Nexus] The total number of UDP datagrams sent from this entity, for devices that can transmit more than 1 million UDP datagrams per second.",0,snmp,
 snmp.udpInErrors,count,,datagram,,[Generic router] [Cisco Nexus]The number of received UDP datagrams that could not be delivered for reasons other than the lack of an application at the destination port.,0,snmp,
 snmp.udpNoPorts,count,,datagram,,[Generic router] [Cisco Nexus] The total number of received UDP datagrams for which there was no application at the destination port.,0,snmp,
+snmp.entPhySensorValue,gauge,,,,The most recent measurement obtained by the agent for this sensor.,0,snmp,
