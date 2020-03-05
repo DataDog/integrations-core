@@ -37,7 +37,7 @@ class Config(object):
         # type: (Instance) -> None
         host = instance.get('host', 'localhost')
         port = instance.get('port', 28015)
-        user = instance.get('user')
+        user = instance.get('username')
         password = instance.get('password')
         tls_ca_cert = instance.get('tls_ca_cert')
 

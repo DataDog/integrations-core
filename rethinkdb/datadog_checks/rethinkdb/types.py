@@ -16,7 +16,7 @@ Metric = TypedDict(
 )
 
 Instance = TypedDict(
-    'Instance', {'host': str, 'port': int, 'user': str, 'password': str, 'tls_ca_cert': str}, total=False
+    'Instance', {'host': str, 'port': int, 'username': str, 'password': str, 'tls_ca_cert': str}, total=False
 )
 
 

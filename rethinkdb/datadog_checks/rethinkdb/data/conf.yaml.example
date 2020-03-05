@@ -53,10 +53,10 @@ instances:
     #
     # port: 28015
 
-    ## @param user - string - optional
+    ## @param username - string - optional
     ## The user account to connect as.
     #
-    # user: <USER>
+    # username: <USERNAME>
 
     ## @param password - string - optional
     ## The password for the user account to connect as.

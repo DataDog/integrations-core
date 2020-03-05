@@ -18,7 +18,7 @@ def instance():
     return {
         'host': HOST,
         'port': SERVER_PORTS['server0'],
-        'user': AGENT_USER,
+        'username': AGENT_USER,
         'password': AGENT_PASSWORD,
     }
 

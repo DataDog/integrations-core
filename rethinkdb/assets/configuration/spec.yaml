@@ -26,7 +26,7 @@ files:
               example: 28015
               type: integer
 
-          - name: user
+          - name: username
             required: false
             description: The user account to connect as.
             value:

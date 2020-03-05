@@ -62,10 +62,18 @@ def test_check(aggregator, instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_check_as_admin(aggregator, instance):
+def test_check_without_credentials_uses_admin(aggregator, instance):
     # type: (AggregatorStub, Instance) -> None
+    """
+    Verify that when no credentials are configured (not recommended though), the check still runs successfully provided
+    the admin account doesn't have a password set.
+    """
     instance = instance.copy()
-    instance.pop('user')
+
+    # Remove any credentials so that the Python driver uses the default credentials (i.e. admin account w/o password)
+    # when connecting to RethinkDB.
+    # See: https://rethinkdb.com/api/python/connect/#description
+    instance.pop('username')
     instance.pop('password')
 
     check = RethinkDBCheck('rethinkdb', {}, [instance])
