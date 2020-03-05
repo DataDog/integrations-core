@@ -27,6 +27,13 @@ init_config:
     #           alias: hive.server.open_operations
     #           metric_type: gauge
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
 instances:
 
     ## @param host - string - required
