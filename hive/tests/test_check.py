@@ -4,7 +4,16 @@
 
 import pytest
 
+import time
 
+METASTORE_METRICS = [
+    "hive.metastore.api.get_all_tables.active_call",
+    "hive.metastore.api.get_all_functions.active_call",
+    "hive.metastore.open_connections",
+    "hive.metastore.partition.init",
+    "hive.metastore.api.get_all_databases.active_call",
+    "hive.metastore.api.init.active_call",
+]
 @pytest.mark.e2e
 def test(dd_agent_check):
     instance = {}
