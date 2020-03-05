@@ -190,7 +190,7 @@ def collect_replica_statistics(engine, conn):
         }
 
         yield {
-            'type': 'gauge',
+            'type': 'monotonic_count',
             'name': 'rethinkdb.stats.table_server.read_docs_total',
             'value': query_engine['read_docs_total'],
             'tags': tags,
@@ -204,7 +204,7 @@ def collect_replica_statistics(engine, conn):
         }
 
         yield {
-            'type': 'gauge',
+            'type': 'monotonic_count',
             'name': 'rethinkdb.stats.table_server.written_docs_total',
             'value': query_engine['written_docs_total'],
             'tags': tags,
@@ -225,7 +225,7 @@ def collect_replica_statistics(engine, conn):
         }
 
         yield {
-            'type': 'gauge',
+            'type': 'monotonic_count',
             'name': 'rethinkdb.stats.table_server.disk.read_bytes_total',
             'value': storage_engine['disk']['read_bytes_total'],
             'tags': tags,
@@ -239,7 +239,7 @@ def collect_replica_statistics(engine, conn):
         }
 
         yield {
-            'type': 'gauge',
+            'type': 'monotonic_count',
             'name': 'rethinkdb.stats.table_server.disk.written_bytes_total',
             'value': storage_engine['disk']['written_bytes_total'],
             'tags': tags,
