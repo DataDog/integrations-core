@@ -200,6 +200,7 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
 init_config:
 
   ## @param allowed_metrics - list of strings - optional
