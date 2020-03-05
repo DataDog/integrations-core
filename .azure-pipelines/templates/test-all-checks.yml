@@ -50,6 +50,9 @@ jobs:
     - checkName: cacti
       displayName: Cacti
       os: linux
+    - checkName: cassandra
+      displayName: Cassandra
+      os: linux
     - checkName: cassandra_nodetool
       displayName: Cassandra Nodetool
       os: linux
