@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 1.14.0-rc.1 / 2020-03-05
+
+* [Fixed] Replace deprecated method `database_names` by `list_database_names`. See [#5864](https://github.com/DataDog/integrations-core/pull/5864).
+
 ## 1.13.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
