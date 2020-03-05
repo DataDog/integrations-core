@@ -1,7 +1,7 @@
 version: '3.5'
 services:
     airflow_webserver:
-        #network_mode: host  # uncomment for QA, more info in test/README.md
+        network_mode: host  # Necessary for Airflow to send statsd metrics to DogStatsD
         build: .
         restart: always
         volumes:
