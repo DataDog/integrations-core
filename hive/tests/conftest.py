@@ -19,4 +19,7 @@ def dd_environment():
         log_patterns=[r'datanode:\(\d+\) is available', 'Starting Hive Metastore Server', 'Starting HiveServer2'],
         sleep=2,
     ):
-        yield load_jmx_config(), {'use_jmx': True}
+        instance = {'host': 'localhost', 'port': 8809}
+        config = load_jmx_config()
+        config['instances'] = [instance]
+        yield config, {'use_jmx': True}
