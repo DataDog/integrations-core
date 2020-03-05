@@ -4,6 +4,8 @@
 import os
 from typing import Dict, List, Set
 
+import pytest
+
 from datadog_checks.utils.common import get_docker_hostname
 
 from .types import ServerName
@@ -211,3 +213,13 @@ COMPOSE_ENV_VARS = env_vars = {
     'RETHINKDB_TLS_DRIVER_KEY': TLS_DRIVER_KEY,
     'RETHINKDB_TLS_DRIVER_CERT': TLS_DRIVER_CERT,
 }
+
+
+# Pytest common test data.
+
+MALFORMED_VERSION_STRING_PARAMS = [
+    pytest.param('rethinkdb 2.3.3', id='no-compilation-string'),
+    pytest.param('rethinkdb (GCC 4.9.2)', id='no-version'),
+    pytest.param('rethinkdb', id='prefix-only'),
+    pytest.param('abc 2.4.0~0bionic (GCC 4.9.2)', id='wrong-prefix'),
+]

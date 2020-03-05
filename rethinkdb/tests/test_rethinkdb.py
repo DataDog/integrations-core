@@ -21,6 +21,7 @@ from .common import (
     HEROES_TABLE,
     HEROES_TABLE_SERVERS,
     HOST,
+    MALFORMED_VERSION_STRING_PARAMS,
     RETHINKDB_VERSION,
     SERVER_PORTS,
     TABLE_STATUS_SERVICE_CHECKS,
@@ -28,8 +29,7 @@ from .common import (
     TLS_SERVER,
 )
 from .types import ServerName
-from .unit.common import MALFORMED_VERSION_STRING_PARAMS
-from .unit.utils import MockConnection
+from .utils import MockConnection
 
 
 def _get_connect_service_check_tags(server='server0'):
