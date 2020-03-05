@@ -26,7 +26,7 @@ def test_version_metadata(check, aggregator, datadog_agent):
     check.check(common.INSTANCE)
 
     # hardcoded because we only support one docker image for test env
-    raw_version = '1.0.6'
+    raw_version = common.GEARMAND_VERSION
 
     major, minor, patch = raw_version.split('.')
     version_metadata = {
