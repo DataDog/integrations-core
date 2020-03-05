@@ -150,9 +150,7 @@ class AggregatorStub(object):
             if tag in metric.tags:
                 candidates.append(metric)
 
-        msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(
-            metric_name, count, at_least
-        )
+        msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(metric_name, count, at_least)
         if count is not None:
             assert len(candidates) == count, msg
         else:
@@ -173,9 +171,7 @@ class AggregatorStub(object):
             else:
                 candidates.append(e)
 
-        msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(
-            msg_text, count, at_least
-        )
+        msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(msg_text, count, at_least)
         if count is not None:
             assert len(candidates) == count, msg
         else:
@@ -395,9 +391,7 @@ class AggregatorStub(object):
             if len(gtags) > 0:
                 candidates.append(metric)
 
-        msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(
-            metric_name, count, at_least
-        )
+        msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(metric_name, count, at_least)
         if count is not None:
             assert len(candidates) == count, msg
         else:
