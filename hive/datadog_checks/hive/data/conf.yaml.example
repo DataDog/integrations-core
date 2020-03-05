@@ -21,10 +21,10 @@ init_config:
     #
     # conf:
     #   - include:
-    #       bean: metrics:name=open_operations
+    #       bean: <BEAN_NAME>
     #       attribute:
-    #         Count:
-    #           alias: hive.server.open_operations
+    #         MyAttribute:
+    #           alias: my.metric.name
     #           metric_type: gauge
 
     ## @param service - string - optional
