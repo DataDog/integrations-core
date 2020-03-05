@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import re
+
 import psycopg2 as pg
 import psycopg2.extras as pgextras
 from six.moves.urllib.parse import urlparse
@@ -162,3 +164,20 @@ class PgBouncer(AgentCheck):
         self.service_check(
             self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._get_service_checks_tags(), message=message,
         )
+        self._set_metadata()
+
+    def _set_metadata(self):
+        if self.is_metadata_collection_enabled():
+            pgbouncer_version = self.get_version()
+            self.set_metadata('version', pgbouncer_version)
+
+    def get_version(self):
+        db = self._get_connection()
+        regex = r'\d\.\d\.\d'
+        with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
+            cursor.execute('SHOW VERSION;')
+            if db.notices:
+                res = re.findall(regex, db.notices[0])
+                if res:
+                    return res[0]
+            return None
