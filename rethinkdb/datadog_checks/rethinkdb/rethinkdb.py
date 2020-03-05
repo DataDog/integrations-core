@@ -72,6 +72,15 @@ class RethinkDBCheck(AgentCheck):
             submit = getattr(self, metric['type'])  # type: Callable
             submit(metric['name'], value=metric['value'], tags=metric['tags'])
 
+    def submit_version_metadata(self, config, conn):
+        # type: (Config, Connection) -> None
+        try:
+            version = config.collect_connected_server_version(conn)
+        except VersionCollectionFailed as exc:
+            self.log.error(exc)
+        else:
+            self.set_metadata('version', version)
+
     def check(self, instance):
         # type: (Instance) -> None
         config = self.config
@@ -81,9 +90,5 @@ class RethinkDBCheck(AgentCheck):
             for metric in config.collect_metrics(conn):
                 self.submit_metric(metric)
 
-            try:
-                version = config.collect_connected_server_version(conn)
-            except VersionCollectionFailed as exc:
-                self.log.error(exc)
-            else:
-                self.set_metadata('version', version)
+            if self.is_metadata_collection_enabled():
+                self.submit_version_metadata(config, conn)
