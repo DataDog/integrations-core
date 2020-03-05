@@ -1,5 +1,8 @@
 # CHANGELOG - mongo
 
+## 1.14.0-rc.2 / 2020-03-05
+
+
 ## 1.14.0-rc.1 / 2020-03-05
 
 * [Fixed] Replace deprecated method `database_names` by `list_database_names`. See [#5864](https://github.com/DataDog/integrations-core/pull/5864).
