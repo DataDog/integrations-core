@@ -4,22 +4,26 @@
   value:
     example: localhost
     type: string
+
 - name: port
   required: true
   description: JMX port to connect to.
   value:
     example: 8686
     type: integer
+
 - name: user
   description: User to use when connecting to JMX.
   value:
     example: <USERNAME>
     type: string
+
 - name: password
   description: Password to use when connecting to JMX.
   value:
     example: <PASSWORD>
     type: string
+
 - name: process_name_regex
   description: |
     Instead of specifying a host, and port. The agent can connect using the attach api.
@@ -28,20 +32,24 @@
     e.g. .*process_name.*
   value:
     type: string
+
 - name: tools_jar_path
   description: |
     Path to the tool.jar file to use with `process_name_regex` parameter.
     e.g. /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
   value:
     type: string
+
 - name: name
   description: Set your instance name that will be used as `instance` tag.
   value:
     type: string
+
 - name: java_bin_path
   description: "`java_bin_path` should be set if the agent cannot find your java executable"
   value:
     type: string
+
 - name: java_options
   description: |
     List of Java JVM options.
