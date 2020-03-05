@@ -1,4 +1,7 @@
-from datadog_checks.checks import AgentCheck
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under Simplified BSD License (see LICENSE)
+from datadog_checks.base import AgentCheck
 
 RATE = AgentCheck.rate
 GAUGE = AgentCheck.gauge

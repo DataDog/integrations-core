@@ -94,5 +94,5 @@ def assert_metric_coverage(version, aggregator):
 
     # Service checks
     sc_tags = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT), 'db:pgbouncer', 'optional:tag1']
-    aggregator.assert_service_check('pgbouncer.can_connect', status=PgBouncer.OK, tags=sc_tags)
+    aggregator.assert_service_check(PgBouncer.SERVICE_CHECK_NAME, status=PgBouncer.OK, tags=sc_tags)
     aggregator.assert_all_metrics_covered()

@@ -7,9 +7,9 @@ import psycopg2 as pg
 import psycopg2.extras as pgextras
 from six.moves.urllib.parse import urlparse
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
-from datadog_checks.errors import CheckException, ConfigurationError
 from datadog_checks.pgbouncer.metrics import DATABASES_METRICS, POOLS_METRICS, STATS_METRICS
 
 
@@ -24,7 +24,7 @@ class PgBouncer(AgentCheck):
     SERVICE_CHECK_NAME = 'pgbouncer.can_connect'
 
     def __init__(self, name, init_config, instances):
-        AgentCheck.__init__(self, name, init_config, instances)
+        super(PgBouncer, self).__init__(name, init_config, instances)
         self.host = self.instance.get('host', '')
         self.port = self.instance.get('port', '')
         self.user = self.instance.get('username', '')
@@ -109,16 +109,16 @@ class PgBouncer(AgentCheck):
             # Use ident method
             return {'dsn': "user={} dbname={}".format(self.user, self.DB_NAME)}
 
+        args = {
+            'host': self.host,
+            'user': self.user,
+            'password': self.password,
+            'database': self.DB_NAME,
+        }
         if self.port:
-            return {
-                'host': self.host,
-                'user': self.user,
-                'password': self.password,
-                'database': self.DB_NAME,
-                'port': self.port,
-            }
+            args['port'] = self.port
 
-        return {'host': self.host, 'user': self.user, 'password': self.password, 'database': self.DB_NAME}
+        return args
 
     def _get_connection(self, use_cached=None):
         """Get and memoize connections to instances"""
@@ -127,14 +127,8 @@ class PgBouncer(AgentCheck):
             return self.connection
         try:
             connect_kwargs = self._get_connect_kwargs()
-
             connection = pg.connect(**connect_kwargs)
             connection.set_isolation_level(pg.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-
-        # re-raise the CheckExceptions raised by _get_connect_kwargs()
-        except CheckException:
-            raise
-
         except Exception:
             redacted_url = self._get_redacted_dsn()
             message = u'Cannot establish connection to {}'.format(redacted_url)
