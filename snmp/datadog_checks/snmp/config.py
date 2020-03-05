@@ -150,7 +150,7 @@ class InstanceConfig:
         self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics, warning, log)
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
-            self.all_oids.append(tag_oids)
+            self.all_oids.extend(tag_oids)
 
         if profile:
             if profile not in profiles:
@@ -189,10 +189,7 @@ class InstanceConfig:
         self.bulk_oids.extend(bulk_oids)
         self.parsed_metrics.extend(parsed_metrics)
         self.parsed_metric_tags.extend(parsed_metric_tags)
-        if tag_oids:
-            # NOTE: counter-intuitively, we must '.append()' the list of tag OIDs instead of '.extend()'ing,
-            # because `.all_oids` is a list of lists of OIDs (batches).
-            self.all_oids.append(tag_oids)
+        self.all_oids.extend(tag_oids)
 
     def add_profile_tag(self, profile_name):
         self.tags.append('snmp_profile:{}'.format(profile_name))
@@ -439,7 +436,6 @@ class InstanceConfig:
             else:
                 raise ConfigurationError('Unsupported metric in config file: {}'.format(metric))
 
-        oids = []
         all_oids = []
         bulk_oids = []
 
@@ -449,14 +445,11 @@ class InstanceConfig:
         for table, symbols in table_oids.values():
             if not symbols:
                 # No table to browse, just one symbol
-                oids.append(table)
+                all_oids.append(table)
             elif bulk_limit and len(symbols) > bulk_limit:
                 bulk_oids.append(table)
             else:
-                all_oids.append(symbols)
-
-        if oids:
-            all_oids.insert(0, oids)
+                all_oids.extend(symbols)
 
         return all_oids, bulk_oids, parsed_metrics
 
@@ -491,10 +484,7 @@ class InstanceConfig:
         # Reference sysUpTimeInstance directly, see http://oidref.com/1.3.6.1.2.1.1.3.0
         uptime_oid = '1.3.6.1.2.1.1.3.0'
         oid_object = hlapi.ObjectType(hlapi.ObjectIdentity(uptime_oid))
-        if not self.all_oids:
-            self.all_oids.append([oid_object])
-        else:
-            self.all_oids[0].append(oid_object)
+        self.all_oids.append(oid_object)
         self._resolver.register(to_oid_tuple(uptime_oid), 'sysUpTimeInstance')
 
         parsed_metric = ParsedMetric('sysUpTimeInstance', [], 'gauge')
