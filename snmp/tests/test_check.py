@@ -1965,6 +1965,8 @@ def test_cisco_asa_5525(aggregator):
         tags = ['cpu:{}'.format(cpu)] + common_tags
         for metric in cpu_metrics:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    sensor_tags = ['sensor_id:31', 'sensor_type:9'] + common_tags
+    aggregator.assert_metric('snmp.entPhySensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
