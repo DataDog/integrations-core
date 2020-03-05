@@ -98,22 +98,23 @@ class GitlabCheck(OpenMetricsBaseCheck):
         return ['gitlab_host:{}'.format(gitlab_host), 'gitlab_port:{}'.format(gitlab_port)]
 
     def submit_version(self, instance):
-        if self.is_metadata_collection_enabled():
-            try:
-                url = instance.get('gitlab_url', None)
-                token = instance.get('api_token', None)
-                if token is None:
-                    self.log.debug(
-                        "Gitlab token not found; please add one in your config to enable version metadata collection."
-                    )
-                    return
-                param = {'access_token': token}
-                response = self.http.get("{}/api/v4/version".format(url), params=param)
-                version = response.json().get('version')
-                self.set_metadata('version', version)
-                self.log.debug("Set version %s for Gitlab", version)
-            except Exception as e:
-                self.log.warning("Gitlab version metadata not collected: %s", e)
+        if not self.is_metadata_collection_enabled():
+            return
+        try:
+            url = instance.get('gitlab_url', None)
+            token = instance.get('api_token', None)
+            if token is None:
+                self.log.debug(
+                    "Gitlab token not found; please add one in your config to enable version metadata collection."
+                )
+                return
+            param = {'access_token': token}
+            response = self.http.get("{}/api/v4/version".format(url), params=param)
+            version = response.json().get('version')
+            self.set_metadata('version', version)
+            self.log.debug("Set version %s for Gitlab", version)
+        except Exception as e:
+            self.log.warning("Gitlab version metadata not collected: %s", e)
 
     # Validates an health endpoint
     #
