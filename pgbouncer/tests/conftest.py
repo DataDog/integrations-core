@@ -30,6 +30,7 @@ def dd_environment():
     Start postgres and install pgbouncer. If there's any problem executing
     docker-compose, let the exception bubble up.
     """
+
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'),
         env_vars={'TEST_RESOURCES_PATH': os.path.join(HERE, 'resources')},
