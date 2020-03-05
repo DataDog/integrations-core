@@ -57,8 +57,8 @@ _Available for Agent versions >6.0_
    ```yaml
    logs:
      - type: file
-       path: /var/log/couchdb/couch.log
-       source: couchdb
+       path: /opt/couchbase/var/lib/couchbase/logs/*.log
+       source: couchbase
        service: couchbase
    ```
 

@@ -224,6 +224,6 @@ instances:
 #
 # logs:
 #   - type: file
-#     path: /var/log/couchdb/couch.log
-#     source: couchdb
+#     path: /opt/couchbase/var/lib/couchbase/logs/*.log
+#     source: couchbase
 #     service: couchbase
