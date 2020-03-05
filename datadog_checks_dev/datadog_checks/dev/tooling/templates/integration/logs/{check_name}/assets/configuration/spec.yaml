@@ -6,5 +6,5 @@ files:
     example:
     - type: file
       path: /var/log/{integration_name}.log
-      source: {integration_name}
+      source: {check_name}
       service: <SERVICE>
