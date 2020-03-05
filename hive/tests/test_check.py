@@ -1,10 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
 import pytest
-
-import time
 
 METASTORE_METRICS = [
     "hive.metastore.api.get_all_tables.active_call",
@@ -14,6 +11,8 @@ METASTORE_METRICS = [
     "hive.metastore.api.get_all_databases.active_call",
     "hive.metastore.api.init.active_call",
 ]
+
+
 @pytest.mark.e2e
 def test(dd_agent_check):
     instance = {}
