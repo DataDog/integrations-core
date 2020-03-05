@@ -457,9 +457,22 @@ class MongoDb(AgentCheck):
         * Create an event on state change.
         """
         last_state = self._last_state_by_server.get(clean_server_name, -1)
+
+        self.log.debug(
+            'report_replica_set_state state=%r last_state=%r clean_server_name=%r replset_name=%r',
+            state,
+            last_state,
+            clean_server_name,
+            replset_name,
+        )
+
         self._last_state_by_server[clean_server_name] = state
-        if last_state != state and last_state != -1:
-            return self.create_event(last_state, state, clean_server_name, replset_name)
+
+        state_changed = last_state != state and last_state != -1
+        if not state_changed:
+            return
+
+        self.create_event(last_state, state, clean_server_name, replset_name)
 
     def hostname_for_event(self, clean_server_name):
         """Return a reasonable hostname for a replset membership event to mention."""
@@ -484,21 +497,23 @@ class MongoDb(AgentCheck):
         msg = "MongoDB %s (%s) just reported as %s (%s) for %s; it was %s before."
         msg = msg % (hostname, clean_server_name, status, short_status, replset_name, last_short_status)
 
-        self.event(
-            {
-                'timestamp': int(time.time()),
-                'source_type_name': self.SOURCE_TYPE_NAME,
-                'msg_title': msg_title,
-                'msg_text': msg,
-                'host': hostname,
-                'tags': [
-                    'action:mongo_replset_member_status_change',
-                    'member_status:' + short_status,
-                    'previous_member_status:' + last_short_status,
-                    'replset:' + replset_name,
-                ],
-            }
-        )
+        event = {
+            'timestamp': int(time.time()),
+            'source_type_name': self.SOURCE_TYPE_NAME,
+            'msg_title': msg_title,
+            'msg_text': msg,
+            'host': hostname,
+            'tags': [
+                'action:mongo_replset_member_status_change',
+                'member_status:' + short_status,
+                'previous_member_status:' + last_short_status,
+                'replset:' + replset_name,
+            ],
+        }
+
+        self.log.debug('create_event event=%r', event)
+
+        self.event(event)
 
     def _build_metric_list_to_collect(self, additional_metrics):
         """
@@ -890,6 +905,8 @@ class MongoDb(AgentCheck):
         # See
         # http://www.mongodb.org/display/DOCS/Replica+Set+Commands#ReplicaSetCommands-replSetGetStatus  # noqa
         if is_affirmative(instance.get('replica_check', True)):
+            self.log.debug('replica_check')
+
             try:
                 data = {}
 
@@ -904,6 +921,8 @@ class MongoDb(AgentCheck):
                     # See: https://docs.mongodb.com/manual/reference/read-concern-local/#readconcern.%22local%22
                     read_concern='local',
                 )
+
+                self.log.debug('replica_check replSetGetStatus replSet=%r', replSet)
 
                 if replSet:
                     primary = None
@@ -944,6 +963,8 @@ class MongoDb(AgentCheck):
                         if int(member.get('state')) == 1:
                             primary = member
 
+                    self.log.debug('replica_check current=%r primary=%r', current, primary)
+
                     # Compute a lag time
                     if current is not None and primary is not None:
                         if 'optimeDate' in primary and 'optimeDate' in current:
@@ -955,13 +976,19 @@ class MongoDb(AgentCheck):
 
                     data['state'] = replSet['myState']
 
+                    self.log.debug('replica_check data=%r', data)
+
                     if current is not None:
                         total = 0.0
+
                         cfg = cli_rs['local']['system.replset'].find_one()
+                        self.log.debug('replica_check local:system.replset cfg=%r', cfg)
+
                         for member in cfg.get('members'):
                             total += member.get('votes', 1)
                             if member['_id'] == current['_id']:
                                 data['votes'] = member.get('votes', 1)
+
                         data['voteFraction'] = data['votes'] / total
 
                     status['replSet'] = data
@@ -973,8 +1000,9 @@ class MongoDb(AgentCheck):
                 if "OperationFailure" in repr(e) and (
                     "not running with --replSet" in str(e) or "replSetGetStatus" in str(e)
                 ):
-                    pass
+                    self.log.debug('replica_check skipped exc=%r', e)
                 else:
+                    self.log.error('replica_check failed_unexpectedly exc=%r', e)
                     raise e
 
         # If these keys exist, remove them for now as they cannot be serialized
