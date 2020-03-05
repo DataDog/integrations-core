@@ -16,7 +16,7 @@ def test_check_ok(dd_agent_check):
     # type: (Callable) -> None
     aggregator = dd_agent_check(rate=True)  # type: AggregatorStub
 
-    for metric in E2E_METRICS:
+    for metric, _ in E2E_METRICS:
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
