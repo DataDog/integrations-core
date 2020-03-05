@@ -2,10 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from typing import Dict, List, Set
+from typing import Callable, Dict, List, Set, Tuple, Union
 
 import pytest
 
+from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.utils.common import get_docker_hostname
 
 from .types import ServerName
@@ -85,49 +86,58 @@ HEROES_TABLE_INDEX_FIELD = 'appearances_count'
 # Metrics lists.
 
 CONFIG_TOTALS_METRICS = (
-    'rethinkdb.server.total',
-    'rethinkdb.database.total',
-    'rethinkdb.database.table.total',
-    'rethinkdb.table.secondary_index.total',
-)
+    (
+        'rethinkdb.server.total',
+        AggregatorStub.GAUGE,
+        lambda disconnected_servers: len(SERVERS) - len(disconnected_servers),
+        [],
+    ),
+    ('rethinkdb.database.total', AggregatorStub.GAUGE, 1, []),
+    ('rethinkdb.database.table.total', AggregatorStub.GAUGE, 1, ['database:{}'.format(DATABASE)]),
+    ('rethinkdb.table.secondary_index.total', AggregatorStub.GAUGE, 1, ['table:{}'.format(HEROES_TABLE)]),
+)  # type: Tuple[Tuple[str, int, Union[int, Callable[[set], int]], List[str]], ...]
 
 CLUSTER_STATISTICS_METRICS = (
-    'rethinkdb.stats.cluster.queries_per_sec',
-    'rethinkdb.stats.cluster.read_docs_per_sec',
-    'rethinkdb.stats.cluster.written_docs_per_sec',
-)
+    ('rethinkdb.stats.cluster.queries_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.cluster.read_docs_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.cluster.written_docs_per_sec', AggregatorStub.GAUGE),
+)  # type: Tuple[Tuple[str, int], ...]
 
 SERVER_STATISTICS_METRICS = (
-    'rethinkdb.stats.server.queries_per_sec',
-    'rethinkdb.stats.server.queries_total',
-    'rethinkdb.stats.server.read_docs_per_sec',
-    'rethinkdb.stats.server.read_docs_total',
-    'rethinkdb.stats.server.written_docs_per_sec',
-    'rethinkdb.stats.server.written_docs_total',
-    'rethinkdb.stats.server.client_connections',
-    'rethinkdb.stats.server.clients_active',  # NOTE: sent, but not documented on the RethinkDB website.
-)
+    ('rethinkdb.stats.server.queries_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.server.queries_total', AggregatorStub.MONOTONIC_COUNT),
+    ('rethinkdb.stats.server.read_docs_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.server.read_docs_total', AggregatorStub.MONOTONIC_COUNT),
+    ('rethinkdb.stats.server.written_docs_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.server.written_docs_total', AggregatorStub.MONOTONIC_COUNT),
+    ('rethinkdb.stats.server.client_connections', AggregatorStub.GAUGE),
+    (
+        # NOTE: submitted but not documented on the RethinkDB website.
+        'rethinkdb.stats.server.clients_active',
+        AggregatorStub.GAUGE,
+    ),
+)  # type: Tuple[Tuple[str, int], ...]
 
 TABLE_STATISTICS_METRICS = (
-    'rethinkdb.stats.table.read_docs_per_sec',
-    'rethinkdb.stats.table.written_docs_per_sec',
-)
+    ('rethinkdb.stats.table.read_docs_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table.written_docs_per_sec', AggregatorStub.GAUGE),
+)  # type: Tuple[Tuple[str, int], ...]
 
 REPLICA_STATISTICS_METRICS = (
-    'rethinkdb.stats.table_server.read_docs_per_sec',
-    'rethinkdb.stats.table_server.read_docs_total',
-    'rethinkdb.stats.table_server.written_docs_per_sec',
-    'rethinkdb.stats.table_server.written_docs_total',
-    'rethinkdb.stats.table_server.cache.in_use_bytes',
-    'rethinkdb.stats.table_server.disk.read_bytes_per_sec',
-    'rethinkdb.stats.table_server.disk.read_bytes_total',
-    'rethinkdb.stats.table_server.disk.written_bytes_per_sec',
-    'rethinkdb.stats.table_server.disk.written_bytes_total',
-    'rethinkdb.stats.table_server.disk.metadata_bytes',
-    'rethinkdb.stats.table_server.disk.data_bytes',
-    'rethinkdb.stats.table_server.disk.garbage_bytes',
-    'rethinkdb.stats.table_server.disk.preallocated_bytes',
-)
+    ('rethinkdb.stats.table_server.read_docs_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.read_docs_total', AggregatorStub.MONOTONIC_COUNT),
+    ('rethinkdb.stats.table_server.written_docs_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.written_docs_total', AggregatorStub.MONOTONIC_COUNT),
+    ('rethinkdb.stats.table_server.cache.in_use_bytes', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.disk.read_bytes_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.disk.read_bytes_total', AggregatorStub.MONOTONIC_COUNT),
+    ('rethinkdb.stats.table_server.disk.written_bytes_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.disk.written_bytes_total', AggregatorStub.MONOTONIC_COUNT),
+    ('rethinkdb.stats.table_server.disk.metadata_bytes', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.disk.data_bytes', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.disk.garbage_bytes', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.disk.preallocated_bytes', AggregatorStub.GAUGE),
+)  # type: Tuple[Tuple[str, int], ...]
 
 TABLE_STATUS_SERVICE_CHECKS = (
     'rethinkdb.table_status.ready_for_outdated_reads',
@@ -136,42 +146,44 @@ TABLE_STATUS_SERVICE_CHECKS = (
     'rethinkdb.table_status.all_replicas_ready',
 )
 
-TABLE_STATUS_METRICS = ('rethinkdb.table_status.shards.total',)
+TABLE_STATUS_METRICS = (
+    ('rethinkdb.table_status.shards.total', AggregatorStub.GAUGE),
+)  # type: Tuple[Tuple[str, int], ...]
 
 TABLE_STATUS_SHARDS_METRICS = (
-    'rethinkdb.table_status.shards.replicas.total',
-    'rethinkdb.table_status.shards.replicas.primary.total',
-)
+    ('rethinkdb.table_status.shards.replicas.total', AggregatorStub.GAUGE),
+    ('rethinkdb.table_status.shards.replicas.primary.total', AggregatorStub.GAUGE),
+)  # type: Tuple[Tuple[str, int], ...]
 
 SERVER_STATUS_METRICS = (
-    'rethinkdb.server_status.network.time_connected',
-    'rethinkdb.server_status.network.connected_to.total',
-    'rethinkdb.server_status.network.connected_to.pending.total',
-    'rethinkdb.server_status.process.time_started',
-)
+    ('rethinkdb.server_status.network.time_connected', AggregatorStub.GAUGE),
+    ('rethinkdb.server_status.network.connected_to.total', AggregatorStub.GAUGE),
+    ('rethinkdb.server_status.network.connected_to.pending.total', AggregatorStub.GAUGE),
+    ('rethinkdb.server_status.process.time_started', AggregatorStub.GAUGE),
+)  # type: Tuple[Tuple[str, int], ...]
 
 # NOTE: jobs metrics are not listed here as they are covered by unit tests instead of integration tests.
 
 CURRENT_ISSUES_METRICS = (
-    'rethinkdb.current_issues.total',
-    'rethinkdb.current_issues.critical.total',
-    'rethinkdb.current_issues.log_write_error.total',
-    'rethinkdb.current_issues.log_write_error.critical.total',
-    'rethinkdb.current_issues.server_name_collision.total',
-    'rethinkdb.current_issues.server_name_collision.critical.total',
-    'rethinkdb.current_issues.db_name_collision.total',
-    'rethinkdb.current_issues.db_name_collision.critical.total',
-    'rethinkdb.current_issues.table_name_collision.total',
-    'rethinkdb.current_issues.table_name_collision.critical.total',
-    'rethinkdb.current_issues.outdated_index.total',
-    'rethinkdb.current_issues.outdated_index.critical.total',
-    'rethinkdb.current_issues.table_availability.total',
-    'rethinkdb.current_issues.table_availability.critical.total',
-    'rethinkdb.current_issues.memory_error.total',
-    'rethinkdb.current_issues.memory_error.critical.total',
-    'rethinkdb.current_issues.non_transitive_error.total',
-    'rethinkdb.current_issues.non_transitive_error.critical.total',
-)
+    ('rethinkdb.current_issues.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.critical.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.log_write_error.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.log_write_error.critical.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.server_name_collision.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.server_name_collision.critical.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.db_name_collision.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.db_name_collision.critical.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.table_name_collision.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.table_name_collision.critical.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.outdated_index.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.outdated_index.critical.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.table_availability.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.table_availability.critical.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.memory_error.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.memory_error.critical.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.non_transitive_error.total', AggregatorStub.GAUGE),
+    ('rethinkdb.current_issues.non_transitive_error.critical.total', AggregatorStub.GAUGE),
+)  # type: Tuple[Tuple[str, int], ...]
 
 CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS = (
     'rethinkdb.current_issues.total',
@@ -183,8 +195,10 @@ CURRENT_ISSUES_METRICS_SUBMITTED_IF_DISCONNECTED_SERVERS = (
     'rethinkdb.current_issues.table_availability.critical.total',
 )
 
-assert set(CURRENT_ISSUES_METRICS).issuperset(CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS)
-assert set(CURRENT_ISSUES_METRICS).issuperset(CURRENT_ISSUES_METRICS_SUBMITTED_IF_DISCONNECTED_SERVERS)
+assert set(name for name, typ in CURRENT_ISSUES_METRICS).issuperset(CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS)
+assert set(name for name, typ in CURRENT_ISSUES_METRICS).issuperset(
+    CURRENT_ISSUES_METRICS_SUBMITTED_IF_DISCONNECTED_SERVERS
+)
 
 
 E2E_METRICS = (

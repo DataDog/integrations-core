@@ -7,6 +7,7 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 
 from .common import (
     CLUSTER_STATISTICS_METRICS,
+    CONFIG_TOTALS_METRICS,
     CURRENT_ISSUES_METRICS,
     CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS,
     CURRENT_ISSUES_METRICS_SUBMITTED_IF_DISCONNECTED_SERVERS,
@@ -45,28 +46,26 @@ def assert_metrics(aggregator, disconnected_servers=None):
 
 def _assert_config_totals_metrics(aggregator, disconnected_servers):
     # type: (AggregatorStub, Set[ServerName]) -> None
-    aggregator.assert_metric('rethinkdb.server.total', count=1, value=len(SERVERS) - len(disconnected_servers))
-    aggregator.assert_metric('rethinkdb.database.total', count=1, value=1)
-    aggregator.assert_metric('rethinkdb.database.table.total', count=1, value=1, tags=['database:{}'.format(DATABASE)])
-    aggregator.assert_metric(
-        'rethinkdb.table.secondary_index.total', count=1, value=1, tags=['table:{}'.format(HEROES_TABLE)]
-    )
+    for metric, typ, value, tags in CONFIG_TOTALS_METRICS:
+        if callable(value):
+            value = value(disconnected_servers)
+        aggregator.assert_metric(metric, metric_type=typ, count=1, tags=tags, value=value)
 
 
 def _assert_statistics_metrics(aggregator, disconnected_servers):
     # type: (AggregatorStub, Set[ServerName]) -> None
-    for metric in CLUSTER_STATISTICS_METRICS:
-        aggregator.assert_metric(metric, count=1, tags=[])
+    for metric, typ in CLUSTER_STATISTICS_METRICS:
+        aggregator.assert_metric(metric, metric_type=typ, count=1, tags=[])
 
     for server in SERVERS:
         tags = ['server:{}'.format(server)] + SERVER_TAGS[server]
-        for metric in SERVER_STATISTICS_METRICS:
+        for metric, typ in SERVER_STATISTICS_METRICS:
             count = 0 if server in disconnected_servers else 1
-            aggregator.assert_metric(metric, count=count, tags=tags)
+            aggregator.assert_metric(metric, metric_type=typ, count=count, tags=tags)
 
-    for metric in TABLE_STATISTICS_METRICS:
+    for metric, typ in TABLE_STATISTICS_METRICS:
         tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
-        aggregator.assert_metric(metric, count=1, tags=tags)
+        aggregator.assert_metric(metric, metric_type=typ, count=1, tags=tags)
 
     for server in HEROES_TABLE_SERVERS:
         tags = [
@@ -75,7 +74,7 @@ def _assert_statistics_metrics(aggregator, disconnected_servers):
             'server:{}'.format(server),
         ] + SERVER_TAGS[server]
 
-        for metric in REPLICA_STATISTICS_METRICS:
+        for metric, typ in REPLICA_STATISTICS_METRICS:
             if server in disconnected_servers:
                 aggregator.assert_metric(metric, count=0, tags=tags)
                 continue
@@ -83,34 +82,34 @@ def _assert_statistics_metrics(aggregator, disconnected_servers):
             # Assumption: cluster is stable (not currently rebalancing), so only these two states can exist.
             state = 'waiting_for_primary' if HEROES_TABLE_PRIMARY_REPLICA in disconnected_servers else 'ready'
             state_tag = 'state:{}'.format(state)
-            aggregator.assert_metric(metric, count=1, tags=tags + [state_tag])
+            aggregator.assert_metric(metric, metric_type=typ, count=1, tags=tags + [state_tag])
 
 
 def _assert_table_status_metrics(aggregator):
     # type: (AggregatorStub) -> None
-    for metric in TABLE_STATUS_METRICS:
+    for metric, typ in TABLE_STATUS_METRICS:
         tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
-        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=1, tags=tags)
+        aggregator.assert_metric(metric, metric_type=typ, count=1, tags=tags)
 
     for shard in HEROES_TABLE_REPLICAS_BY_SHARD:
         tags = ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE), 'shard:{}'.format(shard)]
 
-        for metric in TABLE_STATUS_SHARDS_METRICS:
-            aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=1, tags=tags)
+        for metric, typ in TABLE_STATUS_SHARDS_METRICS:
+            aggregator.assert_metric(metric, metric_type=typ, count=1, tags=tags)
 
 
 def _assert_server_status_metrics(aggregator, disconnected_servers):
     # type: (AggregatorStub, Set[ServerName]) -> None
-    for metric in SERVER_STATUS_METRICS:
+    for metric, typ in SERVER_STATUS_METRICS:
         for server in SERVERS:
             tags = ['server:{}'.format(server)]
             count = 0 if server in disconnected_servers else 1
-            aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=count, tags=tags)
+            aggregator.assert_metric(metric, metric_type=typ, count=count, tags=tags)
 
 
 def _assert_current_issues_metrics(aggregator, disconnected_servers):
     # type: (AggregatorStub, Set[ServerName]) -> None
-    for metric in CURRENT_ISSUES_METRICS:
+    for metric, typ in CURRENT_ISSUES_METRICS:
         if metric in CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS:
             count = 1
         elif disconnected_servers and metric in CURRENT_ISSUES_METRICS_SUBMITTED_IF_DISCONNECTED_SERVERS:
@@ -118,4 +117,4 @@ def _assert_current_issues_metrics(aggregator, disconnected_servers):
         else:
             count = 0
 
-        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, count=count, tags=[])
+        aggregator.assert_metric(metric, metric_type=typ, count=count, tags=[])
