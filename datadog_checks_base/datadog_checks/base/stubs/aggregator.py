@@ -292,10 +292,15 @@ class AggregatorStub(object):
         assert condition, new_msg
 
     def assert_all_metrics_covered(self):
-        missing_metrics = ''
-        if self.metrics_asserted_pct < 100.0:
-            missing_metrics = self.not_asserted()
-        assert self.metrics_asserted_pct >= 100.0, 'Missing metrics: {}'.format(missing_metrics)
+        # use `condition` to avoid building the `msg` if not needed
+        condition = self.metrics_asserted_pct >= 100.0
+        msg = ''
+        if not condition:
+            prefix = '\n\t- '
+            msg = 'Some metrics are missing:'
+            msg += '\nAsserted Metrics:{}{}'.format(prefix, prefix.join(sorted(self._asserted)))
+            msg += '\nMissing Metrics:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
+        assert condition, msg
 
     def assert_no_duplicate_all(self):
         """
