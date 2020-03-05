@@ -1,1 +1,60 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+rethinkdb.server.total,gauge,,node,,Number of connected servers in the cluster.,0,rethinkdb,Server total
+rethinkdb.database.total,gauge,,,,Number of databases in the cluster.,0,rethinkdb,Database total
+rethinkdb.database.table.total,gauge,,table,,Number of tables in a given database.,0,rethinkdb,Database table total
+rethinkdb.table.secondary_index.total,gauge,,index,,Number of secondary indexes in a given table.,0,rethinkdb,Table secondary index total
+rethinkdb.stats.cluster.queries_per_sec,gauge,,query,,Number of queries executed in a cluster per second.,0,rethinkdb,Stats cluster queries per sec
+rethinkdb.stats.cluster.read_docs_per_sec,gauge,,document,,Number of documents read in a cluster per second.,0,rethinkdb,Stats cluster read docs per sec
+rethinkdb.stats.cluster.written_docs_per_sec,gauge,,document,,Number of documents written in a cluster per second.,0,rethinkdb,Stats cluster written docs per sec
+rethinkdb.stats.server.queries_per_sec,gauge,,query,,Number of queries executed on a server per second.,0,rethinkdb,Stats server queries per sec
+rethinkdb.stats.server.queries_total,count,,query,,Total number of queries executed on a server.,0,rethinkdb,Stats server queries total
+rethinkdb.stats.server.read_docs_per_sec,gauge,,document,,Number of documents read from a server per second.,0,rethinkdb,Stats server read docs per sec
+rethinkdb.stats.server.read_docs_total,count,,document,,Total number of documents read from a server.,0,rethinkdb,Stats server read docs total
+rethinkdb.stats.server.written_docs_per_sec,gauge,,document,,Number of documents written to a server per second.,0,rethinkdb,Stats server written docs per sec
+rethinkdb.stats.server.written_docs_total,count,,document,,Total number of documents written to a server.,0,rethinkdb,Stats server written docs total
+rethinkdb.stats.server.client_connections,gauge,,connection,,Current number of client connections to a server.,0,rethinkdb,Stats server client connections
+rethinkdb.stats.server.clients_active,gauge,,host,,Current number of clients actively connected to a server.,0,rethinkdb,Stats server clients active
+rethinkdb.stats.table.read_docs_per_sec,gauge,,document,,Number of documents read from a table per second.,0,rethinkdb,Stats table read docs per sec
+rethinkdb.stats.table.written_docs_per_sec,gauge,,document,,Number of documents written to a table per second.,0,rethinkdb,Stats table written docs per sec
+rethinkdb.stats.table_server.read_docs_per_sec,gauge,,document,,Number of documents read from a replica per second.,0,rethinkdb,Stats table server read docs per sec
+rethinkdb.stats.table_server.read_docs_total,count,,document,,Total number of documents read from a replica.,0,rethinkdb,Stats table server read docs total
+rethinkdb.stats.table_server.written_docs_per_sec,gauge,,document,,Number of documents written to a replica per second.,0,rethinkdb,Stats table server written docs per sec
+rethinkdb.stats.table_server.written_docs_total,count,,document,,Total number of documents written to a replica.,0,rethinkdb,Stats table server written docs total
+rethinkdb.stats.table_server.cache.in_use_bytes,gauge,,byte,,Current amount of memory used by the cache on a replica.,0,rethinkdb,Stats table server cache in use bytes
+rethinkdb.stats.table_server.disk.read_bytes_per_sec,gauge,,byte,,Number of bytes read from the disk of a replica per second.,0,rethinkdb,Stats table server disk read bytes per sec
+rethinkdb.stats.table_server.disk.read_bytes_total,count,,byte,,Total number of bytes read from the disk of a replica.,0,rethinkdb,Stats table server disk read bytes total
+rethinkdb.stats.table_server.disk.written_bytes_per_sec,gauge,,byte,,Number of bytes written to the disk of a replica per second.,0,rethinkdb,Stats table server disk written bytes per sec
+rethinkdb.stats.table_server.disk.written_bytes_total,count,,byte,,Total number of bytes written to the disk of a replica.,0,rethinkdb,Stats table server disk written bytes total
+rethinkdb.stats.table_server.disk.metadata_bytes,gauge,,byte,,Current disk space used by metadata on a replica.,0,rethinkdb,Stats table server disk metadata bytes
+rethinkdb.stats.table_server.disk.data_bytes,gauge,,byte,,Current disk space used by data on a replica.,0,rethinkdb,Stats table server disk data bytes
+rethinkdb.stats.table_server.disk.garbage_bytes,gauge,,byte,,Current disk space used by the garbage collector on a replica.,0,rethinkdb,Stats table server disk garbage bytes
+rethinkdb.stats.table_server.disk.preallocated_bytes,gauge,,byte,,Current disk space preallocated on a replica.,0,rethinkdb,Stats table server disk preallocated bytes
+rethinkdb.table_status.shards.total,gauge,,shard,,Total number of shards for a table.,0,rethinkdb,Table status shards total
+rethinkdb.table_status.shards.replicas.total,gauge,,node,,Total number of replicas for a table shard.,0,rethinkdb,Table status shards replicas total
+rethinkdb.table_status.shards.replicas.primary.total,gauge,,node,,Total number of primary replicas for a table shard.,0,rethinkdb,Table status shards replicas primary total
+rethinkdb.server_status.network.time_connected,gauge,,second,,Current total time a server has been connected to the network.,0,rethinkdb,Server status network time connected
+rethinkdb.server_status.network.connected_to.total,gauge,,node,,Number of other RethinkDB servers a server is currently connected to.,0,rethinkdb,Server status network connected to total
+rethinkdb.server_status.network.connected_to.pending.total,gauge,,node,,Number of other RethinkDB servers a server knows about but is not currently connected to.,0,rethinkdb,Server status network connected to pending total
+rethinkdb.server_status.process.time_started,gauge,,second,,Time when the RethinkDB server process started.,0,rethinkdb,Server status process time started
+rethinkdb.jobs.index_construction.duration,gauge,,second,,Duration of a task that constructs secondary indexes in the background.,0,rethinkdb,Jobs index construction duration
+rethinkdb.jobs.index_construction.progress,gauge,,percent,,Progress of a task that constructs secondary indexes in the background.,0,rethinkdb,Jobs index construction progress
+rethinkdb.jobs.backfill.duration,gauge,,second,,Duration of a task that brings out of date shards up to date (known as backfilling).,0,rethinkdb,Jobs backfill duration
+rethinkdb.jobs.backfill.progress,gauge,,percent,,Progress of a task that brings out of date shards up to date (known as backfilling).,0,rethinkdb,Jobs backfill progress
+rethinkdb.current_issues.total,gauge,,,,Total number of current issues.,0,rethinkdb,Current issues total
+rethinkdb.current_issues.log_write_error.total,gauge,,,,Total number of issues reporting that RethinkDB has failed to write to its log file.,0,rethinkdb,Current issues log write error total
+rethinkdb.current_issues.server_name_collision.total,gauge,,,,Total number of issues reporting that multiple servers have been assigned the same name.,0,rethinkdb,Current issues server name collision total
+rethinkdb.current_issues.db_name_collision.total,gauge,,,,Total number of issues reporting that multiple databases have been assigned the same name.,0,rethinkdb,Current issues db name collision total
+rethinkdb.current_issues.table_name_collision.total,gauge,,,,Total number of issues reporting that multiple tables in the same database have been assigned the same name.,0,rethinkdb,Current issues table name collision total
+rethinkdb.current_issues.outdated_index.total,gauge,,,,Total number of issues reporting that indexes built with an older version of RethinkDB needs to be rebuilt due to changes in the way ReQL handles indexing.,0,rethinkdb,Current issues outdated index total
+rethinkdb.current_issues.table_availability.total,gauge,,,,Total number of issues reporting that a table on the cluster is missing at least one replica.,0,rethinkdb,Current issues table availability total
+rethinkdb.current_issues.memory_error.total,gauge,,,,Total number of issues reporting that a page fault has occurred on a RethinkDB server and swap space is being used.,0,rethinkdb,Current issues memory error total
+rethinkdb.current_issues.non_transitive_error.total,gauge,,,,"Total number of issues reporting that there are currently servers that cannot see every server in the cluster, which may cause table availability issues.",0,rethinkdb,Current issues non transitive error total
+rethinkdb.current_issues.critical.total,gauge,,,,Total number of critical current issues.,0,rethinkdb,Current issues critical total
+rethinkdb.current_issues.log_write_error.critical.total,gauge,,,,Total number of critical issues reporting that RethinkDB has failed to write to its log file.,0,rethinkdb,Current issues log write error critical total
+rethinkdb.current_issues.server_name_collision.critical.total,gauge,,,,Total number of critical issues reporting that multiple servers have been assigned the same name.,0,rethinkdb,Current issues server name collision critical total
+rethinkdb.current_issues.db_name_collision.critical.total,gauge,,,,Total number of critical issues reporting that multiple databases have been assigned the same name.,0,rethinkdb,Current issues db name collision critical total
+rethinkdb.current_issues.table_name_collision.critical.total,gauge,,,,Total number of critical issues reporting that multiple tables in the same database have been assigned the same name.,0,rethinkdb,Current issues table name collision critical total
+rethinkdb.current_issues.outdated_index.critical.total,gauge,,,,Total number of critical issues reporting that indexes built with an older version of RethinkDB needs to be rebuilt due to changes in the way ReQL handles indexing.,0,rethinkdb,Current issues outdated index critical total
+rethinkdb.current_issues.table_availability.critical.total,gauge,,,,Total number of critical issues reporting that a table on the cluster is missing at least one replica.,0,rethinkdb,Current issues table availability critical total
+rethinkdb.current_issues.memory_error.critical.total,gauge,,,,Total number of critical issues reporting that a page fault has occurred on a RethinkDB server and swap space is being used.,0,rethinkdb,Current issues memory error critical total
+rethinkdb.current_issues.non_transitive_error.critical.total,gauge,,,,"Total number of critical issues reporting that there are currently servers that cannot see every server in the cluster, which may cause table availability issues.",0,rethinkdb,Current issues non transitive error critical total
