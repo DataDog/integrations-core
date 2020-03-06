@@ -9,7 +9,7 @@ SCYLLA_ALIEN = {
     'scylla_alien_total_sent_messages': 'alien.total_sent_messages',
 }
 
-SCYLLA_BATCHLOG = {
+SCYLLA_BATCHLOG_MANAGER = {
     'scylla_batchlog_manager_total_write_replay_attempts': 'batchlog_manager.total_write_replay_attempts',
 }
 
@@ -138,7 +138,7 @@ SCYLLA_DATABASE = {
     'scylla_database_view_update_backlog': 'database.view_update_backlog',
 }
 
-SCYLLA_EXECUTION = {
+SCYLLA_EXECUTION_STAGES = {
     'scylla_execution_stages_function_calls_enqueued': 'execution_stages.function_calls_enqueued',
     'scylla_execution_stages_function_calls_executed': 'execution_stages.function_calls_executed',
     'scylla_execution_stages_tasks_preempted': 'execution_stages.tasks_preempted',
@@ -174,7 +174,7 @@ SCYLLA_HTTPD = {
     'scylla_httpd_requests_served': 'httpd.requests_served',
 }
 
-SCYLLA_IO = {
+SCYLLA_IO_QUEUE = {
     'scylla_io_queue_delay': 'io_queue.delay',
     'scylla_io_queue_queue_length': 'io_queue.queue_length',
     'scylla_io_queue_shares': 'io_queue.shares',
@@ -225,7 +225,7 @@ SCYLLA_NODE = {
     'scylla_node_operation_mode': 'node.operation_mode',
 }
 
-SCYLLA_QUERY = {
+SCYLLA_QUERY_PROCESSOR = {
     'scylla_query_processor_queries': 'query_processor.queries',
     'scylla_query_processor_statements_prepared': 'query_processor.statements_prepared',
 }
@@ -376,18 +376,18 @@ INSTANCE_DEFAULT_METRICS = [
 
 ADDITIONAL_METRICS_MAP = {
     'scylla.alien': SCYLLA_ALIEN,
-    'scylla.batchlog': SCYLLA_BATCHLOG,
+    'scylla.batchlog_manager': SCYLLA_BATCHLOG_MANAGER,
     'scylla.commitlog': SCYLLA_COMMITLOG,
     'scylla.cql': SCYLLA_CQL,
     'scylla.database': SCYLLA_DATABASE,
-    'scylla.execution': SCYLLA_EXECUTION,
+    'scylla.execution_stages': SCYLLA_EXECUTION_STAGES,
     'scylla.hints': SCYLLA_HINTS,
     'scylla.httpd': SCYLLA_HTTPD,
-    'scylla.io': SCYLLA_IO,
+    'scylla.io_queue': SCYLLA_IO_QUEUE,
     'scylla.lsa': SCYLLA_LSA,
     'scylla.memory': SCYLLA_MEMORY,
     'scylla.memtables': SCYLLA_MEMTABLES,
-    'scylla.query': SCYLLA_QUERY,
+    'scylla.query_processor': SCYLLA_QUERY_PROCESSOR,
     'scylla.scheduler': SCYLLA_SCHEDULER,
     'scylla.sstables': SCYLLA_SSTABLES,
     'scylla.thrift': SCYLLA_THRIFT,

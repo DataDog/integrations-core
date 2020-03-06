@@ -132,7 +132,8 @@ def options_validator(options, loader, file_name, *sections):
             )
             continue
 
-        if 'template' in option:
+        templates_resolved = False
+        while 'template' in option:
             parameters = {
                 parameter: option.pop(parameter) for parameter in loader.templates.fields if parameter in option
             }
@@ -141,7 +142,7 @@ def options_validator(options, loader, file_name, *sections):
                 template = loader.templates.load(option.pop('template'), parameters)
             except Exception as e:
                 loader.errors.append(f'{loader.source}, {file_name}, {sections_display}option #{option_index}: {e}')
-                continue
+                break
 
             if isinstance(template, dict):
                 template.update(option)
@@ -163,21 +164,28 @@ def options_validator(options, loader, file_name, *sections):
                                 loader.source, file_name, sections_display, option_index
                             )
                         )
-                        continue
+                        break
                 else:
                     loader.errors.append(
                         '{}, {}, {}option #{}: Template refers to an empty array'.format(
                             loader.source, file_name, sections_display, option_index
                         )
                     )
-                    continue
+                    break
             else:
                 loader.errors.append(
                     '{}, {}, {}option #{}: Template does not refer to a mapping object nor array'.format(
                         loader.source, file_name, sections_display, option_index
                     )
                 )
-                continue
+                break
+
+        # Only set upon success or if there were no templates
+        else:
+            templates_resolved = True
+
+        if not templates_resolved:
+            continue
 
         if 'name' not in option:
             loader.errors.append(
@@ -321,6 +329,16 @@ def options_validator(options, loader, file_name, *sections):
             previous_sections = list(sections)
             previous_sections.append(option_name)
             options_validator(nested_options, loader, file_name, *previous_sections)
+
+
+VALID_TYPES = {
+    'string',
+    'integer',
+    'number',
+    'boolean',
+    'array',
+    'object',
+}
 
 
 def value_validator(value, loader, file_name, sections_display, option_name, depth=0):
@@ -571,7 +589,7 @@ def value_validator(value, loader, file_name, sections_display, option_name, dep
             )
     else:
         loader.errors.append(
-            '{}, {}, {}{}: Unknown type `{}`'.format(
-                loader.source, file_name, sections_display, option_name, value_type
+            '{}, {}, {}{}: Unknown type `{}`, valid types are {}'.format(
+                loader.source, file_name, sections_display, option_name, value_type, ' | '.join(sorted(VALID_TYPES))
             )
         )

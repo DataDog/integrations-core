@@ -1,5 +1,13 @@
 # CHANGELOG - go_expvar
 
+## 1.7.2 / 2020-03-05
+
+* [Fixed] Revert "Submit total_alloc as monotonic count". See [#5972](https://github.com/DataDog/integrations-core/pull/5972).
+
+## 1.7.1 / 2020-02-22
+
+* [Fixed] Submit total_alloc as monotonic count. See [#5703](https://github.com/DataDog/integrations-core/pull/5703).
+
 ## 1.7.0 / 2019-12-02
 
 * [Added] Adhere to logging style. See [#5106](https://github.com/DataDog/integrations-core/pull/5106).

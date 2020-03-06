@@ -57,9 +57,9 @@ _Available for Agent versions >6.0_
    ```yaml
    logs:
      - type: file
-       path: /var/log/couchdb/couch.log
-       source: couchdb
-       service: couchbase
+       path: /opt/couchbase/var/lib/couchbase/logs/*.log
+       source: couchbase
+       service: <SERVICE>
    ```
 
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample couchbase.d/conf.yaml][4] for all available configuration options.
@@ -114,7 +114,7 @@ Returns `Critical` if the node failed over.
 Returns `Warning` if the node is added to the cluster but is waiting for a rebalance.
 Returns `Ok` otherwise.
 
-- `couchbase.by_node.health_status`:
+- `couchbase.by_node.health`:
 
 Returns `Critical` if the node is unhealthy. Returns `Ok` otherwise.
 

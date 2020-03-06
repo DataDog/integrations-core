@@ -106,11 +106,13 @@ class HAProxy(AgentCheck):
         if parsed_url.scheme == 'unix' or parsed_url.scheme == 'tcp':
             info, data = self._fetch_socket_data(parsed_url)
             self._collect_version_from_socket(info)
+            uptime = self._collect_uptime_from_socket(info)
         else:
             try:
-                self._collect_version_from_http(url)
+                uptime = self._collect_info_from_http(url)
             except Exception as e:
-                self.log.warning("Couldn't collect version information: %s", e)
+                self.log.warning("Couldn't collect version or uptime information: %s", e)
+                uptime = None
             data = self._fetch_url_data(url)
 
         collect_aggregates_only = instance.get('collect_aggregates_only', True)
@@ -126,6 +128,8 @@ class HAProxy(AgentCheck):
 
         enable_service_check = is_affirmative(instance.get('enable_service_check', False))
 
+        startup_grace_period = float(instance.get('startup_grace_seconds', 0))
+
         services_incl_filter = instance.get('services_include', [])
         services_excl_filter = instance.get('services_exclude', [])
 
@@ -138,6 +142,9 @@ class HAProxy(AgentCheck):
             active_tag.append("active:%s" % ('true' if 'act' in data else 'false'))
 
         process_events = instance.get('status_check', self.init_config.get('status_check', False))
+
+        if uptime is not None and uptime < startup_grace_period:
+            return
 
         self._process_data(
             data,
@@ -184,16 +191,33 @@ class HAProxy(AgentCheck):
 
             return content.splitlines()
 
-    def _collect_version_from_http(self, url):
+    UPTIME_PARSER = re.compile(r"(?P<days>\d+)d (?P<hours>\d+)h(?P<minutes>\d+)m(?P<seconds>\d+)s")
+
+    @classmethod
+    def _parse_uptime(cls, uptime):
+        matched_uptime = re.search(cls.UPTIME_PARSER, uptime)
+        return (
+            int(matched_uptime.group('days')) * 86400
+            + int(matched_uptime.group('hours')) * 3600
+            + int(matched_uptime.group('minutes')) * 60
+            + int(matched_uptime.group('seconds'))
+        )
+
+    def _collect_info_from_http(self, url):
         # the csv format does not offer version info, therefore we need to get the HTML page
         self.log.debug("collecting version info for HAProxy from %s", url)
 
         r = self.http.get(url)
         r.raise_for_status()
         raw_version = ""
+        raw_uptime = ""
+        uptime = None
         for line in self._decode_response(r):
             if "HAProxy version" in line:
                 raw_version = line
+            if "uptime = " in line:
+                raw_uptime = line
+            if raw_uptime and raw_version:
                 break
 
         if raw_version == "":
@@ -202,6 +226,15 @@ class HAProxy(AgentCheck):
             version = re.search(r"HAProxy version ([^,]+)", raw_version).group(1)
             self.log.debug("HAProxy version is %s", version)
             self.set_metadata('version', version)
+        if raw_uptime == "":
+            self.log.debug("unable to find HAProxy uptime")
+        else:
+            # It is not documented whether this output format is under any
+            # compatibility guarantee, but it hasn't yet changed since it was
+            # introduced
+            uptime = self._parse_uptime(raw_uptime)
+
+        return uptime
 
     def _fetch_socket_data(self, parsed_url):
         ''' Hit a given stats socket and return the stats lines '''
@@ -243,6 +276,12 @@ class HAProxy(AgentCheck):
         else:
             self.log.debug("HAProxy version is %s", version)
             self.set_metadata('version', version)
+
+    def _collect_uptime_from_socket(self, info):
+        for line in info.splitlines():
+            key, value = line.split(':')
+            if key == 'Uptime_sec':
+                return int(value)
 
     def _process_data(
         self,

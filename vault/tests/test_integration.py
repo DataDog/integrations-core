@@ -61,7 +61,7 @@ def assert_collection(aggregator, tags, runs=1):
         metrics.remove(metric)
         metrics.update({'{}.count'.format(metric), '{}.quantile'.format(metric), '{}.sum'.format(metric)})
 
-    missing_summaries = defaultdict(list)
+    missing_summaries = defaultdict(set)
     for metric in sorted(metrics):
         metric = 'vault.{}'.format(metric)
 
@@ -72,7 +72,7 @@ def assert_collection(aggregator, tags, runs=1):
             except Exception:
                 possible_summary = re.sub(r'^vault\.|(\.count|\.quantile|\.sum)$', '', metric)
                 if possible_summary in summaries:
-                    missing_summaries[possible_summary].append(metric)
+                    missing_summaries[possible_summary].add(metric)
                 else:
                     raise
             else:
@@ -82,7 +82,7 @@ def assert_collection(aggregator, tags, runs=1):
 
     for _, summaries in sorted(missing_summaries.items()):
         if len(summaries) > 2:
-            raise AssertionError('Missing: {}'.format(' | '.join(summaries)))
+            raise AssertionError('Missing: {}'.format(' | '.join(sorted(summaries))))
 
     aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, Vault.OK, count=runs)
     aggregator.assert_service_check(Vault.SERVICE_CHECK_UNSEALED, Vault.OK, count=runs)

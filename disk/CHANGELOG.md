@@ -1,5 +1,9 @@
 # CHANGELOG - disk
 
+## 2.7.0 / 2020-02-22
+
+* [Added] Read udev disk labels from the blkid cache file. See [#5515](https://github.com/DataDog/integrations-core/pull/5515).
+
 ## 2.6.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).

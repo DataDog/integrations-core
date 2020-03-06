@@ -8,7 +8,7 @@ from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime, timedelta
 
-from pyVmomi import vim
+from pyVmomi import vim, vmodl
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
@@ -348,9 +348,13 @@ class VSphereCheck(AgentCheck):
             self.log.debug("Queued all %d tasks, waiting for completion.", len(tasks))
             for future in as_completed(tasks):
                 e = future.exception()
-                if e is not None:
+                if isinstance(e, vmodl.fault.InvalidArgument):
+                    # The query was invalid or the resource does not have values for this metric.
+                    continue
+                elif e is not None:
                     self.log.warning("A metric collection API call failed with the following error: %s", e)
                     continue
+
                 results = future.result()
                 if not results:
                     self.log.debug("A metric collection API call did not return data.")

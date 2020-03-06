@@ -50,6 +50,12 @@ instances:
     ## The password to use if services are behind basic or NTLM auth.
     #
     # password: <PASSWORD>
+    
+    ## @param api_token - string - optional
+    ## A Gitlab API token for this instance.
+    ## Used to collect the Gitlab version.
+    #
+    # api_token: <TOKEN>
 
     ## @param connect_timeout - integer - optional
     ## Overrides the default connection timeout value,

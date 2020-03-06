@@ -50,6 +50,9 @@ jobs:
     - checkName: cacti
       displayName: Cacti
       os: linux
+    - checkName: cassandra
+      displayName: Cassandra
+      os: linux
     - checkName: cassandra_nodetool
       displayName: Cassandra Nodetool
       os: linux
@@ -175,6 +178,9 @@ jobs:
       os: linux
     - checkName: jboss_wildfly
       displayName: JBoss/WildFly
+      os: linux
+    - checkName: kafka
+      displayName: Kafka
       os: linux
     - checkName: kafka_consumer
       displayName: Kafka Consumer

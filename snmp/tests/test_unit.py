@@ -4,17 +4,22 @@
 
 import os
 import time
+from concurrent import futures
+from typing import List
 
 import mock
 import pytest
+import yaml
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck
 from datadog_checks.snmp.config import InstanceConfig
 from datadog_checks.snmp.resolver import OIDTrie
+from datadog_checks.snmp.utils import oid_pattern_specificity, recursively_expand_base_profiles
 
 from . import common
+from .utils import mock_profiles_root
 
 pytestmark = pytest.mark.unit
 
@@ -192,6 +197,8 @@ def test_removing_host():
     check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance)
     msg = 'No SNMP response received before timeout for instance 1.1.1.1'
 
+    check._start_discovery = lambda: None
+    check._executor = futures.ThreadPoolExecutor(max_workers=1)
     check.check(instance)
     assert warnings == [msg]
 
@@ -208,6 +215,20 @@ def test_removing_host():
     assert warnings == [msg, msg, msg]
 
 
+def test_invalid_discovery_interval():
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+
+    # Trigger autodiscovery.
+    instance.pop('ip_address')
+    instance['network_address'] = '192.168.0.0/24'
+
+    instance['discovery_interval'] = 'not_parsable_as_a_float'
+
+    check = SnmpCheck('snmp', {}, [instance])
+    with pytest.raises(ConfigurationError):
+        check.check(instance)
+
+
 @mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")
 def test_cache_discovered_host(read_mock):
     instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
@@ -216,6 +237,7 @@ def test_cache_discovered_host(read_mock):
 
     read_mock.return_value = '["192.168.0.1"]'
     check = SnmpCheck('snmp', {}, [instance])
+    check.discover_instances = lambda: None
     check.check(instance)
 
     assert '192.168.0.1' in check._config.discovered_instances
@@ -229,6 +251,7 @@ def test_cache_corrupted(write_mock, read_mock):
     instance['network_address'] = '192.168.0.0/24'
     read_mock.return_value = '["192.168.0."]'
     check = SnmpCheck('snmp', {}, [instance])
+    check.discover_instances = lambda: None
     check.check(instance)
 
     assert not check._config.discovered_instances
@@ -273,3 +296,104 @@ def test_trie():
     assert trie.match((1, 2, 3)) == ((1, 2, 3), 'foo')
     assert trie.match((1, 2, 3, 4)) == ((1, 2, 3), 'foo')
     assert trie.match((2, 3, 4)) == ((), None)
+
+
+@pytest.mark.parametrize(
+    'oids, expected',
+    [
+        (['1.3.4.1'], ['1.3.4.1']),
+        (['1.3.4.*', '1.3.4.1'], ['1.3.4.*', '1.3.4.1']),
+        (['1.3.4.1', '1.3.4.*'], ['1.3.4.*', '1.3.4.1']),
+        (['1.3.4.1.2', '1.3.4'], ['1.3.4', '1.3.4.1.2']),
+        (
+            ['1.3.6.1.4.1.3375.2.1.3.4.43', '1.3.6.1.4.1.8072.3.2.10'],
+            ['1.3.6.1.4.1.8072.3.2.10', '1.3.6.1.4.1.3375.2.1.3.4.43'],
+        ),
+    ],
+)
+def test_oid_pattern_specificity(oids, expected):
+    # type: (List[str], List[str]) -> None
+    assert sorted(oids, key=oid_pattern_specificity) == expected
+
+
+def test_profile_extends():
+    # type: () -> None
+    base = {
+        'metrics': [
+            {'MIB': 'TCP-MIB', 'symbol': 'tcpActiveOpens', 'forced_type': 'monotonic_count'},
+            {'MIB': 'UDP-MIB', 'symbol': 'udpHCInDatagrams', 'forced_type': 'monotonic_count'},
+        ],
+        'metric_tags': [{'MIB': 'SNMPv2-MIB', 'symbol': 'sysName', 'tag': 'snmp_host'}],
+    }
+
+    profile1 = {
+        'extends': ['base.yaml'],
+        'metrics': [{'MIB': 'TCP-MIB', 'symbol': 'tcpPassiveOpens', 'forced_type': 'monotonic_count'}],
+    }
+
+    with temp_dir() as tmp:
+        with mock_profiles_root(tmp):
+            with open(os.path.join(tmp, 'base.yaml'), 'w') as f:
+                f.write(yaml.safe_dump(base))
+
+            with open(os.path.join(tmp, 'profile1.yaml'), 'w') as f:
+                f.write(yaml.safe_dump(profile1))
+
+            definition = {'extends': ['profile1.yaml']}
+
+            recursively_expand_base_profiles(definition)
+
+            assert definition == {
+                'extends': ['profile1.yaml'],
+                'metrics': [
+                    {'MIB': 'TCP-MIB', 'symbol': 'tcpActiveOpens', 'forced_type': 'monotonic_count'},
+                    {'MIB': 'UDP-MIB', 'symbol': 'udpHCInDatagrams', 'forced_type': 'monotonic_count'},
+                    {'MIB': 'TCP-MIB', 'symbol': 'tcpPassiveOpens', 'forced_type': 'monotonic_count'},
+                ],
+                'metric_tags': [{'MIB': 'SNMPv2-MIB', 'symbol': 'sysName', 'tag': 'snmp_host'}],
+            }
+
+
+def test_discovery_tags():
+    """When specifying a tag on discovery, it doesn't make tags leaks between instances."""
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance.pop('ip_address')
+
+    instance['network_address'] = '192.168.0.0/29'
+    instance['tags'] = ['test:check']
+
+    check = SnmpCheck('snmp', {}, [instance])
+
+    oids = ['1.3.6.1.4.5', '1.3.6.1.4.5']
+
+    def mock_fetch(cfg):
+        if oids:
+            return oids.pop(0)
+        check._running = False
+        raise RuntimeError("Not snmp")
+
+    check.fetch_sysobject_oid = mock_fetch
+
+    check.discover_instances(interval=0)
+
+    config = check._config.discovered_instances['192.168.0.2']
+    assert set(config.tags) == {'snmp_device:192.168.0.2', 'test:check'}
+
+
+@mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")
+@mock.patch("threading.Thread")
+def test_cache_loading_tags(thread_mock, read_mock):
+    """When loading discovered instances from cache, tags don't leak from one to the others."""
+    read_mock.return_value = '["192.168.0.1", "192.168.0.2"]'
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance.pop('ip_address')
+
+    instance['network_address'] = '192.168.0.0/29'
+    instance['discovery_interval'] = 0
+    instance['tags'] = ['test:check']
+
+    check = SnmpCheck('snmp', {}, [instance])
+    check._start_discovery()
+
+    config = check._config.discovered_instances['192.168.0.2']
+    assert set(config.tags) == {'snmp_device:192.168.0.2', 'test:check'}

@@ -2490,7 +2490,10 @@ def test_value_type_unknown():
     )
     spec.load()
 
-    assert 'test, test.yaml, instances, foo: Unknown type `custom`' in spec.errors
+    assert (
+        "test, test.yaml, instances, foo: Unknown type `custom`, "
+        "valid types are array | boolean | integer | number | object | string" in spec.errors
+    )
 
 
 def test_option_no_section():
