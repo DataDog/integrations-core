@@ -1108,7 +1108,7 @@ class DockerDaemon(AgentCheck):
                 if os.path.exists(path):
                     with open(path, 'r') as f:
                         selinux_policy = f.readlines()[0]
-            except IOError, e:
+            except IOError as e:
                 #  Issue #2074
                 self.log.debug("Cannot read %s, process likely raced to finish : %s", path, e)
             except Exception as e:

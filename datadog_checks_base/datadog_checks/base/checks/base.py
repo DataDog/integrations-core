@@ -606,7 +606,8 @@ class AgentCheck(object):
             'config', self.init_config, section='init_config', whitelist=self.METADATA_DEFAULT_CONFIG_INIT_CONFIG
         )
 
-    def is_metadata_collection_enabled(self):
+    @staticmethod
+    def is_metadata_collection_enabled():
         # type: () -> bool
         return is_affirmative(datadog_agent.get_config('enable_metadata_collection'))
 
