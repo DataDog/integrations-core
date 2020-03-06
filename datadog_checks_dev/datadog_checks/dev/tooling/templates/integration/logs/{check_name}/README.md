@@ -1,8 +1,8 @@
-# Agent Check: {integration_name}
+# Agent Integration: {integration_name}
 
 ## Overview
 
-This check monitors [{integration_name}][3].
+This integration monitors [{integration_name}][3].
 
 ## Setup
 
