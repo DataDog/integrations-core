@@ -28,9 +28,9 @@ No additional installation is needed on your server.
         chain.add Sidekiq::Middleware::Server::Statsd
       end
     end
-```
+  ```
 
-    See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information and [Datadog Ruby][7] documentation for further configuration options.
+  See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information and [Datadog Ruby][7] documentation for further configuration options.
 
 
 3. [Restart the Agent][8].
