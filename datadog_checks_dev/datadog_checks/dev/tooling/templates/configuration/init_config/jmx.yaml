@@ -25,7 +25,6 @@
            MyAttribute:
              alias: my.metric.name
              metric_type: gauge
-
     type: array
     items:
       type: object
