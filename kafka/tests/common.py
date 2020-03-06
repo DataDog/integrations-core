@@ -35,7 +35,7 @@ Rate type metrics that do not work in our e2e:
 """
 
 KAFKA_E2E_METRICS = [
-    "kafka.net.handler.avg.idle.pct.rate",
+    "kafka.net.processor.avg.idle.pct.rate",
     # Request metrics:
     "kafka.request.channel.queue.size",
     "kafka.request.fetch_consumer.time.99percentile",
