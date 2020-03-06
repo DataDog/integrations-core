@@ -5,13 +5,24 @@ import ipaddress
 from collections import defaultdict
 from typing import Any, Callable, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple, Union
 
-from pyasn1.type.univ import OctetString
-from pysnmp import hlapi
-from pysnmp.hlapi.asyncore.cmdgen import lcd
-from pysnmp.smi import builder, view
-
 from datadog_checks.base import ConfigurationError, is_affirmative
 
+from .models import (
+    CommunityData,
+    ContextData,
+    DirMibSource,
+    MibViewController,
+    ObjectIdentity,
+    ObjectType,
+    OctetString,
+    SnmpEngine,
+    UdpTransportTarget,
+    UsmUserData,
+    hlapi,
+    lcd,
+    usmDESPrivProtocol,
+    usmHMACMD5AuthProtocol,
+)
 from .resolver import OIDResolver
 from .utils import to_oid_tuple
 
@@ -50,6 +61,7 @@ class ParsedMetricTag(object):
     __slots__ = ('name', 'symbol')
 
     def __init__(self, name, symbol):
+        # type: (str, str) -> None
         self.name = name
         self.symbol = symbol
 
@@ -158,7 +170,7 @@ class InstanceConfig:
             self.refresh_with_profile(profiles[profile], warning, log)
             self.add_profile_tag(profile)
 
-        self._context_data = hlapi.ContextData(*self.get_context_data(instance))
+        self._context_data = ContextData(*self.get_context_data(instance))
 
         self._uptime_metric_added = False
 
@@ -192,22 +204,24 @@ class InstanceConfig:
         self.all_oids.extend(tag_oids)
 
     def add_profile_tag(self, profile_name):
+        # type: (str) -> None
         self.tags.append('snmp_profile:{}'.format(profile_name))
 
     @staticmethod
-    def create_snmp_engine(mibs_path):
+    def create_snmp_engine(mibs_path=None):
+        # type: (str) -> Tuple[SnmpEngine, MibViewController]
         """
         Create a command generator to perform all the snmp query.
         If mibs_path is not None, load the mibs present in the custom mibs
         folder. (Need to be in pysnmp format)
         """
-        snmp_engine = hlapi.SnmpEngine()
+        snmp_engine = SnmpEngine()
         mib_builder = snmp_engine.getMibBuilder()
 
         if mibs_path is not None:
-            mib_builder.addMibSources(builder.DirMibSource(mibs_path))
+            mib_builder.addMibSources(DirMibSource(mibs_path))
 
-        mib_view_controller = view.MibViewController(mib_builder)
+        mib_view_controller = MibViewController(mib_builder)
 
         return snmp_engine, mib_view_controller
 
@@ -219,7 +233,7 @@ class InstanceConfig:
         """
         ip_address = instance['ip_address']
         port = int(instance.get('port', 161))  # Default SNMP port
-        return hlapi.UdpTransportTarget((ip_address, port), timeout=timeout, retries=retries)
+        return UdpTransportTarget((ip_address, port), timeout=timeout, retries=retries)
 
     @staticmethod
     def get_auth_data(instance):
@@ -232,8 +246,8 @@ class InstanceConfig:
             # SNMP v1 - SNMP v2
             # See http://snmplabs.com/pysnmp/docs/api-reference.html#pysnmp.hlapi.CommunityData
             if int(instance.get('snmp_version', 2)) == 1:
-                return hlapi.CommunityData(instance['community_string'], mpModel=0)
-            return hlapi.CommunityData(instance['community_string'], mpModel=1)
+                return CommunityData(instance['community_string'], mpModel=0)
+            return CommunityData(instance['community_string'], mpModel=1)
 
         if 'user' in instance:
             # SNMP v3
@@ -245,12 +259,12 @@ class InstanceConfig:
 
             if 'authKey' in instance:
                 auth_key = instance['authKey']
-                auth_protocol = hlapi.usmHMACMD5AuthProtocol
+                auth_protocol = usmHMACMD5AuthProtocol
 
             if 'privKey' in instance:
                 priv_key = instance['privKey']
-                auth_protocol = hlapi.usmHMACMD5AuthProtocol
-                priv_protocol = hlapi.usmDESPrivProtocol
+                auth_protocol = usmHMACMD5AuthProtocol
+                priv_protocol = usmDESPrivProtocol
 
             if 'authProtocol' in instance:
                 auth_protocol = getattr(hlapi, instance['authProtocol'])
@@ -258,7 +272,7 @@ class InstanceConfig:
             if 'privProtocol' in instance:
                 priv_protocol = getattr(hlapi, instance['privProtocol'])
 
-            return hlapi.UsmUserData(user, auth_key, priv_key, auth_protocol, priv_protocol)
+            return UsmUserData(user, auth_key, priv_key, auth_protocol, priv_protocol)
 
         raise ConfigurationError('An authentication method needs to be provided')
 
@@ -304,34 +318,38 @@ class InstanceConfig:
         metrics,  # type: List[Dict[str, Any]]
         warning,  # type: Callable[..., None]
         log,  # type: Callable[..., None]
+        object_identity_factory=None,  # type: Callable[..., ObjectIdentity]  # For unit tests purposes.
     ):
         # type: (...) -> Tuple[list, list, List[Union[ParsedMetric, ParsedTableMetric]]]
         """Parse configuration and returns data to be used for SNMP queries.
 
         `oids` is a dictionnary of SNMP tables to symbols to query.
         """
+        if object_identity_factory is None:
+            object_identity_factory = ObjectIdentity
+
         table_oids = {}  # type: Dict[Tuple[str, str], Tuple[Any, List[Any]]]
         parsed_metrics = []  # type: List[Union[ParsedMetric, ParsedTableMetric]]
 
-        def extract_symbol(mib, symbol):
+        def extract_symbol(mib, symbol):  # type: ignore
             if isinstance(symbol, dict):
                 symbol_oid = symbol['OID']
                 symbol = symbol['name']
                 self._resolver.register(to_oid_tuple(symbol_oid), symbol)
-                identity = hlapi.ObjectIdentity(symbol_oid)
+                identity = object_identity_factory(symbol_oid)
             else:
-                identity = hlapi.ObjectIdentity(mib, symbol)
+                identity = object_identity_factory(mib, symbol)
 
             return identity, symbol
 
-        def get_table_symbols(mib, table):
+        def get_table_symbols(mib, table):  # type: ignore
             identity, table = extract_symbol(mib, table)
             key = (mib, table)
 
             if key in table_oids:
                 return table_oids[key][1], table
 
-            table_object = hlapi.ObjectType(identity)
+            table_object = ObjectType(identity)
             symbols = []
 
             table_oids[key] = (table_object, symbols)
@@ -382,7 +400,7 @@ class InstanceConfig:
                         column_tags.append((tag_key, column))
 
                         try:
-                            object_type = hlapi.ObjectType(identity)
+                            object_type = ObjectType(identity)
                         except Exception as e:
                             warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
                         else:
@@ -417,7 +435,7 @@ class InstanceConfig:
                     identity, parsed_metric_name = extract_symbol(metric['MIB'], symbol)
 
                     try:
-                        symbols.append(hlapi.ObjectType(identity))
+                        symbols.append(ObjectType(identity))
                     except Exception as e:
                         warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
 
@@ -425,7 +443,7 @@ class InstanceConfig:
                     parsed_metrics.append(parsed_table_metric)
 
             elif 'OID' in metric:
-                oid_object = hlapi.ObjectType(hlapi.ObjectIdentity(metric['OID']))
+                oid_object = ObjectType(object_identity_factory(metric['OID']))
 
                 table_oids[metric['OID']] = (oid_object, [])
                 self._resolver.register(to_oid_tuple(metric['OID']), metric['name'])
@@ -467,12 +485,12 @@ class InstanceConfig:
             tag_name = tag['tag']
             if 'MIB' in tag:
                 mib = tag['MIB']
-                identity = hlapi.ObjectIdentity(mib, symbol)
+                identity = ObjectIdentity(mib, symbol)
             else:
                 oid = tag['OID']
-                identity = hlapi.ObjectIdentity(oid)
+                identity = ObjectIdentity(oid)
                 self._resolver.register(to_oid_tuple(oid), symbol)
-            object_type = hlapi.ObjectType(identity)
+            object_type = ObjectType(identity)
             oids.append(object_type)
             parsed_metric_tags.append(ParsedMetricTag(tag_name, symbol))
         return oids, parsed_metric_tags
@@ -483,7 +501,7 @@ class InstanceConfig:
             return
         # Reference sysUpTimeInstance directly, see http://oidref.com/1.3.6.1.2.1.1.3.0
         uptime_oid = '1.3.6.1.2.1.1.3.0'
-        oid_object = hlapi.ObjectType(hlapi.ObjectIdentity(uptime_oid))
+        oid_object = ObjectType(ObjectIdentity(uptime_oid))
         self.all_oids.append(oid_object)
         self._resolver.register(to_oid_tuple(uptime_oid), 'sysUpTimeInstance')
 
