@@ -12,12 +12,6 @@ from collections import defaultdict
 from concurrent import futures
 from typing import Any, DefaultDict, Dict, List, Optional, Tuple, Union
 
-import pysnmp.proto.rfc1902 as snmp_type
-from pyasn1.codec.ber import decoder
-from pysnmp import hlapi
-from pysnmp.error import PySnmpError
-from pysnmp.smi import builder
-from pysnmp.smi.exval import noSuchInstance, noSuchObject
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -26,24 +20,34 @@ from datadog_checks.base.errors import CheckException
 from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
 from .config import InstanceConfig, ParsedMetric, ParsedMetricTag, ParsedTableMetric
-from .utils import OIDPrinter, get_profile_definition, oid_pattern_specificity, recursively_expand_base_profiles
-
-# Additional types that are not part of the SNMP protocol. cf RFC 2856
-CounterBasedGauge64, ZeroBasedCounter64 = builder.MibBuilder().importSymbols(
-    'HCNUM-TC', 'CounterBasedGauge64', 'ZeroBasedCounter64'
+from .exceptions import PySnmpError
+from .types import (
+    Counter32,
+    Counter64,
+    CounterBasedGauge64,
+    Gauge32,
+    Integer,
+    Integer32,
+    ObjectIdentity,
+    ObjectType,
+    Unsigned32,
+    ZeroBasedCounter64,
+    noSuchInstance,
+    noSuchObject,
+)
+from .utils import (
+    OIDPrinter,
+    decode_asn1_object,
+    get_profile_definition,
+    oid_pattern_specificity,
+    recursively_expand_base_profiles,
 )
 
 # Metric type that we support
-SNMP_COUNTERS = frozenset([snmp_type.Counter32.__name__, snmp_type.Counter64.__name__, ZeroBasedCounter64.__name__])
+SNMP_COUNTERS = frozenset([Counter32.__name__, Counter64.__name__, ZeroBasedCounter64.__name__])
 
 SNMP_GAUGES = frozenset(
-    [
-        snmp_type.Gauge32.__name__,
-        snmp_type.Unsigned32.__name__,
-        CounterBasedGauge64.__name__,
-        snmp_type.Integer.__name__,
-        snmp_type.Integer32.__name__,
-    ]
+    [Gauge32.__name__, Unsigned32.__name__, CounterBasedGauge64.__name__, Integer.__name__, Integer32.__name__]
 )
 
 DEFAULT_OID_BATCH_SIZE = 10
@@ -236,7 +240,7 @@ class SnmpCheck(AgentCheck):
                     result_oid, value = var
                     if reply_invalid(value):
                         oid_tuple = result_oid.asTuple()
-                        missing_results.append(hlapi.ObjectType(hlapi.ObjectIdentity(oid_tuple)))
+                        missing_results.append(ObjectType(ObjectIdentity(oid_tuple)))
                     else:
                         all_binds.append(var)
 
@@ -246,11 +250,13 @@ class SnmpCheck(AgentCheck):
                     self.log.debug(
                         'Running SNMP command getNext on OIDS: %s', OIDPrinter(missing_results, with_values=False)
                     )
-                    binds = snmp_getnext(
-                        config,
-                        missing_results,
-                        lookup_mib=enforce_constraints,
-                        ignore_nonincreasing_oid=self.ignore_nonincreasing_oid,
+                    binds = list(
+                        snmp_getnext(
+                            config,
+                            missing_results,
+                            lookup_mib=enforce_constraints,
+                            ignore_nonincreasing_oid=self.ignore_nonincreasing_oid,
+                        )
                     )
                     self.log.debug('Returned vars: %s', OIDPrinter(binds, with_values=True))
                     all_binds.extend(binds)
@@ -270,7 +276,7 @@ class SnmpCheck(AgentCheck):
         # type: (InstanceConfig) -> str
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
-        oid = hlapi.ObjectType(hlapi.ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2, 0)))
+        oid = ObjectType(ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2, 0)))
         self.log.debug('Running SNMP command on OID: %r', OIDPrinter((oid,), with_values=False))
         var_binds = snmp_get(config, [oid], lookup_mib=False)
         self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
@@ -341,6 +347,7 @@ class SnmpCheck(AgentCheck):
             self._check_with_config(config)
 
     def _check_config_done(self, host, future):
+        # type: (str, futures.Future) -> None
         config = self._config
         if future.result():
             config.failing_instances[host] += 1
@@ -535,7 +542,7 @@ class SnmpCheck(AgentCheck):
         if snmp_class == 'Opaque':
             # Try support for floats
             try:
-                value = float(decoder.decode(bytes(snmp_value))[0])
+                value = float(decode_asn1_object(snmp_value))
             except Exception:
                 pass
             else:

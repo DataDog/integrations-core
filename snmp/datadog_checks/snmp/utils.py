@@ -2,15 +2,14 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Mapping, Sequence, Tuple, Union
 
 import yaml
-from pysnmp import hlapi
-from pysnmp.proto.rfc1902 import ObjectName
-from pysnmp.smi.error import SmiError
-from pysnmp.smi.exval import endOfMibView, noSuchInstance
+from pyasn1.codec.ber.decoder import decode as asn1_decode
 
 from .compat import get_config
+from .exceptions import SmiError
+from .types import ObjectName, ObjectType, endOfMibView, noSuchInstance
 
 
 def get_profile_definition(profile):
@@ -37,6 +36,7 @@ def get_profile_definition(profile):
 
 
 def _get_profiles_root():
+    # type: () -> str
     # NOTE: this separate helper function exists for mocking purposes.
     confd = get_config('confd_path')
     return os.path.join(confd, 'snmp.d', 'profiles')
@@ -101,6 +101,12 @@ def oid_pattern_specificity(pattern):
     )
 
 
+def decode_asn1_object(obj):
+    # type: (Any) -> float
+    value, _ = asn1_decode(bytes(obj))
+    return value
+
+
 class OIDPrinter(object):
     """Utility class to display OIDs efficiently.
 
@@ -109,11 +115,12 @@ class OIDPrinter(object):
     """
 
     def __init__(self, oids, with_values):
+        # type: (Union[Mapping, Sequence], bool) -> None
         self.oids = oids
         self.with_values = with_values
 
     def oid_str(self, oid):
-        # type: (hlapi.ObjectType) -> str
+        # type: (ObjectType) -> str
         """Display an OID object (or MIB symbol), even if the object is not initialized by PySNMP.
 
         Output:
@@ -131,7 +138,7 @@ class OIDPrinter(object):
             return arg
 
     def oid_str_value(self, oid):
-        # type: (hlapi.ObjectType) -> str
+        # type: (ObjectType) -> str
         """Display an OID object and its associated value.
 
         Output:
@@ -181,6 +188,7 @@ class OIDPrinter(object):
         return "'{}': {}".format(key, displayed)
 
     def __str__(self):
+        # type: () -> str
         if isinstance(self.oids, dict):
             return '{{{}}}'.format(', '.join(self.oid_dict(key, value) for (key, value) in self.oids.items()))
         if self.with_values:
