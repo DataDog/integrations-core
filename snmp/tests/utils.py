@@ -44,4 +44,4 @@ class ClassInstantiationSpy(Generic[T]):
 
     def reset(self):
         # type: () -> None
-        self.calls.clear()
+        self.calls = []
