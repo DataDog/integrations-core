@@ -26,8 +26,13 @@
   "short_description": "Correlate container performance with that of the services running inside them.",
   "support": "core",
   "supported_os": [
-    "linux",
-    "mac_os"
+    "linux"
   ],
-  "type": "check"
+  "type": "check",
+  "integration_id": "docker",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": "assets/service_checks.json"
+  }
 }

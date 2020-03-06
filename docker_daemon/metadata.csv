@@ -14,6 +14,7 @@ docker.cpu.user.median,gauge,,percent,,Median value of docker.cpu.user,0,docker,
 docker.cpu.usage,gauge,,percent,,The percent of CPU time obtained by this container,0,docker,docker.cpu.usage
 docker.cpu.throttled,gauge,,,,Number of times the cgroup has been throttled,-1,docker,cpu throttled
 docker.cpu.shares,gauge,,,,Shares of CPU usage allocated to the container,0,docker,cpu shares
+docker.kmem.usage,gauge,,byte,,"The amount of kernel memory that belongs to the container's processes.",0,docker,kmem usage
 docker.mem.cache,gauge,,byte,,The amount of memory that is being used to cache data from disk (e.g. memory contents that can be associated precisely with a block on a block device),0,docker,mem cache
 docker.mem.cache.95percentile,gauge,,byte,,95th percentile value of docker.mem.cache,0,docker,mem cache 95%
 docker.mem.cache.avg,gauge,,byte,,Average value of docker.mem.cache,0,docker,mem cache avg
@@ -32,6 +33,7 @@ docker.mem.swap.avg,gauge,,byte,,Average value of docker.mem.swap,0,docker,mem s
 docker.mem.swap.count,rate,,sample,second,The rate that the value of docker.mem.swap was sampled,0,docker,mem swap count
 docker.mem.swap.max,gauge,,byte,,Max value of docker.mem.swap,0,docker,mem swap max
 docker.mem.swap.median,gauge,,byte,,Median value of docker.mem.swap,0,docker,mem swap median
+docker.container.open_fds,gauge,,file,,The number of open file descriptors,0,docker,open_fds
 docker.container.size_rw,gauge,,byte,,Total size of all the files in the container which have been created or changed by processes running in the container,0,docker,changed files size
 docker.container.size_rw.95percentile,gauge,,byte,,95th percentile of docker.container.size_rw,0,docker,changed files size 95%
 docker.container.size_rw.avg,gauge,,byte,,Average value of docker.container.size_rw,0,docker,changed files size avg
@@ -114,3 +116,5 @@ docker.metadata.used,gauge,,byte,,Storage pool metadata space used,0,docker,meta
 docker.metadata.free,gauge,,byte,,Storage pool metadata space free,0,docker,metadata space free
 docker.metadata.total,gauge,,byte,,Storage pool metadata space total,0,docker,metadata space total
 docker.metadata.percent,gauge,,percent,,The percent of storage pool metadata used,0,docker,percent of metadata space total
+docker.thread.count,gauge,,thread,,"Current thread count for the container",0,docker,thread.count
+docker.thread.limit,gauge,,thread,,"Thread count limit for the container, if set",0,docker,thread.limit

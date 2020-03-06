@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -73,6 +73,13 @@ CGROUP_METRICS = [
         "file": "memory.soft_limit_in_bytes",
         "metrics": {
             "softlimit": ("docker.mem.soft_limit", GAUGE),
+        },
+    },
+    {
+        "cgroup": "memory",
+        "file": "memory.kmem.usage_in_bytes",
+        "metrics": {
+            "kmemusage": ("docker.kmem.usage", GAUGE),
         },
     },
     {
@@ -317,7 +324,7 @@ class DockerDaemon(AgentCheck):
                     try:
                         self.kube_pod_tags = self.kubeutil.get_kube_pod_tags()
                     except Exception as e:
-                        self.log.warning('Could not retrieve kubernetes labels: %s' % str(e))
+                        self.log.warning('Could not retrieve kubernetes labels: %s', e)
 
             # containers running with custom cgroups?
             custom_cgroups = _is_affirmative(instance.get('custom_cgroups', False))
@@ -370,7 +377,7 @@ class DockerDaemon(AgentCheck):
 
         except Exception as e:
             # It's not an important metric, keep going if it fails
-            self.warning("Failed to count Docker images. Exception: {0}".format(e))
+            self.warning("Failed to count Docker images. Exception: %s", e)
 
     def _get_and_count_containers(self, custom_cgroups=False, healthchecks=False):
         """List all the containers from the API, filter and count them."""
@@ -410,7 +417,7 @@ class DockerDaemon(AgentCheck):
 
             # Check if the container is included/excluded via its tags
             if self._is_container_excluded(container):
-                self.log.debug("Container {0} is excluded".format(container_name))
+                self.log.debug("Container %s is excluded", container_name)
                 continue
 
             containers_by_id[container['Id']] = container
@@ -543,7 +550,7 @@ class DockerDaemon(AgentCheck):
         Cache extracted tags inside the entity object.
         """
         if tag_name not in TAG_EXTRACTORS:
-            self.warning("{0} isn't a supported tag".format(tag_name))
+            self.warning("%s isn't a supported tag", tag_name)
             return
 
         # Check for already extracted tags
@@ -566,7 +573,7 @@ class DockerDaemon(AgentCheck):
             if self.docker_util.are_tags_filtered(container_tags):
                 container_name = DockerUtil.container_name_extractor(container)[0]
                 self._filtered_containers.add(container_name)
-                self.log.debug("Container {0} is filtered".format(container_name))
+                self.log.debug("Container %s is filtered", container_name)
 
     def _is_container_excluded(self, container):
         """Check if a container is excluded according to the filter rules.
@@ -712,7 +719,7 @@ class DockerDaemon(AgentCheck):
                     for mname, (key_list, fct, metric_func) in cgroup.get('to_compute', {}).iteritems():
                         values = [stats[key] for key in key_list if key in stats]
                         if len(values) != len(key_list):
-                            self.log.debug("Couldn't compute {0}, some keys were missing.".format(mname))
+                            self.log.debug("Couldn't compute %s, some keys were missing.", mname)
                             continue
                         value = fct(*values)
                         metric_func = FUNC_MAP[metric_func][self.use_histogram]
@@ -738,7 +745,7 @@ class DockerDaemon(AgentCheck):
         except Exception as e:
             # Revert to previous behaviour if the method is missing or failing
             # Debug message will only appear once per container, then the cache is used
-            self.log.debug("Failed to build docker network mapping, using failsafe. Exception: {0}".format(e))
+            self.log.debug("Failed to build docker network mapping, using failsafe. Exception: %s", e)
             networks = {'eth0': 'bridge'}
             self.network_mappings[container['Id']] = networks
 
@@ -761,7 +768,7 @@ class DockerDaemon(AgentCheck):
 
         except IOError as e:
             # It is possible that the container got stopped between the API call and now
-            self.log.debug("Cannot read network interface file, container likely raced to finish : {0}".format(e))
+            self.log.debug("Cannot read network interface file, container likely raced to finish : %s", e)
 
     def _invalidate_network_mapping_cache(self, api_events):
         for ev in api_events:
@@ -769,10 +776,10 @@ class DockerDaemon(AgentCheck):
                 if ev.get('Type') == 'network' and ev.get('Action').endswith('connect'):
                     container_id = ev.get('Actor').get('Attributes').get('container')
                     if container_id in self.network_mappings:
-                        self.log.debug("Removing network mapping cache for container %s" % container_id)
+                        self.log.debug("Removing network mapping cache for container %s", container_id)
                         del self.network_mappings[container_id]
             except Exception:
-                self.log.warning('Malformed network event: %s' % str(ev))
+                self.log.warning('Malformed network event: %s', str(ev))
 
     def _process_events(self, containers_by_id):
         api_events = self._get_events()
@@ -851,7 +858,7 @@ class DockerDaemon(AgentCheck):
 
                 normal_prio_events.append((event, container_name))
             if filtered_events_count:
-                self.log.debug('%d events were filtered out because of ignored event type' % filtered_events_count)
+                self.log.debug('%d events were filtered out because of ignored event type', filtered_events_count)
 
             normal_event = self._create_dd_event(normal_prio_events, image_name, container_tags, priority='Normal')
             if normal_event:
@@ -878,7 +885,7 @@ class DockerDaemon(AgentCheck):
                     status = AgentCheck.OK if exit_code == 0 else AgentCheck.CRITICAL
                     self.service_check(EXIT_SERVICE_CHECK_NAME, status, tags=list(container_tags), message=message)
                 except KeyError:
-                    self.log.warning('Unable to collect the exit code for container %s' % container_name)
+                    self.log.warning('Unable to collect the exit code for container %s', container_name)
 
     def _create_dd_event(self, events, image, c_tags, priority='Normal'):
         """Create the actual event to submit from a list of similar docker events"""
@@ -973,7 +980,7 @@ class DockerDaemon(AgentCheck):
             if raw_val:
                 match = DISK_STATS_RE.search(raw_val)
                 if match is None or len(match.groups()) != 2:
-                    self.log.warning('Can\'t parse value %s for disk metric %s. Dropping it.' % (raw_val, name))
+                    self.log.warning('Can\'t parse value %s for disk metric %s. Dropping it.', raw_val, name)
                     metrics[name] = None
                 val, unit = match.groups()
                 # by default some are uppercased others lowercased. That's error prone.
@@ -982,7 +989,7 @@ class DockerDaemon(AgentCheck):
                     val = int(float(val) * UNIT_MAP[unit])
                     metrics[name] = val
                 except KeyError:
-                    self.log.error('Unrecognized unit %s for disk metric %s. Dropping it.' % (unit, name))
+                    self.log.error('Unrecognized unit %s for disk metric %s. Dropping it.', unit, name)
                     metrics[name] = None
         return metrics
 
@@ -1019,7 +1026,7 @@ class DockerDaemon(AgentCheck):
 
     def _parse_cgroup_file(self, stat_file):
         """Parse a cgroup pseudo file for key/values."""
-        self.log.debug("Opening cgroup file: %s" % stat_file)
+        self.log.debug("Opening cgroup file: %s", stat_file)
         try:
             with open(stat_file, 'r') as fp:
                 if 'blkio' in stat_file:
@@ -1033,6 +1040,10 @@ class DockerDaemon(AgentCheck):
                     # 2 ** 60 is kept for consistency of other cgroups metrics
                     if value < 2 ** 60:
                         return dict({'softlimit': value})
+                elif 'memory.kmem.usage_in_bytes' in stat_file:
+                    value = int(fp.read())
+                    if value < 2 ** 60:
+                        return dict({'kmemusage': value})
                 elif 'cpu.shares' in stat_file:
                     value = int(fp.read())
                     return {'shares': value}
@@ -1041,7 +1052,7 @@ class DockerDaemon(AgentCheck):
         except IOError:
             # It is possible that the container got stopped between the API call and now.
             # Some files can also be missing (like cpu.stat) and that's fine.
-            self.log.debug("Can't open %s. Its metrics will be missing." % stat_file)
+            self.log.debug("Can't open %s. Its metrics will be missing.", stat_file)
 
     def _parse_blkio_metrics(self, stats):
         """Parse the blkio metrics."""
@@ -1101,7 +1112,7 @@ class DockerDaemon(AgentCheck):
                 #  Issue #2074
                 self.log.debug("Cannot read %s, process likely raced to finish : %s", path, e)
             except Exception as e:
-                self.warning("Cannot read %s : %s" % (path, str(e)))
+                self.warning("Cannot read %s : %s", path, e)
                 continue
 
             try:
@@ -1129,7 +1140,7 @@ class DockerDaemon(AgentCheck):
                             break
 
             except Exception, e:
-                self.warning("Cannot parse %s content: %s" % (path, str(e)))
+                self.warning("Cannot parse %s content: %s", path, e)
                 continue
         return container_dict
 
