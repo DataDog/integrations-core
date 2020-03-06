@@ -15,9 +15,8 @@ from .common import HERE
 @pytest.fixture(scope='session')
 def dd_environment():
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yml')
-    
+
     with docker_run(
-        compose_file,
-        conditions=[CheckDockerLogs(compose_file, [r'\[KafkaServer id=\d+\] started'], matches="all")]
+        compose_file, conditions=[CheckDockerLogs(compose_file, [r'\[KafkaServer id=\d+\] started'], matches="all")]
     ):
         yield load_jmx_config(), {'use_jmx': True}
