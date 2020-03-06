@@ -25,7 +25,9 @@ pytestmark = pytest.mark.unit
 
 
 @mock.patch("datadog_checks.snmp.config.hlapi")
-def test_parse_metrics(hlapi_mock):
+@mock.patch("datadog_checks.snmp.config.lcd")
+def test_parse_metrics(lcd_mock, hlapi_mock):
+    lcd_mock.configure.return_value = ('addr', None)
     instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
     check = SnmpCheck('snmp', {}, [instance])
     # Unsupported metric
@@ -66,8 +68,7 @@ def test_parse_metrics(hlapi_mock):
     # MIB with table and symbols
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"]}]
     table, _, _ = config.parse_metrics(metrics, check.warning, check.log)
-    assert len(table) == 1
-    assert len(table[0]) == 2
+    assert len(table) == 2
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
     hlapi_mock.reset_mock()
@@ -86,7 +87,6 @@ def test_parse_metrics(hlapi_mock):
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": [{"OID": "1.2.3", "name": "foo"}]}]
     table, _, _ = config.parse_metrics(metrics, check.warning, check.log)
     assert len(table) == 1
-    assert len(table[0]) == 1
     hlapi_mock.ObjectIdentity.assert_any_call("1.2.3")
     hlapi_mock.reset_mock()
 
@@ -95,8 +95,7 @@ def test_parse_metrics(hlapi_mock):
         {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "index": "1"}]}
     ]
     table, _, _ = config.parse_metrics(metrics, check.warning, check.log)
-    assert len(table) == 1
-    assert len(table[0]) == 2
+    assert len(table) == 2
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
     hlapi_mock.reset_mock()
@@ -106,8 +105,7 @@ def test_parse_metrics(hlapi_mock):
         {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "column": "baz"}]}
     ]
     table, _, _ = config.parse_metrics(metrics, check.warning, check.log)
-    assert len(table) == 1
-    assert len(table[0]) == 3
+    assert len(table) == 3
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "baz")
@@ -123,8 +121,7 @@ def test_parse_metrics(hlapi_mock):
         }
     ]
     table, _, _ = config.parse_metrics(metrics, check.warning, check.log)
-    assert len(table) == 1
-    assert len(table[0]) == 3
+    assert len(table) == 3
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "foo")
     hlapi_mock.ObjectIdentity.assert_any_call("foo_mib", "bar")
     hlapi_mock.ObjectIdentity.assert_any_call("1.5.6")
