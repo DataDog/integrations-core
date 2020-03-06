@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-ignite.threads.active,gauge,10,thread,,Approximate number of threads that are actively executing tasks.,0,
+ignite.threads.active,gauge,10,thread,,Approximate number of threads that are actively executing tasks.,0,ignite,
 ignite.threads.pool_size,gauge,10,thread,,Current number of threads in the pool.,0,ignite,
 ignite.threads.largest_size,gauge,10,thread,,Largest number of threads that have ever simultaneously been in the pool.,0,ignite,
 ignite.threads.tasks,gauge,10,task,,Approximate total number of tasks that have been scheduled for execution.,0,ignite,
@@ -92,7 +92,7 @@ ignite.transaction.locked_keys,gauge,10,key,,The number of keys locked on the no
 ignite.transaction.owner,gauge,10,transaction,,The number of active transactions for which this node is the initiator.,0,ignite,
 ignite.wal.archive_segments,gauge,10,segment,,Current number of WAL segments in the WAL archive.,0,ignite,
 ignite.wal.logging_rate,gauge,10,record,second,Average number of WAL records per second written during the last time interval.,0,ignite,
-ignite.wal.writing_rate,gauge,10,bytes,second,Average number of bytes per second written during the last time interval.,0,ignite,
+ignite.wal.writing_rate,gauge,10,byte,second,Average number of bytes per second written during the last time interval.,0,ignite,
 ignite.wal.buffer_poll_spin,gauge,10,,,WAL buffer poll spins number over the last time interval.,0,ignite,
 ignite.wal.fsync_average,gauge,10,microsecond,,Average WAL fsync duration in microseconds over the last time interval.,-1,ignite,
 ignite.wal.total_size,gauge,10,byte,,Total size in bytes for storage wal files.,0,ignite,

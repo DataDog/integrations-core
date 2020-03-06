@@ -92,6 +92,7 @@ instances:
 
 init_config:
 
+  ## @param is_jmx - boolean - required - default: true
   ## Whether or not this file is a configuration for a JMX integration
   #
   is_jmx: true
@@ -101,6 +102,11 @@ init_config:
   #
   collect_default_metrics: true
 
+  ## @param conf - list of objects - required
+  ## List of metrics to be collected by the integration
+  ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
+  ## The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
+  #
   conf:
     - include:
         bean_regex:

@@ -1,12 +1,12 @@
 {
-  "display_name": "ignite",
+  "display_name": "Ignite",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "ignite",
   "metric_prefix": "ignite.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Collect metrics from your Ignite server.",
   "guid": "fd5a21d5-ddfe-4d04-855f-28492b4d270e",
   "support": "core",
   "supported_os": [
