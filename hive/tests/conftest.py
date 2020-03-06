@@ -7,19 +7,27 @@ import os
 import pytest
 
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.utils import load_jmx_config
 
-from .common import HERE
+from .common import HERE, HOST, METASTORE_PORT, SERVER_PORT
 
 
 @pytest.fixture(scope="session")
 def dd_environment():
+    compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
     with docker_run(
-        os.path.join(HERE, 'compose', 'docker-compose.yaml'),
-        log_patterns=[r'datanode:\(\d+\) is available', 'Starting Hive Metastore Server', 'Starting HiveServer2'],
-        sleep=2,
+        compose_file,
+        conditions=[
+            CheckDockerLogs(
+                compose_file,
+                [r'datanode:\d+ is available', 'Starting Hive Metastore Server', 'Starting HiveServer2'],
+                matches='all',
+            )
+        ],
     ):
-        instance = {'host': 'localhost', 'port': 8809}
+        instance_metastore = {'host': HOST, 'port': METASTORE_PORT}
+        instance_server = {'host': HOST, 'port': SERVER_PORT}
         config = load_jmx_config()
-        config['instances'] = [instance]
+        config['instances'] = [instance_metastore, instance_server]
         yield config, {'use_jmx': True}
