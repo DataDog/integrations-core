@@ -7,7 +7,16 @@ import pytest
 
 from datadog_checks.gitlab import GitlabCheck
 
-from .common import ALLOWED_METRICS, AUTH_CONFIG, CONFIG, CUSTOM_TAGS, GITLAB_TAGS, LEGACY_CONFIG, METRICS, METRICS_TO_TEST
+from .common import (
+    ALLOWED_METRICS,
+    AUTH_CONFIG,
+    CONFIG,
+    CUSTOM_TAGS,
+    GITLAB_TAGS,
+    LEGACY_CONFIG,
+    METRICS,
+    METRICS_TO_TEST,
+)
 
 
 def assert_check(aggregator, metrics):

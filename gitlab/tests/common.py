@@ -96,7 +96,7 @@ METRICS_TO_TEST = [
     "http_requests_total",
     "http_request_duration_seconds.sum",
     "ruby.process_start_time_seconds",
-    "sql_duration_seconds.sum"
+    "sql_duration_seconds.sum",
 ]
 
 LEGACY_CONFIG = {
