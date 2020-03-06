@@ -12,3 +12,14 @@ files:
       overrides:
         port.example: 8686
     - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /tmp/<USER>/hive.log
+      source: hive
+      sourcecategory: database
+      service: <SERVICE_NAME>
+      log_processing_rules:
+      - type: multi_line
+        name: new_log_start_with_date
+        pattern: \d{4}\-\d{2}\-\d{2}

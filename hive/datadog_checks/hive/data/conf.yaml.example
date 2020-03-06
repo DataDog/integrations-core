@@ -1,31 +1,60 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param is_jmx - boolean - required
+    ## Whether or not this file is a configuration for a JMX integration.
+    #
+    is_jmx: true
+
+    ## @param collect_default_metrics - boolean - required
+    ## Whether or not the check should collect all default metrics.
+    #
+    collect_default_metrics: true
+
+    ## @param conf - list of mappings - optional
+    ## List of metrics to be collected by the integration
+    ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
+    ## Agent 5: Customize all your metrics below
+    ## Agent 6: The default metrics to be collected are kept in metrics.yaml,
+    ##          but you can still add your own metrics here
+    #
+    # conf:
+    #   - include:
+    #       bean: <BEAN_NAME>
+    #       attribute:
+    #         MyAttribute:
+    #           alias: my.metric.name
+    #           metric_type: gauge
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param host - string - required
-    ## HiveServer2 or Hive Metastore JMX host to connect to.
+    ## JMX hostname to connect to.
     #
   - host: localhost
 
     ## @param port - integer - required
-    ## HiveServer2 or Hive Metastore JMX port to connect to.
+    ## JMX port to connect to.
     #
-    port: 8809
-
-    ## @param tags - list of key:value elements - optional
-    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
-    ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
+    port: 8686
 
     ## @param user - string - optional
-    ## Username to use when connecting to HiveServer2 or Hive Metastore JMX.
+    ## User to use when connecting to JMX.
     #
     # user: <USER>
 
     ## @param password - string - optional
-    ## Password to use when connecting to HiveServer2 or Hive Metastore JMX.
+    ## Password to use when connecting to JMX.
     #
     # password: <PASSWORD>
 
@@ -33,67 +62,100 @@ instances:
     ## Instead of specifying a host, and port. The agent can connect using the attach api.
     ## This requires the JDK to be installed and the path to tools.jar to be set below.
     ## Note: It needs to be set when process_name_regex parameter is set
-    ##
+    ## e.g. .*process_name.*
     #
-    # process_name_regex: .*process_name.*
+    # process_name_regex: <PROCESS_NAME_REGEX>
 
     ## @param tools_jar_path - string - optional
     ## Path to the tool.jar file to use with `process_name_regex` parameter.
+    ## e.g. /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
     #
-    # tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+    # tools_jar_path: <TOOLS_JAR_PATH>
 
     ## @param name - string - optional
-    ## Set your instance name.
+    ## Set your instance name that will be used as `instance` tag.
     #
-    # name: hiveserver_instance
+    # name: <NAME>
 
     ## @param java_bin_path - string - optional
-    ## java_bin_path should be set if the agent cannot find your java executable
+    ## `java_bin_path` should be set if the agent cannot find your java executable
     #
-    # java_bin_path: <JAVA_PATH>
+    # java_bin_path: <JAVA_BIN_PATH>
 
     ## @param java_options - string - optional
     ## List of Java JVM options e.g. "-Xmx200m -Xms50m".
     #
-    # java_options: "-Xmx200m -Xms50m"
+    # java_options: <JAVA_OPTIONS>
 
     ## @param trust_store_path - string - optional
-    ## trust_store_path should be set if ssl is enabled.
-    ## path to your trusted store
+    ## Path to your trusted store.
+    ## `trust_store_path` should be set if ssl is enabled.
     #
-    # trust_store_path: <TRUSTSTORE.JKS_PATH>
+    # trust_store_path: <TRUST_STORE_PATH>
 
     ## @param trust_store_password - string - optional
-    ## trust_store_password should be set if ssl is enabled
-    ## password for your TrustStore.jks file
+    ## Password for your TrustStore.jks file.
+    ## `trust_store_password` should be set if ssl is enabled.
     #
-    # trust_store_password: <PASSWORD>
+    # trust_store_password: <TRUST_STORE_PASSWORD>
 
     ## @param key_store_path - string - optional
-    ## key_store_path should be set if client authentication is enabled on the target JVM.
-    ## path to your key store
+    ## Path to your key store.
+    ## `key_store_path` should be set if client authentication is enabled on the target JVM.
     #
-    # key_store_path: <KEYSTORE.JKS_PATH>
+    # key_store_path: <KEY_STORE_PATH>
 
     ## @param key_store_password - string - optional
-    ## key_store_password should be set if client authentication is enabled on the target JVM.
-    ## password for your KeyStore.jks file
+    ## Password to your key store.
+    ## `key_store_password` should be set if client authentication is enabled on the target JVM.
     #
-    # key_store_password: <PASSWORD>
+    # key_store_password: <KEY_STORE_PASSWORD>
 
     ## @param rmi_registry_ssl - boolean - optional - default: false
     ## Whether or not the agent should connect to the rmi registry using ssl.
     #
     # rmi_registry_ssl: false
 
-## Log Section (Available for Agent >=6.0)
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+## Log Section
 ##
-## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
-## service - mandatory - Name of the service that generated the log
-## source  - mandatory - Attribute that defines which Integration sent the logs
+## type - required - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - required - Set port if type is tcp or udp.
+##                                         Set path if type is file.
+##                                         Set channel_path if type is windows_event.
+## source  - required - Attribute that defines which Integration sent the logs
+## service - required - The name of the service that generates the log.
+##                      Overrides any `service` defined in the `init_config` section.
 ## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
-## tags: - optional - Add tags to the collected logs
+## tags - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
@@ -101,748 +163,9 @@ instances:
 #   - type: file
 #     path: /tmp/<USER>/hive.log
 #     source: hive
+#     sourcecategory: database
 #     service: <SERVICE_NAME>
 #     log_processing_rules:
-#       - type: multi_line
-#         name: new_log_start_with_date
-#         pattern: \d{4}\-\d{2}\-\d{2}
-
-init_config:
-
-  ## @param is_jmx - boolean - required - default: true
-  ## Whether or not this file is a configuration for a JMX integration
-  #
-  is_jmx: true
-
-  ## @param collect_default_metrics - boolean - required - default: true
-  ## Whether or not the check should collect all default metrics for this integration.
-  #
-  collect_default_metrics: true
-
-  ## @param conf - list of objects - required
-  ## List of metrics to be collected by the integration
-  ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
-  ## Agent 5: Customize all your metrics below
-  ## Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
-  #
-  conf:
-    # Metrics HiveServer2 related
-    - include:
-        bean: metrics:name=open_operations
-        attribute:
-          Count:
-            alias: hive.server.open_operations
-            metric_type: gauge
-
-    # Session
-    - include:
-        bean: metrics:name=hs2_active_sessions
-        attribute:
-          Value:
-            alias: hive.server.session.active
-            metric_type: gauge
-
-    - include:
-        bean: metrics:name=hs2_avg_active_session_time
-        attribute:
-          Value:
-            alias: hive.server.session.active.time_mean
-            metric_type: gauge
-
-    - include:
-        bean: metrics:name=hs2_open_sessions
-        attribute:
-          Value:
-            alias: hive.server.session.open
-            metric_type: gauge
-
-    - include:
-        bean: metrics:name=hs2_avg_open_session_time
-        attribute:
-          Value:
-            alias: hive.server.session.open.time_mean
-            metric_type: gauge
-
-    # Queries
-    - include:
-        bean: metrics:name=active_calls_hs2_submitted_queries
-        attribute:
-          Count:
-            alias: hive.server.queries.submitted.active_call
-            metric_type: gauge
-
-    - include:
-        bean: metrics:name=hs2_submitted_queries
-        attribute:
-          Max:
-            alias: hive.server.queries.submitted.max
-            metric_type: gauge
-          Mean:
-            alias: hive.server.queries.submitted.mean
-            metric_type: gauge
-          Min:
-            alias: hive.server.queries.submitted.min
-            metric_type: gauge
-          75thPercentile:
-            alias: hive.server.queries.submitted.75percentile
-            metric_type: gauge
-          95thPercentile:
-            alias: hive.server.queries.submitted.95percentile
-            metric_type: gauge
-          Count:
-            alias: hive.server.queries.submitted.count
-            metric_type: monotonic_count
-          MeanRate:
-            alias: hive.server.queries.submitted.meanrate
-            metric_type: rate
-
-    - include:
-        bean: metrics:name=active_calls_hs2_compiling_queries
-        attribute:
-          Count:
-            alias: hive.server.queries.compiling.active_call
-            metric_type: gauge
-
-    - include:
-        bean: metrics:name=hs2_compiling_queries
-        attribute:
-          Max:
-            alias: hive.server.queries.compiling.max
-            metric_type: gauge
-          Mean:
-            alias: hive.server.queries.compiling.mean
-            metric_type: gauge
-          Min:
-            alias: hive.server.queries.compiling.min
-            metric_type: gauge
-          75thPercentile:
-            alias: hive.server.queries.compiling.75percentile
-            metric_type: gauge
-          95thPercentile:
-            alias: hive.server.queries.compiling.95percentile
-            metric_type: gauge
-          Count:
-            alias: hive.server.queries.compiling.count
-            metric_type: monotonic_count
-          MeanRate:
-            alias: hive.server.queries.compiling.meanrate
-            metric_type: rate
-
-    - include:
-        bean: metrics:name=active_calls_hs2_executing_queries
-        attribute:
-          Count:
-            alias: hive.server.api.queries.executing.active_call
-            metric_type: gauge
-
-    - include:
-        bean: metrics:name=hs2_executing_queries
-        attribute:
-          Max:
-            alias: hive.server.queries.executing.max
-            metric_type: gauge
-          Mean:
-            alias: hive.server.queries.executing.mean
-            metric_type: gauge
-          Min:
-            alias: hive.server.queries.executing.min
-            metric_type: gauge
-          75thPercentile:
-            alias: hive.server.queries.executing.75percentile
-            metric_type: gauge
-          95thPercentile:
-            alias: hive.server.queries.executing.95percentile
-            metric_type: gauge
-          Count:
-            alias: hive.server.queries.executing.count
-            metric_type: monotonic_count
-          MeanRate:
-            alias: hive.server.queries.executing.meanrate
-            metric_type: rate
-
-    - include:
-        bean: metrics:name=hs2_succeeded_queries
-        attribute:
-          Count:
-            alias: hive.server.queries.succeeded.count
-            type: monotonic_count
-          MeanRate:
-            alias: hive.server.queries.succeeded.meanrate
-            type: rate
-
-    # SQL operation
-    # Pending
-    - include:
-        bean: metrics:name=active_calls_api_hs2_sql_operation_PENDING
-        attribute:
-          Count:
-            alias: hive.server.api.sql_operation.pending.active_call
-            metric_type: gauge
-
-    - include:
-        bean: metrics:name=api_hs2_sql_operation_PENDING
-        attribute:
-          Max:
-            alias: hive.server.api.sql_operation.pending.max
-            metric_type: gauge
-          Mean:
-            alias: hive.server.api.sql_operation.pending.mean
-            metric_type: gauge
-          Min:
-            alias: hive.server.api.sql_operation.pending.min
-            metric_type: gauge
-          75thPercentile:
-            alias: hive.server.api.sql_operation.pending.75percentile
-            metric_type: gauge
-          95thPercentile:
-            alias: hive.server.api.sql_operation.pending.95percentile
-            metric_type: gauge
-          Count:
-            alias: hive.server.api.sql_operation.pending.count
-            metric_type: monotonic_count
-          MeanRate:
-            alias: hive.server.api.sql_operation.pending.meanrate
-            metric_type: rate
-
-    # Running
-    - include:
-        bean: metrics:name=active_calls_api_hs2_sql_operation_RUNNING
-        attribute:
-          Count:
-            alias: hive.server.api.sql_operation.running.active_call
-            metric_type: gauge
-
-    - include:
-        bean: metrics:name=api_hs2_sql_operation_RUNNING
-        attribute:
-          Max:
-            alias: hive.server.api.sql_operation.running.max
-            metric_type: gauge
-          Mean:
-            alias: hive.server.api.sql_operation.running.mean
-            metric_type: gauge
-          Min:
-            alias: hive.server.api.sql_operation.running.min
-            metric_type: gauge
-          75thPercentile:
-            alias: hive.server.api.sql_operation.running.75percentile
-            metric_type: gauge
-          95thPercentile:
-            alias: hive.server.api.sql_operation.running.95percentile
-            metric_type: gauge
-          Count:
-            alias: hive.server.api.sql_operation.running.count
-            metric_type: monotonic_count
-          MeanRate:
-            alias: hive.server.api.sql_operation.running.meanrate
-            metric_type: rate
-
-    # Completed
-    - include:
-        bean: metrics:name=hs2_completed_sql_operation_CLOSED
-        attribute:
-          Count:
-            alias: hive.server.sql_operation.completed.closed
-            metric_type: monotonic_count
-
-    - include:
-        bean: metrics:name=hs2_completed_sql_operation_FINISHED
-        attribute:
-          Count:
-            alias: hive.server.sql_operation.completed.finished
-            metric_type: monotonic_count
-
-    # User
-    - include:
-        bean: metrics:name=hs2_sql_operation_active_user
-        attribute:
-          Count:
-            alias: hive.server.sql_operation.user.active
-            metric_type: gauge
-
-    # Operation
-    # Initialized
-    - include:
-        bean: metrics:name=active_calls_api_hs2_operation_INITIALIZED
-        attribute:
-          Count:
-            alias: hive.server.api.operation.initialized.active_call
-            metric_type: gauge
-
-    - include:
-        bean: metrics:name=api_hs2_operation_INITIALIZED
-        attribute:
-          Max:
-            alias: hive.server.api.operation.initialized.max
-            metric_type: gauge
-          Mean:
-            alias: hive.server.api.operation.initialized.mean
-            metric_type: gauge
-          Min:
-            alias: hive.server.api.operation.initialized.min
-            metric_type: gauge
-          75thPercentile:
-            alias: hive.server.api.operation.initialized.75percentile
-            metric_type: gauge
-          95thPercentile:
-            alias: hive.server.api.operation.initialized.95percentile
-            metric_type: gauge
-          Count:
-            alias: hive.server.api.operation.initialized.count
-            metric_type: monotonic_count
-          MeanRate:
-            alias: hive.server.api.operation.initialized.meanrate
-            metric_type: rate
-
-    # Pending
-    - include:
-        bean: metrics:name=active_calls_api_hs2_operation_PENDING
-        attribute:
-          Count:
-            alias: hive.server.api.operation.pending.active_call
-            metric_type: gauge
-
-    - include:
-        bean: metrics:name=api_hs2_operation_PENDING
-        attribute:
-          Max:
-            alias: hive.server.api.operation.pending.max
-            metric_type: gauge
-          Mean:
-            alias: hive.server.api.operation.pending.mean
-            metric_type: gauge
-          Min:
-            alias: hive.server.api.operation.pending.min
-            metric_type: gauge
-          75thPercentile:
-            alias: hive.server.api.operation.pending.75percentile
-            metric_type: gauge
-          95thPercentile:
-            alias: hive.server.api.operation.pending.95percentile
-            metric_type: gauge
-          Count:
-            alias: hive.server.api.operation.pending.count
-            metric_type: monotonic_count
-          MeanRate:
-            alias: hive.server.api.operation.pending.meanrate
-            metric_type: rate
-
-    # Running
-    - include:
-        bean: metrics:name=active_calls_api_hs2_operation_RUNNING
-        attribute:
-          Count:
-            alias: hive.server.api.operation.running.active_call
-            metric_type: gauge
-
-    - include:
-        bean: metrics:name=api_hs2_operation_RUNNING
-        attribute:
-          Max:
-            alias: hive.server.api.operation.running.max
-            metric_type: gauge
-          Mean:
-            alias: hive.server.api.operation.running.mean
-            metric_type: gauge
-          Min:
-            alias: hive.server.api.operation.running.min
-            metric_type: gauge
-          75thPercentile:
-            alias: hive.server.api.operation.running.75percentile
-            metric_type: gauge
-          95thPercentile:
-            alias: hive.server.api.operation.running.95percentile
-            metric_type: gauge
-          Count:
-            alias: hive.server.api.operation.running.count
-            metric_type: monotonic_count
-          MeanRate:
-            alias: hive.server.api.operation.running.meanrate
-            metric_type: rate
-
-    # Completed
-    - include:
-        bean: metrics:name=hs2_completed_operation_FINISHED
-        attribute:
-          Count:
-            alias: hive.server.operation.completed.finished
-            metric_type: monotonic_count
-
-    - include:
-        bean: metrics:name=hs2_completed_operation_CLOSED
-        attribute:
-          Count:
-            alias: hive.server.operation.completed.closed
-            metric_type: monotonic_count
-
-    # Memory
-    - include:
-        bean: metrics:name=memory.heap.init
-        attribute:
-          Value:
-            alias: hive.server.memory.heap.init
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.heap.used
-        attribute:
-          Value:
-            alias: hive.server.memory.heap.used
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.heap.max
-        attribute:
-          Value:
-            alias: hive.server.memory.heap.max
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.heap.committed
-        attribute:
-          Value:
-            alias: hive.server.memory.heap.committed
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.non-heap.init
-        attribute:
-          Value:
-            alias: hive.server.memory.non_heap.init
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.non-heap.used
-        attribute:
-          Value:
-            alias: hive.server.memory.non_heap.used
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.non-heap.max
-        attribute:
-          Value:
-            alias: hive.server.memory.non_heap.max
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.non-heap.committed
-        attribute:
-          Value:
-            alias: hive.server.memory.non_heap.committed
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.total.init
-        attribute:
-          Value:
-            alias: hive.server.memory.total.init
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.total.used
-        attribute:
-          Value:
-            alias: hive.server.memory.total.used
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.total.max
-        attribute:
-          Value:
-            alias: hive.server.memory.total.max
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.total.committed
-        attribute:
-          Value:
-            alias: hive.server.memory.total.committed
-            metric_type: gauge
-
-    # Metrics Hive Metastore related
-    - include:
-        bean: metrics:name=open_connections
-        attribute:
-          Count:
-            alias: hive.metastore.open_connections
-            metric_type: gauge
-
-    - include:
-        bean: metrics:name=create_total_count_dbs
-        attribute:
-          Count:
-            alias: hive.metastore.db.created
-            metric_type: monotonic_count
-
-    - include:
-        bean: metrics:name=delete_total_count_dbs
-        attribute:
-          Count:
-            alias: hive.metastore.db.deleted
-            metric_type: monotonic_count
-
-    - include:
-        bean: metrics:name=init_total_count_dbs
-        attribute:
-          Value:
-            alias: hive.metastore.db.init
-            metric_type: monotonic_count
-
-    - include:
-        bean: metrics:name=create_total_count_tables
-        attribute:
-          Count:
-            alias: hive.metastore.table.created
-            metric_type: monotonic_count
-
-    - include:
-        bean: metrics:name=delete_total_count_tables
-        attribute:
-          Count:
-            alias: hive.metastore.table.deleted
-            metric_type: monotonic_count
-
-    - include:
-        bean: metrics:name=init_total_count_tables
-        attribute:
-          Value:
-            alias: hive.metastore.table.init
-            metric_type: monotonic_count
-
-    - include:
-        bean: metrics:name=create_total_count_partitions
-        attribute:
-          Count:
-            alias: hive.metastore.partition.created
-            metric_type: monotonic_count
-
-    - include:
-        bean: metrics:name=delete_total_count_partitions
-        attribute:
-          Count:
-            alias: hive.metastore.partition.deleted
-            metric_type: monotonic_count
-
-    - include:
-        bean: metrics:name=init_total_count_partitions
-        attribute:
-          Value:
-            alias: hive.metastore.partition.init
-            metric_type: gauge
-
-    - include:
-        bean: metrics:name=directsql_errors
-        attribute:
-          Count:
-            alias: hive.metastore.directsql_errors
-            metric_type: gauge
-
-    # Memory
-    - include:
-        bean: metrics:name=memory.heap.init
-        attribute:
-          Value:
-            alias: hive.metastore.memory.heap.init
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.heap.used
-        attribute:
-          Value:
-            alias: hive.metastore.memory.heap.used
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.heap.max
-        attribute:
-          Value:
-            alias: hive.metastore.memory.heap.max
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.heap.committed
-        attribute:
-          Value:
-            alias: hive.metastore.memory.heap.committed
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.non-heap.init
-        attribute:
-          Value:
-            alias: hive.metastore.memory.non_heap.init
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.non-heap.used
-        attribute:
-          Value:
-            alias: hive.metastore.memory.non_heap.used
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.non-heap.max
-        attribute:
-          Value:
-            alias: hive.metastore.memory.non_heap.max
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.non-heap.committed
-        attribute:
-          Value:
-            alias: hive.metastore.memory.non_heap.committed
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.total.init
-        attribute:
-          Value:
-            alias: hive.metastore.memory.total.init
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.total.used
-        attribute:
-          Value:
-            alias: hive.metastore.memory.total.used
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.total.max
-        attribute:
-          Value:
-            alias: hive.metastore.memory.total.max
-            metric_type: gauge
-    - include:
-        bean: metrics:name=memory.total.committed
-        attribute:
-          Value:
-            alias: hive.metastore.memory.total.committed
-            metric_type: gauge
-
-    # API
-    - include:
-        bean: metrics:name=api_create_table
-        attribute:
-          Count:
-            alias: hive.metastore.api.create_table
-            metric_type: monotonic_count
-    - include:
-        bean: metrics:name=active_calls_api_create_table
-        attribute:
-          Count:
-            alias: hive.metastore.api.create_table.active_call
-            metric_type: gauge
-    - include:
-        bean: metrics:name=api_get_table
-        attribute:
-          Count:
-            alias: hive.metastore.api.get_table
-            metric_type: monotonic_count
-    - include:
-        bean: metrics:name=active_calls_api_get_table
-        attribute:
-          Count:
-            alias: hive.metastore.api.get_table.active_call
-            metric_type: gauge
-    - include:
-        bean: metrics:name=api_drop_table
-        attribute:
-          Count:
-            alias: hive.metastore.api.drop_table
-            metric_type: monotonic_count
-    - include:
-        bean: metrics:name=active_calls_api_drop_table
-        attribute:
-          Count:
-            alias: hive.metastore.api.drop_table.active_call
-            metric_type: gauge
-    - include:
-        bean: metrics:name=api_init
-        attribute:
-          Count:
-            alias: hive.metastore.api.init
-            metric_type: monotonic_count
-    - include:
-        bean: metrics:name=active_calls_api_init
-        attribute:
-          Count:
-            alias: hive.metastore.api.init.active_call
-            metric_type: gauge
-    - include:
-        bean: metrics:name=api_get_all_databases
-        attribute:
-          Count:
-            alias: hive.metastore.api.get_all_databases
-            metric_type: monotonic_count
-    - include:
-        bean: metrics:name=active_calls_api_get_all_databases
-        attribute:
-          Count:
-            alias: hive.metastore.api.get_all_databases.active_call
-            metric_type: gauge
-    - include:
-        bean: metrics:name=api_get_database
-        attribute:
-          Count:
-            alias: hive.metastore.api.get_database
-            metric_type: monotonic_count
-    - include:
-        bean: metrics:name=active_calls_api_get_database
-        attribute:
-          Count:
-            alias: hive.metastore.api.get_database.active_call
-            metric_type: gauge
-    - include:
-        bean: metrics:name=api_get_all_tables
-        attribute:
-          Count:
-            alias: hive.metastore.api.get_all_tables
-            metric_type: monotonic_count
-    - include:
-        bean: metrics:name=active_calls_api_get_all_tables
-        attribute:
-          Count:
-            alias: hive.metastore.api.get_all_tables.active_call
-            metric_type: gauge
-    - include:
-        bean: metrics:name=api_shutdown
-        attribute:
-          Count:
-            alias: hive.metastore.api.shutdown
-            metric_type: monotonic_count
-    - include:
-        bean: metrics:name=active_calls_api_shutdown
-        attribute:
-          Count:
-            alias: hive.metastore.api.shutdown.active_call
-            metric_type: gauge
-    - include:
-        bean: metrics:name=api_flushCache
-        attribute:
-          Count:
-            alias: hive.metastore.api.flushcache
-            metric_type: monotonic_count
-    - include:
-        bean: metrics:name=active_calls_api_flushCache
-        attribute:
-          Count:
-            alias: hive.metastore.api.flushcache.active_call
-            metric_type: gauge
-    - include:
-        bean: metrics:name=api_alter_table
-        attribute:
-          Count:
-            alias: hive.metastore.api.alter_table
-            metric_type: monotonic_count
-    - include:
-        bean: metrics:name=active_calls_api_alter_table
-        attribute:
-          Count:
-            alias: hive.metastore.api.alter_table.active_call
-            metric_type: gauge
-    - include:
-        bean: metrics:name=api_get_all_functions
-        attribute:
-          Count:
-            alias: hive.metastore.api.get_all_functions
-            metric_type: monotonic_count
-    - include:
-        bean: metrics:name=active_calls_api_get_all_functions
-        attribute:
-          Count:
-            alias: hive.metastore.api.get_all_functions.active_call
-            metric_type: gauge
-    - include:
-        bean: metrics:name=api_get_table_req
-        attribute:
-          Count:
-            alias: hive.metastore.api.get_table_req
-            metric_type: monotonic_count
-    - include:
-        bean: metrics:name=active_calls_api_get_table_req
-        attribute:
-          Count:
-            alias: hive.metastore.api.get_table_req.active_call
-            metric_type: gauge
+#     - type: multi_line
+#       name: new_log_start_with_date
+#       pattern: \d{4}\-\d{2}\-\d{2}
