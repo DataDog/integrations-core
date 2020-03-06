@@ -22,7 +22,6 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.tracing import traced
 
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
 from .config import InstanceConfig, ParsedMetric, ParsedMetricTag, ParsedTableMetric
@@ -81,7 +80,6 @@ class SnmpCheck(AgentCheck):
         self.instance['name'] = self._get_instance_name(self.instance)
         self._config = self._build_config(self.instance)
 
-    @traced
     def _load_profiles(self):
         # type: () -> None
         """
@@ -103,7 +101,6 @@ class SnmpCheck(AgentCheck):
             if sys_object_oid is not None:
                 self.profiles_by_oid[sys_object_oid] = name
 
-    @traced
     def _build_config(self, instance):
         # type: (dict) -> InstanceConfig
         return InstanceConfig(
@@ -116,7 +113,6 @@ class SnmpCheck(AgentCheck):
             profiles_by_oid=self.profiles_by_oid,
         )
 
-    @traced
     def _get_instance_name(self, instance):
         # type: (Dict[str, Any]) -> Optional[str]
         name = instance.get('name')
@@ -133,7 +129,6 @@ class SnmpCheck(AgentCheck):
         else:
             return None
 
-    @traced
     def discover_instances(self, interval):
         # type: (float) -> None
         config = self._config
@@ -174,14 +169,12 @@ class SnmpCheck(AgentCheck):
             if interval - time_elapsed > 0:
                 time.sleep(interval - time_elapsed)
 
-    @traced
     def raise_on_error_indication(self, error_indication, ip_address):
         # type: (Any, Optional[str]) -> None
         if error_indication:
             message = '{} for instance {}'.format(error_indication, ip_address)
             raise CheckException(message)
 
-    @traced
     def fetch_results(self, config, all_oids, bulk_oids):
         # type: (InstanceConfig, list, list) -> Tuple[dict, Optional[str]]
         """
@@ -233,7 +226,6 @@ class SnmpCheck(AgentCheck):
         results.default_factory = None
         return results, error
 
-    @traced
     def fetch_oids(self, config, oids, enforce_constraints):
         # type: (InstanceConfig, list, bool) -> Tuple[List[Any], Optional[str]]
         # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
@@ -293,7 +285,6 @@ class SnmpCheck(AgentCheck):
 
         return all_binds, error
 
-    @traced
     def fetch_sysobject_oid(self, config):
         # type: (InstanceConfig) -> str
         """Return the sysObjectID of the instance."""
@@ -305,7 +296,6 @@ class SnmpCheck(AgentCheck):
         self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
         return var_binds[0][1].prettyPrint()
 
-    @traced
     def _profile_for_sysobject_oid(self, sys_object_oid):
         # type: (str) -> str
         """
@@ -320,7 +310,6 @@ class SnmpCheck(AgentCheck):
             profiles, key=lambda profile: oid_pattern_specificity(self.profiles[profile]['definition']['sysobjectid'])
         )
 
-    @traced
     def _consume_binds_iterator(self, binds_iterator, config):
         # type: (Iterator[Any], InstanceConfig) -> Tuple[List[Any], Optional[str]]
         all_binds = []  # type: List[Any]
@@ -344,7 +333,6 @@ class SnmpCheck(AgentCheck):
             all_binds.extend(var_bind for var_bind in var_binds_table if var_bind[1] is not endOfMibView)
         return all_binds, error
 
-    @traced
     def _start_discovery(self):
         # type: () -> None
         cache = read_persistent_cache(self.check_id)
@@ -375,7 +363,6 @@ class SnmpCheck(AgentCheck):
         self._thread.start()
         self._executor = futures.ThreadPoolExecutor(max_workers=self._config.workers)
 
-    @traced
     def check(self, instance):
         # type: (Dict[str, Any]) -> None
         config = self._config
@@ -396,7 +383,6 @@ class SnmpCheck(AgentCheck):
         else:
             self._check_with_config(config)
 
-    @traced
     def _check_config_done(self, host, future):
         config = self._config
         if future.result():
@@ -410,7 +396,6 @@ class SnmpCheck(AgentCheck):
             # Reset the counter if not's failing
             config.failing_instances.pop(host, None)
 
-    @traced
     def _check_with_config(self, config):
         # type: (InstanceConfig) -> Optional[str]
         # Reset errors
@@ -448,7 +433,6 @@ class SnmpCheck(AgentCheck):
             self.service_check(self.SC_STATUS, status, tags=tags, message=error)
         return error
 
-    @traced
     def extract_metric_tags(self, metric_tags, results):
         # type: (List[ParsedMetricTag], Dict[str, dict]) -> List[str]
         extracted_tags = []
@@ -465,7 +449,6 @@ class SnmpCheck(AgentCheck):
             extracted_tags.append('{}:{}'.format(tag.name, tag_values[0]))
         return extracted_tags
 
-    @traced
     def report_metrics(
         self,
         metrics,  # type: List[Union[ParsedMetric, ParsedTableMetric]]
@@ -499,7 +482,6 @@ class SnmpCheck(AgentCheck):
                 metric_tags = tags + metric.metric_tags
                 self.submit_metric(name, val, metric.forced_type, metric_tags)
 
-    @traced
     def get_index_tags(
         self,
         index,  # type: Dict[int, float]
@@ -545,7 +527,6 @@ class SnmpCheck(AgentCheck):
 
         return tags
 
-    @traced
     def submit_metric(self, name, snmp_value, forced_type, tags):
         # type: (str, Any, Optional[str], List[str]) -> None
         """
