@@ -11,10 +11,10 @@ import traceback
 import unicodedata
 from collections import defaultdict, deque
 from os.path import basename
-from typing import TYPE_CHECKING, Any, Callable, DefaultDict, Deque, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, DefaultDict, Deque, Dict, List, Optional, Sequence, Tuple, Union
 
 import yaml
-from six import iteritems
+from six import iteritems, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
@@ -33,11 +33,6 @@ from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.proxy import config_proxy_skip
-
-if TYPE_CHECKING:
-    text_type = str
-else:
-    from six import text_type
 
 try:
     import datadog_agent
