@@ -20,7 +20,6 @@
 - name: password
   description: Password to use when connecting to JMX.
   value:
-    example: <PASSWORD>
     type: string
 
 - name: process_name_regex
