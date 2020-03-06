@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 METRICS_MAP = {
     "gitlab_banzai_cached_render_real_duration_seconds": "banzai.cached_render_real_duration_seconds",
     "gitlab_banzai_cacheless_render_real_duration_seconds": "banzai.cacheless_render_real_duration_seconds",
