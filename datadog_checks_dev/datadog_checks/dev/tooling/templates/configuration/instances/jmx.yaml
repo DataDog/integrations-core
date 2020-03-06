@@ -49,8 +49,7 @@
     type: string
 
 - name: java_options
-  description: |
-    List of Java JVM options e.g. "-Xmx200m -Xms50m".
+  description: List of Java JVM options e.g. "-Xmx200m -Xms50m".
   value:
     type: string
 
