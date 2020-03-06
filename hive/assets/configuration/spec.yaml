@@ -11,7 +11,7 @@ files:
     - template: instances/jmx
       overrides:
         host.description: HiveServer2 or Hive Metastore JMX host to connect to.
-        port.example: 8809
+        port.value.example: 8809
         port.description: HiveServer2 or Hive Metastore JMX port to connect to.
     - template: instances/default
   - template: logs

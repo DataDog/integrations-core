@@ -46,7 +46,7 @@ instances:
     ## @param port - integer - required
     ## HiveServer2 or Hive Metastore JMX port to connect to.
     #
-    port: 8686
+    port: 8809
 
     ## @param user - string - optional
     ## User to use when connecting to JMX.
