@@ -9,3 +9,4 @@ services:
      - 49112:49112
     volumes:
      - ${CONFIG_FILE}:/config.xml
+     - ${FUNCTIONS_FILE}:/opt/ignite/apache-ignite/bin/include/functions.sh
