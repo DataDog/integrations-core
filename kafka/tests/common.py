@@ -22,7 +22,6 @@ Rate type metrics that do not work in our e2e:
     "kafka.net.bytes_in.rate",
     "kafka.net.bytes_out.rate",
     "kafka.net.bytes_rejected.rate",
-    "kafka.net.handler.avg.idle.pct.rate",
     "kafka.replication.isr_expands.rate",
     "kafka.replication.isr_shrinks.rate",
     "kafka.replication.leader_elections.rate",
