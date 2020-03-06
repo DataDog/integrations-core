@@ -148,6 +148,7 @@ class AgentCheck(object):
                 configuration file (a list is used to keep backward compatibility with
                 older versions of the Agent).
         """
+        # NOTE: these variable assignments exist to ease type checking when eventually assigned as attributes.
         name = kwargs.get('name', '')
         init_config = kwargs.get('init_config', {})
         agentConfig = kwargs.get('agentConfig', {})
