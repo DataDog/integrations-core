@@ -2,11 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-from typing import Iterator
+from typing import Iterator, cast
 
 from ..connections import Connection
 from ..queries import QueryEngine
-from ..types import Metric
+from ..types import BackfillInfo, IndexConstructionInfo, Metric
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +29,14 @@ def collect_system_jobs(engine, conn):
         tags = ['server:{}'.format(server) for server in servers]
 
         if job['type'] == 'index_construction':
-            database = job['info']['db']
-            table = job['info']['table']
-            index = job['info']['index']
-            progress = job['info']['progress']
+            # NOTE: Using `cast()` is required until tagged unions are released in mypy stable. Until then, avoid using
+            # 'info' as a variable name in all cases (workaround for https://github.com/python/mypy/issues/6232).
+            # See: https://mypy.readthedocs.io/en/latest/literal_types.html#tagged-unions
+            index_construction_info = cast(IndexConstructionInfo, job['info'])
+            database = index_construction_info['db']
+            table = index_construction_info['table']
+            index = index_construction_info['index']
+            progress = index_construction_info['progress']
 
             index_construction_tags = tags + [
                 'database:{}'.format(database),
@@ -55,11 +59,12 @@ def collect_system_jobs(engine, conn):
             }
 
         elif job['type'] == 'backfill':
-            database = job['info']['db']
-            destination_server = job['info']['destination_server']
-            source_server = job['info']['source_server']
-            table = job['info']['table']
-            progress = job['info']['progress']
+            backfill_info = cast(BackfillInfo, job['info'])
+            database = backfill_info['db']
+            destination_server = backfill_info['destination_server']
+            source_server = backfill_info['source_server']
+            table = backfill_info['table']
+            progress = backfill_info['progress']
 
             backfill_tags = tags + [
                 'database:{}'.format(database),
