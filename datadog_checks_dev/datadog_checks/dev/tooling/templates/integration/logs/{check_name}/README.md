@@ -33,7 +33,7 @@ This check monitors [{integration_name}][3].
       logs_enabled: true
     ```
 
-2. Add this configuration block to your `{check_name}.d/conf.yaml` file to start collecting your DataNode logs:
+2. Add this configuration block to your `{check_name}.d/conf.yaml` file to start collecting your {integration_name} logs:
 
     ```yaml
       logs:
