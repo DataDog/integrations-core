@@ -38,20 +38,32 @@ def setup_cluster():
     logger.debug('setup_cluster')
 
     with RethinkDBConnection(r.connect(host=HOST, port=SERVER_PORTS['server0'])) as conn:
-        conn.run(r.db_drop('test'))  # Automatically created, but we don't use it and it would skew our metrics.
+        # A test DB is automatically created, but we don't use it and it would skew our metrics.
+        response = conn.run(r.db_drop('test'))
+        assert response['dbs_dropped'] == 1
 
         # Cluster content.
-        conn.run(r.db_create(DATABASE))
-        conn.run(r.db(DATABASE).table_create(HEROES_TABLE, **HEROES_TABLE_CONFIG))
-        conn.run(r.db(DATABASE).table(HEROES_TABLE).index_create(HEROES_TABLE_INDEX_FIELD))
+        response = conn.run(r.db_create(DATABASE))
+        assert response['dbs_created'] == 1
+        response = conn.run(r.db(DATABASE).table_create(HEROES_TABLE, **HEROES_TABLE_CONFIG))
+        assert response['tables_created'] == 1
+        response = conn.run(r.db(DATABASE).table(HEROES_TABLE).index_create(HEROES_TABLE_INDEX_FIELD))
+        assert response['created'] == 1
+
+        response = conn.run(r.db(DATABASE).table(HEROES_TABLE).wait(timeout=1))
+        assert response['ready'] == 1
 
         # Users.
         # See: https://rethinkdb.com/docs/permissions-and-accounts/
-        conn.run(r.db('rethinkdb').table('users').insert({'id': AGENT_USER, 'password': AGENT_PASSWORD}))
-        conn.run(r.db('rethinkdb').grant(AGENT_USER, {'read': True}))
+        response = conn.run(r.db('rethinkdb').table('users').insert({'id': AGENT_USER, 'password': AGENT_PASSWORD}))
+        assert response['inserted'] == 1
+        response = conn.run(r.db('rethinkdb').grant(AGENT_USER, {'read': True}))
+        assert response['granted'] == 1
 
-        conn.run(r.db('rethinkdb').table('users').insert({'id': CLIENT_USER, 'password': False}))
-        conn.run(r.db(DATABASE).grant(CLIENT_USER, {'read': True, 'write': True}))
+        response = conn.run(r.db('rethinkdb').table('users').insert({'id': CLIENT_USER, 'password': False}))
+        assert response['inserted'] == 1
+        response = conn.run(r.db(DATABASE).grant(CLIENT_USER, {'read': True, 'write': True}))
+        assert response['granted'] == 1
 
     # Simulate client activity.
     # NOTE: ensures that 'written_docs_*' and 'read_docs_*' metrics have non-zero values.
