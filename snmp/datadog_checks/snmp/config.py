@@ -318,12 +318,16 @@ class InstanceConfig:
         metrics,  # type: List[Dict[str, Any]]
         warning,  # type: Callable[..., None]
         log,  # type: Callable[..., None]
+        object_identity_factory=None,  # type: Callable[..., ObjectIdentity]  # For unit tests purposes.
     ):
         # type: (...) -> Tuple[list, list, List[Union[ParsedMetric, ParsedTableMetric]]]
         """Parse configuration and returns data to be used for SNMP queries.
 
         `oids` is a dictionnary of SNMP tables to symbols to query.
         """
+        if object_identity_factory is None:
+            object_identity_factory = ObjectIdentity
+
         table_oids = {}  # type: Dict[Tuple[str, str], Tuple[Any, List[Any]]]
         parsed_metrics = []  # type: List[Union[ParsedMetric, ParsedTableMetric]]
 
@@ -332,9 +336,9 @@ class InstanceConfig:
                 symbol_oid = symbol['OID']
                 symbol = symbol['name']
                 self._resolver.register(to_oid_tuple(symbol_oid), symbol)
-                identity = hlapi.ObjectIdentity(symbol_oid)
+                identity = object_identity_factory(symbol_oid)
             else:
-                identity = hlapi.ObjectIdentity(mib, symbol)
+                identity = object_identity_factory(mib, symbol)
 
             return identity, symbol
 
@@ -439,7 +443,7 @@ class InstanceConfig:
                     parsed_metrics.append(parsed_table_metric)
 
             elif 'OID' in metric:
-                oid_object = ObjectType(ObjectIdentity(metric['OID']))
+                oid_object = ObjectType(object_identity_factory(metric['OID']))
 
                 table_oids[metric['OID']] = (oid_object, [])
                 self._resolver.register(to_oid_tuple(metric['OID']), metric['name'])

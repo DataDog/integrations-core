@@ -5,7 +5,6 @@ import os
 from typing import Any, Dict, Mapping, Sequence, Tuple, Union
 
 import yaml
-from pyasn1.codec.ber.decoder import decode as asn1_decode
 
 from .compat import get_config
 from .exceptions import SmiError
@@ -99,12 +98,6 @@ def oid_pattern_specificity(pattern):
         len(parts),  # Shorter OIDs are less specific than longer OIDs, regardless of their contents.
         parts,  # For same-length OIDs, compare their contents (integer parts).
     )
-
-
-def decode_asn1_object(obj):
-    # type: (Any) -> float
-    value, _ = asn1_decode(bytes(obj))
-    return value
 
 
 class OIDPrinter(object):

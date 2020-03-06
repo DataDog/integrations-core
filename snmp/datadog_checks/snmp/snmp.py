@@ -12,6 +12,7 @@ from collections import defaultdict
 from concurrent import futures
 from typing import Any, DefaultDict, Dict, List, Optional, Tuple, Union
 
+from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -35,13 +36,7 @@ from .types import (
     noSuchInstance,
     noSuchObject,
 )
-from .utils import (
-    OIDPrinter,
-    decode_asn1_object,
-    get_profile_definition,
-    oid_pattern_specificity,
-    recursively_expand_base_profiles,
-)
+from .utils import OIDPrinter, get_profile_definition, oid_pattern_specificity, recursively_expand_base_profiles
 
 # Metric type that we support
 SNMP_COUNTERS = frozenset([Counter32.__name__, Counter64.__name__, ZeroBasedCounter64.__name__])
@@ -54,6 +49,7 @@ DEFAULT_OID_BATCH_SIZE = 10
 
 
 def reply_invalid(oid):
+    # type: (Any) -> bool
     return noSuchInstance.isSameTypeWith(oid) or noSuchObject.isSameTypeWith(oid)
 
 
@@ -333,9 +329,13 @@ class SnmpCheck(AgentCheck):
             if self._thread is None:
                 self._start_discovery()
 
+            executor = self._executor
+            if executor is None:
+                raise RuntimeError("Expected executor be set")
+
             sent = []
             for host, discovered in list(config.discovered_instances.items()):
-                future = self._executor.submit(self._check_with_config, discovered)
+                future = executor.submit(self._check_with_config, discovered)
                 sent.append(future)
                 future.add_done_callback(functools.partial(self._check_config_done, host))
             futures.wait(sent)
@@ -542,7 +542,7 @@ class SnmpCheck(AgentCheck):
         if snmp_class == 'Opaque':
             # Try support for floats
             try:
-                value = float(decode_asn1_object(snmp_value))
+                value = float(pyasn1_decode(snmp_value)[0])
             except Exception:
                 pass
             else:
