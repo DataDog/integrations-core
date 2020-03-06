@@ -91,6 +91,14 @@ METRICS = [
     "unicorn.workers",
 ]
 
+METRICS_TO_TEST = [
+    "unicorn.workers",
+    "http_requests_total",
+    "http_request_duration_seconds.sum",
+    "ruby.process_start_time_seconds",
+    "sql_duration_seconds.sum"
+]
+
 LEGACY_CONFIG = {
     'init_config': {'allowed_metrics': ALLOWED_METRICS},
     'instances': [

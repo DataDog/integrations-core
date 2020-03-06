@@ -7,10 +7,10 @@ import pytest
 
 from datadog_checks.gitlab import GitlabCheck
 
-from .common import ALLOWED_METRICS, AUTH_CONFIG, CONFIG, CUSTOM_TAGS, GITLAB_TAGS, LEGACY_CONFIG, METRICS
+from .common import ALLOWED_METRICS, AUTH_CONFIG, CONFIG, CUSTOM_TAGS, GITLAB_TAGS, LEGACY_CONFIG, METRICS, METRICS_TO_TEST
 
 
-def assert_check(aggregator):
+def assert_check(aggregator, metrics):
     """
     Basic Test for gitlab integration.
     """
@@ -23,7 +23,7 @@ def assert_check(aggregator):
     # Make sure we're receiving prometheus service checks
     aggregator.assert_service_check(GitlabCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabCheck.OK, tags=CUSTOM_TAGS)
 
-    for metric in METRICS:
+    for metric in metrics:
         aggregator.assert_metric("gitlab.{}".format(metric))
 
 
@@ -82,19 +82,16 @@ def test_check_integration(aggregator, mock_data):
     gitlab.check(instance)
     gitlab.check(instance)
 
-    assert_check(aggregator)
-    for metric in METRICS:
-        aggregator.assert_metric("gitlab.{}".format(metric))
+    assert_check(aggregator, METRICS)
 
 
 @pytest.mark.e2e
 def test_e2e_legacy(dd_agent_check):
     aggregator = dd_agent_check(LEGACY_CONFIG, rate=True)
-    for metric in ALLOWED_METRICS:
-        aggregator.assert_metric("gitlab.{}".format(metric), tags=CUSTOM_TAGS, count=2)
+    assert_check(aggregator, ALLOWED_METRICS)
 
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(CONFIG, rate=True)
-    assert_check(aggregator)
+    assert_check(aggregator, METRICS_TO_TEST)
