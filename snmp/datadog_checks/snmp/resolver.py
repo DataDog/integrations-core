@@ -4,7 +4,7 @@
 
 from collections import defaultdict
 
-from .types import ObjectIdentity
+from .models import ObjectIdentity
 
 
 class OIDTreeNode(object):

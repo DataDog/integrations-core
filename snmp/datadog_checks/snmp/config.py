@@ -7,8 +7,7 @@ from typing import Any, Callable, DefaultDict, Dict, Iterator, List, Optional, S
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
-from .resolver import OIDResolver
-from .types import (
+from .models import (
     CommunityData,
     ContextData,
     DirMibSource,
@@ -24,6 +23,7 @@ from .types import (
     usmDESPrivProtocol,
     usmHMACMD5AuthProtocol,
 )
+from .resolver import OIDResolver
 from .utils import to_oid_tuple
 
 

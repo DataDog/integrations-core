@@ -8,7 +8,7 @@ import yaml
 
 from .compat import get_config
 from .exceptions import SmiError
-from .types import ObjectName, ObjectType, endOfMibView, noSuchInstance
+from .models import ObjectName, ObjectType, endOfMibView, noSuchInstance
 
 
 def get_profile_definition(profile):
