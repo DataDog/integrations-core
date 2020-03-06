@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import contextlib
-from typing import Any, Iterator, Generic, TypeVar, Type, List
+from typing import Any, Generic, Iterator, List, Type, TypeVar
 
 import mock
 

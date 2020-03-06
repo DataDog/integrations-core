@@ -16,11 +16,11 @@ from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck
 from datadog_checks.snmp.config import InstanceConfig
 from datadog_checks.snmp.resolver import OIDTrie
-from datadog_checks.snmp.utils import oid_pattern_specificity, recursively_expand_base_profiles
 from datadog_checks.snmp.types import ObjectIdentity
+from datadog_checks.snmp.utils import oid_pattern_specificity, recursively_expand_base_profiles
 
 from . import common
-from .utils import mock_profiles_root, ClassInstantiationSpy
+from .utils import ClassInstantiationSpy, mock_profiles_root
 
 pytestmark = pytest.mark.unit
 
