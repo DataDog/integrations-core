@@ -150,10 +150,11 @@ class AggregatorStub(object):
             if tag in metric.tags:
                 candidates.append(metric)
 
+        msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(metric_name, count, at_least)
         if count is not None:
-            assert len(candidates) == count
+            assert len(candidates) == count, msg
         else:
-            assert len(candidates) >= at_least
+            assert len(candidates) >= at_least, msg
 
     # Potential kwargs: aggregation_key, alert_type, event_type,
     # msg_title, source_type_name
@@ -170,9 +171,7 @@ class AggregatorStub(object):
             else:
                 candidates.append(e)
 
-        msg = ("Candidates size assertion for {0}, count: {1}, " "at_least: {2}) failed").format(
-            msg_text, count, at_least
-        )
+        msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(msg_text, count, at_least)
         if count is not None:
             assert len(candidates) == count, msg
         else:
@@ -392,10 +391,11 @@ class AggregatorStub(object):
             if len(gtags) > 0:
                 candidates.append(metric)
 
+        msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(metric_name, count, at_least)
         if count is not None:
-            assert len(candidates) == count
+            assert len(candidates) == count, msg
         else:
-            assert len(candidates) >= at_least
+            assert len(candidates) >= at_least, msg
 
     @property
     def metrics_asserted_pct(self):
