@@ -86,7 +86,8 @@ instances:
     # auto_discover_queues: false
 
     ## @param mqcd_version - integer - optional - default: 6
-    ## Which API version to use. Supported values are 1 to 9 including.
+    ## Which channel definition version to use. Supported values are 1 to 9 including.
+    ## If you're having connection issues make sure it matches your MQ version
     #
     # mqcd_version: 6
 
