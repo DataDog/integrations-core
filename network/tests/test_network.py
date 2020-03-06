@@ -345,4 +345,3 @@ def test_invalid_excluded_interfaces(check):
     instance = {'excluded_interfaces': None}
     with pytest.raises(ConfigurationError):
         check.check(instance)
-    check.check(instance)
