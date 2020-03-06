@@ -542,7 +542,7 @@ class SnmpCheck(AgentCheck):
         if snmp_class == 'Opaque':
             # Try support for floats
             try:
-                value = float(pyasn1_decode(snmp_value)[0])
+                value = float(pyasn1_decode(bytes(snmp_value))[0])
             except Exception:
                 pass
             else:
