@@ -15,7 +15,6 @@
 - name: user
   description: User to use when connecting to JMX.
   value:
-    example: <USERNAME>
     type: string
 
 - name: password
