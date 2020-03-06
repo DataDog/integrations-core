@@ -38,8 +38,8 @@ This check monitors [{integration_name}][1].
     ```yaml
       logs:
         - type: file
-          path:  /var/log/{integration_name}.log
-          source: {integration_name}
+          path:  /var/log/{check_name}.log
+          source: {check_name}
           service: <SERVICE_NAME>
     ```
 
@@ -59,5 +59,5 @@ This check monitors [{integration_name}][1].
 
 Need help? Contact [Datadog support][1].
 
-[1]: https://docs.datadoghq.com/help
+[1]: **LINK_TO_INTEGRATION_SITE**
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
