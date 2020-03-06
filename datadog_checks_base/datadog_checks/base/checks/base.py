@@ -342,7 +342,7 @@ class AgentCheck(object):
         return False
 
     def get_instance_proxy(self, instance, uri, proxies=None):
-        # type: (InstanceType, str, ProxySettings) -> Any
+        # type: (InstanceType, str, ProxySettings) -> ProxySettings
         # TODO: Remove with Agent 5
         proxies = proxies if proxies is not None else self.proxies.copy()
 
@@ -572,7 +572,7 @@ class AgentCheck(object):
         )
 
     def _log_deprecation(self, deprecation_key, *args):
-        # type: (str, *Any) -> None
+        # type: (str, *str) -> None
         """
         Logs a deprecation notice at most once per AgentCheck instance, for the pre-defined `deprecation_key`
         """
