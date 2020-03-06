@@ -1,7 +1,10 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from typing import Any, Dict, Generator
+
 from pyasn1.type.univ import Null
+from pysnmp import hlapi
 from pysnmp.entity.rfc3413 import cmdgen
 from pysnmp.hlapi.asyncore.cmdgen import vbProcessor
 from pysnmp.proto import errind
@@ -9,8 +12,11 @@ from pysnmp.proto.rfc1905 import endOfMibView
 
 from datadog_checks.base.errors import CheckException
 
+from .config import InstanceConfig
+
 
 def _handle_error(ctx, config):
+    # type: (dict, InstanceConfig) -> None
     error = ctx['error']
     if error:
         message = '{} for instance {}'.format(error, config.ip_address)
@@ -18,6 +24,7 @@ def _handle_error(ctx, config):
 
 
 def snmp_get(config, oids, lookup_mib):
+    # type: (InstanceConfig, list, bool) -> list
     """Call SNMP GET on a list of oids."""
 
     def callback(snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx):
@@ -26,7 +33,7 @@ def snmp_get(config, oids, lookup_mib):
         cbCtx['error'] = errorIndication
         cbCtx['var_binds'] = var_binds
 
-    ctx = {}
+    ctx = {}  # type: Dict[str, Any]
 
     var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
 
@@ -48,6 +55,7 @@ def snmp_get(config, oids, lookup_mib):
 
 
 def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
+    # type: (InstanceConfig, list, bool, bool) -> Generator
     """Call SNMP GETNEXT on a list of oids. It will iterate on the results if it happens to be under the same prefix."""
 
     def callback(snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx):
@@ -57,7 +65,7 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
         cbCtx['error'] = errorIndication
         cbCtx['var_bind_table'] = var_bind_table[0]
 
-    ctx = {}
+    ctx = {}  # type: Dict[str, Any]
 
     initial_vars = [x[0] for x in vbProcessor.makeVarBinds(config._snmp_engine, oids)]
 
@@ -95,6 +103,7 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
 
 
 def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_nonincreasing_oid):
+    # type: (InstanceConfig, hlapi.ObjectType, int, int, bool, bool) -> Generator
     """Call SNMP GETBULK on an oid."""
 
     def callback(snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx):
@@ -104,7 +113,7 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
         cbCtx['error'] = errorIndication
         cbCtx['var_bind_table'] = var_bind_table
 
-    ctx = {}
+    ctx = {}  # type: Dict[str, Any]
 
     var_binds = [oid]
     initial_var = vbProcessor.makeVarBinds(config._snmp_engine, var_binds)[0][0]
