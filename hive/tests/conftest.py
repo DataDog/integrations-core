@@ -10,7 +10,7 @@ from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.utils import load_jmx_config
 
-from .common import HERE
+from .common import HERE, HOST, METASTORE_PORT, SERVER_PORT
 
 
 @pytest.fixture(scope="session")
@@ -26,4 +26,8 @@ def dd_environment():
             )
         ],
     ):
-        yield load_jmx_config(), {'use_jmx': True}
+        instance_metastore = {'host': HOST, 'port': METASTORE_PORT}
+        instance_server = {'host': HOST, 'port': SERVER_PORT}
+        config = load_jmx_config()
+        config['instances'] = [instance_metastore, instance_server]
+        yield config, {'use_jmx': True}

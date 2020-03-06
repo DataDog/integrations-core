@@ -3,20 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 
-METASTORE_METRICS = [
-    "hive.metastore.api.get_all_tables.active_call",
-    "hive.metastore.api.get_all_functions.active_call",
-    "hive.metastore.open_connections",
-    "hive.metastore.partition.init",
-    "hive.metastore.api.get_all_databases.active_call",
-    "hive.metastore.api.init.active_call",
-]
-
 
 @pytest.mark.e2e
 def test(dd_agent_check):
-    instance = {}
-    aggregator = dd_agent_check(instance)
+    aggregator = dd_agent_check()
     metrics = [
         "hive.server.memory.heap.committed",
         "hive.server.memory.heap.init",
@@ -32,6 +22,12 @@ def test(dd_agent_check):
         "hive.server.memory.total.used",
         "hive.server.session.active",
         "hive.server.session.open",
+        "hive.metastore.api.get_all_tables.active_call",
+        "hive.metastore.api.get_all_functions.active_call",
+        "hive.metastore.open_connections",
+        "hive.metastore.partition.init",
+        "hive.metastore.api.get_all_databases.active_call",
+        "hive.metastore.api.init.active_call",
     ]
     for metric in metrics:
         aggregator.assert_metric(metric)
