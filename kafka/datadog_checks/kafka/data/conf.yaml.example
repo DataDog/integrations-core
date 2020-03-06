@@ -616,7 +616,7 @@ init_config:
         attribute:
           Value:
             metric_type: gauge
-            alias: kafka.net.handler.avg.idle.pct.rate
+            alias: kafka.net.processor.avg.idle.pct.rate
     - include:
         domain: 'kafka.server'
         bean: 'kafka.server:type=KafkaRequestHandlerPool,name=RequestHandlerAvgIdlePercent'
