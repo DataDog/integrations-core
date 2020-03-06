@@ -71,7 +71,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
         """
         Set up the gitlab instance so it can be used in OpenMetricsBaseCheck
         """
-        # Mapping from Prometheus metrics names to Datadog ones
+        # Mapping from Gitlab specific Prometheus metric names to Datadog ones
         metrics = [METRICS_MAP]
 
         # Add allowed legacy metrics
