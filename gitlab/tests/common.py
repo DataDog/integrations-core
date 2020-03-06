@@ -112,10 +112,9 @@ CONFIG = {
             'disable_ssl_validation': True,
             'tags': list(CUSTOM_TAGS),
         }
-    ]
+    ],
 }
 
-          
 AUTH_CONFIG = {
     'init_config': {'allowed_metrics': ALLOWED_METRICS},
     'instances': [
