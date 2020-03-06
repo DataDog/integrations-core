@@ -22,7 +22,7 @@ instances:
     ## @param user - string - optional
     ## Username to use when connecting to HiveServer2 or Hive Metastore JMX.
     #
-    # user: <USERNAME>
+    # user: <USER>
 
     ## @param password - string - optional
     ## Password to use when connecting to HiveServer2 or Hive Metastore JMX.
@@ -53,7 +53,7 @@ instances:
     # java_bin_path: <JAVA_PATH>
 
     ## @param java_options - string - optional
-    ## List of Java JVM options.
+    ## List of Java JVM options e.g. "-Xmx200m -Xms50m".
     #
     # java_options: "-Xmx200m -Xms50m"
 
