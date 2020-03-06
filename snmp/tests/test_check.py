@@ -1828,3 +1828,79 @@ def test_proliant(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_generic_host_resources(aggregator):
+    instance = common.generate_instance_config([])
+
+    instance['community_string'] = 'generic_host'
+    instance['profile'] = 'generic'
+    instance['enforce_mib_constraints'] = False
+
+    # We need the full path as we're not in installed mode
+    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', '_generic-host-resources.yaml')
+    init_config = {'profiles': {'generic': {'definition_file': path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    common_tags = common.CHECK_TAGS + ['snmp_profile:generic']
+
+    sys_metrics = [
+        'snmp.hrSystemUptime',
+        'snmp.hrSystemNumUsers',
+        'snmp.hrSystemProcesses',
+        'snmp.hrSystemMaxProcesses',
+    ]
+    for metric in sys_metrics:
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+
+    aggregator.assert_metric('snmp.hrStorageAllocationUnits', count=2)
+    aggregator.assert_metric('snmp.hrStorageSize', count=2)
+    aggregator.assert_metric('snmp.hrStorageUsed', count=2)
+    aggregator.assert_metric('snmp.hrStorageAllocationFailures', count=2)
+
+    aggregator.assert_metric('snmp.hrProcessorLoad', count=2)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_palo_alto(aggregator):
+    instance = common.generate_instance_config([])
+
+    instance['community_string'] = 'pan-common'
+    instance['profile'] = 'palo-alto'
+    instance['enforce_mib_constraints'] = False
+
+    # We need the full path as we're not in installed mode
+    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'palo-alto.yaml')
+    init_config = {'profiles': {'palo-alto': {'definition_file': path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    common_tags = common.CHECK_TAGS + ['snmp_profile:palo-alto']
+
+    session = [
+        'panSessionUtilization',
+        'panSessionMax',
+        'panSessionActive',
+        'panSessionActiveTcp',
+        'panSessionActiveUdp',
+        'panSessionActiveICMP',
+        'panSessionActiveSslProxy',
+        'panSessionSslProxyUtilization',
+    ]
+
+    global_protect = [
+        'panGPGWUtilizationPct',
+        'panGPGWUtilizationMaxTunnels',
+        'panGPGWUtilizationActiveTunnels',
+    ]
+
+    for metric in session:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    for metric in global_protect:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+
+    aggregator.assert_all_metrics_covered()
