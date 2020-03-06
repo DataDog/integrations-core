@@ -1884,6 +1884,8 @@ def test_palo_alto(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+
+
 def test_cisco_asa_5525(aggregator):
     instance = common.generate_instance_config([])
     instance['community_string'] = 'cisco_asa_5525'
