@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "ignite",
   "metric_prefix": "ignite.",
-  "metric_to_check": "",
+  "metric_to_check": "ignite.received_messages",
   "creates_events": false,
   "short_description": "Collect metrics from your Ignite server.",
   "guid": "fd5a21d5-ddfe-4d04-855f-28492b4d270e",
@@ -17,7 +17,7 @@
   "public_title": "Datadog-ignite Integration",
   "categories": [
     "caching",
-    "data store",
+    "data store"
   ],
   "type": "check",
   "is_public": false,
