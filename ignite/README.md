@@ -8,7 +8,7 @@ This check monitors [Ignite][1].
 
 ### Installation
 
-The ignite check is included in the [Datadog Agent][2] package.
+The Ignite check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
