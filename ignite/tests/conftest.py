@@ -16,9 +16,7 @@ E2E_METADATA = {
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    with docker_run(
-        os.path.join(get_here(), 'compose', 'docker-compose.yml'), log_patterns="Ignite node started OK"
-    ):
+    with docker_run(os.path.join(get_here(), 'compose', 'docker-compose.yml'), log_patterns="Ignite node started OK"):
         result = run_command("docker exec dd-ignite /opt/ignite/apache-ignite/bin/control.sh --activate", capture=True)
         if result.stderr:
             raise Exception(result.stderr)
