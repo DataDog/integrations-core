@@ -1,0 +1,102 @@
+extends:
+  - _base.yaml
+  - _generic-router-if.yaml
+
+sysobjectid: 1.3.6.1.4.1.30065.*
+
+metrics:
+  ### Sensor
+
+  # This table contains one row per physical sensor.
+  - MIB: ENTITY-SENSOR-MIB
+    table:
+      OID: 1.3.6.1.2.1.99.1.1.1
+      name: entPhySensorTable
+    symbols:
+      - OID: 1.3.6.1.2.1.99.1.1.1.4
+        name: entPhySensorValue
+      - OID: 1.3.6.1.2.1.99.1.1.1.5
+        name: entPhySensorOperStatus
+    metric_tags:
+      - tag: sensor_type
+        column:
+          OID: 1.3.6.1.2.1.99.1.1.1.1
+          name: entPhySensorType
+      - tag: sensor_entry
+        column:
+          OID: 1.3.6.1.2.1.99.1.1.1
+          name: entPhySensorEntry
+
+  ### Processor
+
+  # The (conceptual) table of processors contained by the host.
+  - MIB: HOST-RESOURCES-MIB
+    table:
+      OID: 1.3.6.1.2.1.25.3.3
+      name: hrProcessorTable
+    symbols:
+      # The average, over the last minute, of the percentage of time that this processor was not idle.
+      - OID: 1.3.6.1.2.1.25.3.3.1.2
+        name: hrProcessorLoad
+    metric_tags:
+      - tag: processor_index
+        column:
+          OID: 1.3.6.1.2.1.25.3.2.1.1
+          name: hrDeviceIndex
+
+  ### Memory
+
+  - # An entry shall be placed in the storage table for each logical area of storage that is allocated and has fixed resource limits.
+    MIB: HOST-RESOURCES-MIB
+    table:
+      OID: 1.3.6.1.2.1.25.2.3
+      name: hrStorageTable
+    symbols:
+      - OID: 1.3.6.1.2.1.25.2.3.1.5
+        name: hrStorageSize
+      - OID: 1.3.6.1.2.1.25.2.3.1.6
+        name: hrStorageUsed
+    metric_tags:
+      - tag: storage_index
+        column:
+          OID: 1.3.6.1.2.1.25.2.3.1.1
+          name: hrStorageIndex
+
+
+  ### Interface
+
+  - # This table contains statistical information of the ingress queue in an interface.
+    MIB: ARISTA-QUEUE-MIB
+    table:
+      OID: 1.3.6.1.4.1.30065.3.6.1.1
+      name: aristaIngressQueueTable
+    symbols:
+      - OID: 1.3.6.1.4.1.30065.3.6.1.1.1.3
+        name: aristaIngressQueuePktsDropped
+    metric_tags:
+      - tag: interface_index
+        column:
+          OID: 1.3.6.1.4.1.30065.3.6.1.1.1.1
+          name: aristaIngressIfIndex
+      - tag: queue_index
+        column:
+          OID: 1.3.6.1.4.1.30065.3.6.1.1.1.2
+          name: aristaIngressQueueIndex
+
+  - # This table contains statistical objects for the egress queues of an interface.
+    MIB: ARISTA-QUEUE-MIB
+    table:
+      OID: 1.3.6.1.4.1.30065.3.6.1.2
+      name: aristaEgressQueueTable
+    symbols:
+      - OID: 1.3.6.1.4.1.30065.3.6.1.2.1.6
+        name: aristaEgressQueuePktsDropped
+    metric_tags:
+      - tag: interface_index
+        column:
+          OID: 1.3.6.1.4.1.30065.3.6.1.2.1.1
+          name: aristaEgressIfIndex
+      - tag: queue_index
+        column:
+          OID: 1.3.6.1.4.1.30065.3.6.1.2.1.2
+          name: aristaEgressQueueIndex
