@@ -18,7 +18,7 @@ from six import binary_type, iteritems, text_type
 from ..config import is_affirmative
 from ..constants import ServiceCheck
 from ..utils.agent.utils import should_profile_memory
-from ..utils.common import ensure_bytes, ensure_unicode, to_string
+from ..utils.common import ensure_bytes, to_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
@@ -746,11 +746,11 @@ class AgentCheck(object):
         :param ev event: the event to be sent.
         """
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
-        for key, value in list(iteritems(event)):
-            if not isinstance(value, binary_type):
+        for key, value in iteritems(event):
+            if not isinstance(value, text_type):
                 continue
             try:
-                event[key] = ensure_unicode(event[key])
+                event[key] = to_string(event[key])
             except UnicodeError:
                 self.log.warning('Encoding error with field `%s`, cannot submit event', key)
                 return
