@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from collections import namedtuple, defaultdict
+from collections import defaultdict, namedtuple
 from datetime import datetime
 from io import StringIO
 
