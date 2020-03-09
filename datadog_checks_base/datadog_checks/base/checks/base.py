@@ -810,7 +810,7 @@ class AgentCheck(object):
             try:
                 event[key] = to_string(value)  # type: ignore
                 # ^ Mypy complains about dynamic key assignment -- arguably for good reason.
-                # Ideally we should convert this to a dict literal to only submit events with allowed keys.
+                # Ideally we should convert this to a dict literal so that submitted events only include known keys.
             except UnicodeError:
                 self.log.warning('Encoding error with field `%s`, cannot submit event', key)
                 return
