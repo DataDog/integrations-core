@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [IBM MQ][1].
+This check monitors [IBM MQ][1] versions 5 to 9.0.
 
 ## Setup
 
