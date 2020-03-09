@@ -99,6 +99,13 @@ files:
         value:
           example: false
           type: boolean
+      - name: mqcd_version
+        description: |
+          Which channel definition version to use. Supported values are 1 to 9 including.
+          If you're having connection issues make sure it matches your MQ version
+        value:
+          example: 6
+          type: number
       - name: ssl_auth
         description: Whether or not to use SSL auth while connecting to the channel.
         value:

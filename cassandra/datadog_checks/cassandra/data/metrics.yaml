@@ -27,6 +27,7 @@ jmx_metrics:
       name:
         - PendingTasks
         - CurrentlyBlockedTasks
+        - TotalBlockedTasks
       path:
         - request
   - include:
@@ -42,6 +43,7 @@ jmx_metrics:
       name:
         - PendingTasks
         - CurrentlyBlockedTasks
+        - TotalBlockedTasks
       path:
         - internal
   - include:

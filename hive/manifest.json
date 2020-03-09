@@ -24,6 +24,9 @@
   "is_public": true,
   "integration_id": "hive",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "Hive Overview": "assets/dashboards/overview.json"

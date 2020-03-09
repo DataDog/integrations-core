@@ -10,45 +10,46 @@ import threading
 import time
 from collections import defaultdict
 from concurrent import futures
-from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, DefaultDict, Dict, List, Optional, Tuple, Union
 
-import pysnmp.proto.rfc1902 as snmp_type
-from pyasn1.codec.ber import decoder
-from pysnmp import hlapi
-from pysnmp.error import PySnmpError
-from pysnmp.smi import builder
-from pysnmp.smi.exval import endOfMibView, noSuchInstance, noSuchObject
+from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
 
+from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
 from .config import InstanceConfig, ParsedMetric, ParsedMetricTag, ParsedTableMetric
+from .exceptions import PySnmpError
+from .models import (
+    Counter32,
+    Counter64,
+    CounterBasedGauge64,
+    Gauge32,
+    Integer,
+    Integer32,
+    ObjectIdentity,
+    ObjectType,
+    Unsigned32,
+    ZeroBasedCounter64,
+    noSuchInstance,
+    noSuchObject,
+)
 from .utils import OIDPrinter, get_profile_definition, oid_pattern_specificity, recursively_expand_base_profiles
 
-# Additional types that are not part of the SNMP protocol. cf RFC 2856
-CounterBasedGauge64, ZeroBasedCounter64 = builder.MibBuilder().importSymbols(
-    'HCNUM-TC', 'CounterBasedGauge64', 'ZeroBasedCounter64'
-)
-
 # Metric type that we support
-SNMP_COUNTERS = frozenset([snmp_type.Counter32.__name__, snmp_type.Counter64.__name__, ZeroBasedCounter64.__name__])
+SNMP_COUNTERS = frozenset([Counter32.__name__, Counter64.__name__, ZeroBasedCounter64.__name__])
 
 SNMP_GAUGES = frozenset(
-    [
-        snmp_type.Gauge32.__name__,
-        snmp_type.Unsigned32.__name__,
-        CounterBasedGauge64.__name__,
-        snmp_type.Integer.__name__,
-        snmp_type.Integer32.__name__,
-    ]
+    [Gauge32.__name__, Unsigned32.__name__, CounterBasedGauge64.__name__, Integer.__name__, Integer32.__name__]
 )
 
 DEFAULT_OID_BATCH_SIZE = 10
 
 
 def reply_invalid(oid):
+    # type: (Any) -> bool
     return noSuchInstance.isSameTypeWith(oid) or noSuchObject.isSameTypeWith(oid)
 
 
@@ -129,14 +130,9 @@ class SnmpCheck(AgentCheck):
         else:
             return None
 
-    def discover_instances(self):
-        # type: () -> None
+    def discover_instances(self, interval):
+        # type: (float) -> None
         config = self._config
-
-        if config.ip_network is None:
-            raise RuntimeError("Expected config.ip_network to be set to start discovery")
-
-        discovery_interval = config.instance.get('discovery_interval', 3600)
 
         while self._running:
             start_time = time.time()
@@ -171,14 +167,8 @@ class SnmpCheck(AgentCheck):
             write_persistent_cache(self.check_id, json.dumps(list(config.discovered_instances)))
 
             time_elapsed = time.time() - start_time
-            if discovery_interval - time_elapsed > 0:
-                time.sleep(discovery_interval - time_elapsed)
-
-    def raise_on_error_indication(self, error_indication, ip_address):
-        # type: (Any, Optional[str]) -> None
-        if error_indication:
-            message = '{} for instance {}'.format(error_indication, ip_address)
-            raise CheckException(message)
+            if interval - time_elapsed > 0:
+                time.sleep(interval - time_elapsed)
 
     def fetch_results(self, config, all_oids, bulk_oids):
         # type: (InstanceConfig, list, list) -> Tuple[dict, Optional[str]]
@@ -193,30 +183,20 @@ class SnmpCheck(AgentCheck):
         results = defaultdict(dict)  # type: DefaultDict[str, dict]
         enforce_constraints = config.enforce_constraints
 
-        all_binds = []
-        error = None  # type: Optional[str]
-
-        for to_fetch in all_oids:
-            binds, current_error = self.fetch_oids(config, to_fetch, enforce_constraints=enforce_constraints)
-            all_binds.extend(binds)
-            error = current_error if not error else error
+        all_binds, error = self.fetch_oids(config, all_oids, enforce_constraints=enforce_constraints)
 
         for oid in bulk_oids:
             try:
                 self.log.debug('Running SNMP command getBulk on OID %r', oid)
-                binds_iterator = config.call_cmd(
-                    hlapi.bulkCmd,
+                binds = snmp_bulk(
+                    config,
+                    oid,
                     self._NON_REPEATERS,
                     self._MAX_REPETITIONS,
-                    oid,
-                    lookupMib=enforce_constraints,
-                    ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
-                    lexicographicMode=False,
+                    enforce_constraints,
+                    self.ignore_nonincreasing_oid,
                 )
-                binds, current_error = self._consume_binds_iterator(binds_iterator, config)
                 all_binds.extend(binds)
-                error = current_error if not error else error
-
             except PySnmpError as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
                 if not error:
@@ -246,12 +226,9 @@ class SnmpCheck(AgentCheck):
             try:
                 oids_batch = oids[first_oid : first_oid + self.oid_batch_size]
                 self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
-                error_indication, error_status, _, var_binds = next(
-                    config.call_cmd(hlapi.getCmd, *oids_batch, lookupMib=enforce_constraints)
-                )
-                self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
 
-                self.raise_on_error_indication(error_indication, config.ip_address)
+                var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
+                self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
 
                 missing_results = []
 
@@ -259,7 +236,7 @@ class SnmpCheck(AgentCheck):
                     result_oid, value = var
                     if reply_invalid(value):
                         oid_tuple = result_oid.asTuple()
-                        missing_results.append(hlapi.ObjectType(hlapi.ObjectIdentity(oid_tuple)))
+                        missing_results.append(ObjectType(ObjectIdentity(oid_tuple)))
                     else:
                         all_binds.append(var)
 
@@ -269,14 +246,15 @@ class SnmpCheck(AgentCheck):
                     self.log.debug(
                         'Running SNMP command getNext on OIDS: %s', OIDPrinter(missing_results, with_values=False)
                     )
-                    binds_iterator = config.call_cmd(
-                        hlapi.nextCmd,
-                        *missing_results,
-                        lookupMib=enforce_constraints,
-                        ignoreNonIncreasingOid=self.ignore_nonincreasing_oid,
-                        lexicographicMode=False
+                    binds = list(
+                        snmp_getnext(
+                            config,
+                            missing_results,
+                            lookup_mib=enforce_constraints,
+                            ignore_nonincreasing_oid=self.ignore_nonincreasing_oid,
+                        )
                     )
-                    binds, error = self._consume_binds_iterator(binds_iterator, config)
+                    self.log.debug('Returned vars: %s', OIDPrinter(binds, with_values=True))
                     all_binds.extend(binds)
 
             except PySnmpError as e:
@@ -294,10 +272,9 @@ class SnmpCheck(AgentCheck):
         # type: (InstanceConfig) -> str
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
-        oid = hlapi.ObjectType(hlapi.ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2)))
+        oid = ObjectType(ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2, 0)))
         self.log.debug('Running SNMP command on OID: %r', OIDPrinter((oid,), with_values=False))
-        error_indication, _, _, var_binds = next(config.call_cmd(hlapi.nextCmd, oid, lookupMib=False))
-        self.raise_on_error_indication(error_indication, config.ip_address)
+        var_binds = snmp_get(config, [oid], lookup_mib=False)
         self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
         return var_binds[0][1].prettyPrint()
 
@@ -314,29 +291,6 @@ class SnmpCheck(AgentCheck):
         return max(
             profiles, key=lambda profile: oid_pattern_specificity(self.profiles[profile]['definition']['sysobjectid'])
         )
-
-    def _consume_binds_iterator(self, binds_iterator, config):
-        # type: (Iterator[Any], InstanceConfig) -> Tuple[List[Any], Optional[str]]
-        all_binds = []  # type: List[Any]
-        error = None  # type: Optional[str]
-
-        for error_indication, error_status, _, var_binds_table in binds_iterator:
-            self.log.debug('Returned vars: %s', OIDPrinter(var_binds_table, with_values=True))
-
-            self.raise_on_error_indication(error_indication, config.ip_address)
-
-            if error_status:
-                message = '{} for instance {}'.format(error_status.prettyPrint(), config.ip_address)
-                error = message
-
-                # submit CRITICAL service check if we can't connect to device
-                if 'unknownUserName' in message:
-                    self.log.error(message)
-                else:
-                    self.warning(message)
-
-            all_binds.extend(var_bind for var_bind in var_binds_table if var_bind[1] is not endOfMibView)
-        return all_binds, error
 
     def _start_discovery(self):
         # type: () -> None
@@ -356,7 +310,14 @@ class SnmpCheck(AgentCheck):
                 host_config = self._build_config(instance)
                 self._config.discovered_instances[host] = host_config
 
-        self._thread = threading.Thread(target=self.discover_instances, name=self.name)
+        raw_discovery_interval = self._config.instance.get('discovery_interval', 3600)
+        try:
+            discovery_interval = float(raw_discovery_interval)
+        except (ValueError, TypeError):
+            message = 'discovery_interval could not be parsed as a number: {!r}'.format(raw_discovery_interval)
+            raise ConfigurationError(message)
+
+        self._thread = threading.Thread(target=self.discover_instances, args=(discovery_interval,), name=self.name)
         self._thread.daemon = True
         self._thread.start()
         self._executor = futures.ThreadPoolExecutor(max_workers=self._config.workers)
@@ -368,9 +329,13 @@ class SnmpCheck(AgentCheck):
             if self._thread is None:
                 self._start_discovery()
 
+            executor = self._executor
+            if executor is None:
+                raise RuntimeError("Expected executor be set")
+
             sent = []
             for host, discovered in list(config.discovered_instances.items()):
-                future = self._executor.submit(self._check_with_config, discovered)
+                future = executor.submit(self._check_with_config, discovered)
                 sent.append(future)
                 future.add_done_callback(functools.partial(self._check_config_done, host))
             futures.wait(sent)
@@ -382,6 +347,7 @@ class SnmpCheck(AgentCheck):
             self._check_with_config(config)
 
     def _check_config_done(self, host, future):
+        # type: (str, futures.Future) -> None
         config = self._config
         if future.result():
             config.failing_instances[host] += 1
@@ -576,7 +542,7 @@ class SnmpCheck(AgentCheck):
         if snmp_class == 'Opaque':
             # Try support for floats
             try:
-                value = float(decoder.decode(bytes(snmp_value))[0])
+                value = float(pyasn1_decode(bytes(snmp_value))[0])
             except Exception:
                 pass
             else:
