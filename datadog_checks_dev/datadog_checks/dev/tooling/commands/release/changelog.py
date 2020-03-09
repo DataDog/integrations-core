@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 from datetime import datetime
 from io import StringIO
 
@@ -10,7 +10,7 @@ import click
 from semver import parse_version_info
 
 from ....utils import stream_file_lines, write_file
-from ...constants import CHANGELOG_TYPE_NONE, get_root
+from ...constants import CHANGELOG_TYPE_NONE, CHANGELOG_TYPES_ORDERED, get_root
 from ...git import get_commits_since
 from ...github import from_contributor, get_changelog_types, get_pr, parse_pr_numbers
 from ...release import get_release_tag_string
@@ -64,7 +64,7 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_
         del pr_numbers[:-1]
 
     user_config = ctx.obj
-    entries = []
+    entries = defaultdict(list)
     for pr_num in pr_numbers:
         try:
             payload = get_pr(pr_num, user_config)
@@ -92,7 +92,7 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_
 
         entry = ChangelogEntry(pr_num, title, payload.get('html_url'), author, author_url, from_contributor(payload))
 
-        entries.append(entry)
+        entries[changelog_type].append(entry)
 
     # store the new changelog in memory
     new_entry = StringIO()
@@ -103,11 +103,12 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_
 
     # one bullet point for each PR
     new_entry.write('\n')
-    for entry in entries:
-        thanks_note = ''
-        if entry.from_contributor:
-            thanks_note = f' Thanks [{entry.author}]({entry.author_url}).'
-        new_entry.write(f'* {entry.title}. See [#{entry.number}]({entry.url}).{thanks_note}\n')
+    for changelog_type in CHANGELOG_TYPES_ORDERED:
+        for entry in entries[changelog_type]:
+            thanks_note = ''
+            if entry.from_contributor:
+                thanks_note = f' Thanks [{entry.author}]({entry.author_url}).'
+            new_entry.write(f'* {entry.title}. See [#{entry.number}]({entry.url}).{thanks_note}\n')
     new_entry.write('\n')
 
     # read the old contents
