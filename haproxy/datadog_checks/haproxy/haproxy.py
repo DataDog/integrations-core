@@ -13,7 +13,7 @@ from collections import defaultdict
 from six import PY2, iteritems
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import AgentCheck, is_affirmative, to_string
+from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
 
 STATS_URL = "/;csv;norefresh"
 EVENT_TYPE = SOURCE_TYPE_NAME = 'haproxy'
@@ -779,7 +779,7 @@ class HAProxy(AgentCheck):
         custom_tags = [] if custom_tags is None else custom_tags
         service_name = data['pxname']
         status = data['status']
-        haproxy_hostname = to_string(self.hostname)
+        haproxy_hostname = to_native_string(self.hostname)
         check_hostname = haproxy_hostname if tag_by_host else ''
 
         if self._is_service_excl_filtered(service_name, services_incl_filter, services_excl_filter):

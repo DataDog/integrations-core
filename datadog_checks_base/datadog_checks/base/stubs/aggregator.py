@@ -10,7 +10,7 @@ from six import iteritems
 from datadog_checks.base.stubs.common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from datadog_checks.base.stubs.similar import build_similar_elements_msg
 
-from ..utils.common import ensure_unicode, to_string
+from ..utils.common import ensure_unicode, to_native_string
 
 
 def normalize_tags(tags, sort=False):
@@ -18,9 +18,9 @@ def normalize_tags(tags, sort=False):
     # This function makes sure strings are compared with the same type.
     if tags:
         if sort:
-            return sorted(to_string(tag) for tag in tags)
+            return sorted(to_native_string(tag) for tag in tags)
         else:
-            return [to_string(tag) for tag in tags]
+            return [to_native_string(tag) for tag in tags]
     return tags
 
 
@@ -96,7 +96,7 @@ class AggregatorStub(object):
                 ensure_unicode(stub.hostname),
                 stub.device,
             )
-            for stub in self._metrics.get(to_string(name), [])
+            for stub in self._metrics.get(to_native_string(name), [])
         ]
 
     def service_checks(self, name):
@@ -112,7 +112,7 @@ class AggregatorStub(object):
                 ensure_unicode(stub.hostname),
                 ensure_unicode(stub.message),
             )
-            for stub in self._service_checks.get(to_string(name), [])
+            for stub in self._service_checks.get(to_native_string(name), [])
         ]
 
     @property
@@ -136,7 +136,7 @@ class AggregatorStub(object):
                 ensure_unicode(stub.hostname),
                 normalize_tags(stub.tags),
             )
-            for stub in self._histogram_buckets.get(to_string(name), [])
+            for stub in self._histogram_buckets.get(to_native_string(name), [])
         ]
 
     def assert_metric_has_tag(self, metric_name, tag, count=None, at_least=1):
