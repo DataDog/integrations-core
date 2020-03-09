@@ -43,7 +43,7 @@ def get_normal_connection(config):
         queue_manager.connect_with_options(config.queue_manager_name, **kwargs)
     else:
         log.debug("connecting without a username and password")
-        queue_manager.connect_with_options(config.queue_manager, channel_definition)
+        queue_manager.connect_with_options(config.queue_manager_name, channel_definition)
     return queue_manager
 
 

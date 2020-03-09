@@ -4,7 +4,7 @@
 
 import logging
 import re
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from six import iteritems
 
@@ -60,7 +60,6 @@ class IBMMQConfig:
     ]
 
     def __init__(self, instance):
-        # type: (Dict[str, Any]) -> IBMMQConfig
         self.channel = instance.get('channel')  # type: str
         self.queue_manager_name = instance.get('queue_manager', 'default')  # type: str
 
@@ -105,7 +104,7 @@ class IBMMQConfig:
 
         raw_mqcd_version = instance.get('mqcd_version', 6)
         try:
-            self.mqcd_version = getattr(pymqi.CMQC, 'MQCD_VERSION_{}'.format(raw_mqcd_version))
+            self.mqcd_version = getattr(pymqi.CMQC, 'MQCD_VERSION_{}'.format(raw_mqcd_version))  # type: int
         except (ValueError, AttributeError):
             raise ConfigurationError(
                 "mqcd_version must be a number between 1 and 9. {} found.".format(raw_mqcd_version)
