@@ -35,7 +35,7 @@ else:
 
 def to_string(value):
     # type: (Any) -> str
-    warnings.warn('`to_string` is deprecated, use `to_native_string` instead.', category=DeprecationWarning)
+    warnings.warn('`to_string` is deprecated, please use `to_native_string` instead.', category=DeprecationWarning)
     return to_native_string(value)
 
 

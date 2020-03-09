@@ -31,5 +31,5 @@ __all__ = [
     'ensure_unicode',
     'is_affirmative',
     'to_native_string',
-    'to_string',  # For backwards compat before when this was renamed to `to_native_string`.
+    'to_string',  # For backwards compat (was renamed to `to_native_string`).
 ]
