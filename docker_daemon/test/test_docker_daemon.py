@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -82,7 +82,7 @@ class TestCheckDockerDaemonNoSetUp(AgentCheckTest):
             "nginx:latest", detach=True, name='event-tags-test', entrypoint='/bin/false')
         log.debug('start nginx:latest with entrypoint /bin/false')
         DockerUtil().client.start(container_fail)
-        log.debug('container exited with %s' % DockerUtil().client.wait(container_fail, 1))
+        log.debug('container exited with %s', DockerUtil().client.wait(container_fail, 1))
         # Wait 1 second after exit so the event will be picked up
         from time import sleep
         sleep(1)
@@ -259,7 +259,7 @@ class TestCheckDockerDaemon(AgentCheckTest):
             images = [i["RepoTags"][0] for i in self.docker_client.images(c.split(":")[0]) if i["RepoTags"] and i["RepoTags"][0].startswith(c)]
             if len(images) == 0:
                 for line in self.docker_client.pull(c, stream=True):
-                    print line
+                    print(line)
 
         self.containers = []
         for c in CONTAINERS_TO_RUN:
@@ -278,12 +278,12 @@ class TestCheckDockerDaemon(AgentCheckTest):
                 self.docker_client.connect_container_to_network(cont['Id'], self.second_network)
 
         for c in self.containers:
-            log.info("Starting container: {0}".format(c))
+            log.info("Starting container: %s", c)
             self.docker_client.start(c)
 
     def tearDown(self):
         for c in self.containers:
-            log.info("Stopping container: {0}".format(c))
+            log.info("Stopping container: %s", c)
             self.docker_client.remove_container(c, force=True)
         self.docker_client.remove_network(self.second_network)
 
@@ -829,8 +829,8 @@ class TestCheckDockerDaemon(AgentCheckTest):
         log.debug('start nginx:latest with entrypoint /bin/false')
         self.docker_client.start(container_ok)
         self.docker_client.start(container_fail)
-        log.debug('container exited with %s' % self.docker_client.wait(container_ok, 1))
-        log.debug('container exited with %s' % self.docker_client.wait(container_fail, 1))
+        log.debug('container exited with %s', self.docker_client.wait(container_ok, 1))
+        log.debug('container exited with %s', self.docker_client.wait(container_fail, 1))
         # After the container exits, we need to wait a second so the event isn't too recent
         # when the check runs, otherwise the event is not picked up
         from time import sleep
