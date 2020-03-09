@@ -24,7 +24,7 @@ class TestAttribute:
     def test_default(self):
         check = AgentCheck('test', {}, [{}])
 
-        assert check._metadata_manager is None
+        assert not hasattr(check, '_metadata_manager')
 
     def test_no_check_id_error(self):
         check = AgentCheck('test', {}, [{}])
