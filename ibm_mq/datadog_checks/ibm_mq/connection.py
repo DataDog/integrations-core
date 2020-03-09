@@ -27,18 +27,18 @@ def get_normal_connection(config):
     Get the connection either with a username and password or without
     """
     cd = _get_channel_definition(config)
-    query_manager = pymqi.QueueManager(None)
+    queue_manager = pymqi.QueueManager(None)
 
     if config.username and config.password:
         log.debug("connecting with username and password")
 
         kwargs = {'user': config.username, 'password': config.password, 'cd': cd}
 
-        query_manager.connect_with_options(config.queue_manager_name, **kwargs)
+        queue_manager.connect_with_options(config.queue_manager_name, **kwargs)
     else:
         log.debug("connecting without a username and password")
-        query_manager.connect_with_options(config.queue_manager, cd)
-    return query_manager
+        queue_manager.connect_with_options(config.queue_manager, cd)
+    return queue_manager
 
 
 def get_ssl_connection(config):
