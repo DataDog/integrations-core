@@ -750,7 +750,7 @@ class AgentCheck(object):
             if not isinstance(value, text_type):
                 continue
             try:
-                event[key] = to_string(event[key])
+                event[key] = to_string(value)
             except UnicodeError:
                 self.log.warning('Encoding error with field `%s`, cannot submit event', key)
                 return
