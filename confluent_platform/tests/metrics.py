@@ -258,6 +258,10 @@ ALWAYS_PRESENT_METRICS = (
     + KSQL_QUERY_STATS
 )
 
+# Metrics below are not always present since they are only submitted after some activity.
+# Investigation to trigger those metrics are not trivial.
+# Since this is not crucial, we can find way to trigger those metrics in a more consistent way later on.
+# TODO: Find a way to triggered metrics below so we can assert them consistently.
 NOT_ALWAYS_PRESENT_METRICS = (
     BROKER_OPTIONAL_METRICS
     + SCHEMA_REGISTRY_JERSEY_METRICS

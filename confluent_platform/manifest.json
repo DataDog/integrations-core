@@ -16,7 +16,9 @@
   ],
   "public_title": "Datadog-Confluent Platform Integration",
   "categories": [
-    ""
+    "processing",
+    "messaging",
+    "autodiscovery"
   ],
   "type": "check",
   "is_public": false,

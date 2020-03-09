@@ -1,5 +1,4 @@
 # Default metrics collected by this check. You should not have to modify this.
-# TODO: `rate`, `count` metrics are not tested yet in e2e
 jmx_metrics:
   # Kafka Broker Metrics (Yammer Metric Gauge)
   - include:
@@ -647,9 +646,8 @@ jmx_metrics:
           alias: $domain.worker_rebalance.$attribute
           metric_type: gauge
 
-  # Kafka Connect Metrics
+  # Kafka Connect Task Metrics
   # https://kafka.apache.org/documentation/#connect_monitoring
-  # TODO: Not yet tested in e2e
   - include:
       domain: kafka.connect
       bean_regex: kafka\.connect:type=connector-task-metrics,connector=.*,task=.*
@@ -687,9 +685,8 @@ jmx_metrics:
           alias: $domain.connector_task.$attribute
           metric_type: gauge
 
-  # Kafka Connect Metrics
+  # Kafka Connect Sink Metrics
   # https://kafka.apache.org/documentation/#connect_monitoring
-  # TODO: Not yet tested in e2e
   - include:
       domain: kafka.connect
       bean_regex: kafka\.connect:type=sink-task-metrics,connector=.*,task=.*
@@ -759,9 +756,8 @@ jmx_metrics:
           alias: $domain.sink_task.$attribute
           metric_type: gauge
 
-  # Kafka Connect Metrics
+  # Kafka Connect Source Tasks Metrics
   # https://kafka.apache.org/documentation/#connect_monitoring
-  # TODO: Not yet tested in e2e
   - include:
       domain: kafka.connect
       bean_regex: kafka\.connect:type=source-task-metrics,connector=.*,task=.*
@@ -803,9 +799,8 @@ jmx_metrics:
           alias: $domain.source_task.$attribute
           metric_type: gauge
 
-  # Kafka Connect Metrics
+  # Kafka Connect Task Error Metrics
   # https://kafka.apache.org/documentation/#connect_monitoring
-  # TODO: Not yet tested in e2e
   - include:
       domain: kafka.connect
       bean_regex: kafka\.connect:type=task-error-metrics,connector=.*,task=.*
@@ -1131,7 +1126,6 @@ jmx_metrics:
 
   # Components Metrics:
   #   - Confluent Streams Thread: https://docs.confluent.io/current/streams/monitoring.html#built-in-metrics
-  # TODO: add e2e test
   - include:
       domain: kafka.streams
       bean_regex: kafka\.streams:type=stream-metrics,client-id=.*
@@ -1227,7 +1221,6 @@ jmx_metrics:
 
   # Components Metrics:
   #   - Confluent Stream Task: https://docs.confluent.io/current/streams/monitoring.html#task-metrics
-  # TODO: not tested in e2e yet
   - include:
       domain: kafka.streams
       # Pattern: MBean: kafka.streams:type=stream-task-metrics,client-id=[threadId],task-id=[taskId]
@@ -1248,7 +1241,6 @@ jmx_metrics:
 
   # Confluent Stream Processor Node Metrics:
   # https://docs.confluent.io/current/streams/monitoring.html#processor-node-metrics
-  # TODO: not tested in e2e yet
   - include:
       domain: kafka.streams
       # Pattern: kafka.streams:type=stream-processor-node-metrics,client-id=[threadId],task-id=[taskId],processor-node-id=[processorNodeId]

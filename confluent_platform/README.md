@@ -4,7 +4,7 @@
 
 This check monitors Confluent Platform and Kafka components through the Datadog Agent.
 
-This integration collects JMX metrics for following components:
+This integration collects JMX metrics for the following components:
 - Broker
 - Connect
 - Replicator
@@ -21,7 +21,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 The Confluent Platform check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Confluent Platform component server.
 
-The check collects metrics via JMX, so you need a JVM on each node so the Agent can fork [jmxfetch][3]. We recommend using an Oracle-provided JVM.
+The check collects metrics via JMX, so you need a JVM on each node so the Agent can run [jmxfetch][3]. We recommend using an Oracle-provided JVM.
 
 
 ### Configuration
@@ -46,6 +46,12 @@ The check collects metrics via JMX, so you need a JVM on each node so the Agent 
     ```
 
 2. [Restart the Agent][5].
+
+#### Containerized
+
+##### Metric collection
+
+For containerized environments, see the [Autodiscovery with JMX][10] guide.
 
 ### Validation
 
@@ -91,3 +97,4 @@ Need help? Contact [Datadog support][8].
 [7]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/metadata.csv
 [8]: https://docs.datadoghq.com/help
 [9]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/datadog_checks/confluent_platform/data/metrics.yaml
+[10]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent

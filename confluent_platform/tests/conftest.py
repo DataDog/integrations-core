@@ -21,7 +21,7 @@ def dd_environment():
             # Kafka Broker
             CheckDockerLogs('broker', 'Monitored service is now ready'),
             # Kafka Schema Registry
-            CheckDockerLogs('schema-registry', 'Server started, listening for requests...', attempts=90,),
+            CheckDockerLogs('schema-registry', 'Server started, listening for requests...', attempts=90),
             # Kafka Connect
             CheckDockerLogs('connect', 'Kafka Connect started', attempts=120),
         ],
