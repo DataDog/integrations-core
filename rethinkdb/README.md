@@ -16,7 +16,7 @@ The RethinkDB check is included in the [Datadog Agent][3] package. No additional
 
 ### Configuration
 
-1. Recommended: add a `datadog-agent` user with read-only permissions on the `rethinkdb` database. Use the following ReQL commands, referring to [Permissions and user accounts][4] for details:
+1. Add a `datadog-agent` user with read-only permissions on the `rethinkdb` database. Use the following ReQL commands, referring to [Permissions and user accounts][4] for details:
 
     ```python
     r.db('rethinkdb').table('users').insert({'id': 'datadog-agent', 'password': '<PASSWORD>'})
@@ -32,7 +32,7 @@ The RethinkDB check is included in the [Datadog Agent][3] package. No additional
       - host: localhost
         port: 28015
         user: datadog-agent
-        password: <PASSWORD>
+        password: "<PASSWORD>"
     ```
 
 3. [Restart the Agent][7].
