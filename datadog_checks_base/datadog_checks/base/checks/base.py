@@ -13,7 +13,7 @@ from collections import defaultdict, deque
 from os.path import basename
 
 import yaml
-from six import binary_type, iteritems, text_type
+from six import iteritems, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
