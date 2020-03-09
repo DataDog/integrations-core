@@ -1006,6 +1006,8 @@ class VSphereLegacyCheck(AgentCheck):
 
             if self.exception_printed > 0:
                 self.log.error("One thread in the pool crashed, check the logs")
-        except Exception:
-            self.terminate_pool()
+        except Exception as e:
+            self.log.error("An exception occured while collecting vSphere metrics: %s", e)
+            if self.pool:
+                self.terminate_pool()
             raise

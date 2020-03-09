@@ -27,7 +27,5 @@ def test_go_expvar(check, aggregator):
         aggregator.assert_metric(rate, count=1, tags=shared_tags)
     for rate, value in iteritems(CHECK_RATES_CUSTOM):
         aggregator.assert_metric(rate, count=1, value=value, tags=shared_tags)
-    for count in common.CHECK_COUNT:
-        aggregator.assert_metric(count, count=1, metric_type=3, tags=shared_tags)
 
     aggregator.assert_all_metrics_covered()

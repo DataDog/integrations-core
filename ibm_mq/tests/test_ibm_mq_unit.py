@@ -7,6 +7,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.ibm_mq import IbmMqCheck
+from datadog_checks.ibm_mq.config import IBMMQConfig
 
 pytestmark = pytest.mark.unit
 
@@ -86,3 +87,21 @@ def test_channel_status_service_check_custom_mapping_invalid_config(aggregator, 
 
     with pytest.raises(ConfigurationError):
         IbmMqCheck('ibm_mq', {}, [instance])
+
+
+@pytest.mark.parametrize(
+    'mqcd_version', [pytest.param(10, id='unsupported-version'), pytest.param('foo', id='not-an-int')]
+)
+def test_invalid_mqcd_version(instance, mqcd_version):
+    instance['mqcd_version'] = mqcd_version
+
+    with pytest.raises(ConfigurationError):
+        IbmMqCheck('ibm_mq', {}, [instance])
+
+
+def test_set_mqcd_version(instance):
+    import pymqi
+
+    instance['mqcd_version'] = 9
+    config = IBMMQConfig(instance)
+    assert config.mqcd_version == pymqi.CMQC.MQCD_VERSION_9

@@ -24,10 +24,12 @@
   "is_public": false,
   "integration_id": "flink",
   "assets": {
+    "dashboards": {
+      "Flink Overview": "assets/dashboards/overview.json"
+    },
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
     "saved_views": {},
     "monitors": {},
     "service_checks": "assets/service_checks.json"

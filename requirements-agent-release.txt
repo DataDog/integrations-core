@@ -40,7 +40,7 @@ datadog-fluentd==1.5.0
 datadog-gearmand==1.4.0; sys_platform != 'win32'
 datadog-gitlab-runner==2.7.1
 datadog-gitlab==2.8.1
-datadog-go-expvar==1.7.1
+datadog-go-expvar==1.7.2
 datadog-gunicorn==1.9.0; sys_platform != 'win32'
 datadog-haproxy==2.7.1
 datadog-harbor==1.3.1
@@ -58,14 +58,14 @@ datadog-jboss-wildfly==1.1.1
 datadog-kafka-consumer==2.4.0; sys_platform != 'win32'
 datadog-kafka==2.0.2
 datadog-kong==1.7.1
-datadog-kube-apiserver-metrics==1.2.2; sys_platform == 'linux2'
+datadog-kube-apiserver-metrics==1.2.2
 datadog-kube-controller-manager==1.6.0
 datadog-kube-dns==2.3.0
 datadog-kube-metrics-server==1.1.1
 datadog-kube-proxy==3.3.0
 datadog-kube-scheduler==1.3.0
-datadog-kubelet==3.6.0; sys_platform == 'linux2'
-datadog-kubernetes-state==5.2.1; sys_platform != 'win32'
+datadog-kubelet==3.6.0
+datadog-kubernetes-state==5.2.1
 datadog-kyototycoon==1.9.0
 datadog-lighttpd==1.8.0
 datadog-linkerd==2.4.0

@@ -1,0 +1,44 @@
+# Generic Resource metrics for devices
+
+# Currently covers basic uptime and system process count along with storage stats
+# TODO: add device table
+
+metrics:
+  #
+  # General System Information
+  #
+  - MIB: HOST-RESOURCES-MIB
+    symbol: hrSystemUptime
+  - MIB: HOST-RESOURCES-MIB
+    symbol: hrSystemNumUsers
+  - MIB: HOST-RESOURCES-MIB
+    symbol: hrSystemProcesses
+  - MIB: HOST-RESOURCES-MIB
+    symbol: hrSystemMaxProcesses
+
+  #
+  # Storage Devices
+  #
+  - MIB: HOST-RESOURCES-MIB
+    table: hrStorageTable
+    symbols:
+      - hrStorageAllocationUnits
+      - hrStorageSize
+      - hrStorageUsed
+      - hrStorageAllocationFailures
+    metric_tags:
+      - tag: storagedesc
+        column: hrStorageDescr
+      - tag: storagetype
+        column: hrStorageType
+
+  #
+  # Processor Load
+  #
+  - MIB: HOST-RESOURCES-MIB
+    table: hrProcessorTable
+    symbols:
+      - hrProcessorLoad
+    metric_tags:
+      - tag: processorid
+        column: hrProcessorFrwID
