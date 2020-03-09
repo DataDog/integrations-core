@@ -15,7 +15,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Enable your metrics by including:
+1. Enable your metrics by including this in your initializer:
 
 ```ruby
     require 'datadog/statsd' # gem 'dogstatsd-ruby'
