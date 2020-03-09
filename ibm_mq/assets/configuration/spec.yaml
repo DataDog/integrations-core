@@ -134,8 +134,7 @@ files:
             'SYSTEM.*': queue_type:system
             'DEV.*': role:dev,queue_type:default
           type: object
-      - template: instances/tags
-      - template: instances/global
+      - template: instances/default
   - template: logs
     example:
     - type: file
