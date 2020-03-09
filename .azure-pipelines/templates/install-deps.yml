@@ -4,7 +4,7 @@ parameters:
   - name: pip_cache_config
     displayName: 'Pip cache configuration'
     type: object
-    default: {}
+    default: null
 
 steps:
 # Install the Python version with which to use globally last as
@@ -21,9 +21,10 @@ steps:
   displayName: 'Use Python 3.8'
 
 # See: https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching
-- task: Cache@2
-  inputs: ${{ parameters.pip_cache_config }}
-  displayName: 'Cache pip dependencies'
+- ${{ if parameters.pip_cache_config }}:
+  - task: Cache@2
+    inputs: ${{ parameters.pip_cache_config }}
+    displayName: 'Cache pip dependencies'
 
 - script: python -m pip install --disable-pip-version-check --upgrade pip setuptools
   displayName: 'Upgrade Python packaging tools'
