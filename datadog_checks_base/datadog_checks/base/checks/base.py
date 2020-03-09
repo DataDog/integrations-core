@@ -14,7 +14,7 @@ from os.path import basename
 from typing import Any, Callable, DefaultDict, Deque, Dict, List, Optional, Sequence, Tuple, Union
 
 import yaml
-from six import iteritems, text_type
+from six import binary_type, iteritems, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
@@ -805,7 +805,7 @@ class AgentCheck(object):
         """
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
         for key, value in iteritems(event):
-            if not isinstance(value, (str, bytes)):
+            if not isinstance(value, (text_type, binary_type)):
                 continue
 
             try:
