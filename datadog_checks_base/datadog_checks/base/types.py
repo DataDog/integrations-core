@@ -11,12 +11,15 @@ ProxySettings = TypedDict(
     'ProxySettings', {'http': Optional[str], 'https': Optional[str], 'no': List[str]}, total=False
 )
 
-ServiceCheckStatus = Literal[0, 1, 2, 3]
+# NOTE: a bit involved, but this is basically a type checking-friendly `NamedTuple`-based version of an `Enum`.
+# We don't use an actual `Enum` because for backwards compatibility we need e.g. `ServiceCheck.OK` to be
+# `0` (the integer), instead of an opaque enum instance.
+ServiceCheckStatus = Literal[0, 1, 2, 3]  # Can serve as an int enum type for type checking purposes.
 _ServiceCheckType = NamedTuple(
     '_ServiceCheckType',
     [('OK', Literal[0]), ('WARNING', Literal[1]), ('CRITICAL', Literal[2]), ('UNKNOWN', Literal[3])],
 )
-ServiceCheck = _ServiceCheckType(0, 1, 2, 3)
+ServiceCheck = _ServiceCheckType(0, 1, 2, 3)  # For public enum-style use: `ServiceCheck.OK`, ...
 
 ExternalTagType = Tuple[str, Dict[str, List[str]]]
 
