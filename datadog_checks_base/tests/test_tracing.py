@@ -34,7 +34,18 @@ class DummyCheck(AgentCheck):
         pytest.param(
             {'integration_tracing': False}, {'trace_check': True}, False, id='agent_false_init_true_notcalled'
         ),
-        pytest.param({'integration_tracing': True}, {'trace_check': True}, True, id='agent_true_init_true_called'),
+        pytest.param(
+            {'integration_tracing': True, 'integration_tracing_futures': False},
+            {'trace_check': True},
+            True,
+            id='agent_true_init_true_called',
+        ),
+        pytest.param(
+            {'integration_tracing': True, 'integration_tracing_futures': True},
+            {'trace_check': True},
+            True,
+            id='agent_true_futures_true_init_true_called',
+        ),
     ],
 )
 def test_traced(aggregator, agent_config, init_config, called):
@@ -47,7 +58,7 @@ def test_traced(aggregator, agent_config, init_config, called):
         check.check({})
 
         if called:
-            tracer.trace.assert_called_once_with('integration.check', service='integrations-tracing', resource='dummy')
+            tracer.trace.assert_called_once_with('dummy', service='integrations-tracing', resource='check')
         else:
             tracer.trace.assert_not_called()
         aggregator.assert_metric('dummy.metric', 10, count=1)
