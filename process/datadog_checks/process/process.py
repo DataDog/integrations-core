@@ -120,17 +120,14 @@ class ProcessCheck(AgentCheck):
 
         matching_pids = set()
 
-        # Acquire the write lock to check whether to refresh because we're
-        # going to keep it to do the refresh, AND, we don't want multiple
-        # threads getting a `yes` result at once
-        with self.process_list_cache.write_lock():
-            if self.process_list_cache.should_refresh_proclist():
-                self.log.debug("Refreshing process list")
-                self.process_list_cache.elements = [proc for proc in psutil.process_iter(attrs=['pid', 'name'])]
-                self.process_list_cache.last_ts = time.time()
-                self.log.debug("Set last ts to %s", self.process_list_cache.last_ts)
-            else:
-                self.log.debug("Using process list cache")
+        self.log.debug("Refreshing process list")
+
+        # If refresh returns True, then the cache has been refreshed.
+        # Otherwise the existing cache elements are used.
+        if self.process_list_cache.refresh():
+            self.log.debug("Set last ts to %s", self.process_list_cache.last_ts)
+        else:
+            self.log.debug("Using process list cache")
 
         with self.process_list_cache.read_lock():
             for proc in self.process_list_cache.elements:
