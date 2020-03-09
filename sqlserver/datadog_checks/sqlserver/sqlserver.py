@@ -8,9 +8,10 @@ http://blogs.msdn.com/b/psssql/archive/2013/09/23/interpreting-the-counter-value
 '''
 from __future__ import division
 
-import traceback
 from collections import defaultdict
 from contextlib import contextmanager
+
+from six import raise_from
 
 from datadog_checks.checks import AgentCheck
 from datadog_checks.config import is_affirmative
@@ -660,13 +661,7 @@ class SQLServer(AgentCheck):
             message = "Unable to connect to SQL Server for instance {}.".format(cx)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=message)
 
-            password = instance.get('password')
-            tracebk = traceback.format_exc()
-            if password is not None:
-                tracebk = tracebk.replace(password, "*" * 6)
-
-            cxn_failure_exp = SQLConnectionError("{} \n {}".format(message, tracebk))
-            raise cxn_failure_exp
+            raise_from(SQLConnectionError(message), None)
 
 
 class SqlServerMetric(object):
