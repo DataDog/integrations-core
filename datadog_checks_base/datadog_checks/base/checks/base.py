@@ -13,12 +13,12 @@ from collections import defaultdict, deque
 from os.path import basename
 
 import yaml
-from six import iteritems, text_type
+from six import binary_type, iteritems, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
 from ..utils.agent.utils import should_profile_memory
-from ..utils.common import ensure_bytes, to_string
+from ..utils.common import ensure_bytes, ensure_unicode, to_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
@@ -746,10 +746,11 @@ class AgentCheck(object):
         :param ev event: the event to be sent.
         """
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
-        for key in event:
-            # Ensure strings have the correct type
+        for key, value in list(iteritems(event)):
+            if not isinstance(value, binary_type):
+                continue
             try:
-                event[key] = to_string(event[key])
+                event[key] = ensure_unicode(event[key])
             except UnicodeError:
                 self.log.warning('Encoding error with field `%s`, cannot submit event', key)
                 return
