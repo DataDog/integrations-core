@@ -1,37 +1,64 @@
 # Generic network interfaces metrics for routers.
-
+#
 metrics:
-  - MIB: IF-MIB
-    table: ifTable
-    forced_type: monotonic_count
-    symbols:
-      - ifInErrors
-      - ifInDiscards
-      - ifOutErrors
-      - ifOutDiscards
-    metric_tags:
-      - tag: interface
-        column: ifDescr
-  - MIB: IF-MIB
-    table: ifTable
-    symbols:
-      - ifAdminStatus
-      - ifOperStatus
-    metric_tags:
-      - tag: interface
-        column: ifDescr
-  - MIB: IF-MIB
-    table: ifXTable
-    forced_type: monotonic_count
-    symbols:
-      - ifHCInOctets
-      - ifHCInUcastPkts
-      - ifHCInMulticastPkts
-      - ifHCInBroadcastPkts
-      - ifHCOutOctets
-      - ifHCOutUcastPkts
-      - ifHCOutMulticastPkts
-      - ifHCOutBroadcastPkts
-    metric_tags:
-      - tag: interface
-        column: ifName
+- MIB: IF-MIB
+  table:
+    OID: 1.3.6.1.2.1.2.2
+    name: ifTable
+  forced_type: monotonic_count
+  symbols:
+  - OID: 1.3.6.1.2.1.2.2.1.14
+    name: ifInErrors
+  - OID: 1.3.6.1.2.1.2.2.1.13
+    name: ifInDiscards
+  - OID: 1.3.6.1.2.1.2.2.1.20
+    name: ifOutErrors
+  - OID: 1.3.6.1.2.1.2.2.1.19
+    name: ifOutDiscards
+  metric_tags:
+  - column:
+      OID: 1.3.6.1.2.1.2.2.1.2
+      name: ifDescr
+    tag: interface
+- MIB: IF-MIB
+  table:
+    OID: 1.3.6.1.2.1.2.2
+    name: ifTable
+  symbols:
+  - OID: 1.3.6.1.2.1.2.2.1.7
+    name: ifAdminStatus
+  - OID: 1.3.6.1.2.1.2.2.1.8
+    name: ifOperStatus
+  metric_tags:
+  - column:
+      OID: 1.3.6.1.2.1.2.2.1.2
+      name: ifDescr
+    tag: interface
+- MIB: IF-MIB
+  table:
+    OID: 1.3.6.1.2.1.31.1.1
+    name: ifXTable
+  forced_type: monotonic_count
+  symbols:
+  - OID: 1.3.6.1.2.1.31.1.1.1.6
+    name: ifHCInOctets
+  - OID: 1.3.6.1.2.1.31.1.1.1.7
+    name: ifHCInUcastPkts
+  - OID: 1.3.6.1.2.1.31.1.1.1.8
+    name: ifHCInMulticastPkts
+  - OID: 1.3.6.1.2.1.31.1.1.1.9
+    name: ifHCInBroadcastPkts
+  - OID: 1.3.6.1.2.1.31.1.1.1.10
+    name: ifHCOutOctets
+  - OID: 1.3.6.1.2.1.31.1.1.1.11
+    name: ifHCOutUcastPkts
+  - OID: 1.3.6.1.2.1.31.1.1.1.12
+    name: ifHCOutMulticastPkts
+  - OID: 1.3.6.1.2.1.31.1.1.1.13
+    name: ifHCOutBroadcastPkts
+  metric_tags:
+  - column:
+      OID: 1.3.6.1.2.1.31.1.1.1.1
+      name: ifName
+    tag: interface
+

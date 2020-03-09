@@ -1,15 +1,24 @@
 # Generic UDP metrics for routers.
 
 metrics:
-  - MIB: UDP-MIB
-    symbol: udpHCInDatagrams
-    forced_type: monotonic_count
-  - MIB: UDP-MIB
-    symbol: udpNoPorts
-    forced_type: monotonic_count
-  - MIB: UDP-MIB
-    symbol: udpInErrors
-    forced_type: monotonic_count
-  - MIB: UDP-MIB
-    symbol: udpHCOutDatagrams
-    forced_type: monotonic_count
+- MIB: UDP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.7.8
+    name: udpHCInDatagrams
+- MIB: UDP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.7.2
+    name: udpNoPorts
+- MIB: UDP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.7.3
+    name: udpInErrors
+- MIB: UDP-MIB
+  forced_type: monotonic_count
+  symbol:
+    OID: 1.3.6.1.2.1.7.9
+    name: udpHCOutDatagrams
+
