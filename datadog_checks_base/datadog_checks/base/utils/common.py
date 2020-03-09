@@ -6,6 +6,7 @@ from __future__ import division
 import os
 import re
 from decimal import ROUND_HALF_UP, Decimal
+from typing import TYPE_CHECKING
 
 from six import PY3, iteritems, text_type
 from six.moves.urllib.parse import urlparse
@@ -25,7 +26,10 @@ def ensure_unicode(s):
     return s
 
 
-to_string = ensure_unicode if PY3 else ensure_bytes
+if TYPE_CHECKING:
+    to_string = str
+else:
+    to_string = ensure_unicode if PY3 else ensure_bytes
 
 
 def compute_percent(part, total):
