@@ -14,7 +14,7 @@ from os.path import basename
 from typing import Any, Callable, DefaultDict, Deque, Dict, List, Optional, Sequence, Tuple, Union
 
 import yaml
-from six import iteritems, text_type
+from six import binary_type, iteritems, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
@@ -804,10 +804,14 @@ class AgentCheck(object):
         :param ev event: the event to be sent.
         """
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
-        for key in event:
-            # Ensure strings have the correct type
+        for key, value in iteritems(event):
+            if not isinstance(value, (text_type, binary_type)):
+                continue
+
             try:
-                event[key] = to_native_string(event[key])  # type: ignore
+                event[key] = to_native_string(value)  # type: ignore
+                # ^ Mypy complains about dynamic key assignment -- arguably for good reason.
+                # Ideally we should convert this to a dict literal so that submitted events only include known keys.
             except UnicodeError:
                 self.log.warning('Encoding error with field `%s`, cannot submit event', key)
                 return
