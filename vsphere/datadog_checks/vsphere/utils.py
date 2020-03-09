@@ -31,7 +31,9 @@ METRIC_TO_INSTANCE_TAG_MAPPING = {
 
 def format_metric_name(counter):
     return "{}.{}.{}".format(
-        to_native_string(counter.groupInfo.key), to_native_string(counter.nameInfo.key), SHORT_ROLLUP[str(counter.rollupType)],
+        to_native_string(counter.groupInfo.key),
+        to_native_string(counter.nameInfo.key),
+        SHORT_ROLLUP[str(counter.rollupType)],
     )
 
 

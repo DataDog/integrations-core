@@ -73,7 +73,9 @@ def test_external_host_tags(aggregator, realtime_instance):
     for ex, sub in zip(expected_tags, submitted_tags):
         ex_host, sub_host = ex[0], sub[0]
         ex_tags, sub_tags = ex[1]['vsphere'], sub[1]['vsphere']
-        ex_tags = [to_native_string(t) for t in ex_tags]  # json library loads data in unicode, let's convert back to native
+        ex_tags = [
+            to_native_string(t) for t in ex_tags
+        ]  # json library loads data in unicode, let's convert back to native
         assert ex_host == sub_host
         assert ex_tags == sub_tags
 
