@@ -15,12 +15,18 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Enable your metrics by including this in your initializer:
+1. Ensure that you have the `dogstatsd-ruby` [gem][4] installed:
+
+```
+  gem install dogstatsd-ruby
+```
+
+2. Enable metric collection by including this in your initializer:
 
 ```ruby
     require 'datadog/statsd' # gem 'dogstatsd-ruby'
 
-    Sidekiq::Pro.dogstatsd = ->{ Datadog::Statsd.new("metrics.example.com", 8125) }
+    Sidekiq::Pro.dogstatsd = ->{ Datadog::Statsd.new('metrics.example.com', 8125, namespace:'sidekiq') }
 
     Sidekiq.configure_server do |config|
       config.server_middleware do |chain|
