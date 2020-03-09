@@ -22,6 +22,7 @@ jobs:
   - template: './install-deps.yml'
     parameters:
       repo: ${{ parameters.repo }}
+      pip_cache_config: ${{ parameters.pip_cache_config }}
 
   - template: './set-up-integrations.yml'
     parameters:
@@ -40,4 +41,3 @@ jobs:
       test_e2e: ${{ parameters.test_e2e }}
       benchmark: ${{ parameters.benchmark }}
       repo: ${{ parameters.repo }}
-      pip_cache_config: ${{ parameters.pip_cache_config }}
