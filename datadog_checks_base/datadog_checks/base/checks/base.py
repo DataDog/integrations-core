@@ -805,8 +805,9 @@ class AgentCheck(object):
         """
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
         for key, value in iteritems(event):
-            if not isinstance(value, text_type):
+            if not isinstance(value, (str, bytes)):
                 continue
+
             try:
                 event[key] = to_string(value)  # type: ignore
                 # ^ Mypy complains about dynamic key assignment -- arguably for good reason.
