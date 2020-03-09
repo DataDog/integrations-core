@@ -7,6 +7,7 @@ parameters:
   benchmark: false
   validate: false
   repo: 'core'
+  pip_cache_config: null
 
 jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Windows'
@@ -41,3 +42,4 @@ jobs:
       test_e2e: ${{ parameters.test_e2e }}
       benchmark: ${{ parameters.benchmark }}
       repo: ${{ parameters.repo }}
+      pip_cache_config: ${{ parameters.pip_cache_config }}

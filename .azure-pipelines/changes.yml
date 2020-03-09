@@ -15,11 +15,13 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed
+    pip_cache_key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
     display: Linux
     validate: true
 
 - template: './templates/test-single-windows.yml'
   parameters:
     job_name: Changed
+    pip_cache_key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
     check: '--changed datadog_checks_base datadog_checks_dev active_directory aspdotnet disk dotnetclr exchange_server iis pdh_check sqlserver win32_event_log windows_service wmi_check'
     display: Windows
