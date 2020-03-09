@@ -94,7 +94,9 @@ def test_channel_status_service_check_custom_mapping_invalid_config(aggregator, 
         check.check(instance)
 
 
-@pytest.mark.parametrize('mqcd_version', [10, 'foo'])
+@pytest.mark.parametrize(
+    'mqcd_version', [pytest.param(10, id='unsupported-version'), pytest.param('foo', id='not-an-int')]
+)
 def test_invalid_mqcd_version(instance, mqcd_version):
     instance['mqcd_version'] = mqcd_version
     check = IbmMqCheck('ibm_mq', {}, [instance])
