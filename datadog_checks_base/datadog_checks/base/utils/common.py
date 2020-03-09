@@ -25,7 +25,8 @@ def ensure_unicode(s):
     return s
 
 
-to_string = ensure_unicode if PY3 else ensure_bytes
+to_native_string = ensure_unicode if PY3 else ensure_bytes
+to_string = to_native_string  # For backwards compat before when this was renamed to `to_native_string`.
 
 
 def compute_percent(part, total):

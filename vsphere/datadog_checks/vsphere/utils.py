@@ -4,7 +4,7 @@
 from pyVmomi import vim
 from six import iteritems
 
-from datadog_checks.base import to_string
+from datadog_checks.base import to_native_string
 from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
 
 METRIC_TO_INSTANCE_TAG_MAPPING = {
@@ -31,7 +31,7 @@ METRIC_TO_INSTANCE_TAG_MAPPING = {
 
 def format_metric_name(counter):
     return "{}.{}.{}".format(
-        to_string(counter.groupInfo.key), to_string(counter.nameInfo.key), SHORT_ROLLUP[str(counter.rollupType)],
+        to_native_string(counter.groupInfo.key), to_native_string(counter.nameInfo.key), SHORT_ROLLUP[str(counter.rollupType)],
     )
 
 
@@ -117,7 +117,7 @@ def get_parent_tags_recursively(mor, infrastructure_data):
     if parent:
         tags = []
         parent_props = infrastructure_data.get(parent, {})
-        parent_name = to_string(parent_props.get('name', 'unknown'))
+        parent_name = to_native_string(parent_props.get('name', 'unknown'))
         if isinstance(parent, vim.HostSystem):
             tags.append('vsphere_host:{}'.format(parent_name))
         elif isinstance(parent, vim.Folder):
