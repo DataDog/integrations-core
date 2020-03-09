@@ -8,6 +8,7 @@ consul.catalog.services_critical,gauge,,service,,Total critical services on node
 consul.catalog.services_passing,gauge,,service,,Total passing services on nodes,1,consul,svc pass
 consul.catalog.services_up,gauge,,service,,Total services registered on nodes,0,consul,svc up
 consul.catalog.services_warning,gauge,,service,,Total warning services on nodes,-1,consul,svc warn
+consul.catalog.services_count,gauge,,service,,"Metrics to count the number of services matching criteria like the service tag, the node name, or the status. To be queried using the `max by` aggregator.",-1,consul,svc warn
 consul.net.node.latency.min,gauge,,millisecond,,minimum latency from this node to all others,-1,consul,min latency
 consul.net.node.latency.p25,gauge,,millisecond,,p25 latency from this node to all others,-1,consul,p25 latency
 consul.net.node.latency.median,gauge,,millisecond,,median latency from this node to all others,-1,consul,median latency
