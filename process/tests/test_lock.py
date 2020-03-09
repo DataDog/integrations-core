@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-from datadog_checks.process.process import ReadWriteLock
+from datadog_checks.process.lock import ReadWriteLock
 
 READER_SLEEP = 0.005
 
