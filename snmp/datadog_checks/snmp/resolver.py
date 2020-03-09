@@ -4,7 +4,7 @@
 
 from collections import defaultdict
 
-from pysnmp import hlapi
+from .models import ObjectIdentity
 
 
 class OIDTreeNode(object):
@@ -87,7 +87,7 @@ class OIDResolver(object):
             # if enforce_constraints is false, then MIB resolution has not been done yet
             # so we need to do it manually. We have to specify the mibs that we will need
             # to resolve the name.
-            oid_to_resolve = hlapi.ObjectIdentity(oid_tuple)
+            oid_to_resolve = ObjectIdentity(oid_tuple)
             result_oid = oid_to_resolve.resolveWithMib(self._mib_view_controller)
         _, metric, indexes = result_oid.getMibSymbol()
         return metric, tuple(index.prettyPrint() for index in indexes)

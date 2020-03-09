@@ -17,7 +17,8 @@
   "support": "core",
   "supported_os": [
     "linux",
-    "mac_os"
+    "mac_os",
+    "windows"
   ],
   "type": "check",
   "integration_id": "kubernetes-state",

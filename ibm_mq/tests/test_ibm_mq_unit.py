@@ -92,3 +92,22 @@ def test_channel_status_service_check_custom_mapping_invalid_config(aggregator, 
 
     with pytest.raises(ConfigurationError):
         check.check(instance)
+
+
+@pytest.mark.parametrize(
+    'mqcd_version', [pytest.param(10, id='unsupported-version'), pytest.param('foo', id='not-an-int')]
+)
+def test_invalid_mqcd_version(instance, mqcd_version):
+    instance['mqcd_version'] = mqcd_version
+    check = IbmMqCheck('ibm_mq', {}, [instance])
+
+    with pytest.raises(ConfigurationError):
+        check.check(instance)
+
+
+def test_set_mqcd_version(instance):
+    import pymqi
+
+    instance['mqcd_version'] = 9
+    config = IBMMQConfig(instance)
+    assert config.mqcd_version == pymqi.CMQC.MQCD_VERSION_9

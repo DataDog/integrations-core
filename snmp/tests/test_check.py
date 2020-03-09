@@ -82,7 +82,7 @@ def test_transient_error(aggregator):
     instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
     check = common.create_check(instance)
 
-    with mock.patch.object(check, 'raise_on_error_indication', side_effect=RuntimeError):
+    with mock.patch('datadog_checks.snmp.commands._handle_error', side_effect=RuntimeError):
         check.check(instance)
 
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
@@ -115,26 +115,6 @@ def test_snmpget(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     aggregator.all_metrics_asserted()
-
-
-def test_snmp_getnext_call():
-    instance = common.generate_instance_config(common.PLAY_WITH_GET_NEXT_METRICS)
-    instance['snmp_version'] = 1
-    check = common.create_check(instance)
-
-    # Test that we invoke next with the correct keyword arguments that are hard to test otherwise
-    with mock.patch("datadog_checks.snmp.snmp.hlapi.nextCmd") as nextCmd:
-
-        check.check(instance)
-        _, kwargs = nextCmd.call_args
-        assert ("ignoreNonIncreasingOid", False) in kwargs.items()
-        assert ("lexicographicMode", False) in kwargs.items()
-
-        check = SnmpCheck('snmp', common.IGNORE_NONINCREASING_OID, [instance])
-        check.check(instance)
-        _, kwargs = nextCmd.call_args
-        assert ("ignoreNonIncreasingOid", True) in kwargs.items()
-        assert ("lexicographicMode", False) in kwargs.items()
 
 
 def test_custom_mib(aggregator):
@@ -1826,5 +1806,81 @@ def test_proliant(aggregator):
             )
         for metric in drive_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_generic_host_resources(aggregator):
+    instance = common.generate_instance_config([])
+
+    instance['community_string'] = 'generic_host'
+    instance['profile'] = 'generic'
+    instance['enforce_mib_constraints'] = False
+
+    # We need the full path as we're not in installed mode
+    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', '_generic-host-resources.yaml')
+    init_config = {'profiles': {'generic': {'definition_file': path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    common_tags = common.CHECK_TAGS + ['snmp_profile:generic']
+
+    sys_metrics = [
+        'snmp.hrSystemUptime',
+        'snmp.hrSystemNumUsers',
+        'snmp.hrSystemProcesses',
+        'snmp.hrSystemMaxProcesses',
+    ]
+    for metric in sys_metrics:
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+
+    aggregator.assert_metric('snmp.hrStorageAllocationUnits', count=2)
+    aggregator.assert_metric('snmp.hrStorageSize', count=2)
+    aggregator.assert_metric('snmp.hrStorageUsed', count=2)
+    aggregator.assert_metric('snmp.hrStorageAllocationFailures', count=2)
+
+    aggregator.assert_metric('snmp.hrProcessorLoad', count=2)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_palo_alto(aggregator):
+    instance = common.generate_instance_config([])
+
+    instance['community_string'] = 'pan-common'
+    instance['profile'] = 'palo-alto'
+    instance['enforce_mib_constraints'] = False
+
+    # We need the full path as we're not in installed mode
+    path = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles', 'palo-alto.yaml')
+    init_config = {'profiles': {'palo-alto': {'definition_file': path}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+
+    check.check(instance)
+
+    common_tags = common.CHECK_TAGS + ['snmp_profile:palo-alto']
+
+    session = [
+        'panSessionUtilization',
+        'panSessionMax',
+        'panSessionActive',
+        'panSessionActiveTcp',
+        'panSessionActiveUdp',
+        'panSessionActiveICMP',
+        'panSessionActiveSslProxy',
+        'panSessionSslProxyUtilization',
+    ]
+
+    global_protect = [
+        'panGPGWUtilizationPct',
+        'panGPGWUtilizationMaxTunnels',
+        'panGPGWUtilizationActiveTunnels',
+    ]
+
+    for metric in session:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    for metric in global_protect:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
     aggregator.assert_all_metrics_covered()

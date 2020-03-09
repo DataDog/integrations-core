@@ -14,7 +14,7 @@ from collections import defaultdict
 import psutil
 from six import PY3, iteritems, itervalues
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
@@ -49,6 +49,11 @@ class Network(AgentCheck):
             instance = {}
 
         self._excluded_ifaces = instance.get('excluded_interfaces', [])
+        if not isinstance(self._excluded_ifaces, list):
+            raise ConfigurationError(
+                "Expected 'excluded_interfaces' to be a list, got '{}'".format(self._excluded_ifaces)
+            )
+
         self._collect_cx_state = instance.get('collect_connection_state', False)
         self._collect_rate_metrics = instance.get('collect_rate_metrics', True)
         self._collect_count_metrics = instance.get('collect_count_metrics', False)

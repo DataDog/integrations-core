@@ -1,0 +1,66 @@
+# Profile for Palo Alto devices
+
+# https://docs.paloaltonetworks.com/pan-os/9-1/pan-os-admin/monitoring/snmp-monitoring-and-traps/supported-mibs/pan-common-mibmy.html#idaeaa4a59-0bf4-4f66-90cf-9c0096c6f8a4
+# https://docs.paloaltonetworks.com/content/dam/techdocs/en_US/pdf/pan-os/9-1/pan-os-admin/pan-os-admin.pdf
+
+extends:
+  - _base.yaml
+  - _generic-router-if.yaml
+  - _generic-host-resources.yaml
+
+sysobjectid: 1.3.6.1.4.1.25461.*
+
+metrics:
+  #
+  # Session Utilization Metrics
+  #
+
+  - MIB: PAN-COMMON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.2.1.2.3.1
+      name: panSessionUtilization
+  - MIB: PAN-COMMON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.2.1.2.3.2
+      name: panSessionMax
+  - MIB: PAN-COMMON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.2.1.2.3.3
+      name: panSessionActive
+  - MIB: PAN-COMMON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.2.1.2.3.4
+      name: panSessionActiveTcp
+  - MIB: PAN-COMMON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.2.1.2.3.5
+      name: panSessionActiveUdp
+  - MIB: PAN-COMMON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.2.1.2.3.6
+      name: panSessionActiveICMP
+  - MIB: PAN-COMMON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.2.1.2.3.7
+      name: panSessionActiveSslProxy
+  - MIB: PAN-COMMON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.2.1.2.3.8
+      name: panSessionSslProxyUtilization
+
+  #
+  # GlobalProtect gateway utilization
+  #
+  - MIB: PAN-COMMON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.2.1.2.5.1.1
+      name: panGPGWUtilizationPct
+  - MIB: PAN-COMMON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.2.1.2.5.1.2
+      name: panGPGWUtilizationMaxTunnels
+  - MIB: PAN-COMMON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.2.1.2.5.1.3
+      name: panGPGWUtilizationActiveTunnels
+
