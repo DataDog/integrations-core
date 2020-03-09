@@ -6,6 +6,7 @@ from __future__ import division
 import os
 import re
 from decimal import ROUND_HALF_UP, Decimal
+from typing import TYPE_CHECKING
 
 from six import PY3, iteritems, text_type
 from six.moves.urllib.parse import urlparse
@@ -25,7 +26,11 @@ def ensure_unicode(s):
     return s
 
 
-to_native_string = ensure_unicode if PY3 else ensure_bytes
+if TYPE_CHECKING:
+    to_native_string = str
+else:
+    to_native_string = ensure_unicode if PY3 else ensure_bytes
+
 to_string = to_native_string  # For backwards compat before when this was renamed to `to_native_string`.
 
 
