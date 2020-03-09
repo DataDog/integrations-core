@@ -10,7 +10,14 @@ import mock
 import pytest
 from six import PY3
 
-from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, pattern_filter, round_value
+from datadog_checks.base.utils.common import (
+    ensure_bytes,
+    ensure_unicode,
+    pattern_filter,
+    round_value,
+    to_native_string,
+    to_string,
+)
 from datadog_checks.base.utils.containers import iter_unique
 from datadog_checks.base.utils.limiter import Limiter
 
@@ -162,3 +169,17 @@ class TestBytesUnicode:
     def test_ensure_unicode(self):
         assert ensure_unicode('éâû') == u'éâû'
         assert ensure_unicode(u'éâû') == u'éâû'
+
+    def test_to_native_string(self):
+        # type: () -> None
+        text = u'éâû'
+        binary = text.encode('utf-8')
+        if PY3:
+            assert to_native_string(binary) == text
+        else:
+            assert to_native_string(binary) == binary
+
+    def test_to_string_deprecated(self):
+        # type: () -> None
+        with pytest.deprecated_call():
+            to_string(b'example')
