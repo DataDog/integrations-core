@@ -130,11 +130,16 @@ If necessary, additional metrics can be defined in the instances. These metrics 
 Profiles can be used interchangeably, such that devices that share MIB dependencies can reuse the same profiles. For example, the Cisco c3850 profile can be used across many Cisco switches.
 
 * [Generic router][7]
-* [F5 Big IP][8]
-* [Dell iDRAC][9]
-* [Cisco Nexus][10]
+* [Cisco ASA 5525][18]
 * [Cisco c3850][11]
+* [Cisco Nexus][10]
 * [Cisco Meraki][12]
+* [Dell iDRAC][9]
+* [Dell Poweredge][19]
+* [F5 Big IP][8]
+* [HP iLO4][20]
+* [HPE Proliant][21]
+* [Palo Alto][22]
 
 ### Validation
 
@@ -185,3 +190,8 @@ Additional helpful documentation, links, and articles:
 [15]: https://docs.datadoghq.com/help
 [16]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
 [17]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
+[18]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco-asa-5525.yaml
+[19]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/dell-poweredge.yaml
+[20]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/hp-ilo4.yaml
+[20]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/hpe-proliant.yaml
+[20]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/palo-alto.yaml
