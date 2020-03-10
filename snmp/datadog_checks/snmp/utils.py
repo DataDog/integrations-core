@@ -8,7 +8,7 @@ import yaml
 
 from .compat import get_config
 from .exceptions import CouldNotDecodeOID, SmiError
-from .pysnmp_types import ObjectIdentity, ObjectName, ObjectType, endOfMibView, noSuchInstance
+from .pysnmp_types import ObjectIdentity, ObjectName, ObjectType
 
 
 def get_profile_definition(profile):
@@ -116,7 +116,7 @@ def parse_as_oid_tuple(value):
         except SmiError as exc:
             # Not resolved yet. Probably us building an `ObjectIdentity` instance manually...
             # We should be using our `OID` model in that case, so let's fail.
-            raise CouldNotDecodeOID('Could not infer OID from `ObjectIdentity`: {!r}'.format(exc))
+            raise CouldNotDecodeOID('Could not infer OID from `ObjectIdentity` {!r}: {!r}'.format(value, exc))
 
         return parse_as_oid_tuple(object_name)
 
@@ -128,7 +128,7 @@ def parse_as_oid_tuple(value):
         except SmiError as exc:
             # Not resolved yet. Probably us building an `ObjectType` instance manually...
             # We should be using our `OID` model in that case, so let's fail.
-            raise CouldNotDecodeOID('Could not infer OID from `ObjectType`: {!r}'.format(exc))
+            raise CouldNotDecodeOID('Could not infer OID from `ObjectType` {!r}: {!r}'.format(value, exc))
 
         return parse_as_oid_tuple(object_identity)
 
@@ -158,50 +158,10 @@ class OIDPrinter(object):
     managed, and can be more expensive to use than regular display.
     """
 
-    def __init__(self, oids, with_values):
+    def __init__(self, variables, with_values):
         # type: (Union[Mapping, Sequence], bool) -> None
-        self.oids = oids
+        self.variables = variables
         self.with_values = with_values
-
-    def oid_str(self, oid):
-        # type: (ObjectType) -> str
-        """Display an OID object (or MIB symbol), even if the object is not initialized by PySNMP.
-
-        Output:
-            1.3.4.8.3.4
-        """
-        try:
-            return oid[0].getOid().prettyPrint()
-        except SmiError:
-            # PySNMP screams when we try to access the name of an OID
-            # that has no value yet. Fine, let's work around this arbitrary limitation...
-            arg = oid._ObjectType__args[0]._ObjectIdentity__args[-1]
-            if isinstance(arg, tuple):
-                arg = '.'.join(map(str, arg))
-
-            return arg
-
-    def oid_str_value(self, oid):
-        # type: (ObjectType) -> str
-        """Display an OID object and its associated value.
-
-        Output:
-            '1.3.4.5.6': 57
-        """
-        if noSuchInstance.isSameTypeWith(oid[1]):
-            value = "'NoSuchInstance'"
-        elif endOfMibView.isSameTypeWith(oid[1]):
-            value = "'EndOfMibView'"
-        else:
-            value = oid[1].prettyPrint()
-            try:
-                value = str(int(value))
-            except (TypeError, ValueError):
-                value = "'{}'".format(value)
-        key = oid[0]
-        if not isinstance(key, ObjectName):
-            key = key.getOid()
-        return "'{}': {}".format(key.prettyPrint(), value)
 
     def oid_dict(self, key, value):
         # type: (str, Dict[Any, Any]) -> str
@@ -233,9 +193,9 @@ class OIDPrinter(object):
 
     def __str__(self):
         # type: () -> str
-        if isinstance(self.oids, dict):
-            return '{{{}}}'.format(', '.join(self.oid_dict(key, value) for (key, value) in self.oids.items()))
+        if isinstance(self.variables, Mapping):
+            return '{{{}}}'.format(', '.join(self.oid_dict(key, value) for (key, value) in self.variables.items()))
         if self.with_values:
-            return '{{{}}}'.format(', '.join(self.oid_str_value(oid) for oid in self.oids))
+            return '{{{}}}'.format(', '.join(str(variable) for variable in self.variables))
         else:
-            return '({})'.format(', '.join("'{}'".format(self.oid_str(oid)) for oid in self.oids))
+            return '({})'.format(', '.join("'{}'".format(variable.oid) for variable in self.variables))

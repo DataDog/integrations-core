@@ -17,24 +17,24 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.types import ServiceCheckStatus
 
 from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
 from .config import InstanceConfig, ParsedMetric, ParsedMetricTag, ParsedTableMetric
-from .exceptions import PySnmpError
+from .exceptions import NoSuchInstance, PySnmpError
+from .models import OID, Variable
 from .pysnmp_types import (
+    Asn1Type,
     Counter32,
     Counter64,
     CounterBasedGauge64,
     Gauge32,
     Integer,
     Integer32,
-    ObjectIdentity,
-    ObjectType,
     Unsigned32,
     ZeroBasedCounter64,
     noSuchInstance,
-    noSuchObject,
 )
 from .utils import OIDPrinter, get_profile_definition, oid_pattern_specificity, recursively_expand_base_profiles
 
@@ -46,11 +46,6 @@ SNMP_GAUGES = frozenset(
 )
 
 DEFAULT_OID_BATCH_SIZE = 10
-
-
-def reply_invalid(oid):
-    # type: (Any) -> bool
-    return noSuchInstance.isSameTypeWith(oid) or noSuchObject.isSameTypeWith(oid)
 
 
 class SnmpCheck(AgentCheck):
@@ -170,7 +165,7 @@ class SnmpCheck(AgentCheck):
                 time.sleep(interval - time_elapsed)
 
     def fetch_results(self, config, all_oids, bulk_oids):
-        # type: (InstanceConfig, list, list) -> Tuple[dict, Optional[str]]
+        # type: (InstanceConfig, List[OID], List[OID]) -> Tuple[dict, Optional[str]]
         """
         Perform a snmpwalk on the domain specified by the oids, on the device
         configured in instance.
@@ -182,12 +177,12 @@ class SnmpCheck(AgentCheck):
         results = defaultdict(dict)  # type: DefaultDict[str, dict]
         enforce_constraints = config.enforce_constraints
 
-        all_binds, error = self.fetch_oids(config, all_oids, enforce_constraints=enforce_constraints)
+        all_variables, error = self.fetch_oids(config, all_oids, enforce_constraints=enforce_constraints)
 
         for oid in bulk_oids:
             try:
                 self.log.debug('Running SNMP command getBulk on OID %r', oid)
-                binds = snmp_bulk(
+                variables = snmp_bulk(
                     config,
                     oid,
                     self._NON_REPEATERS,
@@ -195,23 +190,23 @@ class SnmpCheck(AgentCheck):
                     enforce_constraints,
                     self.ignore_nonincreasing_oid,
                 )
-                all_binds.extend(binds)
+                all_variables.extend(variables)
             except PySnmpError as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
                 if not error:
                     error = message
                 self.warning(message)
 
-        for result_oid, value in all_binds:
-            metric, indexes = config.resolve_oid(result_oid)
-            results[metric][indexes] = value
+        for variable in all_variables:
+            metric, indexes = config.resolve_oid(variable.oid)
+            results[metric][indexes] = variable.value
         self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
         # Freeze the result
         results.default_factory = None
         return results, error
 
     def fetch_oids(self, config, oids, enforce_constraints):
-        # type: (InstanceConfig, list, bool) -> Tuple[List[Any], Optional[str]]
+        # type: (InstanceConfig, List[OID], bool) -> Tuple[List[Variable], Optional[str]]
         # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
         # It returns the wrong value when the OID passed is referring to a specific leaf.
         # For example:
@@ -220,24 +215,23 @@ class SnmpCheck(AgentCheck):
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
         error = None
         first_oid = 0
-        all_binds = []
+        all_variables = []  # type: List[Variable]
+
         while first_oid < len(oids):
             try:
                 oids_batch = oids[first_oid : first_oid + self.oid_batch_size]
                 self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
 
-                var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
-                self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
+                variables = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
+                self.log.debug('Returned variables: %s', OIDPrinter(variables, with_values=True))
 
-                missing_results = []
+                missing_results = []  # type: List[OID]
 
-                for var in var_binds:
-                    result_oid, value = var
-                    if reply_invalid(value):
-                        oid_tuple = result_oid.asTuple()
-                        missing_results.append(ObjectType(ObjectIdentity(oid_tuple)))
+                for variable in variables:
+                    if not Variable.was_oid_found(variable.value):
+                        missing_results.append(variable.oid)
                     else:
-                        all_binds.append(var)
+                        all_variables.append(variable)
 
                 if missing_results:
                     # If we didn't catch the metric using snmpget, try snmpnext
@@ -245,7 +239,7 @@ class SnmpCheck(AgentCheck):
                     self.log.debug(
                         'Running SNMP command getNext on OIDS: %s', OIDPrinter(missing_results, with_values=False)
                     )
-                    binds = list(
+                    variables = list(
                         snmp_getnext(
                             config,
                             missing_results,
@@ -253,8 +247,8 @@ class SnmpCheck(AgentCheck):
                             ignore_nonincreasing_oid=self.ignore_nonincreasing_oid,
                         )
                     )
-                    self.log.debug('Returned vars: %s', OIDPrinter(binds, with_values=True))
-                    all_binds.extend(binds)
+                    self.log.debug('Returned vars: %s', OIDPrinter(variables, with_values=True))
+                    all_variables.extend(variables)
 
             except PySnmpError as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
@@ -265,24 +259,38 @@ class SnmpCheck(AgentCheck):
             # if we fail move onto next batch
             first_oid += self.oid_batch_size
 
-        return all_binds, error
+        return all_variables, error
 
     def fetch_sysobject_oid(self, config):
-        # type: (InstanceConfig) -> str
+        # type: (InstanceConfig) -> OID
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
-        oid = ObjectType(ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2, 0)))
-        self.log.debug('Running SNMP command on OID: %r', OIDPrinter((oid,), with_values=False))
-        var_binds = snmp_get(config, [oid], lookup_mib=False)
-        self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
-        return var_binds[0][1].prettyPrint()
+        oid = OID((1, 3, 6, 1, 2, 1, 1, 2, 0))
+
+        self.log.debug('Running SNMP command on OID: %r', oid)
+        variables = snmp_get(config, [oid], lookup_mib=False)
+        self.log.debug('Returned vars: %s', OIDPrinter(variables, with_values=True))
+
+        value = variables[0].value
+
+        if isinstance(value, Asn1Type) and value.isSameTypeWith(noSuchInstance):
+            raise NoSuchInstance
+
+        if not isinstance(value, OID):
+            raise RuntimeError(
+                'Expected sysObjectID query to return OID, got {!r} of type {}'.format(value, type(value))
+            )
+
+        return value
 
     def _profile_for_sysobject_oid(self, sys_object_oid):
-        # type: (str) -> str
+        # type: (OID) -> str
         """
         Return the most specific profile that matches the given sysObjectID.
         """
-        profiles = [profile for oid, profile in self.profiles_by_oid.items() if fnmatch.fnmatch(sys_object_oid, oid)]
+        profiles = [
+            profile for oid, profile in self.profiles_by_oid.items() if fnmatch.fnmatch(str(sys_object_oid), oid)
+        ]
 
         if not profiles:
             raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
@@ -385,10 +393,10 @@ class SnmpCheck(AgentCheck):
         except Exception as e:
             if not error:
                 error = 'Failed to collect metrics for {} - {}'.format(instance['name'], e)
-            self.warning(error)
+            self.log.warning(error, exc_info=e)
         finally:
             # Report service checks
-            status = self.OK
+            status = self.OK  # type: ServiceCheckStatus
             if error:
                 status = self.CRITICAL
                 if results:
@@ -466,26 +474,37 @@ class SnmpCheck(AgentCheck):
         """
         tags = []  # type: List[str]
 
+        tag_value = None  # type: Any
+
         for idx_tag in index_tags:
             tag_group = idx_tag[0]
+
             try:
                 tag_value = index[idx_tag[1] - 1]
             except IndexError:
                 self.log.warning('Not enough indexes, skipping tag %s', tag_group)
                 continue
+
             tags.append('{}:{}'.format(tag_group, tag_value))
 
         for col_tag in column_tags:
             tag_group = col_tag[0]
+
             try:
                 column_value = results[col_tag[1]][index]
             except KeyError:
                 self.log.warning('Column %s not present in the table, skipping this tag', col_tag[1])
                 continue
-            if reply_invalid(column_value):
+
+            if not Variable.was_oid_found(column_value):
                 self.log.warning("Can't deduct tag from column for tag %s", tag_group)
                 continue
-            tag_value = column_value.prettyPrint()
+
+            if isinstance(column_value, OID):
+                tag_value = str(column_value)
+            else:
+                tag_value = column_value.prettyPrint()
+
             tags.append('{}:{}'.format(tag_group, tag_value))
 
         return tags
@@ -496,7 +515,7 @@ class SnmpCheck(AgentCheck):
         Convert the values reported as pysnmp-Managed Objects to values and
         report them to the aggregator.
         """
-        if reply_invalid(snmp_value):
+        if not Variable.was_oid_found(snmp_value):
             # Metrics not present in the queried object
             self.log.warning('No such Mib available: %s', name)
             return

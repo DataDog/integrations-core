@@ -1,18 +1,18 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import Any, Dict, Generator
+from typing import Any, Dict, Iterator, List, Sequence
 
 from pyasn1.type.univ import Null
-from pysnmp import hlapi
 from pysnmp.entity.rfc3413 import cmdgen
 from pysnmp.hlapi.asyncore.cmdgen import vbProcessor
 from pysnmp.proto import errind
-from pysnmp.proto.rfc1905 import endOfMibView
 
 from datadog_checks.base.errors import CheckException
 
 from .config import InstanceConfig
+from .models import OID, Variable
+from .pysnmp_types import endOfMibView
 
 
 def _handle_error(ctx, config):
@@ -24,10 +24,12 @@ def _handle_error(ctx, config):
 
 
 def snmp_get(config, oids, lookup_mib):
-    # type: (InstanceConfig, list, bool) -> list
+    # type: (InstanceConfig, Sequence[OID], bool) -> List[Variable]
     """Call SNMP GET on a list of oids."""
 
-    def callback(snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx):
+    def callback(  # type: ignore
+        snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx
+    ):
         var_binds = vbProcessor.unmakeVarBinds(snmpEngine, varBinds, lookup_mib)
 
         cbCtx['error'] = errorIndication
@@ -35,7 +37,8 @@ def snmp_get(config, oids, lookup_mib):
 
     ctx = {}  # type: Dict[str, Any]
 
-    var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
+    var_binds = [oid.maybe_resolve_as_object_type() for oid in oids]
+    var_binds = vbProcessor.makeVarBinds(config._snmp_engine, var_binds)
 
     cmdgen.GetCommandGenerator().sendVarBinds(
         config._snmp_engine,
@@ -51,14 +54,16 @@ def snmp_get(config, oids, lookup_mib):
 
     _handle_error(ctx, config)
 
-    return ctx['var_binds']
+    return [Variable.from_var_bind(var_bind) for var_bind in ctx['var_binds']]
 
 
 def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
-    # type: (InstanceConfig, list, bool, bool) -> Generator
+    # type: (InstanceConfig, List[OID], bool, bool) -> Iterator[Variable]
     """Call SNMP GETNEXT on a list of oids. It will iterate on the results if it happens to be under the same prefix."""
 
-    def callback(snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx):
+    def callback(  # type: ignore
+        snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx
+    ):
         var_bind_table = [vbProcessor.unmakeVarBinds(snmpEngine, row, lookup_mib) for row in varBindTable]
         if ignore_nonincreasing_oid and errorIndication and isinstance(errorIndication, errind.OidNotIncreasing):
             errorIndication = None
@@ -67,9 +72,8 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
 
     ctx = {}  # type: Dict[str, Any]
 
-    initial_vars = [x[0] for x in vbProcessor.makeVarBinds(config._snmp_engine, oids)]
-
-    var_binds = oids
+    var_binds = [oid.maybe_resolve_as_object_type() for oid in oids]
+    initial_vars = [x[0] for x in vbProcessor.makeVarBinds(config._snmp_engine, var_binds)]
 
     gen = cmdgen.NextCommandGenerator()
 
@@ -96,17 +100,19 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
             if not isinstance(val, Null) and initial_vars[col].isPrefixOf(name):
                 var_binds.append(var_bind)
                 new_initial_vars.append(initial_vars[col])
-                yield var_bind
+                yield Variable.from_var_bind(var_bind)
         if not var_binds:
             return
         initial_vars = new_initial_vars
 
 
 def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_nonincreasing_oid):
-    # type: (InstanceConfig, hlapi.ObjectType, int, int, bool, bool) -> Generator
+    # type: (InstanceConfig, OID, int, int, bool, bool) -> Iterator[Variable]
     """Call SNMP GETBULK on an oid."""
 
-    def callback(snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx):
+    def callback(  # type: ignore
+        snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx
+    ):
         var_bind_table = [vbProcessor.unmakeVarBinds(snmpEngine, row, lookup_mib) for row in varBindTable]
         if ignore_nonincreasing_oid and errorIndication and isinstance(errorIndication, errind.OidNotIncreasing):
             errorIndication = None
@@ -115,7 +121,7 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
 
     ctx = {}  # type: Dict[str, Any]
 
-    var_binds = [oid]
+    var_binds = [oid.maybe_resolve_as_object_type()]
     initial_var = vbProcessor.makeVarBinds(config._snmp_engine, var_binds)[0][0]
 
     gen = cmdgen.BulkCommandGenerator()
@@ -142,6 +148,6 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
             if endOfMibView.isSameTypeWith(value):
                 return
             if initial_var.isPrefixOf(name):
-                yield var_binds[0]
+                yield Variable.from_var_bind(var_binds[0])
             else:
                 return

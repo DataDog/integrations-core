@@ -6,7 +6,7 @@ Re-export PyASN1/PySNMP types and classes that we use, so that we can access the
 """
 
 from pyasn1.type.base import Asn1Type
-from pyasn1.type.univ import OctetString
+from pyasn1.type.univ import ObjectIdentifier, OctetString
 from pysnmp import hlapi
 from pysnmp.hlapi import (
     CommunityData,
@@ -47,6 +47,7 @@ __all__ = [
     'MibViewController',
     'noSuchInstance',
     'noSuchObject',
+    'ObjectIdentifier',
     'ObjectIdentity',
     'ObjectName',
     'ObjectType',
