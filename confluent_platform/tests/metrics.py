@@ -226,11 +226,18 @@ CONSUMER_FETCH_METRICS = [
     'kafka.consumer.fetch.fetch_throttle_time_avg',
     'kafka.consumer.fetch.fetch_throttle_time_max',
     'kafka.consumer.fetch.records_consumed_rate',
+    'kafka.consumer.fetch.fetch_size_avg',
+    'kafka.consumer.fetch.fetch_size_max',
+    'kafka.consumer.fetch.records_lag_max',
+    'kafka.consumer.fetch.records_per_request_avg',
 ]
 
 CONSUMER_FETCH_TOPIC_METRICS = [
     'kafka.consumer.fetch_topic.bytes_consumed_rate',
     'kafka.consumer.fetch_topic.records_consumed_rate',
+    'kafka.consumer.fetch_topic.fetch_size_avg',
+    'kafka.consumer.fetch_topic.fetch_size_max',
+    'kafka.consumer.fetch_topic.records_per_request_avg',
 ]
 
 KSQL_QUERY_STATS = [
