@@ -1,5 +1,8 @@
 # CHANGELOG - IBM MQ
 
+## 4.1.0-rc.1 / 2020-03-10
+
+
 ## 4.0.0 / 2020-03-10
 
 * [Fixed] IBM MQ refactor. See [#5902](https://github.com/DataDog/integrations-core/pull/5902).
