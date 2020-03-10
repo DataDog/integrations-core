@@ -26,16 +26,25 @@ def host_profiles_root():
         yield
 
 
-def test_f5(aggregator):
+def run_profile_check(profile, community, profile_name, set_profile=False):
+    """Run a single check with the given `profile`, with the provided `community`.
+
+    If `set_profile` is True, we don't rely on `sysObjectID` matching and pass the profile explicitly.
+    """
     instance = common.generate_instance_config([])
 
-    instance['community_string'] = 'f5'
+    instance['community_string'] = community
     instance['enforce_mib_constraints'] = False
+    if set_profile:
+        instance['profile'] = profile_name
 
-    init_config = {'profiles': {'f5-big-ip': {'definition_file': 'f5-big-ip.yaml'}}}
+    init_config = {'profiles': {profile_name: {'definition_file': profile}}}
     check = SnmpCheck('snmp', init_config, [instance])
-
     check.check(instance)
+
+
+def test_f5(aggregator):
+    run_profile_check('f5-big-ip.yaml', 'f5', 'f5-big-ip')
 
     gauges = [
         'sysStatMemoryTotal',
@@ -124,16 +133,7 @@ def test_f5(aggregator):
 
 
 def test_router(aggregator):
-    instance = common.generate_instance_config([])
-
-    instance['community_string'] = 'network'
-    instance['profile'] = 'router'
-    instance['enforce_mib_constraints'] = False
-
-    init_config = {'profiles': {'router': {'definition_file': 'generic-router.yaml'}}}
-    check = SnmpCheck('snmp', init_config, [instance])
-
-    check.check(instance)
+    run_profile_check('generic-router.yaml', 'network', 'router')
 
     tcp_counts = [
         'tcpActiveOpens',
@@ -259,17 +259,8 @@ def test_router(aggregator):
 
 
 def test_f5_router(aggregator):
-    instance = common.generate_instance_config([])
-
     # Use the generic profile against the f5 device
-    instance['community_string'] = 'f5'
-    instance['profile'] = 'router'
-    instance['enforce_mib_constraints'] = False
-
-    init_config = {'profiles': {'router': {'definition_file': 'generic-router.yaml'}}}
-    check = SnmpCheck('snmp', init_config, [instance])
-
-    check.check(instance)
+    run_profile_check('generic-router.yaml', 'f5', 'router')
 
     if_counts = [
         'ifInErrors',
@@ -321,16 +312,7 @@ def test_f5_router(aggregator):
 
 
 def test_3850(aggregator):
-    instance = common.generate_instance_config([])
-
-    instance['community_string'] = '3850'
-    instance['profile'] = 'cisco-3850'
-    instance['enforce_mib_constraints'] = False
-
-    init_config = {'profiles': {'cisco-3850': {'definition_file': 'cisco-3850.yaml'}}}
-    check = SnmpCheck('snmp', init_config, [instance])
-
-    check.check(instance)
+    run_profile_check('cisco-3850.yaml', '3850', 'cisco-3850')
 
     tcp_counts = [
         'tcpActiveOpens',
@@ -414,15 +396,7 @@ def test_3850(aggregator):
 
 
 def test_meraki_cloud_controller(aggregator):
-    instance = common.generate_instance_config([])
-
-    instance['community_string'] = 'meraki-cloud-controller'
-    instance['profile'] = 'meraki'
-    instance['enforce_mib_constraints'] = False
-    init_config = {'profiles': {'meraki': {'definition_file': 'meraki-cloud-controller.yaml'}}}
-
-    check = SnmpCheck('snmp', init_config, [instance])
-    check.check(instance)
+    run_profile_check('meraki-cloud-controller.yaml', 'meraki-cloud-controller', 'meraki')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:meraki']
     dev_metrics = ['devStatus', 'devClientCount']
@@ -440,16 +414,7 @@ def test_meraki_cloud_controller(aggregator):
 
 
 def test_idrac(aggregator):
-    instance = common.generate_instance_config([])
-
-    instance['community_string'] = 'idrac'
-    instance['profile'] = 'idrac'
-    instance['enforce_mib_constraints'] = False
-
-    init_config = {'profiles': {'idrac': {'definition_file': 'idrac.yaml'}}}
-    check = SnmpCheck('snmp', init_config, [instance])
-
-    check.check(instance)
+    run_profile_check('idrac.yaml', 'idrac', 'idrac')
 
     if_counts = [
         'adapterRxPackets',
@@ -511,15 +476,7 @@ def test_idrac(aggregator):
 
 
 def test_cisco_nexus(aggregator):
-    instance = common.generate_instance_config([])
-    instance['community_string'] = 'cisco_nexus'
-    instance['profile'] = 'cisco-nexus'
-    instance['enforce_mib_constraints'] = False
-
-    init_config = {'profiles': {'cisco-nexus': {'definition_file': 'cisco-nexus.yaml'}}}
-    check = SnmpCheck('snmp', init_config, [instance])
-
-    check.check(instance)
+    run_profile_check('cisco-nexus.yaml', 'cisco_nexus', 'cisco-nexus')
 
     tcp_counts = [
         'tcpActiveOpens',
@@ -608,15 +565,7 @@ def test_cisco_nexus(aggregator):
 
 
 def test_dell_poweredge(aggregator):
-    instance = common.generate_instance_config([])
-    instance['community_string'] = 'dell-poweredge'
-    instance['profile'] = 'dell-poweredge'
-    instance['enforce_mib_constraints'] = False
-
-    init_config = {'profiles': {'dell-poweredge': {'definition_file': 'dell-poweredge.yaml'}}}
-    check = SnmpCheck('snmp', init_config, [instance])
-
-    check.check(instance)
+    run_profile_check('dell-poweredge.yaml', 'dell-poweredge', 'dell-poweredge')
 
     # Poweredge
     sys_mem_gauges = [
@@ -748,15 +697,7 @@ def test_dell_poweredge(aggregator):
 
 
 def test_hp_ilo4(aggregator):
-    instance = common.generate_instance_config([])
-    instance['community_string'] = 'hp_ilo4'
-    instance['profile'] = 'hp-ilo4'
-    instance['enforce_mib_constraints'] = False
-
-    init_config = {'profiles': {'hp-ilo4': {'definition_file': 'hp-ilo4.yaml'}}}
-    check = SnmpCheck('snmp', init_config, [instance])
-
-    check.check(instance)
+    run_profile_check('hp-ilo4.yaml', 'hp_ilo4', 'hp-ilo4')
 
     status_gauges = [
         'cpqHeCritLogCondition',
@@ -863,15 +804,7 @@ def test_hp_ilo4(aggregator):
 
 
 def test_proliant(aggregator):
-    instance = common.generate_instance_config([])
-    instance['community_string'] = 'hpe-proliant'
-    instance['profile'] = 'hpe-proliant'
-    instance['enforce_mib_constraints'] = False
-
-    init_config = {'profiles': {'hpe-proliant': {'definition_file': 'hpe-proliant.yaml'}}}
-    check = SnmpCheck('snmp', init_config, [instance])
-
-    check.check(instance)
+    run_profile_check('hpe-proliant.yaml', 'hpe-proliant', 'hpe-proliant')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:hpe-proliant']
 
@@ -958,16 +891,7 @@ def test_proliant(aggregator):
 
 
 def test_generic_host_resources(aggregator):
-    instance = common.generate_instance_config([])
-
-    instance['community_string'] = 'generic_host'
-    instance['profile'] = 'generic'
-    instance['enforce_mib_constraints'] = False
-
-    init_config = {'profiles': {'generic': {'definition_file': '_generic-host-resources.yaml'}}}
-    check = SnmpCheck('snmp', init_config, [instance])
-
-    check.check(instance)
+    run_profile_check('_generic-host-resources.yaml', 'generic_host', 'generic', set_profile=True)
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:generic']
 
@@ -991,16 +915,7 @@ def test_generic_host_resources(aggregator):
 
 
 def test_palo_alto(aggregator):
-    instance = common.generate_instance_config([])
-
-    instance['community_string'] = 'pan-common'
-    instance['profile'] = 'palo-alto'
-    instance['enforce_mib_constraints'] = False
-
-    init_config = {'profiles': {'palo-alto': {'definition_file': 'palo-alto.yaml'}}}
-    check = SnmpCheck('snmp', init_config, [instance])
-
-    check.check(instance)
+    run_profile_check('palo-alto.yaml', 'pan-common', 'palo-alto')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:palo-alto']
 
@@ -1030,15 +945,7 @@ def test_palo_alto(aggregator):
 
 
 def test_cisco_asa_5525(aggregator):
-    instance = common.generate_instance_config([])
-    instance['community_string'] = 'cisco_asa_5525'
-    instance['profile'] = 'cisco-asa-5525'
-    instance['enforce_mib_constraints'] = False
-
-    init_config = {'profiles': {'cisco-asa-5525': {'definition_file': 'cisco-asa-5525.yaml'}}}
-    check = SnmpCheck('snmp', init_config, [instance])
-
-    check.check(instance)
+    run_profile_check('cisco-asa-5525.yaml', 'cisco_asa_5525', 'cisco-asa-5525')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-asa-5525', 'snmp_host:kept']
 
