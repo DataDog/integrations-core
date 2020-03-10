@@ -8,7 +8,7 @@ import yaml
 
 from .compat import get_config
 from .exceptions import CouldNotDecodeOID, SmiError
-from .models import ObjectIdentity, ObjectName, ObjectType, endOfMibView, noSuchInstance
+from .pysnmp_types import ObjectIdentity, ObjectName, ObjectType, endOfMibView, noSuchInstance
 
 
 def get_profile_definition(profile):
