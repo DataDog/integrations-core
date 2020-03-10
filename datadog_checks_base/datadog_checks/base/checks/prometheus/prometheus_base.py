@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from ...utils.common import to_string
+from ...utils.common import to_native_string
 from .. import AgentCheck
 from .mixins import PrometheusScraperMixin
 
@@ -79,7 +79,7 @@ class PrometheusCheck(PrometheusScraperMixin, AgentCheck):
                 tag_name = label.name
                 if self.labels_mapper is not None and label.name in self.labels_mapper:
                     tag_name = self.labels_mapper[label.name]
-                _tags.append('{}:{}'.format(to_string(tag_name), to_string(label.value)))
+                _tags.append('{}:{}'.format(to_native_string(tag_name), to_native_string(label.value)))
         return self._finalize_tags_to_submit(
             _tags, metric_name, val, metric, custom_tags=custom_tags, hostname=hostname
         )

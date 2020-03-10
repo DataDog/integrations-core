@@ -37,7 +37,7 @@ class TestAttribute:
     def test_default(self):
         check = AgentCheck('test', {}, [{}])
 
-        assert check._http is None
+        assert not hasattr(check, '_http')
 
     def test_activate(self):
         check = AgentCheck('test', {}, [{}])

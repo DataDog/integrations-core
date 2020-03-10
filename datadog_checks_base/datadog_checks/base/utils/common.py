@@ -5,7 +5,9 @@ from __future__ import division
 
 import os
 import re
+import warnings
 from decimal import ROUND_HALF_UP, Decimal
+from typing import TYPE_CHECKING, Any
 
 from six import PY3, iteritems, text_type
 from six.moves.urllib.parse import urlparse
@@ -25,7 +27,16 @@ def ensure_unicode(s):
     return s
 
 
-to_string = ensure_unicode if PY3 else ensure_bytes
+if TYPE_CHECKING:
+    to_native_string = str
+else:
+    to_native_string = ensure_unicode if PY3 else ensure_bytes
+
+
+def to_string(value):
+    # type: (Any) -> str
+    warnings.warn('`to_string` is deprecated, please use `to_native_string` instead.', category=DeprecationWarning)
+    return to_native_string(value)
 
 
 def compute_percent(part, total):
