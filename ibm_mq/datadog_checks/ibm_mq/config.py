@@ -4,7 +4,7 @@
 
 import logging
 import re
-from typing import Dict, List
+from typing import Dict, List, Pattern
 
 from six import iteritems
 
@@ -72,7 +72,7 @@ class IBMMQConfig:
 
         self.queues = instance.get('queues', [])  # type: List[str]
         self.queue_patterns = instance.get('queue_patterns', [])  # type: List[str]
-        self.queue_regex = [re.compile(regex) for regex in instance.get('queue_regex', [])]  # type: List[re]
+        self.queue_regex = [re.compile(regex) for regex in instance.get('queue_regex', [])]  # type: List[Pattern]
 
         self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))  # type: bool
 
