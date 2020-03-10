@@ -26,14 +26,16 @@ def host_profiles_root():
         yield
 
 
-def run_profile_check(profile, community, profile_name, set_profile=False):
-    """Run a single check with the given `profile`, with the provided `community`.
+def run_profile_check(profile, recording_name, profile_name, set_profile=False):
+    """
+    Run a single check with the given `profile`, with the provided
+    `recording_name` used as `community_string` by the docker SNMP endpoint.
 
     If `set_profile` is True, we don't rely on `sysObjectID` matching and pass the profile explicitly.
     """
     instance = common.generate_instance_config([])
 
-    instance['community_string'] = community
+    instance['community_string'] = recording_name
     instance['enforce_mib_constraints'] = False
     if set_profile:
         instance['profile'] = profile_name
