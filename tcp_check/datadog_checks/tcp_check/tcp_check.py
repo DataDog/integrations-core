@@ -14,46 +14,55 @@ class TCPCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(TCPCheck, self).__init__(name, init_config, instances)
-        instance = self.instances[0]
 
-        self.instance_name = self.normalize_tag(instance['name'])
-        port = instance.get('port', None)
-        self.timeout = float(instance.get('timeout', 10))
-        self.collect_response_time = instance.get('collect_response_time', False)
-        self.custom_tags = instance.get('tags', [])
+        self.instance_name = self.normalize_tag(self.instance['name'])
+        self.collect_response_time = self.instance.get('collect_response_time', False)
+        self.custom_tags = self.instance.get('tags', [])
         self.socket_type = None
 
+        raw_port = self.instance.get('port', None)
         try:
-            self.port = int(port)
+            self.port = int(raw_port)
         except Exception:
-            raise ConfigurationError("{} is not a correct port.".format(str(port)))
+            raise ConfigurationError("{} is not a correct port.".format(str(raw_port)))
+
+        raw_timeout = self.instance.get('timeout', 10)
+        try:
+            self.timeout = float(raw_timeout)
+        except Exception:
+            raise ConfigurationError("{} is not a correct timeout.".format(str(raw_timeout)))
 
         try:
-            self.url = instance.get('host', None)
-            split = self.url.split(":")
+            self.host = self.instance.get('host', None)
+            self.split_url = self.host.split(":")
         except Exception:  # Would be raised if url is not a string
             raise ConfigurationError("A valid url must be specified")
 
-        # IPv6 address format: 2001:db8:85a3:8d3:1319:8a2e:370:7348
-        if len(split) == 8:  # It may then be a IP V6 address, we check that
-            for block in split:
+        if len(self.split_url) == 8:  # It may then be a IP V6 address, we check that
+            for block in self.split_url:
                 if len(block) != 4:
-                    raise ConfigurationError("{} is not a correct IPv6 address.".format(self.url))
+                    raise ConfigurationError("{} is not a correct IPv6 address.".format(self.host))
 
-            self.addr = self.url
+        self._set_socket_type()
+
+    def _set_socket_type(self):
+        # IPv6 address format: 2001:db8:85a3:8d3:1319:8a2e:370:7348
+        if len(self.split_url) == 8:  # It may then be a IP V6 address, we check that
+            self.addr = self.host
             # It's a correct IP V6 address
             self.socket_type = socket.AF_INET6
 
         if self.socket_type is None:
             try:
-                self.addr = socket.gethostbyname(self.url)
+                self.addr = socket.gethostbyname(self.host)
                 self.socket_type = socket.AF_INET
             except Exception:
-                msg = "URL: {} is not a correct IPv4, IPv6 or hostname".format(self.url)
+                msg = "URL: {} is not a correct IPv4, IPv6 or hostname".format(self.host)
                 raise ConfigurationError(msg)
 
     def check(self, instance):
         response_time = None
+        start = time.time()  # Avoid initialisation warning
         try:
             self.log.debug("Connecting to %s %d", self.addr, self.port)
             sock = socket.socket(self.socket_type)
@@ -110,7 +119,7 @@ class TCPCheck(AgentCheck):
                 'network.tcp.response_time',
                 response_time,
                 tags=[
-                    'url:{}:{}'.format(instance.get('host', None), self.port),
+                    'url:{}:{}'.format(self.host, self.port),
                     'instance:{}'.format(instance.get('name')),
                 ]
                 + self.custom_tags,
@@ -121,7 +130,7 @@ class TCPCheck(AgentCheck):
             msg = None
 
         tags = self.custom_tags + [
-            'target_host:{}'.format(self.url),
+            'target_host:{}'.format(self.host),
             'port:{}'.format(self.port),
             'instance:{}'.format(self.instance_name),
         ]
