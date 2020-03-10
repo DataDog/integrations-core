@@ -5,6 +5,7 @@
 This check monitors Confluent Platform and Kafka components through the Datadog Agent.
 
 This integration collects JMX metrics for the following components:
+
 - Broker
 - Connect
 - Replicator
