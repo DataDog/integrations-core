@@ -38,6 +38,7 @@ INSTANCE = {
     'password': PASSWORD,
     'queues': [QUEUE],
     'channels': [CHANNEL, BAD_CHANNEL],
+    'tags': ['foo:bar'],
 }
 
 INSTANCE_WITH_CONNECTION_NAME = {

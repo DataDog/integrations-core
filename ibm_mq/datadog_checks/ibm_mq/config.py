@@ -103,14 +103,18 @@ class IBMMQConfig:
         )  # type: Dict[str, str]
 
         custom_tags = instance.get('tags', [])  # type: List[str]
-        self.tags_no_channel = [
+        tags = [
             "queue_manager:{}".format(self.queue_manager_name),
-            "mq_host:{}".format(host),  # 'host' is reserved and 'mq_host' is used instead
-            "port:{}".format(port),
             "connection_name:{}".format(self.connection_name),
-        ] + custom_tags  # type: List[str]
-
-        self.tags = self.tags_no_channel + ["channel:{}".format(self.channel)]  # type: List[str]
+        ]  # type: List[str]
+        tags.extend(custom_tags)
+        if host or port:
+            tags.extend({
+                "mq_host:{}".format(host),  # 'host' is reserved and 'mq_host' is used instead
+                "port:{}".format(port),
+            })
+        self.tags_no_channel = tags
+        self.tags = tags + ["channel:{}".format(self.channel)]  # type: List[str]
 
         self.ssl = is_affirmative(instance.get('ssl_auth', False))  # type: bool
         self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')  # type: str
