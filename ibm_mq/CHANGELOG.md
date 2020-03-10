@@ -1,5 +1,11 @@
 # CHANGELOG - IBM MQ
 
+## 3.4.0-rc.1 / 2020-03-10
+
+* [Fixed] IBM MQ refactor. See [#5902](https://github.com/DataDog/integrations-core/pull/5902).
+* [Changed] Add configuration option for the Channel Definition API version. See [#5905](https://github.com/DataDog/integrations-core/pull/5905).
+* [Changed] Upgrade pymqi to 1.10.1. See [#5955](https://github.com/DataDog/integrations-core/pull/5955).
+
 ## 3.3.1 / 2020-01-17
 
 * [Fixed] Fix metric type and missing metrics in metadata.csv. See [#5470](https://github.com/DataDog/integrations-core/pull/5470).
