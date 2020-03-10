@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 from copy import deepcopy
-from unittest import mock
+import mock
 
 from datadog_checks.tcp_check import TCPCheck
 
