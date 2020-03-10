@@ -130,20 +130,20 @@ If necessary, additional metrics can be defined in the instances. These metrics 
 Profiles can be used interchangeably, such that devices that share MIB dependencies can reuse the same profiles. For example, the Cisco c3850 profile can be used across many Cisco switches.
 
 * [Generic router][7]
-* [Cisco ASA 5525][18]
-* [Cisco c3850][11]
+* [Cisco ASA 5525][8]
+* [Cisco c3850][9]
 * [Cisco Nexus][10]
-* [Cisco Meraki][12]
-* [Dell iDRAC][9]
-* [Dell Poweredge][19]
-* [F5 Big IP][8]
-* [HP iLO4][20]
-* [HPE Proliant][21]
-* [Palo Alto][22]
+* [Cisco Meraki][11]
+* [Dell iDRAC][12]
+* [Dell Poweredge][13]
+* [F5 Big IP][14]
+* [HP iLO4][15]
+* [HPE Proliant][16]
+* [Palo Alto][17]
 
 ### Validation
 
-[Run the Agent's status subcommand][13] and look for `snmp` under the Checks section.
+[Run the Agent's status subcommand][18] and look for `snmp` under the Checks section.
 
 ## Data Collected
 
@@ -151,7 +151,7 @@ The SNMP check submits specified metrics under the `snmp.*` namespace. **Metrics
 
 ### Metrics
 
-See [metadata.csv][14] for a list of metrics provided by this check.
+See [metadata.csv][19] for a list of metrics provided by this check.
 
 ### Events
 
@@ -164,14 +164,14 @@ Returns `CRITICAL` if the Agent cannot collect SNMP metrics, otherwise returns `
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][15].
+Need help? Contact [Datadog support][20].
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-* [Does Datadog have a list of commonly used/compatible OIDs with SNMP?][16]
-* [Monitoring Unifi devices using SNMP and Datadog][17]
+* [Does Datadog have a list of commonly used/compatible OIDs with SNMP?][21]
+* [Monitoring Unifi devices using SNMP and Datadog][22]
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -180,18 +180,18 @@ Additional helpful documentation, links, and articles:
 [5]: https://github.com/DataDog/integrations-core/tree/master/snmp/datadog_checks/snmp/data/profiles
 [6]: https://docs.datadoghq.com/tagging/
 [7]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/generic-router.yaml
-[8]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/f5-big-ip.yaml
-[9]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/idrac.yaml
+[8]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco-asa-5525.yaml
+[9]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco-3850.yaml
 [10]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco-nexus.yaml
-[11]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco-3850.yaml
-[12]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/meraki-cloud-controller.yaml
-[13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[14]: https://github.com/DataDog/integrations-core/blob/master/snmp/metadata.csv
-[15]: https://docs.datadoghq.com/help
-[16]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
-[17]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
-[18]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco-asa-5525.yaml
-[19]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/dell-poweredge.yaml
-[20]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/hp-ilo4.yaml
-[21]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/hpe-proliant.yaml
-[22]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/palo-alto.yaml
+[11]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/meraki-cloud-controller.yaml
+[12]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/idrac.yaml
+[13]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/dell-poweredge.yaml
+[14]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/f5-big-ip.yaml
+[15]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/hp-ilo4.yaml
+[16]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/hpe-proliant.yaml
+[17]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/palo-alto.yaml
+[18]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[19]: https://github.com/DataDog/integrations-core/blob/master/snmp/metadata.csv
+[20]: https://docs.datadoghq.com/help
+[21]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
+[22]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
