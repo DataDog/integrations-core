@@ -24,27 +24,26 @@ class TCPCheck(AgentCheck):
         custom_tags = instance.get('tags', [])
         self.socket_type = None
 
+        try:
+            self.port = int(port)
+        except Exception:
+            raise ConfigurationError("{} is not a correct port.".format(str(port)))
+        try:
+            self.url = instance.get('host', None)
+            split_url = self.url.split(":")
+        except Exception:  # Would be raised if url is not a string
+            raise ConfigurationError("A valid url must be specified")
+
         self.tags = [
-            'url:{}:{}'.format(instance.get('host', None), self.port),
-            'instance:{}'.format(instance.get('name')),
-        ] + custom_tags
+                        'url:{}:{}'.format(instance.get('host', None), self.port),
+                        'instance:{}'.format(instance.get('name')),
+                    ] + custom_tags
 
         self.service_check_tags = custom_tags + [
             'target_host:{}'.format(self.url),
             'port:{}'.format(self.port),
             'instance:{}'.format(self.instance_name),
         ]
-
-        try:
-            self.port = int(port)
-        except Exception:
-            raise ConfigurationError("{} is not a correct port.".format(str(port)))
-
-        try:
-            self.url = instance.get('host', None)
-            split_url = self.url.split(":")
-        except Exception:  # Would be raised if url is not a string
-            raise ConfigurationError("A valid url must be specified")
 
         # IPv6 address format: 2001:db8:85a3:8d3:1319:8a2e:370:7348
         if len(split_url) == 8:  # It may then be a IP V6 address, we check that
@@ -56,14 +55,14 @@ class TCPCheck(AgentCheck):
             self.socket_type = socket.AF_INET6
         else:
             self.socket_type = socket.AF_INET
-            self.resolve_ip()
+            try:
+                self.resolve_ip()
+            except Exception:
+                msg = "URL: {} is not a correct IPv4, IPv6 or hostname".format(self.url)
+                raise ConfigurationError(msg)
 
     def resolve_ip(self):
-        try:
-            self.addr = socket.gethostbyname(self.url)
-        except Exception:
-            msg = "URL: {} is not a correct IPv4, IPv6 or hostname".format(self.url)
-            raise ConfigurationError(msg)
+        self.addr = socket.gethostbyname(self.url)
 
     def check(self, instance):
         start = time.time()  # Avoid initialisation warning
@@ -106,7 +105,10 @@ class TCPCheck(AgentCheck):
                 )
             if self.socket_type == socket.AF_INET:
                 self.log.debug("Attempting to re-resolve IP for %s:%d", self.addr, self.port)
-                self.resolve_ip()
+                try:
+                    self.resolve_ip()
+                except Exception:
+                    self.log.debug("Unable to re-resolve IP for %s:%d", self.addr, self.port)
 
     def report_as_service_check(self, status, msg=None):
         if status == AgentCheck.OK:

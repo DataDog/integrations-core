@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import socket
 from copy import deepcopy
 
 from datadog_checks.tcp_check import TCPCheck
