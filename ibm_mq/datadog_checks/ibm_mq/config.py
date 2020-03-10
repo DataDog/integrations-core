@@ -72,7 +72,7 @@ class IBMMQConfig:
         self.connection_name = instance.get('connection_name')  # type: str
         if (host or port) and self.connection_name:
             raise ConfigurationError(
-                'Provide either host/port or connection_name configurations, not both '
+                'Specify only one host/port or connection_name configuration, '
                 '(host={}, port={}, connection_name={}).'.format(host, port, self.connection_name)
             )
 
