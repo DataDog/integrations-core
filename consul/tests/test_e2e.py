@@ -23,6 +23,7 @@ def test_e2e(dd_agent_check, instance_single_node_install):
     aggregator.assert_metric('consul.catalog.nodes_passing', count=2)
     aggregator.assert_metric('consul.catalog.nodes_up', count=2)
     aggregator.assert_metric('consul.catalog.total_nodes', count=2)
+    aggregator.assert_metric('consul.catalog.services_count', count=6)
 
     aggregator.assert_service_check(
         'consul.up', ConsulCheck.OK, tags=['consul_datacenter:dc1', 'consul_url:http://{}:8500'.format(common.HOST)]
