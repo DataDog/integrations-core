@@ -260,4 +260,41 @@ TEST_CASES = [
             ]
         },
     },
+    {
+        'instances': [{'name': 'server0', 'host': 'localhost', 'port': 9001, 'proc_regex': '^mysq.$'}],
+        'expected_metrics': {
+            'server0': [
+                (
+                    'supervisord.process.count',
+                    1,
+                    {'type': 'gauge', 'tags': ['supervisord_server:server0', 'status:up']},
+                ),
+                (
+                    'supervisord.process.count',
+                    0,
+                    {'type': 'gauge', 'tags': ['supervisord_server:server0', 'status:down']},
+                ),
+                (
+                    'supervisord.process.count',
+                    0,
+                    {'type': 'gauge', 'tags': ['supervisord_server:server0', 'status:unknown']},
+                ),
+                (
+                    'supervisord.process.uptime',
+                    125,
+                    {'type': 'gauge', 'tags': ['supervisord_server:server0', 'supervisord_process:mysql']},
+                ),
+            ]
+        },
+        'expected_service_checks': {
+            'server0': [
+                {'status': ServiceCheck.OK, 'tags': ['supervisord_server:server0'], 'check': 'supervisord.can_connect'},
+                {
+                    'status': ServiceCheck.OK,
+                    'tags': ['supervisord_server:server0', 'supervisord_process:mysql'],
+                    'check': 'supervisord.process.status',
+                },
+            ]
+        },
+    },
 ]
