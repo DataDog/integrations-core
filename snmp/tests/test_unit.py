@@ -36,18 +36,17 @@ def test_parse_metrics(lcd_mock):
     config = InstanceConfig(
         {"ip_address": "127.0.0.1", "community_string": "public", "metrics": [{"OID": "1.2.3", "name": "foo"}]},
         warning=check.warning,
-        log=check.log,
     )
 
     object_identity_factory = ClassInstantiationSpy(ObjectIdentity)
 
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, check.warning, check.log)
+        config.parse_metrics(metrics, check.warning)
 
     # Simple OID
     metrics = [{"OID": "1.2.3", "name": "foo"}]
     table, _, _ = config.parse_metrics(
-        metrics, check.warning, check.log, object_identity_factory=object_identity_factory
+        metrics, check.warning, object_identity_factory=object_identity_factory
     )
     assert len(table) == 1
     object_identity_factory.assert_called_once_with("1.2.3")
@@ -56,12 +55,12 @@ def test_parse_metrics(lcd_mock):
     # MIB with no symbol or table
     metrics = [{"MIB": "foo_mib"}]
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, check.warning, check.log)
+        config.parse_metrics(metrics, check.warning)
 
     # MIB with symbol
     metrics = [{"MIB": "foo_mib", "symbol": "foo"}]
     table, _, _ = config.parse_metrics(
-        metrics, check.warning, check.log, object_identity_factory=object_identity_factory
+        metrics, check.warning, object_identity_factory=object_identity_factory
     )
     assert len(table) == 1
     object_identity_factory.assert_called_once_with("foo_mib", "foo")
@@ -70,12 +69,12 @@ def test_parse_metrics(lcd_mock):
     # MIB with table, no symbols
     metrics = [{"MIB": "foo_mib", "table": "foo"}]
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, check.warning, check.log)
+        config.parse_metrics(metrics, check.warning)
 
     # MIB with table and symbols
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"]}]
     table, _, _ = config.parse_metrics(
-        metrics, check.warning, check.log, object_identity_factory=object_identity_factory
+        metrics, check.warning, object_identity_factory=object_identity_factory
     )
     assert len(table) == 2
     object_identity_factory.assert_any_call("foo_mib", "foo")
@@ -85,17 +84,17 @@ def test_parse_metrics(lcd_mock):
     # MIB with table, symbols, bad metrics_tags
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{}]}]
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, check.warning, check.log)
+        config.parse_metrics(metrics, check.warning)
 
     # MIB with table, symbols, bad metrics_tags
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo"}]}]
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, check.warning, check.log)
+        config.parse_metrics(metrics, check.warning)
 
     # Table with manual OID
     metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": [{"OID": "1.2.3", "name": "foo"}]}]
     table, _, _ = config.parse_metrics(
-        metrics, check.warning, check.log, object_identity_factory=object_identity_factory
+        metrics, check.warning, object_identity_factory=object_identity_factory
     )
     assert len(table) == 1
     object_identity_factory.assert_any_call("1.2.3")
@@ -106,7 +105,7 @@ def test_parse_metrics(lcd_mock):
         {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "index": "1"}]}
     ]
     table, _, _ = config.parse_metrics(
-        metrics, check.warning, check.log, object_identity_factory=object_identity_factory
+        metrics, check.warning, object_identity_factory=object_identity_factory
     )
     assert len(table) == 2
     object_identity_factory.assert_any_call("foo_mib", "foo")
@@ -118,7 +117,7 @@ def test_parse_metrics(lcd_mock):
         {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "column": "baz"}]}
     ]
     table, _, _ = config.parse_metrics(
-        metrics, check.warning, check.log, object_identity_factory=object_identity_factory
+        metrics, check.warning, object_identity_factory=object_identity_factory
     )
     assert len(table) == 3
     object_identity_factory.assert_any_call("foo_mib", "foo")
@@ -136,7 +135,7 @@ def test_parse_metrics(lcd_mock):
         }
     ]
     table, _, _ = config.parse_metrics(
-        metrics, check.warning, check.log, object_identity_factory=object_identity_factory
+        metrics, check.warning, object_identity_factory=object_identity_factory
     )
     assert len(table) == 3
     object_identity_factory.assert_any_call("1.5.6")

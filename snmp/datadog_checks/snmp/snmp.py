@@ -17,6 +17,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.types import ServiceCheckStatus
 
 from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
@@ -107,7 +108,6 @@ class SnmpCheck(AgentCheck):
         return InstanceConfig(
             instance,
             warning=self.warning,
-            log=self.log,
             global_metrics=self.init_config.get('global_metrics', []),
             mibs_path=self.mibs_path,
             profiles=self.profiles,
@@ -156,7 +156,7 @@ class SnmpCheck(AgentCheck):
                         self.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
                         continue
                 else:
-                    host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
+                    host_config.refresh_with_profile(self.profiles[profile], self.warning)
                     host_config.add_profile_tag(profile)
 
                 config.discovered_instances[host] = host_config
@@ -370,7 +370,7 @@ class SnmpCheck(AgentCheck):
             if not (config.all_oids or config.bulk_oids):
                 sys_object_oid = self.fetch_sysobject_oid(config)
                 profile = self._profile_for_sysobject_oid(sys_object_oid)
-                config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
+                config.refresh_with_profile(self.profiles[profile], self.warning)
                 config.add_profile_tag(profile)
 
             if config.all_oids or config.bulk_oids:
@@ -389,7 +389,7 @@ class SnmpCheck(AgentCheck):
             self.warning(error)
         finally:
             # Report service checks
-            status = self.OK
+            status = self.OK  # type: ServiceCheckStatus
             if error:
                 status = self.CRITICAL
                 if results:
