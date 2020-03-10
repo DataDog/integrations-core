@@ -3,7 +3,8 @@ from typing import Any, Tuple
 import pytest
 
 from datadog_checks.snmp.exceptions import CouldNotDecodeOID
-from datadog_checks.snmp.models import OID, MibViewController, ObjectIdentity, ObjectName, ObjectType, SnmpEngine
+from datadog_checks.snmp.models import OID
+from datadog_checks.snmp.pysnmp_types import MibViewController, ObjectIdentity, ObjectName, ObjectType, SnmpEngine
 
 
 @pytest.mark.unit

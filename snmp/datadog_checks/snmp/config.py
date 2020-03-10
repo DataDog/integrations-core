@@ -7,8 +7,8 @@ from typing import Any, Callable, DefaultDict, Dict, Iterator, List, Optional, S
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
-from .models import (
-    OID,
+from .models import OID
+from .pysnmp_types import (
     CommunityData,
     ContextData,
     DirMibSource,
