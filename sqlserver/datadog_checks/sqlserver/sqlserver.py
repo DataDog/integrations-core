@@ -656,9 +656,14 @@ class SQLServer(AgentCheck):
                     self.log.info("Could not close adodbapi db connection\n%s", e)
 
                 self.connections[conn_key]['conn'] = rawconn
-        except Exception:
+        except Exception as e:
             cx = "{} - {}".format(host, database)
-            message = "Unable to connect to SQL Server for instance {}.".format(cx)
+            message = "Unable to connect to SQL Server for instance {}: {}".format(cx, repr(e))
+
+            password = instance.get('password')
+            if password is not None:
+                message = message.replace(password, "*" * 6)
+
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=message)
 
             raise_from(SQLConnectionError(message), None)
