@@ -58,6 +58,7 @@ For containerized environments, see the [Autodiscovery with JMX][10] guide.
 
 [Run the Agent's status subcommand][6] and look for `confluent_platform` under the **JMXFetch** section.
 
+```
     ========
     JMXFetch
     ========
@@ -70,6 +71,7 @@ For containerized environments, see the [Autodiscovery with JMX][10] guide.
           metric_count : 26
           service_check_count : 0
           status : OK
+```
 
 ## Data Collected
 
