@@ -1024,3 +1024,63 @@ def test_cisco_asa_5525(aggregator):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
+
+
+def test_checkpoint_firewall(aggregator):
+    run_profile_check('checkpoint-firewall.yaml', 'checkpoint-firewall', 'checkpoint-firewall')
+
+    common_tags = common.CHECK_TAGS + ['snmp_profile:checkpoint-firewall']
+
+    cpu_metrics = [
+        'multiProcUserTime',
+        'multiProcSystemTime',
+        'multiProcIdleTime',
+        'multiProcUsage',
+    ]
+    cpu_cores = [7097, 13039, 13761, 28994, 29751, 33826, 40053, 48847, 61593, 65044]
+    for core in cpu_cores:
+        tags = ['cpu_core:{}'.format(core)] + common_tags
+        for metric in cpu_metrics:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+    aggregator.assert_metric('snmp.procNum', metric_type=aggregator.GAUGE, tags=common_tags)
+
+    mem_metrics = ['memTotalReal64', 'memActiveReal64', 'memFreeReal64', 'memTotalVirtual64', 'memActiveVirtual64']
+    for metric in mem_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
+
+    disk_metrics = [
+        'multiDiskSize',
+        'multiDiskUsed',
+        'multiDiskFreeTotalBytes',
+        'multiDiskFreeAvailableBytes',
+        'multiDiskFreeTotalPercent',
+        'multiDiskFreeAvailablePercent',
+    ]
+    appliance_metrics = [
+        'fanSpeedSensorValue',
+        'fanSpeedSensorStatus',
+        'tempertureSensorValue',
+        'tempertureSensorStatus',
+    ]
+    common_indices = range(10)
+    common_names = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth']
+    for idx in common_indices:
+        name = common_names[idx]
+        tags = ['disk_index:{}'.format(idx), 'disk_name:{}'.format(name)] + common_tags
+        for metric in disk_metrics:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+        tags = ['sensor_index:{}'.format(idx), 'sensor_name:{}'.format(name)] + common_tags
+        for metric in appliance_metrics:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+    fw_count_metrics = ['fwAccepted', 'fwDropped', 'fwRejected']
+    for metric in fw_count_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
+
+    fw_gauge_metrics = ['fwNumConn', 'fwPeakNumConn']
+    for metric in fw_gauge_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
+
+    aggregator.assert_all_metrics_covered()

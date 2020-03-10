@@ -124,6 +124,8 @@ init_config:
       definition_file: palo-alto.yaml
     cisco-asa-5525:
       definition_file: cisco-asa-5525.yaml
+    checkpoint-firewall:
+      definition_file: checkpoint-firewall.yaml
 
 instances:
   -

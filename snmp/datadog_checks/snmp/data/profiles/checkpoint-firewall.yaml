@@ -1,0 +1,87 @@
+extends:
+  - _base.yaml
+  - _generic-router-if.yaml
+
+sysobjectid: 1.3.6.1.4.1.2620.1.*
+
+metrics:
+    # CPU
+  - MIB: CHECKPOINT-MIB
+    table: multiProcTable
+    symbols:
+      - multiProcUserTime
+      - multiProcSystemTime
+      - multiProcIdleTime
+      - multiProcUsage
+    metric_tags:
+      - column: multiProcIndex
+        tag: cpu_core
+  - MIB: CHECKPOINT-MIB
+    symbol: procNum
+    # Memory
+  - MIB: CHECKPOINT-MIB
+    symbol: memTotalReal64
+    forced_type: gauge
+  - MIB: CHECKPOINT-MIB
+    symbol: memActiveReal64
+    forced_type: gauge
+  - MIB: CHECKPOINT-MIB
+    symbol: memFreeReal64
+    forced_type: gauge
+  - MIB: CHECKPOINT-MIB
+    symbol: memTotalVirtual64
+    forced_type: gauge
+  - MIB: CHECKPOINT-MIB
+    symbol: memActiveVirtual64
+    forced_type: gauge
+    # Disk
+  - MIB: CHECKPOINT-MIB
+    table: multiDiskTable
+    symbols:
+      - multiDiskSize
+      - multiDiskUsed
+      - multiDiskFreeTotalBytes
+      - multiDiskFreeAvailableBytes
+      - multiDiskFreeTotalPercent
+      - multiDiskFreeAvailablePercent
+    forced_type: gauge
+    metric_tags:
+      - column: multiDiskIndex
+        tag: disk_index
+      - column: multiDiskName
+        tag: disk_name
+    # Appliances
+  - MIB: CHECKPOINT-MIB
+    table: fanSpeedSensorTable
+    symbols:
+      - fanSpeedSensorValue
+      - fanSpeedSensorStatus
+    metric_tags:
+      - column: fanSpeedSensorIndex
+        tag: sensor_index
+      - column: fanSpeedSensorName
+        tag: sensor_name
+  - MIB: CHECKPOINT-MIB
+    table: tempartureSensorTable
+    symbols:
+      - tempertureSensorValue
+      - tempertureSensorStatus
+    metric_tags:
+      - column: tempertureSensorIndex
+        tag: sensor_index
+      - column: tempertureSensorName
+        tag: sensor_name
+    # Network
+  - MIB: CHECKPOINT-MIB
+    symbol: fwAccepted
+    forced_type: monotonic_count
+  - MIB: CHECKPOINT-MIB
+    symbol: fwDropped
+    forced_type: monotonic_count
+  - MIB: CHECKPOINT-MIB
+    symbol: fwRejected
+    forced_type: monotonic_count
+  - MIB: CHECKPOINT-MIB
+    symbol: fwNumConn
+  - MIB: CHECKPOINT-MIB
+    symbol: fwPeakNumConn
