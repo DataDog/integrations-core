@@ -182,7 +182,7 @@ class GoExpvar(AgentCheck):
                 SUPPORTED_TYPES[metric_type](self, metric_name, value, metric_tags + path_tag)
 
                 # Submit 'go_expvar.memstats.total_alloc' as a monotonic count
-                if metric_name == 'go_expvar.memstats.total_alloc':
+                if 'memstats.total_alloc' in metric_name:
                     self.monotonic_count(metric_name + '.count', value, metric_tags + path_tag)
                     count += 1
 
