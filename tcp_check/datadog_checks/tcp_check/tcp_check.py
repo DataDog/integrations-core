@@ -35,9 +35,9 @@ class TCPCheck(AgentCheck):
             raise ConfigurationError("A valid url must be specified")
 
         self.tags = [
-                        'url:{}:{}'.format(instance.get('host', None), self.port),
-                        'instance:{}'.format(instance.get('name')),
-                    ] + custom_tags
+            'url:{}:{}'.format(instance.get('host', None), self.port),
+            'instance:{}'.format(instance.get('name')),
+        ] + custom_tags
 
         self.service_check_tags = custom_tags + [
             'target_host:{}'.format(self.url),
@@ -64,16 +64,19 @@ class TCPCheck(AgentCheck):
     def resolve_ip(self):
         self.addr = socket.gethostbyname(self.url)
 
+    def connect(self):
+        with closing(socket.socket(self.socket_type)) as sock:
+            sock.settimeout(self.timeout)
+            start = time.time()
+            sock.connect((self.addr, self.port))
+            response_time = time.time() - start
+            return response_time
+
     def check(self, instance):
         start = time.time()  # Avoid initialisation warning
         self.log.debug("Connecting to %s %d", self.addr, self.port)
         try:
-            with closing(socket.socket(self.socket_type)) as sock:
-                sock.settimeout(self.timeout)
-                start = time.time()
-                sock.connect((self.addr, self.port))
-                response_time = time.time() - start
-
+            response_time = self.connect()
             self.log.debug("%s:%d is UP", self.addr, self.port)
             self.report_as_service_check(AgentCheck.OK, 'UP')
             if self.collect_response_time:
