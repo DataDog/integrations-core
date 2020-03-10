@@ -182,7 +182,7 @@ snmp.multiDiskFreeTotalPercent,gauge,,percent,,[Checkpoint Firewall] Percentage 
 snmp.multiDiskFreeAvailablePercent,gauge,,percent,,[Checkpoint Firewall] Percentage of available free disk in partition.,0,snmp,
 snmp.fanSpeedSensorValue,gauge,,hertz,,[Checkpoint Firewall] Fan rotations per minute.,0,snmp,
 snmp.fanSpeedSensorStatus,gauge,,,,[Checkpoint Firewall] 0 = OK Otherwise = problem,0,snmp,
-snmp.tempertureSensorValue,gauge,,celsius,,[Checkpoint Firewall] Temperature in Celsius.,0,snmp,
+snmp.tempertureSensorValue,gauge,,degree celsius,,[Checkpoint Firewall] Temperature in Celsius.,0,snmp,
 snmp.tempertureSensorStatus,gauge,,,,[Checkpoint Firewall] 0 = OK Otherwise = Problem,0,snmp,
 snmp.fwAccepted,gauge,,packet,,[Checkpoint Firewall] Number of accepted packets.,0,snmp,
 snmp.fwDropped,gauge,,packet,,[Checkpoint Firewall] Number of dropped packets.,0,snmp,
