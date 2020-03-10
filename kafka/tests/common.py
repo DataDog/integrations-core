@@ -3,13 +3,12 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import socket
 
-from datadog_checks.dev import get_docker_hostname, get_here
+from datadog_checks.dev import get_here
 
 CHECK_NAME = "kafka"
 
 HERE = get_here()
-HOST = get_docker_hostname()
-HOST_IP = socket.gethostbyname(HOST)
+
 
 
 """

@@ -368,6 +368,9 @@ jobs:
     - checkName: tokumx
       displayName: TokuMX
       os: linux
+    - checkName: tomcat
+      displayName: Tomcat
+      os: linux
     - checkName: twemproxy
       displayName: Twemproxy
       os: linux
