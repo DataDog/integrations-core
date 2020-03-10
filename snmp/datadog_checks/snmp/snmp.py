@@ -17,7 +17,6 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.types import ServiceCheckStatus
 
 from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
@@ -389,7 +388,7 @@ class SnmpCheck(AgentCheck):
             self.warning(error)
         finally:
             # Report service checks
-            status = self.OK  # type: ServiceCheckStatus
+            status = self.OK
             if error:
                 status = self.CRITICAL
                 if results:
