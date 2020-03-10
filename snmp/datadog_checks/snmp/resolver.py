@@ -4,7 +4,7 @@
 
 from collections import defaultdict
 
-from .models import ObjectIdentity
+from .pysnmp_types import ObjectIdentity
 
 
 class OIDTreeNode(object):

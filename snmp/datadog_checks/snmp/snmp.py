@@ -22,7 +22,7 @@ from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
 from .config import InstanceConfig, ParsedMetric, ParsedMetricTag, ParsedTableMetric
 from .exceptions import PySnmpError
-from .models import (
+from .pysnmp_types import (
     Counter32,
     Counter64,
     CounterBasedGauge64,

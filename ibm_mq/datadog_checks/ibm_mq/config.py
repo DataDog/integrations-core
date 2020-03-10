@@ -4,6 +4,7 @@
 
 import logging
 import re
+from typing import Dict, List, Pattern
 
 from six import iteritems
 
@@ -59,21 +60,21 @@ class IBMMQConfig:
     ]
 
     def __init__(self, instance):
-        self.channel = instance.get('channel')
-        self.queue_manager_name = instance.get('queue_manager', 'default')
+        self.channel = instance.get('channel')  # type: str
+        self.queue_manager_name = instance.get('queue_manager', 'default')  # type: str
 
-        self.host = instance.get('host', 'localhost')
-        self.port = instance.get('port', '1414')
+        self.host = instance.get('host', 'localhost')  # type: str
+        self.port = instance.get('port', '1414')  # type: str
         self.host_and_port = "{}({})".format(self.host, self.port)
 
-        self.username = instance.get('username')
-        self.password = instance.get('password')
+        self.username = instance.get('username')  # type: str
+        self.password = instance.get('password')  # type: str
 
-        self.queues = instance.get('queues', [])
-        self.queue_patterns = instance.get('queue_patterns', [])
-        self.queue_regex = [re.compile(regex) for regex in instance.get('queue_regex', [])]
+        self.queues = instance.get('queues', [])  # type: List[str]
+        self.queue_patterns = instance.get('queue_patterns', [])  # type: List[str]
+        self.queue_regex = [re.compile(regex) for regex in instance.get('queue_regex', [])]  # type: List[Pattern]
 
-        self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))
+        self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))  # type: bool
 
         if int(self.auto_discover_queues) + int(bool(self.queue_patterns)) + int(bool(self.queue_regex)) > 1:
             log.warning(
@@ -81,27 +82,35 @@ class IBMMQConfig:
                 "together."
             )
 
-        self.channels = instance.get('channels', [])
+        self.channels = instance.get('channels', [])  # type: List[str]
 
-        self.channel_status_mapping = self.get_channel_status_mapping(instance.get('channel_status_mapping'))
+        self.channel_status_mapping = self.get_channel_status_mapping(
+            instance.get('channel_status_mapping')
+        )  # type: Dict[str, str]
 
-        self.custom_tags = instance.get('tags', [])
+        custom_tags = instance.get('tags', [])  # type: List[str]
+        self.tags_no_channel = [
+            "queue_manager:{}".format(self.queue_manager_name),
+            "mq_host:{}".format(self.host),  # 'host' is reserved and 'mq_host' is used instead
+            "port:{}".format(self.port),
+        ] + custom_tags  # type: List[str]
+        self.tags = self.tags_no_channel + ["channel:{}".format(self.channel)]  # type: List[str]
 
-        self.ssl = is_affirmative(instance.get('ssl_auth', False))
-        self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')
+        self.ssl = is_affirmative(instance.get('ssl_auth', False))  # type: bool
+        self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')  # type: str
 
         self.ssl_key_repository_location = instance.get(
             'ssl_key_repository_location', '/var/mqm/ssl-db/client/KeyringClient'
-        )
+        )  # type: str
 
         self.mq_installation_dir = instance.get('mq_installation_dir', '/opt/mqm/')
 
-        self._queue_tag_re = instance.get('queue_tag_re', {})
+        self._queue_tag_re = instance.get('queue_tag_re', {})  # type: Dict[str, str]
         self.queue_tag_re = self._compile_tag_re()
 
         raw_mqcd_version = instance.get('mqcd_version', 6)
         try:
-            self.mqcd_version = getattr(pymqi.CMQC, 'MQCD_VERSION_{}'.format(raw_mqcd_version))
+            self.mqcd_version = getattr(pymqi.CMQC, 'MQCD_VERSION_{}'.format(raw_mqcd_version))  # type: int
         except (ValueError, AttributeError):
             raise ConfigurationError(
                 "mqcd_version must be a number between 1 and 9. {} found.".format(raw_mqcd_version)
@@ -127,23 +136,6 @@ class IBMMQConfig:
             except TypeError:
                 log.warning('%s is not a valid regular expression and will be ignored', regex_str)
         return queue_tag_list
-
-    @property
-    def tags(self):
-        return [
-            "queue_manager:{}".format(self.queue_manager_name),
-            "mq_host:{}".format(self.host),  # 'host' is reserved and 'mq_host' is used instead
-            "port:{}".format(self.port),
-            "channel:{}".format(self.channel),
-        ] + self.custom_tags
-
-    @property
-    def tags_no_channel(self):
-        return [
-            "queue_manager:{}".format(self.queue_manager_name),
-            "mq_host:{}".format(self.host),  # 'host' is reserved and 'mq_host' is used instead
-            "port:{}".format(self.port),
-        ] + self.custom_tags
 
     @staticmethod
     def get_channel_status_mapping(channel_status_mapping_raw):
