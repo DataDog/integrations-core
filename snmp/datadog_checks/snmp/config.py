@@ -69,7 +69,7 @@ class ParsedMetricTag(object):
 def _no_op(*args, **kwargs):
     # type: (*Any, **Any) -> None
     """
-    A 'do-nothing' replacement for the `warning()` and `log()` AgentCheck functions, suitable for when those
+    A 'do-nothing' replacement for the `warning()` AgentCheck function, suitable for when those
     functions are not available (e.g. in unit tests).
     """
 
@@ -87,7 +87,6 @@ class InstanceConfig:
         self,
         instance,  # type: dict
         warning=_no_op,  # type: Callable[..., None]
-        log=_no_op,  # type: Callable[..., None]
         global_metrics=None,  # type: List[dict]
         mibs_path=None,  # type: str
         profiles=None,  # type: Dict[str, dict]
@@ -159,7 +158,7 @@ class InstanceConfig:
 
         self._auth_data = self.get_auth_data(instance)
 
-        self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics, warning, log)
+        self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics, warning)
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
             self.all_oids.extend(tag_oids)
@@ -167,7 +166,7 @@ class InstanceConfig:
         if profile:
             if profile not in profiles:
                 raise ConfigurationError("Unknown profile '{}'".format(profile))
-            self.refresh_with_profile(profiles[profile], warning, log)
+            self.refresh_with_profile(profiles[profile], warning)
             self.add_profile_tag(profile)
 
         self._context_data = ContextData(*self.get_context_data(instance))
@@ -183,10 +182,10 @@ class InstanceConfig:
         # type: (Any) -> Tuple[Any, Any]
         return self._resolver.resolve_oid(oid)
 
-    def refresh_with_profile(self, profile, warning, log):
-        # type: (Dict[str, Any], Callable[..., None], Callable[..., None]) -> None
+    def refresh_with_profile(self, profile, warning):
+        # type: (Dict[str, Any], Callable[..., None]) -> None
         metrics = profile['definition'].get('metrics', [])
-        all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics, warning, log)
+        all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics, warning)
 
         metric_tags = profile['definition'].get('metric_tags', [])
         tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
@@ -317,7 +316,6 @@ class InstanceConfig:
         self,
         metrics,  # type: List[Dict[str, Any]]
         warning,  # type: Callable[..., None]
-        log,  # type: Callable[..., None]
         object_identity_factory=None,  # type: Callable[..., ObjectIdentity]  # For unit tests purposes.
     ):
         # type: (...) -> Tuple[list, list, List[Union[ParsedMetric, ParsedTableMetric]]]

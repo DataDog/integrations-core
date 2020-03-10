@@ -107,7 +107,6 @@ class SnmpCheck(AgentCheck):
         return InstanceConfig(
             instance,
             warning=self.warning,
-            log=self.log,
             global_metrics=self.init_config.get('global_metrics', []),
             mibs_path=self.mibs_path,
             profiles=self.profiles,
@@ -156,7 +155,7 @@ class SnmpCheck(AgentCheck):
                         self.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
                         continue
                 else:
-                    host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
+                    host_config.refresh_with_profile(self.profiles[profile], self.warning)
                     host_config.add_profile_tag(profile)
 
                 config.discovered_instances[host] = host_config
@@ -370,7 +369,7 @@ class SnmpCheck(AgentCheck):
             if not (config.all_oids or config.bulk_oids):
                 sys_object_oid = self.fetch_sysobject_oid(config)
                 profile = self._profile_for_sysobject_oid(sys_object_oid)
-                config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
+                config.refresh_with_profile(self.profiles[profile], self.warning)
                 config.add_profile_tag(profile)
 
             if config.all_oids or config.bulk_oids:
