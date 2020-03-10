@@ -16,9 +16,7 @@ def test_channel_status_service_check_default_mapping(aggregator, instance):
     # Late import to not require it for e2e
     import pymqi
 
-    check = IbmMqCheck('ibm_mq', {}, {})
-
-    config = IBMMQConfig(instance)
+    check = IbmMqCheck('ibm_mq', {}, [instance])
 
     service_check_map = {
         pymqi.CMQCFC.MQCHS_INACTIVE: AgentCheck.CRITICAL,
@@ -34,7 +32,7 @@ def test_channel_status_service_check_default_mapping(aggregator, instance):
     }
 
     for status in service_check_map:
-        check._submit_status_check('my_channel', status, ["channel:my_channel_{}".format(status)], config)
+        check._submit_status_check('my_channel', status, ["channel:my_channel_{}".format(status)])
 
     for status, service_check_status in iteritems(service_check_map):
         aggregator.assert_service_check(
@@ -61,8 +59,6 @@ def test_channel_status_service_check_custom_mapping(aggregator, instance):
 
     check = IbmMqCheck('ibm_mq', {}, [instance])
 
-    config = IBMMQConfig(instance)
-
     service_check_map = {
         pymqi.CMQCFC.MQCHS_INACTIVE: AgentCheck.WARNING,
         pymqi.CMQCFC.MQCHS_BINDING: AgentCheck.WARNING,
@@ -77,7 +73,7 @@ def test_channel_status_service_check_custom_mapping(aggregator, instance):
     }
 
     for status in service_check_map:
-        check._submit_status_check('my_channel', status, ["channel:my_channel_{}".format(status)], config)
+        check._submit_status_check('my_channel', status, ["channel:my_channel_{}".format(status)])
 
     for status, service_check_status in iteritems(service_check_map):
         aggregator.assert_service_check(
@@ -88,10 +84,9 @@ def test_channel_status_service_check_custom_mapping(aggregator, instance):
 @pytest.mark.parametrize('channel_status_mapping', [{'inactive': 'warningXX'}, {'inactiveXX': 'warning'}])
 def test_channel_status_service_check_custom_mapping_invalid_config(aggregator, instance, channel_status_mapping):
     instance['channel_status_mapping'] = channel_status_mapping
-    check = IbmMqCheck('ibm_mq', {}, [instance])
 
     with pytest.raises(ConfigurationError):
-        check.check(instance)
+        IbmMqCheck('ibm_mq', {}, [instance])
 
 
 @pytest.mark.parametrize(
@@ -99,10 +94,9 @@ def test_channel_status_service_check_custom_mapping_invalid_config(aggregator, 
 )
 def test_invalid_mqcd_version(instance, mqcd_version):
     instance['mqcd_version'] = mqcd_version
-    check = IbmMqCheck('ibm_mq', {}, [instance])
 
     with pytest.raises(ConfigurationError):
-        check.check(instance)
+        IbmMqCheck('ibm_mq', {}, [instance])
 
 
 def test_set_mqcd_version(instance):
