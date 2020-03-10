@@ -106,7 +106,7 @@ datadog-scylla==1.0.2
 datadog-snmp==2.5.0
 datadog-solr==1.2.0
 datadog-spark==1.11.4
-datadog-sqlserver==1.16.1; sys_platform != 'darwin'
+datadog-sqlserver==1.16.2; sys_platform != 'darwin'
 datadog-squid==1.5.0
 datadog-ssh-check==1.10.0
 datadog-statsd==1.3.0
