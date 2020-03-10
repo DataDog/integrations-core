@@ -37,6 +37,7 @@ Scylla has different modes of outputting logs depending on the environment it's 
          - type: file
            path: <LOG_FILE_PATH>
            source: scylla
+           sourcecategory: database
            service: <SERVICE_NAME>
            #To handle multi line that starts with yyyy-mm-dd use the following pattern
            #log_processing_rules:
