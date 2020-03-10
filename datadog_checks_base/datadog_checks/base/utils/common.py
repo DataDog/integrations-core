@@ -7,7 +7,7 @@ import os
 import re
 import warnings
 from decimal import ROUND_HALF_UP, Decimal
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Text, Union
 
 from six import PY3, iteritems, text_type
 from six.moves.urllib.parse import urlparse
@@ -16,12 +16,14 @@ from .constants import MILLISECOND
 
 
 def ensure_bytes(s):
+    # type: (Union[Text, bytes]) -> bytes
     if isinstance(s, text_type):
         s = s.encode('utf-8')
     return s
 
 
 def ensure_unicode(s):
+    # type: (Union[Text, bytes]) -> Text
     if isinstance(s, bytes):
         s = s.decode('utf-8')
     return s
