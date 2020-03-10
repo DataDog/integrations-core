@@ -135,7 +135,7 @@ def test_connection_config_error(instance_config):
     with pytest.raises(ConfigurationError) as excinfo:
         IBMMQConfig(instance_config)
 
-    assert 'Provide either host/port or connection_name configurations' in str(excinfo.value)
+    assert 'Specify only one host/port or connection_name configuration' in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
