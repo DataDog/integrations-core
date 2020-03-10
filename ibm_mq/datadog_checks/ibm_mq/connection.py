@@ -65,6 +65,7 @@ def get_ssl_connection(config):
 
 
 def _get_channel_definition(config):
+    # type: (IBMMQConfig) -> pymqi.CD
     cd = pymqi.CD()
     cd.ChannelName = pymqi.ensure_bytes(config.channel)
     cd.ConnectionName = pymqi.ensure_bytes(config.host_and_port)

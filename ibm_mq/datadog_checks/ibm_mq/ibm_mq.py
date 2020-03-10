@@ -65,23 +65,22 @@ class IbmMqCheck(AgentCheck):
             log.error("You need to install pymqi: %s", pymqiException)
             raise errors.PymqiException("You need to install pymqi: {}".format(pymqiException))
 
-        tags = self.config.tags  # Calculated property
         try:
             queue_manager = connection.get_queue_manager_connection(self.config)
-            self.service_check(self.SERVICE_CHECK, AgentCheck.OK, tags)
+            self.service_check(self.SERVICE_CHECK, AgentCheck.OK, self.config.tags)
         except Exception as e:
             self.warning("cannot connect to queue manager: %s", e)
-            self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, tags)
+            self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, self.config.tags)
             return
 
         self.get_pcf_channel_metrics(queue_manager)
         self.discover_queues(queue_manager)
 
         try:
-            self.queue_manager_stats(queue_manager, tags)
+            self.queue_manager_stats(queue_manager, self.config.tags)
 
             for queue_name in self.config.queues:
-                queue_tags = tags + ["queue:{}".format(queue_name)]
+                queue_tags = self.config.tags + ["queue:{}".format(queue_name)]
 
                 for regex, q_tags in self.config.queue_tag_re:
                     if regex.match(queue_name):
@@ -234,7 +233,6 @@ class IbmMqCheck(AgentCheck):
 
     def get_pcf_channel_metrics(self, queue_manager):
         args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes('*')}
-        tags = self.config.tags_no_channel  # Calculated property
         try:
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_CHANNEL(args)
@@ -243,11 +241,11 @@ class IbmMqCheck(AgentCheck):
         else:
             channels = len(response)
             mname = '{}.channel.channels'.format(self.METRIC_PREFIX)
-            self.gauge(mname, channels, tags=tags)
+            self.gauge(mname, channels, tags=self.config.tags_no_channel)
 
             for channel_info in response:
                 channel_name = ensure_unicode(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
-                channel_tags = tags + ["channel:{}".format(channel_name)]
+                channel_tags = self.config.tags_no_channel + ["channel:{}".format(channel_name)]
 
                 self._submit_metrics_from_properties(channel_info, metrics.channel_metrics(), channel_tags)
 
@@ -256,10 +254,10 @@ class IbmMqCheck(AgentCheck):
         # Specific channels are checked first to send channel metrics and `ibm_mq.channel` service checks
         # at the same time, but the end result is the same in any order.
         for channel in self.config.channels:
-            self._submit_channel_status(queue_manager, channel, tags)
+            self._submit_channel_status(queue_manager, channel, self.config.tags_no_channel)
 
         # Grab all the discoverable channels
-        self._submit_channel_status(queue_manager, '*', tags)
+        self._submit_channel_status(queue_manager, '*', self.config.tags_no_channel)
 
     def _submit_channel_status(self, queue_manager, search_channel_name, tags, channels_to_skip=None):
         """Submit channel status
