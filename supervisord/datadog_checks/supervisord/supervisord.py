@@ -114,10 +114,14 @@ class SupervisordCheck(AgentCheck):
 
         # Filter monitored processes on configuration directives
         proc_regex = instance.get('proc_regex', [])
+        if isinstance(proc_regex, str):
+            proc_regex = [proc_regex]
         if not isinstance(proc_regex, list):
             raise Exception("Empty or invalid proc_regex.")
 
         proc_names = instance.get('proc_names', [])
+        if isinstance(proc_names, str):
+            proc_names = [proc_names]
         if not isinstance(proc_names, list):
             raise Exception("Empty or invalid proc_names.")
 
