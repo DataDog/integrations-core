@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from datadog_checks.dev.docker import CheckDockerLogs, docker_run
+from datadog_checks.dev.docker import docker_run
 from datadog_checks.dev.utils import load_jmx_config
 
 from .common import HERE
