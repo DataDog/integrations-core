@@ -7,7 +7,7 @@ from collections import OrderedDict, defaultdict
 
 from six import iteritems
 
-from ...utils.testing import e2e_testing, echo_warning, get_metadata_metrics
+from ...utils.testing import get_metadata_metrics
 from ..utils.common import ensure_unicode, to_native_string
 from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from .similar import build_similar_elements_msg
@@ -206,46 +206,8 @@ class AggregatorStub(object):
             condition=condition, msg=msg, expected_stub=expected_bucket, submitted_elements=self._histogram_buckets
         )
 
-    def _assert_metric_using_metadata(self, metric_stub):
-        # type: (MetricStub) -> None
-        """
-        Assert metric using metadata.
-
-        For now, we only raise warning, but this is later turn into assertions.
-        """
-
-        # read metadata only once
-        if not getattr(self, '_metadata_metrics', None):
-            self._metadata_metrics = get_metadata_metrics()
-
-        if metric_stub.name not in self._metadata_metrics:
-            echo_warning("Expect metric `{}` to be in metadata.csv, but it's not.".format(metric_stub.name))
-            return
-
-        # Since we are asserting the in-app metric type (NOT submission type),
-        # asserting the type make sense only for e2e (metrics collected from agent).
-        if e2e_testing():
-            expected_metric_type = self._metadata_metrics[metric_stub.name]['metric_type']
-            actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
-
-            if expected_metric_type != actual_metric_type:
-                echo_warning(
-                    "Expect type `{}` (from metadata.csv) but got type `{}` for metric `{}`.".format(
-                        expected_metric_type, actual_metric_type, metric_stub.name
-                    )
-                )
-
     def assert_metric(
-        self,
-        name,
-        value=None,
-        tags=None,
-        count=None,
-        at_least=1,
-        hostname=None,
-        metric_type=None,
-        device=None,
-        assert_metadata=True,
+        self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None, device=None,
     ):
         """
         Assert a metric was processed by this stub
@@ -272,9 +234,6 @@ class AggregatorStub(object):
                 continue
 
             candidates.append(metric)
-
-            if assert_metadata:
-                self._assert_metric_using_metadata(metric)
 
         expected_metric = MetricStub(name, metric_type, value, tags, hostname, device)
 
@@ -342,6 +301,37 @@ class AggregatorStub(object):
             msg += '\nAsserted Metrics:{}{}'.format(prefix, prefix.join(sorted(self._asserted)))
             msg += '\nMissing Metrics:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
         assert condition, msg
+
+    def assert_metrics_using_metadata(self, check_type=True, exclude=None):
+        """
+        Assert metrics using metadata.csv
+
+        Checking type: Since we are asserting the in-app metric type (NOT submission type),
+        asserting the type make sense only for e2e (metrics collected from agent).
+        """
+
+        metadata_metrics = get_metadata_metrics()
+        exclude = exclude or []
+        errors = set()
+        for metric_name, metric_stubs in iteritems(self._metrics):
+            if metric_name in exclude:
+                continue
+            for metric_stub in metric_stubs:
+
+                if metric_stub.name not in metadata_metrics:
+                    errors.add("Expect `{}` to be in metadata.csv.".format(metric_stub.name))
+                    continue
+
+                if check_type:
+                    expected_metric_type = metadata_metrics[metric_stub.name]['metric_type']
+                    actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
+
+                    if expected_metric_type != actual_metric_type:
+                        errors.add("Expect `{}` to have type `{}` but got `{}`.".format(
+                            metric_stub.name, expected_metric_type, actual_metric_type
+                        ))
+
+        assert not errors, "Metadata assertion errors using metadata.csv: " + "\n\t- ".join([""] + sorted(list(errors)))
 
     def assert_no_duplicate_all(self):
         """
