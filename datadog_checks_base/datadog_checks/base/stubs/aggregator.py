@@ -327,9 +327,11 @@ class AggregatorStub(object):
                     actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
 
                     if expected_metric_type != actual_metric_type:
-                        errors.add("Expect `{}` to have type `{}` but got `{}`.".format(
-                            metric_stub.name, expected_metric_type, actual_metric_type
-                        ))
+                        errors.add(
+                            "Expect `{}` to have type `{}` but got `{}`.".format(
+                                metric_stub.name, expected_metric_type, actual_metric_type
+                            )
+                        )
 
         assert not errors, "Metadata assertion errors using metadata.csv: " + "\n\t- ".join([""] + sorted(list(errors)))
 
