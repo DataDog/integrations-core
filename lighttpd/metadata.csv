@@ -1,16 +1,12 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-lighttpd.net.bytes,gauge,,byte,,[Lighttpd 1 only] The number of bytes sent and received since start.,0,lighttpd,net bytes
 lighttpd.net.hits,gauge,,hit,,[Lighttpd 1 only] The number of hits since start.,0,lighttpd,net hits
-lighttpd.net.bytes_per_s,gauge,,byte,second,[Lighttpd 1 only] The number of bytes sent and received per second.,0,lighttpd,net bytes per s
+lighttpd.net.bytes_per_s,count,,byte,second,[Lighttpd 1 only] The number of bytes sent and received per second.,0,lighttpd,net bytes per s
 lighttpd.net.request_per_s,gauge,,request,second,[Lighttpd 1 only] The number of requests per second.,0,lighttpd,net requests per s
-lighttpd.performance.idle_server,gauge,,connection,,[Lighttpd 1 only] The number of idle connections.,0,lighttpd,idle servers
-lighttpd.performance.busy_servers,gauge,,connection,,[Lighttpd 1 only] The number of active connections.,0,lighttpd,busy servers
-lighttpd.performance.uptime,gauge,,second,,[Lighttpd 1 only] The amount of time the server has been up and running.,0,lighttpd,server uptime
 lighttpd.connections.state_start,gauge,,connection,,[Lighttpd 2 only] The number of active connections in the state of initializing the read-idle timer.,0,lighttpd,conn state start
-lighttpd.connections.state_read_header,gauge,,connection,,[Lighttpd 2 only] The number of active connections in the state of reading the http request header.,0,lighttpd,conn state read header
-lighttpd.connections.state_handle_request,gauge,,connection,,[Lighttpd 2 only] The number of active connections in the state of handling the request internally.,0,lighttpd,conn state handle req
-lighttpd.connections.state_write_response,gauge,,connection,,[Lighttpd 2 only] The number of active connections in the state of writing the response to the network.,0,lighttpd,conn state write resp
-lighttpd.connections.state_keep_alive,gauge,,connection,,[Lighttpd 2 only] The number of idle connections.,0,lighttpd,conn state keep alive
+lighttpd.connections.state_read_header,count,,connection,,[Lighttpd 2 only] The number of active connections in the state of reading the http request header.,0,lighttpd,conn state read header
+lighttpd.connections.state_handle_request,count,,connection,,[Lighttpd 2 only] The number of active connections in the state of handling the request internally.,0,lighttpd,conn state handle req
+lighttpd.connections.state_write_response,count,,connection,,[Lighttpd 2 only] The number of active connections in the state of writing the response to the network.,0,lighttpd,conn state write resp
+lighttpd.connections.state_keep_alive,count,,connection,,[Lighttpd 2 only] The number of idle connections.,0,lighttpd,conn state keep alive
 lighttpd.net.bytes_out_avg,gauge,,byte,second,[Lighttpd 2 only] The average number of bytes sent per second since start.,0,lighttpd,net bytes out avg
 lighttpd.net.bytes_in_avg,gauge,,byte,second,[Lighttpd 2 only] The average number of bytes received per second since start.,0,lighttpd,net bytes in avg
 lighttpd.net.bytes_in_avg_5sec,gauge,,byte,second,[Lighttpd 2 only] The average number of bytes received per second in the past 5 seconds.,0,lighttpd,net bytes in avg 5sec
