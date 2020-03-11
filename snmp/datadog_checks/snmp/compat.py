@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import Any
+from typing import Any, Optional
 
 try:
     from datadog_checks.base.utils.common import total_time_to_temporal_percent
@@ -16,14 +16,14 @@ try:
     from datadog_agent import get_config, read_persistent_cache, write_persistent_cache
 except ImportError:
 
-    def get_config(value):
-        # type: (Any) -> str
+    def get_config(key):
+        # type: (str) -> Optional[str]
         return ''
 
-    def write_persistent_cache(value, key):
-        # type: (Any, Any) -> None
+    def write_persistent_cache(key, value):
+        # type: (str, str) -> None
         pass
 
-    def read_persistent_cache(value):
-        # type: (Any) -> str
+    def read_persistent_cache(key):
+        # type: (str) -> Optional[str]
         return ''
