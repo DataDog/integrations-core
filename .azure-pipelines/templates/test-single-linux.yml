@@ -16,6 +16,9 @@ jobs:
     vmImage: 'ubuntu-18.04'
 
   steps:
+  - script: |
+      echo '##vso[task.logissue type=warning]this is a warning'
+      echo '##vso[task.logissue type=error]this is an error'
   - template: './checkout-code.yml'
 
   - template: './install-deps.yml'
