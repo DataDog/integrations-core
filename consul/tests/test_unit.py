@@ -24,21 +24,34 @@ def test_get_nodes_with_service(aggregator):
     expected_tags = [
         'consul_datacenter:dc1',
         'consul_service_id:service-1',
-        'consul_service-1_service_tag:az-us-east-1a',
-        'consul_service_tag:az-us-east-1a',
+        'consul_service-1_service_tag:active',
+        'consul_service-1_service_tag:standby',
+        'consul_service_tag:active',
+        'consul_service_tag:standby',
     ]
 
-    aggregator.assert_metric('consul.catalog.nodes_up', value=1, tags=expected_tags)
-    aggregator.assert_metric('consul.catalog.nodes_passing', value=1, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.nodes_up', value=4, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.nodes_passing', value=4, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_warning', value=0, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_critical', value=0, tags=expected_tags)
 
     expected_tags = ['consul_datacenter:dc1', 'consul_node_id:node-1']
 
-    aggregator.assert_metric('consul.catalog.services_up', value=6, tags=expected_tags)
-    aggregator.assert_metric('consul.catalog.services_passing', value=6, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.services_up', value=24, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.services_passing', value=24, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.services_warning', value=0, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.services_critical', value=0, tags=expected_tags)
+
+    expected_tags = [
+        'consul_datacenter:dc1',
+        'consul_service-1_service_tag:standby',
+        'consul_service_id:service-1',
+        'consul_node_id:node-1',
+        'consul_status:passing',
+    ]
+    aggregator.assert_metric('consul.catalog.services_count', value=3, tags=expected_tags)
+    expected_tags.append('consul_service-1_service_tag:active')
+    aggregator.assert_metric('consul.catalog.services_count', value=1, tags=expected_tags)
 
 
 def test_get_peers_in_cluster(aggregator):
@@ -76,19 +89,32 @@ def test_get_nodes_with_service_warning(aggregator):
     expected_tags = [
         'consul_datacenter:dc1',
         'consul_service_id:service-1',
-        'consul_service-1_service_tag:az-us-east-1a',
-        'consul_service_tag:az-us-east-1a',
+        'consul_service-1_service_tag:active',
+        'consul_service-1_service_tag:standby',
+        'consul_service_tag:active',
+        'consul_service_tag:standby',
     ]
-    aggregator.assert_metric('consul.catalog.nodes_up', value=1, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.nodes_up', value=4, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_passing', value=0, tags=expected_tags)
-    aggregator.assert_metric('consul.catalog.nodes_warning', value=1, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.nodes_warning', value=4, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_critical', value=0, tags=expected_tags)
 
     expected_tags = ['consul_datacenter:dc1', 'consul_node_id:node-1']
-    aggregator.assert_metric('consul.catalog.services_up', value=6, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.services_up', value=24, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.services_passing', value=0, tags=expected_tags)
-    aggregator.assert_metric('consul.catalog.services_warning', value=6, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.services_warning', value=24, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.services_critical', value=0, tags=expected_tags)
+
+    expected_tags = [
+        'consul_datacenter:dc1',
+        'consul_service-1_service_tag:standby',
+        'consul_service_id:service-1',
+        'consul_node_id:node-1',
+        'consul_status:warning',
+    ]
+    aggregator.assert_metric('consul.catalog.services_count', value=3, tags=expected_tags)
+    expected_tags.append('consul_service-1_service_tag:active')
+    aggregator.assert_metric('consul.catalog.services_count', value=1, tags=expected_tags)
 
 
 def test_get_nodes_with_service_critical(aggregator):
@@ -101,19 +127,32 @@ def test_get_nodes_with_service_critical(aggregator):
     expected_tags = [
         'consul_datacenter:dc1',
         'consul_service_id:service-1',
-        'consul_service-1_service_tag:az-us-east-1a',
-        'consul_service_tag:az-us-east-1a',
+        'consul_service-1_service_tag:active',
+        'consul_service-1_service_tag:standby',
+        'consul_service_tag:active',
+        'consul_service_tag:standby',
     ]
-    aggregator.assert_metric('consul.catalog.nodes_up', value=1, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.nodes_up', value=4, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_passing', value=0, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.nodes_warning', value=0, tags=expected_tags)
-    aggregator.assert_metric('consul.catalog.nodes_critical', value=1, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.nodes_critical', value=4, tags=expected_tags)
 
     expected_tags = ['consul_datacenter:dc1', 'consul_node_id:node-1']
-    aggregator.assert_metric('consul.catalog.services_up', value=6, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.services_up', value=24, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.services_passing', value=0, tags=expected_tags)
     aggregator.assert_metric('consul.catalog.services_warning', value=0, tags=expected_tags)
-    aggregator.assert_metric('consul.catalog.services_critical', value=6, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.services_critical', value=24, tags=expected_tags)
+
+    expected_tags = [
+        'consul_datacenter:dc1',
+        'consul_service-1_service_tag:standby',
+        'consul_service_id:service-1',
+        'consul_node_id:node-1',
+        'consul_status:critical',
+    ]
+    aggregator.assert_metric('consul.catalog.services_count', value=3, tags=expected_tags)
+    expected_tags.append('consul_service-1_service_tag:active')
+    aggregator.assert_metric('consul.catalog.services_count', value=1, tags=expected_tags)
 
 
 def test_consul_request(aggregator, instance):

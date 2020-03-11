@@ -14,7 +14,7 @@ from os.path import basename
 from typing import Any, Callable, DefaultDict, Deque, Dict, List, Optional, Sequence, Tuple, Union
 
 import yaml
-from six import iteritems, text_type
+from six import binary_type, iteritems, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
@@ -28,7 +28,7 @@ from ..types import (
     ServiceCheckStatus,
 )
 from ..utils.agent.utils import should_profile_memory
-from ..utils.common import ensure_bytes, to_string
+from ..utils.common import ensure_bytes, to_native_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
@@ -561,7 +561,7 @@ class AgentCheck(object):
         if message is None:
             message = ''
         else:
-            message = to_string(message)
+            message = to_native_string(message)
 
         aggregator.submit_service_check(
             self, self.check_id, self._format_namespace(name, raw), status, tags, hostname, message
@@ -617,7 +617,7 @@ class AgentCheck(object):
         try:
             new_tags = []
             for hostname, source_map in external_tags:
-                new_tags.append((to_string(hostname), source_map))
+                new_tags.append((to_native_string(hostname), source_map))
                 for src_name, tags in iteritems(source_map):
                     source_map[src_name] = self._normalize_tags_type(tags)
             datadog_agent.set_external_tags(new_tags)
@@ -626,12 +626,13 @@ class AgentCheck(object):
             raise
 
     def convert_to_underscore_separated(self, name):
-        # type: (bytes) -> bytes
+        # type: (Union[str, bytes]) -> bytes
         """
         Convert from CamelCase to camel_case
         And substitute illegal metric characters
         """
-        metric_name = self.FIRST_CAP_RE.sub(br'\1_\2', ensure_bytes(name))
+        name = ensure_bytes(name)
+        metric_name = self.FIRST_CAP_RE.sub(br'\1_\2', name)
         metric_name = self.ALL_CAP_RE.sub(br'\1_\2', metric_name).lower()
         metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
@@ -647,7 +648,7 @@ class AgentCheck(object):
         :param list args: format string args used to format warning_message e.g. `warning_message % args`
         :param dict kwargs: not used for now, but added to match Python logger's `warning` method signature
         """
-        warning_message = to_string(warning_message)
+        warning_message = to_native_string(warning_message)
         # Interpolate message only if args is not empty. Same behavior as python logger:
         # https://github.com/python/cpython/blob/1dbe5373851acb85ba91f0be7b83c69563acd68d/Lib/logging/__init__.py#L368-L369
         if args:
@@ -688,12 +689,12 @@ class AgentCheck(object):
     def _format_namespace(self, s, raw=False):
         # type: (str, bool) -> str
         if not raw and self.__NAMESPACE__:
-            return '{}.{}'.format(self.__NAMESPACE__, to_string(s))
+            return '{}.{}'.format(self.__NAMESPACE__, to_native_string(s))
 
-        return to_string(s)
+        return to_native_string(s)
 
     def normalize(self, metric, prefix=None, fix_case=False):
-        # type: (Union[str, bytes], bytes, bool) -> str
+        # type: (Union[str, bytes], Union[str, bytes], bool) -> str
         """
         Turn a metric into a well-formed metric name
         prefix.b.c
@@ -717,7 +718,7 @@ class AgentCheck(object):
         if prefix is not None:
             name = ensure_bytes(prefix) + b"." + name
 
-        return to_string(name)
+        return to_native_string(name)
 
     def normalize_tag(self, tag):
         # type: (Union[str, bytes]) -> str
@@ -731,7 +732,7 @@ class AgentCheck(object):
         tag = self.TAG_REPLACEMENT.sub(br'_', tag)
         tag = self.MULTIPLE_UNDERSCORE_CLEANUP.sub(br'_', tag)
         tag = self.DOT_UNDERSCORE_CLEANUP.sub(br'.', tag).strip(b'_')
-        return to_string(tag)
+        return to_native_string(tag)
 
     def check(self, instance):
         # type: (InstanceType) -> None
@@ -804,10 +805,14 @@ class AgentCheck(object):
         :param ev event: the event to be sent.
         """
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
-        for key in event:
-            # Ensure strings have the correct type
+        for key, value in iteritems(event):
+            if not isinstance(value, (text_type, binary_type)):
+                continue
+
             try:
-                event[key] = to_string(event[key])  # type: ignore
+                event[key] = to_native_string(value)  # type: ignore
+                # ^ Mypy complains about dynamic key assignment -- arguably for good reason.
+                # Ideally we should convert this to a dict literal so that submitted events only include known keys.
             except UnicodeError:
                 self.log.warning('Encoding error with field `%s`, cannot submit event', key)
                 return
@@ -817,7 +822,7 @@ class AgentCheck(object):
         if event.get('timestamp'):
             event['timestamp'] = int(event['timestamp'])
         if event.get('aggregation_key'):
-            event['aggregation_key'] = to_string(event['aggregation_key'])
+            event['aggregation_key'] = to_native_string(event['aggregation_key'])
 
         if self.__NAMESPACE__:
             event.setdefault('source_type_name', self.__NAMESPACE__)
@@ -837,7 +842,7 @@ class AgentCheck(object):
         if device_name:
             self._log_deprecation('device_name')
             try:
-                normalized_tags.append('device:{}'.format(to_string(device_name)))
+                normalized_tags.append('device:{}'.format(to_native_string(device_name)))
             except UnicodeError:
                 self.log.warning(
                     'Encoding error with device name `%r` for metric `%r`, ignoring tag', device_name, metric_name
@@ -848,7 +853,7 @@ class AgentCheck(object):
                 continue
 
             try:
-                tag = to_string(tag)
+                tag = to_native_string(tag)
             except UnicodeError:
                 self.log.warning('Encoding error with tag `%s` for metric `%s`, ignoring tag', tag, metric_name)
                 continue

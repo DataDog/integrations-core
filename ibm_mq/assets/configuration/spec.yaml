@@ -29,6 +29,19 @@ files:
           example: 1414
           type: integer
         description: The port IBM MQ is listening on.
+      - name: connection_name
+        description: |
+          Connection name used to connect to IBM MQ with following syntax `<HOSTNAME>(<PORT>)`.
+
+          Multiple connection names can be provided using comma as separator.
+          The connections are usually tried in the order they are specified in the connection list
+          until a connection is successfully established.
+
+          Example `localhost(8080)` or `localhost(8080),localhost(8080),my.server(9090)`
+
+          Either `host/port` or `connection_name` configuration must be provided.
+        value:
+          type: string
       - name: username
         value:
           type: string

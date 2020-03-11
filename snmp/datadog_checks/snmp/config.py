@@ -7,7 +7,8 @@ from typing import Any, Callable, DefaultDict, Dict, Iterator, List, Optional, S
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
-from .models import (
+from .models import OID
+from .pysnmp_types import (
     CommunityData,
     ContextData,
     DirMibSource,
@@ -24,7 +25,6 @@ from .models import (
     usmHMACMD5AuthProtocol,
 )
 from .resolver import OIDResolver
-from .utils import to_oid_tuple
 
 
 class ParsedMetric(object):
@@ -69,7 +69,7 @@ class ParsedMetricTag(object):
 def _no_op(*args, **kwargs):
     # type: (*Any, **Any) -> None
     """
-    A 'do-nothing' replacement for the `warning()` and `log()` AgentCheck functions, suitable for when those
+    A 'do-nothing' replacement for the `warning()` AgentCheck function, suitable for when those
     functions are not available (e.g. in unit tests).
     """
 
@@ -87,7 +87,6 @@ class InstanceConfig:
         self,
         instance,  # type: dict
         warning=_no_op,  # type: Callable[..., None]
-        log=_no_op,  # type: Callable[..., None]
         global_metrics=None,  # type: List[dict]
         mibs_path=None,  # type: str
         profiles=None,  # type: Dict[str, dict]
@@ -159,7 +158,7 @@ class InstanceConfig:
 
         self._auth_data = self.get_auth_data(instance)
 
-        self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics, warning, log)
+        self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics, warning)
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
             self.all_oids.extend(tag_oids)
@@ -167,7 +166,7 @@ class InstanceConfig:
         if profile:
             if profile not in profiles:
                 raise ConfigurationError("Unknown profile '{}'".format(profile))
-            self.refresh_with_profile(profiles[profile], warning, log)
+            self.refresh_with_profile(profiles[profile], warning)
             self.add_profile_tag(profile)
 
         self._context_data = ContextData(*self.get_context_data(instance))
@@ -180,13 +179,13 @@ class InstanceConfig:
             )
 
     def resolve_oid(self, oid):
-        # type: (Any) -> Tuple[Any, Any]
+        # type: (ObjectType) -> Tuple[str, Tuple[str, ...]]
         return self._resolver.resolve_oid(oid)
 
-    def refresh_with_profile(self, profile, warning, log):
-        # type: (Dict[str, Any], Callable[..., None], Callable[..., None]) -> None
+    def refresh_with_profile(self, profile, warning):
+        # type: (Dict[str, Any], Callable[..., None]) -> None
         metrics = profile['definition'].get('metrics', [])
-        all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics, warning, log)
+        all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics, warning)
 
         metric_tags = profile['definition'].get('metric_tags', [])
         tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
@@ -317,7 +316,6 @@ class InstanceConfig:
         self,
         metrics,  # type: List[Dict[str, Any]]
         warning,  # type: Callable[..., None]
-        log,  # type: Callable[..., None]
         object_identity_factory=None,  # type: Callable[..., ObjectIdentity]  # For unit tests purposes.
     ):
         # type: (...) -> Tuple[list, list, List[Union[ParsedMetric, ParsedTableMetric]]]
@@ -335,7 +333,7 @@ class InstanceConfig:
             if isinstance(symbol, dict):
                 symbol_oid = symbol['OID']
                 symbol = symbol['name']
-                self._resolver.register(to_oid_tuple(symbol_oid), symbol)
+                self._resolver.register(OID(symbol_oid).as_tuple(), symbol)
                 identity = object_identity_factory(symbol_oid)
             else:
                 identity = object_identity_factory(mib, symbol)
@@ -446,7 +444,7 @@ class InstanceConfig:
                 oid_object = ObjectType(object_identity_factory(metric['OID']))
 
                 table_oids[metric['OID']] = (oid_object, [])
-                self._resolver.register(to_oid_tuple(metric['OID']), metric['name'])
+                self._resolver.register(OID(metric['OID']).as_tuple(), metric['name'])
 
                 parsed_metric = ParsedMetric(metric['name'], metric_tags, forced_type, enforce_scalar=False)
                 parsed_metrics.append(parsed_metric)
@@ -489,7 +487,7 @@ class InstanceConfig:
             else:
                 oid = tag['OID']
                 identity = ObjectIdentity(oid)
-                self._resolver.register(to_oid_tuple(oid), symbol)
+                self._resolver.register(OID(oid).as_tuple(), symbol)
             object_type = ObjectType(identity)
             oids.append(object_type)
             parsed_metric_tags.append(ParsedMetricTag(tag_name, symbol))
@@ -503,7 +501,7 @@ class InstanceConfig:
         uptime_oid = '1.3.6.1.2.1.1.3.0'
         oid_object = ObjectType(ObjectIdentity(uptime_oid))
         self.all_oids.append(oid_object)
-        self._resolver.register(to_oid_tuple(uptime_oid), 'sysUpTimeInstance')
+        self._resolver.register(OID(uptime_oid).as_tuple(), 'sysUpTimeInstance')
 
         parsed_metric = ParsedMetric('sysUpTimeInstance', [], 'gauge')
         self.parsed_metrics.append(parsed_metric)

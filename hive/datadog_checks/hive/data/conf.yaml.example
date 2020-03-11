@@ -41,7 +41,7 @@ instances:
     ## @param host - string - required
     ## HiveServer2 or Hive Metastore JMX host to connect to.
     #
-  - host: localhost
+  - host: <HOST>
 
     ## @param port - integer - required
     ## HiveServer2 or Hive Metastore JMX port to connect to.

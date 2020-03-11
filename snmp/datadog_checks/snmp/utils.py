@@ -7,8 +7,8 @@ from typing import Any, Dict, Mapping, Sequence, Tuple, Union
 import yaml
 
 from .compat import get_config
-from .exceptions import SmiError
-from .models import ObjectName, ObjectType, endOfMibView, noSuchInstance
+from .exceptions import CouldNotDecodeOID, SmiError
+from .pysnmp_types import ObjectIdentity, ObjectName, ObjectType, endOfMibView, noSuchInstance
 
 
 def get_profile_definition(profile):
@@ -74,14 +74,65 @@ def recursively_expand_base_profiles(definition):
         definition.setdefault('metric_tags', []).extend(base_definition.get('metric_tags', []))
 
 
-def to_oid_tuple(oid):
-    # type: (str) -> Tuple[int, ...]
-    """Return a OID tuple from a OID string.
-
-    Example:
-    '1.3.6.1.4.1' -> (1, 3, 6, 1, 4, 1)
+def parse_as_oid_tuple(value):
+    # type: (Union[Sequence[int], str, ObjectName, ObjectIdentity, ObjectType]) -> Tuple[int, ...]
     """
-    return tuple(map(int, oid.lstrip('.').split('.')))
+    Given an OID in one of many forms, return its int-tuple representation.
+
+    NOTE: not meant to be used directly -- use `models.OID` for a consistent interface instead.
+
+    Raises:
+    -------
+    CouldNotDecodeOID:
+        If `value` is of an unsupported type, or if it is supported by the OID could not be inferred from it.
+    """
+    if isinstance(value, (list, tuple)):
+        # Eg: `(1, 3, 6, 1, 2, 1, 1, 1, 0)`
+        try:
+            return tuple(int(digit) for digit in value)
+        except (TypeError, ValueError) as exc:
+            raise CouldNotDecodeOID(exc)
+
+    if isinstance(value, str):
+        # Eg: ``'1.3.6.1.2.1.1.1.0'`
+
+        # NOTE: There's an obscure and optional convention [0][1] that OIDs *CAN* be prefixed with a leading dot to
+        # mark them as 'absolute', eg '.1.3.6.1.<etc>', as opposed to relative to a some non-agreed-upon root OID.
+        # [0]: http://oid-info.com/faq.htm#mib
+        # [1]: https://comp.protocols.snmp.narkive.com/3UtKdsqv/leading-dot-in-enterprise-oid-in-snmp-traps
+        # This integration can only deal with absolute OIDs anyway, so let's assume that's what we get.
+        value = value.lstrip('.')
+        return parse_as_oid_tuple(value.split('.'))
+
+    if isinstance(value, ObjectName):
+        # Eg: ObjectName('1.3.6.1.2.1.1.1.0'), ObjectName((1, 3, 6, 1, 2, 1, 1, 1, 0)), etc.
+        return value.asTuple()
+
+    if isinstance(value, ObjectIdentity):
+        # Eg: `ObjectIdentity('1.3.6.1.2.1.1.0').resolveWithMib(mibViewController)``
+        # NOTE: inputs of this type most likely come from the execution of a PySNMP command.
+        try:
+            object_name = value.getOid()  # type: ObjectName
+        except SmiError as exc:
+            # Not resolved yet. Probably us building an `ObjectIdentity` instance manually...
+            # We should be using our `OID` model in that case, so let's fail.
+            raise CouldNotDecodeOID('Could not infer OID from `ObjectIdentity`: {!r}'.format(exc))
+
+        return parse_as_oid_tuple(object_name)
+
+    if isinstance(value, ObjectType):
+        # Eg: `ObjectType(some_object_identity)`
+        # NOTE: inputs of this type most likely come from the execution of a PySNMP command.
+        try:
+            object_identity = value[0]
+        except SmiError as exc:
+            # Not resolved yet. Probably us building an `ObjectType` instance manually...
+            # We should be using our `OID` model in that case, so let's fail.
+            raise CouldNotDecodeOID('Could not infer OID from `ObjectType`: {!r}'.format(exc))
+
+        return parse_as_oid_tuple(object_identity)
+
+    raise CouldNotDecodeOID('Building an OID from object {!r} of type {} is not supported'.format(value, type(value)))
 
 
 def oid_pattern_specificity(pattern):
