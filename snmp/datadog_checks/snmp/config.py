@@ -179,7 +179,7 @@ class InstanceConfig:
             )
 
     def resolve_oid(self, oid):
-        # type: (Any) -> Tuple[Any, Any]
+        # type: (ObjectType) -> Tuple[str, Tuple[str, ...]]
         return self._resolver.resolve_oid(oid)
 
     def refresh_with_profile(self, profile, warning):

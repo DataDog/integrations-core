@@ -6,64 +6,64 @@
 *                   @DataDog/agent-integrations
 
 # Documentation
-/docs/                @DataDog/baklava @DataDog/agent-integrations
-*.md                  @DataDog/baklava @DataDog/agent-integrations
-conf.yaml.example     @DataDog/baklava @DataDog/agent-integrations
-conf.yaml.default     @DataDog/baklava @DataDog/agent-integrations @DataDog/agent-core
-auto_conf.yaml        @DataDog/baklava @DataDog/agent-integrations @DataDog/container-integrations
-manifest.json         @DataDog/baklava @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
+/docs/                @DataDog/documentation @DataDog/agent-integrations
+*.md                  @DataDog/documentation @DataDog/agent-integrations
+conf.yaml.example     @DataDog/documentation @DataDog/agent-integrations
+conf.yaml.default     @DataDog/documentation @DataDog/agent-integrations @DataDog/agent-core
+auto_conf.yaml        @DataDog/documentation @DataDog/agent-integrations @DataDog/container-integrations
+manifest.json         @DataDog/documentation @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
 assets/               @DataDog/agent-integrations @DataDog/integrations-tools-and-libraries
 
 
 # Container monitoring
 /containerd/                              @DataDog/container-integrations @DataDog/agent-integrations
-/containerd/*.md                          @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/containerd/manifest.json                 @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/containerd/*.md                          @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/containerd/manifest.json                 @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /cri/                                     @DataDog/container-integrations @DataDog/agent-integrations
-/cri/*.md                                 @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/cri/manifest.json                        @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/cri/*.md                                 @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/cri/manifest.json                        @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /crio/                                    @DataDog/container-integrations @DataDog/agent-integrations
-/crio/*.md                                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/crio/manifest.json                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/crio/*.md                                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/crio/manifest.json                       @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /ecs_fargate/                             @DataDog/container-integrations @DataDog/agent-integrations
-/ecs_fargate/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/ecs_fargate/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/ecs_fargate/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/ecs_fargate/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /eks_fargate/                             @DataDog/container-integrations @DataDog/agent-integrations
-/eks_fargate/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/eks_fargate/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/eks_fargate/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/eks_fargate/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kube_apiserver_metrics/                  @DataDog/container-integrations @DataDog/agent-integrations
-/kube_apiserver_metrics/*.md              @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/kube_apiserver_metrics/manifest.json     @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/kube_apiserver_metrics/*.md              @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/kube_apiserver_metrics/manifest.json     @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kube_controller_manager/                 @DataDog/container-integrations @DataDog/agent-integrations
-/kube_controller_manager/*.md             @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/kube_controller_manager/manifest.json    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/kube_controller_manager/*.md             @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/kube_controller_manager/manifest.json    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kube_dns/                                @DataDog/container-integrations @DataDog/agent-integrations
-/kube_dns/*.md                            @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/kube_dns/manifest.json                   @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/kube_dns/*.md                            @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/kube_dns/manifest.json                   @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kube_metrics_server/                     @DataDog/container-integrations @DataDog/agent-integrations
-/kube_metrics_server/*.md                 @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/kube_metrics_server/manifest.json        @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/kube_metrics_server/*.md                 @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/kube_metrics_server/manifest.json        @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kube_proxy/                              @DataDog/container-integrations @DataDog/agent-integrations
-/kube_proxy/*.md                          @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/kube_proxy/manifest.json                 @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/kube_proxy/*.md                          @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/kube_proxy/manifest.json                 @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kube_scheduler/                          @DataDog/container-integrations @DataDog/agent-integrations
-/kube_scheduler/*.md                      @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/kube_scheduler/manifest.json             @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/kube_scheduler/*.md                      @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/kube_scheduler/manifest.json             @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kubelet/                                 @DataDog/container-integrations @DataDog/agent-integrations
-/kubelet/*.md                             @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/kubelet/manifest.json                    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/kubelet/*.md                             @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/kubelet/manifest.json                    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kubernetes/                              @DataDog/container-integrations @DataDog/agent-integrations
-/kubernetes/*.md                          @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/kubernetes/manifest.json                 @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/kubernetes/*.md                          @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/kubernetes/manifest.json                 @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /kubernetes_state/                        @DataDog/container-integrations @DataDog/agent-integrations
-/kubernetes_state/*.md                    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/kubernetes_state/manifest.json           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/kubernetes_state/*.md                    @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/kubernetes_state/manifest.json           @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /nginx_ingress_controller/                @DataDog/container-integrations @DataDog/agent-integrations
-/nginx_ingress_controller/*.md            @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/nginx_ingress_controller/manifest.json   @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/nginx_ingress_controller/*.md            @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/nginx_ingress_controller/manifest.json   @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /openmetrics/                             @DataDog/container-integrations @DataDog/agent-integrations
-/openmetrics/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
-/openmetrics/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/baklava
+/openmetrics/*.md                         @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
+/openmetrics/manifest.json                @DataDog/container-integrations @DataDog/agent-integrations @DataDog/documentation
 /tenable/                                 @anshumgargdd @DataDog/agent-integrations
 
 # System (and Process) checks

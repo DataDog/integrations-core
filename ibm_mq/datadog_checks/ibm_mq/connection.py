@@ -68,7 +68,7 @@ def _get_channel_definition(config):
     # type: (IBMMQConfig) -> pymqi.CD
     cd = pymqi.CD()
     cd.ChannelName = pymqi.ensure_bytes(config.channel)
-    cd.ConnectionName = pymqi.ensure_bytes(config.host_and_port)
+    cd.ConnectionName = pymqi.ensure_bytes(config.connection_name)
     cd.ChannelType = pymqi.CMQC.MQCHT_CLNTCONN
     cd.TransportType = pymqi.CMQC.MQXPT_TCP
     cd.Version = config.mqcd_version

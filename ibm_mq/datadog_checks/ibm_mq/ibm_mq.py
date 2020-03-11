@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+from typing import Any
 
 from six import iteritems
 
@@ -55,10 +56,10 @@ class IbmMqCheck(AgentCheck):
 
     CHANNEL_COUNT_CHECK = 'ibm_mq.channel.count'
 
-    def __init__(self, name, init_config, instances):
-        super(IbmMqCheck, self).__init__(name, init_config, instances)
+    def __init__(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
+        super(IbmMqCheck, self).__init__(*args, **kwargs)
         self.config = IBMMQConfig(self.instance)
-        self.config.check_properly_configured()
 
     def check(self, instance):
         if not pymqi:
