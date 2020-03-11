@@ -5,11 +5,11 @@ import csv
 import os
 import sys
 
-E2E_PREFIX = 'DDEV_E2E'
+E2E_PARENT_PYTHON = 'DDEV_E2E_PYTHON_PATH'
 
 
-def e2e_active():
-    return any(ev.startswith(E2E_PREFIX) for ev in os.environ)
+def e2e_testing():
+    return E2E_PARENT_PYTHON in os.environ
 
 
 def get_check_root_path():
