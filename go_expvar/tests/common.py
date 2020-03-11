@@ -48,3 +48,7 @@ CHECK_RATES = [
     'go_expvar.memstats.num_gc',
     'go_expvar.memstats.pause_total_ns',
 ]
+
+CHECK_COUNT = [
+    'go_expvar.memstats.total_alloc.count',
+]

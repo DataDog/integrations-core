@@ -34,6 +34,8 @@ CHECK_RATES = [
     '{}.memstats.pause_total_ns',
 ]
 
+CHECK_COUNT = ['{}.memstats.total_alloc.count']
+
 CHECK_GAUGES_CUSTOM_MOCK = {
     '{}.gauge1': ['metric_tag1:metric_value1', 'metric_tag2:metric_value2', 'path:random_walk'],
     '{}.memstats.by_size.1.mallocs': [],
@@ -102,6 +104,10 @@ def test_go_expvar_mocked(go_expvar_mock, check, aggregator):
             metric_type=aggregator.COUNT,
             tags=shared_tags + ['path:memstats.NumGC'],
         )
+    for count in CHECK_COUNT:
+        aggregator.assert_metric(
+            count.format(common.CHECK_NAME), count=1, metric_type=aggregator.MONOTONIC_COUNT, tags=shared_tags,
+        )
 
     aggregator.assert_all_metrics_covered()
 
@@ -148,6 +154,8 @@ def test_go_expvar_mocked_namespace(go_expvar_mock, check, aggregator):
         aggregator.assert_metric(
             rate.format(metric_namespace), count=1, tags=shared_tags + ['path:memstats.PauseTotalNs']
         )
+    for count in CHECK_COUNT:
+        aggregator.assert_metric(count.format(metric_namespace), tags=shared_tags)
 
     aggregator.assert_all_metrics_covered()
 
