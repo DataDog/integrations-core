@@ -308,6 +308,7 @@ class AggregatorStub(object):
 
         Checking type: Since we are asserting the in-app metric type (NOT submission type),
         asserting the type make sense only for e2e (metrics collected from agent).
+        For integration tests, set kwarg `check_metric_type=False`.
         """
 
         metadata_metrics = get_metadata_metrics()
