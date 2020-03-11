@@ -6,13 +6,13 @@ import fnmatch
 import functools
 import ipaddress
 import json
+import sys
 import threading
 import time
 from collections import defaultdict
 from concurrent import futures
 from typing import Any, DefaultDict, Dict, List, Optional, Tuple, Union
 
-from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
@@ -20,29 +20,13 @@ from datadog_checks.base.errors import CheckException
 from datadog_checks.base.types import ServiceCheckStatus
 
 from .commands import snmp_bulk, snmp_get, snmp_getnext
-from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
+from .compat import read_persistent_cache, write_persistent_cache
 from .config import InstanceConfig, ParsedMetric, ParsedMetricTag, ParsedTableMetric
 from .exceptions import PySnmpError
-from .models import OID, Variable
-from .pysnmp_types import (
-    Asn1Type,
-    Counter32,
-    Counter64,
-    CounterBasedGauge64,
-    Gauge32,
-    Integer,
-    Integer32,
-    Unsigned32,
-    ZeroBasedCounter64,
-)
+from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
+from .models import OID, Value, Variable
+from .types import ForceableMetricType
 from .utils import OIDPrinter, get_profile_definition, oid_pattern_specificity, recursively_expand_base_profiles
-
-# Metric type that we support
-SNMP_COUNTERS = frozenset([Counter32.__name__, Counter64.__name__, ZeroBasedCounter64.__name__])
-
-SNMP_GAUGES = frozenset(
-    [Gauge32.__name__, Unsigned32.__name__, CounterBasedGauge64.__name__, Integer.__name__, Integer32.__name__]
-)
 
 DEFAULT_OID_BATCH_SIZE = 10
 
@@ -71,6 +55,9 @@ class SnmpCheck(AgentCheck):
         self.profiles = self.init_config.get('profiles', {})  # type: Dict[str, Dict[str, Any]]
         self.profiles_by_oid = {}  # type: Dict[str, str]
         self._load_profiles()
+
+        if self.instance is None:
+            raise RuntimeError
 
         self.instance['name'] = self._get_instance_name(self.instance)
         self._config = self._build_config(self.instance)
@@ -164,7 +151,7 @@ class SnmpCheck(AgentCheck):
                 time.sleep(interval - time_elapsed)
 
     def fetch_results(self, config, all_oids, bulk_oids):
-        # type: (InstanceConfig, List[OID], List[OID]) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], Optional[str]]
+        # type: (InstanceConfig, List[OID], List[OID]) -> Tuple[Dict[str, Dict[Tuple[str, ...], Value]], Optional[str]]
         """
         Perform a snmpwalk on the domain specified by the oids, on the device
         configured in instance.
@@ -202,7 +189,7 @@ class SnmpCheck(AgentCheck):
             results[metric][indexes] = variable.value
         self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
         # Freeze the result
-        results.default_factory = None
+        results.default_factory = None  # type: ignore
         return results, error
 
     def fetch_oids(self, config, oids, enforce_constraints):
@@ -228,7 +215,7 @@ class SnmpCheck(AgentCheck):
                 missing_results = []  # type: List[OID]
 
                 for variable in variables:
-                    if not Variable.was_oid_found(variable.value):
+                    if not variable.value:
                         missing_results.append(variable.oid)
                     else:
                         all_variables.append(variable)
@@ -271,12 +258,7 @@ class SnmpCheck(AgentCheck):
         variables = snmp_get(config, [oid], lookup_mib=False)
         self.log.debug('Returned vars: %s', OIDPrinter(variables, with_values=True))
 
-        value = variables[0].value
-
-        if isinstance(value, Asn1Type):
-            return value.prettyPrint()
-        else:
-            return str(value)
+        return str(variables[0].value)
 
     def _profile_for_sysobject_oid(self, sys_object_oid):
         # type: (str) -> str
@@ -303,6 +285,8 @@ class SnmpCheck(AgentCheck):
                 except ValueError:
                     write_persistent_cache(self.check_id, json.dumps([]))
                     break
+                if self.instance is None:
+                    raise RuntimeError
                 instance = copy.deepcopy(self.instance)
                 instance.pop('network_address')
                 instance['ip_address'] = host
@@ -386,7 +370,7 @@ class SnmpCheck(AgentCheck):
         except Exception as e:
             if not error:
                 error = 'Failed to collect metrics for {} - {}'.format(instance['name'], e)
-            self.log.warning(error, exc_info=e)
+            self.log.warning(error, exc_info=sys.exc_info())
         finally:
             # Report service checks
             status = self.OK  # type: ServiceCheckStatus
@@ -416,7 +400,7 @@ class SnmpCheck(AgentCheck):
     def report_metrics(
         self,
         metrics,  # type: List[Union[ParsedMetric, ParsedTableMetric]]
-        results,  # type: Dict[str, Dict[Tuple[str, ...], Any]]
+        results,  # type: Dict[str, Dict[Tuple[str, ...], Value]]
         tags,  # type: List[str]
     ):
         # type: (...) -> None
@@ -449,7 +433,7 @@ class SnmpCheck(AgentCheck):
     def get_index_tags(
         self,
         index,  # type: Tuple[str, ...]
-        results,  # type: Dict[str, dict]
+        results,  # type: Dict[str, Dict[Tuple[str, ...], Value]]
         index_tags,  # type: List[Tuple[str, int]]
         column_tags,  # type: List[Tuple[str, str]]
     ):
@@ -482,84 +466,39 @@ class SnmpCheck(AgentCheck):
                 self.log.warning('Column %s not present in the table, skipping this tag', raw_column_value)
                 continue
 
-            if not Variable.was_oid_found(column_value):
+            if not column_value:
                 self.log.warning("Can't deduct tag from column for tag %s", name)
                 continue
 
-            if isinstance(column_value, OID):
-                value = str(column_value)
-            else:
-                value = column_value.prettyPrint()
-
+            value = str(column_value)
             tags.append('{}:{}'.format(name, value))
 
         return tags
 
-    def submit_metric(self, name, snmp_value, forced_type, tags):
-        # type: (str, Any, Optional[str], List[str]) -> None
+    def submit_metric(self, name, value, forced_type, tags):
+        # type: (str, Value, Optional[ForceableMetricType], List[str]) -> None
         """
-        Convert the values reported as pysnmp-Managed Objects to values and
-        report them to the aggregator.
+        Convert a value queried from an SNMP server to a metric, and submit it to the aggregator.
         """
-        if not Variable.was_oid_found(snmp_value):
+        if not value:
             # Metrics not present in the queried object
             self.log.warning('No such Mib available: %s', name)
             return
 
         metric_name = self.normalize(name, prefix='snmp')
 
-        value = 0.0  # type: float
-
-        if forced_type:
-            forced_type = forced_type.lower()
-            if forced_type == 'gauge':
-                value = int(snmp_value)
-                self.gauge(metric_name, value, tags)
-            elif forced_type == 'percent':
-                value = total_time_to_temporal_percent(int(snmp_value), scale=1)
-                self.rate(metric_name, value, tags)
-            elif forced_type == 'counter':
-                value = int(snmp_value)
-                self.rate(metric_name, value, tags)
-            elif forced_type == 'monotonic_count':
-                value = int(snmp_value)
-                self.monotonic_count(metric_name, value, tags)
-            else:
-                self.warning('Invalid forced-type specified: %s in %s', forced_type, name)
-                raise ConfigurationError('Invalid forced-type in config file: {}'.format(name))
-            return
-
-        # Ugly hack but couldn't find a cleaner way
-        # Proper way would be to use the ASN1 method isSameTypeWith but it
-        # wrongfully returns True in the case of CounterBasedGauge64
-        # and Counter64 for example
-        snmp_class = snmp_value.__class__.__name__
-        if snmp_class in SNMP_COUNTERS:
-            value = int(snmp_value)
-            self.rate(metric_name, value, tags)
-            return
-        if snmp_class in SNMP_GAUGES:
-            value = int(snmp_value)
-            self.gauge(metric_name, value, tags)
-            return
-
-        if snmp_class == 'Opaque':
-            # Try support for floats
-            try:
-                value = float(pyasn1_decode(bytes(snmp_value))[0])
-            except Exception:
-                pass
-            else:
-                self.gauge(metric_name, value, tags)
-                return
-
-        # Falls back to try to cast the value.
-        try:
-            value = float(snmp_value)
-        except ValueError:
-            pass
+        if forced_type is not None:
+            metric = as_metric_with_forced_type(value, forced_type)
+            if metric is None:
+                message = 'Invalid forced type {!r} for metric {!r}'.format(forced_type, name)
+                self.warning(message)
+                raise ConfigurationError(message)
         else:
-            self.gauge(metric_name, value, tags)
+            metric = as_metric_with_inferred_type(value)
+
+        if metric is None:
+            self.log.warning('Unsupported value %s for metric %s', value, metric_name)
             return
 
-        self.log.warning('Unsupported metric type %s for %s', snmp_class, metric_name)
+        submit_func = getattr(self, metric['type'])
+        submit_func(metric_name, metric['value'], tags=tags)

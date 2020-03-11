@@ -2,13 +2,16 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
-from typing import Any, Dict, Mapping, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Mapping, Sequence, Tuple, Union
 
 import yaml
 
 from .compat import get_config
 from .exceptions import CouldNotDecodeOID, SmiError
 from .pysnmp_types import ObjectIdentity, ObjectName, ObjectType
+
+if TYPE_CHECKING:  # Avoid circular imports.
+    from .models import OID, Value, Variable
 
 
 def get_profile_definition(profile):
@@ -158,13 +161,13 @@ class OIDPrinter(object):
     managed, and can be more expensive to use than regular display.
     """
 
-    def __init__(self, variables, with_values):
-        # type: (Union[Mapping, Sequence], bool) -> None
-        self.variables = variables
+    def __init__(self, data, with_values):
+        # type: (Union[Dict[str, Dict[Tuple[str, ...], Value]], Sequence[Variable], Sequence[OID]], bool) -> None
+        self.data = data
         self.with_values = with_values
 
-    def oid_dict(self, key, value):
-        # type: (str, Dict[Any, Any]) -> str
+    def _format_result(self, key, result):
+        # type: (str, Dict[Tuple[str, ...], Value]) -> str
         """Display a dictionary of OID results with indexes.
 
         This is tailored made for the structure we build for results in the check.
@@ -174,28 +177,27 @@ class OIDPrinter(object):
         """
         values = []
         have_indexes = False
-        for indexes, data in value.items():
-            try:
-                data = int(data)
-            except (TypeError, ValueError):
-                data = "'{}'".format(data)
+
+        for indexes, value in result.items():
+            item = str(value)
             if indexes:
-                values.append("'{}': {}".format('.'.join(indexes), data))
+                values.append("'{}': {}".format('.'.join(indexes), item))
                 have_indexes = True
             else:
-                values.append(str(data))
+                values.append(item)
 
-        if not have_indexes:
-            displayed = values[0]
-        else:
+        if have_indexes:
             displayed = '{{{}}}'.format(', '.join(values))
+        else:
+            displayed = values[0]
+
         return "'{}': {}".format(key, displayed)
 
     def __str__(self):
         # type: () -> str
-        if isinstance(self.variables, Mapping):
-            return '{{{}}}'.format(', '.join(self.oid_dict(key, value) for (key, value) in self.variables.items()))
+        if isinstance(self.data, Mapping):
+            return '{{{}}}'.format(', '.join(self._format_result(key, result) for (key, result) in self.data.items()))
         if self.with_values:
-            return '{{{}}}'.format(', '.join(str(variable) for variable in self.variables))
+            return '{{{}}}'.format(', '.join(str(item) for item in self.data))
         else:
-            return '({})'.format(', '.join("'{}'".format(variable.oid) for variable in self.variables))
+            return '({})'.format(', '.join("'{}'".format(getattr(item, 'oid', item) for item in self.data)))

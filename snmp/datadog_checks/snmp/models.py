@@ -4,11 +4,13 @@
 """
 Define our own models and interfaces for dealing with SNMP data.
 """
+from typing import Any, NoReturn, Optional, Sequence, Tuple, Union
 
-from typing import Any, Sequence, Tuple, Union
+from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 
 from .exceptions import CouldNotDecodeOID
 from .pysnmp_types import (
+    PYSNMP_CLASS_NAME_TO_SNMP_TYPE,
     Asn1Type,
     ObjectIdentifier,
     ObjectIdentity,
@@ -18,6 +20,7 @@ from .pysnmp_types import (
     noSuchInstance,
     noSuchObject,
 )
+from .types import SNMPType
 from .utils import parse_as_oid_tuple
 
 
@@ -60,6 +63,11 @@ class OID(object):
 
         self._parts = parts
 
+    @property
+    def known_snmp_type(self):
+        # type: () -> NoReturn
+        raise NotImplementedError
+
     def get_mib_symbol(self):
         # type: () -> Tuple[str, Tuple[str, ...]]
         if not isinstance(self.raw, ObjectIdentity):
@@ -100,13 +108,72 @@ class OID(object):
         return self.resolve_as_string()
 
 
-class Variable(object):
+class _PySNMPValue(object):
     """
-    An SNMP variable, i.e. an OID associated to a value.
+    Wrapper around PySNMP value-like objects.
+
+    Abstracts away any details about the type of the value or its decoding.
     """
 
-    def __init__(self, oid, value):
-        # type: (OID, Union[ObjectIdentity, Asn1Type]) -> None
+    def __init__(self, value):
+        # type: (Asn1Type) -> None
+        self._value = value
+
+    @property
+    def known_snmp_type(self):
+        # type: () -> Optional[SNMPType]
+        pysnmp_class_name = self._value.__class__.__name__
+        try:
+            return PYSNMP_CLASS_NAME_TO_SNMP_TYPE[pysnmp_class_name]
+        except KeyError:
+            # We shouldn't depend on the raw PySNMP class name anywhere in our code, so hide that information.
+            return None
+
+    def __int__(self):
+        # type: () -> int
+        return int(self._value)
+
+    def __float__(self):
+        # type: () -> float
+        opaque = 'opaque'  # type: SNMPType  # Use type hint to make sure this literal is correct.
+        if self.known_snmp_type == opaque:
+            decoded, _ = pyasn1_decode(bytes(self._value))
+            return float(decoded)
+        else:
+            return float(self._value)
+
+    def __bool__(self):
+        # type: () -> bool
+        return not noSuchInstance.isSameTypeWith(self._value) and not noSuchObject.isSameTypeWith(self._value)
+
+    def __nonzero__(self):  # Python 2 compatibility.
+        # type: () -> bool
+        return self.__bool__()
+
+    def __repr__(self):
+        # type: () -> str
+        return repr(self._value)
+
+    def __str__(self):
+        # type: () -> str
+        value = self._value
+        if noSuchInstance.isSameTypeWith(value):
+            return 'NoSuchInstance'
+        elif noSuchObject.isSameTypeWith(value):
+            return 'NoSuchObject'
+        elif endOfMibView.isSameTypeWith(value):
+            return 'EndOfMibView'
+        else:
+            return value.prettyPrint()
+
+
+class Value(object):
+    """
+    Represents an SNMP value, such as a number, a string, an OID, etc.
+    """
+
+    def __init__(self, value):
+        # type: (Union[ObjectIdentity, Asn1Type]) -> None
         if isinstance(value, ObjectIdentity):
             # OID values (such as obtained when querying `sysObjectID`) may be returned in this form.
             value = OID(value)
@@ -115,34 +182,55 @@ class Variable(object):
             value = OID(tuple(value))
         elif isinstance(value, Asn1Type):
             # Scalar value: a number, a description string, etc.
-            # NOTE: store as-is for now, but ideally we'd wrap this into an interface we have better control over.
-            pass
+            value = _PySNMPValue(value)
         else:
-            raise RuntimeError('Got unexpected MIB variable value {!r} of type {}'.format(value, type(value)))
-
-        self.oid = oid
-        self.value = value  # type: Union[OID, Asn1Type]
-
-    @classmethod
-    def from_var_bind(cls, var_bind):
-        # type: (Any) -> Variable
-        name, value = var_bind
-        return cls(oid=OID(name), value=value)
-
-    # NOTE: defined here because the processing of `value` is tightly coupled to the type of the `.value` attribute.
-    @staticmethod
-    def was_oid_found(value):
-        # type: (Union[OID, Asn1Type]) -> bool
-        """
-        Return whether `value` corresponds to a value indicating that the original OID was found by the SNMP server.
-        """
-        if isinstance(value, Asn1Type):
-            return not noSuchInstance.isSameTypeWith(value) and not noSuchObject.isSameTypeWith(value)
-
-        if not isinstance(value, OID):
             raise RuntimeError('Got unexpected value {!r} of type {}'.format(value, type(value)))
 
-        return True
+        self._value = value  # type: Union[OID, _PySNMPValue]
+
+    @property
+    def known_snmp_type(self):
+        # type: () -> Optional[SNMPType]
+        return self._value.known_snmp_type
+
+    def __int__(self):
+        # type: () -> int
+        if isinstance(self._value, OID):
+            raise ValueError('OID value is not convertible to int')
+        return int(self._value)
+
+    def __float__(self):
+        # type: () -> float
+        if isinstance(self._value, OID):
+            raise ValueError('OID value is not convertible to float')
+        return float(self._value)
+
+    def __bool__(self):
+        # type: () -> bool
+        return bool(self._value)
+
+    def __nonzero__(self):  # Python 2 compatibility.
+        # type: () -> bool
+        return self.__bool__()
+
+    def __repr__(self):
+        # type: () -> str
+        return 'Value({!r})'.format(self._value)
+
+    def __str__(self):
+        # type: () -> str
+        return str(self._value)
+
+
+class Variable(object):
+    """
+    An SNMP variable, i.e. an OID associated to a value.
+    """
+
+    def __init__(self, oid, value):
+        # type: (OID, Value) -> None
+        self.oid = oid
+        self.value = value
 
     def __repr__(self):
         # type: () -> str
@@ -150,18 +238,4 @@ class Variable(object):
 
     def __str__(self):
         # type: () -> str
-        value = self.value
-
-        if isinstance(value, Asn1Type):
-            if noSuchInstance.isSameTypeWith(self.value):
-                value = "'NoSuchInstance'"
-            elif endOfMibView.isSameTypeWith(self.value):
-                value = "'EndOfMibView'"
-            else:
-                value = value.prettyPrint()
-                try:
-                    value = str(int(value))
-                except (TypeError, ValueError):
-                    value = "'{}'".format(value)
-
-        return "('{}', {})".format(self.oid, value)
+        return '({}, {})'.format(self.oid, self.value)

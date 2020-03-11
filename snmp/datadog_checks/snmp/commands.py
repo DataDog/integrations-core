@@ -11,8 +11,8 @@ from pysnmp.proto import errind
 from datadog_checks.base.errors import CheckException
 
 from .config import InstanceConfig
-from .models import OID, Variable
-from .pysnmp_types import endOfMibView
+from .models import OID, Value, Variable
+from .pysnmp_types import ObjectType, endOfMibView
 
 
 def _handle_error(ctx, config):
@@ -21,6 +21,12 @@ def _handle_error(ctx, config):
     if error:
         message = '{} for instance {}'.format(error, config.ip_address)
         raise CheckException(message)
+
+
+def _build_variable_from_var_bind(var_bind):
+    # type: (ObjectType) -> Variable
+    name, raw = var_bind
+    return Variable(oid=OID(name), value=Value(raw))
 
 
 def snmp_get(config, oids, lookup_mib):
@@ -54,7 +60,7 @@ def snmp_get(config, oids, lookup_mib):
 
     _handle_error(ctx, config)
 
-    return [Variable.from_var_bind(var_bind) for var_bind in ctx['var_binds']]
+    return [_build_variable_from_var_bind(var_bind) for var_bind in ctx['var_binds']]
 
 
 def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
@@ -100,7 +106,7 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
             if not isinstance(val, Null) and initial_vars[col].isPrefixOf(name):
                 var_binds.append(var_bind)
                 new_initial_vars.append(initial_vars[col])
-                yield Variable.from_var_bind(var_bind)
+                yield _build_variable_from_var_bind(var_bind)
         if not var_binds:
             return
         initial_vars = new_initial_vars
@@ -148,6 +154,6 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
             if endOfMibView.isSameTypeWith(value):
                 return
             if initial_var.isPrefixOf(name):
-                yield Variable.from_var_bind(var_binds[0])
+                yield _build_variable_from_var_bind(var_binds[0])
             else:
                 return
