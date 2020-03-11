@@ -10,33 +10,25 @@ from typing import Any, Optional
 from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 
 from .compat import total_time_to_temporal_percent
-from .pysnmp_types import PYSNMP_CLASS_NAME_TO_SNMP_TYPE
-from .types import SNMP_COUNTERS, SNMP_GAUGES, ForceableMetricType, MetricDefinition, SNMPType
-
-
-def _get_known_snmp_type(value):
-    # type: (Any) -> Optional[SNMPType]
-    pysnmp_class_name = value.__class__.__name__
-    try:
-        return PYSNMP_CLASS_NAME_TO_SNMP_TYPE[pysnmp_class_name]
-    except KeyError:
-        # Unrecognized PySNMP type. Fine -- but let's discard this piece of information
-        # so that we're not tempted to rely on it downstream.
-        return None
+from .pysnmp_types import PYSNMP_COUNTER_CLASSES, PYSNMP_GAUGE_CLASSES, Opaque
+from .types import ForceableMetricType, MetricDefinition
 
 
 def as_metric_with_inferred_type(value):
     # type: (Any) -> Optional[MetricDefinition]
-    snmp_type = _get_known_snmp_type(value)
 
-    if snmp_type in SNMP_COUNTERS:
+    # Ugly hack but couldn't find a cleaner way.
+    # Proper way would be to use the ASN1 method isSameTypeWith but it wrongfully returns True in the
+    # case of CounterBasedGauge64 and Counter64 for example.
+    pysnmp_class_name = value.__class__.__name__
+
+    if pysnmp_class_name in PYSNMP_COUNTER_CLASSES:
         return {'type': 'rate', 'value': int(value)}
 
-    if snmp_type in SNMP_GAUGES:
+    if pysnmp_class_name in PYSNMP_GAUGE_CLASSES:
         return {'type': 'gauge', 'value': int(value)}
 
-    opaque = 'opaque'  # type: SNMPType  # Use type hint to make sure this literal is correct.
-    if snmp_type == opaque:
+    if pysnmp_class_name == Opaque.__name__:
         # Arbitrary ASN.1 syntax encoded as an octet string. Let's try to decode it as a float.
         # See: http://snmplabs.com/pysnmp/docs/api-reference.html#opaque-type
         try:
@@ -46,13 +38,6 @@ def as_metric_with_inferred_type(value):
             pass
         else:
             return {'type': 'gauge', 'value': value}
-
-    if snmp_type is not None:
-        # Make sure we don't implicitly rely on the fallback too much.
-        message = (
-            'Value {!r} was recognized as SNMP type {!r} but not handled explicitly. Consider inferring it explicitly.'
-        ).format(value, snmp_type)
-        raise RuntimeError(message)
 
     # Fallback for unknown SNMP types.
     try:

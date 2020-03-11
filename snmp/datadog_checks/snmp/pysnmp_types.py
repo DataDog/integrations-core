@@ -4,7 +4,6 @@
 """
 Re-export PyASN1/PySNMP types and classes that we use, so that we can access them from a single module.
 """
-from typing import Dict
 
 from pyasn1.type.base import Asn1Type
 from pyasn1.type.univ import OctetString
@@ -27,8 +26,6 @@ from pysnmp.smi.builder import DirMibSource, MibBuilder
 from pysnmp.smi.exval import endOfMibView, noSuchInstance, noSuchObject
 from pysnmp.smi.view import MibViewController
 
-from .types import SNMPType
-
 __all__ = [
     'AbstractTransportTarget',
     'Asn1Type',
@@ -45,6 +42,7 @@ __all__ = [
     'ObjectName',
     'ObjectType',
     'OctetString',
+    'Opaque',
     'SnmpEngine',
     'UdpTransportTarget',
     'usmDESPrivProtocol',
@@ -52,22 +50,24 @@ __all__ = [
     'UsmUserData',
 ]
 
-# Additional types that we support but are not part of the SNMP protocol (see RFC 2856).
+# Additional types that are not part of the SNMP protocol (see RFC 2856).
 CounterBasedGauge64, ZeroBasedCounter64 = MibBuilder().importSymbols(
     'HCNUM-TC', 'CounterBasedGauge64', 'ZeroBasedCounter64'
 )
 
-PYSNMP_CLASS_NAME_TO_SNMP_TYPE = {
-    Counter32.__name__: 'counter32',
-    Counter64.__name__: 'counter64',
-    CounterBasedGauge64.__name__: 'counter-based-gauge64',
-    Gauge32.__name__: 'gauge32',
-    Integer.__name__: 'integer',
-    Integer32.__name__: 'integer32',
-    Opaque.__name__: 'opaque',
-    Unsigned32.__name__: 'unsigned32',
-    ZeroBasedCounter64.__name__: 'zero-based-counter64',
-}  # type: Dict[str, SNMPType]
+# SNMP value types that we explicitly support.
+PYSNMP_COUNTER_CLASSES = {
+    Counter32.__name__,
+    Counter64.__name__,
+    ZeroBasedCounter64.__name__,
+}
+PYSNMP_GAUGE_CLASSES = {
+    Gauge32.__name__,
+    CounterBasedGauge64.__name__,
+    Integer.__name__,
+    Integer32.__name__,
+    Unsigned32.__name__,
+}
 
 # Cleanup items we used here but don't want to expose.
 del MibBuilder
@@ -77,6 +77,5 @@ del CounterBasedGauge64
 del Gauge32
 del Integer
 del Integer32
-del Opaque
 del Unsigned32
 del ZeroBasedCounter64
