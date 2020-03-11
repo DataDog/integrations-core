@@ -3,12 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-import warnings
 from collections import OrderedDict, defaultdict
 
 from six import iteritems
 
-from ...utils.testing import e2e_testing, get_metadata_metrics
+from ...utils.testing import e2e_testing, echo_warning, get_metadata_metrics
 from ..utils.common import ensure_unicode, to_native_string
 from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from .similar import build_similar_elements_msg
@@ -220,7 +219,7 @@ class AggregatorStub(object):
             self._metadata_metrics = get_metadata_metrics()
 
         if metric_stub.name not in self._metadata_metrics:
-            warnings.warn("[WARNING] Expect metric `{}` to be in metadata.csv, but it's not.".format(metric_stub.name))
+            echo_warning("Expect metric `{}` to be in metadata.csv, but it's not.".format(metric_stub.name))
             return
 
         # Since we are asserting the in-app metric type (NOT submission type),
@@ -230,10 +229,11 @@ class AggregatorStub(object):
             actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
 
             if expected_metric_type != actual_metric_type:
-                error_msg = "[WARNING] Expect type `{}` (from metadata.csv) but got type `{}` for metric `{}`.".format(
-                    expected_metric_type, actual_metric_type, metric_stub.name
+                echo_warning(
+                    "Expect type `{}` (from metadata.csv) but got type `{}` for metric `{}`.".format(
+                        expected_metric_type, actual_metric_type, metric_stub.name
+                    )
                 )
-                warnings.warn(error_msg)
 
     def assert_metric(
         self,

@@ -4,12 +4,18 @@
 import csv
 import os
 import sys
+import warnings
 
 E2E_PARENT_PYTHON = 'DDEV_E2E_PYTHON_PATH'
+CI_WARNING_PREFIX = '##vso[task.logissue type=warning] '
 
 
 def e2e_testing():
     return E2E_PARENT_PYTHON in os.environ
+
+
+def running_on_ci():
+    return 'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI' in os.environ
 
 
 def get_check_root_path():
@@ -23,3 +29,9 @@ def get_metadata_metrics():
         for row in csv.DictReader(f):
             metrics[row['metric_name']] = row
     return metrics
+
+
+def echo_warning(msg):
+    if running_on_ci():
+        msg = "{} {}".format(CI_WARNING_PREFIX, msg)
+    warnings.warn(msg)
