@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev.docker import CheckDockerLogs, docker_run
 from datadog_checks.dev.utils import load_jmx_config
 
 from .common import HERE
@@ -15,5 +15,7 @@ from .common import HERE
 def dd_environment():
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yml')
 
-    with docker_run(compose_file,):
+    with docker_run(
+        compose_file, conditions=[CheckDockerLogs(compose_file, ['Server startup'], matches="all", wait=5)]
+    ):
         yield load_jmx_config(), {'use_jmx': True}
