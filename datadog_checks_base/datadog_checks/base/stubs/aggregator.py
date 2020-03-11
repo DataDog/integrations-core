@@ -220,7 +220,7 @@ class AggregatorStub(object):
             self._metadata_metrics = get_metadata_metrics()
 
         if metric_stub.name not in self._metadata_metrics:
-            warnings.warn("[WARNING] Expect metric `{}` to be in metadata.csv, but it's not.".format(metric_stub.name))
+            warnings.warn("##[warning] Expect metric `{}` to be in metadata.csv, but it's not.".format(metric_stub.name))
             return
 
         # Since we are asserting the in-app metric type (NOT submission type),
@@ -230,7 +230,7 @@ class AggregatorStub(object):
             actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
 
             if expected_metric_type != actual_metric_type:
-                error_msg = "[WARNING] Expect type `{}` (from metadata.csv) but got type `{}` for metric `{}`.".format(
+                error_msg = "##[warning] Expect type `{}` (from metadata.csv) but got type `{}` for metric `{}`.".format(
                     expected_metric_type, actual_metric_type, metric_stub.name
                 )
                 warnings.warn(error_msg)
