@@ -50,7 +50,7 @@ datadog-hive==1.1.2
 datadog-http-check==4.6.4
 datadog-hyperv==1.1.0; sys_platform == 'win32'
 datadog-ibm-db2==1.4.0
-datadog-ibm-mq==3.3.1; sys_platform == 'linux2'
+datadog-ibm-mq==3.4.0; sys_platform == 'linux2'
 datadog-ibm-was==1.5.0
 datadog-iis==2.8.0; sys_platform == 'win32'
 datadog-istio==2.4.2
