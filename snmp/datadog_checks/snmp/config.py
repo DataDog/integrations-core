@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
 from collections import defaultdict
-from typing import Any, Callable, DefaultDict, Dict, Iterator, List, Mapping, Optional, Set, Tuple, Union
+from typing import Any, Callable, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
@@ -157,15 +157,10 @@ class InstanceConfig:
 
         self._auth_data = self.get_auth_data(instance)
 
-        all_oids, bulk_oids, parsed_metrics = self.parse_metrics(self.metrics, warning)
-        tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
+        self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics, warning)
+        tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
-            all_oids.extend(tag_oids)
-
-        self.all_oids = all_oids
-        self.bulk_oids = bulk_oids
-        self.parsed_metrics = parsed_metrics
-        self.parsed_metric_tags = parsed_metric_tags
+            self.all_oids.extend(tag_oids)
 
         if profile:
             if profile not in profiles:
@@ -183,7 +178,7 @@ class InstanceConfig:
             )
 
     def resolve_oid(self, oid):
-        # type: (OID) -> Tuple[str, tuple]
+        # type: (OID) -> Tuple[str, Tuple[str, ...]]
         return self._resolver.resolve_oid(oid)
 
     def refresh_with_profile(self, profile, warning):
@@ -320,7 +315,6 @@ class InstanceConfig:
         self,
         metrics,  # type: List[Dict[str, Any]]
         warning,  # type: Callable[..., None]
-        object_identity_factory=ObjectIdentity,  # type: Callable[..., ObjectIdentity]  # For unit tests purposes.
     ):
         # type: (...) -> Tuple[List[OID], List[OID], List[Union[ParsedMetric, ParsedTableMetric]]]
         """Parse configuration and returns data to be used for SNMP queries.
@@ -331,19 +325,19 @@ class InstanceConfig:
         parsed_metrics = []  # type: List[Union[ParsedMetric, ParsedTableMetric]]
 
         def extract_symbol(mib, symbol):
-            # type: (str, Union[str, Mapping]) -> Tuple[OID, str]
+            # type: (str, Union[str, Dict[str, str]]) -> Tuple[OID, str]
             if isinstance(symbol, dict):
                 oid = OID(symbol['OID'])
                 symbol_name = symbol['name']
                 self._resolver.register(oid, symbol_name)
             else:
-                oid = OID(object_identity_factory(mib, symbol))
+                oid = OID(ObjectIdentity(mib, symbol))
                 symbol_name = symbol
 
             return oid, symbol_name
 
         def get_table_symbols(mib, table_def):
-            # type: (str, Mapping) -> Tuple[List[OID], str]
+            # type: (str, Dict[str, str]) -> Tuple[List[OID], str]
             table_oid, table = extract_symbol(mib, table_def)
             key = (mib, table)
 

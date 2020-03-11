@@ -21,9 +21,3 @@ class CouldNotDecodeOID(SNMPException):
     """
     A value could not be decoded as an OID.
     """
-
-
-class NoSuchInstance(SNMPException):
-    """
-    The requested OID does not exist on the SNMP server.
-    """

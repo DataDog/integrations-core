@@ -22,7 +22,7 @@ from datadog_checks.base.types import ServiceCheckStatus
 from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
 from .config import InstanceConfig, ParsedMetric, ParsedMetricTag, ParsedTableMetric
-from .exceptions import NoSuchInstance, PySnmpError
+from .exceptions import PySnmpError
 from .models import OID, Variable
 from .pysnmp_types import (
     Asn1Type,
@@ -34,7 +34,6 @@ from .pysnmp_types import (
     Integer32,
     Unsigned32,
     ZeroBasedCounter64,
-    noSuchInstance,
 )
 from .utils import OIDPrinter, get_profile_definition, oid_pattern_specificity, recursively_expand_base_profiles
 
@@ -177,27 +176,28 @@ class SnmpCheck(AgentCheck):
         results = defaultdict(dict)  # type: DefaultDict[str, Dict[Tuple[str, ...], Any]]
         enforce_constraints = config.enforce_constraints
 
-        all_variables, error = self.fetch_oids(config, all_oids, enforce_constraints=enforce_constraints)
+        variables, error = self.fetch_oids(config, all_oids, enforce_constraints=enforce_constraints)
 
         for oid in bulk_oids:
             try:
                 self.log.debug('Running SNMP command getBulk on OID %r', oid)
-                variables = snmp_bulk(
-                    config,
-                    oid,
-                    self._NON_REPEATERS,
-                    self._MAX_REPETITIONS,
-                    enforce_constraints,
-                    self.ignore_nonincreasing_oid,
+                variables.extend(
+                    snmp_bulk(
+                        config,
+                        oid,
+                        self._NON_REPEATERS,
+                        self._MAX_REPETITIONS,
+                        enforce_constraints,
+                        self.ignore_nonincreasing_oid,
+                    )
                 )
-                all_variables.extend(variables)
             except PySnmpError as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
                 if not error:
                     error = message
                 self.warning(message)
 
-        for variable in all_variables:
+        for variable in variables:
             metric, indexes = config.resolve_oid(variable.oid)
             results[metric][indexes] = variable.value
         self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
@@ -262,7 +262,7 @@ class SnmpCheck(AgentCheck):
         return all_variables, error
 
     def fetch_sysobject_oid(self, config):
-        # type: (InstanceConfig) -> OID
+        # type: (InstanceConfig) -> str
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
         oid = OID((1, 3, 6, 1, 2, 1, 1, 2, 0))
@@ -273,24 +273,17 @@ class SnmpCheck(AgentCheck):
 
         value = variables[0].value
 
-        if isinstance(value, Asn1Type) and value.isSameTypeWith(noSuchInstance):
-            raise NoSuchInstance
-
-        if not isinstance(value, OID):
-            raise RuntimeError(
-                'Expected sysObjectID query to return OID, got {!r} of type {}'.format(value, type(value))
-            )
-
-        return value
+        if isinstance(value, Asn1Type):
+            return value.prettyPrint()
+        else:
+            return str(value)
 
     def _profile_for_sysobject_oid(self, sys_object_oid):
-        # type: (OID) -> str
+        # type: (str) -> str
         """
         Return the most specific profile that matches the given sysObjectID.
         """
-        profiles = [
-            profile for oid, profile in self.profiles_by_oid.items() if fnmatch.fnmatch(str(sys_object_oid), oid)
-        ]
+        profiles = [profile for oid, profile in self.profiles_by_oid.items() if fnmatch.fnmatch(sys_object_oid, oid)]
 
         if not profiles:
             raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
