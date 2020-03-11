@@ -23,6 +23,9 @@
   "is_public": false,
   "integration_id": "ignite",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {},
     "saved_views": {},
     "monitors": {},
