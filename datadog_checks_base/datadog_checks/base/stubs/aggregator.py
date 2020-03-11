@@ -236,7 +236,16 @@ class AggregatorStub(object):
                 warnings.warn(error_msg)
 
     def assert_metric(
-        self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None, device=None
+        self,
+        name,
+        value=None,
+        tags=None,
+        count=None,
+        at_least=1,
+        hostname=None,
+        metric_type=None,
+        device=None,
+        assert_metadata=True,
     ):
         """
         Assert a metric was processed by this stub
@@ -264,7 +273,8 @@ class AggregatorStub(object):
 
             candidates.append(metric)
 
-            self._assert_metric_using_metadata(metric)
+            if assert_metadata:
+                self._assert_metric_using_metadata(metric)
 
         expected_metric = MetricStub(name, metric_type, value, tags, hostname, device)
 
