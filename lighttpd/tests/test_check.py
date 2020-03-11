@@ -76,3 +76,4 @@ def test_e2e(dd_agent_check, instance):
 
     tags = ['host:{}'.format(common.HOST), 'port:9449', 'instance:first']
     aggregator.assert_service_check('lighttpd.can_connect', status=Lighttpd.OK, tags=tags)
+    aggregator.assert_metrics_using_metadata()
