@@ -2,6 +2,402 @@ jobs:
 - template: ./test-all.yml
   parameters:
     checks:
+    - checkName: datadog_checks_base
+      displayName: Datadog Checks Base (Linux)
+      os: linux
+    - checkName: datadog_checks_base
+      displayName: Datadog Checks Base (Windows)
+      os: windows
+    - checkName: datadog_checks_dev
+      displayName: Datadog Checks Dev (Linux)
+      os: linux
+    - checkName: datadog_checks_dev
+      displayName: Datadog Checks Dev (Windows)
+      os: windows
+    - checkName: datadog_checks_downloader
+      displayName: Datadog Checks Downloader
+      os: linux
+    - checkName: active_directory
+      displayName: Active Directory
+      os: windows
+    - checkName: activemq
+      displayName: ActiveMQ
+      os: linux
+    - checkName: activemq_xml
+      displayName: ActiveMQ XML
+      os: linux
+    - checkName: aerospike
+      displayName: Aerospike
+      os: linux
+    - checkName: airflow
+      displayName: Airflow
+      os: linux
+    - checkName: amazon_msk
+      displayName: Amazon Kafka
+      os: linux
+    - checkName: ambari
+      displayName: Ambari
+      os: linux
+    - checkName: apache
+      displayName: Apache
+      os: linux
+    - checkName: aspdotnet
+      displayName: ASP.NET
+      os: windows
+    - checkName: btrfs
+      displayName: Btrfs
+      os: linux
+    - checkName: cacti
+      displayName: Cacti
+      os: linux
+    - checkName: cassandra
+      displayName: Cassandra
+      os: linux
+    - checkName: cassandra_nodetool
+      displayName: Cassandra Nodetool
+      os: linux
+    - checkName: ceph
+      displayName: Ceph
+      os: linux
+    - checkName: cilium
+      displayName: Cilium
+      os: linux
+    - checkName: cisco_aci
+      displayName: Cisco ACI
+      os: linux
+    - checkName: clickhouse
+      displayName: ClickHouse
+      os: linux
+    - checkName: cockroachdb
+      displayName: CockroachDB
+      os: linux
+    - checkName: consul
+      displayName: Consul
+      os: linux
+    - checkName: coredns
+      displayName: CoreDNS
+      os: linux
+    - checkName: couch
+      displayName: CouchDB
+      os: linux
+    - checkName: couchbase
+      displayName: Couchbase
+      os: linux
+    - checkName: crio
+      displayName: CRI-O
+      os: linux
+    - checkName: directory
+      displayName: Directory
+      os: linux
+    - checkName: disk
+      displayName: Disk (Linux)
+      os: linux
+    - checkName: disk
+      displayName: Disk (Windows)
+      os: windows
+    - checkName: dns_check
+      displayName: DNS
+      os: linux
+    - checkName: dotnetclr
+      displayName: .NET CLR
+      os: windows
+    - checkName: druid
+      displayName: Druid
+      os: linux
+    - checkName: ecs_fargate
+      displayName: Amazon ECS Fargate
+      os: linux
+    - checkName: eks_fargate
+      displayName: EKS Fargate
+      os: linux
+    - checkName: elastic
+      displayName: Elasticsearch
+      os: linux
+    - checkName: envoy
+      displayName: Envoy
+      os: linux
+    - checkName: etcd
+      displayName: etcd
+      os: linux
+    - checkName: exchange_server
+      displayName: Exchange Server
+      os: windows
+    - checkName: external_dns
+      displayName: External DNS
+      os: linux
+    - checkName: fluentd
+      displayName: fluentd
+      os: linux
+    - checkName: gearmand
+      displayName: Gearman
+      os: linux
+    - checkName: gitlab
+      displayName: Gitlab
+      os: linux
+    - checkName: gitlab_runner
+      displayName: Gitlab Runner
+      os: linux
+    - checkName: go_expvar
+      displayName: Go-Expvar
+      os: linux
+    - checkName: gunicorn
+      displayName: Gunicorn
+      os: linux
+    - checkName: haproxy
+      displayName: HAProxy
+      os: linux
+    - checkName: harbor
+      displayName: Harbor
+      os: linux
+    - checkName: hdfs_datanode
+      displayName: HDFS Datanode
+      os: linux
+    - checkName: hdfs_namenode
+      displayName: HDFS Namenode
+      os: linux
+    - checkName: hive
+      displayName: Hive
+      os: linux
+    - checkName: http_check
+      displayName: HTTP
+      os: linux
+    - checkName: ibm_db2
+      displayName: IBM Db2
+      os: linux
+    - checkName: ibm_mq
+      displayName: IBM MQ
+      os: linux
+    - checkName: ibm_was
+      displayName: IBM WAS
+      os: linux
+    - checkName: iis
+      displayName: IIS
+      os: windows
+    - checkName: istio
+      displayName: Istio
+      os: linux
+    - checkName: jboss_wildfly
+      displayName: JBoss/WildFly
+      os: linux
+    - checkName: kafka
+      displayName: Kafka
+      os: linux
+    - checkName: kafka_consumer
+      displayName: Kafka Consumer
+      os: linux
+    - checkName: kong
+      displayName: Kong
+      os: linux
+    - checkName: kube_apiserver_metrics
+      displayName: Kubernetes API server metrics
+      os: linux
+    - checkName: kube_controller_manager
+      displayName: Kubernetes Controller Manager
+      os: linux
+    - checkName: kube_dns
+      displayName: Kube DNS
+      os: linux
+    - checkName: kube_metrics_server
+      displayName: Kube metrics server
+      os: linux
+    - checkName: kube_proxy
+      displayName: Kube Proxy
+      os: linux
+    - checkName: kube_scheduler
+      displayName: Kubernetes Scheduler
+      os: linux
+    - checkName: kubelet
+      displayName: Kubelet
+      os: linux
+    - checkName: kubernetes_state
+      displayName: Kubernetes State
+      os: linux
+    - checkName: kyototycoon
+      displayName: Kyoto Tycoon
+      os: linux
     - checkName: lighttpd
       displayName: Lighttpd
+      os: linux
+    - checkName: linkerd
+      displayName: Linkerd
+      os: linux
+    - checkName: linux_proc_extras
+      displayName: Linux proc extras
+      os: linux
+    - checkName: mapr
+      displayName: MapR
+      os: linux
+    - checkName: mapreduce
+      displayName: MapReduce
+      os: linux
+    - checkName: marathon
+      displayName: Marathon
+      os: linux
+    - checkName: mcache
+      displayName: Memcached
+      os: linux
+    - checkName: mesos_master
+      displayName: Mesos Master
+      os: linux
+    - checkName: mesos_slave
+      displayName: Mesos Slave
+      os: linux
+    - checkName: mongo
+      displayName: MongoDB
+      os: linux
+    - checkName: mysql
+      displayName: MySQL
+      os: linux
+    - checkName: nagios
+      displayName: Nagios
+      os: linux
+    - checkName: network
+      displayName: Network
+      os: linux
+    - checkName: nfsstat
+      displayName: NFSstat
+      os: linux
+    - checkName: nginx
+      displayName: NGINX
+      os: linux
+    - checkName: nginx_ingress_controller
+      displayName: NGINX Ingress Controller
+      os: linux
+    - checkName: openldap
+      displayName: OpenLDAP
+      os: linux
+    - checkName: openmetrics
+      displayName: OpenMetrics
+      os: linux
+    - checkName: openstack
+      displayName: OpenStack
+      os: linux
+    - checkName: openstack_controller
+      displayName: OpenStack Controller
+      os: linux
+    - checkName: oracle
+      displayName: Oracle Database
+      os: linux
+    - checkName: pdh_check
+      displayName: PDH
+      os: windows
+    - checkName: pgbouncer
+      displayName: PGBouncer
+      os: linux
+    - checkName: php_fpm
+      displayName: PHP-FPM
+      os: linux
+    - checkName: postfix
+      displayName: Postfix
+      os: linux
+    - checkName: postgres
+      displayName: Postgres
+      os: linux
+    - checkName: powerdns_recursor
+      displayName: PowerDNS Recursor
+      os: linux
+    - checkName: presto
+      displayName: Presto
+      os: linux
+    - checkName: process
+      displayName: Process
+      os: linux
+    - checkName: prometheus
+      displayName: Prometheus
+      os: linux
+    - checkName: rabbitmq
+      displayName: RabbitMQ
+      os: linux
+    - checkName: redisdb
+      displayName: Redis
+      os: linux
+    - checkName: riak
+      displayName: Riak
+      os: linux
+    - checkName: riakcs
+      displayName: Riak CS
+      os: linux
+    - checkName: sap_hana
+      displayName: SAP HANA
+      os: linux
+    - checkName: scylla
+      displayName: Scylla
+      os: linux
+    - checkName: snmp
+      displayName: SNMP
+      os: linux
+    - checkName: solr
+      displayName: Solr
+      os: linux
+    - checkName: spark
+      displayName: Spark
+      os: linux
+    - checkName: sqlserver
+      displayName: SQL Server (Linux)
+      os: linux
+    - checkName: sqlserver
+      displayName: SQL Server (Windows)
+      os: windows
+    - checkName: squid
+      displayName: Squid
+      os: linux
+    - checkName: ssh_check
+      displayName: SSH
+      os: linux
+    - checkName: statsd
+      displayName: StatsD
+      os: linux
+    - checkName: supervisord
+      displayName: Supervisord
+      os: linux
+    - checkName: system_core
+      displayName: System Core
+      os: linux
+    - checkName: system_swap
+      displayName: System Swap
+      os: linux
+    - checkName: tcp_check
+      displayName: TCP
+      os: linux
+    - checkName: teamcity
+      displayName: TeamCity
+      os: linux
+    - checkName: tls
+      displayName: TLS
+      os: linux
+    - checkName: tokumx
+      displayName: TokuMX
+      os: linux
+    - checkName: twemproxy
+      displayName: Twemproxy
+      os: linux
+    - checkName: twistlock
+      displayName: Twistlock
+      os: linux
+    - checkName: varnish
+      displayName: Varnish
+      os: linux
+    - checkName: vault
+      displayName: Vault
+      os: linux
+    - checkName: vertica
+      displayName: Vertica
+      os: linux
+    - checkName: vsphere
+      displayName: vSphere
+      os: linux
+    - checkName: win32_event_log
+      displayName: Win32 Event Log
+      os: windows
+    - checkName: windows_service
+      displayName: Windows Service
+      os: windows
+    - checkName: wmi_check
+      displayName: WMI
+      os: windows
+    - checkName: yarn
+      displayName: Yarn
+      os: linux
+    - checkName: zk
+      displayName: ZooKeeper
       os: linux
