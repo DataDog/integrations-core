@@ -17,8 +17,8 @@ pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration
 
 def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
     instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
+    check = IbmMqCheck('ibm_mq', {}, [instance])
 
-    check = IbmMqCheck('ibm_mq', {}, {})
     check.check(instance)
 
     assert_all_metrics(aggregator)
@@ -40,7 +40,7 @@ def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
 
 
 def test_check_all(aggregator, instance_collect_all, seed_data):
-    check = IbmMqCheck('ibm_mq', {}, {})
+    check = IbmMqCheck('ibm_mq', {}, [instance_collect_all])
     check.check(instance_collect_all)
 
     assert_all_metrics(aggregator)
@@ -60,14 +60,14 @@ def test_integration_custom_mapping(aggregator, instance, channel_status_mapping
 
 
 def test_check_queue_pattern(aggregator, instance_queue_pattern, seed_data):
-    check = IbmMqCheck('ibm_mq', {}, {})
+    check = IbmMqCheck('ibm_mq', {}, [instance_queue_pattern])
     check.check(instance_queue_pattern)
 
     assert_all_metrics(aggregator)
 
 
 def test_check_queue_regex(aggregator, instance_queue_regex, seed_data):
-    check = IbmMqCheck('ibm_mq', {}, {})
+    check = IbmMqCheck('ibm_mq', {}, [instance_queue_regex])
     check.check(instance_queue_regex)
 
     assert_all_metrics(aggregator)
@@ -91,7 +91,7 @@ def test_check_channel_count(aggregator, instance_queue_regex_tag, seed_data):
         "unknown": 0,
     }
 
-    check = IbmMqCheck('ibm_mq', {}, {})
+    check = IbmMqCheck('ibm_mq', {}, [instance_queue_regex_tag])
     check._submit_channel_count('my_channel', pymqi.CMQCFC.MQCHS_RUNNING, ["channel:my_channel"])
 
     for status, expected_value in iteritems(metrics_to_assert):
@@ -116,7 +116,7 @@ def test_check_channel_count_status_unknown(aggregator, instance_queue_regex_tag
         "unknown": 1,
     }
 
-    check = IbmMqCheck('ibm_mq', {}, {})
+    check = IbmMqCheck('ibm_mq', {}, [instance_queue_regex_tag])
     check._submit_channel_count('my_channel', 123, ["channel:my_channel"])
 
     for status, expected_value in iteritems(metrics_to_assert):
@@ -126,7 +126,7 @@ def test_check_channel_count_status_unknown(aggregator, instance_queue_regex_tag
 
 
 def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):
-    check = IbmMqCheck('ibm_mq', {}, {})
+    check = IbmMqCheck('ibm_mq', {}, [instance_queue_regex_tag])
     check.check(instance_queue_regex_tag)
 
     tags = [

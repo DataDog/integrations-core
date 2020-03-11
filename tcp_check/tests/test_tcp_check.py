@@ -1,7 +1,10 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+
 from copy import deepcopy
+
+import mock
 
 from datadog_checks.tcp_check import TCPCheck
 
@@ -22,6 +25,20 @@ def test_down(aggregator):
     aggregator.assert_metric('network.tcp.response_time', count=0)  # should not submit response time metric on failure
     aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_checks('tcp.can_connect')) == 1
+
+
+def test_reattempt_resolution():
+    instance = deepcopy(common.INSTANCE)
+    check = TCPCheck(common.CHECK_NAME, {}, [instance])
+
+    def failed_connection(self):
+        raise Exception()
+
+    check.connect = failed_connection
+
+    with mock.patch.object(check, 'resolve_ip', wraps=check.resolve_ip) as resolve_ip:
+        check.check(instance)
+        assert resolve_ip.called
 
 
 def test_up(aggregator, check):

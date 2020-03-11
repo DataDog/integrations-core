@@ -320,13 +320,13 @@ def test_cache_building(write_mock, read_mock):
 def test_trie():
     # type: () -> None
     trie = OIDTrie()
-    trie.set(OID((1, 2)), 'bar')
-    trie.set(OID((1, 2, 3)), 'foo')
-    assert trie.match(OID((1,))) == ((1,), None)
-    assert trie.match(OID((1, 2))) == ((1, 2), 'bar')
-    assert trie.match(OID((1, 2, 3))) == ((1, 2, 3), 'foo')
-    assert trie.match(OID((1, 2, 3, 4))) == ((1, 2, 3), 'foo')
-    assert trie.match(OID((2, 3, 4))) == ((), None)
+    trie.set((1, 2), 'bar')
+    trie.set((1, 2, 3), 'foo')
+    assert trie.match((1,)) == ((1,), None)
+    assert trie.match((1, 2)) == ((1, 2), 'bar')
+    assert trie.match((1, 2, 3)) == ((1, 2, 3), 'foo')
+    assert trie.match((1, 2, 3, 4)) == ((1, 2, 3), 'foo')
+    assert trie.match((2, 3, 4)) == ((), None)
 
 
 @pytest.mark.parametrize(
