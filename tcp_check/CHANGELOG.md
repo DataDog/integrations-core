@@ -1,5 +1,9 @@
 # CHANGELOG - tcp_check
 
+## 2.3.4 / 2020-03-11
+
+* [Fixed] Reattempt to resolve IP on failure. See [#6012](https://github.com/DataDog/integrations-core/pull/6012).
+
 ## 2.3.3 / 2019-12-24
 
 * [Fixed] Don't report response time when connection fails. See [#5271](https://github.com/DataDog/integrations-core/pull/5271).
