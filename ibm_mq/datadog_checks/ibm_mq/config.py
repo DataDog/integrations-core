@@ -109,10 +109,8 @@ class IBMMQConfig:
         ]  # type: List[str]
         tags.extend(custom_tags)
         if host or port:
-            tags.extend({
-                "mq_host:{}".format(host),  # 'host' is reserved and 'mq_host' is used instead
-                "port:{}".format(port),
-            })
+            # 'host' is reserved and 'mq_host' is used instead
+            tags.extend({"mq_host:{}".format(host), "port:{}".format(port)})
         self.tags_no_channel = tags
         self.tags = tags + ["channel:{}".format(self.channel)]  # type: List[str]
 
