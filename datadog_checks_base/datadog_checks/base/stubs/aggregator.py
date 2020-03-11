@@ -8,7 +8,7 @@ from collections import OrderedDict, defaultdict
 
 from six import iteritems
 
-from ...utils.testing import e2e_active, get_metadata_metrics
+from ...utils.testing import e2e_testing, get_metadata_metrics
 from ..utils.common import ensure_unicode, to_native_string
 from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from .similar import build_similar_elements_msg
@@ -225,7 +225,7 @@ class AggregatorStub(object):
 
         # Since we are asserting the in-app metric type (NOT submission type),
         # asserting the type make sense only for e2e (metrics collected from agent).
-        if e2e_active():
+        if e2e_testing():
             expected_metric_type = self._metadata_metrics[metric_stub.name]['metric_type']
             actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
 
