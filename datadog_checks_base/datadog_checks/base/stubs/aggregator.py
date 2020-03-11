@@ -215,16 +215,17 @@ class AggregatorStub(object):
             self._metadata_metrics = get_metadata_metrics()
 
         if metric_stub.name not in self._metadata_metrics:
-            warnings.warn("[WARNING] Metric `{}` is not in metadata.csv".format(metric_stub.name))
+            warnings.warn("[WARNING] Expect metric `{}` to be in metadata.csv, but it's not.".format(metric_stub.name))
             return
 
         expected_metric_type = self._metadata_metrics[metric_stub.name]['metric_type']
         actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
 
-        error_msg = "Expect type `{}` (from metadata.csv) but got type `{}` for metric `{}`".format(
-            expected_metric_type, actual_metric_type, metric_stub.name
-        )
-        assert expected_metric_type == actual_metric_type, error_msg
+        if expected_metric_type != actual_metric_type:
+            error_msg = "[WARNING] Expect type `{}` (from metadata.csv) but got type `{}` for metric `{}`.".format(
+                expected_metric_type, actual_metric_type, metric_stub.name
+            )
+            warnings.warn(error_msg)
 
     def assert_metric(
         self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None, device=None
