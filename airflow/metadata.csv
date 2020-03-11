@@ -1,6 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-airflow.can_connect,count,,,,"1 if can connect to Airflow, otherwise 0",0,airflow,can_connect
-airflow.healthy,count,,,,"1 if Airflow is healthy, otherwise 0",0,airflow,healthy
+airflow.can_connect,gauge,,,,"1 if can connect to Airflow, otherwise 0",0,airflow,can_connect
+airflow.healthy,gauge,,,,"1 if Airflow is healthy, otherwise 0",0,airflow,healthy
 airflow.job.start,count,,job,,"Number of started `<job_name>` job, ex. `SchedulerJob`, `LocalTaskJob`",0,airflow,job.start
 airflow.job.end,count,,job,,"Number of ended `<job_name>` job, ex. `SchedulerJob`, `LocalTaskJob`",0,airflow,job.end
 airflow.operator_failures,count,,,,Operator `<operator_name>` failures,-1,airflow,operator_failures

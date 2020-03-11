@@ -34,3 +34,4 @@ def assert_service_checks(aggregator):
     aggregator.assert_metric('airflow.healthy', 1, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata()
