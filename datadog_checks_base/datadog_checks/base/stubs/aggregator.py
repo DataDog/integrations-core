@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import warnings
 from collections import OrderedDict, defaultdict
 
 from six import iteritems
@@ -213,7 +214,9 @@ class AggregatorStub(object):
         if not getattr(self, '_metadata_metrics', None):
             self._metadata_metrics = get_metadata_metrics()
 
-        assert metric_stub.name in self._metadata_metrics, "Metric `{}` is not in metadata.csv".format(metric_stub.name)
+        if metric_stub.name not in self._metadata_metrics:
+            warnings.warn("[WARNING] Metric `{}` is not in metadata.csv".format(metric_stub.name))
+            return
 
         expected_metric_type = self._metadata_metrics[metric_stub.name]['metric_type']
         actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
