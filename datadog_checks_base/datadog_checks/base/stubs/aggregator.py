@@ -207,8 +207,13 @@ class AggregatorStub(object):
             condition=condition, msg=msg, expected_stub=expected_bucket, submitted_elements=self._histogram_buckets
         )
 
-    def _assert_metric_type(self, metric_stub):
+    def _assert_metric_using_metadata(self, metric_stub):
         # type: (MetricStub) -> None
+        """
+        Assert metric using metadata.
+
+        For now, we only raise warning, but this is later turn into assertions.
+        """
 
         # read metadata only once
         if not getattr(self, '_metadata_metrics', None):
@@ -218,14 +223,17 @@ class AggregatorStub(object):
             warnings.warn("[WARNING] Expect metric `{}` to be in metadata.csv, but it's not.".format(metric_stub.name))
             return
 
-        expected_metric_type = self._metadata_metrics[metric_stub.name]['metric_type']
-        actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
+        # Since we are asserting the in-app metric type (NOT submission type),
+        # asserting the type make sense only for e2e (metrics collected from agent).
+        if e2e_active():
+            expected_metric_type = self._metadata_metrics[metric_stub.name]['metric_type']
+            actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
 
-        if expected_metric_type != actual_metric_type:
-            error_msg = "[WARNING] Expect type `{}` (from metadata.csv) but got type `{}` for metric `{}`.".format(
-                expected_metric_type, actual_metric_type, metric_stub.name
-            )
-            warnings.warn(error_msg)
+            if expected_metric_type != actual_metric_type:
+                error_msg = "[WARNING] Expect type `{}` (from metadata.csv) but got type `{}` for metric `{}`.".format(
+                    expected_metric_type, actual_metric_type, metric_stub.name
+                )
+                warnings.warn(error_msg)
 
     def assert_metric(
         self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None, device=None
@@ -256,8 +264,7 @@ class AggregatorStub(object):
 
             candidates.append(metric)
 
-            if e2e_active():
-                self._assert_metric_type(metric)
+            self._assert_metric_using_metadata(metric)
 
         expected_metric = MetricStub(name, metric_type, value, tags, hostname, device)
 
