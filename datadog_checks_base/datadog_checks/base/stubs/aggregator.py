@@ -7,10 +7,10 @@ from collections import OrderedDict, defaultdict
 
 from six import iteritems
 
-from datadog_checks.base.stubs.common import HistogramBucketStub, MetricStub, ServiceCheckStub
-from datadog_checks.base.stubs.similar import build_similar_elements_msg
-
+from ...utils.testing import e2e_active, get_metadata_metrics
 from ..utils.common import ensure_unicode, to_native_string
+from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
+from .similar import build_similar_elements_msg
 
 
 def normalize_tags(tags, sort=False):
@@ -42,6 +42,7 @@ class AggregatorStub(object):
             ('historate', 6),
         )
     )
+    METRIC_ENUM_MAP_REV = {v: k for k, v in iteritems(METRIC_ENUM_MAP)}
     GAUGE, RATE, COUNT, MONOTONIC_COUNT, COUNTER, HISTOGRAM, HISTORATE = list(METRIC_ENUM_MAP.values())
     AGGREGATE_TYPES = {COUNT, COUNTER}
     IGNORED_METRICS = {'datadog.agent.profile.memory.check_run_alloc'}
@@ -205,6 +206,21 @@ class AggregatorStub(object):
             condition=condition, msg=msg, expected_stub=expected_bucket, submitted_elements=self._histogram_buckets
         )
 
+    def _assert_metric_type(self, metric_stub):
+        # type: (MetricStub) -> None
+
+        # read metadata only once
+        if not getattr(self, '_metadata_metrics', None):
+            self._metadata_metrics = get_metadata_metrics()
+
+        expected_metric_type = self._metadata_metrics[metric_stub.name]['metric_type']
+        actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
+
+        error_msg = "Expect type `{}` (from metadata.csv) but got type `{}` for metric `{}`".format(
+            expected_metric_type, actual_metric_type, metric_stub.name
+        )
+        assert expected_metric_type == actual_metric_type, error_msg
+
     def assert_metric(
         self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None, device=None
     ):
@@ -233,6 +249,9 @@ class AggregatorStub(object):
                 continue
 
             candidates.append(metric)
+
+            if e2e_active():
+                self._assert_metric_type(metric)
 
         expected_metric = MetricStub(name, metric_type, value, tags, hostname, device)
 
