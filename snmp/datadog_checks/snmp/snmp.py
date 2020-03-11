@@ -170,7 +170,7 @@ class SnmpCheck(AgentCheck):
                 time.sleep(interval - time_elapsed)
 
     def fetch_results(self, config, all_oids, bulk_oids):
-        # type: (InstanceConfig, list, list) -> Tuple[dict, Optional[str]]
+        # type: (InstanceConfig, list, list) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], Optional[str]]
         """
         Perform a snmpwalk on the domain specified by the oids, on the device
         configured in instance.
@@ -179,7 +179,7 @@ class SnmpCheck(AgentCheck):
         dict[oid/metric_name][row index] = value
         In case of scalar objects, the row index is just 0
         """
-        results = defaultdict(dict)  # type: DefaultDict[str, dict]
+        results = defaultdict(dict)  # type: DefaultDict[str, Dict[Tuple[str, ...], Any]]
         enforce_constraints = config.enforce_constraints
 
         all_binds, error = self.fetch_oids(config, all_oids, enforce_constraints=enforce_constraints)
@@ -415,7 +415,7 @@ class SnmpCheck(AgentCheck):
     def report_metrics(
         self,
         metrics,  # type: List[Union[ParsedMetric, ParsedTableMetric]]
-        results,  # type: Dict[str, dict]
+        results,  # type: Dict[str, Dict[Tuple[str, ...], Any]]
         tags,  # type: List[str]
     ):
         # type: (...) -> None
