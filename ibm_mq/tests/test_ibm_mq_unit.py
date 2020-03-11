@@ -105,3 +105,66 @@ def test_set_mqcd_version(instance):
     instance['mqcd_version'] = 9
     config = IBMMQConfig(instance)
     assert config.mqcd_version == pymqi.CMQC.MQCD_VERSION_9
+
+
+@pytest.mark.parametrize(
+    'instance_config, expected_connection_name',
+    [
+        pytest.param({}, 'localhost(1414)', id='empty'),
+        pytest.param({'host': 'foo'}, 'foo(1414)', id='only host'),
+        pytest.param({'port': '1234'}, 'localhost(1234)', id='only port'),
+        pytest.param({'host': 'foo', 'port': 3333}, 'foo(3333)', id='host port'),
+        pytest.param({'connection_name': 'baz(8888)'}, 'baz(8888)', id='connection_name'),
+    ],
+)
+def test_connection_config_ok(instance_config, expected_connection_name):
+    instance_config.update({'channel': 'foo', 'queue_manager': 'bar'})
+
+    config = IBMMQConfig(instance_config)
+
+    assert config.connection_name == expected_connection_name
+
+
+@pytest.mark.parametrize(
+    'instance_config',
+    [pytest.param({'host': 'localhost', 'port': 1000, 'connection_name': 'localhost(1234)'}, id='both')],
+)
+def test_connection_config_error(instance_config):
+    instance_config.update({'channel': 'foo', 'queue_manager': 'bar'})
+
+    with pytest.raises(ConfigurationError) as excinfo:
+        IBMMQConfig(instance_config)
+
+    assert 'Specify only one host/port or connection_name configuration' in str(excinfo.value)
+
+
+@pytest.mark.parametrize(
+    'instance_config',
+    [
+        pytest.param({'channel': 'foo'}, id='channel and default queue manager'),
+        pytest.param({'channel': 'foo', 'queue_manager': 'abc'}, id='both'),
+    ],
+)
+def test_channel_queue_config_ok(instance_config):
+    instance_config.update({'host': 'localhost', 'port': 1000})
+
+    IBMMQConfig(instance_config)
+    # finish without configuration error
+
+
+@pytest.mark.parametrize(
+    'instance_config',
+    [
+        pytest.param({}, id='empty'),
+        pytest.param({'channel': 'foo', 'queue_manager': ''}, id='empty queue manager'),
+        pytest.param({'channel': '', 'queue_manager': 'abc'}, id='empty channel'),
+        pytest.param({'channel': '', 'queue_manager': ''}, id='both empty'),
+    ],
+)
+def test_channel_queue_config_error(instance_config):
+    instance_config.update({'host': 'localhost', 'port': 1000})
+
+    with pytest.raises(ConfigurationError) as excinfo:
+        IBMMQConfig(instance_config)
+
+    assert 'channel, queue_manager are required configurations' in str(excinfo.value)

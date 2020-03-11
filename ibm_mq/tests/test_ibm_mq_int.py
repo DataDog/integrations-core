@@ -27,6 +27,8 @@ def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
         'queue_manager:{}'.format(common.QUEUE_MANAGER),
         'mq_host:{}'.format(common.HOST),
         'port:{}'.format(common.PORT),
+        'connection_name:{}({})'.format(common.HOST, common.PORT),
+        'foo:bar',
     ]
 
     channel_tags = tags + ['channel:{}'.format(common.CHANNEL)]
@@ -37,6 +39,34 @@ def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
 
     discoverable_tags = tags + ['channel:*']
     aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=discoverable_tags, count=1)
+
+
+def test_check_connection_name_one(aggregator, instance_with_connection_name):
+    instance_with_connection_name['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
+
+    check = IbmMqCheck('ibm_mq', {}, [instance_with_connection_name])
+    check.check(instance_with_connection_name)
+
+    assert_all_metrics(aggregator)
+
+    tags = [
+        'queue_manager:{}'.format(common.QUEUE_MANAGER),
+        'connection_name:{}({})'.format(common.HOST, common.PORT),
+    ]
+
+    channel_tags = tags + ['channel:{}'.format(common.CHANNEL)]
+    aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=channel_tags, count=1)
+
+
+def test_check_connection_names_multi(aggregator, instance_with_connection_name):
+    instance = instance_with_connection_name
+    instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
+    instance['connection_name'] = "localhost(9999),{}".format(instance['connection_name'])
+
+    check = IbmMqCheck('ibm_mq', {}, [instance])
+    check.check(instance)
+
+    assert_all_metrics(aggregator)
 
 
 def test_check_all(aggregator, instance_collect_all, seed_data):
@@ -133,6 +163,7 @@ def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):
         'queue_manager:{}'.format(common.QUEUE_MANAGER),
         'mq_host:{}'.format(common.HOST),
         'port:{}'.format(common.PORT),
+        'connection_name:{}({})'.format(common.HOST, common.PORT),
         'channel:{}'.format(common.CHANNEL),
         'queue:{}'.format(common.QUEUE),
         'foo:bar',

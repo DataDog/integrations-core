@@ -63,9 +63,23 @@ class IBMMQConfig:
         self.channel = instance.get('channel')  # type: str
         self.queue_manager_name = instance.get('queue_manager', 'default')  # type: str
 
-        self.host = instance.get('host', 'localhost')  # type: str
-        self.port = instance.get('port', '1414')  # type: str
-        self.host_and_port = "{}({})".format(self.host, self.port)
+        if not self.channel or not self.queue_manager_name:
+            msg = "channel, queue_manager are required configurations"
+            raise ConfigurationError(msg)
+
+        host = instance.get('host')  # type: str
+        port = instance.get('port')  # type: str
+        self.connection_name = instance.get('connection_name')  # type: str
+        if (host or port) and self.connection_name:
+            raise ConfigurationError(
+                'Specify only one host/port or connection_name configuration, '
+                '(host={}, port={}, connection_name={}).'.format(host, port, self.connection_name)
+            )
+
+        if not self.connection_name:
+            host = host or 'localhost'
+            port = port or '1414'
+            self.connection_name = "{}({})".format(host, port)
 
         self.username = instance.get('username')  # type: str
         self.password = instance.get('password')  # type: str
@@ -89,12 +103,16 @@ class IBMMQConfig:
         )  # type: Dict[str, str]
 
         custom_tags = instance.get('tags', [])  # type: List[str]
-        self.tags_no_channel = [
+        tags = [
             "queue_manager:{}".format(self.queue_manager_name),
-            "mq_host:{}".format(self.host),  # 'host' is reserved and 'mq_host' is used instead
-            "port:{}".format(self.port),
-        ] + custom_tags  # type: List[str]
-        self.tags = self.tags_no_channel + ["channel:{}".format(self.channel)]  # type: List[str]
+            "connection_name:{}".format(self.connection_name),
+        ]  # type: List[str]
+        tags.extend(custom_tags)
+        if host or port:
+            # 'host' is reserved and 'mq_host' is used instead
+            tags.extend({"mq_host:{}".format(host), "port:{}".format(port)})
+        self.tags_no_channel = tags
+        self.tags = tags + ["channel:{}".format(self.channel)]  # type: List[str]
 
         self.ssl = is_affirmative(instance.get('ssl_auth', False))  # type: bool
         self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')  # type: str
@@ -115,11 +133,6 @@ class IBMMQConfig:
             raise ConfigurationError(
                 "mqcd_version must be a number between 1 and 9. {} found.".format(raw_mqcd_version)
             )
-
-    def check_properly_configured(self):
-        if not self.channel or not self.queue_manager_name or not self.host or not self.port:
-            msg = "channel, queue_manager, host and port are all required configurations"
-            raise ConfigurationError(msg)
 
     def add_queues(self, new_queues):
         # add queues without duplication
