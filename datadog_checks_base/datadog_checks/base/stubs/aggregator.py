@@ -302,7 +302,7 @@ class AggregatorStub(object):
             msg += '\nMissing Metrics:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
         assert condition, msg
 
-    def assert_metrics_using_metadata(self, check_type=True, exclude=None):
+    def assert_metrics_using_metadata(self, check_metric_type=True, exclude=None):
         """
         Assert metrics using metadata.csv
 
@@ -322,7 +322,7 @@ class AggregatorStub(object):
                     errors.add("Expect `{}` to be in metadata.csv.".format(metric_stub.name))
                     continue
 
-                if check_type:
+                if check_metric_type:
                     expected_metric_type = metadata_metrics[metric_stub.name]['metric_type']
                     actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
 
