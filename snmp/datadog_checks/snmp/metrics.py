@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 """
-Helpers for deriving metrics from raw values.
+Helpers for deriving metrics from SNMP values.
 """
 
 from typing import Any, Optional
@@ -20,8 +20,8 @@ def _get_known_snmp_type(value):
     try:
         return PYSNMP_CLASS_NAME_TO_SNMP_TYPE[pysnmp_class_name]
     except KeyError:
-        # Unrecognized PySNMP type. Fine -- but let's discard that piece of information to not be
-        # tempted to rely on this information downstream.
+        # Unrecognized PySNMP type. Fine -- but let's discard this piece of information
+        # so that we're not tempted to rely on it downstream.
         return None
 
 
@@ -37,7 +37,8 @@ def as_metric_with_inferred_type(value):
 
     opaque = 'opaque'  # type: SNMPType  # Use type hint to make sure this literal is correct.
     if snmp_type == opaque:
-        # Try support for float opaque values.
+        # Arbitrary ASN.1 syntax encoded as an octet string. Let's try to decode it as a float.
+        # See: http://snmplabs.com/pysnmp/docs/api-reference.html#opaque-type
         try:
             decoded, _ = pyasn1_decode(bytes(value))
             value = float(decoded)

@@ -35,7 +35,7 @@ class ParsedMetric(object):
     def __init__(
         self,
         name,  # type: str
-        metric_tags,  # type: list
+        metric_tags,  # type: List[Dict[str, Any]]
         forced_type=None,  # type: ForceableMetricType
         enforce_scalar=True,  # type: bool
     ):
