@@ -20,15 +20,15 @@ def as_metric_with_inferred_type(value):
     # Ugly hack but couldn't find a cleaner way.
     # Proper way would be to use the ASN1 method isSameTypeWith but it wrongfully returns True in the
     # case of CounterBasedGauge64 and Counter64 for example.
-    pysnmp_class = value.__class__
+    pysnmp_class_name = value.__class__.__name__
 
-    if pysnmp_class in PYSNMP_COUNTER_CLASSES:
+    if pysnmp_class_name in PYSNMP_COUNTER_CLASSES:
         return {'type': 'rate', 'value': int(value)}
 
-    if pysnmp_class in PYSNMP_GAUGE_CLASSES:
+    if pysnmp_class_name in PYSNMP_GAUGE_CLASSES:
         return {'type': 'gauge', 'value': int(value)}
 
-    if pysnmp_class == Opaque:
+    if pysnmp_class_name == 'Opaque':
         # Arbitrary ASN.1 syntax encoded as an octet string. Let's try to decode it as a float.
         # See: http://snmplabs.com/pysnmp/docs/api-reference.html#opaque-type
         try:
