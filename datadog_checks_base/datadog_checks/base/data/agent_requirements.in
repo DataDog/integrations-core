@@ -67,7 +67,7 @@ semver==2.9.0
 serpent==1.27; sys_platform == 'win32'
 service_identity[idna]==18.1.0
 simplejson==3.6.5
-six==1.12.0
+six==1.14.0
 supervisor==4.1.0
 tuf==0.12.2
 typing==3.7.4.1; python_version < '3.0'
