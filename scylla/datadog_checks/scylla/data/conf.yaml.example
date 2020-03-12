@@ -142,7 +142,7 @@ instances:
 #     sourcecategory: database
 #     service: <SERVICE>
 #     #To handle multi line that starts with yyyy-mm-dd or yyyy-dd-mm use the following pattern
-#     log_processing_rules:
-#       - type: multi_line
-#         pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
-#         name: new_log_start_with_date
+#     #log_processing_rules:
+#     #  - type: multi_line
+#     #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+#     #    name: new_log_start_with_date
