@@ -4,7 +4,7 @@
 import functools
 import ssl
 from logging import Logger
-from typing import Any, Callable, List
+from typing import Any, Callable, List, cast
 
 from pyVim import connect
 from pyVmomi import vim, vmodl
@@ -185,10 +185,11 @@ class VSphereAPI(object):
             view_ref.Destroy()
 
         infrastructure_data = {mor.obj: {prop.name: prop.val for prop in mor.propSet} for mor in mors if mor.propSet}
+        infrastructure_data_typed = cast(InfrastructureData, infrastructure_data)
 
         root_folder = self._conn.content.rootFolder
-        infrastructure_data[root_folder] = {"name": root_folder.name, "parent": None}
-        return infrastructure_data
+        infrastructure_data_typed[root_folder] = {"name": root_folder.name, "parent": None}
+        return infrastructure_data_typed
 
     @smart_retry
     def query_metrics(self, query_specs):

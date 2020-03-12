@@ -1,6 +1,6 @@
 import re
 from logging import Logger
-from typing import Any, Dict, List
+from typing import List
 
 from pyVmomi import vim
 from six import iteritems, string_types
@@ -24,6 +24,7 @@ from datadog_checks.vsphere.constants import (
 from datadog_checks.vsphere.types import (
     FormattedMetricFilters,
     FormattedResourceFilter,
+    InstanceConfig,
     MetricFilterConfig,
     ResourceFilterConfig,
 )
@@ -31,7 +32,7 @@ from datadog_checks.vsphere.types import (
 
 class VSphereConfig(object):
     def __init__(self, instance, log):
-        # type: (Dict[str, Any], Logger) -> None
+        # type: (InstanceConfig, Logger) -> None
         self.log = log
 
         # Connection parameters
@@ -76,7 +77,7 @@ class VSphereConfig(object):
             self.collected_resource_types = REALTIME_RESOURCES
 
         # Filters
-        self.resource_filters = self._parse_resource_filters(instance.get("resource_filters", {}))
+        self.resource_filters = self._parse_resource_filters(instance.get("resource_filters", []))
         self.metric_filters = self._parse_metric_regex_filters(instance.get("metric_filters", {}))
         # Since `collect_per_instance_filters` have the same structure as `metric_filters` we use the same parser
         self.collect_per_instance_filters = self._parse_metric_regex_filters(
