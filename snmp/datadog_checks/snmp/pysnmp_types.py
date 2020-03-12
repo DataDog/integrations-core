@@ -51,23 +51,20 @@ __all__ = [
     'UsmUserData',
 ]
 
-# Additional types that are not part of the SNMP protocol (see RFC 2856).
-CounterBasedGauge64, ZeroBasedCounter64 = MibBuilder().importSymbols(
-    'HCNUM-TC', 'CounterBasedGauge64', 'ZeroBasedCounter64'
-)
-
 # SNMP value types that we explicitly support.
 PYSNMP_COUNTER_CLASSES = {
     'Counter32',
     'Counter64',
+    # Additional types that are not part of the SNMP protocol (see RFC 2856).
     'ZeroBasedCounter64',
 }  # type: Set[str]
 PYSNMP_GAUGE_CLASSES = {
     'Gauge32',
-    'CounterBasedGauge64',
     'Integer',
     'Integer32',
     'Unsigned32',
+    # Additional types that are not part of the SNMP protocol (see RFC 2856).
+    'CounterBasedGauge64',
 }  # type: Set[str]
 
 # Cleanup items we used here but don't want to expose.

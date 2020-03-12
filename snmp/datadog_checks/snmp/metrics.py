@@ -10,16 +10,23 @@ from typing import Any, Optional
 from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 
 from .compat import total_time_to_temporal_percent
-from .pysnmp_types import PYSNMP_COUNTER_CLASSES, PYSNMP_GAUGE_CLASSES, Opaque
+from .pysnmp_types import PYSNMP_COUNTER_CLASSES, PYSNMP_GAUGE_CLASSES
 from .types import ForceableMetricType, MetricDefinition
 
 
 def as_metric_with_inferred_type(value):
     # type: (Any) -> Optional[MetricDefinition]
 
-    # Ugly hack but couldn't find a cleaner way.
-    # Proper way would be to use the ASN1 method isSameTypeWith but it wrongfully returns True in the
-    # case of CounterBasedGauge64 and Counter64 for example.
+    # Ugly hack but couldn't find a cleaner way. Proper way would be to use the ASN.1
+    # method `.isSameTypeWith()`, or at least `isinstance()`.
+    # But these wrongfully return `True` in some cases, eg:
+    # ```python
+    # >>> from pysnmp.proto.rfc1902 import Counter64
+    # >>> from datadog_checks.snmp.pysnmp_types import CounterBasedGauge64
+    # >>> issubclass(CounterBasedGauge64, Counter64)
+    # True  # <-- WRONG! (CounterBasedGauge64 values are gauges, not counters.)
+    # ````
+
     pysnmp_class_name = value.__class__.__name__
 
     if pysnmp_class_name in PYSNMP_COUNTER_CLASSES:
