@@ -28,8 +28,6 @@ instances:
     #
     # tls_name: <TLS_NAME>
 
-    tls a dict of optional TLS configuration parameters.
-
     ## @param tls_config - list of key:value elements - optional
     ## Note TLS usage requires Aerospike Enterprise Edition
     ## Key value pairs with a choice of the following elements:
