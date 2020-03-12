@@ -4,13 +4,14 @@
 """
 Define our own models and interfaces for dealing with SNMP data.
 """
-from typing import Any, NoReturn, Optional, Sequence, Tuple, Union
+from typing import Any, Sequence, Tuple, Union
 
 from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 
 from .exceptions import CouldNotDecodeOID
 from .pysnmp_types import (
-    PYSNMP_CLASS_NAME_TO_SNMP_TYPE,
+    PYSNMP_COUNTER_CLASSES,
+    PYSNMP_GAUGE_CLASSES,
     Asn1Type,
     ObjectIdentifier,
     ObjectIdentity,
@@ -20,8 +21,7 @@ from .pysnmp_types import (
     noSuchInstance,
     noSuchObject,
 )
-from .types import SNMPType
-from .utils import parse_as_oid_tuple
+from .utils import format_as_oid_string, parse_as_oid_tuple
 
 
 class OID(object):
@@ -63,26 +63,22 @@ class OID(object):
 
         self._parts = parts
 
-    @property
-    def known_snmp_type(self):
-        # type: () -> NoReturn
-        raise NotImplementedError
-
     def get_mib_symbol(self):
         # type: () -> Tuple[str, Tuple[str, ...]]
         if not isinstance(self.raw, ObjectIdentity):
-            raise NotImplementedError
+            raise NotImplementedError  # pragma: no cover
+
         _, metric, indexes = self.raw.getMibSymbol()
         return metric, tuple(str(index) for index in indexes)
 
     def resolve_as_tuple(self):
         # type: () -> Tuple[int, ...]
-        self._initialize()  # Trigger decoding of the raw OID object.
+        self._initialize()
         return self._parts
 
     def resolve_as_string(self):
         # type: () -> str
-        return '.'.join(map(str, self.resolve_as_tuple()))
+        return format_as_oid_string(self.resolve_as_tuple())
 
     def maybe_resolve_as_object_type(self):
         # type: () -> ObjectType
@@ -108,7 +104,7 @@ class OID(object):
         return self.resolve_as_string()
 
 
-class _PySNMPValue(object):
+class Value(object):
     """
     Wrapper around PySNMP value-like objects.
 
@@ -117,97 +113,68 @@ class _PySNMPValue(object):
 
     def __init__(self, value):
         # type: (Asn1Type) -> None
-        self._value = value
+        if isinstance(value, (ObjectIdentifier, ObjectIdentity)):
+            # Eg. a result for `sysObjectID`. It's a special case, so wrap around our helper
+            # class to make it easier to work with.
+            value = OID(value)
 
-    @property
-    def known_snmp_type(self):
-        # type: () -> Optional[SNMPType]
-        pysnmp_class_name = self._value.__class__.__name__
-        try:
-            return PYSNMP_CLASS_NAME_TO_SNMP_TYPE[pysnmp_class_name]
-        except KeyError:
-            # We shouldn't depend on the raw PySNMP class name anywhere in our code, so hide that information.
-            return None
+        self._value = value  # type: Union[OID, Asn1Type]
+
+    # NOTE: About these class name checks...
+    # Ugly hack but couldn't find a cleaner way. Proper way would be to use the ASN.1
+    # method `.isSameTypeWith()`, or at least `isinstance()`.
+    # But these wrongfully return `True` in some cases, eg:
+    # ```python
+    # >>> from pysnmp.proto.rfc1902 import Counter64
+    # >>> from datadog_checks.snmp.pysnmp_types import CounterBasedGauge64
+    # >>> issubclass(CounterBasedGauge64, Counter64)
+    # True  # <-- WRONG! (CounterBasedGauge64 values are gauges, not counters.)
+    # ````
+
+    def is_counter(self):
+        # type: () -> bool
+        return self._value.__class__.__name__ in PYSNMP_COUNTER_CLASSES
+
+    def is_gauge(self):
+        # type: () -> bool
+        return self._value.__class__.__name__ in PYSNMP_GAUGE_CLASSES
+
+    def is_opaque(self):
+        # type: () -> bool
+        # Arbitrary ASN.1 syntax encoded as an octet string.
+        # See: http://snmplabs.com/pysnmp/docs/api-reference.html#opaque-type
+        return self._value.__class__.__name__ == 'Opaque'
 
     def __int__(self):
         # type: () -> int
+        if isinstance(self._value, OID):
+            raise ValueError
+
         return int(self._value)
 
     def __float__(self):
         # type: () -> float
-        opaque = 'opaque'  # type: SNMPType  # Use type hint to make sure this literal is correct.
-        if self.known_snmp_type == opaque:
+        if isinstance(self._value, OID):
+            raise ValueError
+
+        if self.is_opaque():
             decoded, _ = pyasn1_decode(bytes(self._value))
             return float(decoded)
-        else:
-            return float(self._value)
 
-    def __bool__(self):
-        # type: () -> bool
-        return not noSuchInstance.isSameTypeWith(self._value) and not noSuchObject.isSameTypeWith(self._value)
-
-    def __nonzero__(self):  # Python 2 compatibility.
-        # type: () -> bool
-        return self.__bool__()
-
-    def __repr__(self):
-        # type: () -> str
-        return repr(self._value)
-
-    def __str__(self):
-        # type: () -> str
-        value = self._value
-        if noSuchInstance.isSameTypeWith(value):
-            return 'NoSuchInstance'
-        elif noSuchObject.isSameTypeWith(value):
-            return 'NoSuchObject'
-        elif endOfMibView.isSameTypeWith(value):
-            return 'EndOfMibView'
-        else:
-            return value.prettyPrint()
-
-
-class Value(object):
-    """
-    Represents an SNMP value, such as a number, a string, an OID, etc.
-    """
-
-    def __init__(self, value):
-        # type: (Union[ObjectIdentity, Asn1Type]) -> None
-        if isinstance(value, ObjectIdentity):
-            # OID values (such as obtained when querying `sysObjectID`) may be returned in this form.
-            value = OID(value)
-        elif isinstance(value, ObjectIdentifier):
-            # Another possible type for OID values (such as obtained when querying `sysObjectID`).
-            value = OID(tuple(value))
-        elif isinstance(value, Asn1Type):
-            # Scalar value: a number, a description string, etc.
-            value = _PySNMPValue(value)
-        else:
-            raise RuntimeError('Got unexpected value {!r} of type {}'.format(value, type(value)))
-
-        self._value = value  # type: Union[OID, _PySNMPValue]
-
-    @property
-    def known_snmp_type(self):
-        # type: () -> Optional[SNMPType]
-        return self._value.known_snmp_type
-
-    def __int__(self):
-        # type: () -> int
-        if isinstance(self._value, OID):
-            raise ValueError('OID value is not convertible to int')
-        return int(self._value)
-
-    def __float__(self):
-        # type: () -> float
-        if isinstance(self._value, OID):
-            raise ValueError('OID value is not convertible to float')
         return float(self._value)
 
     def __bool__(self):
         # type: () -> bool
-        return bool(self._value)
+        if isinstance(self._value, OID):
+            return True
+
+        if noSuchInstance.isSameTypeWith(self._value):
+            return False
+
+        if noSuchObject.isSameTypeWith(self._value):
+            return False
+
+        return True
 
     def __nonzero__(self):  # Python 2 compatibility.
         # type: () -> bool
@@ -219,7 +186,21 @@ class Value(object):
 
     def __str__(self):
         # type: () -> str
-        return str(self._value)
+        value = self._value
+
+        if isinstance(value, OID):
+            return str(value)
+
+        if noSuchInstance.isSameTypeWith(value):
+            return 'NoSuchInstance'
+
+        if noSuchObject.isSameTypeWith(value):
+            return 'NoSuchObject'
+
+        if endOfMibView.isSameTypeWith(value):
+            return 'EndOfMibView'
+
+        return value.prettyPrint()
 
 
 class Variable(object):
