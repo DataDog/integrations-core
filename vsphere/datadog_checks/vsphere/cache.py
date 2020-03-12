@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import time
 from contextlib import contextmanager
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Dict, Iterator, List
 
 from six import iterkeys
 
@@ -66,8 +66,8 @@ class MetricsMetadataCache(VSphereCache):
     """
 
     def get_metadata(self, resource_type):
-        # type: (MorType) -> Optional[Dict[str, str]]
-        return self._content.get(resource_type)
+        # type: (MorType) -> Dict[str, str]
+        return self._content[resource_type]
 
     def set_metadata(self, resource_type, metadata):
         # type: (MorType, Dict[str, str]) -> None

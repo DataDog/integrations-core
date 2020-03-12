@@ -7,7 +7,7 @@ from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Type, TypeVar, cast
+from typing import Any, Dict, List, Set, Type, TypeVar, cast
 
 from pyVmomi import vim, vmodl
 from six import iteritems
@@ -28,7 +28,7 @@ from datadog_checks.vsphere.constants import (
 )
 from datadog_checks.vsphere.legacy.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
-from datadog_checks.vsphere.types import InstanceConfig
+from datadog_checks.vsphere.types import InstanceConfig, MorType
 from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,
     format_metric_name,
@@ -209,6 +209,7 @@ class VSphereCheck(AgentCheck):
             self.infrastructure_cache.set_mor_data(mor, mor_payload)
 
     def submit_metrics_callback(self, query_results):
+        # type: (List[vim.PerformanceManager.EntityMetricBase]) -> None
         """
         Callback of the collection of metrics. This is run in the main thread!
 
@@ -218,12 +219,12 @@ class VSphereCheck(AgentCheck):
 
         # `have_instance_value` is used later to avoid collecting aggregated metrics
         # when instance metrics are collected.
-        have_instance_value = defaultdict(set)
+        have_instance_value = defaultdict(set)  # type: Dict[MorType, Set[str]]
         for results_per_mor in query_results:
             resource_type = type(results_per_mor.entity)
             metadata = self.metrics_metadata_cache.get_metadata(resource_type)
             for result in results_per_mor.value:
-                metric_name = metadata.get(result.id.counterId)
+                metric_name = metadata[result.id.counterId]
                 if result.id.instance:
                     have_instance_value[resource_type].add(metric_name)
 
