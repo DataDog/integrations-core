@@ -17,6 +17,7 @@ except ImportError:
     from simplejson import JSONDecodeError
 
 Api = namedtuple('Api', ('check_health', 'check_leader'))
+Leader = namedtuple('Leader', ('leader_addr', 'leader_cluster_addr'))
 
 
 class Vault(OpenMetricsBaseCheck):
@@ -136,25 +137,48 @@ class Vault(OpenMetricsBaseCheck):
 
         submission_queue.append(lambda tags: self.gauge('vault.is_leader', int(is_leader), tags=tags))
 
-        current_leader = leader_data.get('leader_address')
-        if self._detect_leader and current_leader:
-            if self._previous_leader is not None and current_leader != self._previous_leader:
-                previous_leader = self._previous_leader
-                submission_queue.append(
-                    lambda tags: self.event(
-                        {
-                            'timestamp': time.time(),
-                            'event_type': self.EVENT_LEADER_CHANGE,
-                            'msg_title': 'Leader change',
-                            'msg_text': 'Leader changed from `{}` to `{}`.'.format(previous_leader, current_leader),
-                            'alert_type': 'info',
-                            'source_type_name': self.CHECK_NAME,
-                            'host': self.hostname,
-                            'tags': tags,
-                        }
-                    )
+        current_leader = Leader(leader_data.get('leader_address'), leader_data.get('leader_cluster_address'))
+        has_leader = any(current_leader)  # At least one address is set
+
+        if self._detect_leader and has_leader:
+            if self._previous_leader is None:
+                # First check run, let's set the previous leader variable.
+                self._previous_leader = current_leader
+                return
+            if self._previous_leader == current_leader:
+                # Leader hasn't changed
+                return
+            if not is_leader:
+                # Leader has changed but the monitored vault node is not the leader. Because the agent monitors
+                # each vault node in the cluster, let's use this condition to submit a single event.
+                self._previous_leader = current_leader
+                return
+
+            if current_leader.leader_addr != self._previous_leader.leader_addr:
+                # The main leader address has changed
+                event_message = "Leader address changed from `{}` to `{}`.".format(
+                    self._previous_leader.leader_addr, current_leader.leader_addr
                 )
-            self._previous_leader = current_leader
+            else:
+                # The leader_cluster_addr changed (usually happen when the leader address points to a load balancer
+                event_message = "Leader cluster address changed from `{}` to `{}`.".format(
+                    self._previous_leader.leader_cluster_addr, current_leader.leader_cluster_addr
+                )
+
+            submission_queue.append(
+                lambda tags: self.event(
+                    {
+                        'timestamp': time.time(),
+                        'event_type': self.EVENT_LEADER_CHANGE,
+                        'msg_title': 'Leader change',
+                        'msg_text': event_message,
+                        'alert_type': 'info',
+                        'source_type_name': self.CHECK_NAME,
+                        'host': self.hostname,
+                        'tags': tags,
+                    }
+                )
+            )
 
     def check_health_v1(self, submission_queue, dynamic_tags):
         url = self._api_url + '/sys/health'
