@@ -1,4 +1,6 @@
 import re
+from logging import Logger
+from typing import Any, Dict, List
 
 from pyVmomi import vim
 from six import iteritems, string_types
@@ -19,10 +21,17 @@ from datadog_checks.vsphere.constants import (
     MOR_TYPE_AS_STRING,
     REALTIME_RESOURCES,
 )
+from datadog_checks.vsphere.types import (
+    FormattedMetricFilters,
+    FormattedResourceFilter,
+    MetricFilterConfig,
+    ResourceFilterConfig,
+)
 
 
 class VSphereConfig(object):
     def __init__(self, instance, log):
+        # type: (Dict[str, Any], Logger) -> None
         self.log = log
 
         # Connection parameters
@@ -77,9 +86,11 @@ class VSphereConfig(object):
         self.validate_config()
 
     def is_historical(self):
+        # type: () -> bool
         return self.collection_type in ('historical', 'both')
 
     def validate_config(self):
+        # type: () -> None
         if not self.ssl_verify and self.ssl_capath:
             self.log.warning(
                 "Your configuration is incorrectly attempting to "
@@ -103,7 +114,9 @@ class VSphereConfig(object):
             )
 
     def _parse_resource_filters(self, all_resource_filters):
-        formatted_resource_filters = {}
+        # type: (List[ResourceFilterConfig]) -> FormattedResourceFilter
+
+        formatted_resource_filters = {}  # type: FormattedResourceFilter
         allowed_resource_types = [MOR_TYPE_AS_STRING[k] for k in self.collected_resource_types]
 
         for resource_filter in all_resource_filters:
@@ -115,7 +128,7 @@ class VSphereConfig(object):
                         "Ignoring filter %r because it doesn't contain a %s field.", resource_filter, field
                     )
                     continue
-                if not isinstance(resource_filter[field], field_type):
+                if not isinstance(resource_filter[field], field_type):  # type: ignore
                     self.log.warning(
                         "Ignoring filter %r because field %s should have type %s.", resource_filter, field, field_type
                     )
@@ -160,6 +173,7 @@ class VSphereConfig(object):
         return formatted_resource_filters
 
     def _parse_metric_regex_filters(self, all_metric_filters):
+        # type: (MetricFilterConfig) -> FormattedMetricFilters
         allowed_resource_types = [MOR_TYPE_AS_STRING[k] for k in self.collected_resource_types]
         metric_filters = {}
         for resource_type, filters in iteritems(all_metric_filters):

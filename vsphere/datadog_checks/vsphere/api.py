@@ -11,7 +11,6 @@ from pyVmomi import vim, vmodl
 
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES, MAX_QUERY_METRICS_OPTION, UNLIMITED_HIST_METRICS_PER_QUERY
-
 from datadog_checks.vsphere.types import InfrastructureDataItem
 
 # Python 3 only

@@ -3,8 +3,11 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import time
 from contextlib import contextmanager
+from typing import Any, Dict, Iterator, List, Optional
 
 from six import iterkeys
+
+from datadog_checks.vsphere.types import MorObject, MorType
 
 
 class VSphereCache(object):
@@ -14,12 +17,14 @@ class VSphereCache(object):
     """
 
     def __init__(self, interval_sec):
-        self._last_ts = 0
+        # type: (int) -> None
+        self._last_ts = 0  # type: float
         self._interval = interval_sec
-        self._content = {}
+        self._content = {}  # type: Dict[Any, Any]
 
     @contextmanager
     def update(self):
+        # type: () -> Iterator[None]
         """A context manager to allow modification of the cache. It will restore the previous value
         on any error.
         Usage:
@@ -39,6 +44,7 @@ class VSphereCache(object):
             raise
 
     def is_expired(self):
+        # type: () -> bool
         """The cache has a global time to live, all elements expire at the same time.
         :return True if the cache is expired."""
         elapsed = time.time() - self._last_ts
@@ -60,9 +66,11 @@ class MetricsMetadataCache(VSphereCache):
     """
 
     def get_metadata(self, resource_type):
+        # type: (MorType) -> Optional[Dict[str, str]]
         return self._content.get(resource_type)
 
     def set_metadata(self, resource_type, metadata):
+        # type: (MorType, Dict[str, str]) -> None
         self._content[resource_type] = metadata
 
 
@@ -79,13 +87,16 @@ class InfrastructureCache(VSphereCache):
     """
 
     def get_mor_props(self, mor, default=None):
+        # type: (MorObject, Dict[str, str]) -> Dict[str, str]
         mor_type = type(mor)
         return self._content.get(mor_type, {}).get(mor, default)
 
     def get_mors(self, resource_type):
+        # type: (MorType) -> Iterator[MorObject]
         return iterkeys(self._content.get(resource_type, {}))
 
     def set_mor_data(self, mor, mor_data):
+        # type: (MorObject, Dict[str, str]) -> None
         mor_type = type(mor)
         if mor_type not in self._content:
             self._content[mor_type] = {}
@@ -107,6 +118,7 @@ class TagsCache(VSphereCache):
     """
 
     def get_mor_tags(self, mor):
+        # type: (MorObject) -> List[str]
         """
         :return: list of mor tags or empty list if mor is not found.
         """
@@ -114,4 +126,5 @@ class TagsCache(VSphereCache):
         return self._content.get(mor_type, {}).get(mor._moId, [])
 
     def set_all_tags(self, mor_tags):
+        # type: (Dict[MorType, List[str]]) -> None
         self._content = mor_tags
