@@ -1,12 +1,16 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from typing import Pattern, List, cast
+
 from pyVmomi import vim
 from six import iteritems
 
 from datadog_checks.base import to_native_string
+from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
-from datadog_checks.vsphere.types import Counter
+from datadog_checks.vsphere.types import Counter, MorObject, InfrastructureData, FormattedResourceFilter, MorType, \
+    FormattedMetricFilters, InfrastructureDataItem
 
 METRIC_TO_INSTANCE_TAG_MAPPING = {
     # Structure:
@@ -40,6 +44,7 @@ def format_metric_name(counter):
 
 
 def match_any_regex(string, regexes):
+    # type: (str, List[Pattern]) -> bool
     for regex in regexes:
         match = regex.match(string)
         if match:
@@ -48,6 +53,7 @@ def match_any_regex(string, regexes):
 
 
 def is_resource_excluded_by_filters(mor, infrastructure_data, resource_filters):
+    # type: (MorObject, InfrastructureData, FormattedResourceFilter) -> bool
     resource_type = MOR_TYPE_AS_STRING[type(mor)]
 
     if not [f for f in resource_filters if f[0] == resource_type]:
@@ -60,7 +66,7 @@ def is_resource_excluded_by_filters(mor, infrastructure_data, resource_filters):
     guest_hostname_filter = resource_filters.get((resource_type, 'guest_hostname'))
 
     if name_filter:
-        mor_name = infrastructure_data.get(mor).get("name", "")
+        mor_name = infrastructure_data[mor].get("name", "")
         if match_any_regex(mor_name, name_filter):
             return False
     if inventory_path_filter:
@@ -69,12 +75,12 @@ def is_resource_excluded_by_filters(mor, infrastructure_data, resource_filters):
             return False
 
     if hostname_filter and isinstance(mor, vim.VirtualMachine):
-        host = infrastructure_data.get(mor).get("runtime.host")
-        hostname = infrastructure_data.get(host, {}).get("name", "")
+        host = infrastructure_data[mor].get("runtime.host")
+        hostname = infrastructure_data.get(host, {}).get("name", "")  # type: ignore
         if match_any_regex(hostname, hostname_filter):
             return False
     if guest_hostname_filter and isinstance(mor, vim.VirtualMachine):
-        guest_hostname = infrastructure_data.get(mor, {}).get("guest.hostName", "")
+        guest_hostname = infrastructure_data.get(mor, {}).get("guest.hostName", "")  # type: ignore
         if match_any_regex(guest_hostname, guest_hostname_filter):
             return False
 
@@ -82,6 +88,7 @@ def is_resource_excluded_by_filters(mor, infrastructure_data, resource_filters):
 
 
 def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
+    # type: (str, MorType, FormattedMetricFilters) -> bool
     if metric_name.startswith(REFERENCE_METRIC):
         # Always collect at least one metric for reference
         return False
@@ -96,14 +103,16 @@ def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
 
 
 def make_inventory_path(mor, infrastructure_data):
-    mor_name = infrastructure_data.get(mor).get('name', '')
-    mor_parent = infrastructure_data.get(mor).get('parent')
+    # type: (MorObject, InfrastructureData) -> str
+    mor_name = infrastructure_data[mor].get('name', '')
+    mor_parent = infrastructure_data[mor].get('parent')
     if mor_parent:
         return make_inventory_path(mor_parent, infrastructure_data) + '/' + mor_name
     return ''
 
 
 def get_parent_tags_recursively(mor, infrastructure_data):
+    # type: (MorObject, InfrastructureData) -> List[str]
     """Go up the resources hierarchy from the given mor. Note that a host running a VM is not considered to be a
     parent of that VM.
 
@@ -116,11 +125,11 @@ def get_parent_tags_recursively(mor, infrastructure_data):
           HOST2
 
     """
-    mor_props = infrastructure_data.get(mor)
+    mor_props = infrastructure_data[mor]
     parent = mor_props.get('parent')
     if parent:
         tags = []
-        parent_props = infrastructure_data.get(parent, {})
+        parent_props = infrastructure_data.get(parent, cast(InfrastructureDataItem, {}))
         parent_name = to_native_string(parent_props.get('name', 'unknown'))
         if isinstance(parent, vim.HostSystem):
             tags.append('vsphere_host:{}'.format(parent_name))
@@ -142,12 +151,14 @@ def get_parent_tags_recursively(mor, infrastructure_data):
 
 
 def should_collect_per_instance_values(config, metric_name, resource_type):
+    # type: (VSphereConfig, str, MorType) -> bool
     filters = config.collect_per_instance_filters.get(MOR_TYPE_AS_STRING[resource_type], [])
     metric_matched = match_any_regex(metric_name, filters)
     return metric_matched
 
 
 def get_mapped_instance_tag(metric_name):
+    # type: (str) -> str
     """
     When collecting per-instance metric, the `instance` tag can mean a lot of different things. The meaning of the
     tag cannot be guessed by looking at the api results and has to be inferred using documentation or experience.

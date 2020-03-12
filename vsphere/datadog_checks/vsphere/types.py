@@ -1,11 +1,18 @@
 from typing import Any, Dict, List, Pattern, Tuple, TypedDict
 
-# parent is a MOR resource
-InfrastructureDataItem = TypedDict('InfrastructureDataItem', {'name': str, 'parent': Any})
-
 MorObject = Any
 MorType = Any
 Counter = Any
+
+
+# parent is a MOR resource
+InfrastructureDataItem = TypedDict('InfrastructureDataItem', {
+    'name': str,
+    'runtime.host': str,
+    'guest.hostName': str,
+    'parent': Any
+})
+InfrastructureData = Dict[MorType, InfrastructureDataItem]
 
 ResourceTags = Dict[Any, Dict[str, List]]
 
