@@ -37,11 +37,11 @@ instances:
     ##  protocols: Specifies enabled protocols. If not specified the client will use “-all +TLSv1.2”.
     ##  cipher_suite: Specifies enabled cipher suites. Defaults to the OpenSSL default cipher suite.
     ##  keyfile: Path to the client’s key for mutual authentication. By default mutual authentication is disabled.
-    ##  keyfile_pw: Decryption password for the client’s key for mutual authentication. By default the key is assumed not to be encrypted.
+    ##  keyfile_pw: Decryption password for the client’s key for mutual authentication if needed.
     ##  cert_blacklist: Path to a certificate blacklist file.
-    ##  certfile: Path to the client’s certificate chain file for mutual authentication. By default mutual authentication is disabled.
-    ##  crl_check: (True, False) Enable CRL checking for the certificate chain leaf certificate. An error occurs if a suitable CRL cannot be found. By default CRL checking is disabled.
-    ##  crl_check_all: (True, False): Enable CRL checking for the entire certificate chain. An error occurs if a suitable CRL cannot be found. By default CRL checking is disabled.
+    ##  certfile: Path to the client’s certificate chain file for mutual authentication if needed.
+    ##  crl_check: (True, False) Enable CRL checking for the certificate chain leaf certificate.
+    ##  crl_check_all: (True, False): Enable CRL checking for the entire certificate chain.
     #
     # tls_config:
     #     cafile: <CA_FILE>
