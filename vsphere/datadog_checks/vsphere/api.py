@@ -3,12 +3,12 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import functools
 import ssl
-from logging import Logger
 from typing import Any, Callable, List, cast
 
 from pyVim import connect
 from pyVmomi import vim, vmodl
 
+from datadog_checks.base.log import CheckLoggingAdapter
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES, MAX_QUERY_METRICS_OPTION, UNLIMITED_HIST_METRICS_PER_QUERY
 from datadog_checks.vsphere.types import InfrastructureData
@@ -67,7 +67,7 @@ class VSphereAPI(object):
     """Abstraction class over the vSphere SOAP api using the pyvmomi library"""
 
     def __init__(self, config, log):
-        # type: (VSphereConfig, Logger) -> None
+        # type: (VSphereConfig, CheckLoggingAdapter) -> None
         self.config = config
         self.log = log
 

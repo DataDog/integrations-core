@@ -7,7 +7,7 @@ from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Type, TypeVar
+from typing import Any, Dict, List, Type, TypeVar, cast
 
 from pyVmomi import vim, vmodl
 from six import iteritems
@@ -28,6 +28,7 @@ from datadog_checks.vsphere.constants import (
 )
 from datadog_checks.vsphere.legacy.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
+from datadog_checks.vsphere.types import InstanceConfig
 from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,
     format_metric_name,
@@ -54,13 +55,14 @@ class VSphereCheck(AgentCheck):
         if is_affirmative(instances[0].get('use_legacy_check_version', True)):
             from datadog_checks.vsphere.legacy.vsphere_legacy import VSphereLegacyCheck
 
-            return VSphereLegacyCheck(name, init_config, instances)
+            return VSphereLegacyCheck(name, init_config, instances)  # type: ignore
         return super(VSphereCheck, cls).__new__(cls)
 
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
         super(VSphereCheck, self).__init__(*args, **kwargs)
-        self.config = VSphereConfig(self.instance, self.log)
+        instance = cast(InstanceConfig, self.instance)
+        self.config = VSphereConfig(instance, self.log)
 
         self.latest_event_query = datetime.now()
         self.infrastructure_cache = InfrastructureCache(interval_sec=self.config.refresh_infrastructure_cache_interval)
@@ -68,8 +70,8 @@ class VSphereCheck(AgentCheck):
             interval_sec=self.config.refresh_metrics_metadata_cache_interval
         )
         self.tags_cache = TagsCache(interval_sec=self.config.refresh_tags_cache_interval)
-        self.api = None
-        self.api_rest = None
+        self.api = cast(VSphereAPI, None)
+        self.api_rest = cast(VSphereRestAPI, None)
         # Do not override `AgentCheck.hostname`
         self._hostname = None
         self.thread_pool = ThreadPoolExecutor(max_workers=self.config.threads_count)

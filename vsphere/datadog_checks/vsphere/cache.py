@@ -96,7 +96,7 @@ class InfrastructureCache(VSphereCache):
         return iterkeys(self._content.get(resource_type, {}))
 
     def set_mor_data(self, mor, mor_data):
-        # type: (MorObject, Dict[str, str]) -> None
+        # type: (MorObject, Dict[str, Any]) -> None
         mor_type = type(mor)
         if mor_type not in self._content:
             self._content[mor_type] = {}

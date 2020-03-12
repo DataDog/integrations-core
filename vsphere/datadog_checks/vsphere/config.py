@@ -1,11 +1,11 @@
 import re
-from logging import Logger
 from typing import List
 
 from pyVmomi import vim
 from six import iteritems, string_types
 
 from datadog_checks.base import ConfigurationError, is_affirmative
+from datadog_checks.base.log import CheckLoggingAdapter
 from datadog_checks.vsphere.constants import (
     ALLOWED_FILTER_PROPERTIES,
     DEFAULT_BATCH_COLLECTOR_SIZE,
@@ -32,7 +32,7 @@ from datadog_checks.vsphere.types import (
 
 class VSphereConfig(object):
     def __init__(self, instance, log):
-        # type: (InstanceConfig, Logger) -> None
+        # type: (InstanceConfig, CheckLoggingAdapter) -> None
         self.log = log
 
         # Connection parameters

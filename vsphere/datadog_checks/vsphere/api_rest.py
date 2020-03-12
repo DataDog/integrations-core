@@ -3,11 +3,11 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import json
 from collections import defaultdict
-from logging import Logger
 from typing import Any, Dict, List
 
 from pyVmomi import vim
 
+from datadog_checks.base.log import CheckLoggingAdapter
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.types import ResourceTags, TagAssociation
@@ -29,7 +29,7 @@ class VSphereRestAPI(object):
     """
 
     def __init__(self, config, log):
-        # type: (VSphereConfig, Logger) -> None
+        # type: (VSphereConfig, CheckLoggingAdapter) -> None
         self.config = config
         self.log = log
         self._client = VSphereRestClient(config, log)
@@ -128,7 +128,7 @@ class VSphereRestClient(object):
     JSON_REQUEST_HEADERS = {'Content-Type': 'application/json'}
 
     def __init__(self, config, log):
-        # type: (VSphereConfig, Logger) -> None
+        # type: (VSphereConfig, CheckLoggingAdapter) -> None
         self.log = log
         http_config = {
             'username': config.username,
