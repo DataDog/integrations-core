@@ -12,38 +12,19 @@ from collections import defaultdict
 from concurrent import futures
 from typing import Any, DefaultDict, Dict, List, Optional, Tuple, Union
 
-from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
 
 from .commands import snmp_bulk, snmp_get, snmp_getnext
-from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
+from .compat import read_persistent_cache, write_persistent_cache
 from .config import InstanceConfig, ParsedMetric, ParsedMetricTag, ParsedTableMetric
 from .exceptions import PySnmpError
-from .pysnmp_types import (
-    Counter32,
-    Counter64,
-    CounterBasedGauge64,
-    Gauge32,
-    Integer,
-    Integer32,
-    ObjectIdentity,
-    ObjectType,
-    Unsigned32,
-    ZeroBasedCounter64,
-    noSuchInstance,
-    noSuchObject,
-)
+from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
+from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
+from .types import ForceableMetricType
 from .utils import OIDPrinter, get_profile_definition, oid_pattern_specificity, recursively_expand_base_profiles
-
-# Metric type that we support
-SNMP_COUNTERS = frozenset([Counter32.__name__, Counter64.__name__, ZeroBasedCounter64.__name__])
-
-SNMP_GAUGES = frozenset(
-    [Gauge32.__name__, Unsigned32.__name__, CounterBasedGauge64.__name__, Integer.__name__, Integer32.__name__]
-)
 
 DEFAULT_OID_BATCH_SIZE = 10
 
@@ -489,7 +470,7 @@ class SnmpCheck(AgentCheck):
         return tags
 
     def submit_metric(self, name, snmp_value, forced_type, tags):
-        # type: (str, Any, Optional[str], List[str]) -> None
+        # type: (str, Any, Optional[ForceableMetricType], List[str]) -> None
         """
         Convert the values reported as pysnmp-Managed Objects to values and
         report them to the aggregator.
@@ -501,58 +482,17 @@ class SnmpCheck(AgentCheck):
 
         metric_name = self.normalize(name, prefix='snmp')
 
-        value = 0.0  # type: float
-
-        if forced_type:
-            forced_type = forced_type.lower()
-            if forced_type == 'gauge':
-                value = int(snmp_value)
-                self.gauge(metric_name, value, tags)
-            elif forced_type == 'percent':
-                value = total_time_to_temporal_percent(int(snmp_value), scale=1)
-                self.rate(metric_name, value, tags)
-            elif forced_type == 'counter':
-                value = int(snmp_value)
-                self.rate(metric_name, value, tags)
-            elif forced_type == 'monotonic_count':
-                value = int(snmp_value)
-                self.monotonic_count(metric_name, value, tags)
-            else:
+        if forced_type is not None:
+            metric = as_metric_with_forced_type(snmp_value, forced_type)
+            if metric is None:
                 self.warning('Invalid forced-type specified: %s in %s', forced_type, name)
                 raise ConfigurationError('Invalid forced-type in config file: {}'.format(name))
-            return
-
-        # Ugly hack but couldn't find a cleaner way
-        # Proper way would be to use the ASN1 method isSameTypeWith but it
-        # wrongfully returns True in the case of CounterBasedGauge64
-        # and Counter64 for example
-        snmp_class = snmp_value.__class__.__name__
-        if snmp_class in SNMP_COUNTERS:
-            value = int(snmp_value)
-            self.rate(metric_name, value, tags)
-            return
-        if snmp_class in SNMP_GAUGES:
-            value = int(snmp_value)
-            self.gauge(metric_name, value, tags)
-            return
-
-        if snmp_class == 'Opaque':
-            # Try support for floats
-            try:
-                value = float(pyasn1_decode(bytes(snmp_value))[0])
-            except Exception:
-                pass
-            else:
-                self.gauge(metric_name, value, tags)
-                return
-
-        # Falls back to try to cast the value.
-        try:
-            value = float(snmp_value)
-        except ValueError:
-            pass
         else:
-            self.gauge(metric_name, value, tags)
+            metric = as_metric_with_inferred_type(snmp_value)
+
+        if metric is None:
+            self.log.warning('Unsupported metric type %s for %s', snmp_value.__class__.__name__, metric_name)
             return
 
-        self.log.warning('Unsupported metric type %s for %s', snmp_class, metric_name)
+        submit_func = getattr(self, metric['type'])
+        submit_func(metric_name, metric['value'], tags=tags)
