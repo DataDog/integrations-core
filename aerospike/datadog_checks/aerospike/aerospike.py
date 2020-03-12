@@ -77,7 +77,7 @@ class AerospikeCheck(AgentCheck):
         port = int(self.instance.get('port', 3000))
         tls_name = self.instance.get('tls_name')
         self._host = (host, port, tls_name) if tls_name else (host, port)
-        self._tls_config = self.instance.get('tls_config', None)
+        self._tls_config = self.instance.get('tls_config')
         if self._tls_config:
             self._tls_config['enable'] = True
 
