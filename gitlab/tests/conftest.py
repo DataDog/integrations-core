@@ -5,6 +5,7 @@
 import os
 from time import sleep
 
+import mock
 import pytest
 import requests
 
@@ -15,10 +16,10 @@ from .common import (
     CONFIG,
     GITLAB_LOCAL_PORT,
     GITLAB_LOCAL_PROMETHEUS_PORT,
+    GITLAB_PROMETHEUS_ENDPOINT,
     GITLAB_TEST_PASSWORD,
     GITLAB_URL,
     HERE,
-    PROMETHEUS_ENDPOINT,
 )
 
 
@@ -38,7 +39,7 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'),
         env_vars=env,
-        conditions=[CheckEndpoints(GITLAB_URL, attempts=200), CheckEndpoints(PROMETHEUS_ENDPOINT)],
+        conditions=[CheckEndpoints(GITLAB_URL, attempts=200), CheckEndpoints(GITLAB_PROMETHEUS_ENDPOINT)],
     ):
         # run pre-test commands
         for _ in range(100):
@@ -46,3 +47,17 @@ def dd_environment():
         sleep(2)
 
         yield CONFIG
+
+
+@pytest.fixture()
+def mock_data():
+    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
+    with open(f_name, 'r') as f:
+        text_data = f.read()
+    with mock.patch(
+        'requests.get',
+        return_value=mock.MagicMock(
+            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
+        ),
+    ):
+        yield

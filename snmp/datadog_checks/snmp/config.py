@@ -31,7 +31,14 @@ class ParsedMetric(object):
 
     __slots__ = ('name', 'metric_tags', 'forced_type', 'enforce_scalar')
 
-    def __init__(self, name, metric_tags, forced_type, enforce_scalar=True):  # type: ignore
+    def __init__(
+        self,
+        name,  # type: str
+        metric_tags,  # type: List[Dict[str, Any]]
+        forced_type=None,  # type: ForceableMetricType
+        enforce_scalar=True,  # type: bool
+    ):
+        # type: (...) -> None
         self.name = name
         self.metric_tags = metric_tags
         self.forced_type = forced_type

@@ -25,6 +25,7 @@ from .config import InstanceConfig, ParsedMetric, ParsedMetricTag, ParsedTableMe
 from .exceptions import PySnmpError
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
 from .models import OID, Value, Variable
+from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
 from .types import ForceableMetricType
 from .utils import OIDPrinter, get_profile_definition, oid_pattern_specificity, recursively_expand_base_profiles
 

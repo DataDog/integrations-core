@@ -2,27 +2,51 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 """
-Helpers for deriving metrics from raw values.
+Helpers for deriving metrics from SNMP values.
 """
 
-from typing import Optional
+from typing import Any, Optional
+
+from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 
 from .compat import total_time_to_temporal_percent
-from .models import Value
-from .types import SNMP_COUNTERS, SNMP_GAUGES, ForceableMetricType, MetricDefinition
+from .pysnmp_types import PYSNMP_COUNTER_CLASSES, PYSNMP_GAUGE_CLASSES
+from .types import ForceableMetricType, MetricDefinition
 
 
 def as_metric_with_inferred_type(value):
-    # type: (Value) -> Optional[MetricDefinition]
-    snmp_type = value.known_snmp_type
+    # type: (Any) -> Optional[MetricDefinition]
 
-    if snmp_type in SNMP_COUNTERS:
+    # Ugly hack but couldn't find a cleaner way. Proper way would be to use the ASN.1
+    # method `.isSameTypeWith()`, or at least `isinstance()`.
+    # But these wrongfully return `True` in some cases, eg:
+    # ```python
+    # >>> from pysnmp.proto.rfc1902 import Counter64
+    # >>> from datadog_checks.snmp.pysnmp_types import CounterBasedGauge64
+    # >>> issubclass(CounterBasedGauge64, Counter64)
+    # True  # <-- WRONG! (CounterBasedGauge64 values are gauges, not counters.)
+    # ````
+
+    pysnmp_class_name = value.__class__.__name__
+
+    if pysnmp_class_name in PYSNMP_COUNTER_CLASSES:
         return {'type': 'rate', 'value': int(value)}
 
-    if snmp_type in SNMP_GAUGES:
+    if pysnmp_class_name in PYSNMP_GAUGE_CLASSES:
         return {'type': 'gauge', 'value': int(value)}
 
-    # Fallback.
+    if pysnmp_class_name == 'Opaque':
+        # Arbitrary ASN.1 syntax encoded as an octet string. Let's try to decode it as a float.
+        # See: http://snmplabs.com/pysnmp/docs/api-reference.html#opaque-type
+        try:
+            decoded, _ = pyasn1_decode(bytes(value))
+            value = float(decoded)
+        except Exception:
+            pass
+        else:
+            return {'type': 'gauge', 'value': value}
+
+    # Fallback for unknown SNMP types.
     try:
         number = float(value)
     except ValueError:
@@ -31,18 +55,18 @@ def as_metric_with_inferred_type(value):
         return {'type': 'gauge', 'value': number}
 
 
-def as_metric_with_forced_type(value, typ):
-    # type: (Value, ForceableMetricType) -> Optional[MetricDefinition]
-    if typ == 'gauge':
+def as_metric_with_forced_type(value, forced_type):
+    # type: (Any, ForceableMetricType) -> Optional[MetricDefinition]
+    if forced_type == 'gauge':
         return {'type': 'gauge', 'value': int(value)}
 
-    if typ == 'percent':
+    if forced_type == 'percent':
         return {'type': 'rate', 'value': total_time_to_temporal_percent(int(value), scale=1)}
 
-    if typ == 'counter':
+    if forced_type == 'counter':
         return {'type': 'rate', 'value': int(value)}
 
-    if typ == 'monotonic_count':
+    if forced_type == 'monotonic_count':
         return {'type': 'monotonic_count', 'value': int(value)}
 
     return None

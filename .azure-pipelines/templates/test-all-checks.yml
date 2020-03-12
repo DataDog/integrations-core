@@ -1,6 +1,10 @@
+parameters:
+  pip_cache_config: null
+
 jobs:
 - template: ./test-all.yml
   parameters:
+    pip_cache_config: ${{ parameters.pip_cache_config }}
     checks:
     - checkName: datadog_checks_base
       displayName: Datadog Checks Base (Linux)

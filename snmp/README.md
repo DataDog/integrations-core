@@ -140,10 +140,11 @@ Profiles can be used interchangeably, such that devices that share MIB dependenc
 * [HP iLO4][15]
 * [HPE Proliant][16]
 * [Palo Alto][17]
+* [Checkpoint Firewall][18]
 
 ### Validation
 
-[Run the Agent's status subcommand][18] and look for `snmp` under the Checks section.
+[Run the Agent's status subcommand][19] and look for `snmp` under the Checks section.
 
 ## Data Collected
 
@@ -151,7 +152,7 @@ The SNMP check submits specified metrics under the `snmp.*` namespace. **Metrics
 
 ### Metrics
 
-See [metadata.csv][19] for a list of metrics provided by this check.
+See [metadata.csv][20] for a list of metrics provided by this check.
 
 ### Events
 
@@ -164,14 +165,14 @@ Returns `CRITICAL` if the Agent cannot collect SNMP metrics, otherwise returns `
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][20].
+Need help? Contact [Datadog support][21].
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-* [Does Datadog have a list of commonly used/compatible OIDs with SNMP?][21]
-* [Monitoring Unifi devices using SNMP and Datadog][22]
+* [Does Datadog have a list of commonly used/compatible OIDs with SNMP?][22]
+* [Monitoring Unifi devices using SNMP and Datadog][23]
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -190,8 +191,9 @@ Additional helpful documentation, links, and articles:
 [15]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/hp-ilo4.yaml
 [16]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/hpe-proliant.yaml
 [17]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/palo-alto.yaml
-[18]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[19]: https://github.com/DataDog/integrations-core/blob/master/snmp/metadata.csv
-[20]: https://docs.datadoghq.com/help
-[21]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
-[22]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
+[18]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/checkpoint-firewall.yaml
+[19]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[20]: https://github.com/DataDog/integrations-core/blob/master/snmp/metadata.csv
+[21]: https://docs.datadoghq.com/help
+[22]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
+[23]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
