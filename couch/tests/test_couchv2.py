@@ -304,63 +304,20 @@ def test_replication_metrics(aggregator, gauges):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_compaction_metrics(aggregator, gauges):
-    url = "{}/kennel".format(common.NODE1['server'])
-    body = {'_id': 'fsdr2345fgwert249i9fg9drgsf4SDFGWE', 'data': str(time.time())}
-    r = requests.post(
-        url,
-        auth=(common.NODE1['user'], common.NODE1['password']),
-        headers={'Content-Type': 'application/json'},
-        json=body,
-    )
-    r.raise_for_status()
+def test_compaction_metrics(aggregator, gauges, active_tasks):
+    """
+    Database compaction tasks are super quick to run on small amounts of data, leading to the task sometimes
+    being complete before the check queries for active tasks. This can lead to flaky results, so let's mock.
+    """
+    from datadog_checks.couch import couch
 
-    update_url = '{}/{}'.format(url, body['_id'])
+    def _get_active_tasks(server, name, tags):
+        return active_tasks
 
-    for _ in range(100):
-        rev = r.json()['rev']
-        body['data'] = str(time.time())
-        body['_rev'] = rev
-        r = requests.put(
-            update_url,
-            auth=(common.NODE1['user'], common.NODE1['password']),
-            headers={'Content-Type': 'application/json'},
-            json=body,
-        )
-        r.raise_for_status()
-
-        r2 = requests.post(
-            url,
-            auth=(common.NODE1['user'], common.NODE1['password']),
-            headers={'Content-Type': 'application/json'},
-            json={"_id": str(time.time())},
-        )
-        r2.raise_for_status()
-
-    url = '{}/kennel/_compact'.format(common.NODE1['server'])
-    r = requests.post(
-        url, auth=(common.NODE1['user'], common.NODE1['password']), headers={'Content-Type': 'application/json'}
-    )
-    r.raise_for_status()
-
-    url = '{}/_global_changes/_compact'.format(common.NODE1['server'])
-    r = requests.post(
-        url, auth=(common.NODE1['user'], common.NODE1['password']), headers={'Content-Type': 'application/json'}
-    )
-    r.raise_for_status()
-
-    for _ in range(120):
-        url = '{}/kennel'.format(common.NODE1['server'])
-        r = requests.get(
-            url, auth=(common.NODE1['user'], common.NODE1['password']), headers={'Content-Type': 'application/json'}
-        )
-        r.raise_for_status()
-        print(r.json()['compact_running'])
-        raise Exception()
-
-    for config in [common.NODE1, common.NODE2, common.NODE3]:
-        check = CouchDb(common.CHECK_NAME, {}, [config])
-        check.check(config)
+    check = CouchDb(common.CHECK_NAME, {}, [common.NODE1])
+    check.checker = couch.CouchDB2(check)
+    check.checker._get_active_tasks = _get_active_tasks
+    check.check(common.NODE1)
 
     for gauge in gauges["compaction_tasks_gauges"]:
         aggregator.assert_metric(gauge)
