@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import Pattern, List, cast
+from typing import List, Pattern, cast
 
 from pyVmomi import vim
 from six import iteritems
@@ -9,8 +9,15 @@ from six import iteritems
 from datadog_checks.base import to_native_string
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
-from datadog_checks.vsphere.types import Counter, MorObject, InfrastructureData, FormattedResourceFilter, MorType, \
-    FormattedMetricFilters, InfrastructureDataItem
+from datadog_checks.vsphere.types import (
+    Counter,
+    FormattedMetricFilters,
+    FormattedResourceFilter,
+    InfrastructureData,
+    InfrastructureDataItem,
+    MorObject,
+    MorType,
+)
 
 METRIC_TO_INSTANCE_TAG_MAPPING = {
     # Structure:

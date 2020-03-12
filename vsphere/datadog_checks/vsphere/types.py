@@ -6,12 +6,9 @@ Counter = Any
 
 
 # parent is a MOR resource
-InfrastructureDataItem = TypedDict('InfrastructureDataItem', {
-    'name': str,
-    'runtime.host': str,
-    'guest.hostName': str,
-    'parent': Any
-})
+InfrastructureDataItem = TypedDict(
+    'InfrastructureDataItem', {'name': str, 'runtime.host': str, 'guest.hostName': str, 'parent': Any}
+)
 InfrastructureData = Dict[MorType, InfrastructureDataItem]
 
 ResourceTags = Dict[Any, Dict[str, List]]
