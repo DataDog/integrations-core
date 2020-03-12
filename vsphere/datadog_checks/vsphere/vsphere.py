@@ -7,6 +7,7 @@ from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Type, TypeVar
 
 from pyVmomi import vim, vmodl
 from six import iteritems
@@ -39,11 +40,14 @@ from datadog_checks.vsphere.utils import (
 
 SERVICE_CHECK_NAME = 'can_connect'
 
+T = TypeVar("T", bound="VSphereCheck")
+
 
 class VSphereCheck(AgentCheck):
     __NAMESPACE__ = 'vsphere'
 
     def __new__(cls, name, init_config, instances):
+        # type: (Type[T], str, Dict[str, Any], List[Dict[str, Any]]) -> VSphereCheck
         """For backward compatibility reasons, there are two side-by-side implementations of the VSphereCheck.
         Instantiating this class will return an instance of the legacy integration for existing users and
         an instance of the new implementation for new users."""
@@ -53,8 +57,9 @@ class VSphereCheck(AgentCheck):
             return VSphereLegacyCheck(name, init_config, instances)
         return super(VSphereCheck, cls).__new__(cls)
 
-    def __init__(self, name, init_config, instances):
-        super(VSphereCheck, self).__init__(name, init_config, instances)
+    def __init__(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
+        super(VSphereCheck, self).__init__(*args, **kwargs)
         self.config = VSphereConfig(self.instance, self.log)
 
         self.latest_event_query = datetime.now()
@@ -71,6 +76,7 @@ class VSphereCheck(AgentCheck):
         self.check_initializations.append(self.initiate_api_connection)
 
     def initiate_api_connection(self):
+        # type: () -> None
         try:
             self.log.debug(
                 "Connecting to the vCenter API %s with username %s...", self.config.hostname, self.config.username
@@ -89,6 +95,7 @@ class VSphereCheck(AgentCheck):
                 self.log.error("Cannot connect to vCenter REST API. Tags won't be collected. Error: %s", e)
 
     def refresh_metrics_metadata_cache(self):
+        # type: () -> None
         """Request the list of counters (metrics) from vSphere and store them in a cache."""
         self.log.debug(
             "Refreshing the metrics metadata cache. Collecting all counters metadata for collection_level=%d",
@@ -121,6 +128,7 @@ class VSphereCheck(AgentCheck):
         # https://pubs.vmware.com/vsphere-50/index.jsp?topic=%2Fcom.vmware.wssdk.pg.doc_50%2FPG_Ch16_Performance.18.5.html
 
     def refresh_tags_cache(self):
+        # type: () -> None
         """
         Fetch the all tags, build tags for each monitored resources and store all of that into the tags_cache.
         """
@@ -136,6 +144,7 @@ class VSphereCheck(AgentCheck):
         self.tags_cache.set_all_tags(mor_tags)
 
     def refresh_infrastructure_cache(self):
+        # type: () -> None
         """Fetch the complete infrastructure, generate tags for each monitored resources and store all of that
         into the infrastructure_cache. It also computes the resource `hostname` property to be used when submitting
         metrics for this mor."""
@@ -337,6 +346,7 @@ class VSphereCheck(AgentCheck):
                     yield query_specs
 
     def collect_metrics_async(self):
+        # type: () -> None
         """Run queries in multiple threads and wait for completion."""
         tasks = []
         try:
@@ -408,6 +418,7 @@ class VSphereCheck(AgentCheck):
             yield batch
 
     def submit_external_host_tags(self):
+        # type: () -> None
         """Send external host tags to the Datadog backend. This is only useful for a REALTIME instance because
         only VMs and Hosts appear as 'datadog hosts'."""
         external_host_tags = []
@@ -429,6 +440,7 @@ class VSphereCheck(AgentCheck):
             self.set_external_tags(external_host_tags)
 
     def collect_events(self):
+        # type: () -> None
         self.log.debug("Starting events collection.")
         try:
             t0 = Timer()
@@ -456,6 +468,7 @@ class VSphereCheck(AgentCheck):
         self.latest_event_query = self.api.get_latest_event_timestamp() + timedelta(seconds=1)
 
     def check(self, _):
+        # type: (Any) -> None
         self._hostname = datadog_agent.get_hostname()
         # Assert the health of the vCenter API and submit the service_check accordingly
         try:
