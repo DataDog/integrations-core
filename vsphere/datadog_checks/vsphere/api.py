@@ -3,23 +3,30 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import functools
 import ssl
+from logging import Logger
+from typing import Any, Callable, Dict, List
 
 from pyVim import connect
 from pyVmomi import vim, vmodl
 
+from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES, MAX_QUERY_METRICS_OPTION, UNLIMITED_HIST_METRICS_PER_QUERY
 
+from datadog_checks.vsphere.types import InfrastructureDataItem
+
 # Python 3 only
-PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
+PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)  # type: ignore
 
 
 def smart_retry(f):
+    # type: (Callable[..., Any]) -> (Callable[..., Any])
     """A function decorated with this `@smart_retry` will trigger a new authentication if it fails. The function
     will then be retried.
     This is useful when the integration keeps a semi-healthy connection to the vSphere API"""
 
     @functools.wraps(f)
     def wrapper(api_instance, *args, **kwargs):
+        # type: (VSphereAPI, *Any, **Any) -> Any
         try:
             return f(api_instance, *args, **kwargs)
         except vmodl.fault.InvalidArgument:
@@ -61,21 +68,26 @@ class VSphereAPI(object):
     """Abstraction class over the vSphere SOAP api using the pyvmomi library"""
 
     def __init__(self, config, log):
+        # type: (VSphereConfig, Logger) -> None
         self.config = config
         self.log = log
 
-        self._conn = None
         self.smart_connect()
 
     def smart_connect(self):
-        """Creates the connection object to the vSphere API using parameters supplied from the configuration.
+        # type: () -> vim.ServiceInstance
+        """
+        Creates the connection object to the vSphere API using parameters supplied from the configuration.
+
+        Docs for vim.ServiceInstance:
+            https://vdc-download.vmware.com/vmwb-repository/dcr-public/b525fb12-61bb-4ede-b9e3-c4a1f8171510/99ba073a-60e9-4933-8690-149860ce8754/doc/vim.ServiceInstance.html
         """
         context = None
         if not self.config.ssl_verify:
-            context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS)  # type: ignore
             context.verify_mode = ssl.CERT_NONE
         elif self.config.ssl_capath:
-            context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)  # type: ignore
             context.verify_mode = ssl.CERT_REQUIRED
             context.load_verify_locations(capath=self.config.ssl_capath)
 
@@ -91,26 +103,29 @@ class VSphereAPI(object):
             err_msg = "Connection to {} failed: {}".format(self.config.hostname, e)
             raise APIConnectionError(err_msg)
 
-        if self._conn:
+        if getattr(self, '_conn'):
             connect.Disconnect(self._conn)
-        self._conn = conn
+
+        self._conn = conn  # type: vim.ServiceInstance
 
     @smart_retry
     def check_health(self):
+        # type: () -> None
         self._conn.CurrentTime()
 
     @smart_retry
     def get_perf_counter_by_level(self, collection_level):
+        # type: (int) -> List[vim.PerformanceManager.CounterInfo]
         """
         Requests and returns the list of counter available for a given collection_level.
 
-        :return list of vim.PerformanceManager.CounterInfo:
         https://vdc-download.vmware.com/vmwb-repository/dcr-public/fe08899f-1eec-4d8d-b3bc-a6664c168c2c/7fdf97a1-4c0d-4be0-9d43-2ceebbc174d9/doc/vim.PerformanceManager.CounterInfo.html
         """
         return self._conn.content.perfManager.QueryPerfCounterByLevel(collection_level)
 
     @smart_retry
     def get_infrastructure(self):
+        # type: () -> Dict[Any, InfrastructureDataItem]
         """Traverse the whole vSphere infrastructure and outputs a dict mapping the mors to their properties.
 
         :return: {
@@ -178,12 +193,21 @@ class VSphereAPI(object):
 
     @smart_retry
     def query_metrics(self, query_specs):
+        # type: (vim.PerformanceManager.QuerySpec) -> List[vim.PerformanceManager.EntityMetricBase]
         perf_manager = self._conn.content.perfManager
         values = perf_manager.QueryPerf(query_specs)
         return values
 
     @smart_retry
     def get_new_events(self, start_time):
+        # type: (int) -> List[vim.event.Event]
+        """
+        Docs on `vim.event.EventManager` and `vim.event.EventManager.QueryEvents`:
+            https://pubs.vmware.com/vi3/sdk/ReferenceGuide/vim.event.EventManager.html
+        Docs on `vim.event.Event`:
+            https://pubs.vmware.com/vi3/sdk/ReferenceGuide/vim.event.Event.html
+        """
+        #
         event_manager = self._conn.content.eventManager
         query_filter = vim.event.EventFilterSpec()
         time_filter = vim.event.EventFilterSpec.ByTime(beginTime=start_time)
@@ -192,11 +216,16 @@ class VSphereAPI(object):
 
     @smart_retry
     def get_latest_event_timestamp(self):
+        # type: () -> int
         event_manager = self._conn.content.eventManager
         return event_manager.latestEvent.createdTime
 
     @smart_retry
     def get_max_query_metrics(self):
+        # type: () -> float
         vcenter_settings = self._conn.content.setting.QueryOptions(MAX_QUERY_METRICS_OPTION)
         max_historical_metrics = int(vcenter_settings[0].value)
-        return max_historical_metrics if max_historical_metrics > 0 else UNLIMITED_HIST_METRICS_PER_QUERY
+        if max_historical_metrics > 0:
+            return max_historical_metrics
+        else:
+            return UNLIMITED_HIST_METRICS_PER_QUERY

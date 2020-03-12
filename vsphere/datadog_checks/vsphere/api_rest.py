@@ -3,10 +3,14 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import json
 from collections import defaultdict
+from logging import Logger
+from typing import Any, Dict, List
 
 from pyVmomi import vim
 
 from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.vsphere.config import VSphereConfig
+from datadog_checks.vsphere.types import ResourceTags, TagAssociation
 
 from .api import APIResponseError, smart_retry
 
@@ -25,12 +29,14 @@ class VSphereRestAPI(object):
     """
 
     def __init__(self, config, log):
+        # type: (VSphereConfig, Logger) -> None
         self.config = config
         self.log = log
         self._client = VSphereRestClient(config, log)
         self.smart_connect()
 
     def smart_connect(self):
+        # type: () -> None
         """
         Connect to vSphere client.
         """
@@ -38,6 +44,7 @@ class VSphereRestAPI(object):
 
     @smart_retry
     def get_resource_tags(self):
+        # type: () -> ResourceTags
         """
         Get resource tags.
 
@@ -57,7 +64,9 @@ class VSphereRestAPI(object):
         self.log.debug("Fetched tag associations: %s", tag_associations)
 
         # Initialise resource_tags
-        resource_tags = {resource_type: defaultdict(list) for resource_type in MOR_TYPE_MAPPING.values()}
+        resource_tags = {
+            resource_type: defaultdict(list) for resource_type in MOR_TYPE_MAPPING.values()
+        }  # type: ResourceTags
 
         for tag_asso in tag_associations:
             tag = tags[tag_asso['tag_id']]
@@ -70,6 +79,7 @@ class VSphereRestAPI(object):
         return resource_tags
 
     def _get_categories(self):
+        # type: () -> Dict[str, str]
         """
         Returns a dict of categories with category id as key and category name as value.
 
@@ -88,6 +98,7 @@ class VSphereRestAPI(object):
         return categories
 
     def _get_tags(self, categories):
+        # type: (Dict[str, str]) -> Dict[str, str]
         """
         Create tags using vSphere tags prefix + vSphere tag category name as key and vSphere tag name as value.
 
@@ -117,6 +128,7 @@ class VSphereRestClient(object):
     JSON_REQUEST_HEADERS = {'Content-Type': 'application/json'}
 
     def __init__(self, config, log):
+        # type: (VSphereConfig, Logger) -> None
         self.log = log
         http_config = {
             'username': config.username,
@@ -129,14 +141,16 @@ class VSphereRestClient(object):
         self._http = RequestsWrapper(http_config, {})
 
     def connect_session(self):
-        session_token = self.session_create("session")
+        # type: () -> None
+        session_token = self.session_create()
 
         if not session_token:
             raise APIResponseError("Failed to retrieve session token")
 
         self._http.options['headers']['vmware-api-session-id'] = session_token
 
-    def session_create(self, tag_ids):
+    def session_create(self):
+        # type: () -> str
         """
         Create session token
         Doc:
@@ -146,6 +160,7 @@ class VSphereRestClient(object):
         return session_token
 
     def tagging_category_list(self):
+        # type: () -> List[str]
         """
         Get list of categories
         Doc:
@@ -154,6 +169,7 @@ class VSphereRestClient(object):
         return self._request_json("tagging/category")
 
     def tagging_category_get(self, category_id):
+        # type: (str) -> Dict[str, Any]
         """
         Get one category
         Doc:
@@ -162,6 +178,7 @@ class VSphereRestClient(object):
         return self._request_json("tagging/category/id:{}".format(category_id))
 
     def tagging_tags_list(self):
+        # type: () -> List[str]
         """
         Get list of tags
         Doc:
@@ -170,6 +187,7 @@ class VSphereRestClient(object):
         return self._request_json("tagging/tag")
 
     def tagging_tags_get(self, tag_id):
+        # type: (str) -> Dict[str, Any]
         """
         Get one tag
         Doc:
@@ -178,6 +196,7 @@ class VSphereRestClient(object):
         return self._request_json("tagging/tag/id:{}".format(tag_id))
 
     def tagging_tag_association_list_attached_objects_on_tags(self, tag_ids):
+        # type: (List[str]) -> List[TagAssociation]
         """
         Get tag associations for vSphere resources
         Doc:
@@ -189,10 +208,11 @@ class VSphereRestClient(object):
             method="post",
             data=json.dumps(payload),
             extra_headers=self.JSON_REQUEST_HEADERS,
-        )
+        )  # type: List[TagAssociation]
         return tag_associations
 
     def _request_json(self, endpoint, method='get', **options):
+        # type: (str, str, **Any) -> Any
         url = self._api_base_url + endpoint
         resp = getattr(self._http, method)(url, **options)
         resp.raise_for_status()
