@@ -349,6 +349,15 @@ def test_compaction_metrics(aggregator, gauges):
     )
     r.raise_for_status()
 
+    for _ in range(120):
+        url = '{}/kennel'.format(common.NODE1['server'])
+        r = requests.get(
+            url, auth=(common.NODE1['user'], common.NODE1['password']), headers={'Content-Type': 'application/json'}
+        )
+        r.raise_for_status()
+        print(r.json()['compact_running'])
+        raise Exception()
+
     for config in [common.NODE1, common.NODE2, common.NODE3]:
         check = CouchDb(common.CHECK_NAME, {}, [config])
         check.check(config)
