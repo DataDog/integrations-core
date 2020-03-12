@@ -21,7 +21,7 @@
     "id": 1009816,
     "isIntegration": false,
     "isShared": false,
-    "modified": "2020-03-12T18:19:49.026424+00:00",
+    "modified": "2020-03-12T18:49:47.671477+00:00",
     "new_id": "52g-qkm-q4e",
     "originalHeight": 80,
     "originalWidth": "calc(100% - 32px)",
@@ -77,7 +77,6 @@
             "grouping": "check",
             "height": 8,
             "isShared": false,
-            "scaleFactor": 1,
             "sharedGlobalTime": {
                 "live_span": "1h"
             },
@@ -161,7 +160,6 @@
             "html": "Service Checks",
             "isShared": false,
             "refresh_every": 30000,
-            "scaleFactor": 1,
             "show_tick": true,
             "text_align": "center",
             "tick": true,
@@ -176,7 +174,6 @@
         {
             "add_timeframe": true,
             "error": null,
-            "generated_title": "Avg of gitlab.http_requests_total over *",
             "height": 13,
             "isShared": false,
             "legend": false,
@@ -213,7 +210,7 @@
             "title_text": "Http requests",
             "type": "timeseries",
             "viz": "timeseries",
-            "width": 42,
+            "width": 43,
             "x": 34,
             "y": 13,
             "yaxis": {
@@ -263,7 +260,7 @@
             "title_text": "Http request duration",
             "type": "timeseries",
             "viz": "timeseries",
-            "width": 42,
+            "width": 43,
             "x": 34,
             "y": 29,
             "yaxis": {
@@ -285,7 +282,6 @@
             "html": "Requests Information",
             "isShared": false,
             "refresh_every": 30000,
-            "scaleFactor": 1,
             "show_tick": true,
             "text_align": "center",
             "tick": true,
@@ -293,37 +289,25 @@
             "tick_pos": "50%",
             "title": false,
             "type": "note",
-            "width": 42,
+            "width": 43,
             "x": 34,
             "y": 1
         },
         {
             "add_timeframe": true,
-            "board_id": "52g-qkm-q4e",
             "error": null,
-            "generated_title": "Avg of gitlab.pipelines_created_total over *",
             "height": 9,
             "isShared": false,
-            "legend": false,
+            "precision": 1,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
             "tile_def": {
-                "precision": "1",
+                "precision": 1,
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_red"
-                            },
-                            {
-                                "comparator": ">=",
-                                "palette": "white_on_yellow"
-                            },
-                            {
-                                "comparator": "<",
-                                "palette": "white_on_green"
-                            }
-                        ],
+                        "conditional_formats": [],
                         "q": "avg:gitlab.pipelines_created_total{*}.as_count()"
                     }
                 ],
@@ -332,40 +316,29 @@
             "time": {},
             "title": true,
             "title_align": "left",
-            "title_size": 16,
+            "title_size": "16",
             "title_text": "Pipelines Created",
             "type": "query_value",
+            "viz": "query_value",
             "width": 16,
-            "x": 78,
-            "y": 1
+            "x": 79,
+            "y": 13
         },
         {
             "add_timeframe": true,
-            "board_id": "52g-qkm-q4e",
             "error": null,
-            "generated_title": "Avg of gitlab.auto_devops_pipelines_completed_total.1 over *",
             "height": 9,
             "isShared": false,
-            "legend": false,
+            "precision": 1,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
             "tile_def": {
-                "precision": "1",
+                "precision": 1,
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_red"
-                            },
-                            {
-                                "comparator": ">=",
-                                "palette": "white_on_yellow"
-                            },
-                            {
-                                "comparator": "<",
-                                "palette": "white_on_green"
-                            }
-                        ],
+                        "conditional_formats": [],
                         "q": "avg:gitlab.auto_devops_pipelines_completed_total.1{*}"
                     }
                 ],
@@ -374,60 +347,52 @@
             "time": {},
             "title": true,
             "title_align": "left",
-            "title_size": 16,
+            "title_size": "16",
             "title_text": "Pipelines Completed",
             "type": "query_value",
+            "viz": "query_value",
             "width": 16,
-            "x": 78,
-            "y": 13
+            "x": 79,
+            "y": 25
         },
         {
             "add_timeframe": true,
             "auto_refresh": false,
+            "background_color": "gray",
             "bgcolor": "gray",
-            "board_id": "52g-qkm-q4e",
+            "content": "Pipelines",
             "font_size": "24",
             "height": 10,
             "html": "Pipelines",
             "isShared": false,
             "refresh_every": 30000,
             "scaleFactor": 1,
+            "show_tick": true,
             "text_align": "center",
             "tick": true,
-            "tick_edge": "top",
+            "tick_edge": "bottom",
             "tick_pos": "50%",
             "title": false,
             "type": "note",
             "width": 16,
-            "x": 78,
-            "y": 26
+            "x": 79,
+            "y": 1
         },
         {
             "add_timeframe": true,
-            "board_id": "52g-qkm-q4e",
             "error": null,
-            "generated_title": "Avg of gitlab.transaction.event_create_repository_total.1 over *",
             "height": 9,
             "isShared": false,
-            "legend": false,
+            "precision": 2,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
             "tile_def": {
+                "precision": 2,
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_red"
-                            },
-                            {
-                                "comparator": ">=",
-                                "palette": "white_on_yellow"
-                            },
-                            {
-                                "comparator": "<",
-                                "palette": "white_on_green"
-                            }
-                        ],
+                        "conditional_formats": [],
                         "q": "avg:gitlab.transaction.event_create_repository_total.1{*}"
                     }
                 ],
@@ -436,40 +401,29 @@
             "time": {},
             "title": true,
             "title_align": "left",
-            "title_size": 16,
+            "title_size": "16",
             "title_text": "Repositories Created",
             "type": "query_value",
+            "viz": "query_value",
             "width": 16,
             "x": 96,
             "y": 25
         },
         {
             "add_timeframe": true,
-            "board_id": "52g-qkm-q4e",
             "error": null,
-            "generated_title": "Avg of gitlab.transaction.event_fork_repository_total.1 over *",
             "height": 9,
             "isShared": false,
-            "legend": false,
+            "precision": 1,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
             "tile_def": {
-                "precision": "1",
+                "precision": 1,
                 "requests": [
                     {
                         "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_red"
-                            },
-                            {
-                                "comparator": ">=",
-                                "palette": "white_on_yellow"
-                            },
-                            {
-                                "comparator": "<",
-                                "palette": "white_on_green"
-                            }
-                        ],
+                        "conditional_formats": [],
                         "q": "avg:gitlab.transaction.event_fork_repository_total.1{*}"
                     }
                 ],
@@ -478,9 +432,10 @@
             "time": {},
             "title": true,
             "title_align": "left",
-            "title_size": 16,
+            "title_size": "16",
             "title_text": "Repositories Forked",
             "type": "query_value",
+            "viz": "query_value",
             "width": 16,
             "x": 96,
             "y": 13
@@ -488,14 +443,15 @@
         {
             "add_timeframe": true,
             "auto_refresh": false,
+            "background_color": "gray",
             "bgcolor": "gray",
-            "board_id": "52g-qkm-q4e",
+            "content": "Repositories",
             "font_size": "24",
             "height": 10,
             "html": "Repositories",
             "isShared": false,
             "refresh_every": 30000,
-            "scaleFactor": 1,
+            "show_tick": true,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
@@ -508,12 +464,14 @@
         },
         {
             "add_timeframe": true,
-            "board_id": "52g-qkm-q4e",
             "error": null,
-            "generated_title": "Avg of gitlab.transaction.event_push_commit_total over *",
             "height": 12,
             "isShared": false,
             "legend": false,
+            "markers": [],
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
             "tile_def": {
                 "markers": [],
                 "requests": [
@@ -539,63 +497,77 @@
             "time": {},
             "title": true,
             "title_align": "left",
-            "title_size": 16,
+            "title_size": "16",
             "title_text": "Total Commits",
             "type": "timeseries",
+            "viz": "timeseries",
             "width": 31,
             "x": 1,
-            "y": 38
+            "y": 49,
+            "yaxis": {
+                "includeZero": true,
+                "label": "",
+                "max": "auto",
+                "min": "auto",
+                "scale": "linear"
+            }
         },
         {
             "add_timeframe": true,
             "auto_refresh": false,
+            "background_color": "gray",
             "bgcolor": "gray",
-            "board_id": "52g-qkm-q4e",
+            "content": "Commits",
             "font_size": "24",
-            "height": 6,
+            "height": 8,
             "html": "Commits",
             "isShared": false,
             "refresh_every": 30000,
             "scaleFactor": 1,
+            "show_tick": true,
             "text_align": "center",
             "tick": true,
-            "tick_edge": "left",
+            "tick_edge": "bottom",
             "tick_pos": "50%",
             "title": false,
             "type": "note",
-            "width": 21,
-            "x": 34,
-            "y": 46
+            "width": 31,
+            "x": 1,
+            "y": 39
         },
         {
             "add_timeframe": true,
             "auto_refresh": false,
+            "background_color": "gray",
             "bgcolor": "gray",
-            "board_id": "52g-qkm-q4e",
+            "content": "Users",
             "font_size": "24",
-            "height": 6,
+            "height": 7,
             "html": "Users",
             "isShared": false,
             "refresh_every": 30000,
             "scaleFactor": 1,
+            "show_tick": true,
             "text_align": "center",
             "tick": true,
-            "tick_edge": "right",
+            "tick_edge": "bottom",
             "tick_pos": "50%",
             "title": false,
             "type": "note",
-            "width": 18,
-            "x": 57,
-            "y": 46
+            "width": 33,
+            "x": 79,
+            "y": 37
         },
         {
             "add_timeframe": true,
-            "board_id": "52g-qkm-q4e",
             "error": null,
-            "generated_title": "Avg of gitlab.user_session_logins_total over *",
             "height": 12,
             "isShared": false,
             "legend": false,
+            "markers": [],
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
             "tile_def": {
                 "markers": [],
                 "requests": [
@@ -621,12 +593,60 @@
             "time": {},
             "title": true,
             "title_align": "left",
-            "title_size": 16,
+            "title_size": "16",
             "title_text": "User Logins ",
             "type": "timeseries",
-            "width": 34,
-            "x": 78,
-            "y": 38
+            "viz": "timeseries",
+            "width": 33,
+            "x": 79,
+            "y": 46,
+            "yaxis": {
+                "includeZero": true,
+                "label": "",
+                "max": "auto",
+                "min": "auto",
+                "scale": "linear"
+            }
+        },
+        {
+            "add_timeframe": true,
+            "board_id": "52g-qkm-q4e",
+            "error": null,
+            "generated_title": "Avg of gitlab.method_call_duration_seconds.count over *",
+            "height": 13,
+            "isShared": false,
+            "legend": false,
+            "tile_def": {
+                "markers": [],
+                "requests": [
+                    {
+                        "q": "avg:gitlab.method_call_duration_seconds.count{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Method Call Duration",
+            "type": "timeseries",
+            "width": 43,
+            "x": 34,
+            "y": 45
         }
     ]
 }
