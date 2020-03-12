@@ -22,7 +22,7 @@ from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, total_time_to_temporal_percent, write_persistent_cache
 from .config import InstanceConfig, ParsedMetric, ParsedMetricTag, ParsedTableMetric
 from .exceptions import PySnmpError
-from .models import (
+from .pysnmp_types import (
     Counter32,
     Counter64,
     CounterBasedGauge64,
@@ -107,7 +107,6 @@ class SnmpCheck(AgentCheck):
         return InstanceConfig(
             instance,
             warning=self.warning,
-            log=self.log,
             global_metrics=self.init_config.get('global_metrics', []),
             mibs_path=self.mibs_path,
             profiles=self.profiles,
@@ -156,7 +155,7 @@ class SnmpCheck(AgentCheck):
                         self.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
                         continue
                 else:
-                    host_config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
+                    host_config.refresh_with_profile(self.profiles[profile], self.warning)
                     host_config.add_profile_tag(profile)
 
                 config.discovered_instances[host] = host_config
@@ -171,7 +170,7 @@ class SnmpCheck(AgentCheck):
                 time.sleep(interval - time_elapsed)
 
     def fetch_results(self, config, all_oids, bulk_oids):
-        # type: (InstanceConfig, list, list) -> Tuple[dict, Optional[str]]
+        # type: (InstanceConfig, list, list) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], Optional[str]]
         """
         Perform a snmpwalk on the domain specified by the oids, on the device
         configured in instance.
@@ -180,7 +179,7 @@ class SnmpCheck(AgentCheck):
         dict[oid/metric_name][row index] = value
         In case of scalar objects, the row index is just 0
         """
-        results = defaultdict(dict)  # type: DefaultDict[str, dict]
+        results = defaultdict(dict)  # type: DefaultDict[str, Dict[Tuple[str, ...], Any]]
         enforce_constraints = config.enforce_constraints
 
         all_binds, error = self.fetch_oids(config, all_oids, enforce_constraints=enforce_constraints)
@@ -370,7 +369,7 @@ class SnmpCheck(AgentCheck):
             if not (config.all_oids or config.bulk_oids):
                 sys_object_oid = self.fetch_sysobject_oid(config)
                 profile = self._profile_for_sysobject_oid(sys_object_oid)
-                config.refresh_with_profile(self.profiles[profile], self.warning, self.log)
+                config.refresh_with_profile(self.profiles[profile], self.warning)
                 config.add_profile_tag(profile)
 
             if config.all_oids or config.bulk_oids:
@@ -416,7 +415,7 @@ class SnmpCheck(AgentCheck):
     def report_metrics(
         self,
         metrics,  # type: List[Union[ParsedMetric, ParsedTableMetric]]
-        results,  # type: Dict[str, dict]
+        results,  # type: Dict[str, Dict[Tuple[str, ...], Any]]
         tags,  # type: List[str]
     ):
         # type: (...) -> None
@@ -448,7 +447,7 @@ class SnmpCheck(AgentCheck):
 
     def get_index_tags(
         self,
-        index,  # type: Dict[int, float]
+        index,  # type: Tuple[str, ...]
         results,  # type: Dict[str, dict]
         index_tags,  # type: List[Tuple[str, int]]
         column_tags,  # type: List[Tuple[str, str]]
@@ -467,27 +466,25 @@ class SnmpCheck(AgentCheck):
         """
         tags = []  # type: List[str]
 
-        for idx_tag in index_tags:
-            tag_group = idx_tag[0]
+        for name, raw_index_value in index_tags:
             try:
-                tag_value = index[idx_tag[1] - 1]
+                value = index[raw_index_value - 1]
             except IndexError:
-                self.log.warning('Not enough indexes, skipping tag %s', tag_group)
+                self.log.warning('Not enough indexes, skipping tag %s', name)
                 continue
-            tags.append('{}:{}'.format(tag_group, tag_value))
+            tags.append('{}:{}'.format(name, value))
 
-        for col_tag in column_tags:
-            tag_group = col_tag[0]
+        for name, raw_column_value in column_tags:
             try:
-                column_value = results[col_tag[1]][index]
+                column_value = results[raw_column_value][index]
             except KeyError:
-                self.log.warning('Column %s not present in the table, skipping this tag', col_tag[1])
+                self.log.warning('Column %s not present in the table, skipping this tag', raw_column_value)
                 continue
             if reply_invalid(column_value):
-                self.log.warning("Can't deduct tag from column for tag %s", tag_group)
+                self.log.warning("Can't deduct tag from column for tag %s", name)
                 continue
-            tag_value = column_value.prettyPrint()
-            tags.append('{}:{}'.format(tag_group, tag_value))
+            value = column_value.prettyPrint()
+            tags.append('{}:{}'.format(name, value))
 
         return tags
 

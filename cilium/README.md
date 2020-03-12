@@ -40,6 +40,7 @@ The Cilium check is included in the [Datadog Agent][3] package, but it requires 
 
 ### Configuration
 
+#### Host
 1. Edit the `cilium.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Cilium performance data. See the [sample cilium.d/conf.yaml][4] for all available configuration options.
 
    - To collect `cilium-agent` metrics, enable the `agent_endpoint` option.
@@ -47,11 +48,9 @@ The Cilium check is included in the [Datadog Agent][3] package, but it requires 
 
 2. [Restart the Agent][5].
 
-#### Log Collection
+##### Log Collection
 
 Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
-
-#### Available for Agent >6.0
 
 1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [DaemonSet configuration][4]:
 
@@ -69,6 +68,27 @@ Cilium contains two types of logs: `cilium-agent` and `cilium-operator`.
 2. Mount the Docker socket to the Datadog Agent as done in [this manifest][9] or mount the `/var/log/pods` directory if you are not using Docker.
 
 3. [Restart the Agent][5].
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][11] for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                                                      |
+|----------------------|------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `cilium`                                                   |
+| `<INIT_CONFIG>`      | blank or `{}`                                              |
+| `<INSTANCE_CONFIG>`  | `{"agent_endpoint": "http://%%host%%:9090/metrics"}`       |
+
+##### Log collection
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][10].
+
+| Parameter      | Value                                     |
+|----------------|-------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "cilium-agent", "service": "cilium-agent"}` |
+
 
 ### Validation
 
@@ -101,3 +121,5 @@ Need help? Contact [Datadog support][8].
 [7]: https://github.com/DataDog/integrations-core/blob/master/cilium/metadata.csv
 [8]: https://docs.datadoghq.com/help
 [9]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#create-manifest
+[10]: https://docs.datadoghq.com/agent/docker/log
+[11]: https://docs.datadoghq.com/agent/autodiscovery/integrations

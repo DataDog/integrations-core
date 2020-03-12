@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from datetime import datetime, timedelta
 from itertools import islice
 from time import time as timestamp
@@ -26,6 +26,8 @@ from datadog_checks.consul.common import (
     ceili,
     distance,
 )
+
+NodeStatus = namedtuple('NodeStatus', ['node_id', 'service_name', 'service_tags_set', 'status'])
 
 
 class ConsulCheck(AgentCheck):
@@ -310,6 +312,19 @@ class ConsulCheck(AgentCheck):
             # {node_id: {"up: 0, "passing": 0, "warning": 0, "critical": 0}
             nodes_to_service_status = defaultdict(lambda: defaultdict(int))
 
+            # Maps NodeStatus -> int
+            nodes_per_service_tag_counts = defaultdict(int)
+
+            # Note: This part submits multiple metrics with different meanings.
+            # `consul.catalog.nodes_<STATUS>` tagged with the name of the service and all the tags for this service.
+            #   The metric means the number of nodes with that status and should use `max` queries when aggregating
+            #   over multiple services.
+            # `consul.catalog.services_<STATUS>` tagged with the name of the node.
+            #   The metric means the number of services with that status and should use `max` queries when aggregating
+            #   over multiple nodes.
+            # `consul.catalog.services_count` tagged by node name, service name and status and service tags.
+            #   The metric is a gauge whose value is the total number of services sharing the same name, the same node
+            #   and the same tags.
             for service in services:
                 # For every service in the cluster,
                 # Gauge the following:
@@ -318,12 +333,12 @@ class ConsulCheck(AgentCheck):
                 # `consul.catalog.nodes_warning` : # of Nodes with service status `warning` from those registered
                 # `consul.catalog.nodes_critical` : # of Nodes with service status `critical` from those registered
 
-                service_tags = self._get_service_tags(service, services[service])
+                all_service_tags = self._get_service_tags(service, services[service])
 
                 nodes_with_service = self.get_nodes_with_service(service)
 
                 # {'up': 0, 'passing': 0, 'warning': 0, 'critical': 0}
-                node_status = defaultdict(int)
+                node_count_per_status = defaultdict(int)
 
                 for node in nodes_with_service:
                     # The node_id is n['Node']['Node']
@@ -334,8 +349,8 @@ class ConsulCheck(AgentCheck):
 
                     # If there is no Check for the node then Consul and dd-agent consider it up
                     if 'Checks' not in node:
-                        node_status['passing'] += 1
-                        node_status['up'] += 1
+                        node_count_per_status['passing'] += 1
+                        node_count_per_status['up'] += 1
                     else:
                         found_critical = False
                         found_warning = False
@@ -345,13 +360,13 @@ class ConsulCheck(AgentCheck):
                             if check['CheckID'] == 'serfHealth':
                                 found_serf_health = True
 
-                                # For backwards compatibility, the "up" node_status is computed
+                                # For backwards compatibility, the "up" node_count_per_status is computed
                                 # based on the total # of nodes 'running' as part of the service.
 
                                 # If the serfHealth is `critical` it means the Consul agent isn't even responding,
                                 # and we don't register the node as `up`
                                 if check['Status'] != 'critical':
-                                    node_status["up"] += 1
+                                    node_count_per_status["up"] += 1
                                     continue
 
                             if check['Status'] == 'critical':
@@ -361,30 +376,37 @@ class ConsulCheck(AgentCheck):
                                 found_warning = True
                                 # Keep looping in case there is a critical status
 
+                        service_tags_set = frozenset(node.get('Service', {}).get('Tags') or [])
+
                         # Increment the counters based on what was found in Checks
                         # `critical` checks override `warning`s, and if neither are found,
                         # register the node as `passing`
                         if found_critical:
-                            node_status['critical'] += 1
+                            node_count_per_status['critical'] += 1
                             nodes_to_service_status[node_id]["critical"] += 1
+                            node_status = NodeStatus(node_id, service, service_tags_set, 'critical')
                         elif found_warning:
-                            node_status['warning'] += 1
+                            node_count_per_status['warning'] += 1
                             nodes_to_service_status[node_id]["warning"] += 1
+                            node_status = NodeStatus(node_id, service, service_tags_set, 'warning')
                         else:
                             if not found_serf_health:
                                 # We have not found a serfHealth check for this node, which is unexpected
                                 # If we get here assume this node's status is "up", since we register it as 'passing'
-                                node_status['up'] += 1
+                                node_count_per_status['up'] += 1
 
-                            node_status['passing'] += 1
+                            node_count_per_status['passing'] += 1
                             nodes_to_service_status[node_id]["passing"] += 1
+                            node_status = NodeStatus(node_id, service, service_tags_set, 'passing')
+
+                        nodes_per_service_tag_counts[node_status] += 1
 
                 for status_key in STATUS_SC:
-                    status_value = node_status[status_key]
+                    status_value = node_count_per_status[status_key]
                     self.gauge(
                         '{}.nodes_{}'.format(CONSUL_CATALOG_CHECK, status_key),
                         status_value,
-                        tags=main_tags + service_tags,
+                        tags=main_tags + all_service_tags,
                     )
 
             for node, service_status in iteritems(nodes_to_service_status):
@@ -404,6 +426,17 @@ class ConsulCheck(AgentCheck):
                         status_value,
                         tags=main_tags + node_tags,
                     )
+
+            for node_status, count in iteritems(nodes_per_service_tag_counts):
+                service_tags = [
+                    'consul_{}_service_tag:{}'.format(node_status.service_name, tag)
+                    for tag in node_status.service_tags_set
+                ]
+                service_tags.append('consul_service_id:{}'.format(node_status.service_name))
+                service_tags.append('consul_node_id:{}'.format(node_status.node_id))
+                service_tags.append('consul_status:{}'.format(node_status.status))
+
+                self.gauge('{}.services_count'.format(CONSUL_CATALOG_CHECK), count, tags=main_tags + service_tags)
 
         if self.perform_network_latency_checks:
             self.check_network_latency(agent_dc, main_tags)

@@ -38,6 +38,17 @@ INSTANCE = {
     'password': PASSWORD,
     'queues': [QUEUE],
     'channels': [CHANNEL, BAD_CHANNEL],
+    'tags': ['foo:bar'],
+}
+
+INSTANCE_WITH_CONNECTION_NAME = {
+    'channel': CHANNEL,
+    'queue_manager': QUEUE_MANAGER,
+    'connection_name': "{}({})".format(HOST, PORT),
+    'username': USERNAME,
+    'password': PASSWORD,
+    'queues': [QUEUE],
+    'channels': [CHANNEL, BAD_CHANNEL],
 }
 
 INSTANCE_QUEUE_PATTERN = {

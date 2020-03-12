@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 1.16.2 / 2020-03-10
+
+* [Fixed] Streamline exception handling. See [#6003](https://github.com/DataDog/integrations-core/pull/6003).
+
 ## 1.16.1 / 2020-02-22
 
 * [Fixed] Fix small capitalization error in log. See [#5509](https://github.com/DataDog/integrations-core/pull/5509).
