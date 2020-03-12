@@ -103,7 +103,7 @@ class VSphereAPI(object):
             err_msg = "Connection to {} failed: {}".format(self.config.hostname, e)
             raise APIConnectionError(err_msg)
 
-        if getattr(self, '_conn'):
+        if getattr(self, '_conn', None):
             connect.Disconnect(self._conn)
 
         self._conn = conn  # type: vim.ServiceInstance
