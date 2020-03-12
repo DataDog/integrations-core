@@ -77,6 +77,9 @@ class AerospikeCheck(AgentCheck):
         port = int(self.instance.get('port', 3000))
         tls_name = self.instance.get('tls_name')
         self._host = (host, port, tls_name) if tls_name else (host, port)
+        self._tls_config = self.instance.get('tls_config', None)
+        if self._tls_config:
+            self._tls_config['enable'] = True
 
         # https://www.aerospike.com/apidocs/python/client.html#aerospike.Client.connect
         self._username = self.instance.get('username')
@@ -198,8 +201,11 @@ class AerospikeCheck(AgentCheck):
         return datacenters
 
     def get_client(self):
+        client_config = {'hosts': [self._host]}
+        if self._tls_config:
+            client_config['tls'] = self._tls_config
         try:
-            client = aerospike.client({'hosts': [self._host]}).connect(self._username, self._password)
+            client = aerospike.client(client_config).connect(self._username, self._password)
         except Exception as e:
             self.log.error('Unable to connect to database: %s', e)
             self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
