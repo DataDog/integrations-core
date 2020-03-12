@@ -4,6 +4,7 @@
 """
 Re-export PyASN1/PySNMP types and classes that we use, so that we can access them from a single module.
 """
+from typing import Set
 
 from pyasn1.type.base import Asn1Type
 from pyasn1.type.univ import OctetString
@@ -57,25 +58,17 @@ CounterBasedGauge64, ZeroBasedCounter64 = MibBuilder().importSymbols(
 
 # SNMP value types that we explicitly support.
 PYSNMP_COUNTER_CLASSES = {
-    Counter32.__name__,
-    Counter64.__name__,
-    ZeroBasedCounter64.__name__,
-}
+    Counter32,
+    Counter64,
+    ZeroBasedCounter64,
+}  # type: Set[type]
 PYSNMP_GAUGE_CLASSES = {
-    Gauge32.__name__,
-    CounterBasedGauge64.__name__,
-    Integer.__name__,
-    Integer32.__name__,
-    Unsigned32.__name__,
-}
+    Gauge32,
+    CounterBasedGauge64,
+    Integer,
+    Integer32,
+    Unsigned32,
+}  # type: Set[type]
 
 # Cleanup items we used here but don't want to expose.
 del MibBuilder
-del Counter32
-del Counter64
-del CounterBasedGauge64
-del Gauge32
-del Integer
-del Integer32
-del Unsigned32
-del ZeroBasedCounter64
