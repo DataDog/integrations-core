@@ -223,7 +223,7 @@ class VSphereCheck(AgentCheck):
         # when instance metrics are collected.
         have_instance_value = defaultdict(set)  # type: Dict[Type[vim.ManagedEntity], Set[MetricName]]
         for results_per_mor in query_results:
-            resource_type = cast(Type[vim.ManagedEntity], type(results_per_mor.entity))
+            resource_type = type(results_per_mor.entity)
             metadata = self.metrics_metadata_cache.get_metadata(resource_type)
             for result in results_per_mor.value:
                 if result.id.instance:
@@ -238,7 +238,7 @@ class VSphereCheck(AgentCheck):
                     results_per_mor.entity,
                 )
                 continue
-            resource_type = cast(Type[vim.ManagedEntity], type(results_per_mor.entity))
+            resource_type = type(results_per_mor.entity)
             metadata = self.metrics_metadata_cache.get_metadata(resource_type)
             for result in results_per_mor.value:
                 metric_name = metadata.get(result.id.counterId)

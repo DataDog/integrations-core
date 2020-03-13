@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import List, Pattern, Type, cast
+from typing import List, Pattern, Type
 
 from pyVmomi import vim
 from six import iteritems
@@ -134,7 +134,7 @@ def get_parent_tags_recursively(mor, infrastructure_data):
     parent = mor_props.get('parent')
     if parent:
         tags = []
-        parent_props = infrastructure_data.get(parent, cast(InfrastructureDataItem, {}))
+        parent_props = infrastructure_data.get(parent, {})
         parent_name = to_native_string(parent_props.get('name', 'unknown'))
         if isinstance(parent, vim.HostSystem):
             tags.append('vsphere_host:{}'.format(parent_name))
