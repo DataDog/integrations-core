@@ -29,20 +29,20 @@ class OIDTrie(object):
         # type: () -> None
         self._root = OIDTreeNode()
 
-    def set(self, oid_tuple, name):
+    def set(self, oid, name):
         # type: (Tuple[int, ...], str) -> None
         node = self._root
-        for part in oid_tuple:
+        for part in oid:
             node = node.children[part]
         node.name = name
 
-    def match(self, oid_tuple):
+    def match(self, oid):
         # type: (Tuple[int, ...]) -> Tuple[Tuple[int, ...], Optional[str]]
         node = self._root
-        matched = []  # type: List[int]
+        matched = []
         name = None
 
-        for part in oid_tuple:
+        for part in oid:
             child = node.children.get(part)
             if child is None:
                 break
