@@ -2,28 +2,13 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import os
-
 import pytest
 
-from datadog_checks import snmp
 from datadog_checks.snmp import SnmpCheck
 
 from . import common
-from .utils import mock_profiles_root
 
 pytestmark = pytest.mark.usefixtures("dd_environment")
-
-
-@pytest.fixture(autouse=True)
-def host_profiles_root():
-    # By default, we resolve profiles relative to the `snmp.d` directory.
-    # But this directory is only created by the Agent when the integration is installed, so we have
-    # to replace it with the path within the Python package.
-    package_profiles_root = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles')
-
-    with mock_profiles_root(package_profiles_root):
-        yield
 
 
 def run_profile_check(profile, recording_name, profile_name, set_profile=False):

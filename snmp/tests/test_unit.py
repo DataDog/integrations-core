@@ -376,7 +376,7 @@ def test_discovery_tags():
     check.discover_instances(interval=0)
 
     config = check._config.discovered_instances['192.168.0.2']
-    assert set(config.tags) == {'snmp_device:192.168.0.2', 'test:check'}
+    assert set(config.tags) == {'snmp_device:192.168.0.2', 'test:check', 'snmp_profile:generic-router'}
 
 
 @mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")

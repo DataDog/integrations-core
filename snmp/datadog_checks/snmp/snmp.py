@@ -24,7 +24,13 @@ from .exceptions import PySnmpError
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
 from .types import ForceableMetricType
-from .utils import OIDPrinter, get_profile_definition, oid_pattern_specificity, recursively_expand_base_profiles
+from .utils import (
+    OIDPrinter,
+    get_default_profiles,
+    get_profile_definition,
+    oid_pattern_specificity,
+    recursively_expand_base_profiles,
+)
 
 DEFAULT_OID_BATCH_SIZE = 10
 
@@ -55,7 +61,9 @@ class SnmpCheck(AgentCheck):
 
         self.ignore_nonincreasing_oid = is_affirmative(self.init_config.get('ignore_nonincreasing_oid', False))
 
-        self.profiles = self.init_config.get('profiles', {})  # type: Dict[str, Dict[str, Any]]
+        self.profiles = self.init_config.get('profiles')  # type: Dict[str, Dict[str, Any]]
+        if self.profiles is None:
+            self.profiles = get_default_profiles()
         self.profiles_by_oid = {}  # type: Dict[str, str]
         self._load_profiles()
 

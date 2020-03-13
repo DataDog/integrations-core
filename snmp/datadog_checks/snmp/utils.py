@@ -41,10 +41,19 @@ def _get_profiles_root():
     return os.path.join(confd, 'snmp.d', 'profiles')
 
 
+def _get_profiles_site_root():
+    here = os.path.dirname(__file__)
+    return os.path.join(here, 'data', 'profiles')
+
+
 def _read_profile_definition(definition_file):
     # type: (str) -> Dict[str, Any]
     if not os.path.isabs(definition_file):
-        definition_file = os.path.join(_get_profiles_root(), definition_file)
+        definition_conf_file = os.path.join(_get_profiles_root(), definition_file)
+        if not os.path.isfile(definition_conf_file):
+            definition_file = os.path.join(_get_profiles_site_root(), definition_file)
+        else:
+            definition_file = definition_conf_file
 
     with open(definition_file) as f:
         return yaml.safe_load(f)
@@ -72,6 +81,22 @@ def recursively_expand_base_profiles(definition):
         definition['metrics'] = base_metrics + existing_metrics  # NOTE: base metrics must be added first.
 
         definition.setdefault('metric_tags', []).extend(base_definition.get('metric_tags', []))
+
+
+def get_default_profiles():
+    profiles = {}
+    paths = [_get_profiles_site_root(), _get_profiles_root()]
+    for path in paths:
+        if not os.path.isdir(path):
+            continue
+        for filename in os.listdir(path):
+            if filename.startswith('_'):
+                continue
+            base, ext = os.path.splitext(filename)
+            if ext != '.yaml':
+                continue
+            profiles[base] = {'definition_file': os.path.join(path, filename)}
+    return profiles
 
 
 def parse_as_oid_tuple(value):
