@@ -133,7 +133,7 @@ class WinPDHCounter(object):
         # by counter name.
 
         idx = 0
-        idx_max = len(val)
+        idx_max = len(val) - 1 # some systems may have an odd number of entries, don't accidentaly index at val[len(val]
         while idx < idx_max:
             # counter index is idx , counter name is idx + 1
             WinPDHCounter.pdh_counter_dict[val[idx + 1]].append(val[idx])
