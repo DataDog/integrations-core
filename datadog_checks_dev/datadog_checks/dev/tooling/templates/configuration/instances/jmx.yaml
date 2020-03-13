@@ -2,14 +2,12 @@
   required: true
   description: JMX hostname to connect to.
   value:
-    example: localhost
     type: string
 
 - name: port
   required: true
   description: JMX port to connect to.
   value:
-    example: 8686
     type: integer
 
 - name: user

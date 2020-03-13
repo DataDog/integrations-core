@@ -1,3 +1,5 @@
+import copy
+
 import mock
 import pytest
 
@@ -46,3 +48,18 @@ def test_datacenter_metrics(aggregator):
     check.check(common.INSTANCE)
     for metric in METRICS:
         aggregator.assert_metric(metric)
+
+
+def connection_uses_tls():
+    instance = copy.deepcopy(common.INSTANCE)
+    tls_config = {'cafile': 'my-ca-file', 'certfile': 'my-certfile', 'keyfile': 'my-keyfile'}
+    instance['tls_config'] = copy.deepcopy(tls_config)
+
+    check = aerospike.AerospikeCheck('aerospike', {}, [common.INSTANCE])
+    tls_config['enable'] = True
+
+    assert check._tls_config == tls_config
+
+    with mock.patch('aerospike.client') as client:
+        check.get_client()
+        assert client.called_with({'host': check._host, 'tls': tls_config})

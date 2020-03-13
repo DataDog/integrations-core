@@ -26,5 +26,7 @@ def test_check_e2e(dd_agent_check):
         aggregator.assert_metric(gauge, count=1, tags=shared_tags)
     for rate in common.CHECK_RATES + CHECK_RATES_CUSTOM:
         aggregator.assert_metric(rate, count=2, tags=shared_tags)
+    for count in common.CHECK_COUNT:
+        aggregator.assert_metric(count, count=2, tags=shared_tags)
 
     aggregator.assert_all_metrics_covered()
