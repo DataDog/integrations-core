@@ -9,7 +9,7 @@ from typing import Any, Sequence, Tuple, Union
 
 from .exceptions import CouldNotDecodeOID
 from .pysnmp_types import ObjectIdentity, ObjectName, ObjectType
-from .utils import format_as_oid_string, parse_as_oid_tuple
+from .utils import parse_as_oid_tuple
 
 
 class OID(object):
