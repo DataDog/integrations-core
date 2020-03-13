@@ -190,7 +190,10 @@ spec:
             cpu: "200m"
 ```
 
-**Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
+**Note**:
+
+- Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
+- Container metrics are not available in Fargate because the `cgroups` volume from the host can't be mounted into the Agent.
 
 ### DogStatsD
 
