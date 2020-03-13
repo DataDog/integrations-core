@@ -9,7 +9,7 @@ from typing import Any, Sequence, Tuple, Union
 
 from .exceptions import CouldNotDecodeOID
 from .pysnmp_types import ObjectIdentity, ObjectName, ObjectType
-from .utils import parse_as_oid_tuple
+from .utils import format_as_oid_string, parse_as_oid_tuple
 
 
 class OID(object):
@@ -38,14 +38,14 @@ class OID(object):
         # type: () -> Tuple[int, ...]
         return self._parts
 
-    def as_string(self):
-        # type: () -> str
-        return '.'.join(map(str, self.as_tuple()))
-
     def __eq__(self, other):
         # type: (Any) -> bool
         return isinstance(other, OID) and self.as_tuple() == other.as_tuple()
 
+    def __str__(self):
+        # type: () -> str
+        return format_as_oid_string(self.as_tuple())
+
     def __repr__(self):
         # type: () -> str
-        return 'OID({!r})'.format(self.as_string())
+        return 'OID({!r})'.format(str(self))
