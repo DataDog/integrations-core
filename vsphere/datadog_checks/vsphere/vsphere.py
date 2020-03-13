@@ -100,7 +100,9 @@ class VSphereCheck(AgentCheck):
 
     def refresh_metrics_metadata_cache(self):
         # type: () -> None
-        """Request the list of counters (metrics) from vSphere and store them in a cache."""
+        """
+        Request the list of counters (metrics) from vSphere and store them in a cache.
+        """
         self.log.debug(
             "Refreshing the metrics metadata cache. Collecting all counters metadata for collection_level=%d",
             self.config.collection_level,
@@ -314,9 +316,6 @@ class VSphereCheck(AgentCheck):
         # type: () -> Iterable[List[QuerySpec]]
         """
         Build query specs using MORs and metrics metadata.
-
-        :returns a list of vim.PerformanceManager.QuerySpec:
-        https://www.vmware.com/support/developer/vc-sdk/visdk41pubs/ApiReference/vim.PerformanceManager.QuerySpec.html
         """
         for resource_type in self.config.collected_resource_types:
             mors = self.infrastructure_cache.get_mors(resource_type)
@@ -478,7 +477,7 @@ class VSphereCheck(AgentCheck):
         self.latest_event_query = self.api.get_latest_event_timestamp() + timedelta(seconds=1)
 
     def check(self, _):
-        # type: (Any) -> None
+        # type: (InstanceConfig) -> None
         self._hostname = datadog_agent.get_hostname()
         # Assert the health of the vCenter API and submit the service_check accordingly
         try:
