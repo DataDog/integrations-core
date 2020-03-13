@@ -34,7 +34,7 @@ def get_profile_definition(profile):
     return profile['definition']
 
 
-def _get_profiles_root():
+def _get_profiles_confd_root():
     # type: () -> str
     # NOTE: this separate helper function exists for mocking purposes.
     confd = get_config('confd_path')
@@ -42,6 +42,7 @@ def _get_profiles_root():
 
 
 def _get_profiles_site_root():
+    # type: () -> str
     here = os.path.dirname(__file__)
     return os.path.join(here, 'data', 'profiles')
 
@@ -49,7 +50,7 @@ def _get_profiles_site_root():
 def _read_profile_definition(definition_file):
     # type: (str) -> Dict[str, Any]
     if not os.path.isabs(definition_file):
-        definition_conf_file = os.path.join(_get_profiles_root(), definition_file)
+        definition_conf_file = os.path.join(_get_profiles_confd_root(), definition_file)
         if not os.path.isfile(definition_conf_file):
             definition_file = os.path.join(_get_profiles_site_root(), definition_file)
         else:
@@ -84,8 +85,10 @@ def recursively_expand_base_profiles(definition):
 
 
 def get_default_profiles():
+    """Return all the profiles installed on the system."""
+    # type: () -> Dict[str, Any]
     profiles = {}
-    paths = [_get_profiles_site_root(), _get_profiles_root()]
+    paths = [_get_profiles_site_root(), _get_profiles_confd_root()]
     for path in paths:
         if not os.path.isdir(path):
             continue
