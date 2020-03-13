@@ -102,11 +102,12 @@ def get_default_profiles():
             continue
 
         for filename in os.listdir(path):
-            if filename.startswith('_'):
-                continue
-
             base, ext = os.path.splitext(filename)
             if ext != '.yaml':
+                continue
+
+            is_abstract = base.startswith('_')
+            if is_abstract:
                 continue
 
             profiles[base] = {'definition_file': os.path.join(path, filename)}
