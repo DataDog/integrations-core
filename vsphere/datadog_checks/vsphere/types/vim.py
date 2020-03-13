@@ -60,3 +60,14 @@ class ServiceInstance:
     def CurrentTime(self):
         # type: () -> Any
         pass
+
+
+class EntityMetricBase:
+    """
+    vim.ServiceInstance
+    """
+
+    def __init__(self):
+        # type: () -> None
+        self.value = cast(Any, None)
+        self.entity = cast(ManagedEntity, None)

@@ -29,7 +29,8 @@ from datadog_checks.vsphere.constants import (
 from datadog_checks.vsphere.legacy.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
 from datadog_checks.vsphere.types.check import InstanceConfig, MetricName, MorBatch
-from datadog_checks.vsphere.types.vim import CounterId, ManagedEntity, ManagedEntityType, MetricId, QuerySpec
+from datadog_checks.vsphere.types.vim import CounterId, ManagedEntity, ManagedEntityType, MetricId, QuerySpec, \
+    EntityMetricBase
 from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,
     format_metric_name,
@@ -210,7 +211,7 @@ class VSphereCheck(AgentCheck):
             self.infrastructure_cache.set_mor_data(mor, mor_payload)
 
     def submit_metrics_callback(self, query_results):
-        # type: (List[vim.PerformanceManager.EntityMetricBase]) -> None
+        # type: (List[EntityMetricBase]) -> None
         """
         Callback of the collection of metrics. This is run in the main thread!
 
@@ -300,7 +301,7 @@ class VSphereCheck(AgentCheck):
                 self.gauge(to_native_string(metric_name), value, hostname=hostname, tags=tags)
 
     def query_metrics_wrapper(self, query_specs):
-        # type: (List[QuerySpec]) -> List[vim.PerformanceManager.EntityMetricBase]
+        # type: (List[QuerySpec]) -> List[EntityMetricBase]
         """Just an instrumentation wrapper around the VSphereAPI.query_metrics method
         Warning: called in threads
         """
