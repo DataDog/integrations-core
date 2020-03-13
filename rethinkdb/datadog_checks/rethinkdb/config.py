@@ -3,27 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import absolute_import
 
-from typing import Callable, Iterator, List, Optional
-
-import rethinkdb
+from typing import Optional
 
 from datadog_checks.base import ConfigurationError
 
-from .connections import Connection, RethinkDBConnection
-from .exceptions import CouldNotConnect
-from .metrics.config import collect_config_totals
-from .metrics.current_issues import collect_current_issues
-from .metrics.statistics import (
-    collect_cluster_statistics,
-    collect_replica_statistics,
-    collect_server_statistics,
-    collect_table_statistics,
-)
-from .metrics.statuses import collect_server_status, collect_table_status
-from .metrics.system_jobs import collect_system_jobs
-from .queries import QueryEngine
-from .types import Instance, Metric
-from .version import parse_version
+from .types import Instance
 
 
 class Config(object):
@@ -50,66 +34,18 @@ class Config(object):
         if port < 0:
             raise ConfigurationError('port must be positive (got {!r})'.format(port))
 
-        self._host = host  # type: str
-        self._port = port  # type: int
-        self._user = user  # type: Optional[str]
-        self._password = password  # type: Optional[str]
-        self._tls_ca_cert = tls_ca_cert  # type: Optional[str]
-
-        self._r = rethinkdb.r
-        self._query_engine = QueryEngine(r=self._r)
-
-        self._collect_funcs = [
-            collect_config_totals,
-            collect_cluster_statistics,
-            collect_server_statistics,
-            collect_table_statistics,
-            collect_replica_statistics,
-            collect_server_status,
-            collect_table_status,
-            collect_system_jobs,
-            collect_current_issues,
-        ]  # type: List[Callable[[QueryEngine, Connection], Iterator[Metric]]]
-
-    @property
-    def host(self):
-        # type: () -> str
-        return self._host
-
-    @property
-    def port(self):
-        # type: () -> int
-        return self._port
-
-    def connect(self):
-        # type: () -> Connection
-        host = self._host
-        port = self._port
-        user = self._user
-        password = self._password
-        ssl = {'ca_certs': self._tls_ca_cert} if self._tls_ca_cert is not None else None
-
-        try:
-            conn = self._r.connect(host=host, port=port, user=user, password=password, ssl=ssl)
-        except rethinkdb.errors.ReqlDriverError as exc:
-            raise CouldNotConnect(exc)
-
-        return RethinkDBConnection(conn)
-
-    def collect_metrics(self, conn):
-        # type: (Connection) -> Iterator[Metric]
-        for collect in self._collect_funcs:
-            for metric in collect(self._query_engine, conn):
-                yield metric
-
-    def collect_connected_server_version(self, conn):
-        # type: (Connection) -> str
-        """
-        Return the version of RethinkDB run by the server at the other end of the connection, in SemVer format.
-        """
-        version_string = self._query_engine.query_connected_server_version_string(conn)
-        return parse_version(version_string)
+        self.host = host  # type: str
+        self.port = port  # type: int
+        self.user = user  # type: Optional[str]
+        self.password = password  # type: Optional[str]
+        self.tls_ca_cert = tls_ca_cert  # type: Optional[str]
 
     def __repr__(self):
         # type: () -> str
-        return 'Config(host={host!r}, port={port!r})'.format(host=self._host, port=self._port)
+        return (
+            'Config(host={host!r}, '
+            'port={port!r}, '
+            'user={user!r}, '
+            "password='*****', "
+            'tls_ca_cert={tls_ca_cert!r})'
+        ).format(host=self.host, port=self.port, user=self.user, tls_ca_cert=self.tls_ca_cert)

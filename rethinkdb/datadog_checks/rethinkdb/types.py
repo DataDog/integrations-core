@@ -9,7 +9,6 @@ from typing import Any, List, Literal, Mapping, Tuple, TypedDict, Union
 
 # Check interfaces.
 
-# A lightweight shim to decouple metric collection from metric submission.
 Metric = TypedDict(
     'Metric',
     {'type': Literal['gauge', 'monotonic_count', 'service_check'], 'name': str, 'value': float, 'tags': List[str]},
@@ -134,7 +133,7 @@ ServerNetwork = TypedDict(
 )
 
 ServerProcess = TypedDict(
-    'ServerProcess', {'argv': List[str], 'cache_size_mb': int, 'pid': int, 'time_started': dt.datetime, 'version': str}
+    'ServerProcess', {'argv': List[str], 'cache_size_mb': int, 'pid': int, 'time_started': dt.datetime, 'version': str},
 )
 
 ServerStatus = TypedDict('ServerStatus', {'id': str, 'name': str, 'network': ServerNetwork, 'process': ServerProcess})

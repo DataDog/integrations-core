@@ -18,21 +18,31 @@ def test_default_config():
     config = Config(instance)
     assert config.host == 'localhost'
     assert config.port == 28015
+    assert config.user is None
+    assert config.tls_ca_cert is None
 
 
 def test_config():
     # type: () -> None
-    instance = {'host': '192.168.121.1', 'port': 28016}  # type: Instance
+    instance = {
+        'host': '192.168.121.1',
+        'port': 28016,
+        'username': 'datadog-agent',
+        'password': 's3kr3t',
+        'tls_ca_cert': '/path/to/client.cert',
+    }  # type: Instance
     config = Config(instance)
     assert config.host == '192.168.121.1'
     assert config.port == 28016
+    assert config.user == 'datadog-agent'
+    assert config.tls_ca_cert == '/path/to/client.cert'
 
 
 def test_config_repr():
     # type: () -> None
     instance = {}  # type: Instance
     config = Config(instance)
-    assert repr(config) == "Config(host='localhost', port=28015)"
+    assert repr(config) == "Config(host='localhost', port=28015, user=None, password='*****', tls_ca_cert=None)"
 
 
 @pytest.mark.parametrize('host', [42, True, object()])
