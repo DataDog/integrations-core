@@ -23,7 +23,7 @@ from datadog_checks.vsphere.constants import (
 )
 from datadog_checks.vsphere.types.check import (
     FormattedMetricFilters,
-    FormattedResourceFilter,
+    FormattedResourceFilters,
     InstanceConfig,
     MetricFilterConfig,
     ResourceFilterConfig,
@@ -115,9 +115,9 @@ class VSphereConfig(object):
             )
 
     def _parse_resource_filters(self, all_resource_filters):
-        # type: (List[ResourceFilterConfig]) -> FormattedResourceFilter
+        # type: (List[ResourceFilterConfig]) -> FormattedResourceFilters
 
-        formatted_resource_filters = {}  # type: FormattedResourceFilter
+        formatted_resource_filters = {}  # type: FormattedResourceFilters
         allowed_resource_types = [MOR_TYPE_AS_STRING[k] for k in self.collected_resource_types]
 
         for resource_filter in all_resource_filters:

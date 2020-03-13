@@ -11,7 +11,7 @@ from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
 from datadog_checks.vsphere.types.check import (
     FormattedMetricFilters,
-    FormattedResourceFilter,
+    FormattedResourceFilters,
     InfrastructureData,
     InfrastructureDataItem,
     MetricName,
@@ -59,7 +59,7 @@ def match_any_regex(string, regexes):
 
 
 def is_resource_excluded_by_filters(mor, infrastructure_data, resource_filters):
-    # type: (ManagedEntity, InfrastructureData, FormattedResourceFilter) -> bool
+    # type: (ManagedEntity, InfrastructureData, FormattedResourceFilters) -> bool
     resource_type = MOR_TYPE_AS_STRING[type(mor)]
 
     if not [f for f in resource_filters if f[0] == resource_type]:

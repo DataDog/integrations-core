@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import time
 from contextlib import contextmanager
-from typing import Any, Dict, Generator, Iterable, List
+from typing import Any, Dict, Generator, List, Iterator
 
 from six import iterkeys
 
@@ -19,7 +19,7 @@ class VSphereCache(object):
 
     def __init__(self, interval_sec):
         # type: (int) -> None
-        self._last_ts = 0  # type: float
+        self._last_ts = .0
         self._interval = interval_sec
         self._content = {}  # type: Dict[Any, Any]
 
@@ -93,7 +93,7 @@ class InfrastructureCache(VSphereCache):
         return self._content.get(mor_type, {}).get(mor, default)
 
     def get_mors(self, resource_type):
-        # type: (ManagedEntityType) -> Iterable[ManagedEntity]
+        # type: (ManagedEntityType) -> Iterator[ManagedEntity]
         return iterkeys(self._content.get(resource_type, {}))
 
     def set_mor_data(self, mor, mor_data):

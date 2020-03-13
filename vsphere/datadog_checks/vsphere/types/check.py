@@ -58,5 +58,5 @@ ResourceTags = Dict[ManagedEntityType, Dict[str, List[str]]]
 
 TagAssociation = TypedDict('TagAssociation', {'tag_id': str, 'object_ids': List[Dict[str, str]]})
 
-FormattedResourceFilter = Dict[Tuple[str, str], List[Pattern]]
+FormattedResourceFilters = Dict[Tuple[str, str], List[Pattern]]
 FormattedMetricFilters = Dict[str, List[Pattern]]
