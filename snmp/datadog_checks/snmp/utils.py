@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, Mapping, Sequence, Tuple, Union
 import yaml
 
 from .compat import get_config
-from .exceptions import CouldNotDecodeOID, SmiError
+from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
 from .pysnmp_types import ObjectIdentity, ObjectName, ObjectType
 
 if TYPE_CHECKING:  # Avoid circular imports.
@@ -117,9 +117,7 @@ def parse_as_oid_tuple(value):
         try:
             object_name = value.getOid()  # type: ObjectName
         except SmiError as exc:
-            # Not resolved yet. Probably us building an `ObjectIdentity` instance manually...
-            # We should be using our `OID` model in that case, so let's fail.
-            raise CouldNotDecodeOID('Could not infer OID from `ObjectIdentity` {!r}: {!r}'.format(value, exc))
+            raise UnresolvedOID(exc)
 
         return parse_as_oid_tuple(object_name)
 
@@ -129,9 +127,7 @@ def parse_as_oid_tuple(value):
         try:
             object_identity = value[0]
         except SmiError as exc:
-            # Not resolved yet. Probably us building an `ObjectType` instance manually...
-            # We should be using our `OID` model in that case, so let's fail.
-            raise CouldNotDecodeOID('Could not infer OID from `ObjectType` {!r}: {!r}'.format(value, exc))
+            raise UnresolvedOID(exc)
 
         return parse_as_oid_tuple(object_identity)
 

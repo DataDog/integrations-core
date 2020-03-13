@@ -21,3 +21,9 @@ class CouldNotDecodeOID(SNMPException):
     """
     A value could not be decoded as an OID.
     """
+
+
+class UnresolvedOID(SNMPException):
+    """
+    Tried to access information about an OID that is not available yet.
+    """

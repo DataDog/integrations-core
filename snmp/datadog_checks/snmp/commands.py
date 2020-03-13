@@ -25,8 +25,8 @@ def _handle_error(ctx, config):
 
 def _build_variable_from_var_bind(var_bind):
     # type: (ObjectType) -> Variable
-    name, raw = var_bind
-    return Variable(oid=OID(name), value=Value(raw))
+    name, value = var_bind
+    return Variable(oid=OID(name), value=Value(value))
 
 
 def snmp_get(config, oids, lookup_mib):
@@ -43,7 +43,7 @@ def snmp_get(config, oids, lookup_mib):
 
     ctx = {}  # type: Dict[str, Any]
 
-    var_binds = [oid.maybe_resolve_as_object_type() for oid in oids]
+    var_binds = [oid.as_object_type() for oid in oids]
     var_binds = vbProcessor.makeVarBinds(config._snmp_engine, var_binds)
 
     cmdgen.GetCommandGenerator().sendVarBinds(
@@ -78,7 +78,7 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
 
     ctx = {}  # type: Dict[str, Any]
 
-    var_binds = [oid.maybe_resolve_as_object_type() for oid in oids]
+    var_binds = [oid.as_object_type() for oid in oids]
     initial_vars = [x[0] for x in vbProcessor.makeVarBinds(config._snmp_engine, var_binds)]
 
     gen = cmdgen.NextCommandGenerator()
@@ -127,7 +127,7 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
 
     ctx = {}  # type: Dict[str, Any]
 
-    var_binds = [oid.maybe_resolve_as_object_type()]
+    var_binds = [oid.as_object_type()]
     initial_var = vbProcessor.makeVarBinds(config._snmp_engine, var_binds)[0][0]
 
     gen = cmdgen.BulkCommandGenerator()

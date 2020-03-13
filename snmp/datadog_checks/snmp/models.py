@@ -4,13 +4,14 @@
 """
 Define our own models and interfaces for dealing with SNMP data.
 """
-from typing import Any, Sequence, Set, Tuple, Union
+from typing import Any, Optional, Sequence, Set, Tuple, Union
 
 from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 
-from .exceptions import CouldNotDecodeOID
+from .exceptions import CouldNotDecodeOID, UnresolvedOID, SmiError
 from .pysnmp_types import (
     Asn1Type,
+    MibViewController,
     ObjectIdentifier,
     ObjectIdentity,
     ObjectName,
@@ -42,59 +43,78 @@ class OID(object):
     """
     An SNMP object identifier.
 
-    Acts as a lazy facade for various types used by PySNMP to represent OIDs.
+    Acts as a facade for various types used by PySNMP to represent OIDs.
     """
 
     def __init__(self, value):
         # type: (Union[Sequence[int], str, ObjectName, ObjectIdentity, ObjectType]) -> None
-        # NOTE: we can't decode the `value` just yet, because it may be a PySNMP object that hasn't been resolved yet.
-        # Using such unresolved objects is generally OK: looking up the MIB name of an OID isn't required to query it
-        # from a server. (We can query '1.3.6.1.2.1.1.2' without saying 'and by the way, this is sysObjectId'.)
-        # Anyway, this is why we do lazy decoding, and why '._initialize()' even exists.
-        self.raw = value
-
-    def _initialize(self):
-        # type: () -> None
-        value = self.raw
+        parts = None  # type: Optional[Tuple[int, ...]]
 
         try:
             parts = parse_as_oid_tuple(value)
         except CouldNotDecodeOID:
-            raise  # Explicitly re-raise this exception.
+            raise  # Invalid input.
+        except UnresolvedOID:
+            if isinstance(value, ObjectType):
+                # An unresolved `ObjectType(ObjectIdentity('<MIB>', '<symbol>'))`.
+                parts = None
+            elif isinstance(value, ObjectIdentity):
+                # An unresolved `ObjectIdentity('<MIB>', '<symbol>')`.
+                parts = None
+            else:
+                raise RuntimeError('Unexpectedly treated {!r} as an unresolved OID'.format(value))
+
+        if isinstance(value, ObjectType):
+            object_identity = value._ObjectType__args[0]
+        elif isinstance(value, ObjectIdentity):
+            object_identity = value
+        else:
+            if parts is None:  # Consistency check.
+                raise RuntimeError('`parts` should have been set')
+            # IMPORTANT: instantiating an `ObjectIdentity` directly should only be used as a last resort,
+            # as otherwise we may lose some metadata, and `.getMibSymbol()` might fail later.
+            object_identity = ObjectIdentity(parts)
 
         self._parts = parts
+        self._object_identity = object_identity  # type: ObjectIdentity
+
+    def resolve(self, mib_view_controller):
+        # type: (MibViewController) -> None
+        if self._parts is None:
+            # Consistency check: client code should only call this if they're certain the
+            # underlying OID isn't resolved yet.
+            raise RuntimeError('Already resolved: {}'.format(self._object_identity))
+
+        self._object_identity.resolveWithMib(mib_view_controller)
+        self._parts = parse_as_oid_tuple(self._object_identity)
+
+    def as_tuple(self):
+        # type: () -> Tuple[int, ...]
+        if self._parts is None:
+            raise UnresolvedOID('OID parts are not available given {!r}'.format(self._object_identity))
+        return self._parts
+
+    def as_object_type(self):
+        # type: () -> ObjectType
+        return ObjectType(self._object_identity)
 
     def get_mib_symbol(self):
         # type: () -> Tuple[str, Tuple[str, ...]]
-        if not isinstance(self.raw, ObjectIdentity):
-            raise NotImplementedError  # pragma: no cover
+        try:
+            result = self._object_identity.getMibSymbol()  # type: Tuple[str, str, Sequence[ObjectName]]
+        except SmiError as exc:
+            raise UnresolvedOID(exc)
 
-        _, metric, indexes = self.raw.getMibSymbol()
-        return metric, tuple(str(index) for index in indexes)
-
-    def resolve_as_tuple(self):
-        # type: () -> Tuple[int, ...]
-        self._initialize()
-        return self._parts
-
-    def maybe_resolve_as_object_type(self):
-        # type: () -> ObjectType
-        # NOTE: if we have a reference to the original PySNMP instance, use it directly and don't resolve it.
-        # Otherwise, may trigger an "SmiError: OID not fully initialized" exception.
-        if isinstance(self.raw, ObjectType):
-            return self.raw
-        elif isinstance(self.raw, ObjectIdentity):
-            return ObjectType(self.raw)
-
-        return ObjectType(ObjectIdentity(self.resolve_as_tuple()))
+        _, symbol, indexes = result
+        return symbol, tuple(str(index) for index in indexes)
 
     def __eq__(self, other):
         # type: (Any) -> bool
-        return isinstance(other, OID) and self.resolve_as_tuple() == other.resolve_as_tuple()
+        return isinstance(other, OID) and self.as_tuple() == other.as_tuple()
 
     def __str__(self):
         # type: () -> str
-        return format_as_oid_string(self.resolve_as_tuple())
+        return format_as_oid_string(self.as_tuple())
 
     def __repr__(self):
         # type: () -> str

@@ -2,7 +2,7 @@ from typing import Any, Tuple
 
 import pytest
 
-from datadog_checks.snmp.exceptions import CouldNotDecodeOID
+from datadog_checks.snmp.exceptions import CouldNotDecodeOID, UnresolvedOID
 from datadog_checks.snmp.models import OID, Value, Variable
 from datadog_checks.snmp.pysnmp_types import (
     MibViewController,
@@ -20,7 +20,7 @@ pytestmark = pytest.mark.unit
 def test_oid():
     # type: () -> None
     oid = OID((1, 3, 6, 1, 2, 1, 0))
-    assert oid.resolve_as_tuple() == (1, 3, 6, 1, 2, 1, 0)
+    assert oid.as_tuple() == (1, 3, 6, 1, 2, 1, 0)
     assert oid == OID((1, 3, 6, 1, 2, 1, 0))
     assert oid != OID((1, 3, 6, 1, 4, 0))
     assert repr(oid) == "OID('1.3.6.1.2.1.0')"
@@ -53,12 +53,12 @@ def test_oid():
         ),
     ],
 )
-def test_oid_resolve_ok(value, expected_tuple):
+def test_oid_decode_and_resolve_ok(value, expected_tuple):
     # type: (Any, Tuple[int, ...]) -> None
     mib_view_controller = MibViewController(SnmpEngine().getMibBuilder())
     if callable(value):
         value = value(mib_view_controller)
-    assert OID(value).resolve_as_tuple() == expected_tuple
+    assert OID(value).as_tuple() == expected_tuple
 
 
 @pytest.mark.unit
@@ -70,16 +70,12 @@ def test_oid_resolve_ok(value, expected_tuple):
         pytest.param('abc123', id='not-dot-separated-string'),
         pytest.param(True, id='not-tuple-or-str'),
         pytest.param(42, id='not-tuple-or-str'),
-        pytest.param(ObjectIdentity((1, 3, 6, 1, 2, 1, 0)), id='unresolved-object-identity'),
-        pytest.param(ObjectType(ObjectIdentity((1, 3, 6, 1, 2, 1, 0))), id='unresolved-object-type'),
     ],
 )
-def test_oid_resolve_failed(value):
+def test_oid_decode_failed(value):
     # type: (Any) -> None
-    oid = OID(value)
-
     with pytest.raises(CouldNotDecodeOID):
-        oid.resolve_as_tuple()
+        OID(value)
 
 
 @pytest.mark.parametrize(
@@ -89,15 +85,19 @@ def test_oid_resolve_failed(value):
         pytest.param(ObjectType(ObjectIdentity((1, 3, 6, 1, 2, 1, 0))), (1, 3, 6, 1, 2, 1, 0), id='object-type',),
     ],
 )
-def test_oid_resolve_object_type_ok(value, expected_tuple):
+def test_oid_from_unresolved_instance(value, expected_tuple):
     # type: (Any, Tuple[int, ...]) -> None
     oid = OID(value)
-    object_type = oid.maybe_resolve_as_object_type()
 
-    # Verify a valid ObjectType instance was indeed returned by decoding it.
+    with pytest.raises(UnresolvedOID):
+        oid.as_tuple()
+
+    object_type = oid.as_object_type()
+
+    # Verify returned ObjectType instance is valid by decoding it.
     mib_view_controller = MibViewController(SnmpEngine().getMibBuilder())
     resolved = object_type.resolveWithMib(mib_view_controller)
-    assert OID(resolved).resolve_as_tuple() == (1, 3, 6, 1, 2, 1, 0)
+    assert OID(resolved).as_tuple() == (1, 3, 6, 1, 2, 1, 0)
 
 
 def test_variable_number():

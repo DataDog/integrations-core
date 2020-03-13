@@ -161,9 +161,8 @@ class SnmpCheck(AgentCheck):
         In case of scalar objects, the row index is just 0
         """
         results = defaultdict(dict)  # type: DefaultDict[str, Dict[Tuple[str, ...], Any]]
-        enforce_constraints = config.enforce_constraints
 
-        variables, error = self.fetch_oids(config, all_oids, enforce_constraints=enforce_constraints)
+        variables, error = self.fetch_oids(config, all_oids)
 
         for oid in bulk_oids:
             try:
@@ -174,7 +173,7 @@ class SnmpCheck(AgentCheck):
                         oid,
                         self._NON_REPEATERS,
                         self._MAX_REPETITIONS,
-                        enforce_constraints,
+                        config.enforce_constraints,
                         self.ignore_nonincreasing_oid,
                     )
                 )
@@ -185,6 +184,7 @@ class SnmpCheck(AgentCheck):
                 self.warning(message)
 
         for variable in variables:
+            print(variable)
             metric, indexes = config.resolve_oid(variable.oid)
             results[metric][indexes] = variable.value
         self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
@@ -192,8 +192,8 @@ class SnmpCheck(AgentCheck):
         results.default_factory = None  # type: ignore
         return results, error
 
-    def fetch_oids(self, config, oids, enforce_constraints):
-        # type: (InstanceConfig, List[OID], bool) -> Tuple[List[Variable], Optional[str]]
+    def fetch_oids(self, config, oids):
+        # type: (InstanceConfig, List[OID]) -> Tuple[List[Variable], Optional[str]]
         # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
         # It returns the wrong value when the OID passed is referring to a specific leaf.
         # For example:
@@ -209,7 +209,7 @@ class SnmpCheck(AgentCheck):
                 oids_batch = oids[first_oid : first_oid + self.oid_batch_size]
                 self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
 
-                variables = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
+                variables = snmp_get(config, oids_batch, lookup_mib=config.enforce_constraints)
                 self.log.debug('Returned variables: %s', OIDPrinter(variables, with_values=True))
 
                 missing_results = []  # type: List[OID]
@@ -230,7 +230,7 @@ class SnmpCheck(AgentCheck):
                         snmp_getnext(
                             config,
                             missing_results,
-                            lookup_mib=enforce_constraints,
+                            lookup_mib=config.enforce_constraints,
                             ignore_nonincreasing_oid=self.ignore_nonincreasing_oid,
                         )
                     )
