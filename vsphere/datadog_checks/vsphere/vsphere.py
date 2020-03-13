@@ -477,7 +477,7 @@ class VSphereCheck(AgentCheck):
         self.latest_event_query = self.api.get_latest_event_timestamp() + timedelta(seconds=1)
 
     def check(self, _):
-        # type: (InstanceConfig) -> None
+        # type: (Any) -> None
         self._hostname = datadog_agent.get_hostname()
         # Assert the health of the vCenter API and submit the service_check accordingly
         try:
