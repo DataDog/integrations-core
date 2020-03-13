@@ -8,7 +8,7 @@ from typing import Any, Dict, Generator, Iterable, List
 from six import iterkeys
 
 from datadog_checks.vsphere.types.check import CounterId, MetricName
-from datadog_checks.vsphere.types.vim import ManagedEntity, MorType
+from datadog_checks.vsphere.types.vim import ManagedEntity, ManagedEntityType
 
 
 class VSphereCache(object):
@@ -67,11 +67,11 @@ class MetricsMetadataCache(VSphereCache):
     """
 
     def get_metadata(self, resource_type):
-        # type: (MorType) -> Dict[CounterId, MetricName]
+        # type: (ManagedEntityType) -> Dict[CounterId, MetricName]
         return self._content[resource_type]
 
     def set_metadata(self, resource_type, metadata):
-        # type: (MorType, Dict[CounterId, MetricName]) -> None
+        # type: (ManagedEntityType, Dict[CounterId, MetricName]) -> None
         self._content[resource_type] = metadata
 
 
@@ -93,7 +93,7 @@ class InfrastructureCache(VSphereCache):
         return self._content.get(mor_type, {}).get(mor, default)
 
     def get_mors(self, resource_type):
-        # type: (MorType) -> Iterable[ManagedEntity]
+        # type: (ManagedEntityType) -> Iterable[ManagedEntity]
         return iterkeys(self._content.get(resource_type, {}))
 
     def set_mor_data(self, mor, mor_data):
@@ -127,5 +127,5 @@ class TagsCache(VSphereCache):
         return self._content.get(mor_type, {}).get(mor._moId, [])
 
     def set_all_tags(self, mor_tags):
-        # type: (Dict[MorType, List[str]]) -> None
+        # type: (Dict[ManagedEntityType, List[str]]) -> None
         self._content = mor_tags

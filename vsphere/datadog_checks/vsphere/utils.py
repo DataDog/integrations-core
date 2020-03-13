@@ -14,8 +14,9 @@ from datadog_checks.vsphere.types.check import (
     FormattedResourceFilter,
     InfrastructureData,
     InfrastructureDataItem,
-    MetricName)
-from datadog_checks.vsphere.types.vim import Counter, ManagedEntity, MorType
+    MetricName,
+)
+from datadog_checks.vsphere.types.vim import Counter, ManagedEntity, ManagedEntityType
 
 METRIC_TO_INSTANCE_TAG_MAPPING = {
     # Structure:
@@ -93,7 +94,7 @@ def is_resource_excluded_by_filters(mor, infrastructure_data, resource_filters):
 
 
 def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
-    # type: (str, MorType, FormattedMetricFilters) -> bool
+    # type: (str, ManagedEntityType, FormattedMetricFilters) -> bool
     if metric_name.startswith(REFERENCE_METRIC):
         # Always collect at least one metric for reference
         return False
@@ -156,7 +157,7 @@ def get_parent_tags_recursively(mor, infrastructure_data):
 
 
 def should_collect_per_instance_values(config, metric_name, resource_type):
-    # type: (VSphereConfig, str, MorType) -> bool
+    # type: (VSphereConfig, str, ManagedEntityType) -> bool
     filters = config.collect_per_instance_filters.get(MOR_TYPE_AS_STRING[resource_type], [])
     metric_matched = match_any_regex(metric_name, filters)
     return metric_matched

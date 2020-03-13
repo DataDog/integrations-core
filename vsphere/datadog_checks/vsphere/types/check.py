@@ -1,6 +1,6 @@
-from typing import Any, Dict, List, NewType, Pattern, Tuple, TypedDict
+from typing import Any, Dict, List, Pattern, Tuple, TypedDict
 
-from datadog_checks.vsphere.types.vim import ManagedEntity, MetricId, MorType
+from datadog_checks.vsphere.types.vim import ManagedEntity, MetricId
 
 MetricName = str
 CounterId = int
@@ -9,9 +9,9 @@ CounterId = int
 InfrastructureDataItem = TypedDict(
     'InfrastructureDataItem', {'name': str, 'runtime.host': str, 'guest.hostName': str, 'parent': Any}, total=False
 )
-InfrastructureData = Dict[MorType, InfrastructureDataItem]
+InfrastructureData = Dict[ManagedEntity, InfrastructureDataItem]
 
-MorBatch = Dict[ManagedEntity, MetricId]
+MorBatch = Dict[ManagedEntity, List[MetricId]]
 
 ResourceTags = Dict[Any, Dict[str, List]]
 

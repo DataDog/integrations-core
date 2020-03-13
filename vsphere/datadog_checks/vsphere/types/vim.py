@@ -1,12 +1,42 @@
-from typing import TypeVar, Any, NewType
+from datetime import datetime
+from typing import Any, List, cast
 
-ManagedEntity = NewType('ManagedEntity', Any)  # type: ignore
+
+class ManagedEntity:
+    def __init__(self):
+        # type: () -> None
+        self._moId = cast(str, None)
 
 
-MorType = NewType('MorType', Any)  # type: ignore
-Counter = NewType('Counter', Any)  # type: ignore
+class ManagedEntityType:
+    def __init__(self):
+        # type: () -> None
+        pass
 
-# vim.PerformanceManager.QuerySpec
-QuerySpec = NewType('QuerySpec', Any)  # type: ignore
-# vim.PerformanceManager.MetricId
-MetricId = NewType('MetricId', Any)  # type: ignore
+
+class MetricId:
+    """ vim.PerformanceManager.MetricId """
+
+    def __init__(self):
+        # type: () -> None
+        pass
+
+
+class Counter:
+    def __init__(self):
+        # type: () -> None
+        self.groupInfo = cast(Any, None)
+        self.nameInfo = cast(Any, None)
+        self.rollupType = cast(Any, None)
+
+
+class QuerySpec:
+    """ vim.PerformanceManager.QuerySpec """
+
+    def __init__(self):
+        # type: () -> None
+        self.entity = cast(ManagedEntity, None)
+        self.metricId = cast(List[MetricId], None)
+        self.intervalId = cast(int, None)
+        self.maxSample = cast(int, None)
+        self.startTime = cast(datetime, None)

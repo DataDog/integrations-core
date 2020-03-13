@@ -28,8 +28,8 @@ from datadog_checks.vsphere.constants import (
 )
 from datadog_checks.vsphere.legacy.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
-from datadog_checks.vsphere.types.check import InstanceConfig, MetricName, MorBatch, CounterId
-from datadog_checks.vsphere.types.vim import ManagedEntity, MetricId, MorType, QuerySpec
+from datadog_checks.vsphere.types.check import CounterId, InstanceConfig, MetricName, MorBatch
+from datadog_checks.vsphere.types.vim import ManagedEntity, ManagedEntityType, MetricId, QuerySpec
 from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,
     format_metric_name,
@@ -220,9 +220,9 @@ class VSphereCheck(AgentCheck):
 
         # `have_instance_value` is used later to avoid collecting aggregated metrics
         # when instance metrics are collected.
-        have_instance_value = defaultdict(set)  # type: Dict[MorType, Set[MetricName]]
+        have_instance_value = defaultdict(set)  # type: Dict[ManagedEntityType, Set[MetricName]]
         for results_per_mor in query_results:
-            resource_type = cast(MorType, type(results_per_mor.entity))
+            resource_type = cast(ManagedEntityType, type(results_per_mor.entity))
             metadata = self.metrics_metadata_cache.get_metadata(resource_type)
             for result in results_per_mor.value:
                 if result.id.instance:
@@ -237,7 +237,7 @@ class VSphereCheck(AgentCheck):
                     results_per_mor.entity,
                 )
                 continue
-            resource_type = cast(MorType, type(results_per_mor.entity))
+            resource_type = cast(ManagedEntityType, type(results_per_mor.entity))
             metadata = self.metrics_metadata_cache.get_metadata(resource_type)
             for result in results_per_mor.value:
                 metric_name = metadata.get(result.id.counterId)
@@ -386,7 +386,7 @@ class VSphereCheck(AgentCheck):
                     )
 
     def make_batch(self, mors, metric_ids, resource_type):
-        # type: (Iterable[ManagedEntity], List[MetricId], MorType) -> Generator[MorBatch, None, None]
+        # type: (Iterable[ManagedEntity], List[MetricId], ManagedEntityType) -> Generator[MorBatch, None, None]
         """Iterates over mor and generate batches with a fixed number of metrics to query.
         Querying multiple resource types in the same call is error prone if we query a cluster metric. Indeed,
         cluster metrics result in an unpredicatable number of internal metric queries which all count towards
@@ -394,7 +394,10 @@ class VSphereCheck(AgentCheck):
         why we should never batch cluster metrics with anything else.
         """
         # Safeguard, let's avoid collecting multiple resources in the same call
-        mors = [m for m in mors if isinstance(m, resource_type)]
+        mors_filtered = []  # type: List[ManagedEntity]
+        for m in mors:
+            if isinstance(m, resource_type):  # type: ignore
+                mors_filtered.append(m)
 
         if resource_type == vim.ClusterComputeResource:
             # Cluster metrics are unpredictable and a single call can max out the limit. Always collect them one by one.
@@ -411,7 +414,7 @@ class VSphereCheck(AgentCheck):
 
         batch = cast(MorBatch, defaultdict(list))
         batch_size = 0
-        for m in mors:
+        for m in mors_filtered:
             for metric_id in metric_ids:
                 if batch_size == max_batch_size:
                     yield batch
