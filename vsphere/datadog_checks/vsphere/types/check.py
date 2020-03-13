@@ -1,28 +1,10 @@
-from typing import Any, Dict, List, Optional, Pattern, Tuple, TypedDict
+from typing import Dict, List, Optional, Pattern, Tuple, TypedDict
 
-from datadog_checks.vsphere.types.vim import ManagedEntity, MetricId
+from datadog_checks.vsphere.types.vim import ManagedEntity, ManagedEntityType, MetricId
 
-MetricName = str
-CounterId = int
-
-InfrastructureDataItem = TypedDict(
-    'InfrastructureDataItem',
-    {'name': str, 'runtime.host': str, 'guest.hostName': str, 'parent': Optional[ManagedEntity]},
-    total=False,
-)
-InfrastructureData = Dict[ManagedEntity, InfrastructureDataItem]
-
-MorBatch = Dict[ManagedEntity, List[MetricId]]
-
-ResourceTags = Dict[Any, Dict[str, List]]
-
-TagAssociation = TypedDict('TagAssociation', {'tag_id': str, 'object_ids': List[Dict[str, str]]})
-
+# CONFIG ALIASES
 ResourceFilterConfig = TypedDict('ResourceFilterConfig', {'resource': str, 'property': str, 'patterns': List[str]})
 MetricFilterConfig = Dict[str, List[str]]
-
-FormattedResourceFilter = Dict[Tuple[str, str], List[Pattern]]
-FormattedMetricFilters = Dict[str, List[Pattern]]
 
 InstanceConfig = TypedDict(
     'InstanceConfig',
@@ -53,3 +35,23 @@ InstanceConfig = TypedDict(
         'collect_per_instance_filters': MetricFilterConfig,
     },
 )
+
+# CHECK ALIASES
+MetricName = str
+CounterId = int
+
+InfrastructureDataItem = TypedDict(
+    'InfrastructureDataItem',
+    {'name': str, 'runtime.host': str, 'guest.hostName': str, 'parent': Optional[ManagedEntity]},
+    total=False,
+)
+InfrastructureData = Dict[ManagedEntity, InfrastructureDataItem]
+
+MorBatch = Dict[ManagedEntity, List[MetricId]]
+
+ResourceTags = Dict[ManagedEntityType, Dict[str, List[str]]]
+
+TagAssociation = TypedDict('TagAssociation', {'tag_id': str, 'object_ids': List[Dict[str, str]]})
+
+FormattedResourceFilter = Dict[Tuple[str, str], List[Pattern]]
+FormattedMetricFilters = Dict[str, List[Pattern]]

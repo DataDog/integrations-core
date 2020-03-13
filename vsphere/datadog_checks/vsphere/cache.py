@@ -7,7 +7,7 @@ from typing import Any, Dict, Generator, Iterable, List
 
 from six import iterkeys
 
-from datadog_checks.vsphere.types.check import CounterId, MetricName
+from datadog_checks.vsphere.types.check import CounterId, MetricName, ResourceTags
 from datadog_checks.vsphere.types.vim import ManagedEntity, ManagedEntityType
 
 
@@ -127,5 +127,5 @@ class TagsCache(VSphereCache):
         return self._content.get(mor_type, {}).get(mor._moId, [])
 
     def set_all_tags(self, mor_tags):
-        # type: (Dict[ManagedEntityType, List[str]]) -> None
+        # type: (ResourceTags) -> None
         self._content = mor_tags

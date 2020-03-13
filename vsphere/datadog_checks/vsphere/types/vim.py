@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, List, cast
+from typing import Any, List, Type, cast
 
 
 class ManagedEntity:
@@ -8,10 +8,7 @@ class ManagedEntity:
         self._moId = cast(str, None)
 
 
-class ManagedEntityType:
-    def __init__(self):
-        # type: () -> None
-        pass
+ManagedEntityType = Type[ManagedEntity]
 
 
 class MetricId:
