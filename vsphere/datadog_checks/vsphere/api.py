@@ -8,7 +8,7 @@ from typing import Any, Callable, List, TypeVar, cast
 
 from pyVim import connect
 from pyVmomi import vim, vmodl
-from vim import EntityMetricBase, PerformanceManager, QuerySpec, ServiceInstance
+from vim import EntityMetricBase, PerformanceManager, ServiceInstance
 from vim.event import Event
 
 from datadog_checks.base.log import CheckLoggingAdapter
@@ -195,7 +195,7 @@ class VSphereAPI(object):
 
     @smart_retry
     def query_metrics(self, query_specs):
-        # type: (List[QuerySpec]) -> List[EntityMetricBase]
+        # type: (List[PerformanceManager.QuerySpec]) -> List[EntityMetricBase]
         perf_manager = self._conn.content.perfManager
         values = perf_manager.QueryPerf(query_specs)
         return values

@@ -11,7 +11,7 @@ from typing import Any, Dict, Generator, Iterable, List, Set, Type, TypeVar, cas
 
 from pyVmomi import vim, vmodl
 from six import iteritems
-from vim import EntityMetricBase, ManagedEntity, ManagedEntityType, PerformanceManager, QuerySpec
+from vim import EntityMetricBase, ManagedEntity, ManagedEntityType, PerformanceManager
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
 from datadog_checks.base.checks.libs.timer import Timer
@@ -302,7 +302,7 @@ class VSphereCheck(AgentCheck):
                 self.gauge(to_native_string(metric_name), value, hostname=hostname, tags=tags)
 
     def query_metrics_wrapper(self, query_specs):
-        # type: (List[QuerySpec]) -> List[EntityMetricBase]
+        # type: (List[PerformanceManager.QuerySpec]) -> List[EntityMetricBase]
         """Just an instrumentation wrapper around the VSphereAPI.query_metrics method
         Warning: called in threads
         """
@@ -312,7 +312,7 @@ class VSphereCheck(AgentCheck):
         return metrics_values
 
     def make_query_specs(self):
-        # type: () -> Iterable[List[QuerySpec]]
+        # type: () -> Iterable[List[PerformanceManager.QuerySpec]]
         """
         Build query specs using MORs and metrics metadata.
         """
@@ -330,12 +330,12 @@ class VSphereCheck(AgentCheck):
                 else:
                     instance = ''
 
-                metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance))
+                metric_ids.append(PerformanceManager.MetricId(counterId=counter_key, instance=instance))
 
             for batch in self.make_batch(mors, metric_ids, resource_type):
                 query_specs = []
                 for mor, metrics in iteritems(batch):
-                    query_spec = vim.PerformanceManager.QuerySpec()  # type: QuerySpec
+                    query_spec = PerformanceManager.QuerySpec()  # type: PerformanceManager.QuerySpec
                     query_spec.entity = mor
                     query_spec.metricId = metrics
                     if resource_type in REALTIME_RESOURCES:
