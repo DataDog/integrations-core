@@ -152,6 +152,11 @@ class Vault(OpenMetricsBaseCheck):
                 # Leader has changed but the monitored vault node is not the leader. Because the agent monitors
                 # each vault node in the cluster, let's use this condition to submit a single event.
                 self._previous_leader = current_leader
+                self.log.debug(
+                    "Leader changed from %s to %s but not reporting an event as the current node is not the leader.",
+                    self._previous_leader,
+                    current_leader,
+                )
                 return
 
             if current_leader.leader_addr != self._previous_leader.leader_addr:
@@ -165,6 +170,7 @@ class Vault(OpenMetricsBaseCheck):
                     self._previous_leader.leader_cluster_addr, current_leader.leader_cluster_addr
                 )
 
+            self.log.debug("Leader changed from %s to %s, sending the event.", self._previous_leader, current_leader)
             submission_queue.append(
                 lambda tags: self.event(
                     {
