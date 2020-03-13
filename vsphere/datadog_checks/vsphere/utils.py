@@ -9,15 +9,13 @@ from six import iteritems
 from datadog_checks.base import to_native_string
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
-from datadog_checks.vsphere.types import (
-    Counter,
+from datadog_checks.vsphere.types.check import (
     FormattedMetricFilters,
     FormattedResourceFilter,
     InfrastructureData,
     InfrastructureDataItem,
-    MorObject,
-    MorType,
-)
+    MetricName)
+from datadog_checks.vsphere.types.vim import Counter, ManagedEntity, MorType
 
 METRIC_TO_INSTANCE_TAG_MAPPING = {
     # Structure:
@@ -42,7 +40,7 @@ METRIC_TO_INSTANCE_TAG_MAPPING = {
 
 
 def format_metric_name(counter):
-    # type: (Counter) -> str
+    # type: (Counter) -> MetricName
     return "{}.{}.{}".format(
         to_native_string(counter.groupInfo.key),
         to_native_string(counter.nameInfo.key),
@@ -60,7 +58,7 @@ def match_any_regex(string, regexes):
 
 
 def is_resource_excluded_by_filters(mor, infrastructure_data, resource_filters):
-    # type: (MorObject, InfrastructureData, FormattedResourceFilter) -> bool
+    # type: (ManagedEntity, InfrastructureData, FormattedResourceFilter) -> bool
     resource_type = MOR_TYPE_AS_STRING[type(mor)]
 
     if not [f for f in resource_filters if f[0] == resource_type]:
@@ -110,7 +108,7 @@ def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
 
 
 def make_inventory_path(mor, infrastructure_data):
-    # type: (MorObject, InfrastructureData) -> str
+    # type: (ManagedEntity, InfrastructureData) -> str
     mor_name = infrastructure_data[mor].get('name', '')
     mor_parent = infrastructure_data[mor].get('parent')
     if mor_parent:
@@ -119,7 +117,7 @@ def make_inventory_path(mor, infrastructure_data):
 
 
 def get_parent_tags_recursively(mor, infrastructure_data):
-    # type: (MorObject, InfrastructureData) -> List[str]
+    # type: (ManagedEntity, InfrastructureData) -> List[str]
     """Go up the resources hierarchy from the given mor. Note that a host running a VM is not considered to be a
     parent of that VM.
 

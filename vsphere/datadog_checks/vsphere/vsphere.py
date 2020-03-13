@@ -7,7 +7,7 @@ from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Set, Type, TypeVar, cast
+from typing import Any, Dict, Generator, Iterable, List, Set, Type, TypeVar, cast
 
 from pyVmomi import vim, vmodl
 from six import iteritems
@@ -28,7 +28,8 @@ from datadog_checks.vsphere.constants import (
 )
 from datadog_checks.vsphere.legacy.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
-from datadog_checks.vsphere.types import InstanceConfig, MorType
+from datadog_checks.vsphere.types.check import InstanceConfig, MetricName, MorBatch, CounterId
+from datadog_checks.vsphere.types.vim import ManagedEntity, MetricId, MorType, QuerySpec
 from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,
     format_metric_name,
@@ -122,7 +123,7 @@ class VSphereCheck(AgentCheck):
                     metric_name, mor_type, self.config.metric_filters
                 ):
                     allowed_counters.append(c)
-            metadata = {c.key: format_metric_name(c) for c in allowed_counters}
+            metadata = {c.key: format_metric_name(c) for c in allowed_counters}  # type: Dict[CounterId, MetricName]
             self.metrics_metadata_cache.set_metadata(mor_type, metadata)
 
         # TODO: Later - Understand how much data actually changes between check runs
@@ -219,14 +220,13 @@ class VSphereCheck(AgentCheck):
 
         # `have_instance_value` is used later to avoid collecting aggregated metrics
         # when instance metrics are collected.
-        have_instance_value = defaultdict(set)  # type: Dict[MorType, Set[str]]
+        have_instance_value = defaultdict(set)  # type: Dict[MorType, Set[MetricName]]
         for results_per_mor in query_results:
-            resource_type = type(results_per_mor.entity)
+            resource_type = cast(MorType, type(results_per_mor.entity))
             metadata = self.metrics_metadata_cache.get_metadata(resource_type)
             for result in results_per_mor.value:
-                metric_name = metadata[result.id.counterId]
                 if result.id.instance:
-                    have_instance_value[resource_type].add(metric_name)
+                    have_instance_value[resource_type].add(metadata[result.id.counterId])
 
         for results_per_mor in query_results:
             mor_props = self.infrastructure_cache.get_mor_props(results_per_mor.entity)
@@ -237,7 +237,7 @@ class VSphereCheck(AgentCheck):
                     results_per_mor.entity,
                 )
                 continue
-            resource_type = type(results_per_mor.entity)
+            resource_type = cast(MorType, type(results_per_mor.entity))
             metadata = self.metrics_metadata_cache.get_metadata(resource_type)
             for result in results_per_mor.value:
                 metric_name = metadata.get(result.id.counterId)
@@ -300,6 +300,7 @@ class VSphereCheck(AgentCheck):
                 self.gauge(to_native_string(metric_name), value, hostname=hostname, tags=tags)
 
     def query_metrics_wrapper(self, query_specs):
+        # type: (List[QuerySpec]) -> List[vim.PerformanceManager.EntityMetricBase]
         """Just an instrumentation wrapper around the VSphereAPI.query_metrics method
         Warning: called in threads
         """
@@ -309,6 +310,7 @@ class VSphereCheck(AgentCheck):
         return metrics_values
 
     def make_query_specs(self):
+        # type: () -> Iterable[List[QuerySpec]]
         """
         Build query specs using MORs and metrics metadata.
 
@@ -318,7 +320,7 @@ class VSphereCheck(AgentCheck):
         for resource_type in self.config.collected_resource_types:
             mors = self.infrastructure_cache.get_mors(resource_type)
             counters = self.metrics_metadata_cache.get_metadata(resource_type)
-            metric_ids = []
+            metric_ids = []  # type: List[MetricId]
             for counter_key, metric_name in iteritems(counters):
                 # PerformanceManager.MetricId `instance` kwarg:
                 # - An asterisk (*) to specify all instances of the metric for the specified counterId
@@ -334,7 +336,7 @@ class VSphereCheck(AgentCheck):
             for batch in self.make_batch(mors, metric_ids, resource_type):
                 query_specs = []
                 for mor, metrics in iteritems(batch):
-                    query_spec = vim.PerformanceManager.QuerySpec()
+                    query_spec = vim.PerformanceManager.QuerySpec()  # type: QuerySpec
                     query_spec.entity = mor
                     query_spec.metricId = metrics
                     if resource_type in REALTIME_RESOURCES:
@@ -360,12 +362,12 @@ class VSphereCheck(AgentCheck):
         finally:
             self.log.debug("Queued all %d tasks, waiting for completion.", len(tasks))
             for future in as_completed(tasks):
-                e = future.exception()
-                if isinstance(e, vmodl.fault.InvalidArgument):
+                future_exc = future.exception()
+                if isinstance(future_exc, vmodl.fault.InvalidArgument):
                     # The query was invalid or the resource does not have values for this metric.
                     continue
-                elif e is not None:
-                    self.log.warning("A metric collection API call failed with the following error: %s", e)
+                elif future_exc is not None:
+                    self.log.warning("A metric collection API call failed with the following error: %s", future_exc)
                     continue
 
                 results = future.result()
@@ -384,6 +386,7 @@ class VSphereCheck(AgentCheck):
                     )
 
     def make_batch(self, mors, metric_ids, resource_type):
+        # type: (Iterable[ManagedEntity], List[MetricId], MorType) -> Generator[MorBatch, None, None]
         """Iterates over mor and generate batches with a fixed number of metrics to query.
         Querying multiple resource types in the same call is error prone if we query a cluster metric. Indeed,
         cluster metrics result in an unpredicatable number of internal metric queries which all count towards
@@ -406,15 +409,15 @@ class VSphereCheck(AgentCheck):
             else:
                 max_batch_size = min(self.config.metrics_per_query, self.config.max_historical_metrics)
 
-        batch = defaultdict(list)
+        batch = cast(MorBatch, defaultdict(list))
         batch_size = 0
         for m in mors:
-            for metric in metric_ids:
+            for metric_id in metric_ids:
                 if batch_size == max_batch_size:
                     yield batch
-                    batch = defaultdict(list)
+                    batch = cast(MorBatch, defaultdict(list))
                     batch_size = 0
-                batch[m].append(metric)
+                batch[m].append(metric_id)
                 batch_size += 1
         # Do not yield an empty batch
         if batch:

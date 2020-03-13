@@ -3,11 +3,12 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import time
 from contextlib import contextmanager
-from typing import Any, Dict, Iterator, List
+from typing import Any, Dict, Generator, Iterable, List
 
 from six import iterkeys
 
-from datadog_checks.vsphere.types import MorObject, MorType
+from datadog_checks.vsphere.types.check import CounterId, MetricName
+from datadog_checks.vsphere.types.vim import ManagedEntity, MorType
 
 
 class VSphereCache(object):
@@ -24,7 +25,7 @@ class VSphereCache(object):
 
     @contextmanager
     def update(self):
-        # type: () -> Iterator[None]
+        # type: () -> Generator[None, None, None]
         """A context manager to allow modification of the cache. It will restore the previous value
         on any error.
         Usage:
@@ -57,7 +58,7 @@ class MetricsMetadataCache(VSphereCache):
 
     _content = {
         vim.HostSystem: {
-            <COUNTER_KEY>: <DD_METRIC_NAME>,
+            <COUNTER_ID>: <DD_METRIC_NAME>,
             ...
         },
         vim.VirtualMachine: {...},
@@ -66,11 +67,11 @@ class MetricsMetadataCache(VSphereCache):
     """
 
     def get_metadata(self, resource_type):
-        # type: (MorType) -> Dict[str, str]
+        # type: (MorType) -> Dict[CounterId, MetricName]
         return self._content[resource_type]
 
     def set_metadata(self, resource_type, metadata):
-        # type: (MorType, Dict[str, str]) -> None
+        # type: (MorType, Dict[CounterId, MetricName]) -> None
         self._content[resource_type] = metadata
 
 
@@ -87,16 +88,16 @@ class InfrastructureCache(VSphereCache):
     """
 
     def get_mor_props(self, mor, default=None):
-        # type: (MorObject, Dict[str, str]) -> Dict[str, str]
+        # type: (ManagedEntity, Dict[str, Any]) -> Dict[str, Any]
         mor_type = type(mor)
         return self._content.get(mor_type, {}).get(mor, default)
 
     def get_mors(self, resource_type):
-        # type: (MorType) -> Iterator[MorObject]
+        # type: (MorType) -> Iterable[ManagedEntity]
         return iterkeys(self._content.get(resource_type, {}))
 
     def set_mor_data(self, mor, mor_data):
-        # type: (MorObject, Dict[str, Any]) -> None
+        # type: (ManagedEntity, Dict[str, Any]) -> None
         mor_type = type(mor)
         if mor_type not in self._content:
             self._content[mor_type] = {}
@@ -118,7 +119,7 @@ class TagsCache(VSphereCache):
     """
 
     def get_mor_tags(self, mor):
-        # type: (MorObject) -> List[str]
+        # type: (ManagedEntity) -> List[str]
         """
         :return: list of mor tags or empty list if mor is not found.
         """
