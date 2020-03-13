@@ -6,6 +6,7 @@ from typing import Iterator
 import pytest
 
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.rethinkdb.types import Instance
 
 from .cluster import setup_cluster
@@ -35,12 +36,13 @@ def instance():
 @pytest.fixture(scope='session')
 def dd_environment(instance):
     # type: (Instance) -> Iterator
-    conditions = [setup_cluster]
-
     log_patterns = [r'Server ready, "{}".*'.format(BOOTSTRAP_SERVER)]
     log_patterns += [r'Connected to server "{}".*'.format(server) for server in SERVERS - {BOOTSTRAP_SERVER}]
     log_patterns += [r'Connected to proxy.*']
+    wait_servers_ready = CheckDockerLogs(COMPOSE_FILE, patterns=log_patterns, matches='all')
 
-    with docker_run(COMPOSE_FILE, conditions=conditions, env_vars=COMPOSE_ENV_VARS, log_patterns=log_patterns):
+    conditions = [wait_servers_ready, setup_cluster]
+
+    with docker_run(COMPOSE_FILE, conditions=conditions, env_vars=COMPOSE_ENV_VARS):
         config = {'instances': [instance]}
         yield config
