@@ -62,19 +62,6 @@ class OID(object):
         except CouldNotDecodeOID:
             raise  # Explicitly re-raise this exception.
 
-        # Let's make extra sure we didn't mess up.
-
-        if not isinstance(parts, tuple):  # pragma: no cover
-            raise RuntimeError(
-                'Expected result {!r} of parsing value {!r} to be a tuple, but got {}'.format(parts, value, type(parts))
-            )
-
-        for index, part in enumerate(parts):  # pragma: no cover
-            if not isinstance(part, int):
-                raise RuntimeError(
-                    'Expected part {!r} at index {} to be an int, but got {}'.format(part, index, type(part))
-                )
-
         self._parts = parts
 
     def get_mib_symbol(self):
@@ -89,10 +76,6 @@ class OID(object):
         # type: () -> Tuple[int, ...]
         self._initialize()
         return self._parts
-
-    def resolve_as_string(self):
-        # type: () -> str
-        return format_as_oid_string(self.resolve_as_tuple())
 
     def maybe_resolve_as_object_type(self):
         # type: () -> ObjectType
@@ -109,13 +92,13 @@ class OID(object):
         # type: (Any) -> bool
         return isinstance(other, OID) and self.resolve_as_tuple() == other.resolve_as_tuple()
 
-    def __repr__(self):
-        # type: () -> str
-        return 'OID({!r})'.format(self.resolve_as_string())
-
     def __str__(self):
         # type: () -> str
-        return self.resolve_as_string()
+        return format_as_oid_string(self.resolve_as_tuple())
+
+    def __repr__(self):
+        # type: () -> str
+        return 'OID({!r})'.format(str(self))
 
 
 class Value(object):

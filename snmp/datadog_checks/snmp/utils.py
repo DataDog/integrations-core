@@ -140,6 +140,9 @@ def parse_as_oid_tuple(value):
 
 def format_as_oid_string(parts):
     # type: (Tuple[int, ...]) -> str
+    """
+    Given an OID in int-tuple form, format it to the conventional dot-separated representation.
+    """
     return '.'.join(str(part) for part in parts)
 
 

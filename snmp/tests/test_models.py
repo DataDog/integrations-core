@@ -21,7 +21,6 @@ def test_oid():
     # type: () -> None
     oid = OID((1, 3, 6, 1, 2, 1, 0))
     assert oid.resolve_as_tuple() == (1, 3, 6, 1, 2, 1, 0)
-    assert oid.resolve_as_string() == '1.3.6.1.2.1.0'
     assert oid == OID((1, 3, 6, 1, 2, 1, 0))
     assert oid != OID((1, 3, 6, 1, 4, 0))
     assert repr(oid) == "OID('1.3.6.1.2.1.0')"
@@ -60,7 +59,6 @@ def test_oid_resolve_ok(value, expected_tuple):
     if callable(value):
         value = value(mib_view_controller)
     assert OID(value).resolve_as_tuple() == expected_tuple
-    assert OID(value).resolve_as_string() == OID(expected_tuple).resolve_as_string()
 
 
 @pytest.mark.unit
@@ -82,9 +80,6 @@ def test_oid_resolve_failed(value):
 
     with pytest.raises(CouldNotDecodeOID):
         oid.resolve_as_tuple()
-
-    with pytest.raises(CouldNotDecodeOID):
-        oid.resolve_as_string()
 
 
 @pytest.mark.parametrize(
