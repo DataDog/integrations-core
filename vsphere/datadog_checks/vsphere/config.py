@@ -22,11 +22,11 @@ from datadog_checks.vsphere.constants import (
     REALTIME_RESOURCES,
 )
 from datadog_checks.vsphere.types.check import (
-    MetricFilters,
-    ResourceFilters,
     InstanceConfig,
     MetricFilterConfig,
+    MetricFilters,
     ResourceFilterConfig,
+    ResourceFilters,
 )
 
 

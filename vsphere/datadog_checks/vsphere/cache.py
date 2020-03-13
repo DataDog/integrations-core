@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import time
 from contextlib import contextmanager
-from typing import Any, Dict, Generator, List, Iterator
+from typing import Any, Dict, Generator, Iterator, List
 
 from six import iterkeys
 
@@ -19,7 +19,7 @@ class VSphereCache(object):
 
     def __init__(self, interval_sec):
         # type: (int) -> None
-        self._last_ts = .0
+        self._last_ts = 0.0
         self._interval = interval_sec
         self._content = {}  # type: Dict[Any, Any]
 

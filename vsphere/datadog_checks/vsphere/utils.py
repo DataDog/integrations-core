@@ -10,11 +10,11 @@ from datadog_checks.base import to_native_string
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
 from datadog_checks.vsphere.types.check import (
-    MetricFilters,
-    ResourceFilters,
     InfrastructureData,
     InfrastructureDataItem,
+    MetricFilters,
     MetricName,
+    ResourceFilters,
 )
 from datadog_checks.vsphere.types.vim import CounterInfo, ManagedEntity, ManagedEntityType
 
