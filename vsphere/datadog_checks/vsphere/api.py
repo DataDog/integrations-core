@@ -19,11 +19,11 @@ from datadog_checks.vsphere.types.vim import CounterInfo, QuerySpec, ServiceInst
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)  # type: ignore
 
 
-RetriedFuncT = TypeVar('RetriedFuncT', bound=Callable[..., Any])
+CallableT = TypeVar('CallableT', bound=Callable[..., Any])
 
 
 def smart_retry(f):
-    # type: (RetriedFuncT) -> RetriedFuncT
+    # type: (CallableT) -> CallableT
     """A function decorated with this `@smart_retry` will trigger a new authentication if it fails. The function
     will then be retried.
     This is useful when the integration keeps a semi-healthy connection to the vSphere API"""
@@ -57,7 +57,7 @@ def smart_retry(f):
             api_instance.smart_connect()
             return f(api_instance, *args, **kwargs)
 
-    return cast(RetriedFuncT, wrapper)
+    return cast(CallableT, wrapper)
 
 
 class APIConnectionError(Exception):
