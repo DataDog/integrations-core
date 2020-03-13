@@ -29,8 +29,14 @@ from datadog_checks.vsphere.constants import (
 from datadog_checks.vsphere.legacy.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
 from datadog_checks.vsphere.types.check import InstanceConfig, MetricName, MorBatch
-from datadog_checks.vsphere.types.vim import CounterId, ManagedEntity, ManagedEntityType, MetricId, QuerySpec, \
-    EntityMetricBase
+from datadog_checks.vsphere.types.vim import (
+    CounterId,
+    EntityMetricBase,
+    ManagedEntity,
+    ManagedEntityType,
+    MetricId,
+    QuerySpec,
+)
 from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,
     format_metric_name,

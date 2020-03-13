@@ -9,6 +9,7 @@ class ManagedEntity:
     vim.ManagedEntity
     https://www.vmware.com/support/developer/vc-sdk/visdk25pubs/ReferenceGuide/vim.ManagedEntity.html
     """
+
     def __init__(self):
         # type: () -> None
         self._moId = cast(str, None)
@@ -22,6 +23,7 @@ class MetricId:
     vim.PerformanceManager.MetricId
     https://pubs.vmware.com/vi3/sdk/ReferenceGuide/vim.PerformanceManager.MetricId.html
     """
+
     def __init__(self):
         # type: () -> None
         pass
@@ -81,3 +83,14 @@ class EntityMetricBase:
         # type: () -> None
         self.value = cast(Any, None)
         self.entity = cast(ManagedEntity, None)
+
+
+class Event:
+    """
+    vim.event.Event
+    https://vdc-repo.vmware.com/vmwb-repository/dcr-public/fe08899f-1eec-4d8d-b3bc-a6664c168c2c/7fdf97a1-4c0d-4be0-9d43-2ceebbc174d9/doc/vim.event.Event.html
+    """
+
+    def __init__(self):
+        # type: () -> None
+        pass

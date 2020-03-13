@@ -10,10 +10,11 @@ from pyVim import connect
 from pyVmomi import vim, vmodl
 
 from datadog_checks.base.log import CheckLoggingAdapter
+from datadog_checks.base.types import Event
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES, MAX_QUERY_METRICS_OPTION, UNLIMITED_HIST_METRICS_PER_QUERY
 from datadog_checks.vsphere.types.check import InfrastructureData
-from datadog_checks.vsphere.types.vim import CounterInfo, QuerySpec, ServiceInstance
+from datadog_checks.vsphere.types.vim import CounterInfo, EntityMetricBase, QuerySpec, ServiceInstance
 
 # Python 3 only
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)  # type: ignore
@@ -197,14 +198,14 @@ class VSphereAPI(object):
 
     @smart_retry
     def query_metrics(self, query_specs):
-        # type: (List[QuerySpec]) -> List[vim.PerformanceManager.EntityMetricBase]
+        # type: (List[QuerySpec]) -> List[EntityMetricBase]
         perf_manager = self._conn.content.perfManager
         values = perf_manager.QueryPerf(query_specs)
         return values
 
     @smart_retry
     def get_new_events(self, start_time):
-        # type: (datetime) -> List[vim.event.Event]
+        # type: (datetime) -> List[Event]
         """
         Docs on `vim.event.EventManager` and `vim.event.EventManager.QueryEvents`:
             https://pubs.vmware.com/vi3/sdk/ReferenceGuide/vim.event.EventManager.html
