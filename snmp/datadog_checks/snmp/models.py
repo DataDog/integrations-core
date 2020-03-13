@@ -4,14 +4,12 @@
 """
 Define our own models and interfaces for dealing with SNMP data.
 """
-from typing import Any, Sequence, Tuple, Union
+from typing import Any, Sequence, Set, Tuple, Union
 
 from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 
 from .exceptions import CouldNotDecodeOID
 from .pysnmp_types import (
-    PYSNMP_COUNTER_CLASSES,
-    PYSNMP_GAUGE_CLASSES,
     Asn1Type,
     ObjectIdentifier,
     ObjectIdentity,
@@ -22,6 +20,22 @@ from .pysnmp_types import (
     noSuchObject,
 )
 from .utils import format_as_oid_string, parse_as_oid_tuple
+
+# SNMP value types that we explicitly support.
+SNMP_COUNTER_CLASSES = {
+    'Counter32',
+    'Counter64',
+    # Additional types that are not part of the SNMP protocol (see RFC 2856).
+    'ZeroBasedCounter64',
+}  # type: Set[str]
+SNMP_GAUGE_CLASSES = {
+    'Gauge32',
+    'Integer',
+    'Integer32',
+    'Unsigned32',
+    # Additional types that are not part of the SNMP protocol (see RFC 2856).
+    'CounterBasedGauge64',
+}  # type: Set[str]
 
 
 class OID(object):
@@ -133,11 +147,11 @@ class Value(object):
 
     def is_counter(self):
         # type: () -> bool
-        return self._value.__class__.__name__ in PYSNMP_COUNTER_CLASSES
+        return self._value.__class__.__name__ in SNMP_COUNTER_CLASSES
 
     def is_gauge(self):
         # type: () -> bool
-        return self._value.__class__.__name__ in PYSNMP_GAUGE_CLASSES
+        return self._value.__class__.__name__ in SNMP_GAUGE_CLASSES
 
     def is_opaque(self):
         # type: () -> bool

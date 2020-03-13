@@ -105,16 +105,16 @@ def test_snmpget(aggregator):
 
 
 def test_custom_mib(aggregator):
-    instance = common.generate_instance_config(common.DUMMY_MIB_OID)
+    instance = common.generate_instance_config([oid for oid, _, _ in common.DUMMY_MIB_OID])
     instance["community_string"] = "dummy"
 
     check = SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
     check.check(instance)
 
     # Test metrics
-    for metric in common.DUMMY_MIB_OID:
+    for metric, metric_type, value in common.DUMMY_MIB_OID:
         metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
-        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, at_least=1)
+        aggregator.assert_metric(metric_name, metric_type=metric_type, count=1, value=value, tags=common.CHECK_TAGS)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
