@@ -341,7 +341,7 @@ class InstanceConfig:
             if isinstance(symbol, dict):
                 symbol_oid = symbol['OID']
                 symbol = symbol['name']
-                self._resolver.register(OID(symbol_oid).as_tuple(), symbol)
+                self._resolver.register(OID(symbol_oid).resolve_as_tuple(), symbol)
                 identity = object_identity_factory(symbol_oid)
             else:
                 identity = object_identity_factory(mib, symbol)
@@ -452,7 +452,7 @@ class InstanceConfig:
                 oid_object = ObjectType(object_identity_factory(metric['OID']))
 
                 table_oids[metric['OID']] = (oid_object, [])
-                self._resolver.register(OID(metric['OID']).as_tuple(), metric['name'])
+                self._resolver.register(OID(metric['OID']).resolve_as_tuple(), metric['name'])
 
                 parsed_metric = ParsedMetric(metric['name'], metric_tags, forced_type, enforce_scalar=False)
                 parsed_metrics.append(parsed_metric)
@@ -495,7 +495,7 @@ class InstanceConfig:
             else:
                 oid = tag['OID']
                 identity = ObjectIdentity(oid)
-                self._resolver.register(OID(oid).as_tuple(), symbol)
+                self._resolver.register(OID(oid).resolve_as_tuple(), symbol)
             object_type = ObjectType(identity)
             oids.append(object_type)
             parsed_metric_tags.append(ParsedMetricTag(tag_name, symbol))
@@ -509,7 +509,7 @@ class InstanceConfig:
         uptime_oid = '1.3.6.1.2.1.1.3.0'
         oid_object = ObjectType(ObjectIdentity(uptime_oid))
         self.all_oids.append(oid_object)
-        self._resolver.register(OID(uptime_oid).as_tuple(), 'sysUpTimeInstance')
+        self._resolver.register(OID(uptime_oid).resolve_as_tuple(), 'sysUpTimeInstance')
 
         parsed_metric = ParsedMetric('sysUpTimeInstance', [], 'gauge')
         self.parsed_metrics.append(parsed_metric)
