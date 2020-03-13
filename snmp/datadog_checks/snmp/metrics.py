@@ -5,13 +5,28 @@
 Helpers for deriving metrics from SNMP values.
 """
 
-from typing import Any, Optional
+from typing import Any, Optional, Set
 
 from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 
 from .compat import total_time_to_temporal_percent
-from .pysnmp_types import PYSNMP_COUNTER_CLASSES, PYSNMP_GAUGE_CLASSES
 from .types import ForceableMetricType, MetricDefinition
+
+# SNMP value types that we explicitly support.
+SNMP_COUNTER_CLASSES = {
+    'Counter32',
+    'Counter64',
+    # Additional types that are not part of the SNMP protocol (see RFC 2856).
+    'ZeroBasedCounter64',
+}  # type: Set[str]
+SNMP_GAUGE_CLASSES = {
+    'Gauge32',
+    'Integer',
+    'Integer32',
+    'Unsigned32',
+    # Additional types that are not part of the SNMP protocol (see RFC 2856).
+    'CounterBasedGauge64',
+}  # type: Set[str]
 
 
 def as_metric_with_inferred_type(value):
@@ -29,10 +44,10 @@ def as_metric_with_inferred_type(value):
 
     pysnmp_class_name = value.__class__.__name__
 
-    if pysnmp_class_name in PYSNMP_COUNTER_CLASSES:
+    if pysnmp_class_name in SNMP_COUNTER_CLASSES:
         return {'type': 'rate', 'value': int(value)}
 
-    if pysnmp_class_name in PYSNMP_GAUGE_CLASSES:
+    if pysnmp_class_name in SNMP_GAUGE_CLASSES:
         return {'type': 'gauge', 'value': int(value)}
 
     if pysnmp_class_name == 'Opaque':
