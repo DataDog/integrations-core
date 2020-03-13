@@ -5,7 +5,7 @@
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Optional, Tuple
 
-from .pysnmp_types import MibViewController, ObjectIdentity, ObjectType
+from .pysnmp_types import ObjectType
 
 
 class OIDTreeNode(object):
@@ -83,12 +83,10 @@ class OIDResolver(object):
     ```
     """
 
-    def __init__(self, mib_view_controller, enforce_constraints):
-        # type: (MibViewController, bool) -> None
-        self._mib_view_controller = mib_view_controller
+    def __init__(self):
+        # type: () -> None
         self._resolver = OIDTrie()
         self._index_resolvers = defaultdict(dict)  # type: DefaultDict[str, Dict[int, Dict[int, str]]]
-        self._enforce_constraints = enforce_constraints
 
     def register(self, oid, name):
         # type: (Tuple[int, ...], str) -> None
@@ -105,18 +103,6 @@ class OIDResolver(object):
         Corresponds to XXX(3) in the summary listing.
         """
         self._index_resolvers[tag][index] = mapping
-
-    def _resolve_from_mibs(self, oid_tuple, oid):
-        # type: (Tuple[int, ...], ObjectType) -> Tuple[str, Tuple[str, ...]]
-        if not self._enforce_constraints:
-            # if enforce_constraints is false, then MIB resolution has not been done yet
-            # so we need to do it manually. We have to specify the mibs that we will need
-            # to resolve the name.
-            oid = ObjectIdentity(oid_tuple).resolveWithMib(self._mib_view_controller)
-
-        _, name, indexes = oid.getMibSymbol()
-
-        return name, tuple(index.prettyPrint() for index in indexes)
 
     def _resolve_tag_index(self, tail, name):
         # type: (Tuple[int, ...], str) -> Tuple[str, ...]
@@ -141,23 +127,18 @@ class OIDResolver(object):
         return tuple(tags)
 
     def resolve_oid(self, oid):
-        # type: (ObjectType) -> Tuple[str, Tuple[str, ...]]
+        # type: (ObjectType) -> Optional[Tuple[str, Tuple[str, ...]]]
         """Resolve an OID to a name and its indexes.
 
-        This will perform either:
-        1. MIB-based resolution, if `oid` doesn't match any registered OID.
-        2. Manual resolution, if `oid` matched. In this case, indexes are resolved using any registered mappings.
-
-        Returns
-        -------
-        name: the name of the metric associated to `oid`.
-        tag_index: a sequence of tag values. k-th item in the sequence corresponds to the k-th entry in `metric_tags`.
+        Returns `None` if `oid` didn't match any registered OID, otherwise a 2-tuple containing:
+        - name: the name of the metric associated to `oid`.
+        - tag_index: a sequence of tag values. k-th item in the sequence corresponds to the k-th entry in `metric_tags`.
         """
         oid_tuple = oid.asTuple()
         prefix, name = self._resolver.match(oid_tuple)
 
         if name is None:
-            return self._resolve_from_mibs(oid_tuple, oid=oid)
+            return None
 
         # Example: oid: (1, 3, 6, 1, 2, 1, 1), prefix: (1, 3, 6, 1) -> tail: (2, 1, 1)
         tail = oid_tuple[len(prefix) :]

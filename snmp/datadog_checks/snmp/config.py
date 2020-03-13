@@ -116,8 +116,8 @@ class InstanceConfig:
             self.metrics.extend(global_metrics)
 
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
-        self._snmp_engine, mib_view_controller = self.create_snmp_engine(mibs_path)
-        self._resolver = OIDResolver(mib_view_controller, self.enforce_constraints)
+        self._snmp_engine, self._mib_view_controller = self.create_snmp_engine(mibs_path)
+        self._resolver = OIDResolver()
 
         self.ip_address = None
         self.ip_network = None
@@ -188,7 +188,19 @@ class InstanceConfig:
 
     def resolve_oid(self, oid):
         # type: (ObjectType) -> Tuple[str, Tuple[str, ...]]
-        return self._resolver.resolve_oid(oid)
+        resolved = self._resolver.resolve_oid(oid)
+
+        if resolved is not None:
+            return resolved
+
+        # Fallback to MIB-based resolution.
+
+        if not self.enforce_constraints:
+            # MIBs haven't been looked up yet as part of issuing the SNMP command this OID comes from.
+            oid = ObjectIdentity(OID(oid).as_tuple()).resolveWithMib(self._mib_view_controller)
+
+        _, name, indexes = oid.getMibSymbol()
+        return name, tuple(index.prettyPrint() for index in indexes)
 
     def refresh_with_profile(self, profile, warning):
         # type: (Dict[str, Any], Callable[..., None]) -> None
