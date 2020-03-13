@@ -12,10 +12,10 @@ def test_oid():
     # type: () -> None
     oid = OID((1, 3, 6, 1, 2, 1, 0))
     assert oid.as_tuple() == (1, 3, 6, 1, 2, 1, 0)
-    assert oid.as_string() == '1.3.6.1.2.1.0'
     assert oid == OID((1, 3, 6, 1, 2, 1, 0))
     assert oid != OID((1, 3, 6, 1, 4, 0))
     assert repr(oid) == "OID('1.3.6.1.2.1.0')"
+    assert str(oid) == '1.3.6.1.2.1.0'
 
 
 @pytest.mark.unit
