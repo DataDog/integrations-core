@@ -5,8 +5,6 @@ from pyVmomi.vim import ManagedEntity
 class ContainerView: ...
 
 class ViewManager:
-    ...
-
     # Note, doc says the type is List[str], but in practice it seems to be List[Type[ManagedEntity]]
     # https://pubs.vmware.com/vi-sdk/visdk250/ReferenceGuide/vim.view.ViewManager.html
     @staticmethod

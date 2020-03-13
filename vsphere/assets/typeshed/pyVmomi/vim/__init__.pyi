@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any, List, Type
+from typing import Any, List
 
 from ..vmodl.query import PropertyCollector
 from . import event as event
