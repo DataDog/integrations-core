@@ -8,18 +8,13 @@ from typing import Any, Callable, List, TypeVar, cast
 
 from pyVim import connect
 from pyVmomi import vim, vmodl
+from vim import EntityMetricBase, PerformanceManager, QuerySpec, ServiceInstance
+from vim.event import Event
 
 from datadog_checks.base.log import CheckLoggingAdapter
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES, MAX_QUERY_METRICS_OPTION, UNLIMITED_HIST_METRICS_PER_QUERY
-from datadog_checks.vsphere.types.check import InfrastructureData
-
-# Python 3 only
-from vim import EntityMetricBase, ServiceInstance, QuerySpec, PerformanceManager
-from vim.event import Event
-
-PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)  # type: ignore
-
+from datadog_checks.vsphere.types import InfrastructureData
 
 CallableT = TypeVar('CallableT', bound=Callable[..., Any])
 

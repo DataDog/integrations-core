@@ -21,7 +21,7 @@ from datadog_checks.vsphere.constants import (
     MOR_TYPE_AS_STRING,
     REALTIME_RESOURCES,
 )
-from datadog_checks.vsphere.types.check import (
+from datadog_checks.vsphere.types import (
     InstanceConfig,
     MetricFilterConfig,
     MetricFilters,

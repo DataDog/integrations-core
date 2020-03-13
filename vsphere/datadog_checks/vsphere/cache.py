@@ -6,9 +6,9 @@ from contextlib import contextmanager
 from typing import Any, Dict, Generator, Iterator, List
 
 from six import iterkeys
-
-from datadog_checks.vsphere.types.check import MetricName, ResourceTags, CounterId
 from vim import ManagedEntity, ManagedEntityType
+
+from datadog_checks.vsphere.types import CounterId, MetricName, ResourceTags
 
 
 class VSphereCache(object):

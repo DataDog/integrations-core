@@ -1,8 +1,7 @@
 from datetime import datetime
-from typing import cast, Any, List, Type
+from typing import Any, List, Type, cast
 
 from datadog_checks.vsphere.types.check import CounterId
-
 
 class ManagedEntity:
     """
@@ -14,25 +13,23 @@ class ManagedEntity:
 
 ManagedEntityType = Type[ManagedEntity]
 
-
 class EntityMetricBase:
     """
     vim.ServiceInstance
     https://pubs.vmware.com/vi3/sdk/ReferenceGuide/vim.PerformanceManager.EntityMetricBase.html
     """
+
     value: Any
     entity: ManagedEntity
-
 
 class ServiceInstance:
     """
     vim.ServiceInstance
     https://vdc-download.vmware.com/vmwb-repository/dcr-public/b525fb12-61bb-4ede-b9e3-c4a1f8171510/99ba073a-60e9-4933-8690-149860ce8754/doc/vim.ServiceInstance.html
     """
+
     content: Any
-
     def CurrentTime(self) -> Any: ...
-
 
 class PerformanceManager:
     class MetricId:

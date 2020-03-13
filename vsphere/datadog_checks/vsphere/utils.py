@@ -5,18 +5,18 @@ from typing import List, Pattern, cast
 
 from pyVmomi import vim
 from six import iteritems
+from vim import ManagedEntity, ManagedEntityType, PerformanceManager
 
 from datadog_checks.base import to_native_string
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
-from datadog_checks.vsphere.types.check import (
+from datadog_checks.vsphere.types import (
     InfrastructureData,
     InfrastructureDataItem,
     MetricFilters,
     MetricName,
     ResourceFilters,
 )
-from vim import ManagedEntityType, ManagedEntity, PerformanceManager
 
 METRIC_TO_INSTANCE_TAG_MAPPING = {
     # Structure:

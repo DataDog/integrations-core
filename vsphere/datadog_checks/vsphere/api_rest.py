@@ -10,7 +10,7 @@ from pyVmomi import vim
 from datadog_checks.base.log import CheckLoggingAdapter
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.vsphere.config import VSphereConfig
-from datadog_checks.vsphere.types.check import ResourceTags, TagAssociation
+from datadog_checks.vsphere.types import ResourceTags, TagAssociation
 
 from .api import APIResponseError, smart_retry
 

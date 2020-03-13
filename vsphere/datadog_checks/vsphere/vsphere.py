@@ -11,6 +11,7 @@ from typing import Any, Dict, Generator, Iterable, List, Set, Type, TypeVar, cas
 
 from pyVmomi import vim, vmodl
 from six import iteritems
+from vim import EntityMetricBase, ManagedEntity, ManagedEntityType, PerformanceManager, QuerySpec
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
 from datadog_checks.base.checks.libs.timer import Timer
@@ -28,7 +29,7 @@ from datadog_checks.vsphere.constants import (
 )
 from datadog_checks.vsphere.legacy.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
-from datadog_checks.vsphere.types.check import InstanceConfig, MetricName, MorBatch, CounterId
+from datadog_checks.vsphere.types import CounterId, InstanceConfig, MetricName, MorBatch
 from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,
     format_metric_name,
@@ -38,7 +39,6 @@ from datadog_checks.vsphere.utils import (
     is_resource_excluded_by_filters,
     should_collect_per_instance_values,
 )
-from vim import EntityMetricBase, QuerySpec, ManagedEntityType, ManagedEntity, PerformanceManager
 
 SERVICE_CHECK_NAME = 'can_connect'
 
@@ -384,8 +384,12 @@ class VSphereCheck(AgentCheck):
                         e,
                     )
 
-    def make_batch(self, mors, metric_ids, resource_type):
-        # type: (Iterable[ManagedEntity], List[PerformanceManager.MetricId], ManagedEntityType) -> Generator[MorBatch, None, None]
+    def make_batch(
+        self,
+        mors,  # type: Iterable[ManagedEntity]
+        metric_ids,  # type: List[PerformanceManager.MetricId]
+        resource_type,  # type: ManagedEntityType
+    ):  # type: (...) -> Generator[MorBatch, None, None]
         """Iterates over mor and generate batches with a fixed number of metrics to query.
         Querying multiple resource types in the same call is error prone if we query a cluster metric. Indeed,
         cluster metrics result in an unpredicatable number of internal metric queries which all count towards
