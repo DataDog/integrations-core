@@ -9,6 +9,7 @@ import requests
 
 from datadog_checks.vault import Vault
 from datadog_checks.vault.errors import ApiUnreachable
+from datadog_checks.vault.vault import Leader
 
 from .common import INSTANCES, MockResponse
 from .utils import run_check
@@ -256,18 +257,33 @@ class TestVault:
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.CRITICAL, count=1)
 
-    def test_event_leader_change(self, aggregator):
+    @pytest.mark.parametrize("cluster", [True, False])
+    def test_event_leader_change(self, aggregator, cluster):
         instance = INSTANCES['main']
         c = Vault(Vault.CHECK_NAME, {}, [instance])
-        c._previous_leader = 'foo'
+        if cluster:
+            c._previous_leader = Leader('', 'foo')
+        else:
+            c._previous_leader = Leader('foo', '')
 
         # Keep a reference for use during mock
         requests_get = requests.get
 
         def mock_requests_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
+                if cluster:
+                    leader_addr = ''
+                    leader_cluster_addr = 'bar'
+                else:
+                    leader_addr = 'bar'
+                    leader_cluster_addr = ''
                 return MockResponse(
-                    {'ha_enabled': False, 'is_self': True, 'leader_address': 'bar', 'leader_cluster_address': ''}
+                    {
+                        'ha_enabled': False,
+                        'is_self': True,
+                        'leader_address': leader_addr,
+                        'leader_cluster_address': leader_cluster_addr,
+                    }
                 )
             return requests_get(url, *args, **kwargs)
 
@@ -279,11 +295,35 @@ class TestVault:
         event = aggregator.events[0]
         assert event['event_type'] == Vault.EVENT_LEADER_CHANGE
         assert event['msg_title'] == 'Leader change'
-        assert event['msg_text'] == 'Leader changed from `foo` to `bar`.'
+        if cluster:
+            assert event['msg_text'] == 'Leader cluster address changed from `foo` to `bar`.'
+        else:
+            assert event['msg_text'] == 'Leader address changed from `foo` to `bar`.'
         assert event['alert_type'] == 'info'
         assert event['source_type_name'] == Vault.CHECK_NAME
         assert event['host'] == c.hostname
         assert 'is_leader:true' in event['tags']
+
+    def test_leader_change_not_self(self, aggregator):
+        """The agent should only submit a leader change event when the monitored vault is the leader."""
+        instance = INSTANCES['main']
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
+        c._previous_leader = Leader('foo', '')
+
+        # Keep a reference for use during mock
+        requests_get = requests.get
+
+        def mock_requests_get(url, *args, **kwargs):
+            if url == instance['api_url'] + '/sys/leader':
+                return MockResponse(
+                    {'ha_enabled': False, 'is_self': False, 'leader_address': 'bar', 'leader_cluster_address': ''}
+                )
+            return requests_get(url, *args, **kwargs)
+
+        with mock.patch('requests.get', side_effect=mock_requests_get, autospec=True):
+            run_check(c)
+
+        assert len(aggregator.events) == 0
 
     def test_is_leader_metric_true(self, aggregator):
         instance = INSTANCES['main']
