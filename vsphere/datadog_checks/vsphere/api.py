@@ -77,6 +77,7 @@ class VSphereAPI(object):
         self.config = config
         self.log = log
 
+        self._conn = cast(ServiceInstance, None)
         self.smart_connect()
 
     def smart_connect(self):
@@ -108,10 +109,10 @@ class VSphereAPI(object):
             err_msg = "Connection to {} failed: {}".format(self.config.hostname, e)
             raise APIConnectionError(err_msg)
 
-        if getattr(self, '_conn', None):
+        if self._conn:
             connect.Disconnect(self._conn)
 
-        self._conn = conn  # type: ServiceInstance
+        self._conn = conn
 
     @smart_retry
     def check_health(self):
