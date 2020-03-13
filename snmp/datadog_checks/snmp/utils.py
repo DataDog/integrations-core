@@ -135,6 +135,14 @@ def parse_as_oid_tuple(value):
     raise CouldNotDecodeOID('Building an OID from object {!r} of type {} is not supported'.format(value, type(value)))
 
 
+def format_as_oid_string(parts):
+    # type: (Tuple[int, ...]) -> str
+    """
+    Given an OID in int-tuple form, format it to the conventional dot-separated representation.
+    """
+    return '.'.join(str(part) for part in parts)
+
+
 def oid_pattern_specificity(pattern):
     # type: (str) -> Tuple[int, Tuple[int, ...]]
     """Return a measure of the specificity of an OID pattern.

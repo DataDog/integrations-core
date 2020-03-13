@@ -13,10 +13,10 @@ def test_oid():
     # type: () -> None
     oid = OID((1, 3, 6, 1, 2, 1, 0))
     assert oid.resolve_as_tuple() == (1, 3, 6, 1, 2, 1, 0)
-    assert oid.resolve_as_string() == '1.3.6.1.2.1.0'
     assert oid == OID((1, 3, 6, 1, 2, 1, 0))
     assert oid != OID((1, 3, 6, 1, 4, 0))
     assert repr(oid) == "OID('1.3.6.1.2.1.0')"
+    assert str(oid) == '1.3.6.1.2.1.0'
 
 
 @pytest.mark.parametrize(
@@ -72,9 +72,6 @@ def test_oid_resolve_failed(value):
 
     with pytest.raises(CouldNotDecodeOID):
         oid.resolve_as_tuple()
-
-    with pytest.raises(CouldNotDecodeOID):
-        oid.resolve_as_string()
 
 
 @pytest.mark.parametrize(
