@@ -28,8 +28,8 @@ from datadog_checks.vsphere.constants import (
 )
 from datadog_checks.vsphere.legacy.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
-from datadog_checks.vsphere.types.check import CounterId, InstanceConfig, MetricName, MorBatch
-from datadog_checks.vsphere.types.vim import ManagedEntity, ManagedEntityType, MetricId, QuerySpec
+from datadog_checks.vsphere.types.check import InstanceConfig, MetricName, MorBatch
+from datadog_checks.vsphere.types.vim import CounterId, ManagedEntity, ManagedEntityType, MetricId, QuerySpec
 from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,
     format_metric_name,
@@ -187,7 +187,7 @@ class VSphereCheck(AgentCheck):
                 # Hosts are not considered as parents of the VMs they run, we use the `runtime.host` property
                 # to get the name of the ESXi host
                 runtime_host = properties.get("runtime.host")
-                runtime_host_props = infrastructure_data.get(runtime_host, {})
+                runtime_host_props = infrastructure_data.get(runtime_host, {})  # type: ignore
                 runtime_hostname = to_native_string(runtime_host_props.get("name", "unknown"))
                 tags.append('vsphere_host:{}'.format(runtime_hostname))
 
@@ -202,7 +202,7 @@ class VSphereCheck(AgentCheck):
 
             tags.extend(get_parent_tags_recursively(mor, infrastructure_data))
             tags.append('vsphere_type:{}'.format(mor_type_str))
-            mor_payload = {"tags": tags}
+            mor_payload = {"tags": tags}  # type: Dict[str, Any]
 
             if hostname:
                 mor_payload['hostname'] = hostname
@@ -401,7 +401,7 @@ class VSphereCheck(AgentCheck):
 
         if resource_type == vim.ClusterComputeResource:
             # Cluster metrics are unpredictable and a single call can max out the limit. Always collect them one by one.
-            max_batch_size = 1
+            max_batch_size = 1.0
         elif resource_type in REALTIME_RESOURCES or self.config.max_historical_metrics < 0:
             # Queries are not limited by vCenter
             max_batch_size = self.config.metrics_per_query

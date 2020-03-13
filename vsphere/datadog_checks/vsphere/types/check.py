@@ -38,11 +38,16 @@ InstanceConfig = TypedDict(
 
 # CHECK ALIASES
 MetricName = str
-CounterId = int
 
 InfrastructureDataItem = TypedDict(
     'InfrastructureDataItem',
-    {'name': str, 'runtime.host': str, 'guest.hostName': str, 'parent': Optional[ManagedEntity]},
+    {
+        'name': str,
+        'runtime.host': ManagedEntity,
+        'guest.hostName': str,
+        'runtime.powerState': str,
+        'parent': Optional[ManagedEntity],
+    },
     total=False,
 )
 InfrastructureData = Dict[ManagedEntity, InfrastructureDataItem]

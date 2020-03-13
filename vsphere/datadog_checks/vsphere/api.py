@@ -3,7 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import functools
 import ssl
-from typing import Any, Callable, List, cast
+from datetime import datetime
+from typing import Any, Callable, List, TypeVar, cast
 
 from pyVim import connect
 from pyVmomi import vim, vmodl
@@ -12,14 +13,17 @@ from datadog_checks.base.log import CheckLoggingAdapter
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES, MAX_QUERY_METRICS_OPTION, UNLIMITED_HIST_METRICS_PER_QUERY
 from datadog_checks.vsphere.types.check import InfrastructureData
-from datadog_checks.vsphere.types.vim import QuerySpec
+from datadog_checks.vsphere.types.vim import CounterInfo, QuerySpec, ServiceInstance
 
 # Python 3 only
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)  # type: ignore
 
 
+RetriedFuncT = TypeVar('RetriedFuncT', bound=Callable[..., Any])
+
+
 def smart_retry(f):
-    # type: (Callable[..., Any]) -> (Callable[..., Any])
+    # type: (RetriedFuncT) -> RetriedFuncT
     """A function decorated with this `@smart_retry` will trigger a new authentication if it fails. The function
     will then be retried.
     This is useful when the integration keeps a semi-healthy connection to the vSphere API"""
@@ -53,7 +57,7 @@ def smart_retry(f):
             api_instance.smart_connect()
             return f(api_instance, *args, **kwargs)
 
-    return wrapper
+    return cast(RetriedFuncT, wrapper)
 
 
 class APIConnectionError(Exception):
@@ -75,7 +79,7 @@ class VSphereAPI(object):
         self.smart_connect()
 
     def smart_connect(self):
-        # type: () -> vim.ServiceInstance
+        # type: () -> None
         """
         Creates the connection object to the vSphere API using parameters supplied from the configuration.
 
@@ -106,7 +110,7 @@ class VSphereAPI(object):
         if getattr(self, '_conn', None):
             connect.Disconnect(self._conn)
 
-        self._conn = conn  # type: vim.ServiceInstance
+        self._conn = conn  # type: ServiceInstance
 
     @smart_retry
     def check_health(self):
@@ -115,7 +119,7 @@ class VSphereAPI(object):
 
     @smart_retry
     def get_perf_counter_by_level(self, collection_level):
-        # type: (int) -> List[vim.PerformanceManager.CounterInfo]
+        # type: (int) -> List[CounterInfo]
         """
         Requests and returns the list of counter available for a given collection_level.
 
@@ -201,7 +205,7 @@ class VSphereAPI(object):
 
     @smart_retry
     def get_new_events(self, start_time):
-        # type: (int) -> List[vim.event.Event]
+        # type: (datetime) -> List[vim.event.Event]
         """
         Docs on `vim.event.EventManager` and `vim.event.EventManager.QueryEvents`:
             https://pubs.vmware.com/vi3/sdk/ReferenceGuide/vim.event.EventManager.html
@@ -217,7 +221,7 @@ class VSphereAPI(object):
 
     @smart_retry
     def get_latest_event_timestamp(self):
-        # type: () -> int
+        # type: () -> datetime
         event_manager = self._conn.content.eventManager
         return event_manager.latestEvent.createdTime
 
