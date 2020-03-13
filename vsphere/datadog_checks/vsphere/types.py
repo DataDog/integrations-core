@@ -38,6 +38,7 @@ InstanceConfig = TypedDict(
 
 # CHECK ALIASES
 MetricName = str
+CounterId = int
 
 InfrastructureDataItem = TypedDict(
     'InfrastructureDataItem',
@@ -52,12 +53,10 @@ InfrastructureDataItem = TypedDict(
 )
 InfrastructureData = Dict[vim.ManagedEntity, InfrastructureDataItem]
 
-MorBatch = Dict[vim.ManagedEntity, List[vim.PerformanceManager.MetricId]]
-
 ResourceTags = Dict[Type[vim.ManagedEntity], Dict[str, List[str]]]
-
 TagAssociation = TypedDict('TagAssociation', {'tag_id': str, 'object_ids': List[Dict[str, str]]})
 
 ResourceFilters = Dict[Tuple[str, str], List[Pattern]]
 MetricFilters = Dict[str, List[Pattern]]
-CounterId = int
+
+MorBatch = Dict[vim.ManagedEntity, List[vim.PerformanceManager.MetricId]]
