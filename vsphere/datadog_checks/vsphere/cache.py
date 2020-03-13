@@ -3,10 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import time
 from contextlib import contextmanager
-from typing import Any, Dict, Generator, Iterator, List
+from typing import Any, Dict, Generator, Iterator, List, Type
 
+from pyVmomi import vim
 from six import iterkeys
-from vim import ManagedEntity, ManagedEntityType
 
 from datadog_checks.vsphere.types import CounterId, MetricName, ResourceTags
 
@@ -67,11 +67,11 @@ class MetricsMetadataCache(VSphereCache):
     """
 
     def get_metadata(self, resource_type):
-        # type: (ManagedEntityType) -> Dict[CounterId, MetricName]
+        # type: (Type[vim.ManagedEntity]) -> Dict[CounterId, MetricName]
         return self._content[resource_type]
 
     def set_metadata(self, resource_type, metadata):
-        # type: (ManagedEntityType, Dict[CounterId, MetricName]) -> None
+        # type: (Type[vim.ManagedEntity], Dict[CounterId, MetricName]) -> None
         self._content[resource_type] = metadata
 
 
@@ -88,16 +88,16 @@ class InfrastructureCache(VSphereCache):
     """
 
     def get_mor_props(self, mor, default=None):
-        # type: (ManagedEntity, Dict[str, Any]) -> Dict[str, Any]
+        # type: (vim.ManagedEntity, Dict[str, Any]) -> Dict[str, Any]
         mor_type = type(mor)
         return self._content.get(mor_type, {}).get(mor, default)
 
     def get_mors(self, resource_type):
-        # type: (ManagedEntityType) -> Iterator[ManagedEntity]
+        # type: (Type[vim.ManagedEntity]) -> Iterator[vim.ManagedEntity]
         return iterkeys(self._content.get(resource_type, {}))
 
     def set_mor_data(self, mor, mor_data):
-        # type: (ManagedEntity, Dict[str, Any]) -> None
+        # type: (vim.ManagedEntity, Dict[str, Any]) -> None
         mor_type = type(mor)
         if mor_type not in self._content:
             self._content[mor_type] = {}
@@ -119,7 +119,7 @@ class TagsCache(VSphereCache):
     """
 
     def get_mor_tags(self, mor):
-        # type: (ManagedEntity) -> List[str]
+        # type: (vim.ManagedEntity) -> List[str]
         """
         :return: list of mor tags or empty list if mor is not found.
         """

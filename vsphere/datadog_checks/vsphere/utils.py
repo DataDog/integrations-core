@@ -1,11 +1,10 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import List, Pattern, cast
+from typing import List, Pattern, Type, cast
 
 from pyVmomi import vim
 from six import iteritems
-from vim import ManagedEntity, ManagedEntityType, PerformanceManager
 
 from datadog_checks.base import to_native_string
 from datadog_checks.vsphere.config import VSphereConfig
@@ -41,7 +40,7 @@ METRIC_TO_INSTANCE_TAG_MAPPING = {
 
 
 def format_metric_name(counter):
-    # type: (PerformanceManager.CounterInfo) -> MetricName
+    # type: (vim.PerformanceManager.PerfCounterInfo) -> MetricName
     return "{}.{}.{}".format(
         to_native_string(counter.groupInfo.key),
         to_native_string(counter.nameInfo.key),
@@ -59,7 +58,7 @@ def match_any_regex(string, regexes):
 
 
 def is_resource_excluded_by_filters(mor, infrastructure_data, resource_filters):
-    # type: (ManagedEntity, InfrastructureData, ResourceFilters) -> bool
+    # type: (vim.ManagedEntity, InfrastructureData, ResourceFilters) -> bool
     resource_type = MOR_TYPE_AS_STRING[type(mor)]
 
     if not [f for f in resource_filters if f[0] == resource_type]:
@@ -94,7 +93,7 @@ def is_resource_excluded_by_filters(mor, infrastructure_data, resource_filters):
 
 
 def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
-    # type: (str, ManagedEntityType, MetricFilters) -> bool
+    # type: (str, Type[vim.ManagedEntity], MetricFilters) -> bool
     if metric_name.startswith(REFERENCE_METRIC):
         # Always collect at least one metric for reference
         return False
@@ -109,7 +108,7 @@ def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
 
 
 def make_inventory_path(mor, infrastructure_data):
-    # type: (ManagedEntity, InfrastructureData) -> str
+    # type: (vim.ManagedEntity, InfrastructureData) -> str
     mor_name = infrastructure_data[mor].get('name', '')
     mor_parent = infrastructure_data[mor].get('parent')
     if mor_parent:
@@ -118,7 +117,7 @@ def make_inventory_path(mor, infrastructure_data):
 
 
 def get_parent_tags_recursively(mor, infrastructure_data):
-    # type: (ManagedEntity, InfrastructureData) -> List[str]
+    # type: (vim.ManagedEntity, InfrastructureData) -> List[str]
     """Go up the resources hierarchy from the given mor. Note that a host running a VM is not considered to be a
     parent of that VM.
 
@@ -157,7 +156,7 @@ def get_parent_tags_recursively(mor, infrastructure_data):
 
 
 def should_collect_per_instance_values(config, metric_name, resource_type):
-    # type: (VSphereConfig, str, ManagedEntityType) -> bool
+    # type: (VSphereConfig, str, Type[vim.ManagedEntity]) -> bool
     filters = config.collect_per_instance_filters.get(MOR_TYPE_AS_STRING[resource_type], [])
     metric_matched = match_any_regex(metric_name, filters)
     return metric_matched

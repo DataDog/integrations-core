@@ -8,8 +8,6 @@ from typing import Any, Callable, List, TypeVar, cast
 
 from pyVim import connect
 from pyVmomi import vim, vmodl
-from vim import EntityMetricBase, PerformanceManager, ServiceInstance
-from vim.event import Event
 
 from datadog_checks.base.log import CheckLoggingAdapter
 from datadog_checks.vsphere.config import VSphereConfig
@@ -73,7 +71,7 @@ class VSphereAPI(object):
         self.config = config
         self.log = log
 
-        self._conn = cast(ServiceInstance, None)
+        self._conn = cast(vim.ServiceInstance, None)
         self.smart_connect()
 
     def smart_connect(self):
@@ -117,7 +115,7 @@ class VSphereAPI(object):
 
     @smart_retry
     def get_perf_counter_by_level(self, collection_level):
-        # type: (int) -> List[PerformanceManager.CounterInfo]
+        # type: (int) -> List[vim.PerformanceManager.PerfCounterInfo]
         """
         Requests and returns the list of counter available for a given collection_level.
 
@@ -179,15 +177,19 @@ class VSphereAPI(object):
 
             # Collect the objects and their properties
             res = content.propertyCollector.RetrievePropertiesEx([filter_spec], retr_opts)
-            mors = res.objects
+            obj_content_list = res.objects
             # Results can be paginated
             while res.token is not None:
                 res = content.propertyCollector.ContinueRetrievePropertiesEx(res.token)
-                mors.extend(res.objects)
+                obj_content_list.extend(res.objects)
         finally:
             view_ref.Destroy()
 
-        infrastructure_data = {mor.obj: {prop.name: prop.val for prop in mor.propSet} for mor in mors if mor.propSet}
+        infrastructure_data = {
+            obj_content.obj: {prop.name: prop.val for prop in obj_content.propSet}
+            for obj_content in obj_content_list
+            if obj_content.propSet
+        }
 
         root_folder = self._conn.content.rootFolder
         infrastructure_data[root_folder] = {"name": root_folder.name, "parent": None}
@@ -195,14 +197,14 @@ class VSphereAPI(object):
 
     @smart_retry
     def query_metrics(self, query_specs):
-        # type: (List[PerformanceManager.QuerySpec]) -> List[EntityMetricBase]
+        # type: (List[vim.PerformanceManager.QuerySpec]) -> List[vim.PerformanceManager.EntityMetricBase]
         perf_manager = self._conn.content.perfManager
         values = perf_manager.QueryPerf(query_specs)
         return values
 
     @smart_retry
     def get_new_events(self, start_time):
-        # type: (datetime) -> List[Event]
+        # type: (datetime) -> List[vim.event.Event]
         event_manager = self._conn.content.eventManager
         query_filter = vim.event.EventFilterSpec()
         time_filter = vim.event.EventFilterSpec.ByTime(beginTime=start_time)
