@@ -20,7 +20,7 @@ from datadog_checks.snmp.resolver import OIDTrie
 from datadog_checks.snmp.utils import get_default_profiles, oid_pattern_specificity, recursively_expand_base_profiles
 
 from . import common
-from .utils import ClassInstantiationSpy, mock_profiles_root
+from .utils import ClassInstantiationSpy, mock_profiles_confd_root
 
 pytestmark = pytest.mark.unit
 
@@ -331,7 +331,7 @@ def test_profile_extends():
     }
 
     with temp_dir() as tmp:
-        with mock_profiles_root(tmp):
+        with mock_profiles_confd_root(tmp):
             with open(os.path.join(tmp, 'base.yaml'), 'w') as f:
                 f.write(yaml.safe_dump(base))
 
@@ -359,7 +359,7 @@ def test_default_profiles():
     }
 
     with temp_dir() as tmp:
-        with mock_profiles_root(tmp):
+        with mock_profiles_confd_root(tmp):
             profile_file = os.path.join(tmp, 'profile.yaml')
             with open(profile_file, 'w') as f:
                 f.write(yaml.safe_dump(profile))
@@ -374,7 +374,7 @@ def test_profile_override():
     }
 
     with temp_dir() as tmp:
-        with mock_profiles_root(tmp):
+        with mock_profiles_confd_root(tmp):
             profile_file = os.path.join(tmp, 'generic-router.yaml')
             with open(profile_file, 'w') as f:
                 f.write(yaml.safe_dump(profile))

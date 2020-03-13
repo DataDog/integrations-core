@@ -47,14 +47,21 @@ def _get_profiles_site_root():
     return os.path.join(here, 'data', 'profiles')
 
 
+def _resolve_definition_file(definition_file):
+    # type: (str) -> str
+    if os.path.isabs(definition_file):
+        return definition_file
+
+    definition_conf_file = os.path.join(_get_profiles_confd_root(), definition_file)
+    if os.path.isfile(definition_conf_file):
+        return definition_conf_file
+
+    return os.path.join(_get_profiles_site_root(), definition_file)
+
+
 def _read_profile_definition(definition_file):
     # type: (str) -> Dict[str, Any]
-    if not os.path.isabs(definition_file):
-        definition_conf_file = os.path.join(_get_profiles_confd_root(), definition_file)
-        if not os.path.isfile(definition_conf_file):
-            definition_file = os.path.join(_get_profiles_site_root(), definition_file)
-        else:
-            definition_file = definition_conf_file
+    definition_file = _resolve_definition_file(definition_file)
 
     with open(definition_file) as f:
         return yaml.safe_load(f)
@@ -85,20 +92,25 @@ def recursively_expand_base_profiles(definition):
 
 
 def get_default_profiles():
-    """Return all the profiles installed on the system."""
     # type: () -> Dict[str, Any]
+    """Return all the profiles installed on the system."""
     profiles = {}
     paths = [_get_profiles_site_root(), _get_profiles_confd_root()]
+
     for path in paths:
         if not os.path.isdir(path):
             continue
+
         for filename in os.listdir(path):
             if filename.startswith('_'):
                 continue
+
             base, ext = os.path.splitext(filename)
             if ext != '.yaml':
                 continue
+
             profiles[base] = {'definition_file': os.path.join(path, filename)}
+
     return profiles
 
 
