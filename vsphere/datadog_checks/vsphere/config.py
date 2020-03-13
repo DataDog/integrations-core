@@ -22,8 +22,8 @@ from datadog_checks.vsphere.constants import (
     REALTIME_RESOURCES,
 )
 from datadog_checks.vsphere.types.check import (
-    FormattedMetricFilters,
-    FormattedResourceFilters,
+    MetricFilters,
+    ResourceFilters,
     InstanceConfig,
     MetricFilterConfig,
     ResourceFilterConfig,
@@ -115,9 +115,9 @@ class VSphereConfig(object):
             )
 
     def _parse_resource_filters(self, all_resource_filters):
-        # type: (List[ResourceFilterConfig]) -> FormattedResourceFilters
+        # type: (List[ResourceFilterConfig]) -> ResourceFilters
 
-        formatted_resource_filters = {}  # type: FormattedResourceFilters
+        formatted_resource_filters = {}  # type: ResourceFilters
         allowed_resource_types = [MOR_TYPE_AS_STRING[k] for k in self.collected_resource_types]
 
         for resource_filter in all_resource_filters:
@@ -174,7 +174,7 @@ class VSphereConfig(object):
         return formatted_resource_filters
 
     def _parse_metric_regex_filters(self, all_metric_filters):
-        # type: (MetricFilterConfig) -> FormattedMetricFilters
+        # type: (MetricFilterConfig) -> MetricFilters
         allowed_resource_types = [MOR_TYPE_AS_STRING[k] for k in self.collected_resource_types]
         metric_filters = {}
         for resource_type, filters in iteritems(all_metric_filters):

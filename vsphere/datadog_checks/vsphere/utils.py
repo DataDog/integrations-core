@@ -10,8 +10,8 @@ from datadog_checks.base import to_native_string
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
 from datadog_checks.vsphere.types.check import (
-    FormattedMetricFilters,
-    FormattedResourceFilters,
+    MetricFilters,
+    ResourceFilters,
     InfrastructureData,
     InfrastructureDataItem,
     MetricName,
@@ -59,7 +59,7 @@ def match_any_regex(string, regexes):
 
 
 def is_resource_excluded_by_filters(mor, infrastructure_data, resource_filters):
-    # type: (ManagedEntity, InfrastructureData, FormattedResourceFilters) -> bool
+    # type: (ManagedEntity, InfrastructureData, ResourceFilters) -> bool
     resource_type = MOR_TYPE_AS_STRING[type(mor)]
 
     if not [f for f in resource_filters if f[0] == resource_type]:
@@ -94,7 +94,7 @@ def is_resource_excluded_by_filters(mor, infrastructure_data, resource_filters):
 
 
 def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
-    # type: (str, ManagedEntityType, FormattedMetricFilters) -> bool
+    # type: (str, ManagedEntityType, MetricFilters) -> bool
     if metric_name.startswith(REFERENCE_METRIC):
         # Always collect at least one metric for reference
         return False
