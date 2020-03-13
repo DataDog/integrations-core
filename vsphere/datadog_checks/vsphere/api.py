@@ -206,13 +206,6 @@ class VSphereAPI(object):
     @smart_retry
     def get_new_events(self, start_time):
         # type: (datetime) -> List[Event]
-        """
-        Docs on `vim.event.EventManager` and `vim.event.EventManager.QueryEvents`:
-            https://pubs.vmware.com/vi3/sdk/ReferenceGuide/vim.event.EventManager.html
-        Docs on `vim.event.Event`:
-            https://pubs.vmware.com/vi3/sdk/ReferenceGuide/vim.event.Event.html
-        """
-        #
         event_manager = self._conn.content.eventManager
         query_filter = vim.event.EventFilterSpec()
         time_filter = vim.event.EventFilterSpec.ByTime(beginTime=start_time)
