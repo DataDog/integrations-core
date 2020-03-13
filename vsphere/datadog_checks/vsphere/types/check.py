@@ -1,13 +1,14 @@
-from typing import Any, Dict, List, Pattern, Tuple, TypedDict
+from typing import Any, Dict, List, Optional, Pattern, Tuple, TypedDict
 
 from datadog_checks.vsphere.types.vim import ManagedEntity, MetricId
 
 MetricName = str
 CounterId = int
 
-# parent is a MOR resource
 InfrastructureDataItem = TypedDict(
-    'InfrastructureDataItem', {'name': str, 'runtime.host': str, 'guest.hostName': str, 'parent': Any}, total=False
+    'InfrastructureDataItem',
+    {'name': str, 'runtime.host': str, 'guest.hostName': str, 'parent': Optional[ManagedEntity]},
+    total=False,
 )
 InfrastructureData = Dict[ManagedEntity, InfrastructureDataItem]
 
