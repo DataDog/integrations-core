@@ -2,17 +2,17 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, List, Type
 
-from pyVmomi.vim.event import EventManager
-from pyVmomi.vim.option import OptionManager
-from pyVmomi.vim.view import ViewManager
-from pyVmomi.vmodl import ManagedObjectReference
-from pyVmomi.vmodl.query import PropertyCollector
-
+from ..vmodl.query import PropertyCollector
 from . import event as event
 from . import fault as fault
 from . import view as view
+from .event import EventManager
+from .option import OptionManager
+from .view import ViewManager
 
-class ManagedEntity:
+class ManagedObject: ...
+
+class ManagedEntity(ManagedObject):
     """
     vim.ManagedEntity
     https://www.vmware.com/support/developer/vc-sdk/visdk25pubs/ReferenceGuide/vim.ManagedEntity.html

@@ -414,13 +414,13 @@ class VSphereCheck(AgentCheck):
             else:
                 max_batch_size = min(self.config.metrics_per_query, self.config.max_historical_metrics)
 
-        batch = cast(MorBatch, defaultdict(list))
+        batch = defaultdict(list)  # type: MorBatch
         batch_size = 0
         for m in mors_filtered:
             for metric_id in metric_ids:
                 if batch_size == max_batch_size:
                     yield batch
-                    batch = cast(MorBatch, defaultdict(list))
+                    batch = defaultdict(list)
                     batch_size = 0
                 batch[m].append(metric_id)
                 batch_size += 1

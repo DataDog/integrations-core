@@ -1,8 +1,8 @@
-from typing import Any, List, Type
+from typing import Any, List, Optional, Type
 
 from pyVmomi.vim import ManagedEntity
 from pyVmomi.vim.view import ContainerView
-from pyVmomi.vmodl import DynamicProperty, ManagedObjectReference
+from pyVmomi.vmodl import DynamicProperty
 
 class PropertyCollector:
     class PropertySpec:
@@ -25,9 +25,9 @@ class PropertyCollector:
         self, specSet: List[PropertyCollector.FilterSpec], options: PropertyCollector.RetrieveOptions
     ) -> PropertyCollector.RetrieveResult: ...
     class ObjectContent:
-        obj: ManagedObjectReference
+        obj: ManagedEntity
         propSet: List[DynamicProperty]
     class RetrieveResult:
         objects: List[PropertyCollector.ObjectContent]
-        token: str
+        token: Optional[str]
     def ContinueRetrievePropertiesEx(self, token: str) -> PropertyCollector.RetrieveResult: ...
