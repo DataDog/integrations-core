@@ -7,8 +7,8 @@ from typing import Any, Dict, Generator, Iterator, List
 
 from six import iterkeys
 
-from datadog_checks.vsphere.types.check import MetricName, ResourceTags
-from datadog_checks.vsphere.types.vim import CounterId, ManagedEntity, ManagedEntityType
+from datadog_checks.vsphere.types.check import MetricName, ResourceTags, CounterId
+from vim import ManagedEntity, ManagedEntityType
 
 
 class VSphereCache(object):

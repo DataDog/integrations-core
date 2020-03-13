@@ -10,13 +10,14 @@ from pyVim import connect
 from pyVmomi import vim, vmodl
 
 from datadog_checks.base.log import CheckLoggingAdapter
-from datadog_checks.base.types import Event
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES, MAX_QUERY_METRICS_OPTION, UNLIMITED_HIST_METRICS_PER_QUERY
 from datadog_checks.vsphere.types.check import InfrastructureData
-from datadog_checks.vsphere.types.vim import CounterInfo, EntityMetricBase, QuerySpec, ServiceInstance
 
 # Python 3 only
+from vim import EntityMetricBase, ServiceInstance, QuerySpec, PerformanceManager
+from vim.event import Event
+
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)  # type: ignore
 
 
@@ -121,7 +122,7 @@ class VSphereAPI(object):
 
     @smart_retry
     def get_perf_counter_by_level(self, collection_level):
-        # type: (int) -> List[CounterInfo]
+        # type: (int) -> List[PerformanceManager.CounterInfo]
         """
         Requests and returns the list of counter available for a given collection_level.
 

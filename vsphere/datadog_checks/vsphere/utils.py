@@ -16,7 +16,7 @@ from datadog_checks.vsphere.types.check import (
     MetricName,
     ResourceFilters,
 )
-from datadog_checks.vsphere.types.vim import CounterInfo, ManagedEntity, ManagedEntityType
+from vim import ManagedEntityType, ManagedEntity, PerformanceManager
 
 METRIC_TO_INSTANCE_TAG_MAPPING = {
     # Structure:
@@ -41,7 +41,7 @@ METRIC_TO_INSTANCE_TAG_MAPPING = {
 
 
 def format_metric_name(counter):
-    # type: (CounterInfo) -> MetricName
+    # type: (PerformanceManager.CounterInfo) -> MetricName
     return "{}.{}.{}".format(
         to_native_string(counter.groupInfo.key),
         to_native_string(counter.nameInfo.key),

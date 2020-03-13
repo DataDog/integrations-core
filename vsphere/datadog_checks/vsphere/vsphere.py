@@ -28,15 +28,7 @@ from datadog_checks.vsphere.constants import (
 )
 from datadog_checks.vsphere.legacy.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
-from datadog_checks.vsphere.types.check import InstanceConfig, MetricName, MorBatch
-from datadog_checks.vsphere.types.vim import (
-    CounterId,
-    EntityMetricBase,
-    ManagedEntity,
-    ManagedEntityType,
-    MetricId,
-    QuerySpec,
-)
+from datadog_checks.vsphere.types.check import InstanceConfig, MetricName, MorBatch, CounterId
 from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,
     format_metric_name,
@@ -46,6 +38,7 @@ from datadog_checks.vsphere.utils import (
     is_resource_excluded_by_filters,
     should_collect_per_instance_values,
 )
+from vim import EntityMetricBase, QuerySpec, ManagedEntityType, ManagedEntity, PerformanceManager
 
 SERVICE_CHECK_NAME = 'can_connect'
 
@@ -326,7 +319,7 @@ class VSphereCheck(AgentCheck):
         for resource_type in self.config.collected_resource_types:
             mors = self.infrastructure_cache.get_mors(resource_type)
             counters = self.metrics_metadata_cache.get_metadata(resource_type)
-            metric_ids = []  # type: List[MetricId]
+            metric_ids = []  # type: List[PerformanceManager.MetricId]
             for counter_key, metric_name in iteritems(counters):
                 # PerformanceManager.MetricId `instance` kwarg:
                 # - An asterisk (*) to specify all instances of the metric for the specified counterId
@@ -392,7 +385,7 @@ class VSphereCheck(AgentCheck):
                     )
 
     def make_batch(self, mors, metric_ids, resource_type):
-        # type: (Iterable[ManagedEntity], List[MetricId], ManagedEntityType) -> Generator[MorBatch, None, None]
+        # type: (Iterable[ManagedEntity], List[PerformanceManager.MetricId], ManagedEntityType) -> Generator[MorBatch, None, None]
         """Iterates over mor and generate batches with a fixed number of metrics to query.
         Querying multiple resource types in the same call is error prone if we query a cluster metric. Indeed,
         cluster metrics result in an unpredicatable number of internal metric queries which all count towards

@@ -1,8 +1,8 @@
 from typing import Dict, List, Optional, Pattern, Tuple, TypedDict
 
-from datadog_checks.vsphere.types.vim import ManagedEntity, ManagedEntityType, MetricId
-
 # CONFIG ALIASES
+from vim import ManagedEntity, ManagedEntityType, PerformanceManager
+
 ResourceFilterConfig = TypedDict('ResourceFilterConfig', {'resource': str, 'property': str, 'patterns': List[str]})
 MetricFilterConfig = Dict[str, List[str]]
 
@@ -52,7 +52,7 @@ InfrastructureDataItem = TypedDict(
 )
 InfrastructureData = Dict[ManagedEntity, InfrastructureDataItem]
 
-MorBatch = Dict[ManagedEntity, List[MetricId]]
+MorBatch = Dict[ManagedEntity, List[PerformanceManager.MetricId]]
 
 ResourceTags = Dict[ManagedEntityType, Dict[str, List[str]]]
 
@@ -60,3 +60,4 @@ TagAssociation = TypedDict('TagAssociation', {'tag_id': str, 'object_ids': List[
 
 ResourceFilters = Dict[Tuple[str, str], List[Pattern]]
 MetricFilters = Dict[str, List[Pattern]]
+CounterId = int
