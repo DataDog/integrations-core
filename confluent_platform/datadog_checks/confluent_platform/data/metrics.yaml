@@ -44,6 +44,7 @@ jmx_metrics:
       domain: kafka.server
       bean_regex:
         # Lag in number of messages per follower replica. This is useful to know if the replica is slow or has stopped replicating from the leader.
+        # Pattern: kafka.server:type=FetcherLagMetrics,name=ConsumerLag,clientId=([-.\w]+),topic=([-.\w]+),partition=([0-9]+)
         - kafka\.server:type=FetcherLagMetrics,name=ConsumerLag,.*
       attribute:
         Value:
@@ -82,6 +83,7 @@ jmx_metrics:
         # Produce request rate.
         - kafka.server:type=BrokerTopicMetrics,name=TotalProduceRequestsPerSec
       attribute:
+        # Count metric is monotonically increasing.
         Count:
           alias: $domain.topic.$name.rate
           metric_type: rate

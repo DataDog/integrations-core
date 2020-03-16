@@ -1,6 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 kafka.network.request_channel.request_queue_size,gauge,,,,Size of the request queue. A congested request queue will not be able to process incoming or outgoing requests,0,confluent_platform,net req channel req queue size
-kafka.network.socket_server.network_processor_avg_idle_percent,gauge,,fraction,,Average fraction of time the network processor threads are idle. Values are between 0 (all resources are used) and 1 (all resources are available),0,confluent_platform,net sock net proc avg idle percent
+kafka.network.socket_server.network_processor_avg_idle_percent,gauge,,fraction,,Average fraction of time the network processor threads are idle,0,confluent_platform,net sock net proc avg idle percent
 kafka.server.delayed_operation_purgatory.purgatory_size,gauge,,request,,Number of requests waiting in the fetch purgatory. This is high if consumers use a large value for fetch.wait.max.ms.,0,confluent_platform,delayed operation purgatory size
 kafka.server.replica_fetcher_manager.max_lag,gauge,,message,,Maximum lag in messages between the follower and leader replicas. This is controlled by the `replica.lag.max.messages` config.,0,confluent_platform,replica fetcher max lag
 kafka.server.replica_manager.leader_count,gauge,,,,"Number of leaders on this broker. This should be mostly even across all brokers. If not, set auto.leader.rebalance.enable to true on all brokers in the cluster.",0,confluent_platform,replica leader
