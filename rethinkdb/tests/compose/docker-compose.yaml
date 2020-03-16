@@ -4,7 +4,9 @@ services:
   # 3-node RethinkDB cluster with 1 proxy node.
 
   rethinkdb-server0:
-    tty: true  # Required otherwise RethinkDB won't output any logs.
+    # NOTE: `tty` is required for RethinkDB 2.4.0, otherwise `docker logs` won't see logs.
+    # This due to an issue with I/O buffering on this version, see: https://github.com/rethinkdb/rethinkdb/issues/6819
+    tty: true
     image: ${RETHINKDB_IMAGE}
     container_name: rethinkdb-server0
     command: rethinkdb --bind all --server-name server0 --server-tag us
