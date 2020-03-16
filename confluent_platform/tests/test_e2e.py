@@ -22,6 +22,7 @@ from .metrics import ALWAYS_PRESENT_METRICS, NOT_ALWAYS_PRESENT_METRICS
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
+    # type: (Any) -> None
     aggregator = dd_agent_check(CHECK_CONFIG, rate=True)  # type: AggregatorStub
 
     # Skip default `jvm.*` metrics by marking them as asserted
