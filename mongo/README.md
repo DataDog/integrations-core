@@ -119,7 +119,7 @@ _Available for Agent versions >6.0_
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
 
 ##### Metric collection
 
@@ -127,7 +127,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `mongo`                                                                                                                                                                         |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                                                                                                   |
-| `<INSTANCE_CONFIG>`  | `{"server": "mongodb://datadog:<UNIQUEPASSWORD>@%%host%%:%%port%%/<DB_NAME>", "replica_check": true, "additional_metrics": ["metrics.commands","tcmalloc","top","collection"]}` |
+| `<INSTANCE_CONFIG>`  | `{"server": "mongodb://datadog:<UNIQUEPASSWORD>@%%host%%:%%port%%/<DB_NAME>", "replica_check": true, "additional_metrics": "metrics.commands","tcmalloc","top","collection"]}` |
 
 ##### Trace collection
 
@@ -150,7 +150,7 @@ Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the 
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][7].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][9].
 
 | Parameter      | Value                                       |
 | -------------- | ------------------------------------------- |
@@ -158,15 +158,15 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's status subcommand][8] and look for `mongo` under the Checks section.
+[Run the Agent's status subcommand][10] and look for `mongo` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][9] for a list of metrics provided by this check.
+See [metadata.csv][11] for a list of metrics provided by this check.
 
-See the [MongoDB 3.0 Manual][10] for more detailed descriptions of some of these metrics.
+See the [MongoDB 3.0 Manual][12] for more detailed descriptions of some of these metrics.
 
 **NOTE**: The following metrics are NOT collected by default, use the `additional_metrics` parameter in your `mongo.d/conf.yaml` file to collect them:
 
@@ -198,14 +198,14 @@ Returns `CRITICAL` if the Agent cannot connect to MongoDB to collect metrics, ot
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][13].
 
 ## Further Reading
 
 Read our series of blog posts about collecting metrics from MongoDB with Datadog:
 
-- [Monitoring MongoDB performance metrics (WiredTiger)][12]
-- [Monitoring MongoDB performance metrics (MMAP)][13]
+- [Monitoring MongoDB performance metrics (WiredTiger)][14]
+- [Monitoring MongoDB performance metrics (MMAP)][15]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mongo/images/mongo_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
