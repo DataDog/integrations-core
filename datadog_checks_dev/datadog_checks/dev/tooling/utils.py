@@ -9,7 +9,7 @@ from ast import literal_eval
 import requests
 import semver
 
-from ..utils import dir_exists, file_exists, read_file, write_file
+from ..utils import dir_exists, file_exists, read_file, read_file_lines, write_file
 from .config import load_config
 from .constants import NOT_CHECKS, REPO_CHOICES, REPO_OPTIONS_MAP, VERSION_BUMP, get_root, set_root
 from .git import get_latest_tag
@@ -174,6 +174,12 @@ def get_data_directory(check_name):
 
 def get_test_directory(check_name):
     return os.path.join(get_root(), check_name, 'tests')
+
+
+def get_codeowners():
+    codeowners_file = os.path.join(get_root(), '.github', 'CODEOWNERS')
+    contents = read_file_lines(codeowners_file)
+    return contents
 
 
 def get_config_files(check_name):
