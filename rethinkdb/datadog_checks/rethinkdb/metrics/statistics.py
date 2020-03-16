@@ -63,7 +63,8 @@ def collect_server_statistics(engine, conn):
         server_tags = server['tags']
         query_engine = stats['query_engine']
 
-        tags = ['server:{}'.format(name)] + server_tags
+        tags = ['server:{}'.format(name)]
+        tags.extend(server_tags)
 
         yield {
             'type': 'gauge',
@@ -180,7 +181,8 @@ def collect_replica_statistics(engine, conn):
             'database:{}'.format(database),
             'server:{}'.format(server_name),
             'state:{}'.format(state),
-        ] + server_tags
+        ]
+        tags.extend(server_tags)
 
         yield {
             'type': 'gauge',

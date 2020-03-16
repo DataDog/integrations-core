@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from __future__ import absolute_import
-
 from typing import Callable, Iterator, List
 
 import rethinkdb
@@ -67,14 +65,14 @@ class DefaultBackend(Backend):
 
     def connect(self, config):
         # type: (Config) -> Connection
-        host = config.host
-        port = config.port
-        user = config.user
-        password = config.password
-        ssl = {'ca_certs': config.tls_ca_cert} if config.tls_ca_cert is not None else None
-
         try:
-            conn = self._r.connect(host=host, port=port, user=user, password=password, ssl=ssl)
+            conn = self._r.connect(
+                host=config.host,
+                port=config.port,
+                user=config.user,
+                password=config.password,
+                ssl={'ca_certs': config.tls_ca_cert} if config.tls_ca_cert is not None else None,
+            )
         except rethinkdb.errors.ReqlDriverError as exc:
             raise CouldNotConnect(exc)
 

@@ -4,8 +4,6 @@
 """
 RethinkDB connection interface and implementations.
 """
-from __future__ import absolute_import
-
 from typing import Any, TypedDict
 
 import rethinkdb

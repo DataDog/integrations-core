@@ -1,10 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-# Required for `import rethinkdb` to correctly import the client package (instead of this package) on Python 2.
-from __future__ import absolute_import
-
 from contextlib import contextmanager
 from typing import Any, Callable, Iterator, List, cast
 

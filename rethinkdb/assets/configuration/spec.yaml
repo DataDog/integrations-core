@@ -10,8 +10,6 @@ files:
 
       - template: instances
         options:
-          - template: instances/default
-
           - name: host
             required: false
             description: Host of the RethinkDB server.
@@ -45,3 +43,5 @@ files:
               See also: https://rethinkdb.com/docs/security/#using-tls
             value:
               type: string
+
+          - template: instances/default

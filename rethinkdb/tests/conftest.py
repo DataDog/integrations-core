@@ -36,9 +36,8 @@ def instance():
 @pytest.fixture(scope='session')
 def dd_environment(instance):
     # type: (Instance) -> Iterator
-    log_patterns = [r'Server ready, "{}".*'.format(BOOTSTRAP_SERVER)]
-    log_patterns += [r'Connected to server "{}".*'.format(server) for server in SERVERS - {BOOTSTRAP_SERVER}]
-    log_patterns += [r'Connected to proxy.*']
+    log_patterns = [r'Server ready, "{}".*'.format(BOOTSTRAP_SERVER), r'Connected to proxy.*']
+    log_patterns.extend(r'Connected to server "{}".*'.format(server) for server in SERVERS - {BOOTSTRAP_SERVER})
     wait_servers_ready = CheckDockerLogs(COMPOSE_FILE, patterns=log_patterns, matches='all')
 
     conditions = [wait_servers_ready, setup_cluster]

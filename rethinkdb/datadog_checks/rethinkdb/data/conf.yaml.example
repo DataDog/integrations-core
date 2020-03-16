@@ -14,6 +14,32 @@ init_config:
 instances:
 
   -
+    ## @param host - string - optional - default: localhost
+    ## Host of the RethinkDB server.
+    #
+    # host: localhost
+
+    ## @param port - integer - optional - default: 28015
+    ## Driver port of the RethinkDB server.
+    #
+    # port: 28015
+
+    ## @param username - string - optional
+    ## The user account to connect as.
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## The password for the user account to connect as.
+    #
+    # password: <PASSWORD>
+
+    ## @param tls_ca_cert - string - optional
+    ## Path to a TLS client certificate to use when connecting to the RethinkDB server.
+    ## See also: https://rethinkdb.com/docs/security/#using-tls
+    #
+    # tls_ca_cert: <TLS_CA_CERT>
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -42,29 +68,3 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
-
-    ## @param host - string - optional - default: localhost
-    ## Host of the RethinkDB server.
-    #
-    # host: localhost
-
-    ## @param port - integer - optional - default: 28015
-    ## Driver port of the RethinkDB server.
-    #
-    # port: 28015
-
-    ## @param username - string - optional
-    ## The user account to connect as.
-    #
-    # username: <USERNAME>
-
-    ## @param password - string - optional
-    ## The password for the user account to connect as.
-    #
-    # password: <PASSWORD>
-
-    ## @param tls_ca_cert - string - optional
-    ## Path to a TLS client certificate to use when connecting to the RethinkDB server.
-    ## See also: https://rethinkdb.com/docs/security/#using-tls
-    #
-    # tls_ca_cert: <TLS_CA_CERT>

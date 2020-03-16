@@ -7,12 +7,11 @@ from typing import Callable, Dict, List, Set, Tuple, Union
 import pytest
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.dev import get_docker_hostname, get_here
 
 from .types import ServerName
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(os.path.dirname(HERE))
+HERE = get_here()
 
 CHECK_NAME = 'rethinkdb'
 
