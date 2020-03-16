@@ -32,7 +32,7 @@ def get_all_checks_with_codeowners():
     short_help='Validate `CODEOWNERS` file has an entry for each integration',
 )
 def codeowners():
-    """Validate all `CODEOWNERS` file."""
+    """Validate that every integration has an entry in the `CODEOWNERS` file."""
     all_checks_with_codeowners = get_all_checks_with_codeowners()
     all_checks = get_valid_integrations()
     has_failed = False
