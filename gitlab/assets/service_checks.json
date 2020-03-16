@@ -1,1 +1,62 @@
-[]
+[
+	{
+        "agent_version": "7.18.0",
+        "integration": "Gitlab",
+        "check": "gitlab.prometheus_endpoint_up",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Gitlab prometheus endpoint up",
+        "description": "Returns `CRITICAL` if the check cannot access the Prometheus metrics endpoint of the Gitlab instance."
+	},
+    {
+        "agent_version": "7.18.0",
+        "integration": "Gitlab",
+        "check": "gitlab.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Gitlab health",
+        "description": "Returns `CRITICAL` if the check cannot access the Gitlab instance."
+	},
+	{
+        "agent_version": "7.18.0",
+        "integration": "Gitlab",
+        "check": "gitlab.liveness",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Gitlab liveness",
+        "description": "Returns `CRITICAL` if the check cannot access the Gitlab instance due to deadlock with Rails Controllers."
+	},
+	{
+        "agent_version": "7.18.0",
+        "integration": "Gitlab",
+        "check": "gitlab.readiness",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Gitlab readiness",
+        "description": "Returns `CRITICAL` if the Gitlab instance is able to accept traffic via Rails Controllers."
+    }
+]

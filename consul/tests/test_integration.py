@@ -17,6 +17,7 @@ METRICS = [
     'consul.catalog.services_passing',
     'consul.catalog.services_warning',
     'consul.catalog.services_critical',
+    'consul.catalog.services_count',
     'consul.catalog.total_nodes',
     # Enable again when it's figured out why only followers submit these
     # 'consul.net.node.latency.p95',
@@ -70,7 +71,7 @@ def test_acl_forbidden(instance_bad_token, dd_environment):
 
     got_error_403 = False
     try:
-        consul_check.check(instance_bad_token)
+        consul_check.check(None)
     except HTTPError as e:
         if e.response.status_code == 403:
             got_error_403 = True

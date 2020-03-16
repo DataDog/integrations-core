@@ -7,7 +7,7 @@ import re
 
 from six import iteritems
 
-from ..common import to_string
+from ..common import to_native_string
 from .constants import DEFAULT_BLACKLIST
 from .utils import is_primitive
 from .version import parse_version
@@ -33,7 +33,7 @@ class MetadataManager(object):
             self.metadata_transformers.update(metadata_transformers)
 
     def submit_raw(self, name, value):
-        datadog_agent.set_check_metadata(self.check_id, to_string(name), to_string(value))
+        datadog_agent.set_check_metadata(self.check_id, to_native_string(name), to_native_string(value))
 
     def submit(self, name, value, options):
         transformer = self.metadata_transformers.get(name)

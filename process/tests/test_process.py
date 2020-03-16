@@ -29,6 +29,12 @@ except Exception:
     _PSUTIL_MEM_SHARED = False
 
 
+@pytest.fixture(autouse=True)
+def reset_process_list_cache():
+    # Force process list cache flush in the next test
+    ProcessCheck.process_list_cache.last_ts = -ProcessCheck.process_list_cache.cache_duration - 1
+
+
 class MockProcess(object):
     def __init__(self):
         self.pid = None
@@ -37,6 +43,18 @@ class MockProcess(object):
         return True
 
     def children(self, recursive=False):
+        return []
+
+
+class NamedMockProcess(object):
+    def __init__(self, name):
+        self.pid = None
+        self._name = name
+
+    def name(self):
+        return self._name
+
+    def cmdline(self):
         return []
 
 
@@ -77,6 +95,23 @@ def test_psutil_wrapper_accessors_fail(aggregator):
     meminfo = process.psutil_wrapper(get_psutil_proc(), 'memory_infoo', ['rss', 'vms'], False)
     assert 'rss' not in meminfo
     assert 'vms' not in meminfo
+
+
+@patch('psutil.process_iter', side_effect=[[NamedMockProcess("Process 1")], [NamedMockProcess("Process 2")]])
+def test_process_list_cache(aggregator):
+    config = {
+        'instances': [{'name': 'python', 'search_string': ['python']}, {'name': 'python', 'search_string': ['python']}]
+    }
+    process1 = ProcessCheck(common.CHECK_NAME, {}, {}, [config['instances'][0]])
+    process2 = ProcessCheck(common.CHECK_NAME, {}, {}, [config['instances'][1]])
+
+    process1.check(config['instances'][0])
+    process2.check(config['instances'][1])
+
+    # Should always succeed
+    assert process1.process_list_cache.elements[0].name() == "Process 1"
+    # Fails with 'assert "Process 2" == "Process 1"' if process list cache is not shared
+    assert process2.process_list_cache.elements[0].name() == "Process 1"
 
 
 def test_ad_cache(aggregator):
@@ -132,7 +167,7 @@ def generate_expected_tags(instance):
 
 
 @patch('psutil.Process', return_value=MockProcess())
-def test_check(mock_process, aggregator):
+def test_check(mock_process, reset_process_list_cache, aggregator):
     (minflt, cminflt, majflt, cmajflt) = [1, 2, 3, 4]
 
     def mock_get_pagefault_stats(pid):
@@ -160,7 +195,7 @@ def test_check(mock_process, aggregator):
 
 
 @patch('psutil.Process', return_value=MockProcess())
-def test_check_collect_children(mock_process, aggregator):
+def test_check_collect_children(mock_process, reset_process_list_cache, aggregator):
     instance = {'name': 'foo', 'pid': 1, 'collect_children': True}
     process = ProcessCheck(common.CHECK_NAME, {}, {})
     process.check(instance)
@@ -168,7 +203,7 @@ def test_check_collect_children(mock_process, aggregator):
 
 
 @patch('psutil.Process', return_value=MockProcess())
-def test_check_filter_user(mock_process, aggregator):
+def test_check_filter_user(mock_process, reset_process_list_cache, aggregator):
     instance = {'name': 'foo', 'pid': 1, 'user': 'Bob'}
     process = ProcessCheck(common.CHECK_NAME, {}, {})
     with patch('datadog_checks.process.ProcessCheck._filter_by_user', return_value={1, 2}):

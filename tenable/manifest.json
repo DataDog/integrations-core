@@ -14,7 +14,7 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-Tenable Integration",
+  "public_title": "Datadog-Tenable Nessus Integration",
   "categories": [
     "log collection"
   ],
@@ -22,6 +22,9 @@
   "is_public": true,
   "integration_id": "tenable",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {},
     "saved_views": {},
     "monitors": {},

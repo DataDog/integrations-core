@@ -40,7 +40,7 @@ def traced(fn):
         integration_tracing = is_affirmative(datadog_agent.get_config('integration_tracing'))
 
         if integration_tracing and trace_check:
-            with tracer.trace('integration.check', service='integrations-tracing', resource=self.name):
+            with tracer.trace(self.name, service='integrations-tracing', resource=fn.__name__):
                 return fn(self, *args, **kwargs)
         return fn(self, *args, **kwargs)
 

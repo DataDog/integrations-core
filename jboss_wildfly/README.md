@@ -8,7 +8,7 @@ This check monitors [JBoss][1] and [WildFly][2] applications.
 
 ### Installation
 
-The JBoss/WildFly check is included in the [Datadog Agent][3] package. No additional installation is needed on your server.
+The JBoss/WildFly check is included in the [Datadog Agent][3] package. Depending on your server setup (particularly when using the `remote+http` JMX scheme), you may need to specify a custom JAR to connect to the server. Place the JAR on the same machine as your Agent, and add the path to the `custom_jar_paths` option.
 
 ### Configuration
 
@@ -78,7 +78,8 @@ The JBoss/WildFly integration does not include any events.
 
 ### Service Checks
 
-The JBoss/WildFly integration does not include any service checks.
+**jboss.can_connect**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored JBoss/WildFly instance, otherwise returns `OK`.
 
 ## Troubleshooting
 

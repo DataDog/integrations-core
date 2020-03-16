@@ -11,12 +11,12 @@ protobuf==3.7.0
 pysocks==1.7.0
 pytz==2019.3
 pywin32==227; sys_platform == 'win32'
-pyyaml==5.1
+pyyaml==5.3
 requests==2.22.0
 requests-kerberos==0.12.0
 requests_ntlm==1.1.0
 simplejson==3.6.5
-six==1.12.0
+six==1.14.0
 typing==3.7.4.1; python_version < '3.0'
 uptime==3.0.1
 win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'

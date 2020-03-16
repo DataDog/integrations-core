@@ -1,5 +1,9 @@
 # CHANGELOG - kubernetes_state
 
+## 5.2.1 / 2020-02-27
+
+* [Fixed] Fix type error. See [#5904](https://github.com/DataDog/integrations-core/pull/5904).
+
 ## 5.2.0 / 2020-02-22
 
 * [Added] Add an option to enable KSM experimental metrics and add some new metrics from KSM 1.9. See [#5447](https://github.com/DataDog/integrations-core/pull/5447).

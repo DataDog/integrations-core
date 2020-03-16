@@ -6,6 +6,7 @@ import copy
 import logging
 import os
 
+from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.snmp import SnmpCheck
 from datadog_checks.utils.common import get_docker_hostname
@@ -59,7 +60,12 @@ CAST_METRICS = [
 
 CONSTRAINED_OID = [{"MIB": "RFC1213-MIB", "symbol": "tcpRtoAlgorithm"}]
 
-DUMMY_MIB_OID = [{"MIB": "DUMMY-MIB", "symbol": "scalar"}]
+DUMMY_MIB_OID = [
+    ({"MIB": "DUMMY-MIB", "symbol": "scalar"}, AggregatorStub.GAUGE, 10),  # Integer
+    # Additional types we support but that are not part of the original SNMP protocol.
+    ({"MIB": "DUMMY-MIB", "symbol": "dummyCounterGauge"}, AggregatorStub.GAUGE, 90),  # CounterBasedGauge64
+    ({"MIB": "DUMMY-MIB", "symbol": "dummyZeroCounter"}, AggregatorStub.RATE, 120),  # ZeroBasedCounter64
+]
 
 FORCED_METRICS = [
     {'OID': "1.3.6.1.2.1.4.24.6.0", 'name': "IAmAGauge32", 'forced_type': 'counter'},  # Gauge32

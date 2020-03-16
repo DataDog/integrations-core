@@ -120,6 +120,12 @@ init_config:
       definition_file: hp-ilo4.yaml
     hpe-proliant:
       definition_file: hpe-proliant.yaml
+    palo-alto:
+      definition_file: palo-alto.yaml
+    cisco-asa-5525:
+      definition_file: cisco-asa-5525.yaml
+    checkpoint-firewall:
+      definition_file: checkpoint-firewall.yaml
 
 instances:
   -
@@ -176,6 +182,11 @@ instances:
     ## Number of times a discovered host can fail before we remove it from the discovered list.
     #
     # discovery_allowed_failures: 3
+
+    ## @param workers - integer - optional - default: 5
+    ## Number of workers used for check when using discovery.
+    #
+    # workers: 5
 
     ## @param enforce_mib_constraints - boolean - optional - default: true
     ## If set to false we will not check the values returned meet the MIB constraints.

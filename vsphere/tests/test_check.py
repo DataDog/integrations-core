@@ -8,7 +8,7 @@ import mock
 import pytest
 from mock import MagicMock
 
-from datadog_checks.base import to_string
+from datadog_checks.base import to_native_string
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.api import APIConnectionError
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
@@ -73,7 +73,9 @@ def test_external_host_tags(aggregator, realtime_instance):
     for ex, sub in zip(expected_tags, submitted_tags):
         ex_host, sub_host = ex[0], sub[0]
         ex_tags, sub_tags = ex[1]['vsphere'], sub[1]['vsphere']
-        ex_tags = [to_string(t) for t in ex_tags]  # json library loads data in unicode, let's convert back to native
+        ex_tags = [
+            to_native_string(t) for t in ex_tags
+        ]  # json library loads data in unicode, let's convert back to native
         assert ex_host == sub_host
         assert ex_tags == sub_tags
 
@@ -85,7 +87,7 @@ def test_external_host_tags(aggregator, realtime_instance):
     for ex, sub in zip(expected_tags, submitted_tags):
         ex_host, sub_host = ex[0], sub[0]
         ex_tags, sub_tags = ex[1]['vsphere'], sub[1]['vsphere']
-        ex_tags = [to_string(t) for t in ex_tags if 'vsphere_host:' not in t]
+        ex_tags = [to_native_string(t) for t in ex_tags if 'vsphere_host:' not in t]
         assert ex_host == sub_host
         assert ex_tags == sub_tags
 
@@ -133,6 +135,63 @@ def test_collect_metric_instance_values(aggregator, dd_run_check, realtime_insta
         aggregator.assert_metric(
             'vsphere.disk.read.avg', tags=['vcenter_server:FAKE'] + [instance_tag], hostname='VM4-1', count=1
         )
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api')
+def test_collect_metric_instance_values_historical(aggregator, dd_run_check, historical_instance):
+
+    historical_instance.update(
+        {
+            'collect_per_instance_filters': {
+                'datastore': [r'disk\..*'],
+                # datacenter metric group doesn't have any instance tags so this has no effect
+                'datacenter': [r'cpu\.usagemhz\.avg'],
+                'cluster': [r'cpu\.usagemhz\.avg'],
+            }
+        }
+    )
+
+    check = VSphereCheck('vsphere', {}, [historical_instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'vsphere.cpu.usagemhz.avg',
+        tags=[
+            'cpu_core:16',
+            'vcenter_server:FAKE',
+            'vsphere_cluster:Cluster2',
+            'vsphere_datacenter:Datacenter2',
+            'vsphere_folder:Datacenters',
+            'vsphere_folder:host',
+            'vsphere_type:cluster',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'vsphere.disk.used.latest',
+        tags=[
+            'device_path:value-aa',
+            'vcenter_server:FAKE',
+            'vsphere_datacenter:Datacenter2',
+            'vsphere_datastore:NFS Share',
+            'vsphere_folder:Datacenters',
+            'vsphere_folder:datastore',
+            'vsphere_type:datastore',
+        ],
+    )
+
+    # Following metrics should NOT match and do NOT have instance value tag
+    aggregator.assert_metric(
+        'vsphere.cpu.usage.avg',
+        tags=[
+            'vcenter_server:FAKE',
+            'vsphere_cluster:Cluster2',
+            'vsphere_datacenter:Datacenter2',
+            'vsphere_folder:Datacenters',
+            'vsphere_folder:host',
+            'vsphere_type:cluster',
+        ],
+    )
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')

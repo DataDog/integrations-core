@@ -8,7 +8,7 @@ import requests
 from six import iteritems, itervalues
 from six.moves.urllib.parse import urljoin, urlparse
 
-from datadog_checks.base import AgentCheck, to_string
+from datadog_checks.base import AgentCheck, to_native_string
 
 from .config import from_instance
 from .metrics import (
@@ -348,7 +348,7 @@ class ESCheck(AgentCheck):
         )
 
     def _create_event(self, status, tags=None):
-        hostname = to_string(self.hostname)
+        hostname = to_native_string(self.hostname)
         if status == "red":
             alert_type = "error"
             msg_title = "{} is {}".format(hostname, status)

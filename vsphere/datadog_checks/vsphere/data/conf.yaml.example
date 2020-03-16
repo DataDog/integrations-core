@@ -21,6 +21,15 @@ instances:
     #
     password: <PASSWORD>
 
+    ## @param tags - list of key:value element - optional
+    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ##
+    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
     ## @param collection_level - integer - optional - default: 1
     ## A number between 1 and 4 to specify how many metrics will be sent
     ## 1: Only basic metrics - 4: every metric available.
@@ -126,8 +135,9 @@ instances:
     #     - <CLUSTER_REGEX>            # Only possible with "collection_type: historical"
 
     ## @param collect_per_instance_filters - object - optional - default: none
-    ## For each resource type (vm, host, datastore, datacenter, cluster) to collect,
-    ## you can choose which metric you want to collect the instance value using a list of regex.
+    ## Some vsphere metrics can be tagged with instance values.
+    ## For each resource type (vm, host, datastore, cluster) to collect,
+    ## you can choose which metrics you want to collect the instance value as tags using a list of regex.
     ## See https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/metrics.py
     ## for the list of collected metrics (do not prefix them with `vsphere`)
     ## /!\ Use with parsimony, collecting per-instance metrics might be very expensive for big environments.
@@ -139,8 +149,6 @@ instances:
     #     - <HOST_REGEX>               # Only possible with "collection_type: realtime"
     #   datastore:
     #     - <DATASTORE_REGEX>          # Only possible with "collection_type: historical"
-    #   datacenter:
-    #     - <DATACENTER_REGEX>         # Only possible with "collection_type: historical"
     #   cluster:
     #     - <CLUSTER_REGEX>            # Only possible with "collection_type: historical"
 

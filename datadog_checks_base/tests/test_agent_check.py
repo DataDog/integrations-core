@@ -12,7 +12,7 @@ from six import PY3
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base import __version__ as base_package_version
-from datadog_checks.base import to_string
+from datadog_checks.base import to_native_string
 from datadog_checks.base.checks.base import datadog_agent
 
 
@@ -41,6 +41,21 @@ def test_check_version():
 
 def test_load_config():
     assert AgentCheck.load_config("raw_foo: bar") == {'raw_foo': 'bar'}
+
+
+@pytest.mark.parametrize(
+    'enable_metadata_collection, expected_is_metadata_collection_enabled',
+    [(None, False), ('true', True), ('false', False)],
+)
+def test_is_metadata_collection_enabled(enable_metadata_collection, expected_is_metadata_collection_enabled):
+    check = AgentCheck()
+    with mock.patch('datadog_checks.base.checks.base.datadog_agent.get_config') as get_config:
+        get_config.return_value = enable_metadata_collection
+
+        assert check.is_metadata_collection_enabled() is expected_is_metadata_collection_enabled
+        assert AgentCheck.is_metadata_collection_enabled() is expected_is_metadata_collection_enabled
+
+        get_config.assert_called_with('enable_metadata_collection')
 
 
 def test_log_critical_error():
@@ -391,7 +406,7 @@ class TestEvents:
             'timestamp': 1,
         }
         check.event(event)
-        aggregator.assert_event(to_string(msg_text), tags=['∆', 'Ω-bar'])
+        aggregator.assert_event(to_native_string(msg_text), tags=['∆', 'Ω-bar'])
 
     def test_namespace(self, aggregator):
         check = AgentCheck()
@@ -604,7 +619,7 @@ class TestLimits:
         assert len(check.get_warnings()) == 1
         assert len(aggregator.metrics("metric")) == 42
 
-    def test_metric_limit_instance_config_zero(self, aggregator):
+    def test_metric_limit_instance_config_zero_limited(self, aggregator):
         instances = [{"max_returned_metrics": 0}]
         check = LimitedCheck("test", {}, instances)
         assert len(check.get_warnings()) == 1
@@ -613,6 +628,16 @@ class TestLimits:
             check.gauge("metric", 0)
         assert len(check.get_warnings()) == 1  # get_warnings resets the array
         assert len(aggregator.metrics("metric")) == 10
+
+    def test_metric_limit_instance_config_zero_unlimited(self, aggregator):
+        instances = [{"max_returned_metrics": 0}]
+        check = AgentCheck("test", {}, instances)
+        assert len(check.get_warnings()) == 0
+
+        for _ in range(0, 42):
+            check.gauge("metric", 0)
+        assert len(check.get_warnings()) == 0  # get_warnings resets the array
+        assert len(aggregator.metrics("metric")) == 42
 
     def test_metric_limit_instance_config_string(self, aggregator):
         instances = [{"max_returned_metrics": "4"}]
