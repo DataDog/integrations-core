@@ -203,8 +203,8 @@ To get a better idea of how (or why) to integrate your Elasticsearch cluster wit
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/elastic/datadog_checks/elastic/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[7]: https://docs.datadoghq.com/agent/docker/log/
+[6]: https://docs.datadoghq.com/tracing/send_traces/
+[7]: https://docs.datadoghq.com/tracing/setup/
 [8]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [9]: https://docs.datadoghq.com/agent/docker/log/
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
