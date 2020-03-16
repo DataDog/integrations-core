@@ -124,7 +124,7 @@ class DirectoryCheck(AgentCheck):
                 # agent versions.
                 for file_entry in files:
                     filename = join(root, file_entry.name)
-                    if (fnmatch(filename, pattern) or fnmatch(relpath(filename, directory), pattern)):
+                    if fnmatch(filename, pattern) or fnmatch(relpath(filename, directory), pattern):
                         matched_files.append(file_entry)
             else:
                 matched_files = list(files)
