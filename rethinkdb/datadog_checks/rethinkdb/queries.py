@@ -219,19 +219,16 @@ class QueryEngine(object):
         r = self._r
 
         current_issues = r.db('rethinkdb').table('current_issues').pluck('type', 'critical')
-        critical_current_issues = current_issues.filter(r.row['critical'])
 
         # NOTE: Need to `.run()` these separately because ReQL does not support putting grouped data in raw
         # expressions yet. See: https://github.com/rethinkdb/rethinkdb/issues/2067
 
         issues_by_type = conn.run(current_issues.group('type').count())  # type: Mapping[str, int]
-        critical_issues_by_type = conn.run(critical_current_issues.group('type').count())  # type: Mapping[str, int]
+        critical_issues_by_type = conn.run(
+            current_issues.filter(r.row['critical']).group('type').count()
+        )  # type: Mapping[str, int]
 
-        totals = {
-            'issues': current_issues.count(),
-            'critical_issues': critical_current_issues.count(),
+        return {
             'issues_by_type': issues_by_type,
             'critical_issues_by_type': critical_issues_by_type,
-        }  # type: CurrentIssuesTotals  # Enforce keys to match.
-
-        return conn.run(r.expr(totals))
+        }

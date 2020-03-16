@@ -8,9 +8,8 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from .common import (
     CLUSTER_STATISTICS_METRICS,
     CONFIG_TOTALS_METRICS,
+    CURRENT_ISSUE_TYPES_SUBMITTED_IF_DISCONNECTED_SERVERS,
     CURRENT_ISSUES_METRICS,
-    CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS,
-    CURRENT_ISSUES_METRICS_SUBMITTED_IF_DISCONNECTED_SERVERS,
     DATABASE,
     HEROES_TABLE,
     HEROES_TABLE_PRIMARY_REPLICA,
@@ -110,11 +109,9 @@ def _assert_server_status_metrics(aggregator, disconnected_servers):
 def _assert_current_issues_metrics(aggregator, disconnected_servers):
     # type: (AggregatorStub, Set[ServerName]) -> None
     for metric, typ in CURRENT_ISSUES_METRICS:
-        if metric in CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS:
-            count = 1
-        elif disconnected_servers and metric in CURRENT_ISSUES_METRICS_SUBMITTED_IF_DISCONNECTED_SERVERS:
-            count = 1
+        if disconnected_servers:
+            for issue_type in CURRENT_ISSUE_TYPES_SUBMITTED_IF_DISCONNECTED_SERVERS:
+                tags = ['issue_type:{}'.format(issue_type)]
+                aggregator.assert_metric(metric, metric_type=typ, count=1, tags=tags)
         else:
-            count = 0
-
-        aggregator.assert_metric(metric, metric_type=typ, count=count, tags=[])
+            aggregator.assert_metric(metric, metric_type=typ, count=0)

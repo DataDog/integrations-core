@@ -176,13 +176,7 @@ Job = Union[IndexConstructionJob, BackfillJob]
 # System current issues.
 
 CurrentIssuesTotals = TypedDict(
-    'CurrentIssuesTotals',
-    {
-        'issues': int,
-        'critical_issues': int,
-        'issues_by_type': Mapping[str, int],
-        'critical_issues_by_type': Mapping[str, int],
-    },
+    'CurrentIssuesTotals', {'issues_by_type': Mapping[str, int], 'critical_issues_by_type': Mapping[str, int]},
 )
 
 

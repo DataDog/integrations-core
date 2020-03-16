@@ -83,6 +83,7 @@ HEROES_TABLE_DOCUMENTS = [
 HEROES_TABLE_INDEX_FIELD = 'appearances_count'
 
 # Metrics lists.
+# NOTE: jobs metrics are not listed here as they're hard to trigger, so they're covered by unit tests instead.
 
 CONFIG_TOTALS_METRICS = (
     (
@@ -161,56 +162,24 @@ SERVER_STATUS_METRICS = (
     ('rethinkdb.server_status.process.time_started', AggregatorStub.GAUGE),
 )  # type: Tuple[Tuple[str, int], ...]
 
-# NOTE: jobs metrics are not listed here as they are covered by unit tests instead of integration tests.
-
 CURRENT_ISSUES_METRICS = (
     ('rethinkdb.current_issues.total', AggregatorStub.GAUGE),
     ('rethinkdb.current_issues.critical.total', AggregatorStub.GAUGE),
-    ('rethinkdb.current_issues.log_write_error.total', AggregatorStub.GAUGE),
-    ('rethinkdb.current_issues.log_write_error.critical.total', AggregatorStub.GAUGE),
-    ('rethinkdb.current_issues.server_name_collision.total', AggregatorStub.GAUGE),
-    ('rethinkdb.current_issues.server_name_collision.critical.total', AggregatorStub.GAUGE),
-    ('rethinkdb.current_issues.db_name_collision.total', AggregatorStub.GAUGE),
-    ('rethinkdb.current_issues.db_name_collision.critical.total', AggregatorStub.GAUGE),
-    ('rethinkdb.current_issues.table_name_collision.total', AggregatorStub.GAUGE),
-    ('rethinkdb.current_issues.table_name_collision.critical.total', AggregatorStub.GAUGE),
-    ('rethinkdb.current_issues.outdated_index.total', AggregatorStub.GAUGE),
-    ('rethinkdb.current_issues.outdated_index.critical.total', AggregatorStub.GAUGE),
-    ('rethinkdb.current_issues.table_availability.total', AggregatorStub.GAUGE),
-    ('rethinkdb.current_issues.table_availability.critical.total', AggregatorStub.GAUGE),
-    ('rethinkdb.current_issues.memory_error.total', AggregatorStub.GAUGE),
-    ('rethinkdb.current_issues.memory_error.critical.total', AggregatorStub.GAUGE),
-    ('rethinkdb.current_issues.non_transitive_error.total', AggregatorStub.GAUGE),
-    ('rethinkdb.current_issues.non_transitive_error.critical.total', AggregatorStub.GAUGE),
 )  # type: Tuple[Tuple[str, int], ...]
 
-CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS = (
-    'rethinkdb.current_issues.total',
-    'rethinkdb.current_issues.critical.total',
-)
-
-CURRENT_ISSUES_METRICS_SUBMITTED_IF_DISCONNECTED_SERVERS = (
-    'rethinkdb.current_issues.table_availability.total',
-    'rethinkdb.current_issues.table_availability.critical.total',
-)
-
-assert set(name for name, typ in CURRENT_ISSUES_METRICS).issuperset(CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS)
-assert set(name for name, typ in CURRENT_ISSUES_METRICS).issuperset(
-    CURRENT_ISSUES_METRICS_SUBMITTED_IF_DISCONNECTED_SERVERS
-)
+CURRENT_ISSUE_TYPES_SUBMITTED_IF_DISCONNECTED_SERVERS = ['table_availability']
 
 
-E2E_METRICS = []  # type: List[Tuple[str, int]]
-E2E_METRICS += [(name, typ) for name, typ, _, _ in CONFIG_TOTALS_METRICS]
-E2E_METRICS += CLUSTER_STATISTICS_METRICS
-E2E_METRICS += SERVER_STATISTICS_METRICS
-E2E_METRICS += TABLE_STATISTICS_METRICS
-E2E_METRICS += REPLICA_STATISTICS_METRICS
-E2E_METRICS += TABLE_STATUS_METRICS
-E2E_METRICS += TABLE_STATUS_SHARDS_METRICS
-E2E_METRICS += SERVER_STATUS_METRICS
-E2E_METRICS += [(name, typ) for name, typ in CURRENT_ISSUES_METRICS if name in CURRENT_ISSUES_METRICS_SUBMITTED_ALWAYS]
-
+E2E_METRICS = (
+    tuple((name, typ) for name, typ, _, _ in CONFIG_TOTALS_METRICS)
+    + CLUSTER_STATISTICS_METRICS
+    + SERVER_STATISTICS_METRICS
+    + TABLE_STATISTICS_METRICS
+    + REPLICA_STATISTICS_METRICS
+    + TABLE_STATUS_METRICS
+    + TABLE_STATUS_SHARDS_METRICS
+    + SERVER_STATUS_METRICS
+)  # type: Tuple[Tuple[str, int], ...]
 
 # Docker Compose configuration.
 
