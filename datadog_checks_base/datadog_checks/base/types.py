@@ -17,7 +17,12 @@ ProxySettings = TypedDict(
 ServiceCheckStatus = Literal[0, 1, 2, 3]  # Can serve as an int enum type for type checking purposes.
 _ServiceCheckType = NamedTuple(
     '_ServiceCheckType',
-    [('OK', Literal[0]), ('WARNING', Literal[1]), ('CRITICAL', Literal[2]), ('UNKNOWN', Literal[3])],
+    [
+        ('OK', ServiceCheckStatus),
+        ('WARNING', ServiceCheckStatus),
+        ('CRITICAL', ServiceCheckStatus),
+        ('UNKNOWN', ServiceCheckStatus),
+    ],
 )
 ServiceCheck = _ServiceCheckType(0, 1, 2, 3)  # For public enum-style use: `ServiceCheck.OK`, ...
 
