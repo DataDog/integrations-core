@@ -23,7 +23,7 @@ jmx_metrics:
         - kafka.server:type=ReplicaManager,name=UnderReplicatedPartitions
       attribute:
         Value:
-          alias: $domain.$type.$name
+          alias: confluent.$domain.$type.$name
           metric_type: gauge
 
   # Kafka Broker Controller Metrics (Yammer Metric Gauge)
@@ -36,7 +36,7 @@ jmx_metrics:
         - kafka.controller:type=KafkaController,name=ActiveControllerCount
       attribute:
         Value:
-          alias: $domain.$name
+          alias: confluent.$domain.$name
           metric_type: gauge
 
   # Kafka Broker Server Metrics Regex (Yammer Metric Gauge)
@@ -48,7 +48,7 @@ jmx_metrics:
         - kafka\.server:type=FetcherLagMetrics,name=ConsumerLag,.*
       attribute:
         Value:
-          alias: $domain.fetcher_lag.$name
+          alias: confluent.$domain.fetcher_lag.$name
           metric_type: gauge
 
   # Kafka Broker Cluster Metrics Regex (Yammer Metric Gauge)
@@ -59,7 +59,7 @@ jmx_metrics:
         - kafka\.cluster:type=Partition,name=UnderMinIsr,.*
       attribute:
         Value:
-          alias: $domain.$type.$name
+          alias: confluent.$domain.$type.$name
           metric_type: gauge
 
   # Kafka Broker Topic Metrics (Yammer Metric Meter)
@@ -85,7 +85,7 @@ jmx_metrics:
       attribute:
         # Count metric is monotonically increasing.
         Count:
-          alias: $domain.topic.$name.rate
+          alias: confluent.$domain.topic.$name.rate
           metric_type: rate
 
   # Kafka Broker Topic Metrics Regex (Yammer Metric Meter)
@@ -98,7 +98,7 @@ jmx_metrics:
         - kafka.server:type=ReplicaManager,name=IsrShrinksPerSec
       attribute:
         Count:
-          alias: $domain.$type.$name.rate
+          alias: confluent.$domain.$type.$name.rate
           metric_type: rate
   - include:
       domain: kafka.server
@@ -107,7 +107,7 @@ jmx_metrics:
         - kafka.server:type=KafkaRequestHandlerPool,name=RequestHandlerAvgIdlePercent
       attribute:
         Count:
-          alias: $domain.request_handler_pool.avg_idle_percent.rate
+          alias: confluent.$domain.request_handler_pool.avg_idle_percent.rate
           metric_type: rate
 
   # Kafka Broker ZooKeeper Metrics (Yammer Metric Meter)
@@ -128,7 +128,7 @@ jmx_metrics:
         - kafka.server:type=SessionExpireListener,name=ZooKeeperSaslAuthenticationsPerSec
       attribute:
         Count:
-          alias: $domain.session.$name.rate
+          alias: confluent.$domain.session.$name.rate
           metric_type: rate
 
   # Kafka Broker Request Metrics (Yammer Metric Meter)
@@ -139,7 +139,7 @@ jmx_metrics:
         - kafka.network:type=RequestMetrics,name=RequestsPerSec,request=(Produce|FetchConsumer|FetchFollower).*
       attribute:
         Count:
-          alias: $domain.request.$name.rate
+          alias: confluent.$domain.request.$name.rate
           metric_type: rate
 
   # Kafka Broker Controller Metrics (Yammer Metric Timer/Meter)
@@ -152,10 +152,10 @@ jmx_metrics:
         - kafka.controller:type=ControllerStats,name=LeaderElectionRateAndTimeMs
       attribute:
         Count:  # Timer and Meter
-          alias: $domain.$name.rate
+          alias: confluent.$domain.$name.rate
           metric_type: rate
         Mean: # Timer
-          alias: $domain.$name.avg
+          alias: confluent.$domain.$name.avg
           metric_type: gauge
 
   # Kafka Broker Log Metrics (Yammer Metric Timer)
@@ -166,10 +166,10 @@ jmx_metrics:
         - kafka.log:type=LogFlushStats,name=LogFlushRateAndTimeMs
       attribute:
         Count:
-          alias: $domain.$name.rate
+          alias: confluent.$domain.$name.rate
           metric_type: rate
         Mean:
-          alias: $domain.$name.avg
+          alias: confluent.$domain.$name.avg
           metric_type: gauge
 
   # Kafka Broker Request Metrics (Yammer Metric Histogram)
@@ -190,10 +190,10 @@ jmx_metrics:
         - kafka\.network:type=RequestMetrics,name=ResponseSendTimeMs,request=(Produce|FetchConsumer|FetchFollower).*
       attribute:
         Count:
-          alias: $domain.request.$name.rate
+          alias: confluent.$domain.request.$name.rate
           metric_type: rate
         Mean:
-          alias: $domain.request.$name.avg
+          alias: confluent.$domain.request.$name.avg
           metric_type: gauge
 
   # Components Metrics:
@@ -207,108 +207,108 @@ jmx_metrics:
         # If they are consistently close to the configured batch.size, you may be producing as fast as possible and you’ll want to increase the batch size to get better batching.
         batch-size-avg:
           # The average number of bytes sent per partition per-request.
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         batch-size-max:
           # The max number of bytes sent per partition per-request.
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
 
         # io-ratio or io-wait-ratio:
         # If the io-ratio is low or io-wait-ratio is high, this means the producer is not very busy and is unlikely to be a bottleneck.
         io-ratio:
           # The fraction of time the I/O thread spent doing I/O
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         io-wait-ratio:
           # The fraction of time the I/O thread spent waiting
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
 
         # outgoing-byte-rate:
         # Reports the producer throughput when writing to destination Kafka.
         outgoing-byte-rate:
           # The number of outgoing bytes sent to all servers per second
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
 
         # record-retry-rate and record-error-rate:
         # The average per-second number of retried record sends and failed record sends for a topic. High number of those can indicate issues writing to the destination cluster.
         record-retry-rate:
           # The average per-second number of retried record sends
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         record-error-rate:
           # The average per-second number of record sends that resulted in errors
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
 
         # produce-throttle-time-avg and produce-throttle-time-max:
         # Produce requests may be throttled to meet quotas configured on the destination cluster. If these are non-zero, it indicates that the destination brokers are slowing the producer down and the quotas configuration should be reviewed. For more information on quotas see Enforcing Client Quotas.
         produce-throttle-time-avg:
           # The average time in ms a request was throttled by a broker
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         produce-throttle-time-max:
           # The maximum time in ms a request was throttled by a broker
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
 
         # waiting-threads and bufferpool-wait-time:
         # Non-zero values here indicate memory pressure. Connect producers can’t send events fast enough, resulting in full memory buffers that cause Replicator threads to block.
         waiting-threads:
           # The number of user threads blocked waiting for buffer memory to enqueue their records
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         bufferpool-wait-time-total:
           # The total time an appender waits for space allocation.
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
 
         # Other useful metrics
         connection-count:
           # The current number of active connections.
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         network-io-rate:
           # The number of network operations (reads or writes) on all connections per second
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         request-rate:
           # The number of requests sent per second
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         response-rate:
           # The number of responses received per second
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         request-latency-avg:
           # The average request latency in ms
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         io-wait-time-ns-avg:
           # The average length of time the I/O thread spent waiting for a socket ready for reads or writes in nanoseconds.
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         connection-creation-rate:
           # New connections established per second in the window.
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         connection-close-rate:
           # Connections closed per second in the window.
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         io-time-ns-avg:
           # The average length of time for I/O per select call in nanoseconds.
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         select-rate:
           # Number of times the I/O layer checked for new I/O to perform per second.
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         incoming-byte-rate:
           # The average number of incoming bytes received per second from all servers.
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
 
   # Components Metrics:
@@ -319,27 +319,27 @@ jmx_metrics:
       attribute:
         request-size-max:
           # The maximum size of any request sent in the window for a broker.
-          alias: $domain.node.$attribute
+          alias: confluent.$domain.node.$attribute
           metric_type: gauge
         request-size-avg:
           # The average size of all requests in the window for a broker.
-          alias: $domain.node.$attribute
+          alias: confluent.$domain.node.$attribute
           metric_type: gauge
         request-rate:
           # The average number of requests sent per second to the broker.
-          alias: $domain.node.$attribute
+          alias: confluent.$domain.node.$attribute
           metric_type: gauge
         response-rate:
           # The average number of responses received per second from the broker.
-          alias: $domain.node.$attribute
+          alias: confluent.$domain.node.$attribute
           metric_type: gauge
         incoming-byte-rate:
           # The average number of bytes received per second from the broker.
-          alias: $domain.node.$attribute
+          alias: confluent.$domain.node.$attribute
           metric_type: gauge
         outgoing-byte-rate:
           # The average number of bytes sent per second to the broker.
-          alias: $domain.node.$attribute
+          alias: confluent.$domain.node.$attribute
           metric_type: gauge
 
   # Components Metrics:
@@ -350,23 +350,23 @@ jmx_metrics:
       attribute:
         byte-rate:
           # The average number of bytes sent per second for a topic.
-          alias: $domain.topic.$attribute
+          alias: confluent.$domain.topic.$attribute
           metric_type: gauge
         record-send-rate:
           # The average number of records sent per second for a topic.
-          alias: $domain.topic.$attribute
+          alias: confluent.$domain.topic.$attribute
           metric_type: gauge
         compression-rate:
           # The average compression rate of record batches for a topic.
-          alias: $domain.topic.$attribute
+          alias: confluent.$domain.topic.$attribute
           metric_type: gauge
         record-retry-rate:
           # The average per-second number of retried record sends for a topic.
-          alias: $domain.topic.$attribute
+          alias: confluent.$domain.topic.$attribute
           metric_type: gauge
         record-error-rate:
           # The average per-second number of record sends that resulted in errors for a topic.
-          alias: $domain.topic.$attribute
+          alias: confluent.$domain.topic.$attribute
           metric_type: gauge
 
   # Components Metrics:
@@ -380,76 +380,76 @@ jmx_metrics:
         # If the io-ratio is low or io-wait-ratio is high, this means the consumer is not very busy and is unlikely to be a bottleneck.
         io-ratio:
           # The fraction of time the I/O thread spent doing I/O
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         io-wait-ratio:
           # The fraction of time the I/O thread spent waiting
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
 
         # bytes-consumed-rate:
         # Indicates throughput of Replicator reading events from origin cluster.
         bytes-consumed-rate:
           # Indicates throughput of Replicator reading events from origin cluster.
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
 
         # fetch-size-avg and fetch-size-max:
         # If they are close to the configured maximum fetch size consistently, it means that Replicator is reading at the maximum possible rate. Increase the maximum fetch size and check if the throughput per task is improved.
         fetch-size-avg:
           # The average number of bytes fetched per request
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         fetch-size-max:
           # The maximum number of bytes fetched per request.
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
 
         # records-lag-max:
         # The maximum lag in terms of number of records for any partition. An increasing value over time indicates that Replicator is not keeping up with the rate at which events are written to the origin cluster.
         records-lag-max:
           # The maximum lag in terms of number of records for any partition. An increasing value over time indicates that Replicator is not keeping up with the rate at which events are written to the origin cluster.
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
 
         # fetch-rate, fetch-size-avg and fetch-size-max:
         # If fetch-rate is high but fetch-size-avg and fetch-size-max are not close to the maximum configured fetch size, perhaps the consumer is “churning”. Try increasing the fetch.min.bytes and fetch.max.wait configuration. This can help the consumer batch more efficiently.
         fetch-rate:
           # The number of fetch requests per second.
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
 
         # fetch-throttle-time-max and fetch-throttle-time-avg:
         # Fetch requests may be throttled to meet quotas configured on the origin cluster. If these are non-zero, it indicates that the origin brokers are slowing the consumer down and the quotas configuration should be reviewed. For more information on quotas see Enforcing Client Quotas
         fetch-throttle-time-max:
           # Fetch requests may be throttled to meet quotas configured on the origin cluster. If these are non-zero, it indicates that the origin brokers are slowing the consumer down and the quotas configuration should be reviewed. For more information on quotas see Enforcing Client Quotas
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         fetch-throttle-time-avg:
           # Fetch requests may be throttled to meet quotas configured on the origin cluster. If these are non-zero, it indicates that the origin brokers are slowing the consumer down and the quotas configuration should be reviewed. For more information on quotas see Enforcing Client Quotas
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
 
         # metrics not listed in official doc, but might be useful to collect
         connection-count:
           # The current number of active connections.
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         network-io-rate:
           # The number of network operations (reads or writes) on all connections per second
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         request-rate:
           # The number of requests sent per second
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         response-rate:
           # The number of responses received per second
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
         request-latency-avg:
           # The average request latency in ms
-          alias: $domain.$attribute
+          alias: confluent.$domain.$attribute
           metric_type: gauge
 
   # Confluent Broker Consumer Fetch Metrics: https://docs.confluent.io/current/kafka/monitoring.html#fetch-metrics
@@ -459,47 +459,47 @@ jmx_metrics:
       attribute:
         records-lag-max:
           # The maximum lag in terms of number of records for any partition in this window. An increasing value over time is your best indication that the consumer group is not keeping up with the producers.
-          alias: $domain.fetch.$attribute
+          alias: confluent.$domain.fetch.$attribute
           metric_type: gauge
         fetch-size-avg:
           # The average number of bytes fetched per request.
-          alias: $domain.fetch.$attribute
+          alias: confluent.$domain.fetch.$attribute
           metric_type: gauge
         fetch-size-max:
           # The average number of bytes fetched per request.
-          alias: $domain.fetch.$attribute
+          alias: confluent.$domain.fetch.$attribute
           metric_type: gauge
         bytes-consumed-rate:
           # The average number of bytes consumed per second.
-          alias: $domain.fetch.$attribute
+          alias: confluent.$domain.fetch.$attribute
           metric_type: gauge
         records-per-request-avg:
           # The average number of records in each request.
-          alias: $domain.fetch.$attribute
+          alias: confluent.$domain.fetch.$attribute
           metric_type: gauge
         records-consumed-rate:
           # The average number of records consumed per second.
-          alias: $domain.fetch.$attribute
+          alias: confluent.$domain.fetch.$attribute
           metric_type: gauge
         fetch-rate:
           # The number of fetch requests per second.
-          alias: $domain.fetch.$attribute
+          alias: confluent.$domain.fetch.$attribute
           metric_type: gauge
         fetch-latency-avg:
           # The average time taken for a fetch request.
-          alias: $domain.fetch.$attribute
+          alias: confluent.$domain.fetch.$attribute
           metric_type: gauge
         fetch-latency-max:
           # The max time taken for a fetch request.
-          alias: $domain.fetch.$attribute
+          alias: confluent.$domain.fetch.$attribute
           metric_type: gauge
         fetch-throttle-time-avg:
           # The average throttle time in ms. When quotas are enabled, the broker may delay fetch requests in order to throttle a consumer which has exceeded its limit. This metric indicates how throttling time has been added to fetch requests on average.
-          alias: $domain.fetch.$attribute
+          alias: confluent.$domain.fetch.$attribute
           metric_type: gauge
         fetch-throttle-time-max:
           # The maximum throttle time in ms.
-          alias: $domain.fetch.$attribute
+          alias: confluent.$domain.fetch.$attribute
           metric_type: gauge
 
   # Confluent Broker Consumer Fetch Topic Metrics: https://docs.confluent.io/current/kafka/monitoring.html#topic-level-fetch-metrics
@@ -509,23 +509,23 @@ jmx_metrics:
       attribute:
           fetch-size-avg:
             # The average number of bytes fetched per request for a specific topic.
-            alias: $domain.fetch_topic.$attribute
+            alias: confluent.$domain.fetch_topic.$attribute
             metric_type: gauge
           fetch-size-max:
             # The maximum number of bytes fetched per request for a specific topic.
-            alias: $domain.fetch_topic.$attribute
+            alias: confluent.$domain.fetch_topic.$attribute
             metric_type: gauge
           bytes-consumed-rate:
             # The average number of bytes consumed per second for a specific topic.
-            alias: $domain.fetch_topic.$attribute
+            alias: confluent.$domain.fetch_topic.$attribute
             metric_type: gauge
           records-per-request-avg:
             # The average number of records in each request for a specific topic.
-            alias: $domain.fetch_topic.$attribute
+            alias: confluent.$domain.fetch_topic.$attribute
             metric_type: gauge
           records-consumed-rate:
             # The average number of records consumed per second for a specific topic.
-            alias: $domain.fetch_topic.$attribute
+            alias: confluent.$domain.fetch_topic.$attribute
             metric_type: gauge
 
 
@@ -537,51 +537,51 @@ jmx_metrics:
       attribute:
         connector-count:
           # The number of connectors run in this worker.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
         connector-startup-attempts-total:
           # The total number of connector startups that this worker has attempted.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
         connector-startup-failure-percentage:
           # The average percentage of this worker's connectors starts that failed.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
         connector-startup-failure-total:
           # The total number of connector starts that failed.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
         connector-startup-success-percentage:
           # The average percentage of this worker's connectors starts that succeeded.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
         connector-startup-success-total:
           # The total number of connector starts that succeeded.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
         task-count:
           # The number of tasks run in this worker.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
         task-startup-attempts-total:
           # The total number of task startups that this worker has attempted.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
         task-startup-failure-percentage:
           # The average percentage of this worker's tasks starts that failed.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
         task-startup-failure-total:
           # The total number of task starts that failed.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
         task-startup-success-percentage:
           # The average percentage of this worker's tasks starts that succeeded.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
         task-startup-success-total:
           # The total number of task starts that succeeded.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
 
   # Kafka Connect Metrics
@@ -594,27 +594,27 @@ jmx_metrics:
       attribute:
         connector-destroyed-task-count:
           # The number of destroyed tasks of the connector on the worker.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
         connector-failed-task-count:
           # The number of failed tasks of the connector on the worker.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
         connector-paused-task-count:
           # The number of paused tasks of the connector on the worker.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
         connector-running-task-count:
           # The number of running tasks of the connector on the worker.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
         connector-total-task-count:
           # The number of tasks of the connector on the worker.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
         connector-unassigned-task-count:
           # The number of unassigned tasks of the connector on the worker.
-          alias: $domain.worker.$attribute
+          alias: confluent.$domain.worker.$attribute
           metric_type: gauge
 
   # Kafka Connect Metrics
@@ -625,27 +625,27 @@ jmx_metrics:
       attribute:
         completed-rebalances-total:
           # The total number of rebalances completed by this worker.
-          alias: $domain.worker_rebalance.$attribute
+          alias: confluent.$domain.worker_rebalance.$attribute
           metric_type: gauge
         epoch:
           # The epoch or generation number of this worker.
-          alias: $domain.worker_rebalance.$attribute
+          alias: confluent.$domain.worker_rebalance.$attribute
           metric_type: gauge
         rebalance-avg-time-ms:
           # The average time in milliseconds spent by this worker to rebalance.
-          alias: $domain.worker_rebalance.$attribute
+          alias: confluent.$domain.worker_rebalance.$attribute
           metric_type: gauge
         rebalance-max-time-ms:
           # The maximum time in milliseconds spent by this worker to rebalance.
-          alias: $domain.worker_rebalance.$attribute
+          alias: confluent.$domain.worker_rebalance.$attribute
           metric_type: gauge
         rebalancing:
           # Whether this worker is currently rebalancing.
-          alias: $domain.worker_rebalance.$attribute
+          alias: confluent.$domain.worker_rebalance.$attribute
           metric_type: gauge
         time-since-last-rebalance-ms:
           # The time in milliseconds since this worker completed the most recent rebalance.
-          alias: $domain.worker_rebalance.$attribute
+          alias: confluent.$domain.worker_rebalance.$attribute
           metric_type: gauge
 
   # Kafka Connect Task Metrics
@@ -656,35 +656,35 @@ jmx_metrics:
       attribute:
         batch-size-avg:
           # The average size of the batches processed by the connector.
-          alias: $domain.connector_task.$attribute
+          alias: confluent.$domain.connector_task.$attribute
           metric_type: gauge
         batch-size-max:
           # The maximum size of the batches processed by the connector.
-          alias: $domain.connector_task.$attribute
+          alias: confluent.$domain.connector_task.$attribute
           metric_type: gauge
         offset-commit-avg-time-ms:
           # The average time in milliseconds taken by this task to commit offsets.
-          alias: $domain.connector_task.$attribute
+          alias: confluent.$domain.connector_task.$attribute
           metric_type: gauge
         offset-commit-failure-percentage:
           # The average percentage of this task's offset commit attempts that failed.
-          alias: $domain.connector_task.$attribute
+          alias: confluent.$domain.connector_task.$attribute
           metric_type: gauge
         offset-commit-max-time-ms:
           # The maximum time in milliseconds taken by this task to commit offsets.
-          alias: $domain.connector_task.$attribute
+          alias: confluent.$domain.connector_task.$attribute
           metric_type: gauge
         offset-commit-success-percentage:
           # The average percentage of this task's offset commit attempts that succeeded.
-          alias: $domain.connector_task.$attribute
+          alias: confluent.$domain.connector_task.$attribute
           metric_type: gauge
         pause-ratio:
           # The fraction of time this task has spent in the pause state.
-          alias: $domain.connector_task.$attribute
+          alias: confluent.$domain.connector_task.$attribute
           metric_type: gauge
         running-ratio:
           # The fraction of time this task has spent in the running state.
-          alias: $domain.connector_task.$attribute
+          alias: confluent.$domain.connector_task.$attribute
           metric_type: gauge
 
   # Kafka Connect Sink Metrics
@@ -695,67 +695,67 @@ jmx_metrics:
       attribute:
         offset-commit-completion-rate:
           # The average per-second number of offset commit completions that were completed successfully.
-          alias: $domain.sink_task.$attribute
+          alias: confluent.$domain.sink_task.$attribute
           metric_type: gauge
         offset-commit-completion-total:
           # The total number of offset commit completions that were completed successfully.
-          alias: $domain.sink_task.$attribute
+          alias: confluent.$domain.sink_task.$attribute
           metric_type: gauge
         offset-commit-seq-no:
           # The current sequence number for offset commits.
-          alias: $domain.sink_task.$attribute
+          alias: confluent.$domain.sink_task.$attribute
           metric_type: gauge
         offset-commit-skip-rate:
           # The average per-second number of offset commit completions that were received too late and skipped/ignored.
-          alias: $domain.sink_task.$attribute
+          alias: confluent.$domain.sink_task.$attribute
           metric_type: gauge
         offset-commit-skip-total:
           # The total number of offset commit completions that were received too late and skipped/ignored.
-          alias: $domain.sink_task.$attribute
+          alias: confluent.$domain.sink_task.$attribute
           metric_type: gauge
         partition-count:
           # The number of topic partitions assigned to this task belonging to the named sink connector in this worker.
-          alias: $domain.sink_task.$attribute
+          alias: confluent.$domain.sink_task.$attribute
           metric_type: gauge
         put-batch-avg-time-ms:
           # The average time taken by this task to put a batch of sinks records.
-          alias: $domain.sink_task.$attribute
+          alias: confluent.$domain.sink_task.$attribute
           metric_type: gauge
         put-batch-max-time-ms:
           # The maximum time taken by this task to put a batch of sinks records.
-          alias: $domain.sink_task.$attribute
+          alias: confluent.$domain.sink_task.$attribute
           metric_type: gauge
         sink-record-active-count:
           # The number of records that have been read from Kafka but not yet completely committed/flushed/acknowledged by the sink task.
-          alias: $domain.sink_task.$attribute
+          alias: confluent.$domain.sink_task.$attribute
           metric_type: gauge
         sink-record-active-count-avg:
           # The average number of records that have been read from Kafka but not yet completely committed/flushed/acknowledged by the sink task.
-          alias: $domain.sink_task.$attribute
+          alias: confluent.$domain.sink_task.$attribute
           metric_type: gauge
         sink-record-active-count-max:
           # The maximum number of records that have been read from Kafka but not yet completely committed/flushed/acknowledged by the sink task.
-          alias: $domain.sink_task.$attribute
+          alias: confluent.$domain.sink_task.$attribute
           metric_type: gauge
         sink-record-lag-max:
           # The maximum lag in terms of number of records that the sink task is behind the consumer's position for any topic partitions.
-          alias: $domain.sink_task.$attribute
+          alias: confluent.$domain.sink_task.$attribute
           metric_type: gauge
         sink-record-read-rate:
           # The average per-second number of records read from Kafka for this task belonging to the named sink connector in this worker. This is before transformations are applied.
-          alias: $domain.sink_task.$attribute
+          alias: confluent.$domain.sink_task.$attribute
           metric_type: gauge
         sink-record-read-total:
           # The total number of records read from Kafka by this task belonging to the named sink connector in this worker, since the task was last restarted.
-          alias: $domain.sink_task.$attribute
+          alias: confluent.$domain.sink_task.$attribute
           metric_type: gauge
         sink-record-send-rate:
           # The average per-second number of records output from the transformations and sent/put to this task belonging to the named sink connector in this worker. This is after transformations are applied and excludes any records filtered out by the transformations.
-          alias: $domain.sink_task.$attribute
+          alias: confluent.$domain.sink_task.$attribute
           metric_type: gauge
         sink-record-send-total:
           # The total number of records output from the transformations and sent/put to this task belonging to the named sink connector in this worker, since the task was last restarted.
-          alias: $domain.sink_task.$attribute
+          alias: confluent.$domain.sink_task.$attribute
           metric_type: gauge
 
   # Kafka Connect Source Tasks Metrics
@@ -766,39 +766,39 @@ jmx_metrics:
       attribute:
         poll-batch-avg-time-ms:
           # The average time in milliseconds taken by this task to poll for a batch of source records.
-          alias: $domain.source_task.$attribute
+          alias: confluent.$domain.source_task.$attribute
           metric_type: gauge
         poll-batch-max-time-ms:
           # The maximum time in milliseconds taken by this task to poll for a batch of source records.
-          alias: $domain.source_task.$attribute
+          alias: confluent.$domain.source_task.$attribute
           metric_type: gauge
         source-record-active-count:
           # The number of records that have been produced by this task but not yet completely written to Kafka.
-          alias: $domain.source_task.$attribute
+          alias: confluent.$domain.source_task.$attribute
           metric_type: gauge
         source-record-active-count-avg:
           # The average number of records that have been produced by this task but not yet completely written to Kafka.
-          alias: $domain.source_task.$attribute
+          alias: confluent.$domain.source_task.$attribute
           metric_type: gauge
         source-record-active-count-max:
           # The maximum number of records that have been produced by this task but not yet completely written to Kafka.
-          alias: $domain.source_task.$attribute
+          alias: confluent.$domain.source_task.$attribute
           metric_type: gauge
         source-record-poll-rate:
           # The average per-second number of records produced/polled (before transformation) by this task belonging to the named source connector in this worker.
-          alias: $domain.source_task.$attribute
+          alias: confluent.$domain.source_task.$attribute
           metric_type: gauge
         source-record-poll-total:
           # The total number of records produced/polled (before transformation) by this task belonging to the named source connector in this worker.
-          alias: $domain.source_task.$attribute
+          alias: confluent.$domain.source_task.$attribute
           metric_type: gauge
         source-record-write-rate:
           # The average per-second number of records output from the transformations and written to Kafka for this task belonging to the named source connector in this worker. This is after transformations are applied and excludes any records filtered out by the transformations.
-          alias: $domain.source_task.$attribute
+          alias: confluent.$domain.source_task.$attribute
           metric_type: gauge
         source-record-write-total:
           # The number of records output from the transformations and written to Kafka for this task belonging to the named source connector in this worker, since the task was last restarted.
-          alias: $domain.source_task.$attribute
+          alias: confluent.$domain.source_task.$attribute
           metric_type: gauge
 
   # Kafka Connect Task Error Metrics
@@ -809,35 +809,35 @@ jmx_metrics:
       attribute:
         deadletterqueue-produce-failures:
           # The number of failed writes to the dead letter queue.
-          alias: $domain.task_error.$attribute
+          alias: confluent.$domain.task_error.$attribute
           metric_type: gauge
         deadletterqueue-produce-requests:
           # The number of attempted writes to the dead letter queue.
-          alias: $domain.task_error.$attribute
+          alias: confluent.$domain.task_error.$attribute
           metric_type: gauge
         last-error-timestamp:
           # The epoch timestamp when this task last encountered an error.
-          alias: $domain.task_error.$attribute
+          alias: confluent.$domain.task_error.$attribute
           metric_type: gauge
         total-errors-logged:
           # The number of errors that were logged.
-          alias: $domain.task_error.$attribute
+          alias: confluent.$domain.task_error.$attribute
           metric_type: gauge
         total-record-errors:
           # The number of record processing errors in this task.
-          alias: $domain.task_error.$attribute
+          alias: confluent.$domain.task_error.$attribute
           metric_type: gauge
         total-record-failures:
           # The number of record processing failures in this task.
-          alias: $domain.task_error.$attribute
+          alias: confluent.$domain.task_error.$attribute
           metric_type: gauge
         total-records-skipped:
           # The number of records skipped due to errors.
-          alias: $domain.task_error.$attribute
+          alias: confluent.$domain.task_error.$attribute
           metric_type: gauge
         total-retries:
           # The number of operations retried.
-          alias: $domain.task_error.$attribute
+          alias: confluent.$domain.task_error.$attribute
           metric_type: gauge
 
   # Components Metrics:
@@ -850,15 +850,15 @@ jmx_metrics:
       attribute:
         connections-active:
           # Total number of active TCP connections.
-          alias: $domain.jetty.$attribute
+          alias: confluent.$domain.jetty.$attribute
           metric_type: gauge
         connections-opened-rate:
           # The average rate per second of opened TCP connections.
-          alias: $domain.jetty.$attribute
+          alias: confluent.$domain.jetty.$attribute
           metric_type: gauge
         connections-closed-rate:
           # The average rate per second of closed TCP connections.
-          alias: $domain.jetty.$attribute
+          alias: confluent.$domain.jetty.$attribute
           metric_type: gauge
 
   # Components Metrics:
@@ -871,175 +871,175 @@ jmx_metrics:
       attribute:
         brokers.list.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.assign+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.assignment+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.commit-offsets+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.commit.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.committed-offsets+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.create+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.create.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.delete+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.delete.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.records.read-avro+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.records.read-binary+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.records.read-json+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.seek-to-beginning+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.seek-to-end+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.seek-to-offset+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.subscribe+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.subscription+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.topic.read-avro.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.topic.read-binary.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.topic.read-json.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         consumer.unsubscribe+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         partition.consume-avro.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         partition.consume-binary.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         partition.consume-json.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         partition.get+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         partition.get.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         partition.produce-avro+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         partition.produce-avro.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         partition.produce-binary+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         partition.produce-binary.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         partition.produce-json+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         partition.produce-json.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         partitions.list+v2.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         partitions.list.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         root.get.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         root.post.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         topic.get.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         topic.produce-avro.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         topic.produce-binary.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         topic.produce-json.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
         topics.list.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
-          alias: $domain.jersey.$attribute
+          alias: confluent.$domain.jersey.$attribute
           metric_type: gauge
 
   # Components Metrics:
@@ -1050,7 +1050,7 @@ jmx_metrics:
       attribute:
         master-slave-role:
           # The current role of this Schema Registry instance. A value of 1 indicates this instance is the primary, 0 indicates it is a secondary.
-          alias: $domain.$type.$attribute
+          alias: confluent.$domain.$type.$attribute
           metric_type: gauge
 
   # Components Metrics:
@@ -1134,91 +1134,91 @@ jmx_metrics:
       attribute:
         commit-latency-avg:
           # The average value of commit-latency.
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         commit-latency-max:
           # The maximum value of commit-latency.
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         commit-rate:
           # The average per-second number of commit calls
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         commit-total:
           # The total number of commit calls
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         poll-latency-avg:
           # The average value of poll-latency.
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         poll-latency-max:
           # The maximum value of poll-latency.
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         poll-rate:
           # The average per-second number of poll calls
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         poll-total:
           # The total number of poll calls
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         process-latency-avg:
           # The average value of process-latency.
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         process-latency-max:
           # The maximum value of process-latency.
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         process-rate:
           # The average per-second number of process calls
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         process-total:
           # The total number of process calls
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         punctuate-latency-avg:
           # The average value of punctuate-latency.
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         punctuate-latency-max:
           # The maximum value of punctuate-latency.
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         punctuate-rate:
           # The average per-second number of punctuate calls
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         punctuate-total:
           # The total number of punctuate calls
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         skipped-records-rate:
           # The average per-second number of skipped records
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         skipped-records-total:
           # The total number of skipped records
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         task-closed-rate:
           # The average per-second number of closed tasks
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         task-closed-total:
           # The total number of closed tasks
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         task-created-rate:
           # The average per-second number of newly created tasks
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
         task-created-total:
           # The total number of newly created tasks
-          alias: $domain.stream.$attribute
+          alias: confluent.$domain.stream.$attribute
           metric_type: gauge
 
   # Components Metrics:
@@ -1230,15 +1230,15 @@ jmx_metrics:
       attribute:
         commit-latency-avg:
           # The average value of commit-latency.
-          alias: $domain.task.$attribute
+          alias: confluent.$domain.task.$attribute
           metric_type: gauge
         commit-rate:
           # The average per-second number of commit calls over all tasks
-          alias: $domain.task.$attribute
+          alias: confluent.$domain.task.$attribute
           metric_type: gauge
         record-lateness-avg:
           # The average value of record-lateness.
-          alias: $domain.task.$attribute
+          alias: confluent.$domain.task.$attribute
           metric_type: gauge
 
   # Confluent Stream Processor Node Metrics:
@@ -1250,29 +1250,29 @@ jmx_metrics:
       attribute:
         # The average execution time in ns, for the respective operation.
         process-latency-avg:
-          alias: $domain.processor_node.$attribute
+          alias: confluent.$domain.processor_node.$attribute
           metric_type: gauge
         # The average number of respective operations per second.
         process-rate:
-          alias: $domain.processor_node.$attribute
+          alias: confluent.$domain.processor_node.$attribute
           metric_type: gauge
         # The total number of respective operations.
         process-total:
-          alias: $domain.processor_node.$attribute
+          alias: confluent.$domain.processor_node.$attribute
           metric_type: gauge
         # The average rate of records being forwarded downstream, from source nodes only, per second. This metric can be used to understand how fast the library is consuming from source topics.
         forward-rate:
-          alias: $domain.processor_node.$attribute
+          alias: confluent.$domain.processor_node.$attribute
           metric_type: gauge
         # The total number of records being forwarded downstream, from source nodes only.
         forward-total:
-          alias: $domain.processor_node.$attribute
+          alias: confluent.$domain.processor_node.$attribute
           metric_type: gauge
         # The rate at which records that have been emitted downstream from suppression operation nodes. Compare with the process-rate metric to determine how many updates are being suppressed.
         suppression-emit-rate:
-          alias: $domain.processor_node.$attribute
+          alias: confluent.$domain.processor_node.$attribute
           metric_type: gauge
         # The total number of records that have been emitted downstream from suppression operation nodes. Compare with the process-total metric to determine how many updates are being suppressed.
         suppression-emit-total:
-          alias: $domain.processor_node.$attribute
+          alias: confluent.$domain.processor_node.$attribute
           metric_type: gauge

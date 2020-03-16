@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "confluent_platform",
   "metric_prefix": "confluent.",
-  "metric_to_check": "kafka.server.topic.bytes_out_per_sec",
+  "metric_to_check": "confluent.kafka.producer.outgoing_byte_rate",
   "creates_events": false,
   "short_description": "Monitor Confluent Platform components.",
   "guid": "8e4a6d7e-44bc-440c-aafa-a0f98df87cc0",
