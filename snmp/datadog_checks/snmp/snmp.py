@@ -61,9 +61,11 @@ class SnmpCheck(AgentCheck):
 
         self.ignore_nonincreasing_oid = is_affirmative(self.init_config.get('ignore_nonincreasing_oid', False))
 
-        self.profiles = self.init_config.get('profiles')  # type: Dict[str, Dict[str, Any]]
-        if self.profiles is None:
-            self.profiles = get_default_profiles()
+        profiles = self.init_config.get('profiles')
+        if profiles is None:
+            profiles = get_default_profiles()
+
+        self.profiles = profiles  # type: Dict[str, Dict[str, Any]]
         self.profiles_by_oid = {}  # type: Dict[str, str]
         self._load_profiles()
 
