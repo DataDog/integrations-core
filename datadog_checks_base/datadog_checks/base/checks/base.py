@@ -164,15 +164,10 @@ class AgentCheck(object):
                 # new-style init: the 3rd argument is `instances`
                 instances = args[2]
 
-        # NOTE: Agent 6+ should pass exactly one instance... But we are not abiding by that rule on our side
-        # everywhere just yet. It's complicated... See: https://github.com/DataDog/integrations-core/pull/5573
-        instance = instances[0] if instances else None
-
         self.check_id = ''
         self.name = name  # type: str
         self.init_config = init_config  # type: InitConfigType
         self.agentConfig = agentConfig  # type: AgentConfigType
-        self.instance = instance  # type: Optional[InstanceType]
         self.instances = instances  # type: List[InstanceType]
         self.warnings = []  # type: List[str]
         self.metrics = defaultdict(list)  # type: DefaultDict[str, List[str]]
@@ -236,7 +231,25 @@ class AgentCheck(object):
         # Functions that will be called exactly once (if successful) before the first check run
         self.check_initializations = deque([self.send_config_metadata])  # type: Deque[Callable[[], None]]
 
-    def _get_metric_limiter(self, name, instance=None):
+    @property
+    def instance(self):
+        # type: () -> InstanceType
+        """
+        Return the instance to use when running a check.
+        """
+        try:
+            return self.instances[0]
+        except IndexError:
+            # NOTE: Agent 6+ should pass exactly one instance... But we are not abiding by that rule on our side
+            # everywhere just yet. It's complicated... See: https://github.com/DataDog/integrations-core/pull/5573
+            return {}
+
+    @instance.setter
+    def instance(self, instance):
+        # type: (InstanceType) -> None
+        self.instances[0] = instance
+
+    def _get_metric_limiter(self, name, instance):
         # type: (str, InstanceType) -> Optional[Limiter]
         limit = self._get_metric_limit(instance=instance)
 
@@ -749,7 +762,7 @@ class AgentCheck(object):
                     self.check_initializations.appendleft(initialization)
                     raise
 
-            instance = copy.deepcopy(self.instances[0])
+            instance = copy.deepcopy(self.instance)
 
             if 'set_breakpoint' in self.init_config:
                 from ..utils.agent.debug import enter_pdb
