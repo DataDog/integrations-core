@@ -6,7 +6,7 @@
   "creates_events": false,
   "display_name": "External DNS",
   "guid": "31eb63d5-15eb-42b3-912d-f8de47ea252a",
-  "is_public": false,
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "external_dns.",
