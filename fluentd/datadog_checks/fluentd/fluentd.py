@@ -102,24 +102,25 @@ class Fluentd(AgentCheck):
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
     def _collect_metadata(self):
+        raw_version = None
         if not self.is_metadata_collection_enabled():
             return
+
         try:
             r = self.http.get(self.config_url)
             r.raise_for_status()
             config = r.json()
-            if 'version' in config:
-                self.set_metadata('version', config['version'])
-                return
+            raw_version = config.get('version')
         except Exception as e:
             self.log.debug("No config could be retrieved from %s: %s", self.config_url, e)
 
         # Fall back to command line for older versions of fluentd
-        raw_version = self._get_raw_version()
+        if not raw_version:
+            raw_version = self._get_version_from_command_line()
         if raw_version:
             self.set_metadata('version', raw_version)
 
-    def _get_raw_version(self):
+    def _get_version_from_command_line(self):
         version_command = '{} --version'.format(self._fluentd_command)
 
         try:

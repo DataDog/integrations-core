@@ -11,7 +11,6 @@ from datadog_checks.fluentd import Fluentd
 from .common import CHECK_NAME, EXPECTED_GAUGES, HOST, INSTANCE_WITH_PLUGIN
 
 
-@pytest.mark.integration
 def assert_basic_case(aggregator):
     sc_tags = ['fluentd_host:{}'.format(HOST), 'fluentd_port:24220']
 
