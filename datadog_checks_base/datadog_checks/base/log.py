@@ -5,7 +5,7 @@ import logging
 
 from six import PY2, text_type
 
-from .utils.common import to_string
+from .utils.common import to_native_string
 
 try:
     import datadog_agent
@@ -61,7 +61,7 @@ class AgentLogHandler(logging.Handler):
             getattr(record, '_check_id', '-'),
             getattr(record, '_filename', record.filename),
             getattr(record, '_lineno', record.lineno),
-            to_string(self.format(record)),
+            to_native_string(self.format(record)),
         )
         datadog_agent.log(msg, record.levelno)
 

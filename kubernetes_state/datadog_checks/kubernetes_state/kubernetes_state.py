@@ -12,7 +12,7 @@ from six import iteritems
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.config import is_affirmative
 from datadog_checks.errors import CheckException
-from datadog_checks.utils.common import to_string
+from datadog_checks.utils.common import to_native_string
 
 try:
     # this module is only available in agent 6
@@ -459,7 +459,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         Lookups the labels_mapper table to see if replacing the tag name is
         necessary, then returns a "name:value" tag string
         """
-        return '%s:%s' % (scraper_config['labels_mapper'].get(name, name), to_string(value).lower())
+        return '%s:%s' % (scraper_config['labels_mapper'].get(name, name), to_native_string(value).lower())
 
     def _label_to_tag(self, name, labels, scraper_config, tag_name=None):
         """
@@ -829,10 +829,10 @@ class KubernetesState(OpenMetricsBaseCheck):
         tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
         # then try to use the kube_labels_mapper
         kube_tag_name = kube_labels_mapper.get(tag_name, tag_name)
-        label_value = to_string(label_value).lower()
-        tags.append('{}:{}'.format(to_string(kube_tag_name), label_value))
+        label_value = to_native_string(label_value).lower()
+        tags.append('{}:{}'.format(to_native_string(kube_tag_name), label_value))
         if self.keep_ksm_labels and (kube_tag_name != tag_name):
-            tags.append('{}:{}'.format(to_string(tag_name), label_value))
+            tags.append('{}:{}'.format(to_native_string(tag_name), label_value))
         return tags
 
     def _metric_tags(self, metric_name, val, sample, scraper_config, hostname=None):

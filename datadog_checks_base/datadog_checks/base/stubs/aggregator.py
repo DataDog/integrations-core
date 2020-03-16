@@ -10,7 +10,7 @@ from six import iteritems
 from datadog_checks.base.stubs.common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from datadog_checks.base.stubs.similar import build_similar_elements_msg
 
-from ..utils.common import ensure_unicode, to_string
+from ..utils.common import ensure_unicode, to_native_string
 
 
 def normalize_tags(tags, sort=False):
@@ -18,9 +18,9 @@ def normalize_tags(tags, sort=False):
     # This function makes sure strings are compared with the same type.
     if tags:
         if sort:
-            return sorted(to_string(tag) for tag in tags)
+            return sorted(to_native_string(tag) for tag in tags)
         else:
-            return [to_string(tag) for tag in tags]
+            return [to_native_string(tag) for tag in tags]
     return tags
 
 
@@ -96,7 +96,7 @@ class AggregatorStub(object):
                 ensure_unicode(stub.hostname),
                 stub.device,
             )
-            for stub in self._metrics.get(to_string(name), [])
+            for stub in self._metrics.get(to_native_string(name), [])
         ]
 
     def service_checks(self, name):
@@ -112,7 +112,7 @@ class AggregatorStub(object):
                 ensure_unicode(stub.hostname),
                 ensure_unicode(stub.message),
             )
-            for stub in self._service_checks.get(to_string(name), [])
+            for stub in self._service_checks.get(to_native_string(name), [])
         ]
 
     @property
@@ -136,7 +136,7 @@ class AggregatorStub(object):
                 ensure_unicode(stub.hostname),
                 normalize_tags(stub.tags),
             )
-            for stub in self._histogram_buckets.get(to_string(name), [])
+            for stub in self._histogram_buckets.get(to_native_string(name), [])
         ]
 
     def assert_metric_has_tag(self, metric_name, tag, count=None, at_least=1):
@@ -150,10 +150,11 @@ class AggregatorStub(object):
             if tag in metric.tags:
                 candidates.append(metric)
 
+        msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(metric_name, count, at_least)
         if count is not None:
-            assert len(candidates) == count
+            assert len(candidates) == count, msg
         else:
-            assert len(candidates) >= at_least
+            assert len(candidates) >= at_least, msg
 
     # Potential kwargs: aggregation_key, alert_type, event_type,
     # msg_title, source_type_name
@@ -170,9 +171,7 @@ class AggregatorStub(object):
             else:
                 candidates.append(e)
 
-        msg = ("Candidates size assertion for {0}, count: {1}, " "at_least: {2}) failed").format(
-            msg_text, count, at_least
-        )
+        msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(msg_text, count, at_least)
         if count is not None:
             assert len(candidates) == count, msg
         else:
@@ -292,10 +291,15 @@ class AggregatorStub(object):
         assert condition, new_msg
 
     def assert_all_metrics_covered(self):
-        missing_metrics = ''
-        if self.metrics_asserted_pct < 100.0:
-            missing_metrics = self.not_asserted()
-        assert self.metrics_asserted_pct >= 100.0, 'Missing metrics: {}'.format(missing_metrics)
+        # use `condition` to avoid building the `msg` if not needed
+        condition = self.metrics_asserted_pct >= 100.0
+        msg = ''
+        if not condition:
+            prefix = '\n\t- '
+            msg = 'Some metrics are missing:'
+            msg += '\nAsserted Metrics:{}{}'.format(prefix, prefix.join(sorted(self._asserted)))
+            msg += '\nMissing Metrics:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
+        assert condition, msg
 
     def assert_no_duplicate_all(self):
         """
@@ -387,10 +391,11 @@ class AggregatorStub(object):
             if len(gtags) > 0:
                 candidates.append(metric)
 
+        msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(metric_name, count, at_least)
         if count is not None:
-            assert len(candidates) == count
+            assert len(candidates) == count, msg
         else:
-            assert len(candidates) >= at_least
+            assert len(candidates) >= at_least, msg
 
     @property
     def metrics_asserted_pct(self):

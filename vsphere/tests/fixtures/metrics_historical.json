@@ -50,7 +50,7 @@
             7544
         ],
         "counterId": 6,
-        "instance": ""
+        "instance": "16"
     },
     {
         "entity": "Cluster2",
@@ -3192,7 +3192,7 @@
             46580528
         ],
         "counterId": 281,
-        "instance": ""
+        "instance": "value-aa"
     },
     {
         "entity": "NFS Share",

@@ -14,7 +14,7 @@ from six import PY3, iteritems, itervalues, string_types
 
 from ...config import is_affirmative
 from ...errors import CheckException
-from ...utils.common import to_string
+from ...utils.common import to_native_string
 from ...utils.http import RequestsWrapper
 from .. import AgentCheck
 
@@ -343,6 +343,9 @@ class OpenMetricsScraperMixin(object):
         # TODO: Determine if we really need this
         headers.setdefault('accept-encoding', 'gzip')
 
+        # Explicitly set the content type we accept
+        headers.setdefault('accept', 'text/plain')
+
         return http_handler
 
     def reset_http_config(self):
@@ -359,6 +362,8 @@ class OpenMetricsScraperMixin(object):
         :param response: requests.Response
         :return: core.Metric
         """
+        if response.encoding is None:
+            response.encoding = 'utf-8'
         input_gen = response.iter_lines(chunk_size=self.REQUESTS_CHUNK_SIZE, decode_unicode=True)
         if scraper_config['_text_filter_blacklist']:
             input_gen = self._text_filter_input(input_gen, scraper_config)
@@ -878,7 +883,7 @@ class OpenMetricsScraperMixin(object):
         for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
             if label_name not in scraper_config['exclude_labels']:
                 tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
-                _tags.append('{}:{}'.format(to_string(tag_name), to_string(label_value)))
+                _tags.append('{}:{}'.format(to_native_string(tag_name), to_native_string(label_value)))
         return self._finalize_tags_to_submit(
             _tags, metric_name, val, sample, custom_tags=custom_tags, hostname=hostname
         )

@@ -16,4 +16,5 @@ go_expvar.memstats.pause_ns.count,rate,,sample,second,Number of submitted GC pau
 go_expvar.memstats.pause_ns.max,gauge,,nanosecond,,Max GC pause duration,0,go_expvar,gc pause max
 go_expvar.memstats.pause_ns.median,gauge,,nanosecond,,Median GC pause duration,0,go_expvar,gc pause median
 go_expvar.memstats.pause_total_ns,gauge,,nanosecond,,Total GC pause duration over lifetime of process,0,go_expvar,gc pause tot
-go_expvar.memstats.total_alloc,count,,byte,,Bytes allocated (even if freed),0,go_expvar,total alloc
+go_expvar.memstats.total_alloc,gauge,,byte,,Bytes allocated (even if freed),0,go_expvar,total alloc
+go_expvar.memstats.total_alloc.count,count,,byte,,Bytes allocated (even if freed) as monotonic count,0,go_expvar,total alloc

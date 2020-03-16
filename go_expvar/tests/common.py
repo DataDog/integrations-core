@@ -27,6 +27,7 @@ CHECK_GAUGES = [
     'go_expvar.memstats.heap_objects',
     'go_expvar.memstats.heap_released',
     'go_expvar.memstats.heap_sys',
+    'go_expvar.memstats.total_alloc',
 ]
 
 # this is a histogram
@@ -49,5 +50,5 @@ CHECK_RATES = [
 ]
 
 CHECK_COUNT = [
-    'go_expvar.memstats.total_alloc',
+    'go_expvar.memstats.total_alloc.count',
 ]

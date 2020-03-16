@@ -2,6 +2,8 @@ metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation
 clickhouse.background_pool.processing.task.active,gauge,,task,,"The number of active tasks in BackgroundProcessingPool (merges, mutations, fetches, or replication queue bookkeeping)",-1,clickhouse,
 clickhouse.background_pool.move.task.active,gauge,,task,,"The number of active tasks in BackgroundProcessingPool for moves",-1,clickhouse,
 clickhouse.background_pool.schedule.task.active,gauge,,task,,"The number of active tasks in BackgroundSchedulePool. This pool is used for periodic ReplicatedMergeTree tasks, like cleaning old data parts, altering data parts, replica re-initialization, etc.",-1,clickhouse,
+clickhouse.cache_dictionary.update_queue.batches,gauge,,,,"Number of 'batches' (a set of keys) in update queue in CacheDictionaries.",-1,clickhouse,
+clickhouse.cache_dictionary.update_queue.keys,gauge,,key,,"Exact number of keys in update queue in CacheDictionaries.",-1,clickhouse,
 clickhouse.thread.lock.context.waiting,gauge,,thread,,The number of threads waiting for lock in Context. This is global lock.,-1,clickhouse,
 clickhouse.query.insert.delayed,gauge,,query,,The number of INSERT queries that are throttled due to high number of active data parts for partition in a MergeTree table.,-1,clickhouse,
 clickhouse.dictionary.request.cache,gauge,,request,,The number of requests in fly to data sources of dictionaries of cache type.,0,clickhouse,

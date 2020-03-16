@@ -1,0 +1,25 @@
+# Profile for Cisco ASA 5525 devices
+
+extends:
+  - _base_cisco.yaml
+
+sysobjectid: 1.3.6.1.4.1.9.1.1408
+
+# 5505 1.3.6.1.4.1.9.1.745
+# 5555 1.3.6.1.4.1.9.1.1410
+
+metrics:
+  - MIB: ENTITY-SENSOR-MIB
+    table:
+      OID: 1.3.6.1.2.1.99.1.1
+      name: entPhySensorTable
+    symbols:
+      - OID: 1.3.6.1.2.1.99.1.1.1.4
+        name: entPhySensorValue
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.2.1.99.1.1.1.1
+          name: entPhySensorType
+        tag: sensor_type
+      - index: 1
+        tag: sensor_id

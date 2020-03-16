@@ -202,5 +202,16 @@
       "total_changes": 68,
       "type": "indexer",
       "updated_on": 1525771365
+    },
+    {
+      "node": "node1@127.0.0.1",
+      "changes_done": 44461,
+      "database": "my_db",
+      "pid": "<0.218.0>",
+      "progress": 58,
+      "started_on": 1371659228,
+      "total_changes": 76215,
+      "type": "database_compaction",
+      "updated_on": 1371659241
     }
   ]

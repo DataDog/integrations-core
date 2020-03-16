@@ -33,21 +33,27 @@ _Available for Agent versions >6.0_
    See the [sample tenable.d/conf.yaml][3] for available configuration options.
 
    ```yaml
-   logs:
-    - type: file
-      path: /opt/nessus/var/nessus/logs/backend.log
-      service: nessus_backend
-      source: tenable
+      logs:
+       - type: file
+         path: /opt/nessus/var/nessus/logs/backend.log
+         service: nessus_backend
+         source: tenable
 
-    - type: file
-      path: /opt/nessus/var/nessus/logs/www_server.log
-      service: nessus_webserver
-      source: tenable
+       - type: file
+         path: /opt/nessus/var/nessus/logs/www_server.log
+         service: nessus_webserver
+         source: tenable
    ```
 
     Customize the `path` and `service` parameter values if necessary for your environment.
 
-3. [Restart the Agent][7].
+3. [Restart the Agent][4].
+
+
+#### Log Data collected
+
+1. Nessus backend logs collect data on scan names, start time, stop time, durations, target(s)
+2. Nessus webserver logs collect data on access logs for neesus webserver including Client IPs, User agents, login attempt/success/failure.
 
 
 ### Metrics

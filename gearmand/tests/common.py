@@ -23,3 +23,5 @@ INSTANCE2 = {'server': HOST, 'port': PORT, 'tags': TAGS2}
 BAD_INSTANCE = {'server': HOST, 'port': BAD_PORT, 'tags': TAGS2}
 
 CHECK_NAME = 'gearmand'
+
+GEARMAND_VERSION = os.getenv('GEARMAND_VERSION')
