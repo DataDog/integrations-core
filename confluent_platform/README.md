@@ -81,7 +81,8 @@ See [metadata.csv][7] for a list of metrics provided by this check.
 
 ### Service Checks
 
-Confluent Platform does not include any service checks.
+**confluentplatform.can_connect**:<br>
+Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Confluent Platform / Kafka component, otherwise returns `OK`.
 
 ### Events
 
