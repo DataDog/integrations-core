@@ -105,11 +105,18 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][4].
 
+##### Trace collection
+
+Datadog APM integrates with Redis to see the traces across your distributed system. Trace collection is enabled by default in the Datadog Agent v6+. To start collecting traces:
+
+1. [Enable trace collection in Datadog][5].
+2. [Instrument your application that makes requests to Memchache][6].
+
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-PostgreSQL default logging is to `stderr`, and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix. Refer to the PostgreSQL [documentation][14] on this topic for additional details.
+PostgreSQL default logging is to `stderr`, and logs do not include detailed information. It is recommended to log into a file with additional details specified in the log line prefix. Refer to the PostgreSQL [documentation][16] on this topic for additional details.
 
 1. Logging is configured within the file `/etc/postgresql/<VERSION>/main/postgresql.conf`. For regular log results, including statement outputs, uncomment the following parameters in the log section:
 
@@ -126,7 +133,7 @@ PostgreSQL default logging is to `stderr`, and logs do not include detailed info
      #log_destination = 'eventlog'
    ```
 
-2. To gather detailed duration metrics and make them searchable in the Datadog interface, they should be configured inline with the statement themselves. See below for the recommended configuration differences from above and note that both `log_statement` and `log_duration` options are commented out. See discussion on this topic [here][15].
+2. To gather detailed duration metrics and make them searchable in the Datadog interface, they should be configured inline with the statement themselves. See below for the recommended configuration differences from above and note that both `log_statement` and `log_duration` options are commented out. See discussion on this topic [here][17].
 
     This config logs all statements, but to reduce the output to those which have a certain duration, set the `log_min_duration_statement` value to the desired minimum duration (in milliseconds):
 
@@ -167,7 +174,7 @@ PostgreSQL default logging is to `stderr`, and logs do not include detailed info
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][5] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
 
 ##### Metric collection
 
@@ -177,11 +184,27 @@ For containerized environments, see the [Autodiscovery Integration Templates][5]
 | `<INIT_CONFIG>`      | blank or `{}`                                                                   |
 | `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":5432,"username":"datadog","password":"<PASSWORD>"}` |
 
+##### Trace collection
+
+APM for containerized apps is supported on hosts running Agent v6+ but requires extra configuration to begin collecting traces.
+
+Required environment variables on the Agent container:
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<DD_API_KEY>` | `api_key`                                                                  |
+| `<DD_APM_ENABLED>`      | true                                                              |
+| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
+
+See [Tracing Docker Applications][18] and the [Kubernetes Daemon Setup][19] for a complete list of available environment variables and configuration.
+
+Then, [instrument your application container][6] and set `DD_AGENT_HOST` to the name of your Agent container.
+
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection documentation][6].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection documentation][8].
 
 | Parameter      | Value                                               |
 | -------------- | --------------------------------------------------- |
@@ -189,7 +212,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's status subcommand][7] and look for `postgres` under the Checks section.
+[Run the Agent's status subcommand][9] and look for `postgres` under the Checks section.
 
 ## Data Collected
 
@@ -197,7 +220,7 @@ Some of the metrics listed below require additional configuration, see the [samp
 
 ### Metrics
 
-See [metadata.csv][8] for a list of metrics provided by this integration.
+See [metadata.csv][10] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -214,27 +237,31 @@ Additional helpful documentation, links, and articles:
 
 ### FAQ
 
-- [PostgreSQL custom metric collection explained][9]
+- [PostgreSQL custom metric collection explained][11]
 
 ### Blog posts
 
-- [100x faster Postgres performance by changing 1 line][10]
-- [Key metrics for PostgreSQL monitoring][11]
-- [Collecting metrics with PostgreSQL monitoring tools][12]
-- [How to collect and monitor PostgreSQL data with Datadog][13]
+- [100x faster Postgres performance by changing 1 line][12]
+- [Key metrics for PostgreSQL monitoring][13]
+- [Collecting metrics with PostgreSQL monitoring tools][14]
+- [How to collect and monitor PostgreSQL data with Datadog][15]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/postgres/images/postgresql_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/integrations-core/blob/master/postgres/datadog_checks/postgres/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/autodiscovery/integrations/
-[6]: https://docs.datadoghq.com/agent/docker/log/
-[7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[8]: https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv
-[9]: https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained
-[10]: https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line
-[11]: https://www.datadoghq.com/blog/postgresql-monitoring
-[12]: https://www.datadoghq.com/blog/postgresql-monitoring-tools
-[13]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog
-[14]: https://www.postgresql.org/docs/11/runtime-config-logging.html
-[15]: https://www.postgresql.org/message-id/20100210180532.GA20138@depesz.com
+[5]: https://docs.datadoghq.com/tracing/send_traces/
+[6]: https://docs.datadoghq.com/tracing/setup/
+[7]: https://docs.datadoghq.com/agent/autodiscovery/integrations/
+[8]: https://docs.datadoghq.com/agent/docker/log/
+[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[10]: https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv
+[11]: https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained
+[12]: https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line
+[13]: https://www.datadoghq.com/blog/postgresql-monitoring
+[14]: https://www.datadoghq.com/blog/postgresql-monitoring-tools
+[15]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog
+[16]: https://www.postgresql.org/docs/11/runtime-config-logging.html
+[17]: https://www.postgresql.org/message-id/20100210180532.GA20138@depesz.com
+[18]: https://docs.datadoghq.com/agent/docker/apm/?tab=java
+[19]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
