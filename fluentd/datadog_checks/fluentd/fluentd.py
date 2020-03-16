@@ -39,7 +39,9 @@ class Fluentd(AgentCheck):
         parsed_url = urlparse(self.url)
         self.monitor_agent_host = parsed_url.hostname
         self.monitor_agent_port = parsed_url.port or 24220
-        self.config_url = '{}:{}/api/config.json'.format(self.monitor_agent_host, self.monitor_agent_port)
+        self.config_url = '{}://{}:{}/api/config.json'.format(
+            parsed_url.scheme, self.monitor_agent_host, self.monitor_agent_port
+        )
 
     """Tracks basic fluentd metrics via the monitor_agent plugin
     * number of retry_count
