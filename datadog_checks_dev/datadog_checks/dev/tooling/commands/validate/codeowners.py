@@ -1,15 +1,11 @@
-# (C) Datadog, Inc. 2018-present
+# (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
-import os
 import re
 
 import click
 
-from ....utils import file_exists, read_file, write_file
-from ...constants import get_root
-from ...utils import get_codeowners, get_valid_checks, get_valid_integrations, load_manifest
+from ...utils import get_codeowners, get_valid_integrations
 from ..console import CONTEXT_SETTINGS, echo_failure, echo_success
 
 DIRECTORY_REGEX = re.compile(r"\/(.*)\/$")
