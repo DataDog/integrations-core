@@ -21,7 +21,7 @@ files:
           - Streams
           - REST Proxy
         For each component, you need to create a separate instance to collect its jmx metrics.
-        List of default metrics collected are listed in `metrics.yaml` file.
+        The list of metrics collected by default are listed in `metrics.yaml`.
     options:
     - template: instances/jmx
     - template: instances/default
