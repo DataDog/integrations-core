@@ -75,11 +75,11 @@ def is_resource_excluded_by_filters(mor, infrastructure_data, resource_filters):
 
     if hostname_filter and isinstance(mor, vim.VirtualMachine):
         host = infrastructure_data[mor].get("runtime.host")
-        hostname = infrastructure_data.get(host, {}).get("name", "")
+        hostname = infrastructure_data.get(host, {}).get("name", "")  # type: ignore
         if match_any_regex(hostname, hostname_filter):
             return False
     if guest_hostname_filter and isinstance(mor, vim.VirtualMachine):
-        guest_hostname = infrastructure_data.get(mor, {}).get("guest.hostName", "")
+        guest_hostname = infrastructure_data.get(mor, {}).get("guest.hostName", "")  # type: ignore
         if match_any_regex(guest_hostname, guest_hostname_filter):
             return False
 
