@@ -394,10 +394,7 @@ class VSphereCheck(AgentCheck):
         why we should never batch cluster metrics with anything else.
         """
         # Safeguard, let's avoid collecting multiple resources in the same call
-        mors_filtered = []  # type: List[vim.ManagedEntity]
-        for m in mors:
-            if isinstance(m, resource_type):  # type: ignore
-                mors_filtered.append(m)
+        mors_filtered = [m for m in mors if isinstance(m, resource_type)]  # type: List[vim.ManagedEntity]
 
         if resource_type == vim.ClusterComputeResource:
             # Cluster metrics are unpredictable and a single call can max out the limit. Always collect them one by one.
