@@ -72,10 +72,10 @@ class VSphereAPI(object):
         """
         context = None
         if not self.config.ssl_verify:
-            context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+            context = ssl.SSLContext(PROTOCOL_TLS_CLIENT)
             context.verify_mode = ssl.CERT_NONE
         elif self.config.ssl_capath:
-            context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            context = ssl.SSLContext(PROTOCOL_TLS_CLIENT)
             context.verify_mode = ssl.CERT_REQUIRED
             context.load_verify_locations(capath=self.config.ssl_capath)
 
