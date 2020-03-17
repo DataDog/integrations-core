@@ -8,14 +8,17 @@ import re
 import ssl
 import time
 import traceback
+from collections import defaultdict
 
 from pyVim import connect
 from pyVmomi import vim  # pylint: disable=E0611
+from pyVmomi import vmodl
 
 from datadog_checks.config import _is_affirmative
 from datadog_checks.checks import AgentCheck
 from datadog_checks.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.checks.libs.vmware.all_metrics import ALL_METRICS
+from datadog_checks.checks.libs.vmware.vsphere_metrics import VSPHERE_METRICS
 from datadog_checks.checks.libs.thread_pool import Pool
 from datadog_checks.checks.libs.timer import Timer
 from .common import SOURCE_TYPE
@@ -40,6 +43,9 @@ REFRESH_MORLIST_INTERVAL = 3 * 60
 REFRESH_METRICS_METADATA_INTERVAL = 10 * 60
 # The amount of jobs batched at the same time in the queue to query available metrics
 BATCH_MORLIST_SIZE = 50
+# Maximum number of objects to collect at once by the propertyCollector. The size of the response returned by the query
+# is significantly lower than the size of the queryPerf response, so allow specifying a different value.
+BATCH_COLLECTOR_SIZE = 500
 
 REALTIME_RESOURCES = {'vm', 'host'}
 
@@ -49,6 +55,9 @@ RESOURCE_TYPE_MAP = {
     'host': vim.HostSystem,
     'datastore': vim.Datastore
 }
+
+RESOURCE_TYPE_METRICS = (vim.VirtualMachine, vim.HostSystem, vim.Datacenter, vim.Datastore)
+RESOURCE_TYPE_NO_METRIC = (vim.ComputeResource, vim.Folder)
 
 # Time after which we reap the jobs that clog the queue
 # TODO: use it
@@ -95,6 +104,9 @@ class VSphereCheck(AgentCheck):
 
         # Event configuration
         self.event_config = {}
+        # Batch size for property collector
+        self.batch_collector_size = init_config.get("batch_property_collector_size", BATCH_COLLECTOR_SIZE)
+
         # Caching resources, timeouts
         self.cache_times = {}
         for instance in self.instances:
@@ -275,7 +287,7 @@ class VSphereCheck(AgentCheck):
             if (i_key not in self.metrics_metadata
                     or metric.counterId not in self.metrics_metadata[i_key]):
                 continue
-            if self.metrics_metadata[i_key][metric.counterId]['name'] in BASIC_METRICS:
+            if self.metrics_metadata[i_key][metric.counterId]['name'] in VSPHERE_METRICS:
                 wanted_metrics.append(metric)
 
         return wanted_metrics
@@ -332,64 +344,171 @@ class VSphereCheck(AgentCheck):
         If it's a node we want to query metric for, queue it in `self.morlist_raw` that
         will be processed by another job.
         """
-        def _get_parent_tags(mor):
-            tags = []
-            if mor.parent:
-                tag = []
-                if isinstance(mor.parent, vim.HostSystem):
-                    tag.append(u'vsphere_host:{}'.format(mor.parent.name))
-                elif isinstance(mor.parent, vim.Folder):
-                    tag.append(u'vsphere_folder:{}'.format(mor.parent.name))
-                elif isinstance(mor.parent, vim.ComputeResource):
-                    if isinstance(mor.parent, vim.ClusterComputeResource):
-                        tag.append(u'vsphere_cluster:{}'.format(mor.parent.name))
-                    tag.append(u'vsphere_compute:{}'.format(mor.parent.name))
-                elif isinstance(mor.parent, vim.Datacenter):
-                    tag.append(u'vsphere_datacenter:{}'.format(mor.parent.name))
+        def _get_parent_tags(mor,all_mors):
+            properties = all_mors.get(mor, {})
+            parent = properties.get('parent')
+            parent_mor = all_mors.get(parent, {})
+            if parent and parent_mor:
+                tags = []
+                parent_name = parent_mor.get('name', 'unknown')
+                if isinstance(parent, vim.HostSystem):
+                    tags.append(u'vsphere_host:{}'.format(parent_name))
+                elif isinstance(parent, vim.Folder):
+                    tags.append(u'vsphere_folder:{}'.format(parent_name))
+                elif isinstance(parent, vim.ComputeResource):
+                    if isinstance(parent, vim.ClusterComputeResource):
+                        tags.append(u'vsphere_cluster:{}'.format(parent_name))
+                    tags.append(u'vsphere_compute:{}'.format(parent_name))
+                elif isinstance(parent, vim.Datacenter):
+                    tags.append(u'vsphere_datacenter:{}'.format(parent_name))
 
-                tags = _get_parent_tags(mor.parent)
-                if tag:
-                    tags.extend(tag)
+                parent_tags = _get_parent_tags(parent, all_mors)
+                parent_tags.extend(tags)
+                return parent_tags
 
-            return tags
+            return []
 
-        def _get_all_objs(content, vimtype, regexes=None, include_only_marked=False, tags=[]):
+        def _collect_mors_and_attributes(server_instance):
+            resources = list()
+            for resource_type in RESOURCE_TYPE_MAP.values():
+                resources.append(resource_type)
+
+            #add the non metric types for parents info
+            resources.extend(RESOURCE_TYPE_NO_METRIC)
+
+            content = server_instance.content
+            view_ref = content.viewManager.CreateContainerView(content.rootFolder, resources, True)
+
+            # Object used to query MORs as well as the attributes we require in one API call
+            # See https://code.vmware.com/apis/358/vsphere#/doc/vmodl.query.PropertyCollector.html
+            collector = content.propertyCollector
+
+            # Specify the root object from where we collect the rest of the objects
+            obj_spec = vmodl.query.PropertyCollector.ObjectSpec()
+            obj_spec.obj = view_ref
+            obj_spec.skip = True
+
+            # Specify the attribute of the root object to traverse to obtain all the attributes
+            traversal_spec = vmodl.query.PropertyCollector.TraversalSpec()
+            traversal_spec.path = "view"
+            traversal_spec.skip = False
+            traversal_spec.type = view_ref.__class__
+            obj_spec.selectSet = [traversal_spec]
+
+            property_specs = []
+            # Specify which attributes we want to retrieve per object
+            for resource in resources:
+                property_spec = vmodl.query.PropertyCollector.PropertySpec()
+                property_spec.type = resource
+                property_spec.pathSet = ["name", "parent", "customValue"]
+                if resource == vim.VirtualMachine:
+                    property_spec.pathSet.append("runtime.powerState")
+                    property_spec.pathSet.append("runtime.host")
+                    property_spec.pathSet.append("config.instanceUuid")
+                elif resource == vim.HostSystem:
+                    property_spec.pathSet.append("summary.hardware.uuid")
+
+                property_specs.append(property_spec)
+
+            # Create our filter spec from the above specs
+            filter_spec = vmodl.query.PropertyCollector.FilterSpec()
+            filter_spec.objectSet = [obj_spec]
+            filter_spec.propSet = property_specs
+
+            retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
+            # To limit the number of objects retrieved per call.
+            # If batch_collector_size is 0, collect maximum number of objects.
+            retr_opts.maxObjects = self.batch_collector_size or None
+
+            # Collect the objects and their properties
+            res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
+            objects = res.objects
+            # Results can be paginated
+            while res.token is not None:
+                res = collector.ContinueRetrievePropertiesEx(res.token)
+                objects.extend(res.objects)
+
+            mor_attrs = {}
+            error_counter = 0
+            for obj in objects:
+                if obj.missingSet and error_counter < 10:
+                    for prop in obj.missingSet:
+                        error_counter += 1
+                        self.log.error(
+                            "Unable to retrieve property %s for object %s: %s",
+                                                prop.path,str(obj.obj),str(prop.fault))
+                        if error_counter == 10:
+                            self.log.error("Too many errors during object collection, stop logging")
+                            break
+                mor_attrs[obj.obj] = {prop.name: prop.val for prop in obj.propSet} if obj.propSet else {}
+
+            return mor_attrs
+
+        def _get_all_objs(server_instance, regexes=None, include_only_marked=False, tags=[]):
             """
-            Get all the vsphere objects associated with a given type
+            Get all the vsphere objects of all types
             """
-            obj_list = []
-            container = content.viewManager.CreateContainerView(
-                content.rootFolder,
-                [RESOURCE_TYPE_MAP[vimtype]],
-                True)
+            obj_list = defaultdict(list)
 
-            for c in container.view:
+            # Collect mors and their required attributes
+            all_mors = _collect_mors_and_attributes(server_instance)
+            # Add rootFolder since it is not explored by the propertyCollector
+            root_mor = server_instance.content.rootFolder
+            all_mors[root_mor] = {"name": root_mor.name, "parent": None}
+
+            for mor, properties in all_mors.items():
                 instance_tags = []
-                if not self._is_excluded(c, regexes, include_only_marked):
-                    hostname = c.name
-                    if c.parent:
-                        instance_tags += _get_parent_tags(c)
+                if isinstance(mor, RESOURCE_TYPE_METRICS) and not self._is_excluded(mor, properties, regexes, include_only_marked):
+                    hostname = properties.get("name", "unknown")
+                    if properties.get("parent"):
+                        instance_tags.extend(_get_parent_tags(mor, all_mors))
 
                     vsphere_type = None
-                    if isinstance(c, vim.VirtualMachine):
-                        vsphere_type = u'vsphere_type:vm'
-                        if c.runtime.powerState == vim.VirtualMachinePowerState.poweredOff:
-                            continue
-                        host = c.runtime.host.name
-                        instance_tags.append(u'vsphere_host:{}'.format(host))
-                    elif isinstance(c, vim.HostSystem):
-                        vsphere_type = u'vsphere_type:host'
-                    elif isinstance(c, vim.Datastore):
-                        vsphere_type = u'vsphere_type:datastore'
-                        instance_tags.append(u'vsphere_datastore:{}'.format(c.name))
-                        hostname = None
-                    elif isinstance(c, vim.Datacenter):
-                        vsphere_type = u'vsphere_type:datacenter'
-                        hostname = None
+                    entity_type = None
+                    entity_id = None
+                    mor_type = None
 
-                    if vsphere_type:
-                        instance_tags.append(vsphere_type)
-                    obj_list.append(dict(mor_type=vimtype, mor=c, hostname=hostname, tags=tags+instance_tags))
+                    if isinstance(mor, vim.VirtualMachine):
+                        power_state = properties.get("runtime.powerState")
+                        if power_state == vim.VirtualMachinePowerState.poweredOn:
+                            host_mor = properties.get("runtime.host")
+                            host_props = all_mors.get(host_mor, {})
+                            host = "unknown"
+                            if host_mor and host_props:
+                                host = host_props.get("name", "unknown")
+                                if self._is_excluded(host_mor, host_props, regexes, include_only_marked):
+                                    self.log.debug("Skipping VM because host %s is excluded by rule %s.", host, regexes.get('host_include'))
+                                    continue
+                            instance_tags.append('vsphere_host:{}'.format(host))
+                            vsphere_type = u'vsphere_type:vm'
+                            entity_id = properties.get("config.instanceUuid","")
+                            entity_type = "vm"
+                            mor_type = "vm"
+                    elif isinstance(mor, vim.HostSystem):
+                        vsphere_type = u'vsphere_type:host'
+                        mor_type = "host"
+                        entity_type = "node"
+                        entity_id = properties.get("summary.hardware.uuid","")
+                    elif isinstance(mor, vim.Datastore):
+                        vsphere_type = u'vsphere_type:datastore'
+                        instance_tags.append(u'vsphere_datastore:{}'.format(properties.get("name", "unknown")))
+                        hostname = None
+                        mor_type = "datastore"
+                    elif isinstance(mor, vim.Datacenter):
+                        vsphere_type = u'vsphere_type:datacenter'
+                        instance_tags.append(u'vsphere_datacenter:{}'.format(properties.get("name", "unknown")))
+                        hostname = None
+                        mor_type = "datacenter"
+
+                    if mor_type:
+                        if vsphere_type:
+                            instance_tags.append(vsphere_type)
+                        obj_dict = dict(mor_type=mor_type, mor=mor, hostname=hostname, tags=tags+instance_tags)
+                        if entity_type:
+                            obj_dict.update(entity_type=entity_type)
+                        if entity_id:
+                            obj_dict.update(entity_id=entity_id)
+                        obj_list[mor_type].append(obj_dict)
 
             return obj_list
 
@@ -400,14 +519,8 @@ class VSphereCheck(AgentCheck):
             if i_key not in self.morlist_raw:
                 self.morlist_raw[i_key] = {}
 
-            for resource in sorted(RESOURCE_TYPE_MAP):
-                self.morlist_raw[i_key][resource] = _get_all_objs(
-                    server_instance.RetrieveContent(),
-                    resource,
-                    regexes,
-                    include_only_marked,
-                    tags
-                )
+            all_objs = _get_all_objs(server_instance,regexes,include_only_marked,tags)
+            self.morlist_raw[i_key] = all_objs
 
         # collect...
         self.pool.apply_async(
@@ -416,7 +529,7 @@ class VSphereCheck(AgentCheck):
         )
 
     @staticmethod
-    def _is_excluded(obj, regexes, include_only_marked):
+    def _is_excluded(obj, properties, regexes, include_only_marked):
         """
         Return `True` if the given host or virtual machine is excluded by the user configuration,
         i.e. violates any of the following rules:
@@ -442,7 +555,7 @@ class VSphereCheck(AgentCheck):
             # Based on `include_only_marked`
             if include_only_marked:
                 monitored = False
-                for field in obj.customValue:
+                for field in properties.get('customValue',''):
                     if field.value == VM_MONITORING_FLAG:
                         monitored = True
                         break  # we shall monitor
@@ -653,13 +766,28 @@ class VSphereCheck(AgentCheck):
                 if not mor['hostname']:  # no host tags available
                     tags.extend(mor['tags'])
 
+                if custom_tags:
+                    tags.extend(custom_tags)
+
+                #add the entity id and type to tags
+                entity_tags = []
+                entity_id = mor.get('entity_id',None)
+                entity_type = mor.get('entity_type',None)
+                if entity_id:
+                    entity_tags.append('entity_id:%s' %entity_id)
+                if entity_type:
+                    entity_tags.append('entity_type:%s' %entity_type)
+
+                if entity_tags:
+                    tags.extend(entity_tags)
+
                 # vsphere "rates" should be submitted as gauges (rate is
                 # precomputed).
                 self.gauge(
                     "vsphere.%s" % metric_name,
                     value,
                     hostname=mor['hostname'],
-                    tags=['instance:%s' % instance_name] + custom_tags
+                    tags=tags
                 )
 
         # ## <TEST-INSTRUMENTATION>
