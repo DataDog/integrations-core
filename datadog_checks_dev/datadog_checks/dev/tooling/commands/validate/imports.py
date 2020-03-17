@@ -8,117 +8,71 @@ import click
 
 from ...constants import get_root
 from ...utils import complete_valid_checks, get_valid_integrations
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning, echo_debug
+from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
 
 
-# .base - error if not there, insert for fix
-DEPRECATED_MODULES = set(
-    [
-        'datadog_checks.checks',
-        'datadog_checks.checks.prometheus_check',
-        'datadog_checks.checks.openmetrics',
-        'datadog_checks.checks.openmetrics.mixins',
-        'datadog_checks.checks.openmetrics.base_check',
-        'datadog_checks.checks.win',
-        'datadog_checks.checks.win.winpdh',
-        'datadog_checks.checks.win.wmi',
-        'datadog_checks.checks.win.wmi.counter_type',
-        'datadog_checks.checks.win.wmi.sampler',
-        'datadog_checks.checks.win.winpdh_base',
-        'datadog_checks.checks.win.winpdh_stub',
-        'datadog_checks.checks.libs',
-        'datadog_checks.checks.libs.wmi',
-        'datadog_checks.checks.libs.wmi.sampler',
-        'datadog_checks.checks.libs.thread_pool',
-        'datadog_checks.checks.libs.timer',
-        'datadog_checks.checks.libs.vmware',
-        'datadog_checks.checks.libs.vmware.basic_metrics',
-        'datadog_checks.checks.libs.vmware.all_metrics',
-        'datadog_checks.checks.network',
-        'datadog_checks.checks.winwmi_check',
-        'datadog_checks.checks.prometheus',
-        'datadog_checks.checks.prometheus.mixins',
-        'datadog_checks.checks.prometheus.prometheus_base',
-        'datadog_checks.checks.prometheus.base_check',
-        'datadog_checks.checks.base',
-        'datadog_checks.checks.network_checks',
-        'datadog_checks.config',
-        'datadog_checks.errors',
-        'datadog_checks.log',
-        'datadog_checks.stubs',
-        'datadog_checks.stubs.aggregator',
-        'datadog_checks.stubs._util',
-        'datadog_checks.stubs.datadog_agent',
-        'datadog_checks.utils',
-        'datadog_checks.utils.tracing',
-        'datadog_checks.utils.proxy',
-        'datadog_checks.utils.containers',
-        'datadog_checks.utils.timeout',
-        'datadog_checks.utils.tailfile',
-        'datadog_checks.utils.platform',
-        'datadog_checks.utils.common',
-        'datadog_checks.utils.subprocess_output',
-        'datadog_checks.utils.prometheus',
-        'datadog_checks.utils.prometheus.functions',
-        'datadog_checks.utils.prometheus.metrics_pb2',
-        'datadog_checks.utils.headers',
-        'datadog_checks.utils.limiter',
-    ]
-)
+def validate_import(filepath, check):
+    """Validate imports are coming from the correct base package."""
+    # almost every case is of the form `from datadog_checks.. import ..`
+    # we want to ensure that the imports are from `datadog_checks.base...`
+    # except for cases where its importing from actual check code
 
-
-def validate_import(filepath):
     success = True
     lines = []
 
     with open(filepath) as f:
         for num, line in enumerate(f):
-            if 'import' in line:
-                # almost every case is of the form `from datadog_checks.. import ..`
-                try:
-                    parts = line.split('import', 1)[0].split()
-                except Exception as e:
-                    echo_warning(f'ERROR processing line: {line}')
-                    continue
-
-                for part in parts:
-                    if 'datadog_checks' in part and part in DEPRECATED_MODULES:
-                        success = False
-                        lines.append((num, line))
+            if all(
+                (
+                    'import' in line,
+                    'datadog_checks' in line,
+                    'datadog_checks.base' not in line,
+                    f'datadog_checks.{check}' not in line,
+                    'datadog_checks.dev' not in line,
+                )
+            ):
+                success = False
+                lines.append((num, line))
     return success, lines
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate proper base imports')
-@click.option('--include-extras', '-i', is_flag=True, help='Include optional fields')
-@click.argument('check', autocompletion=complete_valid_checks, required=False)
+@click.argument('checks', nargs=-1, autocompletion=complete_valid_checks, required=False)
 @click.pass_context
-def imports(ctx, check, include_extras):
+def imports(ctx, checks):
     """Validate proper imports in checks."""
 
+    validation_fails = {}
     integrations_root = get_root()
+    all_checks = sorted(get_valid_integrations())
 
-    validation_results = {}
+    if checks:
+        invalid_checks = [c for c in checks if c not in all_checks]
+        if invalid_checks:
+            abort(f'Invalid checks: {invalid_checks}')
+        all_checks = sorted(checks)
 
     echo_info("Validating imports avoiding deprecated modules ...")
-    for check_name in sorted(get_valid_integrations()):
-
+    for check_name in sorted(all_checks):
         echo_debug(f'Checking {check_name}')
-        for root, dirs, files in os.walk(os.path.join(integrations_root, check_name)):
-            for i, d in enumerate(dirs):
-                if d == '.tox':
-                    dirs.pop(i)
 
-            for f in files:
-                if f.endswith('.py'):
-                    fpath = os.path.join(root, f)
-                    success, lines = validate_import(fpath)
+        # focus on check and testing directories
+        bases = [os.path.join(integrations_root, check_name, base) for base in ('datadog_checks', 'tests')]
+        for base in bases:
+            for root, dirs, files in os.walk(base):
+                for f in files:
+                    if f.endswith('.py'):
+                        fpath = os.path.join(root, f)
+                        success, lines = validate_import(fpath, check_name)
 
-                    if not success:
-                        validation_results[fpath] = lines
+                        if not success:
+                            validation_fails[fpath] = lines
 
-    if validation_results:
-        echo_warning(f'Validation failed:')
-        for f, lines in validation_results.items():
+    if validation_fails:
+        num_files = len(validation_fails)
+        num_failures = sum(len(lines) for lines in validation_fails.values())
+        echo_failure(f'\nValidation failed: {num_failures} deprecated imports found in {num_files} files:\n')
+        for f, lines in validation_fails.items():
             for line in lines:
                 linenum, linetext = line
                 echo_warning(f'{f}: line # {linenum}', indent='  ')
@@ -128,10 +82,3 @@ def imports(ctx, check, include_extras):
 
     else:
         echo_success('Validation passed!')
-
-
-
-
-
-
-
