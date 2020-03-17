@@ -22,27 +22,30 @@ The Agent can collect data from Supervisor via HTTP server or UNIX socket. The A
 
 Add a block like this to Supervisor's main configuration file (e.g. `/etc/supervisor.conf`):
 
-```text
+```ini
 [inet_http_server]
 port=localhost:9001
-username=user  # optional
-password=pass  # optional
+;username=user  # optional
+;password=pass  # optional
 ```
 
 ##### UNIX socket
 
 Add blocks like these to `/etc/supervisor.conf` (if they're not already there):
 
-```text
+```ini
 [supervisorctl]
-serverurl=unix:///var/run//supervisor.sock
+serverurl=unix:///var/run/supervisor.sock
 
 [unix_http_server]
 file=/var/run/supervisor.sock
 chmod=777
+chown=nobody:nogroup
+;username=user  # optional
+;password=pass  # optional
 ```
 
-If Supervisor is running as root, make sure `chmod` is set so that non-root users (i.e. dd-agent) can read the socket.
+If Supervisor is running as root, make sure `chmod` or `chown` is set so that non-root users (i.e. dd-agent) can read the socket.
 
 ---
 
@@ -58,14 +61,13 @@ Edit the `supervisord.d/conf.yaml` file in the `conf.d/` folder at the root of y
 init_config:
 
 instances:
-  # used to tag service checks and metrics, i.e. supervisor_server:supervisord0
+  ## Used to tag service checks and metrics, i.e. supervisor_server:supervisord0
   - name: supervisord0
     host: localhost
     port: 9001
-  #To collect from the socket instead
-  #- name: supervisord0
-  #  host: http://127.0.0.1
-  #  socket: unix:///var/run//supervisor.sock
+  ## To collect from the socket instead
+  # - name: supervisord0
+  #   socket: unix:///var/run/supervisor.sock
 ```
 
 Use the `proc_names` and/or `proc_regex` options to list processes you want the Agent to collect metrics on and create service checks for. If you don't provide either option, the Agent tracks _all_ child processes of Supervisor. If you provide both options, the Agent tracks processes from both lists (i.e. the two options are not mutually exclusive).
