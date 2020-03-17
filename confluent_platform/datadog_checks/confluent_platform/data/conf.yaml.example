@@ -80,51 +80,51 @@ instances:
 
     ## @param tools_jar_path - string - optional
     ## The tool.jar path to be used with the `process_name_regex` parameter,
-    ## e.g. /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+    ## for example: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
     #
     # tools_jar_path: <TOOLS_JAR_PATH>
 
     ## @param name - string - optional
-    ## Set your instance name that will be used as `instance` tag.
+    ## Set the instance name to be used as the `instance` tag.
     #
     # name: <NAME>
 
     ## @param java_bin_path - string - optional
-    ## `java_bin_path` should be set if the agent cannot find your java executable
+    ## `java_bin_path` should be set if the Agent cannot find your java executable.
     #
     # java_bin_path: <JAVA_BIN_PATH>
 
     ## @param java_options - string - optional
-    ## List of Java JVM options e.g. "-Xmx200m -Xms50m".
+    ## A list of Java JVM options, for example: "-Xmx200m -Xms50m".
     #
     # java_options: <JAVA_OPTIONS>
 
     ## @param trust_store_path - string - optional
-    ## Path to your trusted store.
-    ## `trust_store_path` should be set if ssl is enabled.
+    ## The path to your trusted store.
+    ## `trust_store_path` should be set if SSL is enabled.
     #
     # trust_store_path: <TRUST_STORE_PATH>
 
     ## @param trust_store_password - string - optional
-    ## Password for your TrustStore.jks file.
-    ## `trust_store_password` should be set if ssl is enabled.
+    ## The password for your TrustStore.jks file.
+    ## `trust_store_password` should be set if SSL is enabled.
     #
     # trust_store_password: <TRUST_STORE_PASSWORD>
 
     ## @param key_store_path - string - optional
-    ## Path to your key store.
+    ## The path to your key store.
     ## `key_store_path` should be set if client authentication is enabled on the target JVM.
     #
     # key_store_path: <KEY_STORE_PATH>
 
     ## @param key_store_password - string - optional
-    ## Password to your key store.
+    ## The password to your key store.
     ## `key_store_password` should be set if client authentication is enabled on the target JVM.
     #
     # key_store_password: <KEY_STORE_PASSWORD>
 
     ## @param rmi_registry_ssl - boolean - optional - default: false
-    ## Whether or not the agent should connect to the rmi registry using ssl.
+    ## Whether or not the Agent should connect to the RMI registry using SSL.
     #
     # rmi_registry_ssl: false
 
