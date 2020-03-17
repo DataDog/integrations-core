@@ -85,7 +85,7 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 
 ### Events
 
-Confluent Platform does not include any events.
+The Confluent Platform check does not include any events.
 
 ## Troubleshooting
 
