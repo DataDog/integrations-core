@@ -22,7 +22,7 @@ from .common import (
     HEROES_TABLE_SERVERS,
     HOST,
     MALFORMED_VERSION_STRING_PARAMS,
-    RETHINKDB_VERSION,
+    RAW_VERSION,
     SERVER_PORTS,
     TABLE_STATUS_SERVICE_CHECKS,
     TAGS,
@@ -193,7 +193,7 @@ def test_version_metadata(instance, datadog_agent):
 
     check.check(instance)
 
-    raw_version = RETHINKDB_VERSION
+    raw_version = RAW_VERSION
     version, _, build = raw_version.partition('~')
     major, minor, patch = version.split('.')
     version_metadata = {

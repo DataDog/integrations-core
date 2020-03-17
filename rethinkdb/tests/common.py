@@ -15,8 +15,8 @@ HERE = get_here()
 
 CHECK_NAME = 'rethinkdb'
 
-IMAGE = 'rethinkdb:2.4.0'
-RETHINKDB_VERSION = '2.4.0~0bionic'
+IMAGE = os.environ.get('RETHINKDB_IMAGE', '')
+RAW_VERSION = os.environ.get('RETHINKDB_RAW_VERSION', '')
 
 HOST = get_docker_hostname()
 
