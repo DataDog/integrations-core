@@ -4,17 +4,11 @@
 import ssl
 
 import pytest
-import six
 from mock import ANY, MagicMock, patch
 from pyVmomi import vim, vmodl
 
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.config import VSphereConfig
-
-if six.PY3:
-    EXPECTED_PROTOCOL = ssl.PROTOCOL_TLS_CLIENT
-else:
-    EXPECTED_PROTOCOL = ssl.PROTOCOL_TLS
 
 
 def test_ssl_verify_false(realtime_instance):
@@ -30,7 +24,7 @@ def test_ssl_verify_false(realtime_instance):
         VSphereAPI(config, MagicMock())
 
         actual_context = smart_connect.call_args.kwargs['sslContext']  # type: ssl.SSLContext
-        assert actual_context.protocol == EXPECTED_PROTOCOL
+        assert actual_context.protocol == ssl.PROTOCOL_TLS
         assert actual_context.verify_mode == ssl.CERT_NONE
         load_verify_locations.assert_not_called()
 
@@ -48,8 +42,9 @@ def test_ssl_cert(realtime_instance):
         VSphereAPI(config, MagicMock())
 
         actual_context = smart_connect.call_args.kwargs['sslContext']  # type: ssl.SSLContext
-        assert actual_context.protocol == EXPECTED_PROTOCOL
+        assert actual_context.protocol == ssl.PROTOCOL_TLS
         assert actual_context.verify_mode == ssl.CERT_REQUIRED
+        assert actual_context.check_hostname is True
         load_verify_locations.assert_called_with(capath='/dummy/path')
 
 
