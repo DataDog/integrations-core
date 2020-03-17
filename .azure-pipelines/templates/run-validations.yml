@@ -9,10 +9,6 @@ steps:
   - script: ddev validate agent-reqs
     displayName: 'Validate Agent requirements'
 
-- ${{ if eq(parameters.repo, 'extras') }}:
-  - script: ddev validate codeowners
-    displayName: 'Validate codeowners file'
-
 - script: ddev validate config
   displayName: 'Validate default configuration files'
 
