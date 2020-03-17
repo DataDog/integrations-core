@@ -19,12 +19,6 @@ INTEGRATION_ID_REGEX = r'^[a-z][a-z0-9-]{0,254}(?<!-)$'
 
 DEPRECATED_MODULES = set(
     [
-        'datadog_checks.stubs',
-        'datadog_checks.stubs.aggregator',
-        'datadog_checks.stubs._util',
-        'datadog_checks.stubs.datadog_agent',
-        'datadog_checks.config',
-        'datadog_checks.log',
         'datadog_checks.checks',
         'datadog_checks.checks.prometheus_check',
         'datadog_checks.checks.openmetrics',
@@ -53,6 +47,13 @@ DEPRECATED_MODULES = set(
         'datadog_checks.checks.prometheus.base_check',
         'datadog_checks.checks.base',
         'datadog_checks.checks.network_checks',
+        'datadog_checks.config',
+        'datadog_checks.errors',
+        'datadog_checks.log',
+        'datadog_checks.stubs',
+        'datadog_checks.stubs.aggregator',
+        'datadog_checks.stubs._util',
+        'datadog_checks.stubs.datadog_agent',
         'datadog_checks.utils',
         'datadog_checks.utils.tracing',
         'datadog_checks.utils.proxy',
@@ -75,7 +76,6 @@ def validate_import(filepath):
     success = True
     lines = []
 
-    #echo_debug(f'validating file {filepath}', indent='  ')
     with open(filepath) as f:
         for num, line in enumerate(f):
             if 'import' in line:
@@ -83,6 +83,7 @@ def validate_import(filepath):
                 try:
                     parts = line.split('import', 1)[0].split()
                 except Exception as e:
+                    echo_warning(f'ERROR processing line: {line}')
                     continue
 
                 for part in parts:
