@@ -3,10 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
+import datetime as dt
 from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
-from datetime import datetime, timedelta
 from typing import Any, Dict, Generator, Iterable, List, Set, Type, TypeVar, cast
 
 from pyVmomi import vim, vmodl
@@ -64,7 +64,7 @@ class VSphereCheck(AgentCheck):
         instance = cast(InstanceConfig, self.instance)
         self.config = VSphereConfig(instance, self.log)
 
-        self.latest_event_query = datetime.now()
+        self.latest_event_query = dt.datetime.now()
         self.infrastructure_cache = InfrastructureCache(interval_sec=self.config.refresh_infrastructure_cache_interval)
         self.metrics_metadata_cache = MetricsMetadataCache(
             interval_sec=self.config.refresh_metrics_metadata_cache_interval
@@ -343,7 +343,7 @@ class VSphereCheck(AgentCheck):
                     else:
                         # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
                         # contain at least one element
-                        query_spec.startTime = datetime.now() - timedelta(hours=2)
+                        query_spec.startTime = dt.datetime.now() - dt.timedelta(hours=2)
                     query_specs.append(query_spec)
                 if query_specs:
                     yield query_specs
@@ -476,7 +476,7 @@ class VSphereCheck(AgentCheck):
             # Ignore them for next pass
             self.log.warning("Unable to fetch Events %s", e)
 
-        self.latest_event_query = self.api.get_latest_event_timestamp() + timedelta(seconds=1)
+        self.latest_event_query = self.api.get_latest_event_timestamp() + dt.timedelta(seconds=1)
 
     def check(self, _):
         # type: (Any) -> None

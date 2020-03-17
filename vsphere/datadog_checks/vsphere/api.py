@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import datetime as dt
 import functools
 import ssl
-from datetime import datetime
 from typing import Any, Callable, List, TypeVar, cast
 
 from pyVim import connect
@@ -207,7 +207,7 @@ class VSphereAPI(object):
 
     @smart_retry
     def get_new_events(self, start_time):
-        # type: (datetime) -> List[vim.event.Event]
+        # type: (dt.datetime) -> List[vim.event.Event]
         event_manager = self._conn.content.eventManager
         query_filter = vim.event.EventFilterSpec()
         time_filter = vim.event.EventFilterSpec.ByTime(beginTime=start_time)
@@ -216,7 +216,7 @@ class VSphereAPI(object):
 
     @smart_retry
     def get_latest_event_timestamp(self):
-        # type: () -> datetime
+        # type: () -> dt.datetime
         event_manager = self._conn.content.eventManager
         return event_manager.latestEvent.createdTime
 
