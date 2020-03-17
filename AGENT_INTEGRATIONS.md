@@ -944,6 +944,7 @@
 * datadog-go-expvar: 1.4.0
 * datadog-gunicorn: 1.7.1
 * datadog-haproxy: 2.2.0
+* datadog-harbor: 1.0.0
 * datadog-hdfs-datanode: 1.8.0
 * datadog-hdfs-namenode: 1.7.0
 * datadog-hive: 1.1.0
