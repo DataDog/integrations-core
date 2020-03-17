@@ -19,7 +19,7 @@ class VSphereCache(object):
 
     def __init__(self, interval_sec):
         # type: (int) -> None
-        self._last_ts = 0.0
+        self._last_ts = 0  # type: float
         self._interval = interval_sec
         self._content = {}  # type: Dict[Any, Any]
 

@@ -398,7 +398,7 @@ class VSphereCheck(AgentCheck):
 
         if resource_type == vim.ClusterComputeResource:
             # Cluster metrics are unpredictable and a single call can max out the limit. Always collect them one by one.
-            max_batch_size = 1.0
+            max_batch_size = 1  # type: float
         elif resource_type in REALTIME_RESOURCES or self.config.max_historical_metrics < 0:
             # Queries are not limited by vCenter
             max_batch_size = self.config.metrics_per_query
