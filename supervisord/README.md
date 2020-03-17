@@ -78,7 +78,6 @@ Configuration Options
 - `user` (Optional) - Username
 - `pass` (Optional) - Password
 - `proc_names` (Optional) - Dictionary of process names to monitor
-- `server_check` (Optional) - Defaults to true. Service check for connection to the `supervisord` server.
 - `socket` (Optional) - If using `supervisorctl` to communicate with Supervisor, a socket is needed.
 
 See the [example check configuration][4] for comprehensive descriptions of other check options.
