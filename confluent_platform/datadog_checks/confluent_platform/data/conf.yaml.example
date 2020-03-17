@@ -13,7 +13,7 @@ init_config:
     collect_default_metrics: true
 
     ## @param conf - list of mappings - optional
-    ## List of metrics to be collected by the integration
+    ## The list of metrics to be collected by the integration
     ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
     ## Agent 5: Customize all your metrics below
     ## Agent 6: The default metrics to be collected are kept in metrics.yaml,
