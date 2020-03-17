@@ -40,7 +40,6 @@ DEFAULT_METRIC_NAMESPACE = "go_expvar"
 DEFAULT_GAUGE_MEMSTAT_METRICS = [
     # General statistics
     "Alloc",
-    "TotalAlloc",
     # Main allocation heap statistics
     "HeapAlloc",
     "HeapSys",
@@ -48,6 +47,7 @@ DEFAULT_GAUGE_MEMSTAT_METRICS = [
     "HeapInuse",
     "HeapReleased",
     "HeapObjects",
+    "TotalAlloc",
 ]
 
 DEFAULT_RATE_MEMSTAT_METRICS = [
@@ -180,6 +180,12 @@ class GoExpvar(AgentCheck):
                     return
 
                 SUPPORTED_TYPES[metric_type](self, metric_name, value, metric_tags + path_tag)
+
+                # Submit 'go_expvar.memstats.total_alloc' as a monotonic count
+                if 'memstats.total_alloc' in metric_name:
+                    self.monotonic_count(metric_name + '.count', value, metric_tags + path_tag)
+                    count += 1
+
                 count += 1
 
     def deep_get(self, content, keys, traversed_path=None):

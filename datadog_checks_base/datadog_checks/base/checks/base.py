@@ -626,12 +626,13 @@ class AgentCheck(object):
             raise
 
     def convert_to_underscore_separated(self, name):
-        # type: (bytes) -> bytes
+        # type: (Union[str, bytes]) -> bytes
         """
         Convert from CamelCase to camel_case
         And substitute illegal metric characters
         """
-        metric_name = self.FIRST_CAP_RE.sub(br'\1_\2', ensure_bytes(name))
+        name = ensure_bytes(name)
+        metric_name = self.FIRST_CAP_RE.sub(br'\1_\2', name)
         metric_name = self.ALL_CAP_RE.sub(br'\1_\2', metric_name).lower()
         metric_name = self.METRIC_REPLACEMENT.sub(br'_', metric_name)
         return self.DOT_UNDERSCORE_CLEANUP.sub(br'.', metric_name).strip(b'_')
@@ -693,7 +694,7 @@ class AgentCheck(object):
         return to_native_string(s)
 
     def normalize(self, metric, prefix=None, fix_case=False):
-        # type: (Union[str, bytes], bytes, bool) -> str
+        # type: (Union[str, bytes], Union[str, bytes], bool) -> str
         """
         Turn a metric into a well-formed metric name
         prefix.b.c

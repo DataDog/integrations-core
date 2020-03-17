@@ -1,121 +1,135 @@
+## All options defined here are available to all instances.
+#
 init_config:
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
 instances:
+
     ## @param channel - string - required
     ## The IBMMQ Channel to connect to.
     #
-  - channel: 'DEV.ADMIN.SVRCONN'
+  - channel: DEV.ADMIN.SVRCONN
 
     ## @param queue_manager - string - required
     ## The name of the queue manager.
     #
-    queue_manager: 'datadog'
+    queue_manager: datadog
 
-    ## @param host - string - required - default: localhost
+    ## @param host - string - optional - default: localhost
     ## The host IBM MQ is running on.
     #
-    host: 'localhost'
+    # host: localhost
 
-    ## @param port - string - required - default: 1414
+    ## @param port - integer - optional - default: 1414
     ## The port IBM MQ is listening on.
     #
-    port: '1414'
+    # port: 1414
+
+    ## @param connection_name - string - optional
+    ## Connection name used to connect to IBM MQ with following syntax `<HOSTNAME>(<PORT>)`.
+    ##
+    ## Multiple connection names can be provided using comma as separator.
+    ## The connections are usually tried in the order they are specified in the connection list
+    ## until a connection is successfully established.
+    ##
+    ## Example `localhost(8080)` or `localhost(8080),localhost(8080),my.server(9090)`
+    ##
+    ## Either `host/port` or `connection_name` configuration must be provided.
+    #
+    # connection_name: <CONNECTION_NAME>
 
     ## @param username - string - optional
     ## <USERNAME> of the IBMMQ Channel to connect to.
     #
-    # username: '<USERNAME>'
+    # username: <USERNAME>
 
     ## @param password - string - optional
     ## <PASSWORD> of the IBMMQ Channel to connect to.
     #
-    # password: '<PASSWORD>'
+    # password: <PASSWORD>
 
-    ## @param queues - list of string - optional
+    ## @param queues - list of strings - optional
     ## The IBMMQ queues to get data from (no queue metrics will be sent, but the check will run without it).
     #
     # queues:
-    #   - '<QUEUE_NAME>'
+    #   - <QUEUE_NAME>
 
-    ## @param queue_patterns - list of string - optional
+    ## @param queue_patterns - list of strings - optional
     ## Collect from queues that match a MQ pattern
     #
     # queue_patterns:
-    #   - 'DEV.*'          # match queues starting with "DEV."
-    #   - 'SYSTEM.*'       # match queues starting with "SYSTEM."
+    #   - DEV.*
+    #   - SYSTEM.*
 
-    ## @param queue_regex - list of string - optional
+    ## @param queue_regex - list of strings - optional
     ## Collect from queues that match a regex
     #
     # queue_regex:
-    #   - '^DEV\..*$'          # match queues starting with "DEV."
-    #   - '^SYSTEM\..*$'       # match queues starting with "SYSTEM."
+    #   - ^DEV\..*$
+    #   - ^SYSTEM\..*$
 
-    ## @param channels - list of string - optional
+    ## @param channels - list of strings - optional
     ## Check the status of the following channels
     #
     # channels:
-    #   - '<CHANNEL_NAME>'
+    #   - <CHANNEL_NAME>
 
-    ## @param channel_status_mapping - list of key:value elements - optional
+    ## @param channel_status_mapping - mapping - optional
     ## Custom channel status mapping for service check `ibm_mq.channel.status`.
     ##
     ## The key is the IBM MQ channel status. Valid keys are: `inactive`, `binding`, `starting`, `running`, `stopping`,
     ## `retrying`, `stopped`, `requesting`, `paused`, and `initializing`.
     ## The value is the Datadog service check level. Valid values are: `ok`, `warning`, `critical`, and `unknown`.
     ## If a channel status is not mapped, it is mapped to `unknown`.
-    ##
-    ## Example of mapping:
     #
     # channel_status_mapping:
-    #     inactive: critical
-    #     binding: warning
-    #     starting: warning
-    #     running: ok
-    #     stopping: critical
-    #     retrying: warning
-    #     stopped: critical
-    #     requesting: warning
-    #     paused: warning
-    #     initializing: warning
+    #   inactive: critical
+    #   binding: warning
+    #   starting: warning
+    #   running: ok
+    #   stopping: critical
+    #   retrying: warning
+    #   stopped: critical
+    #   requesting: warning
+    #   paused: warning
+    #   initializing: warning
 
-    ## @param auto_discover_queues - string - optional - default: false
+    ## @param auto_discover_queues - boolean - optional - default: false
     ## Autodiscover the queues to monitor
     ## Warning: this will lead to some warnings in your logs
     #
     # auto_discover_queues: false
 
-    ## @param mqcd_version - integer - optional - default: 6
+    ## @param mqcd_version - number - optional - default: 6
     ## Which channel definition version to use. Supported values are 1 to 9 including.
     ## If you're having connection issues make sure it matches your MQ version
     #
     # mqcd_version: 6
 
-    ## @param ssl_auth - string - optional
+    ## @param ssl_auth - boolean - optional - default: false
     ## Whether or not to use SSL auth while connecting to the channel.
     #
-    # ssl_auth: 'no'
+    # ssl_auth: false
 
-    ## @param ssl_cipher_spec - string - optional - default: 'TLS_RSA_WITH_AES_256_CBC_SHA'
+    ## @param ssl_cipher_spec - string - optional - default: TLS_RSA_WITH_AES_256_CBC_SHA
     ## The ssl cipher to use.
     #
-    # ssl_cipher_spec: 'TLS_RSA_WITH_AES_256_CBC_SHA'
+    # ssl_cipher_spec: TLS_RSA_WITH_AES_256_CBC_SHA
 
-    ## @param ssl_key_repository_location - string - optional - default: '/var/mqm/ssl-db/client/KeyringClient'
+    ## @param ssl_key_repository_location - string - optional - default: /var/mqm/ssl-db/client/KeyringClient
     ## The location of the ssl keyring.
     #
-    # ssl_key_repository_location: '/var/mqm/ssl-db/client/KeyringClient'
+    # ssl_key_repository_location: /var/mqm/ssl-db/client/KeyringClient
 
-    ## @param tags - list of key:value elements - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
-    ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
-
-    ## @param queue_tag_re - list of regex:tags string - optional
+    ## @param queue_tag_re - mapping - optional
     ## Instruct the check to apply additional tags to matching
     ## queues
     ##
@@ -123,26 +137,57 @@ instances:
     ## pattern contains special characters e.g. colons.
     #
     # queue_tag_re:
-    #   'SYSTEM.*': queue_type:system
-    #   'DEV.*': role:dev,queue_type:default
+    #   SYSTEM.*: queue_type:system
+    #   DEV.*: role:dev,queue_type:default
 
-## Log Section (Available for Agent >=6.0)
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+## Log Section
 ##
-## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
-## service - mandatory - Name of the service that generated the log
-## source  - mandatory - Attribute that defines which Integration sent the logs
+## type - required - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - required - Set port if type is tcp or udp.
+##                                         Set path if type is file.
+##                                         Set channel_path if type is windows_event.
+## source  - required - Attribute that defines which Integration sent the logs
+## service - required - The name of the service that generates the log.
+##                      Overrides any `service` defined in the `init_config` section.
 ## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
-## tags: - optional - Add tags to the collected logs
+## tags - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
 # logs:
 #   - type: file
 #     path: /var/mqm/log/<APPNAME>/active/AMQERR01.LOG
-#     service: <APPNAME>
 #     source: ibm_mq
 #     log_processing_rules:
-#       - type: multi_line
-#         name: new_log_start_with_date
-#         pattern: "\d{2}/\d{2}/\d{4}"
+#     - type: multi_line
+#       name: new_log_start_with_date
+#       pattern: \d{2}/\d{2}/\d{4}

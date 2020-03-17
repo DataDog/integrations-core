@@ -97,10 +97,10 @@ class Fluentd(AgentCheck):
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
     def _collect_metadata(self):
-        raw_version = self._get_raw_version()
-
-        if raw_version:
-            self.set_metadata('version', raw_version)
+        if self.is_metadata_collection_enabled():
+            raw_version = self._get_raw_version()
+            if raw_version:
+                self.set_metadata('version', raw_version)
 
     def _get_raw_version(self):
         version_command = '{} --version'.format(self._fluentd_command)

@@ -8,7 +8,7 @@ import yaml
 
 from .compat import get_config
 from .exceptions import CouldNotDecodeOID, SmiError
-from .models import ObjectIdentity, ObjectName, ObjectType, endOfMibView, noSuchInstance
+from .pysnmp_types import ObjectIdentity, ObjectName, ObjectType, endOfMibView, noSuchInstance
 
 
 def get_profile_definition(profile):
@@ -34,17 +34,34 @@ def get_profile_definition(profile):
     return profile['definition']
 
 
-def _get_profiles_root():
+def _get_profiles_confd_root():
     # type: () -> str
     # NOTE: this separate helper function exists for mocking purposes.
     confd = get_config('confd_path')
     return os.path.join(confd, 'snmp.d', 'profiles')
 
 
+def _get_profiles_site_root():
+    # type: () -> str
+    here = os.path.dirname(__file__)
+    return os.path.join(here, 'data', 'profiles')
+
+
+def _resolve_definition_file(definition_file):
+    # type: (str) -> str
+    if os.path.isabs(definition_file):
+        return definition_file
+
+    definition_conf_file = os.path.join(_get_profiles_confd_root(), definition_file)
+    if os.path.isfile(definition_conf_file):
+        return definition_conf_file
+
+    return os.path.join(_get_profiles_site_root(), definition_file)
+
+
 def _read_profile_definition(definition_file):
     # type: (str) -> Dict[str, Any]
-    if not os.path.isabs(definition_file):
-        definition_file = os.path.join(_get_profiles_root(), definition_file)
+    definition_file = _resolve_definition_file(definition_file)
 
     with open(definition_file) as f:
         return yaml.safe_load(f)
@@ -72,6 +89,30 @@ def recursively_expand_base_profiles(definition):
         definition['metrics'] = base_metrics + existing_metrics  # NOTE: base metrics must be added first.
 
         definition.setdefault('metric_tags', []).extend(base_definition.get('metric_tags', []))
+
+
+def get_default_profiles():
+    # type: () -> Dict[str, Any]
+    """Return all the profiles installed on the system."""
+    profiles = {}
+    paths = [_get_profiles_site_root(), _get_profiles_confd_root()]
+
+    for path in paths:
+        if not os.path.isdir(path):
+            continue
+
+        for filename in os.listdir(path):
+            base, ext = os.path.splitext(filename)
+            if ext != '.yaml':
+                continue
+
+            is_abstract = base.startswith('_')
+            if is_abstract:
+                continue
+
+            profiles[base] = {'definition_file': os.path.join(path, filename)}
+
+    return profiles
 
 
 def parse_as_oid_tuple(value):
@@ -133,6 +174,14 @@ def parse_as_oid_tuple(value):
         return parse_as_oid_tuple(object_identity)
 
     raise CouldNotDecodeOID('Building an OID from object {!r} of type {} is not supported'.format(value, type(value)))
+
+
+def format_as_oid_string(parts):
+    # type: (Tuple[int, ...]) -> str
+    """
+    Given an OID in int-tuple form, format it to the conventional dot-separated representation.
+    """
+    return '.'.join(str(part) for part in parts)
 
 
 def oid_pattern_specificity(pattern):
