@@ -11,7 +11,7 @@ from ...utils import complete_valid_checks, get_valid_integrations
 from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
 
 
-def validate_import(filepath, check):
+def validate_import(filepath, check, autofix):
     """Validate imports are coming from the correct base package."""
     # almost every case is of the form `from datadog_checks.. import ..`
     # we want to ensure that the imports are from `datadog_checks.base...`
@@ -33,13 +33,25 @@ def validate_import(filepath, check):
             ):
                 success = False
                 lines.append((num, line))
+
+    if autofix and not success:
+        with open(filepath, 'r') as f:
+            data = f.readlines()
+
+        for num, _ in lines:
+            data[num] = data[num].replace('datadog_checks', 'datadog_checks.base')
+
+        with open(filepath, 'w') as f:
+            f.write(''.join(data))
+
     return success, lines
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate proper base imports')
 @click.argument('checks', nargs=-1, autocompletion=complete_valid_checks, required=False)
+@click.option('--autofix', is_flag=True, help='Apply suggested fix')
 @click.pass_context
-def imports(ctx, checks):
+def imports(ctx, autofix, checks):
     """Validate proper imports in checks."""
 
     validation_fails = {}
@@ -63,7 +75,7 @@ def imports(ctx, checks):
                 for f in files:
                     if f.endswith('.py'):
                         fpath = os.path.join(root, f)
-                        success, lines = validate_import(fpath, check_name)
+                        success, lines = validate_import(fpath, check_name, autofix)
 
                         if not success:
                             validation_fails[fpath] = lines
