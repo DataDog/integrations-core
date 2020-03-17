@@ -77,8 +77,9 @@ Configuration Options
 - `port` (Optional) - Defaults to 9001. The port number.
 - `user` (Optional) - Username
 - `pass` (Optional) - Password
-- `proc_names` (Optional) - Dictionary of process names to monitor
-- `socket` (Optional) - If using `supervisorctl` to communicate with Supervisor, a socket is needed.
+- `proc_names` (Optional) - List of process names to monitor
+- `proc_regex` (Optional) - List of Regex pattern/s matching the names of processes to monitor.
+- `socket` (Optional) - Path to a UNIX domain socket on which supervisor is listening for HTTP/XML-RPC requests
 
 See the [example check configuration][4] for comprehensive descriptions of other check options.
 
