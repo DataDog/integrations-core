@@ -153,7 +153,7 @@ def test_config(check, test_case, extra_config, expected_http_kwargs):
 def test_nodes(aggregator, check):
 
     # default, node metrics are collected
-    check = RabbitMQ('rabbitmq', hi, {}, instances=[common.CONFIG])
+    check = RabbitMQ('rabbitmq', {}, instances=[common.CONFIG])
     check.check(common.CONFIG)
 
     for m in metrics.COMMON_METRICS:
