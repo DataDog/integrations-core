@@ -22,7 +22,7 @@ Follow the instructions below to install and configure this check for an Agent r
 
 The Confluent Platform check is included in the [Datadog Agent][2] package. No additional installation is needed on your Confluent Platform component server.
 
-The check collects metrics via JMX, so you need a JVM on each node so the Agent can run [jmxfetch][3]. It is recommend using an Oracle-provided JVM.
+**Note**: This check collects metrics with JMX. A JVM is required on each node so the Agent can run [jmxfetch][3]. It is recommended to use an Oracle-provided JVM.
 
 
 ### Configuration
