@@ -13,7 +13,6 @@ from datadog_checks.vsphere.config import VSphereConfig
 
 def test_ssl_verify_false(realtime_instance):
     realtime_instance['ssl_verify'] = False
-    realtime_instance['ssl_capath'] = '/dummy/path'
 
     with patch('datadog_checks.vsphere.api.connect') as connect, patch(
         'ssl.SSLContext.load_verify_locations'
