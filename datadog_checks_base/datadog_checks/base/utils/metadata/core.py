@@ -7,6 +7,7 @@ import re
 
 from six import iteritems
 
+from ...config import is_affirmative
 from ..common import to_native_string
 from .constants import DEFAULT_BLACKLIST
 from .utils import is_primitive
@@ -32,10 +33,18 @@ class MetadataManager(object):
         if metadata_transformers:
             self.metadata_transformers.update(metadata_transformers)
 
+    @staticmethod
+    def is_collection_enabled():
+        # type: () -> bool
+        return is_affirmative(datadog_agent.get_config('enable_metadata_collection'))
+
     def submit_raw(self, name, value):
         datadog_agent.set_check_metadata(self.check_id, to_native_string(name), to_native_string(value))
 
     def submit(self, name, value, options):
+        if not self.is_collection_enabled():
+            return
+
         transformer = self.metadata_transformers.get(name)
         if transformer:
             try:

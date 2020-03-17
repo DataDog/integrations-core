@@ -43,21 +43,6 @@ def test_load_config():
     assert AgentCheck.load_config("raw_foo: bar") == {'raw_foo': 'bar'}
 
 
-@pytest.mark.parametrize(
-    'enable_metadata_collection, expected_is_metadata_collection_enabled',
-    [(None, False), ('true', True), ('false', False)],
-)
-def test_is_metadata_collection_enabled(enable_metadata_collection, expected_is_metadata_collection_enabled):
-    check = AgentCheck()
-    with mock.patch('datadog_checks.base.checks.base.datadog_agent.get_config') as get_config:
-        get_config.return_value = enable_metadata_collection
-
-        assert check.is_metadata_collection_enabled() is expected_is_metadata_collection_enabled
-        assert AgentCheck.is_metadata_collection_enabled() is expected_is_metadata_collection_enabled
-
-        get_config.assert_called_with('enable_metadata_collection')
-
-
 def test_log_critical_error():
     check = AgentCheck()
 

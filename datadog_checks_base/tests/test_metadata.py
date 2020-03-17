@@ -75,6 +75,19 @@ class TestRaw:
             m.assert_called_once_with('test:123', finalizer(name), finalizer(value))
 
 
+class TestSubmission:
+    def test_metadata_collection_disabled(self):
+        # type: () -> None
+        check = AgentCheck('test', {}, [{}])
+
+        with mock.patch('datadog_checks.base.checks.base.datadog_agent.get_config') as get_config:
+            get_config.return_value = False
+
+            with mock.patch(SET_CHECK_METADATA_METHOD) as m:
+                check.set_metadata('foo', 'bar')
+                m.assert_not_called()
+
+
 class TestVersion:
     def test_override_allowed(self):
         class NewAgentCheck(AgentCheck):
