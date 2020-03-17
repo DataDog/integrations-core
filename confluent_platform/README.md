@@ -91,7 +91,6 @@ The Confluent Platform check does not include any events.
 
 Need help? Contact [Datadog support][8].
 
-[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://github.com/DataDog/jmxfetch
 [4]: https://github.com/DataDog/integrations-core/blob/master/confluent_platform/datadog_checks/confluent_platform/data/conf.yaml.example
