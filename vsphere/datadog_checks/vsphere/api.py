@@ -73,6 +73,11 @@ class VSphereAPI(object):
         context = None
         if not self.config.ssl_verify:
             context = ssl.SSLContext(PROTOCOL_TLS_CLIENT)
+
+            # IMPORTANT: This must be set before verify_mode in Python 3.7+, see:
+            # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname
+            context.check_hostname = False
+
             context.verify_mode = ssl.CERT_NONE
         elif self.config.ssl_capath:
             context = ssl.SSLContext(PROTOCOL_TLS_CLIENT)
