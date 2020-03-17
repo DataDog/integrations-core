@@ -2,21 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import json
 import os
-import mock
-import uuid
 
 import click
 
-from ....utils import file_exists, read_file, write_file
 from ...constants import get_root
 from ...utils import complete_valid_checks, get_valid_integrations
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning, echo_debug
 
 
-INTEGRATION_ID_REGEX = r'^[a-z][a-z0-9-]{0,254}(?<!-)$'
-
+# .base - error if not there, insert for fix
 DEPRECATED_MODULES = set(
     [
         'datadog_checks.checks',
