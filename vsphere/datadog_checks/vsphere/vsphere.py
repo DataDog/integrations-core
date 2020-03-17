@@ -41,14 +41,12 @@ from datadog_checks.vsphere.utils import (
 
 SERVICE_CHECK_NAME = 'can_connect'
 
-T = TypeVar("T", bound="VSphereCheck")
-
 
 class VSphereCheck(AgentCheck):
     __NAMESPACE__ = 'vsphere'
 
     def __new__(cls, name, init_config, instances):
-        # type: (Type[T], str, Dict[str, Any], List[Dict[str, Any]]) -> VSphereCheck
+        # type: (Type[VSphereCheck], str, Dict[str, Any], List[Dict[str, Any]]) -> VSphereCheck
         """For backward compatibility reasons, there are two side-by-side implementations of the VSphereCheck.
         Instantiating this class will return an instance of the legacy integration for existing users and
         an instance of the new implementation for new users."""
