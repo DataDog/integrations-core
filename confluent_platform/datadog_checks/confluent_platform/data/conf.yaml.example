@@ -45,7 +45,7 @@ init_config:
 ##   - SQL Server
 ##   - Streams
 ##   - REST Proxy
-## For each component, you need to create a separate instance to collect its jmx metrics.
+## For each component, you need to create a separate instance to collect its JMX metrics.
 ## List of default metrics collected are listed in `metrics.yaml` file.
 #
 instances:
