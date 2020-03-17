@@ -16,7 +16,6 @@ This integration collects JMX metrics for the following components:
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][1] for guidance on applying these instructions.
 
 ### Installation
 
