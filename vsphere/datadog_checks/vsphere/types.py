@@ -44,7 +44,7 @@ InfrastructureDataItem = TypedDict(
     'InfrastructureDataItem',
     {
         'name': str,
-        'runtime.host': Type[vim.ManagedEntity],
+        'runtime.host': vim.ManagedEntity,
         'guest.hostName': str,
         'runtime.powerState': str,
         'parent': Optional[vim.ManagedEntity],

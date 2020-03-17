@@ -7,7 +7,7 @@ import datetime as dt
 from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
-from typing import Any, Dict, Generator, Iterable, List, Set, Type, TypeVar, cast
+from typing import Any, Dict, Generator, Iterable, List, Set, Type, cast
 
 from pyVmomi import vim, vmodl
 from six import iteritems
