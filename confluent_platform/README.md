@@ -27,7 +27,7 @@ The Confluent Platform check is included in the [Datadog Agent][2] package. No a
 
 ### Configuration
 
-1. Edit the `confluent_platform.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Confluent Platform performance data. See the [sample confluent_platform.d/conf.yaml][4] for all available configuration options.
+1. Edit the `confluent_platform.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to collect your Confluent Platform performance data. See the [sample confluent_platform.d/conf.yaml][4] for all available configuration options.
 
     For each component, you need to create a separate instance to collect its jmx metrics. List of default metrics collected are listed in [`metrics.yaml` file][9]. For example:
 
