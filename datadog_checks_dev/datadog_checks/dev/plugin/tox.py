@@ -51,6 +51,7 @@ def tox_configure(config):
 
 
 def add_style_checker(config, sections, make_envconfig, reader):
+
     # testenv:style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_CHECK_ENV_NAME)
 
@@ -68,17 +69,24 @@ def add_style_checker(config, sections, make_envconfig, reader):
         'isort --check-only --diff --recursive .',
     ]
 
-    if sections['testenv'].get(TYPES_FLAG, 'false').lower() == 'true':
+    testenv = sections['testenv']
+    test_envvars = []
+
+    if testenv.get(TYPES_FLAG, 'false').lower() == 'true':
         # For command line options accepted by mypy, see: https://mypy.readthedocs.io/en/stable/command_line.html
         # Each integration should explicitly specify its options and which files it'd like to type check, which is
         # why we're defaulting to 'no arguments' by default.
-        mypy_args = sections['testenv'].get(MYPY_ARGS_OPTION, '')
+        mypy_args = testenv.get(MYPY_ARGS_OPTION, '')
 
         # Allow using multiple lines for enhanced readability in case of large amount of options/files to check.
         mypy_args = mypy_args.replace('\n', ' ')
 
         dependencies.append('mypy>=0.761')
         commands.append('mypy --config-file=../mypy.ini {}'.format(mypy_args))
+
+        # Add stubs envs
+        stubs_path = os.path.join('..', '.stubs')  # relative to tox execution path
+        test_envvars.append('MYPYPATH = {}'.format(stubs_path))
 
     sections[section] = {
         'platform': 'linux|darwin|win32',
@@ -89,6 +97,10 @@ def add_style_checker(config, sections, make_envconfig, reader):
         'deps': '\n'.join(dependencies),
         'commands': '\n'.join(commands),
     }
+
+    if 'setenv' in testenv:
+        test_envvars.insert(0, testenv['setenv'])
+    testenv['setenv'] = '\n'.join([] + test_envvars)
 
     # Always add the environment configurations
     config.envconfigs[STYLE_CHECK_ENV_NAME] = make_envconfig(
