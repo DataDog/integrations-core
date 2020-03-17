@@ -31,6 +31,7 @@ class RethinkDBCheck(AgentCheck):
     def connect_submitting_service_checks(self):
         # type: () -> Iterator[Connection]
         tags = []  # type: List[str]
+        tags.extend(self.config.tags)
 
         try:
             with self.backend.connect(self.config) as conn:
@@ -63,14 +64,19 @@ class RethinkDBCheck(AgentCheck):
 
     def submit_metric(self, metric):
         # type: (Metric) -> None
-        self.log.debug('submit_metric metric=%r', metric)
+        typ = metric['type']
+        name = metric['name']
+        value = metric['value']
+        tags = self.config.tags + metric['tags']
 
-        if metric['type'] == 'service_check':
-            value = cast(ServiceCheckStatus, metric['value'])
-            self.service_check(metric['name'], value, tags=metric['tags'])
+        self.log.debug('submit_metric type=%r name=%r value=%r tags=%r', typ, name, value, tags)
+
+        if typ == 'service_check':
+            value = cast(ServiceCheckStatus, value)
+            self.service_check(name, value, tags=tags)
         else:
-            submit = getattr(self, metric['type'])  # type: Callable
-            submit(metric['name'], value=metric['value'], tags=metric['tags'])
+            submit = getattr(self, typ)  # type: Callable
+            submit(name, value, tags=tags)
 
     def submit_version_metadata(self, conn):
         # type: (Connection) -> None

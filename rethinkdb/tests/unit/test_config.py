@@ -20,6 +20,7 @@ def test_default_config():
     assert config.port == 28015
     assert config.user is None
     assert config.tls_ca_cert is None
+    assert config.tags == []
 
 
 def test_config():
@@ -30,19 +31,21 @@ def test_config():
         'username': 'datadog-agent',
         'password': 's3kr3t',
         'tls_ca_cert': '/path/to/client.cert',
+        'tags': ['env:testing'],
     }  # type: Instance
     config = Config(instance)
     assert config.host == '192.168.121.1'
     assert config.port == 28016
     assert config.user == 'datadog-agent'
     assert config.tls_ca_cert == '/path/to/client.cert'
+    assert config.tags == ['env:testing']
 
 
 def test_config_repr():
     # type: () -> None
     instance = {}  # type: Instance
     config = Config(instance)
-    assert repr(config) == "Config(host='localhost', port=28015, user=None, password='*****', tls_ca_cert=None)"
+    assert repr(config) == "Config(host='localhost', port=28015, user=None, password='', tls_ca_cert=None, tags=[])"
 
 
 @pytest.mark.parametrize('host', [42, True, object()])

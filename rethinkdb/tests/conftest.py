@@ -19,6 +19,7 @@ from .common import (
     HOST,
     SERVER_PORTS,
     SERVERS,
+    TAGS,
 )
 
 
@@ -30,6 +31,7 @@ def instance():
         'port': SERVER_PORTS['server0'],
         'username': AGENT_USER,
         'password': AGENT_PASSWORD,
+        'tags': TAGS,
     }
 
 

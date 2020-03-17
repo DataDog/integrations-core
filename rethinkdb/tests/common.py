@@ -20,6 +20,7 @@ RETHINKDB_VERSION = '2.4.0~0bionic'
 
 HOST = get_docker_hostname()
 
+TAGS = ['env:testing']
 
 # Servers.
 # NOTE: server information is tightly coupled to the Docker Compose setup.

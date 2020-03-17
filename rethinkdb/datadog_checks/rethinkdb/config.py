@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import absolute_import
 
-from typing import Optional
+from typing import List, Optional
 
 from datadog_checks.base import ConfigurationError
 
@@ -24,6 +24,7 @@ class Config(object):
         user = instance.get('username')
         password = instance.get('password')
         tls_ca_cert = instance.get('tls_ca_cert')
+        tags = instance.get('tags', [])
 
         if not isinstance(host, str):
             raise ConfigurationError('host must be a string (got {!r})'.format(type(host)))
@@ -39,6 +40,7 @@ class Config(object):
         self.user = user  # type: Optional[str]
         self.password = password  # type: Optional[str]
         self.tls_ca_cert = tls_ca_cert  # type: Optional[str]
+        self.tags = tags  # type: List[str]
 
     def __repr__(self):
         # type: () -> str
@@ -46,6 +48,14 @@ class Config(object):
             'Config(host={host!r}, '
             'port={port!r}, '
             'user={user!r}, '
-            "password='*****', "
-            'tls_ca_cert={tls_ca_cert!r})'
-        ).format(host=self.host, port=self.port, user=self.user, tls_ca_cert=self.tls_ca_cert)
+            "password={password!r}, "
+            'tls_ca_cert={tls_ca_cert!r}, '
+            'tags={tags!r})'
+        ).format(
+            host=self.host,
+            port=self.port,
+            user=self.user,
+            password='********' if self.password else '',
+            tls_ca_cert=self.tls_ca_cert,
+            tags=self.tags,
+        )
