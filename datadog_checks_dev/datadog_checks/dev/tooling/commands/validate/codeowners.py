@@ -19,7 +19,7 @@ def get_all_checks_with_codeowners():
 
     for entry in codeowners:
         parts = [part for part in entry.split(" ") if part != "" and part != "\t"]
-        if len(parts) < 1:
+        if not parts:
             continue
         match = DIRECTORY_REGEX.match(parts[0])
         if match and match.group(1):
