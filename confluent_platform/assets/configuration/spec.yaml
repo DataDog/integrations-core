@@ -20,7 +20,7 @@ files:
           - SQL Server
           - Streams
           - REST Proxy
-        For each component, you need to create a separate instance to collect its jmx metrics.
+        For each component, you need to create a separate instance to collect its JMX metrics.
         The list of metrics collected by default are listed in `metrics.yaml`.
     options:
     - template: instances/jmx
