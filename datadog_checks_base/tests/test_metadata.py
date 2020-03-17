@@ -5,6 +5,7 @@ import json
 import logging
 import re
 from collections import OrderedDict
+from typing import Any
 
 import mock
 import pytest
@@ -499,3 +500,25 @@ class TestConfig:
             assert data.pop('is_set', None) is True
             assert data.pop('value', None) == 'bar'
             assert not data
+
+
+class TestProcessMetadata:
+    def test_process_metadata_with_metadata_collection_disabled(self):
+        # type: () -> None
+        class MyCheck(AgentCheck):
+            def process_metadata(self, message):
+                # type: (str) -> None
+                self.set_metadata('my_message', message)
+
+            def check(self, instance):
+                # type: (Any) -> None
+                self.process_metadata(message='Hello, world')
+
+        with mock.patch('datadog_checks.base.checks.base.datadog_agent.get_config') as get_config:
+            get_config.return_value = False
+
+            check = MyCheck('my', {}, [{}])
+
+            with mock.patch(SET_CHECK_METADATA_METHOD) as m:
+                check.check({})
+                m.assert_not_called()

@@ -236,6 +236,17 @@ class AgentCheck(object):
         # Functions that will be called exactly once (if successful) before the first check run
         self.check_initializations = deque([self.send_config_metadata])  # type: Deque[Callable[[], None]]
 
+        # Automatically turn this method into a no-op if metadata collection is disabled on the Agent.
+        # A bit hacky, but it means implementations of this method can safely perform extra processing,
+        # as that processing will be skipped altogether at runtime if it's not actually needed.
+        if hasattr(self, 'process_metadata') and not self.is_metadata_collection_enabled():
+
+            def no_op(*args, **kwargs):  # type: ignore
+                self.log.debug('Skipping metadata processing as metadata collection is disabled on the Agent.')
+
+            # Can't set directly otherwise mypy would still try to impose the signature of `no_op` to subclasses.
+            setattr(self, 'process_metadata', no_op)  # noqa: B010
+
     def _get_metric_limiter(self, name, instance=None):
         # type: (str, InstanceType) -> Optional[Limiter]
         limit = self._get_metric_limit(instance=instance)
@@ -583,6 +594,10 @@ class AgentCheck(object):
     def service_metadata(self, meta_name, value):
         # type: (str, Any) -> None
         pass
+
+    def _metadata_no_op(self, *args, **kwargs):
+        # type: (AgentCheck, *Any, **Any) -> None
+        self.log.debug('Skipping submission of metadata as metadata collection is disabled')
 
     def set_metadata(self, name, value, **options):
         # type: (str, Any, **Any) -> None
