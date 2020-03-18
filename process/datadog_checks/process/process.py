@@ -81,13 +81,8 @@ class ProcessCheck(AgentCheck):
         self._conflicting_procfs = False
         self._deprecated_init_procfs = False
         if Platform.is_linux():
-            procfs_path = init_config.get('procfs_path')
-            if procfs_path:
-                if 'procfs_path' in agentConfig and procfs_path != agentConfig.get('procfs_path').rstrip('/'):
-                    self._conflicting_procfs = True
-                else:
-                    self._deprecated_init_procfs = True
-                    psutil.PROCFS_PATH = procfs_path
+            psutil.PROCFS_PATH = init_config.get('procfs_path')
+            self._deprecated_init_procfs = True
 
         # Process cache, indexed by instance
         self.process_cache = defaultdict(dict)
