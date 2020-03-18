@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.fluentd import Fluentd
 
 from .common import CHECK_NAME, FLUENTD_CONTAINER_NAME, FLUENTD_VERSION, HERE
-from .util import requires_0_12_23, requires_1_9
+from .util import requires_above_1_8, requires_below_1_8
 
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration, pytest.mark.metadata]
 
@@ -36,7 +36,7 @@ def test_collect_metadata_instance(aggregator, datadog_agent, instance):
     datadog_agent.assert_metadata_count(5)
 
 
-@requires_0_12_23
+@requires_below_1_8
 def test_collect_metadata_missing_version(aggregator, datadog_agent, instance):
     instance["fluentd"] = "python {} 'fluentd not.a.version'".format(VERSION_MOCK_SCRIPT)
 
@@ -48,7 +48,7 @@ def test_collect_metadata_missing_version(aggregator, datadog_agent, instance):
     datadog_agent.assert_metadata_count(0)
 
 
-@requires_0_12_23
+@requires_below_1_8
 def test_collect_metadata_invalid_binary(datadog_agent, instance):
     instance['fluentd'] = '/bin/does_not_exist'
 
@@ -60,7 +60,7 @@ def test_collect_metadata_invalid_binary(datadog_agent, instance):
     datadog_agent.assert_metadata_count(0)
 
 
-@requires_1_9
+@requires_above_1_8
 def test_collect_metadata_invalid_binary_with_endpoint(datadog_agent, instance):
     instance['fluentd'] = '/bin/does_not_exist'
 
