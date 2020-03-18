@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import List, Dict
+from typing import Dict, List
 
 import win32wnet
 from six import iteritems
