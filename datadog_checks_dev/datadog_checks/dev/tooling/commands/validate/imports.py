@@ -71,7 +71,7 @@ def imports(ctx, autofix, checks):
         # focus on check and testing directories
         bases = [os.path.join(integrations_root, check_name, base) for base in ('datadog_checks', 'tests')]
         for base in bases:
-            for root, dirs, files in os.walk(base):
+            for root, _, files in os.walk(base):
                 for f in files:
                     if f.endswith('.py'):
                         fpath = os.path.join(root, f)
