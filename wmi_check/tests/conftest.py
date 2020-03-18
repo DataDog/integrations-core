@@ -10,7 +10,7 @@ from datadog_checks.wmi_check import WMICheck
 
 @pytest.fixture
 def check():
-    return WMICheck('wmi_check', {}, {}, None)
+    return WMICheck('wmi_check', {}, None)
 
 
 class MockSampler:

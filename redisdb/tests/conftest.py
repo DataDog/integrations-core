@@ -93,4 +93,4 @@ def master_instance():
 
 @pytest.fixture
 def check():
-    return Redis('redisdb', {}, {}, None)
+    return Redis('redisdb', {}, None)

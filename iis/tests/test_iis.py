@@ -22,7 +22,7 @@ from .common import (
 @pytest.mark.usefixtures('pdh_mocks_fixture')
 def test_basic_check(aggregator):
     instance = MINIMAL_INSTANCE
-    c = IIS(CHECK_NAME, {}, {}, [instance])
+    c = IIS(CHECK_NAME, {}, [instance])
     c.check(instance)
     iis_host = c.get_iishost(instance)
 
@@ -41,7 +41,7 @@ def test_basic_check(aggregator):
 @pytest.mark.usefixtures('pdh_mocks_fixture')
 def test_check_on_specific_websites(aggregator):
     instance = INSTANCE
-    c = IIS(CHECK_NAME, {}, {}, [instance])
+    c = IIS(CHECK_NAME, {}, [instance])
     c.check(instance)
     iis_host = c.get_iishost(instance)
 
@@ -64,7 +64,7 @@ def test_check_on_specific_websites(aggregator):
 @pytest.mark.usefixtures('pdh_mocks_fixture')
 def test_service_check_with_invalid_host(aggregator):
     instance = INVALID_HOST_INSTANCE
-    c = IIS(CHECK_NAME, {}, {}, [instance])
+    c = IIS(CHECK_NAME, {}, [instance])
     c.check(instance)
     iis_host = c.get_iishost(instance)
 
@@ -77,7 +77,7 @@ def test_check(aggregator):
     Returns the right metrics and service checks
     """
     instance = WIN_SERVICES_CONFIG
-    c = IIS(CHECK_NAME, {}, {}, [instance])
+    c = IIS(CHECK_NAME, {}, [instance])
     c.check(instance)
     iis_host = c.get_iishost(instance)
 
@@ -116,7 +116,7 @@ def test_check_without_sites_specified(aggregator):
     """
     # Run check
     instance = WIN_SERVICES_MINIMAL_CONFIG
-    c = IIS(CHECK_NAME, {}, {}, [instance])
+    c = IIS(CHECK_NAME, {}, [instance])
     c.check(instance)
     iis_host = c.get_iishost(instance)
 

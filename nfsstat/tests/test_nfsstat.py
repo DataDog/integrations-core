@@ -41,7 +41,7 @@ class TestNfsstat:
 
     def test_no_devices(self, aggregator):
         instance = self.INSTANCES['main']
-        c = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, {}, [instance])
+        c = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, [instance])
         with mock.patch(
             'datadog_checks.nfsstat.nfsstat.get_subprocess_output',
             return_value=('No NFS mount points were found', '', 0),
@@ -50,7 +50,7 @@ class TestNfsstat:
 
     def test_check(self, aggregator):
         instance = self.INSTANCES['main']
-        c = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, {}, [instance])
+        c = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, [instance])
 
         with open(os.path.join(FIXTURE_DIR, 'nfsiostat'), 'rb') as f:
             mock_output = ensure_unicode(f.read())

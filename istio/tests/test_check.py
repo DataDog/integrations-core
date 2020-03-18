@@ -191,7 +191,7 @@ def test_istio(aggregator, mesh_mixture_fixture):
     """
     Test the full check
     """
-    check = Istio('istio', {}, {}, [MOCK_INSTANCE])
+    check = Istio('istio', {}, [MOCK_INSTANCE])
     check.check(MOCK_INSTANCE)
 
     for metric in MESH_METRICS + MIXER_METRICS:
@@ -201,7 +201,7 @@ def test_istio(aggregator, mesh_mixture_fixture):
 
 
 def test_new_istio(aggregator, new_mesh_mixture_fixture):
-    check = Istio('istio', {}, {}, [NEW_MOCK_INSTANCE])
+    check = Istio('istio', {}, [NEW_MOCK_INSTANCE])
     check.check(NEW_MOCK_INSTANCE)
 
     for metric in MESH_METRICS + NEW_MIXER_METRICS + GALLEY_METRICS + PILOT_METRICS + CITADEL_METRICS:
@@ -211,7 +211,7 @@ def test_new_istio(aggregator, new_mesh_mixture_fixture):
 
 
 def test_pilot_only_istio(aggregator, new_pilot_fixture):
-    check = Istio('istio', {}, {}, [NEW_MOCK_PILOT_ONLY_INSTANCE])
+    check = Istio('istio', {}, [NEW_MOCK_PILOT_ONLY_INSTANCE])
     check.check(NEW_MOCK_PILOT_ONLY_INSTANCE)
 
     for metric in PILOT_METRICS:
@@ -221,7 +221,7 @@ def test_pilot_only_istio(aggregator, new_pilot_fixture):
 
 
 def test_galley_only_istio(aggregator, new_galley_fixture):
-    check = Istio('istio', {}, {}, [NEW_MOCK_GALLEY_ONLY_INSTANCE])
+    check = Istio('istio', {}, [NEW_MOCK_GALLEY_ONLY_INSTANCE])
     check.check(NEW_MOCK_GALLEY_ONLY_INSTANCE)
 
     for metric in GALLEY_METRICS:
@@ -231,7 +231,7 @@ def test_galley_only_istio(aggregator, new_galley_fixture):
 
 
 def test_scraper_creator():
-    check = Istio('istio', {}, {}, [MOCK_INSTANCE])
+    check = Istio('istio', {}, [MOCK_INSTANCE])
     istio_mesh_config = check.config_map.get(MOCK_INSTANCE['istio_mesh_endpoint'])
     mixer_scraper_dict = check.config_map.get(MOCK_INSTANCE['mixer_endpoint'])
 
