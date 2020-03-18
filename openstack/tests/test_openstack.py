@@ -227,7 +227,6 @@ def test_server_exclusion(*args):
             'ssl_verify': False,
             'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
         },
-        {},
         instances=instances,
     )
 
@@ -289,7 +288,7 @@ def test_cache_between_runs(self, *args):
             'ssl_verify': False,
             'exclude_server_ids': common.EXCLUDED_SERVER_IDS,
         },
-        instances=instances,
+        instances=instances
     )
 
     # Start off with a list of servers
