@@ -56,7 +56,7 @@ class RethinkDBCheck(AgentCheck):
             raise
         except Exception as exc:
             message = 'Unexpected error while executing RethinkDB check: {!r}'.format(exc)
-            self.log.error(message)
+            self.log.exception(message)
             self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, tags=tags, message=message)
             raise
         else:

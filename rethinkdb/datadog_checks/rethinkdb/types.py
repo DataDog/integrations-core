@@ -9,10 +9,9 @@ from typing import Any, List, Literal, Mapping, Tuple, TypedDict, Union
 
 # Check interfaces.
 
-Metric = TypedDict(
-    'Metric',
-    {'type': Literal['gauge', 'monotonic_count', 'service_check'], 'name': str, 'value': float, 'tags': List[str]},
-)
+MetricType = Literal['gauge', 'monotonic_count', 'service_check']
+
+Metric = TypedDict('Metric', {'type': MetricType, 'name': str, 'value': float, 'tags': List[str]})
 
 Instance = TypedDict(
     'Instance',
@@ -143,6 +142,32 @@ ServerStatus = TypedDict('ServerStatus', {'id': str, 'name': str, 'network': Ser
 
 # System jobs documents.
 # See: https://rethinkdb.com/docs/system-jobs/
+
+QueryInfo = TypedDict('QueryInfo', {})
+
+QueryJob = TypedDict(
+    'QueryJob',
+    {
+        'type': Literal['query'],
+        'id': Tuple[Literal['query'], str],
+        'duration_sec': float,
+        'info': QueryInfo,
+        'servers': List[str],
+    },
+)
+
+DiskCompactionInfo = TypedDict('DiskCompactionInfo', {})
+
+DiskCompactionJob = TypedDict(
+    'DiskCompactionJob',
+    {
+        'type': Literal['disk_compaction'],
+        'id': Tuple[Literal['disk_compaction'], str],
+        'duration_sec': None,
+        'info': DiskCompactionInfo,
+        'servers': List[str],
+    },
+)
 
 IndexConstructionInfo = TypedDict('IndexConstructionInfo', {'db': str, 'table': str, 'index': str, 'progress': int})
 

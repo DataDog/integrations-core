@@ -99,52 +99,52 @@ CONFIG_TOTALS_METRICS = (
 )  # type: Tuple[Tuple[str, int, Union[int, Callable[[set], int]], List[str]], ...]
 
 CLUSTER_STATISTICS_METRICS = (
-    ('rethinkdb.stats.cluster.queries_per_sec', AggregatorStub.GAUGE),
-    ('rethinkdb.stats.cluster.read_docs_per_sec', AggregatorStub.GAUGE),
-    ('rethinkdb.stats.cluster.written_docs_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.cluster.query_engine.queries_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.cluster.query_engine.read_docs_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.cluster.query_engine.written_docs_per_sec', AggregatorStub.GAUGE),
 )  # type: Tuple[Tuple[str, int], ...]
 
 SERVER_STATISTICS_METRICS = (
-    ('rethinkdb.stats.server.queries_per_sec', AggregatorStub.GAUGE),
-    ('rethinkdb.stats.server.queries_total', AggregatorStub.MONOTONIC_COUNT),
-    ('rethinkdb.stats.server.read_docs_per_sec', AggregatorStub.GAUGE),
-    ('rethinkdb.stats.server.read_docs_total', AggregatorStub.MONOTONIC_COUNT),
-    ('rethinkdb.stats.server.written_docs_per_sec', AggregatorStub.GAUGE),
-    ('rethinkdb.stats.server.written_docs_total', AggregatorStub.MONOTONIC_COUNT),
-    ('rethinkdb.stats.server.client_connections', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.server.query_engine.queries_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.server.query_engine.queries_total', AggregatorStub.MONOTONIC_COUNT),
+    ('rethinkdb.stats.server.query_engine.read_docs_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.server.query_engine.read_docs_total', AggregatorStub.MONOTONIC_COUNT),
+    ('rethinkdb.stats.server.query_engine.written_docs_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.server.query_engine.written_docs_total', AggregatorStub.MONOTONIC_COUNT),
+    ('rethinkdb.stats.server.query_engine.client_connections', AggregatorStub.GAUGE),
     (
         # NOTE: submitted but not documented on the RethinkDB website.
-        'rethinkdb.stats.server.clients_active',
+        'rethinkdb.stats.server.query_engine.clients_active',
         AggregatorStub.GAUGE,
     ),
 )  # type: Tuple[Tuple[str, int], ...]
 
 TABLE_STATISTICS_METRICS = (
-    ('rethinkdb.stats.table.read_docs_per_sec', AggregatorStub.GAUGE),
-    ('rethinkdb.stats.table.written_docs_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table.query_engine.read_docs_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table.query_engine.written_docs_per_sec', AggregatorStub.GAUGE),
 )  # type: Tuple[Tuple[str, int], ...]
 
 REPLICA_STATISTICS_METRICS = (
-    ('rethinkdb.stats.table_server.read_docs_per_sec', AggregatorStub.GAUGE),
-    ('rethinkdb.stats.table_server.read_docs_total', AggregatorStub.MONOTONIC_COUNT),
-    ('rethinkdb.stats.table_server.written_docs_per_sec', AggregatorStub.GAUGE),
-    ('rethinkdb.stats.table_server.written_docs_total', AggregatorStub.MONOTONIC_COUNT),
-    ('rethinkdb.stats.table_server.cache.in_use_bytes', AggregatorStub.GAUGE),
-    ('rethinkdb.stats.table_server.disk.read_bytes_per_sec', AggregatorStub.GAUGE),
-    ('rethinkdb.stats.table_server.disk.read_bytes_total', AggregatorStub.MONOTONIC_COUNT),
-    ('rethinkdb.stats.table_server.disk.written_bytes_per_sec', AggregatorStub.GAUGE),
-    ('rethinkdb.stats.table_server.disk.written_bytes_total', AggregatorStub.MONOTONIC_COUNT),
-    ('rethinkdb.stats.table_server.disk.metadata_bytes', AggregatorStub.GAUGE),
-    ('rethinkdb.stats.table_server.disk.data_bytes', AggregatorStub.GAUGE),
-    ('rethinkdb.stats.table_server.disk.garbage_bytes', AggregatorStub.GAUGE),
-    ('rethinkdb.stats.table_server.disk.preallocated_bytes', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.query_engine.read_docs_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.query_engine.read_docs_total', AggregatorStub.MONOTONIC_COUNT),
+    ('rethinkdb.stats.table_server.query_engine.written_docs_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.query_engine.written_docs_total', AggregatorStub.MONOTONIC_COUNT),
+    ('rethinkdb.stats.table_server.storage_engine.cache.in_use_bytes', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.storage_engine.disk.read_bytes_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.storage_engine.disk.read_bytes_total', AggregatorStub.MONOTONIC_COUNT),
+    ('rethinkdb.stats.table_server.storage_engine.disk.written_bytes_per_sec', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.storage_engine.disk.written_bytes_total', AggregatorStub.MONOTONIC_COUNT),
+    ('rethinkdb.stats.table_server.storage_engine.disk.space_usage.metadata_bytes', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.storage_engine.disk.space_usage.data_bytes', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.storage_engine.disk.space_usage.garbage_bytes', AggregatorStub.GAUGE),
+    ('rethinkdb.stats.table_server.storage_engine.disk.space_usage.preallocated_bytes', AggregatorStub.GAUGE),
 )  # type: Tuple[Tuple[str, int], ...]
 
 TABLE_STATUS_SERVICE_CHECKS = (
-    'rethinkdb.table_status.ready_for_outdated_reads',
-    'rethinkdb.table_status.ready_for_reads',
-    'rethinkdb.table_status.ready_for_writes',
-    'rethinkdb.table_status.all_replicas_ready',
+    'rethinkdb.table_status.status.ready_for_outdated_reads',
+    'rethinkdb.table_status.status.ready_for_reads',
+    'rethinkdb.table_status.status.ready_for_writes',
+    'rethinkdb.table_status.status.all_replicas_ready',
 )
 
 TABLE_STATUS_METRICS = (
@@ -153,13 +153,13 @@ TABLE_STATUS_METRICS = (
 
 TABLE_STATUS_SHARDS_METRICS = (
     ('rethinkdb.table_status.shards.replicas.total', AggregatorStub.GAUGE),
-    ('rethinkdb.table_status.shards.replicas.primary.total', AggregatorStub.GAUGE),
+    ('rethinkdb.table_status.shards.primary_replicas.total', AggregatorStub.GAUGE),
 )  # type: Tuple[Tuple[str, int], ...]
 
 SERVER_STATUS_METRICS = (
     ('rethinkdb.server_status.network.time_connected', AggregatorStub.GAUGE),
     ('rethinkdb.server_status.network.connected_to.total', AggregatorStub.GAUGE),
-    ('rethinkdb.server_status.network.connected_to.pending.total', AggregatorStub.GAUGE),
+    ('rethinkdb.server_status.network.not_connected_to.total', AggregatorStub.GAUGE),
     ('rethinkdb.server_status.process.time_started', AggregatorStub.GAUGE),
 )  # type: Tuple[Tuple[str, int], ...]
 
