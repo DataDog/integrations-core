@@ -11,7 +11,7 @@ from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.rethinkdb import RethinkDBCheck
 from datadog_checks.rethinkdb.backends import DefaultBackend
 from datadog_checks.rethinkdb.connections import Connection
-from datadog_checks.rethinkdb.exceptions import CouldNotConnect
+from datadog_checks.rethinkdb.exceptions import CouldNotConnect, VersionCollectionFailed
 from datadog_checks.rethinkdb.types import Instance, Metric
 
 from .assertions import assert_metrics
@@ -184,7 +184,7 @@ def test_connected_but_check_failed_unexpectedly(aggregator, instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_version_metadata(instance, datadog_agent):
+def test_mestadata_version(instance, datadog_agent):
     # type: (Instance, DatadogAgentStub) -> None
     check_id = 'test'
 
@@ -209,7 +209,7 @@ def test_version_metadata(instance, datadog_agent):
 
 @pytest.mark.unit
 @pytest.mark.parametrize('malformed_version_string', MALFORMED_VERSION_STRING_PARAMS)
-def test_version_metadata_failure(instance, aggregator, datadog_agent, malformed_version_string):
+def test_metadata_version_malformed(instance, aggregator, datadog_agent, malformed_version_string):
     # type: (Instance, AggregatorStub, DatadogAgentStub, str) -> None
     """
     Verify that check still runs to completion if version provided by RethinkDB is malformed.
@@ -219,6 +219,30 @@ def test_version_metadata_failure(instance, aggregator, datadog_agent, malformed
         def collect_connected_server_version(self, conn):
             # type: (Connection) -> str
             return malformed_version_string
+
+    check_id = 'test'
+
+    check = RethinkDBCheck('rethinkdb', {}, [instance])
+    check.check_id = check_id
+    check.backend = MockBackend()
+
+    check.check(instance)
+    aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK)
+
+    datadog_agent.assert_metadata(check_id, {})
+
+
+@pytest.mark.unit
+def test_metadata_version_failure(instance, aggregator, datadog_agent):
+    # type: (Instance, AggregatorStub, DatadogAgentStub) -> None
+    """
+    Verify that check still runs to completion if it fails to retrieve the RethinkDB version.
+    """
+
+    class MockBackend(DefaultBackend):
+        def collect_connected_server_version(self, conn):
+            # type: (Connection) -> str
+            raise VersionCollectionFailed('Oops!')
 
     check_id = 'test'
 
