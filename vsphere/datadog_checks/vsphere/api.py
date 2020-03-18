@@ -84,10 +84,16 @@ class VSphereAPI(object):
         """
         context = None
         if not self.config.ssl_verify:
-            context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+            # Remove type ignore when this is merged https://github.com/python/typeshed/pull/3855
+            context = ssl.SSLContext(
+                ssl.PROTOCOL_TLS  # type: ignore
+            )
             context.verify_mode = ssl.CERT_NONE
         elif self.config.ssl_capath:
-            context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+            # Remove type ignore when this is merged https://github.com/python/typeshed/pull/3855
+            context = ssl.SSLContext(
+                ssl.PROTOCOL_TLS  # type: ignore
+            )
             context.verify_mode = ssl.CERT_REQUIRED
             # `check_hostname` must be enabled as well to verify the authenticity of a cert.
             context.check_hostname = True
