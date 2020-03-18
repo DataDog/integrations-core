@@ -48,4 +48,4 @@ DEFAULT_COUNTERS = [
 
 class AspdotnetCheck(PDHBaseCheck):
     def __init__(self, name, init_config, instances=None):
-        PDHBaseCheck.__init__(self, name, init_config, instances=instances, counter_list=DEFAULT_COUNTERS)
+        super(AspdotnetCheck, self).__init__(name, init_config, instances=instances, counter_list=DEFAULT_COUNTERS)
