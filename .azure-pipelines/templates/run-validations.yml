@@ -19,6 +19,10 @@ steps:
   - script: ddev validate dep
     displayName: 'Validate dependencies'
 
+- ${{ if eq(parameters.repo, 'core') }}:
+  - script: ddev validate legacy-signature
+    displayName: 'Validate that no integrations use the legacy agent signature'
+
 - script: ddev validate manifest -i
   displayName: 'Validate manifest files'
 
