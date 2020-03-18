@@ -26,18 +26,30 @@ from .version import parse_version
 class Backend(object):
     """
     Base interface for high-level operations performed during a RethinkDB check.
+
+    Abstracts any interfaces specific to the `rethinkdb` client library or our default metrics collection strategy
+    to facilitate swapping for alternative implementations (e.g. for testing purposes).
     """
 
     def connect(self, config):
         # type: (Config) -> Connection
+        """
+        Establish a connection with the configured RethinkDB server.
+        """
         raise NotImplementedError  # pragma: no cover
 
     def collect_metrics(self, conn):
         # type: (Connection) -> Iterator[Metric]
+        """
+        Collect metrics from the RethinkDB cluster we are connected to.
+        """
         raise NotImplementedError  # pragma: no cover
 
     def collect_connected_server_version(self, conn):
         # type: (Connection) -> str
+        """
+        Return the version of RethinkDB run by the server at the other end of the connection, in SemVer format.
+        """
         raise NotImplementedError  # pragma: no cover
 
 
@@ -60,6 +72,8 @@ class DefaultBackend(Backend):
 
     def __init__(self):
         # type: () -> None
+        # NOTE: the name 'r' may look off-putting at first, but it was chosen for consistency with the officially
+        # advertised ReQL usage. For example, see: https://rethinkdb.com/docs/guide/python/
         self._r = rethinkdb.r
         self._query_engine = QueryEngine(r=self._r)
 
@@ -86,8 +100,5 @@ class DefaultBackend(Backend):
 
     def collect_connected_server_version(self, conn):
         # type: (Connection) -> str
-        """
-        Return the version of RethinkDB run by the server at the other end of the connection, in SemVer format.
-        """
         version_string = self._query_engine.query_connected_server_version_string(conn)
         return parse_version(version_string)

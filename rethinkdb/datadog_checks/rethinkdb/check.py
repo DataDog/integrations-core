@@ -64,18 +64,18 @@ class RethinkDBCheck(AgentCheck):
 
     def submit_metric(self, metric):
         # type: (Metric) -> None
-        typ = metric['type']
+        metric_type = metric['type']
         name = metric['name']
         value = metric['value']
         tags = self.config.tags + metric['tags']
 
-        self.log.debug('submit_metric type=%r name=%r value=%r tags=%r', typ, name, value, tags)
+        self.log.debug('submit_metric type=%r name=%r value=%r tags=%r', metric_type, name, value, tags)
 
-        if typ == 'service_check':
+        if metric_type == 'service_check':
             value = cast(ServiceCheckStatus, value)
             self.service_check(name, value, tags=tags)
         else:
-            submit = getattr(self, typ)  # type: Callable
+            submit = getattr(self, metric_type)  # type: Callable
             submit(name, value, tags=tags)
 
     def submit_version_metadata(self, conn):

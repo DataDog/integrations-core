@@ -18,7 +18,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 
-CHECKS_BASE_REQ = 'datadog-checks-base>=4.2.0'
+CHECKS_BASE_REQ = 'datadog-checks-base>=11.0.0'
 
 
 setup(
@@ -43,7 +43,7 @@ setup(
         'Topic :: System :: Monitoring',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
     # The package we're going to ship
     packages=['datadog_checks.rethinkdb'],

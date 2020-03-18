@@ -17,6 +17,9 @@ ConnectionTags = TypedDict('ConnectionTags', {'server': str, 'host': str, 'port'
 class Connection(object):
     """
     Base class and interface for connection objects.
+
+    Abstracts any interfaces specific to the `rethinkdb` client library to facilitate swapping for alternative
+    implementations (e.g. for testing purposes).
     """
 
     def __enter__(self):
