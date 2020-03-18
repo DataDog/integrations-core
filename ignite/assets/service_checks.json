@@ -1,1 +1,17 @@
-[]
+[
+    {
+        "agent_version": "6.19.0",
+        "integration": "Ignite",
+        "groups": [
+            "host",
+            "instance"
+        ],
+        "check": "ignite.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Ignite instance. Returns `OK` otherwise."
+    }
+]
