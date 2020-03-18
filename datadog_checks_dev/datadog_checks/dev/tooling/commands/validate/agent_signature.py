@@ -4,7 +4,7 @@
 
 import click
 
-from ...utils import get_valid_integrations, has_legacy_signature
+from ...utils import complete_valid_checks, get_valid_checks, has_legacy_signature
 from ..console import CONTEXT_SETTINGS, echo_failure, echo_success
 
 
@@ -13,13 +13,19 @@ from ..console import CONTEXT_SETTINGS, echo_failure, echo_success
     context_settings=CONTEXT_SETTINGS,
     short_help='Validate that no integration uses the legacy signature',
 )
-def legacy_signature():
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
+def legacy_signature(check):
     """Validate that no integration uses the legacy signature."""
-    integrations = get_valid_integrations()
+    if check:
+        checks = [check]
+    else:
+        checks = sorted(get_valid_checks())
+
     has_failed = False
-    for integration in integrations:
-        if has_legacy_signature(integration):
-            echo_failure(f'Integration {integration} uses legacy agent signature.')
+    for check in checks:
+        if has_legacy_signature(check):
+            has_failed = True
+            echo_failure(f'Check {check} uses legacy agent signature.')
     if not has_failed:
-        echo_success(f'All integrations use the new agent signature.')
+        echo_success(f'All checks use the new agent signature.')
     return
