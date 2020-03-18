@@ -5,7 +5,7 @@ import mock
 import pytest
 from six import iteritems
 
-from datadog_checks.mongo import MongoDb
+from datadog_checks.mongo import MongoDb, metrics
 
 RATE = MongoDb.rate
 GAUGE = MongoDb.gauge
@@ -13,11 +13,12 @@ GAUGE = MongoDb.gauge
 pytestmark = pytest.mark.unit
 
 
-def test_build_metric_list(check):
+def test_build_metric_list(check, instance):
     """
     Build the metric list according to the user configuration.
     Print a warning when an option has no match.
     """
+    check = check(instance)
     # Initialize check
     check.log = mock.Mock()
 
@@ -26,7 +27,7 @@ def test_build_metric_list(check):
     # Default metric list
     DEFAULT_METRICS = {
         m_name: m_type
-        for d in [check.BASE_METRICS, check.DURABILITY_METRICS, check.LOCKS_METRICS, check.WIREDTIGER_METRICS]
+        for d in [metrics.BASE_METRICS, metrics.DURABILITY_METRICS, metrics.LOCKS_METRICS, metrics.WIREDTIGER_METRICS]
         for m_name, m_type in iteritems(d)
     }
 
@@ -43,18 +44,19 @@ def test_build_metric_list(check):
     # One correct option
     default_and_tcmalloc_metrics = build_metric_list(['tcmalloc'])
 
-    assert len(default_and_tcmalloc_metrics) == len(DEFAULT_METRICS) + len(check.TCMALLOC_METRICS)
+    assert len(default_and_tcmalloc_metrics) == len(DEFAULT_METRICS) + len(metrics.TCMALLOC_METRICS)
 
     # One wrong and correct option
     default_and_tcmalloc_metrics = build_metric_list(['foobar', 'top'])
-    assert len(default_and_tcmalloc_metrics) == len(DEFAULT_METRICS) + len(check.TOP_METRICS)
+    assert len(default_and_tcmalloc_metrics) == len(DEFAULT_METRICS) + len(metrics.TOP_METRICS)
     assert check.log.warning.call_count == 2
 
 
-def test_metric_resolution(check):
+def test_metric_resolution(check, instance):
     """
     Resolve metric names and types.
     """
+    check = check(instance)
 
     metrics_to_collect = {'foobar': (GAUGE, 'barfoo'), 'foo.bar': (RATE, 'bar.foo'), 'fOoBaR': GAUGE, 'fOo.baR': RATE}
 
@@ -73,11 +75,12 @@ def test_metric_resolution(check):
     assert (GAUGE, 'mongodb.qux.foobar') == resolve_metric('fOoBaR', metrics_to_collect, prefix="qux")
 
 
-def test_metric_normalization(check):
+def test_metric_normalization(check, instance):
     """
     Metric names suffixed with `.R`, `.r`, `.W`, `.w` are renamed.
     """
     # Initialize check and tests
+    check = check(instance)
     metrics_to_collect = {'foo.bar': GAUGE, 'foobar.r': GAUGE, 'foobar.R': RATE, 'foobar.w': RATE, 'foobar.W': GAUGE}
     resolve_metric = check._resolve_metric
 
@@ -90,10 +93,11 @@ def test_metric_normalization(check):
     assert (GAUGE, 'mongodb.foobar.exclusive') == resolve_metric('foobar.W', metrics_to_collect)
 
 
-def test_state_translation(check):
+def test_state_translation(check, instance):
     """
     Check that resolving replset member state IDs match to names and descriptions properly.
     """
+    check = check(instance)
     assert 'STARTUP2' == check.get_state_name(5)
     assert 'PRIMARY' == check.get_state_name(1)
 
@@ -106,7 +110,8 @@ def test_state_translation(check):
     assert unknown_desc.find('500') != -1
 
 
-def test_server_uri_sanitization(check):
+def test_server_uri_sanitization(check, instance):
+    check = check(instance)
     _parse_uri = check._parse_uri
 
     # Batch with `sanitize_username` set to False
