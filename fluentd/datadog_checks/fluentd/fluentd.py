@@ -7,7 +7,6 @@ import re
 
 from six.moves.urllib.parse import urlparse
 
-# 3rd party
 from datadog_checks.base import ConfigurationError
 
 # project
