@@ -44,8 +44,8 @@ class CassandraNodetoolCheck(AgentCheck):
         r'(?P<rack>.*)'
     )
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances=None):
+        AgentCheck.__init__(self, name, init_config, instances)
         self.nodetool_cmd = init_config.get("nodetool", "/usr/bin/nodetool")
 
     def check(self, instance):

@@ -16,7 +16,7 @@ class Istio(OpenMetricsBaseCheck):
     CITADEL_NAMESPACE = 'istio.citadel'
     DEFAULT_METRIC_LIMIT = 0
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances=None):
 
         # Create instances we can use in OpenMetricsBaseCheck
         generic_instances = None
@@ -24,7 +24,7 @@ class Istio(OpenMetricsBaseCheck):
             generic_instances = self.create_generic_instances(instances)
 
         # Set up OpenMetricsBaseCheck with our generic instances
-        super(Istio, self).__init__(name, init_config, agentConfig, instances=generic_instances)
+        super(Istio, self).__init__(name, init_config, instances=generic_instances)
 
     def check(self, instance):
         """

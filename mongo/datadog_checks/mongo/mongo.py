@@ -421,8 +421,8 @@ class MongoDb(AgentCheck):
         10: ('REMOVED', 'Removed'),
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances=None):
+        AgentCheck.__init__(self, name, init_config, instances)
 
         # Members' last replica set states
         self._last_state_by_server = {}

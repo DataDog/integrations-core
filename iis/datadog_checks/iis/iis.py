@@ -42,8 +42,8 @@ TOTAL_SITE = "_Total"
 class IIS(PDHBaseCheck):
     SERVICE_CHECK = "iis.site_up"
 
-    def __init__(self, name, init_config, agentConfig, instances):
-        super(IIS, self).__init__(name, init_config, agentConfig, instances=instances, counter_list=DEFAULT_COUNTERS)
+    def __init__(self, name, init_config, instances):
+        super(IIS, self).__init__(name, init_config, instances=instances, counter_list=DEFAULT_COUNTERS)
 
     def get_iishost(self, instance):
         inst_host = instance.get("host")
