@@ -26,8 +26,8 @@ class Win32EventLogWMI(WinWMICheck):
     NAMESPACE = "root\\CIMV2"
     EVENT_CLASS = "Win32_NTLogEvent"
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        WinWMICheck.__init__(self, name, init_config, agentConfig, instances=instances)
+    def __init__(self, name, init_config, instances=None):
+        WinWMICheck.__init__(self, name, init_config, instances=instances)
         # Settings
         self._tag_event_id = is_affirmative(init_config.get('tag_event_id', False))
         self._verbose = init_config.get('verbose', True)

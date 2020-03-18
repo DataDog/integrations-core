@@ -116,8 +116,8 @@ class SQLServer(AgentCheck):
         DM_OS_VIRTUAL_FILE_STATS,
     ]
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances=None):
+        AgentCheck.__init__(self, name, init_config, instances)
 
         # Cache connections
         self.connections = {}

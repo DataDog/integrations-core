@@ -14,8 +14,8 @@ class NfsStatCheck(AgentCheck):
 
     metric_prefix = 'system.nfs.'
 
-    def __init__(self, name, init_config, agentConfig, instances):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        AgentCheck.__init__(self, name, init_config, instances)
         # if they set the path, use that
         if init_config.get('nfsiostat_path'):
             self.nfs_cmd = [init_config.get('nfsiostat_path'), '1', '2']

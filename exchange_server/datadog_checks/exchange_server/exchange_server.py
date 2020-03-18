@@ -178,5 +178,5 @@ DEFAULT_COUNTERS = [
 
 
 class ExchangeCheck(PDHBaseCheck):
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        PDHBaseCheck.__init__(self, name, init_config, agentConfig, instances=instances, counter_list=DEFAULT_COUNTERS)
+    def __init__(self, name, init_config, instances=None):
+        PDHBaseCheck.__init__(self, name, init_config, instances=instances, counter_list=DEFAULT_COUNTERS)

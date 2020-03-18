@@ -101,8 +101,8 @@ class Redis(AgentCheck):
         'keyspace_misses': 'redis.stats.keyspace_misses',
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances=None):
+        AgentCheck.__init__(self, name, init_config, instances)
         self.connections = {}
         self.last_timestamp_seen = defaultdict(int)
 

@@ -70,7 +70,7 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     DEFAULT_METRIC_LIMIT = 0
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances=None):
         # We do not support more than one instance of kube-state-metrics
         instance = instances[0]
         kubernetes_state_instance = self._create_kubernetes_state_prometheus_instance(instance)
@@ -81,7 +81,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         self.keep_ksm_labels = is_affirmative(kubernetes_state_instance.get('keep_ksm_labels', True))
 
         generic_instances = [kubernetes_state_instance]
-        super(KubernetesState, self).__init__(name, init_config, agentConfig, instances=generic_instances)
+        super(KubernetesState, self).__init__(name, init_config, instances=generic_instances)
 
         self.condition_to_status_positive = {'true': self.OK, 'false': self.CRITICAL, 'unknown': self.UNKNOWN}
 

@@ -209,8 +209,8 @@ class Riak(AgentCheck):
 
     vnodeq_keys = ["riak_kv_vnodeq", "riak_pipe_vnodeq"]
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances=None):
+        AgentCheck.__init__(self, name, init_config, instances)
         for k in ["mean", "median", "95", "99", "100"]:
             for m in self.stat_keys:
                 self.keys.append(m + "_" + k)

@@ -90,11 +90,11 @@ class Kubernetes(AgentCheck):
 
     pod_names_by_container = {}
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances=None):
         if instances is not None and len(instances) > 1:
             raise Exception('Kubernetes check only supports one configured instance.')
 
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+        AgentCheck.__init__(self, name, init_config, instances)
 
         inst = instances[0] if instances is not None else None
         self.kubeutil = KubeUtil(init_config=init_config, instance=inst)
