@@ -28,8 +28,8 @@ class PDHBaseCheck(AgentCheck):
     Windows only.
     """
 
-    def __init__(self, name, init_config, agentConfig, instances, counter_list):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances, counter_list):
+        AgentCheck.__init__(self, name, init_config, instances)
         self._missing_counters = {}
         self._metrics = {}
         self._tags = {}
