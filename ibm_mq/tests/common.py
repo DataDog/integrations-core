@@ -38,6 +38,17 @@ INSTANCE = {
     'password': PASSWORD,
     'queues': [QUEUE],
     'channels': [CHANNEL, BAD_CHANNEL],
+    'tags': ['foo:bar'],
+}
+
+INSTANCE_WITH_CONNECTION_NAME = {
+    'channel': CHANNEL,
+    'queue_manager': QUEUE_MANAGER,
+    'connection_name': "{}({})".format(HOST, PORT),
+    'username': USERNAME,
+    'password': PASSWORD,
+    'queues': [QUEUE],
+    'channels': [CHANNEL, BAD_CHANNEL],
 }
 
 INSTANCE_QUEUE_PATTERN = {
@@ -85,13 +96,16 @@ INSTANCE_QUEUE_REGEX_TAG = {
 }
 
 E2E_METADATA = {
+    # This script makes the necessary setup to be able to compile pymqi on the agent machine
     'start_commands': [
+        'apt-get update',
+        'apt-get install gcc -y',
         'mkdir /opt/mqm',
-        'curl -o /opt/mqm/mq-client.tar.gz '
-        'https://dd-agent-tarball-mirror.s3.amazonaws.com/9.0.0.6-IBM-MQC-Redist-LinuxX64.tar.gz',
+        'curl -L -o /opt/mqm/mq-client.tar.gz '
+        'https://ddintegrations.blob.core.windows.net/ibm-mq/9.1.0.4-IBM-MQC-Redist-LinuxX64.tar.gz',
         'tar -C /opt/mqm -xf /opt/mqm/mq-client.tar.gz',
     ],
-    'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib'},
+    'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib', 'C_INCLUDE_PATH': '/opt/mqm/inc'},
 }
 
 QUEUE_METRICS = [
@@ -179,3 +193,13 @@ METRICS = (
 OPTIONAL_METRICS = [
     'ibm_mq.queue.max_channels',
 ]
+
+
+def assert_all_metrics(aggregator):
+    for metric, metric_type in METRICS:
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()))
+
+    for metric in OPTIONAL_METRICS:
+        aggregator.assert_metric(metric, at_least=0)
+
+    aggregator.assert_all_metrics_covered()

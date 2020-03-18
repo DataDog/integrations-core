@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  aerospike:
+  oracle:
     container_name: oracle-database
     image: container-registry.oracle.com/database/enterprise:${ORACLE_DATABASE_VERSION}-slim
     shm_size: '8gb'

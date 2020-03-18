@@ -17,6 +17,13 @@ init_config:
   #
   # access_denied_cache_duration: 120
 
+  ## @param shared_process_list_cache_duration - integer - optional - default: 120
+  ## The check maintains a list of running processes shared among all instances, that is used to generate the
+  ## matching pid list on each instance. It won't try to look at them again for the duration in seconds
+  ## specified by shared_process_list_cache_duration.
+  #
+  # shared_process_list_cache_duration: 120
+
   ## @param procfs_path - string - optional
   ## Used to override the default procfs path, e.g. for docker containers with the outside fs mounted at /host/proc
   ## DEPRECATED: please specify `procfs_path` globally in `datadog.conf` instead

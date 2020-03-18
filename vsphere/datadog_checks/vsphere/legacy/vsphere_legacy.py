@@ -18,7 +18,7 @@ from pyVmomi import vmodl  # pylint: disable=E0611
 from six import itervalues
 from six.moves import range
 
-from datadog_checks.base import ensure_unicode, to_string
+from datadog_checks.base import ensure_unicode, to_native_string
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.checks.libs.thread_pool import SENTINEL, Pool
 from datadog_checks.base.checks.libs.timer import Timer
@@ -879,7 +879,7 @@ class VSphereLegacyCheck(AgentCheck):
                     if not hostname:  # no host tags available
                         tags.extend(mor['tags'])
                     else:
-                        hostname = to_string(hostname)
+                        hostname = to_native_string(hostname)
                         if self.excluded_host_tags:
                             tags.extend(mor["excluded_host_tags"])
 
@@ -1006,6 +1006,8 @@ class VSphereLegacyCheck(AgentCheck):
 
             if self.exception_printed > 0:
                 self.log.error("One thread in the pool crashed, check the logs")
-        except Exception:
-            self.terminate_pool()
+        except Exception as e:
+            self.log.error("An exception occured while collecting vSphere metrics: %s", e)
+            if self.pool:
+                self.terminate_pool()
             raise

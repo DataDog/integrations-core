@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [SAP HANA][1] through the Datadog Agent.
+This check monitors [SAP HANA][1] 2.0, SPS 2 through the Datadog Agent. 
 
 ## Setup
 

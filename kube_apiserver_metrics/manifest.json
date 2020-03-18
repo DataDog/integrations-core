@@ -10,7 +10,9 @@
     "guid": "406b274b-c44d-4499-a329-efd053b3f538",
     "support": "core",
     "supported_os": [
-        "linux"
+        "linux",
+        "mac_os",
+        "windows"
     ],
     "public_title": "Datadog-Kubernetes API server metrics Integration",
     "categories": [
