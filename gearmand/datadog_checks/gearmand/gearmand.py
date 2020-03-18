@@ -5,7 +5,7 @@
 
 from six import PY2
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 
 # Python 3 compatibility is a different library
 # It's a drop in replacement but has a different name

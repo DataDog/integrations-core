@@ -7,7 +7,7 @@ from collections import defaultdict
 
 import requests
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 
 db_stats = re.compile(r'^db_(\d)+$')
 whitespace = re.compile(r'\s')

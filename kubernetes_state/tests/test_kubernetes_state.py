@@ -7,7 +7,7 @@ import mock
 import pytest
 
 from datadog_checks.kubernetes_state import KubernetesState
-from datadog_checks.utils.common import ensure_unicode
+from datadog_checks.base.utils.common import ensure_unicode
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIXTURES_PATH = os.path.join(HERE, 'fixtures')

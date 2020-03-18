@@ -10,7 +10,7 @@ import requests
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.utils import ON_WINDOWS
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FOLDER = os.path.join(HERE, 'docker', 'coredns')

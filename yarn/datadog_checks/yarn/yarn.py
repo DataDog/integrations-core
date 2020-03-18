@@ -6,7 +6,7 @@ from six import iteritems
 from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 
 from datadog_checks.base import AgentCheck, is_affirmative
-from datadog_checks.errors import ConfigurationError
+from datadog_checks.base.errors import ConfigurationError
 
 # Default settings
 DEFAULT_RM_URI = 'http://localhost:8088'

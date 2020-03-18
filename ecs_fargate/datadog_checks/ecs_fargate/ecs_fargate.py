@@ -7,7 +7,7 @@ import requests
 from six import iteritems
 
 from datadog_checks.base.utils.common import round_value
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 
 try:
     from tagger import get_tags

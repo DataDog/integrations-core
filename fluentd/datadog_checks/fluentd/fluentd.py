@@ -10,7 +10,7 @@ from six.moves.urllib.parse import urlparse
 
 # project
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 
 
 class Fluentd(AgentCheck):

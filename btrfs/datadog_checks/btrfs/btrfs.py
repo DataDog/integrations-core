@@ -14,7 +14,7 @@ import psutil
 from six import iteritems
 from six.moves import range
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 
 MIXED = "mixed"
 DATA = "data"

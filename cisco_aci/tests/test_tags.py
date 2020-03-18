@@ -7,7 +7,7 @@ import logging
 import pytest
 
 from datadog_checks.cisco_aci.tags import CiscoTags
-from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.base.utils.containers import hash_mutable
 
 log = logging.getLogger('test_cisco_aci')
 

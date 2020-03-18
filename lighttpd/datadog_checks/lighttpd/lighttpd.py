@@ -6,7 +6,7 @@ import re
 
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 
 VERSION_REGEX = re.compile(r".*/((\d+).*)")
 

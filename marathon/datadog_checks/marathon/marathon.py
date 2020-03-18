@@ -7,7 +7,7 @@ import requests
 from six import iteritems
 from six.moves.urllib.parse import urljoin
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 
 
 class Marathon(AgentCheck):

@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from collections import namedtuple
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 
 
 class PowerDNSRecursorCheck(AgentCheck):

@@ -10,7 +10,7 @@ from fnmatch import fnmatch
 
 import pymysql
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 
 try:
     import rrdtool

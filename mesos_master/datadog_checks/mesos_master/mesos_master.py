@@ -10,8 +10,8 @@ import requests
 from six import iteritems
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.errors import CheckException
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.errors import CheckException
 
 
 class MesosMaster(AgentCheck):

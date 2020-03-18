@@ -8,7 +8,7 @@ from typing import Any
 from six import iteritems
 
 from datadog_checks.base import ensure_bytes, ensure_unicode
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base.checks import AgentCheck
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
 from . import connection, errors, metrics

@@ -13,7 +13,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
 from datadog_checks.base.checks.libs.timer import Timer
-from datadog_checks.stubs import datadog_agent
+from datadog_checks.base.stubs import datadog_agent
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache, TagsCache

@@ -6,9 +6,9 @@ from os.path import abspath, exists, join, relpath
 from re import compile as re_compile
 from time import time
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
-from datadog_checks.errors import ConfigurationError
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.errors import ConfigurationError
 
 from .traverse import walk
 
