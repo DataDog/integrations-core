@@ -119,4 +119,6 @@ DEFAULT_COUNTERS = [
 
 class ActiveDirectoryCheck(PDHBaseCheck):
     def __init__(self, name, init_config, instances=None):
-        PDHBaseCheck.__init__(self, name, init_config, instances=instances, counter_list=DEFAULT_COUNTERS)
+        super(ActiveDirectoryCheck, self).__init__(
+            name, init_config, instances=instances, counter_list=DEFAULT_COUNTERS
+        )
