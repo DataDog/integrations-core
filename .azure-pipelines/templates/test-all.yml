@@ -1,6 +1,7 @@
 parameters:
   checks: []
   repo: 'core'
+  pip_cache_config: null
 
 jobs:
 - ${{ each check in parameters.checks }}:
@@ -10,3 +11,4 @@ jobs:
       display: ${{ check.displayName }}
       validate: true
       repo: ${{ parameters.repo }}
+      pip_cache_config: ${{ parameters.pip_cache_config }}

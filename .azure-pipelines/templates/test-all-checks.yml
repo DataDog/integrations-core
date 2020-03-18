@@ -1,6 +1,10 @@
+parameters:
+  pip_cache_config: null
+
 jobs:
 - template: ./test-all.yml
   parameters:
+    pip_cache_config: ${{ parameters.pip_cache_config }}
     checks:
     - checkName: datadog_checks_base
       displayName: Datadog Checks Base (Linux)
@@ -49,6 +53,9 @@ jobs:
       os: linux
     - checkName: cacti
       displayName: Cacti
+      os: linux
+    - checkName: cassandra
+      displayName: Cassandra
       os: linux
     - checkName: cassandra_nodetool
       displayName: Cassandra Nodetool
@@ -175,6 +182,9 @@ jobs:
       os: linux
     - checkName: jboss_wildfly
       displayName: JBoss/WildFly
+      os: linux
+    - checkName: kafka
+      displayName: Kafka
       os: linux
     - checkName: kafka_consumer
       displayName: Kafka Consumer
@@ -361,6 +371,9 @@ jobs:
       os: linux
     - checkName: tokumx
       displayName: TokuMX
+      os: linux
+    - checkName: tomcat
+      displayName: Tomcat
       os: linux
     - checkName: twemproxy
       displayName: Twemproxy

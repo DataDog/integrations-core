@@ -1,7 +1,7 @@
 datadog-active-directory==1.6.0; sys_platform == 'win32'
 datadog-activemq-xml==1.5.0
 datadog-activemq==1.3.0
-datadog-aerospike==1.6.0; sys_platform != 'win32'
+datadog-aerospike==1.7.0; sys_platform != 'win32'
 datadog-airflow==1.1.0
 datadog-amazon-msk==1.0.0
 datadog-ambari==1.2.0; sys_platform != 'win32'
@@ -40,7 +40,7 @@ datadog-fluentd==1.5.0
 datadog-gearmand==1.4.0; sys_platform != 'win32'
 datadog-gitlab-runner==2.7.1
 datadog-gitlab==2.8.1
-datadog-go-expvar==1.7.1
+datadog-go-expvar==1.7.2
 datadog-gunicorn==1.9.0; sys_platform != 'win32'
 datadog-haproxy==2.7.1
 datadog-harbor==1.3.1
@@ -50,7 +50,7 @@ datadog-hive==1.1.2
 datadog-http-check==4.6.4
 datadog-hyperv==1.1.0; sys_platform == 'win32'
 datadog-ibm-db2==1.4.0
-datadog-ibm-mq==3.3.1; sys_platform == 'linux2'
+datadog-ibm-mq==3.4.0; sys_platform == 'linux2'
 datadog-ibm-was==1.5.0
 datadog-iis==2.8.0; sys_platform == 'win32'
 datadog-istio==2.4.2
@@ -58,14 +58,14 @@ datadog-jboss-wildfly==1.1.1
 datadog-kafka-consumer==2.4.0; sys_platform != 'win32'
 datadog-kafka==2.0.2
 datadog-kong==1.7.1
-datadog-kube-apiserver-metrics==1.2.2; sys_platform == 'linux2'
+datadog-kube-apiserver-metrics==1.2.2
 datadog-kube-controller-manager==1.6.0
 datadog-kube-dns==2.3.0
 datadog-kube-metrics-server==1.1.1
 datadog-kube-proxy==3.3.0
 datadog-kube-scheduler==1.3.0
-datadog-kubelet==3.6.0; sys_platform == 'linux2'
-datadog-kubernetes-state==5.2.1; sys_platform != 'win32'
+datadog-kubelet==3.6.0
+datadog-kubernetes-state==5.2.1
 datadog-kyototycoon==1.9.0
 datadog-lighttpd==1.8.0
 datadog-linkerd==2.4.0
@@ -95,7 +95,7 @@ datadog-postfix==1.6.1; sys_platform != 'win32'
 datadog-postgres==3.5.3
 datadog-powerdns-recursor==1.5.0
 datadog-presto==2.0.1
-datadog-process==1.11.1
+datadog-process==1.12.0
 datadog-prometheus==3.2.0
 datadog-rabbitmq==1.13.0
 datadog-redisdb==2.0.1
@@ -106,14 +106,14 @@ datadog-scylla==1.0.2
 datadog-snmp==2.5.0
 datadog-solr==1.2.0
 datadog-spark==1.11.4
-datadog-sqlserver==1.16.1; sys_platform != 'darwin'
+datadog-sqlserver==1.16.2; sys_platform != 'darwin'
 datadog-squid==1.5.0
 datadog-ssh-check==1.10.0
 datadog-statsd==1.3.0
 datadog-supervisord==1.4.0
 datadog-system-core==1.5.3
 datadog-system-swap==1.6.3
-datadog-tcp-check==2.3.3
+datadog-tcp-check==2.3.4
 datadog-teamcity==1.7.0
 datadog-tenable==1.0.1
 datadog-tls==1.4.1

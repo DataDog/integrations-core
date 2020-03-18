@@ -47,6 +47,7 @@ DEFAULT_GAUGE_MEMSTAT_METRICS = [
     "HeapInuse",
     "HeapReleased",
     "HeapObjects",
+    "TotalAlloc",
 ]
 
 DEFAULT_RATE_MEMSTAT_METRICS = [
@@ -59,13 +60,9 @@ DEFAULT_RATE_MEMSTAT_METRICS = [
     "NumGC",
 ]
 
-DEFAULT_COUNTER_METRICS = ["TotalAlloc"]
-
-DEFAULT_METRICS = (
-    [{PATH: "memstats/%s" % path, TYPE: GAUGE} for path in DEFAULT_GAUGE_MEMSTAT_METRICS]
-    + [{PATH: "memstats/%s" % path, TYPE: RATE} for path in DEFAULT_RATE_MEMSTAT_METRICS]
-    + [{PATH: "memstats/%s" % path, TYPE: MONOTONIC_COUNTER} for path in DEFAULT_COUNTER_METRICS]
-)
+DEFAULT_METRICS = [{PATH: "memstats/%s" % path, TYPE: GAUGE} for path in DEFAULT_GAUGE_MEMSTAT_METRICS] + [
+    {PATH: "memstats/%s" % path, TYPE: RATE} for path in DEFAULT_RATE_MEMSTAT_METRICS
+]
 
 GO_EXPVAR_URL_PATH = "/debug/vars"
 
@@ -183,6 +180,12 @@ class GoExpvar(AgentCheck):
                     return
 
                 SUPPORTED_TYPES[metric_type](self, metric_name, value, metric_tags + path_tag)
+
+                # Submit 'go_expvar.memstats.total_alloc' as a monotonic count
+                if 'memstats.total_alloc' in metric_name:
+                    self.monotonic_count(metric_name + '.count', value, metric_tags + path_tag)
+                    count += 1
+
                 count += 1
 
     def deep_get(self, content, keys, traversed_path=None):

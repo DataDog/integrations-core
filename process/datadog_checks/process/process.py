@@ -16,6 +16,8 @@ from datadog_checks.checks import AgentCheck
 from datadog_checks.config import _is_affirmative
 from datadog_checks.utils.platform import Platform
 
+from .cache import DEFAULT_SHARED_PROCESS_LIST_CACHE_DURATION, ProcessListCache
+
 DEFAULT_AD_CACHE_DURATION = 120
 DEFAULT_PID_CACHE_DURATION = 120
 
@@ -54,6 +56,9 @@ ATTR_TO_METRIC_RATE = {
 
 
 class ProcessCheck(AgentCheck):
+    # Shared process list
+    process_list_cache = ProcessListCache()
+
     def __init__(self, name, init_config, agentConfig, instances=None):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
 
@@ -87,6 +92,10 @@ class ProcessCheck(AgentCheck):
         # Process cache, indexed by instance
         self.process_cache = defaultdict(dict)
 
+        self.process_list_cache.cache_duration = int(
+            init_config.get('shared_process_list_cache_duration', DEFAULT_SHARED_PROCESS_LIST_CACHE_DURATION)
+        )
+
     def should_refresh_ad_cache(self, name):
         now = time.time()
         return now - self.last_ad_cache_ts.get(name, 0) > self.access_denied_cache_duration
@@ -109,63 +118,69 @@ class ProcessCheck(AgentCheck):
 
         refresh_ad_cache = self.should_refresh_ad_cache(name)
 
-        encountered_process_names = set()
         matching_pids = set()
 
-        for proc in psutil.process_iter():
-            # Skip access denied processes
-            if not refresh_ad_cache and proc.pid in self.ad_cache:
-                continue
+        self.log.debug("Refreshing process list")
 
-            found = False
-            for string in search_string:
-                try:
-                    proc_name = proc.name()
-                    encountered_process_names.add(proc_name)
+        # If refresh returns True, then the cache has been refreshed.
+        # Otherwise the existing cache elements are used.
+        if self.process_list_cache.refresh():
+            self.log.debug("Set last ts to %s", self.process_list_cache.last_ts)
+        else:
+            self.log.debug("Using process list cache")
 
-                    # FIXME 8.x: All has been deprecated
-                    # from the doc, should be removed
-                    if string == 'All':
-                        found = True
-                    if exact_match:
-                        if os.name == 'nt':
-                            if proc_name.lower() == string.lower():
-                                found = True
+        with self.process_list_cache.read_lock():
+            for proc in self.process_list_cache.elements:
+                # Skip access denied processes
+                if not refresh_ad_cache and proc.pid in self.ad_cache:
+                    continue
+
+                found = False
+                for string in search_string:
+                    try:
+                        # FIXME 8.x: All has been deprecated
+                        # from the doc, should be removed
+                        if string == 'All':
+                            found = True
+                        if exact_match:
+                            if os.name == 'nt':
+                                if proc.name().lower() == string.lower():
+                                    found = True
+                            else:
+                                if proc.name() == string:
+                                    found = True
+
                         else:
-                            if proc_name == string:
-                                found = True
-
+                            cmdline = proc.cmdline()
+                            if os.name == 'nt':
+                                lstring = string.lower()
+                                if re.search(lstring, ' '.join(cmdline).lower()):
+                                    found = True
+                            else:
+                                if re.search(string, ' '.join(cmdline)):
+                                    found = True
+                    except psutil.NoSuchProcess:
+                        self.log.warning('Process disappeared while scanning')
+                    except psutil.AccessDenied as e:
+                        ad_error_logger('Access denied to process with PID {}'.format(proc.pid))
+                        ad_error_logger('Error: {}'.format(e))
+                        if refresh_ad_cache:
+                            self.ad_cache.add(proc.pid)
+                        if not ignore_ad:
+                            raise
                     else:
-                        cmdline = proc.cmdline()
-                        if os.name == 'nt':
-                            lstring = string.lower()
-                            if re.search(lstring, ' '.join(cmdline).lower()):
-                                found = True
-                        else:
-                            if re.search(string, ' '.join(cmdline)):
-                                found = True
-                except psutil.NoSuchProcess:
-                    self.log.warning('Process disappeared while scanning')
-                except psutil.AccessDenied as e:
-                    ad_error_logger('Access denied to process with PID {}'.format(proc.pid))
-                    ad_error_logger('Error: {}'.format(e))
-                    if refresh_ad_cache:
-                        self.ad_cache.add(proc.pid)
-                    if not ignore_ad:
-                        raise
-                else:
-                    if refresh_ad_cache:
-                        self.ad_cache.discard(proc.pid)
-                    if found:
-                        matching_pids.add(proc.pid)
-                        break
+                        if refresh_ad_cache:
+                            self.ad_cache.discard(proc.pid)
+                        if found:
+                            matching_pids.add(proc.pid)
+                            break
 
-        if not matching_pids:
-            self.log.debug(
-                "Unable to find process named %s among processes: %s",
-                search_string,
-                ', '.join(sorted(encountered_process_names)),
-            )
+            if not matching_pids:
+                self.log.debug(
+                    "Unable to find process named %s among processes: %s",
+                    search_string,
+                    ', '.join(sorted(proc.name() for proc in self.process_list_cache.elements)),
+                )
 
         self.pid_cache[name] = matching_pids
         self.last_pid_cache_ts[name] = time.time()

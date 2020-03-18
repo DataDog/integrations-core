@@ -29,6 +29,12 @@ def instance():
 
 
 @pytest.fixture
+def instance_with_connection_name():
+    inst = copy.deepcopy(common.INSTANCE_WITH_CONNECTION_NAME)
+    return inst
+
+
+@pytest.fixture
 def instance_queue_pattern():
     inst = copy.deepcopy(common.INSTANCE_QUEUE_PATTERN)
     return inst

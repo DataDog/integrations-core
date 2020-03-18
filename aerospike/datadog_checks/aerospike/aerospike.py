@@ -8,10 +8,17 @@ from __future__ import absolute_import
 
 import re
 
-import aerospike
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.errors import CheckException
+
+try:
+    import aerospike
+except ImportError as e:
+    aerospike = None
+    aerospike_exception = e
+
 
 SOURCE_TYPE_NAME = 'aerospike'
 SERVICE_CHECK_UP = '%s.cluster_up' % SOURCE_TYPE_NAME
@@ -60,11 +67,19 @@ class AerospikeCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(AerospikeCheck, self).__init__(name, init_config, instances)
 
+        if not aerospike:
+            msg = 'The `aerospike` client is not installed: {}'.format(aerospike_exception)
+            self.log.error(msg)
+            raise CheckException(msg)
+
         # https://www.aerospike.com/apidocs/python/aerospike.html#aerospike.client
         host = self.instance.get('host', 'localhost')
         port = int(self.instance.get('port', 3000))
         tls_name = self.instance.get('tls_name')
         self._host = (host, port, tls_name) if tls_name else (host, port)
+        self._tls_config = self.instance.get('tls_config')
+        if self._tls_config:
+            self._tls_config['enable'] = True
 
         # https://www.aerospike.com/apidocs/python/client.html#aerospike.Client.connect
         self._username = self.instance.get('username')
@@ -186,8 +201,11 @@ class AerospikeCheck(AgentCheck):
         return datacenters
 
     def get_client(self):
+        client_config = {'hosts': [self._host]}
+        if self._tls_config:
+            client_config['tls'] = self._tls_config
         try:
-            client = aerospike.client({'hosts': [self._host]}).connect(self._username, self._password)
+            client = aerospike.client(client_config).connect(self._username, self._password)
         except Exception as e:
             self.log.error('Unable to connect to database: %s', e)
             self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)

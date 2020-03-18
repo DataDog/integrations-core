@@ -55,7 +55,7 @@ def _get_random_ip():
     return "10.0.2.{}".format(rand_int)
 
 
-def mock_get_all_nodes(instance):
+def mock_get_all_nodes():
     return [
         {
             'Address': _get_random_ip(),
@@ -80,18 +80,18 @@ def mock_get_all_nodes(instance):
     ]
 
 
-def mock_get_peers_in_cluster(instance):
+def mock_get_peers_in_cluster():
     return ["10.0.2.14:8300", "10.0.2.15:8300", "10.0.2.16:8300"]
 
 
-def mock_get_services_in_cluster(instance):
+def mock_get_services_in_cluster():
     return {
-        "service-1": ["az-us-east-1a"],
-        "service-2": ["az-us-east-1a"],
-        "service-3": ["az-us-east-1a"],
-        "service-4": ["az-us-east-1a"],
-        "service-5": ["az-us-east-1a"],
-        "service-6": ["az-us-east-1a"],
+        "service-1": ["active", "standby"],
+        "service-2": ["active", "standby"],
+        "service-3": ["active", "standby"],
+        "service-4": ["active", "standby"],
+        "service-5": ["active", "standby"],
+        "service-6": ["active", "standby"],
     }
 
 
@@ -103,7 +103,7 @@ def mock_get_n_services_in_cluster(n):
     return dct
 
 
-def mock_get_local_config(instance, instance_state):
+def mock_get_local_config():
     return {
         "Config": {
             "AdvertiseAddr": "10.0.2.15",
@@ -121,7 +121,7 @@ def mock_get_local_config(instance, instance_state):
     }
 
 
-def mock_get_nodes_in_cluster(instance):
+def mock_get_nodes_in_cluster():
     return [
         {"Address": "10.0.2.15", "Node": "node-1"},
         {"Address": "10.0.2.25", "Node": "node-2"},
@@ -129,8 +129,8 @@ def mock_get_nodes_in_cluster(instance):
     ]
 
 
-def mock_get_nodes_with_service(instance, service):
-    return [
+def mock_get_nodes_with_service(service):
+    nodes = [
         {
             "Checks": [
                 {
@@ -155,84 +155,41 @@ def mock_get_nodes_with_service(instance, service):
                 },
             ],
             "Node": {"Address": _get_random_ip(), "Node": "node-1"},
-            "Service": {"Address": "", "ID": service, "Port": 80, "Service": service, "Tags": ["az-us-east-1a"]},
+            "Service": {"Address": "", "ID": service, "Port": 80, "Service": service, "Tags": ["standby"]},
         }
+        for _ in range(4)
     ]
 
-
-def mock_get_nodes_with_service_warning(instance, service):
-    return [
-        {
-            "Checks": [
-                {
-                    "CheckID": "serfHealth",
-                    "Name": "Serf Health Status",
-                    "Node": "node-1",
-                    "Notes": "",
-                    "Output": "Agent alive and reachable",
-                    "ServiceID": "",
-                    "ServiceName": "",
-                    "Status": "passing",
-                },
-                {
-                    "CheckID": "service:{}".format(service),
-                    "Name": "service check {}".format(service),
-                    "Node": "node-1",
-                    "Notes": "",
-                    "Output": "Service {} alive".format(service),
-                    "ServiceID": service,
-                    "ServiceName": "",
-                    "Status": "warning",
-                },
-            ],
-            "Node": {"Address": _get_random_ip(), "Node": "node-1"},
-            "Service": {"Address": "", "ID": service, "Port": 80, "Service": service, "Tags": ["az-us-east-1a"]},
-        }
-    ]
+    nodes[0]['Service']['Tags'] = ['active', 'standby']
+    return nodes
 
 
-def mock_get_nodes_with_service_critical(instance, service):
-    return [
-        {
-            "Checks": [
-                {
-                    "CheckID": "serfHealth",
-                    "Name": "Serf Health Status",
-                    "Node": "node-1",
-                    "Notes": "",
-                    "Output": "Agent alive and reachable",
-                    "ServiceID": "",
-                    "ServiceName": "",
-                    "Status": "passing",
-                },
-                {
-                    "CheckID": "service:{}".format(service),
-                    "Name": "service check {}".format(service),
-                    "Node": "node-1",
-                    "Notes": "",
-                    "Output": "Service {} alive".format(service),
-                    "ServiceID": service,
-                    "ServiceName": "",
-                    "Status": "warning",
-                },
-                {
-                    "CheckID": "service:{}".format(service),
-                    "Name": "service check {}".format(service),
-                    "Node": "node-1",
-                    "Notes": "",
-                    "Output": "Service {} alive".format(service),
-                    "ServiceID": service,
-                    "ServiceName": "",
-                    "Status": "critical",
-                },
-            ],
-            "Node": {"Address": _get_random_ip(), "Node": "node-1"},
-            "Service": {"Address": "", "ID": service, "Port": 80, "Service": service, "Tags": ["az-us-east-1a"]},
-        }
-    ]
+def mock_get_nodes_with_service_warning(service):
+    nodes = mock_get_nodes_with_service(service)
+    for node in nodes:
+        node["Checks"][1]["Status"] = "warning"
+    return nodes
 
 
-def mock_get_coord_datacenters(instance):
+def mock_get_nodes_with_service_critical(service):
+    nodes = mock_get_nodes_with_service_warning(service)
+    for node in nodes:
+        node["Checks"].append(
+            {
+                "CheckID": "service:{}".format(service),
+                "Name": "service check {}".format(service),
+                "Node": "node-1",
+                "Notes": "",
+                "Output": "Service {} alive".format(service),
+                "ServiceID": service,
+                "ServiceName": "",
+                "Status": "critical",
+            }
+        )
+    return nodes
+
+
+def mock_get_coord_datacenters():
     return [
         {
             "Datacenter": "dc1",
@@ -283,7 +240,7 @@ def mock_get_coord_datacenters(instance):
     ]
 
 
-def mock_get_coord_nodes(instance):
+def mock_get_coord_nodes():
     return [
         {
             "Node": "host-1",
@@ -324,7 +281,7 @@ def mock_get_coord_nodes(instance):
     ]
 
 
-def mock_get_health_check(instance, endpoint):
+def mock_get_health_check(_):
     return [
         {
             "ModifyIndex": 75214492,
@@ -401,9 +358,9 @@ def mock_get_health_check(instance, endpoint):
     ]
 
 
-def mock_get_cluster_leader_A(instance):
+def mock_get_cluster_leader_A():
     return '10.0.2.15:8300'
 
 
-def mock_get_cluster_leader_B(instance):
+def mock_get_cluster_leader_B():
     return 'My New Leader'
