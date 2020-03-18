@@ -371,14 +371,7 @@ class ProcessCheck(AgentCheck):
         user = instance.get('user', False)
         try_sudo = instance.get('try_sudo', False)
 
-        if self._conflicting_procfs:
-            self.warning(
-                'The `procfs_path` defined in `process.yaml is different from the one defined in '
-                '`datadog.conf` This is currently not supported by the Agent. Defaulting to the '
-                'value defined in `datadog.conf`: %s',
-                psutil.PROCFS_PATH,
-            )
-        elif self._deprecated_init_procfs:
+        if self._deprecated_init_procfs:
             self.warning(
                 'DEPRECATION NOTICE: Specifying `procfs_path` in process.yaml` is deprecated. '
                 'Please specify it in `datadog.conf` instead'
