@@ -25,13 +25,21 @@ from .pysnmp_types import (
     usmHMACMD5AuthProtocol,
 )
 from .resolver import OIDResolver
+from .types import ForceableMetricType
 
 
 class ParsedMetric(object):
 
     __slots__ = ('name', 'metric_tags', 'forced_type', 'enforce_scalar')
 
-    def __init__(self, name, metric_tags, forced_type, enforce_scalar=True):
+    def __init__(
+        self,
+        name,  # type: str
+        metric_tags,  # type: List[Dict[str, Any]]
+        forced_type=None,  # type: ForceableMetricType
+        enforce_scalar=True,  # type: bool
+    ):
+        # type: (...) -> None
         self.name = name
         self.metric_tags = metric_tags
         self.forced_type = forced_type
@@ -47,7 +55,7 @@ class ParsedTableMetric(object):
         name,  # type: str
         index_tags,  # type: List[Tuple[str, int]]
         column_tags,  # type: List[Tuple[str, str]]
-        forced_type=None,  # type: str
+        forced_type=None,  # type: ForceableMetricType
     ):
         # type: (...) -> None
         self.name = name

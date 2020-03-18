@@ -1,7 +1,7 @@
 datadog-active-directory==1.6.0; sys_platform == 'win32'
 datadog-activemq-xml==1.5.0
 datadog-activemq==1.3.0
-datadog-aerospike==1.6.0; sys_platform != 'win32'
+datadog-aerospike==1.7.0; sys_platform != 'win32'
 datadog-airflow==1.1.0
 datadog-amazon-msk==1.0.0
 datadog-ambari==1.2.0; sys_platform != 'win32'
@@ -95,7 +95,7 @@ datadog-postfix==1.6.1; sys_platform != 'win32'
 datadog-postgres==3.5.3
 datadog-powerdns-recursor==1.5.0
 datadog-presto==2.0.1
-datadog-process==1.11.1
+datadog-process==1.12.0
 datadog-prometheus==3.2.0
 datadog-rabbitmq==1.13.0
 datadog-redisdb==2.0.1

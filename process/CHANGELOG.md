@@ -1,5 +1,9 @@
 # CHANGELOG - process
 
+## 1.12.0 / 2020-03-13
+
+* [Added] Improve check performance. See [#5920](https://github.com/DataDog/integrations-core/pull/5920).
+
 ## 1.11.1 / 2020-01-15
 
 * [Fixed] Fix debug logging. See [#5460](https://github.com/DataDog/integrations-core/pull/5460).

@@ -14,9 +14,6 @@ from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES, MAX_QUERY_METRICS_OPTION, UNLIMITED_HIST_METRICS_PER_QUERY
 from datadog_checks.vsphere.types import InfrastructureData
 
-# Python 3 only
-PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)  # type: ignore
-
 CallableT = TypeVar('CallableT', bound=Callable)
 
 
@@ -87,11 +84,13 @@ class VSphereAPI(object):
         """
         context = None
         if not self.config.ssl_verify:
-            context = ssl.SSLContext(ssl.PROTOCOL_TLS)  # type: ignore
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS)
             context.verify_mode = ssl.CERT_NONE
         elif self.config.ssl_capath:
-            context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)  # type: ignore
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS)
             context.verify_mode = ssl.CERT_REQUIRED
+            # `check_hostname` must be enabled as well to verify the authenticity of a cert.
+            context.check_hostname = True
             context.load_verify_locations(capath=self.config.ssl_capath)
 
         try:

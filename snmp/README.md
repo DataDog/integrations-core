@@ -21,7 +21,7 @@ The SNMP check is included in the [Datadog Agent][1] package. No additional inst
 
 The Datadog SNMP check auto-discovers network devices on a provided subnet, and collects metrics using Datadog's sysOID mapped device profiles.
 
-Edit the subnet, SNMP version, and profiles in the `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample snmp.d/conf.yaml][3] for all available configuration options.
+Edit the subnet and SNMP version in the `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample snmp.d/conf.yaml][3] for all available configuration options.
 
 #### Autodiscovery
 
@@ -33,7 +33,7 @@ To use Autodiscovery with the SNMP check:
 
 | Parameter                    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 |------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `profiles`                   | A list of profiles to use. A profile is a collection of OIDs the Datadog Agent collects metrics and associated tags from. A complete list of Datadog supported profiles can be found in [Github][5]. Profiles can be referenced by file, under `definition_file`, or written inline under `definition`. Any of the OOTB Datadog profiles can be listed by their name. Additional custom profiles can be referenced by the file path. **Note**: The generic profile is `generic_router.yaml`, which should work for routers, switches, etc. |
+| `profiles`                   | A list of profiles to use. A profile is a collection of OIDs the Datadog Agent collects metrics and associated tags from and a complete list of Datadog supported profiles can be found in [Github][5]. By default, all profiles shipped by the agent and in the configuration directory are loaded.  To customize the specific profiles for collection, they can be explicitly referenced by filename under `definition_file`, or written inline under `definition`. Any of the OOTB Datadog profiles can be listed by their name. Additional custom profiles can be referenced by the file path in the config, or simply dropped in the configuration directory. **Note**: The generic profile is `generic_router.yaml`, which should work for routers, switches, etc. |
 | `network_address`            | The subnet and mask written in IPv4 notation for the Agent to scan and discover devices on.                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `community_string`           | For use with SNMPv1 and SNMPv2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `snmp_version`               | The SNMP version you are using.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
@@ -42,18 +42,13 @@ To use Autodiscovery with the SNMP check:
 | `retries`                    | The number of retries before failure.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `discovery_interval`         | The interval between discovery scans.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `discovery_allowed_failures` | The number of times a discovered host can fail before being removed from the list of discovered devices.                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `bulk_threshold`             | The number of symbols in a table that triggers a BULK request. This paramater is only relevant for SNMPv > 1.                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `bulk_threshold`             | The number of symbols in a table that triggers a BULK request. This parameter is only relevant for SNMPv > 1.                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `tags`                       | A list of global tags to add to all SNMP metrics. Read more about [tagging in Datadog][6].                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ##### Sample config
 
 ```yaml
 init_config:
-  profiles:
-    f5-big-ip:
-      definition_file: f5-big-ip.yaml
-    router:
-      definition_file: generic-router.yaml
 
 instances:
   -
@@ -140,10 +135,11 @@ Profiles can be used interchangeably, such that devices that share MIB dependenc
 * [HP iLO4][15]
 * [HPE Proliant][16]
 * [Palo Alto][17]
+* [Checkpoint Firewall][18]
 
 ### Validation
 
-[Run the Agent's status subcommand][18] and look for `snmp` under the Checks section.
+[Run the Agent's status subcommand][19] and look for `snmp` under the Checks section.
 
 ## Data Collected
 
@@ -151,7 +147,7 @@ The SNMP check submits specified metrics under the `snmp.*` namespace. **Metrics
 
 ### Metrics
 
-See [metadata.csv][19] for a list of metrics provided by this check.
+See [metadata.csv][20] for a list of metrics provided by this check.
 
 ### Events
 
@@ -164,14 +160,14 @@ Returns `CRITICAL` if the Agent cannot collect SNMP metrics, otherwise returns `
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][20].
+Need help? Contact [Datadog support][21].
 
 ## Further Reading
 
 Additional helpful documentation, links, and articles:
 
-* [Does Datadog have a list of commonly used/compatible OIDs with SNMP?][21]
-* [Monitoring Unifi devices using SNMP and Datadog][22]
+* [Does Datadog have a list of commonly used/compatible OIDs with SNMP?][22]
+* [Monitoring Unifi devices using SNMP and Datadog][23]
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -190,8 +186,9 @@ Additional helpful documentation, links, and articles:
 [15]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/hp-ilo4.yaml
 [16]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/hpe-proliant.yaml
 [17]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/palo-alto.yaml
-[18]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[19]: https://github.com/DataDog/integrations-core/blob/master/snmp/metadata.csv
-[20]: https://docs.datadoghq.com/help
-[21]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
-[22]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
+[18]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/checkpoint-firewall.yaml
+[19]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[20]: https://github.com/DataDog/integrations-core/blob/master/snmp/metadata.csv
+[21]: https://docs.datadoghq.com/help
+[22]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
+[23]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
