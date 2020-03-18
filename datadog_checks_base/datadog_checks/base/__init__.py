@@ -7,6 +7,7 @@ from .checks.openmetrics import OpenMetricsBaseCheck
 from .config import is_affirmative
 from .errors import ConfigurationError
 from .utils.common import ensure_bytes, ensure_unicode, to_native_string, to_string
+from .utils.metadata import metadata_entrypoint
 
 # Windows-only
 try:
@@ -30,6 +31,7 @@ __all__ = [
     'ensure_bytes',
     'ensure_unicode',
     'is_affirmative',
+    'metadata_entrypoint',
     'to_native_string',
     'to_string',  # For backwards compat (was renamed to `to_native_string`).
 ]

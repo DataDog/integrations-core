@@ -5,12 +5,13 @@ import json
 import logging
 import re
 from collections import OrderedDict
+from typing import Any
 
 import mock
 import pytest
 from six import PY3
 
-from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
+from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode, metadata_entrypoint
 
 pytestmark = pytest.mark.metadata
 
@@ -499,3 +500,46 @@ class TestConfig:
             assert data.pop('is_set', None) is True
             assert data.pop('value', None) == 'bar'
             assert not data
+
+
+class TestMetadataEntrypoint:
+    def test_metadata_entrypoint_no_op_if_collection_disabled(self):
+        # type: () -> None
+
+        class MyCheck(AgentCheck):
+            @metadata_entrypoint
+            def process_metadata(self, message):
+                # type: (str) -> None
+                self.set_metadata('my_message', message)
+
+            def check(self, instance):
+                # type: (Any) -> None
+                self.process_metadata(message='Hello, world')
+
+        with mock.patch('datadog_checks.base.checks.base.datadog_agent.get_config') as get_config:
+            get_config.return_value = False
+
+            check = MyCheck('test', {}, [{}])
+
+            with mock.patch(SET_CHECK_METADATA_METHOD) as m:
+                check.check({})
+                m.assert_not_called()
+
+    def test_metadata_entrypoint_logs_exceptions(self, caplog):
+        # type: (Any) -> None
+        class MyCheck(AgentCheck):
+            @metadata_entrypoint
+            def process_metadata(self):
+                # type: () -> None
+                raise RuntimeError('Something went wrong -- catch me!')
+
+            def check(self, instance):
+                # type: (Any) -> None
+                self.process_metadata()
+
+        check = MyCheck('test', {}, [{}])
+
+        caplog.set_level(logging.WARNING)
+        check.check({})
+        assert len(caplog.records) == 1
+        assert 'Something went wrong -- catch me!' in caplog.text
