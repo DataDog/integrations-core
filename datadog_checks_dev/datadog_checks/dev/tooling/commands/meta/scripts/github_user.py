@@ -18,7 +18,7 @@ def email2ghuser(email):
     """
 
     try:
-        response = requests.get(f'https://api.github.com/search/users?q={email}',)
+        response = requests.get(f'https://api.github.com/search/users?q={email}')
         response.raise_for_status()
         content = response.json()
 
