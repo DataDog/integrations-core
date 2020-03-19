@@ -36,6 +36,7 @@
     example:
     - ['NTDS', none, 'DS % Writes from LDAP', active_directory.ds.writes_from_ldap, gauge]
     type: array
+    compact_example: true
     items:
       type: array
       items:
@@ -53,5 +54,6 @@
         - [active_directory.dra.inbound.bytes.total, int]
         - [active_directory.ldap.bind_time, float]
       type: array
+      compact_example: true
       items:
         type: string
