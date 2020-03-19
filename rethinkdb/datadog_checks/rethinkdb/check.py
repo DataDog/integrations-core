@@ -8,19 +8,11 @@ import rethinkdb
 
 from datadog_checks.base import AgentCheck
 
-from . import operations
+from . import operations, queries
 from .config import Config
-from .metrics.config_summary import collect_config_summary
-from .metrics.current_issues import collect_current_issues
-from .metrics.statistics import (
-    collect_cluster_statistics,
-    collect_replica_statistics,
-    collect_server_statistics,
-    collect_table_statistics,
-)
-from .metrics.statuses import collect_server_status, collect_table_status
-from .metrics.system_jobs import collect_system_jobs
-from .types import Instance, Metric
+from .document_db import DocumentQuery
+from .document_db.types import Metric
+from .types import Instance
 from .version import parse_version
 
 SERVICE_CHECK_CONNECT = 'rethinkdb.can_connect'
@@ -35,17 +27,17 @@ class RethinkDBCheck(AgentCheck):
         # type: (*Any, **Any) -> None
         super(RethinkDBCheck, self).__init__(*args, **kwargs)
         self.config = Config(cast(Instance, self.instance))
-        self.collect_funcs = (
-            collect_config_summary,
-            collect_cluster_statistics,
-            collect_server_statistics,
-            collect_table_statistics,
-            collect_replica_statistics,
-            collect_server_status,
-            collect_table_status,
-            collect_system_jobs,
-            collect_current_issues,
-        )  # type: Sequence[Callable]
+        self.queries = (
+            queries.config_summary,
+            queries.cluster_statistics,
+            queries.server_statistics,
+            queries.table_statistics,
+            queries.replica_statistics,
+            queries.table_statuses,
+            queries.server_statuses,
+            queries.system_jobs,
+            queries.current_issues_summary,
+        )  # type: Sequence[DocumentQuery]
 
     @contextmanager
     def connect_submitting_service_checks(self):
@@ -82,8 +74,8 @@ class RethinkDBCheck(AgentCheck):
         """
         Collect metrics from the RethinkDB cluster we are connected to.
         """
-        for collect in self.collect_funcs:
-            for metric in collect(conn):
+        for query in self.queries:
+            for metric in query.run(conn):
                 yield metric
 
     def collect_connected_server_version(self, conn):
@@ -91,7 +83,7 @@ class RethinkDBCheck(AgentCheck):
         """
         Return the version of RethinkDB run by the server at the other end of the connection, in SemVer format.
         """
-        version_string = operations.query_connected_server_version_string(conn)
+        version_string = operations.get_connected_server_version_string(conn)
         return parse_version(version_string)
 
     def submit_metric(self, metric):

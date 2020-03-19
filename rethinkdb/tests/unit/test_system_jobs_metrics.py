@@ -1,14 +1,11 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""
-Unit tests for metrics that are hard to test using integration tests, eg. because they depend on cluster dynamics.
-"""
 import mock
 import pytest
 
-from datadog_checks.rethinkdb.metrics.system_jobs import collect_system_jobs
-from datadog_checks.rethinkdb.types import BackfillJob, IndexConstructionJob
+from datadog_checks.rethinkdb import queries
+from datadog_checks.rethinkdb.types import BackfillJob, DiskCompactionJob, IndexConstructionJob, QueryJob
 
 pytestmark = pytest.mark.unit
 
@@ -27,6 +24,22 @@ def test_jobs_metrics():
     * Query jobs can only be seen by us when an external client issues queries to the cluster.
     * Etc.
     """
+
+    mock_query_job_row = {
+        'type': 'query',
+        'id': ('query', 'abcd1234'),
+        'duration_sec': 0.12,
+        'info': {},
+        'servers': ['server0'],
+    }  # type: QueryJob
+
+    mock_disk_compaction_row = {
+        'type': 'disk_compaction',
+        'id': ('disk_compaction', 'zero'),
+        'duration_sec': None,
+        'info': {},
+        'servers': ['server0'],
+    }  # type: DiskCompactionJob
 
     mock_backfill_job_row = {
         # See: https://rethinkdb.com/docs/system-jobs/#backfill
@@ -52,21 +65,22 @@ def test_jobs_metrics():
         'servers': ['server1'],
     }  # type: IndexConstructionJob
 
-    mock_unknown_job_row = {'type': 'an_unknown_type_that_should_be_ignored', 'duration_sec': 0.42, 'servers': []}
-
-    mock_rows = [mock_backfill_job_row, mock_index_construction_job_row, mock_unknown_job_row]
+    mock_rows = [mock_query_job_row, mock_disk_compaction_row, mock_backfill_job_row, mock_index_construction_job_row]
 
     conn = mock.Mock()
     with mock.patch('rethinkdb.ast.RqlQuery.run') as run:
         run.return_value = mock_rows
-        metrics = list(collect_system_jobs(conn))
+        metrics = list(queries.system_jobs.run(conn))
 
     assert metrics == [
+        # -- `query` job ignored --
+        # -- `disk_compaction` job ignored --
         {
             'type': 'gauge',
-            'name': 'rethinkdb.jobs.duration',
+            'name': 'rethinkdb.jobs.duration_sec',
             'value': 0.42,
             'tags': [
+                'job_type:backfill',
                 'server:server0',
                 'server:server2',
                 'job_type:backfill',
@@ -78,14 +92,28 @@ def test_jobs_metrics():
         },
         {
             'type': 'gauge',
-            'name': 'rethinkdb.jobs.duration',
+            'name': 'rethinkdb.jobs.duration_sec',
             'value': 0.24,
             'tags': [
-                'server:server1',
                 'job_type:index_construction',
+                'server:server1',
                 'database:doghouse',
                 'table:heroes',
                 'index:appearances_count',
             ],
         },
     ]
+
+
+def test_unknown_job():
+    # type: () -> None
+    """
+    If a new job type is added, an exception should be raised so we are notified via CI failures and can add support.
+    """
+    mock_unknown_job_row = {'type': 'an_unknown_type_that_should_be_ignored', 'duration_sec': 0.42, 'servers': []}
+
+    conn = mock.Mock()
+    with mock.patch('rethinkdb.ast.RqlQuery.run') as run:
+        run.return_value = [mock_unknown_job_row]
+        with pytest.raises(RuntimeError):
+            list(queries.system_jobs.run(conn))

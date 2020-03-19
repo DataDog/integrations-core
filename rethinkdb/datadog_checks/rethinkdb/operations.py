@@ -7,7 +7,7 @@ Definition of high-level RethinkDB operations used by the RethinkDB check.
 Python ReQL reference documentation: https://rethinkdb.com/api/python/
 """
 
-from typing import Any, Iterator, Mapping, Tuple
+from typing import Any, Iterator, List, Mapping, Tuple
 
 import rethinkdb
 
@@ -36,7 +36,7 @@ r = rethinkdb.r
 system = r.db('rethinkdb')
 
 
-def query_connected_server_version_string(conn):
+def get_connected_server_version_string(conn):
     # type: (rethinkdb.net.Connection) -> str
     """
     Return the raw string of the RethinkDB version used by the server at the other end of the connection.
@@ -48,8 +48,8 @@ def query_connected_server_version_string(conn):
     return server_status['process']['version']
 
 
-def query_config_summary(conn):
-    # type: (rethinkdb.net.Connection) -> ConfigSummary
+def get_config_summary(conn):
+    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[ConfigSummary, List[str]]]
     """
     Return a summary of the cluster configuration.
     """
@@ -72,28 +72,28 @@ def query_config_summary(conn):
         .run(conn)
     )  # type: Mapping[str, int]
 
-    totals = {
+    summary = {
         'servers': server_config.count(),
         'databases': db_config.count(),
         'tables_per_database': tables_per_database,
         'secondary_indexes_per_table': secondary_indexes_per_table,
     }  # type: ConfigSummary  # Enforce keys to match.
 
-    return r.expr(totals).run(conn)
+    yield r.expr(summary).run(conn), []
 
 
-def query_cluster_stats(conn):
-    # type: (rethinkdb.net.Connection) -> ClusterStats
+def get_cluster_statistics(conn):
+    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[ClusterStats, List[str]]]
     """
     Retrieve statistics about the cluster.
     """
-    return system.table('stats').get(['cluster']).run(conn)
+    yield system.table('stats').get(['cluster']).run(conn), []
 
 
-def query_servers_with_stats(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[Server, ServerStats]]
+def get_servers_statistics(conn):
+    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[ServerStats, List[str]]]
     """
-    Retrieve each server in the cluster along with its statistics.
+    Retrieve statistics about each server in the cluster.
     """
     # For servers: stats['id'] = ['server', '<SERVER_ID>']
     is_server_stats_row = r.row['id'].nth(0) == 'server'
@@ -107,13 +107,15 @@ def query_servers_with_stats(conn):
     for row in rows:
         server_stats = row['left']  # type: ServerStats
         server = row['right']  # type: Server
-        yield server, server_stats
+        tags = ['server:{}'.format(server['name'])]
+        tags.extend(server['tags'])
+        yield server_stats, tags
 
 
-def query_tables_with_stats(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[Table, TableStats]]
+def get_tables_statistics(conn):
+    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[TableStats, List[str]]]
     """
-    Retrieve each table in the cluster along with its statistics.
+    Retrieve statistics about each table in the cluster.
     """
     # For tables: stats['id'] = ['table', '<TABLE_ID>']
     is_table_stats_row = r.row['id'].nth(0) == 'table'
@@ -127,13 +129,14 @@ def query_tables_with_stats(conn):
     for row in rows:
         table_stats = row['left']  # type: TableStats
         table = row['right']  # type: Table
-        yield table, table_stats
+        tags = ['table:{}'.format(table['name']), 'database:{}'.format(table['db'])]
+        yield table_stats, tags
 
 
-def query_replicas_with_stats(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[Table, Server, ShardReplica, ReplicaStats]]
+def get_replicas_statistics(conn):
+    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[ReplicaStats, List[str]]]
     """
-    Retrieve each replica (table/server pair) in the cluster along with its statistics.
+    Retrieve statistics about each replica (table/server pair) in the cluster.
     """
     # NOTE: To reduce bandwidth usage, we make heavy use of the `.pluck()` operation, i.e. ask RethinkDB
     # for a specific set of fields, instead of sending entire objects, which can be expensive when joining
@@ -189,37 +192,86 @@ def query_replicas_with_stats(conn):
         server = row['server']  # type: Server
         replica = row['replica']  # type: ShardReplica
         replica_stats = row['stats']  # type: ReplicaStats
-        yield table, server, replica, replica_stats
+
+        tags = [
+            'table:{}'.format(table['name']),
+            'database:{}'.format(table['db']),
+            'server:{}'.format(server['name']),
+            'state:{}'.format(replica['state']),
+        ]
+        tags.extend(server['tags'])
+
+        yield replica_stats, tags
 
 
-def query_table_status(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[TableStatus]
+def get_table_statuses(conn):
+    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[TableStatus, List[str]]]
     """
     Retrieve the status of each table in the cluster.
     """
-    return system.table('table_status').run(conn)
+    for table_status in system.table('table_status').run(conn):  # type: TableStatus
+        tags = ['table:{}'.format(table_status['name']), 'database:{}'.format(table_status['db'])]
+        yield table_status, tags
 
 
-def query_server_status(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[ServerStatus]
+def get_server_statuses(conn):
+    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[ServerStatus, List[str]]]
     """
     Retrieve the status of each server in the cluster.
     """
-    return system.table('server_status').run(conn)
+    for server_status in system.table('server_status').run(conn):  # type: ServerStatus
+        tags = ['server:{}'.format(server_status['name'])]
+        yield server_status, tags
 
 
-def query_system_jobs(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Job]
+def get_system_jobs(conn):
+    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[Job, List[str]]]
     """
     Retrieve all the currently running system jobs.
     """
-    return system.table('jobs').run(conn)
+    for job in system.table('jobs').run(conn):  # type: Job
+        tags = ['job_type:{}'.format(job['type'])]
+        tags.extend('server:{}'.format(server) for server in job['servers'])
+
+        # Follow job types listed on: https://rethinkdb.com/docs/system-jobs/#document-schema
+
+        if job['type'] == 'query':
+            # NOTE: Request-response queries are typically too short-lived to be captured across Agent checks.
+            # Change feed queries however are long-running, they we'd be able to capture them.
+            # See: https://rethinkdb.com/docs/system-jobs/#query
+            # TODO(before-merging): submit within a `duration_sec` threshold instead of skipping entirely.
+            continue
+        elif job['type'] == 'disk_compaction':
+            # Ongoing task on each server -- no information provided (i.e. `info` is empty).
+            # See: https://rethinkdb.com/docs/system-jobs/#disk_compaction
+            continue
+        if job['type'] == 'index_construction':
+            tags.extend(
+                [
+                    'database:{}'.format(job['info']['db']),
+                    'table:{}'.format(job['info']['table']),
+                    'index:{}'.format(job['info']['index']),
+                ]
+            )
+        elif job['type'] == 'backfill':
+            tags.extend(
+                [
+                    'database:{}'.format(job['info']['db']),
+                    'destination_server:{}'.format(job['info']['destination_server']),
+                    'source_server:{}'.format(job['info']['source_server']),
+                    'table:{}'.format(job['info']['table']),
+                ]
+            )
+        else:
+            raise RuntimeError('Unknown job type: {!r}'.format(job['type']))
+
+        yield job, tags
 
 
-def query_current_issues_summary(conn):
-    # type: (rethinkdb.net.Connection) -> CurrentIssuesSummary
+def get_current_issues_summary(conn):
+    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[CurrentIssuesSummary, List[str]]]
     """
-    Retrieve all the problems detected with the cluster.
+    Retrieve a summary of problems detected within the cluster.
     """
     current_issues = system.table('current_issues').pluck('type', 'critical')
 
@@ -231,7 +283,4 @@ def query_current_issues_summary(conn):
         current_issues.filter(r.row['critical']).group('type').count().run(conn)
     )  # type: Mapping[str, int]
 
-    return {
-        'issues': issues_by_type,
-        'critical_issues': critical_issues_by_type,
-    }
+    yield {'issues': issues_by_type, 'critical_issues': critical_issues_by_type}, []

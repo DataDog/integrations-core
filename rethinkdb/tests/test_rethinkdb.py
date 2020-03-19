@@ -10,7 +10,8 @@ import rethinkdb
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.rethinkdb import RethinkDBCheck
-from datadog_checks.rethinkdb.types import Instance, Metric
+from datadog_checks.rethinkdb.document_db.types import Metric
+from datadog_checks.rethinkdb.types import Instance
 
 from .assertions import assert_metrics
 from .cluster import temporarily_disconnect_server
