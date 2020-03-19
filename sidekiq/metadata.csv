@@ -1,1 +1,22 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+sidekiq.jobs.perform.count,gauge,,,,Count performance of Sidekiq jobs,sidekiq,0,jobs perform count
+sidekiq.jobs.perform.avg,gauge,,,,Average performance of Sidekiq jobs,sidekiq,0,jobs perform avg
+sidekiq.jobs.perform.max,gauge,,,,Max performance of Sidekiq jobs,sidekiq,0,jobs perform max
+sidekiq.jobs.count,count,,,,Count of Sidekiq jobs,sidekiq,0,jobs count
+sidekiq.jobs.success,count,,,,Count of successful Sidekiq jobs,sidekiq,0,jobs success
+sidekiq.jobs.failure,count,,,,Count of failed Sidekiq jobs,sidekiq,-1,jobs failure
+sidekiq.processed,count,,,,Number of job executions completed (success or failure),sidekiq,0,job execution processed
+sidekiq.failures,count,,,,Number of job executions which raised an error,sidekiq,0,jobs execution failures
+sidekiq.enqueued,count,,,,Total size of all known queues,sidekiq,-1,jobs enqueued
+sidekiq.retries,count,,,,Total retries size,sidekiq,0,job retries
+sidekiq.dead,count,,,,Total Dead Size,sidekiq,0,jobs dead
+sidekiq.scheduled,count,,,,Total Scheduled Size,sidekiq,0,jobs scheduled
+sidekiq.busy,count,,,,Total Busy Size,sidekiq,0,jobs busy
+
+
+sidekiq.jobs.expired - when a job is expired
+sidekiq.jobs.recovered.push - when a job is recovered by reliable_push after network outage
+sidekiq.jobs.recovered.fetch - when a job is recovered by super_fetch after process crash
+sidekiq.batch.created - when a batch is created
+sidekiq.batch.complete - when a batch is completed
+sidekiq.batch.success - when a batch is successful

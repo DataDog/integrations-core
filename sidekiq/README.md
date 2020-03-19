@@ -4,7 +4,7 @@
 
 This check monitors [Sidekiq][3] through [Dogstatsd][5]. It collects metrics through [Datadog's Dogstatsd Ruby client][4].
 
-**Note** Only Sidekiq Pro or Enterprise users can collect metrics.
+**Note** Only Sidekiq Pro (>= 3.6) or Enterprise (>= 1.1.0) users can collect metrics.
 
 ## Setup
 
@@ -49,7 +49,7 @@ No additional installation is needed on your server.
 
 ### Metrics
 
-Sidekiq does not include any metrics.
+See [metadata.csv][12] for a list of metrics provided by this check. Custom metrics may be added in Sidekiq itself. Browse the [Sidekiq documentation][11] for custom metric inspiration.
 
 ### Log Collection
 
@@ -97,3 +97,5 @@ Need help? Contact [Datadog support][1].
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [9]: https://github.com/mperham/sidekiq/wiki/Logging#log-file
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[11]: https://github.com/mperham/sidekiq/wiki/Ent-Historical-Metrics#custom
+[12]: https://github.com/DataDog/integrations-core/blob/master/sidekiq/metadata.csv
