@@ -98,7 +98,7 @@ def test_directory_metrics(aggregator):
         aggregator.reset()
         dir_check.check(config)
         dirtagname = config.get('dirtagname', "name")
-        name = config.get('name', temp_dir+ "/main")
+        name = config.get('name', temp_dir + "/main")
         dir_tags = [dirtagname + ":%s" % name, 'optional:tag1']
 
         # 'recursive' and 'pattern' parameters
@@ -190,7 +190,9 @@ def test_file_metrics(aggregator):
                 # Files in 'temp_dir/subfolder'
                 if config.get('recursive'):
                     for i in range(0, 5):
-                        file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/main/subfolder" + "/file_" + str(i))]
+                        file_tag = [
+                            filetagname + ":%s" % os.path.normpath(temp_dir + "/main/subfolder" + "/file_" + str(i))
+                        ]
                         aggregator.assert_metric(mname, tags=dir_tags + file_tag, count=1)
 
         # Common metrics
@@ -241,11 +243,19 @@ def test_file_metrics_many(aggregator):
                     for i in range(0, 15):
                         # Files in 'temp_dir/many/subfolder' < 20 therefore all gets `filename`
                         if i < 2:
-                            file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/many/subfolder" + "/aalog_" + str(i) + '.log')]
+                            file_tag = [
+                                filetagname
+                                + ":%s" % os.path.normpath(temp_dir + "/many/subfolder" + "/aalog_" + str(i) + '.log')
+                            ]
                         elif i >= 12:
-                            file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/many/subfolder" + "/zzlog_" + str(i) + '.log')]
+                            file_tag = [
+                                filetagname
+                                + ":%s" % os.path.normpath(temp_dir + "/many/subfolder" + "/zzlog_" + str(i) + '.log')
+                            ]
                         else:
-                            file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/many/subfolder" + "/file_" + str(i))]
+                            file_tag = [
+                                filetagname + ":%s" % os.path.normpath(temp_dir + "/many/subfolder" + "/file_" + str(i))
+                            ]
                         aggregator.assert_metric(mname, tags=dir_tags + file_tag, count=1)
                     # Remaining files in 'temp_dir/many/` > 20 therefore no `filename`
                     aggregator.assert_metric(mname, tags=dir_tags, count=50)
