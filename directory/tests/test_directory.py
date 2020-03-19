@@ -8,10 +8,10 @@ import tempfile
 import mock
 import pytest
 
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.dev.utils import create_file
 from datadog_checks.dev.utils import temp_dir as temp_directory
 from datadog_checks.directory import DirectoryCheck
-from datadog_checks.base.errors import ConfigurationError
 
 from . import common
 

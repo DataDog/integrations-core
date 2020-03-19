@@ -8,9 +8,10 @@ import re
 # 3rd party
 from six.moves.urllib.parse import urlparse
 
+from datadog_checks.base.checks import AgentCheck
+
 # project
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
-from datadog_checks.base.checks import AgentCheck
 
 
 class Fluentd(AgentCheck):

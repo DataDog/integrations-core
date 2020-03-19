@@ -15,12 +15,12 @@ from kubeutil import get_connection_info
 from six import iteritems
 from urllib3.exceptions import InsecureRequestWarning
 
-from datadog_checks.base.utils.date import UTC, parse_rfc3339
-from datadog_checks.base.utils.tagging import tagger
-from datadog_checks.base.utils.warnings_util import disable_warnings_ctx
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.date import UTC, parse_rfc3339
+from datadog_checks.base.utils.tagging import tagger
+from datadog_checks.base.utils.warnings_util import disable_warnings_ctx
 
 from .cadvisor import CadvisorScraper
 from .common import CADVISOR_DEFAULT_PORT, KubeletCredentials, PodListUtils, replace_container_rt_prefix, urljoin

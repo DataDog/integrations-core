@@ -7,8 +7,8 @@ from copy import deepcopy
 
 from six import iteritems
 
-from datadog_checks.base.utils.tagging import tagger
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base.utils.tagging import tagger
 
 from .common import get_pod_by_uid, is_static_pending_pod, replace_container_rt_prefix
 

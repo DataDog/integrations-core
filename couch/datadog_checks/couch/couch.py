@@ -11,8 +11,8 @@ from six import iteritems
 from six.moves.urllib.parse import quote, urljoin
 
 from datadog_checks.base.checks import AgentCheck
-from datadog_checks.couch import errors
 from datadog_checks.base.utils.headers import headers
+from datadog_checks.couch import errors
 
 
 class CouchDb(AgentCheck):

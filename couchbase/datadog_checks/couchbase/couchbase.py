@@ -13,6 +13,7 @@ import requests
 from six import string_types
 
 from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.couchbase.couchbase_consts import (
     BUCKET_STATS,
     COUCHBASE_STATS_PATH,
@@ -27,7 +28,6 @@ from datadog_checks.couchbase.couchbase_consts import (
     SOURCE_TYPE_NAME,
     TO_SECONDS,
 )
-from datadog_checks.base.utils.containers import hash_mutable
 
 
 class Couchbase(AgentCheck):
