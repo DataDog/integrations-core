@@ -10,7 +10,6 @@ import rethinkdb
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.rethinkdb import RethinkDBCheck
-from datadog_checks.rethinkdb.backends import Backend
 from datadog_checks.rethinkdb.types import Instance, Metric
 
 from .assertions import assert_metrics
@@ -163,14 +162,13 @@ def test_connected_but_check_failed_unexpectedly(aggregator, instance):
     class Failure(Exception):
         pass
 
-    class MockBackend(Backend):
+    class MockRethinkDBCheck(RethinkDBCheck):
         def collect_metrics(self, conn):
             # type: (Any) -> Iterator[Metric]
             yield {'type': 'gauge', 'name': 'rethinkdb.some.metric', 'value': 42, 'tags': []}
             raise Failure
 
-    check = RethinkDBCheck('rethinkdb', {}, [instance])
-    check.backend = MockBackend()
+    check = MockRethinkDBCheck('rethinkdb', {}, [instance])
 
     with pytest.raises(Failure):
         check.check(instance)
@@ -212,16 +210,15 @@ def test_metadata_version_malformed(instance, aggregator, datadog_agent, malform
     Verify that check still runs to completion if version provided by RethinkDB is malformed.
     """
 
-    class MockBackend(Backend):
+    class MockRethinkDBCheck(RethinkDBCheck):
         def collect_connected_server_version(self, conn):
             # type: (Any) -> str
             return malformed_version_string
 
     check_id = 'test'
 
-    check = RethinkDBCheck('rethinkdb', {}, [instance])
+    check = MockRethinkDBCheck('rethinkdb', {}, [instance])
     check.check_id = check_id
-    check.backend = MockBackend()
 
     check.check(instance)
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK)
@@ -236,16 +233,15 @@ def test_metadata_version_failure(instance, aggregator, datadog_agent):
     Verify that check still runs to completion if it fails to retrieve the RethinkDB version.
     """
 
-    class MockBackend(Backend):
+    class MockRethinkDBCheck(RethinkDBCheck):
         def collect_connected_server_version(self, conn):
             # type: (Any) -> str
             raise ValueError('Oops!')
 
     check_id = 'test'
 
-    check = RethinkDBCheck('rethinkdb', {}, [instance])
+    check = MockRethinkDBCheck('rethinkdb', {}, [instance])
     check.check_id = check_id
-    check.backend = MockBackend()
 
     check.check(instance)
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK)

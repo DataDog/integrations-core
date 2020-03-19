@@ -8,7 +8,6 @@ import mock
 import pytest
 
 from datadog_checks.rethinkdb.metrics.system_jobs import collect_system_jobs
-from datadog_checks.rethinkdb.queries import QueryEngine
 from datadog_checks.rethinkdb.types import BackfillJob, IndexConstructionJob
 
 pytestmark = pytest.mark.unit
@@ -57,11 +56,10 @@ def test_jobs_metrics():
 
     mock_rows = [mock_backfill_job_row, mock_index_construction_job_row, mock_unknown_job_row]
 
-    engine = QueryEngine()
     conn = mock.Mock()
     with mock.patch('rethinkdb.ast.RqlQuery.run') as run:
         run.return_value = mock_rows
-        metrics = list(collect_system_jobs(engine, conn))
+        metrics = list(collect_system_jobs(conn))
 
     assert metrics == [
         {

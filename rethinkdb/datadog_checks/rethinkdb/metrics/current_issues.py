@@ -6,14 +6,14 @@ from typing import Iterator
 
 import rethinkdb
 
-from ..queries import QueryEngine
+from .. import operations
 from ..types import Metric
 
 logger = logging.getLogger(__name__)
 
 
-def collect_current_issues(engine, conn):
-    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
+def collect_current_issues(conn):
+    # type: (rethinkdb.net.Connection) -> Iterator[Metric]
     """
     Collect metrics about current system issues.
 
@@ -21,7 +21,7 @@ def collect_current_issues(engine, conn):
     """
     logger.debug('collect_current_issues')
 
-    totals = engine.query_current_issues_totals(conn)
+    totals = operations.query_current_issues_totals(conn)
     logger.debug('current_issues totals=%r', totals)
 
     for issue_type, total in totals['issues_by_type'].items():

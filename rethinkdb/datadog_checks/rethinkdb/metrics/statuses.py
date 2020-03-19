@@ -10,14 +10,14 @@ import rethinkdb
 
 from datadog_checks.base import AgentCheck
 
-from ..queries import QueryEngine
+from .. import operations
 from ..types import Metric
 
 logger = logging.getLogger(__name__)
 
 
-def collect_table_status(engine, conn):
-    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
+def collect_table_status(conn):
+    # type: (rethinkdb.net.Connection) -> Iterator[Metric]
     """
     Collect metrics about table statuses.
 
@@ -25,7 +25,7 @@ def collect_table_status(engine, conn):
     """
     logger.debug('collect_table_status')
 
-    for table_status in engine.query_table_status(conn):
+    for table_status in operations.query_table_status(conn):
         logger.debug('table_status %r', table_status)
 
         table = table_status['name']
@@ -86,8 +86,8 @@ def collect_table_status(engine, conn):
             }
 
 
-def collect_server_status(engine, conn):
-    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
+def collect_server_status(conn):
+    # type: (rethinkdb.net.Connection) -> Iterator[Metric]
     """
     Collect metrics about server statuses.
 
@@ -95,7 +95,7 @@ def collect_server_status(engine, conn):
     """
     logger.debug('collect_server_status')
 
-    for server_status in engine.query_server_status(conn):
+    for server_status in operations.query_server_status(conn):
         logger.debug('server_status %r', server_status)
 
         server = server_status['name']
