@@ -2,13 +2,15 @@ name: Active Directory
 files:
 - name: active_directory.yaml
   options:
+  - template: init_config
+    options:
+    - template: init_config/default
   - template: instances
     options:
     - template: instances/pdh
       overrides:
           host.required: true
-    - template: instances/tags
-    - template: instances/global
+    - template: instances/default
   - template: logs
     example:
     - type: file
