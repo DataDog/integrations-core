@@ -86,7 +86,7 @@ HEROES_TABLE_INDEX_FIELD = 'appearances_count'
 # Metrics lists.
 # NOTE: jobs metrics are not listed here as they're hard to trigger, so they're covered by unit tests instead.
 
-CONFIG_TOTALS_METRICS = (
+CONFIG_METRICS = (
     (
         'rethinkdb.config.servers',
         AggregatorStub.GAUGE,
@@ -147,9 +147,7 @@ TABLE_STATUS_SERVICE_CHECKS = (
     'rethinkdb.table_status.status.all_replicas_ready',
 )
 
-TABLE_STATUS_METRICS = (
-    ('rethinkdb.table_status.shards', AggregatorStub.GAUGE),
-)  # type: Tuple[Tuple[str, int], ...]
+TABLE_STATUS_METRICS = (('rethinkdb.table_status.shards', AggregatorStub.GAUGE),)  # type: Tuple[Tuple[str, int], ...]
 
 TABLE_STATUS_SHARDS_METRICS = (
     ('rethinkdb.table_status.shards.replicas', AggregatorStub.GAUGE),
@@ -171,7 +169,7 @@ CURRENT_ISSUE_TYPES_SUBMITTED_IF_DISCONNECTED_SERVERS = ['table_availability']
 
 
 E2E_METRICS = (
-    tuple((name, typ) for name, typ, _, _ in CONFIG_TOTALS_METRICS)
+    tuple((name, typ) for name, typ, _, _ in CONFIG_METRICS)
     + CLUSTER_STATISTICS_METRICS
     + SERVER_STATISTICS_METRICS
     + TABLE_STATISTICS_METRICS

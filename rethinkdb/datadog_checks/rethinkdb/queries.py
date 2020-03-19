@@ -117,11 +117,7 @@ server_statuses = DocumentQuery(
     prefix='server_status',
     metrics=[
         {'type': 'gauge', 'path': 'network.time_connected', 'modifier': 'timestamp'},
-        {
-            'type': 'gauge',
-            'path': 'network.connected_to',
-            'modifier': 'total',
-        },
+        {'type': 'gauge', 'path': 'network.connected_to', 'modifier': 'total'},
         {'type': 'gauge', 'path': 'process.time_started', 'modifier': 'timestamp'},
     ],
 )

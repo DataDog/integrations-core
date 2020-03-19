@@ -26,8 +26,8 @@ class RethinkDBCheck(AgentCheck):
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
         super(RethinkDBCheck, self).__init__(*args, **kwargs)
-        self._config = Config(cast(Instance, self.instance))
-        self._queries = (
+        self.config = Config(cast(Instance, self.instance))
+        self.queries = (
             queries.config_summary,
             queries.cluster_statistics,
             queries.server_statistics,
@@ -40,21 +40,20 @@ class RethinkDBCheck(AgentCheck):
         )  # type: Sequence[DocumentQuery]
 
     @contextmanager
-    def _connect_submitting_service_checks(self):
+    def connect_submitting_service_checks(self):
         # type: () -> Iterator[rethinkdb.net.Connection]
-        tags = [
-            'host:{}'.format(self._config.host),
-            'port:{}'.format(self._config.port),
-        ]
-        tags.extend(self._config.tags)
+        config = self.config
+
+        tags = ['host:{}'.format(config.host), 'port:{}'.format(config.port)]
+        tags.extend(config.tags)
 
         try:
             with rethinkdb.r.connect(
-                host=self._config.host,
-                port=self._config.port,
-                user=self._config.user,
-                password=self._config.password,
-                ssl={'ca_certs': self._config.tls_ca_cert} if self._config.tls_ca_cert is not None else None,
+                host=config.host,
+                port=config.port,
+                user=config.user,
+                password=config.password,
+                ssl={'ca_certs': config.tls_ca_cert} if config.tls_ca_cert is not None else None,
             ) as conn:
                 yield conn
         except rethinkdb.errors.ReqlDriverError as exc:
@@ -70,16 +69,16 @@ class RethinkDBCheck(AgentCheck):
         else:
             self.service_check(SERVICE_CHECK_CONNECT, self.OK, tags=tags)
 
-    def _collect_metrics(self, conn):
+    def collect_metrics(self, conn):
         # type: (rethinkdb.net.Connection) -> Iterator[Metric]
         """
         Collect metrics from the RethinkDB cluster we are connected to.
         """
-        for query in self._queries:
+        for query in self.queries:
             for metric in query.run(conn):
                 yield metric
 
-    def _collect_connected_server_version(self, conn):
+    def collect_connected_server_version(self, conn):
         # type: (rethinkdb.net.Connection) -> str
         """
         Return the version of RethinkDB run by the server at the other end of the connection, in SemVer format.
@@ -87,22 +86,22 @@ class RethinkDBCheck(AgentCheck):
         version_string = operations.get_connected_server_version_string(conn)
         return parse_version(version_string)
 
-    def __submit_metric(self, metric):
+    def submit_metric(self, metric):
         # type: (Metric) -> None
         metric_type = metric['type']
         name = metric['name']
         value = metric['value']
-        tags = self._config.tags + metric['tags']
+        tags = self.config.tags + metric['tags']
 
         self.log.debug('submit_metric type=%r name=%r value=%r tags=%r', metric_type, name, value, tags)
 
         submit = getattr(self, metric_type)  # type: Callable
         submit(name, value, tags=tags)
 
-    def _submit_version_metadata(self, conn):
+    def submit_version_metadata(self, conn):
         # type: (rethinkdb.net.Connection) -> None
         try:
-            version = self._collect_connected_server_version(conn)
+            version = self.collect_connected_server_version(conn)
         except ValueError as exc:
             self.log.error(exc)
         else:
@@ -110,11 +109,11 @@ class RethinkDBCheck(AgentCheck):
 
     def check(self, instance):
         # type: (Any) -> None
-        self.log.debug('check config=%r', self._config)
+        self.log.debug('check config=%r', self.config)
 
-        with self._connect_submitting_service_checks() as conn:
-            for metric in self._collect_metrics(conn):
-                self.__submit_metric(metric)
+        with self.connect_submitting_service_checks() as conn:
+            for metric in self.collect_metrics(conn):
+                self.submit_metric(metric)
 
             if self.is_metadata_collection_enabled():
-                self._submit_version_metadata(conn)
+                self.submit_version_metadata(conn)

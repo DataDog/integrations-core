@@ -155,7 +155,7 @@ def test_connected_but_check_failed_unexpectedly(aggregator, instance):
         pass
 
     class MockRethinkDBCheck(RethinkDBCheck):
-        def _collect_metrics(self, conn):
+        def collect_metrics(self, conn):
             # type: (Any) -> Iterator[Metric]
             yield {'type': 'gauge', 'name': 'rethinkdb.some.metric', 'value': 42, 'tags': []}
             raise Failure
@@ -203,7 +203,7 @@ def test_metadata_version_malformed(instance, aggregator, datadog_agent, malform
     """
 
     class MockRethinkDBCheck(RethinkDBCheck):
-        def _collect_connected_server_version(self, conn):
+        def collect_connected_server_version(self, conn):
             # type: (Any) -> str
             return malformed_version_string
 
@@ -226,7 +226,7 @@ def test_metadata_version_failure(instance, aggregator, datadog_agent):
     """
 
     class MockRethinkDBCheck(RethinkDBCheck):
-        def _collect_connected_server_version(self, conn):
+        def collect_connected_server_version(self, conn):
             # type: (Any) -> str
             raise ValueError('Oops!')
 

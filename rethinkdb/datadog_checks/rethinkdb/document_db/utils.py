@@ -21,9 +21,7 @@ def lookup_dotted(dct, path):
     while keys:
         if not isinstance(value, Mapping):  # pragma: no cover
             raise RuntimeError(
-                'followed path {!r} with remaining keys {!r}, but value {!r} is not a mapping'.format(
-                    path, value, keys
-                )
+                'followed path {!r} with remaining keys {!r}, but value {!r} is not a mapping'.format(path, value, keys)
             )
 
         key = keys.pop()

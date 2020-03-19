@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """
-Definition of high-level operations (RethinkDB/ReQL queries) used by metrics queries.
+Definition of high-level RethinkDB operations used by the RethinkDB check.
 
 Python ReQL reference documentation: https://rethinkdb.com/api/python/
 """
@@ -28,8 +28,7 @@ from .types import (
     TableStatus,
 )
 
-# This is the usual entrypoint for building ReQL queries.
-# See https://rethinkdb.com/docs/guide/python/
+# The usual entrypoint for building ReQL queries.
 r = rethinkdb.r
 
 # All system tables are located in this database.
