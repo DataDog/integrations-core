@@ -1,44 +1,40 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-rethinkdb.server.total,gauge,,node,,Number of connected servers in the cluster.,0,rethinkdb,Server total
-rethinkdb.database.total,gauge,,,,Number of databases in the cluster.,0,rethinkdb,Database total
-rethinkdb.database.table.total,gauge,,table,,Number of tables in a given database.,0,rethinkdb,Database table total
-rethinkdb.table.secondary_index.total,gauge,,index,,Number of secondary indexes in a given table.,0,rethinkdb,Table secondary index total
-rethinkdb.stats.cluster.queries_per_sec,gauge,,query,,Number of queries executed in a cluster per second.,0,rethinkdb,Stats cluster queries per sec
-rethinkdb.stats.cluster.read_docs_per_sec,gauge,,document,,Number of documents read in a cluster per second.,0,rethinkdb,Stats cluster read docs per sec
-rethinkdb.stats.cluster.written_docs_per_sec,gauge,,document,,Number of documents written in a cluster per second.,0,rethinkdb,Stats cluster written docs per sec
-rethinkdb.stats.server.queries_per_sec,gauge,,query,,Number of queries executed on a server per second.,0,rethinkdb,Stats server queries per sec
-rethinkdb.stats.server.queries_total,count,,query,,Total number of queries executed on a server.,0,rethinkdb,Stats server queries total
-rethinkdb.stats.server.read_docs_per_sec,gauge,,document,,Number of documents read from a server per second.,0,rethinkdb,Stats server read docs per sec
-rethinkdb.stats.server.read_docs_total,count,,document,,Total number of documents read from a server.,0,rethinkdb,Stats server read docs total
-rethinkdb.stats.server.written_docs_per_sec,gauge,,document,,Number of documents written to a server per second.,0,rethinkdb,Stats server written docs per sec
-rethinkdb.stats.server.written_docs_total,count,,document,,Total number of documents written to a server.,0,rethinkdb,Stats server written docs total
-rethinkdb.stats.server.client_connections,gauge,,connection,,Current number of client connections to a server.,0,rethinkdb,Stats server client connections
-rethinkdb.stats.server.clients_active,gauge,,host,,Current number of clients actively connected to a server.,0,rethinkdb,Stats server clients active
-rethinkdb.stats.table.read_docs_per_sec,gauge,,document,,Number of documents read from a table per second.,0,rethinkdb,Stats table read docs per sec
-rethinkdb.stats.table.written_docs_per_sec,gauge,,document,,Number of documents written to a table per second.,0,rethinkdb,Stats table written docs per sec
-rethinkdb.stats.table_server.read_docs_per_sec,gauge,,document,,Number of documents read from a replica per second.,0,rethinkdb,Stats table server read docs per sec
-rethinkdb.stats.table_server.read_docs_total,count,,document,,Total number of documents read from a replica.,0,rethinkdb,Stats table server read docs total
-rethinkdb.stats.table_server.written_docs_per_sec,gauge,,document,,Number of documents written to a replica per second.,0,rethinkdb,Stats table server written docs per sec
-rethinkdb.stats.table_server.written_docs_total,count,,document,,Total number of documents written to a replica.,0,rethinkdb,Stats table server written docs total
-rethinkdb.stats.table_server.cache.in_use_bytes,gauge,,byte,,Current amount of memory used by the cache on a replica.,0,rethinkdb,Stats table server cache in use bytes
-rethinkdb.stats.table_server.disk.read_bytes_per_sec,gauge,,byte,,Number of bytes read from the disk of a replica per second.,0,rethinkdb,Stats table server disk read bytes per sec
-rethinkdb.stats.table_server.disk.read_bytes_total,count,,byte,,Total number of bytes read from the disk of a replica.,0,rethinkdb,Stats table server disk read bytes total
-rethinkdb.stats.table_server.disk.written_bytes_per_sec,gauge,,byte,,Number of bytes written to the disk of a replica per second.,0,rethinkdb,Stats table server disk written bytes per sec
-rethinkdb.stats.table_server.disk.written_bytes_total,count,,byte,,Total number of bytes written to the disk of a replica.,0,rethinkdb,Stats table server disk written bytes total
-rethinkdb.stats.table_server.disk.metadata_bytes,gauge,,byte,,Current disk space used by metadata on a replica.,0,rethinkdb,Stats table server disk metadata bytes
-rethinkdb.stats.table_server.disk.data_bytes,gauge,,byte,,Current disk space used by data on a replica.,0,rethinkdb,Stats table server disk data bytes
-rethinkdb.stats.table_server.disk.garbage_bytes,gauge,,byte,,Current disk space used by the garbage collector on a replica.,0,rethinkdb,Stats table server disk garbage bytes
-rethinkdb.stats.table_server.disk.preallocated_bytes,gauge,,byte,,Current disk space preallocated on a replica.,0,rethinkdb,Stats table server disk preallocated bytes
-rethinkdb.table_status.shards.total,gauge,,shard,,Total number of shards for a table.,0,rethinkdb,Table status shards total
-rethinkdb.table_status.shards.replicas.total,gauge,,node,,Total number of replicas for a table shard.,0,rethinkdb,Table status shards replicas total
-rethinkdb.table_status.shards.replicas.primary.total,gauge,,node,,Total number of primary replicas for a table shard.,0,rethinkdb,Table status shards replicas primary total
+rethinkdb.config.servers,gauge,,node,,Number of connected servers in the cluster.,0,rethinkdb,Config servers
+rethinkdb.config.databases,gauge,,,,Number of databases in the cluster.,0,rethinkdb,Config databases
+rethinkdb.config.tables_per_database,gauge,,table,,Number of tables in a given database.,0,rethinkdb,Config tables per database
+rethinkdb.config.secondary_indexes_per_table,gauge,,index,,Number of secondary indexes in a given table.,0,rethinkdb,Config secondary indexes per table
+rethinkdb.stats.cluster.query_engine.queries_per_sec,gauge,,query,second,Number of queries executed in a cluster per second.,0,rethinkdb,Stats cluster query engine queries per sec
+rethinkdb.stats.cluster.query_engine.read_docs_per_sec,gauge,,document,second,Number of documents read in a cluster per second.,0,rethinkdb,Stats cluster query engine read docs per sec
+rethinkdb.stats.cluster.query_engine.written_docs_per_sec,gauge,,document,second,Number of documents written in a cluster per second.,0,rethinkdb,Stats cluster query engine written docs per sec
+rethinkdb.stats.server.query_engine.queries_per_sec,gauge,,query,second,Number of queries executed on a server per second.,0,rethinkdb,Stats server query engine queries per sec
+rethinkdb.stats.server.query_engine.queries_total,count,,query,,Total number of queries executed on a server.,0,rethinkdb,Stats server query engine queries total
+rethinkdb.stats.server.query_engine.read_docs_per_sec,gauge,,document,second,Number of documents read from a server per second.,0,rethinkdb,Stats server query engine read docs per sec
+rethinkdb.stats.server.query_engine.read_docs_total,count,,document,,Total number of documents read from a server.,0,rethinkdb,Stats server query engine read docs total
+rethinkdb.stats.server.query_engine.written_docs_per_sec,gauge,,document,second,Number of documents written to a server per second.,0,rethinkdb,Stats server query engine written docs per sec
+rethinkdb.stats.server.query_engine.written_docs_total,count,,document,,Total number of documents written to a server.,0,rethinkdb,Stats server query engine written docs total
+rethinkdb.stats.server.query_engine.client_connections,gauge,,connection,,Current number of client connections to a server.,0,rethinkdb,Stats server query engine client connections
+rethinkdb.stats.server.query_engine.clients_active,gauge,,host,,Current number of clients actively connected to a server.,0,rethinkdb,Stats server query engine clients active
+rethinkdb.stats.table.query_engine.read_docs_per_sec,gauge,,document,second,Number of documents read from a table per second.,0,rethinkdb,Stats table query engine read docs per sec
+rethinkdb.stats.table.query_engine.written_docs_per_sec,gauge,,document,second,Number of documents written to a table per second.,0,rethinkdb,Stats table query engine written docs per sec
+rethinkdb.stats.table_server.query_engine.read_docs_per_sec,gauge,,document,second,Number of documents read from a replica per second.,0,rethinkdb,Stats table server query engine read docs per sec
+rethinkdb.stats.table_server.query_engine.read_docs_total,count,,document,,Total number of documents read from a replica.,0,rethinkdb,Stats table server query engine read docs total
+rethinkdb.stats.table_server.query_engine.written_docs_per_sec,gauge,,document,second,Number of documents written to a replica per second.,0,rethinkdb,Stats table server query engine written docs per sec
+rethinkdb.stats.table_server.query_engine.written_docs_total,count,,document,,Total number of documents written to a replica.,0,rethinkdb,Stats table server query engine written docs total
+rethinkdb.stats.table_server.storage_engine.cache.in_use_bytes,gauge,,byte,,Current amount of memory used by the cache on a replica.,0,rethinkdb,Stats table server storage engine cache in use bytes
+rethinkdb.stats.table_server.storage_engine.disk.read_bytes_per_sec,gauge,,byte,second,Number of bytes read from the disk of a replica per second.,0,rethinkdb,Stats table server storage engine disk read bytes per sec
+rethinkdb.stats.table_server.storage_engine.disk.read_bytes_total,count,,byte,,Total number of bytes read from the disk of a replica.,0,rethinkdb,Stats table server storage engine disk read bytes total
+rethinkdb.stats.table_server.storage_engine.disk.written_bytes_per_sec,gauge,,byte,second,Number of bytes written to the disk of a replica per second.,0,rethinkdb,Stats table server storage engine disk written bytes per sec
+rethinkdb.stats.table_server.storage_engine.disk.written_bytes_total,count,,byte,,Total number of bytes written to the disk of a replica.,0,rethinkdb,Stats table server storage engine disk written bytes total
+rethinkdb.stats.table_server.storage_engine.disk.space_usage.metadata_bytes,gauge,,byte,,Current disk space used by metadata on a replica.,0,rethinkdb,Stats table server storage engine disk space usage metadata bytes
+rethinkdb.stats.table_server.storage_engine.disk.space_usage.data_bytes,gauge,,byte,,Current disk space used by data on a replica.,0,rethinkdb,Stats table server storage engine disk space usage data bytes
+rethinkdb.stats.table_server.storage_engine.disk.space_usage.garbage_bytes,gauge,,byte,,Current disk space used by the garbage collector on a replica.,0,rethinkdb,Stats table server storage engine disk space usage garbage bytes
+rethinkdb.stats.table_server.storage_engine.disk.space_usage.preallocated_bytes,gauge,,byte,,Current disk space preallocated on a replica.,0,rethinkdb,Stats table server storage engine disk space usage preallocated bytes
+rethinkdb.table_status.shards,gauge,,shard,,Total number of shards for a table.,0,rethinkdb,Table status shards
+rethinkdb.table_status.shards.replicas,gauge,,node,,Total number of replicas for a table shard.,0,rethinkdb,Table status shards replicas
+rethinkdb.table_status.shards.primary_replicas,gauge,,node,,Total number of primary replicas for a table shard.,0,rethinkdb,Table status shards primary replicas
 rethinkdb.server_status.network.time_connected,gauge,,second,,Current total time a server has been connected to the network.,0,rethinkdb,Server status network time connected
-rethinkdb.server_status.network.connected_to.total,gauge,,node,,Number of other RethinkDB servers a server is currently connected to.,0,rethinkdb,Server status network connected to total
-rethinkdb.server_status.network.connected_to.pending.total,gauge,,node,,Number of other RethinkDB servers a server knows about but is not currently connected to.,0,rethinkdb,Server status network connected to pending total
+rethinkdb.server_status.network.connected_to,gauge,,node,,Number of other RethinkDB servers a server is currently connected to.,0,rethinkdb,Server status network connected to
 rethinkdb.server_status.process.time_started,gauge,,second,,Time when the RethinkDB server process started.,0,rethinkdb,Server status process time started
-rethinkdb.jobs.index_construction.duration,gauge,,second,,Duration of a task that constructs secondary indexes in the background.,0,rethinkdb,Jobs index construction duration
-rethinkdb.jobs.index_construction.progress,gauge,,percent,,Progress of a task that constructs secondary indexes in the background.,0,rethinkdb,Jobs index construction progress
-rethinkdb.jobs.backfill.duration,gauge,,second,,Duration of a task that brings out of date shards up to date (known as backfilling).,0,rethinkdb,Jobs backfill duration
-rethinkdb.jobs.backfill.progress,gauge,,percent,,Progress of a task that brings out of date shards up to date (known as backfilling).,0,rethinkdb,Jobs backfill progress
-rethinkdb.current_issues.total,gauge,,,,Total number of current issues of a given issue_type.,0,rethinkdb,Current issues total
-rethinkdb.current_issues.critical.total,gauge,,,,Total number of critical current issues of a given issue_type.,0,rethinkdb,Current issues critical total
+rethinkdb.jobs.duration,gauge,,second,,"Duration of a currently running system job, tagged with the job_type.",0,rethinkdb,Jobs duration
+rethinkdb.current_issues.issues,gauge,,,,Total number of current issues of a given issue_type.,0,rethinkdb,Current issues issues
+rethinkdb.current_issues.critical_issues,gauge,,,,Total number of critical current issues of a given issue_type.,0,rethinkdb,Current issues critical issues
