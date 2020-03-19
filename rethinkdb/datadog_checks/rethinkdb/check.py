@@ -5,7 +5,6 @@ from contextlib import contextmanager
 from typing import Any, Callable, Iterator, List, cast
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.types import ServiceCheckStatus
 
 from .backends import Backend
 from .config import Config
@@ -71,12 +70,8 @@ class RethinkDBCheck(AgentCheck):
 
         self.log.debug('submit_metric type=%r name=%r value=%r tags=%r', metric_type, name, value, tags)
 
-        if metric_type == 'service_check':
-            value = cast(ServiceCheckStatus, value)
-            self.service_check(name, value, tags=tags)
-        else:
-            submit = getattr(self, metric_type)  # type: Callable
-            submit(name, value, tags=tags)
+        submit = getattr(self, metric_type)  # type: Callable
+        submit(name, value, tags=tags)
 
     def submit_version_metadata(self, conn):
         # type: (Connection) -> None
