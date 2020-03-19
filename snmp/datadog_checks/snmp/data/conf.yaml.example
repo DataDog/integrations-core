@@ -332,7 +332,7 @@ instances:
 
     ## @param metric_tags - list of elements - optional
     ## Specify tags that you want applied to all metrics. A tag can be applied from a symbol or an OID.
-    ## Regular expressions can be used to separate the found value into several tags, or get a substring, using the regular
+    ## Regular expressions can be used to separate the resulting value into several tags, or get a substring using the regular
     ## Python engine: https://docs.python.org/3/library/re.html
     #
     # metric_tags:
