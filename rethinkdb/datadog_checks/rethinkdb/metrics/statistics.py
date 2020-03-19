@@ -1,122 +1,276 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Iterator, List, Tuple
+import logging
+from typing import Iterator
 
 from ..connections import Connection
 from ..queries import QueryEngine
-from ..types import ClusterStats, ReplicaStats, ServerStats, TableStats
-from ._base import DocumentMetricCollector
+from ..types import Metric
+
+logger = logging.getLogger(__name__)
 
 
-class ClusterStatisticsCollector(DocumentMetricCollector[ClusterStats]):
+def collect_cluster_statistics(engine, conn):
+    # type: (QueryEngine, Connection) -> Iterator[Metric]
     """
     Collect metrics about cluster statistics.
 
     See: https://rethinkdb.com/docs/system-stats#cluster
     """
+    logger.debug('collect_cluster_statistics')
 
-    name = 'cluster_statistics'
-    group = 'stats.cluster'
-    metrics = [
-        {'type': 'gauge', 'path': 'query_engine.queries_per_sec'},
-        {'type': 'gauge', 'path': 'query_engine.read_docs_per_sec'},
-        {'type': 'gauge', 'path': 'query_engine.written_docs_per_sec'},
-    ]
+    stats = engine.query_cluster_stats(conn)
+    logger.debug('cluster_statistics stats=%r', stats)
 
-    def iter_documents(self, engine, conn):
-        # type: (QueryEngine, Connection) -> Iterator[Tuple[ClusterStats, List[str]]]
-        yield engine.query_cluster_stats(conn), []
+    query_engine = stats['query_engine']
+
+    yield {
+        'type': 'gauge',
+        'name': 'rethinkdb.stats.cluster.queries_per_sec',
+        'value': query_engine['queries_per_sec'],
+        'tags': [],
+    }
+
+    yield {
+        'type': 'gauge',
+        'name': 'rethinkdb.stats.cluster.read_docs_per_sec',
+        'value': query_engine['read_docs_per_sec'],
+        'tags': [],
+    }
+
+    yield {
+        'type': 'gauge',
+        'name': 'rethinkdb.stats.cluster.written_docs_per_sec',
+        'value': query_engine['written_docs_per_sec'],
+        'tags': [],
+    }
 
 
-class ServerStatisticsCollector(DocumentMetricCollector[ServerStats]):
+def collect_server_statistics(engine, conn):
+    # type: (QueryEngine, Connection) -> Iterator[Metric]
     """
     Collect metrics about server statistics.
 
     See: https://rethinkdb.com/docs/system-stats#server
     """
+    logger.debug('collect_server_statistics')
 
-    name = 'server_statistics'
-    group = 'stats.server'
-    metrics = [
-        {'type': 'gauge', 'path': 'query_engine.client_connections'},
-        {'type': 'gauge', 'path': 'query_engine.clients_active'},
-        {'type': 'gauge', 'path': 'query_engine.queries_per_sec'},
-        {'type': 'monotonic_count', 'path': 'query_engine.queries_total'},
-        {'type': 'gauge', 'path': 'query_engine.read_docs_per_sec'},
-        {'type': 'monotonic_count', 'path': 'query_engine.read_docs_total'},
-        {'type': 'gauge', 'path': 'query_engine.written_docs_per_sec'},
-        {'type': 'monotonic_count', 'path': 'query_engine.written_docs_total'},
-    ]
+    for server, stats in engine.query_servers_with_stats(conn):
+        logger.debug('server_statistics server=%r stats=%r', server, stats)
 
-    def iter_documents(self, engine, conn):
-        # type: (QueryEngine, Connection) -> Iterator[Tuple[ServerStats, List[str]]]
-        for server, stats in engine.query_servers_with_stats(conn):
-            tags = ['server:{}'.format(server['name'])]
-            tags.extend(server['tags'])
-            yield stats, tags
+        name = server['name']
+        server_tags = server['tags']
+        query_engine = stats['query_engine']
+
+        tags = ['server:{}'.format(name)]
+        tags.extend(server_tags)
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.server.client_connections',
+            'value': query_engine['client_connections'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.server.clients_active',
+            'value': query_engine['clients_active'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.server.queries_per_sec',
+            'value': query_engine['queries_per_sec'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'monotonic_count',
+            'name': 'rethinkdb.stats.server.queries_total',
+            'value': query_engine['queries_total'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.server.read_docs_per_sec',
+            'value': query_engine['read_docs_per_sec'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'monotonic_count',
+            'name': 'rethinkdb.stats.server.read_docs_total',
+            'value': query_engine['read_docs_total'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.server.written_docs_per_sec',
+            'value': query_engine['written_docs_per_sec'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'monotonic_count',
+            'name': 'rethinkdb.stats.server.written_docs_total',
+            'value': query_engine['written_docs_total'],
+            'tags': tags,
+        }
 
 
-class TableStatisticsCollector(DocumentMetricCollector[TableStats]):
+def collect_table_statistics(engine, conn):
+    # type: (QueryEngine, Connection) -> Iterator[Metric]
     """
     Collect metrics about table statistics.
 
     See: https://rethinkdb.com/docs/system-stats#table
     """
+    logger.debug('collect_table_statistics')
 
-    name = 'table_statistics'
-    group = 'stats.table'
-    metrics = [
-        {'type': 'gauge', 'path': 'query_engine.read_docs_per_sec'},
-        {'type': 'gauge', 'path': 'query_engine.written_docs_per_sec'},
-    ]
+    for table, stats in engine.query_tables_with_stats(conn):
+        logger.debug('table_statistics table=%r stats=%r', table, stats)
 
-    def iter_documents(self, engine, conn):
-        # type: (QueryEngine, Connection) -> Iterator[Tuple[TableStats, List[str]]]
-        for table, stats in engine.query_tables_with_stats(conn):
-            tags = ['table:{}'.format(table['name']), 'database:{}'.format(table['db'])]
-            yield stats, tags
+        name = table['name']
+        database = table['db']
+        query_engine = stats['query_engine']
+
+        tags = ['table:{}'.format(name), 'database:{}'.format(database)]
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table.read_docs_per_sec',
+            'value': query_engine['read_docs_per_sec'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table.written_docs_per_sec',
+            'value': query_engine['written_docs_per_sec'],
+            'tags': tags,
+        }
 
 
-class ReplicaStatisticsCollector(DocumentMetricCollector[ReplicaStats]):
+def collect_replica_statistics(engine, conn):
+    # type: (QueryEngine, Connection) -> Iterator[Metric]
     """
     Collect metrics about replicas (table/server pairs) statistics.
 
     See: https://rethinkdb.com/docs/system-stats#replica
     """
+    logger.debug('collect_replica_statistics')
 
-    name = 'replica_statistics'
-    group = 'stats.table_server'
-    metrics = [
-        {'type': 'gauge', 'path': 'query_engine.read_docs_per_sec'},
-        {'type': 'monotonic_count', 'path': 'query_engine.read_docs_total'},
-        {'type': 'gauge', 'path': 'query_engine.written_docs_per_sec'},
-        {'type': 'monotonic_count', 'path': 'query_engine.written_docs_total'},
-        {'type': 'gauge', 'path': 'storage_engine.cache.in_use_bytes'},
-        {'type': 'gauge', 'path': 'storage_engine.disk.read_bytes_per_sec'},
-        {'type': 'monotonic_count', 'path': 'storage_engine.disk.read_bytes_total'},
-        {'type': 'gauge', 'path': 'storage_engine.disk.written_bytes_per_sec'},
-        {'type': 'monotonic_count', 'path': 'storage_engine.disk.written_bytes_total'},
-        {'type': 'gauge', 'path': 'storage_engine.disk.space_usage.metadata_bytes'},
-        {'type': 'gauge', 'path': 'storage_engine.disk.space_usage.data_bytes'},
-        {'type': 'gauge', 'path': 'storage_engine.disk.space_usage.garbage_bytes'},
-        {'type': 'gauge', 'path': 'storage_engine.disk.space_usage.preallocated_bytes'},
-    ]
+    for table, server, replica, stats in engine.query_replicas_with_stats(conn):
+        logger.debug('replica_statistics table=%r server=%r replica=%r stats=%r', table, server, replica, stats)
 
-    def iter_documents(self, engine, conn):
-        # type: (QueryEngine, Connection) -> Iterator[Tuple[ReplicaStats, List[str]]]
-        for table, server, replica, stats in engine.query_replicas_with_stats(conn):
-            tags = [
-                'table:{}'.format(table['name']),
-                'database:{}'.format(table['db']),
-                'server:{}'.format(server['name']),
-                'state:{}'.format(replica['state']),
-            ]
-            tags.extend(server['tags'])
-            yield stats, tags
+        database = table['db']
+        server_name = server['name']
+        table_name = table['name']
+        server_tags = server['tags']
+        query_engine = stats['query_engine']
+        storage_engine = stats['storage_engine']
+        state = replica['state']
 
+        tags = [
+            'table:{}'.format(table_name),
+            'database:{}'.format(database),
+            'server:{}'.format(server_name),
+            'state:{}'.format(state),
+        ]
+        tags.extend(server_tags)
 
-collect_cluster_statistics = ClusterStatisticsCollector()
-collect_server_statistics = ServerStatisticsCollector()
-collect_table_statistics = TableStatisticsCollector()
-collect_replica_statistics = ReplicaStatisticsCollector()
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.read_docs_per_sec',
+            'value': query_engine['read_docs_per_sec'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'monotonic_count',
+            'name': 'rethinkdb.stats.table_server.read_docs_total',
+            'value': query_engine['read_docs_total'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.written_docs_per_sec',
+            'value': query_engine['written_docs_per_sec'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'monotonic_count',
+            'name': 'rethinkdb.stats.table_server.written_docs_total',
+            'value': query_engine['written_docs_total'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.cache.in_use_bytes',
+            'value': storage_engine['cache']['in_use_bytes'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.disk.read_bytes_per_sec',
+            'value': storage_engine['disk']['read_bytes_per_sec'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'monotonic_count',
+            'name': 'rethinkdb.stats.table_server.disk.read_bytes_total',
+            'value': storage_engine['disk']['read_bytes_total'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.disk.written_bytes_per_sec',
+            'value': storage_engine['disk']['written_bytes_per_sec'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'monotonic_count',
+            'name': 'rethinkdb.stats.table_server.disk.written_bytes_total',
+            'value': storage_engine['disk']['written_bytes_total'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.disk.metadata_bytes',
+            'value': storage_engine['disk']['space_usage']['metadata_bytes'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.disk.data_bytes',
+            'value': storage_engine['disk']['space_usage']['data_bytes'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.disk.garbage_bytes',
+            'value': storage_engine['disk']['space_usage']['garbage_bytes'],
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.stats.table_server.disk.preallocated_bytes',
+            'value': storage_engine['disk']['space_usage']['preallocated_bytes'],
+            'tags': tags,
+        }

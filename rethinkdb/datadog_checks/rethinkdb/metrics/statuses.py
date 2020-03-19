@@ -1,99 +1,141 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import datetime as dt
 import logging
-from typing import Iterator, List, Tuple
+import time
+from typing import Iterator
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.types import ServiceCheckStatus
 
 from ..connections import Connection
 from ..queries import QueryEngine
-from ..types import ServerStatus, TableStatus
-from ._base import DocumentMetricCollector
+from ..types import Metric
 
 logger = logging.getLogger(__name__)
 
 
-def transform_status(status):
-    # type: (bool) -> ServiceCheckStatus
-    return AgentCheck.OK if status else AgentCheck.WARNING
-
-
-class TableStatusCollector(DocumentMetricCollector[TableStatus]):
+def collect_table_status(engine, conn):
+    # type: (QueryEngine, Connection) -> Iterator[Metric]
     """
     Collect metrics about table statuses.
 
     See: https://rethinkdb.com/docs/system-tables/#table_status
     """
+    logger.debug('collect_table_status')
 
-    name = 'table_status'
-    group = 'table_status'
+    for table_status in engine.query_table_status(conn):
+        logger.debug('table_status %r', table_status)
 
-    metrics = [
-        {'type': 'service_check', 'path': 'status.ready_for_outdated_reads', 'modifier': 'ok_warning'},
-        {'type': 'service_check', 'path': 'status.ready_for_reads', 'modifier': 'ok_warning'},
-        {'type': 'service_check', 'path': 'status.ready_for_writes', 'modifier': 'ok_warning'},
-        {'type': 'service_check', 'path': 'status.all_replicas_ready', 'modifier': 'ok_warning'},
-        {'type': 'gauge', 'path': 'shards', 'modifier': 'total'},
-    ]
+        table = table_status['name']
+        database = table_status['db']
 
-    enumerations = [
-        {
-            'path': 'shards',
-            'index_tag': 'shard',
-            'metrics': [
-                {'type': 'gauge', 'path': 'replicas', 'modifier': 'total'},
-                {'type': 'gauge', 'path': 'primary_replicas', 'modifier': 'total'},
-            ],
+        tags = ['table:{}'.format(table), 'database:{}'.format(database)]
+
+        yield {
+            'type': 'service_check',
+            'name': 'rethinkdb.table_status.ready_for_outdated_reads',
+            'value': AgentCheck.OK if table_status['status']['ready_for_outdated_reads'] else AgentCheck.WARNING,
+            'tags': tags,
         }
-    ]
 
-    def iter_documents(self, engine, conn):
-        # type: (QueryEngine, Connection) -> Iterator[Tuple[TableStatus, List[str]]]
-        for table_status in engine.query_table_status(conn):
-            tags = ['table:{}'.format(table_status['name']), 'database:{}'.format(table_status['db'])]
-            yield table_status, tags
+        yield {
+            'type': 'service_check',
+            'name': 'rethinkdb.table_status.ready_for_reads',
+            'value': AgentCheck.OK if table_status['status']['ready_for_reads'] else AgentCheck.WARNING,
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'service_check',
+            'name': 'rethinkdb.table_status.ready_for_writes',
+            'value': AgentCheck.OK if table_status['status']['ready_for_writes'] else AgentCheck.WARNING,
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'service_check',
+            'name': 'rethinkdb.table_status.all_replicas_ready',
+            'value': AgentCheck.OK if table_status['status']['all_replicas_ready'] else AgentCheck.WARNING,
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.table_status.shards.total',
+            'value': len(table_status['shards']),
+            'tags': tags,
+        }
+
+        for index, shard in enumerate(table_status['shards']):
+            shard_tags = tags + ['shard:{}'.format(index)]
+
+            yield {
+                'type': 'gauge',
+                'name': 'rethinkdb.table_status.shards.replicas.total',
+                'value': len(shard['replicas']),
+                'tags': shard_tags,
+            }
+
+            yield {
+                'type': 'gauge',
+                'name': 'rethinkdb.table_status.shards.replicas.primary.total',
+                'value': len(shard['primary_replicas']),
+                'tags': shard_tags,
+            }
 
 
-class ServerStatusCollector(DocumentMetricCollector[ServerStatus]):
+def collect_server_status(engine, conn):
+    # type: (QueryEngine, Connection) -> Iterator[Metric]
     """
     Collect metrics about server statuses.
 
     See: https://rethinkdb.com/docs/system-tables/#server_status
     """
+    logger.debug('collect_server_status')
 
-    name = 'server_status'
-    group = 'server_status'
+    for server_status in engine.query_server_status(conn):
+        logger.debug('server_status %r', server_status)
 
-    metrics = [
-        {'type': 'gauge', 'path': 'network.time_connected', 'modifier': 'timestamp'},
-        {
+        server = server_status['name']
+        network = server_status['network']
+        process = server_status['process']
+
+        tags = ['server:{}'.format(server)]
+
+        yield {
             'type': 'gauge',
-            'path': 'network.connected_to',
-            'modifier': {
-                'name': 'total',
-                'map': lambda value: [other for other, connected in value.items() if connected],
-            },
-        },
-        {
+            'name': 'rethinkdb.server_status.network.time_connected',
+            'value': _to_timestamp(network['time_connected']),
+            'tags': tags,
+        }
+
+        yield {
             'type': 'gauge',
-            'path': 'network.connected_to',
-            'name': 'network.not_connected_to',
-            'modifier': {
-                'name': 'total',
-                'map': lambda value: [other for other, connected in value.items() if not connected],
-            },
-        },
-        {'type': 'gauge', 'path': 'process.time_started', 'modifier': 'timestamp'},
-    ]
+            'name': 'rethinkdb.server_status.network.connected_to.total',
+            'value': len([other for other, connected in network['connected_to'].items() if connected]),
+            'tags': tags,
+        }
 
-    def iter_documents(self, engine, conn):
-        # type: (QueryEngine, Connection) -> Iterator[Tuple[ServerStatus, List[str]]]
-        for server_status in engine.query_server_status(conn):
-            tags = ['server:{}'.format(server_status['name'])]
-            yield server_status, tags
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.server_status.network.connected_to.pending.total',
+            'value': len([other for other, connected in network['connected_to'].items() if not connected]),
+            'tags': tags,
+        }
+
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.server_status.process.time_started',
+            'value': _to_timestamp(process['time_started']),
+            'tags': tags,
+        }
 
 
-collect_table_status = TableStatusCollector()
-collect_server_status = ServerStatusCollector()
+def _to_timestamp(datetime):
+    # type: (dt.datetime) -> float
+    try:
+        return datetime.timestamp()  # type: ignore  # (Mypy is run in --py2 mode.)
+    except AttributeError:  # pragma: no cover
+        # Python 2.
+        return time.mktime(datetime.now().timetuple())

@@ -7,32 +7,34 @@ from typing import Iterator
 from ..connections import Connection
 from ..queries import QueryEngine
 from ..types import Metric
-from ._base import DocumentMetricCollector
 
 logger = logging.getLogger(__name__)
 
 
-class CurrentIssuesCollector(DocumentMetricCollector):
+def collect_current_issues(engine, conn):
+    # type: (QueryEngine, Connection) -> Iterator[Metric]
     """
     Collect metrics about current system issues.
 
     See: https://rethinkdb.com/docs/system-issues/
     """
+    logger.debug('collect_current_issues')
 
-    name = 'current_issues'
-    group = 'current_issues'
+    totals = engine.query_current_issues_totals(conn)
+    logger.debug('current_issues totals=%r', totals)
 
-    def _collect(self, engine, conn):
-        # type: (QueryEngine, Connection) -> Iterator[Metric]
-        totals = engine.query_current_issues_totals(conn)
+    for issue_type, total in totals['issues_by_type'].items():
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.current_issues.total',
+            'value': total,
+            'tags': ['issue_type:{}'.format(issue_type)],
+        }
 
-        for issue_type, total in totals['issues_by_type'].items():
-            tags = ['issue_type:{}'.format(issue_type)]
-            yield self._make_metric(type='gauge', name='total', value=total, tags=tags)
-
-        for issue_type, total in totals['critical_issues_by_type'].items():
-            tags = ['issue_type:{}'.format(issue_type)]
-            yield self._make_metric(type='gauge', name='critical.total', value=total, tags=tags)
-
-
-collect_current_issues = CurrentIssuesCollector()
+    for issue_type, total in totals['critical_issues_by_type'].items():
+        yield {
+            'type': 'gauge',
+            'name': 'rethinkdb.current_issues.critical.total',
+            'value': total,
+            'tags': ['issue_type:{}'.format(issue_type)],
+        }
