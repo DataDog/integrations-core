@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
+
 import mock
 import pytest
 
@@ -8,6 +10,11 @@ from datadog_checks.rethinkdb import queries
 from datadog_checks.rethinkdb.types import BackfillJob, DiskCompactionJob, IndexConstructionJob, QueryJob
 
 pytestmark = pytest.mark.unit
+
+
+class MockLogger(logging.Logger):
+    def trace(self, *args, **kwargs):  # type: ignore
+        pass  # Called by queries.
 
 
 def test_jobs_metrics():
@@ -70,7 +77,7 @@ def test_jobs_metrics():
     conn = mock.Mock()
     with mock.patch('rethinkdb.ast.RqlQuery.run') as run:
         run.return_value = mock_rows
-        metrics = list(queries.system_jobs.run(conn))
+        metrics = list(queries.system_jobs.run(conn, logger=MockLogger('test')))
 
     assert metrics == [
         # -- `query` job ignored --
@@ -83,7 +90,6 @@ def test_jobs_metrics():
                 'job_type:backfill',
                 'server:server0',
                 'server:server2',
-                'job_type:backfill',
                 'database:doghouse',
                 'destination_server:server2',
                 'source_server:server0',
@@ -116,4 +122,4 @@ def test_unknown_job():
     with mock.patch('rethinkdb.ast.RqlQuery.run') as run:
         run.return_value = [mock_unknown_job_row]
         with pytest.raises(RuntimeError):
-            list(queries.system_jobs.run(conn))
+            list(queries.system_jobs.run(conn, logger=MockLogger('test')))
