@@ -10,7 +10,7 @@ from rethinkdb import r
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.docker import temporarily_stop_service
 from datadog_checks.dev.structures import EnvVars
-from datadog_checks.rethinkdb.connections import Connection, RethinkDBConnection
+from datadog_checks.rethinkdb.connections import Connection
 
 from .common import (
     AGENT_PASSWORD,
@@ -37,7 +37,7 @@ def setup_cluster():
     """
     logger.debug('setup_cluster')
 
-    with RethinkDBConnection(r.connect(host=HOST, port=SERVER_PORTS['server0'])) as conn:
+    with Connection(r.connect(host=HOST, port=SERVER_PORTS['server0'])) as conn:
         # A test DB is automatically created, but we don't use it and it would skew our metrics.
         response = conn.run(r.db_drop('test'))
         assert response['dbs_dropped'] == 1
@@ -68,7 +68,7 @@ def setup_cluster():
     # Simulate client activity.
     # NOTE: ensures that 'written_docs_*' and 'read_docs_*' metrics have non-zero values.
 
-    with RethinkDBConnection(r.connect(host=HOST, port=SERVER_PORTS['proxy'], user=CLIENT_USER)) as conn:
+    with Connection(r.connect(host=HOST, port=SERVER_PORTS['proxy'], user=CLIENT_USER)) as conn:
         response = conn.run(r.db(DATABASE).table(HEROES_TABLE).insert(HEROES_TABLE_DOCUMENTS))
         assert response['inserted'] == len(HEROES_TABLE_DOCUMENTS)
 
@@ -120,10 +120,10 @@ def temporarily_disconnect_server(server):
 
     with temporarily_stop_service(service, compose_file=COMPOSE_FILE):
         with EnvVars(COMPOSE_ENV_VARS):
-            with RethinkDBConnection(r.connect(host=HOST, port=SERVER_PORTS['server0'])) as conn:
+            with Connection(r.connect(host=HOST, port=SERVER_PORTS['server0'])) as conn:
                 WaitFor(lambda: _server_disconnected(conn))()
 
             yield
 
-    with RethinkDBConnection(r.connect(host=HOST, port=SERVER_PORTS['server0'])) as conn:
+    with Connection(r.connect(host=HOST, port=SERVER_PORTS['server0'])) as conn:
         WaitFor(lambda: _server_reconnected(conn))()

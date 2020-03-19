@@ -66,8 +66,8 @@ def test_jobs_metrics():
     mock_rows = [mock_query_job_row, mock_disk_compaction_row, mock_backfill_job_row, mock_index_construction_job_row]
 
     engine = QueryEngine()
-    with MockConnection(rows=mock_rows) as conn:
-        metrics = list(collect_system_jobs(engine, conn))
+    conn = MockConnection(rows=mock_rows)
+    metrics = list(collect_system_jobs(engine, conn))
 
     assert metrics == [
         # -- `query` job ignored --
@@ -109,6 +109,7 @@ def test_unknown_job():
     mock_unknown_job_row = {'type': 'an_unknown_type_that_should_be_ignored', 'duration_sec': 0.42, 'servers': []}
 
     engine = QueryEngine()
-    with MockConnection(rows=[mock_unknown_job_row]) as conn:
-        with pytest.raises(RuntimeError):
-            list(collect_system_jobs(engine, conn))
+    conn = MockConnection(rows=[mock_unknown_job_row])
+
+    with pytest.raises(RuntimeError):
+        list(collect_system_jobs(engine, conn))
