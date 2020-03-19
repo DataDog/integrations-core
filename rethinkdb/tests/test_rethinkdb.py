@@ -173,7 +173,7 @@ def test_connected_but_check_failed_unexpectedly(aggregator, instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_mestadata_version(instance, datadog_agent):
+def test_metadata_version(instance, datadog_agent):
     # type: (Instance, DatadogAgentStub) -> None
     check_id = 'test'
 
