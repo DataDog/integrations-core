@@ -21,7 +21,7 @@ No additional installation is needed on your server.
   gem install dogstatsd-ruby
 ```
 
-2. Enable metric collection by including this in your initializer:
+2. Enable Sidekiq Pro metric collection by including this in your initializer:
 
 ```ruby
     require 'datadog/statsd' # gem 'dogstatsd-ruby'
@@ -35,6 +35,15 @@ No additional installation is needed on your server.
       end
     end
   ```
+
+3. If you are using Sidekiq Enterprise and would like to collect historical metrics, include this line as well:
+
+```ruby
+    Sidekiq.configure_server do |config|
+      # history is captured every 30 seconds by default
+      config.retain_history(30)
+    end
+```
 
   See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information and [Datadog Ruby][7] documentation for further configuration options.
 
