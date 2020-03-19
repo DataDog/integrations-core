@@ -72,6 +72,7 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.cpu.load.10s.avg',
     'kubernetes.cpu.system.total',
     'kubernetes.cpu.user.total',
+    'kubernetes.cpu.cfs.periods',
     'kubernetes.cpu.cfs.throttled.periods',
     'kubernetes.cpu.cfs.throttled.seconds',
     'kubernetes.memory.usage_pct',
