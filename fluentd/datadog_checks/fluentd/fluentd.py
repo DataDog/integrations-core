@@ -35,6 +35,14 @@ class Fluentd(AgentCheck):
 
         self._fluentd_command = self.instance.get('fluentd', init_config.get('fluentd', 'fluentd'))
 
+        self.url = self.instance.get('monitor_agent_url')
+        parsed_url = urlparse(self.url)
+        self.monitor_agent_host = parsed_url.hostname
+        self.monitor_agent_port = parsed_url.port or 24220
+        self.config_url = '{}://{}:{}/api/config.json'.format(
+            parsed_url.scheme, self.monitor_agent_host, self.monitor_agent_port
+        )
+
     """Tracks basic fluentd metrics via the monitor_agent plugin
     * number of retry_count
     * number of buffer_queue_length
@@ -49,7 +57,7 @@ class Fluentd(AgentCheck):
             raise Exception('Fluentd instance missing "monitor_agent_url" value.')
 
         try:
-            url = instance.get('monitor_agent_url')
+
             plugin_ids = instance.get('plugin_ids', [])
             custom_tags = instance.get('tags', [])
 
@@ -57,15 +65,12 @@ class Fluentd(AgentCheck):
             tag_by = instance.get('tag_by')
             tag_by = tag_by if tag_by in self._AVAILABLE_TAGS else 'plugin_id'
 
-            parsed_url = urlparse(url)
-            monitor_agent_host = parsed_url.hostname
-            monitor_agent_port = parsed_url.port or 24220
             service_check_tags = [
-                'fluentd_host:%s' % monitor_agent_host,
-                'fluentd_port:%s' % monitor_agent_port,
+                'fluentd_host:%s' % self.monitor_agent_host,
+                'fluentd_port:%s' % self.monitor_agent_port,
             ] + custom_tags
 
-            r = self.http.get(url)
+            r = self.http.get(self.url)
             r.raise_for_status()
             status = r.json()
 
@@ -90,19 +95,32 @@ class Fluentd(AgentCheck):
 
             self._collect_metadata()
         except Exception as e:
-            msg = "No stats could be retrieved from %s : %s" % (url, str(e))
+            msg = "No stats could be retrieved from %s : %s" % (self.url, str(e))
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=msg)
             raise
         else:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
     def _collect_metadata(self):
-        if self.is_metadata_collection_enabled():
-            raw_version = self._get_raw_version()
-            if raw_version:
-                self.set_metadata('version', raw_version)
+        raw_version = None
+        if not self.is_metadata_collection_enabled():
+            return
 
-    def _get_raw_version(self):
+        try:
+            r = self.http.get(self.config_url)
+            r.raise_for_status()
+            config = r.json()
+            raw_version = config.get('version')
+        except Exception as e:
+            self.log.debug("No config could be retrieved from %s: %s", self.config_url, e)
+
+        # Fall back to command line for older versions of fluentd
+        if not raw_version:
+            raw_version = self._get_version_from_command_line()
+        if raw_version:
+            self.set_metadata('version', raw_version)
+
+    def _get_version_from_command_line(self):
         version_command = '{} --version'.format(self._fluentd_command)
 
         try:

@@ -648,7 +648,7 @@ def test_profile_sys_object_no_metrics():
     """If an instance is created without metrics and there is no profile defined, an error is raised."""
     instance = common.generate_instance_config([])
     with pytest.raises(ConfigurationError):
-        SnmpCheck('snmp', {}, [instance])
+        SnmpCheck('snmp', {'profiles': {}}, [instance])
 
 
 def test_discovery(aggregator):

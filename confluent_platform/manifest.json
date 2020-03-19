@@ -1,0 +1,35 @@
+{
+  "display_name": "Confluent Platform",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "confluent_platform",
+  "metric_prefix": "confluent.",
+  "metric_to_check": "confluent.kafka.producer.outgoing_byte_rate",
+  "creates_events": false,
+  "short_description": "Monitor Confluent Platform components.",
+  "guid": "8e4a6d7e-44bc-440c-aafa-a0f98df87cc0",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Confluent Platform Integration",
+  "categories": [
+    "processing",
+    "messaging",
+    "autodiscovery"
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "confluent-platform",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json"
+  }
+}
