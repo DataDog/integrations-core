@@ -83,6 +83,7 @@ def test_jobs_metrics():
                 'job_type:backfill',
                 'server:server0',
                 'server:server2',
+                'job_type:backfill',
                 'database:doghouse',
                 'destination_server:server2',
                 'source_server:server0',
