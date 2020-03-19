@@ -32,26 +32,35 @@ class QueryEngine(object):
 
     def __init__(self, r=None):
         # type: (rethinkdb.RethinkDB) -> None
-        self._r = rethinkdb.r if r is None else r
+        if r is None:
+            r = rethinkdb.r
+
+        self._r = r
+        # NOTE: all system tables are located in this database.
+        # See: https://rethinkdb.com/docs/system-tables/
+        self._system = r.db('rethinkdb')
 
     def query_connected_server_version_string(self, conn):
         # type: (Connection) -> str
         """
         Return the raw string of the RethinkDB version used by the server at the other end of the connection.
         """
-        r = self._r
+        system = self._system
+
         # See: https://rethinkdb.com/docs/system-tables/#server_status
         server = conn.server()  # type: ConnectionServer
-        server_status = conn.run(r.db('rethinkdb').table('server_status').get(server['id']))  # type: ServerStatus
+        server_status = conn.run(system.table('server_status').get(server['id']))  # type: ServerStatus
+
         return server_status['process']['version']
 
     def query_config_totals(self, conn):
         # type: (Connection) -> ConfigTotals
         r = self._r
+        system = self._system
 
-        table_config = r.db('rethinkdb').table('table_config')
-        server_config = r.db('rethinkdb').table('server_config')
-        db_config = r.db('rethinkdb').table('db_config')
+        table_config = system.table('table_config')
+        server_config = system.table('server_config')
+        db_config = system.table('db_config')
 
         # Need to `.run()` these separately because ReQL does not support putting grouped data in raw expressions yet.
         # See: https://github.com/rethinkdb/rethinkdb/issues/2067
@@ -81,7 +90,7 @@ class QueryEngine(object):
         """
         Retrieve statistics about the cluster.
         """
-        return conn.run(self._r.db('rethinkdb').table('stats').get(['cluster']))
+        return conn.run(self._system.table('stats').get(['cluster']))
 
     def query_servers_with_stats(self, conn):
         # type: (Connection) -> Iterator[Tuple[Server, ServerStats]]
@@ -89,13 +98,14 @@ class QueryEngine(object):
         Retrieve each server in the cluster along with its statistics.
         """
         r = self._r
+        system = self._system
 
         # For servers: stats['id'] = ['server', '<SERVER_ID>']
         is_server_stats_row = r.row['id'].nth(0) == 'server'
         server_id = r.row['id'].nth(1)
 
-        stats = r.db('rethinkdb').table('stats')
-        server_config = r.db('rethinkdb').table('server_config')
+        stats = system.table('stats')
+        server_config = system.table('server_config')
 
         rows = conn.run(stats.filter(is_server_stats_row).eq_join(server_id, server_config))  # type: Iterator[JoinRow]
 
@@ -110,13 +120,14 @@ class QueryEngine(object):
         Retrieve each table in the cluster along with its statistics.
         """
         r = self._r
+        system = self._system
 
         # For tables: stats['id'] = ['table', '<TABLE_ID>']
         is_table_stats_row = r.row['id'].nth(0) == 'table'
         table_id = r.row['id'].nth(1)
 
-        stats = r.db('rethinkdb').table('stats')
-        table_config = r.db('rethinkdb').table('table_config')
+        stats = system.table('stats')
+        table_config = system.table('table_config')
 
         rows = conn.run(stats.filter(is_table_stats_row).eq_join(table_id, table_config))  # type: Iterator[JoinRow]
 
@@ -131,16 +142,17 @@ class QueryEngine(object):
         Retrieve each replica (table/server pair) in the cluster along with its statistics.
         """
         r = self._r
+        system = self._system
 
         # NOTE: To reduce bandwidth usage, we make heavy use of the `.pluck()` operation, i.e. ask RethinkDB
         # for a specific set of fields, instead of sending entire objects, which can be expensive when joining
         # data as we do here.
         # See: https://rethinkdb.com/api/python/pluck/
 
-        stats = r.db('rethinkdb').table('stats')
-        server_config = r.db('rethinkdb').table('server_config')
-        table_config = r.db('rethinkdb').table('table_config')
-        table_status = r.db('rethinkdb').table(
+        stats = system.table('stats')
+        server_config = system.table('server_config')
+        table_config = system.table('table_config')
+        table_status = system.table(
             'table_status',
             # Required so that we can join on 'server_config' below without having to look up UUIDs from names.
             # See: https://rethinkdb.com/api/python/table/#description
@@ -195,21 +207,21 @@ class QueryEngine(object):
         """
         Retrieve the status of each table in the cluster.
         """
-        return conn.run(self._r.db('rethinkdb').table('table_status'))
+        return conn.run(self._system.table('table_status'))
 
     def query_server_status(self, conn):
         # type: (Connection) -> Iterator[ServerStatus]
         """
         Retrieve the status of each server in the cluster.
         """
-        return conn.run(self._r.db('rethinkdb').table('server_status'))
+        return conn.run(self._system.table('server_status'))
 
     def query_system_jobs(self, conn):
         # type: (Connection) -> Iterator[Job]
         """
         Retrieve all the currently running system jobs.
         """
-        return conn.run(self._r.db('rethinkdb').table('jobs'))
+        return conn.run(self._system.table('jobs'))
 
     def query_current_issues_totals(self, conn):
         # type: (Connection) -> CurrentIssuesTotals
@@ -217,8 +229,9 @@ class QueryEngine(object):
         Retrieve all the problems detected with the cluster.
         """
         r = self._r
+        system = self._system
 
-        current_issues = r.db('rethinkdb').table('current_issues').pluck('type', 'critical')
+        current_issues = system.table('current_issues').pluck('type', 'critical')
 
         # NOTE: Need to `.run()` these separately because ReQL does not support putting grouped data in raw
         # expressions yet. See: https://github.com/rethinkdb/rethinkdb/issues/2067
