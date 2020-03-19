@@ -25,7 +25,7 @@ def setup_module(module):
     """
     module.temp_dir = tempfile.mkdtemp()
 
-    # Create a main folder
+    # Create folder structure
     os.makedirs(str(temp_dir) + "/main/subfolder")
     os.makedirs(str(temp_dir) + "/many/subfolder")
 
