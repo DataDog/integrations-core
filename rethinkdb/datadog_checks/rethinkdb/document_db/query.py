@@ -45,7 +45,7 @@ class DocumentQuery(object):
         if not isinstance(value, (int, float)):  # pragma: no cover
             raise RuntimeError('Expected float or int, got {!r} of type {}', value, type(value))
 
-        name = dotted_join(('rethinkdb', self.prefix, name))
+        name = dotted_join((self.prefix, name))
 
         return {'type': spec['type'], 'name': name, 'value': value, 'tags': tags}
 
@@ -61,7 +61,7 @@ class DocumentQuery(object):
             for spec in enumeration['metrics']:
                 spec = {
                     'type': spec['type'],
-                    'name': dotted_join((enumeration['path'], spec['path']), drop_empty=True),
+                    'name': dotted_join((enumeration['path'], spec['path'])),
                     'path': spec['path'],
                     'modifier': spec.get('modifier'),
                 }

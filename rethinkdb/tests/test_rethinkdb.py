@@ -194,7 +194,7 @@ def test_metadata_version(instance, datadog_agent):
     datadog_agent.assert_metadata(check_id, version_metadata)
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.parametrize('malformed_version_string', MALFORMED_VERSION_STRING_PARAMS)
 def test_metadata_version_malformed(instance, aggregator, datadog_agent, malformed_version_string):
     # type: (Instance, AggregatorStub, DatadogAgentStub, str) -> None
@@ -218,7 +218,7 @@ def test_metadata_version_malformed(instance, aggregator, datadog_agent, malform
     datadog_agent.assert_metadata(check_id, {})
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_metadata_version_failure(instance, aggregator, datadog_agent):
     # type: (Instance, AggregatorStub, DatadogAgentStub) -> None
     """

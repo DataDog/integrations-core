@@ -10,7 +10,7 @@ from .document_db import DocumentQuery
 config_summary = DocumentQuery(
     source=operations.get_config_summary,
     name='config_summary',
-    prefix='config',
+    prefix='rethinkdb.config',
     metrics=[{'type': 'gauge', 'path': 'servers'}, {'type': 'gauge', 'path': 'databases'}],
     groups=[
         {'path': 'tables_per_database', 'key_tag': 'database', 'value_metric_type': 'gauge'},
@@ -25,7 +25,7 @@ config_summary = DocumentQuery(
 cluster_statistics = DocumentQuery(
     source=operations.get_cluster_statistics,
     name='cluster_statistics',
-    prefix='stats.cluster',
+    prefix='rethinkdb.stats.cluster',
     metrics=[
         {'type': 'gauge', 'path': 'query_engine.queries_per_sec'},
         {'type': 'gauge', 'path': 'query_engine.read_docs_per_sec'},
@@ -37,7 +37,7 @@ cluster_statistics = DocumentQuery(
 server_statistics = DocumentQuery(
     source=operations.get_servers_statistics,
     name='server_statistics',
-    prefix='stats.server',
+    prefix='rethinkdb.stats.server',
     metrics=[
         {'type': 'gauge', 'path': 'query_engine.client_connections'},
         {'type': 'gauge', 'path': 'query_engine.clients_active'},
@@ -54,7 +54,7 @@ server_statistics = DocumentQuery(
 table_statistics = DocumentQuery(
     source=operations.get_tables_statistics,
     name='table_statistics',
-    prefix='stats.table',
+    prefix='rethinkdb.stats.table',
     metrics=[
         {'type': 'gauge', 'path': 'query_engine.read_docs_per_sec'},
         {'type': 'gauge', 'path': 'query_engine.written_docs_per_sec'},
@@ -65,7 +65,7 @@ table_statistics = DocumentQuery(
 replica_statistics = DocumentQuery(
     source=operations.get_replicas_statistics,
     name='replica_statistics',
-    prefix='stats.table_server',
+    prefix='rethinkdb.stats.table_server',
     metrics=[
         {'type': 'gauge', 'path': 'query_engine.read_docs_per_sec'},
         {'type': 'monotonic_count', 'path': 'query_engine.read_docs_total'},
@@ -90,7 +90,7 @@ replica_statistics = DocumentQuery(
 table_statuses = DocumentQuery(
     source=operations.get_table_statuses,
     name='table_status',
-    prefix='table_status',
+    prefix='rethinkdb.table_status',
     metrics=[
         {'type': 'service_check', 'path': 'status.ready_for_outdated_reads', 'modifier': 'ok_warning'},
         {'type': 'service_check', 'path': 'status.ready_for_reads', 'modifier': 'ok_warning'},
@@ -114,7 +114,7 @@ table_statuses = DocumentQuery(
 server_statuses = DocumentQuery(
     source=operations.get_server_statuses,
     name='server_status',
-    prefix='server_status',
+    prefix='rethinkdb.server_status',
     metrics=[
         {'type': 'gauge', 'path': 'network.time_connected', 'modifier': 'timestamp'},
         {'type': 'gauge', 'path': 'network.connected_to', 'modifier': 'total'},
@@ -129,7 +129,7 @@ server_statuses = DocumentQuery(
 system_jobs = DocumentQuery(
     source=operations.get_system_jobs,
     name='system_jobs',
-    prefix='jobs',
+    prefix='rethinkdb.jobs',
     metrics=[{'type': 'gauge', 'path': 'duration_sec'}],
 )
 
@@ -140,7 +140,7 @@ system_jobs = DocumentQuery(
 current_issues_summary = DocumentQuery(
     source=operations.get_current_issues_summary,
     name='current_issues',
-    prefix='current_issues',
+    prefix='rethinkdb.current_issues',
     groups=[
         {'path': 'issues', 'key_tag': 'issue_type', 'value_metric_type': 'gauge'},
         {'path': 'critical_issues', 'key_tag': 'issue_type', 'value_metric_type': 'gauge'},
