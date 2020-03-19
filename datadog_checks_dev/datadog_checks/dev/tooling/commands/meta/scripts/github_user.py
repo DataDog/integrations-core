@@ -20,9 +20,7 @@ def github_user(email):
     GITHUB_ENDPOINT = 'https://api.github.com/search/users'
 
     try:
-        response = requests.get(
-            f'{GITHUB_ENDPOINT}?q={email}',
-        )
+        response = requests.get(f'{GITHUB_ENDPOINT}?q={email}',)
         response.raise_for_status()
         content = response.json()
 
@@ -39,4 +37,3 @@ def github_user(email):
 
     except Exception as e:
         abort(str(e))
-
