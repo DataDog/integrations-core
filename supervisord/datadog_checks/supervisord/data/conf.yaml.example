@@ -20,7 +20,7 @@ instances:
     # port: 9001
 
     ## @param socket - string - optional
-    ## A path to a UNIX domain socket on which supervisor is listening for HTTP/XML-RPC requests.
+    ## The path to a UNIX domain socket that supervisor is listening on for HTTP/XML-RPC requests.
     ##
     ## See: http://supervisord.org/configuration.html#unix-http-server-section-settings
     #
