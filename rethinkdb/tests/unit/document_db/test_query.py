@@ -24,24 +24,24 @@ def test_document_query():
     """
 
     PRODUCTS_COLLECTION = [
-        # Use OrderedDict's so that order of submitted metrics is deterministic on Python 2 too.
+        # NOTE: use ordered dicts so that order of submitted metrics is deterministic on Python 2 too.
         OrderedDict(
-            {
-                'name': 'T-Shirt',
-                'category': 'clothing',
-                'sales': {'sales_per_day': 100, 'sales_total': 10000},
-                'locations': [{'name': 'London', 'stock': 1200}, {'name': 'Paris', 'stock': 700}],
-                'total_sales_per_location': OrderedDict({'london': 2000, 'paris': 8000}),
-            }
+            (
+                ('name', 'T-Shirt'),
+                ('category', 'clothing'),
+                ('sales', {'sales_per_day': 100, 'sales_total': 10000}),
+                ('locations', [{'name': 'London', 'stock': 1200}, {'name': 'Paris', 'stock': 700}]),
+                ('total_sales_per_location', OrderedDict((('london', 2000), ('paris', 8000)))),
+            ),
         ),
         OrderedDict(
-            {
-                'name': 'Laptop',
-                'category': 'high-tech',
-                'sales': {'sales_per_day': 5, 'sales_total': 400},
-                'locations': [{'name': 'New York', 'stock': 150}],
-                'total_sales_per_location': {'new-york': 400},
-            }
+            (
+                ('name', 'Laptop'),
+                ('category', 'high-tech'),
+                ('sales', {'sales_per_day': 5, 'sales_total': 400}),
+                ('locations', [{'name': 'New York', 'stock': 150}]),
+                ('total_sales_per_location', {'new-york': 400}),
+            )
         ),
     ]
 

@@ -15,13 +15,13 @@ from .document_db.types import Metric
 from .types import Instance
 from .version import parse_version
 
-SERVICE_CHECK_CONNECT = 'rethinkdb.can_connect'
-
 
 class RethinkDBCheck(AgentCheck):
     """
     Collect metrics from a RethinkDB cluster.
     """
+
+    SERVICE_CHECK_CONNECT = 'rethinkdb.can_connect'
 
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
@@ -59,15 +59,15 @@ class RethinkDBCheck(AgentCheck):
         except rethinkdb.errors.ReqlDriverError as exc:
             message = 'Could not connect to RethinkDB server: {!r}'.format(exc)
             self.log.error(message)
-            self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, tags=tags, message=message)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=tags, message=message)
             raise
         except Exception as exc:
             message = 'Unexpected error while executing RethinkDB check: {!r}'.format(exc)
             self.log.error(message)
-            self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, tags=tags, message=message)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=tags, message=message)
             raise
         else:
-            self.service_check(SERVICE_CHECK_CONNECT, self.OK, tags=tags)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=tags)
 
     def collect_metrics(self, conn):
         # type: (rethinkdb.net.Connection) -> Iterator[Metric]
@@ -88,29 +88,20 @@ class RethinkDBCheck(AgentCheck):
 
     def submit_metric(self, metric):
         # type: (Metric) -> None
-        metric_type = metric['type']
-        name = metric['name']
-        value = metric['value']
-        tags = self.config.tags + metric['tags']
-
-        self.log.debug('submit_metric type=%r name=%r value=%r tags=%r', metric_type, name, value, tags)
-
-        submit = getattr(self, metric_type)  # type: Callable
-        submit(name, value, tags=tags)
+        submit = getattr(self, metric['type'])  # type: Callable
+        submit(metric['name'], metric['value'], tags=self.config.tags + metric['tags'])
 
     def submit_version_metadata(self, conn):
         # type: (rethinkdb.net.Connection) -> None
         try:
             version = self.collect_connected_server_version(conn)
         except ValueError as exc:
-            self.log.error(exc)
+            self.log.error('Error collecting version metadata: %r', exc)
         else:
             self.set_metadata('version', version)
 
     def check(self, instance):
         # type: (Any) -> None
-        self.log.debug('check config=%r', self.config)
-
         with self.connect_submitting_service_checks() as conn:
             for metric in self.collect_metrics(conn):
                 self.submit_metric(metric)

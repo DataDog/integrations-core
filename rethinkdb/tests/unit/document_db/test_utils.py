@@ -4,8 +4,9 @@
 import datetime as dt
 
 import pytest
+import pytz
 
-from datadog_checks.rethinkdb.document_db.utils import dotted_join, lookup_dotted, to_timestamp
+from datadog_checks.rethinkdb.document_db.utils import dotted_join, lookup_dotted, to_time_elapsed
 
 pytestmark = pytest.mark.unit
 
@@ -21,10 +22,10 @@ def test_dotted_join():
     assert dotted_join(('', 'bar', 'baz')) == 'bar.baz'
 
 
-def test_to_timestamp():
+def test_to_time_elapsed():
     # type: () -> None
-    datetime = dt.datetime(year=2020, month=1, day=1, hour=3, minute=45, second=0)
-    assert to_timestamp(datetime) == 1577846700.0
+    one_day_seconds = 3600 * 24
+    to_time_elapsed(dt.datetime.now(pytz.utc) - dt.timedelta(days=1)) == one_day_seconds
 
 
 def test_lookup_dotted():

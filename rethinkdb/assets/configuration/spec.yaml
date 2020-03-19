@@ -11,33 +11,30 @@ files:
       - template: instances
         options:
           - name: host
-            required: false
+            required: true
             description: Host of the RethinkDB server.
             value:
               example: localhost
               type: string
 
           - name: port
-            required: false
+            required: true
             description: Driver port of the RethinkDB server.
             value:
               example: 28015
               type: integer
 
           - name: username
-            required: false
             description: The user account to connect as.
             value:
               type: string
 
           - name: password
-            required: false
             description: The password for the user account to connect as.
             value:
               type: string
 
           - name: tls_ca_cert
-            required: false
             description: |
               Path to a TLS client certificate to use when connecting to the RethinkDB server.
               See also: https://rethinkdb.com/docs/security/#using-tls

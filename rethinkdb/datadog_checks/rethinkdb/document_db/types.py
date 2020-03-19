@@ -6,7 +6,7 @@ from typing import Any, Callable, List, Literal, Optional, Sequence, TypedDict, 
 MetricType = Literal['gauge', 'count', 'monotonic_count', 'rate', 'service_check']
 Metric = TypedDict('Metric', {'type': MetricType, 'name': str, 'value': float, 'tags': List[str]})
 
-ModifierName = Literal['total', 'ok_warning', 'timestamp']
+ModifierName = Literal['total', 'ok_warning', 'time_elapsed']
 TotalModifier = TypedDict('TotalModifier', {'name': Literal['total'], 'map': Callable[[Any], Sequence]})
 Modifier = Union[ModifierName, TotalModifier]
 

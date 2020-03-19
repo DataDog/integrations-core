@@ -10,13 +10,11 @@ from rethinkdb import r
 
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.docker import temporarily_stop_service
-from datadog_checks.dev.structures import EnvVars
 
 from .common import (
     AGENT_PASSWORD,
     AGENT_USER,
     CLIENT_USER,
-    COMPOSE_ENV_VARS,
     COMPOSE_FILE,
     DATABASE,
     HEROES_TABLE,
@@ -119,11 +117,10 @@ def temporarily_disconnect_server(server):
         return _server_exists(conn) and _leader_election_done(conn)
 
     with temporarily_stop_service(service, compose_file=COMPOSE_FILE):
-        with EnvVars(COMPOSE_ENV_VARS):
-            with r.connect(host=HOST, port=SERVER_PORTS['server0']) as conn:
-                WaitFor(lambda: _server_disconnected(conn))()
+        with r.connect(host=HOST, port=SERVER_PORTS['server0']) as conn:
+            WaitFor(lambda: _server_disconnected(conn))()
 
-            yield
+        yield
 
     with r.connect(host=HOST, port=SERVER_PORTS['server0']) as conn:
         WaitFor(lambda: _server_reconnected(conn))()

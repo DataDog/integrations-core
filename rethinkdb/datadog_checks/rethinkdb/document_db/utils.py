@@ -5,7 +5,6 @@
 Miscellaneous utilities.
 """
 import datetime as dt
-import time
 from typing import Any, Mapping, Sequence
 
 
@@ -43,10 +42,6 @@ def dotted_join(values):
     return '.'.join(filter(None, values))
 
 
-def to_timestamp(datetime):
+def to_time_elapsed(datetime):
     # type: (dt.datetime) -> float
-    try:
-        return datetime.timestamp()  # type: ignore  # (mypy runs in `--py2` mode.)
-    except AttributeError:  # pragma: no cover
-        # Python 2.
-        return time.mktime(datetime.timetuple())
+    return (dt.datetime.now(datetime.tzinfo) - datetime).total_seconds()

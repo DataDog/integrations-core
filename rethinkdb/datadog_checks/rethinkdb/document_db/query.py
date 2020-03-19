@@ -7,7 +7,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.log import CheckLoggingAdapter
 
 from .types import Enumeration, Group, Metric, MetricSpec, Modifier
-from .utils import dotted_join, lookup_dotted, to_timestamp
+from .utils import dotted_join, lookup_dotted, to_time_elapsed
 
 
 class DocumentQuery(object):
@@ -92,8 +92,8 @@ class DocumentQuery(object):
         if modifier == 'ok_warning':
             return AgentCheck.OK if value else AgentCheck.WARNING
 
-        if modifier == 'timestamp':
-            return to_timestamp(value)
+        if modifier == 'time_elapsed':
+            return to_time_elapsed(value)
 
         raise RuntimeError('Unknown modifier: {!r}'.format(modifier))  # pragma: no cover
 

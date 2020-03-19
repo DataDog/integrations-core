@@ -116,9 +116,9 @@ server_statuses = DocumentQuery(
     name='server_status',
     prefix='rethinkdb.server_status',
     metrics=[
-        {'type': 'gauge', 'path': 'network.time_connected', 'modifier': 'timestamp'},
+        {'type': 'gauge', 'path': 'network.time_connected', 'modifier': 'time_elapsed'},
         {'type': 'gauge', 'path': 'network.connected_to', 'modifier': 'total'},
-        {'type': 'gauge', 'path': 'process.time_started', 'modifier': 'timestamp'},
+        {'type': 'gauge', 'path': 'process.time_started', 'modifier': 'time_elapsed'},
     ],
 )
 

@@ -13,16 +13,15 @@ init_config:
 #
 instances:
 
-  -
-    ## @param host - string - optional - default: localhost
+    ## @param host - string - required
     ## Host of the RethinkDB server.
     #
-    # host: localhost
+  - host: localhost
 
-    ## @param port - integer - optional - default: 28015
+    ## @param port - integer - required
     ## Driver port of the RethinkDB server.
     #
-    # port: 28015
+    port: 28015
 
     ## @param username - string - optional
     ## The user account to connect as.

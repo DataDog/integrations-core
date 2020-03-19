@@ -253,9 +253,5 @@ def _read_example_logs_config(check_root):
 def temporarily_stop_service(service, compose_file, check=True):
     # type: (str, str, bool) -> Iterator[None]
     run_command(['docker-compose', '-f', compose_file, 'stop', service], capture=False, check=check)
-    try:
-        yield
-    except Exception:
-        raise
-    else:
-        run_command(['docker-compose', '-f', compose_file, 'start', service], capture=False, check=check)
+    yield
+    run_command(['docker-compose', '-f', compose_file, 'start', service], capture=False, check=check)
