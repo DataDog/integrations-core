@@ -6,7 +6,6 @@ from typing import Callable, Iterator, Sequence
 import rethinkdb
 
 from .config import Config
-from .connections import Connection
 from .exceptions import CouldNotConnect
 from .metrics.config import collect_config_totals
 from .metrics.current_issues import collect_current_issues
@@ -47,15 +46,15 @@ class Backend(object):
             collect_table_status,
             collect_system_jobs,
             collect_current_issues,
-        )  # type: Sequence[Callable[[QueryEngine, Connection], Iterator[Metric]]]
+        )  # type: Sequence[Callable[[QueryEngine, rethinkdb.net.Connection], Iterator[Metric]]]
 
     def connect(self, config):
-        # type: (Config) -> Connection
+        # type: (Config) -> rethinkdb.net.Connection
         """
         Establish a connection with the configured RethinkDB server.
         """
         try:
-            conn = self._r.connect(
+            return self._r.connect(
                 host=config.host,
                 port=config.port,
                 user=config.user,
@@ -65,10 +64,8 @@ class Backend(object):
         except rethinkdb.errors.ReqlDriverError as exc:
             raise CouldNotConnect(exc)
 
-        return Connection(conn)
-
     def collect_metrics(self, conn):
-        # type: (Connection) -> Iterator[Metric]
+        # type: (rethinkdb.net.Connection) -> Iterator[Metric]
         """
         Collect metrics from the RethinkDB cluster we are connected to.
         """
@@ -77,7 +74,7 @@ class Backend(object):
                 yield metric
 
     def collect_connected_server_version(self, conn):
-        # type: (Connection) -> str
+        # type: (rethinkdb.net.Connection) -> str
         """
         Return the version of RethinkDB run by the server at the other end of the connection, in SemVer format.
         """

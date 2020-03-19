@@ -4,7 +4,8 @@
 import logging
 from typing import Iterator, cast
 
-from ..connections import Connection
+import rethinkdb
+
 from ..queries import QueryEngine
 from ..types import BackfillInfo, IndexConstructionInfo, Metric
 
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def collect_system_jobs(engine, conn):
-    # type: (QueryEngine, Connection) -> Iterator[Metric]
+    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
     """
     Collect metrics about system jobs.
 

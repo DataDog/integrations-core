@@ -4,7 +4,8 @@
 import logging
 from typing import Iterator
 
-from ..connections import Connection
+import rethinkdb
+
 from ..queries import QueryEngine
 from ..types import Metric
 
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def collect_config_totals(engine, conn):
-    # type: (QueryEngine, Connection) -> Iterator[Metric]
+    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
     """
     Collect aggregated metrics about cluster configuration.
 

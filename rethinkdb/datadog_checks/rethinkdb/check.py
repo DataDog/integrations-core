@@ -4,11 +4,12 @@
 from contextlib import contextmanager
 from typing import Any, Callable, Iterator, cast
 
+import rethinkdb
+
 from datadog_checks.base import AgentCheck
 
 from .backends import Backend
 from .config import Config
-from .connections import Connection
 from .exceptions import CouldNotConnect, VersionCollectionFailed
 from .types import Instance, Metric
 
@@ -28,7 +29,7 @@ class RethinkDBCheck(AgentCheck):
 
     @contextmanager
     def connect_submitting_service_checks(self):
-        # type: () -> Iterator[Connection]
+        # type: () -> Iterator[rethinkdb.net.Connection]
         tags = [
             'host:{}'.format(self.config.host),
             'port:{}'.format(self.config.port),
@@ -64,7 +65,7 @@ class RethinkDBCheck(AgentCheck):
         submit(name, value, tags=tags)
 
     def submit_version_metadata(self, conn):
-        # type: (Connection) -> None
+        # type: (rethinkdb.net.Connection) -> None
         try:
             version = self.backend.collect_connected_server_version(conn)
         except VersionCollectionFailed as exc:

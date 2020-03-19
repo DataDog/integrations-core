@@ -6,9 +6,10 @@ import logging
 import time
 from typing import Iterator
 
+import rethinkdb
+
 from datadog_checks.base import AgentCheck
 
-from ..connections import Connection
 from ..queries import QueryEngine
 from ..types import Metric
 
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def collect_table_status(engine, conn):
-    # type: (QueryEngine, Connection) -> Iterator[Metric]
+    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
     """
     Collect metrics about table statuses.
 
@@ -86,7 +87,7 @@ def collect_table_status(engine, conn):
 
 
 def collect_server_status(engine, conn):
-    # type: (QueryEngine, Connection) -> Iterator[Metric]
+    # type: (QueryEngine, rethinkdb.net.Connection) -> Iterator[Metric]
     """
     Collect metrics about server statuses.
 

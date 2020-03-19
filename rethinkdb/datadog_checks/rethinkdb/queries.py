@@ -5,10 +5,10 @@ from typing import Any, Iterator, Mapping, Tuple
 
 import rethinkdb
 
-from .connections import Connection, ConnectionServer
 from .types import (
     ClusterStats,
     ConfigTotals,
+    ConnectionServer,
     CurrentIssuesTotals,
     Job,
     JoinRow,
@@ -41,7 +41,7 @@ class QueryEngine(object):
         self._system = r.db('rethinkdb')
 
     def query_connected_server_version_string(self, conn):
-        # type: (Connection) -> str
+        # type: (rethinkdb.net.Connection) -> str
         """
         Return the raw string of the RethinkDB version used by the server at the other end of the connection.
         """
@@ -49,12 +49,12 @@ class QueryEngine(object):
 
         # See: https://rethinkdb.com/docs/system-tables/#server_status
         server = conn.server()  # type: ConnectionServer
-        server_status = conn.run(system.table('server_status').get(server['id']))  # type: ServerStatus
+        server_status = system.table('server_status').get(server['id']).run(conn)  # type: ServerStatus
 
         return server_status['process']['version']
 
     def query_config_totals(self, conn):
-        # type: (Connection) -> ConfigTotals
+        # type: (rethinkdb.net.Connection) -> ConfigTotals
         r = self._r
         system = self._system
 
@@ -65,15 +65,16 @@ class QueryEngine(object):
         # Need to `.run()` these separately because ReQL does not support putting grouped data in raw expressions yet.
         # See: https://github.com/rethinkdb/rethinkdb/issues/2067
 
-        tables_per_database = conn.run(table_config.group('db').count())  # type: Mapping[str, int]
+        tables_per_database = table_config.group('db').count().run(conn)  # type: Mapping[str, int]
 
-        secondary_indexes_per_table = conn.run(
+        secondary_indexes_per_table = (
             # NOTE: this is an example of a map-reduce query.
             # See: https://rethinkdb.com/docs/map-reduce/#a-more-complex-example
             table_config.pluck('name', 'indexes')
             .concat_map(lambda row: row['indexes'].map(lambda _: {'table': row['name']}))
             .group('table')
             .count()
+            .run(conn)
         )  # type: Mapping[str, int]
 
         totals = {
@@ -83,17 +84,17 @@ class QueryEngine(object):
             'secondary_indexes_per_table': secondary_indexes_per_table,
         }  # type: ConfigTotals  # Enforce keys to match.
 
-        return conn.run(r.expr(totals))
+        return r.expr(totals).run(conn)
 
     def query_cluster_stats(self, conn):
-        # type: (Connection) -> ClusterStats
+        # type: (rethinkdb.net.Connection) -> ClusterStats
         """
         Retrieve statistics about the cluster.
         """
-        return conn.run(self._system.table('stats').get(['cluster']))
+        return self._system.table('stats').get(['cluster']).run(conn)
 
     def query_servers_with_stats(self, conn):
-        # type: (Connection) -> Iterator[Tuple[Server, ServerStats]]
+        # type: (rethinkdb.net.Connection) -> Iterator[Tuple[Server, ServerStats]]
         """
         Retrieve each server in the cluster along with its statistics.
         """
@@ -107,7 +108,7 @@ class QueryEngine(object):
         stats = system.table('stats')
         server_config = system.table('server_config')
 
-        rows = conn.run(stats.filter(is_server_stats_row).eq_join(server_id, server_config))  # type: Iterator[JoinRow]
+        rows = stats.filter(is_server_stats_row).eq_join(server_id, server_config).run(conn)  # type: Iterator[JoinRow]
 
         for row in rows:
             server_stats = row['left']  # type: ServerStats
@@ -115,7 +116,7 @@ class QueryEngine(object):
             yield server, server_stats
 
     def query_tables_with_stats(self, conn):
-        # type: (Connection) -> Iterator[Tuple[Table, TableStats]]
+        # type: (rethinkdb.net.Connection) -> Iterator[Tuple[Table, TableStats]]
         """
         Retrieve each table in the cluster along with its statistics.
         """
@@ -129,7 +130,7 @@ class QueryEngine(object):
         stats = system.table('stats')
         table_config = system.table('table_config')
 
-        rows = conn.run(stats.filter(is_table_stats_row).eq_join(table_id, table_config))  # type: Iterator[JoinRow]
+        rows = stats.filter(is_table_stats_row).eq_join(table_id, table_config).run(conn)  # type: Iterator[JoinRow]
 
         for row in rows:
             table_stats = row['left']  # type: TableStats
@@ -137,7 +138,7 @@ class QueryEngine(object):
             yield table, table_stats
 
     def query_replicas_with_stats(self, conn):
-        # type: (Connection) -> Iterator[Tuple[Table, Server, ShardReplica, ReplicaStats]]
+        # type: (rethinkdb.net.Connection) -> Iterator[Tuple[Table, Server, ShardReplica, ReplicaStats]]
         """
         Retrieve each replica (table/server pair) in the cluster along with its statistics.
         """
@@ -193,7 +194,7 @@ class QueryEngine(object):
             )
         )
 
-        rows = conn.run(query)  # type: Iterator[Mapping[str, Any]]
+        rows = query.run(conn)  # type: Iterator[Mapping[str, Any]]
 
         for row in rows:
             table = row['table']  # type: Table
@@ -203,28 +204,28 @@ class QueryEngine(object):
             yield table, server, replica, replica_stats
 
     def query_table_status(self, conn):
-        # type: (Connection) -> Iterator[TableStatus]
+        # type: (rethinkdb.net.Connection) -> Iterator[TableStatus]
         """
         Retrieve the status of each table in the cluster.
         """
-        return conn.run(self._system.table('table_status'))
+        return self._system.table('table_status').run(conn)
 
     def query_server_status(self, conn):
-        # type: (Connection) -> Iterator[ServerStatus]
+        # type: (rethinkdb.net.Connection) -> Iterator[ServerStatus]
         """
         Retrieve the status of each server in the cluster.
         """
-        return conn.run(self._system.table('server_status'))
+        return self._system.table('server_status').run(conn)
 
     def query_system_jobs(self, conn):
-        # type: (Connection) -> Iterator[Job]
+        # type: (rethinkdb.net.Connection) -> Iterator[Job]
         """
         Retrieve all the currently running system jobs.
         """
-        return conn.run(self._system.table('jobs'))
+        return self._system.table('jobs').run(conn)
 
     def query_current_issues_totals(self, conn):
-        # type: (Connection) -> CurrentIssuesTotals
+        # type: (rethinkdb.net.Connection) -> CurrentIssuesTotals
         """
         Retrieve all the problems detected with the cluster.
         """
@@ -236,9 +237,9 @@ class QueryEngine(object):
         # NOTE: Need to `.run()` these separately because ReQL does not support putting grouped data in raw
         # expressions yet. See: https://github.com/rethinkdb/rethinkdb/issues/2067
 
-        issues_by_type = conn.run(current_issues.group('type').count())  # type: Mapping[str, int]
-        critical_issues_by_type = conn.run(
-            current_issues.filter(r.row['critical']).group('type').count()
+        issues_by_type = current_issues.group('type').count().run(conn)  # type: Mapping[str, int]
+        critical_issues_by_type = (
+            current_issues.filter(r.row['critical']).group('type').count().run(conn)
         )  # type: Mapping[str, int]
 
         return {

@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-from typing import Iterator, List
+from typing import Any, Iterator, List
 
 import pytest
 
@@ -10,7 +10,6 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.rethinkdb import RethinkDBCheck
 from datadog_checks.rethinkdb.backends import Backend
-from datadog_checks.rethinkdb.connections import Connection
 from datadog_checks.rethinkdb.exceptions import CouldNotConnect, VersionCollectionFailed
 from datadog_checks.rethinkdb.types import Instance, Metric
 
@@ -166,7 +165,7 @@ def test_connected_but_check_failed_unexpectedly(aggregator, instance):
 
     class MockBackend(Backend):
         def collect_metrics(self, conn):
-            # type: (Connection) -> Iterator[Metric]
+            # type: (Any) -> Iterator[Metric]
             yield {'type': 'gauge', 'name': 'rethinkdb.some.metric', 'value': 42, 'tags': []}
             raise Failure
 
@@ -215,7 +214,7 @@ def test_metadata_version_malformed(instance, aggregator, datadog_agent, malform
 
     class MockBackend(Backend):
         def collect_connected_server_version(self, conn):
-            # type: (Connection) -> str
+            # type: (Any) -> str
             return malformed_version_string
 
     check_id = 'test'
@@ -239,7 +238,7 @@ def test_metadata_version_failure(instance, aggregator, datadog_agent):
 
     class MockBackend(Backend):
         def collect_connected_server_version(self, conn):
-            # type: (Connection) -> str
+            # type: (Any) -> str
             raise VersionCollectionFailed('Oops!')
 
     check_id = 'test'
