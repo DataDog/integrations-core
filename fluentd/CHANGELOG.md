@@ -1,5 +1,10 @@
 # CHANGELOG - fluentd
 
+## 1.6.0 / 2020-03-18
+
+* [Added] Support Fluentd config API endpoint for metadata collection. See [#6062](https://github.com/DataDog/integrations-core/pull/6062).
+* [Added] Allow disabling metadata collection in fluentd. See [#6061](https://github.com/DataDog/integrations-core/pull/6061).
+
 ## 1.5.0 / 2019-11-26
 
 * [Added] Collect version metadata for Fluentd. See [#5057](https://github.com/DataDog/integrations-core/pull/5057).

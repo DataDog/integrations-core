@@ -2,51 +2,30 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import os
-
 import pytest
 
-from datadog_checks import snmp
 from datadog_checks.snmp import SnmpCheck
 
 from . import common
-from .utils import mock_profiles_root
 
 pytestmark = pytest.mark.usefixtures("dd_environment")
 
 
-@pytest.fixture(autouse=True)
-def host_profiles_root():
-    # By default, we resolve profiles relative to the `snmp.d` directory.
-    # But this directory is only created by the Agent when the integration is installed, so we have
-    # to replace it with the path within the Python package.
-    package_profiles_root = os.path.join(os.path.dirname(snmp.__file__), 'data', 'profiles')
-
-    with mock_profiles_root(package_profiles_root):
-        yield
-
-
-def run_profile_check(profile, recording_name, profile_name, set_profile=False):
+def run_profile_check(recording_name):
     """
-    Run a single check with the given `profile`, with the provided
-    `recording_name` used as `community_string` by the docker SNMP endpoint.
-
-    If `set_profile` is True, we don't rely on `sysObjectID` matching and pass the profile explicitly.
+    Run a single check with the provided `recording_name` used as
+    `community_string` by the docker SNMP endpoint.
     """
     instance = common.generate_instance_config([])
 
     instance['community_string'] = recording_name
     instance['enforce_mib_constraints'] = False
-    if set_profile:
-        instance['profile'] = profile_name
-
-    init_config = {'profiles': {profile_name: {'definition_file': profile}}}
-    check = SnmpCheck('snmp', init_config, [instance])
+    check = SnmpCheck('snmp', {}, [instance])
     check.check(instance)
 
 
 def test_f5(aggregator):
-    run_profile_check('f5-big-ip.yaml', 'f5', 'f5-big-ip')
+    run_profile_check('f5')
 
     gauges = [
         'sysStatMemoryTotal',
@@ -135,7 +114,7 @@ def test_f5(aggregator):
 
 
 def test_router(aggregator):
-    run_profile_check('generic-router.yaml', 'network', 'router')
+    run_profile_check('network')
 
     tcp_counts = [
         'tcpActiveOpens',
@@ -225,7 +204,7 @@ def test_router(aggregator):
         'ipIfStatsHCInBcastPkts',
         'ipIfStatsHCOutBcastPkts',
     ]
-    common_tags = common.CHECK_TAGS + ['snmp_profile:router']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:generic-router']
     for interface in ['eth0', 'eth1']:
         tags = ['interface:{}'.format(interface)] + common_tags
         for metric in if_counts:
@@ -262,7 +241,14 @@ def test_router(aggregator):
 
 def test_f5_router(aggregator):
     # Use the generic profile against the f5 device
-    run_profile_check('generic-router.yaml', 'f5', 'router')
+    instance = common.generate_instance_config([])
+
+    instance['community_string'] = 'f5'
+    instance['enforce_mib_constraints'] = False
+
+    init_config = {'profiles': {'router': {'definition_file': 'generic-router.yaml'}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+    check.check(instance)
 
     if_counts = [
         'ifInErrors',
@@ -314,7 +300,7 @@ def test_f5_router(aggregator):
 
 
 def test_3850(aggregator):
-    run_profile_check('cisco-3850.yaml', '3850', 'cisco-3850')
+    run_profile_check('3850')
 
     tcp_counts = [
         'tcpActiveOpens',
@@ -398,9 +384,9 @@ def test_3850(aggregator):
 
 
 def test_meraki_cloud_controller(aggregator):
-    run_profile_check('meraki-cloud-controller.yaml', 'meraki-cloud-controller', 'meraki')
+    run_profile_check('meraki-cloud-controller')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:meraki']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:meraki-cloud-controller']
     dev_metrics = ['devStatus', 'devClientCount']
     dev_tags = ['device:Gymnasium', 'product:MR16-HW', 'network:L_NETWORK'] + common_tags
     for metric in dev_metrics:
@@ -416,7 +402,7 @@ def test_meraki_cloud_controller(aggregator):
 
 
 def test_idrac(aggregator):
-    run_profile_check('idrac.yaml', 'idrac', 'idrac')
+    run_profile_check('idrac')
 
     if_counts = [
         'adapterRxPackets',
@@ -478,7 +464,7 @@ def test_idrac(aggregator):
 
 
 def test_cisco_nexus(aggregator):
-    run_profile_check('cisco-nexus.yaml', 'cisco_nexus', 'cisco-nexus')
+    run_profile_check('cisco_nexus')
 
     tcp_counts = [
         'tcpActiveOpens',
@@ -567,7 +553,7 @@ def test_cisco_nexus(aggregator):
 
 
 def test_dell_poweredge(aggregator):
-    run_profile_check('dell-poweredge.yaml', 'dell-poweredge', 'dell-poweredge')
+    run_profile_check('dell-poweredge')
 
     # Poweredge
     sys_mem_gauges = [
@@ -699,7 +685,7 @@ def test_dell_poweredge(aggregator):
 
 
 def test_hp_ilo4(aggregator):
-    run_profile_check('hp-ilo4.yaml', 'hp_ilo4', 'hp-ilo4')
+    run_profile_check('hp_ilo4')
 
     status_gauges = [
         'cpqHeCritLogCondition',
@@ -806,7 +792,7 @@ def test_hp_ilo4(aggregator):
 
 
 def test_proliant(aggregator):
-    run_profile_check('hpe-proliant.yaml', 'hpe-proliant', 'hpe-proliant')
+    run_profile_check('hpe-proliant')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:hpe-proliant']
 
@@ -893,7 +879,15 @@ def test_proliant(aggregator):
 
 
 def test_generic_host_resources(aggregator):
-    run_profile_check('_generic-host-resources.yaml', 'generic_host', 'generic', set_profile=True)
+    instance = common.generate_instance_config([])
+
+    instance['community_string'] = 'generic_host'
+    instance['enforce_mib_constraints'] = False
+    instance['profile'] = 'generic'
+
+    init_config = {'profiles': {'generic': {'definition_file': '_generic-host-resources.yaml'}}}
+    check = SnmpCheck('snmp', init_config, [instance])
+    check.check(instance)
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:generic']
 
@@ -917,7 +911,7 @@ def test_generic_host_resources(aggregator):
 
 
 def test_palo_alto(aggregator):
-    run_profile_check('palo-alto.yaml', 'pan-common', 'palo-alto')
+    run_profile_check('pan-common')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:palo-alto']
 
@@ -947,7 +941,7 @@ def test_palo_alto(aggregator):
 
 
 def test_cisco_asa_5525(aggregator):
-    run_profile_check('cisco-asa-5525.yaml', 'cisco_asa_5525', 'cisco-asa-5525')
+    run_profile_check('cisco_asa_5525')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-asa-5525', 'snmp_host:kept']
 
@@ -1027,7 +1021,7 @@ def test_cisco_asa_5525(aggregator):
 
 
 def test_checkpoint_firewall(aggregator):
-    run_profile_check('checkpoint-firewall.yaml', 'checkpoint-firewall', 'checkpoint-firewall')
+    run_profile_check('checkpoint-firewall')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:checkpoint-firewall']
 
