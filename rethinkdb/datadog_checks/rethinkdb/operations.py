@@ -51,7 +51,7 @@ def get_connected_server_version_string(conn):
 def get_config_summary(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Tuple[ConfigSummary, List[str]]]
     """
-    Return a summary of the cluster configuration in terms of servers, databases and tables.
+    Return a summary of the cluster configuration.
     """
     table_config = system.table('table_config')
     server_config = system.table('server_config')
@@ -271,7 +271,7 @@ def get_system_jobs(conn):
 def get_current_issues_summary(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Tuple[CurrentIssuesSummary, List[str]]]
     """
-    Retrieve data about problems detected within the cluster.
+    Retrieve a summary of problems detected within the cluster.
     """
     current_issues = system.table('current_issues').pluck('type', 'critical')
 
