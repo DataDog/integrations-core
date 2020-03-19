@@ -63,7 +63,7 @@ class Fluentd(AgentCheck):
     {"plugins":[{"type": "monitor_agent", ...}, {"type": "forward", ...}]}
     """
 
-    def check(self, instance):
+    def check(self, _):
         try:
             r = self.http.get(self.url)
             r.raise_for_status()
