@@ -4,9 +4,9 @@
   "manifest_version": "1.0.0",
   "name": "sidekiq",
   "metric_prefix": "sidekiq.",
-  "metric_to_check": "",
+  "metric_to_check": "sidekiq.jobs.count",
   "creates_events": false,
-  "short_description": "",
+  "short_description": "Track metrics about your Sidekiq jobs, queues, and batches.",
   "guid": "b4bc604c-73a5-4bd8-8dfe-3f80fc19976b",
   "support": "core",
   "supported_os": [
