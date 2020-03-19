@@ -27,6 +27,7 @@ def setup_module(module):
 
     # Create a main folder
     os.makedirs(str(temp_dir) + "/main/subfolder")
+    os.makedirs(str(temp_dir) + "/many/subfolder")
 
     # Create 10 files in main
     for i in range(0, 10):
@@ -39,6 +40,30 @@ def setup_module(module):
     # Create 5 subfiles in main
     for i in range(0, 5):
         open(temp_dir + "/main/subfolder" + '/file_' + str(i), 'a').close()
+
+    # Create 50 files in many
+    for i in range(0, 50):
+        if i < 5:
+            # First 5 files in list match `*.log`
+            open(temp_dir + "/many" + '/aalog_' + str(i) + '.log', 'a').close()
+        elif i >= 45:
+            # Last 5 files in list match `*.log`
+            open(temp_dir + "/many" + '/zzlog_' + str(i) + '.log', 'a').close()
+        else:
+            # Remaining 40 files in between match `file_*`
+            open(temp_dir + "/many" + '/file_' + str(i), 'a').close()
+
+    # Create 15 subfiles in many
+    for i in range(0, 15):
+        if i < 2:
+            # First 2 files in list match `*.log`
+            open(temp_dir + "/many/subfolder" + '/aalog_' + str(i) + '.log', 'a').close()
+        elif i >= 12:
+            # Last 3 files in list match `*.log`
+            open(temp_dir + "/many/subfolder" + '/zzlog_' + str(i) + '.log', 'a').close()
+        else:
+            # Remaining 10 files in between match `file_*`
+            open(temp_dir + "/many/subfolder" + '/file_' + str(i), 'a').close()
 
 
 def tearDown_module(module):
@@ -94,6 +119,45 @@ def test_directory_metrics(aggregator):
     aggregator.metrics_asserted_pct == 100.0
 
 
+def test_directory_metrics_many(aggregator):
+    """
+    Directory metric coverage
+    """
+    config_stubs = common.get_config_stubs(temp_dir + "/many")
+    countonly_stubs = common.get_config_stubs(temp_dir + "/many")
+
+    # Try all the configurations in countonly mode as well
+    for stub in countonly_stubs:
+        stub['countonly'] = True
+
+    for config in config_stubs:
+        aggregator.reset()
+        dir_check.check(config)
+        dirtagname = config.get('dirtagname', "name")
+        name = config.get('name', temp_dir + "/many")
+        dir_tags = [dirtagname + ":%s" % name, 'optional:tag1']
+
+        # 'recursive' and 'pattern' parameters
+        if config.get('pattern') == "*.log":
+            # 10 '*.log' files in 'temp_dir/many'
+            if config.get('recursive'):
+                aggregator.assert_metric("system.disk.directory.files", tags=dir_tags, count=1, value=15)
+            else:
+                aggregator.assert_metric("system.disk.directory.files", tags=dir_tags, count=1, value=10)
+        elif config.get('pattern') == "file_*":
+            # 40 'file_*' files in 'temp_dir/many'
+            aggregator.assert_metric("system.disk.directory.files", tags=dir_tags, count=1, value=40)
+        elif config.get('recursive'):
+            # 50 files in 'temp_dir/many' + 15 files in 'temp_dir/many/subfolder'
+            aggregator.assert_metric("system.disk.directory.files", tags=dir_tags, count=1, value=65)
+        else:
+            # 50 files in 'temp_dir/many'
+            aggregator.assert_metric("system.disk.directory.files", tags=dir_tags, count=1, value=50)
+
+    # Raises when coverage < 100%
+    aggregator.metrics_asserted_pct == 100.0
+
+
 def test_file_metrics(aggregator):
     """
     File metric coverage
@@ -128,6 +192,65 @@ def test_file_metrics(aggregator):
                     for i in range(0, 5):
                         file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/main/subfolder" + "/file_" + str(i))]
                         aggregator.assert_metric(mname, tags=dir_tags + file_tag, count=1)
+
+        # Common metrics
+        for mname in common.COMMON_METRICS:
+            aggregator.assert_metric(mname, tags=dir_tags, count=1)
+
+        # Raises when coverage < 100%
+        assert aggregator.metrics_asserted_pct == 100.0
+
+
+def test_file_metrics_many(aggregator):
+    """
+    File metric coverage
+    """
+    config_stubs = common.get_config_stubs(temp_dir + "/many", filegauges=True)
+
+    for config in config_stubs:
+        aggregator.reset()
+        dir_check.check(config)
+        dirtagname = config.get('dirtagname', "name")
+        name = config.get('name', temp_dir + "/many")
+        filetagname = config.get('filetagname', "filename")
+        dir_tags = [dirtagname + ":%s" % name, 'optional:tag1']
+
+        # File metrics
+        for mname in common.FILE_METRICS:
+            if config.get('pattern') == "*.log":
+                # 10 '*.log' files in 'temp_dir/many'
+                for i in range(0, 50):
+                    if i < 5:
+                        file_tag = [filetagname + ":%s" % os.path.normpath("{}/many/aalog_{}.log".format(temp_dir, i))]
+                    elif i >= 45:
+
+                        file_tag = [filetagname + ":%s" % os.path.normpath("{}/many/zzlog_{}.log".format(temp_dir, i))]
+                    else:
+                        continue
+                    aggregator.assert_metric(mname, tags=dir_tags + file_tag, count=1)
+
+            if config.get('pattern') == "file_*":
+                # file_* in 'temp_dir/many' > 20 therefore no `filename`
+                aggregator.assert_metric(mname, tags=dir_tags, count=40)
+
+            if not config.get('pattern'):
+                # Files in 'temp_dir/many/'
+                file_tag = []
+                if config.get('recursive'):
+
+                    for i in range(0, 15):
+                        # Files in 'temp_dir/many/subfolder' < 20 therefore all gets `filename`
+                        if i < 2:
+                            file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/many/subfolder" + "/aalog_" + str(i) + '.log')]
+                        elif i >= 12:
+                            file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/many/subfolder" + "/zzlog_" + str(i) + '.log')]
+                        else:
+                            file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/many/subfolder" + "/file_" + str(i))]
+                        aggregator.assert_metric(mname, tags=dir_tags + file_tag, count=1)
+                    # Remaining files in 'temp_dir/many/` > 20 therefore no `filename`
+                    aggregator.assert_metric(mname, tags=dir_tags, count=50)
+                else:
+                    aggregator.assert_metric(mname, tags=dir_tags + file_tag, count=50)
 
         # Common metrics
         for mname in common.COMMON_METRICS:
