@@ -75,6 +75,7 @@ markdown_extensions:
       toc_depth: "2-6"
   # Extra
   - mkautodoc:
+  - mkdocs-click:
   - pymdownx.arithmatex:
   - pymdownx.betterem:
       smart_enable: all
