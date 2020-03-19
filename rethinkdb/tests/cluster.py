@@ -81,7 +81,8 @@ def temporarily_disconnect_server(server):
     # type: (str) -> Iterator[None]
     """
     Gracefully disconnect a server from the cluster.
-    Ensures that the stable is left in a stable state inside and after exiting the context.
+
+    Ensures that the cluster/replicas are in a stable state (not rebalancing) inside and after exiting the context.
     """
     service = 'rethinkdb-{}'.format(server)
     logger.debug('temporarily_disconnect_server server=%r service=%r', server, service)
