@@ -47,4 +47,4 @@ def to_timestamp(datetime):
         return datetime.timestamp()  # type: ignore  # (mypy runs in `--py2` mode.)
     except AttributeError:  # pragma: no cover
         # Python 2.
-        return time.mktime(datetime.now().timetuple())
+        return time.mktime(datetime.timetuple())
