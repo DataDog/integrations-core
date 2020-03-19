@@ -3,7 +3,7 @@ import copy
 import mock
 import pytest
 
-from datadog_checks.base import aerospike
+from datadog_checks import aerospike
 
 from . import common
 
