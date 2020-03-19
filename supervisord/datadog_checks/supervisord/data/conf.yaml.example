@@ -13,7 +13,7 @@ instances:
     # host: localhost
 
     ## @param port - integer - optional - default: 9001
-    ## A TCP port value on which supervisor is listening for HTTP/XML-RPC requests.
+    ## The TCP port value that supervisor is listening on for HTTP/XML-RPC requests.
     ##
     ## See: http://supervisord.org/configuration.html#inet-http-server-section-settings
     #
