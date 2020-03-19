@@ -10,30 +10,25 @@ from ...console import CONTEXT_SETTINGS, abort, echo_success
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Lookup Github username by email.')
 @click.argument('email')
-def github_user(email):
+def email2ghuser(email):
     """Given an email, attempt to find a Github username
        associated with the email.
 
-    `$ ddev meta scripts github-user example@datadoghq.com`
+    `$ ddev meta scripts email2ghuser example@datadoghq.com`
     """
-    usernames = []
-    GITHUB_ENDPOINT = 'https://api.github.com/search/users'
 
     try:
-        response = requests.get(f'{GITHUB_ENDPOINT}?q={email}',)
+        response = requests.get(f'https://api.github.com/search/users?q={email}',)
         response.raise_for_status()
         content = response.json()
 
         if content.get('total_count') == 0:
             abort(f'No username found for email {email}')
 
-        for item in content.get('items'):
-            username = item.get('login')
-            usernames.append(username)
+        user = content.get('items')[0]
+        username = user.get('login')
 
-        usernames_formatted = ' \n'.join(usernames)
-
-        echo_success(f'Username(s) associated with email {email}: \n{usernames_formatted}')
+        echo_success(f'Found username "{username}" associated with email {email}')
 
     except Exception as e:
         abort(str(e))
