@@ -2,12 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-from typing import Iterator, cast
+from typing import Iterator
 
 import rethinkdb
 
 from .. import operations
-from ..types import BackfillInfo, IndexConstructionInfo, Metric
+from ..types import Metric
 
 logger = logging.getLogger(__name__)
 
@@ -30,60 +30,30 @@ def collect_system_jobs(conn):
         tags = ['server:{}'.format(server) for server in servers]
 
         if job['type'] == 'index_construction':
-            # NOTE: Using `cast()` is required until tagged unions are released in mypy stable. Until then, avoid using
-            # 'info' as a variable name in all cases (workaround for https://github.com/python/mypy/issues/6232).
-            # See: https://mypy.readthedocs.io/en/latest/literal_types.html#tagged-unions
-            index_construction_info = cast(IndexConstructionInfo, job['info'])
-            database = index_construction_info['db']
-            table = index_construction_info['table']
-            index = index_construction_info['index']
-            progress = index_construction_info['progress']
-
-            index_construction_tags = tags + [
-                'database:{}'.format(database),
-                'table:{}'.format(table),
-                'index:{}'.format(index),
+            job_tags = tags + [
+                'job_type:{}'.format(job['type']),
+                'database:{}'.format(job['info']['db']),
+                'table:{}'.format(job['info']['table']),
+                'index:{}'.format(job['info']['index']),
             ]
-
             yield {
                 'type': 'gauge',
-                'name': 'rethinkdb.jobs.index_construction.duration',
+                'name': 'rethinkdb.jobs.duration',
                 'value': duration,
-                'tags': index_construction_tags,
-            }
-
-            yield {
-                'type': 'gauge',
-                'name': 'rethinkdb.jobs.index_construction.progress',
-                'value': progress,
-                'tags': index_construction_tags,
+                'tags': job_tags,
             }
 
         elif job['type'] == 'backfill':
-            backfill_info = cast(BackfillInfo, job['info'])
-            database = backfill_info['db']
-            destination_server = backfill_info['destination_server']
-            source_server = backfill_info['source_server']
-            table = backfill_info['table']
-            progress = backfill_info['progress']
-
-            backfill_tags = tags + [
-                'database:{}'.format(database),
-                'destination_server:{}'.format(destination_server),
-                'source_server:{}'.format(source_server),
-                'table:{}'.format(table),
+            job_tags = tags + [
+                'job_type:{}'.format(job['type']),
+                'database:{}'.format(job['info']['db']),
+                'destination_server:{}'.format(job['info']['destination_server']),
+                'source_server:{}'.format(job['info']['source_server']),
+                'table:{}'.format(job['info']['table']),
             ]
-
             yield {
                 'type': 'gauge',
-                'name': 'rethinkdb.jobs.backfill.duration',
+                'name': 'rethinkdb.jobs.duration',
                 'value': duration,
-                'tags': backfill_tags,
-            }
-
-            yield {
-                'type': 'gauge',
-                'name': 'rethinkdb.jobs.backfill.progress',
-                'value': progress,
-                'tags': backfill_tags,
+                'tags': job_tags,
             }

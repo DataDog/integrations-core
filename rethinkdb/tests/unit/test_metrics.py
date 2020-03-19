@@ -47,7 +47,7 @@ def test_jobs_metrics():
         # See: https://rethinkdb.com/docs/system-jobs/#index_construction
         'type': 'index_construction',
         'id': ('index_construction', 'abcd1234'),
-        'duration_sec': 0.42,
+        'duration_sec': 0.24,
         'info': {'db': 'doghouse', 'table': 'heroes', 'index': 'appearances_count', 'progress': 42},
         'servers': ['server1'],
     }  # type: IndexConstructionJob
@@ -64,11 +64,12 @@ def test_jobs_metrics():
     assert metrics == [
         {
             'type': 'gauge',
-            'name': 'rethinkdb.jobs.backfill.duration',
+            'name': 'rethinkdb.jobs.duration',
             'value': 0.42,
             'tags': [
                 'server:server0',
                 'server:server2',
+                'job_type:backfill',
                 'database:doghouse',
                 'destination_server:server2',
                 'source_server:server0',
@@ -77,27 +78,14 @@ def test_jobs_metrics():
         },
         {
             'type': 'gauge',
-            'name': 'rethinkdb.jobs.backfill.progress',
-            'value': 42,
+            'name': 'rethinkdb.jobs.duration',
+            'value': 0.24,
             'tags': [
-                'server:server0',
-                'server:server2',
+                'server:server1',
+                'job_type:index_construction',
                 'database:doghouse',
-                'destination_server:server2',
-                'source_server:server0',
                 'table:heroes',
+                'index:appearances_count',
             ],
-        },
-        {
-            'type': 'gauge',
-            'name': 'rethinkdb.jobs.index_construction.duration',
-            'value': 0.42,
-            'tags': ['server:server1', 'database:doghouse', 'table:heroes', 'index:appearances_count'],
-        },
-        {
-            'type': 'gauge',
-            'name': 'rethinkdb.jobs.index_construction.progress',
-            'value': 42,
-            'tags': ['server:server1', 'database:doghouse', 'table:heroes', 'index:appearances_count'],
         },
     ]

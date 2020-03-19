@@ -10,7 +10,7 @@ from datadog_checks.base import AgentCheck
 
 from . import operations
 from .config import Config
-from .metrics.config import collect_config_totals
+from .metrics.config_summary import collect_config_summary
 from .metrics.current_issues import collect_current_issues
 from .metrics.statistics import (
     collect_cluster_statistics,
@@ -36,7 +36,7 @@ class RethinkDBCheck(AgentCheck):
         super(RethinkDBCheck, self).__init__(*args, **kwargs)
         self.config = Config(cast(Instance, self.instance))
         self.collect_funcs = (
-            collect_config_totals,
+            collect_config_summary,
             collect_cluster_statistics,
             collect_server_statistics,
             collect_table_statistics,

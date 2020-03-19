@@ -35,35 +35,35 @@ def collect_table_status(conn):
 
         yield {
             'type': 'service_check',
-            'name': 'rethinkdb.table_status.ready_for_outdated_reads',
+            'name': 'rethinkdb.table_status.status.ready_for_outdated_reads',
             'value': AgentCheck.OK if table_status['status']['ready_for_outdated_reads'] else AgentCheck.WARNING,
             'tags': tags,
         }
 
         yield {
             'type': 'service_check',
-            'name': 'rethinkdb.table_status.ready_for_reads',
+            'name': 'rethinkdb.table_status.status.ready_for_reads',
             'value': AgentCheck.OK if table_status['status']['ready_for_reads'] else AgentCheck.WARNING,
             'tags': tags,
         }
 
         yield {
             'type': 'service_check',
-            'name': 'rethinkdb.table_status.ready_for_writes',
+            'name': 'rethinkdb.table_status.status.ready_for_writes',
             'value': AgentCheck.OK if table_status['status']['ready_for_writes'] else AgentCheck.WARNING,
             'tags': tags,
         }
 
         yield {
             'type': 'service_check',
-            'name': 'rethinkdb.table_status.all_replicas_ready',
+            'name': 'rethinkdb.table_status.status.all_replicas_ready',
             'value': AgentCheck.OK if table_status['status']['all_replicas_ready'] else AgentCheck.WARNING,
             'tags': tags,
         }
 
         yield {
             'type': 'gauge',
-            'name': 'rethinkdb.table_status.shards.total',
+            'name': 'rethinkdb.table_status.shards',
             'value': len(table_status['shards']),
             'tags': tags,
         }
@@ -73,14 +73,14 @@ def collect_table_status(conn):
 
             yield {
                 'type': 'gauge',
-                'name': 'rethinkdb.table_status.shards.replicas.total',
+                'name': 'rethinkdb.table_status.shards.replicas',
                 'value': len(shard['replicas']),
                 'tags': shard_tags,
             }
 
             yield {
                 'type': 'gauge',
-                'name': 'rethinkdb.table_status.shards.replicas.primary.total',
+                'name': 'rethinkdb.table_status.shards.primary_replicas',
                 'value': len(shard['primary_replicas']),
                 'tags': shard_tags,
             }
@@ -113,18 +113,10 @@ def collect_server_status(conn):
 
         yield {
             'type': 'gauge',
-            'name': 'rethinkdb.server_status.network.connected_to.total',
+            'name': 'rethinkdb.server_status.network.connected_to',
             'value': len([other for other, connected in network['connected_to'].items() if connected]),
             'tags': tags,
         }
-
-        yield {
-            'type': 'gauge',
-            'name': 'rethinkdb.server_status.network.connected_to.pending.total',
-            'value': len([other for other, connected in network['connected_to'].items() if not connected]),
-            'tags': tags,
-        }
-
         yield {
             'type': 'gauge',
             'name': 'rethinkdb.server_status.process.time_started',

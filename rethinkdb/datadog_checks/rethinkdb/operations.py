@@ -13,9 +13,9 @@ import rethinkdb
 
 from .types import (
     ClusterStats,
-    ConfigTotals,
+    ConfigSummary,
     ConnectionServer,
-    CurrentIssuesTotals,
+    CurrentIssuesSummary,
     Job,
     JoinRow,
     ReplicaStats,
@@ -48,8 +48,8 @@ def query_connected_server_version_string(conn):
     return server_status['process']['version']
 
 
-def query_config_totals(conn):
-    # type: (rethinkdb.net.Connection) -> ConfigTotals
+def query_config_summary(conn):
+    # type: (rethinkdb.net.Connection) -> ConfigSummary
     """
     Return a summary of the cluster configuration.
     """
@@ -77,7 +77,7 @@ def query_config_totals(conn):
         'databases': db_config.count(),
         'tables_per_database': tables_per_database,
         'secondary_indexes_per_table': secondary_indexes_per_table,
-    }  # type: ConfigTotals  # Enforce keys to match.
+    }  # type: ConfigSummary  # Enforce keys to match.
 
     return r.expr(totals).run(conn)
 
@@ -216,8 +216,8 @@ def query_system_jobs(conn):
     return system.table('jobs').run(conn)
 
 
-def query_current_issues_totals(conn):
-    # type: (rethinkdb.net.Connection) -> CurrentIssuesTotals
+def query_current_issues_summary(conn):
+    # type: (rethinkdb.net.Connection) -> CurrentIssuesSummary
     """
     Retrieve all the problems detected with the cluster.
     """
@@ -232,6 +232,6 @@ def query_current_issues_totals(conn):
     )  # type: Mapping[str, int]
 
     return {
-        'issues_by_type': issues_by_type,
-        'critical_issues_by_type': critical_issues_by_type,
+        'issues': issues_by_type,
+        'critical_issues': critical_issues_by_type,
     }

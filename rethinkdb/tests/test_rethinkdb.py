@@ -125,18 +125,9 @@ def test_check_with_disconnected_server(aggregator, instance, server_with_data):
 
     table_status_tags = TAGS + ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
 
-    aggregator.assert_service_check(
-        'rethinkdb.table_status.ready_for_outdated_reads', RethinkDBCheck.OK, count=1, tags=table_status_tags
-    )
-    aggregator.assert_service_check(
-        'rethinkdb.table_status.ready_for_reads', RethinkDBCheck.WARNING, count=1, tags=table_status_tags
-    )
-    aggregator.assert_service_check(
-        'rethinkdb.table_status.ready_for_writes', RethinkDBCheck.WARNING, count=1, tags=table_status_tags
-    )
-    aggregator.assert_service_check(
-        'rethinkdb.table_status.all_replicas_ready', RethinkDBCheck.WARNING, count=1, tags=table_status_tags
-    )
+    for service_check in TABLE_STATUS_SERVICE_CHECKS:
+        status = RethinkDBCheck.OK if service_check.endswith('ready_for_outdated_reads') else RethinkDBCheck.WARNING
+        aggregator.assert_service_check(service_check, status, count=1, tags=table_status_tags)
 
 
 @pytest.mark.integration

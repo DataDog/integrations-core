@@ -12,48 +12,48 @@ from ..types import Metric
 logger = logging.getLogger(__name__)
 
 
-def collect_config_totals(conn):
+def collect_config_summary(conn):
     # type: (rethinkdb.net.Connection) -> Iterator[Metric]
     """
     Collect aggregated metrics about cluster configuration.
 
     See: https://rethinkdb.com/docs/system-tables/#configuration-tables
     """
-    logger.debug('collect_config_totals')
+    logger.debug('collect_config_summary')
 
-    totals = operations.query_config_totals(conn)
-    logger.debug('config_totals totals=%r', totals)
+    summary = operations.query_config_summary(conn)
+    logger.debug('config_summary %r', summary)
 
     yield {
         'type': 'gauge',
-        'name': 'rethinkdb.server.total',
-        'value': totals['servers'],
+        'name': 'rethinkdb.config.servers',
+        'value': summary['servers'],
         'tags': [],
     }
 
     yield {
         'type': 'gauge',
-        'name': 'rethinkdb.database.total',
-        'value': totals['databases'],
+        'name': 'rethinkdb.config.databases',
+        'value': summary['databases'],
         'tags': [],
     }
 
-    for database, total in totals['tables_per_database'].items():
+    for database, num_tables in summary['tables_per_database'].items():
         tags = ['database:{}'.format(database)]
 
         yield {
             'type': 'gauge',
-            'name': 'rethinkdb.database.table.total',
-            'value': total,
+            'name': 'rethinkdb.config.tables_per_database',
+            'value': num_tables,
             'tags': tags,
         }
 
-    for table, total in totals['secondary_indexes_per_table'].items():
+    for table, num_indexes in summary['secondary_indexes_per_table'].items():
         tags = ['table:{}'.format(table)]
 
         yield {
             'type': 'gauge',
-            'name': 'rethinkdb.table.secondary_index.total',
-            'value': total,
+            'name': 'rethinkdb.config.secondary_indexes_per_table',
+            'value': num_indexes,
             'tags': tags,
         }

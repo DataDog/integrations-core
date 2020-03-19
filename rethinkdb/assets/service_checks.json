@@ -21,7 +21,7 @@
             "database",
             "table"
         ],
-        "check": "rethinkdb.table_status.ready_for_outdated_reads",
+        "check": "rethinkdb.table_status.status.ready_for_outdated_reads",
         "statuses": [
             "ok",
             "warning"
@@ -36,7 +36,7 @@
             "database",
             "table"
         ],
-        "check": "rethinkdb.table_status.ready_for_reads",
+        "check": "rethinkdb.table_status.status.ready_for_reads",
         "statuses": [
             "ok",
             "warning"
@@ -51,7 +51,7 @@
             "database",
             "table"
         ],
-        "check": "rethinkdb.table_status.ready_for_writes",
+        "check": "rethinkdb.table_status.status.ready_for_writes",
         "statuses": [
             "ok",
             "warning"
@@ -66,7 +66,7 @@
             "database",
             "table"
         ],
-        "check": "rethinkdb.table_status.all_replicas_ready",
+        "check": "rethinkdb.table_status.status.all_replicas_ready",
         "statuses": [
             "ok",
             "warning"

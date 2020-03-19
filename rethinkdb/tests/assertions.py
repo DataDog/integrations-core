@@ -7,7 +7,7 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 
 from .common import (
     CLUSTER_STATISTICS_METRICS,
-    CONFIG_TOTALS_METRICS,
+    CONFIG_METRICS,
     CURRENT_ISSUE_TYPES_SUBMITTED_IF_DISCONNECTED_SERVERS,
     CURRENT_ISSUES_METRICS,
     DATABASE,
@@ -33,7 +33,7 @@ def assert_metrics(aggregator, disconnected_servers=None):
     if disconnected_servers is None:
         disconnected_servers = set()
 
-    _assert_config_totals_metrics(aggregator, disconnected_servers=disconnected_servers)
+    _assert_config_metrics(aggregator, disconnected_servers=disconnected_servers)
     _assert_statistics_metrics(aggregator, disconnected_servers=disconnected_servers)
     _assert_table_status_metrics(aggregator)
     _assert_server_status_metrics(aggregator, disconnected_servers=disconnected_servers)
@@ -44,9 +44,9 @@ def assert_metrics(aggregator, disconnected_servers=None):
     # test without introducing flakiness.
 
 
-def _assert_config_totals_metrics(aggregator, disconnected_servers):
+def _assert_config_metrics(aggregator, disconnected_servers):
     # type: (AggregatorStub, Set[ServerName]) -> None
-    for metric, typ, value, tags in CONFIG_TOTALS_METRICS:
+    for metric, typ, value, tags in CONFIG_METRICS:
         if callable(value):
             value = value(disconnected_servers)
         aggregator.assert_metric(metric, metric_type=typ, count=1, tags=TAGS + tags, value=value)
