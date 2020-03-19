@@ -6,7 +6,6 @@ from typing import Callable, Iterator, Sequence
 import rethinkdb
 
 from .config import Config
-from .exceptions import CouldNotConnect
 from .metrics.config import collect_config_totals
 from .metrics.current_issues import collect_current_issues
 from .metrics.statistics import (
@@ -61,8 +60,8 @@ class Backend(object):
                 password=config.password,
                 ssl={'ca_certs': config.tls_ca_cert} if config.tls_ca_cert is not None else None,
             )
-        except rethinkdb.errors.ReqlDriverError as exc:
-            raise CouldNotConnect(exc)
+        except rethinkdb.errors.ReqlDriverError:
+            raise  # Failed to establish connection (catch and re-raise for explicitness).
 
     def collect_metrics(self, conn):
         # type: (rethinkdb.net.Connection) -> Iterator[Metric]

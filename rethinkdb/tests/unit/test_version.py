@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.rethinkdb.exceptions import VersionCollectionFailed
 from datadog_checks.rethinkdb.version import parse_version
 
 from ..common import MALFORMED_VERSION_STRING_PARAMS
@@ -29,5 +28,5 @@ def test_parse_version(version_string, expected_version):
 @pytest.mark.parametrize('version_string', MALFORMED_VERSION_STRING_PARAMS)
 def test_parse_malformed_version(version_string):
     # type: (str) -> None
-    with pytest.raises(VersionCollectionFailed):
+    with pytest.raises(ValueError):
         parse_version(version_string)

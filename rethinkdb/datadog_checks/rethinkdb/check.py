@@ -10,7 +10,6 @@ from datadog_checks.base import AgentCheck
 
 from .backends import Backend
 from .config import Config
-from .exceptions import CouldNotConnect, VersionCollectionFailed
 from .types import Instance, Metric
 
 SERVICE_CHECK_CONNECT = 'rethinkdb.can_connect'
@@ -39,7 +38,7 @@ class RethinkDBCheck(AgentCheck):
         try:
             with self.backend.connect(self.config) as conn:
                 yield conn
-        except CouldNotConnect as exc:
+        except rethinkdb.errors.ReqlDriverError as exc:
             message = 'Could not connect to RethinkDB server: {!r}'.format(exc)
             self.log.error(message)
             self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, tags=tags, message=message)
@@ -68,7 +67,7 @@ class RethinkDBCheck(AgentCheck):
         # type: (rethinkdb.net.Connection) -> None
         try:
             version = self.backend.collect_connected_server_version(conn)
-        except VersionCollectionFailed as exc:
+        except ValueError as exc:
             self.log.error(exc)
         else:
             self.set_metadata('version', version)

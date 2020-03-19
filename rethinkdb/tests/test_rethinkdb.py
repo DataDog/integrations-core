@@ -5,12 +5,12 @@ import copy
 from typing import Any, Iterator, List
 
 import pytest
+import rethinkdb
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.rethinkdb import RethinkDBCheck
 from datadog_checks.rethinkdb.backends import Backend
-from datadog_checks.rethinkdb.exceptions import CouldNotConnect, VersionCollectionFailed
 from datadog_checks.rethinkdb.types import Instance, Metric
 
 from .assertions import assert_metrics
@@ -149,7 +149,7 @@ def test_cannot_connect_unknown_host(aggregator, instance):
 
     check = RethinkDBCheck('rethinkdb', {}, [instance])
 
-    with pytest.raises(CouldNotConnect):
+    with pytest.raises(rethinkdb.errors.ReqlDriverError):
         check.check(instance)
 
     tags = TAGS + _get_connect_service_check_tags(instance)
@@ -239,7 +239,7 @@ def test_metadata_version_failure(instance, aggregator, datadog_agent):
     class MockBackend(Backend):
         def collect_connected_server_version(self, conn):
             # type: (Any) -> str
-            raise VersionCollectionFailed('Oops!')
+            raise ValueError('Oops!')
 
     check_id = 'test'
 
