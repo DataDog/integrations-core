@@ -48,24 +48,24 @@ No additional installation is needed on your server.
        mappings:
          - match: "sidekiq.sidekiq.*"
            name: "sidekiq.*"
-         - match: "sidekiq.*.perform.avg"
-           name: "sidekiq.perform.avg"
+         - match: "sidekiq.jobs.*.perform.avg"
+           name: "sidekiq.jobs.perform.avg"
            tags:
              worker: "$1"
-        - match: "sidekiq.*.perform.count"
-           name: "sidekiq.perform.count"
+         - match: "sidekiq.jobs.*.perform.count"
+           name: "sidekiq.jobs.perform.count"
            tags:
              worker: "$1"
-        - match: "sidekiq.*.perform.max"
-           name: "sidekiq.perform.max"
+         - match: "sidekiq.jobs.*.perform.max"
+           name: "sidekiq.jobs.perform.max"
            tags:
              worker: "$1"
-        - match: "sidekiq.*.perform.median"
-           name: "sidekiq.perform.median"
+         - match: "sidekiq.jobs.*.perform.median"
+           name: "sidekiq.jobs.perform.median"
            tags:
              worker: "$1"
-        - match: "sidekiq.*.perform.95percentile"
-           name: "sidekiq.perform.95percentile"
+         - match: "sidekiq.jobs.*.perform.95percentile"
+           name: "sidekiq.jobs.perform.95percentile"
            tags:
              worker: "$1"
 
