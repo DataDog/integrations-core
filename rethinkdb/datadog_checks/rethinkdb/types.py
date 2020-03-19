@@ -28,8 +28,8 @@ Server = TypedDict('Server', {'id': str, 'name': str, 'cache_size_mb': str, 'tag
 
 Table = TypedDict('Table', {'id': str, 'name': str, 'db': str})
 
-ConfigTotals = TypedDict(
-    'ConfigTotals',
+ConfigSummary = TypedDict(
+    'ConfigSummary',
     {
         'servers': int,
         'databases': int,
@@ -177,8 +177,8 @@ Job = Union[IndexConstructionJob, BackfillJob]
 
 # System current issues.
 
-CurrentIssuesTotals = TypedDict(
-    'CurrentIssuesTotals', {'issues_by_type': Mapping[str, int], 'critical_issues_by_type': Mapping[str, int]},
+CurrentIssuesSummary = TypedDict(
+    'CurrentIssuesSummary', {'issues': Mapping[str, int], 'critical_issues': Mapping[str, int]},
 )
 
 

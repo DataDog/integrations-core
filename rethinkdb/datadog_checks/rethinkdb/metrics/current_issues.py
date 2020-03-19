@@ -21,21 +21,21 @@ def collect_current_issues(conn):
     """
     logger.debug('collect_current_issues')
 
-    totals = operations.query_current_issues_totals(conn)
-    logger.debug('current_issues totals=%r', totals)
+    summary = operations.query_current_issues_summary(conn)
+    logger.debug('current_issues %r', summary)
 
-    for issue_type, total in totals['issues_by_type'].items():
+    for issue_type, total in summary['issues'].items():
         yield {
             'type': 'gauge',
-            'name': 'rethinkdb.current_issues.total',
+            'name': 'rethinkdb.current_issues.issues',
             'value': total,
             'tags': ['issue_type:{}'.format(issue_type)],
         }
 
-    for issue_type, total in totals['critical_issues_by_type'].items():
+    for issue_type, total in summary['critical_issues'].items():
         yield {
             'type': 'gauge',
-            'name': 'rethinkdb.current_issues.critical.total',
+            'name': 'rethinkdb.current_issues.critical_issues',
             'value': total,
             'tags': ['issue_type:{}'.format(issue_type)],
         }
