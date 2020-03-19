@@ -108,7 +108,7 @@ class DirectoryCheck(AgentCheck):
         get_length = len
 
         for root, dirs, files in walker:
-            matched_files = list()
+            matched_files = []
             adjust_max_filegauge = False
 
             if exclude_dirs_pattern is not None:
