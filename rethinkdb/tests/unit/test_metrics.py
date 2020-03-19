@@ -21,6 +21,13 @@ def test_jobs_metrics():
     Verify jobs metrics submitted by RethinkDB are processed correctly.
 
     We provide unit tests for these metrics because testing them in a live environment is tricky.
+
+    For example:
+    * Backfill jobs can only be seen by us when large amounts of data is rebalanced between servers, e.g.
+    when a new server is added to the cluster, or an existing server is shut down.
+    * Index construction jobs can only be seen by us when a secondary index is added to a relatively large table.
+    * Query jobs can only be seen by us when an external client issues queries to the cluster.
+    * Etc.
     """
 
     mock_query_job_row = {
