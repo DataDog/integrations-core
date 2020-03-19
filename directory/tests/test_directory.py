@@ -25,20 +25,20 @@ def setup_module(module):
     """
     module.temp_dir = tempfile.mkdtemp()
 
-    # Create 10 files
+    # Create a main folder
+    os.makedirs(str(temp_dir) + "/main/subfolder")
+
+    # Create 10 files in main
     for i in range(0, 10):
-        open(temp_dir + "/file_" + str(i), 'a').close()
+        open(temp_dir + "/main/file_" + str(i), 'a').close()
 
-    # Add 2 '.log' files
-    open(temp_dir + "/log_1.log", 'a').close()
-    open(temp_dir + "/log_2.log", 'a').close()
+    # Add 2 '.log' files in main
+    open(temp_dir + "/main/log_1.log", 'a').close()
+    open(temp_dir + "/main/log_2.log", 'a').close()
 
-    # Create a subfolder and generate files into it
-    os.makedirs(str(temp_dir) + "/subfolder")
-
-    # Create 5 subfiles
+    # Create 5 subfiles in main
     for i in range(0, 5):
-        open(temp_dir + "/subfolder" + '/file_' + str(i), 'a').close()
+        open(temp_dir + "/main/subfolder" + '/file_' + str(i), 'a').close()
 
 
 def tearDown_module(module):
@@ -62,8 +62,8 @@ def test_directory_metrics(aggregator):
     """
     Directory metric coverage
     """
-    config_stubs = common.get_config_stubs(temp_dir)
-    countonly_stubs = common.get_config_stubs(temp_dir)
+    config_stubs = common.get_config_stubs(temp_dir + "/main")
+    countonly_stubs = common.get_config_stubs(temp_dir + "/main")
 
     # Try all the configurations in countonly mode as well
     for stub in countonly_stubs:
@@ -73,7 +73,7 @@ def test_directory_metrics(aggregator):
         aggregator.reset()
         dir_check.check(config)
         dirtagname = config.get('dirtagname', "name")
-        name = config.get('name', temp_dir)
+        name = config.get('name', temp_dir+ "/main")
         dir_tags = [dirtagname + ":%s" % name, 'optional:tag1']
 
         # 'recursive' and 'pattern' parameters
@@ -98,13 +98,13 @@ def test_file_metrics(aggregator):
     """
     File metric coverage
     """
-    config_stubs = common.get_config_stubs(temp_dir, filegauges=True)
+    config_stubs = common.get_config_stubs(temp_dir + "/main", filegauges=True)
 
     for config in config_stubs:
         aggregator.reset()
         dir_check.check(config)
         dirtagname = config.get('dirtagname', "name")
-        name = config.get('name', temp_dir)
+        name = config.get('name', temp_dir + "/main")
         filetagname = config.get('filetagname', "filename")
         dir_tags = [dirtagname + ":%s" % name, 'optional:tag1']
 
@@ -113,20 +113,20 @@ def test_file_metrics(aggregator):
             if config.get('pattern') != "file_*":
                 # 2 '*.log' files in 'temp_dir'
                 for i in range(1, 3):
-                    file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/log_" + str(i) + ".log")]
+                    file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/main/log_" + str(i) + ".log")]
                     aggregator.assert_metric(mname, tags=dir_tags + file_tag, count=1)
 
             if config.get('pattern') != "*.log":
                 # Files in 'temp_dir'
                 for i in range(0, 10):
-                    file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/file_" + str(i))]
+                    file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/main/file_" + str(i))]
                     aggregator.assert_metric(mname, tags=dir_tags + file_tag, count=1)
 
             if not config.get('pattern'):
                 # Files in 'temp_dir/subfolder'
                 if config.get('recursive'):
                     for i in range(0, 5):
-                        file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/subfolder" + "/file_" + str(i))]
+                        file_tag = [filetagname + ":%s" % os.path.normpath(temp_dir + "/main/subfolder" + "/file_" + str(i))]
                         aggregator.assert_metric(mname, tags=dir_tags + file_tag, count=1)
 
         # Common metrics
