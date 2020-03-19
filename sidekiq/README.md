@@ -38,8 +38,40 @@ No additional installation is needed on your server.
 
   See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information and [Datadog Ruby][7] documentation for further configuration options.
 
+3. Update the [Datadog Agent main configuration file][13] `datadog.yaml` by adding the following configs:
 
-3. [Restart the Agent][8].
+   ```yaml
+   # dogstatsd_mapper_cache_size: 1000  # default to 1000
+   dogstatsd_mapper_profiles:
+     - name: sidekiq
+       prefix: "sidekiq."
+       mappings:
+         - match: "sidekiq.sidekiq.*"
+           name: "sidekiq.*"
+         - match: "sidekiq.*.perform.avg"
+           name: "sidekiq.perform.avg"
+           tags:
+             worker: "$1"
+        - match: "sidekiq.*.perform.count"
+           name: "sidekiq.perform.count"
+           tags:
+             worker: "$1"
+        - match: "sidekiq.*.perform.max"
+           name: "sidekiq.perform.max"
+           tags:
+             worker: "$1"
+        - match: "sidekiq.*.perform.median"
+           name: "sidekiq.perform.median"
+           tags:
+             worker: "$1"
+        - match: "sidekiq.*.perform.95percentile"
+           name: "sidekiq.perform.95percentile"
+           tags:
+             worker: "$1"
+
+    ```
+
+4. [Restart the Agent][8].
 
 ### Validation
 
@@ -99,3 +131,4 @@ Need help? Contact [Datadog support][1].
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/mperham/sidekiq/wiki/Ent-Historical-Metrics#custom
 [12]: https://github.com/DataDog/integrations-core/blob/master/sidekiq/metadata.csv
+[13]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
