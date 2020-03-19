@@ -4,9 +4,7 @@
         "integration": "RethinkDB",
         "groups": [
             "host",
-            "port",
-            "server",
-            "proxy"
+            "port"
         ],
         "check": "rethinkdb.can_connect",
         "statuses": [

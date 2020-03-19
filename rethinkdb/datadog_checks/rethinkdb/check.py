@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import contextmanager
-from typing import Any, Callable, Iterator, List, cast
+from typing import Any, Callable, Iterator, cast
 
 from datadog_checks.base import AgentCheck
 
@@ -29,25 +29,15 @@ class RethinkDBCheck(AgentCheck):
     @contextmanager
     def connect_submitting_service_checks(self):
         # type: () -> Iterator[Connection]
-        tags = []  # type: List[str]
+        tags = [
+            'host:{}'.format(self.config.host),
+            'port:{}'.format(self.config.port),
+        ]
         tags.extend(self.config.tags)
 
         try:
             with self.backend.connect(self.config) as conn:
-                server = conn.server()
-
-                connection_tags = [
-                    'host:{}'.format(conn.host),
-                    'port:{}'.format(conn.port),
-                    'server:{}'.format(server['name']),
-                    'proxy:{}'.format('true' if server['proxy'] else 'false'),
-                ]
-
-                self.log.debug('connected connection_tags=%r', connection_tags)
-                tags.extend(connection_tags)
-
                 yield conn
-
         except CouldNotConnect as exc:
             message = 'Could not connect to RethinkDB server: {!r}'.format(exc)
             self.log.error(message)

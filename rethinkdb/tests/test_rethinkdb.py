@@ -20,7 +20,6 @@ from .common import (
     DATABASE,
     HEROES_TABLE,
     HEROES_TABLE_SERVERS,
-    HOST,
     MALFORMED_VERSION_STRING_PARAMS,
     RAW_VERSION,
     SERVER_PORTS,
@@ -32,13 +31,11 @@ from .common import (
 from .types import ServerName
 
 
-def _get_connect_service_check_tags(server='server0'):
-    # type: (ServerName) -> List[str]
+def _get_connect_service_check_tags(instance):
+    # type: (Instance) -> List[str]
     return [
-        'host:{}'.format(HOST),
-        'port:{}'.format(SERVER_PORTS[server]),
-        'server:{}'.format(server),
-        'proxy:false',
+        'host:{}'.format(instance['host']),
+        'port:{}'.format(instance['port']),
     ]
 
 
@@ -52,7 +49,7 @@ def test_check(aggregator, instance):
     assert_metrics(aggregator)
     aggregator.assert_all_metrics_covered()
 
-    service_check_tags = TAGS + _get_connect_service_check_tags()
+    service_check_tags = TAGS + _get_connect_service_check_tags(instance)
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK, count=1, tags=service_check_tags)
 
     for service_check in TABLE_STATUS_SERVICE_CHECKS:
@@ -82,7 +79,7 @@ def test_check_without_credentials_uses_admin(aggregator, instance):
     assert_metrics(aggregator)
     aggregator.assert_all_metrics_covered()
 
-    service_check_tags = TAGS + _get_connect_service_check_tags()
+    service_check_tags = TAGS + _get_connect_service_check_tags(instance)
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK, count=1, tags=service_check_tags)
 
 
@@ -102,7 +99,7 @@ def test_check_connect_to_server_with_tls(aggregator, instance):
     assert_metrics(aggregator)
     aggregator.assert_all_metrics_covered()
 
-    service_check_tags = TAGS + _get_connect_service_check_tags(server=server)
+    service_check_tags = TAGS + _get_connect_service_check_tags(instance)
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK, count=1, tags=service_check_tags)
 
 
@@ -125,7 +122,7 @@ def test_check_with_disconnected_server(aggregator, instance, server_with_data):
     assert_metrics(aggregator, disconnected_servers=disconnected_servers)
     aggregator.assert_all_metrics_covered()
 
-    service_check_tags = TAGS + _get_connect_service_check_tags()
+    service_check_tags = TAGS + _get_connect_service_check_tags(instance)
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK, count=1, tags=service_check_tags)
 
     table_status_tags = TAGS + ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
@@ -147,7 +144,8 @@ def test_cannot_connect_unknown_host(aggregator, instance):
     with pytest.raises(CouldNotConnect):
         check.check(instance)
 
-    aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.CRITICAL, count=1, tags=TAGS)
+    tags = TAGS + _get_connect_service_check_tags(instance)
+    aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.CRITICAL, count=1, tags=tags)
 
 
 @pytest.mark.integration
@@ -169,7 +167,7 @@ def test_connected_but_check_failed_unexpectedly(aggregator, instance):
     with pytest.raises(Failure):
         check.check(instance)
 
-    service_check_tags = TAGS + _get_connect_service_check_tags()
+    service_check_tags = TAGS + _get_connect_service_check_tags(instance)
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.CRITICAL, count=1, tags=service_check_tags)
 
 
