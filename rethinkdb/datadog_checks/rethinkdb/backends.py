@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Callable, Iterator, List
+from typing import Callable, Iterator, Sequence
 
 import rethinkdb
 
@@ -25,50 +25,11 @@ from .version import parse_version
 
 class Backend(object):
     """
-    Base interface for high-level operations performed during a RethinkDB check.
+    An interface for high-level operations performed during a RethinkDB check.
 
-    Abstracts any interfaces specific to the `rethinkdb` client library or our default metrics collection strategy
-    to facilitate swapping for alternative implementations (e.g. for testing purposes).
+    Abstracts away any interfaces specific to the `rethinkdb` client library, while providing a default
+    implementation that uses that library.
     """
-
-    def connect(self, config):
-        # type: (Config) -> Connection
-        """
-        Establish a connection with the configured RethinkDB server.
-        """
-        raise NotImplementedError  # pragma: no cover
-
-    def collect_metrics(self, conn):
-        # type: (Connection) -> Iterator[Metric]
-        """
-        Collect metrics from the RethinkDB cluster we are connected to.
-        """
-        raise NotImplementedError  # pragma: no cover
-
-    def collect_connected_server_version(self, conn):
-        # type: (Connection) -> str
-        """
-        Return the version of RethinkDB run by the server at the other end of the connection, in SemVer format.
-        """
-        raise NotImplementedError  # pragma: no cover
-
-
-class DefaultBackend(Backend):
-    """
-    A backend that uses the RethinkDB Python client library and the built-in metrics collection functions.
-    """
-
-    collect_funcs = [
-        collect_config_totals,
-        collect_cluster_statistics,
-        collect_server_statistics,
-        collect_table_statistics,
-        collect_replica_statistics,
-        collect_server_status,
-        collect_table_status,
-        collect_system_jobs,
-        collect_current_issues,
-    ]  # type: List[Callable[[QueryEngine, Connection], Iterator[Metric]]]
 
     def __init__(self):
         # type: () -> None
@@ -76,9 +37,23 @@ class DefaultBackend(Backend):
         # advertised ReQL usage. For example, see: https://rethinkdb.com/docs/guide/python/
         self._r = rethinkdb.r
         self._query_engine = QueryEngine(r=self._r)
+        self._collect_funcs = (
+            collect_config_totals,
+            collect_cluster_statistics,
+            collect_server_statistics,
+            collect_table_statistics,
+            collect_replica_statistics,
+            collect_server_status,
+            collect_table_status,
+            collect_system_jobs,
+            collect_current_issues,
+        )  # type: Sequence[Callable[[QueryEngine, Connection], Iterator[Metric]]]
 
     def connect(self, config):
         # type: (Config) -> Connection
+        """
+        Establish a connection with the configured RethinkDB server.
+        """
         try:
             conn = self._r.connect(
                 host=config.host,
@@ -94,11 +69,17 @@ class DefaultBackend(Backend):
 
     def collect_metrics(self, conn):
         # type: (Connection) -> Iterator[Metric]
-        for collect in self.collect_funcs:
+        """
+        Collect metrics from the RethinkDB cluster we are connected to.
+        """
+        for collect in self._collect_funcs:
             for metric in collect(self._query_engine, conn):
                 yield metric
 
     def collect_connected_server_version(self, conn):
         # type: (Connection) -> str
+        """
+        Return the version of RethinkDB run by the server at the other end of the connection, in SemVer format.
+        """
         version_string = self._query_engine.query_connected_server_version_string(conn)
         return parse_version(version_string)

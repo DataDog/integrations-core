@@ -7,7 +7,7 @@ from typing import Any, Callable, Iterator, List, cast
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.types import ServiceCheckStatus
 
-from .backends import Backend, DefaultBackend
+from .backends import Backend
 from .config import Config
 from .connections import Connection
 from .exceptions import CouldNotConnect, VersionCollectionFailed
@@ -25,7 +25,7 @@ class RethinkDBCheck(AgentCheck):
         # type: (*Any, **Any) -> None
         super(RethinkDBCheck, self).__init__(*args, **kwargs)
         self.config = Config(cast(Instance, self.instance))
-        self.backend = DefaultBackend()  # type: Backend
+        self.backend = Backend()
 
     @contextmanager
     def connect_submitting_service_checks(self):
