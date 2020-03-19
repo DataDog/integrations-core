@@ -10,8 +10,8 @@ import rethinkdb
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
 from datadog_checks.rethinkdb import RethinkDBCheck
-from datadog_checks.rethinkdb.backends import Backend
-from datadog_checks.rethinkdb.types import Instance, Metric
+from datadog_checks.rethinkdb.document_db.types import Metric
+from datadog_checks.rethinkdb.types import Instance
 
 from .assertions import assert_metrics
 from .cluster import temporarily_disconnect_server
@@ -126,18 +126,9 @@ def test_check_with_disconnected_server(aggregator, instance, server_with_data):
 
     table_status_tags = TAGS + ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
 
-    aggregator.assert_service_check(
-        'rethinkdb.table_status.ready_for_outdated_reads', RethinkDBCheck.OK, count=1, tags=table_status_tags
-    )
-    aggregator.assert_service_check(
-        'rethinkdb.table_status.ready_for_reads', RethinkDBCheck.WARNING, count=1, tags=table_status_tags
-    )
-    aggregator.assert_service_check(
-        'rethinkdb.table_status.ready_for_writes', RethinkDBCheck.WARNING, count=1, tags=table_status_tags
-    )
-    aggregator.assert_service_check(
-        'rethinkdb.table_status.all_replicas_ready', RethinkDBCheck.WARNING, count=1, tags=table_status_tags
-    )
+    for service_check in TABLE_STATUS_SERVICE_CHECKS:
+        status = RethinkDBCheck.OK if service_check.endswith('ready_for_outdated_reads') else RethinkDBCheck.WARNING
+        aggregator.assert_service_check(service_check, status, count=1, tags=table_status_tags)
 
 
 @pytest.mark.integration
@@ -163,14 +154,13 @@ def test_connected_but_check_failed_unexpectedly(aggregator, instance):
     class Failure(Exception):
         pass
 
-    class MockBackend(Backend):
-        def collect_metrics(self, conn):
+    class MockRethinkDBCheck(RethinkDBCheck):
+        def _collect_metrics(self, conn):
             # type: (Any) -> Iterator[Metric]
             yield {'type': 'gauge', 'name': 'rethinkdb.some.metric', 'value': 42, 'tags': []}
             raise Failure
 
-    check = RethinkDBCheck('rethinkdb', {}, [instance])
-    check.backend = MockBackend()
+    check = MockRethinkDBCheck('rethinkdb', {}, [instance])
 
     with pytest.raises(Failure):
         check.check(instance)
@@ -212,16 +202,15 @@ def test_metadata_version_malformed(instance, aggregator, datadog_agent, malform
     Verify that check still runs to completion if version provided by RethinkDB is malformed.
     """
 
-    class MockBackend(Backend):
-        def collect_connected_server_version(self, conn):
+    class MockRethinkDBCheck(RethinkDBCheck):
+        def _collect_connected_server_version(self, conn):
             # type: (Any) -> str
             return malformed_version_string
 
     check_id = 'test'
 
-    check = RethinkDBCheck('rethinkdb', {}, [instance])
+    check = MockRethinkDBCheck('rethinkdb', {}, [instance])
     check.check_id = check_id
-    check.backend = MockBackend()
 
     check.check(instance)
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK)
@@ -236,16 +225,15 @@ def test_metadata_version_failure(instance, aggregator, datadog_agent):
     Verify that check still runs to completion if it fails to retrieve the RethinkDB version.
     """
 
-    class MockBackend(Backend):
-        def collect_connected_server_version(self, conn):
+    class MockRethinkDBCheck(RethinkDBCheck):
+        def _collect_connected_server_version(self, conn):
             # type: (Any) -> str
             raise ValueError('Oops!')
 
     check_id = 'test'
 
-    check = RethinkDBCheck('rethinkdb', {}, [instance])
+    check = MockRethinkDBCheck('rethinkdb', {}, [instance])
     check.check_id = check_id
-    check.backend = MockBackend()
 
     check.check(instance)
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK)

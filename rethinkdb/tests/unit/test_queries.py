@@ -10,10 +10,10 @@ from datadog_checks.rethinkdb.types import BackfillJob, DiskCompactionJob, Index
 pytestmark = pytest.mark.unit
 
 
-def test_jobs_query():
+def test_jobs_metrics():
     # type: () -> None
     """
-    Verify system jobs metrics retrieved from RethinkDB are processed correctly.
+    Verify jobs metrics submitted by RethinkDB are processed correctly.
 
     We provide unit tests for these metrics because testing them in a live environment is tricky.
 
