@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Sidekiq][3] through [Dogstatsd][5]. It collects metrics through [Datadog's Dogstatsd Ruby client][4].
+This integration monitors [Sidekiq][3] through [Dogstatsd][5]. It collects metrics through [Datadog's Dogstatsd Ruby client][4].
 
 **Note** Only Sidekiq Pro (>= 3.6) or Enterprise (>= 1.1.0) users can collect metrics.
 
@@ -10,7 +10,7 @@ This check monitors [Sidekiq][3] through [Dogstatsd][5]. It collects metrics thr
 
 ### Installation
 
-The Sidekiq check is included in the [Datadog Agent][2] package.
+The Sidekiq integration is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
 ### Configuration
@@ -90,7 +90,7 @@ No additional installation is needed on your server.
 
 ### Metrics
 
-See [metadata.csv][12] for a list of metrics provided by this check. Custom metrics may be added in Sidekiq itself. Browse the [Sidekiq documentation][11] for custom metric inspiration.
+See [metadata.csv][12] for a list of metrics provided by this integration. Custom metrics may be added in Sidekiq itself. Browse the [Sidekiq documentation][11] for custom metric inspiration.
 
 ### Log Collection
 
