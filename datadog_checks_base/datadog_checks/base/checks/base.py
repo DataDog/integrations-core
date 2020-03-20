@@ -608,7 +608,7 @@ class AgentCheck(object):
         return is_affirmative(datadog_agent.get_config('enable_metadata_collection'))
 
     def set_external_tags(self, external_tags):
-        # type: (List[ExternalTagType]) -> None
+        # type: (Sequence[ExternalTagType]) -> None
         # Example of external_tags format
         # [
         #     ('hostname', {'src_name': ['test:t1']}),
