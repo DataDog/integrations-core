@@ -473,7 +473,7 @@ class MongoDb(AgentCheck):
             for metric_name, metric_value, submit_method in metric_info:
                 submit_method(metric_name, metric_value, tags=query_tags)
 
-    def check(self, instance):
+    def check(self, _):
         """
         Returns a dictionary that looks a lot like what's sent back by
         db.serverStatus()
