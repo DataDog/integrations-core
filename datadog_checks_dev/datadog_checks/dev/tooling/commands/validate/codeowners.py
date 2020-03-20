@@ -64,7 +64,9 @@ def codeowners():
             echo_failure(f"Integration {integration} has a `CODEOWNERS` entry, but the codeowner is empty.")
         elif not codeowner.startswith("@") and integration not in IGNORE_TILES:
             has_failed = True
-            echo_failure(f"Integration {integration} has a `CODEOWNERS` entry, but the codeowner is not a username or team.")
+            echo_failure(
+                f"Integration {integration} has a `CODEOWNERS` entry, but the codeowner is not a username or team."
+            )
 
     if not has_failed:
         echo_success("All integrations have codeowners.")
