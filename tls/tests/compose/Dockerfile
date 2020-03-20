@@ -1,11 +1,10 @@
-FROM alpine AS builder
+FROM alpine
 COPY ca.* /root/ca_cert/
 COPY ssl.conf /opt/ssl.conf
-RUN apk add --no-cache openssl git
+RUN apk add --no-cache openssl git build-base
 
 # Build the faketime lib, used to generate expired certificate
-RUN git clone https://github.com/wolfcw/libfaketime /libfaketime \
- && apk -U add build-base
+RUN git clone https://github.com/wolfcw/libfaketime /libfaketime
 WORKDIR /libfaketime
 RUN make \
  && make install \
