@@ -1116,3 +1116,30 @@ def test_arista(aggregator):
         aggregator.assert_metric('snmp.entPhySensorOperStatus', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_aruba(aggregator):
+    run_profile_check('aruba')
+
+    common_tags = common.CHECK_TAGS + ['snmp_profile:aruba']
+
+    for fan in [18, 28]:
+        fan_tags = common_tags + ['fan_index:{}'.format(fan)]
+        aggregator.assert_metric('snmp.sysExtFanStatus', metric_type=aggregator.GAUGE, tags=fan_tags, count=1)
+    for psu in [1, 17]:
+        psu_tags = common_tags + ['powersupply_index:{}'.format(psu)]
+        aggregator.assert_metric('snmp.sysExtPowerSupplyStatus', metric_type=aggregator.GAUGE, tags=psu_tags, count=1)
+    for proc in [11, 26]:
+        proc_tags = common_tags + ['processor_index:{}'.format(proc)]
+        aggregator.assert_metric('snmp.sysExtProcessorLoad', metric_type=aggregator.GAUGE, tags=proc_tags, count=1)
+    for mem in [3, 20]:
+        mem_tags = common_tags + ['memory_index:{}'.format(mem)]
+        aggregator.assert_metric('snmp.sysExtMemorySize', metric_type=aggregator.GAUGE, tags=mem_tags, count=1)
+        aggregator.assert_metric('snmp.sysExtMemoryUsed', metric_type=aggregator.GAUGE, tags=mem_tags, count=1)
+        aggregator.assert_metric('snmp.sysExtMemoryFree', metric_type=aggregator.GAUGE, tags=mem_tags, count=1)
+
+    aggregator.assert_metric(
+        'snmp.wlsxSysExtPacketLossPercent', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+
+    aggregator.assert_all_metrics_covered()
