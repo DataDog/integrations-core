@@ -11,12 +11,28 @@ from ..console import CONTEXT_SETTINGS, echo_failure, echo_success
 DIRECTORY_REGEX = re.compile(r"\/(.*)\/$")
 
 
+IGNORE_EXTRAS_TILES = {
+    'bluematador',
+    'bonsai',
+    'buddy',
+    'launchdarkly',
+    'concourse_ci',
+    'auth0',
+    'gremlin',
+    'lacework',
+    'rigor',
+    'rookout',
+    'squadcast',
+}
+
+
 def get_all_integrations_with_codeowners():
     """ Returns a list of all integrations that have a codeowner"""
     codeowners = get_codeowners()
 
     integrations_with_codeowners = set()
     integrations_with_only_entries = set()
+    integrations_with_email_only = set()
 
     # each valid entry looks something like:
     # /containerd/                              @DataDog/container-integrations @DataDog/agent-integrations
@@ -27,28 +43,45 @@ def get_all_integrations_with_codeowners():
         match = DIRECTORY_REGEX.match(parts[0])
         if match and match.group(1):
             integration = match.group(1)
-            if len(parts) != 2:
+            print(integration, parts[0])
+            if len(parts) < 2:
                 integrations_with_only_entries.add(integration)
             else:
-                integrations_with_codeowners.add(integration)
-    return integrations_with_codeowners, integrations_with_only_entries
+                owner = parts[1]
+                if not owner.startswith("@") or integration in IGNORE_EXTRAS_TILES:
+                    integrations_with_email_only.add(integration)
+                else:
+                    integrations_with_codeowners.add(integration)
+
+    return integrations_with_codeowners, integrations_with_email_only, integrations_with_only_entries
 
 
 @click.command(
-    'codeowners',
-    context_settings=CONTEXT_SETTINGS,
-    short_help='Validate `CODEOWNERS` file has an entry for each integration',
+    context_settings=CONTEXT_SETTINGS, short_help='Validate `CODEOWNERS` file has an entry for each integration'
 )
-def codeowners():
+@click.pass_context
+def codeowners(ctx):
     """Validate that every integration has an entry in the `CODEOWNERS` file."""
-    all_integrations_with_codeowners, integrations_with_only_entries = get_all_integrations_with_codeowners()
-    all_integrations = get_valid_integrations()
+    repo_choice = ctx.obj['repo_choice']
+    if repo_choice == 'extras':
+        IGNORE_EXTRAS_TILES
+
+    (
+        all_integrations_with_codeowners,
+        integrations_with_email_only,
+        integrations_with_only_entries,
+    ) = get_all_integrations_with_codeowners()
+
+    all_integrations = sorted(get_valid_integrations())
     has_failed = False
 
     for integration in all_integrations:
         if integration in integrations_with_only_entries:
             has_failed = True
             echo_failure(f"Integration {integration} has a `CODEOWNERS` entry, but the codeowner is empty.")
+        elif integration in integrations_with_email_only:
+            has_failed = True
+            echo_failure(f"Integration {integration} has a `CODEOWNERS` entry, but the codeowner is not a username or team.")
         elif integration not in all_integrations_with_codeowners:
             has_failed = True
             echo_failure(f"Integration {integration} does not have a valid `CODEOWNERS` entry.")
