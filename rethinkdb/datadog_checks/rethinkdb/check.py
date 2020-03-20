@@ -13,7 +13,6 @@ from .config import Config
 from .document_db import DocumentQuery
 from .document_db.types import Metric
 from .types import Instance
-from .version import parse_version
 
 
 class RethinkDBCheck(AgentCheck):
@@ -53,7 +52,7 @@ class RethinkDBCheck(AgentCheck):
                 port=config.port,
                 user=config.user,
                 password=config.password,
-                ssl={'ca_certs': config.tls_ca_cert} if config.tls_ca_cert is not None else None,
+                ssl={'ca_certs': config.tls_ca_cert} if config.tls_ca_cert is not None else {},
             ) as conn:
                 yield conn
         except rethinkdb.errors.ReqlDriverError as exc:
@@ -83,8 +82,7 @@ class RethinkDBCheck(AgentCheck):
         """
         Return the version of RethinkDB run by the server at the other end of the connection, in SemVer format.
         """
-        version_string = operations.get_connected_server_version_string(conn)
-        return parse_version(version_string)
+        return operations.get_connected_server_version(conn)
 
     def submit_metric(self, metric):
         # type: (Metric) -> None

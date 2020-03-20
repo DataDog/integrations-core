@@ -28,6 +28,7 @@ from .types import (
     TableStats,
     TableStatus,
 )
+from .version import parse_version
 
 # The usual entrypoint for building ReQL queries.
 r = rethinkdb.r
@@ -37,19 +38,15 @@ r = rethinkdb.r
 system = r.db('rethinkdb')
 
 
-QUERY_JOB_DURATION_SEC_THRESHOLD = 15
-
-
-def get_connected_server_version_string(conn, **kwargs):
+def get_connected_server_version(conn, **kwargs):
     # type: (rethinkdb.net.Connection, **Any) -> str
     """
-    Return the raw string of the RethinkDB version used by the server at the other end of the connection.
+    Return the RethinkDB version used by the server at the other end of the connection.
     """
     # See: https://rethinkdb.com/docs/system-tables/#server_status
     server = conn.server()  # type: ConnectionServer
     server_status = system.table('server_status').get(server['id']).run(conn)  # type: ServerStatus
-
-    return server_status['process']['version']
+    return parse_version(server_status['process']['version'])
 
 
 def get_config_summary(conn, **kwargs):
