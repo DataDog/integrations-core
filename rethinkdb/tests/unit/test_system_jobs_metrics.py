@@ -7,6 +7,7 @@ import mock
 import pytest
 
 from datadog_checks.rethinkdb import queries
+from datadog_checks.rethinkdb.config import Config
 from datadog_checks.rethinkdb.types import BackfillJob, DiskCompactionJob, IndexConstructionJob, QueryJob
 
 pytestmark = pytest.mark.unit
@@ -32,12 +33,20 @@ def test_jobs_metrics():
     * Etc.
     """
 
-    mock_query_job_row = {
+    mock_request_response_query_job_row = {
         'type': 'query',
         'id': ('query', 'abcd1234'),
         'duration_sec': 0.12,
         'info': {},
         'servers': ['server0'],
+    }  # type: QueryJob
+
+    mock_changefeed_query_job_row = {
+        'type': 'query',
+        'id': ('query', 'abcd1234'),
+        'duration_sec': 10,
+        'info': {},
+        'servers': ['server1'],
     }  # type: QueryJob
 
     mock_disk_compaction_row = {
@@ -72,16 +81,30 @@ def test_jobs_metrics():
         'servers': ['server1'],
     }  # type: IndexConstructionJob
 
-    mock_rows = [mock_query_job_row, mock_disk_compaction_row, mock_backfill_job_row, mock_index_construction_job_row]
+    mock_rows = [
+        mock_request_response_query_job_row,
+        mock_changefeed_query_job_row,
+        mock_disk_compaction_row,
+        mock_backfill_job_row,
+        mock_index_construction_job_row,
+    ]
 
     conn = mock.Mock()
     with mock.patch('rethinkdb.ast.RqlQuery.run') as run:
         run.return_value = mock_rows
-        metrics = list(queries.system_jobs.run(conn, logger=MockLogger('test')))
+        metrics = list(
+            queries.system_jobs.run(conn, config=Config({'min_collection_interval': 5}), logger=MockLogger('test'))
+        )
 
     assert metrics == [
-        # -- `query` job ignored --
-        # -- `disk_compaction` job ignored --
+        # short request-response `query` job ignored
+        {
+            'type': 'gauge',
+            'name': 'rethinkdb.jobs.duration_sec',
+            'value': 10,
+            'tags': ['job_type:query', 'server:server1'],
+        },
+        # `disk_compaction` job ignored
         {
             'type': 'gauge',
             'name': 'rethinkdb.jobs.duration_sec',
@@ -122,4 +145,4 @@ def test_unknown_job():
     with mock.patch('rethinkdb.ast.RqlQuery.run') as run:
         run.return_value = [mock_unknown_job_row]
         with pytest.raises(RuntimeError):
-            list(queries.system_jobs.run(conn, logger=MockLogger('test')))
+            list(queries.system_jobs.run(conn, config=Config(), logger=MockLogger('test')))

@@ -15,13 +15,17 @@ class Config(object):
     Encapsulates the validation of an `instance` dictionary while improving type information.
     """
 
-    def __init__(self, instance):
+    def __init__(self, instance=None):
         # type: (Instance) -> None
+        if instance is None:
+            instance = {}
+
         host = instance.get('host', 'localhost')
         port = instance.get('port', 28015)
         user = instance.get('username')
         password = instance.get('password')
         tls_ca_cert = instance.get('tls_ca_cert')
+        min_collection_interval = instance.get('min_collection_interval', 15)
         tags = instance.get('tags', [])
 
         if not isinstance(host, str):
@@ -33,12 +37,22 @@ class Config(object):
         if port < 0:
             raise ConfigurationError('port must be positive (got {!r})'.format(port))
 
+        try:
+            min_collection_interval = float(min_collection_interval)
+        except (ValueError, TypeError):
+            raise ConfigurationError(
+                'min_collection_interval must be convertible to a number (got {!r})'.format(
+                    type(min_collection_interval)
+                )
+            )
+
         self.host = host  # type: str
         self.port = port  # type: int
         self.user = user  # type: Optional[str]
         self.password = password  # type: Optional[str]
         self.tls_ca_cert = tls_ca_cert  # type: Optional[str]
         self.tags = tags  # type: List[str]
+        self.min_collection_interval = min_collection_interval  # type: float
 
     def __repr__(self):
         # type: () -> str

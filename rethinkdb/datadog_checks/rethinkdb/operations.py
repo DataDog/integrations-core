@@ -11,6 +11,7 @@ from typing import Any, Iterator, List, Mapping, Tuple
 
 import rethinkdb
 
+from .config import Config
 from .types import (
     ClusterStats,
     ConfigSummary,
@@ -36,8 +37,11 @@ r = rethinkdb.r
 system = r.db('rethinkdb')
 
 
-def get_connected_server_version_string(conn):
-    # type: (rethinkdb.net.Connection) -> str
+QUERY_JOB_DURATION_SEC_THRESHOLD = 15
+
+
+def get_connected_server_version_string(conn, **kwargs):
+    # type: (rethinkdb.net.Connection, **Any) -> str
     """
     Return the raw string of the RethinkDB version used by the server at the other end of the connection.
     """
@@ -48,8 +52,8 @@ def get_connected_server_version_string(conn):
     return server_status['process']['version']
 
 
-def get_config_summary(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[ConfigSummary, List[str]]]
+def get_config_summary(conn, **kwargs):
+    # type: (rethinkdb.net.Connection, **Any) -> Iterator[Tuple[ConfigSummary, List[str]]]
     """
     Return a summary of the cluster configuration.
     """
@@ -82,16 +86,16 @@ def get_config_summary(conn):
     yield r.expr(summary).run(conn), []
 
 
-def get_cluster_statistics(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[ClusterStats, List[str]]]
+def get_cluster_statistics(conn, **kwargs):
+    # type: (rethinkdb.net.Connection, **Any) -> Iterator[Tuple[ClusterStats, List[str]]]
     """
     Retrieve statistics about the cluster.
     """
     yield system.table('stats').get(['cluster']).run(conn), []
 
 
-def get_servers_statistics(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[ServerStats, List[str]]]
+def get_servers_statistics(conn, **kwargs):
+    # type: (rethinkdb.net.Connection, **Any) -> Iterator[Tuple[ServerStats, List[str]]]
     """
     Retrieve statistics about each server in the cluster.
     """
@@ -112,8 +116,8 @@ def get_servers_statistics(conn):
         yield server_stats, tags
 
 
-def get_tables_statistics(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[TableStats, List[str]]]
+def get_tables_statistics(conn, **kwargs):
+    # type: (rethinkdb.net.Connection, **Any) -> Iterator[Tuple[TableStats, List[str]]]
     """
     Retrieve statistics about each table in the cluster.
     """
@@ -133,8 +137,8 @@ def get_tables_statistics(conn):
         yield table_stats, tags
 
 
-def get_replicas_statistics(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[ReplicaStats, List[str]]]
+def get_replicas_statistics(conn, **kwargs):
+    # type: (rethinkdb.net.Connection, **Any) -> Iterator[Tuple[ReplicaStats, List[str]]]
     """
     Retrieve statistics about each replica (table/server pair) in the cluster.
     """
@@ -204,8 +208,8 @@ def get_replicas_statistics(conn):
         yield replica_stats, tags
 
 
-def get_table_statuses(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[TableStatus, List[str]]]
+def get_table_statuses(conn, **kwargs):
+    # type: (rethinkdb.net.Connection, **Any) -> Iterator[Tuple[TableStatus, List[str]]]
     """
     Retrieve the status of each table in the cluster.
     """
@@ -214,8 +218,8 @@ def get_table_statuses(conn):
         yield table_status, tags
 
 
-def get_server_statuses(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[ServerStatus, List[str]]]
+def get_server_statuses(conn, **kwargs):
+    # type: (rethinkdb.net.Connection, **Any) -> Iterator[Tuple[ServerStatus, List[str]]]
     """
     Retrieve the status of each server in the cluster.
     """
@@ -224,8 +228,8 @@ def get_server_statuses(conn):
         yield server_status, tags
 
 
-def get_system_jobs(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[Job, List[str]]]
+def get_system_jobs(conn, config, **kwargs):
+    # type: (rethinkdb.net.Connection, Config, **Any) -> Iterator[Tuple[Job, List[str]]]
     """
     Retrieve all the currently running system jobs.
     """
@@ -236,16 +240,15 @@ def get_system_jobs(conn):
         # Follow job types listed on: https://rethinkdb.com/docs/system-jobs/#document-schema
 
         if job['type'] == 'query':
-            # NOTE: Request-response queries are typically too short-lived to be captured across Agent checks.
-            # Change feed queries however are long-running, they we'd be able to capture them.
-            # See: https://rethinkdb.com/docs/system-jobs/#query
-            # TODO(before-merging): submit within a `duration_sec` threshold instead of skipping entirely.
-            continue
+            # NOTE: we can only consistently collect metrics about queries that span more than an Agent collection
+            # interval. (There will be many short-lived queries within two checks that we can't capture.)
+            # Here, this means only changefeed queries and abnormally long request-response queries will pass through.
+            if job['duration_sec'] < config.min_collection_interval:
+                continue
         elif job['type'] == 'disk_compaction':
-            # Ongoing task on each server -- no information provided (i.e. `info` is empty).
-            # See: https://rethinkdb.com/docs/system-jobs/#disk_compaction
+            # Ongoing task on each server. Duration is `null` and `info` is empty, so nothing interesting there.
             continue
-        if job['type'] == 'index_construction':
+        elif job['type'] == 'index_construction':
             tags.extend(
                 [
                     'database:{}'.format(job['info']['db']),
@@ -268,8 +271,8 @@ def get_system_jobs(conn):
         yield job, tags
 
 
-def get_current_issues_summary(conn):
-    # type: (rethinkdb.net.Connection) -> Iterator[Tuple[CurrentIssuesSummary, List[str]]]
+def get_current_issues_summary(conn, **kwargs):
+    # type: (rethinkdb.net.Connection, **Any) -> Iterator[Tuple[CurrentIssuesSummary, List[str]]]
     """
     Retrieve a summary of problems detected within the cluster.
     """

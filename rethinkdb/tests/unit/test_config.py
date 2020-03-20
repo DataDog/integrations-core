@@ -14,8 +14,7 @@ pytestmark = pytest.mark.unit
 
 def test_default_config():
     # type: () -> None
-    instance = {}  # type: Instance
-    config = Config(instance)
+    config = Config()
     assert config.host == 'localhost'
     assert config.port == 28015
     assert config.user is None
@@ -43,20 +42,26 @@ def test_config():
 
 def test_config_repr():
     # type: () -> None
-    instance = {}  # type: Instance
-    config = Config(instance)
+    config = Config()
     assert repr(config) == "Config(host='localhost', port=28015, user=None, password='', tls_ca_cert=None, tags=[])"
 
 
-@pytest.mark.parametrize('host', [42, True, object()])
-def test_invalid_host(host):
+@pytest.mark.parametrize('value', [42, True, object()])
+def test_invalid_host(value):
     # type: (Any) -> None
     with pytest.raises(ConfigurationError):
-        Config(instance={'host': host})
+        Config(instance={'host': value})
 
 
-@pytest.mark.parametrize('port', [42.42, -42, True, object()])
-def test_invalid_port(port):
+@pytest.mark.parametrize('value', [42.42, -42, True, object()])
+def test_invalid_port(value):
     # type: (Any) -> None
     with pytest.raises(ConfigurationError):
-        Config(instance={'port': port})
+        Config(instance={'port': value})
+
+
+@pytest.mark.parametrize('value', ['not-a-number', object()])
+def test_invalid_min_collection_interval(value):
+    # type: (Any) -> None
+    with pytest.raises(ConfigurationError):
+        Config(instance={'min_collection_interval': value})
