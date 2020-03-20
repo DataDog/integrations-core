@@ -53,10 +53,13 @@ def setup_cluster():
 
         # Users.
         # See: https://rethinkdb.com/docs/permissions-and-accounts/
-        response = r.db('rethinkdb').table('users').insert({'id': AGENT_USER, 'password': AGENT_PASSWORD}).run(conn)
-        assert response['inserted'] == 1
-        response = r.db('rethinkdb').grant(AGENT_USER, {'read': True}).run(conn)
-        assert response['granted'] == 1
+
+        if AGENT_USER != 'admin':
+            # Setup a dedicated Agent user.
+            response = r.db('rethinkdb').table('users').insert({'id': AGENT_USER, 'password': AGENT_PASSWORD}).run(conn)
+            assert response['inserted'] == 1
+            response = r.db('rethinkdb').grant(AGENT_USER, {'read': True}).run(conn)
+            assert response['granted'] == 1
 
         response = r.db('rethinkdb').table('users').insert({'id': CLIENT_USER, 'password': False}).run(conn)
         assert response['inserted'] == 1
@@ -98,7 +101,7 @@ def temporarily_disconnect_server(server):
         replica_states = list(
             r.db('rethinkdb')
             .table('table_status')
-            .concat_map(r.row['shards'])
+            .concat_map(r.row['shards'].default([]))  # May be `None` on 2.3.x.
             .concat_map(r.row['replicas'])
             .map(r.row['state'])
             .run(conn)

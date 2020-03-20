@@ -36,8 +36,17 @@ SERVER_TAGS = {
 
 # Users.
 
-AGENT_USER = 'datadog-agent'
-AGENT_PASSWORD = 'r3th1nK'
+if RAW_VERSION.startswith('2.3.'):
+    # In RethinkDB 2.3.x, only the admin user could access the `rethinkdb` system database by default, but it was
+    # not possible to grant permissions to any other user. This was resolved in 2.4.0.
+    # See: https://github.com/rethinkdb/rethinkdb/issues/5692
+    AGENT_USER = 'admin'
+    AGENT_PASSWORD = ''
+else:
+    # Use a dedicated user for metric collection.
+    AGENT_USER = 'datadog-agent'
+    AGENT_PASSWORD = 'r3th1nK'
+
 CLIENT_USER = 'doggo'
 
 # TLS.
@@ -197,7 +206,6 @@ COMPOSE_ENV_VARS = env_vars = {
 # Pytest common test data.
 
 MALFORMED_VERSION_STRING_PARAMS = [
-    pytest.param('rethinkdb 2.3.3', id='no-compilation-string'),
     pytest.param('rethinkdb (GCC 4.9.2)', id='no-version'),
     pytest.param('rethinkdb', id='prefix-only'),
     pytest.param('abc 2.4.0~0bionic (GCC 4.9.2)', id='wrong-prefix'),

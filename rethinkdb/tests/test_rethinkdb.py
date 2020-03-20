@@ -61,7 +61,7 @@ def test_check(aggregator, instance):
 def test_check_without_credentials_uses_admin(aggregator, instance):
     # type: (AggregatorStub, Instance) -> None
     """
-    Verify that when no credentials are configured (not recommended though), the check still runs successfully provided
+    Verify that when no credentials are configured, the check still runs successfully provided
     the admin account doesn't have a password set.
     """
     instance = instance.copy()
@@ -169,6 +169,7 @@ def test_connected_but_check_failed_unexpectedly(aggregator, instance):
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.CRITICAL, count=1, tags=service_check_tags)
 
 
+@pytest.mark.skipif(not RAW_VERSION, reason='Requires RAW_VERSION to be set')
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_metadata_version(instance, datadog_agent):

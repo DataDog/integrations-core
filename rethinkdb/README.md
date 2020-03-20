@@ -6,6 +6,8 @@
 
 This check monitors a RethinkDB cluster through the Datadog Agent and collects metrics about performance, data availability, cluster configuration, and more.
 
+**NOTE**: this integration is compatible with RethinkDB **version 2.3.6 and above**.
+
 ## Setup
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
