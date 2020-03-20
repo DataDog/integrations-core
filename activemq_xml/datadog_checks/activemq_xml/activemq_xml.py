@@ -6,7 +6,7 @@ from xml.etree import ElementTree
 import requests
 from six import iteritems
 
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
 
 QUEUE_URL = "/admin/xml/queues.jsp"
