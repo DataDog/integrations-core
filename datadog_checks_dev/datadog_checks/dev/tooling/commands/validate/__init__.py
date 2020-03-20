@@ -17,6 +17,7 @@ from .service_checks import service_checks
 
 ALL_COMMANDS = (agent_reqs, ci, codeowners, config, dashboards, dep, imports, manifest, metadata, service_checks)
 
+
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Verify certain aspects of the repo')
 def validate():
     pass
