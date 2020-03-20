@@ -53,21 +53,3 @@ class Config(object):
         self.tls_ca_cert = tls_ca_cert  # type: Optional[str]
         self.tags = tags  # type: List[str]
         self.min_collection_interval = min_collection_interval  # type: float
-
-    def __repr__(self):
-        # type: () -> str
-        return (
-            'Config(host={host!r}, '
-            'port={port!r}, '
-            'user={user!r}, '
-            "password={password!r}, "
-            'tls_ca_cert={tls_ca_cert!r}, '
-            'tags={tags!r})'
-        ).format(
-            host=self.host,
-            port=self.port,
-            user=self.user,
-            password='********' if self.password else '',
-            tls_ca_cert=self.tls_ca_cert,
-            tags=self.tags,
-        )

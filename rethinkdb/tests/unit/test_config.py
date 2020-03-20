@@ -40,12 +40,6 @@ def test_config():
     assert config.tags == ['env:testing']
 
 
-def test_config_repr():
-    # type: () -> None
-    config = Config()
-    assert repr(config) == "Config(host='localhost', port=28015, user=None, password='', tls_ca_cert=None, tags=[])"
-
-
 @pytest.mark.parametrize('value', [42, True, object()])
 def test_invalid_host(value):
     # type: (Any) -> None
