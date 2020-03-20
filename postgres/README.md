@@ -110,7 +110,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 Datadog APM integrates with Postgres to see the traces across your distributed system. Trace collection is enabled by default in the Datadog Agent v6+. To start collecting traces:
 
 1. [Enable trace collection in Datadog][5].
-2. [Instrument your application that makes requests to Memchache][6].
+2. [Instrument your application that makes requests to Postgres][6].
 
 ##### Log collection
 
