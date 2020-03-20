@@ -11,6 +11,8 @@ from datadog_checks.base.errors import CheckException
 
 from .metrics import METRICS_MAP
 
+# noop
+
 
 class GitlabCheck(OpenMetricsBaseCheck):
     """
