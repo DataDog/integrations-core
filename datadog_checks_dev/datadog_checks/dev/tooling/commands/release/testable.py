@@ -141,12 +141,10 @@ def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
 @click.pass_context
 def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str, dry_run: bool) -> None:
     """
-    Create a Jira issue for changes since a previous release (referenced by BASE_REF)
-    that need to be tested for the next release (referenced by TARGET_REF).
+    Create a Jira issue for changes since a previous release (referenced by `BASE_REF`)
+    that need to be tested for the next release (referenced by `TARGET_REF`).
 
-    Usage
-    -----
-    BASE_REF and TARGET_REF can be any valid git references. It practice, you should use either:
+    `BASE_REF` and `TARGET_REF` can be any valid git references. It practice, you should use either:
 
     * A tag: `7.16.1`, `7.17.0-rc.4`, ...
 
@@ -160,32 +158,31 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
 
     * Create cards for changes between a previous Agent release and `master` (useful when preparing an initial RC):
 
-        $ ddev release testable 7.16.1 origin/master
+        `$ ddev release testable 7.16.1 origin/master`
 
     * Create cards for changes between a previous RC and `master` (useful when preparing a new RC, and a separate
     release branch was not created yet):
 
-        $ ddev release testable 7.17.0-rc.2 origin/master
+        `$ ddev release testable 7.17.0-rc.2 origin/master`
 
     * Create cards for changes between a previous RC and a release branch (useful to only review changes in a
     release branch that has diverged from `master`):
 
-        $ ddev release testable 7.17.0-rc.4 7.17.x
+        `$ ddev release testable 7.17.0-rc.4 7.17.x`
 
     * Create cards for changes between two arbitrary tags, e.g. between RCs:
 
-        $ ddev release testable 7.17.0-rc.4 7.17.0-rc.5
+        `$ ddev release testable 7.17.0-rc.4 7.17.0-rc.5`
 
     TIP: run with `ddev -x release testable` to force the use of the current directory.
 
-    Prerequisites
-    -------------
     To avoid GitHub's public API rate limits, you need to set
     `github.user`/`github.token` in your config file or use the
     `DD_GITHUB_USER`/`DD_GITHUB_TOKEN` environment variables.
 
     \b
     To use Jira:
+
     1. Go to `https://id.atlassian.com/manage/api-tokens` and create an API token.
     2. Run `ddev config set jira.user` and enter your jira email.
     3. Run `ddev config set jira.token` and paste your API token.
