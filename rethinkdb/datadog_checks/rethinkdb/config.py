@@ -25,8 +25,8 @@ class Config(object):
         user = instance.get('username')
         password = instance.get('password')
         tls_ca_cert = instance.get('tls_ca_cert')
-        min_collection_interval = instance.get('min_collection_interval', 15)
         tags = instance.get('tags', [])
+        min_collection_interval = instance.get('min_collection_interval', 15)
 
         if not isinstance(host, str):
             raise ConfigurationError('host must be a string (got {!r})'.format(type(host)))

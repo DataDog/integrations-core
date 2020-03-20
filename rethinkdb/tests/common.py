@@ -13,8 +13,6 @@ from .types import ServerName
 
 HERE = get_here()
 
-CHECK_NAME = 'rethinkdb'
-
 IMAGE = os.environ.get('RETHINKDB_IMAGE', '')
 RAW_VERSION = os.environ.get('RETHINKDB_RAW_VERSION', '')
 
@@ -37,8 +35,8 @@ SERVER_TAGS = {
 # Users.
 
 if RAW_VERSION.startswith('2.3.'):
-    # In RethinkDB 2.3.x, only the admin user could access the `rethinkdb` system database by default, but it was
-    # not possible to grant permissions to any other user. This was resolved in 2.4.0.
+    # In RethinkDB 2.3.x, granting permissions onto `rethinkdb` database to non-admin users is not supported.
+    # So we must use the admin account.
     # See: https://github.com/rethinkdb/rethinkdb/issues/5692
     AGENT_USER = 'admin'
     AGENT_PASSWORD = ''
@@ -176,7 +174,6 @@ CURRENT_ISSUES_METRICS = (
 
 CURRENT_ISSUE_TYPES_SUBMITTED_IF_DISCONNECTED_SERVERS = ['table_availability']
 
-
 E2E_METRICS = (
     tuple((name, typ) for name, typ, _, _ in CONFIG_METRICS)
     + CLUSTER_STATISTICS_METRICS
@@ -201,7 +198,6 @@ COMPOSE_ENV_VARS = env_vars = {
     'RETHINKDB_TLS_DRIVER_KEY': TLS_DRIVER_KEY,
     'RETHINKDB_TLS_DRIVER_CERT': TLS_DRIVER_CERT,
 }
-
 
 # Pytest common test data.
 
