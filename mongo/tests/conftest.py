@@ -1,11 +1,13 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import os
 import time
 
 import pymongo
 import pytest
+from tests.common import DEFAULT_INSTANCE
 
 from datadog_checks.dev import LazyFunction, WaitFor, docker_run, run_command
 from datadog_checks.mongo import MongoDb
@@ -25,7 +27,7 @@ def dd_environment(instance):
 
 @pytest.fixture(scope='session')
 def instance():
-    return {'server': common.MONGODB_SERVER}
+    return copy.deepcopy(DEFAULT_INSTANCE)
 
 
 @pytest.fixture(scope='session')

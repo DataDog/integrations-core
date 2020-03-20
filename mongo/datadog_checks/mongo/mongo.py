@@ -5,14 +5,14 @@ from __future__ import division
 
 import re
 import time
-from copy import copy, deepcopy
+from copy import deepcopy
 from distutils.version import LooseVersion
 
 import pymongo
 from six import PY3, iteritems, itervalues
 from six.moves.urllib.parse import unquote_plus, urlsplit
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import round_value
 
 from . import metrics
@@ -87,24 +87,20 @@ class MongoDb(AgentCheck):
         # Members' last replica set states
         self._last_state_by_server = {}
 
-        self.collection_metrics_names = []
-        for key in metrics.COLLECTION_METRICS:
-            self.collection_metrics_names.append(key.split('.')[1])
+        self.collection_metrics_names = (key.split('.')[1] for key in metrics.COLLECTION_METRICS)
 
         if 'server' not in self.instance:
-            raise Exception("Missing 'server' in mongo config")
+            raise ConfigurationError("Missing 'server' in mongo config")
 
-            # x.509 authentication
-        self.ssl_params = {
+        # x.509 authentication
+        ssl_params = {
             'ssl': self.instance.get('ssl', None),
             'ssl_keyfile': self.instance.get('ssl_keyfile', None),
             'ssl_certfile': self.instance.get('ssl_certfile', None),
             'ssl_cert_reqs': self.instance.get('ssl_cert_reqs', None),
             'ssl_ca_certs': self.instance.get('ssl_ca_certs', None),
         }
-        for key, param in list(iteritems(self.ssl_params)):
-            if param is None:
-                del self.ssl_params[key]
+        self.ssl_params = {key: value for key, value in iteritems(ssl_params) if value is not None}
 
         self.server = self.instance['server']
         (
@@ -116,11 +112,11 @@ class MongoDb(AgentCheck):
             self.auth_source,
         ) = self._parse_uri(self.server, sanitize_username=bool(self.ssl_params))
 
-        additional_metrics = self.instance.get('additional_metrics', [])
+        self.additional_metrics = self.instance.get('additional_metrics', [])
 
         # Get the list of metrics to collect
-        self.collect_tcmalloc_metrics = 'tcmalloc' in additional_metrics
-        self.metrics_to_collect = self._build_metric_list_to_collect(additional_metrics)
+        self.collect_tcmalloc_metrics = 'tcmalloc' in self.additional_metrics
+        self.metrics_to_collect = self._build_metric_list_to_collect()
 
         if not self.db_name:
             self.log.info('No MongoDB database found in URI. Defaulting to admin.')
@@ -219,7 +215,7 @@ class MongoDb(AgentCheck):
             }
         )
 
-    def _build_metric_list_to_collect(self, additional_metrics):
+    def _build_metric_list_to_collect(self):
         """
         Build the metric list to collect based on the instance preferences.
         """
@@ -230,7 +226,7 @@ class MongoDb(AgentCheck):
             metrics_to_collect.update(default_metrics)
 
         # Additional metrics metrics
-        for option in additional_metrics:
+        for option in self.additional_metrics:
             additional_metrics = metrics.AVAILABLE_METRICS.get(option)
             if not additional_metrics:
                 if option in metrics.DEFAULT_METRICS:
@@ -276,7 +272,7 @@ class MongoDb(AgentCheck):
         prefix and suffix according to its type.
         """
         metric_prefix = "mongodb." if not prefix else "mongodb.{0}.".format(prefix)
-        metric_suffix = "ps" if submit_method == self.rate else ""
+        metric_suffix = "ps" if submit_method == metrics.RATE else ""
 
         # Replace case-sensitive metric name characters
         for pattern, repl in iteritems(metrics.CASE_SENSITIVE_METRIC_NAME_SUFFIXES):
@@ -315,7 +311,7 @@ class MongoDb(AgentCheck):
             self.log.error(u"Authentication failed due to invalid credentials or configuration issues. %s", e)
 
         if not authenticated:
-            message = "Mongo: cannot connect with config %s" % self.server_name
+            message = "Mongo: cannot connect with config %s" % self.clean_server_name
             self.service_check(
                 self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.service_check_tags, message=message
             )
@@ -540,7 +536,7 @@ class MongoDb(AgentCheck):
             self.log.exception("Error when collecting the version from the mongo server.")
             mongo_version = '0.0'
 
-        tags = copy.deepcopy(self.tags)
+        tags = deepcopy(self.tags)
         # Handle replica data, if any
         # See
         # http://www.mongodb.org/display/DOCS/Replica+Set+Commands#ReplicaSetCommands-replSetGetStatus  # noqa
