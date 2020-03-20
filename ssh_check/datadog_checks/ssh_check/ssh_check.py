@@ -7,7 +7,7 @@ from collections import namedtuple
 
 import paramiko
 
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 # Example ssh remote version: http://supervisord.org/changes.html
 #   - SSH-2.0-OpenSSH_8.1

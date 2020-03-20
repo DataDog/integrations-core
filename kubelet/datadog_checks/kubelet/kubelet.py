@@ -15,8 +15,7 @@ from kubeutil import get_connection_info
 from six import iteritems
 from urllib3.exceptions import InsecureRequestWarning
 
-from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.date import UTC, parse_rfc3339
 from datadog_checks.base.utils.tagging import tagger

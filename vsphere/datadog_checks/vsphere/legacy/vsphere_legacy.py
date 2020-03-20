@@ -18,8 +18,7 @@ from pyVmomi import vmodl  # pylint: disable=E0611
 from six import itervalues
 from six.moves import range
 
-from datadog_checks.base import ensure_unicode, to_native_string
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base import AgentCheck, ensure_unicode, to_native_string
 from datadog_checks.base.checks.libs.thread_pool import SENTINEL, Pool
 from datadog_checks.base.checks.libs.timer import Timer
 from datadog_checks.base.checks.libs.vmware.all_metrics import ALL_METRICS

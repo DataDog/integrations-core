@@ -13,7 +13,7 @@ from contextlib import contextmanager
 
 from six import raise_from
 
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
 
 try:

@@ -7,8 +7,7 @@ import socket
 
 from six import BytesIO
 
-from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode
+from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
 
 SERVICE_CHECK_NAME = "statsd.can_connect"
 SERVICE_CHECK_NAME_HEALTH = "statsd.is_up"

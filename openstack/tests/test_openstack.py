@@ -9,7 +9,7 @@ import mock
 import pytest
 from six import iteritems
 
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 from datadog_checks.openstack.openstack import (
     IncompleteAuthScope,
     IncompleteConfig,

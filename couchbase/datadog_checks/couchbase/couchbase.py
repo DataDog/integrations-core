@@ -12,7 +12,7 @@ from collections import defaultdict
 import requests
 from six import string_types
 
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.couchbase.couchbase_consts import (
     BUCKET_STATS,

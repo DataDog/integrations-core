@@ -8,7 +8,7 @@ import requests
 from six import iteritems
 
 # project
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'squid'
 

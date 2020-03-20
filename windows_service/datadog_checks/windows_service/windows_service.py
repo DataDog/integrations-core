@@ -6,7 +6,7 @@ import re
 import win32service
 from six import iteritems
 
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 SERVICE_PATTERN_FLAGS = re.IGNORECASE
 

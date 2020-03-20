@@ -7,7 +7,7 @@ from __future__ import division
 import re
 from collections import defaultdict
 
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'cassandra_nodetool'

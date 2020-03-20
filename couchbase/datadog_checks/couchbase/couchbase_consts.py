@@ -1,6 +1,6 @@
 import re
 
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 # Paths
 COUCHBASE_STATS_PATH = '/pools/default'
