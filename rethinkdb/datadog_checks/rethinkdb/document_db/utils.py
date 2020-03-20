@@ -7,6 +7,8 @@ Miscellaneous utilities.
 import datetime as dt
 from typing import Any, Mapping, Sequence
 
+from datadog_checks.base.utils.db.utils import normalize_datetime
+
 
 def lookup_dotted(dct, path):
     # type: (Mapping, str) -> Any
@@ -44,4 +46,6 @@ def dotted_join(values):
 
 def to_time_elapsed(datetime):
     # type: (dt.datetime) -> float
-    return (dt.datetime.now(datetime.tzinfo) - datetime).total_seconds()
+    datetime = normalize_datetime(datetime)
+    elapsed = dt.datetime.now(datetime.tzinfo) - datetime
+    return elapsed.total_seconds()

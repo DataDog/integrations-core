@@ -29,20 +29,25 @@ class Config(object):
         min_collection_interval = instance.get('min_collection_interval', 15)
 
         if not isinstance(host, str):
-            raise ConfigurationError('host must be a string (got {!r})'.format(type(host)))
+            raise ConfigurationError('host {!r} must be a string (got {!r})'.format(host, type(host)))
 
-        if not isinstance(port, int) or isinstance(port, bool):
-            raise ConfigurationError('port must be an integer (got {!r})'.format(type(port)))
+        try:
+            port = int(port)
+        except (ValueError, TypeError):
+            raise ConfigurationError('port {!r} must be convertible to an integer (got {!r})'.format(port, type(port)))
 
         if port < 0:
             raise ConfigurationError('port must be positive (got {!r})'.format(port))
+
+        if not isinstance(tags, list):
+            raise ConfigurationError('tags {!r} must be a list (got {!r})'.format(tags, type(tags)))
 
         try:
             min_collection_interval = float(min_collection_interval)
         except (ValueError, TypeError):
             raise ConfigurationError(
-                'min_collection_interval must be convertible to a number (got {!r})'.format(
-                    type(min_collection_interval)
+                'min_collection_interval {!r} must be convertible to a number (got {!r})'.format(
+                    min_collection_interval, type(min_collection_interval)
                 )
             )
 
@@ -53,3 +58,8 @@ class Config(object):
         self.tls_ca_cert = tls_ca_cert  # type: Optional[str]
         self.tags = tags  # type: List[str]
         self.min_collection_interval = min_collection_interval  # type: float
+
+    @property
+    def service_check_tags(self):
+        # type: () -> List[str]
+        return ['host:{}'.format(self.host), 'port:{}'.format(self.port)] + self.tags

@@ -22,22 +22,27 @@ def test_default_config():
     assert config.tags == []
 
 
-def test_config():
-    # type: () -> None
+@pytest.mark.parametrize('port_28016,', [28016, '28016'])
+@pytest.mark.parametrize('min_collection_interval_10', [10, '10', '10.0'])
+def test_config(port_28016, min_collection_interval_10):
+    # type: (Any, Any) -> None
     instance = {
         'host': '192.168.121.1',
-        'port': 28016,
+        'port': port_28016,
         'username': 'datadog-agent',
         'password': 's3kr3t',
         'tls_ca_cert': '/path/to/client.cert',
         'tags': ['env:testing'],
+        'min_collection_interval': min_collection_interval_10,
     }  # type: Instance
+
     config = Config(instance)
     assert config.host == '192.168.121.1'
     assert config.port == 28016
     assert config.user == 'datadog-agent'
     assert config.tls_ca_cert == '/path/to/client.cert'
     assert config.tags == ['env:testing']
+    assert config.min_collection_interval == 10
 
 
 @pytest.mark.parametrize('value', [42, True, object()])
@@ -47,7 +52,7 @@ def test_invalid_host(value):
         Config(instance={'host': value})
 
 
-@pytest.mark.parametrize('value', [42.42, -42, True, object()])
+@pytest.mark.parametrize('value', [-28016, '280.16', 'true', object()])
 def test_invalid_port(value):
     # type: (Any) -> None
     with pytest.raises(ConfigurationError):

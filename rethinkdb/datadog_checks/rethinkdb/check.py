@@ -42,9 +42,7 @@ class RethinkDBCheck(AgentCheck):
     def connect_submitting_service_checks(self):
         # type: () -> Iterator[rethinkdb.net.Connection]
         config = self.config
-
-        tags = ['host:{}'.format(config.host), 'port:{}'.format(config.port)]
-        tags.extend(config.tags)
+        tags = config.service_check_tags
 
         try:
             with rethinkdb.r.connect(
