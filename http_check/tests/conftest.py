@@ -7,8 +7,8 @@ import sys
 import pytest
 from mock import patch
 
+from datadog_checks.dev import docker_run
 from datadog_checks.dev.utils import ON_WINDOWS
-from datadog_checks.http_check import HTTPCheck
 
 from .common import CONFIG_E2E, HERE
 
@@ -17,11 +17,44 @@ from .common import CONFIG_E2E, HERE
 def dd_environment():
     cacert_path = os.path.join(HERE, 'fixtures', 'cacert.pem')
     e2e_metadata = {'docker_volumes': ['{}:/opt/cacert.pem'.format(cacert_path)]}
-    yield CONFIG_E2E, e2e_metadata
+    with docker_run(
+        os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, log_patterns=["starting server on port"]
+    ):
+        yield CONFIG_E2E, e2e_metadata
+
+
+@pytest.fixture(scope='session')
+def mock_dns():
+    import socket
+
+    _orig_getaddrinfo = socket.getaddrinfo
+    _orig_connect = socket.socket.connect
+
+    def patched_getaddrinfo(host, *args, **kwargs):
+        if host.endswith('.mock'):
+            # See socket.getaddrinfo, just updating the hostname here.
+            return [(2, 1, 6, '', ('127.0.0.1', 4443))]
+
+        return _orig_getaddrinfo(host, *args, **kwargs)
+
+    def patched_connect(self, address):
+        host, port = address[0], address[1]
+        if host.endswith('.mock'):
+            host, port = '127.0.0.1', 4443
+
+        return _orig_connect(self, (host, port))
+
+    socket.getaddrinfo = patched_getaddrinfo
+    socket.socket.connect = patched_connect
+    yield
+    socket.getaddrinfo = _orig_getaddrinfo
+    socket.socket.connect = _orig_connect
 
 
 @pytest.fixture(scope='session')
 def http_check():
+    from datadog_checks.http_check import HTTPCheck
+
     # Patch the function to return the certs located in the `tests/` folder
     with patch('datadog_checks.http_check.http_check.get_ca_certs_path', new=mock_get_ca_certs_path):
         yield HTTPCheck('http_check', {}, [{}])
