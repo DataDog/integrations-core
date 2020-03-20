@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from typing import Any, Set
 
-from six import PY2, text_type
+from six import PY2, iteritems, text_type
 
 from .utils.common import to_native_string
 
@@ -23,11 +24,45 @@ class AgentLogger(logging.getLoggerClass()):
             self._log(TRACE_LEVEL, msg, args, **kwargs)
 
 
+class RedactFilter(logging.Filter):
+    def __init__(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
+        super(RedactFilter, self).__init__(*args, **kwargs)
+        self.patterns = set()  # type: Set[str]
+
+    def filter(self, record):
+        # type: (logging.LogRecord) -> bool
+        record.msg = self.redact(to_native_string(record.msg))
+
+        if isinstance(record.args, dict):
+            record.args = {key: self.redact(value) for key, value in iteritems(record.args)}
+        else:
+            record.args = tuple(self.redact(arg) for arg in record.args)
+
+        return True
+
+    def redact(self, message):
+        # type: (str) -> str
+        for pattern in self.patterns:
+            message = message.replace(pattern, '********')
+        return message
+
+
 class CheckLoggingAdapter(logging.LoggerAdapter):
     def __init__(self, logger, check):
         super(CheckLoggingAdapter, self).__init__(logger, {})
         self.check = check
         self.check_id = self.check.check_id
+        self._redact_filter = RedactFilter('redact-secrets')
+        self.logger.addFilter(self._redact_filter)
+
+    def register_secret_for_redaction(self, secret):
+        # type: (str) -> None
+        self._redact_filter.patterns.add(secret)
+
+    def redact_registered_secrets(self, message):
+        # type: (str) -> str
+        return self._redact_filter.redact(message)
 
     def process(self, msg, kwargs):
         # Cache for performance

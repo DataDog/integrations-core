@@ -65,6 +65,29 @@ def test_log_critical_error():
         check.log.critical('test')
 
 
+class TestLogSecretRedaction:
+    def test_default(self, caplog):
+        # By default, non-registered secrets aren't redacted.
+        check = AgentCheck()
+        secret = 'p@$$w0rd'
+        check.log.error('hello, %s', secret)
+        assert secret in caplog.text
+
+    def test_redact_logs(self, caplog):
+        check = AgentCheck()
+        secret = 'p@$$w0rd'
+        check.log.register_secret_for_redaction(secret)
+        check.log.error('hello, %s', secret)
+        assert secret not in caplog.text
+
+    def test_redact_service_check_messages(self, aggregator, caplog):
+        check = AgentCheck()
+        secret = 'p@$$w0rd'
+        check.log.register_secret_for_redaction(secret)
+        check.service_check('test.can_check', status=AgentCheck.CRITICAL, message=secret)
+        aggregator.assert_service_check('test.can_check', status=AgentCheck.CRITICAL, message='********')
+
+
 def test_warning_ok():
     check = AgentCheck()
 

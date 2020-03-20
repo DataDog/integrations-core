@@ -563,6 +563,8 @@ class AgentCheck(object):
         else:
             message = to_native_string(message)
 
+        message = self.log.redact_registered_secrets(message)
+
         aggregator.submit_service_check(
             self, self.check_id, self._format_namespace(name, raw), status, tags, hostname, message
         )
