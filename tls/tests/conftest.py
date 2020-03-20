@@ -27,7 +27,8 @@ def dd_environment():
     with docker_run(
         os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True,
     ):
-        yield {'server': 'valid.mock'}
+        e2e_metadata = {'docker_volumes': ['{}:{}'.format(CA_CERT, CA_CERT)]}
+        yield {'server': 'valid.mock'}, e2e_metadata
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -156,6 +157,11 @@ def instance_remote_no_server():
 @pytest.fixture
 def instance_remote_ok():
     return {'server': 'https://valid.mock', 'ca_cert': CA_CERT}
+
+
+@pytest.fixture
+def instance_e2e():
+    return {'server': 'https://localhost', 'port': 4443, 'server_hostname': 'valid.mock', 'ca_cert': CA_CERT}
 
 
 @pytest.fixture
