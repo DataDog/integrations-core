@@ -1078,3 +1078,41 @@ def test_checkpoint_firewall(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_arista(aggregator):
+    run_profile_check('arista')
+
+    common_tags = common.CHECK_TAGS + ['snmp_profile:arista']
+
+    aggregator.assert_metric(
+        'snmp.aristaEgressQueuePktsDropped',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=common_tags + ['interface_index:13', 'queue_index:10'],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'snmp.aristaEgressQueuePktsDropped',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=common_tags + ['interface_index:28', 'queue_index:22'],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'snmp.aristaIngressQueuePktsDropped',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=common_tags + ['interface_index:7', 'queue_index:25'],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'snmp.aristaIngressQueuePktsDropped',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=common_tags + ['interface_index:8', 'queue_index:24'],
+        count=1,
+    )
+
+    for (sensor_id, sensor_type) in [(1, 11), (7, 8)]:
+        sensor_tags = ['sensor_id:{}'.format(sensor_id), 'sensor_type:{}'.format(sensor_type)] + common_tags
+        aggregator.assert_metric('snmp.entPhySensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
+        aggregator.assert_metric('snmp.entPhySensorOperStatus', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
+
+    aggregator.assert_all_metrics_covered()
