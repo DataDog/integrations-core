@@ -16,7 +16,8 @@
   ],
   "public_title": "Datadog-Sidekiq Integration",
   "categories": [
-    "log collection"
+    "log collection",
+    "dogstatsd"
   ],
   "type": "check",
   "is_public": false,

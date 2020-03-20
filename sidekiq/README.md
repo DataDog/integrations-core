@@ -106,13 +106,13 @@ See [metadata.csv][12] for a list of metrics provided by this integration. Custo
     ```yaml
       logs:
         - type: file
-          path:  /var/log/Sidekiq.log
+          path:  /var/log/sidekiq.log
           source: sidekiq
           sourcecategory: jobrunner
-          service: <SERVICE_NAME>
+          service: <SERVICE>
     ```
 
-     Change the `path` and `service` parameter values and configure them for your environment. If you cannot find your logs, [you can look in the sidekiq documentation to see how to change your logging][9].
+     Change the `path` and `service` parameter values and configure them for your environment. If you cannot find your logs, [you can look in the Sidekiq documentation to see how to change your logging][9].
 
 3. [Restart the Agent][8].
 
