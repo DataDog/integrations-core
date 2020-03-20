@@ -15,7 +15,6 @@ try:
     from contextlib import ExitStack
 except ImportError:
     from contextlib2 import ExitStack
-# from socket import AddressFamily, SocketKind
 
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -39,6 +38,7 @@ def mock_dns():
 
     def patched_getaddrinfo(host, *args, **kwargs):
         if host.endswith('.mock'):
+            # nginx doesn't support multiple tls versions from the same container
             if 'tls-v1-1' in host:
                 port = 4444
             elif 'tls-v1-2' in host:

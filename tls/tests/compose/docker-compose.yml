@@ -1,12 +1,14 @@
 version: '3'
 
 services:
+  # Runs at startup to build certs and exit
   cert-builder:
     container_name: cert-builder
     build: .
     volumes:
       - certs:/root/certs/:rw
 
+  # nginx serving valid.mock, expired.mock and selfsigned.mock
   nginx-main:
     container_name: nginx-main
     image: nginx:alpine
@@ -15,7 +17,10 @@ services:
       - certs:/etc/nginx/certs/:ro
     ports:
       - "4443:443"
+    depends_on:
+      - cert-builder
 
+  # Serves tls-v1-1.valid.mock
   nginx-tls1-1:
     container_name: nginx-tls1-1
     image: nginx:alpine
@@ -24,7 +29,10 @@ services:
       - certs:/etc/nginx/certs/:ro
     ports:
       - "4444:443"
+    depends_on:
+      - cert-builder
 
+  # Serves tls-v1-2.valid.mock
   nginx-tls1-2:
     container_name: nginx-tls1-2
     image: nginx:alpine
@@ -33,7 +41,10 @@ services:
       - certs:/etc/nginx/certs/:ro
     ports:
       - "4445:443"
+    depends_on:
+      - cert-builder
 
+  # Serves tls-v1-3.valid.mock
   nginx-tls1-3:
     container_name: nginx-tls1-3
     image: nginx:alpine
@@ -42,6 +53,8 @@ services:
       - certs:/etc/nginx/certs/:ro
     ports:
       - "4446:443"
+    depends_on:
+      - cert-builder
 
 volumes:
   certs:
