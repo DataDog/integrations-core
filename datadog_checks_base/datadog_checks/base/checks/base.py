@@ -18,6 +18,7 @@ from six import binary_type, iteritems, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
+from ..log import SanitizationFilter
 from ..types import (
     AgentConfigType,
     Event,
@@ -33,6 +34,7 @@ from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.proxy import config_proxy_skip
+from ..utils.secrets import SecretsSanitizer
 
 try:
     import datadog_agent
@@ -337,6 +339,30 @@ class AgentCheck(object):
         self._log_deprecation('in_developer_mode')
         return False
 
+    def register_secret(self, secret):
+        # type: (str) -> None
+        """
+        Register a secret to be scrubbed by `.sanitize()`.
+        """
+        if not hasattr(self, '_sanitizer'):
+            # Configure lazily so that checks that don't use sanitization aren't affected.
+            self._sanitizer = SecretsSanitizer()
+            self.log.logger.addFilter(SanitizationFilter('secrets', sanitize=self.sanitize))
+
+        self._sanitizer.register(secret)
+
+    def sanitize(self, text):
+        # type: (str) -> str
+        """
+        Scrub any registered secrets in `text`.
+        """
+        try:
+            sanitizer = self._sanitizer
+        except AttributeError:
+            return text
+        else:
+            return sanitizer.sanitize(text)
+
     def get_instance_proxy(self, instance, uri, proxies=None):
         # type: (InstanceType, str, ProxySettings) -> ProxySettings
         # TODO: Remove with Agent 5
@@ -563,7 +589,7 @@ class AgentCheck(object):
         else:
             message = to_native_string(message)
 
-        message = self.log.redact_registered_secrets(message)
+        message = self.sanitize(message)
 
         aggregator.submit_service_check(
             self, self.check_id, self._format_namespace(name, raw), status, tags, hostname, message
@@ -775,7 +801,9 @@ class AgentCheck(object):
 
             result = ''
         except Exception as e:
-            result = json.dumps([{'message': str(e), 'traceback': traceback.format_exc()}])
+            message = self.sanitize(str(e))
+            tb = self.sanitize(traceback.format_exc())
+            result = json.dumps([{'message': message, 'traceback': tb}])
         finally:
             if self.metric_limiter:
                 self.metric_limiter.reset()
