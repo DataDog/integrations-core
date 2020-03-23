@@ -30,6 +30,16 @@ class TrelloClient:
             'team/integrations': 'Integrations',
             'team/logs': 'Logs',
         }
+        self.label_map = {
+            'Containers': '5e7910856f8e4363e3b51708',
+            'Core': '5e79105d4c45a45adb9e7730',
+            'Integrations': '5e790ff25bd3dd48da67608d',
+            'Logs': '5e79108febd27f4864c003ff',
+            'Platform': '5e7910a45d711a6382f08bb9',
+            'Networks': '5e79109821620a60014fc016',
+            'Processes': '5e7910789f92a918152b700d',
+            'Trace': '5c050640ecb34f0915ec589a',
+        }
 
     def create_card(self, team, name, body, member=None):
         rate_limited = False
@@ -38,6 +48,7 @@ class TrelloClient:
 
         params = {
             'idList': self.team_list_map[team],
+            'idLabels': self.label_map[team],
             'name': name,
             # It appears the character limit for descriptions is ~5000
             'desc': body[:5000],
