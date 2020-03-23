@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections import defaultdict
+from typing import Dict, List
+
 import win32wnet
 from six import iteritems
 
@@ -28,81 +31,81 @@ class PDHBaseCheck(AgentCheck):
     Windows only.
     """
 
-    def __init__(self, name, init_config, instances, counter_list):
-        AgentCheck.__init__(self, name, init_config, instances)
-        self._missing_counters = {}
-        self._metrics = {}
-        self._tags = {}
-        key = None
+    def __init__(self, *args, **kwargs):  # To support optional agentConfig
+        # TODO: Change signature to (self, name, init_config, instances, counter_list) once subclasses have been edited
+        super(PDHBaseCheck, self).__init__(*args, **kwargs)
+        self._missing_counters = {}  # type: Dict[str, tuple]
+        self._metrics = defaultdict(list)  # type: Dict[int, List[List]]  # This dictionary only has one key
+        self._tags = defaultdict(list)  # type: Dict[int, List[str]]  # This dictionary only has one key
+        self.refresh_counters = is_affirmative(self.instance.get('refresh_counters', True))  # type: bool
+        # TODO Remove once signature is restored to (self, name, init_config, instances, counter_list)
+        counter_list = kwargs.get('counter_list', args[-1])  # type: List[List[str]]
 
         try:
-            for instance in instances:
-                key = hash_mutable(instance)
+            self.instance_hash = hash_mutable(self.instance)  # type: int
+            cfg_tags = self.instance.get('tags')  # type: List[str]
+            if cfg_tags is not None:
+                if not isinstance(cfg_tags, list):
+                    self.log.error("Tags must be configured as a list")
+                    raise ValueError("Tags must be type list, not %s" % str(type(cfg_tags)))
+                self._tags[self.instance_hash] = list(cfg_tags)
 
-                cfg_tags = instance.get('tags')
-                if cfg_tags is not None:
-                    if not isinstance(cfg_tags, list):
-                        self.log.error("Tags must be configured as a list")
-                        raise ValueError("Tags must be type list, not %s" % str(type(cfg_tags)))
-                    self._tags[key] = list(cfg_tags)
+            remote_machine = None
+            host = self.instance.get('host')
+            if host is not None and host != ".":
+                try:
+                    remote_machine = host
 
-                remote_machine = None
-                host = instance.get('host')
-                self._metrics[key] = []
-                if host is not None and host != ".":
-                    try:
-                        remote_machine = host
+                    username = self.instance.get('username')
+                    password = self.instance.get('password')
+                    nr = self._get_netresource(remote_machine)
+                    win32wnet.WNetAddConnection2(nr, password, username, 0)
 
-                        username = instance.get('username')
-                        password = instance.get('password')
-                        nr = self._get_netresource(remote_machine)
-                        win32wnet.WNetAddConnection2(nr, password, username, 0)
+                except Exception as e:
+                    self.log.error("Failed to make remote connection %s", str(e))
+                    return
 
-                    except Exception as e:
-                        self.log.error("Failed to make remote connection %s", str(e))
-                        return
+            # counter_data_types allows the precision with which counters are queried
+            # to be configured on a per-metric basis. In the metric instance, precision
+            # should be specified as
+            # counter_data_types:
+            # - iis.httpd_request_method.get,int
+            # - iis.net.bytes_rcvd,float
+            #
+            # the above would query the counter associated with iis.httpd_request_method.get
+            # as an integer (LONG) and iis.net.bytes_rcvd as a double
+            datatypes = {}
+            precisions = self.instance.get('counter_data_types')
+            if precisions is not None:
+                if not isinstance(precisions, list):
+                    self.log.warning("incorrect type for counter_data_type %s", str(precisions))
+                else:
+                    for p in precisions:
+                        k, v = p.split(",")
+                        v = v.lower().strip()
+                        if v in int_types:
+                            self.log.info("Setting datatype for %s to integer", k)
+                            datatypes[k] = DATA_TYPE_INT
+                        elif v in double_types:
+                            self.log.info("Setting datatype for %s to double", k)
+                            datatypes[k] = DATA_TYPE_DOUBLE
+                        else:
+                            self.log.warning("Unknown data type %s", str(v))
 
-                # counter_data_types allows the precision with which counters are queried
-                # to be configured on a per-metric basis. In the metric instance, precision
-                # should be specified as
-                # counter_data_types:
-                # - iis.httpd_request_method.get,int
-                # - iis.net.bytes_rcvd,float
-                #
-                # the above would query the counter associated with iis.httpd_request_method.get
-                # as an integer (LONG) and iis.net.bytes_rcvd as a double
-                datatypes = {}
-                precisions = instance.get('counter_data_types')
-                if precisions is not None:
-                    if not isinstance(precisions, list):
-                        self.log.warning("incorrect type for counter_data_type %s", str(precisions))
-                    else:
-                        for p in precisions:
-                            k, v = p.split(",")
-                            v = v.lower().strip()
-                            if v in int_types:
-                                self.log.info("Setting datatype for %s to integer", k)
-                                datatypes[k] = DATA_TYPE_INT
-                            elif v in double_types:
-                                self.log.info("Setting datatype for %s to double", k)
-                                datatypes[k] = DATA_TYPE_DOUBLE
-                            else:
-                                self.log.warning("Unknown data type %s", str(v))
+            self._make_counters(counter_data=(counter_list, (datatypes, remote_machine, False, 'entry')))
 
-                self._make_counters(key, (counter_list, (datatypes, remote_machine, False, 'entry')))
-
-                # get any additional metrics in the instance
-                addl_metrics = instance.get('additional_metrics')
-                if addl_metrics is not None:
-                    self._make_counters(
-                        key, (addl_metrics, (datatypes, remote_machine, True, 'additional metric entry'))
-                    )
+            # get any additional metrics in the instance
+            addl_metrics = self.instance.get('additional_metrics')
+            if addl_metrics is not None:
+                self._make_counters(
+                    counter_data=(addl_metrics, (datatypes, remote_machine, True, 'additional metric entry'))
+                )
 
         except Exception as e:
             self.log.debug("Exception in PDH init: %s", str(e))
             raise
 
-        if key is None or not self._metrics.get(key):
+        if not self.instance_hash or not self._metrics.get(self.instance_hash):
             raise AttributeError('No valid counters to collect')
 
     def _get_netresource(self, remote_machine):
@@ -143,22 +146,18 @@ class PDHBaseCheck(AgentCheck):
 
     def check(self, instance):
         self.log.debug("PDHBaseCheck: check()")
-        key = hash_mutable(instance)
-        refresh_counters = is_affirmative(instance.get('refresh_counters', True))
 
-        if refresh_counters:
+        if self.refresh_counters:
             for counter, values in list(iteritems(self._missing_counters)):
-                self._make_counters(key, ([counter], values))
+                self._make_counters(counter_data=([counter], values))
 
-        for inst_name, dd_name, metric_func, counter in self._metrics[key]:
+        for inst_name, dd_name, metric_func, counter in self._metrics[self.instance_hash]:
             try:
-                if refresh_counters:
+                if self.refresh_counters:
                     counter.collect_counters()
                 vals = counter.get_all_values()
                 for instance_name, val in iteritems(vals):
-                    tags = []
-                    if key in self._tags:
-                        tags = list(self._tags[key])
+                    tags = list(self._tags.get(self.instance_hash, []))  # type: List[str]
 
                     if not counter.is_single_instance():
                         tag = "instance:%s" % instance_name
@@ -168,7 +167,8 @@ class PDHBaseCheck(AgentCheck):
                 # don't give up on all of the metrics because one failed
                 self.log.error("Failed to get data for %s %s: %s", inst_name, dd_name, str(e))
 
-    def _make_counters(self, key, counter_data):
+    def _make_counters(self, key=None, counter_data=([], ())):  # Key left in for retrocompatibility
+        # type: (int, tuple) -> None
         counter_list, (datatypes, remote_machine, check_instance, message) = counter_data
 
         # list of the metrics. Each entry is itself an entry,
@@ -205,7 +205,7 @@ class PDHBaseCheck(AgentCheck):
 
             entry = [inst_name, dd_name, m, obj]
             self.log.debug('%s: %s', message, entry)
-            self._metrics[key].append(entry)
+            self._metrics[self.instance_hash].append(entry)
 
     @classmethod
     def _no_instance(cls, inst_name):

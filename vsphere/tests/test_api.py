@@ -1,12 +1,50 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import ssl
+
 import pytest
 from mock import ANY, MagicMock, patch
 from pyVmomi import vim, vmodl
 
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.config import VSphereConfig
+
+
+def test_ssl_verify_false(realtime_instance):
+    realtime_instance['ssl_verify'] = False
+
+    with patch('datadog_checks.vsphere.api.connect') as connect, patch(
+        'ssl.SSLContext.load_verify_locations'
+    ) as load_verify_locations:
+        smart_connect = connect.SmartConnect
+
+        config = VSphereConfig(realtime_instance, MagicMock())
+        VSphereAPI(config, MagicMock())
+
+        actual_context = smart_connect.call_args.kwargs['sslContext']  # type: ssl.SSLContext
+        assert actual_context.protocol == ssl.PROTOCOL_TLS
+        assert actual_context.verify_mode == ssl.CERT_NONE
+        load_verify_locations.assert_not_called()
+
+
+def test_ssl_cert(realtime_instance):
+    realtime_instance['ssl_verify'] = True
+    realtime_instance['ssl_capath'] = '/dummy/path'
+
+    with patch('datadog_checks.vsphere.api.connect') as connect, patch(
+        'ssl.SSLContext.load_verify_locations'
+    ) as load_verify_locations:
+        smart_connect = connect.SmartConnect
+
+        config = VSphereConfig(realtime_instance, MagicMock())
+        VSphereAPI(config, MagicMock())
+
+        actual_context = smart_connect.call_args.kwargs['sslContext']  # type: ssl.SSLContext
+        assert actual_context.protocol == ssl.PROTOCOL_TLS
+        assert actual_context.verify_mode == ssl.CERT_REQUIRED
+        assert actual_context.check_hostname is True
+        load_verify_locations.assert_called_with(capath='/dummy/path')
 
 
 def test_connect_success(realtime_instance):
