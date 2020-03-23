@@ -205,6 +205,13 @@ class OpenMetricsScraperMixin(object):
             )
         )
 
+        config['send_distribution_sums_as_monotonic'] = is_affirmative(
+            instance.get(
+                'send_distribution_sums_as_monotonic',
+                default_instance.get('send_distribution_sums_as_monotonic', False),
+            )
+        )
+
         # If the `labels_mapper` dictionary is provided, the metrics labels names
         # in the `labels_mapper` will use the corresponding value as tag name
         # when sending the gauges.
