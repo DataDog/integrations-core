@@ -11,22 +11,20 @@ from datadog_checks.tls.utils import days_to_seconds
 
 from .utils import download_cert, temp_binary
 
-try:
-    from contextlib import ExitStack
-except ImportError:
-    from contextlib2 import ExitStack
-
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 CA_CERT = os.path.join(HERE, 'compose', 'ca.crt')
 
+HOSTNAME_TO_PORT_MAPPING = {
+    "tls-v1-1.valid.mock": 4444,
+    "tls-v1-2.valid.mock": 4445,
+    "tls-v1-3.valid.mock": 4446,
+}
+
 
 @pytest.fixture(scope='session', autouse=True)
 def dd_environment():
-    with docker_run(
-        os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True,
-    ):
+    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=5):
         e2e_metadata = {'docker_volumes': ['{}:{}'.format(CA_CERT, CA_CERT)]}
         yield {'server': 'valid.mock'}, e2e_metadata
 
@@ -40,16 +38,10 @@ def mock_dns():
     def patched_getaddrinfo(host, *args, **kwargs):
         if host.endswith('.mock'):
             # nginx doesn't support multiple tls versions from the same container
-            if 'tls-v1-1' in host:
-                port = 4444
-            elif 'tls-v1-2' in host:
-                port = 4445
-            elif 'tls-v1-3' in host:
-                port = 4446
-            else:
-                port = 4443
+            port = HOSTNAME_TO_PORT_MAPPING.get(host, 4443)
 
             # See socket.getaddrinfo, just updating the hostname here.
+            # https://docs.python.org/3/library/socket.html#socket.getaddrinfo
             return [(2, 1, 6, '', ('127.0.0.1', port))]
 
         return _orig_getaddrinfo(host, *args, **kwargs)
@@ -66,14 +58,15 @@ def certs(dd_environment, mock_dns):
         'https://valid.mock': 'valid.crt',
     }
     certs = {}
-    with ExitStack() as stack:
-        tmp_dir = stack.enter_context(TempDir())
+    with TempDir('certs') as tmp_dir:
         for address, name in iteritems(downloads):
             filepath = os.path.join(tmp_dir, name)
-            certs[name] = stack.enter_context(download_cert(filepath, address))
+            download_cert(filepath, address)
+            certs[name] = filepath
         for address, name in iteritems(raw_downloads):
             filepath = os.path.join(tmp_dir, name)
-            certs[name] = stack.enter_context(download_cert(filepath, address, raw=True))
+            certs[name] = download_cert(filepath, address, raw=True)
+            certs[name] = filepath
         yield certs
 
 

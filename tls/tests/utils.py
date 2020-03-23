@@ -24,7 +24,6 @@ def temp_binary(contents):
         yield path
 
 
-@contextmanager
 def download_cert(filepath, host, raw=False):
     host = urlparse(host).hostname or host
     context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
@@ -50,5 +49,3 @@ def download_cert(filepath, host, raw=False):
         cert = ssl.DER_cert_to_PEM_cert(cert)
         with open(filepath, 'w') as f:
             f.write(cert)
-
-    yield filepath
