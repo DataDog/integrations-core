@@ -2,6 +2,10 @@ name: ActiveMQ
 files:
 - name: activemq.yaml
   options:
+  - template: init_config
+    options:
+      - template: init_config/jmx
+      - template: init_config/default
   - template: instances
     options:
     - template: instances/jmx
@@ -16,8 +20,3 @@ files:
       path: <ACTIVEMQ_BASEDIR>/data/audit.log
       source: activemq
       service: <SERVICE_NAME>
-  - template: init_config
-    options:
-      - template: init_config/jmx
-      - template: init_config/default
-

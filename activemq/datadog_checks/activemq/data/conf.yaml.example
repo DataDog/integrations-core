@@ -1,3 +1,38 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param is_jmx - boolean - required
+    ## Whether or not this file is a configuration for a JMX integration.
+    #
+    is_jmx: true
+
+    ## @param collect_default_metrics - boolean - required
+    ## Whether or not the check should collect all default metrics.
+    #
+    collect_default_metrics: true
+
+    ## @param conf - list of mappings - optional
+    ## The list of metrics to be collected by the integration
+    ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
+    ## The default metrics to be collected are kept in metrics.yaml, but you can still
+    ## add your own metrics here.
+    #
+    # conf:
+    #   - include:
+    #       bean: <BEAN_NAME>
+    #       attribute:
+    #         MyAttribute:
+    #           alias: my.metric.name
+    #           metric_type: gauge
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
 ## Every instance is scheduled independent of the others.
 #
 instances:
@@ -132,38 +167,3 @@ instances:
 #     path: <ACTIVEMQ_BASEDIR>/data/audit.log
 #     source: activemq
 #     service: <SERVICE_NAME>
-
-## All options defined here are available to all instances.
-#
-init_config:
-
-    ## @param is_jmx - boolean - required
-    ## Whether or not this file is a configuration for a JMX integration.
-    #
-    is_jmx: true
-
-    ## @param collect_default_metrics - boolean - required
-    ## Whether or not the check should collect all default metrics.
-    #
-    collect_default_metrics: true
-
-    ## @param conf - list of mappings - required
-    ## The list of metrics to be collected by the integration
-    ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
-    ## The default metrics to be collected are kept in metrics.yaml, but you can still
-    ## add your own metrics here.
-    #
-    conf:
-      - include:
-          bean: <BEAN_NAME>
-          attribute:
-            MyAttribute:
-              alias: my.metric.name
-              metric_type: gauge
-
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Additionally, this sets the default `service` for every log source.
-    #
-    # service: <SERVICE>
