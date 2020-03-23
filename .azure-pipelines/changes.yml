@@ -2,8 +2,8 @@ trigger: none
 
 pr:
   branches:
-    include:
-    - master
+    exclude:
+      - '*_ci_all'
   paths:
     exclude:
     - datadog_checks_base/datadog_checks/*
