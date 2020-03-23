@@ -712,7 +712,8 @@ class OpenMetricsScraperMixin(object):
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
             if sample[self.SAMPLE_NAME].endswith("_sum"):
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
-                self.gauge(
+                self._submit_distribution_count(
+                    scraper_config['send_distribution_sums_as_monotonic'],
                     "{}.{}.sum".format(scraper_config['namespace'], metric_name),
                     val,
                     tags=tags,
@@ -751,7 +752,8 @@ class OpenMetricsScraperMixin(object):
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
             if sample[self.SAMPLE_NAME].endswith("_sum") and not scraper_config['send_distribution_buckets']:
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
-                self.gauge(
+                self._submit_distribution_count(
+                    scraper_config['send_distribution_sums_as_monotonic'],
                     "{}.{}.sum".format(scraper_config['namespace'], metric_name),
                     val,
                     tags=tags,
