@@ -1,0 +1,19 @@
+name: Active Directory
+files:
+- name: active_directory.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/pdh
+      overrides:
+          host.required: true
+    - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /path/to/active_directory/file.log
+      source: ruby
+      service: <SERVICE_NAME>

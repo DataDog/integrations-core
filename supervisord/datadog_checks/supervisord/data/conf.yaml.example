@@ -13,9 +13,18 @@ instances:
     # host: localhost
 
     ## @param port - integer - optional - default: 9001
-    ## The port number.
+    ## The TCP port value that supervisor is listening on for HTTP/XML-RPC requests.
+    ##
+    ## See: http://supervisord.org/configuration.html#inet-http-server-section-settings
     #
     # port: 9001
+
+    ## @param socket - string - optional
+    ## The path to a UNIX domain socket that supervisor is listening on for HTTP/XML-RPC requests.
+    ##
+    ## See: http://supervisord.org/configuration.html#unix-http-server-section-settings
+    #
+    # socket: <SOCKETFILE_PATH>
 
     ## @param user - string - optional
     ## Required only if a username is configured.

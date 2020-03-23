@@ -33,8 +33,7 @@ def upgrade_python(new_version, old_version):
     """Upgrade the Python version of all test environments.
 
     \b
-    $ ddev meta scripts upgrade-python 3.8
-    Updated 125 files
+    `$ ddev meta scripts upgrade-python 3.8`
     """
     root = get_root()
 
