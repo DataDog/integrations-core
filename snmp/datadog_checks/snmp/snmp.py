@@ -6,6 +6,7 @@ import fnmatch
 import functools
 import ipaddress
 import json
+import re
 import threading
 import time
 from collections import defaultdict
@@ -19,7 +20,7 @@ from datadog_checks.base.errors import CheckException
 
 from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, write_persistent_cache
-from .config import InstanceConfig, ParsedMetric, ParsedMetricTag, ParsedTableMetric
+from .config import InstanceConfig, ParsedMatchMetricTags, ParsedMetric, ParsedMetricTag, ParsedTableMetric
 from .exceptions import PySnmpError
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
@@ -388,7 +389,7 @@ class SnmpCheck(AgentCheck):
         return error
 
     def extract_metric_tags(self, metric_tags, results):
-        # type: (List[ParsedMetricTag], Dict[str, dict]) -> List[str]
+        # type: (List[Union[ParsedMetricTag, ParsedMatchMetricTags]], Dict[str, dict]) -> List[str]
         extracted_tags = []
         for tag in metric_tags:
             if tag.symbol not in results:
@@ -400,7 +401,10 @@ class SnmpCheck(AgentCheck):
                     'You are trying to use a table column (OID `{}`) as a metric tag. This is not supported as '
                     '`metric_tags` can only refer to scalar OIDs.'.format(tag.symbol)
                 )
-            extracted_tags.append('{}:{}'.format(tag.name, tag_values[0]))
+            try:
+                extracted_tags.extend(tag.matched_tags(tag_values[0]))
+            except re.error as e:
+                self.log.debug('Failed to match %s for %s: %s', tag_values[0], tag.symbol, e)
         return extracted_tags
 
     def report_metrics(
