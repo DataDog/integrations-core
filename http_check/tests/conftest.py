@@ -7,10 +7,12 @@ import sys
 import pytest
 from mock import patch
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, run_command
 from datadog_checks.dev.utils import ON_WINDOWS
 
 from .common import CONFIG_E2E, HERE
+
+MOCKED_HOSTS = ['valid.mock', 'expired.mock', 'wronghost.mock', 'selfsigned.mock']
 
 
 @pytest.fixture(scope='session')
@@ -33,14 +35,15 @@ def mock_dns():
     def patched_getaddrinfo(host, *args, **kwargs):
         if host.endswith('.mock'):
             # See socket.getaddrinfo, just updating the hostname here.
-            return [(2, 1, 6, '', ('127.0.0.1', 4443))]
+            # https://docs.python.org/3/library/socket.html#socket.getaddrinfo
+            return [(2, 1, 6, '', ('127.0.0.1', 443))]
 
         return _orig_getaddrinfo(host, *args, **kwargs)
 
     def patched_connect(self, address):
         host, port = address[0], address[1]
         if host.endswith('.mock'):
-            host, port = '127.0.0.1', 4443
+            host, port = '127.0.0.1', 443
 
         return _orig_connect(self, (host, port))
 
@@ -49,6 +52,18 @@ def mock_dns():
     yield
     socket.getaddrinfo = _orig_getaddrinfo
     socket.socket.connect = _orig_connect
+
+
+@pytest.fixture()
+def mock_hosts_e2e():
+    """Only for e2e testing"""
+    container_id = "dd_http_check_{}".format(os.environ["TOX_ENV_NAME"])
+    commands = []
+    for mocked_host in MOCKED_HOSTS:
+        commands.append(r'bash -c "printf \"127.0.0.1 {}\n\" >> /etc/hosts"'.format(mocked_host))
+
+    for command in commands:
+        run_command('docker exec {} {}'.format(container_id, command))
 
 
 @pytest.fixture(scope='session')

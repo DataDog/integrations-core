@@ -17,7 +17,7 @@ services:
       - ./www/:/www/data/
       - certs:/etc/nginx/certs/:ro
     ports:
-      - "4443:443"
+      - "443:443"
     depends_on:
       - cert-builder
 

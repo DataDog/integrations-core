@@ -100,7 +100,7 @@ CONFIG_SSL_ONLY = {
     'instances': [
         {
             'name': 'good_cert',
-            'url': 'https://valid.mock:443',  # Redirects to localhost:4443
+            'url': 'https://valid.mock:443',
             'timeout': 1,
             'check_certificate_expiration': True,
             'days_warning': 14,
