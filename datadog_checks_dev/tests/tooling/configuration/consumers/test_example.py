@@ -245,7 +245,6 @@ def test_section_example_indent():
         ## source  - required - Attribute that defines which Integration sent the logs
         ## service - required - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
-        ## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
         ## tags - optional - Add tags to the collected logs
         ##
         ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
@@ -308,7 +307,6 @@ def test_section_example_indent_required():
         ## source  - required - Attribute that defines which Integration sent the logs
         ## service - required - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
-        ## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
         ## tags - optional - Add tags to the collected logs
         ##
         ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
