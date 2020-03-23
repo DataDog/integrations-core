@@ -67,6 +67,7 @@ def assert_metric_coverage(version, aggregator):
     aggregator.assert_metric('pgbouncer.pools.sv_tested')
     aggregator.assert_metric('pgbouncer.pools.sv_login')
     aggregator.assert_metric('pgbouncer.pools.maxwait')
+    aggregator.assert_metric('pgbouncer.pools.maxwait_us')
     aggregator.assert_metric('pgbouncer.stats.avg_recv')
     aggregator.assert_metric('pgbouncer.stats.avg_sent')
 

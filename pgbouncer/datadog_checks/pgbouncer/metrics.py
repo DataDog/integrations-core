@@ -40,6 +40,7 @@ POOLS_METRICS = {
         ('sv_tested', ('pgbouncer.pools.sv_tested', GAUGE)),
         ('sv_login', ('pgbouncer.pools.sv_login', GAUGE)),
         ('maxwait', ('pgbouncer.pools.maxwait', GAUGE)),
+        ('maxwait_us', ('pgbouncer.pools.maxwait_us', GAUGE)),
     ],
     'query': """SHOW POOLS""",
 }
