@@ -4,9 +4,20 @@ files:
   options:
   - template: init_config
     options:
+      - template: init_config/http
       - template: init_config/default
   - template: instances
     options:
+    - name: url
+      required: true
+      description: |
+        url to gather the stats from.
+        It should be something like http://<hostname>:8161
+
+        Note: the agent check will append /admin/xml/queues.jsp to the url
+      value:
+        type: string
+        example: http://localhost:8161
     - name: suppress_errors
       required: false
       description: Suppresses connection errors if url is expected to be sometimes offline (e.g. standby host).
