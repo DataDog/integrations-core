@@ -5,10 +5,9 @@
 
 import re
 
-# 3rd party
 from six.moves.urllib.parse import urlparse
 
-# project
+from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 from datadog_checks.checks import AgentCheck
 
@@ -22,6 +21,9 @@ class Fluentd(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(Fluentd, self).__init__(name, init_config, instances)
+        if 'monitor_agent_url' not in self.instance:
+            raise ConfigurationError('Fluentd instance missing "monitor_agent_url" value.')
+
         if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
             # `default_timeout` config option will be removed with Agent 5
             timeout = (
@@ -35,6 +37,23 @@ class Fluentd(AgentCheck):
 
         self._fluentd_command = self.instance.get('fluentd', init_config.get('fluentd', 'fluentd'))
 
+        self.url = self.instance.get('monitor_agent_url')
+        parsed_url = urlparse(self.url)
+        monitor_agent_host = parsed_url.hostname
+        monitor_agent_port = parsed_url.port or 24220
+        self.config_url = '{}://{}:{}/api/config.json'.format(parsed_url.scheme, monitor_agent_host, monitor_agent_port)
+
+        self.custom_tags = self.instance.get('tags', [])
+        self.service_check_tags = [
+            'fluentd_host:%s' % monitor_agent_host,
+            'fluentd_port:%s' % monitor_agent_port,
+        ] + self.custom_tags
+
+        self.plugin_ids = self.instance.get('plugin_ids', [])
+        # Fallback  with `tag_by: plugin_id`
+        tag_by = self.instance.get('tag_by')
+        self.tag_by = tag_by if tag_by in self._AVAILABLE_TAGS else 'plugin_id'
+
     """Tracks basic fluentd metrics via the monitor_agent plugin
     * number of retry_count
     * number of buffer_queue_length
@@ -44,33 +63,14 @@ class Fluentd(AgentCheck):
     {"plugins":[{"type": "monitor_agent", ...}, {"type": "forward", ...}]}
     """
 
-    def check(self, instance):
-        if 'monitor_agent_url' not in instance:
-            raise Exception('Fluentd instance missing "monitor_agent_url" value.')
-
+    def check(self, _):
         try:
-            url = instance.get('monitor_agent_url')
-            plugin_ids = instance.get('plugin_ids', [])
-            custom_tags = instance.get('tags', [])
-
-            # Fallback  with `tag_by: plugin_id`
-            tag_by = instance.get('tag_by')
-            tag_by = tag_by if tag_by in self._AVAILABLE_TAGS else 'plugin_id'
-
-            parsed_url = urlparse(url)
-            monitor_agent_host = parsed_url.hostname
-            monitor_agent_port = parsed_url.port or 24220
-            service_check_tags = [
-                'fluentd_host:%s' % monitor_agent_host,
-                'fluentd_port:%s' % monitor_agent_port,
-            ] + custom_tags
-
-            r = self.http.get(url)
+            r = self.http.get(self.url)
             r.raise_for_status()
             status = r.json()
 
             for p in status['plugins']:
-                tag = "%s:%s" % (tag_by, p.get(tag_by))
+                tag = "%s:%s" % (self.tag_by, p.get(self.tag_by))
                 for m in self.GAUGES:
                     metric = p.get(m)
                     if metric is None:
@@ -85,24 +85,37 @@ class Fluentd(AgentCheck):
                             else:
                                 metric = 0
                     # Filter unspecified plugins to keep backward compatibility.
-                    if len(plugin_ids) == 0 or p.get('plugin_id') in plugin_ids:
-                        self.gauge('fluentd.%s' % (m), metric, [tag] + custom_tags)
+                    if len(self.plugin_ids) == 0 or p.get('plugin_id') in self.plugin_ids:
+                        self.gauge('fluentd.%s' % m, metric, [tag] + self.custom_tags)
 
             self._collect_metadata()
         except Exception as e:
-            msg = "No stats could be retrieved from %s : %s" % (url, str(e))
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=msg)
+            msg = "No stats could be retrieved from %s : %s" % (self.url, str(e))
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.service_check_tags, message=msg)
             raise
         else:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.service_check_tags)
 
     def _collect_metadata(self):
-        if self.is_metadata_collection_enabled():
-            raw_version = self._get_raw_version()
-            if raw_version:
-                self.set_metadata('version', raw_version)
+        raw_version = None
+        if not self.is_metadata_collection_enabled():
+            return
 
-    def _get_raw_version(self):
+        try:
+            r = self.http.get(self.config_url)
+            r.raise_for_status()
+            config = r.json()
+            raw_version = config.get('version')
+        except Exception as e:
+            self.log.debug("No config could be retrieved from %s: %s", self.config_url, e)
+
+        # Fall back to command line for older versions of fluentd
+        if not raw_version:
+            raw_version = self._get_version_from_command_line()
+        if raw_version:
+            self.set_metadata('version', raw_version)
+
+    def _get_version_from_command_line(self):
         version_command = '{} --version'.format(self._fluentd_command)
 
         try:

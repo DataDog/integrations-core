@@ -10,12 +10,30 @@ pytestmark = pytest.mark.integration
 
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
-def test_integration(aggregator, check, instance):
+def test_integration_metrics(aggregator, check, instance, datadog_agent):
     check = check(instance)
     check.check(instance)
+
     for metric in common.ELAPSED_TIME_METRICS:
         aggregator.assert_metric(metric)
     assert_metrics_covered(aggregator)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_metadata(aggregator, check, instance, datadog_agent):
+    check = check(instance)
+    check.check_id = 'test:123'
+    check.check(instance)
+
+    version_metadata = {
+        'version.raw': '2.7.1',
+        'version.scheme': 'semver',
+        'version.major': '2',
+        'version.minor': '7',
+        'version.patch': '1',
+    }
+    datadog_agent.assert_metadata('test:123', version_metadata)
 
 
 @pytest.mark.e2e

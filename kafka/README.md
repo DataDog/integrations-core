@@ -53,6 +53,7 @@ _Available for Agent versions >6.0_
      %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
      %d [%t] %-5p %c - %m%n
      %r [%t] %p %c %x - %m%n
+     [%d] %p %m (%c)%n
    ```
 
     Clone and edit the [integration pipeline][9] if you have a different format.

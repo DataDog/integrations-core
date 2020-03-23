@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections import defaultdict
 from typing import Dict, List
 
 import win32wnet
@@ -34,19 +35,20 @@ class PDHBaseCheck(AgentCheck):
         # TODO: Change signature to (self, name, init_config, instances, counter_list) once subclasses have been edited
         super(PDHBaseCheck, self).__init__(*args, **kwargs)
         self._missing_counters = {}  # type: Dict[str, tuple]
-        self._metrics = []  # type: List[List]
-        self._tags = []  # type: List[str]
+        self._metrics = defaultdict(list)  # type: Dict[int, List[List]]  # This dictionary only has one key
+        self._tags = defaultdict(list)  # type: Dict[int, List[str]]  # This dictionary only has one key
         self.refresh_counters = is_affirmative(self.instance.get('refresh_counters', True))  # type: bool
         # TODO Remove once signature is restored to (self, name, init_config, instances, counter_list)
         counter_list = kwargs.get('counter_list', args[-1])  # type: List[List[str]]
 
         try:
-            cfg_tags = self.instance.get('tags')
+            self.instance_hash = hash_mutable(self.instance)  # type: int
+            cfg_tags = self.instance.get('tags')  # type: List[str]
             if cfg_tags is not None:
                 if not isinstance(cfg_tags, list):
                     self.log.error("Tags must be configured as a list")
                     raise ValueError("Tags must be type list, not %s" % str(type(cfg_tags)))
-                self._tags = list(cfg_tags)
+                self._tags[self.instance_hash] = list(cfg_tags)
 
             remote_machine = None
             host = self.instance.get('host')
@@ -90,18 +92,20 @@ class PDHBaseCheck(AgentCheck):
                         else:
                             self.log.warning("Unknown data type %s", str(v))
 
-            self._make_counters((counter_list, (datatypes, remote_machine, False, 'entry')))
+            self._make_counters(counter_data=(counter_list, (datatypes, remote_machine, False, 'entry')))
 
             # get any additional metrics in the instance
             addl_metrics = self.instance.get('additional_metrics')
             if addl_metrics is not None:
-                self._make_counters((addl_metrics, (datatypes, remote_machine, True, 'additional metric entry')))
+                self._make_counters(
+                    counter_data=(addl_metrics, (datatypes, remote_machine, True, 'additional metric entry'))
+                )
 
         except Exception as e:
             self.log.debug("Exception in PDH init: %s", str(e))
             raise
 
-        if not self._metrics or not hash_mutable(self.instance):
+        if not self.instance_hash or not self._metrics.get(self.instance_hash):
             raise AttributeError('No valid counters to collect')
 
     def _get_netresource(self, remote_machine):
@@ -145,17 +149,15 @@ class PDHBaseCheck(AgentCheck):
 
         if self.refresh_counters:
             for counter, values in list(iteritems(self._missing_counters)):
-                self._make_counters(([counter], values))
+                self._make_counters(counter_data=([counter], values))
 
-        for inst_name, dd_name, metric_func, counter in self._metrics:
+        for inst_name, dd_name, metric_func, counter in self._metrics[self.instance_hash]:
             try:
                 if self.refresh_counters:
                     counter.collect_counters()
                 vals = counter.get_all_values()
                 for instance_name, val in iteritems(vals):
-                    tags = []
-                    if self._tags:
-                        tags = list(self._tags)
+                    tags = list(self._tags.get(self.instance_hash, []))  # type: List[str]
 
                     if not counter.is_single_instance():
                         tag = "instance:%s" % instance_name
@@ -165,7 +167,8 @@ class PDHBaseCheck(AgentCheck):
                 # don't give up on all of the metrics because one failed
                 self.log.error("Failed to get data for %s %s: %s", inst_name, dd_name, str(e))
 
-    def _make_counters(self, counter_data):
+    def _make_counters(self, key=None, counter_data=([], ())):  # Key left in for retrocompatibility
+        # type: (int, tuple) -> None
         counter_list, (datatypes, remote_machine, check_instance, message) = counter_data
 
         # list of the metrics. Each entry is itself an entry,
@@ -202,7 +205,7 @@ class PDHBaseCheck(AgentCheck):
 
             entry = [inst_name, dd_name, m, obj]
             self.log.debug('%s: %s', message, entry)
-            self._metrics.append(entry)
+            self._metrics[self.instance_hash].append(entry)
 
     @classmethod
     def _no_instance(cls, inst_name):
