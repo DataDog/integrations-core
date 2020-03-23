@@ -18,7 +18,6 @@ files:
       service: <SERVICE_NAME>
   - template: init_config
     options:
-      - template: init_config/default
       - template: init_config/jmx
         overrides:
           conf.required : true
@@ -74,4 +73,5 @@ files:
                   MemoryPercentUsage:
                     alias: activemq.broker.memory_pct
                     metric_type: gauge
+      - template: init_config/default
 

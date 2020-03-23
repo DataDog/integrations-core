@@ -137,13 +137,6 @@ instances:
 #
 init_config:
 
-    ## @param service - string - optional
-    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
-    ##
-    ## Additionally, this sets the default `service` for every log source.
-    #
-    # service: <SERVICE>
-
     ## @param is_jmx - boolean - required
     ## Whether or not this file is a configuration for a JMX integration.
     #
@@ -167,3 +160,10 @@ init_config:
             MyAttribute:
               alias: my.metric.name
               metric_type: gauge
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
