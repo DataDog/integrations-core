@@ -17,8 +17,7 @@ def remove_labels(ctx, issue_number):
     many labels and its state cannot be modified (known GitHub issue).
 
     \b
-    $ ddev meta scripts remove-labels 5626
-    Success!
+    `$ ddev meta scripts remove-labels 5626`
     """
     repo = ctx.obj['repo_name']
     github_config = ctx.obj['github']

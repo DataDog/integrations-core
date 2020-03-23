@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
+import re
 from collections import defaultdict
-from typing import Any, Callable, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, DefaultDict, Dict, Iterator, List, Optional, Pattern, Set, Tuple, Union
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
@@ -72,6 +73,28 @@ class ParsedMetricTag(object):
         # type: (str, str) -> None
         self.name = name
         self.symbol = symbol
+
+    def matched_tags(self, value):
+        # type: (Any) -> Iterator[str]
+        yield '{}:{}'.format(self.name, value)
+
+
+class ParsedMatchMetricTags(object):
+
+    __slots__ = ('names', 'symbol', 'match')
+
+    def __init__(self, names, symbol, match):
+        # type: (dict, str, Pattern) -> None
+        self.names = names
+        self.symbol = symbol
+        self.match = match
+
+    def matched_tags(self, value):
+        # type: (Any) -> Iterator[str]
+        matched = self.match.match(str(value))
+        if matched is not None:
+            for name, match in self.names.items():
+                yield '{}:{}'.format(name, matched.expand(match))
 
 
 def _no_op(*args, **kwargs):
@@ -478,17 +501,42 @@ class InstanceConfig:
         return all_oids, bulk_oids, parsed_metrics
 
     def parse_metric_tags(self, metric_tags):
-        # type: (List[Dict[str, Any]]) -> Tuple[List[Any], List[ParsedMetricTag]]
+        # type: (List[Dict[str, Any]]) -> Tuple[List[Any], List[Any]]
         """Parse configuration for global metric_tags."""
         oids = []
         parsed_metric_tags = []
+
         for tag in metric_tags:
-            if not ('symbol' in tag and 'tag' in tag):
-                raise ConfigurationError("A metric tag needs to specify a symbol and a tag: {}".format(tag))
-            if not ('OID' in tag or 'MIB' in tag):
-                raise ConfigurationError("A metric tag needs to specify an OID or a MIB: {}".format(tag))
+            if 'symbol' not in tag:
+                raise ConfigurationError('A metric tag needs to specify a symbol: {}'.format(tag))
             symbol = tag['symbol']
-            tag_name = tag['tag']
+
+            if not ('OID' in tag or 'MIB' in tag):
+                raise ConfigurationError('A metric tag needs to specify an OID or a MIB: {}'.format(tag))
+
+            if 'tag' not in tag:
+                if not ('tags' in tag and 'match' in tag):
+                    raise ConfigurationError(
+                        'A metric tag needs to specify either a tag, '
+                        'or a mapping of tags and a regular expression: {}'.format(tag)
+                    )
+                tags = tag['tags']
+                if not isinstance(tags, dict):
+                    raise ConfigurationError(
+                        'Specified tags needs to be a mapping of tag name to regular '
+                        'expression matching: {}'.format(tag)
+                    )
+                match = tag['match']
+                try:
+                    compiled_match = re.compile(match)
+                except re.error as e:
+                    raise ConfigurationError('Failed compile regular expression {}: {}'.format(match, e))
+                else:
+                    parsed = ParsedMatchMetricTags(tags, symbol, compiled_match)
+            else:
+                tag_name = tag['tag']
+                parsed = ParsedMetricTag(tag_name, symbol)  # type: ignore
+
             if 'MIB' in tag:
                 mib = tag['MIB']
                 identity = ObjectIdentity(mib, symbol)
@@ -496,9 +544,11 @@ class InstanceConfig:
                 oid = tag['OID']
                 identity = ObjectIdentity(oid)
                 self._resolver.register(OID(oid).as_tuple(), symbol)
+
             object_type = ObjectType(identity)
             oids.append(object_type)
-            parsed_metric_tags.append(ParsedMetricTag(tag_name, symbol))
+            parsed_metric_tags.append(parsed)
+
         return oids, parsed_metric_tags
 
     def add_uptime_metric(self):

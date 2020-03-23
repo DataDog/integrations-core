@@ -20,7 +20,7 @@ def tag(check, version, push, dry_run):
 
     You can tag everything at once by setting the check to `all`.
 
-    Notice: specifying a different version than the one in __about__.py is
+    Notice: specifying a different version than the one in `__about__.py` is
     a maintenance task that should be run under very specific circumstances
     (e.g. re-align an old release performed on the wrong commit).
     """
