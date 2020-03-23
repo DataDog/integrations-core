@@ -64,7 +64,7 @@ _Available for Agent versions >6.0_
        - type: file
          path: <CONFLUENT_COMPONENT_PATH>/logs/*.log
          source: confluent_platform
-         service: '<SERVICE_NAME>'
+         service: <SERVICE_NAME>
          log_processing_rules:
            - type: multi_line
              name: new_log_start_with_date
