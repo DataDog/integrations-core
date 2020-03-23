@@ -293,6 +293,10 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
         pr_author = pr_data.get('user', {}).get('login', '')
         pr_body = pr_data.get('body', '')
 
+        trello_config = user_config['trello']
+        if not (trello_config['key'] and trello_config['token']):
+            abort('Error: You are not authenticated for Trello. Please set your trello ddev config')
+
         teams = [trello.label_team_map[label] for label in pr_labels if label in trello.label_team_map]
         if teams:
             create_trello_card(trello, teams, pr_title, pr_url, pr_body, dry_run, pr_author, user_config)
