@@ -5,7 +5,7 @@ import mock
 import pytest
 from six import iteritems
 
-from datadog_checks.mongo import MongoDb
+from datadog_checks.mongo import MongoDb, metrics
 
 RATE = MongoDb.rate
 GAUGE = MongoDb.gauge
@@ -26,7 +26,7 @@ def test_build_metric_list(check):
     # Default metric list
     DEFAULT_METRICS = {
         m_name: m_type
-        for d in [check.BASE_METRICS, check.DURABILITY_METRICS, check.LOCKS_METRICS, check.WIREDTIGER_METRICS]
+        for d in [metrics.BASE_METRICS, metrics.DURABILITY_METRICS, metrics.LOCKS_METRICS, metrics.WIREDTIGER_METRICS]
         for m_name, m_type in iteritems(d)
     }
 
@@ -43,11 +43,11 @@ def test_build_metric_list(check):
     # One correct option
     default_and_tcmalloc_metrics = build_metric_list(['tcmalloc'])
 
-    assert len(default_and_tcmalloc_metrics) == len(DEFAULT_METRICS) + len(check.TCMALLOC_METRICS)
+    assert len(default_and_tcmalloc_metrics) == len(DEFAULT_METRICS) + len(metrics.TCMALLOC_METRICS)
 
     # One wrong and correct option
     default_and_tcmalloc_metrics = build_metric_list(['foobar', 'top'])
-    assert len(default_and_tcmalloc_metrics) == len(DEFAULT_METRICS) + len(check.TOP_METRICS)
+    assert len(default_and_tcmalloc_metrics) == len(DEFAULT_METRICS) + len(metrics.TOP_METRICS)
     assert check.log.warning.call_count == 2
 
 
