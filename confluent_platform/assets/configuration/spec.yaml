@@ -30,7 +30,6 @@ files:
     - type: file
       path: <CONFLUENT_COMPONENT_PATH>/logs/*.log
       source: confluent_platform
-      sourcecategory: messaging
       service: <SERVICE_NAME>
       log_processing_rules:
       - type: multi_line
