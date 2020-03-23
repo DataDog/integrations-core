@@ -15,3 +15,5 @@ MONGODB_VERSION = os.environ['MONGO_VERSION']
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
+
+DEFAULT_INSTANCE = {'server': MONGODB_SERVER}
