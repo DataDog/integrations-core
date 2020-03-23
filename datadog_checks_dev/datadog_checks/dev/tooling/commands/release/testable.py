@@ -12,25 +12,20 @@ from ....utils import basepath, chdir, get_next
 from ...constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
 from ...github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
 from ...trello import TrelloClient
-from ...utils import format_commit_id, get_current_agent_version
+from ...utils import format_commit_id
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 
-def validate_version(ctx, param, value):
-    if not value or ctx.resilient_parsing:
-        return
-
-    try:
-        parts = value.split('.')
-        if len(parts) == 2:
-            parts.append('0')
-        version_info = parse_version_info('.'.join(parts))
-        return f'{version_info.major}.{version_info.minor}'
-    except ValueError:
-        raise click.BadParameter('needs to be in semver format x.y[.z]')
-
-
-def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run, pr_author, config):
+def create_trello_card(
+    client: TrelloClient,
+    teams: List[str],
+    pr_title: str,
+    pr_url: str,
+    pr_body: str,
+    dry_run: bool,
+    pr_author: str,
+    config: dict,
+):
     body = f'Pull request: {pr_url}\n\n{pr_body}'
 
     for team in teams:
