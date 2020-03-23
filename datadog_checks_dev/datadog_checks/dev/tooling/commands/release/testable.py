@@ -43,7 +43,7 @@ def create_trello_card(client, teams, pr_title, pr_url, pr_body, dry_run, pr_aut
             continue
         creation_attempts = 3
         for attempt in range(3):
-            rate_limited, error, response = client.create_issue(team, pr_title, body, member)
+            rate_limited, error, response = client.create_card(team, pr_title, body, member)
             if rate_limited:
                 wait_time = 10
                 echo_warning(
@@ -226,11 +226,9 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
 
     commit_ids: Set[str] = set()
     user_config = ctx.obj
-    for i, (commit_hash, commit_subject) in enumerate(commits, 1):
     trello = TrelloClient(user_config)
-    found_start_id = False
 
-    for i, (commit_hash, commit_subject) in enumerate(diff_data, 1):
+    for i, (commit_hash, commit_subject) in enumerate(commits, 1):
         commit_id = parse_pr_number(commit_subject)
         if commit_id is not None:
             api_response = get_pr(commit_id, user_config, raw=True)

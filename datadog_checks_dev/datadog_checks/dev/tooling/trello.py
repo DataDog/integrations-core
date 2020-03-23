@@ -31,7 +31,7 @@ class TrelloClient:
             'team/logs': 'Logs',
         }
 
-    def create_card(self, team, name, body, , member=None):
+    def create_card(self, team, name, body, member=None):
         rate_limited = False
         error = None
         response = None
@@ -45,7 +45,7 @@ class TrelloClient:
 
         params.update(self.auth)
 
-        if members:
+        if member:
             params['idMembers'] = [member]
 
         try:
