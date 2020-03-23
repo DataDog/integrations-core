@@ -25,7 +25,7 @@ def create_trello_card(
     dry_run: bool,
     pr_author: str,
     config: dict,
-):
+) -> None:
     body = f'Pull request: {pr_url}\n\n{pr_body}'
 
     for team in teams:
