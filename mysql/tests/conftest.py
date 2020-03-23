@@ -29,14 +29,12 @@ def config_e2e():
                 'type': 'file',
                 'path': '{}/mysql.log'.format(logs_path),
                 'source': 'mysql',
-                'sourcecategory': 'database',
                 'service': 'local_mysql',
             },
             {
                 'type': 'file',
                 'path': '{}/mysql_slow.log'.format(logs_path),
                 'source': 'mysql',
-                'sourcecategory': 'database',
                 'service': 'local_mysql',
                 'log_processing_rules': [
                     {'type': 'multi_line', 'name': 'log_starts_with_time', 'pattern': '# Time: '},
