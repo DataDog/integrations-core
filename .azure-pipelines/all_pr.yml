@@ -2,7 +2,7 @@ pr:
   branches:
     include:
     - master
-    - '*_ci_all'
+    - '*/*_ci_all'
   paths:
     include:
     - datadog_checks_base/datadog_checks/*
