@@ -141,7 +141,7 @@ def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
 @click.pass_context
 def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str, dry_run: bool) -> None:
     """
-     Create a Trello card for changes since a previous release (referenced by `BASE_REF`)
+    Create a Trello card for changes since a previous release (referenced by `BASE_REF`)
     that need to be tested for the next release (referenced by `TARGET_REF`).
 
     `BASE_REF` and `TARGET_REF` can be any valid git references. It practice, you should use either:
