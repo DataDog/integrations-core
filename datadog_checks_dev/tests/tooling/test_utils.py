@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from os.path import join
 
 import mock
 
@@ -121,7 +122,7 @@ def test_complete_set_root_extras(set_root, get_root):
 
 @mock.patch('datadog_checks.dev.tooling.utils.get_root')
 def test_get_check_files(get_root):
-    get_root.return_value = '/tmp'
+    get_root.return_value = ''
 
     mock_dir_map = {
         '': [
@@ -140,25 +141,31 @@ def test_get_check_files(get_root):
             )
         ],
         'datadog_checks': [
-            ('dns_check/datadog_checks', ['dns_check'], ['__init__.py']),
-            ('dns_check/datadog_checks/dns_check', ['data'], ['__init__.py', '__about__.py', 'dns_check.py']),
-            ('dns_check/datadog_checks/dns_check/data', [], ['conf.yaml.example']),
+            (join('dns_check', 'datadog_checks'), ['dns_check'], ['__init__.py']),
+            (
+                join('dns_check', 'datadog_checks', 'dns_check'),
+                ['data'],
+                ['__init__.py', '__about__.py', 'dns_check.py'],
+            ),
+            (join('dns_check', 'datadog_checks', 'dns_check', 'data'), [], ['conf.yaml.example']),
         ],
-        '.tox': [('dns_check/.tox', ['py37', '.tmp', 'py27'], [])],
-        'datadog_dns_check.egg-info': [('dns_check/datadog_dns_check.egg-info', [], ['PKG-INFO', 'SOURCES.txt'])],
-        'tests': [('dns_check/tests', [], ['test_dns_check.py', '__init__.py', 'common.py'])],
-        '.junit': [('dns_check/.junit', [], ['test-e2e-py37.xml', 'test-e2e-py27.xml'])],
-        'assets': [('dns_check/assets', [], ['service_checks.json'])],
+        '.tox': [(join('dns_check', '.tox'), ['py37', '.tmp', 'py27'], [])],
+        'datadog_dns_check.egg-info': [
+            (join('dns_check', 'datadog_dns_check.egg-info'), [], ['PKG-INFO', 'SOURCES.txt'])
+        ],
+        'tests': [(join('dns_check', 'tests'), [], ['test_dns_check.py', '__init__.py', 'common.py'])],
+        '.junit': [(join('dns_check', '.junit'), [], ['test-e2e-py37.xml', 'test-e2e-py27.xml'])],
+        'assets': [(join('dns_check', 'assets'), [], ['service_checks.json'])],
     }
 
     default_py_files = [
-        'dns_check/datadog_checks/__init__.py',
-        'dns_check/datadog_checks/dns_check/__init__.py',
-        'dns_check/datadog_checks/dns_check/__about__.py',
-        'dns_check/datadog_checks/dns_check/dns_check.py',
-        'dns_check/tests/test_dns_check.py',
-        'dns_check/tests/__init__.py',
-        'dns_check/tests/common.py',
+        join('dns_check', 'datadog_checks', '__init__.py'),
+        join('dns_check', 'datadog_checks', 'dns_check', '__init__.py'),
+        join('dns_check', 'datadog_checks', 'dns_check', '__about__.py'),
+        join('dns_check', 'datadog_checks', 'dns_check', 'dns_check.py'),
+        join('dns_check', 'tests', 'test_dns_check.py'),
+        join('dns_check', 'tests', '__init__.py'),
+        join('dns_check', 'tests', 'common.py'),
     ]
 
     with mock.patch('os.walk') as mockwalk:
@@ -168,7 +175,7 @@ def test_get_check_files(get_root):
         assert list(files) == default_py_files
 
         files = get_check_files('dns_check', file_suffix='.json', include_dirs=['assets'])
-        assert list(files) == ['dns_check/assets/service_checks.json']
+        assert list(files) == [join('dns_check', 'assets', 'service_checks.json')]
 
         files = get_check_files('dns_check', file_suffix='.json', include_dirs=['', 'assets'])
-        assert list(files) == ['dns_check/manifest.json', 'dns_check/assets/service_checks.json']
+        assert list(files) == [join('dns_check', 'manifest.json'), join('dns_check', 'assets', 'service_checks.json')]
