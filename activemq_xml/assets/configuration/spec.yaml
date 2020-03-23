@@ -1,0 +1,41 @@
+name: ActiveMQ XML
+files:
+- name: activemq_xml.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/default
+  - template: instances
+    options:
+    - name: suppress_errors
+      required: false
+      description: Suppresses connection errors if url is expected to be sometimes offline (e.g. standby host).
+      value:
+        example: false
+        type: boolean
+    - name: detailed_queues
+      required: false
+      description: If you have more than 300 queues you need to list the ones you want to track.
+      value:
+        type: array
+        items:
+          type: string
+        example: [<QUEUE_1>, <QUEUE_2>]
+    - name: detailed_topics
+      required: false
+      description: If you have more than 300 topics you need to list the ones you want to track.
+      value:
+        type: array
+        items:
+          type: string
+        example: [<TOPIC_1>, <TOPIC_2>]
+    - name: detailed_subscribers
+      required: false
+      description: If you have more than 300 subscribers you need to list the ones you want to track.
+      value:
+        type: array
+        items:
+          type: string
+        example: [<SUBSCRIBER_1>, <SUBSCRIBER_2>]
+    - template: instances/http
+    - template: instances/default
