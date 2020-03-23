@@ -75,8 +75,6 @@ _Available for Agent versions >6.0_
 
 3. [Restart the Agent][7].
 
-#### Containerized
-
 ##### Metric collection
 
 For containerized environments, see the [Autodiscovery with JMX][10] guide.
