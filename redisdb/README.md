@@ -50,7 +50,6 @@ _Available for Agent versions >6.0_
      - type: file
        path: /var/log/redis_6379.log
        source: redis
-       sourcecategory: database
        service: myapplication
    ```
 
