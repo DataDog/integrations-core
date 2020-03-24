@@ -69,7 +69,7 @@ def setup_cluster():
     # Simulate client activity.
     # NOTE: ensures that 'written_docs_*' and 'read_docs_*' metrics have non-zero values.
 
-    with r.connect(host=HOST, port=SERVER_PORTS['proxy'], user=CLIENT_USER) as conn:
+    with r.connect(host=HOST, port=SERVER_PORTS['server0'], user=CLIENT_USER) as conn:
         response = r.db(DATABASE).table(HEROES_TABLE).insert(HEROES_TABLE_DOCUMENTS).run(conn)
         assert response['inserted'] == len(HEROES_TABLE_DOCUMENTS)
 
