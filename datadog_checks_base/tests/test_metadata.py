@@ -11,11 +11,12 @@ import mock
 import pytest
 from six import PY3
 
-from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode, metadata_entrypoint
+from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
 
 pytestmark = pytest.mark.metadata
 
 SET_CHECK_METADATA_METHOD = 'datadog_checks.base.stubs.datadog_agent.set_check_metadata'
+GET_CONFIG_METHOD = 'datadog_checks.base.stubs.datadog_agent.get_config'
 
 # The order is used to derive the display name for the regex tests
 NON_STANDARD_VERSIONS = OrderedDict()
@@ -507,7 +508,7 @@ class TestMetadataEntrypoint:
         # type: () -> None
 
         class MyCheck(AgentCheck):
-            @metadata_entrypoint
+            @AgentCheck.metadata_entrypoint
             def process_metadata(self, message):
                 # type: (str) -> None
                 self.set_metadata('my_message', message)
@@ -516,9 +517,7 @@ class TestMetadataEntrypoint:
                 # type: (Any) -> None
                 self.process_metadata(message='Hello, world')
 
-        with mock.patch('datadog_checks.base.checks.base.datadog_agent.get_config') as get_config:
-            get_config.return_value = False
-
+        with mock.patch(GET_CONFIG_METHOD, return_value=False):
             check = MyCheck('test', {}, [{}])
 
             with mock.patch(SET_CHECK_METADATA_METHOD) as m:
@@ -528,7 +527,7 @@ class TestMetadataEntrypoint:
     def test_metadata_entrypoint_logs_exceptions(self, caplog):
         # type: (Any) -> None
         class MyCheck(AgentCheck):
-            @metadata_entrypoint
+            @AgentCheck.metadata_entrypoint
             def process_metadata(self):
                 # type: () -> None
                 raise RuntimeError('Something went wrong -- catch me!')
@@ -539,7 +538,7 @@ class TestMetadataEntrypoint:
 
         check = MyCheck('test', {}, [{}])
 
-        caplog.set_level(logging.WARNING)
+        caplog.set_level(logging.DEBUG)
         check.check({})
         assert len(caplog.records) == 1
         assert 'Something went wrong -- catch me!' in caplog.text
