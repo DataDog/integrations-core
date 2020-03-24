@@ -193,6 +193,10 @@ class VSphereAPI(object):
         finally:
             view_ref.Destroy()
 
+        # Build infrastructure data
+        # Each `obj_content` contains the fields:
+        #   - `obj`: `ManagedEntity` aka `mor`
+        #   - `propSet`: properties related to the `mor`
         infrastructure_data = {
             obj_content.obj: {prop.name: prop.val for prop in obj_content.propSet}
             for obj_content in obj_content_list
