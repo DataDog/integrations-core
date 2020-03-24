@@ -7,7 +7,7 @@ Definition of high-level RethinkDB operations used by the RethinkDB check.
 Python ReQL reference documentation: https://rethinkdb.com/api/python/
 """
 
-from typing import Any, Iterator, List, Mapping, Tuple
+from typing import Any, Iterator, List, Mapping, Optional, Tuple
 
 import rethinkdb
 
@@ -39,13 +39,20 @@ system = r.db('rethinkdb')
 
 
 def get_connected_server_version(conn, **kwargs):
-    # type: (rethinkdb.net.Connection, **Any) -> str
+    # type: (rethinkdb.net.Connection, **Any) -> Optional[str]
     """
     Return the RethinkDB version used by the server at the other end of the connection.
     """
     # See: https://rethinkdb.com/docs/system-tables/#server_status
     server = conn.server()  # type: ConnectionServer
-    server_status = system.table('server_status').get(server['id']).run(conn)  # type: ServerStatus
+    server_status = system.table('server_status').get(server['id']).run(conn)  # type: Optional[ServerStatus]
+
+    if server_status is None:
+        # Only proxies don't have an entry in the `server_status` table.
+        if not server['proxy']:
+            raise RuntimeError('No `server_status` entry for server {!r}'.format(server['id']))
+        return None
+
     return parse_version(server_status['process']['version'])
 
 

@@ -84,6 +84,23 @@ def test_check_without_credentials_uses_admin(aggregator, instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+def test_check_connect_to_proxy(aggregator, instance):
+    # type: (AggregatorStub, Instance) -> None
+    instance = instance.copy()
+    instance['port'] = SERVER_PORTS['proxy']
+
+    check = RethinkDBCheck('rethinkdb', {}, [instance])
+    check.check(instance)
+
+    assert_metrics(aggregator)
+    aggregator.assert_all_metrics_covered()
+
+    service_check_tags = TAGS + _get_connect_service_check_tags(instance)
+    aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK, count=1, tags=service_check_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
 def test_check_connect_to_server_with_tls(aggregator, instance):
     # type: (AggregatorStub, Instance) -> None
     server = TLS_SERVER

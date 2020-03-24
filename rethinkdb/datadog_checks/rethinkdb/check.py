@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import contextmanager
-from typing import Any, Callable, Iterator, Sequence, cast
+from typing import Any, Callable, Iterator, Optional, Sequence, cast
 
 import rethinkdb
 
@@ -76,7 +76,7 @@ class RethinkDBCheck(AgentCheck):
                 yield metric
 
     def collect_connected_server_version(self, conn):
-        # type: (rethinkdb.net.Connection) -> str
+        # type: (rethinkdb.net.Connection) -> Optional[str]
         """
         Return the version of RethinkDB run by the server at the other end of the connection, in SemVer format.
         """
@@ -94,7 +94,8 @@ class RethinkDBCheck(AgentCheck):
         except ValueError as exc:
             self.log.error('Error collecting version metadata: %r', exc)
         else:
-            self.set_metadata('version', version)
+            if version is not None:
+                self.set_metadata('version', version)
 
     def check(self, instance):
         # type: (Any) -> None
