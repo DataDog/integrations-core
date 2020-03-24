@@ -19,7 +19,6 @@ files:
     - type: file
       path: /tmp/<USER>/hive.log
       source: hive
-      sourcecategory: database
       service: <SERVICE_NAME>
       log_processing_rules:
       - type: multi_line

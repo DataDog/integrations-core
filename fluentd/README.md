@@ -80,7 +80,6 @@ Setup Example:
   # Optional tags
   dd_source '<INTEGRATION_NAME>'
   dd_tags '<KEY1:VALUE1>,<KEY2:VALUE2>'
-  dd_sourcecategory '<SOURCE_CATEGORY>'
 
   <buffer>
           @type memory

@@ -81,7 +81,6 @@ _Available for Agent versions >6.0_
        path: C:\inetpub\logs\LogFiles\W3SVC1\u_ex*
        service: myservice
        source: iis
-       sourcecategory: http_web_access
    ```
 
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample iis.d/conf.yaml][5] for all available configuration options.

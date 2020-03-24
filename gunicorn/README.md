@@ -70,13 +70,11 @@ _Available for Agent versions >6.0_
        path: /var/log/gunicorn/access.log
        service: "<MY_SERVICE>"
        source: gunicorn
-       sourcecategory: http_web_access
 
      - type: file
        path: /var/log/gunicorn/error.log
        service: "<MY_SERVICE>"
        source: gunicorn
-       sourcecategory: sourcecode
        log_processing_rules:
          - type: multi_line
            name: log_start_with_date

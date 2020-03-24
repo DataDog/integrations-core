@@ -73,7 +73,7 @@ def test(
     You can also select specific comma-separated environments to test like so:
 
     \b
-    $ ddev test mysql:mysql57,maria10130
+    `$ ddev test mysql:mysql57,maria10130`
     """
     if list_envs:
         check_envs = get_tox_envs(checks, every=True, sort=True, changed_only=changed)
