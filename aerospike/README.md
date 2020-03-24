@@ -16,8 +16,8 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-<!--- {{< tabs >}} -->
-<!--- {{% tab "Host" %}} -->
+<!--- xxx tabs xxx -->
+<!--- xxx tab "Host" xxx -->
 
 #### Host
 
@@ -29,8 +29,8 @@ To configure this check for an Agent running on a host:
 
 [1]: https://github.com/DataDog/integrations-core/blob/master/aerospike/datadog_checks/aerospike/data/conf.yaml.example
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-<!--- {{% /tab %}} -->
-<!--- {{% tab "Containerized" %}} -->
+<!--- xxz tab xxx -->
+<!--- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -43,8 +43,8 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":"3000"}` |
 
 [6]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-<!--- {{% /tab %}} -->
-<!--- {{< /tabs >}} -->
+<!--- xxz tab xxx -->
+<!--- xxz tabs xxx -->
 
 ### Validation
 
