@@ -18,7 +18,6 @@ from six import binary_type, iteritems, text_type
 
 from ..config import is_affirmative
 from ..constants import ServiceCheck
-from ..log import SanitizationFilter
 from ..types import (
     AgentConfigType,
     Event,
@@ -347,7 +346,7 @@ class AgentCheck(object):
         if not hasattr(self, '_sanitizer'):
             # Configure lazily so that checks that don't use sanitization aren't affected.
             self._sanitizer = SecretsSanitizer()
-            self.log.logger.addFilter(SanitizationFilter('secrets', sanitize=self.sanitize))
+            self.log.setup_sanitization(sanitize=self.sanitize)
 
         self._sanitizer.register(secret)
 
