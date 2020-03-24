@@ -57,9 +57,5 @@ class Config(object):
         self.password = password  # type: Optional[str]
         self.tls_ca_cert = tls_ca_cert  # type: Optional[str]
         self.tags = tags  # type: List[str]
+        self.service_check_tags = ('host:{}'.format(self.host), 'port:{}'.format(self.port)) + tuple(self.tags)
         self.min_collection_interval = min_collection_interval  # type: float
-
-    @property
-    def service_check_tags(self):
-        # type: () -> List[str]
-        return ['host:{}'.format(self.host), 'port:{}'.format(self.port)] + self.tags
