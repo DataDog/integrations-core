@@ -13,15 +13,12 @@
 * [Added] Add meta command to fetch JMX info. See [#5652](https://github.com/DataDog/integrations-core/pull/5652).
 * [Added] Add `validate metadata` option to check for more duplicates. See [#5803](https://github.com/DataDog/integrations-core/pull/5803).
 * [Added] Add markdown output support to catalog tool. See [#5946](https://github.com/DataDog/integrations-core/pull/5946).
-* [Added] Bump datadog-checks-base version in new integration template. See [#5858](https://github.com/DataDog/integrations-core/pull/5858).
+* [Added] Bump `datadog-checks-base` version in new integration template. See [#5858](https://github.com/DataDog/integrations-core/pull/5858).
 * [Added] Add config spec support for logs-only integrations. See [#5932](https://github.com/DataDog/integrations-core/pull/5932).
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
 * [Fixed] Remove reference to check in logs-only template. See [#6106](https://github.com/DataDog/integrations-core/pull/6106).
 * [Fixed] Fix pathing issues with CI setup script. See [#6100](https://github.com/DataDog/integrations-core/pull/6100).
 * [Fixed] Bump classifiers. See [#6083](https://github.com/DataDog/integrations-core/pull/6083).
-* [Fixed] Fix JMX spec doc. See [#6074](https://github.com/DataDog/integrations-core/pull/6074).
-* [Fixed] Remove examples from jmx template. See [#6006](https://github.com/DataDog/integrations-core/pull/6006).
-* [Fixed] Properly use default JMX metrics for E2E. See [#5961](https://github.com/DataDog/integrations-core/pull/5961).
 * [Fixed] Make aggregator stub support multiple jmx instances. See [#5966](https://github.com/DataDog/integrations-core/pull/5966).
 
 ## 3.1.0 / 2020-03-02
