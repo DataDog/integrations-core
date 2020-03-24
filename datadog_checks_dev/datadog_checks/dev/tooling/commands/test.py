@@ -27,6 +27,7 @@ def display_envs(check_envs):
 @click.option('--format-style', '-fs', is_flag=True, help='Run only the code style formatter')
 @click.option('--style', '-s', is_flag=True, help='Run only style checks')
 @click.option('--bench', '-b', is_flag=True, help='Run only benchmarks')
+@click.option('--check-metrics', is_flag=True, help='Run only metrics validation tests')
 @click.option('--e2e', is_flag=True, help='Run only end-to-end tests')
 @click.option('--cov', '-c', 'coverage', is_flag=True, help='Measure code coverage')
 @click.option('--cov-missing', '-cm', is_flag=True, help='Show line numbers of statements that were not executed')
@@ -49,6 +50,7 @@ def test(
     format_style,
     style,
     bench,
+    check_metrics,
     e2e,
     coverage,
     junit,
@@ -150,6 +152,7 @@ def test(
             enter_pdb=enter_pdb,
             debug=debug,
             bench=bench,
+            check_metrics=check_metrics,
             coverage=coverage,
             junit=junit,
             marker=marker,

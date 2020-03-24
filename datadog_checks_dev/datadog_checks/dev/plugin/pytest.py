@@ -237,3 +237,18 @@ def pytest_configure(config):
     config.addinivalue_line('markers', 'unit: marker for unit tests')
     config.addinivalue_line('markers', 'integration: marker for integration tests')
     config.addinivalue_line('markers', 'e2e: marker for end-to-end Datadog Agent tests')
+    config.addinivalue_line("markers", "check_metrics: mark test as checking metrics")
+
+
+def pytest_addoption(parser):
+    parser.addoption("--run-check-metrics", action="store_true", default=False, help="run check_metrics tests")
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--run-check-metrics"):
+        # --run-check-metrics given in cli: do not skip slow tests
+        return
+    skip_check_metrics = pytest.mark.skip(reason="need --run-check-metrics option to run")
+    for item in items:
+        if "check_metrics" in item.keywords:
+            item.add_marker(skip_check_metrics)
