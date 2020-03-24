@@ -45,7 +45,6 @@ _Available for Agent versions >6.0_
      - type: file
        path: /var/log/presto/*.log
        source: presto
-       sourcecategory: database
        service: "<SERVICE_NAME>"
    ```
 

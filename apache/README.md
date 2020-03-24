@@ -55,13 +55,11 @@ _Available for Agent versions >6.0_
      - type: file
        path: /var/log/apache2/access.log
        source: apache
-       sourcecategory: http_web_access
        service: apache
 
      - type: file
        path: /var/log/apache2/error.log
        source: apache
-       sourcecategory: http_web_access
        service: apache
    ```
 
