@@ -1,5 +1,12 @@
 # CHANGELOG - haproxy
 
+## 2.7.2 / 2020-03-24
+
+* [Fixed] Fix event submission on Python 3. See [#6138](https://github.com/DataDog/integrations-core/pull/6138).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+* [Fixed] Rename `to_string()` utility to `to_native_string()`. See [#5996](https://github.com/DataDog/integrations-core/pull/5996).
+
 ## 2.7.1 / 2020-02-25
 
 * [Fixed] Document disable_legacy_service_tag and bump checks_base requirement. See [#5835](https://github.com/DataDog/integrations-core/pull/5835).
