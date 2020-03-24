@@ -7,7 +7,7 @@ import time
 
 import pymongo
 import pytest
-from tests.common import DEFAULT_INSTANCE
+from .common import DEFAULT_INSTANCE
 
 from datadog_checks.dev import LazyFunction, WaitFor, docker_run, run_command
 from datadog_checks.mongo import MongoDb
@@ -103,7 +103,7 @@ def instance_1valid_and_1invalid_custom_queries():
 
 
 @pytest.fixture
-def check(instance):
+def check():
     return lambda instance: MongoDb('mongo', {}, {}, [instance])
 
 
