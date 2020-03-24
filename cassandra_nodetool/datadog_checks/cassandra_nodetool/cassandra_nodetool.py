@@ -7,8 +7,8 @@ from __future__ import division
 import re
 from collections import defaultdict
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.subprocess_output import get_subprocess_output
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'cassandra_nodetool'
 DEFAULT_HOST = 'localhost'

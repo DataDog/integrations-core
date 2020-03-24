@@ -4,7 +4,7 @@
 
 import os
 
-from datadog_checks.checks.base import ServiceCheck
+from datadog_checks.base.checks.base import ServiceCheck
 from datadog_checks.dev import get_docker_hostname
 
 PROCESSES = ["program_0", "program_1", "program_2"]
