@@ -7,7 +7,7 @@ import os
 import ldap3
 import pytest
 
-from datadog_checks.errors import CheckException
+from datadog_checks.base.errors import CheckException
 
 from .common import HERE
 

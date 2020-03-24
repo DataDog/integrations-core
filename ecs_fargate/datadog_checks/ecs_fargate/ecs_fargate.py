@@ -6,8 +6,8 @@ from __future__ import division
 import requests
 from six import iteritems
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import round_value
-from datadog_checks.checks import AgentCheck
 
 try:
     from tagger import get_tags

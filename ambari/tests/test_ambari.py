@@ -4,8 +4,8 @@
 from mock import MagicMock
 
 from datadog_checks.ambari import AmbariCheck
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
-from datadog_checks.checks import AgentCheck
 
 from . import responses
 
