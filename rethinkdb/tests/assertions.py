@@ -3,7 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Set
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.types import ServiceCheckStatus
+from datadog_checks.rethinkdb.types import Instance
 
 from .common import (
     CLUSTER_STATISTICS_METRICS,
@@ -22,10 +25,29 @@ from .common import (
     SERVERS,
     TABLE_STATISTICS_METRICS,
     TABLE_STATUS_METRICS,
+    TABLE_STATUS_SERVICE_CHECKS,
     TABLE_STATUS_SHARDS_METRICS,
     TAGS,
 )
 from .types import ServerName
+
+
+def assert_service_checks(aggregator, instance, connect_status=AgentCheck.OK, disconnected_servers=None):
+    # type: (AggregatorStub, Instance, ServiceCheckStatus, Set[ServerName]) -> None
+    connect_tags = TAGS + ['host:{}'.format(instance['host']), 'port:{}'.format(instance['port'])]
+    aggregator.assert_service_check('rethinkdb.can_connect', connect_status, count=1, tags=connect_tags)
+
+    for service_check in TABLE_STATUS_SERVICE_CHECKS:
+        count = 0 if connect_status == AgentCheck.CRITICAL else 1
+
+        if disconnected_servers:
+            status = AgentCheck.OK if service_check.endswith('ready_for_outdated_reads') else AgentCheck.WARNING
+        else:
+            status = AgentCheck.OK
+
+        tags = TAGS + ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE)]
+
+        aggregator.assert_service_check(service_check, status, count=count, tags=tags)
 
 
 def assert_metrics(aggregator, disconnected_servers=None):
