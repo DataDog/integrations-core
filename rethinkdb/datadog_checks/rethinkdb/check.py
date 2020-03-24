@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import contextmanager
-from typing import Any, Callable, Iterator, Optional, Sequence, cast
+from typing import Any, Callable, Iterator, Sequence, cast
 
 import rethinkdb
 
@@ -13,6 +13,7 @@ from .config import Config
 from .document_db import DocumentQuery
 from .document_db.types import Metric
 from .types import Instance
+from .version import parse_version
 
 
 class RethinkDBCheck(AgentCheck):
@@ -75,13 +76,6 @@ class RethinkDBCheck(AgentCheck):
             for metric in query.run(conn, config=self.config, logger=self.log):
                 yield metric
 
-    def collect_connected_server_version(self, conn):
-        # type: (rethinkdb.net.Connection) -> Optional[str]
-        """
-        Return the version of RethinkDB run by the server at the other end of the connection, in SemVer format.
-        """
-        return operations.get_connected_server_version(conn)
-
     def submit_metric(self, metric):
         # type: (Metric) -> None
         submit = getattr(self, metric['type'])  # type: Callable
@@ -90,12 +84,21 @@ class RethinkDBCheck(AgentCheck):
     def submit_version_metadata(self, conn):
         # type: (rethinkdb.net.Connection) -> None
         try:
-            version = self.collect_connected_server_version(conn)
+            raw_version = operations.get_connected_server_raw_version(conn)
+        except Exception as exc:
+            self.log.error('Error collecting version metadata: %s', exc)
+            return
+
+        if raw_version is None:
+            return
+
+        try:
+            version = parse_version(raw_version)
         except ValueError as exc:
-            self.log.error('Error collecting version metadata: %r', exc)
-        else:
-            if version is not None:
-                self.set_metadata('version', version)
+            self.log.error('Failed to parse version: %s', exc)
+            return
+
+        self.set_metadata('version', version)
 
     def check(self, instance):
         # type: (Any) -> None

@@ -4,6 +4,7 @@
 import copy
 from typing import Any, Iterator, List
 
+import mock
 import pytest
 import rethinkdb
 
@@ -186,74 +187,44 @@ def test_connected_but_check_failed_unexpectedly(aggregator, instance):
     aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.CRITICAL, count=1, tags=service_check_tags)
 
 
-@pytest.mark.skipif(not RAW_VERSION, reason='Requires RAW_VERSION to be set')
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_metadata_version(instance, datadog_agent):
-    # type: (Instance, DatadogAgentStub) -> None
-    check_id = 'test'
+class TestVersionMetadata:
+    VERSION_MOCK_TARGET = 'datadog_checks.rethinkdb.operations.get_connected_server_raw_version'
 
-    check = RethinkDBCheck('rethinkdb', {}, [instance])
-    check.check_id = check_id
+    def run_test(self, instance, datadog_agent, metadata):
+        # type: (Instance, DatadogAgentStub, dict) -> None
+        check_id = 'test'
+        check = RethinkDBCheck('rethinkdb', {}, [instance])
+        check.check_id = check_id
+        check.check(instance)
+        datadog_agent.assert_metadata(check_id, metadata)
 
-    check.check(instance)
+    @pytest.mark.skipif(not RAW_VERSION, reason='Requires RAW_VERSION to be set')
+    def test_success(self, instance, datadog_agent):
+        # type: (Instance, DatadogAgentStub) -> None
+        raw_version = RAW_VERSION
+        version, _, build = raw_version.partition('~')
+        major, minor, patch = version.split('.')
+        metadata = {
+            'version.scheme': 'semver',
+            'version.major': major,
+            'version.minor': minor,
+            'version.patch': patch,
+            'version.raw': raw_version,
+        }
 
-    raw_version = RAW_VERSION
-    version, _, build = raw_version.partition('~')
-    major, minor, patch = version.split('.')
-    version_metadata = {
-        'version.scheme': 'semver',
-        'version.major': major,
-        'version.minor': minor,
-        'version.patch': patch,
-        'version.raw': raw_version,
-    }
+        self.run_test(instance, datadog_agent, metadata=metadata)
 
-    datadog_agent.assert_metadata(check_id, version_metadata)
+    @pytest.mark.integration
+    @pytest.mark.parametrize('malformed_version_string', MALFORMED_VERSION_STRING_PARAMS)
+    def test_malformed(self, instance, aggregator, datadog_agent, malformed_version_string):
+        # type: (Instance, AggregatorStub, DatadogAgentStub, str) -> None
+        with mock.patch(self.VERSION_MOCK_TARGET, return_value=malformed_version_string):
+            self.run_test(instance, datadog_agent, metadata={})
 
-
-@pytest.mark.integration
-@pytest.mark.parametrize('malformed_version_string', MALFORMED_VERSION_STRING_PARAMS)
-def test_metadata_version_malformed(instance, aggregator, datadog_agent, malformed_version_string):
-    # type: (Instance, AggregatorStub, DatadogAgentStub, str) -> None
-    """
-    Verify that check still runs to completion if version provided by RethinkDB is malformed.
-    """
-
-    class MockRethinkDBCheck(RethinkDBCheck):
-        def collect_connected_server_version(self, conn):
-            # type: (Any) -> str
-            return malformed_version_string
-
-    check_id = 'test'
-
-    check = MockRethinkDBCheck('rethinkdb', {}, [instance])
-    check.check_id = check_id
-
-    check.check(instance)
-    aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK)
-
-    datadog_agent.assert_metadata(check_id, {})
-
-
-@pytest.mark.integration
-def test_metadata_version_failure(instance, aggregator, datadog_agent):
-    # type: (Instance, AggregatorStub, DatadogAgentStub) -> None
-    """
-    Verify that check still runs to completion if it fails to retrieve the RethinkDB version.
-    """
-
-    class MockRethinkDBCheck(RethinkDBCheck):
-        def collect_connected_server_version(self, conn):
-            # type: (Any) -> str
-            raise ValueError('Oops!')
-
-    check_id = 'test'
-
-    check = MockRethinkDBCheck('rethinkdb', {}, [instance])
-    check.check_id = check_id
-
-    check.check(instance)
-    aggregator.assert_service_check('rethinkdb.can_connect', RethinkDBCheck.OK)
-
-    datadog_agent.assert_metadata(check_id, {})
+    @pytest.mark.integration
+    def test_failure(self, instance, aggregator, datadog_agent):
+        # type: (Instance, AggregatorStub, DatadogAgentStub) -> None
+        with mock.patch(self.VERSION_MOCK_TARGET, side_effect=ValueError('Oops!')):
+            self.run_test(instance, datadog_agent, metadata={})
