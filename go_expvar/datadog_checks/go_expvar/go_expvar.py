@@ -174,7 +174,9 @@ class GoExpvar(AgentCheck):
                     continue
 
                 if count >= max_metrics:
-                    self.log.warning("Exceeded maximum allowed metrics (%s) while processing: %s", max_metrics, metric_name)
+                    self.log.warning(
+                        "Exceeded maximum allowed metrics (%s) while processing: %s", max_metrics, metric_name
+                    )
                     self.warning(
                         "Reporting more metrics than the allowed maximum. "
                         "Please contact support@datadoghq.com for more information."
