@@ -27,7 +27,7 @@
   description: <PREFIX> for exposed Prometheus metrics.
   value:
     type: string
-    example: <PREFIX>
+    example: <PREFIX>_
 - name: health_service_check
   description: |
     Send a service check reporting about the health of the prometheus endpoint.
@@ -70,7 +70,7 @@
       - flavor: origin
     type: array
     items:
-      type: string
+      type: object
 - name: type_overrides
   description: |
     Type override allows you to override a type in the prometheus payload
@@ -81,7 +81,7 @@
       - <METRIC_NAME>: <METRIC_TYPE>
     type: array
     items:
-      type: string
+      type: object
 - name: send_histograms_buckets
   description: Set send_histograms_buckets to true to send the histograms bucket.
   value:
@@ -143,4 +143,3 @@
       - <*_SUBSTRING_*>
 
 - template: instances/http
-      

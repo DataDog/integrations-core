@@ -8,5 +8,5 @@ files:
         - template: init_config/prometheus
     - template: instances
       options:
-        - template: instances/default
         - template: instances/prometheus
+        - template: instances/default
