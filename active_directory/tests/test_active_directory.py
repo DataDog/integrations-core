@@ -14,7 +14,7 @@ from .common import CHECK_NAME, MINIMAL_INSTANCE
 def test_basic_check(aggregator):
     initialize_pdh_tests()
     instance = MINIMAL_INSTANCE
-    c = ActiveDirectoryCheck(CHECK_NAME, {}, {}, [instance])
+    c = ActiveDirectoryCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
     for metric_def in DEFAULT_COUNTERS:
