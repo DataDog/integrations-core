@@ -122,11 +122,11 @@ instances:
     #
     # send_monotonic_counter: true
 
-    ## @param send_distribution_counts_as_monotonic - boolean - optional - default: true
+    ## @param send_distribution_counts_as_monotonic - boolean - optional - default: false
     ## Set send_distribution_counts_as_monotonic to true to send histograms & summary
     ## counters as monotonic counters (instead of gauges).
     #
-    # send_distribution_counts_as_monotonic: true
+    # send_distribution_counts_as_monotonic: false
 
     ## @param exclude_labels - list of strings - optional
     ## List of labels to be excluded
@@ -134,11 +134,11 @@ instances:
     # exclude_labels:
     #   - timestamp
 
-    ## @param bearer_token_auth - boolean - optional - default: true
+    ## @param bearer_token_auth - boolean - optional - default: false
     ## Set bearer_token_auth to true to add bearer token authentication header.
     ## Note: if bearer_token_path is not set, the default path is /var/run/secrets/kubernetes.io/serviceaccount/token.
     #
-    # bearer_token_auth: true
+    # bearer_token_auth: false
 
     ## @param bearer_token_path - string - optional
     ## The path to a kubernetes service account bearer token file, make sure the file exists and mounted correctly.

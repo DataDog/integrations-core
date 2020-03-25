@@ -105,7 +105,7 @@
     Set send_distribution_counts_as_monotonic to true to send histograms & summary
     counters as monotonic counters (instead of gauges).
   value:
-    example: true
+    example: false
     type: boolean
 - name: exclude_labels
   description: List of labels to be excluded
@@ -120,7 +120,7 @@
     Set bearer_token_auth to true to add bearer token authentication header.
     Note: if bearer_token_path is not set, the default path is /var/run/secrets/kubernetes.io/serviceaccount/token.
   value:
-    example: true
+    example: false
     type: boolean
 - name: bearer_token_path
   description: |
