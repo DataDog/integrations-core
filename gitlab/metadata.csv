@@ -60,7 +60,7 @@ gitlab.view_rendering_duration_seconds.sum,count,,second,,Sum of duration for vi
 gitlab.http.requests_total.count,count,,request,,Rack request count,0,gitlab,rack request count
 gitlab.http.requests_total.sum,gauge,,request,,Sum of rack requests,0,gitlab,rack request sum
 gitlab.http.request_duration_seconds.sum,gauge,,second,,Sum of HTTP response time from rack middleware,0,gitlab,http request dur sum
-gitlab.http.request_duration_seconds.count,count,,second,,Count of HTTP response time from rack middleware,0,gitlab,http request dur sum
+gitlab.http.request_duration_seconds.count,count,,second,,Count of HTTP response time from rack middleware,0,gitlab,http request dur count
 gitlab.pipelines_created_total,count,,,,Counter of pipelines created,0,gitlab,pipelines created total
 gitlab.rack_uncaught_errors_total,count,,connection,,Rack connections handling uncaught errors count,-1,gitlab,rack uncaught errors
 gitlab.user_session_logins_total,count,,,,Counter of how many users have logged in,0,gitlab,user logins
