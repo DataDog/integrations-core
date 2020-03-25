@@ -23,27 +23,27 @@ No additional installation is needed on your server.
 
 2. Enable Sidekiq Pro metric collection by including this in your initializer:
 
-  ```ruby
-      require 'datadog/statsd' # gem 'dogstatsd-ruby'
+    ```ruby
+        require 'datadog/statsd' # gem 'dogstatsd-ruby'
 
-      Sidekiq::Pro.dogstatsd = ->{ Datadog::Statsd.new('metrics.example.com', 8125, namespace:'sidekiq') }
+        Sidekiq::Pro.dogstatsd = ->{ Datadog::Statsd.new('metrics.example.com', 8125, namespace:'sidekiq') }
 
-      Sidekiq.configure_server do |config|
-        config.server_middleware do |chain|
-          require 'sidekiq/middleware/server/statsd'
-          chain.add Sidekiq::Middleware::Server::Statsd
-        end
-      end
-  ```
-
-  If you are using Sidekiq Enterprise and would like to collect historical metrics, include this line as well:
-
-  ```ruby
         Sidekiq.configure_server do |config|
-          # history is captured every 30 seconds by default
-          config.retain_history(30)
+          config.server_middleware do |chain|
+            require 'sidekiq/middleware/server/statsd'
+            chain.add Sidekiq::Middleware::Server::Statsd
+          end
         end
-  ```
+    ```
+
+    If you are using Sidekiq Enterprise and would like to collect historical metrics, include this line as well:
+
+    ```ruby
+          Sidekiq.configure_server do |config|
+            # history is captured every 30 seconds by default
+            config.retain_history(30)
+          end
+    ```
 
   See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information and [Datadog Ruby][7] documentation for further configuration options.
 
