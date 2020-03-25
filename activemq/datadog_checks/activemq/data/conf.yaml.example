@@ -1,180 +1,159 @@
-## WARNING
-## This sample works only for ActiveMQ >= 5.8.0
-## If you are running a version older than that, you can refer to agent 5.10.x released
-## sample files, https://raw.githubusercontent.com/DataDog/dd-agent/5.10.1/conf.d/activemq.yaml.example
+## All options defined here are available to all instances.
+#
+init_config:
 
+    ## @param is_jmx - boolean - required
+    ## Whether or not this file is a configuration for a JMX integration.
+    #
+    is_jmx: true
+
+    ## @param collect_default_metrics - boolean - required
+    ## Whether or not the check should collect all default metrics.
+    #
+    collect_default_metrics: true
+
+    ## @param conf - list of mappings - optional
+    ## The list of metrics to be collected by the integration
+    ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
+    ## The default metrics to be collected are kept in metrics.yaml, but you can still
+    ## add your own metrics here.
+    #
+    # conf:
+    #   - include:
+    #       bean: <BEAN_NAME>
+    #       attribute:
+    #         MyAttribute:
+    #           alias: my.metric.name
+    #           metric_type: gauge
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param host - string - required
-    ## ActiveMQ host to connect to.
+    ## JMX hostname to connect to.
     #
-  - host: localhost
+  - host: <HOST>
 
     ## @param port - integer - required
-    ## ActiveMQ port to connect to.
+    ## JMX port to connect to.
     #
-    port: 1616
-
-    ## @param auth_type - string - optional
-    ## The type of authentication to use.
-    ## The available values are "basic" and "digest".
-    #
-    # auth_type: <AUTH_TYPE>
+    port: <PORT>
 
     ## @param user - string - optional
-    ## Username from the credentials needed to connect to the host.
+    ## User to use when connecting to JMX.
     #
-    # user: <USERNAME>
+    # user: <USER>
 
     ## @param password - string - optional
-    ## Password from the credentials needed to connect to the host.
+    ## Password to use when connecting to JMX.
     #
     # password: <PASSWORD>
 
     ## @param process_name_regex - string - optional
-    ## Instead of specifying a host, and port. The agent can connect using the attach api.
-    ## This requires the JDK to be installed and the path to tools.jar to be set below in tools_jar_path parameter.
+    ## Instead of using a host and port, the Agent can connect using the attach API.
+    ## This requires the JDK to be installed and the path to tools.jar to be set below.
+    ## Note: It needs to be set when process_name_regex parameter is set
+    ## e.g. .*process_name.*
     #
-    # process_name_regex: .*process_name.*
+    # process_name_regex: <PROCESS_NAME_REGEX>
 
     ## @param tools_jar_path - string - optional
-    ## Needs to be set when process_name_regex parameter is set.
+    ## The tool.jar path to be used with the `process_name_regex` parameter,
+    ## for example: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
     #
-    # tools_jar_path: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+    # tools_jar_path: <TOOLS_JAR_PATH>
 
     ## @param name - string - optional
-    ## Set your instance name.
+    ## Set the instance name to be used as the `instance` tag.
     #
-    # name: activemq_instance
+    # name: <NAME>
 
     ## @param java_bin_path - string - optional
-    ## java_bin_path should be set if the agent cannot find your java executable
+    ## `java_bin_path` should be set if the Agent cannot find your java executable.
     #
-    # java_bin_path: <JAVA_PATH>
+    # java_bin_path: <JAVA_BIN_PATH>
 
     ## @param java_options - string - optional
-    ## List of Java JVM options.
+    ## A list of Java JVM options, for example: "-Xmx200m -Xms50m".
     #
-    # java_options: "-Xmx200m -Xms50m"
+    # java_options: <JAVA_OPTIONS>
 
     ## @param trust_store_path - string - optional
-    ## trust_store_path should be set if ssl is enabled.
-    ## path to your trusted store
+    ## The path to your trusted store.
+    ## `trust_store_path` should be set if SSL is enabled.
     #
-    # trust_store_path: <TRUSTSTORE.JKS_PATH>
+    # trust_store_path: <TRUST_STORE_PATH>
 
     ## @param trust_store_password - string - optional
-    ## trust_store_password should be set if ssl is enabled
-    ## password for your TrustStore.jks file
+    ## The password for your TrustStore.jks file.
+    ## `trust_store_password` should be set if SSL is enabled.
     #
-    # trust_store_password: <PASSWORD>
+    # trust_store_password: <TRUST_STORE_PASSWORD>
 
     ## @param key_store_path - string - optional
-    ## key_store_path should be set if client authentication is enabled on the target JVM.
-    ## path to your key store
+    ## The path to your key store.
+    ## `key_store_path` should be set if client authentication is enabled on the target JVM.
     #
-    # key_store_path: <KEYSTORE.JKS_PATH>
+    # key_store_path: <KEY_STORE_PATH>
 
     ## @param key_store_password - string - optional
-    ## key_store_password should be set if client authentication is enabled on the target JVM.
-    ## password for your KeyStore.jks file
+    ## The password to your key store.
+    ## `key_store_password` should be set if client authentication is enabled on the target JVM.
     #
-    # key_store_password: <PASSWORD>
+    # key_store_password: <KEY_STORE_PASSWORD>
 
-    ## @param rmi_registry_ssl - boolean - optional
-    ## Whether or not the agent should connect to the rmi registry using ssl.
+    ## @param rmi_registry_ssl - boolean - optional - default: false
+    ## Whether or not the Agent should connect to the RMI registry using SSL.
     #
     # rmi_registry_ssl: false
 
-    ## @param tags - list of key:value element - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-init_config:
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
 
-  ## @param is_jmx - boolean - required
-  ## Whether or not this file is a configuration for a JMX integration
-  #
-  is_jmx: true
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
 
-  ## @param collect_default_metrics - boolean - required
-  ## Whether or not the check should collect all default metrics for this integration.
-  #
-  collect_default_metrics: true
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
 
-  ## @param conf - list of objects - required
-  ## List of metrics to be collected by the integration
-  ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
-  ## Agent 5: Customize all your metrics below
-  ## Agent 6: The default metrics to be collected are kept in metrics.yaml, but you can still add your own metrics here
-  #
-  conf:
-    - include:
-        destinationType: Queue
-        attribute:
-          AverageEnqueueTime:
-            alias: activemq.queue.avg_enqueue_time
-            metric_type: gauge
-          ConsumerCount:
-            alias: activemq.queue.consumer_count
-            metric_type: gauge
-          ProducerCount:
-            alias: activemq.queue.producer_count
-            metric_type: gauge
-          MaxEnqueueTime:
-            alias: activemq.queue.max_enqueue_time
-            metric_type: gauge
-          MinEnqueueTime:
-            alias: activemq.queue.min_enqueue_time
-            metric_type: gauge
-          MemoryPercentUsage:
-            alias: activemq.queue.memory_pct
-            metric_type: gauge
-          QueueSize:
-            alias: activemq.queue.size
-            metric_type: gauge
-          DequeueCount:
-            alias: activemq.queue.dequeue_count
-            metric_type: counter
-          DispatchCount:
-            alias: activemq.queue.dispatch_count
-            metric_type: counter
-          EnqueueCount:
-            alias: activemq.queue.enqueue_count
-            metric_type: counter
-          ExpiredCount:
-            alias: activemq.queue.expired_count
-            metric_type: counter
-          InFlightCount:
-            alias: activemq.queue.in_flight_count
-            metric_type: counter
-
-    - include:
-        type: Broker
-        attribute:
-          StorePercentUsage:
-            alias: activemq.broker.store_pct
-            metric_type: gauge
-          TempPercentUsage:
-            alias: activemq.broker.temp_pct
-            metric_type: gauge
-          MemoryPercentUsage:
-            alias: activemq.broker.memory_pct
-            metric_type: gauge
-
-## Log Section (Available for Agent >=6.0)
+## Log Section
 ##
-## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
-## service - mandatory - Name of the service that generated the log
-## source  - mandatory - Attribute that defines which Integration sent the logs
-## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
-## tags: - optional - Add tags to the collected logs
+## type - required - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - required - Set port if type is tcp or udp.
+##                                         Set path if type is file.
+##                                         Set channel_path if type is windows_event.
+## source  - required - Attribute that defines which Integration sent the logs
+## service - required - The name of the service that generates the log.
+##                      Overrides any `service` defined in the `init_config` section.
+## tags - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #

@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from datadog_checks.checks.win import PDHBaseCheck
+from datadog_checks.base.checks.win import PDHBaseCheck
 
 
 class PDHCheck(PDHBaseCheck):

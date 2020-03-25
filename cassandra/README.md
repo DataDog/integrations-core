@@ -46,7 +46,6 @@ _Available for Agent versions >6.0_
        - type: file
          path: /var/log/cassandra/*.log
          source: cassandra
-         sourcecategory: database
          service: myapplication
          log_processing_rules:
             - type: multi_line

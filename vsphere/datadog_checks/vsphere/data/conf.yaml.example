@@ -202,7 +202,8 @@ instances:
     ## A good use case is to set this parameter to `[vsphere_host]`, indeed with VM migrations this tag is expected to
     ## change often and it is usually helpful to be informed quickly of this change.
     #
-    # excluded_host_tags: false
+    # excluded_host_tags:
+    #   - <HOST_TAG>
 
     ## @param metrics_per_query - integer - optional - default: 500
     ## This value is used to determine the number of metrics the check will retrieve in the same API call.

@@ -52,13 +52,11 @@ logs:
     channel_path: "<CHANNEL_1>"
     source: "<CHANNEL_1>"
     service: myservice
-    sourcecategory: windowsevent
 
   - type: windows_event
     channel_path: "<CHANNEL_2>"
     source: "<CHANNEL_2>"
     service: myservice
-    sourcecategory: windowsevent
 ```
 
 Edit the `<CHANNEL_X>` parameters with the Windows channel name you want to collect events from.

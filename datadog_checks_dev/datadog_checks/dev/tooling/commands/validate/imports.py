@@ -2,12 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-
 import click
 
-from ...constants import get_root
-from ...utils import complete_valid_checks, get_valid_integrations
+from ...utils import complete_valid_checks, get_check_files, get_valid_integrations
 from ..console import CONTEXT_SETTINGS, abort, echo_debug, echo_failure, echo_info, echo_success, echo_warning
 
 
@@ -55,7 +52,6 @@ def imports(ctx, autofix, checks):
     """Validate proper imports in checks."""
 
     validation_fails = {}
-    integrations_root = get_root()
     all_checks = sorted(get_valid_integrations())
 
     if checks:
@@ -69,16 +65,11 @@ def imports(ctx, autofix, checks):
         echo_debug(f'Checking {check_name}')
 
         # focus on check and testing directories
-        bases = [os.path.join(integrations_root, check_name, base) for base in ('datadog_checks', 'tests')]
-        for base in bases:
-            for root, _, files in os.walk(base):
-                for f in files:
-                    if f.endswith('.py'):
-                        fpath = os.path.join(root, f)
-                        success, lines = validate_import(fpath, check_name, autofix)
+        for fpath in get_check_files(check_name):
+            success, lines = validate_import(fpath, check_name, autofix)
 
-                        if not success:
-                            validation_fails[fpath] = lines
+            if not success:
+                validation_fails[fpath] = lines
 
     if validation_fails:
         num_files = len(validation_fails)

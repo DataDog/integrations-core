@@ -175,13 +175,11 @@ _Available for Agent versions >6.0_
      - type: file
        path: "<ERROR_LOG_FILE_PATH>"
        source: mysql
-       sourcecategory: database
        service: "<SERVICE_NAME>"
 
      - type: file
        path: "<SLOW_QUERY_LOG_FILE_PATH>"
        source: mysql
-       sourcecategory: database
        service: "<SERVICE_NAME>"
        log_processing_rules:
          - type: multi_line
@@ -193,7 +191,6 @@ _Available for Agent versions >6.0_
      - type: file
        path: "<GENERAL_LOG_FILE_PATH>"
        source: mysql
-       sourcecategory: database
        service: "<SERVICE_NAME>"
        # For multiline logs, if they start by the date with the format yyyy-mm-dd uncomment the following processing rule
        # log_processing_rules:

@@ -58,7 +58,6 @@ _Available for Agent versions >6.0_
      - type: file
        path: /var/log/couchdb/couch.log
        source: couchdb
-       sourcecategory: database
        service: couch
    ```
 
