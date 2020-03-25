@@ -41,7 +41,8 @@
     type: string
     example: <LABEL>
 - name: label_joins
-  description: The label join allows to target a metric and retrieve it's label via a 1:1 mapping.
+  description: |
+    The label join allows to target a metric and retrieve it's label via a 1:1 mapping.
   value:
     example:
       target_metric:

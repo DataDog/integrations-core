@@ -38,7 +38,7 @@ instances:
     # label_to_hostname: <LABEL>
 
     ## @param label_joins - object - optional
-    ## The label join allows to target a metric and retrieve it's label via a 1:1 mapping.The label join allows to target a metric and retrieve it's label via a 1:1 mapping.
+    ## The label join allows to target a metric and retrieve it's label via a 1:1 mapping.
     #
     # label_joins:
     #   target_metric:
