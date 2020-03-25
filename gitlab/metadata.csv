@@ -57,7 +57,7 @@ gitlab.transaction.rails_queue_duration_total,count,,,,Measures latency between 
 gitlab.transaction.view_duration_total,count,,,,Duration for views,0,gitlab,view duration count
 gitlab.view_rendering_duration_seconds.count,count,,second,,Count of duration for views (histogram),0,gitlab,rendering duration count
 gitlab.view_rendering_duration_seconds.sum,count,,second,,Sum of duration for views (histogram),0,gitlab,rendering duration sum
-gitlab.http.requests_total.sum,count,,request,,Rack request count,0,gitlab,rack request count
+gitlab.http.requests_total.sum,count,,request,,Sum of rack requests,0,gitlab,rack request sum
 gitlab.http.requests_total.count,count,,request,,Rack request count,0,gitlab,rack request count
 gitlab.http.request_duration_seconds.sum,count,,second,,Sum of HTTP response time from rack middleware,0,gitlab,http request dur sum
 gitlab.http.request_duration_seconds.count,count,,second,,Count of HTTP response time from rack middleware,0,gitlab,http request dur sum
