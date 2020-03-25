@@ -10,12 +10,12 @@ This integration monitors [Sidekiq][3] through [Dogstatsd][5]. It collects metri
 
 ### Installation
 
-The Sidekiq integration is included in the [Datadog Agent][2] package.
+The Sidekiq integration is packaged with the [Datadog Agent][2].
 No additional installation is needed on your server.
 
 ### Configuration
 
-1. Ensure that you have the `dogstatsd-ruby` [gem][4] installed:
+1. Install the `dogstatsd-ruby` [gem][4]:
 
    ```
     gem install dogstatsd-ruby
@@ -45,7 +45,7 @@ No additional installation is needed on your server.
           end
    ```
 
-  See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information and [Datadog Ruby][7] documentation for further configuration options.
+  See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information, and the [Datadog Ruby][7] documentation for further configuration options.
 
 4. Update the [Datadog Agent main configuration file][13] `datadog.yaml` by adding the following configs:
 
@@ -90,7 +90,9 @@ No additional installation is needed on your server.
 
 ### Metrics
 
-See [metadata.csv][12] for a list of metrics provided by this integration. Custom metrics may be added in Sidekiq itself. Browse the [Sidekiq documentation][11] for custom metric inspiration.
+See [metadata.csv][12] for a list of metrics provided by this integration.
+
+Add custom metrics in Sidekiq. See the [Sidekiq documentation][11] for custom metric inspiration.
 
 ### Log Collection
 
