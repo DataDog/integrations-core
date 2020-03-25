@@ -8,7 +8,7 @@ import time
 
 from six import PY3, iteritems
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 from datadog_checks.tokumx.vendor import bson
 from datadog_checks.tokumx.vendor.pymongo import MongoClient, ReadPreference, errors, uri_parser
 from datadog_checks.tokumx.vendor.pymongo import version as py_version

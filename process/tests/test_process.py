@@ -230,7 +230,7 @@ def test_check_missing_process(aggregator, caplog):
 
 def test_check_real_process(aggregator):
     "Check that we detect python running (at least this process)"
-    from datadog_checks.utils.platform import Platform
+    from datadog_checks.base.utils.platform import Platform
 
     instance = {
         'name': 'py',
@@ -270,7 +270,7 @@ def test_check_real_process(aggregator):
 
 def test_check_real_process_regex(aggregator):
     "Check to specifically find this python pytest running process using regex."
-    from datadog_checks.utils.platform import Platform
+    from datadog_checks.base.utils.platform import Platform
 
     instance = {
         'name': 'py',

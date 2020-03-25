@@ -1,6 +1,6 @@
 import os
 
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 try:
     from functools import lru_cache
