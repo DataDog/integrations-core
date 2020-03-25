@@ -1,1 +1,153 @@
+- name: prometheus_url
+  required: true
+  description: The URL where your application metrics are exposed by Prometheus.
+  value:
+    type: string
+    example: http://service/prometheus
+- name: namespace
+  required: true
+  description: The namespace to be prepended to all metrics.
+  value:
+    type: string
+    example: "service"
+- name: metrics
+  required: true
+  description: |
+    List of metrics to be fetched from the prometheus endpoint, if there's a
+    value it'll be renamed. This list should contain at least one metric.
+  value:
+    type: array
+    example:
+      - processor:cpu
+      - memory:mem
+      - io
+    items:
+      type: string # TODO: metrics can be a string or a key:valueß
+- name: prometheus_metrics_prefix
+  description: <PREFIX> for exposed Prometheus metrics.
+  value:
+    type: string
+    example: <PREFIX>
+- name: health_service_check
+  description: |
+    Send a service check reporting about the health of the prometheus endpoint.
+    It's named <NAMESPACE>.prometheus.health
+  value:
+    type: boolean
+    example: true
+- name: label_to_hostname
+  description: Override the hostname with the value of one label.
+  value:
+    type: string
+    example: <LABEL>
+- name: label_joins
+  description: The label join allows to target a metric and retrieve it's label via a 1:1 mapping.
+  value:
+    example:
+      target_metric:
+        label_to_match: <MATCHED_LABEL>
+        labels_to_get:
+          - <EXTRA_LABEL_1>
+          - <EXTRA_LABEL_2>
+    type: object
+    properties:
+    - name: target_metric
+      type: object
+      properties:
+      - name: label_to_match
+        type: string
+      - name: labels_to_get
+        type: array
+- name: labels_mapper
+  description: |
+    The label mapper allows you to rename labels.
+    Format is <LABEL_TO_RENAME>: <NEW_LABEL_NAME>
+  value:
+    example:
+      flavor: origin
+    type: array
+- name: type_overrides
+  description: |
+    Type override allows you to override a type in the prometheus payload
+    or type an untyped metrics (they're ignored by default).
+    Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, `summary`
+  value:
+    example:
+      <METRIC_NAME>: <METRIC_TYPE>
+    type: array
+    items:
+      type: string
+- name: send_histograms_buckets
+  description: Set send_histograms_buckets to true to send the histograms bucket.
+  value:
+    example: true
+    type: boolean
+- name: send_distribution_buckets
+  description: |
+    Set `send_distribution_buckets` to `true` to send histograms as Datadog distribution metrics.
+    
+    Learn more about distribution metrics: https://docs.datadoghq.com/developers/metrics/distributions/
+  value:
+    example: false
+    type: boolean
+- name: send_monotonic_counter
+  description: Set send_monotonic_counter to true to send counters as monotonic counter.
+  value:
+    example: true
+    type: boolean
+- name: send_distribution_counts_as_monotonic
+  description: |
+    Set send_distribution_counts_as_monotonic to true to send histograms & summary
+    counters as monotonic counters (instead of gauges).
+  value:
+    example: true
+    type: boolean
+- name: exclude_labels
+  description: List of labels to be excluded
+  value:
+    example:
+      - timestamp
+    type: array
+    items:
+      type: string
+- name: extra_headers
+  description: |
+    A list of additional HTTP headers to send in queries to the openmetrics endpoint.
+    Can be combined with autodiscovery template variables. Eg: "Authorization: Bearer %%env_TOKEN%%".
+    Note: if the "Authorization" header is present it will be replaced when "bearer_token_auth" is enabled.
+  value:
+    type: array
+    items:
+      type: string
+    example:
+      <HEADER_NAME>: <HEADER_VALUE>
+- name: bearer_token_auth
+  description: |
+    Set bearer_token_auth to true to add bearer token authentication header.
+    Note: if bearer_token_path is not set, /var/run/secrets/kubernetes.io/serviceaccount/token is used as a default path.
+  value:
+    example: true
+    type: boolean
+- name: bearer_token_path
+  description: |
+    The path to a kubernetes service account bearer token file, make sure the file exists and mounted correctly.
+    Note: bearer_token_auth should be set to true to enable adding the token to HTTP headers for authentication.
+  value:
+    example: <TOKEN_PATH>
+    type: string
+- name: ignore_metrics
+  description: List of metrics to be ignored, the "*" wildcard can be used to match multiple metric names.
+  value:
+    type: array
+    items:
+      type: string
+    example:
+      - <IGNORED_METRIC_NAME>
+      - <PREFIX_*>
+      - <*_SUFFIX>
+      - <PREFIX_*_SUFFIX>
+      - <*_SUBSTRING_*>
+
 - template: instances/http
+- template: instances/tags
+      
