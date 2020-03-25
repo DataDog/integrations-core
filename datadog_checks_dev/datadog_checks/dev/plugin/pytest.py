@@ -237,7 +237,7 @@ def pytest_configure(config):
     config.addinivalue_line('markers', 'unit: marker for unit tests')
     config.addinivalue_line('markers', 'integration: marker for integration tests')
     config.addinivalue_line('markers', 'e2e: marker for end-to-end Datadog Agent tests')
-    config.addinivalue_line("markers", "latest_metrics: mark test as checking metrics")
+    config.addinivalue_line("markers", "latest_metrics: marker for verifying support of new metrics")
 
 
 def pytest_addoption(parser):
