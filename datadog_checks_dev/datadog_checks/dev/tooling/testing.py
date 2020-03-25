@@ -181,6 +181,7 @@ def construct_pytest_options(
     enter_pdb=False,
     debug=False,
     bench=False,
+    latest_metrics=False,
     coverage=False,
     junit=False,
     marker='',
@@ -208,6 +209,10 @@ def construct_pytest_options(
         pytest_options += ' --benchmark-only --benchmark-cprofile=tottime'
     else:
         pytest_options += ' --benchmark-skip'
+
+    if latest_metrics:
+        pytest_options += ' --run-latest-metrics'
+        marker = 'latest_metrics'
 
     if junit:
         test_group = 'e2e' if e2e else 'unit'
