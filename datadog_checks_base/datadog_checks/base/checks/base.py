@@ -641,10 +641,7 @@ class AgentCheck(object):
         """
         Mark a method as a metadata entrypoint.
 
-        This decorator provides:
-
-        * Automatic no-op behavior in case metadata collection is disabled on the Agent.
-        * Automatic exception handling.
+        This decorator provides automatic no-op behavior in case metadata collection is disabled on the Agent.
         """
 
         @functools.wraps(method)
@@ -653,10 +650,8 @@ class AgentCheck(object):
             if not self.is_metadata_collection_enabled():
                 return
 
-            try:
-                method(self, *args, **kwargs)
-            except Exception as exc:
-                self.log.debug('Error collecting metadata: %s', exc)
+            # NOTE: error handling still at the discretion of the wrapped method.
+            method(self, *args, **kwargs)
 
         return entrypoint
 

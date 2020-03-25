@@ -504,7 +504,7 @@ class TestConfig:
 
 
 class TestMetadataEntrypoint:
-    def test_metadata_entrypoint_no_op_if_collection_disabled(self):
+    def test_no_op_if_collection_disabled(self):
         # type: () -> None
 
         class MyCheck(AgentCheck):
@@ -524,21 +524,18 @@ class TestMetadataEntrypoint:
                 check.check({})
                 m.assert_not_called()
 
-    def test_metadata_entrypoint_logs_exceptions(self, caplog):
+    def test_exceptions_pass_through(self):
         # type: (Any) -> None
         class MyCheck(AgentCheck):
             @AgentCheck.metadata_entrypoint
             def process_metadata(self):
                 # type: () -> None
-                raise RuntimeError('Something went wrong -- catch me!')
+                raise RuntimeError('Something went wrong')
 
             def check(self, instance):
                 # type: (Any) -> None
                 self.process_metadata()
 
         check = MyCheck('test', {}, [{}])
-
-        caplog.set_level(logging.DEBUG)
-        check.check({})
-        assert len(caplog.records) == 1
-        assert 'Something went wrong -- catch me!' in caplog.text
+        with pytest.raises(RuntimeError):
+            check.check({})
