@@ -1,0 +1,10 @@
+name: Compile Deps
+on: push
+jobs:
+  compile_deps:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Compile Deps
+      run: |
+        echo hello world
+      shell: bash
