@@ -1,0 +1,46 @@
+name: fluentd
+files:
+- name: fluentd.yaml
+  options:
+  - template: init_config
+    options:
+    - name: fluentd
+      description: |
+        Command or path to Fluentd (e.g. `/usr/local/bin/fluentd` or `docker exec container fluentd`).
+        Can be overwritten on an instance.
+      value:
+        type: string
+        example: fluentd
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: monitor_agent_url
+      required: true
+      description: Monitor Agent URL to connect to.
+      value:
+        type: string
+        example: http://example.com:24220/api/plugins.json
+    - name: fluentd
+      description: |
+        Command or path to Fluentd (e.g. `/usr/local/bin/fluentd` or `docker exec container fluentd`).
+        Can be overwritten on an instance.
+      value:
+        type: string
+        example: fluentd
+    - name: plugin_ids
+      description: Enter your Plugin IDs to monitor a specific scope of plugins.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - <PLUGIN_ID_1>
+          - <PLUGIN_ID_2>
+    - name: tag_by
+      description: Set 'tag_by' to specify how to tag metrics. Valid options are type` and `plugin_id`.
+      value:
+        type: string
+        example: plugin_id
+    - template: instances/default
+    - template: instances/http
