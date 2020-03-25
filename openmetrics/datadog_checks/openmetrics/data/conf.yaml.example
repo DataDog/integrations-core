@@ -14,7 +14,7 @@ instances:
 
     ## @param metrics - list of strings - required
     ## List of metrics to be fetched from the prometheus endpoint, if there's a
-    ## value it'll be renamed. This list should contain at least one metric
+    ## value it'll be renamed. This list should contain at least one metric.
     #
     metrics:
       - processor: cpu
@@ -38,7 +38,7 @@ instances:
     # label_to_hostname: <LABEL>
 
     ## @param label_joins - object - optional
-    ## The label join allows to target a metric and retrieve it's label via a 1:1 mapping
+    ## The label join allows to target a metric and retrieve it's label via a 1:1 mapping.The label join allows to target a metric and retrieve it's label via a 1:1 mapping.
     #
     # label_joins:
     #   target_metric:
