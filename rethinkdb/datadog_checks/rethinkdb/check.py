@@ -26,7 +26,12 @@ class RethinkDBCheck(AgentCheck):
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
         super(RethinkDBCheck, self).__init__(*args, **kwargs)
+
         self.config = Config(cast(Instance, self.instance))
+
+        if self.config.password:
+            self.register_secret(self.config.password)
+
         self.queries = (
             queries.config_summary,
             queries.cluster_statistics,
