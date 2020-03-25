@@ -1,6 +1,6 @@
-name: Openmetrics
+name: OpenMetrics
 files:
-  - name: apache.yaml
+  - name: openmetrics.yaml
     options:
     - template: init_config
       options:
@@ -8,5 +8,5 @@ files:
         - template: init_config/prometheus
     - template: instances
       options:
-        - instances/default
-        - instances/prometheus
+        - template: instances/default
+        - template: instances/prometheus

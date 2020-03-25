@@ -59,14 +59,18 @@
         type: string
       - name: labels_to_get
         type: array
+        items:
+          type: string
 - name: labels_mapper
   description: |
     The label mapper allows you to rename labels.
     Format is <LABEL_TO_RENAME>: <NEW_LABEL_NAME>
   value:
     example:
-      flavor: origin
+      - flavor: origin
     type: array
+    items:
+      type: string
 - name: type_overrides
   description: |
     Type override allows you to override a type in the prometheus payload
@@ -74,7 +78,7 @@
     Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, `summary`
   value:
     example:
-      <METRIC_NAME>: <METRIC_TYPE>
+      - <METRIC_NAME>: <METRIC_TYPE>
     type: array
     items:
       type: string
@@ -111,21 +115,10 @@
     type: array
     items:
       type: string
-- name: extra_headers
-  description: |
-    A list of additional HTTP headers to send in queries to the openmetrics endpoint.
-    Can be combined with autodiscovery template variables. Eg: "Authorization: Bearer %%env_TOKEN%%".
-    Note: if the "Authorization" header is present it will be replaced when "bearer_token_auth" is enabled.
-  value:
-    type: array
-    items:
-      type: string
-    example:
-      <HEADER_NAME>: <HEADER_VALUE>
 - name: bearer_token_auth
   description: |
     Set bearer_token_auth to true to add bearer token authentication header.
-    Note: if bearer_token_path is not set, /var/run/secrets/kubernetes.io/serviceaccount/token is used as a default path.
+    Note: if bearer_token_path is not set, the default path is /var/run/secrets/kubernetes.io/serviceaccount/token.
   value:
     example: true
     type: boolean
@@ -150,5 +143,4 @@
       - <*_SUBSTRING_*>
 
 - template: instances/http
-- template: instances/tags
       
