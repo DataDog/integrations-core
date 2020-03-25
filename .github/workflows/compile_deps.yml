@@ -6,15 +6,15 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Compile Deps
+      shell: bash
       run: |
         pwd
         ls -la
         ls datadog_checks_base/datadog_checks/base/data
         which -a python
-#        bash .azure-pipelines/scripts/ibm_mq/linux/55_install_client.sh
         pip install pip-tools
         cat datadog_checks_base/datadog_checks/base/data/agent_requirements.in | grep -v pymqi > agent_requirements.in
         python -m piptools compile --generate-hashes agent_requirements.in
-      shell: bash
 
+#        bash .azure-pipelines/scripts/ibm_mq/linux/55_install_client.sh
 #        python3 -m piptools compile --generate-hashes --output-file tmp.txt datadog_checks_base/datadog_checks/base/data/agent_requirements.in
