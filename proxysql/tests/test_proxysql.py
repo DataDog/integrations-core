@@ -82,18 +82,17 @@ def test_fetch_stats_exception():
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_service_check(aggregator, dd_environment):
-    c = ProxysqlCheck('proxysql', {}, {})
+def test_service_check(aggregator, dd_environment, dd_run_check):
+    c = ProxysqlCheck('proxysql', {}, [dd_environment])
 
     # the check should send OK
-    c.check(dd_environment)
+    dd_run_check(c)
     aggregator.assert_service_check('proxysql.can_connect', AgentCheck.OK)
 
     # the check should send CRITICAL
-    instance = dd_environment.copy()
-    instance['port'] = 1111
+    c.port = 1111
     with pytest.raises(pymysql.OperationalError, match="Can't connect to MySQL server"):
-        c.check(instance)
+        c.check(None)
 
     aggregator.assert_service_check('proxysql.can_connect', AgentCheck.CRITICAL)
 
