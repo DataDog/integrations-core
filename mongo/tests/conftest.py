@@ -103,7 +103,7 @@ def instance_1valid_and_1invalid_custom_queries():
 
 @pytest.fixture
 def check():
-    return lambda instance: MongoDb('mongo', {}, {}, [instance])
+    return lambda instance: MongoDb('mongo', {}, [instance])
 
 
 def setup_sharding(compose_file):

@@ -44,7 +44,7 @@ def test_build_metric_list(check, test_case, additional_metrics, expected_length
     check = check(instance)
     check.log = mock.Mock()
 
-    metrics_to_collect = check._build_metric_list_to_collect(additional_metrics)
+    metrics_to_collect = check._build_metric_list_to_collect()
     assert len(metrics_to_collect) == expected_length
     assert check.log.warning.call_count == expected_warnings
 
