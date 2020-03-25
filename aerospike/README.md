@@ -14,20 +14,13 @@ Get metrics from Aerospike Database in real time to:
 The Aerospike check is included in the Datadog Agent package.
 No additional installation is needed on your server.
 
-<!---
-First comment line...
-last comment line.
--->
-
-comment testing
-
-[^Comment]:  Text that will not appear in html source
-
 ### Configuration
 
-<!--- xxx tabs xxx -->
+Two dashes
 
-<!--- xxx tab "Host" xxx -->
+<!-- xxx tabs xxx -->
+
+<!-- xxx tab "Host" xxx -->
 
 #### Host
 
@@ -40,9 +33,9 @@ To configure this check for an Agent running on a host:
 [1]: https://github.com/DataDog/integrations-core/blob/master/aerospike/datadog_checks/aerospike/data/conf.yaml.example
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 
-<!--- xxz tab xxx -->
+<!-- xxz tab xxx -->
 
-<!--- xxx tab "Containerized" xxx -->
+<!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
 
@@ -56,9 +49,9 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 [6]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 
-<!--- xxz tab xxx -->
+<!-- xxz tab xxx -->
 
-<!--- xxz tabs xxx -->
+<!-- xxz tabs xxx -->
 
 ### Validation
 
