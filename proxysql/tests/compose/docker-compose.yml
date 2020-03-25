@@ -1,0 +1,24 @@
+version: "3"
+
+services:
+  proxysql:
+    image: proxysql/proxysql:2.0.8
+    container_name: proxysql
+    depends_on:
+      - db
+    volumes:
+      - ./proxysql.cnf:/etc/proxysql.cnf
+    ports:
+      - "${PROXY_ADMIN_PORT}:6032"
+      - "${PROXY_PORT}:6033"
+
+  db:
+    image: mysql:5.7
+    container_name: db
+    ports:
+      - "${MYSQL_PORT}:3306"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASS}

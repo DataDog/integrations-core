@@ -1,0 +1,11 @@
+[
+    {
+        "agent_version": "6.0.0",
+        "integration": "ProxySQL",
+        "check": "proxysql.can_connect",
+        "statuses": ["ok", "critical"],
+        "groups": ["server", "port"],
+        "name": "ProxySQL Can Connect",
+        "description": "Returns `CRITICAL` if the Agent can't connect to ProxySQL, otherwise returns `OK`."
+    }
+]

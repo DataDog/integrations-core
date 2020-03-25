@@ -1,0 +1,31 @@
+{
+  "display_name": "ProxySQL",
+  "maintainer": "reyiyo@gmail.com",
+  "manifest_version": "1.0.0",
+  "name": "proxysql",
+  "metric_prefix": "proxysql.",
+  "metric_to_check": "proxysql.active_transactions",
+  "creates_events": false,
+  "short_description": "ProxySQL metrics integration",
+  "guid": "8d759c9d-eb9e-4c78-9f26-1c2c844233a5",
+  "support": "contrib",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-ProxySQL Integration",
+  "categories": [
+    "data store",
+    "caching"
+  ],
+  "type": "check",
+  "is_public": true,
+  "integration_id": "proxysql",
+  "assets": {
+    "dashboards": {},
+    "saved_views": {},
+    "monitors": {},
+    "service_checks": "assets/service_checks.json"
+  }
+}
