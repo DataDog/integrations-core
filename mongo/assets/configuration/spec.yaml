@@ -1,0 +1,137 @@
+name: MongoDB
+files:
+- name: mongo.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: server
+      required: true
+      description: |
+        Specify the MongoDB URI, with database to use for reporting (defaults to "admin")
+        E.g. mongodb://datadog:LnCbkX4uhpuLHSUrcayEoAZA@localhost:27016/admin
+      value:
+        example: mongodb://<USER>:<PASSWORD>@<HOST>:<PORT>/<DB_NAME>
+        type: string
+    - name: replica_check
+      description: |
+        Whether or not to read from available replicas.
+        Disable this if any replicas are inaccessible to the agent.
+      value:
+        type: boolean
+        example: true
+    - name: timeout
+      description: |
+        Controls connectTimeoutMS, serverSelectionTimeoutMS and socketTimeoutMS
+        see http://api.mongodb.com/python/3.4.0/api/pymongo/mongo_client.html
+      value:
+        type: integer
+        example: 30
+    - name: ssl
+      description: If `True`, create the connection to the server using SSL.
+      value:
+        type: boolean
+        example: false
+    - name: ssl_keyfile
+      description: Path to the private key file used to identify the local connection against Mongodb.
+      value:
+        type: string
+    - name: ssl_certfile
+      required: false
+      description: Path to the certificate file used to identify the local connection against Mongodb.
+      value:
+        type: string
+    - name: ssl_cert_reqs
+      description: |
+        Specifies whether a certificate is required from the other side of the connection, and whether it will be
+        validated if provided.
+        Possible values:
+          * 0 for ssl.CERT_NONE (certificates ignored)
+          * 1 for ssl.CERT_OPTIONAL (not required, but validated if provided)
+          * 2 for ssl.CERT_REQUIRED (required and validated)
+      value:
+        type: integer
+    - name: ssl_ca_certs
+      description: Path to the ca_certs file.
+      value:
+        type: string
+    - name: additional_metrics
+      description: |
+        By default, the check collects a sample of metrics from MongoDB.
+        This  parameter instructs the check to collect additional metrics on specific topics.
+        Available options are:
+          * `metrics.commands` - Use of database commands
+          * `tcmalloc` -  TCMalloc memory allocator
+          * `top` - Usage statistics for each collection
+          * `collection` - Metrics of the specified collections
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          [metrics.commands, tcmalloc, top, collection]
+    - name: collections
+      description: |
+        Collect metrics on specific collections from the database specified
+        IT Requires `additional_metrics.collection` to be present.
+        Metrics such as `mongodb.collection.count` are collected for each named collection and tagged as follows:
+         * `db:<DB_NAME>` e.g. `db:<DB_NAME>`
+         * `collection:<COLLECTION_NAME>` e.g. `collection:<COLLECTION_NAME>`
+        Each collection generates many metrics, up to 8 + the number of indices on the collection for each collection.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - <COLLECTION_NAME>
+    - name: collections_indexes_stats
+      description: |
+        Collect indexes access metrics for every index in every collections in
+        the 'collections' list. This is available starting MongoDB 3.2.
+      value:
+        type: boolean
+        example: false
+    - name: custom_queries
+      description: |
+        Define custom queries to collect custom metrics on your Mongo
+        See https://docs.datadoghq.com/integrations/guide/mongo-custom-query-collection to learn more.
+      value:
+        type: array
+        items:
+          type: object
+          properties:
+            - name: metric_prefix
+              type: string
+            - name: query
+              type: string
+            - name: fields
+              type: object
+              properties:
+                - name: field_name
+                  type: string
+                - name: name
+                  type: string
+                - name: type
+                  type: string
+            - name: tags
+              type: array
+              items:
+                type: string
+        example:
+          - metric_prefix: mongo
+            query: <MONGO_COMMAND_QUERY>
+            fields:
+              - field_name: <FIELD_NAME>
+                name: <METRIC_SUFFIX>
+                type: <METRIC_TYPE>
+            tags:
+              - test:mongodb
+    - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/mongodb/mongodb.log
+      source: mongo
+      service: mongo

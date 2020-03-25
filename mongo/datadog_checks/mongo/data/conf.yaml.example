@@ -1,5 +1,16 @@
+## All options defined here are available to all instances.
+#
 init_config:
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param server - string - required
@@ -8,11 +19,11 @@ instances:
     #
   - server: mongodb://<USER>:<PASSWORD>@<HOST>:<PORT>/<DB_NAME>
 
-    ## @param replica_check - boolean - required - default: true
+    ## @param replica_check - boolean - optional - default: true
     ## Whether or not to read from available replicas.
     ## Disable this if any replicas are inaccessible to the agent.
     #
-    replica_check: true
+    # replica_check: true
 
     ## @param timeout - integer - optional - default: 30
     ## Controls connectTimeoutMS, serverSelectionTimeoutMS and socketTimeoutMS
@@ -20,31 +31,20 @@ instances:
     #
     # timeout: 30
 
-    ## @param tags - list of key:value elements - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
-    ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
-
     ## @param ssl - boolean - optional - default: false
-    ## Optional SSL parameters, see
-    ## https://github.com/mongodb/mongo-python-driver/blob/2.6.3/pymongo/mongo_client.py#L193-L212
-    ## for more details
+    ## If `True`, create the connection to the server using SSL.
     #
     # ssl: false
 
     ## @param ssl_keyfile - string - optional
     ## Path to the private key file used to identify the local connection against Mongodb.
     #
-    # ssl_keyfile: <SSL_KEY_FILE_PATH>
+    # ssl_keyfile: <SSL_KEYFILE>
 
     ## @param ssl_certfile - string - optional
     ## Path to the certificate file used to identify the local connection against Mongodb.
     #
-    # ssl_certfile: <CERT_FILE_PATH>
+    # ssl_certfile: <SSL_CERTFILE>
 
     ## @param ssl_cert_reqs - integer - optional
     ## Specifies whether a certificate is required from the other side of the connection, and whether it will be
@@ -54,12 +54,12 @@ instances:
     ##   * 1 for ssl.CERT_OPTIONAL (not required, but validated if provided)
     ##   * 2 for ssl.CERT_REQUIRED (required and validated)
     #
-    # ssl_cert_reqs: <SSL_CERT_REQ_VALUE>
+    # ssl_cert_reqs: <SSL_CERT_REQS>
 
     ## @param ssl_ca_certs - string - optional
     ## Path to the ca_certs file.
     #
-    # ssl_ca_certs: <CA_CERT_FILE_PATH>
+    # ssl_ca_certs: <SSL_CA_CERTS>
 
     ## @param additional_metrics - list of strings - optional
     ## By default, the check collects a sample of metrics from MongoDB.
@@ -93,7 +93,7 @@ instances:
     #
     # collections_indexes_stats: false
 
-    ## @param custom_queries - list - optional
+    ## @param custom_queries - list of mappings - optional
     ## Define custom queries to collect custom metrics on your Mongo
     ## See https://docs.datadoghq.com/integrations/guide/mongo-custom-query-collection to learn more.
     #
@@ -101,24 +101,56 @@ instances:
     #   - metric_prefix: mongo
     #     query: <MONGO_COMMAND_QUERY>
     #     fields:
-    #       - field_name: <FIELD_NAME>
-    #         name: <METRIC_SUFFIX>
-    #         type: <METRIC_TYPE>
+    #     - field_name: <FIELD_NAME>
+    #       name: <METRIC_SUFFIX>
+    #       type: <METRIC_TYPE>
     #     tags:
-    #       - test:mongodb
+    #     - test:mongodb
 
-## Log Section (Available for Agent >=6.0)
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+## Log Section
 ##
-## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
-## service - mandatory - Name of the service that generated the log
-## source  - mandatory - Attribute that defines which Integration sent the logs
-## tags: - optional - Add tags to the collected logs
+## type - required - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - required - Set port if type is tcp or udp.
+##                                         Set path if type is file.
+##                                         Set channel_path if type is windows_event.
+## source  - required - Attribute that defines which Integration sent the logs
+## service - required - The name of the service that generates the log.
+##                      Overrides any `service` defined in the `init_config` section.
+## tags - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
 # logs:
 #   - type: file
 #     path: /var/log/mongodb/mongodb.log
+#     source: mongo
 #     service: mongo
-#     source: mongodb
