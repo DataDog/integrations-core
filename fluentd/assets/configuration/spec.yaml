@@ -38,7 +38,7 @@ files:
           - <PLUGIN_ID_1>
           - <PLUGIN_ID_2>
     - name: tag_by
-      description: Set 'tag_by' to specify how to tag metrics. Valid options are type` and `plugin_id`.
+      description: Set 'tag_by' to specify how to tag metrics. Valid options are `type` and `plugin_id`.
       value:
         type: string
         example: plugin_id

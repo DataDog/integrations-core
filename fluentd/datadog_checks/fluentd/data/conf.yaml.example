@@ -70,7 +70,7 @@ instances:
     #   - <PLUGIN_ID_2>
 
     ## @param tag_by - string - optional - default: plugin_id
-    ## Set 'tag_by' to specify how to tag metrics. Valid options are type` and `plugin_id`.
+    ## Set 'tag_by' to specify how to tag metrics. Valid options are `type` and `plugin_id`.
     #
     # tag_by: plugin_id
 
