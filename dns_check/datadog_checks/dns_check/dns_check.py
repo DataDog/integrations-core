@@ -9,7 +9,7 @@ import time
 import dns.resolver
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.utils.platform import Platform
+from datadog_checks.base.utils.platform import Platform
 
 # These imports are necessary because otherwise dynamic type
 # resolution will fail on windows without it.

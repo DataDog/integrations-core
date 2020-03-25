@@ -27,7 +27,7 @@ def dd_environment(instance):
 
 @pytest.fixture(scope='session')
 def instance():
-    return copy.deepcopy(DEFAULT_INSTANCE)
+    return copy.deepcopy(common.DEFAULT_INSTANCE)
 
 
 @pytest.fixture(scope='session')
@@ -103,7 +103,7 @@ def instance_1valid_and_1invalid_custom_queries():
 
 
 @pytest.fixture
-def check(instance):
+def check():
     return lambda instance: MongoDb('mongo', {}, [instance])
 
 

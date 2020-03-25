@@ -9,10 +9,10 @@ from copy import deepcopy
 
 from six import iteritems
 
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.config import is_affirmative
-from datadog_checks.errors import CheckException
-from datadog_checks.utils.common import to_native_string
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.common import to_native_string
 
 try:
     # this module is only available in agent 6

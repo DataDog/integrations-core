@@ -6,7 +6,7 @@ import os
 
 import requests
 
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 HOST = get_docker_hostname()
 PORT = os.getenv('POWERDNS_HOST_PORT_0', 8082)

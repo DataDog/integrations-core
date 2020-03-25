@@ -5,7 +5,7 @@
 import os
 import re
 
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 CHECK_NAME = "couch"
 CHECK_ID = 'test:123'

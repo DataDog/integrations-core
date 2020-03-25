@@ -7,9 +7,9 @@ import logging
 import os
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.snmp import SnmpCheck
-from datadog_checks.utils.common import get_docker_hostname
 
 log = logging.getLogger(__name__)
 

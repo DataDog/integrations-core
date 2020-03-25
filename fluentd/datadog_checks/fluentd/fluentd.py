@@ -7,9 +7,8 @@ import re
 
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.subprocess_output import get_subprocess_output
-from datadog_checks.checks import AgentCheck
 
 
 class Fluentd(AgentCheck):

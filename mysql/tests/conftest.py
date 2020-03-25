@@ -25,18 +25,11 @@ def config_e2e():
         'init_config': {},
         'instances': [{'server': common.HOST, 'user': common.USER, 'pass': common.PASS, 'port': common.PORT}],
         'logs': [
-            {
-                'type': 'file',
-                'path': '{}/mysql.log'.format(logs_path),
-                'source': 'mysql',
-                'sourcecategory': 'database',
-                'service': 'local_mysql',
-            },
+            {'type': 'file', 'path': '{}/mysql.log'.format(logs_path), 'source': 'mysql', 'service': 'local_mysql'},
             {
                 'type': 'file',
                 'path': '{}/mysql_slow.log'.format(logs_path),
                 'source': 'mysql',
-                'sourcecategory': 'database',
                 'service': 'local_mysql',
                 'log_processing_rules': [
                     {'type': 'multi_line', 'name': 'log_starts_with_time', 'pattern': '# Time: '},

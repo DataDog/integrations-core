@@ -6,9 +6,9 @@ import datetime
 
 from six import iteritems
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import _is_affirmative
-from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.config import _is_affirmative
+from datadog_checks.base.utils.containers import hash_mutable
 
 from . import aci_metrics
 from .api import Api

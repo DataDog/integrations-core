@@ -140,13 +140,11 @@ _Available for Agent versions >6.0_
        path: /var/log/nginx/access.log
        service: nginx
        source: nginx
-       sourcecategory: http_web_access
 
      - type: file
        path: /var/log/nginx/error.log
        service: nginx
        source: nginx
-       sourcecategory: http_web_access
    ```
 
     Change the `service` and `path` parameter values and configure them for your environment. See the [sample nginx.d/conf.yaml][6] for all available configuration options.
