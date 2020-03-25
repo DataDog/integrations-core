@@ -2,7 +2,7 @@ name: Compile Deps
 on: push
 jobs:
   compile_deps:
-    runs-on: ubuntu-latest
+    runs-on: [ubuntu-latest, windows-latest]
     steps:
     - uses: actions/checkout@v1
     - name: Compile Deps
