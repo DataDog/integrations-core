@@ -17,37 +17,37 @@ No additional installation is needed on your server.
 
 1. Ensure that you have the `dogstatsd-ruby` [gem][4] installed:
 
-```
-  gem install dogstatsd-ruby
-```
+  ```
+    gem install dogstatsd-ruby
+  ```
 
 2. Enable Sidekiq Pro metric collection by including this in your initializer:
 
-```ruby
-    require 'datadog/statsd' # gem 'dogstatsd-ruby'
+  ```ruby
+      require 'datadog/statsd' # gem 'dogstatsd-ruby'
 
-    Sidekiq::Pro.dogstatsd = ->{ Datadog::Statsd.new('metrics.example.com', 8125, namespace:'sidekiq') }
+      Sidekiq::Pro.dogstatsd = ->{ Datadog::Statsd.new('metrics.example.com', 8125, namespace:'sidekiq') }
 
-    Sidekiq.configure_server do |config|
-      config.server_middleware do |chain|
-        require 'sidekiq/middleware/server/statsd'
-        chain.add Sidekiq::Middleware::Server::Statsd
+      Sidekiq.configure_server do |config|
+        config.server_middleware do |chain|
+          require 'sidekiq/middleware/server/statsd'
+          chain.add Sidekiq::Middleware::Server::Statsd
+        end
       end
-    end
-  ```
+    ```
 
-3. If you are using Sidekiq Enterprise and would like to collect historical metrics, include this line as well:
+    If you are using Sidekiq Enterprise and would like to collect historical metrics, include this line as well:
 
-```ruby
-    Sidekiq.configure_server do |config|
-      # history is captured every 30 seconds by default
-      config.retain_history(30)
-    end
-```
+    ```ruby
+        Sidekiq.configure_server do |config|
+          # history is captured every 30 seconds by default
+          config.retain_history(30)
+        end
+    ```
 
   See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information and [Datadog Ruby][7] documentation for further configuration options.
 
-3. Update the [Datadog Agent main configuration file][13] `datadog.yaml` by adding the following configs:
+4. Update the [Datadog Agent main configuration file][13] `datadog.yaml` by adding the following configs:
 
    ```yaml
    # dogstatsd_mapper_cache_size: 1000  # default to 1000
@@ -108,11 +108,10 @@ See [metadata.csv][12] for a list of metrics provided by this integration. Custo
         - type: file
           path:  /var/log/sidekiq.log
           source: sidekiq
-          sourcecategory: jobrunner
           service: <SERVICE>
     ```
 
-     Change the `path` and `service` parameter values and configure them for your environment. If you cannot find your logs, [you can look in the Sidekiq documentation to see how to change your logging][9].
+     Change the `path` and `service` parameter values and configure them for your environment. If you cannot find your logs, [see the Sidekiq documentation on more details about logs][9].
 
 3. [Restart the Agent][8].
 
