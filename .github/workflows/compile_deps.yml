@@ -4,6 +4,7 @@ jobs:
   compile_deps:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v1
     - name: Compile Deps
       run: |
         pwd
