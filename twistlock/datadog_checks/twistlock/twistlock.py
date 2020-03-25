@@ -10,14 +10,10 @@ from dateutil import parser, tz
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.serialization import json
 
 from .config import Config
 from .utils import normalize_api_data_inplace
-
-try:
-    import orjson as json
-except ImportError:
-    import json
 
 DOCKERIO_PREFIX = "docker.io/"
 
