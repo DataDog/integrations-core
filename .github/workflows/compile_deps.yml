@@ -1,13 +1,12 @@
 name: Compile Deps
 on: push
 
-runs-on: ${{ matrix.os }}
-strategy:
-  matrix:
-    os: [ubuntu-latest, windows-latest]
-
 jobs:
   compile_deps:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
     - uses: actions/checkout@v1
     - name: Compile Deps
