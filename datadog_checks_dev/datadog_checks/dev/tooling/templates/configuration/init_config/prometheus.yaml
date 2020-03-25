@@ -1,2 +1,65 @@
 - template: init_config/http
 
+- name: prometheus_url
+  required: true
+  description: The URL where your application metrics are exposed by Prometheus.
+  value:
+    type: string
+    example: http://service/prometheus
+- name: namespace
+  required: true
+  description: The namespace to be prepended to all metrics.
+  value:
+    type: string
+    example: "service"
+- name: metrics
+  required: true
+  description: |
+    List of metrics to be fetched from the prometheus endpoint, if there's a
+    value it'll be renamed. This list should contain at least one metric.
+  value:
+    type: array
+    example:
+      - processor:cpu
+      - memory:mem
+      - io
+    items:
+      type: string # TODO: metrics can be a string or a key:valueß
+- name: prometheus_metrics_prefix
+  description: <PREFIX> for exposed Prometheus metrics.
+  value:
+    type: string
+    example: <PREFIX>
+- name: health_service_check
+  description: |
+    Send a service check reporting about the health of the prometheus endpoint.
+    It's named <NAMESPACE>.prometheus.health
+  value:
+    type: boolean
+    example: true
+- name: label_to_hostname
+  description: Override the hostname with the value of one label.
+  value:
+    type: string
+    example: <LABEL>
+- name: label_joins
+  description: The label join allows to target a metric and retrieve it's label via a 1:1 mapping.
+  value:
+    example:
+      target_metric:
+        label_to_match: <MATCHED_LABEL>
+        labels_to_get:
+          - <EXTRA_LABEL_1>
+          - <EXTRA_LABEL_2>
+    type: object
+    properties:
+    - name: target_metric
+      type: object
+      properties:
+      - name: label_to_match
+        type: string
+      - name: labels_to_get
+        type: array
+-
+
+      
