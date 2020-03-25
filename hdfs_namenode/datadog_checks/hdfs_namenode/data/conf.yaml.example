@@ -82,7 +82,7 @@ instances:
 
     ## @param auth_type - string - optional
     ## The type of authentication to use.
-    ## The available values are "basic" and "digest".
+    ## The available values are "basic", "digest" and "kerberos".
     #
     # auth_type: <AUTH_TYPE>
 
