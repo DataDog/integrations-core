@@ -181,7 +181,7 @@ def construct_pytest_options(
     enter_pdb=False,
     debug=False,
     bench=False,
-    check_metrics=False,
+    latest_metrics=False,
     coverage=False,
     junit=False,
     marker='',
@@ -210,9 +210,9 @@ def construct_pytest_options(
     else:
         pytest_options += ' --benchmark-skip'
 
-    if check_metrics:
-        pytest_options += ' --run-check-metrics'
-        marker = 'check_metrics'
+    if latest_metrics:
+        pytest_options += ' --run-latest-metrics'
+        marker = 'latest_metrics'
 
     if junit:
         test_group = 'e2e' if e2e else 'unit'

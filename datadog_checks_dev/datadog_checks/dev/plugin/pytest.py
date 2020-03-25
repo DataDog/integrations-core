@@ -237,18 +237,21 @@ def pytest_configure(config):
     config.addinivalue_line('markers', 'unit: marker for unit tests')
     config.addinivalue_line('markers', 'integration: marker for integration tests')
     config.addinivalue_line('markers', 'e2e: marker for end-to-end Datadog Agent tests')
-    config.addinivalue_line("markers", "check_metrics: mark test as checking metrics")
+    config.addinivalue_line("markers", "latest_metrics: mark test as checking metrics")
 
 
 def pytest_addoption(parser):
-    parser.addoption("--run-check-metrics", action="store_true", default=False, help="run check_metrics tests")
+    parser.addoption("--run-latest-metrics", action="store_true", default=False, help="run check_metrics tests")
 
 
 def pytest_collection_modifyitems(config, items):
-    if config.getoption("--run-check-metrics"):
+    # at test collection time, this function gets called by pytest, see:
+    # https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option
+    # if the particular option is not present, it will skip all tests marked `latest_metrics`
+    if config.getoption("--run-latest-metrics"):
         # --run-check-metrics given in cli: do not skip slow tests
         return
-    skip_check_metrics = pytest.mark.skip(reason="need --run-check-metrics option to run")
+    skip_latest_metrics = pytest.mark.skip(reason="need --run-latest-metrics option to run")
     for item in items:
-        if "check_metrics" in item.keywords:
-            item.add_marker(skip_check_metrics)
+        if "latest_metrics" in item.keywords:
+            item.add_marker(skip_latest_metrics)

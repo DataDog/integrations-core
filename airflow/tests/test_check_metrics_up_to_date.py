@@ -43,7 +43,7 @@ EXPECTED_METRICS = [
 METRIC_PATTERN = re.compile(r'^``([^`]+)``\s+(.*)', re.MULTILINE)
 
 
-@pytest.mark.check_metrics
+@pytest.mark.latest_metrics
 def test_check_metrics_up_to_date():
     url = 'https://raw.githubusercontent.com/apache/airflow/master/docs/metrics.rst'
     resp = requests.get(url)
