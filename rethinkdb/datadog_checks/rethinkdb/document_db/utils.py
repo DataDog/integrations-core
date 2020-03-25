@@ -4,10 +4,7 @@
 """
 Miscellaneous utilities.
 """
-import datetime as dt
 from typing import Any, Mapping, Sequence
-
-from datadog_checks.base.utils.db.utils import normalize_datetime
 
 
 def lookup_dotted(dct, path):
@@ -44,8 +41,6 @@ def dotted_join(values):
     return '.'.join(filter(None, values))
 
 
-def to_time_elapsed(datetime):
-    # type: (dt.datetime) -> float
-    datetime = normalize_datetime(datetime)
-    elapsed = dt.datetime.now(datetime.tzinfo) - datetime
-    return elapsed.total_seconds()
+def no_op(*args, **kwargs):
+    # type: (*Any, **Any) -> None
+    pass

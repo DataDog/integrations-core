@@ -1,20 +1,15 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import logging
 from collections import OrderedDict
 from typing import Iterator, List, Tuple
 
 import pytest
+from six import PY3
 
-from datadog_checks.rethinkdb.document_db.query import DocumentQuery
+from datadog_checks.rethinkdb.document_db import DocumentQuery, transformers
 
 pytestmark = pytest.mark.unit
-
-
-class MockLogger(logging.Logger):
-    def trace(self, *args, **kwargs):  # type: ignore
-        pass  # Called by queries.
 
 
 def test_document_query():
@@ -59,18 +54,18 @@ def test_document_query():
         metrics=[
             {'type': 'gauge', 'path': 'sales.sales_per_day'},
             {'type': 'monotonic_count', 'path': 'sales.sales_total'},
-            {'type': 'gauge', 'path': 'locations', 'modifier': 'total'},
+            {'type': 'gauge', 'path': 'locations', 'transformer': transformers.length},
         ],
         # Metrics for each object in an array, tagged by the index in the array.
         enumerations=[
             {'path': 'locations', 'index_tag': 'location_index', 'metrics': [{'type': 'gauge', 'path': 'stock'}]}
         ],
         # Metrics from the result of a groupby() operation (aggregation).
-        groups=[{'path': 'total_sales_per_location', 'key_tag': 'location', 'value_metric_type': 'gauge'}],
+        groups=[{'type': 'gauge', 'path': 'total_sales_per_location', 'key_tag': 'location'}],
     )
 
     conn = {'server': 'example'}
-    metrics = list(query.run(conn, logger=MockLogger('test')))
+    metrics = list(query.run(conn=conn))
 
     assert metrics == [
         # -- T-Shirt --
@@ -153,5 +148,13 @@ def test_document_query_empty():
         yield {}, []
 
     query = DocumentQuery(source=get_data, name='test', prefix='dogs')
-    metrics = list(query.run(logger=MockLogger('test')))
+    metrics = list(query.run())
     assert metrics == []
+
+
+@pytest.mark.skipif(
+    not PY3, reason='Assertions fail randomly due to Python 2 dicts not being ordered (example should stay simple)'
+)
+def test_example():
+    # type: () -> None
+    import datadog_checks.rethinkdb.document_db._example  # noqa: F401

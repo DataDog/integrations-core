@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from . import operations
-from .document_db import DocumentQuery
+from .document_db import DocumentQuery, transformers
 
 # System configuration.
 
@@ -13,8 +13,8 @@ config_summary = DocumentQuery(
     prefix='rethinkdb.config',
     metrics=[{'type': 'gauge', 'path': 'servers'}, {'type': 'gauge', 'path': 'databases'}],
     groups=[
-        {'path': 'tables_per_database', 'key_tag': 'database', 'value_metric_type': 'gauge'},
-        {'path': 'secondary_indexes_per_table', 'key_tag': 'table', 'value_metric_type': 'gauge'},
+        {'type': 'gauge', 'path': 'tables_per_database', 'key_tag': 'database'},
+        {'type': 'gauge', 'path': 'secondary_indexes_per_table', 'key_tag': 'table'},
     ],
 )
 
@@ -92,19 +92,19 @@ table_statuses = DocumentQuery(
     name='table_status',
     prefix='rethinkdb.table_status',
     metrics=[
-        {'type': 'service_check', 'path': 'status.ready_for_outdated_reads', 'modifier': 'ok_warning'},
-        {'type': 'service_check', 'path': 'status.ready_for_reads', 'modifier': 'ok_warning'},
-        {'type': 'service_check', 'path': 'status.ready_for_writes', 'modifier': 'ok_warning'},
-        {'type': 'service_check', 'path': 'status.all_replicas_ready', 'modifier': 'ok_warning'},
-        {'type': 'gauge', 'path': 'shards', 'modifier': 'total'},
+        {'type': 'service_check', 'path': 'status.ready_for_outdated_reads', 'transformer': transformers.ok_warning},
+        {'type': 'service_check', 'path': 'status.ready_for_reads', 'transformer': transformers.ok_warning},
+        {'type': 'service_check', 'path': 'status.ready_for_writes', 'transformer': transformers.ok_warning},
+        {'type': 'service_check', 'path': 'status.all_replicas_ready', 'transformer': transformers.ok_warning},
+        {'type': 'gauge', 'path': 'shards', 'transformer': transformers.length},
     ],
     enumerations=[
         {
             'path': 'shards',
             'index_tag': 'shard',
             'metrics': [
-                {'type': 'gauge', 'path': 'replicas', 'modifier': 'total'},
-                {'type': 'gauge', 'path': 'primary_replicas', 'modifier': 'total'},
+                {'type': 'gauge', 'path': 'replicas', 'transformer': transformers.length},
+                {'type': 'gauge', 'path': 'primary_replicas', 'transformer': transformers.length},
             ],
         }
     ],
@@ -116,9 +116,9 @@ server_statuses = DocumentQuery(
     name='server_status',
     prefix='rethinkdb.server_status',
     metrics=[
-        {'type': 'gauge', 'path': 'network.time_connected', 'modifier': 'time_elapsed'},
-        {'type': 'gauge', 'path': 'network.connected_to', 'modifier': 'total'},
-        {'type': 'gauge', 'path': 'process.time_started', 'modifier': 'time_elapsed'},
+        {'type': 'gauge', 'path': 'network.time_connected', 'transformer': transformers.to_time_elapsed},
+        {'type': 'gauge', 'path': 'network.connected_to', 'transformer': transformers.length},
+        {'type': 'gauge', 'path': 'process.time_started', 'transformer': transformers.to_time_elapsed},
     ],
 )
 
@@ -142,7 +142,7 @@ current_issues_summary = DocumentQuery(
     name='current_issues',
     prefix='rethinkdb.current_issues',
     groups=[
-        {'path': 'issues', 'key_tag': 'issue_type', 'value_metric_type': 'gauge'},
-        {'path': 'critical_issues', 'key_tag': 'issue_type', 'value_metric_type': 'gauge'},
+        {'type': 'gauge', 'path': 'issues', 'key_tag': 'issue_type'},
+        {'type': 'gauge', 'path': 'critical_issues', 'key_tag': 'issue_type'},
     ],
 )
