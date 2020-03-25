@@ -34,16 +34,16 @@ No additional installation is needed on your server.
           chain.add Sidekiq::Middleware::Server::Statsd
         end
       end
-    ```
+  ```
 
-    If you are using Sidekiq Enterprise and would like to collect historical metrics, include this line as well:
+  If you are using Sidekiq Enterprise and would like to collect historical metrics, include this line as well:
 
-    ```ruby
+  ```ruby
         Sidekiq.configure_server do |config|
           # history is captured every 30 seconds by default
           config.retain_history(30)
         end
-    ```
+  ```
 
   See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information and [Datadog Ruby][7] documentation for further configuration options.
 
