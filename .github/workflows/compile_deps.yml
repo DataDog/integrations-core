@@ -8,20 +8,26 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         python-version: [2.7, 3.8]
+    with:
+      python-version: ${{ matrix.python-version }}
     steps:
     - uses: actions/checkout@v1
     - name: Compile Deps
       shell: bash
-      with:
-        python-version: ${{ matrix.python-version }}
       run: |
         pwd
         ls -la
         ls datadog_checks_base/datadog_checks/base/data
         which -a python
+        mkdir -p compiled_deps
         pip install pip-tools
         cat datadog_checks_base/datadog_checks/base/data/agent_requirements.in | grep -v pymqi > agent_requirements.in
-        python -m piptools compile --generate-hashes agent_requirements.in
+        python -m piptools compile --generate-hashes --output-file compiled_deps/agent_requirements-${{ matrix.os }}-${{ matrix.python-version }}.txt agent_requirements.in
 
+    - name: Upload math result for job 1
+      uses: actions/upload-artifact@v1
+      with:
+        name: compiled_deps
+        path: ./compiled_deps
 #        bash .azure-pipelines/scripts/ibm_mq/linux/55_install_client.sh
 #        python3 -m piptools compile --generate-hashes --output-file tmp.txt datadog_checks_base/datadog_checks/base/data/agent_requirements.in
