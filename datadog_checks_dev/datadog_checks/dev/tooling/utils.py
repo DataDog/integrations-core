@@ -203,6 +203,28 @@ def get_config_files(check_name):
     return sorted(files)
 
 
+def get_check_files(check_name, file_suffix='.py', abs_file_path=True, include_dirs=None):
+    """Return generator of filenames from within a given check.
+
+    By default, only includes files within 'datadog_checks' and 'tests' directories, this
+    can be expanded by adding to the `include_dirs` arg.
+    """
+    base_dirs = ['datadog_checks', 'tests']
+    if include_dirs is not None:
+        base_dirs += include_dirs
+
+    bases = [os.path.join(get_root(), check_name, base) for base in base_dirs]
+
+    for base in bases:
+        for root, _, files in os.walk(base):
+            for f in files:
+                if f.endswith(file_suffix):
+                    if abs_file_path:
+                        yield os.path.join(root, f)
+                    else:
+                        yield f
+
+
 def get_valid_checks():
     return {path for path in os.listdir(get_root()) if file_exists(get_version_file(path))}
 

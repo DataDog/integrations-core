@@ -31,8 +31,9 @@ class OptionWriter(object):
         self.writer.close()
 
 
-def construct_yaml(obj):
-    return yaml.safe_dump(obj, default_flow_style=False, sort_keys=False)
+def construct_yaml(obj, **kwargs):
+    kwargs.setdefault('default_flow_style', False)
+    return yaml.safe_dump(obj, sort_keys=False, **kwargs)
 
 
 def value_type_string(value):
@@ -120,7 +121,20 @@ def write_option(option, writer, indent='', start_list=False):
             option_yaml = construct_yaml([{option_name: example}])
             indent = indent[:-2]
         else:
-            option_yaml = construct_yaml({option_name: example})
+            if value.get('compact_example') and example_type is list:
+                option_yaml_lines = [f'{option_name}:']
+                for item in example:
+                    # Solitary strings are given an ellipsis after, prevent that
+                    if isinstance(item, str):
+                        compacted_item = construct_yaml(item, default_flow_style=True, default_style='"')
+                    else:
+                        compacted_item = construct_yaml(item, default_flow_style=True)
+
+                    option_yaml_lines.append(f'- {compacted_item.strip()}')
+
+                option_yaml = '\n'.join(option_yaml_lines)
+            else:
+                option_yaml = construct_yaml({option_name: example})
 
         example_indent = '  ' if example_type is list and example else ''
         for i, line in enumerate(option_yaml.splitlines()):

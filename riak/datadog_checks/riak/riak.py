@@ -8,7 +8,7 @@ import unicodedata
 import simplejson as json
 from httplib2 import Http, HttpLib2Error
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 
 class Riak(AgentCheck):

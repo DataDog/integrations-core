@@ -5,6 +5,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 from collections import OrderedDict
+from typing import Any
 
 import mock
 import pytest
@@ -63,6 +64,71 @@ def test_log_critical_error():
 
     with pytest.raises(NotImplementedError):
         check.log.critical('test')
+
+
+class TestSecretsSanitization:
+    def test_default(self, caplog):
+        # type: (Any) -> None
+        secret = 's3kr3t'
+        check = AgentCheck()
+
+        message = 'hello, {}'.format(secret)
+        assert check.sanitize(message) == message
+
+        check.log.error(message)
+        assert secret in caplog.text
+
+    def test_sanitize_text(self):
+        # type: () -> None
+        secret = 'p@$$w0rd'
+        check = AgentCheck()
+        check.register_secret(secret)
+
+        sanitized = check.sanitize('hello, {}'.format(secret))
+        assert secret not in sanitized
+
+    def text_sanitize_logs(self, caplog):
+        # type: (Any) -> None
+        secret = 'p@$$w0rd'
+        check = AgentCheck()
+        check.register_secret(secret)
+
+        check.log.error('hello, %s', secret)
+        assert secret not in caplog.text
+
+    def test_sanitize_service_check_message(self, aggregator, caplog):
+        # type: (Any, Any) -> None
+        secret = 'p@$$w0rd'
+        check = AgentCheck()
+        check.register_secret(secret)
+        sanitized = check.sanitize(secret)
+
+        check.service_check('test.can_check', status=AgentCheck.CRITICAL, message=secret)
+
+        aggregator.assert_service_check('test.can_check', status=AgentCheck.CRITICAL, message=sanitized)
+
+    def test_sanitize_exception_tracebacks(self):
+        # type: () -> None
+        class MyCheck(AgentCheck):
+            def __init__(self, *args, **kwargs):
+                # type: (*Any, **Any) -> None
+                super(MyCheck, self).__init__(*args, **kwargs)
+                self.password = 'p@$$w0rd'
+                self.register_secret(self.password)
+
+            def check(self, instance):
+                # type: (Any) -> None
+                try:
+                    # Simulate a failing call in a dependency.
+                    raise Exception('Could not establish connection with Password={}'.format(self.password))
+                except Exception as exc:
+                    raise RuntimeError('Unexpected error while executing check: {}'.format(exc))
+
+        check = MyCheck('my_check', {}, [{}])
+        result = json.loads(check.run())[0]
+
+        assert check.password not in result['message']
+        assert check.password not in result['traceback']
 
 
 def test_warning_ok():

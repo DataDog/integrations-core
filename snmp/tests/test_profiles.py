@@ -1078,3 +1078,136 @@ def test_checkpoint_firewall(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_arista(aggregator):
+    run_profile_check('arista')
+
+    common_tags = common.CHECK_TAGS + ['snmp_profile:arista']
+
+    aggregator.assert_metric(
+        'snmp.aristaEgressQueuePktsDropped',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=common_tags + ['interface_index:13', 'queue_index:10'],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'snmp.aristaEgressQueuePktsDropped',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=common_tags + ['interface_index:28', 'queue_index:22'],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'snmp.aristaIngressQueuePktsDropped',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=common_tags + ['interface_index:7', 'queue_index:25'],
+        count=1,
+    )
+    aggregator.assert_metric(
+        'snmp.aristaIngressQueuePktsDropped',
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=common_tags + ['interface_index:8', 'queue_index:24'],
+        count=1,
+    )
+
+    for (sensor_id, sensor_type) in [(1, 11), (7, 8)]:
+        sensor_tags = ['sensor_id:{}'.format(sensor_id), 'sensor_type:{}'.format(sensor_type)] + common_tags
+        aggregator.assert_metric('snmp.entPhySensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
+        aggregator.assert_metric('snmp.entPhySensorOperStatus', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_aruba(aggregator):
+    run_profile_check('aruba')
+
+    common_tags = common.CHECK_TAGS + ['snmp_profile:aruba']
+
+    for fan in [18, 28]:
+        fan_tags = common_tags + ['fan_index:{}'.format(fan)]
+        aggregator.assert_metric('snmp.sysExtFanStatus', metric_type=aggregator.GAUGE, tags=fan_tags, count=1)
+    for psu in [1, 17]:
+        psu_tags = common_tags + ['powersupply_index:{}'.format(psu)]
+        aggregator.assert_metric('snmp.sysExtPowerSupplyStatus', metric_type=aggregator.GAUGE, tags=psu_tags, count=1)
+    for proc in [11, 26]:
+        proc_tags = common_tags + ['processor_index:{}'.format(proc)]
+        aggregator.assert_metric('snmp.sysExtProcessorLoad', metric_type=aggregator.GAUGE, tags=proc_tags, count=1)
+    for mem in [3, 20]:
+        mem_tags = common_tags + ['memory_index:{}'.format(mem)]
+        aggregator.assert_metric('snmp.sysExtMemorySize', metric_type=aggregator.GAUGE, tags=mem_tags, count=1)
+        aggregator.assert_metric('snmp.sysExtMemoryUsed', metric_type=aggregator.GAUGE, tags=mem_tags, count=1)
+        aggregator.assert_metric('snmp.sysExtMemoryFree', metric_type=aggregator.GAUGE, tags=mem_tags, count=1)
+
+    aggregator.assert_metric(
+        'snmp.wlsxSysExtPacketLossPercent', metric_type=aggregator.GAUGE, tags=common_tags, count=1
+    )
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_chatsworth(aggregator):
+    run_profile_check('chatsworth')
+
+    common_tags = common.CHECK_TAGS + ['snmp_profile:chatsworth_pdu']
+    pdu_tags = common_tags + [
+        'pdu_cabinetid:cab1',
+        'pdu_ipaddress:42.2.210.224',
+        'pdu_macaddress:0x00249b3503f6',
+        'pdu_model:model1',
+        'pdu_name:name1',
+        'pdu_version:v1.1',
+    ]
+    aggregator.assert_metric('snmp.cpiPduNumberBranches', metric_type=aggregator.GAUGE, tags=pdu_tags, count=1)
+    aggregator.assert_metric('snmp.cpiPduNumberOutlets', metric_type=aggregator.GAUGE, tags=pdu_tags, count=1)
+    aggregator.assert_metric('snmp.cpiPduOutOfService', metric_type=aggregator.GAUGE, tags=pdu_tags, count=1)
+    aggregator.assert_metric('snmp.cpiPduUpgrade', metric_type=aggregator.GAUGE, tags=pdu_tags, count=1)
+    aggregator.assert_metric('snmp.cpiPduChainRole', metric_type=aggregator.GAUGE, tags=pdu_tags, count=1)
+    aggregator.assert_metric('snmp.cpiPduTotalPower', metric_type=aggregator.GAUGE, tags=pdu_tags, count=1)
+
+    for lock in [1, 2]:
+        lock_tags = common_tags + ['lock_id:{}'.format(lock)]
+        aggregator.assert_metric('snmp.cpiPduEasStatus', metric_type=aggregator.GAUGE, tags=lock_tags, count=1)
+        aggregator.assert_metric('snmp.cpiPduDoorStatus', metric_type=aggregator.GAUGE, tags=lock_tags, count=1)
+        aggregator.assert_metric('snmp.cpiPduLockStatus', metric_type=aggregator.GAUGE, tags=lock_tags, count=1)
+
+    for (sensor_name, sensor_index) in [('sensor1', 4), ('sensor2', 6)]:
+        sensor_tags = common_tags + [
+            'sensor_index:{}'.format(sensor_index),
+            'sensor_name:{}'.format(sensor_name),
+            'sensor_type:1',
+        ]
+        aggregator.assert_metric('snmp.cpiPduSensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
+
+    for line in [6, 18]:
+        line_tags = common_tags + ['line_id:{}'.format(line)]
+        aggregator.assert_metric('snmp.cpiPduLineCurrent', metric_type=aggregator.GAUGE, tags=line_tags, count=1)
+
+    for branch in [1, 17]:
+        branch_tags = common_tags + ['branch_id:{}'.format(branch)]
+        aggregator.assert_metric('snmp.cpiPduBranchCurrent', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
+        aggregator.assert_metric('snmp.cpiPduBranchMaxCurrent', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
+        aggregator.assert_metric('snmp.cpiPduBranchVoltage', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
+        aggregator.assert_metric('snmp.cpiPduBranchPower', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
+        aggregator.assert_metric(
+            'snmp.cpiPduBranchPowerFactor', metric_type=aggregator.GAUGE, tags=branch_tags, count=1
+        )
+        aggregator.assert_metric('snmp.cpiPduBranchStatus', metric_type=aggregator.GAUGE, tags=branch_tags, count=1)
+        aggregator.assert_metric(
+            'snmp.cpiPduBranchEnergy', metric_type=aggregator.MONOTONIC_COUNT, tags=branch_tags, count=1
+        )
+
+    for (outlet_id, outlet_branch, outlet_name) in [(7, 29, 'outlet1'), (16, 23, 'outlet2')]:
+        outlet_tags = common_tags + [
+            'outlet_id:{}'.format(outlet_id),
+            'outlet_branchid:{}'.format(outlet_branch),
+            'outlet_name:{}'.format(outlet_name),
+        ]
+        aggregator.assert_metric('snmp.cpiPduOutletCurrent', metric_type=aggregator.GAUGE, tags=outlet_tags, count=1)
+        aggregator.assert_metric('snmp.cpiPduOutletVoltage', metric_type=aggregator.GAUGE, tags=outlet_tags, count=1)
+        aggregator.assert_metric('snmp.cpiPduOutletPower', metric_type=aggregator.GAUGE, tags=outlet_tags, count=1)
+        aggregator.assert_metric('snmp.cpiPduOutletStatus', metric_type=aggregator.GAUGE, tags=outlet_tags, count=1)
+        aggregator.assert_metric(
+            'snmp.cpiPduOutletEnergy', metric_type=aggregator.MONOTONIC_COUNT, tags=outlet_tags, count=1
+        )
+
+    aggregator.assert_all_metrics_covered()

@@ -78,18 +78,20 @@ def set_value(ctx, key, value):
     you will be prompted, with the input hidden if it is sensitive.
 
     \b
-    $ ddev config set github.user foo
-    New setting:
-    [github]
-    user = "foo"
+    `$ ddev config set github.user foo`
+
+        New setting:
+        [github]
+        user = "foo"
 
     You can also assign values on a per-org basis.
 
     \b
-    $ ddev config set orgs.<ORG_NAME>.api_key
-    New setting:
-    [orgs.<ORG_NAME>]
-    api_key = "***********"
+    `$ ddev config set orgs.<ORG_NAME>.api_key`
+
+        New setting:
+        [orgs.<ORG_NAME>]
+        api_key = "***********"
     """
     scrubbing = False
     if value is None:

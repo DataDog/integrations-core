@@ -3,9 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 
-from datadog_checks.base import ensure_unicode
-from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.subprocess_output import get_subprocess_output
+from datadog_checks.base import AgentCheck, ensure_unicode
+from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'nfsstat'
 

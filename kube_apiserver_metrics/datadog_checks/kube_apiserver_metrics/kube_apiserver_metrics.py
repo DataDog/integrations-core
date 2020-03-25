@@ -6,8 +6,8 @@ from re import match
 
 from six import iteritems
 
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.errors import CheckException
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base.errors import CheckException
 
 
 class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):

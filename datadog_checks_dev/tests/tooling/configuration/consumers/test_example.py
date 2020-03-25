@@ -245,7 +245,6 @@ def test_section_example_indent():
         ## source  - required - Attribute that defines which Integration sent the logs
         ## service - required - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
-        ## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
         ## tags - optional - Add tags to the collected logs
         ##
         ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
@@ -308,7 +307,6 @@ def test_section_example_indent_required():
         ## source  - required - Attribute that defines which Integration sent the logs
         ## service - required - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
-        ## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
         ## tags - optional - Add tags to the collected logs
         ##
         ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
@@ -959,5 +957,104 @@ def test_no_options():
         instances:
 
           - {}
+        """
+    )
+
+
+def test_compact_example():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: words
+            value:
+              type: array
+              compact_example: true
+              example:
+              - - 0
+                - 1
+              - foo
+              - foo: bar
+                bar: baz
+              - - 2
+                - 3
+              items:
+                type: array
+                items:
+                  type: integer
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - list of lists - optional
+        ## words
+        #
+        # foo:
+        #   - [0, 1]
+        #   - "foo"
+        #   - {foo: bar, bar: baz}
+        #   - [2, 3]
+        """
+    )
+
+
+def test_compact_example_nested():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: instances
+            options:
+            - name: foo
+              description: words
+              value:
+                type: array
+                compact_example: true
+                example:
+                - - 0
+                  - 1
+                - foo
+                - foo: bar
+                  bar: baz
+                - - 2
+                  - 3
+                items:
+                  type: array
+                  items:
+                    type: integer
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## Every instance is scheduled independent of the others.
+        #
+        instances:
+
+          -
+            ## @param foo - list of lists - optional
+            ## words
+            #
+            # foo:
+            #   - [0, 1]
+            #   - "foo"
+            #   - {foo: bar, bar: baz}
+            #   - [2, 3]
         """
     )

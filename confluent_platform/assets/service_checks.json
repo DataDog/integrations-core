@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "6.19.0",
+        "integration": "Confluent Platform",
+        "groups": [
+            "host",
+            "instance"
+        ],
+        "check": "confluentplatform.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from the monitored Confluent Platform component instance. Returns `OK` otherwise."
+    }
+]

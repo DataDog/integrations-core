@@ -41,7 +41,6 @@ from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_wait
 @click.pass_context
 def clean(ctx, check, compiled_only, all_matches, force, verbose):
     """Remove build and test artifacts for the given CHECK.
-
     If CHECK is not specified, the current working directory is used.
     """
     if check:
