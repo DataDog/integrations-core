@@ -134,4 +134,4 @@ files:
     - type: file
       path: /var/log/mongodb/mongodb.log
       source: mongo
-      service: mongo
+      service: <SERVICE>
