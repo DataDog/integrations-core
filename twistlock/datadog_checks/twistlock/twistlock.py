@@ -14,6 +14,11 @@ from datadog_checks.base import AgentCheck
 from .config import Config
 from .utils import normalize_api_data_inplace
 
+try:
+    import orjson as json
+except ImportError:
+    import json
+
 DOCKERIO_PREFIX = "docker.io/"
 
 # min_severity tag allows to query number of vulns for a severity target easily
@@ -322,7 +327,7 @@ class TwistlockCheck(AgentCheck):
         try:
             # it's possible to get a null response from the server
             # {} is a bit easier to deal with
-            j = response.json() or {}
+            j = json.loads(response.content) or {}
             if 'err' in j:
                 err_msg = "Error in response: {}".format(j.get("err"))
                 self.log.error(err_msg)
