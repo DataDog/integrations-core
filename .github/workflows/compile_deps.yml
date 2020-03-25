@@ -7,10 +7,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
+        python-version: [2.7, 3.8]
     steps:
     - uses: actions/checkout@v1
     - name: Compile Deps
       shell: bash
+      with:
+        python-version: ${{ matrix.python-version }}
       run: |
         pwd
         ls -la
