@@ -11,8 +11,8 @@ jobs:
         ls -la
         ls datadog_checks_base/datadog_checks/base/data
         which -a python
-        python2 -m piptools compile --generate-hashes datadog_checks_base/datadog_checks/base/data/agent_requirements.in
-        python3 -m piptools compile --generate-hashes datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+        pip install pip-tools
+        python -m piptools compile --generate-hashes datadog_checks_base/datadog_checks/base/data/agent_requirements.in
       shell: bash
 
 #        python3 -m piptools compile --generate-hashes --output-file tmp.txt datadog_checks_base/datadog_checks/base/data/agent_requirements.in
