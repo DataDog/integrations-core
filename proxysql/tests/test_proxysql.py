@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
+from tests.conftest import PROXYSQL_VERSION
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.errors import ConfigurationError
@@ -58,7 +59,7 @@ def test_config_ok(dd_run_check):
     dd_run_check(check)
 
     connect_mock.assert_called_once()
-    query_executor_mock.assert_called_once()
+    assert query_executor_mock.call_count == 2
 
 
 @pytest.mark.integration
@@ -122,6 +123,23 @@ def test_metric(aggregator, instance_basic, dd_run_check, additional_metrics, ex
             aggregator.assert_metric_has_tag_prefix(metric, prefix)
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_metadata(datadog_agent, dd_run_check, instance_basic):
+    check = get_check(instance_basic)
+    dd_run_check(check)
+
+    raw_version = PROXYSQL_VERSION
+    major, minor = raw_version.split('.')[:2]
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': mock.ANY,
+        'version.raw': mock.ANY,
+    }
+    datadog_agent.assert_metadata('', version_metadata)
 
 
 def _assert_all_metrics(aggregator):

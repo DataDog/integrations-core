@@ -41,7 +41,12 @@ mysql_replication_hostgroups =
 
 mysql_servers =
 (
-  { address="db", port=3306, hostgroup=0, max_connections=1000},
+  {
+    address="db",
+    port=3306,
+    hostgroup=0,
+    max_connections=1000
+  }
 )
 
 mysql_users =

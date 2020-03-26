@@ -2,7 +2,7 @@ version: "3"
 
 services:
   proxysql:
-    image: proxysql/proxysql:2.0.8
+    image: proxysql/proxysql:${PROXYSQL_VERSION}
     container_name: proxysql
     depends_on:
       - db

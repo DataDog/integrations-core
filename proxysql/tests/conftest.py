@@ -19,6 +19,8 @@ MYSQL_PASS = 'pass'
 PROXY_ADMIN_USER = 'proxy'
 PROXY_ADMIN_PASS = 'proxy'
 MYSQL_DATABASE = 'test'
+PROXYSQL_VERSION = os.environ['PROXYSQL_VERSION']
+
 
 BASIC_INSTANCE = {
     'host': DOCKER_HOST,

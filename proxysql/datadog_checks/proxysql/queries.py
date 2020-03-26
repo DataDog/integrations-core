@@ -257,6 +257,9 @@ VERSION_METADATA = Query(
             {
                 'name': 'version',
                 'source': 'bad_version',
+                # Evaluated as python code, the raw version looks like `2.0.8-67-g877cab1e` which is almost semver,
+                # that we parse automatically. To submit a semver formatted version, we transform the last hyphen into
+                # a plus sign: 2.0.8-67+g877cab1e.
                 'expression': "bad_version.replace('-', '+').replace('+', '-', 1)",
                 'submit_type': 'metadata',
             }
