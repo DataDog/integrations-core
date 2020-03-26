@@ -26,7 +26,7 @@ def get_requirements(fpath):
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base>=11.2.0'
+CHECKS_BASE_REQ = 'datadog_checks_base'
 
 setup(
     name='datadog-pdh_check',

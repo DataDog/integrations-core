@@ -18,7 +18,7 @@ def test_basic_check(aggregator):
     # Set up & run the check
     config = {'instances': [INSTANCE]}
     initialize_pdh_tests()
-    c = PDHCheck(CHECK_NAME, {}, config['instances'])
+    c = PDHCheck(CHECK_NAME, {}, {}, config['instances'])
     c.check(config['instances'][0])
 
     for metric in INSTANCE_METRICS:
