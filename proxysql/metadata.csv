@@ -1,25 +1,25 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 proxysql.active_transactions,gauge,,transaction,,The number of client connections currently processing a transaction,0,proxysql,active_transactions
-proxysql.query_processor_time_nsec,gauge,,nanosecond,,The time spent inside the query processor determining the action to take with the query (internal module),-1,proxysql,query_processor_time
-proxysql.questions,rate,,question,second,The number of client requests / statements executed per second,0,proxysql,questions
-proxysql.slow_queries,rate,,query,second,"The number of queries per second with an execution time greater than ""mysql-long_query_time"" milliseconds",-1,proxysql,slow_queries
-proxysql.sqlite3_memory_bytes,gauge,,byte,,Memory used by SQLite,0,proxysql,sqlite_memory_bytes
-proxysql.client.connections_aborted,rate,,connection,second,Client failed or improperly closed connections per second,-1,proxysql,client_connections_failed
+proxysql.query_processor_time_pct,gauge,,percent,,The time (as a percentage of total time) spent inside the query processor determining the action to take with the query (internal module),-1,proxysql,query_processor_time
+proxysql.questions,gauge,,question,second,The number of client requests / statements executed per second,0,proxysql,questions
+proxysql.slow_queries,gauge,,query,second,"The number of queries per second with an execution time greater than 'mysql-long_query_time' milliseconds",-1,proxysql,slow_queries
+proxysql.uptime,gauge,,second,,The total uptime of ProxySQL in seconds,0,proxysql,proxysql uptime
+proxysql.client.connections_aborted,gauge,,connection,second,Client failed or improperly closed connections per second,-1,proxysql,client_connections_failed
 proxysql.client.connections_connected,gauge,,connection,,Client connections that are currently connected,0,proxysql,client_connections_connected
-proxysql.client.connections_created,rate,,connection,second,The number of client connections created per second,0,proxysql,client_connections_created
+proxysql.client.connections_created,gauge,,connection,second,The number of client connections created per second,0,proxysql,client_connections_created
 proxysql.client.connections_non_idle,gauge,,connection,,The number of client connections that are currently handled by the main worker threads,0,proxysql,client_connections_non_idle
-proxysql.server.connections_aborted,rate,,connection,second,Backend failed or improperly closed connections per second,-1,proxysql,backend_connections_failed
+proxysql.server.connections_aborted,gauge,,connection,second,Backend failed or improperly closed connections per second,-1,proxysql,backend_connections_failed
 proxysql.server.connections_connected,gauge,,connection,,Backend connections that are currently connected,0,proxysql,backend_connections_connected
-proxysql.server.connections_created,rate,,connection,second,The number of backend connections created per second,0,proxysql,backend_connections_created
-proxysql.backend.query_time_nsec,gauge,,nanosecond,,Time spent making network calls to communicate with the backends,-1,proxysql,backend_query_time
+proxysql.server.connections_created,gauge,,connection,second,The number of backend connections created per second,0,proxysql,backend_connections_created
+proxysql.backend.query_time_pct,gauge,,percent,,Time spent (as a percentage of total time) making network calls to communicate with the backends,-1,proxysql,backend_query_time
 proxysql.mysql.backend_buffers_bytes,gauge,,byte,,Memory use of buffers related to backend connections,0,proxysql,backend_buffers_memory
 proxysql.mysql.frontend_buffers_bytes,gauge,,byte,,Memory use of buffers related to frontend connections (read/write buffers and other queues),0,proxysql,frontend_buffers_memory
 proxysql.mysql.session_internal_bytes,gauge,,byte,,Other memory used by ProxySQL to handle MySQL Sessions,0,proxysql,mysql_sessions_buffers_memory
 proxysql.mysql.thread_workers,gauge,,worker,,The number of MySQL Thread workers i.e. “mysql-threads”,0,proxysql,mysql_threads
 proxysql.mysql.monitor_workers,gauge,,worker,,The number of monitor threads,0,proxysql,monitor_threads
-proxysql.pool.conn_success,rate,,connection,second,The number of requests where a connection was already available in the connection pool,0,proxysql,connection_pool_success
-proxysql.pool.conn_failure,rate,,connection,second,The number of requests where a connection was not available in the connection pool and either: a new connection had to be created or no backend was available,-1,proxysql,connection_pool_failure
-proxysql.pool.conn_immediate,rate,,connection,second,The number of connections that a MySQL Thread obtained from its own local connection pool cache,0,proxysql,connection_pool_immediate
+proxysql.pool.conn_success,gauge,,connection,second,The number of requests per second where a connection was already available in the connection pool,0,proxysql,connection_pool_success
+proxysql.pool.conn_failure,gauge,,connection,second,The number of requests per second where a connection was not available in the connection pool and either: a new connection had to be created or no backend was available,-1,proxysql,connection_pool_failure
+proxysql.pool.conn_immediate,gauge,,connection,second,The number of connections per second that a MySQL Thread obtained from its own local connection pool cache,0,proxysql,connection_pool_immediate
 proxysql.pool.memory_bytes,gauge,,byte,,Memory used by the connection pool to store connections metadata,0,proxysql,connection_pool_memory
 proxysql.client.statements.active_total,gauge,,unit,,The number of prepared statements that are in use by clients,0,proxysql,client_prepared_statements_active
 proxysql.client.statements.active_unique,gauge,,unit,,The number of unique prepared statements currently in use by clients,0,proxysql,client_prepared_statements_active_unique
@@ -28,14 +28,14 @@ proxysql.server.statements.active_unique,gauge,,unit,,The number of unique prepa
 proxysql.statements.cached,gauge,,unit,,The number of global prepared statements for which proxysql has metadata,0,proxysql,global_prepared_statements_cached
 proxysql.query_cache.entries,gauge,,entry,,The number of entries currently stored in the query cache,0,proxysql,query_cache_entries
 proxysql.query_cache.memory_bytes,gauge,,byte,,Memory usage of the query cache,0,proxysql,query_cache_memory
-proxysql.query_cache.purged,rate,,entry,second,The number of entries purged by the Query Cache due to TTL expiration,0,proxysql,query_cache_purged
+proxysql.query_cache.purged,gauge,,entry,second,The number of entries purged per second by the Query Cache due to TTL expiration,0,proxysql,query_cache_purged
 proxysql.query_cache.bytes_in,gauge,,byte,,The number of bytes sent into the Query Cache,0,proxysql,query_cache_bytes_in
 proxysql.query_cache.bytes_out,gauge,,byte,,The number of bytes read from the Query Cache,0,proxysql,query_cache_bytes_out
 proxysql.query_cache.get.count,gauge,,query,,The number of read requests to the Query Cache,0,proxysql,query_cache_reads
 proxysql.query_cache.get_ok.count,gauge,,query,,The number of successful read requests,0,proxysql,query_cache_reads_successful
 proxysql.query_cache.set.count,gauge,,query,,The number of write requests to the Query Cache,0,proxysql,query_cache_writes
-proxysql.performance.command.total_time_ms,rate,,millisecond,,Total time spent executing commands of a type,0,proxysql,command_time
-proxysql.performance.command.total_count,count,,command,,The total number of commands of a type executed,0,proxysql,command_count
+proxysql.performance.command.total_time_pct,gauge,,percent,,Total time spent executing commands of a type as a percentage of total time.,0,proxysql,command_time
+proxysql.performance.command.total_count,count,,command,,The number of commands of a type executed,0,proxysql,command_count
 proxysql.performance.command.cnt_100us,count,,command,,The number of commands of a type which executed within 100 microseconds,0,proxysql,command_count_100us
 proxysql.performance.command.cnt_500us,count,,command,,"The number of commands of a type which executed within 500 microseconds, but more than 100 microseconds",0,proxysql,command_count_500us
 proxysql.performance.command.cnt_1ms,count,,command,,"The number of commands of a type which executed within 1 milliseconds, but more than 500 microseconds",0,proxysql,command_count_1ms
@@ -47,16 +47,16 @@ proxysql.performance.command.cnt_500ms,count,,command,,"The number of commands o
 proxysql.performance.command.cnt_1s,count,,command,,"The number of commands of a type which executed within 1 second, but more than 500 milliseconds",0,proxysql,command_count_1s
 proxysql.performance.command.cnt_5s,count,,command,,"The number of commands of a type which executed within 5 seconds, but more than 1 second",0,proxysql,command_count_5s
 proxysql.performance.command.cnt_10s,count,,command,,"The number of commands of a type which executed within 10 seconds, but more than 5 seconds",0,proxysql,command_count_10s
-proxysql.performance.command.cnt_INFs,count,,command,,The number of commands whose execution exceeded 10 seconds,0,proxysql,command_count_infs
+proxysql.performance.command.cnt_infs,count,,command,,The number of commands whose execution exceeded 10 seconds,0,proxysql,command_count_infs
 proxysql.pool.connections_used,gauge,,connection,,How many connections are currently used by ProxySQL for sending queries to the backend server,0,proxysql,connection_pool_used_connections
 proxysql.pool.connections_free,gauge,,connection,,How many connections are currently free. They are kept open in order to minimize the time cost of sending a query to the backend server,0,proxysql,connection_pool_free_connections
-proxysql.pool.connections_ok,rate,,connection,second,How many connections were established successfully,0,proxysql,connection_pool_established_ok_connections
-proxysql.pool.connections_error,rate,,connection,second,How many connections weren't established successfully,-1,proxysql,connection_pool_connection_errors
-proxysql.pool.queries,rate,,query,second,The number of queries routed towards this particular backend server,0,proxysql,connection_pool_queries
-proxysql.pool.bytes_data_sent,rate,,byte,second,The amount of data sent to the backend,0,proxysql,connection_pool_bytes_sent
-proxysql.pool.bytes_data_recv,rate,,byte,second,The amount of data received from the backend,0,proxysql,connection_pool_bytes_received
+proxysql.pool.connections_ok,gauge,,connection,second,How many connections are established successfully,0,proxysql,connection_pool_established_ok_connections
+proxysql.pool.connections_error,gauge,,connection,second,How many connections aren't established successfully,-1,proxysql,connection_pool_connection_errors
+proxysql.pool.queries,gauge,,query,second,The number of queries routed towards this particular backend server,0,proxysql,connection_pool_queries
+proxysql.pool.bytes_data_sent,gauge,,byte,second,The amount of data sent to the backend,0,proxysql,connection_pool_bytes_sent
+proxysql.pool.bytes_data_recv,gauge,,byte,second,The amount of data received from the backend,0,proxysql,connection_pool_bytes_received
 proxysql.pool.latency_ms,gauge,,millisecond,,"The current ping time as reported from Monitor",-1,proxysql,connection_pool_backend_latency
-proxysql.memory.sqlite3_memory,gauge,,byte,,Memory used by the embedded SQLite,0,proxysql,sqlite_memory
+proxysql.memory.sqlite3_memory_bytes,gauge,,byte,,Memory used by the embedded SQLite,0,proxysql,sqlite_memory
 proxysql.memory.jemalloc_resident,gauge,,byte,,Bytes in physically resident data pages mapped by the allocator,0,proxysql,jemalloc_resident_memory
 proxysql.memory.jemalloc_active,gauge,,byte,,Bytes in pages allocated by the application,0,proxysql,jemalloc_active_memory
 proxysql.memory.jemalloc_allocated,gauge,,byte,,Bytes allocated by the application,0,proxysql,jemalloc_allocated_memory
@@ -70,4 +70,4 @@ proxysql.memory.stack_memory_admin_threads,gauge,,byte,,Memory used by the stack
 proxysql.memory.stack_memory_cluster_threads,gauge,,byte,,Memory used by the stack of the cluster threads,0,proxysql,cluster_threads_stack_memory
 proxysql.frontend.user_connections,gauge,,connection,,Current number of frontend connections by user,0,proxysql,current_frontend_connections_by_user
 proxysql.frontend.user_max_connections,gauge,,connection,,Max number of frontend connections the user can create (as defined in mysql_users.max_connections),0,proxysql,max_frontend_connections_by_user
-proxysql.query_rules.rule_hits,rate,,hit,second,The number of times query rules matched traffic,0,proxysql,query_rules_hits
+proxysql.query_rules.rule_hits,gauge,,hit,second,The number of times query rules matched traffic,0,proxysql,query_rules_hits

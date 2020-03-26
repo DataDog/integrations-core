@@ -81,9 +81,9 @@ STATS_MYSQL_GLOBAL = Query(
                     # memory currently used by the query cache
                     'Query_Cache_Memory_bytes': {'name': 'query_cache.memory_bytes', 'type': 'gauge'},
                     # number of entries currently stored in the query cache
-                    'Query_Cache_Entries': {'name': 'query_cache.entries', 'type': 'rate'},
+                    'Query_Cache_Entries': {'name': 'query_cache.entries', 'type': 'gauge'},
                     # number of entries purged by the Query Cache due to TTL expiration
-                    'Query_Cache_Purged': {'name': 'query_cache.purged', 'type': 'gauge'},
+                    'Query_Cache_Purged': {'name': 'query_cache.purged', 'type': 'rate'},
                     # TODO: Are the following cache metrics monotonic counters?
                     # number of bytes sent into the Query Cache
                     'Query_Cache_bytes_IN': {'name': 'query_cache.bytes_in', 'type': 'gauge'},
