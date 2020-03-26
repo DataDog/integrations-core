@@ -19,6 +19,7 @@ from .common import (
     HEROES_TABLE_REPLICAS_BY_SHARD,
     HEROES_TABLE_SERVERS,
     IS_RETHINKDB_2_3,
+    JOBS_METRICS,
     REPLICA_STATISTICS_METRICS,
     SERVER_STATISTICS_METRICS,
     SERVER_STATUS_METRICS,
@@ -60,8 +61,8 @@ def assert_metrics(aggregator, is_proxy, disconnected_servers=None):
     _assert_statistics_metrics(aggregator, disconnected_servers=disconnected_servers)
     _assert_table_status_metrics(aggregator)
     _assert_server_status_metrics(aggregator, disconnected_servers=disconnected_servers)
-    _assert_current_issues_metrics(aggregator, disconnected_servers=disconnected_servers)
     _assert_jobs_metrics(aggregator, is_proxy=is_proxy)
+    _assert_current_issues_metrics(aggregator, disconnected_servers=disconnected_servers)
 
 
 def _assert_config_metrics(aggregator, disconnected_servers):
@@ -127,6 +128,19 @@ def _assert_server_status_metrics(aggregator, disconnected_servers):
             aggregator.assert_metric(metric, metric_type=typ, count=count, tags=tags)
 
 
+def _assert_jobs_metrics(aggregator, is_proxy):
+    # type: (AggregatorStub, bool) -> None
+    for metric, typ, value, tags in JOBS_METRICS:
+        if 'job_type:query' in tags and is_proxy and IS_RETHINKDB_2_3:
+            # For some reason, queries issued to retrieve metrics via a proxy server are not included
+            # in system jobs under RethinkDB 2.3.
+            count = 0
+        else:
+            count = 1
+
+        aggregator.assert_metric(metric, metric_type=typ, value=value, count=count, tags=TAGS + tags)
+
+
 def _assert_current_issues_metrics(aggregator, disconnected_servers):
     # type: (AggregatorStub, Set[ServerName]) -> None
     for metric, typ in CURRENT_ISSUES_METRICS:
@@ -136,15 +150,3 @@ def _assert_current_issues_metrics(aggregator, disconnected_servers):
                 aggregator.assert_metric(metric, metric_type=typ, count=1, tags=tags)
         else:
             aggregator.assert_metric(metric, metric_type=typ, count=0)
-
-
-def _assert_jobs_metrics(aggregator, is_proxy):
-    # type: (AggregatorStub, bool) -> None
-    if is_proxy and IS_RETHINKDB_2_3:
-        # For some reason, queries issued to retrieve metrics via a proxy server are not included
-        # in system jobs under RethinkDB 2.3.
-        return
-
-    aggregator.assert_metric(
-        'rethinkdb.system_jobs.jobs', metric_type=AggregatorStub.GAUGE, value=1, count=1, tags=TAGS + ['job_type:query']
-    )

@@ -168,6 +168,10 @@ SERVER_STATUS_METRICS = (
     ('rethinkdb.server_status.process.time_started', AggregatorStub.GAUGE),
 )  # type: Tuple[Tuple[str, int], ...]
 
+JOBS_METRICS = (
+    ('rethinkdb.system_jobs.jobs', AggregatorStub.GAUGE, 1, ['job_type:query'],),
+)  # type: Tuple[Tuple[str, int, int, List[str]], ...]
+
 CURRENT_ISSUES_METRICS = (
     ('rethinkdb.current_issues.issues', AggregatorStub.GAUGE),
     ('rethinkdb.current_issues.critical_issues', AggregatorStub.GAUGE),
@@ -184,6 +188,7 @@ E2E_METRICS = (
     + TABLE_STATUS_METRICS
     + TABLE_STATUS_SHARDS_METRICS
     + SERVER_STATUS_METRICS
+    + tuple((name, typ) for name, typ, _, _ in JOBS_METRICS)
 )  # type: Tuple[Tuple[str, int], ...]
 
 # Docker Compose configuration.
