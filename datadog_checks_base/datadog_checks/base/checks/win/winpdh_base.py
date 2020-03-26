@@ -33,7 +33,7 @@ class PDHBaseCheck(AgentCheck):
 
     def __init__(self, *args, **kwargs):  # To support optional agentConfig
         # TODO: Change signature to (self, name, init_config, instances, counter_list) once subclasses have been edited
-        counter_list = kwargs.get('counter_list', args[-1])  # type: List[List[str]]
+        counter_list = kwargs.pop('counter_list', args[-1])  # type: List[List[str]]
         if 'counter_list' not in kwargs:
             args = args[:-1]  # Base class does not know how to interpret it
 
