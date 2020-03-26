@@ -4,7 +4,11 @@
 """
 Miscellaneous utilities.
 """
+import logging
 from typing import Any, Mapping, Sequence
+
+null_logger = logging.getLogger('null')
+null_logger.addHandler(logging.NullHandler())
 
 
 def lookup_dotted(dct, path):

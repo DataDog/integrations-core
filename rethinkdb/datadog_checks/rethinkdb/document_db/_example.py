@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.rethinkdb.document_db import DocumentQuery, transformers
 
 

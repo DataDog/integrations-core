@@ -78,7 +78,7 @@ class RethinkDBCheck(AgentCheck):
         Collect metrics from the RethinkDB cluster we are connected to.
         """
         for query in self.queries:
-            for metric in query.run(conn=conn, config=self.config, log_debug=self.log.debug):
+            for metric in query.run(check=self, conn=conn, config=self.config):
                 yield metric
 
     def submit_metric(self, metric):

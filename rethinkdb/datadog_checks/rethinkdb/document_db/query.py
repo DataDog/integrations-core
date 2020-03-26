@@ -1,10 +1,13 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Callable, Iterable, Iterator, List, Mapping, Sequence, Tuple
+import logging
+from typing import Any, Callable, Iterable, Iterator, List, Mapping, Sequence, Tuple, Union
+
+from datadog_checks.base import AgentCheck
 
 from .types import Enumeration, Group, Metric, MetricSpec
-from .utils import dotted_join, lookup_dotted, no_op
+from .utils import dotted_join, lookup_dotted, null_logger
 
 
 class DocumentQuery(object):
@@ -108,12 +111,14 @@ class DocumentQuery(object):
             }  # type: MetricSpec
             yield self._make_metric_from_spec(mapping, spec, tags=item_tags)
 
-    def run(self, log_debug=no_op, **kwargs):
-        # type: (Callable, **Any) -> Iterator[Metric]
-        log_debug('document_query %s', self.name)
+    def run(self, check=None, **kwargs):
+        # type: (AgentCheck, **Any) -> Iterator[Metric]
+        logger = check.log if check is not None else null_logger  # type: Union[logging.Logger, logging.LoggerAdapter]
+
+        logger.debug('document_query %s', self.name)
 
         for document, tags in self.source(**kwargs):
-            log_debug('%s %r', self.name, document)
+            logger.debug('%s %r', self.name, document)
 
             for spec in self.metrics:
                 yield self._make_metric_from_spec(document, spec, tags=tags)
