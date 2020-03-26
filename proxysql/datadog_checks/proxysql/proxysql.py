@@ -12,6 +12,7 @@ from datadog_checks.proxysql.queries import (
     STATS_MYSQL_GLOBAL,
     STATS_MYSQL_QUERY_RULES,
     STATS_MYSQL_USERS,
+    VERSION_METADATA,
 )
 
 ADDITIONAL_METRICS_MAPPING = {
@@ -43,6 +44,10 @@ class ProxysqlCheck(AgentCheck):
         self.read_timeout = self.instance.get("read_timeout", None)
 
         manager_queries = [STATS_MYSQL_GLOBAL]
+        if self.is_metadata_collection_enabled():
+            # Add the query to collect the ProxySQL version
+            manager_queries.append(VERSION_METADATA)
+
         additional_metrics = self.instance.get("additional_metrics", [])
         for additional_group in additional_metrics:
             if additional_group not in ADDITIONAL_METRICS_MAPPING:

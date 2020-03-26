@@ -248,3 +248,19 @@ STATS_MYSQL_QUERY_RULES = Query(
         'columns': [{'name': 'rule_id', 'type': 'tag'}, {'name': 'query_rules.rule_hits', 'type': 'rate'}],
     }
 )
+
+VERSION_METADATA = Query(
+    {
+        'name': 'version_metadata',
+        'query': "SELECT variable_value FROM main.global_variables WHERE variable_name='admin-version'",
+        'columns': [{'name': 'bad_version', 'type': 'source'}],
+        'extras': [
+            {
+                'name': 'version',
+                'source': 'bad_version',
+                'expression': "bad_version.replace('-', '+').replace('+', '-', 1)",
+                'submit_type': 'metadata',
+            }
+        ],
+    }
+)
