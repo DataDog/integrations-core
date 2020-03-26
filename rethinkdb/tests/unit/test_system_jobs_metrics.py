@@ -85,16 +85,10 @@ def test_jobs_metrics():
     conn = mock.Mock()
     with mock.patch('rethinkdb.ast.RqlQuery.run') as run:
         run.return_value = mock_rows
-        metrics = list(queries.system_jobs.run(conn=conn, config=Config({'min_collection_interval': 5})))
+        metrics = list(queries.system_jobs.run(conn=conn, config=Config()))
 
     assert metrics == [
-        # short request-response `query` job ignored
-        {
-            'type': 'gauge',
-            'name': 'rethinkdb.jobs.duration_sec',
-            'value': 10,
-            'tags': ['job_type:query', 'server:server1'],
-        },
+        # `query` jobs ignored
         # `disk_compaction` job ignored
         {
             'type': 'gauge',

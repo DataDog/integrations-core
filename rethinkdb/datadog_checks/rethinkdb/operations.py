@@ -244,11 +244,10 @@ def get_system_jobs(conn, config, **kwargs):
         # Follow job types listed on: https://rethinkdb.com/docs/system-jobs/#document-schema
 
         if job['type'] == 'query':
-            # NOTE: we can only consistently collect metrics about queries that span more than an Agent collection
-            # interval. (There will be many short-lived queries within two checks that we can't capture.)
-            # Here, this means only changefeed queries and abnormally long request-response queries will pass through.
-            if job['duration_sec'] < config.min_collection_interval:
-                continue
+            # A query job only exists while the query is running, and its `duration` is unstable (it changes depending
+            # on when the check is executed), so it doesn't make sense to submit metrics from these documents.
+            # So let's skip them. (Query duration information should come from a persistent source, eg slow logs.)
+            continue
         elif job['type'] == 'disk_compaction':
             # Ongoing task on each server. Duration is `null` and `info` is empty, so nothing interesting there.
             continue

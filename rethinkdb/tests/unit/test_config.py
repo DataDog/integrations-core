@@ -33,7 +33,6 @@ def test_config(port_28016, min_collection_interval_10):
         'password': 's3kr3t',
         'tls_ca_cert': '/path/to/client.cert',
         'tags': ['env:testing'],
-        'min_collection_interval': min_collection_interval_10,
     }  # type: Instance
 
     config = Config(instance)
@@ -42,7 +41,6 @@ def test_config(port_28016, min_collection_interval_10):
     assert config.user == 'datadog-agent'
     assert config.tls_ca_cert == '/path/to/client.cert'
     assert config.tags == ['env:testing']
-    assert config.min_collection_interval == 10
 
 
 @pytest.mark.parametrize('value', [42, True, object()])
@@ -57,10 +55,3 @@ def test_invalid_port(value):
     # type: (Any) -> None
     with pytest.raises(ConfigurationError):
         Config(instance={'port': value})
-
-
-@pytest.mark.parametrize('value', ['not-a-number', object()])
-def test_invalid_min_collection_interval(value):
-    # type: (Any) -> None
-    with pytest.raises(ConfigurationError):
-        Config(instance={'min_collection_interval': value})

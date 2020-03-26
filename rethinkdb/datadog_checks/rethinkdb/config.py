@@ -26,7 +26,6 @@ class Config(object):
         password = instance.get('password')
         tls_ca_cert = instance.get('tls_ca_cert')
         tags = instance.get('tags', [])
-        min_collection_interval = instance.get('min_collection_interval', 15)
 
         if not isinstance(host, str):
             raise ConfigurationError('host {!r} must be a string (got {!r})'.format(host, type(host)))
@@ -42,15 +41,6 @@ class Config(object):
         if not isinstance(tags, list):
             raise ConfigurationError('tags {!r} must be a list (got {!r})'.format(tags, type(tags)))
 
-        try:
-            min_collection_interval = float(min_collection_interval)
-        except (ValueError, TypeError):
-            raise ConfigurationError(
-                'min_collection_interval {!r} must be convertible to a number (got {!r})'.format(
-                    min_collection_interval, type(min_collection_interval)
-                )
-            )
-
         self.host = host  # type: str
         self.port = port  # type: int
         self.user = user  # type: Optional[str]
@@ -58,4 +48,3 @@ class Config(object):
         self.tls_ca_cert = tls_ca_cert  # type: Optional[str]
         self.tags = tags  # type: List[str]
         self.service_check_tags = ('host:{}'.format(self.host), 'port:{}'.format(self.port)) + tuple(self.tags)
-        self.min_collection_interval = min_collection_interval  # type: float

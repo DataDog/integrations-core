@@ -17,7 +17,6 @@ Instance = TypedDict(
         'username': str,
         'password': str,
         'tls_ca_cert': str,
-        'min_collection_interval': Union[int, float],
         'tags': List[str],
     },
     total=False,
