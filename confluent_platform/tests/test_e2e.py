@@ -5,6 +5,7 @@ from typing import Any
 
 import pytest
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 
 from .common import CHECK_CONFIG
@@ -38,3 +39,7 @@ def test_e2e(dd_agent_check):
         aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
+
+    for instance in CHECK_CONFIG['instances']:
+        tags = ['instance:confluent_platform-localhost-{}'.format(instance['port']), 'jmx_server:localhost']
+        aggregator.assert_service_check('confluent.can_connect', AgentCheck.OK, tags=tags)

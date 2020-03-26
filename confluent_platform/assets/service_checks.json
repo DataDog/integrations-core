@@ -6,7 +6,7 @@
             "host",
             "instance"
         ],
-        "check": "confluentplatform.can_connect",
+        "check": "confluent.can_connect",
         "statuses": [
             "ok",
             "critical"
