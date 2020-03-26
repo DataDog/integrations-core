@@ -24,16 +24,16 @@ def get_check(instance):
 @pytest.mark.unit
 def test_wrong_config(dd_run_check, instance_basic):
     # Empty instance
-    with pytest.raises(ConfigurationError, match='ProxySQL host, port, user and password are needed'):
+    with pytest.raises(ConfigurationError, match='ProxySQL host, port, username and password are needed'):
         dd_run_check(get_check({}))
 
     # Only host
-    with pytest.raises(ConfigurationError, match='ProxySQL host, port, user and password are needed'):
-        dd_run_check(get_check({'server': 'localhost'}))
+    with pytest.raises(ConfigurationError, match='ProxySQL host, port, username and password are needed'):
+        dd_run_check(get_check({'host': 'localhost'}))
 
     # Missing password
-    with pytest.raises(ConfigurationError, match='ProxySQL host, port, user and password are needed'):
-        dd_run_check(get_check({'server': 'localhost', 'port': 6032, 'user': 'admin'}))
+    with pytest.raises(ConfigurationError, match='ProxySQL host, port, username and password are needed'):
+        dd_run_check(get_check({'host': 'localhost', 'port': 6032, 'username': 'admin'}))
 
     # Wrong additional metrics group
     with pytest.raises(
@@ -46,7 +46,7 @@ def test_wrong_config(dd_run_check, instance_basic):
 
 @pytest.mark.unit
 def test_config_ok(dd_run_check):
-    check = get_check({'server': 'localhost', 'port': 6032, 'user': 'admin', 'pass': 'admin'})
+    check = get_check({'host': 'localhost', 'port': 6032, 'username': 'admin', 'password': 'admin'})
     connect_mock, query_executor_mock = mock.MagicMock(), mock.MagicMock()
 
     check.connect = connect_mock
