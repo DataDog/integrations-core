@@ -31,6 +31,7 @@ lxml==4.4.1
 lz4==2.2.1
 meld3==1.0.2
 openstacksdk==0.24.0
+orjson==2.6.1; python_version > '3.0'
 paramiko==2.6.0
 ply==3.10
 prometheus-client==0.3.0

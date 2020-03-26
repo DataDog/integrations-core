@@ -12,7 +12,7 @@ datadog-cacti==1.6.0; sys_platform == 'linux2'
 datadog-cassandra-nodetool==1.5.1
 datadog-cassandra==1.4.0
 datadog-ceph==1.8.0; sys_platform != 'win32'
-datadog-checks-base==11.2.0
+datadog-checks-base==11.3.0
 datadog-checks-downloader==2.4.0
 datadog-cilium==1.0.2
 datadog-cisco-aci==1.8.3
