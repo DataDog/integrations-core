@@ -49,7 +49,6 @@ STANDARD_FIELDS = {
     'connect_timeout': None,
     'extra_headers': None,
     'headers': None,
-    'host_header_ssl': False,
     'kerberos_auth': None,
     'kerberos_cache': None,
     'kerberos_delegate': False,
@@ -66,6 +65,7 @@ STANDARD_FIELDS = {
     'skip_proxy': False,
     'tls_ca_cert': None,
     'tls_cert': None,
+    'tls_use_host_header': False,
     'tls_ignore_warning': False,
     'tls_private_key': None,
     'tls_verify': True,
@@ -93,7 +93,7 @@ KERBEROS_STRATEGIES = {}
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
-        'host_header_ssl',
+        'tls_use_host_header',
         'ignore_tls_warning',
         'log_requests',
         'logger',
@@ -176,7 +176,7 @@ class RequestsWrapper(object):
             update_headers(headers, config['extra_headers'])
 
         # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
-        self.host_header_ssl = is_affirmative(config.get('host_header_ssl')) and ('Host' in headers)
+        self.tls_use_host_header = is_affirmative(config['tls_use_host_header']) and 'Host' in headers
 
         # http://docs.python-requests.org/en/master/user/authentication/
         auth_type = config['auth_type'].lower()
@@ -347,7 +347,7 @@ class RequestsWrapper(object):
 
             # Enables HostHeaderSSLAdapter
             # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
-            if self.host_header_ssl:
+            if self.tls_use_host_header:
                 self._session.mount('https://', host_header_ssl.HostHeaderSSLAdapter())
 
             # Attributes can't be passed to the constructor

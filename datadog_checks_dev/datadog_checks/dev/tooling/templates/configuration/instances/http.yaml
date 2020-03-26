@@ -171,6 +171,12 @@
     example: true
     type: boolean
   description: Instructs the check to validate the TLS certificate of services.
+- name: tls_use_host_header
+  value:
+    example: false
+    type: boolean
+  description: |
+    If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
 - name: tls_ignore_warning
   value:
     example: false
@@ -221,14 +227,6 @@
       X-Auth-Token: <AUTH_TOKEN>
     type: object
   description: Additional headers to send with every request.
-- name: host_header_ssl
-  value:
-    example: false
-    type: boolean
-  description: |
-    If set to true, the Host header is used to match 
-    against the SSL Certificate CN or SAN.
-    Requires persist_connections set to true.
 - name: timeout
   value:
     example: 10

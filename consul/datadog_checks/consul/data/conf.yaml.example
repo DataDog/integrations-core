@@ -220,6 +220,11 @@ instances:
     #
     # tls_verify: true
 
+    ## @param tls_use_host_header - boolean - optional - default: false
+    ## If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
+    #
+    # tls_use_host_header: false
+
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable these by setting `tls_ignore_warning` to true.
@@ -257,13 +262,6 @@ instances:
     # headers:
     #   Host: <ALTERNATIVE_HOSTNAME>
     #   X-Auth-Token: <AUTH_TOKEN>
-
-    ## @param host_header_ssl - boolean - optional - default: false
-    ## If set to true, the Host header is used to match 
-    ## against the SSL Certificate CN or SAN.
-    ## Requires persist_connections set to true.
-    #
-    # host_header_ssl: false
 
     ## @param timeout - integer - optional - default: 10
     ## The timeout for connecting to services.
