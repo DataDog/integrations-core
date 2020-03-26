@@ -24,7 +24,7 @@ files:
     - name: fluentd
       description: |
         Command or path to Fluentd (e.g. `/usr/local/bin/fluentd` or `docker exec container fluentd`).
-        Can be overwritten on an instance.
+        Overrides `fluentd` in init_config.
       value:
         type: string
         example: fluentd
