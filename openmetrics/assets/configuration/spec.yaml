@@ -5,8 +5,8 @@ files:
     - template: init_config
       options:
         - template: init_config/default
-        - template: init_config/prometheus
+        - template: init_config/openmetrics
     - template: instances
       options:
-        - template: instances/prometheus
+        - template: instances/openmetrics
         - template: instances/default
