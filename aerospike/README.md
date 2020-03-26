@@ -16,10 +16,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-Two dashes
-
 <!-- xxx tabs xxx -->
-
 <!-- xxx tab "Host" xxx -->
 
 #### Host
@@ -34,7 +31,6 @@ To configure this check for an Agent running on a host:
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 
 <!-- xxz tab xxx -->
-
 <!-- xxx tab "Containerized" xxx -->
 
 #### Containerized
@@ -50,7 +46,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 [6]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 
 <!-- xxz tab xxx -->
-
 <!-- xxz tabs xxx -->
 
 ### Validation
