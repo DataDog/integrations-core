@@ -15,6 +15,7 @@ HERE = get_here()
 
 IMAGE = os.environ.get('RETHINKDB_IMAGE', '')
 RAW_VERSION = os.environ.get('RETHINKDB_RAW_VERSION', '')
+IS_RETHINKDB_2_3 = RAW_VERSION.startswith('2.3.')
 
 HOST = get_docker_hostname()
 
@@ -34,7 +35,7 @@ SERVER_TAGS = {
 
 # Users.
 
-if RAW_VERSION.startswith('2.3.'):
+if IS_RETHINKDB_2_3:
     # In RethinkDB 2.3.x, granting permissions onto `rethinkdb` database to non-admin users is not supported.
     # So we must use the admin account.
     # See: https://github.com/rethinkdb/rethinkdb/issues/5692

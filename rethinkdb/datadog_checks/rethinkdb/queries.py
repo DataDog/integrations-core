@@ -126,11 +126,11 @@ server_statuses = DocumentQuery(
 # System jobs.
 
 # See: https://rethinkdb.com/docs/system-jobs/
-system_jobs = DocumentQuery(
-    source=operations.get_system_jobs,
-    name='system_jobs',
-    prefix='rethinkdb.jobs',
-    metrics=[{'type': 'gauge', 'path': 'duration_sec'}],
+jobs_summary = DocumentQuery(
+    source=operations.get_jobs_summary,
+    name='jobs',
+    prefix='rethinkdb.system_jobs',
+    groups=[{'type': 'gauge', 'path': 'jobs', 'key_tag': 'job_type'}],
 )
 
 

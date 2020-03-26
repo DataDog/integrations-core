@@ -40,7 +40,7 @@ class RethinkDBCheck(AgentCheck):
             queries.replica_statistics,
             queries.table_statuses,
             queries.server_statuses,
-            queries.system_jobs,
+            queries.jobs_summary,
             queries.current_issues_summary,
         )  # type: Sequence[DocumentQuery]
 

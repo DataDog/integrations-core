@@ -35,6 +35,6 @@ rethinkdb.table_status.shards.primary_replicas,gauge,,node,,Total number of prim
 rethinkdb.server_status.network.time_connected,gauge,,second,,Current total time a server has been connected to the network.,0,rethinkdb,Server status network time connected
 rethinkdb.server_status.network.connected_to,gauge,,node,,Number of other RethinkDB servers a server is currently connected to.,0,rethinkdb,Server status network connected to
 rethinkdb.server_status.process.time_started,gauge,,second,,Time when the RethinkDB server process started.,0,rethinkdb,Server status process time started
-rethinkdb.jobs.duration,gauge,,second,,"Duration of a currently running system job, tagged with the job_type.",0,rethinkdb,Jobs duration
+rethinkdb.system_jobs.jobs,gauge,,job,,"Total number of currently running system jobs, tagged by `job_type`.",0,rethinkdb,Jobs
 rethinkdb.current_issues.issues,gauge,,,,Total number of current issues of a given issue_type.,0,rethinkdb,Current issues issues
 rethinkdb.current_issues.critical_issues,gauge,,,,Total number of critical current issues of a given issue_type.,0,rethinkdb,Current issues critical issues

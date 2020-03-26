@@ -17,7 +17,7 @@ from .types import (
     ConfigSummary,
     ConnectionServer,
     CurrentIssuesSummary,
-    Job,
+    JobSummary,
     JoinRow,
     ReplicaStats,
     Server,
@@ -232,46 +232,13 @@ def get_server_statuses(conn, **kwargs):
         yield server_status, tags
 
 
-def get_system_jobs(conn, config, **kwargs):
-    # type: (rethinkdb.net.Connection, Config, **Any) -> Iterator[Tuple[Job, List[str]]]
+def get_jobs_summary(conn, config, **kwargs):
+    # type: (rethinkdb.net.Connection, Config, **Any) -> Iterator[Tuple[JobSummary, List[str]]]
     """
-    Retrieve all the currently running system jobs.
+    Retrieve a summary of system jobs currently running in the cluster.
     """
-    for job in system.table('jobs').run(conn):  # type: Job
-        tags = ['job_type:{}'.format(job['type'])]
-        tags.extend('server:{}'.format(server) for server in job['servers'])
-
-        # Follow job types listed on: https://rethinkdb.com/docs/system-jobs/#document-schema
-
-        if job['type'] == 'query':
-            # A query job only exists while the query is running, and its `duration` is unstable (it changes depending
-            # on when the check is executed), so it doesn't make sense to submit metrics from these documents.
-            # So let's skip them. (Query duration information should come from a persistent source, eg slow logs.)
-            continue
-        elif job['type'] == 'disk_compaction':
-            # Ongoing task on each server. Duration is `null` and `info` is empty, so nothing interesting there.
-            continue
-        elif job['type'] == 'index_construction':
-            tags.extend(
-                [
-                    'database:{}'.format(job['info']['db']),
-                    'table:{}'.format(job['info']['table']),
-                    'index:{}'.format(job['info']['index']),
-                ]
-            )
-        elif job['type'] == 'backfill':
-            tags.extend(
-                [
-                    'database:{}'.format(job['info']['db']),
-                    'destination_server:{}'.format(job['info']['destination_server']),
-                    'source_server:{}'.format(job['info']['source_server']),
-                    'table:{}'.format(job['info']['table']),
-                ]
-            )
-        else:
-            raise RuntimeError('Unknown job type: {!r}'.format(job['type']))
-
-        yield job, tags
+    jobs_per_type = system.table('jobs').group('type').count().run(conn)
+    yield {'jobs': jobs_per_type}, []
 
 
 def get_current_issues_summary(conn, **kwargs):

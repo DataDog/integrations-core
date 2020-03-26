@@ -18,6 +18,7 @@ from .common import (
     HEROES_TABLE_PRIMARY_REPLICA,
     HEROES_TABLE_REPLICAS_BY_SHARD,
     HEROES_TABLE_SERVERS,
+    IS_RETHINKDB_2_3,
     REPLICA_STATISTICS_METRICS,
     SERVER_STATISTICS_METRICS,
     SERVER_STATUS_METRICS,
@@ -50,8 +51,8 @@ def assert_service_checks(aggregator, instance, connect_status=AgentCheck.OK, di
         aggregator.assert_service_check(service_check, status, count=count, tags=tags)
 
 
-def assert_metrics(aggregator, disconnected_servers=None):
-    # type: (AggregatorStub, Set[ServerName]) -> None
+def assert_metrics(aggregator, is_proxy, disconnected_servers=None):
+    # type: (AggregatorStub, bool, Set[ServerName]) -> None
     if disconnected_servers is None:
         disconnected_servers = set()
 
@@ -60,10 +61,7 @@ def assert_metrics(aggregator, disconnected_servers=None):
     _assert_table_status_metrics(aggregator)
     _assert_server_status_metrics(aggregator, disconnected_servers=disconnected_servers)
     _assert_current_issues_metrics(aggregator, disconnected_servers=disconnected_servers)
-
-    # NOTE: system jobs metrics are not asserted here because they are only emitted when the cluster is
-    # changing (eg. an index is being created, or data is being rebalanced across servers), which is hard to
-    # test without introducing flakiness.
+    _assert_jobs_metrics(aggregator, is_proxy=is_proxy)
 
 
 def _assert_config_metrics(aggregator, disconnected_servers):
@@ -138,3 +136,15 @@ def _assert_current_issues_metrics(aggregator, disconnected_servers):
                 aggregator.assert_metric(metric, metric_type=typ, count=1, tags=tags)
         else:
             aggregator.assert_metric(metric, metric_type=typ, count=0)
+
+
+def _assert_jobs_metrics(aggregator, is_proxy):
+    # type: (AggregatorStub, bool) -> None
+    if is_proxy and IS_RETHINKDB_2_3:
+        # For some reason, queries issued to retrieve metrics via a proxy server are not included
+        # in system jobs under RethinkDB 2.3.
+        return
+
+    aggregator.assert_metric(
+        'rethinkdb.system_jobs.jobs', metric_type=AggregatorStub.GAUGE, value=1, count=1, tags=TAGS + ['job_type:query']
+    )

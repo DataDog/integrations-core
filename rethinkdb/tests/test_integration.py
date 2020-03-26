@@ -47,7 +47,11 @@ class TestCheck:
             check.check(instance)
 
         if connect_status == RethinkDBCheck.OK:
-            assert_metrics(aggregator, disconnected_servers=disconnected_servers)
+            assert_metrics(
+                aggregator,
+                is_proxy=instance['port'] == SERVER_PORTS['proxy'],
+                disconnected_servers=disconnected_servers,
+            )
             aggregator.assert_all_metrics_covered()
 
         assert_service_checks(
