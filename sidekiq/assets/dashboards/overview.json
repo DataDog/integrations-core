@@ -1,0 +1,373 @@
+{
+    "author_info": {
+        "author_name": "Datadog"
+    },
+    "board_title": "Sidekiq Overview",
+    "created": "2020-03-24T20:11:01.574553+00:00",
+    "created_by": {
+        "access_role": "st",
+        "disabled": false,
+        "email": "support@datadoghq.com",
+        "handle": "support@datadoghq.com",
+        "is_admin": false,
+        "name": "Datadog",
+        "role": null,
+        "title": null,
+        "verified": true
+    },
+    "description": "This dashboard provides a high-level overview of your Sidekiq jobs so you can monitor metrics related to jobs, queues, and batches.\n\nFor further reading on monitoring Sidekiq, see: [Official Sidekiq integration docs](https://docs.datadoghq.com/integrations/sidekiq/)\n\nClone this template to make changes and add your own graphs and widgets.",
+    "id": 1027646,
+    "modified": "2020-03-26T14:35:37.721326+00:00",
+    "new_id": "krb-c8v-dji",
+    "read_only": false,
+    "template_variables": [],
+    "widgets": [
+        {
+            "height": 9,
+            "id": 0,
+            "sizing": "zoom",
+            "type": "image",
+            "url": "https://static.datadoghq.com/static/images/saas_logos/bot/sidekiq@2x.png",
+            "width": 14,
+            "x": 1,
+            "y": 1
+        },
+        {
+            "height": 12,
+            "id": 1,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:sidekiq.busy{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "Busy Jobs",
+            "type": "timeseries",
+            "width": 39,
+            "x": 113,
+            "y": 31
+        },
+        {
+            "height": 12,
+            "id": 2,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:sidekiq.dead{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "Dead jobs",
+            "type": "timeseries",
+            "width": 39,
+            "x": 73,
+            "y": 31
+        },
+        {
+            "height": 12,
+            "id": 3,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:sidekiq.failed{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "Failed Jobs",
+            "type": "timeseries",
+            "width": 39,
+            "x": 73,
+            "y": 1
+        },
+        {
+            "height": 12,
+            "id": 4,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:sidekiq.retries{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "Job Retries ",
+            "type": "timeseries",
+            "width": 39,
+            "x": 73,
+            "y": 16
+        },
+        {
+            "height": 12,
+            "id": 5,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:sidekiq.processed{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "Jobs Processed",
+            "type": "timeseries",
+            "width": 39,
+            "x": 17,
+            "y": 16
+        },
+        {
+            "height": 12,
+            "id": 6,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:sidekiq.enqueued{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "Jobs Enqueued",
+            "type": "timeseries",
+            "width": 39,
+            "x": 113,
+            "y": 16
+        },
+        {
+            "height": 12,
+            "id": 7,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:sidekiq.scheduled{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "Jobs Scheduled",
+            "type": "timeseries",
+            "width": 39,
+            "x": 113,
+            "y": 1
+        },
+        {
+            "height": 12,
+            "id": 8,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:sidekiq.jobs.perform.median{*}, avg:sidekiq.jobs.perform.avg{*}, avg:sidekiq.jobs.perform.count{*}, avg:sidekiq.jobs.perform.max{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "Job Performance",
+            "type": "timeseries",
+            "width": 39,
+            "x": 17,
+            "y": 1
+        },
+        {
+            "height": 12,
+            "id": 9,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:sidekiq.jobs.success{*} by {worker}.as_count()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "Jobs Success",
+            "type": "timeseries",
+            "width": 39,
+            "x": 17,
+            "y": 31
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "18",
+            "height": 33,
+            "html": "Job\n\nPerformance ",
+            "id": 10,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "right",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 14,
+            "x": 1,
+            "y": 12
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "18",
+            "height": 44,
+            "html": "Historical Job Information",
+            "id": 11,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "right",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 13,
+            "x": 58,
+            "y": 1
+        }
+    ]
+}
