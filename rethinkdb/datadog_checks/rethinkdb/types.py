@@ -11,14 +11,7 @@ from typing import Any, List, Literal, Mapping, Tuple, TypedDict, Union
 
 Instance = TypedDict(
     'Instance',
-    {
-        'host': str,
-        'port': int,
-        'username': str,
-        'password': str,
-        'tls_ca_cert': str,
-        'tags': List[str],
-    },
+    {'host': str, 'port': int, 'username': str, 'password': str, 'tls_ca_cert': str, 'tags': List[str]},
     total=False,
 )
 

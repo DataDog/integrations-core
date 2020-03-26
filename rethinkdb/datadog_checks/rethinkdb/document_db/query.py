@@ -4,8 +4,6 @@
 import logging
 from typing import Any, Callable, Iterable, Iterator, List, Mapping, Sequence, Tuple, Union
 
-from datadog_checks.base import AgentCheck
-
 from .types import Enumeration, Group, Metric, MetricSpec
 from .utils import dotted_join, lookup_dotted, null_logger
 
@@ -111,9 +109,10 @@ class DocumentQuery(object):
             }  # type: MetricSpec
             yield self._make_metric_from_spec(mapping, spec, tags=item_tags)
 
-    def run(self, check=None, **kwargs):
-        # type: (AgentCheck, **Any) -> Iterator[Metric]
-        logger = check.log if check is not None else null_logger  # type: Union[logging.Logger, logging.LoggerAdapter]
+    def run(self, logger=None, **kwargs):
+        # type: (Union[logging.Logger, logging.LoggerAdapter], **Any) -> Iterator[Metric]
+        if logger is None:
+            logger = null_logger  # For convenience in unit tests and example scripts.
 
         logger.debug('document_query %s', self.name)
 
