@@ -82,7 +82,7 @@ def test_server_down(aggregator, instance_basic, dd_run_check):
     instance_basic['port'] = 111
     check = get_check(instance_basic)
 
-    with pytest.raises(Exception, match="pymysql.err.OperationalError.*Can't connect to MySQL server on"):
+    with pytest.raises(Exception, match="OperationalError.*Can't connect to MySQL server on"):
         dd_run_check(check)
 
     aggregator.assert_service_check('proxysql.can_connect', AgentCheck.CRITICAL)

@@ -30,13 +30,13 @@ class ProxysqlCheck(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(ProxysqlCheck, self).__init__(name, init_config, instances)
-        self.host = self.instance.get("server", "")
+        self.host = self.instance.get("host", "")
         self.port = int(self.instance.get("port", 0))
-        self.user = self.instance.get("user", "")
-        self.password = str(self.instance.get("pass", ""))
+        self.user = self.instance.get("username", "")
+        self.password = str(self.instance.get("password", ""))
 
         if not all((self.host, self.port, self.user, self.password)):
-            raise ConfigurationError("ProxySQL host, port, user and password are needed")
+            raise ConfigurationError("ProxySQL host, port, username and password are needed")
 
         self.base_tags = self.instance.get("tags", [])
         self.connect_timeout = self.instance.get("connect_timeout", 10)

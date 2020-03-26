@@ -18,10 +18,10 @@ PROXY_ADMIN_PASS = 'proxy'
 MYSQL_DATABASE = 'test'
 
 BASIC_INSTANCE = {
-    'server': DOCKER_HOST,
+    'host': DOCKER_HOST,
     'port': PROXY_ADMIN_PORT,
-    'user': PROXY_ADMIN_USER,
-    'pass': PROXY_ADMIN_PASS,
+    'username': PROXY_ADMIN_USER,
+    'password': PROXY_ADMIN_PASS,
     'tags': ["application:test"],
     'additional_metrics': [],
 }

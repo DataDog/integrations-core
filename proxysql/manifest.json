@@ -23,6 +23,9 @@
   "is_public": true,
   "integration_id": "proxysql",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {},
     "saved_views": {},
     "monitors": {},
