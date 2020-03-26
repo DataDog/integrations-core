@@ -7,6 +7,8 @@ gitlab.cache.misses_total,count,,second,,Cache read miss count,0,gitlab,cache re
 gitlab.cache.operation_duration_seconds_count,count,,second,,Count of cache access time,0,gitlab,cache access time count
 gitlab.cache.operation_duration_seconds_sum,gauge,,second,,Sum of cache access time,0,gitlab,cache access time sum
 gitlab.cache.operations_total,count,,,,Count of cache operations by controller/action,0,gitlab,cache operations total
+gitlab.job.waiter_started_total,count,,job,,Number of batches of jobs started where a web request is waiting for the jobs to complete,0,gitlab,job waiter started
+gitlab.job.waiter_timeouts_total,count,,job,,Number of batches of jobs that timed out where a web request is waiting for the jobs to complete,-1,gitlab,job waiter timeouts
 gitlab.database.transaction_seconds.count,count,,second,,Count of cache operations by controller/action,0,gitlab,cache operations total count
 gitlab.database_transaction_seconds.sum,gauge,,second,,Sum of cache operations by controller/action,0,gitlab,cache operations total sum
 gitlab.method_call_duration_seconds.count,count,,second,,Count of method calls real duration,0,gitlab,method call count
@@ -70,6 +72,10 @@ gitlab.auto_devops_pipelines_completed_total,count,,,,"Counter of completed Auto
 gitlab.sidekiq.jobs_cpu_seconds.count,count,,second,,Count of seconds of cpu time to run Sidekiq job,0,gitlab,cpu sidekiq count
 gitlab.sidekiq.jobs_cpu_seconds.sum,count,,second,,Sum of seconds of cpu time to run Sidekiq job,0,gitlab,sidekiq cpu sum
 gitlab.sidekiq.jobs_completion_seconds.count,count,,second,,Count of seconds to complete Sidekiq job,0,gitlab,sidekiq completion count
+gitlab.sidekiq.jobs_db_second.count,count,,second,,Count of seconds of DB time to run Sidekiq job,0,gitlab,sidekiq db count
+gitlab.sidekiq.jobs_db_second.sum,gauge,,second,,Sum of seconds of DB time to run Sidekiq job,0,gitlab,sidekiq db sum
+gitlab.sidekiq.jobs_gitaly_seconds.count,count,,second,,Count of seconds of Gitaly time to run Sidekiq job,0,gitlab,sidekiq gitaly count
+gitlab.sidekiq.jobs_gitaly_seconds.sum,gauge,,second,,Sum of Seconds of Gitaly time to run Sidekiq job,0,gitlab,sidekiq gitaly sum
 gitlab.sidekiq.jobs_completion_seconds.sum,count,,second,,Sum of seconds to complete Sidekiq job,0,gitlab,sidekiq completion sum
 gitlab.sidekiq.jobs_queue_duration_seconds.count,count,,second,,Count of duration in seconds that a Sidekiq job was queued before being executed,0,gitlab,sidekiq queue count
 gitlab.sidekiq.jobs_queue_duration_seconds.sum,count,,second,,Sum of duration in seconds that a Sidekiq job was queued before being executed,0,gitlab,sidekiq queue sum
