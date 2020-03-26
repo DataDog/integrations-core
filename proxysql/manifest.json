@@ -1,6 +1,6 @@
 {
   "display_name": "ProxySQL",
-  "maintainer": "reyiyo@gmail.com",
+  "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "proxysql",
   "metric_prefix": "proxysql.",
@@ -8,7 +8,7 @@
   "creates_events": false,
   "short_description": "ProxySQL metrics integration",
   "guid": "8d759c9d-eb9e-4c78-9f26-1c2c844233a5",
-  "support": "contrib",
+  "support": "core",
   "supported_os": [
     "linux",
     "mac_os",

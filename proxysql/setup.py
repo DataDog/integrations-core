@@ -15,7 +15,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 
-CHECKS_BASE_REQ = ['datadog-checks-base>=4.2.0']
+CHECKS_BASE_REQ = ['datadog-checks-base>=11.3.1']  # Needs fix integrations-core/#6146 for the QueryManager
 
 
 setup(

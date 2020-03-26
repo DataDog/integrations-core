@@ -1,4 +1,5 @@
 import os
+from copy import deepcopy
 
 import pymysql
 import pytest
@@ -16,20 +17,31 @@ PROXY_ADMIN_USER = 'proxy'
 PROXY_ADMIN_PASS = 'proxy'
 MYSQL_DATABASE = 'test'
 
-INSTANCE = {
+BASIC_INSTANCE = {
     'server': DOCKER_HOST,
     'port': PROXY_ADMIN_PORT,
     'user': PROXY_ADMIN_USER,
     'pass': PROXY_ADMIN_PASS,
     'tags': ["application:test"],
-    'additional_metrics': [
+    'additional_metrics': [],
+}
+
+
+@pytest.fixture
+def instance_basic():
+    return deepcopy(BASIC_INSTANCE)
+
+
+@pytest.fixture()
+def instance_all_metrics(instance_basic):
+    instance_basic['additional_metrics'] = [
         'command_counters_metrics',
         'connection_pool_metrics',
         'users_metrics',
         'memory_metrics',
         'query_rules_metrics',
-    ],
-}
+    ]
+    return instance_basic
 
 
 @pytest.fixture(scope='session')
@@ -47,13 +59,13 @@ def dd_environment():
             'MYSQL_PASS': MYSQL_PASS,
         },
         conditions=[
-            WaitFor(init_mysql, wait=2),
-            WaitFor(init_proxy, wait=2),
             CheckDockerLogs('db', ["mysqld: ready for connections"], wait=5),
             CheckDockerLogs('proxysql', ["read_only_action RO=0 phase 3"], wait=5),
+            WaitFor(init_mysql, wait=2),
+            WaitFor(init_proxy, wait=2),
         ],
     ):
-        yield INSTANCE
+        yield BASIC_INSTANCE
 
 
 def init_mysql():
