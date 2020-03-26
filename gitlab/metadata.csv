@@ -61,8 +61,8 @@ gitlab.rack.http_requests_total.count,count,,request,,Rack request count,0,gitla
 gitlab.rack.http_requests_total.sum,gauge,,request,,Sum of rack requests,0,gitlab,rack request sum
 gitlab.rack.http_request_duration_seconds.sum,gauge,,second,,Sum of HTTP response time from rack middleware,0,gitlab,http request dur sum
 gitlab.rack.http_request_duration_seconds.count,count,,second,,Count of HTTP response time from rack middleware,0,gitlab,http request dur count
+gitlab.rack.uncaught_errors_total,count,,connection,,Rack connections handling uncaught errors count,-1,gitlab,rack uncaught errors
 gitlab.pipelines_created_total,count,,,,Counter of pipelines created,0,gitlab,pipelines created total
-gitlab.rack_uncaught_errors_total,count,,connection,,Rack connections handling uncaught errors count,-1,gitlab,rack uncaught errors
 gitlab.user_session_logins_total,count,,,,Counter of how many users have logged in,0,gitlab,user logins
 gitlab.upload_file_does_not_exist,count,,,,Number of times an upload record could not find its file,0,gitlab,no upload file
 gitlab.failed_login_captcha_total,gauge,,,,Counter of failed CAPTCHA attempts during login,-1,gitlab,failed captchas
