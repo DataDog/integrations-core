@@ -35,7 +35,7 @@ To configure this check for an Agent running on a host:
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
 
 | Parameter            | Value                                |
 | -------------------- | ------------------------------------ |
@@ -43,20 +43,20 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | `<INIT_CONFIG>`      | blank or `{}`                        |
 | `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":"3000"}` |
 
-[6]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[3]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
 ### Validation
 
-[Run the Agent's status subcommand][3] and look for `aerospike` under the Checks section.
+[Run the Agent's status subcommand][4] and look for `aerospike` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][4] for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -69,9 +69,9 @@ Aerospike does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][5].
+Need help? Contact [Datadog support][6].
 
 
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[4]: https://github.com/DataDog/integrations-core/blob/master/aerospike/metadata.csv
-[5]: https://docs.datadoghq.com/help
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/aerospike/metadata.csv
+[6]: https://docs.datadoghq.com/help
