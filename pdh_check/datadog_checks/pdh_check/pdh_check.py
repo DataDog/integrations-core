@@ -21,4 +21,4 @@ class PDHCheck(PDHBaseCheck):
                 (counterset, None, inst_name, dd_name, mtype) for inst_name, dd_name, mtype in instance['metrics']
             )
 
-        super(PDHCheck, self).__init__(name, init_config, instances, counter_list)
+        super(PDHCheck, self).__init__(name, init_config, instances, counter_list=counter_list)
