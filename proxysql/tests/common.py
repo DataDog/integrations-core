@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 GLOBAL_METRICS = (
     'proxysql.active_transactions',
     'proxysql.query_processor_time_pct',
