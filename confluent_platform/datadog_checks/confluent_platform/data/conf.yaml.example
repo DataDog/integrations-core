@@ -12,6 +12,14 @@ init_config:
     #
     collect_default_metrics: true
 
+    ## @param service_check_prefix - string - optional
+    ## Custom service check prefix.
+    ##   e.g. `my_prefix.can_connect`
+    ## If not set, the default service check used if the integration name.
+    ##   e.g. `my_integration.can_connect`
+    #
+    # service_check_prefix: <SERVICE_CHECK_PREFIX>
+
     ## @param conf - list of mappings - optional
     ## The list of metrics to be collected by the integration
     ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it

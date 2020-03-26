@@ -10,6 +10,14 @@
   value:
     example: true
     type: boolean
+- name: service_check_prefix
+  description: |
+    Custom service check prefix.
+      e.g. `my_prefix.can_connect`
+    If not set, the default service check used if the integration name.
+      e.g. `my_integration.can_connect`
+  value:
+    type: string
 - name: conf
   description: |
     The list of metrics to be collected by the integration
