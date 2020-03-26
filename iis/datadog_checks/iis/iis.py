@@ -3,8 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from six import iteritems
 
-from datadog_checks.base import PDHBaseCheck, is_affirmative
-from datadog_checks.base.utils.containers import hash_mutable
+from datadog_checks.base import PDHBaseCheck
+from datadog_checks.base.stubs import datadog_agent
 
 DEFAULT_COUNTERS = [
     ["Web Service", None, "Service Uptime", "iis.uptime", "gauge"],
@@ -42,35 +42,31 @@ TOTAL_SITE = "_Total"
 class IIS(PDHBaseCheck):
     SERVICE_CHECK = "iis.site_up"
 
-    def __init__(self, name, init_config, agentConfig, instances):
-        super(IIS, self).__init__(name, init_config, agentConfig, instances=instances, counter_list=DEFAULT_COUNTERS)
+    def __init__(self, name, init_config, instances):
+        super(IIS, self).__init__(name, init_config, instances=instances, counter_list=DEFAULT_COUNTERS)
+        self.sites = self.instance.get('sites', []) or []
 
-    def get_iishost(self, instance):
-        inst_host = instance.get("host")
+    def get_iishost(self):
+        inst_host = self.instance.get("host")
         if inst_host in [".", "localhost", "127.0.0.1", None]:
             # Use agent's hostname if connecting to local machine.
-            iis_host = self.hostname
+            iis_host = datadog_agent.get_hostname()
         else:
             iis_host = inst_host
         return "iis_host:{}".format(self.normalize_tag(iis_host))
 
-    def check(self, instance):
-        # Duplicate refresh_counters from PDHBaseCheck
-        instance_hash = hash_mutable(instance)
-        refresh_counters = is_affirmative(instance.get('refresh_counters', True))
-
-        if refresh_counters:
+    def check(self, _):
+        if self.refresh_counters:
             for counter, values in list(iteritems(self._missing_counters)):
-                self._make_counters(instance_hash, ([counter], values))
+                self._make_counters(self.instance_hash, ([counter], values))
 
-        sites = instance.get('sites', []) or []
-        expected_sites = set(sites)
+        expected_sites = set(self.sites)
         # _Total should always be in the list of expected sites; we always
         # report _Total
         expected_sites.add(TOTAL_SITE)
-
         self.log.debug("Expected sites is %s", expected_sites)
-        for inst_name, dd_name, metric_func, counter in self._metrics[instance_hash]:
+
+        for inst_name, dd_name, metric_func, counter in self._metrics[self.instance_hash]:
             try:
                 site_values = counter.get_all_values()
             except Exception as e:
@@ -79,10 +75,15 @@ class IIS(PDHBaseCheck):
             try:
                 for site_name, value in iteritems(site_values):
                     is_single_instance = counter.is_single_instance()
-                    if not is_single_instance and sites and site_name != TOTAL_SITE and site_name not in sites:
+                    if (
+                        not is_single_instance
+                        and self.sites
+                        and site_name != TOTAL_SITE
+                        and site_name not in self.sites
+                    ):
                         continue
 
-                    tags = self._get_site_tags(instance_hash, instance, site_name, is_single_instance)
+                    tags = self._get_site_tags(site_name, is_single_instance)
                     try:
                         metric_func(dd_name, value, tags)
                     except Exception as e:
@@ -100,29 +101,29 @@ class IIS(PDHBaseCheck):
                 # don't give up on all of the metrics because one failed
                 self.log.error("IIS Failed to get metric data for %s %s: %s", inst_name, dd_name, e)
 
-        self._report_unavailable_sites(expected_sites, instance_hash, instance)
+        self._report_unavailable_sites(expected_sites)
 
     def _report_uptime(self, site_uptime, tags):
         uptime = int(site_uptime)
         status = self.CRITICAL if uptime == 0 else self.OK
         self.service_check(self.SERVICE_CHECK, status, tags)
 
-    def _report_unavailable_sites(self, remaining_sites, instance_hash, instance):
+    def _report_unavailable_sites(self, remaining_sites):
         for site in remaining_sites:
             tags = []
-            if instance_hash in self._tags:
-                tags = list(self._tags[instance_hash])
-            tags.append(self.get_iishost(instance))
+            if self.instance_hash in self._tags:
+                tags = list(self._tags[self.instance_hash])
+            tags.append(self.get_iishost())
             normalized_site = self.normalize_tag(site)
             tags.append("site:{}".format(normalized_site))
             self.log.warning("Check didn't get any data for expected site: %r", site)
             self.service_check(self.SERVICE_CHECK, self.CRITICAL, tags)
 
-    def _get_site_tags(self, instance_hash, instance, site_name, is_single_instance):
+    def _get_site_tags(self, site_name, is_single_instance):
         tags = []
-        if instance_hash in self._tags:
-            tags = list(self._tags[instance_hash])
-        tags.append(self.get_iishost(instance))
+        if self.instance_hash in self._tags:
+            tags = list(self._tags[self.instance_hash])
+        tags.append(self.get_iishost())
 
         try:
             if not is_single_instance:
