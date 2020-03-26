@@ -57,22 +57,23 @@ gitlab.transaction.rails_queue_duration_total,count,,,,Measures latency between 
 gitlab.transaction.view_duration_total,count,,,,Duration for views,0,gitlab,view duration count
 gitlab.view_rendering_duration_seconds.count,count,,second,,Count of duration for views (histogram),0,gitlab,rendering duration count
 gitlab.view_rendering_duration_seconds.sum,count,,second,,Sum of duration for views (histogram),0,gitlab,rendering duration sum
-gitlab.http_requests_total.sum,count,,request,,Rack request count,0,gitlab,rack request count
-gitlab.http_request_duration_seconds.sum,count,,second,,Sum of HTTP response time from rack middleware,0,gitlab,http request dur sum
-gitlab.http_request_duration_seconds.count,count,,second,,Count of HTTP response time from rack middleware,0,gitlab,http request dur sum
+gitlab.rack.http_requests_total.count,count,,request,,Rack request count,0,gitlab,rack request count
+gitlab.rack.http_requests_total.sum,gauge,,request,,Sum of rack requests,0,gitlab,rack request sum
+gitlab.rack.http_request_duration_seconds.sum,gauge,,second,,Sum of HTTP response time from rack middleware,0,gitlab,http request dur sum
+gitlab.rack.http_request_duration_seconds.count,count,,second,,Count of HTTP response time from rack middleware,0,gitlab,http request dur count
+gitlab.rack.uncaught_errors_total,count,,connection,,Rack connections handling uncaught errors count,-1,gitlab,rack uncaught errors
 gitlab.pipelines_created_total,count,,,,Counter of pipelines created,0,gitlab,pipelines created total
-gitlab.rack_uncaught_errors_total,count,,connection,,Rack connections handling uncaught errors count,-1,gitlab,rack uncaught errors
 gitlab.user_session_logins_total,count,,,,Counter of how many users have logged in,0,gitlab,user logins
 gitlab.upload_file_does_not_exist,count,,,,Number of times an upload record could not find its file,0,gitlab,no upload file
 gitlab.failed_login_captcha_total,gauge,,,,Counter of failed CAPTCHA attempts during login,-1,gitlab,failed captchas
 gitlab.successful_login_captcha_total,gauge,,,,Counter of successful CAPTCHA attempts during login,0,gitlab,successful captchas
 gitlab.auto_devops_pipelines_completed_total,count,,,,"Counter of completed Auto DevOps pipelines, labeled by status",0,gitlab,completed auto pipelines
 gitlab.sidekiq.jobs_cpu_seconds.count,count,,second,,Count of seconds of cpu time to run Sidekiq job,0,gitlab,cpu sidekiq count
-gitlab.sidekiq.jobs_cpu_seconds.sum,count,,second,,Sum of seconds of cpu time to run Sidekiq job,0,gitlab,sidekiq cpu sum
+gitlab.sidekiq.jobs_cpu_seconds.sum,gauge,,second,,Sum of seconds of cpu time to run Sidekiq job,0,gitlab,sidekiq cpu sum
 gitlab.sidekiq.jobs_completion_seconds.count,count,,second,,Count of seconds to complete Sidekiq job,0,gitlab,sidekiq completion count
-gitlab.sidekiq.jobs_completion_seconds.sum,count,,second,,Sum of seconds to complete Sidekiq job,0,gitlab,sidekiq completion sum
+gitlab.sidekiq.jobs_completion_seconds.sum,gauge,,second,,Sum of seconds to complete Sidekiq job,0,gitlab,sidekiq completion sum
 gitlab.sidekiq.jobs_queue_duration_seconds.count,count,,second,,Count of duration in seconds that a Sidekiq job was queued before being executed,0,gitlab,sidekiq queue count
-gitlab.sidekiq.jobs_queue_duration_seconds.sum,count,,second,,Sum of duration in seconds that a Sidekiq job was queued before being executed,0,gitlab,sidekiq queue sum
+gitlab.sidekiq.jobs_queue_duration_seconds.sum,gauge,,second,,Sum of duration in seconds that a Sidekiq job was queued before being executed,0,gitlab,sidekiq queue sum
 gitlab.sidekiq.jobs_failed_total,count,,job,,Sidekiq jobs failed,-1,gitlab,sidekiq jobs failed
 gitlab.sidekiq.jobs_retried_total,count,,job,,Sidekiq jobs retired,0,gitlab,sidekiq jobs retried
 gitlab.sidekiq.running_jobs,gauge,,job,,Number of Sidekiq jobs running,0,gitlab,sidekiq jobs running
