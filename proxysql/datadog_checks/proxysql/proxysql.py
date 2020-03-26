@@ -63,7 +63,6 @@ class ProxysqlCheck(AgentCheck):
     def execute_query_raw(self, query):
         with closing(self._connection.cursor()) as cursor:
             cursor.execute(query)
-            # remove me
             if cursor.rowcount < 1:
                 self.log.warning("Failed to fetch records from query: `%s`.", query)
                 return []
