@@ -263,7 +263,7 @@ class RequestsWrapper(object):
         # https://en.wikipedia.org/wiki/HTTP_persistent_connection#Advantages
         # http://docs.python-requests.org/en/master/user/advanced/#session-objects
         # http://docs.python-requests.org/en/master/user/advanced/#keep-alive
-        self.persist_connections = is_affirmative(config['persist_connections'])
+        self.persist_connections = self.tls_use_host_header or is_affirmative(config['persist_connections'])
         self._session = None
 
         # Whether or not to log request information like method and url
