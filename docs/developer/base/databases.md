@@ -12,17 +12,13 @@ The core premise is that you define a function that accepts a query (usually a `
 
 All the functionality is exposed by the `Query` and `QueryManager` classes.
 
-### Query
-
 ::: datadog_checks.base.utils.db.Query
-    :docstring:
-    :members:
-
-### QueryManager
+    rendering:
+      heading_level: 3
 
 ::: datadog_checks.base.utils.db.QueryManager
-    :docstring:
-    :members:
+    rendering:
+      heading_level: 3
 
 ## Transformers
 
@@ -34,30 +30,10 @@ All the functionality is exposed by the `Query` and `QueryManager` classes.
     </video>
 </div>
 
-### Column
-
 ::: datadog_checks.base.utils.db.transform.ColumnTransformers
-    :docstring:
-    :members:
-
-### Extra
-
-Every column transformer (except `tag`) is supported at this level, the only difference being one must set a `source` to retrieve the desired value.
-
-So for example here:
-
-```yaml
-columns:
-  - name: foo.bar
-    type: rate
-extras:
-  - name: foo.current
-    type: gauge
-    source: foo.bar
-```
-
-the metric `foo.current` will be sent as a gauge will the value of `foo.bar`.
+    rendering:
+      heading_level: 3
 
 ::: datadog_checks.base.utils.db.transform.ExtraTransformers
-    :docstring:
-    :members:
+    rendering:
+      heading_level: 3

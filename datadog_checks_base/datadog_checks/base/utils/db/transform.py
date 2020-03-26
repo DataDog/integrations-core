@@ -112,9 +112,9 @@ def get_match(transformers, column_name, **modifiers):
 
     For example, say you want to collect the fields named `foo` and `bar`. Typically, they would be stored like:
 
-        | foo | bar |
-        | --- | --- |
-        | 4   | 2   |
+    | foo | bar |
+    | --- | --- |
+    | 4   | 2   |
 
     and would be queried like:
 
@@ -124,10 +124,10 @@ def get_match(transformers, column_name, **modifiers):
 
     Often, you will instead find data stored in the following format:
 
-        | metric | value |
-        | ------ | ----- |
-        | foo    | 4     |
-        | bar    | 2     |
+    | metric | value |
+    | ------ | ----- |
+    | foo    | 4     |
+    | bar    | 2     |
 
     and would be queried like:
 
@@ -167,11 +167,11 @@ def get_match(transformers, column_name, **modifiers):
 
     and the result set is:
 
-        | source1 | source2 | metric |
-        | ------- | ------- | ------ |
-        | 1       | 2       | foo    |
-        | 3       | 4       | baz    |
-        | 5       | 6       | bar    |
+    | source1 | source2 | metric |
+    | ------- | ------- | ------ |
+    | 1       | 2       | foo    |
+    | 3       | 4       | baz    |
+    | 5       | 6       | bar    |
 
     Here's what would be submitted:
 
@@ -497,7 +497,23 @@ class ColumnTransformers(object):
 
 
 class ExtraTransformers(object):
-    pass
+    """
+    Every column transformer (except `tag`) is supported at this level, the only difference being one must set a `source` to retrieve the desired value.
+
+    So for example here:
+
+    ```yaml
+    columns:
+      - name: foo.bar
+        type: rate
+    extras:
+      - name: foo.current
+        type: gauge
+        source: foo.bar
+    ```
+
+    the metric `foo.current` will be sent as a gauge will the value of `foo.bar`.
+    """
 
 
 # Need a custom object to allow for modification of docstrings
@@ -506,12 +522,8 @@ class __TransformerDocumentionHelper(object):
 
 
 for name, transformer in sorted(COLUMN_TRANSFORMERS.items()):
-    helper = __TransformerDocumentionHelper()
-    helper.__doc__ = transformer.__doc__
-    setattr(ColumnTransformers, name, helper)
+    setattr(ColumnTransformers, name, transformer)
 
 
 for name, transformer in sorted(EXTRA_TRANSFORMERS.items()):
-    helper = __TransformerDocumentionHelper()
-    helper.__doc__ = transformer.__doc__
-    setattr(ExtraTransformers, name, helper)
+    setattr(ExtraTransformers, name, transformer)

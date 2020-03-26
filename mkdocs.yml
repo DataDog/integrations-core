@@ -63,6 +63,14 @@ plugins:
       minify_html: true
   - git-revision-date-localized:
       type: date
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_if_no_docstring: yes
+            show_root_heading: yes
+            show_source: true
 
 # Extensions
 markdown_extensions:
@@ -74,7 +82,6 @@ markdown_extensions:
       permalink: true
       toc_depth: "2-6"
   # Extra
-  - mkautodoc:
   - mkdocs-click:
   - pymdownx.arithmatex:
   - pymdownx.betterem:
@@ -130,9 +137,9 @@ nav:
     - API: base/api.md
   - Dev Package:
     - "What's in the box?": ddev/layers.md
-    - Configuration: ddev/configuration.md
-    - Plugins: ddev/plugins.md
     - Test framework: ddev/test.md
+    - Plugins: ddev/plugins.md
+    - Configuration: ddev/configuration.md
     - CLI: ddev/cli.md
   - Guidelines:
     - Style: guidelines/style.md

@@ -122,6 +122,12 @@ is desired. This fixture is responsible for starting and stopping environments a
     - Tear down - only if `DDEV_E2E_DOWN` is not set to `false`
 
     !!! note
-        The provided Docker and Terraform environment runner utilities will do this automatically for you.
+        The provided [Docker](test.md#docker) and [Terraform](test.md#terraform) environment runner utilities will do this automatically for you.
 
 #### Metadata
+
+- `env_type` - This is the type of interface that will be used to interact with the Agent. Currently, we support `docker` (default) and `local`.
+- `env_vars` - A `dict` of environment variables and their values that will be present when starting the Agent.
+- `docker_volumes` - A `list` of `str` representing [Docker volume mounts](https://docs.docker.com/storage/volumes/#choose-the--v-or---mount-flag)
+  if `env_type` is `docker` e.g. `/local/path:/agent/container/path:ro`.
+- `logs_config` - A `list` of configs that will be used by the Logs Agent. You will never need to use this directly, but rather via [higher level abstractions](test.md#logs).

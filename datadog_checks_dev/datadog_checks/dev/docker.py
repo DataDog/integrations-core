@@ -23,11 +23,16 @@ except ImportError:
 
 
 def get_docker_hostname():
+    """
+    Determine the hostname Docker uses based on the environment, defaulting to `localhost`.
+    """
     return urlparse(os.getenv('DOCKER_HOST', '')).hostname or 'localhost'
 
 
 def get_container_ip(container_id_or_name):
-    """Get a Docker container's IP address from its id or name."""
+    """
+    Get a Docker container's IP address from its ID or name.
+    """
     command = [
         'docker',
         'inspect',
@@ -40,6 +45,9 @@ def get_container_ip(container_id_or_name):
 
 
 def compose_file_active(compose_file):
+    """
+    Returns a `bool` indicating whether or not a compose file has any active services.
+    """
     command = ['docker-compose', '-f', compose_file, 'ps']
     lines = run_command(command, capture='out', check=True).stdout.splitlines()
 
@@ -112,41 +120,28 @@ def docker_run(
     attempts=None,
     attempts_wait=1,
 ):
-    """This utility provides a convenient way to safely set up and tear down Docker environments.
+    """
+    A convenient context manager for safely setting up and tearing down Docker environments.
 
-    :param compose_file: A path to a Docker compose file. A custom tear
-                         down is not required when using this.
-    :type compose_file: ``str``
-    :param build: Whether or not to build images for when ``compose_file`` is provided.
-    :type build: ``bool``
-    :param service_name: Optional name for when ``compose_file`` is provided.
-    :type service_name: ``str``
-    :param up: A custom setup callable.
-    :type up: ``callable``
-    :param down: A custom tear down callable. This is required when using a custom setup.
-    :type down: ``callable``
-    :param on_error: A callable called in case of an unhandled exception.
-    :type on_error: ``callable``
-    :param sleep: Number of seconds to wait before yielding.
-    :type sleep: ``float``
-    :param endpoints: Endpoints to verify access for before yielding. Shorthand for adding
-                      ``conditions.CheckEndpoints(endpoints)`` to the ``conditions`` argument.
-    :type endpoints: ``list`` of ``str``, or a single ``str``
-    :param log_patterns: Patterns to find in Docker logs before yielding. This is only available
-                         when ``compose_file`` is provided. Shorthand for adding
-                         ``conditions.CheckDockerLogs(compose_file, log_patterns)`` to the ``conditions`` argument.
-    :type log_patterns: ``list`` of (``str`` or ``re.Pattern``)
-    :param mount_logs: Whether or not to mount log files in Agent containers based on example logs configuration.
-    :type mount_logs: ``bool`` or ``list`` of ``int`` or ``dict``
-    :param conditions: A list of callable objects that will be executed before yielding to check for errors.
-    :type conditions: ``callable``
-    :param env_vars: A dictionary to update ``os.environ`` with during execution.
-    :type env_vars: ``dict``
-    :param wrappers: A list of context managers to use during execution.
-    :param attempts: Number attempts to run `up`
-    :type attempts: int
-    :param attempts_wait: Time wait between attempts
-    :type attempts_wait: int
+    - **compose_file** (_str_) - A path to a Docker compose file. A custom tear
+      down is not required when using this.
+    - **build** (_bool_) - Whether or not to build images for when `compose_file` is provided
+    - **service_name** (_str_) - Optional name for when ``compose_file`` is provided
+    - **up** (_callable_) - A custom setup callable
+    - **down** (_callable_) - A custom tear down callable. This is required when using a custom setup.
+    - **on_error** (_callable_) - A callable called in case of an unhandled exception
+    - **sleep** (_float_) - Number of seconds to wait before yielding. This occurs after all conditions are successful.
+    - **endpoints** (_List[str])_) - Endpoints to verify access for before yielding. Shorthand for adding
+      `CheckEndpoints(endpoints)` to the `conditions` argument.
+    - **log_patterns** (_List[str|re.Pattern])_) - Regular expression patterns to find in Docker logs before yielding.
+      This is only available when `compose_file` is provided. Shorthand for adding
+      `CheckDockerLogs(compose_file, log_patterns)` to the `conditions` argument.
+    - **mount_logs** (_bool_) - Whether or not to mount log files in Agent containers based on example logs
+      configuration
+    - **conditions** (_callable_) - A list of callable objects that will be executed before yielding to
+      check for errors
+    - **env_vars** (_dict_) - A dictionary to update `os.environ` with during execution
+    - **wrappers** (_List[callable]_) - A list of context managers to use during execution
     """
     if compose_file and up:
         raise TypeError('You must select either a compose file or a custom setup callable, not both.')

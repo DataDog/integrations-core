@@ -68,13 +68,14 @@ ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MO
 
 
 class AgentCheck(object):
-    """The base class for any Agent based integration.
+    """
+    The base class for any Agent based integration.
 
     In general, you don't need to and you should not override anything from the base
     class except the `check` method but sometimes it might be useful for a Check to
     have its own constructor.
 
-    When overriding `\\_\\_init\\_\\_` you have to remember that, depending on the configuration,
+    When overriding `__init__` you have to remember that, depending on the configuration,
     the Agent might create several different Check instances and the method would be
     called as many times.
 
@@ -92,12 +93,6 @@ class AgentCheck(object):
         when loading a Custom check, the Agent will inspect the module searching
         for a subclass of `AgentCheck`. If such a class exists but has been derived in
         turn, it'll be ignored - **you should never derive from an existing Check**.
-
-    - **name** (_str_) - the name of the check
-    - **init_config** (_dict_) - the `init_config` section of the configuration.
-    - **instance** (_List[dict]_) - a one-element list containing the instance options from the
-            configuration file (a list is used to keep backward compatibility with
-            older versions of the Agent).
     """
 
     # If defined, this will be the prefix of every metric/service check and the source type of events
@@ -144,6 +139,13 @@ class AgentCheck(object):
 
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
+        """
+        - **name** (_str_) - the name of the check
+        - **init_config** (_dict_) - the `init_config` section of the configuration.
+        - **instance** (_List[dict]_) - a one-element list containing the instance options from the
+                configuration file (a list is used to keep backward compatibility with
+                older versions of the Agent).
+        """
         # NOTE: these variable assignments exist to ease type checking when eventually assigned as attributes.
         name = kwargs.get('name', '')
         init_config = kwargs.get('init_config', {})

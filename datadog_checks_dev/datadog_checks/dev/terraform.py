@@ -38,20 +38,17 @@ def construct_env_vars():
 
 @contextmanager
 def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_vars=None, wrappers=None):
-    """This utility provides a convenient way to safely set up and tear down Terraform environments.
+    """
+    A convenient context manager for safely setting up and tearing down Terraform environments.
 
-    :param directory: A path containing Terraform files.
-    :type directory: ``str``
-    :param sleep: Number of seconds to wait before yielding.
-    :type sleep: ``float``
-    :param endpoints: Endpoints to verify access for before yielding. Shorthand for adding
-                      ``conditions.CheckEndpoints(endpoints)`` to the ``conditions`` argument.
-    :type endpoints: ``list`` of ``str``, or a single ``str``
-    :param conditions: A list of callable objects that will be executed before yielding to check for errors.
-    :type conditions: ``callable``
-    :param env_vars: A dictionary to update ``os.environ`` with during execution.
-    :type env_vars: ``dict``
-    :param wrappers: A list of context managers to use during execution.
+    - **directory** (_str_) - A path containing Terraform files
+    - **sleep** (_float_) - Number of seconds to wait before yielding. This occurs after all conditions are successful.
+    - **endpoints** (_List[str])_) - Endpoints to verify access for before yielding. Shorthand for adding
+      `CheckEndpoints(endpoints)` to the `conditions` argument.
+    - **conditions** (_callable_) - A list of callable objects that will be executed before yielding to
+      check for errors
+    - **env_vars** (_dict_) - A dictionary to update `os.environ` with during execution
+    - **wrappers** (_List[callable]_) - A list of context managers to use during execution
     """
     if not which('terraform'):
         pytest.skip('Terraform not available')

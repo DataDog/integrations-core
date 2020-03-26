@@ -43,14 +43,17 @@ If not:
 1. Run `ddev config set github.token` then paste the token
 1. [Enable single sign-on](https://help.github.com/en/github/authenticating-to-github/authorizing-a-personal-access-token-for-use-with-saml-single-sign-on) for the token
 
-## Jira
+## Trello
 
-To participate as an [Agent release manager](../process/agent_release.md), you need to set `jira.user`/`jira.token` in your config file.
+To participate as an [Agent release manager](../process/agent_release.md), you need to set `trello.key`/`trello.token` in your config file.
 
-Run `ddev config show` to see if your Jira user and token is set.
+Run `ddev config show` to see if your Trello key and token is set.
 
 If not:
 
-1. Run `ddev config set jira.user <YOUR_DATADOG_EMAIL>`
-1. Create an [API token](https://id.atlassian.com/manage/api-tokens)
-1. Run `ddev config set jira.token` then paste the token
+1. Go to `https://trello.com/app-key` and copy your API key
+1. Run `ddev config set trello.key` then paste your API key
+1. Go to `https://trello.com/1/authorize?key=<KEY>&name=<NAME>&scope=read,write&expiration=never&response_type=token`,
+   where `<KEY>` is your API key and `<NAME>` is the name to give your token, e.g. `ReleaseTestingYourName`.
+   Authorize access and copy your token.
+1. Run `ddev config set trello.token` and paste your token

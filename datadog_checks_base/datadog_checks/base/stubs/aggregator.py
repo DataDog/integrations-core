@@ -352,10 +352,11 @@ class AggregatorStub(object):
         Assert no duplicate metrics have been submitted.
 
         Metrics are considered duplicate when all following fields match:
-            - metric name
-            - type (gauge, rate, etc)
-            - tags
-            - hostname
+
+        - metric name
+        - type (gauge, rate, etc)
+        - tags
+        - hostname
         """
         # metric types that intended to be called multiple times are ignored
         ignored_types = [self.COUNT, self.MONOTONIC_COUNT, self.COUNTER]

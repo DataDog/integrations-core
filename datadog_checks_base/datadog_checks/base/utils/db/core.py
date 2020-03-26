@@ -32,17 +32,18 @@ class QueryManager(object):
     )
     self.check_initializations.append(self._query_manager.compile_queries)
     ```
-
-    - **check** (_AgentCheck_) - an instance of a Check
-    - **executor** (_callable_) - a callable accepting a `str` query as its sole argument and returning
-      a sequence representing either the full result set or an iterator over the result set
-    - **queries** (_List[Query])_) - a list of `Query` instances
-    - **tags** (_List[str])_) - a list of tags to associate with every submission
-    - **error_handler** (_callable_) - a callable accepting a `str` error as its sole argument and returning
-      a sanitized string, useful for scrubbing potentially sensitive information libraries emit
     """
 
     def __init__(self, check, executor, queries=None, tags=None, error_handler=None):
+        """
+        - **check** (_AgentCheck_) - an instance of a Check
+        - **executor** (_callable_) - a callable accepting a `str` query as its sole argument and returning
+          a sequence representing either the full result set or an iterator over the result set
+        - **queries** (_List[Query])_) - a list of `Query` instances
+        - **tags** (_List[str])_) - a list of tags to associate with every submission
+        - **error_handler** (_callable_) - a callable accepting a `str` error as its sole argument and returning
+          a sanitized string, useful for scrubbing potentially sensitive information libraries emit
+        """
         self.check = check
         self.executor = executor
         self.queries = queries or []

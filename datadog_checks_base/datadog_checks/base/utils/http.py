@@ -496,12 +496,9 @@ AUTH_TYPES = {
 
 
 # For documentation generation
-# TODO: use an enum and remove STANDARD_FIELDS when mkautodoc supports it
+# TODO: use an enum and remove STANDARD_FIELDS when mkdocstrings supports it
 class StandardFields(object):
     pass
 
 
-# mkautodoc does not show the default values but rather the description of its
-# type (when not `None`) which is noisy since everyone knows what e.g. `str` is
-for field in sorted(STANDARD_FIELDS):
-    setattr(StandardFields, field, None)
+StandardFields.__doc__ = '\n'.join('- `{}`'.format(field) for field in STANDARD_FIELDS)

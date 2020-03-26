@@ -39,7 +39,7 @@ We test all changes to integrations that were introduced since the last release.
 
 ### Create items
 
-Create an item for every change in [our board](https://datadoghq.atlassian.net/jira/software/projects/AR/boards/220) using
+Create an item for every change in [our board](https://trello.com/b/ICjijxr4/agent-release-sprint) using
 the `ddev release testable` command.
 
 For example:
@@ -54,9 +54,9 @@ The command will display each change and prompt you to assign a team or skip. Pu
 
 You must assign each item to a team member after creation and ensure no one is assigned to a change that they authored.
 
-If you would like to automate this, then add a `jira_users_$team` table in your [configuration](../ddev/configuration.md), with
-keys being GitHub usernames and values being their corresponding Jira IDs (not names). You can find current team member information
-in [this document](https://github.com/DataDog/devops/wiki/GitHub-usernames-and-Jira-IDs).
+If you would like to automate this, then add a `trello_users_$team` table in your [configuration](../ddev/configuration.md), with
+keys being GitHub usernames and values being their corresponding Trello IDs (not names). You can find current team member information
+in [this document](https://github.com/DataDog/devops/wiki/GitHub-usernames-and-Trello-IDs).
 
 ### Release candidates
 

@@ -38,14 +38,15 @@ class MyCheck(AgentCheck):
 ## Options
 
 Some options can be set globally in `init_config` (with `instances` taking precedence).
-For complete documentation of every option, see the associated configuration templates:
-
-- [instances](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/http.yaml)
-- [init_config](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/init_config/http.yaml)
+For complete documentation of every option, see the associated configuration templates for the
+[instances](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/http.yaml) and
+[init_config](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/init_config/http.yaml)
+sections.
 
 ::: datadog_checks.base.utils.http.StandardFields
-    :docstring:
-    :members:
+    rendering:
+      show_root_heading: false
+      show_root_toc_entry: false
 
 ## Future
 
