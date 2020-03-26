@@ -1,6 +1,6 @@
 schedules:
- - cron: "0 23 * * 0"
-   displayName: Weekly CI (Sunday night UTC)
+- cron: "0 5 * * 1"
+  displayName: Weekly (Sunday night EDT/EST)
   always: true
   branches:
     include:
