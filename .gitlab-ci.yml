@@ -90,20 +90,22 @@ tagger-image-builder:
     paths:
       - compiled_deps
 
-suse-x64:
+agent-suse-x64:
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-builders/suse_x64:$DATADOG_AGENT_BUILDERS
   <<: *common_compile_deps
 
-rpm-x64:
+agent-rpm-x64:
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/rpm_x64:$DATADOG_AGENT_BUILDIMAGES
   <<: *common_compile_deps
 
+agent-deb-x64:
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/deb_x64:$DATADOG_AGENT_BUILDIMAGES
+  <<: *common_compile_deps
+
 deb-x64-py2:
-#  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/deb_x64:$DATADOG_AGENT_BUILDIMAGES
   image: python:3.7.7-stretch
   <<: *common_compile_deps
 
 deb-x64-py3:
-#  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/deb_x64:$DATADOG_AGENT_BUILDIMAGES
   image: python:2.7.17-stretch
   <<: *common_compile_deps
