@@ -3,6 +3,7 @@ variables:
   TAGGER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:tagger
   TAGGER_EMAIL: packages@datadoghq.com
   TAGGER_NAME: ci.integrations-core
+  DATADOG_AGENT_BUILDERS: v2311927-0e261ab
 
 # Uncomment when/if we modify script to use Jira
 #
@@ -72,3 +73,11 @@ tagger-image-builder:
     - docker push $TAGGER_IMAGE
   except: [ tags, schedules ]
   tags: [ "runner:docker", "size:large" ]
+
+# build Agent package for suse-x64
+agent_suse-x64-a6:
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-builders/suse_x64:$DATADOG_AGENT_BUILDERS
+  script:
+    - cat datadog_checks_base/datadog_checks/base/data/agent_requirements.in | grep -v pymqi > agent_requirements.in
+    - python -m piptools compile --generate-hashes --output-file compiled_deps/agent_requirements-${{ matrix.os }}-${{ matrix.python-version }}.txt agent_requirements.in
+    - cat compiled_deps/agent_requirements-${{ matrix.os }}-${{ matrix.python-version }}.txt
