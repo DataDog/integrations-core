@@ -8,5 +8,5 @@ kyototycoon.cnt_set,rate,10,hit,,Rate of set hits,0,kyoto_tycoon,kyot_set_hit
 kyototycoon.cnt_set_misses,rate,10,miss,,Rate of set misses,0,kyoto_tycoon,kyot_set_miss
 kyototycoon.cnt_remove,rate,10,hit,,Rate of deleted hits,0,kyoto_tycoon,kyot_remove_hit
 kyototycoon.cnt_remove_misses,rate,10,miss,,Rate of deleted misses,0,kyoto_tycoon,kyot_remove_miss
-kyototycoon.count,gauge,,record,,Total amount of records,0,kyoto_tycoon,kyot_db_count
+kyototycoon.records,gauge,,record,,Total amount of records,0,kyoto_tycoon,kyot_db_records
 kyototycoon.size,gauge,,,,Current size of the kyoto tycoon DB,0,kyoto_tycoon,kyot_db_size

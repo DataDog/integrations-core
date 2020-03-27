@@ -9,7 +9,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "riakcs.",
-  "metric_to_check": "riakcs.bucket_list_pool.workers",
+  "metric_to_check": "riakcs.block_get.latency_mean",
   "name": "riakcs",
   "process_signatures": [
     "riak-cs start"

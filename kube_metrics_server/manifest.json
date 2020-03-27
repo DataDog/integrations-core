@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "kube_metrics_server",
   "metric_prefix": "kube_metrics_server.",
-  "metric_to_check": "kube_metrics_server.threads",
+  "metric_to_check": "kube_metrics_server.scraper_last_time",
   "creates_events": false,
   "short_description": "Monitors the Kubernetes Metrics Server",
   "guid": "7a477937-4db8-4277-bd58-9e56ac064185",
