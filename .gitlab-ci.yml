@@ -82,11 +82,9 @@ tagger-image-builder:
     - cat datadog_checks_base/datadog_checks/base/data/agent_requirements.in | grep -v pymqi > agent_requirements.in
     - cat agent_requirements.in
     - python --version
-    - command -v  python2
-    - command -v  python3
-    - python2 -m pip install pip-tools
-    - python2 -m piptools compile --generate-hashes --output-file compiled_deps/agent_requirements-suse-x64-py2.txt agent_requirements.in
-    - cat compiled_deps/agent_requirements-suse-x64-py2.txt
+    - python -m pip install pip-tools
+    - python -m piptools compile --generate-hashes --output-file compiled_deps/agent_requirements-$(CI_JOB_NAME).txt agent_requirements.in
+    - cat compiled_deps/agent_requirements-$(CI_JOB_NAME).txt
   artifacts:
     expire_in: 2 weeks
     paths:
@@ -101,5 +99,6 @@ rpm-x64:
   <<: *common_compile_deps
 
 deb-x64:
-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/deb_x64:$DATADOG_AGENT_BUILDIMAGES
+#  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/deb_x64:$DATADOG_AGENT_BUILDIMAGES
+  image: python:3.7.7-stretch
   <<: *common_compile_deps
