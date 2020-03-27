@@ -33,13 +33,16 @@ class PDHBaseCheck(AgentCheck):
 
     def __init__(self, *args, **kwargs):  # To support optional agentConfig
         # TODO: Change signature to (self, name, init_config, instances, counter_list) once subclasses have been edited
+        counter_list = kwargs.get('counter_list', args[-1])  # type: List[List[str]]
+        if 'counter_list' not in kwargs:
+            args = args[:-1]  # Base class does not know how to interpret it
+
         super(PDHBaseCheck, self).__init__(*args, **kwargs)
+
         self._missing_counters = {}  # type: Dict[str, tuple]
         self._metrics = defaultdict(list)  # type: Dict[int, List[List]]  # This dictionary only has one key
         self._tags = defaultdict(list)  # type: Dict[int, List[str]]  # This dictionary only has one key
         self.refresh_counters = is_affirmative(self.instance.get('refresh_counters', True))  # type: bool
-        # TODO Remove once signature is restored to (self, name, init_config, instances, counter_list)
-        counter_list = kwargs.get('counter_list', args[-1])  # type: List[List[str]]
 
         try:
             self.instance_hash = hash_mutable(self.instance)  # type: int
