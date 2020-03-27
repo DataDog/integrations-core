@@ -17,6 +17,7 @@
   "public_title": "Datadog-ProxySQL Integration",
   "categories": [
     "data store",
+    "log collection",
     "caching"
   ],
   "type": "check",
