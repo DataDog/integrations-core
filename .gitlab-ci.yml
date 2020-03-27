@@ -81,6 +81,7 @@ tagger-image-builder:
     - mkdir -p compiled_deps
     - cat datadog_checks_base/datadog_checks/base/data/agent_requirements.in | grep -v pymqi > agent_requirements.in
     - cat agent_requirements.in
+    - python --version
     - command -v  python2
     - command -v  python3
     - python2 -m install pip-tools
