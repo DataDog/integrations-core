@@ -84,7 +84,7 @@ tagger-image-builder:
     - python --version
     - command -v  python2
     - command -v  python3
-    - python2 -m install pip-tools
+    - python2 -m pip install pip-tools
     - python2 -m piptools compile --generate-hashes --output-file compiled_deps/agent_requirements-suse-x64-py2.txt agent_requirements.in
     - cat compiled_deps/agent_requirements-suse-x64-py2.txt
   artifacts:
