@@ -92,6 +92,11 @@ def _test_sticktable_metrics(aggregator, services=None, count=1):
     Checks that sticktable metrics are correctly reported. This requires the
     check to be done over a proper stats socket (not http)
     """
+
+    haproxy_version = os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2]
+    if haproxy_version < ['1', '5']:
+        # We can't gather stick-table metrics for version 1.4
+        return
     if not services:
         services = BACKEND_SERVICES + FRONTEND_SERVICES
 

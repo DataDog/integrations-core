@@ -14,6 +14,7 @@ from six import PY2, iteritems
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
+from datadog_checks.base.errors import CheckException
 
 STATS_URL = "/;csv;norefresh"
 EVENT_TYPE = SOURCE_TYPE_NAME = 'haproxy'
@@ -125,7 +126,7 @@ class HAProxy(AgentCheck):
 
         if parsed_url.scheme == 'unix' or parsed_url.scheme == 'tcp':
             info, data, tables = self._fetch_socket_data(parsed_url)
-            self._collect_version_from_socket(info)
+            self._set_version_metadata(self._collect_version_from_socket(info))
             uptime = self._collect_uptime_from_socket(info)
         else:
             try:
@@ -264,11 +265,7 @@ class HAProxy(AgentCheck):
 
         return uptime
 
-    def _fetch_socket_data(self, parsed_url):
-        ''' Hit a given stats socket and return the stats lines '''
-
-        self.log.debug("Fetching haproxy stats from socket: %s", parsed_url.geturl())
-
+    def _run_socket_commands(self, parsed_url, commands):
         if parsed_url.scheme == 'tcp':
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             splitted_loc = parsed_url.netloc.split(':')
@@ -279,31 +276,53 @@ class HAProxy(AgentCheck):
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.connect(parsed_url.path)
 
-        sock.send(b"show info;show stat;show table\r\n")
+        sock.send(b';'.join(commands) + b"\r\n")
 
         response = ""
         output = sock.recv(BUFSIZE)
         while output:
             response += output.decode("ASCII")
             output = sock.recv(BUFSIZE)
-        try:
-            info, data, tables = response.split('\n\n')[:3]
-        except ValueError:
-            self.log.error("Could not parse information from haproxy socket: '%s'", response)
-            raise
-
         sock.close()
 
-        return info.splitlines(), data.splitlines(), tables.splitlines()
+        responses = response.split('\n\n')
+        if len(responses) != len(commands) + 1 or responses[len(responses) - 1] != '':
+            raise CheckException("Got a different number of responses than expected")
+
+        return tuple(r.splitlines() for r in responses[: len(commands)])
+
+    def _fetch_socket_data(self, parsed_url):
+        ''' Hit a given stats socket and return the stats lines '''
+
+        self.log.debug("Fetching haproxy stats from socket: %s", parsed_url.geturl())
+        info, stat = self._run_socket_commands(parsed_url, (b"show info", b"show stat"))
+
+        # the "show table" command was introduced in 1.5. Sending "show table"
+        # to a haproxy <1.5 results in no output at all even when multiple
+        # commands were sent, so we have to check the version and only send the
+        # command when supported
+        tables = []
+        try:
+            raw_version = self._collect_version_from_socket(info)
+            haproxy_major_version = tuple(int(vernum) for vernum in raw_version.split('.')[:2])
+
+            if len(haproxy_major_version) == 2 and haproxy_major_version >= (1, 5):
+                (tables,) = self._run_socket_commands(parsed_url, (b"show table",))
+        except (IndexError, ValueError) as e:
+            self.log.error("Could not parse version number '%s': %s", raw_version, e)
+            pass
+
+        return info, stat, tables
 
     def _collect_version_from_socket(self, info):
-        version = ''
         for line in info:
             key, value = line.split(':')
             if key == 'Version':
-                version = value
-                break
-        if version == '':
+                return value
+        return ''
+
+    def _set_version_metadata(self, version):
+        if not version:
             self.log.debug("unable to collect version info from socket")
         else:
             self.log.debug("HAProxy version is %s", version)
