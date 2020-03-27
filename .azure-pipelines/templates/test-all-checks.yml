@@ -318,6 +318,9 @@ jobs:
     - checkName: redisdb
       displayName: Redis
       os: linux
+    - checkName: rethinkdb
+      displayName: RethinkDB
+      os: linux
     - checkName: riak
       displayName: Riak
       os: linux

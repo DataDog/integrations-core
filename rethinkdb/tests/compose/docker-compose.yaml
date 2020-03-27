@@ -1,0 +1,64 @@
+version: "3"
+
+services:
+  # 3-node RethinkDB cluster with 1 proxy node.
+
+  rethinkdb-server0:
+    # NOTE: `tty` is required for RethinkDB 2.4.0, otherwise `docker logs` won't see logs.
+    # This due to an issue with I/O buffering on this version, see: https://github.com/rethinkdb/rethinkdb/issues/6819
+    tty: true
+    image: ${RETHINKDB_IMAGE}
+    container_name: rethinkdb-server0
+    command: rethinkdb --bind all --server-name server0 --server-tag us
+    ports:
+      - ${RETHINKDB_PORT_SERVER0}:28015  # Client driver port.
+      - 8080:8080  # Port for the web UI. Debugging only (not used by tests).
+
+  rethinkdb-server1:
+    tty: true
+    image: ${RETHINKDB_IMAGE}
+    container_name: rethinkdb-server1
+    command: |
+      rethinkdb
+      --join rethinkdb-server0:29015
+      --bind all
+      --server-name server1
+      --server-tag us
+      --server-tag primary
+      --http-tls-key /opt/server.key
+      --http-tls-cert /opt/server.pem
+      --driver-tls-key /opt/server.key
+      --driver-tls-cert /opt/server.pem
+    volumes:
+      - ${RETHINKDB_TLS_DRIVER_KEY}:/opt/server.key
+      - ${RETHINKDB_TLS_DRIVER_CERT}:/opt/server.pem
+    links:
+      - rethinkdb-server0
+    depends_on:
+      - rethinkdb-server0
+    ports:
+      - ${RETHINKDB_PORT_SERVER1}:28015
+
+  rethinkdb-server2:
+    tty: true
+    image: ${RETHINKDB_IMAGE}
+    container_name: rethinkdb-server2
+    command: rethinkdb --join rethinkdb-server0:29015 --bind all --server-name server2 --server-tag eu
+    links:
+      - rethinkdb-server0
+    depends_on:
+      - rethinkdb-server0
+    ports:
+      - ${RETHINKDB_PORT_SERVER2}:28015
+
+  rethinkdb-proxy0:
+    tty: true
+    image: ${RETHINKDB_IMAGE}
+    container_name: rethinkdb-proxy0
+    command: rethinkdb proxy --join rethinkdb-server0:29015 --bind all
+    links:
+      - rethinkdb-server0
+    depends_on:
+      - rethinkdb-server0
+    ports:
+      - ${RETHINKDB_PORT_PROXY}:28015
