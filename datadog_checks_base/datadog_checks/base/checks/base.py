@@ -42,7 +42,7 @@ try:
     init_logging()
 except ImportError:
     from ..stubs import datadog_agent
-    from ..stubs.log import CheckLoggingAdapter, init_logging
+    from ..stubs.log import CheckLoggingAdapter, init_logging  # type: ignore
 
     init_logging()
 
