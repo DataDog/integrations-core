@@ -17,7 +17,7 @@ from datadog_checks.proxysql.queries import (
     STATS_MYSQL_USERS,
     VERSION_METADATA,
 )
-from datadog_checks.proxysql.ssl import make_secure_ssl_client_context, make_insecure_ssl_client_context
+from datadog_checks.proxysql.ssl_utils import make_insecure_ssl_client_context, make_secure_ssl_client_context
 
 ADDITIONAL_METRICS_MAPPING = {
     'command_counters_metrics': STATS_COMMAND_COUNTERS,
@@ -89,8 +89,7 @@ class ProxysqlCheck(AgentCheck):
         if self.tls_verify:
             # If ca_cert is None, will load the default certificates
             ssl_context = make_secure_ssl_client_context(
-                ca_cert=self.tls_ca_cert,
-                check_hostname=self.validate_hostname
+                ca_cert=self.tls_ca_cert, check_hostname=self.validate_hostname
             )
         else:
             ssl_context = make_insecure_ssl_client_context()
@@ -104,7 +103,7 @@ class ProxysqlCheck(AgentCheck):
                 passwd=self.password,
                 connect_timeout=self.connect_timeout,
                 read_timeout=self.read_timeout,
-                ssl=ssl_context
+                ssl=ssl_context,
             )
             self.log.debug("Connected to ProxySQL")
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)

@@ -16,21 +16,16 @@ def make_insecure_ssl_client_context():
 
 
 def make_secure_ssl_client_context(
-        ca_cert=None,
-        client_cert=None,
-        client_key=None,
-        check_hostname=True,
-        protocol=ssl.PROTOCOL_TLS,
-
+    ca_cert=None, client_cert=None, client_key=None, check_hostname=True, protocol=ssl.PROTOCOL_TLS,
 ):
     """Creates a secure ssl context for integration that requires one.
     :param str ca_cert:     Path to a file of concatenated CA certificates in PEM format or to a directory containing
                             several CA certificates in PEM format
     :param str client_cert: Path to a single file in PEM format containing the certificate as well as any number of
-                            CA certificates needed to establish the certificate’s authenticity.
+                            CA certificates needed to establish the certificate's authenticity.
     :param str client_key:  Must point to a file containing the private key. Otherwise the private key will be taken
                             from certfile as well.
-    :param bool check_hostname: Whether to match the peer cert’s hostname
+    :param bool check_hostname: Whether to match the peer cert's hostname
     :param int protocol:    Client side protocol (should be one of the `ssl.PROTOCOL_*` constants)
                             By default selects the highest protocol version possible.
 
@@ -66,3 +61,5 @@ def make_secure_ssl_client_context(
     if client_cert:
         # If client_key is not defined, load_cert_chain reads the key from the client_cert
         context.load_cert_chain(client_cert, keyfile=client_key)
+
+    return context

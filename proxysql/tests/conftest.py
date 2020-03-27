@@ -7,7 +7,7 @@ from copy import deepcopy
 import pymysql
 import pytest
 
-from datadog_checks.dev import docker_run, get_docker_hostname, get_here, TempDir, run_command
+from datadog_checks.dev import TempDir, docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 
 DOCKER_HOST = get_docker_hostname()
@@ -42,7 +42,7 @@ INSTANCE_ALL_METRICS = {
         'users_metrics',
         'memory_metrics',
         'query_rules_metrics',
-    ]
+    ],
 }
 
 
@@ -82,8 +82,11 @@ def dd_environment():
             instance = deepcopy(INSTANCE_ALL_METRICS)
             cert_src = os.path.join(tmp_dir, 'proxysql-ca.pem')
             cert_dest = "/etc/ssl/certs/proxysql-ca.pem"
-            instance['tls_ca_cert'] = cert_dest
-            instance['validate_hostname'] = False
+            if PROXYSQL_VERSION.startswith('2'):
+                # SSL is only available with version 2.x of ProxySQL
+                instance['tls_verify'] = True
+                instance['tls_ca_cert'] = cert_dest
+                instance['validate_hostname'] = False
             yield instance, {'docker_volumes': ['{}:{}'.format(cert_src, cert_dest)]}
 
 
