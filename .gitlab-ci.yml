@@ -88,7 +88,7 @@ tagger-image-builder:
   artifacts:
     expire_in: 2 weeks
     paths:
-      - $OMNIBUS_PACKAGE_DIR_SUSE
+      - compiled_deps
 
 suse-x64:
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-builders/suse_x64:$DATADOG_AGENT_BUILDERS
