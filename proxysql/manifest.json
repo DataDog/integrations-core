@@ -20,7 +20,7 @@
     "caching"
   ],
   "type": "check",
-  "is_public": true,
+  "is_public": false,
   "integration_id": "proxysql",
   "assets": {
     "configuration": {
