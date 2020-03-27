@@ -15,6 +15,7 @@ The ProxySQL integration is included in the [Datadog Agent][3] package, so you d
 ### Configuration
 
 #### Host
+
 1. Edit the `proxysql.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your ProxySQL performance data. See the [sample proxysql.d/conf.yaml][5] for all available configuration options.
 
 2. [Restart the Agent][6].
