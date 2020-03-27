@@ -138,7 +138,8 @@ def dd_environment_runner(request):
 @pytest.fixture
 def dd_agent_check(request, aggregator):
     if not e2e_testing():
-        pytest.skip('Not running E2E tests')
+        pytest.skip(
+            'Not running E2E tests. If this is a mistake please define DDEV_E2E_PYTHON_PATH and TOX_ENV_NAME env vars')
 
     # Lazily import to reduce plugin load times for everyone
     from datadog_checks.dev import TempDir, run_command
