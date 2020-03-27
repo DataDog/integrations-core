@@ -42,6 +42,8 @@ def files_changed():
         result = run_command('git diff --name-only master...', capture='out')
     changed_files = result.stdout.splitlines()
 
+    for l in changed_files:
+        print(l)
     # Remove empty lines
     return [f for f in changed_files if f]
 
