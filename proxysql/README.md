@@ -36,19 +36,19 @@ The ProxySQL integration is included in the [Datadog Agent][3] package, so you d
        - type: file
          path: /var/log/proxysql.log
          source: proxysql
-         service: <SERVICE_NAME>
+         service: "<SERVICE_NAME>"
          # Logged queries, file needs to be in JSON
          # https://github.com/sysown/proxysql/wiki/Query-Logging
        - type: file
-         path: <QUERY_LOGGING_FILE_PATH>
+         path: "<QUERY_LOGGING_FILE_PATH>"
          source: proxysql
-         service: <SERVICE_NAME>
+         service: "<SERVICE_NAME>"
          # Audit log
          # https://github.com/sysown/proxysql/wiki/Audit-log
        - type: file
-         path: <AUDIT_LOG_FILE_PATH>
+         path: "<AUDIT_LOG_FILE_PATH>"
          source: proxysql
-         service: <SERVICE_NAME>
+         service: "<SERVICE_NAME>"
    ```
 
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample proxysql.d/conf.yaml][5] for all available configuration options.
