@@ -65,7 +65,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 |----------------------|------------------------------------------------------------|
 | `<INTEGRATION_NAME>` | `proxysql`                                                   |
 | `<INIT_CONFIG>`      | blank or `{}`                                              |
-| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port": "%%port%%", "username": "<USER>", "password": "<PASSWORD"}`       |
+| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port": "%%port%%", "username": "<USER>", "password": "<PASSWORD>"}`       |
 
 ##### Log collection
 
