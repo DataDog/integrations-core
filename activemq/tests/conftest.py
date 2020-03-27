@@ -31,10 +31,19 @@ def populate_server():
 @pytest.fixture(scope="session")
 def dd_environment():
     envs = {'JMX_PORT': str(JMX_PORT)}
+    compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
     with docker_run(
-        os.path.join(HERE, 'compose', 'docker-compose.yaml'),
+        compose_file,
         log_patterns=['ActiveMQ Jolokia REST API available'],
-        conditions=[WaitForPortListening(HOST, TEST_PORT), populate_server],
+        conditions=[
+            WaitForPortListening(HOST, TEST_PORT),
+            populate_server,
+        ],
         env_vars=envs,
     ):
-        yield load_jmx_config(), {'use_jmx': True}
+        config = load_jmx_config()
+        config['instances'][0].update({
+            'port': str(JMX_PORT),
+            'host': HOST
+        })
+        yield config, {'use_jmx': True}
