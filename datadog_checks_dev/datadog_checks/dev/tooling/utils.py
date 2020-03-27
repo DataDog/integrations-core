@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import csv
+import io
 import json
 import os
 import re
@@ -243,6 +245,20 @@ def get_metric_sources():
 
 def read_metric_data_file(check_name):
     return read_file(os.path.join(get_root(), check_name, 'metadata.csv'))
+
+
+def read_metadata_rows(metadata_file):
+    """
+    Iterate over the rows of a `metadata.csv` file.
+    """
+    with io.open(metadata_file, 'r', encoding='utf-8') as f:
+        reader = csv.DictReader(f, delimiter=',')
+
+        # Read header
+        reader._fieldnames = reader.fieldnames
+
+        for line_no, row in enumerate(reader, 2):
+            yield line_no, row
 
 
 def read_version_file(check_name):
