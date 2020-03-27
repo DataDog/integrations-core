@@ -8,7 +8,7 @@ import copy
 import re
 import socket
 import time
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 
 from six import PY2, iteritems
 from six.moves.urllib.parse import urlparse
@@ -49,6 +49,25 @@ class Services(object):
         'no_check': AgentCheck.UNKNOWN,
         'maint': AgentCheck.OK,
     }
+
+
+class StickTable(namedtuple("StickTable", ["name", "type", "size", "used"])):
+
+    SHOWTABLE_RE = re.compile(
+        r"# table: (?P<name>[^ ,]+), type: (?P<type>[^ ,]+), size:(?P<size>[0-9]+), used:(?P<used>[0-9]+)$"
+    )
+
+    @classmethod
+    def parse(cls, line):
+        items = cls.SHOWTABLE_RE.match(line)
+        if not items:
+            return None
+        return StickTable(
+            name=items.group('name'),
+            type=items.group('type'),
+            size=int(items.group('size')),
+            used=int(items.group('used')),
+        )
 
 
 class HAProxy(AgentCheck):
@@ -102,9 +121,10 @@ class HAProxy(AgentCheck):
         url = instance.get('url')
         self.log.debug('Processing HAProxy data for %s', url)
         parsed_url = urlparse(url)
+        tables = None
 
         if parsed_url.scheme == 'unix' or parsed_url.scheme == 'tcp':
-            info, data = self._fetch_socket_data(parsed_url)
+            info, data, tables = self._fetch_socket_data(parsed_url)
             self._collect_version_from_socket(info)
             uptime = self._collect_uptime_from_socket(info)
         else:
@@ -145,6 +165,14 @@ class HAProxy(AgentCheck):
 
         if uptime is not None and uptime < startup_grace_period:
             return
+
+        if tables:
+            self._process_stick_table_metrics(
+                tables,
+                services_incl_filter=services_incl_filter,
+                services_excl_filter=services_excl_filter,
+                custom_tags=custom_tags,
+            )
 
         self._process_data(
             data,
@@ -251,22 +279,26 @@ class HAProxy(AgentCheck):
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.connect(parsed_url.path)
 
-        sock.send(b"show info;show stat\r\n")
+        sock.send(b"show info;show stat;show table\r\n")
 
         response = ""
         output = sock.recv(BUFSIZE)
         while output:
             response += output.decode("ASCII")
             output = sock.recv(BUFSIZE)
-        info, data = response.split('\n\n')[:2]
+        try:
+            info, data, tables = response.split('\n\n')[:3]
+        except ValueError:
+            self.log.error("Could not parse information from haproxy socket: '%s'", response)
+            raise
 
         sock.close()
 
-        return info, data.splitlines()
+        return info.splitlines(), data.splitlines(), tables.splitlines()
 
     def _collect_version_from_socket(self, info):
         version = ''
-        for line in info.splitlines():
+        for line in info:
             key, value = line.split(':')
             if key == 'Version':
                 version = value
@@ -278,7 +310,7 @@ class HAProxy(AgentCheck):
             self.set_metadata('version', version)
 
     def _collect_uptime_from_socket(self, info):
-        for line in info.splitlines():
+        for line in info:
             key, value = line.split(':')
             if key == 'Uptime_sec':
                 return int(value)
@@ -703,6 +735,26 @@ class HAProxy(AgentCheck):
                         self.gauge(name, float(value), tags=tags)
                 except ValueError:
                     pass
+
+    def _process_stick_table_metrics(
+        self, data, services_incl_filter=None, services_excl_filter=None, custom_tags=None
+    ):
+        """
+        Stick table metrics processing. Two metrics will be created for each stick table (current and max size)
+        """
+
+        custom_tags = [] if not custom_tags else custom_tags
+
+        for line in data:
+            table = StickTable.parse(line)
+            if table is None:
+                continue
+            if self._is_service_excl_filtered(table.name, services_incl_filter, services_excl_filter):
+                continue
+
+            tags = ["haproxy_service:%s" % table.name, "stick_type:%s" % table.type] + custom_tags
+            self.gauge("haproxy.sticktable.size", float(table.size), tags=tags)
+            self.gauge("haproxy.sticktable.used", float(table.used), tags=tags)
 
     def _process_event(self, data, url, services_incl_filter=None, services_excl_filter=None, custom_tags=None):
         '''

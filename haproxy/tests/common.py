@@ -87,6 +87,7 @@ CHECK_CONFIG = {
 CHECK_CONFIG_OPEN = {'url': STATS_URL_OPEN, 'collect_aggregates_only': False, 'collect_status_metrics': True}
 
 BACKEND_SERVICES = ['anotherbackend', 'datadog']
+FRONTEND_SERVICES = ['public']
 
 BACKEND_LIST = ['singleton:8080', 'singleton:8081', 'otherserver']
 
@@ -94,6 +95,12 @@ BACKEND_TO_ADDR = {
     'singleton:8080': '127.0.0.1:8080',
     'singleton:8081': '127.0.0.1:8081',
     'otherserver': '127.0.0.1:1234',
+}
+
+STICKTABLE_TYPES = {
+    'anotherbackend': 'ip',
+    'datadog': 'integer',
+    'public': 'string',
 }
 
 
