@@ -74,8 +74,7 @@ tagger-image-builder:
   except: [ tags, schedules ]
   tags: [ "runner:docker", "size:large" ]
 
-suse-x64:
-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-builders/suse_x64:$DATADOG_AGENT_BUILDERS
+.common_compile_deps: &common_compile_deps
   tags: [ "runner:main", "size:2xlarge" ]
   script:
     - mkdir -p compiled_deps
@@ -85,5 +84,18 @@ suse-x64:
     - python2 -m piptools compile --generate-hashes --output-file compiled_deps/agent_requirements-suse-x64-py2.txt agent_requirements.in
     - cat compiled_deps/agent_requirements-suse-x64-py2.txt
   artifacts:
+    expire_in: 2 weeks
     paths:
-    - compiled_deps
+      - $OMNIBUS_PACKAGE_DIR_SUSE
+
+suse-x64:
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-builders/suse_x64:$DATADOG_AGENT_BUILDERS
+  <<: *common_compile_deps
+
+rpm-x64:
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/rpm_x64:$DATADOG_AGENT_BUILDIMAGES
+  <<: *common_compile_deps
+
+deb-x64:
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/deb_x64:$DATADOG_AGENT_BUILDIMAGES
+  <<: *common_compile_deps
