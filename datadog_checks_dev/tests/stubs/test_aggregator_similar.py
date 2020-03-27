@@ -4,9 +4,9 @@
 import difflib
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.stubs import similar
-from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.base.stubs.common import HistogramBucketStub, MetricStub, ServiceCheckStub
+from datadog_checks.dev.stubs import similar
+from datadog_checks.dev.stubs.aggregator import AggregatorStub
+from datadog_checks.dev.stubs.common import HistogramBucketStub, MetricStub, ServiceCheckStub
 
 
 class TestSimilarAssertionMessages(object):
