@@ -39,7 +39,7 @@ R100	foo2	foo3
             retval = files_changed()
             chdir.assert_called_once_with('/foo/')
             run.assert_called_once_with('git diff --name-status master...', capture='out')
-            assert sorted(retval) == sorted(['foo', 'bar', 'baz', 'foo2', 'foo3'])
+            assert retval == ['bar', 'baz', 'foo', 'foo2', 'foo3']
 
 
 def test_get_commits_since():
