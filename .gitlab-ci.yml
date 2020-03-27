@@ -99,9 +99,18 @@ agent-rpm-x64:
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/rpm_x64:$DATADOG_AGENT_BUILDIMAGES
   <<: *common_compile_deps
 
-agent-deb-x64:
+agent-deb-x64-py2:
   tags: [ "runner:main", "size:2xlarge" ]
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/deb_x64:$DATADOG_AGENT_BUILDIMAGES
+  variables:
+    CONDA_ENV: ddpy2
+  <<: *common_compile_deps
+
+agent-deb-x64-py3:
+  tags: [ "runner:main", "size:2xlarge" ]
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/deb_x64:$DATADOG_AGENT_BUILDIMAGES
+  variables:
+    CONDA_ENV: ddpy3
   <<: *common_compile_deps
 
 deb-py2:
