@@ -17,7 +17,7 @@
     },
     "description": "This dashboard provides a high-level overview of your Sidekiq jobs so you can monitor metrics related to jobs, queues, and batches.\n\nFor further reading on monitoring Sidekiq, see: [Official Sidekiq integration docs](https://docs.datadoghq.com/integrations/sidekiq/)\n\nClone this template to make changes and add your own graphs and widgets.",
     "id": 1027646,
-    "modified": "2020-03-26T14:35:37.721326+00:00",
+    "modified": "2020-03-27T13:15:14.205282+00:00",
     "new_id": "krb-c8v-dji",
     "read_only": false,
     "template_variables": [],
@@ -45,7 +45,7 @@
                             "type": "solid",
                             "width": "normal"
                         },
-                        "type": "bars"
+                        "type": "line"
                     }
                 ],
                 "viz": "timeseries",
@@ -57,6 +57,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -79,7 +80,7 @@
                             "type": "solid",
                             "width": "normal"
                         },
-                        "type": "bars"
+                        "type": "line"
                     }
                 ],
                 "viz": "timeseries",
@@ -113,7 +114,7 @@
                             "type": "solid",
                             "width": "normal"
                         },
-                        "type": "bars"
+                        "type": "line"
                     }
                 ],
                 "viz": "timeseries",
@@ -147,7 +148,7 @@
                             "type": "solid",
                             "width": "normal"
                         },
-                        "type": "bars"
+                        "type": "line"
                     }
                 ],
                 "viz": "timeseries",
@@ -181,7 +182,7 @@
                             "type": "solid",
                             "width": "normal"
                         },
-                        "type": "bars"
+                        "type": "line"
                     }
                 ],
                 "viz": "timeseries",
@@ -215,7 +216,7 @@
                             "type": "solid",
                             "width": "normal"
                         },
-                        "type": "bars"
+                        "type": "line"
                     }
                 ],
                 "viz": "timeseries",
@@ -227,6 +228,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -249,7 +251,7 @@
                             "type": "solid",
                             "width": "normal"
                         },
-                        "type": "bars"
+                        "type": "line"
                     }
                 ],
                 "viz": "timeseries",
@@ -261,6 +263,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -295,7 +298,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -330,6 +332,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
