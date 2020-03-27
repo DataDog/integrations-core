@@ -25,8 +25,7 @@ from .common import (
     STATS_SOCKET,
     STATS_URL,
     STATS_URL_OPEN,
-    haproxy_less_than_1_7,
-    platform_supports_sockets,
+    requires_haproxy_tcp_stats,
     requires_shareable_unix_socket,
     requires_socket_support,
 )
@@ -141,6 +140,22 @@ def test_check_service_filter(aggregator, check, instance):
     aggregator.assert_all_metrics_covered()
 
 
+@requires_haproxy_tcp_stats
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_check_service_filter_tcp(aggregator, check):
+    instance = copy.deepcopy(CONFIG_TCPSOCKET)
+    instance['services_include'] = ['datadog']
+    instance['services_exclude'] = ['.*']
+    check = check(instance)
+    check.check(instance)
+    shared_tag = ["instance_url:{0}".format(STATS_SOCKET)]
+
+    _test_backend_metrics(aggregator, shared_tag, ['datadog'], check_aggregates=False, add_addr_tag=True)
+
+    aggregator.assert_all_metrics_covered()
+
+
 @requires_socket_support
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
@@ -171,10 +186,7 @@ def test_open_config(aggregator, check):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.skipif(
-    haproxy_less_than_1_7 or not platform_supports_sockets,
-    reason='Sockets with operator level are only available with haproxy 1.7',
-)
+@requires_haproxy_tcp_stats
 def test_tcp_socket(aggregator, check):
     config = copy.deepcopy(CONFIG_TCPSOCKET)
     check = check(config)
@@ -256,12 +268,9 @@ def test_version_metadata_unix_socket(check, version_metadata, dd_environment, d
     datadog_agent.assert_metadata_count(metadata_count)
 
 
+@requires_haproxy_tcp_stats
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.skipif(
-    haproxy_less_than_1_7 or not platform_supports_sockets,
-    reason='Sockets with operator level are only available with haproxy 1.7',
-)
 def test_version_metadata_tcp_socket(check, version_metadata, datadog_agent):
     config = copy.deepcopy(CONFIG_TCPSOCKET)
     check = check(config)
@@ -278,12 +287,9 @@ def test_version_metadata_tcp_socket(check, version_metadata, datadog_agent):
     datadog_agent.assert_metadata_count(metadata_count)
 
 
+@requires_haproxy_tcp_stats
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.skipif(
-    haproxy_less_than_1_7 or not platform_supports_sockets,
-    reason='Uptime is only reported on the stats socket in v1.7+',
-)
 def test_uptime_skip_tcp(aggregator, check, dd_environment):
     config = copy.deepcopy(CONFIG_TCPSOCKET)
     config['startup_grace_seconds'] = 20
