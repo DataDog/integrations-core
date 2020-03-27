@@ -84,3 +84,6 @@ suse-x64:
     - pip2 install pip-tools
     - python2 -m piptools compile --generate-hashes --output-file compiled_deps/agent_requirements-suse-x64-py2.txt agent_requirements.in
     - cat compiled_deps/agent_requirements-suse-x64-py2.txt
+  artifacts:
+    paths:
+    - compiled_deps
