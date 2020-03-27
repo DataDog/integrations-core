@@ -3,6 +3,7 @@ variables:
   TAGGER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:tagger
   TAGGER_EMAIL: packages@datadoghq.com
   TAGGER_NAME: ci.integrations-core
+  DATADOG_AGENT_BUILDIMAGES: v2287129-4816dc7
   DATADOG_AGENT_BUILDERS: v2311927-0e261ab
 
 # Uncomment when/if we modify script to use Jira
@@ -93,9 +94,9 @@ suse-x64:
   <<: *common_compile_deps
 
 rpm-x64:
-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/rpm_x64:$DATADOG_AGENT_BUILDERS
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/rpm_x64:$DATADOG_AGENT_BUILDIMAGES
   <<: *common_compile_deps
 
 deb-x64:
-  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/deb_x64:$DATADOG_AGENT_BUILDERS
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/deb_x64:$DATADOG_AGENT_BUILDIMAGES
   <<: *common_compile_deps
