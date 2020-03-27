@@ -29,11 +29,11 @@ proxysql.statements.cached,gauge,,unit,,The number of global prepared statements
 proxysql.query_cache.entries,gauge,,entry,,The number of entries currently stored in the query cache,0,proxysql,query_cache_entries
 proxysql.query_cache.memory_bytes,gauge,,byte,,Memory usage of the query cache,0,proxysql,query_cache_memory
 proxysql.query_cache.purged,gauge,,entry,second,The number of entries purged per second by the Query Cache due to TTL expiration,0,proxysql,query_cache_purged
-proxysql.query_cache.bytes_in,gauge,,byte,,The number of bytes sent into the Query Cache,0,proxysql,query_cache_bytes_in
-proxysql.query_cache.bytes_out,gauge,,byte,,The number of bytes read from the Query Cache,0,proxysql,query_cache_bytes_out
-proxysql.query_cache.get.count,gauge,,query,,The number of read requests to the Query Cache,0,proxysql,query_cache_reads
-proxysql.query_cache.get_ok.count,gauge,,query,,The number of successful read requests,0,proxysql,query_cache_reads_successful
-proxysql.query_cache.set.count,gauge,,query,,The number of write requests to the Query Cache,0,proxysql,query_cache_writes
+proxysql.query_cache.bytes_in,gauge,,byte,second,The number of bytes per second sent into the Query Cache,0,proxysql,query_cache_bytes_in
+proxysql.query_cache.bytes_out,gauge,,byte,second,The number of bytes per second read from the Query Cache,0,proxysql,query_cache_bytes_out
+proxysql.query_cache.get.count,gauge,,query,second,The number of read requests per second to the Query Cache,0,proxysql,query_cache_reads
+proxysql.query_cache.get_ok.count,gauge,,query,second,The number of successful read requests per second to the Query Cache,0,proxysql,query_cache_reads_successful
+proxysql.query_cache.set.count,gauge,,query,second,The number of write requests per second to the Query Cache,0,proxysql,query_cache_writes
 proxysql.performance.command.total_time_pct,gauge,,percent,,Total time spent executing commands of a type as a percentage of total time.,0,proxysql,command_time
 proxysql.performance.command.total_count,count,,command,,The number of commands of a type executed,0,proxysql,command_count
 proxysql.performance.command.cnt_100us,count,,command,,The number of commands of a type which executed within 100 microseconds,0,proxysql,command_count_100us

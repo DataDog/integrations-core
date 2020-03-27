@@ -83,17 +83,16 @@ STATS_MYSQL_GLOBAL = Query(
                     'Query_Cache_Entries': {'name': 'query_cache.entries', 'type': 'gauge'},
                     # number of entries purged by the Query Cache due to TTL expiration
                     'Query_Cache_Purged': {'name': 'query_cache.purged', 'type': 'rate'},
-                    # TODO: Are the following cache metrics monotonic counters?
                     # number of bytes sent into the Query Cache
-                    'Query_Cache_bytes_IN': {'name': 'query_cache.bytes_in', 'type': 'gauge'},
+                    'Query_Cache_bytes_IN': {'name': 'query_cache.bytes_in', 'type': 'rate'},
                     # number of bytes read from the Query Cache
-                    'Query_Cache_bytes_OUT': {'name': 'query_cache.bytes_out', 'type': 'gauge'},
+                    'Query_Cache_bytes_OUT': {'name': 'query_cache.bytes_out', 'type': 'rate'},
                     # number of read requests
-                    'Query_Cache_count_GET': {'name': 'query_cache.get.count', 'type': 'gauge'},
+                    'Query_Cache_count_GET': {'name': 'query_cache.get.count', 'type': 'rate'},
                     # number of successful read requests
-                    'Query_Cache_count_GET_OK': {'name': 'query_cache.get_ok.count', 'type': 'gauge'},
+                    'Query_Cache_count_GET_OK': {'name': 'query_cache.get_ok.count', 'type': 'rate'},
                     # number of write requests
-                    'Query_Cache_count_SET': {'name': 'query_cache.set.count', 'type': 'gauge'},
+                    'Query_Cache_count_SET': {'name': 'query_cache.set.count', 'type': 'rate'},
                     # the time spent inside the Query Processor to determine what action needs to be taken with the
                     # query (internal module)
                     'Query_Processor_time_nsec': {
