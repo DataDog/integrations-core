@@ -28,6 +28,7 @@ mysql_variables=
   sessions_sort=true
   monitor_username="proxysql"
   monitor_password="pass"
+  have_ssl=true
 }
 
 mysql_replication_hostgroups =

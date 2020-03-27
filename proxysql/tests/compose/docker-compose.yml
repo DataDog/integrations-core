@@ -8,6 +8,7 @@ services:
       - db
     volumes:
       - ./proxysql.cnf:/etc/proxysql.cnf
+      - ${TMP_DATA_DIR}:/var/lib/proxysql/
     ports:
       - "${PROXY_ADMIN_PORT}:6032"
       - "${PROXY_PORT}:6033"

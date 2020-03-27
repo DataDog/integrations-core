@@ -158,6 +158,6 @@ def test_all_metrics(aggregator, instance_all_metrics, dd_run_check):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, instance_all_metrics):
-    aggregator = dd_agent_check(instance_all_metrics, rate=True)
+def test_e2e(dd_agent_check):
+    aggregator = dd_agent_check(rate=True)
     _assert_all_metrics(aggregator)
