@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "rethinkdb",
   "metric_prefix": "rethinkdb.",
-  "metric_to_check": "rethinkdb.server.total",
+  "metric_to_check": "rethinkdb.config.servers",
   "creates_events": false,
   "short_description": "Collect status, performance and other metrics from a RethinkDB cluster.",
   "guid": "a09f3ed3-c947-413c-a9c6-0dcb641ea890",
