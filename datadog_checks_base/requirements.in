@@ -16,6 +16,7 @@ pyyaml==5.1
 requests==2.22.0
 requests-kerberos==0.12.0
 requests_ntlm==1.1.0
+requests_toolbelt==0.9.1
 simplejson==3.6.5
 six==1.14.0
 typing==3.7.4.1; python_version < '3.0'
