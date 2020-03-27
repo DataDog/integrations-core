@@ -99,9 +99,12 @@ class GitlabCheck(OpenMetricsBaseCheck):
         custom_tags = instance.get('tags', [])
 
         url = instance.get('gitlab_url')
+
+        # creating tags for host and port
         parsed_url = urlparse(url)
         gitlab_host = parsed_url.hostname
         gitlab_port = 443 if parsed_url.scheme == 'https' else (parsed_url.port or 80)
+
         return ['gitlab_host:{}'.format(gitlab_host), 'gitlab_port:{}'.format(gitlab_port)] + custom_tags
 
     def submit_version(self, instance):
