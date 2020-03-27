@@ -47,23 +47,21 @@ class GitlabCheck(OpenMetricsBaseCheck):
             raise CheckException("Unable to find `prometheus_url` or `prometheus_endpoint` in config file.")
 
         scraper_config = self.config_map[endpoint]
-        custom_tags = instance.get('tags', [])
 
         try:
             self.process(scraper_config)
-            self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, OpenMetricsBaseCheck.OK, tags=custom_tags)
+            self.service_check(self.PROMETHEUS_SERVICE_CHECK_NAME, OpenMetricsBaseCheck.OK, self._tags)
         except requests.exceptions.ConnectionError as e:
             # Unable to connect to the metrics endpoint
             self.service_check(
                 self.PROMETHEUS_SERVICE_CHECK_NAME,
                 OpenMetricsBaseCheck.CRITICAL,
                 message="Unable to retrieve Prometheus metrics from endpoint {}: {}".format(endpoint, e),
-                tags=custom_tags,
             )
 
         # Service check to check Gitlab's health endpoints
         for check_type in self.ALLOWED_SERVICE_CHECKS:
-            self._check_health_endpoint(instance, check_type, custom_tags)
+            self._check_health_endpoint(instance, check_type)
 
         self.submit_version(instance)
 
@@ -81,6 +79,13 @@ class GitlabCheck(OpenMetricsBaseCheck):
         # gitlab uses 'prometheus_endpoint' and not 'prometheus_url', so we have to rename the key
         gitlab_instance['prometheus_url'] = instance.get('prometheus_url', instance.get('prometheus_endpoint'))
 
+        url = gitlab_instance.get('gitlab_url')
+
+        host_tags = self._check_tags(url)
+        tags = gitlab_instance.get('tags', [])
+        host_tags.extend(tags)
+        self._tags = host_tags
+
         gitlab_instance.update(
             {
                 'namespace': 'gitlab',
@@ -89,12 +94,13 @@ class GitlabCheck(OpenMetricsBaseCheck):
                 'send_distribution_counts_as_monotonic': instance.get('send_distribution_counts_as_monotonic', False),
                 'send_monotonic_counter': instance.get('send_monotonic_counter', False),
                 'health_service_check': instance.get('health_service_check', False),
+                'tags': tags,
             }
         )
 
         return gitlab_instance
 
-    def _service_check_tags(self, url):
+    def _check_tags(self, url):
         parsed_url = urlparse(url)
         gitlab_host = parsed_url.hostname
         gitlab_port = 443 if parsed_url.scheme == 'https' else (parsed_url.port or 80)
@@ -127,7 +133,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
     # - /-/health
     #
     # https://docs.gitlab.com/ce/user/admin_area/monitoring/health_check.html
-    def _check_health_endpoint(self, instance, check_type, tags):
+    def _check_health_endpoint(self, instance, check_type):
         if check_type not in self.ALLOWED_SERVICE_CHECKS:
             raise CheckException("Health endpoint {} is not a valid endpoint".format(check_type))
 
@@ -138,8 +144,6 @@ class GitlabCheck(OpenMetricsBaseCheck):
             self.log.debug("gitlab_url not configured, service check %s skipped", check_type)
             return
 
-        service_check_tags = self._service_check_tags(url)
-        service_check_tags.extend(tags)
         # These define which endpoint is hit and which type of check is actually performed
         # TODO: parse errors and report for single sub-service failure?
         service_check_name = 'gitlab.{}'.format(check_type)
@@ -153,7 +157,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
                     service_check_name,
                     OpenMetricsBaseCheck.CRITICAL,
                     message="Got {} when hitting {}".format(r.status_code, check_url),
-                    tags=service_check_tags,
+                    tags=self._tags,
                 )
                 raise Exception("Http status code {} on check_url {}".format(r.status_code, check_url))
             else:
@@ -165,7 +169,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
                 service_check_name,
                 OpenMetricsBaseCheck.CRITICAL,
                 message="Timeout when hitting {}".format(check_url),
-                tags=service_check_tags,
+                tags=self._tags,
             )
             raise
         except Exception as e:
@@ -173,10 +177,10 @@ class GitlabCheck(OpenMetricsBaseCheck):
                 service_check_name,
                 OpenMetricsBaseCheck.CRITICAL,
                 message="Error hitting {}. Error: {}".format(check_url, e),
-                tags=service_check_tags,
+                tags=self._tags,
             )
             raise
 
         else:
-            self.service_check(service_check_name, OpenMetricsBaseCheck.OK, tags=service_check_tags)
+            self.service_check(service_check_name, OpenMetricsBaseCheck.OK, self._tags)
         self.log.debug("gitlab check %s succeeded", check_type)
