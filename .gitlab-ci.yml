@@ -76,7 +76,6 @@ tagger-image-builder:
   tags: [ "runner:docker", "size:large" ]
 
 .common_compile_deps: &common_compile_deps
-  tags: [ "runner:main", "size:2xlarge" ]
   script:
     - mkdir -p compiled_deps
     - cat datadog_checks_base/datadog_checks/base/data/agent_requirements.in | grep -v pymqi > agent_requirements.in
@@ -91,29 +90,36 @@ tagger-image-builder:
       - compiled_deps
 
 agent-suse-x64:
+  tags: [ "runner:main", "size:2xlarge" ]
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-builders/suse_x64:$DATADOG_AGENT_BUILDERS
   <<: *common_compile_deps
 
 agent-rpm-x64:
+  tags: [ "runner:main", "size:2xlarge" ]
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/rpm_x64:$DATADOG_AGENT_BUILDIMAGES
   <<: *common_compile_deps
 
 agent-deb-x64:
+  tags: [ "runner:main", "size:2xlarge" ]
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/deb_x64:$DATADOG_AGENT_BUILDIMAGES
   <<: *common_compile_deps
 
 deb-py2:
+  tags: [ "runner:main", "size:2xlarge" ]
   image: python:2.7.17-stretch
   <<: *common_compile_deps
 
 deb-py3:
+  tags: [ "runner:main", "size:2xlarge" ]
   image: python:3.7.7-stretch
   <<: *common_compile_deps
 
 windows-py2:
-  image: python:2.7.17-windowsservercore-ltsc2016
+  image: python:2.7.17-windowsservercore-1809
+  tags: ["runner:windows-docker", "windowsversion:1809"]
   <<: *common_compile_deps
 
 windows-py3:
-  image: python:3.7.7-windowsservercore-ltsc2016
+  image: python:3.7.7-windowsservercore-1809
+  tags: ["runner:windows-docker", "windowsversion:1809"]
   <<: *common_compile_deps
