@@ -47,7 +47,33 @@ The Confluent Platform check is included in the [Datadog Agent][2] package. No a
 
 2. [Restart the Agent][5].
 
-#### Containerized
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+1. Collecting logs is disabled by default in the Datadog Agent, you need to enable it in `datadog.yaml`:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add this configuration block to your `confluent_platform.d/conf.yaml` file to start collecting your Confluent Platform components logs:
+
+   ```yaml
+     logs:
+       - type: file
+         path: <CONFLUENT_COMPONENT_PATH>/logs/*.log
+         source: confluent_platform
+         service: <SERVICE_NAME>
+         log_processing_rules:
+           - type: multi_line
+             name: new_log_start_with_date
+             pattern: \[\d{4}\-\d{2}\-\d{2}
+   ```
+
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample confluent_platform.d/conf.yaml][4] for all available configuration options.
+
+3. [Restart the Agent][7].
 
 ##### Metric collection
 
