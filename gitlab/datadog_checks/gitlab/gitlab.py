@@ -79,12 +79,7 @@ class GitlabCheck(OpenMetricsBaseCheck):
         # gitlab uses 'prometheus_endpoint' and not 'prometheus_url', so we have to rename the key
         gitlab_instance['prometheus_url'] = instance.get('prometheus_url', instance.get('prometheus_endpoint'))
 
-        url = gitlab_instance.get('gitlab_url')
-
-        host_tags = self._check_tags(url)
-        tags = gitlab_instance.get('tags', [])
-        host_tags.extend(tags)
-        self._tags = host_tags
+        self._tags = self._check_tags(gitlab_instance)
 
         gitlab_instance.update(
             {
@@ -94,17 +89,20 @@ class GitlabCheck(OpenMetricsBaseCheck):
                 'send_distribution_counts_as_monotonic': instance.get('send_distribution_counts_as_monotonic', False),
                 'send_monotonic_counter': instance.get('send_monotonic_counter', False),
                 'health_service_check': instance.get('health_service_check', False),
-                'tags': tags,
+                'tags': self._tags,
             }
         )
 
         return gitlab_instance
 
-    def _check_tags(self, url):
+    def _check_tags(self, instance):
+        custom_tags = instance.get('tags', [])
+
+        url = instance.get('gitlab_url')
         parsed_url = urlparse(url)
         gitlab_host = parsed_url.hostname
         gitlab_port = 443 if parsed_url.scheme == 'https' else (parsed_url.port or 80)
-        return ['gitlab_host:{}'.format(gitlab_host), 'gitlab_port:{}'.format(gitlab_port)]
+        return ['gitlab_host:{}'.format(gitlab_host), 'gitlab_port:{}'.format(gitlab_port)] + custom_tags
 
     def submit_version(self, instance):
         if not self.is_metadata_collection_enabled():
