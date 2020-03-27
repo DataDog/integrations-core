@@ -35,7 +35,7 @@ def test_files_changed():
             set_root('/foo/')
             retval = files_changed()
             chdir.assert_called_once_with('/foo/')
-            run.assert_called_once_with('git diff --name-only master...', capture='out')
+            run.assert_called_once_with('git diff --name-status master...', capture='out')
             assert retval == expected
 
 
