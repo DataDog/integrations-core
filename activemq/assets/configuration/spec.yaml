@@ -9,6 +9,9 @@ files:
   - template: instances
     options:
     - template: instances/jmx
+      overrides:
+        host.value.example: localhost
+        port.value.example: 1616
     - template: instances/default
   - template: logs
     example:

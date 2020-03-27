@@ -40,12 +40,12 @@ instances:
     ## @param host - string - required
     ## JMX hostname to connect to.
     #
-  - host: <HOST>
+  - host: localhost
 
     ## @param port - integer - required
     ## JMX port to connect to.
     #
-    port: <PORT>
+    port: 1616
 
     ## @param user - string - optional
     ## User to use when connecting to JMX.

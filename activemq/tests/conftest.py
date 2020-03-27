@@ -35,15 +35,9 @@ def dd_environment():
     with docker_run(
         compose_file,
         log_patterns=['ActiveMQ Jolokia REST API available'],
-        conditions=[
-            WaitForPortListening(HOST, TEST_PORT),
-            populate_server,
-        ],
+        conditions=[WaitForPortListening(HOST, TEST_PORT), populate_server],
         env_vars=envs,
     ):
         config = load_jmx_config()
-        config['instances'][0].update({
-            'port': str(JMX_PORT),
-            'host': HOST
-        })
+        config['instances'][0].update({'port': str(JMX_PORT), 'host': HOST})
         yield config, {'use_jmx': True}
