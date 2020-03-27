@@ -15,7 +15,7 @@ proxysql.backend.query_time_pct,gauge,,percent,,Time spent (as a percentage of t
 proxysql.mysql.backend_buffers_bytes,gauge,,byte,,Memory use of buffers related to backend connections,0,proxysql,backend_buffers_memory
 proxysql.mysql.frontend_buffers_bytes,gauge,,byte,,Memory use of buffers related to frontend connections (read/write buffers and other queues),0,proxysql,frontend_buffers_memory
 proxysql.mysql.session_internal_bytes,gauge,,byte,,Other memory used by ProxySQL to handle MySQL Sessions,0,proxysql,mysql_sessions_buffers_memory
-proxysql.mysql.thread_workers,gauge,,worker,,The number of MySQL Thread workers i.e. “mysql-threads”,0,proxysql,mysql_threads
+proxysql.mysql.thread_workers,gauge,,worker,,The number of MySQL Thread workers i.e. 'mysql-threads',0,proxysql,mysql_threads
 proxysql.mysql.monitor_workers,gauge,,worker,,The number of monitor threads,0,proxysql,monitor_threads
 proxysql.pool.conn_success,gauge,,connection,second,The number of requests per second where a connection was already available in the connection pool,0,proxysql,connection_pool_success
 proxysql.pool.conn_failure,gauge,,connection,second,The number of requests per second where a connection was not available in the connection pool and either: a new connection had to be created or no backend was available,-1,proxysql,connection_pool_failure
