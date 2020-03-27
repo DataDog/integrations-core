@@ -9,4 +9,3 @@ files:
     - template: instances
       options:
         - template: instances/openmetrics
-        - template: instances/default
