@@ -103,13 +103,21 @@ def write_option(option, writer, indent='', start_list=False):
         example = value.get('example')
         example_type = type(example)
         if not required:
-            if example_type is bool:
-                writer.write(' - default: ', 'true' if example else 'false')
-            elif example_type in (int, float):
-                writer.write(' - default: ', str(example))
-            elif example_type is str:
-                if example and not (example[0] == '<' and example[-1] == '>'):
-                    writer.write(' - default: ', example)
+            if 'default' in value:
+                default = value['default']
+                if default is not None:
+                    if type(default) is str:
+                        writer.write(' - default: ', default)
+                    else:
+                        writer.write(' - default: ', repr(default))
+            else:
+                if example_type is bool:
+                    writer.write(' - default: ', 'true' if example else 'false')
+                elif example_type in (int, float):
+                    writer.write(' - default: ', str(example))
+                elif example_type is str:
+                    if example and not (example[0] == '<' and example[-1] == '>'):
+                        writer.write(' - default: ', example)
 
         writer.write('\n')
 
