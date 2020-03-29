@@ -16,11 +16,13 @@ steps:
   displayName: 'Use Python 3.8'
 
 - bash: |
+    set -e
     echo Compile Deps - Hello ${{ parameters.sys_platform }}
     python --version
     python2 --version
     python3 --version
     ls -la
+    alias python3=python
 
     cat datadog_checks_base/datadog_checks/base/data/agent_requirements.in | grep -v pymqi > /tmp/agent_requirements_filtered.in
 
