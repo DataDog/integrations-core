@@ -21,6 +21,7 @@ steps:
     python --version
     python2 --version
     python --version  # python3
+    where python
     ls -la
 
     cat datadog_checks_base/datadog_checks/base/data/agent_requirements.in | grep -v pymqi > /tmp/agent_requirements_filtered.in
