@@ -76,3 +76,4 @@ typing==3.7.4.1; python_version < '3.0'
 uptime==3.0.1
 vertica-python==0.10.1
 win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'
+
