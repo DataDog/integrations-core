@@ -21,7 +21,7 @@ steps:
 
     pip install pip-tools
 
-    PYTHON_MAJOR_VERSION=id="$( cut -d '.' -f 1 <<< "${{ parameters.python_version }}" )"
+    PYTHON_MAJOR_VERSION="$( cut -d '.' -f 1 <<< "${{ parameters.python_version }}" )"
     OUTPUT_FILE="agent_requirements-${{ parameters.sys_platform }}-py$PYTHON_MAJOR_VERSION.txt"
     python -m piptools compile --generate-hashes --output-file $OUTPUT_FILE /tmp/agent_requirements_filtered.in
 
