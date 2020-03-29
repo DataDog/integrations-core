@@ -16,26 +16,32 @@ jobs:
       Linux_Python27:
         VM_IMAGE: 'ubuntu-18.04'
         PYTHON_VERSION: '2.7'
+        SYS_PLATFORM: 'linux'
       Linux_Python38:
         VM_IMAGE: 'ubuntu-18.04'
         PYTHON_VERSION: '3.8'
+        SYS_PLATFORM: 'linux'
       Windows_Python27:
         VM_IMAGE: 'windows-2019'
         PYTHON_VERSION: '2.7'
+        SYS_PLATFORM: 'windows'
       Windows_Python38:
         VM_IMAGE: 'windows-2019'
         PYTHON_VERSION: '3.8'
+        SYS_PLATFORM: 'windows'
       MacOS_Python27:
         VM_IMAGE: 'macOS-10.14'
         PYTHON_VERSION: '2.7'
+        SYS_PLATFORM: 'darwin'
       MacOS_Python38:
         VM_IMAGE: 'macOS-10.14'
         PYTHON_VERSION: '3.8'
+        SYS_PLATFORM: 'darwin'
     maxParallel: 100
   pool:
     vmImage: '$(VM_IMAGE)'
   steps:
   - template: './templates/compile-deps.yml'
     parameters:
-      sys_platform: linux
-      python_version: "2.7"
+      sys_platform: '$(SYS_PLATFORM)'
+      python_version: '$(PYTHON_VERSION)'
