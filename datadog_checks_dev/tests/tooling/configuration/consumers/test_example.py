@@ -1058,3 +1058,97 @@ def test_compact_example_nested():
             #   - [2, 3]
         """
     )
+
+
+def test_option_default_example_override_null():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: words
+            value:
+              type: string
+              example: something
+              default: null
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - string - optional
+        ## words
+        #
+        # foo: something
+        """
+    )
+
+
+def test_option_default_example_override_string():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: words
+            value:
+              type: string
+              example: something
+              default: bar
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - string - optional - default: bar
+        ## words
+        #
+        # foo: something
+        """
+    )
+
+
+def test_option_default_example_override_non_string():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: words
+            value:
+              type: string
+              example: something
+              default:
+                foo: [bar, baz]
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - string - optional - default: {'foo': ['bar', 'baz']}
+        ## words
+        #
+        # foo: something
+        """
+    )
