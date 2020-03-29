@@ -30,7 +30,7 @@ jobs:
 - job: 'compile_deps_macos'
   displayName: 'Compile Deps - MacOS'
   pool:
-    vmImage: 'macOS-10.15'
+    vmImage: 'macOS-10.14'
   steps:
   - template: './templates/compile-deps.yml'
     parameters:

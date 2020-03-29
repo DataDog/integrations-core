@@ -22,14 +22,14 @@ steps:
     python3 --version
     ls -la
 
-    bash .azure-pipelines/scripts/ibm_mq/linux/55_install_client.sh
+    cat agent_requirements.in | grep -v pymqi > /tmp/agent_requirements_filtered.in
 
     pip2 install pip-tools
     pip3 install pip-tools
 
     cd datadog_checks_base/datadog_checks/base/data
-    python2 -m piptools compile --generate-hashes --output-file agent_requirements-${{ parameters.sys_platform }}-py2.txt agent_requirements.in
-    python3 -m piptools compile --generate-hashes --output-file agent_requirements-${{ parameters.sys_platform }}-py3.txt agent_requirements.in
+    python2 -m piptools compile --generate-hashes --output-file agent_requirements-${{ parameters.sys_platform }}-py2.txt /tmp/agent_requirements_filtered.in
+    python3 -m piptools compile --generate-hashes --output-file agent_requirements-${{ parameters.sys_platform }}-py3.txt /tmp/agent_requirements_filtered.in
 
     cat agent_requirements-${{ parameters.sys_platform }}-py2.txt
     cat agent_requirements-${{ parameters.sys_platform }}-py3.txt
