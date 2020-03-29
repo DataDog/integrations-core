@@ -19,10 +19,10 @@ steps:
     set -e
     echo Compile Deps - Hello ${{ parameters.sys_platform }}
     python --version
+    alias python3=python  # for windows
     python2 --version
     python3 --version
     ls -la
-    alias python3=python
 
     cat datadog_checks_base/datadog_checks/base/data/agent_requirements.in | grep -v pymqi > /tmp/agent_requirements_filtered.in
 
