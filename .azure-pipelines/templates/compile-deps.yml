@@ -20,7 +20,7 @@ steps:
     cat datadog_checks_base/datadog_checks/base/data/agent_requirements.in | grep -v pymqi > /tmp/agent_requirements_filtered.in
 
     pip install -U pip
-    pip install pip-tools==4.2.0
+    pip install pip-tools==4.5.1
 
     PYTHON_MAJOR_VERSION="$( cut -d '.' -f 1 <<< "${{ parameters.python_version }}" )"
     OUTPUT_FILE="agent_requirements-${{ parameters.sys_platform }}-py$PYTHON_MAJOR_VERSION.txt"
