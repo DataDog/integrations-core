@@ -24,7 +24,7 @@ steps:
     ls -la
     alias python3=python
 
-    cat datadog_checks_base/datadog_checks/base/data/agent_requirements.in | grep -v pymqi > /tmp/agent_requirements_filtered.in
+    cat datadog_checks_base/datadog_checks/base/data/agent_requirements.in | grep -v pymqi | grep -v aerospike > /tmp/agent_requirements_filtered.in
 
     pip2 install pip-tools
     pip3 install pip-tools
