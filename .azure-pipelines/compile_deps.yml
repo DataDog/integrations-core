@@ -9,8 +9,8 @@ pr:
 trigger: none
 
 jobs:
-- job: 'compile_deps_linux'
-  displayName: 'Compile Deps - Linux'
+- job: 'compile_deps_linux_py27'
+  displayName: 'Compile Deps - Linux - py27'
   pool:
     vmImage: 'ubuntu-18.04'
   steps:
@@ -19,8 +19,8 @@ jobs:
       sys_platform: linux
       python_version: "2.7"
 
-- job: 'compile_deps_windows'
-  displayName: 'Compile Deps - Windows'
+- job: 'compile_deps_windows_py27'
+  displayName: 'Compile Deps - Windows - py27'
   pool:
     vmImage: 'windows-2019'
   steps:
@@ -29,8 +29,8 @@ jobs:
       sys_platform: windows
       python_version: "2.7"
 
-- job: 'compile_deps_macos'
-  displayName: 'Compile Deps - MacOS'
+- job: 'compile_deps_macos_py27'
+  displayName: 'Compile Deps - MacOS - py27'
   pool:
     vmImage: 'macOS-10.14'
   steps:
@@ -39,8 +39,8 @@ jobs:
       sys_platform: darwin
       python_version: "2.7"
 
-- job: 'compile_deps_linux'
-  displayName: 'Compile Deps - Linux'
+- job: 'compile_deps_linux_py38'
+  displayName: 'Compile Deps - Linux - py38'
   pool:
     vmImage: 'ubuntu-18.04'
   steps:
@@ -49,8 +49,8 @@ jobs:
       sys_platform: linux
       python_version: "3.8"
 
-- job: 'compile_deps_windows'
-  displayName: 'Compile Deps - Windows'
+- job: 'compile_deps_windows_py38'
+  displayName: 'Compile Deps - Windows - py38'
   pool:
     vmImage: 'windows-2019'
   steps:
@@ -59,8 +59,8 @@ jobs:
       sys_platform: windows
       python_version: "3.8"
 
-- job: 'compile_deps_macos'
-  displayName: 'Compile Deps - MacOS'
+- job: 'compile_deps_macos_py38'
+  displayName: 'Compile Deps - MacOS - py38'
   pool:
     vmImage: 'macOS-10.14'
   steps:
