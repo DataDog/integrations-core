@@ -22,6 +22,8 @@ steps:
     python3 --version
     ls -la
 
+    bash .azure-pipelines/scripts/ibm_mq/linux/55_install_client.sh
+
     pip2 install pip-tools
     pip3 install pip-tools
 
