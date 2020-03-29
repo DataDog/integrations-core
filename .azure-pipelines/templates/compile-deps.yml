@@ -15,6 +15,11 @@ steps:
     versionSpec: '3.8'
   displayName: 'Use Python 3.8'
 
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: drop
+
 - script: |
     echo Compile Deps - Hello ${{ parameters.sys_platform }}
     python --version
@@ -31,7 +36,8 @@ steps:
     python2 -m piptools compile --generate-hashes --output-file agent_requirements-${{ parameters.sys_platform }}-py2.txt /tmp/agent_requirements_filtered.in
     python3 -m piptools compile --generate-hashes --output-file agent_requirements-${{ parameters.sys_platform }}-py3.txt /tmp/agent_requirements_filtered.in
 
-    cat agent_requirements-${{ parameters.sys_platform }}-py2.txt
-    cat agent_requirements-${{ parameters.sys_platform }}-py3.txt
+    cp agent_requirements-${{ parameters.sys_platform }}-py2.txt $BUILD_ARTIFACTSTAGINGDIRECTORY/
+    cp agent_requirements-${{ parameters.sys_platform }}-py3.txt $BUILD_ARTIFACTSTAGINGDIRECTORY/
+    ls -la
 
   displayName: 'Compile Deps'
