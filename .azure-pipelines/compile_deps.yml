@@ -1,0 +1,38 @@
+pr:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - datadog_checks_base/datadog_checks/base/data/agent_requirements.in
+
+trigger: none
+
+jobs:
+- job: 'compile_deps_linux'
+  displayName: 'Compile Deps - Linux'
+  pool:
+    vmImage: 'ubuntu-18.04'
+  steps:
+  - template: './templates/compile-deps.yml'
+    parameters:
+      sys_platform: linux
+
+- job: 'compile_deps_windows'
+  displayName: 'Compile Deps - Windows'
+  pool:
+    vmImage: 'windows-2019'
+  steps:
+  - template: './templates/compile-deps.yml'
+    parameters:
+      sys_platform: windows
+
+- job: 'compile_deps_macos'
+  displayName: 'Compile Deps - MacOS'
+  pool:
+    vmImage: 'macOS-10.15'
+  steps:
+  - template: './templates/compile-deps.yml'
+    parameters:
+      sys_platform: darwin
+

@@ -1,0 +1,6 @@
+parameters:
+  sys_platform: ''
+
+steps:
+- script: echo Compile Deps - Hello ${{ parameters.sys_platform }}
+  displayName: 'Compile Deps'
