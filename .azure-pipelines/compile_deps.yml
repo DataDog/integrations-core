@@ -9,63 +9,33 @@ pr:
 trigger: none
 
 jobs:
-- job: 'compile_deps_linux_py27'
-  displayName: 'Compile Deps - Linux - py27'
+- job: 'compile_deps'
+  displayName: 'Compile Deps - $(VM_IMAGE) - $(PYTHON_VERSION)'
+  strategy:
+    matrix:
+      Linux_Python27:
+        VM_IMAGE: 'ubuntu-18.04'
+        PYTHON_VERSION: '2.7'
+      Linux_Python38:
+        VM_IMAGE: 'ubuntu-18.04'
+        PYTHON_VERSION: '3.8'
+      Windows_Python27:
+        VM_IMAGE: 'windows-2019'
+        PYTHON_VERSION: '2.7'
+      Windows_Python38:
+        VM_IMAGE: 'windows-2019'
+        PYTHON_VERSION: '3.8'
+      MacOS_Python27:
+        VM_IMAGE: 'macOS-10.14'
+        PYTHON_VERSION: '2.7'
+      MacOS_Python38:
+        VM_IMAGE: 'macOS-10.14'
+        PYTHON_VERSION: '3.8'
+    maxParallel: 100
   pool:
-    vmImage: 'ubuntu-18.04'
+    vmImage: '$(VM_IMAGE)'
   steps:
   - template: './templates/compile-deps.yml'
     parameters:
       sys_platform: linux
       python_version: "2.7"
-
-- job: 'compile_deps_windows_py27'
-  displayName: 'Compile Deps - Windows - py27'
-  pool:
-    vmImage: 'windows-2019'
-  steps:
-  - template: './templates/compile-deps.yml'
-    parameters:
-      sys_platform: windows
-      python_version: "2.7"
-
-- job: 'compile_deps_macos_py27'
-  displayName: 'Compile Deps - MacOS - py27'
-  pool:
-    vmImage: 'macOS-10.14'
-  steps:
-  - template: './templates/compile-deps.yml'
-    parameters:
-      sys_platform: darwin
-      python_version: "2.7"
-
-- job: 'compile_deps_linux_py38'
-  displayName: 'Compile Deps - Linux - py38'
-  pool:
-    vmImage: 'ubuntu-18.04'
-  steps:
-  - template: './templates/compile-deps.yml'
-    parameters:
-      sys_platform: linux
-      python_version: "3.8"
-
-- job: 'compile_deps_windows_py38'
-  displayName: 'Compile Deps - Windows - py38'
-  pool:
-    vmImage: 'windows-2019'
-  steps:
-  - template: './templates/compile-deps.yml'
-    parameters:
-      sys_platform: windows
-      python_version: "3.8"
-
-- job: 'compile_deps_macos_py38'
-  displayName: 'Compile Deps - MacOS - py38'
-  pool:
-    vmImage: 'macOS-10.14'
-  steps:
-  - template: './templates/compile-deps.yml'
-    parameters:
-      sys_platform: darwin
-      python_version: "3.8"
-
