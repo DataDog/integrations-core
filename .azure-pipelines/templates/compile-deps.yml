@@ -19,9 +19,8 @@ steps:
     set -e
     echo Compile Deps - Hello ${{ parameters.sys_platform }}
     python --version
-    alias python3=python  # for windows
     python2 --version
-    python3 --version
+    python --version  # python3
     ls -la
 
     cat datadog_checks_base/datadog_checks/base/data/agent_requirements.in | grep -v pymqi > /tmp/agent_requirements_filtered.in
@@ -30,7 +29,9 @@ steps:
     pip3 install pip-tools
 
     python2 -m piptools compile --generate-hashes --output-file agent_requirements-${{ parameters.sys_platform }}-py2.txt /tmp/agent_requirements_filtered.in
-    python3 -m piptools compile --generate-hashes --output-file agent_requirements-${{ parameters.sys_platform }}-py3.txt /tmp/agent_requirements_filtered.in
+
+    # python3
+    python -m piptools compile --generate-hashes --output-file agent_requirements-${{ parameters.sys_platform }}-py3.txt /tmp/agent_requirements_filtered.in
 
     cp agent_requirements-${{ parameters.sys_platform }}-py2.txt $BUILD_ARTIFACTSTAGINGDIRECTORY/
     cp agent_requirements-${{ parameters.sys_platform }}-py3.txt $BUILD_ARTIFACTSTAGINGDIRECTORY/
