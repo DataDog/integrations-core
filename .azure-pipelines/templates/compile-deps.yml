@@ -1,5 +1,6 @@
 parameters:
   sys_platform: ''
+  python_version: ''
 
 steps:
 # Install the Python version with which to use globally last as
@@ -7,36 +8,23 @@ steps:
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/tool/use-python-version
 - task: UsePythonVersion@0
   inputs:
-    versionSpec: '2.7'
-  displayName: 'Use Python 2.7'
-
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '3.8'
-  displayName: 'Use Python 3.8'
+    versionSpec: '${{ parameters.python_version }}'
+  displayName: 'Use Python ${{ parameters.python_version }}'
 
 - bash: |
     set -e
     echo Compile Deps - Hello ${{ parameters.sys_platform }}
     python --version
-    python2 --version
-    python --version  # python3
-    which python
     ls -la
 
     cat datadog_checks_base/datadog_checks/base/data/agent_requirements.in | grep -v pymqi > /tmp/agent_requirements_filtered.in
 
-    pip2 install pip-tools
-    pip3 install pip-tools
+    pip install pip-tools
 
-    python2 -m piptools compile --generate-hashes --output-file agent_requirements-${{ parameters.sys_platform }}-py2.txt /tmp/agent_requirements_filtered.in
+    OUTPUT_FILE="agent_requirements-${{ parameters.sys_platform }}-${{ parameters.python_version }}.txt"
+    python -m piptools compile --generate-hashes --output-file $OUTPUT_FILE /tmp/agent_requirements_filtered.in
 
-    # python3
-    python -m piptools compile --generate-hashes --output-file agent_requirements-${{ parameters.sys_platform }}-py3.txt /tmp/agent_requirements_filtered.in
-
-    cp agent_requirements-${{ parameters.sys_platform }}-py2.txt $BUILD_ARTIFACTSTAGINGDIRECTORY/
-    cp agent_requirements-${{ parameters.sys_platform }}-py3.txt $BUILD_ARTIFACTSTAGINGDIRECTORY/
-    ls -la
+    cp $OUTPUT_FILE $BUILD_ARTIFACTSTAGINGDIRECTORY/
     ls -la $BUILD_ARTIFACTSTAGINGDIRECTORY
 
   displayName: 'Compile Deps'
