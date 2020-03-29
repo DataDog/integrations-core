@@ -10,7 +10,7 @@ trigger: none
 
 jobs:
 - job: 'compile_deps'
-  displayName: 'Compile Deps - $(VM_IMAGE) - $(PYTHON_VERSION)'
+  displayName: 'Compile Deps'
   strategy:
     matrix:
       Linux_Python27:
