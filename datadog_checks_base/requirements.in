@@ -9,6 +9,7 @@ kubernetes==8.0.1
 orjson==2.6.1; python_version > '3.0'
 prometheus-client==0.3.0
 protobuf==3.7.0
+pympler==0.7
 pysocks==1.7.0
 pytz==2019.3
 pywin32==227; sys_platform == 'win32'
