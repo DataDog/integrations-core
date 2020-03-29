@@ -20,7 +20,7 @@ steps:
     pathtoPublish: '$(Build.ArtifactStagingDirectory)'
     artifactName: drop
 
-- script: |
+- bash: |
     echo Compile Deps - Hello ${{ parameters.sys_platform }}
     python --version
     python2 --version
