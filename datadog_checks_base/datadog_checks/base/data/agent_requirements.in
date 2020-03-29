@@ -1,5 +1,5 @@
 adodbapi==2.6.0.7; sys_platform == 'win32'
-aerospike==3.10.0; sys_platform != 'win32'
+aerospike==3.10.0; sys_platform != 'win32' and sys_platform != 'darwin'
 aws-requests-auth==0.4.2
 beautifulsoup4==4.5.1
 binary==1.0.0
@@ -76,4 +76,3 @@ typing==3.7.4.1; python_version < '3.0'
 uptime==3.0.1
 vertica-python==0.10.1
 win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'
-
