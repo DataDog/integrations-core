@@ -44,7 +44,7 @@ class IIS(PDHBaseCheck):
 
     def __init__(self, name, init_config, instances):
         super(IIS, self).__init__(name, init_config, instances=instances, counter_list=DEFAULT_COUNTERS)
-        self.sites = self.instance.get('sites', []) or []
+        self.sites = self.instance.get('sites') or []
 
     def get_iishost(self):
         inst_host = self.instance.get("host")
