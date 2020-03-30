@@ -92,11 +92,7 @@ No additional installation is needed on your server.
 
 See [metadata.csv][12] for a list of metrics provided by this integration.
 
-<<<<<<< HEAD
-Add custom metrics in Sidekiq. See the [Sidekiq documentation][11] for custom metric inspiration.
-=======
 The Sidekiq integration also allows custom metrics, see the [Sidekiq documentation][11] for custom metric inspiration.
->>>>>>> f2437cb79a213bcfc4571a6b96cde2cb009cb1cc
 
 ### Log Collection
 
