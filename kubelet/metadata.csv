@@ -11,7 +11,7 @@ kubernetes.cpu.system.total,rate,,core,,The number of cores used for system time
 kubernetes.cpu.user.total,rate,,core,,The number of cores used for user time,0,kubernetes,k8s.cpu.user
 kubernetes.cpu.cfs.throttled.period,rate,,,,Number of throttled period intervals,-1,kubernetes,k8s.cpu.throttled.periods
 kubernetes.cpu.cfs.throttled.second,rate,,,,Total time duration the container has been throttled,-1,kubernetes,k8s.cpu.throttled.sec
-kubernetes.cpu.capacity,gauge,,core,,The number of cores in this machine,0,kubernetes,k8s.cpu.capacity
+kubernetes.cpu.capacity,gauge,,core,,The number of cores in this machine (available until kubernetes v1.18),0,kubernetes,k8s.cpu.capacity
 kubernetes.cpu.usage.total,gauge,,nanocore,,The number of cores used,-1,kubernetes,k8s.cpu
 kubernetes.cpu.limits,gauge,,core,,The limit of cpu cores set,0,kubernetes,k8s.cpu.limits
 kubernetes.cpu.requests,gauge,,core,,The requested cpu cores,0,kubernetes,k8s.cpu.requests
@@ -19,7 +19,7 @@ kubernetes.filesystem.usage,gauge,,byte,,The amount of disk used,-1,kubernetes,k
 kubernetes.filesystem.usage_pct,gauge,,fraction,,The percentage of disk used,-1,kubernetes,k8s.disk.used_pct
 kubernetes.io.read_bytes,gauge,,byte,,The amount of bytes read from the disk,0,kubernetes,k8_io_read_bytes
 kubernetes.io.write_bytes,gauge,,byte,,The amount of bytes written to the disk,0,kubernetes,k8_io_write_bytes
-kubernetes.memory.capacity,gauge,,byte,,The amount of memory (in bytes) in this machine,0,kubernetes,k8s.mem.capacity
+kubernetes.memory.capacity,gauge,,byte,,The amount of memory (in bytes) in this machine (available until kubernetes v1.18),0,kubernetes,k8s.mem.capacity
 kubernetes.memory.limits,gauge,,byte,,The limit of memory set,0,kubernetes,k8s.mem.limits
 kubernetes.memory.sw_limit,gauge,,byte,,The limit of swap space set,0,kubernetes,k8s.mem.sw_limit
 kubernetes.memory.requests,gauge,,byte,,The requested memory,0,kubernetes,k8s.mem.requests
