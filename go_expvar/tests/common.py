@@ -4,7 +4,7 @@
 
 import os
 
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 CHECK_NAME = "go_expvar"
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -47,4 +47,8 @@ CHECK_RATES = [
     'go_expvar.memstats.mallocs',
     'go_expvar.memstats.num_gc',
     'go_expvar.memstats.pause_total_ns',
+]
+
+CHECK_COUNT = [
+    'go_expvar.memstats.total_alloc.count',
 ]

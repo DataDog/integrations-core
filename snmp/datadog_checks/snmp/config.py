@@ -2,12 +2,14 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
+import re
 from collections import defaultdict
-from typing import Any, Callable, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, DefaultDict, Dict, Iterator, List, Optional, Pattern, Set, Tuple, Union
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
-from .models import (
+from .models import OID
+from .pysnmp_types import (
     CommunityData,
     ContextData,
     DirMibSource,
@@ -24,14 +26,21 @@ from .models import (
     usmHMACMD5AuthProtocol,
 )
 from .resolver import OIDResolver
-from .utils import to_oid_tuple
+from .types import ForceableMetricType
 
 
 class ParsedMetric(object):
 
     __slots__ = ('name', 'metric_tags', 'forced_type', 'enforce_scalar')
 
-    def __init__(self, name, metric_tags, forced_type, enforce_scalar=True):
+    def __init__(
+        self,
+        name,  # type: str
+        metric_tags,  # type: List[Dict[str, Any]]
+        forced_type=None,  # type: ForceableMetricType
+        enforce_scalar=True,  # type: bool
+    ):
+        # type: (...) -> None
         self.name = name
         self.metric_tags = metric_tags
         self.forced_type = forced_type
@@ -47,7 +56,7 @@ class ParsedTableMetric(object):
         name,  # type: str
         index_tags,  # type: List[Tuple[str, int]]
         column_tags,  # type: List[Tuple[str, str]]
-        forced_type=None,  # type: str
+        forced_type=None,  # type: ForceableMetricType
     ):
         # type: (...) -> None
         self.name = name
@@ -65,11 +74,33 @@ class ParsedMetricTag(object):
         self.name = name
         self.symbol = symbol
 
+    def matched_tags(self, value):
+        # type: (Any) -> Iterator[str]
+        yield '{}:{}'.format(self.name, value)
+
+
+class ParsedMatchMetricTags(object):
+
+    __slots__ = ('names', 'symbol', 'match')
+
+    def __init__(self, names, symbol, match):
+        # type: (dict, str, Pattern) -> None
+        self.names = names
+        self.symbol = symbol
+        self.match = match
+
+    def matched_tags(self, value):
+        # type: (Any) -> Iterator[str]
+        matched = self.match.match(str(value))
+        if matched is not None:
+            for name, match in self.names.items():
+                yield '{}:{}'.format(name, matched.expand(match))
+
 
 def _no_op(*args, **kwargs):
     # type: (*Any, **Any) -> None
     """
-    A 'do-nothing' replacement for the `warning()` and `log()` AgentCheck functions, suitable for when those
+    A 'do-nothing' replacement for the `warning()` AgentCheck function, suitable for when those
     functions are not available (e.g. in unit tests).
     """
 
@@ -87,7 +118,6 @@ class InstanceConfig:
         self,
         instance,  # type: dict
         warning=_no_op,  # type: Callable[..., None]
-        log=_no_op,  # type: Callable[..., None]
         global_metrics=None,  # type: List[dict]
         mibs_path=None,  # type: str
         profiles=None,  # type: Dict[str, dict]
@@ -159,7 +189,7 @@ class InstanceConfig:
 
         self._auth_data = self.get_auth_data(instance)
 
-        self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics, warning, log)
+        self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics, warning)
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
             self.all_oids.extend(tag_oids)
@@ -167,7 +197,7 @@ class InstanceConfig:
         if profile:
             if profile not in profiles:
                 raise ConfigurationError("Unknown profile '{}'".format(profile))
-            self.refresh_with_profile(profiles[profile], warning, log)
+            self.refresh_with_profile(profiles[profile], warning)
             self.add_profile_tag(profile)
 
         self._context_data = ContextData(*self.get_context_data(instance))
@@ -180,13 +210,13 @@ class InstanceConfig:
             )
 
     def resolve_oid(self, oid):
-        # type: (Any) -> Tuple[Any, Any]
+        # type: (ObjectType) -> Tuple[str, Tuple[str, ...]]
         return self._resolver.resolve_oid(oid)
 
-    def refresh_with_profile(self, profile, warning, log):
-        # type: (Dict[str, Any], Callable[..., None], Callable[..., None]) -> None
+    def refresh_with_profile(self, profile, warning):
+        # type: (Dict[str, Any], Callable[..., None]) -> None
         metrics = profile['definition'].get('metrics', [])
-        all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics, warning, log)
+        all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics, warning)
 
         metric_tags = profile['definition'].get('metric_tags', [])
         tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
@@ -317,7 +347,6 @@ class InstanceConfig:
         self,
         metrics,  # type: List[Dict[str, Any]]
         warning,  # type: Callable[..., None]
-        log,  # type: Callable[..., None]
         object_identity_factory=None,  # type: Callable[..., ObjectIdentity]  # For unit tests purposes.
     ):
         # type: (...) -> Tuple[list, list, List[Union[ParsedMetric, ParsedTableMetric]]]
@@ -335,7 +364,7 @@ class InstanceConfig:
             if isinstance(symbol, dict):
                 symbol_oid = symbol['OID']
                 symbol = symbol['name']
-                self._resolver.register(to_oid_tuple(symbol_oid), symbol)
+                self._resolver.register(OID(symbol_oid).as_tuple(), symbol)
                 identity = object_identity_factory(symbol_oid)
             else:
                 identity = object_identity_factory(mib, symbol)
@@ -446,7 +475,7 @@ class InstanceConfig:
                 oid_object = ObjectType(object_identity_factory(metric['OID']))
 
                 table_oids[metric['OID']] = (oid_object, [])
-                self._resolver.register(to_oid_tuple(metric['OID']), metric['name'])
+                self._resolver.register(OID(metric['OID']).as_tuple(), metric['name'])
 
                 parsed_metric = ParsedMetric(metric['name'], metric_tags, forced_type, enforce_scalar=False)
                 parsed_metrics.append(parsed_metric)
@@ -472,27 +501,54 @@ class InstanceConfig:
         return all_oids, bulk_oids, parsed_metrics
 
     def parse_metric_tags(self, metric_tags):
-        # type: (List[Dict[str, Any]]) -> Tuple[List[Any], List[ParsedMetricTag]]
+        # type: (List[Dict[str, Any]]) -> Tuple[List[Any], List[Any]]
         """Parse configuration for global metric_tags."""
         oids = []
         parsed_metric_tags = []
+
         for tag in metric_tags:
-            if not ('symbol' in tag and 'tag' in tag):
-                raise ConfigurationError("A metric tag needs to specify a symbol and a tag: {}".format(tag))
-            if not ('OID' in tag or 'MIB' in tag):
-                raise ConfigurationError("A metric tag needs to specify an OID or a MIB: {}".format(tag))
+            if 'symbol' not in tag:
+                raise ConfigurationError('A metric tag needs to specify a symbol: {}'.format(tag))
             symbol = tag['symbol']
-            tag_name = tag['tag']
+
+            if not ('OID' in tag or 'MIB' in tag):
+                raise ConfigurationError('A metric tag needs to specify an OID or a MIB: {}'.format(tag))
+
+            if 'tag' not in tag:
+                if not ('tags' in tag and 'match' in tag):
+                    raise ConfigurationError(
+                        'A metric tag needs to specify either a tag, '
+                        'or a mapping of tags and a regular expression: {}'.format(tag)
+                    )
+                tags = tag['tags']
+                if not isinstance(tags, dict):
+                    raise ConfigurationError(
+                        'Specified tags needs to be a mapping of tag name to regular '
+                        'expression matching: {}'.format(tag)
+                    )
+                match = tag['match']
+                try:
+                    compiled_match = re.compile(match)
+                except re.error as e:
+                    raise ConfigurationError('Failed compile regular expression {}: {}'.format(match, e))
+                else:
+                    parsed = ParsedMatchMetricTags(tags, symbol, compiled_match)
+            else:
+                tag_name = tag['tag']
+                parsed = ParsedMetricTag(tag_name, symbol)  # type: ignore
+
             if 'MIB' in tag:
                 mib = tag['MIB']
                 identity = ObjectIdentity(mib, symbol)
             else:
                 oid = tag['OID']
                 identity = ObjectIdentity(oid)
-                self._resolver.register(to_oid_tuple(oid), symbol)
+                self._resolver.register(OID(oid).as_tuple(), symbol)
+
             object_type = ObjectType(identity)
             oids.append(object_type)
-            parsed_metric_tags.append(ParsedMetricTag(tag_name, symbol))
+            parsed_metric_tags.append(parsed)
+
         return oids, parsed_metric_tags
 
     def add_uptime_metric(self):
@@ -503,7 +559,7 @@ class InstanceConfig:
         uptime_oid = '1.3.6.1.2.1.1.3.0'
         oid_object = ObjectType(ObjectIdentity(uptime_oid))
         self.all_oids.append(oid_object)
-        self._resolver.register(to_oid_tuple(uptime_oid), 'sysUpTimeInstance')
+        self._resolver.register(OID(uptime_oid).as_tuple(), 'sysUpTimeInstance')
 
         parsed_metric = ParsedMetric('sysUpTimeInstance', [], 'gauge')
         self.parsed_metrics.append(parsed_metric)

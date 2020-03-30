@@ -35,26 +35,26 @@ def setup(checks, changed):
     else:
         echo_info(f'Checks chosen: changed')
 
-    check_envs = get_tox_envs(checks, every=True, sort=True, changed_only=changed)
+    check_envs = list(get_tox_envs(checks, every=True, sort=True, changed_only=changed))
+    echo_info(f'Configuring these envs: {check_envs}')
 
     for check, _ in check_envs:
-        scripts_path = os.path.join(scripts_path, check)
+        check_scripts_path = os.path.join(scripts_path, check)
 
-        if not os.path.isdir(scripts_path):
-            echo_debug(f"Skip! No scripts for check `{check}` at: `{scripts_path}`")
+        if not os.path.isdir(check_scripts_path):
+            echo_debug(f"Skip! No scripts for check `{check}` at: `{check_scripts_path}`")
             continue
 
-        contents = os.listdir(scripts_path)
+        contents = os.listdir(check_scripts_path)
 
         if cur_platform not in contents:
             echo_debug(f"Skip! No scripts for check `{check}` and platform `{cur_platform}`")
             continue
 
-        echo_info(f'Setting up: {check}')
-        scripts_path = os.path.join(scripts_path, cur_platform)
-        scripts = sorted(os.listdir(scripts_path))
+        scripts = sorted(os.listdir(os.path.join(check_scripts_path, cur_platform)))
+        echo_info(f'Setting up: {check} with these config scripts: {scripts}')
 
         for script in scripts:
-            script_file = os.path.join(scripts_path, script)
+            script_file = os.path.join(check_scripts_path, cur_platform, script)
             display_action(script_file)
             subprocess.run([script_file], shell=True, check=True)

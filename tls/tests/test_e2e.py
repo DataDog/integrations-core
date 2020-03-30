@@ -7,8 +7,8 @@ from datadog_checks.tls import TLSCheck
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, instance_remote_ok):
-    aggregator = dd_agent_check(instance_remote_ok)
+def test_e2e(dd_agent_check, instance_e2e):
+    aggregator = dd_agent_check(instance_e2e)
 
     aggregator.assert_service_check(TLSCheck.SERVICE_CHECK_CAN_CONNECT, status=TLSCheck.OK, count=1)
     aggregator.assert_service_check(TLSCheck.SERVICE_CHECK_VERSION, status=TLSCheck.OK, count=1)

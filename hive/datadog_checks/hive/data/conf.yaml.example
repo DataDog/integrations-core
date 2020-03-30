@@ -13,11 +13,10 @@ init_config:
     collect_default_metrics: true
 
     ## @param conf - list of mappings - optional
-    ## List of metrics to be collected by the integration
+    ## The list of metrics to be collected by the integration
     ## Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
-    ## Agent 5: Customize all your metrics below
-    ## Agent 6: The default metrics to be collected are kept in metrics.yaml,
-    ##          but you can still add your own metrics here
+    ## The default metrics to be collected are kept in metrics.yaml, but you can still
+    ## add your own metrics here.
     #
     # conf:
     #   - include:
@@ -41,7 +40,7 @@ instances:
     ## @param host - string - required
     ## HiveServer2 or Hive Metastore JMX host to connect to.
     #
-  - host: localhost
+  - host: <HOST>
 
     ## @param port - integer - required
     ## HiveServer2 or Hive Metastore JMX port to connect to.
@@ -59,7 +58,7 @@ instances:
     # password: <PASSWORD>
 
     ## @param process_name_regex - string - optional
-    ## Instead of specifying a host, and port. The agent can connect using the attach api.
+    ## Instead of using a host and port, the Agent can connect using the attach API.
     ## This requires the JDK to be installed and the path to tools.jar to be set below.
     ## Note: It needs to be set when process_name_regex parameter is set
     ## e.g. .*process_name.*
@@ -67,52 +66,52 @@ instances:
     # process_name_regex: <PROCESS_NAME_REGEX>
 
     ## @param tools_jar_path - string - optional
-    ## Path to the tool.jar file to use with `process_name_regex` parameter.
-    ## e.g. /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+    ## The tool.jar path to be used with the `process_name_regex` parameter,
+    ## for example: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
     #
     # tools_jar_path: <TOOLS_JAR_PATH>
 
     ## @param name - string - optional
-    ## Set your instance name that will be used as `instance` tag.
+    ## Set the instance name to be used as the `instance` tag.
     #
     # name: <NAME>
 
     ## @param java_bin_path - string - optional
-    ## `java_bin_path` should be set if the agent cannot find your java executable
+    ## `java_bin_path` should be set if the Agent cannot find your java executable.
     #
     # java_bin_path: <JAVA_BIN_PATH>
 
     ## @param java_options - string - optional
-    ## List of Java JVM options e.g. "-Xmx200m -Xms50m".
+    ## A list of Java JVM options, for example: "-Xmx200m -Xms50m".
     #
     # java_options: <JAVA_OPTIONS>
 
     ## @param trust_store_path - string - optional
-    ## Path to your trusted store.
-    ## `trust_store_path` should be set if ssl is enabled.
+    ## The path to your trusted store.
+    ## `trust_store_path` should be set if SSL is enabled.
     #
     # trust_store_path: <TRUST_STORE_PATH>
 
     ## @param trust_store_password - string - optional
-    ## Password for your TrustStore.jks file.
-    ## `trust_store_password` should be set if ssl is enabled.
+    ## The password for your TrustStore.jks file.
+    ## `trust_store_password` should be set if SSL is enabled.
     #
     # trust_store_password: <TRUST_STORE_PASSWORD>
 
     ## @param key_store_path - string - optional
-    ## Path to your key store.
+    ## The path to your key store.
     ## `key_store_path` should be set if client authentication is enabled on the target JVM.
     #
     # key_store_path: <KEY_STORE_PATH>
 
     ## @param key_store_password - string - optional
-    ## Password to your key store.
+    ## The password to your key store.
     ## `key_store_password` should be set if client authentication is enabled on the target JVM.
     #
     # key_store_password: <KEY_STORE_PASSWORD>
 
     ## @param rmi_registry_ssl - boolean - optional - default: false
-    ## Whether or not the agent should connect to the rmi registry using ssl.
+    ## Whether or not the Agent should connect to the RMI registry using SSL.
     #
     # rmi_registry_ssl: false
 
@@ -154,7 +153,6 @@ instances:
 ## source  - required - Attribute that defines which Integration sent the logs
 ## service - required - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
-## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
 ## tags - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
@@ -163,7 +161,6 @@ instances:
 #   - type: file
 #     path: /tmp/<USER>/hive.log
 #     source: hive
-#     sourcecategory: database
 #     service: <SERVICE_NAME>
 #     log_processing_rules:
 #     - type: multi_line

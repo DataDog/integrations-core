@@ -7,9 +7,9 @@ from copy import deepcopy
 import pytest
 from mock import MagicMock
 
+from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.cisco_aci import CiscoACICheck
 from datadog_checks.cisco_aci.api import Api, SessionWrapper
-from datadog_checks.utils.containers import hash_mutable
 
 from . import common
 

@@ -152,7 +152,6 @@ PostgreSQL default logging is to `stderr`, and logs do not include detailed info
      - type: file
        path: "<LOG_FILE_PATH>"
        source: postgresql
-       sourcecategory: database
        service: "<SERVICE_NAME>"
        #To handle multi line that starts with yyyy-mm-dd use the following pattern
        #log_processing_rules:

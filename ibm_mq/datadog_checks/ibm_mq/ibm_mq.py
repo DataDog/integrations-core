@@ -3,11 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+from typing import Any
 
 from six import iteritems
 
-from datadog_checks.base import ensure_bytes, ensure_unicode
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
 from . import connection, errors, metrics
@@ -55,33 +55,34 @@ class IbmMqCheck(AgentCheck):
 
     CHANNEL_COUNT_CHECK = 'ibm_mq.channel.count'
 
-    def check(self, instance):
-        config = IBMMQConfig(instance)
-        config.check_properly_configured()
+    def __init__(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
+        super(IbmMqCheck, self).__init__(*args, **kwargs)
+        self.config = IBMMQConfig(self.instance)
 
+    def check(self, instance):
         if not pymqi:
             log.error("You need to install pymqi: %s", pymqiException)
             raise errors.PymqiException("You need to install pymqi: {}".format(pymqiException))
 
         try:
-            queue_manager = connection.get_queue_manager_connection(config)
-            self.service_check(self.SERVICE_CHECK, AgentCheck.OK, config.tags)
+            queue_manager = connection.get_queue_manager_connection(self.config)
+            self.service_check(self.SERVICE_CHECK, AgentCheck.OK, self.config.tags)
         except Exception as e:
             self.warning("cannot connect to queue manager: %s", e)
-            self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, config.tags)
+            self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, self.config.tags)
             return
 
-        self.get_pcf_channel_metrics(queue_manager, config.tags_no_channel, config)
-
-        self.discover_queues(queue_manager, config)
+        self.get_pcf_channel_metrics(queue_manager)
+        self.discover_queues(queue_manager)
 
         try:
-            self.queue_manager_stats(queue_manager, config.tags)
+            self.queue_manager_stats(queue_manager, self.config.tags)
 
-            for queue_name in config.queues:
-                queue_tags = config.tags + ["queue:{}".format(queue_name)]
+            for queue_name in self.config.queues:
+                queue_tags = self.config.tags + ["queue:{}".format(queue_name)]
 
-                for regex, q_tags in config.queue_tag_re:
+                for regex, q_tags in self.config.queue_tag_re:
                     if regex.match(queue_name):
                         queue_tags.extend(q_tags)
 
@@ -89,7 +90,7 @@ class IbmMqCheck(AgentCheck):
                     self.queue_stats(queue_manager, queue_name, queue_tags)
                     # some system queues don't have PCF metrics
                     # so we don't collect those metrics from those queues
-                    if queue_name not in config.DISALLOWED_QUEUES:
+                    if queue_name not in self.config.DISALLOWED_QUEUES:
                         self.get_pcf_queue_status_metrics(queue_manager, queue_name, queue_tags)
                         self.get_pcf_queue_reset_metrics(queue_manager, queue_name, queue_tags)
                     self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags)
@@ -99,26 +100,26 @@ class IbmMqCheck(AgentCheck):
         finally:
             queue_manager.disconnect()
 
-    def discover_queues(self, queue_manager, config):
+    def discover_queues(self, queue_manager):
         queues = []
-        if config.auto_discover_queues:
+        if self.config.auto_discover_queues:
             queues.extend(self._discover_queues(queue_manager, '*'))
 
-        if config.queue_patterns:
-            for pattern in config.queue_patterns:
+        if self.config.queue_patterns:
+            for pattern in self.config.queue_patterns:
                 queues.extend(self._discover_queues(queue_manager, pattern))
 
-        if config.queue_regex:
+        if self.config.queue_regex:
             if not queues:
                 queues = self._discover_queues(queue_manager, '*')
             keep_queues = []
-            for queue_pattern in config.queue_regex:
+            for queue_pattern in self.config.queue_regex:
                 for queue in queues:
                     if queue_pattern.match(queue):
                         keep_queues.append(queue)
             queues = keep_queues
 
-        config.add_queues(queues)
+        self.config.add_queues(queues)
 
     def _discover_queues(self, queue_manager, mq_pattern_filter):
         queues = []
@@ -230,9 +231,8 @@ class IbmMqCheck(AgentCheck):
         else:
             self.log.warning("Unknown metric type `%s` for metric `%s`", metric_type, metric_name)
 
-    def get_pcf_channel_metrics(self, queue_manager, tags, config):
+    def get_pcf_channel_metrics(self, queue_manager):
         args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes('*')}
-
         try:
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_CHANNEL(args)
@@ -241,11 +241,11 @@ class IbmMqCheck(AgentCheck):
         else:
             channels = len(response)
             mname = '{}.channel.channels'.format(self.METRIC_PREFIX)
-            self.gauge(mname, channels, tags=tags)
+            self.gauge(mname, channels, tags=self.config.tags_no_channel)
 
             for channel_info in response:
                 channel_name = ensure_unicode(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
-                channel_tags = tags + ["channel:{}".format(channel_name)]
+                channel_tags = self.config.tags_no_channel + ["channel:{}".format(channel_name)]
 
                 self._submit_metrics_from_properties(channel_info, metrics.channel_metrics(), channel_tags)
 
@@ -253,13 +253,13 @@ class IbmMqCheck(AgentCheck):
         # If a channel is not discoverable, a user may want to check it specifically.
         # Specific channels are checked first to send channel metrics and `ibm_mq.channel` service checks
         # at the same time, but the end result is the same in any order.
-        for channel in config.channels:
-            self._submit_channel_status(queue_manager, channel, tags, config)
+        for channel in self.config.channels:
+            self._submit_channel_status(queue_manager, channel, self.config.tags_no_channel)
 
         # Grab all the discoverable channels
-        self._submit_channel_status(queue_manager, '*', tags, config, config.channels)
+        self._submit_channel_status(queue_manager, '*', self.config.tags_no_channel)
 
-    def _submit_channel_status(self, queue_manager, search_channel_name, tags, config, channels_to_skip=None):
+    def _submit_channel_status(self, queue_manager, search_channel_name, tags, channels_to_skip=None):
         """Submit channel status
 
         Note: Error 3065 (MQRCCF_CHL_STATUS_NOT_FOUND) might indicate that the channel has not been used.
@@ -291,7 +291,7 @@ class IbmMqCheck(AgentCheck):
 
                 channel_status = channel_info[pymqi.CMQCFC.MQIACH_CHANNEL_STATUS]
                 self._submit_channel_count(channel_name, channel_status, channel_tags)
-                self._submit_status_check(channel_name, channel_status, channel_tags, config)
+                self._submit_status_check(channel_name, channel_status, channel_tags)
 
     def _submit_metrics_from_properties(self, channel_info, metrics_map, tags):
         for metric_name, pymqi_type in iteritems(metrics_map):
@@ -302,9 +302,9 @@ class IbmMqCheck(AgentCheck):
             metric_value = int(channel_info[pymqi_type])
             self.gauge(metric_full_name, metric_value, tags=tags)
 
-    def _submit_status_check(self, channel_name, channel_status, channel_tags, config):
-        if channel_status in config.channel_status_mapping:
-            service_check_status = config.channel_status_mapping[channel_status]
+    def _submit_status_check(self, channel_name, channel_status, channel_tags):
+        if channel_status in self.config.channel_status_mapping:
+            service_check_status = self.config.channel_status_mapping[channel_status]
         else:
             self.log.warning("Status `%s` not found for channel `%s`", channel_status, channel_name)
             service_check_status = AgentCheck.UNKNOWN

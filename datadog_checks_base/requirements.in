@@ -1,22 +1,23 @@
 aws-requests-auth==0.4.2
 binary==1.0.0
 botocore==1.13.42
-contextlib2==0.5.5; python_version < '3.0'
+contextlib2==0.6.0; python_version < '3.0'
 ddtrace==0.32.2
 enum34==1.1.6; python_version < '3.0'
 ipaddress==1.0.22; python_version < '3.0'
 kubernetes==8.0.1
+orjson==2.6.1; python_version > '3.0'
 prometheus-client==0.3.0
 protobuf==3.7.0
 pysocks==1.7.0
 pytz==2019.3
 pywin32==227; sys_platform == 'win32'
-pyyaml==5.1
+pyyaml==5.3
 requests==2.22.0
 requests-kerberos==0.12.0
 requests_ntlm==1.1.0
 simplejson==3.6.5
-six==1.12.0
+six==1.14.0
 typing==3.7.4.1; python_version < '3.0'
 uptime==3.0.1
 win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'

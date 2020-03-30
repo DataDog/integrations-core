@@ -86,12 +86,12 @@ def mock_get_peers_in_cluster():
 
 def mock_get_services_in_cluster():
     return {
-        "service-1": ["az-us-east-1a"],
-        "service-2": ["az-us-east-1a"],
-        "service-3": ["az-us-east-1a"],
-        "service-4": ["az-us-east-1a"],
-        "service-5": ["az-us-east-1a"],
-        "service-6": ["az-us-east-1a"],
+        "service-1": ["active", "standby"],
+        "service-2": ["active", "standby"],
+        "service-3": ["active", "standby"],
+        "service-4": ["active", "standby"],
+        "service-5": ["active", "standby"],
+        "service-6": ["active", "standby"],
     }
 
 
@@ -130,7 +130,7 @@ def mock_get_nodes_in_cluster():
 
 
 def mock_get_nodes_with_service(service):
-    return [
+    nodes = [
         {
             "Checks": [
                 {
@@ -155,81 +155,38 @@ def mock_get_nodes_with_service(service):
                 },
             ],
             "Node": {"Address": _get_random_ip(), "Node": "node-1"},
-            "Service": {"Address": "", "ID": service, "Port": 80, "Service": service, "Tags": ["az-us-east-1a"]},
+            "Service": {"Address": "", "ID": service, "Port": 80, "Service": service, "Tags": ["standby"]},
         }
+        for _ in range(4)
     ]
+
+    nodes[0]['Service']['Tags'] = ['active', 'standby']
+    return nodes
 
 
 def mock_get_nodes_with_service_warning(service):
-    return [
-        {
-            "Checks": [
-                {
-                    "CheckID": "serfHealth",
-                    "Name": "Serf Health Status",
-                    "Node": "node-1",
-                    "Notes": "",
-                    "Output": "Agent alive and reachable",
-                    "ServiceID": "",
-                    "ServiceName": "",
-                    "Status": "passing",
-                },
-                {
-                    "CheckID": "service:{}".format(service),
-                    "Name": "service check {}".format(service),
-                    "Node": "node-1",
-                    "Notes": "",
-                    "Output": "Service {} alive".format(service),
-                    "ServiceID": service,
-                    "ServiceName": "",
-                    "Status": "warning",
-                },
-            ],
-            "Node": {"Address": _get_random_ip(), "Node": "node-1"},
-            "Service": {"Address": "", "ID": service, "Port": 80, "Service": service, "Tags": ["az-us-east-1a"]},
-        }
-    ]
+    nodes = mock_get_nodes_with_service(service)
+    for node in nodes:
+        node["Checks"][1]["Status"] = "warning"
+    return nodes
 
 
 def mock_get_nodes_with_service_critical(service):
-    return [
-        {
-            "Checks": [
-                {
-                    "CheckID": "serfHealth",
-                    "Name": "Serf Health Status",
-                    "Node": "node-1",
-                    "Notes": "",
-                    "Output": "Agent alive and reachable",
-                    "ServiceID": "",
-                    "ServiceName": "",
-                    "Status": "passing",
-                },
-                {
-                    "CheckID": "service:{}".format(service),
-                    "Name": "service check {}".format(service),
-                    "Node": "node-1",
-                    "Notes": "",
-                    "Output": "Service {} alive".format(service),
-                    "ServiceID": service,
-                    "ServiceName": "",
-                    "Status": "warning",
-                },
-                {
-                    "CheckID": "service:{}".format(service),
-                    "Name": "service check {}".format(service),
-                    "Node": "node-1",
-                    "Notes": "",
-                    "Output": "Service {} alive".format(service),
-                    "ServiceID": service,
-                    "ServiceName": "",
-                    "Status": "critical",
-                },
-            ],
-            "Node": {"Address": _get_random_ip(), "Node": "node-1"},
-            "Service": {"Address": "", "ID": service, "Port": 80, "Service": service, "Tags": ["az-us-east-1a"]},
-        }
-    ]
+    nodes = mock_get_nodes_with_service_warning(service)
+    for node in nodes:
+        node["Checks"].append(
+            {
+                "CheckID": "service:{}".format(service),
+                "Name": "service check {}".format(service),
+                "Node": "node-1",
+                "Notes": "",
+                "Output": "Service {} alive".format(service),
+                "ServiceID": service,
+                "ServiceName": "",
+                "Status": "critical",
+            }
+        )
+    return nodes
 
 
 def mock_get_coord_datacenters():

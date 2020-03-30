@@ -3,17 +3,17 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
+import datetime as dt
 from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
-from datetime import datetime, timedelta
+from typing import Any, Dict, Generator, Iterable, List, Set, Type, cast
 
 from pyVmomi import vim, vmodl
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, is_affirmative, to_string
+from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
 from datadog_checks.base.checks.libs.timer import Timer
-from datadog_checks.stubs import datadog_agent
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache, TagsCache
@@ -27,6 +27,7 @@ from datadog_checks.vsphere.constants import (
 )
 from datadog_checks.vsphere.legacy.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
+from datadog_checks.vsphere.types import CounterId, InstanceConfig, MetricName, MorBatch
 from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,
     format_metric_name,
@@ -37,6 +38,12 @@ from datadog_checks.vsphere.utils import (
     should_collect_per_instance_values,
 )
 
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
+
 SERVICE_CHECK_NAME = 'can_connect'
 
 
@@ -44,33 +51,37 @@ class VSphereCheck(AgentCheck):
     __NAMESPACE__ = 'vsphere'
 
     def __new__(cls, name, init_config, instances):
+        # type: (Type[VSphereCheck], str, Dict[str, Any], List[Dict[str, Any]]) -> VSphereCheck
         """For backward compatibility reasons, there are two side-by-side implementations of the VSphereCheck.
         Instantiating this class will return an instance of the legacy integration for existing users and
         an instance of the new implementation for new users."""
         if is_affirmative(instances[0].get('use_legacy_check_version', True)):
             from datadog_checks.vsphere.legacy.vsphere_legacy import VSphereLegacyCheck
 
-            return VSphereLegacyCheck(name, init_config, instances)
+            return VSphereLegacyCheck(name, init_config, instances)  # type: ignore
         return super(VSphereCheck, cls).__new__(cls)
 
-    def __init__(self, name, init_config, instances):
-        super(VSphereCheck, self).__init__(name, init_config, instances)
-        self.config = VSphereConfig(self.instance, self.log)
+    def __init__(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
+        super(VSphereCheck, self).__init__(*args, **kwargs)
+        instance = cast(InstanceConfig, self.instance)
+        self.config = VSphereConfig(instance, self.log)
 
-        self.latest_event_query = datetime.now()
+        self.latest_event_query = dt.datetime.now()
         self.infrastructure_cache = InfrastructureCache(interval_sec=self.config.refresh_infrastructure_cache_interval)
         self.metrics_metadata_cache = MetricsMetadataCache(
             interval_sec=self.config.refresh_metrics_metadata_cache_interval
         )
         self.tags_cache = TagsCache(interval_sec=self.config.refresh_tags_cache_interval)
-        self.api = None
-        self.api_rest = None
+        self.api = cast(VSphereAPI, None)
+        self.api_rest = cast(VSphereRestAPI, None)
         # Do not override `AgentCheck.hostname`
         self._hostname = None
         self.thread_pool = ThreadPoolExecutor(max_workers=self.config.threads_count)
         self.check_initializations.append(self.initiate_api_connection)
 
     def initiate_api_connection(self):
+        # type: () -> None
         try:
             self.log.debug(
                 "Connecting to the vCenter API %s with username %s...", self.config.hostname, self.config.username
@@ -89,7 +100,10 @@ class VSphereCheck(AgentCheck):
                 self.log.error("Cannot connect to vCenter REST API. Tags won't be collected. Error: %s", e)
 
     def refresh_metrics_metadata_cache(self):
-        """Request the list of counters (metrics) from vSphere and store them in a cache."""
+        # type: () -> None
+        """
+        Request the list of counters (metrics) from vSphere and store them in a cache.
+        """
         self.log.debug(
             "Refreshing the metrics metadata cache. Collecting all counters metadata for collection_level=%d",
             self.config.collection_level,
@@ -113,7 +127,7 @@ class VSphereCheck(AgentCheck):
                     metric_name, mor_type, self.config.metric_filters
                 ):
                     allowed_counters.append(c)
-            metadata = {c.key: format_metric_name(c) for c in allowed_counters}
+            metadata = {c.key: format_metric_name(c) for c in allowed_counters}  # type: Dict[CounterId, MetricName]
             self.metrics_metadata_cache.set_metadata(mor_type, metadata)
 
         # TODO: Later - Understand how much data actually changes between check runs
@@ -121,6 +135,7 @@ class VSphereCheck(AgentCheck):
         # https://pubs.vmware.com/vsphere-50/index.jsp?topic=%2Fcom.vmware.wssdk.pg.doc_50%2FPG_Ch16_Performance.18.5.html
 
     def refresh_tags_cache(self):
+        # type: () -> None
         """
         Fetch the all tags, build tags for each monitored resources and store all of that into the tags_cache.
         """
@@ -136,6 +151,7 @@ class VSphereCheck(AgentCheck):
         self.tags_cache.set_all_tags(mor_tags)
 
     def refresh_infrastructure_cache(self):
+        # type: () -> None
         """Fetch the complete infrastructure, generate tags for each monitored resources and store all of that
         into the infrastructure_cache. It also computes the resource `hostname` property to be used when submitting
         metrics for this mor."""
@@ -159,7 +175,7 @@ class VSphereCheck(AgentCheck):
                 # The resource does not match the specified patterns
                 continue
 
-            mor_name = to_string(properties.get("name", "unknown"))
+            mor_name = to_native_string(properties.get("name", "unknown"))
             mor_type_str = MOR_TYPE_AS_STRING[type(mor)]
             hostname = None
             tags = []
@@ -169,14 +185,14 @@ class VSphereCheck(AgentCheck):
                 if power_state != vim.VirtualMachinePowerState.poweredOn:
                     # Skipping because the VM is not powered on
                     # TODO: Sometimes VM are "poweredOn" but "disconnected" and thus have no metrics
-                    self.log.debug("Skipping VM %s in state %s", mor_name, to_string(power_state))
+                    self.log.debug("Skipping VM %s in state %s", mor_name, to_native_string(power_state))
                     continue
 
                 # Hosts are not considered as parents of the VMs they run, we use the `runtime.host` property
                 # to get the name of the ESXi host
                 runtime_host = properties.get("runtime.host")
-                runtime_host_props = infrastructure_data.get(runtime_host, {})
-                runtime_hostname = to_string(runtime_host_props.get("name", "unknown"))
+                runtime_host_props = infrastructure_data[runtime_host] if runtime_host else {}
+                runtime_hostname = to_native_string(runtime_host_props.get("name", "unknown"))
                 tags.append('vsphere_host:{}'.format(runtime_hostname))
 
                 if self.config.use_guest_hostname:
@@ -190,7 +206,7 @@ class VSphereCheck(AgentCheck):
 
             tags.extend(get_parent_tags_recursively(mor, infrastructure_data))
             tags.append('vsphere_type:{}'.format(mor_type_str))
-            mor_payload = {"tags": tags}
+            mor_payload = {"tags": tags}  # type: Dict[str, Any]
 
             if hostname:
                 mor_payload['hostname'] = hostname
@@ -198,6 +214,7 @@ class VSphereCheck(AgentCheck):
             self.infrastructure_cache.set_mor_data(mor, mor_payload)
 
     def submit_metrics_callback(self, query_results):
+        # type: (List[vim.PerformanceManager.EntityMetricBase]) -> None
         """
         Callback of the collection of metrics. This is run in the main thread!
 
@@ -207,14 +224,13 @@ class VSphereCheck(AgentCheck):
 
         # `have_instance_value` is used later to avoid collecting aggregated metrics
         # when instance metrics are collected.
-        have_instance_value = defaultdict(set)
+        have_instance_value = defaultdict(set)  # type: Dict[Type[vim.ManagedEntity], Set[MetricName]]
         for results_per_mor in query_results:
             resource_type = type(results_per_mor.entity)
             metadata = self.metrics_metadata_cache.get_metadata(resource_type)
             for result in results_per_mor.value:
-                metric_name = metadata.get(result.id.counterId)
                 if result.id.instance:
-                    have_instance_value[resource_type].add(metric_name)
+                    have_instance_value[resource_type].add(metadata[result.id.counterId])
 
         for results_per_mor in query_results:
             mor_props = self.infrastructure_cache.get_mor_props(results_per_mor.entity)
@@ -239,7 +255,7 @@ class VSphereCheck(AgentCheck):
                     continue
 
                 if not result.value:
-                    self.log.debug("Skipping metric %s because the value is empty", to_string(metric_name))
+                    self.log.debug("Skipping metric %s because the value is empty", to_native_string(metric_name))
                     continue
 
                 # Get the most recent value that isn't negative
@@ -248,7 +264,7 @@ class VSphereCheck(AgentCheck):
                     self.log.debug(
                         "Skipping metric %s because the value returned by vCenter"
                         " is negative (i.e. the metric is not yet available).",
-                        to_string(metric_name),
+                        to_native_string(metric_name),
                     )
                     continue
 
@@ -273,7 +289,7 @@ class VSphereCheck(AgentCheck):
                     hostname = None
                 else:
                     # Tags are (mostly) submitted as external host tags.
-                    hostname = to_string(mor_props.get('hostname'))
+                    hostname = to_native_string(mor_props.get('hostname'))
                     if self.config.excluded_host_tags:
                         tags.extend([t for t in mor_tags if t.split(":", 1)[0] in self.config.excluded_host_tags])
 
@@ -285,9 +301,10 @@ class VSphereCheck(AgentCheck):
                     value /= 100.0
 
                 # vSphere "rates" should be submitted as gauges (rate is precomputed).
-                self.gauge(to_string(metric_name), value, hostname=hostname, tags=tags)
+                self.gauge(to_native_string(metric_name), value, hostname=hostname, tags=tags)
 
     def query_metrics_wrapper(self, query_specs):
+        # type: (List[vim.PerformanceManager.QuerySpec]) -> List[vim.PerformanceManager.EntityMetricBase]
         """Just an instrumentation wrapper around the VSphereAPI.query_metrics method
         Warning: called in threads
         """
@@ -297,16 +314,14 @@ class VSphereCheck(AgentCheck):
         return metrics_values
 
     def make_query_specs(self):
+        # type: () -> Iterable[List[vim.PerformanceManager.QuerySpec]]
         """
         Build query specs using MORs and metrics metadata.
-
-        :returns a list of vim.PerformanceManager.QuerySpec:
-        https://www.vmware.com/support/developer/vc-sdk/visdk41pubs/ApiReference/vim.PerformanceManager.QuerySpec.html
         """
         for resource_type in self.config.collected_resource_types:
             mors = self.infrastructure_cache.get_mors(resource_type)
             counters = self.metrics_metadata_cache.get_metadata(resource_type)
-            metric_ids = []
+            metric_ids = []  # type: List[vim.PerformanceManager.MetricId]
             for counter_key, metric_name in iteritems(counters):
                 # PerformanceManager.MetricId `instance` kwarg:
                 # - An asterisk (*) to specify all instances of the metric for the specified counterId
@@ -322,7 +337,7 @@ class VSphereCheck(AgentCheck):
             for batch in self.make_batch(mors, metric_ids, resource_type):
                 query_specs = []
                 for mor, metrics in iteritems(batch):
-                    query_spec = vim.PerformanceManager.QuerySpec()
+                    query_spec = vim.PerformanceManager.QuerySpec()  # type: vim.PerformanceManager.QuerySpec
                     query_spec.entity = mor
                     query_spec.metricId = metrics
                     if resource_type in REALTIME_RESOURCES:
@@ -331,12 +346,13 @@ class VSphereCheck(AgentCheck):
                     else:
                         # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
                         # contain at least one element
-                        query_spec.startTime = datetime.now() - timedelta(hours=2)
+                        query_spec.startTime = dt.datetime.now() - dt.timedelta(hours=2)
                     query_specs.append(query_spec)
                 if query_specs:
                     yield query_specs
 
     def collect_metrics_async(self):
+        # type: () -> None
         """Run queries in multiple threads and wait for completion."""
         tasks = []
         try:
@@ -347,12 +363,12 @@ class VSphereCheck(AgentCheck):
         finally:
             self.log.debug("Queued all %d tasks, waiting for completion.", len(tasks))
             for future in as_completed(tasks):
-                e = future.exception()
-                if isinstance(e, vmodl.fault.InvalidArgument):
+                future_exc = future.exception()
+                if isinstance(future_exc, vmodl.fault.InvalidArgument):
                     # The query was invalid or the resource does not have values for this metric.
                     continue
-                elif e is not None:
-                    self.log.warning("A metric collection API call failed with the following error: %s", e)
+                elif future_exc is not None:
+                    self.log.warning("A metric collection API call failed with the following error: %s", future_exc)
                     continue
 
                 results = future.result()
@@ -370,7 +386,12 @@ class VSphereCheck(AgentCheck):
                         e,
                     )
 
-    def make_batch(self, mors, metric_ids, resource_type):
+    def make_batch(
+        self,
+        mors,  # type: Iterable[vim.ManagedEntity]
+        metric_ids,  # type: List[vim.PerformanceManager.MetricId]
+        resource_type,  # type: Type[vim.ManagedEntity]
+    ):  # type: (...) -> Generator[MorBatch, None, None]
         """Iterates over mor and generate batches with a fixed number of metrics to query.
         Querying multiple resource types in the same call is error prone if we query a cluster metric. Indeed,
         cluster metrics result in an unpredicatable number of internal metric queries which all count towards
@@ -378,11 +399,11 @@ class VSphereCheck(AgentCheck):
         why we should never batch cluster metrics with anything else.
         """
         # Safeguard, let's avoid collecting multiple resources in the same call
-        mors = [m for m in mors if isinstance(m, resource_type)]
+        mors_filtered = [m for m in mors if isinstance(m, resource_type)]  # type: List[vim.ManagedEntity]
 
         if resource_type == vim.ClusterComputeResource:
             # Cluster metrics are unpredictable and a single call can max out the limit. Always collect them one by one.
-            max_batch_size = 1
+            max_batch_size = 1  # type: float
         elif resource_type in REALTIME_RESOURCES or self.config.max_historical_metrics < 0:
             # Queries are not limited by vCenter
             max_batch_size = self.config.metrics_per_query
@@ -393,21 +414,22 @@ class VSphereCheck(AgentCheck):
             else:
                 max_batch_size = min(self.config.metrics_per_query, self.config.max_historical_metrics)
 
-        batch = defaultdict(list)
+        batch = defaultdict(list)  # type: MorBatch
         batch_size = 0
-        for m in mors:
-            for metric in metric_ids:
+        for m in mors_filtered:
+            for metric_id in metric_ids:
                 if batch_size == max_batch_size:
                     yield batch
                     batch = defaultdict(list)
                     batch_size = 0
-                batch[m].append(metric)
+                batch[m].append(metric_id)
                 batch_size += 1
         # Do not yield an empty batch
         if batch:
             yield batch
 
     def submit_external_host_tags(self):
+        # type: () -> None
         """Send external host tags to the Datadog backend. This is only useful for a REALTIME instance because
         only VMs and Hosts appear as 'datadog hosts'."""
         external_host_tags = []
@@ -429,6 +451,7 @@ class VSphereCheck(AgentCheck):
             self.set_external_tags(external_host_tags)
 
     def collect_events(self):
+        # type: () -> None
         self.log.debug("Starting events collection.")
         try:
             t0 = Timer()
@@ -453,9 +476,10 @@ class VSphereCheck(AgentCheck):
             # Ignore them for next pass
             self.log.warning("Unable to fetch Events %s", e)
 
-        self.latest_event_query = self.api.get_latest_event_timestamp() + timedelta(seconds=1)
+        self.latest_event_query = self.api.get_latest_event_timestamp() + dt.timedelta(seconds=1)
 
     def check(self, _):
+        # type: (Any) -> None
         self._hostname = datadog_agent.get_hostname()
         # Assert the health of the vCenter API and submit the service_check accordingly
         try:

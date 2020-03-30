@@ -4,7 +4,7 @@
 from six import iteritems
 
 from datadog_checks.base import PDHBaseCheck, is_affirmative
-from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.base.utils.containers import hash_mutable
 
 DEFAULT_COUNTERS = [
     ["Web Service", None, "Service Uptime", "iis.uptime", "gauge"],

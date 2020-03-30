@@ -81,7 +81,6 @@ By default Haproxy sends logs over UDP to port 514. The Agent can listen for the
        port: 514
        service: haproxy
        source: haproxy
-       sourcecategory: http_web_access
    ```
 
     Change the `service` parameter value and configure it for your environment. See the [sample haproxy.d/conf.yaml][5] for all available configuration options.

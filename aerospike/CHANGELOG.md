@@ -1,5 +1,9 @@
 # CHANGELOG - Aerospike
 
+## 1.7.0 / 2020-03-13
+
+* [Added] Add TLS config. See [#6035](https://github.com/DataDog/integrations-core/pull/6035).
+
 ## 1.6.0 / 2020-02-22
 
 * [Added] Upgrade `aerospike` dependency. See [#5779](https://github.com/DataDog/integrations-core/pull/5779).

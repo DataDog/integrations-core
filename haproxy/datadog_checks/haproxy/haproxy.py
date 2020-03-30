@@ -13,7 +13,7 @@ from collections import defaultdict
 from six import PY2, iteritems
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import AgentCheck, is_affirmative, to_string
+from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
 
 STATS_URL = "/;csv;norefresh"
 EVENT_TYPE = SOURCE_TYPE_NAME = 'haproxy'
@@ -741,17 +741,16 @@ class HAProxy(AgentCheck):
             self.host_status[url][key] = data_status
 
     def _create_event(self, status, hostname, lastchg, service_name, back_or_front, custom_tags=None):
-        HAProxy_agent = self.hostname.decode('utf-8')
         custom_tags = [] if custom_tags is None else custom_tags
         if status == 'down':
             alert_type = "error"
-            title = "%s reported %s:%s %s" % (HAProxy_agent, service_name, hostname, status.upper())
+            title = "%s reported %s:%s %s" % (self.hostname, service_name, hostname, status.upper())
         else:
             if status == "up":
                 alert_type = "success"
             else:
                 alert_type = "info"
-            title = "%s reported %s:%s back and %s" % (HAProxy_agent, service_name, hostname, status.upper())
+            title = "%s reported %s:%s back and %s" % (self.hostname, service_name, hostname, status.upper())
 
         tags = ["haproxy_service:%s" % service_name]
         if back_or_front == Services.BACKEND:
@@ -762,7 +761,7 @@ class HAProxy(AgentCheck):
         return {
             'timestamp': int(time.time() - lastchg),
             'event_type': EVENT_TYPE,
-            'host': HAProxy_agent,
+            'host': self.hostname,
             'msg_title': title,
             'alert_type': alert_type,
             "source_type_name": SOURCE_TYPE_NAME,
@@ -779,7 +778,7 @@ class HAProxy(AgentCheck):
         custom_tags = [] if custom_tags is None else custom_tags
         service_name = data['pxname']
         status = data['status']
-        haproxy_hostname = to_string(self.hostname)
+        haproxy_hostname = to_native_string(self.hostname)
         check_hostname = haproxy_hostname if tag_by_host else ''
 
         if self._is_service_excl_filtered(service_name, services_incl_filter, services_excl_filter):

@@ -2,10 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from typing import Callable
 
 from six import PY2, text_type
 
-from .utils.common import to_string
+from .utils.common import to_native_string
 
 try:
     import datadog_agent
@@ -29,6 +30,12 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
         self.check = check
         self.check_id = self.check.check_id
 
+    def setup_sanitization(self, sanitize):
+        # type: (Callable[[str], str]) -> None
+        for handler in self.logger.handlers:
+            if isinstance(handler, AgentLogHandler):
+                handler.setFormatter(SanitizationFormatter(handler.formatter, sanitize=sanitize))
+
     def process(self, msg, kwargs):
         # Cache for performance
         if not self.check_id:
@@ -49,21 +56,49 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
             self.log(logging.WARNING, msg, *args, **kwargs)
 
 
+class CheckLogFormatter(logging.Formatter):
+    def format(self, record):
+        # type: (logging.LogRecord) -> str
+        message = to_native_string(super(CheckLogFormatter, self).format(record))
+        return "{} | ({}:{}) | {}".format(
+            # Default to `-` for non-check logs
+            getattr(record, '_check_id', '-'),
+            getattr(record, '_filename', record.filename),
+            getattr(record, '_lineno', record.lineno),
+            message,
+        )
+
+
 class AgentLogHandler(logging.Handler):
     """
     This handler forwards every log to the Go backend allowing python checks to
     log message within the main agent logging system.
     """
 
+    def __init__(self):
+        # type: () -> None
+        super(AgentLogHandler, self).__init__()
+        self.formatter = CheckLogFormatter()  # type: logging.Formatter
+
     def emit(self, record):
-        msg = "{} | ({}:{}) | {}".format(
-            # Default to `-` for non-check logs
-            getattr(record, '_check_id', '-'),
-            getattr(record, '_filename', record.filename),
-            getattr(record, '_lineno', record.lineno),
-            to_string(self.format(record)),
-        )
-        datadog_agent.log(msg, record.levelno)
+        # type: (logging.LogRecord) -> None
+        message = self.format(record)
+        datadog_agent.log(message, record.levelno)
+
+
+class SanitizationFormatter(logging.Formatter):
+    """
+    A formatter-like object that sanitizes log messages to hide sensitive data.
+    """
+
+    def __init__(self, parent, sanitize):
+        # type: (logging.Formatter, Callable[[str], str]) -> None
+        self.parent = parent
+        self.sanitize = sanitize
+
+    def format(self, record):
+        # type: (logging.LogRecord) -> str
+        return self.sanitize(self.parent.format(record))
 
 
 LOG_LEVEL_MAP = {
@@ -98,6 +133,7 @@ def _get_py_loglevel(lvl):
 
 
 def init_logging():
+    # type: () -> None
     """
     Initialize logging (set up forwarding to Go backend and sane defaults)
     """
