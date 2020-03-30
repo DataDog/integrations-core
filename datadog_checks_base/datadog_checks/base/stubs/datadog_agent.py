@@ -1,6 +1,12 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+try:
+    __import__('datadog_agent')
+except Exception:
+    pass
+else:
+    raise Exception("You imported the datadog_agent stub but you seem to be running inside a real agent!")
 
 
 class DatadogAgentStub(object):
