@@ -4,7 +4,10 @@
 from six import iteritems
 
 from datadog_checks.base import PDHBaseCheck
-from datadog_checks.base.stubs import datadog_agent
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
 DEFAULT_COUNTERS = [
     ["Web Service", None, "Service Uptime", "iis.uptime", "gauge"],
