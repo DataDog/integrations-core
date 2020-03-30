@@ -28,12 +28,9 @@ steps:
     cp $OUTPUT_FILE $BUILD_ARTIFACTSTAGINGDIRECTORY/
     ls -la $BUILD_ARTIFACTSTAGINGDIRECTORY
 
-  displayName: 'Compile Deps'
-
-- bash: |
-    set -e
     python -m pip install --no-deps --require-hashes -r /tmp/agent_requirements_filtered.in
-  displayName: 'Install deps'
+
+  displayName: 'Compile Deps'
 
 - task: PublishBuildArtifacts@1
   inputs:
