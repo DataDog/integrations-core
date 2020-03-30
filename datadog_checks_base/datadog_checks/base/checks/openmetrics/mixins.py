@@ -416,14 +416,18 @@ class OpenMetricsScraperMixin(object):
             if not scraper_config['label_joins']:
                 scraper_config['_dry_run'] = False
             elif not scraper_config['_watched_labels']:
-                # build the _watched_labels sets
-                scraper_config['_watched_labels']['single'] = set()
-                scraper_config['_watched_labels']['set'] = []
-                for val in itervalues(scraper_config['label_joins']):
-                    if 'label_to_match' in val:
-                        scraper_config['_watched_labels']['single'].add(val['label_to_match'])
+                for key, val in iteritems(scraper_config['label_joins']):
+                    labels = []
                     if 'labels_to_match' in val:
-                        scraper_config['_watched_labels']['set'].append(set(val['labels_to_match']))
+                        labels = val['labels_to_match']
+                    elif 'label_to_match' in val:
+                        self.log.warning("`label_to_match` is being deprecated, please use `labels_to_match`")
+                        if isinstance(val['label_to_match'], list):
+                            labels = val['label_to_match']
+                        else:
+                            labels = [val['label_to_match']]
+                    if labels:
+                        scraper_config['_watched_labels'][key] = set(labels)
 
             for metric in self.parse_metric_family(response, scraper_config):
                 yield metric
@@ -496,26 +500,9 @@ class OpenMetricsScraperMixin(object):
                 if sample[self.SAMPLE_VALUE] != 1:
                     continue
 
-                # 'label_to_match' allows targeting a metric based on a match with a single label
-                if 'label_to_match' in label_joins:
-                    matching_label = label_joins['label_to_match']
-                    if matching_label not in sample[self.SAMPLE_LABELS]:
-                        continue
-                    matching_value = sample[self.SAMPLE_LABELS][matching_label]
-
-                    label_dict = dict()
-                    for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
-                        if label_name == matching_label:
-                            continue
-                        elif label_name in labels_to_get or '*' in labels_to_get:
-                            label_dict[label_name] = label_value
-
-                    self._update_label_mapping(matching_label, matching_value, label_dict, scraper_config)
-
-                # 'labels_to_match' allows targeting a metric using a match with a tuple of labels
-                if 'labels_to_match' in label_joins:
-                    matching_labels = sorted(label_joins['labels_to_match'])
-                    if set(matching_labels).issubset(set(sample[self.SAMPLE_LABELS].keys())):
+                if metric.name in scraper_config['_watched_labels']:
+                    matching_labels = scraper_config['_watched_labels'][metric.name]
+                    if matching_labels.issubset(set(sample[self.SAMPLE_LABELS].keys())):
                         label_dict = dict()
                         for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
                             if label_name in matching_labels:
@@ -539,25 +526,14 @@ class OpenMetricsScraperMixin(object):
         # Filter metric to see if we can enrich with joined labels
         if scraper_config['label_joins']:
             for sample in metric.samples:
-                # Try matching with tuples of labels
-                for label_set in scraper_config['_watched_labels']['set']:
-                    if label_set.issubset(set(sample[self.SAMPLE_LABELS].keys())):
-                        matching_labels = sorted(label_set)
+                # Match with tuples of labels
+                for matching_labels in itervalues(scraper_config['_watched_labels']):
+                    if matching_labels.issubset(set(sample[self.SAMPLE_LABELS].keys())):
                         mapping_key = ','.join(matching_labels)
                         matching_values = [sample[self.SAMPLE_LABELS][l] for l in matching_labels]
                         mapping_value = ','.join(matching_values)
                         self._set_active_label_mapping(mapping_key, mapping_value, scraper_config)
                         self._join_labels_from_mapping(sample, mapping_key, mapping_value, scraper_config)
-
-                # Try matching with single labels
-                singles = scraper_config['_watched_labels']['single']
-                matching_labels = singles.intersection(set(sample[self.SAMPLE_LABELS].keys()))
-                for label_name in matching_labels:
-                    label_value = sample[self.SAMPLE_LABELS][label_name]
-                    # Set this label value as active
-                    self._set_active_label_mapping(label_name, label_value, scraper_config)
-                    # If mapping found add corresponding labels
-                    self._join_labels_from_mapping(sample, label_name, label_value, scraper_config)
 
     def _join_labels_from_mapping(self, sample, key, value, scraper_config):
         """
