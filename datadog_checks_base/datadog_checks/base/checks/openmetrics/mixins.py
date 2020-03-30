@@ -9,7 +9,7 @@ from os.path import isfile
 from re import compile
 
 import requests
-from prometheus_client.parser import text_fd_to_metric_families
+from prometheus_client.samples import Sample
 from six import PY3, iteritems, itervalues, string_types
 
 from ...config import is_affirmative
@@ -17,6 +17,7 @@ from ...errors import CheckException
 from ...utils.common import to_native_string
 from ...utils.http import RequestsWrapper
 from .. import AgentCheck
+from ..libs.prometheus import text_fd_to_metric_families
 
 if PY3:
     long = int
@@ -841,7 +842,7 @@ class OpenMetricsScraperMixin(object):
             ]
             # Replacing the sample tuple
             sample[self.SAMPLE_LABELS]["lower_bound"] = str(matching_bucket_tuple[0])
-            metric.samples[i] = (sample[self.SAMPLE_NAME], sample[self.SAMPLE_LABELS], matching_bucket_tuple[2])
+            metric.samples[i] = Sample(sample[self.SAMPLE_NAME], sample[self.SAMPLE_LABELS], matching_bucket_tuple[2])
 
     def _submit_sample_histogram_buckets(self, metric_name, sample, scraper_config, hostname=None):
         if "lower_bound" not in sample[self.SAMPLE_LABELS] or "le" not in sample[self.SAMPLE_LABELS]:
