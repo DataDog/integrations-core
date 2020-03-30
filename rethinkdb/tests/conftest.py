@@ -44,5 +44,5 @@ def dd_environment(instance):
 
     conditions = [wait_servers_ready, setup_cluster]
 
-    with docker_run(COMPOSE_FILE, conditions=conditions, env_vars=COMPOSE_ENV_VARS):
+    with docker_run(COMPOSE_FILE, conditions=conditions, env_vars=COMPOSE_ENV_VARS, mount_logs=True):
         yield instance

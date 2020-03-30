@@ -9,10 +9,13 @@ services:
     tty: true
     image: ${RETHINKDB_IMAGE}
     container_name: rethinkdb-server0
-    command: rethinkdb --bind all --server-name server0 --server-tag us
+    command: rethinkdb --bind all --server-name server0 --server-tag us --log-file /var/log/rethinkdb.log
     ports:
       - ${RETHINKDB_PORT_SERVER0}:28015  # Client driver port.
       - 8080:8080  # Port for the web UI. Debugging only (not used by tests).
+    volumes:
+      # NOTE: don't use the default log file path as it may cause permission issues during RethinkDB startup.
+      - ${DD_LOG_1}:/var/log/rethinkdb.log
 
   rethinkdb-server1:
     tty: true
