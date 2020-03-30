@@ -9,7 +9,7 @@ pgbouncer.stats.total_transaction_time,rate,,microsecond,,Time spent by pgbounce
 pgbouncer.stats.avg_req,gauge,,request,second,The average number of requests per second in last stat period,0,pgbouncer,requests per second
 pgbouncer.stats.avg_query_count,gauge,,query,second,The average number of queries per second in last stat period,0,pgbouncer,queries per second
 pgbouncer.stats.total_wait_time,gauge,,microsecond,,"Time spent by clients waiting for a server, in microseconds",0,pgbouncer,total wait time
-pgbouncer.stats.avg_wait_time,rate,,microsecond,,"Time spent by clients waiting for a server, in microseconds (average per second)",0,pgbouncer,query time
+pgbouncer.stats.avg_wait_time,gauge,,microsecond,,"Time spent by clients waiting for a server, in microseconds (average per second)",0,pgbouncer,avg wait time
 pgbouncer.stats.avg_transaction_count,gauge,,transaction,second,The average number of transactions per second in last stat period,0,pgbouncer,transactions per second
 pgbouncer.stats.avg_recv,gauge,,byte,second,The client network traffic received,0,pgbouncer,client bytes received
 pgbouncer.stats.avg_sent,gauge,,byte,second,The client network traffic sent,0,pgbouncer,client bytes sent
