@@ -1605,7 +1605,7 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']},
         'kube_pod_labels': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['*']},
         'kube_deployment_labels': {
-            'label_to_match': 'deployment',
+            'label_to_match': ['deployment'],
             'labels_to_get': [
                 'label_addonmanager_kubernetes_io_mode',
                 'label_k8s_app',
