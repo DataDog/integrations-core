@@ -58,12 +58,13 @@ def poll_mock():
     g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
     g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
 
+    data = ensure_unicode(generate_latest(registry))
+    data = data.replace("_total", "")
+
     poll_mock_patch = mock.patch(
         'requests.get',
         return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: ensure_unicode(generate_latest(registry)).split("\n"),
-            headers={'Content-Type': "text/plain"},
+            status_code=200, iter_lines=lambda **kwargs: data.split("\n"), headers={'Content-Type': "text/plain"},
         ),
     )
     with poll_mock_patch:
