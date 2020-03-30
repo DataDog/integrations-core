@@ -13,10 +13,11 @@ from ...utils import (
     get_check_file,
     get_config_file,
     get_data_directory,
+    get_readme_file,
     get_testable_checks,
     get_valid_integrations,
     has_e2e,
-    get_readme_file)
+)
 from ..console import CONTEXT_SETTINGS, abort, echo_info
 
 CSV_COLUMNS = [
