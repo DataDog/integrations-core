@@ -45,9 +45,9 @@ No additional installation is needed on your server.
           end
    ```
 
-  See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information, and the [Datadog Ruby][7] documentation for further configuration options.
+    See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information, and the [Datadog Ruby][7] documentation for further configuration options.
 
-4. Update the [Datadog Agent main configuration file][13] `datadog.yaml` by adding the following configs:
+3. Update the [Datadog Agent main configuration file][13] `datadog.yaml` by adding the following configs:
 
    ```yaml
    # dogstatsd_mapper_cache_size: 1000  # default to 1000
@@ -92,7 +92,7 @@ No additional installation is needed on your server.
 
 See [metadata.csv][12] for a list of metrics provided by this integration.
 
-Add custom metrics in Sidekiq. See the [Sidekiq documentation][11] for custom metric inspiration.
+The Sidekiq integration also allows custom metrics, see the [Sidekiq documentation][11] for custom metric inspiration.
 
 ### Log Collection
 
