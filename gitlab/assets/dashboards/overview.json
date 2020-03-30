@@ -16,25 +16,27 @@
         "verified": true
     },
     "description": "This dashboard provides a high-level overview of your Gitlab instance so you can monitor metrics related to pipelines, repositories, requests, and more.\n\nFor further reading on monitoring Gitlab, see: [Official Gitlab integration docs](https://docs.datadoghq.com/integrations/gitlab/)\n\nClone this template to make changes and add your own graphs and widgets.",
-    "disableCog": false,
-    "disableEditing": false,
     "id": 1014699,
-    "isIntegration": false,
-    "isShared": false,
-    "modified": "2020-03-16T12:56:17.523883+00:00",
+    "modified": "2020-03-30T18:03:40.950891+00:00",
     "new_id": "c9w-dnm-m3a",
-    "originalHeight": 80,
-    "originalWidth": "calc(100% - 32px)",
     "read_only": false,
-    "template_variables": [],
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "gitlab_host",
+            "prefix": "gitlab_host"
+        },
+        {
+            "default": "*",
+            "name": "gitlab_port",
+            "prefix": "gitlab_port"
+        }
+    ],
     "widgets": [
         {
-            "add_timeframe": true,
             "height": 9,
-            "isShared": false,
-            "margin": "",
+            "id": 0,
             "sizing": "zoom",
-            "title": false,
             "type": "image",
             "url": "https://static.datadoghq.com/static/images/saas_logos/bot/gitlab@2x.png",
             "width": 15,
@@ -42,23 +44,15 @@
             "y": 1
         },
         {
-            "add_timeframe": true,
             "check": "gitlab.liveness",
-            "error": null,
             "group": "gitlab_host:localhost,gitlab_port:8086,optional:tag1,host:docker-desktop",
             "group_by": [],
             "grouping": "cluster",
             "height": 9,
-            "isShared": false,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
+            "id": 1,
             "tags": [
                 "*"
             ],
-            "text_align": "center",
-            "text_size": "auto",
-            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": "16",
@@ -69,23 +63,14 @@
             "y": 1
         },
         {
-            "add_timeframe": true,
             "check": "gitlab.readiness",
-            "error": null,
-            "group": null,
             "group_by": [],
             "grouping": "cluster",
             "height": 8,
-            "isShared": false,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
+            "id": 2,
             "tags": [
                 "*"
             ],
-            "text_align": "center",
-            "text_size": "auto",
-            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": "16",
@@ -96,23 +81,14 @@
             "y": 11
         },
         {
-            "add_timeframe": true,
             "check": "gitlab.health",
-            "error": null,
-            "group": null,
             "group_by": [],
             "grouping": "cluster",
             "height": 8,
-            "isShared": false,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
+            "id": 3,
             "tags": [
                 "*"
             ],
-            "text_align": "center",
-            "text_size": "auto",
-            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": "16",
@@ -123,23 +99,14 @@
             "y": 20
         },
         {
-            "add_timeframe": true,
             "check": "gitlab.prometheus_endpoint_up",
-            "error": null,
-            "group": null,
             "group_by": [],
             "grouping": "cluster",
             "height": 8,
-            "isShared": false,
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
+            "id": 4,
             "tags": [
                 "*"
             ],
-            "text_align": "center",
-            "text_size": "auto",
-            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": "16",
@@ -150,42 +117,28 @@
             "y": 29
         },
         {
-            "add_timeframe": true,
-            "auto_refresh": false,
-            "background_color": "gray",
             "bgcolor": "gray",
-            "content": "Service Checks",
             "font_size": "18",
             "height": 25,
             "html": "Service Checks",
-            "isShared": false,
-            "refresh_every": 30000,
-            "show_tick": true,
+            "id": 5,
             "text_align": "center",
             "tick": true,
             "tick_edge": "right",
             "tick_pos": "50%",
-            "title": false,
             "type": "note",
             "width": 15,
             "x": 1,
             "y": 12
         },
         {
-            "add_timeframe": true,
-            "error": null,
             "height": 13,
-            "isShared": false,
+            "id": 6,
             "legend": false,
-            "markers": [],
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
             "tile_def": {
-                "markers": [],
                 "requests": [
                     {
-                        "q": "avg:gitlab.http_requests_total{*} by {method}.as_count()",
+                        "q": "avg:gitlab.rack.http_requests_total{*} by {method}.as_count()",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -203,58 +156,35 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
             "title_text": "Http requests",
             "type": "timeseries",
-            "viz": "timeseries",
             "width": 43,
             "x": 34,
-            "y": 13,
-            "yaxis": {
-                "includeZero": true,
-                "label": "",
-                "max": "auto",
-                "min": "auto",
-                "scale": "linear"
-            }
+            "y": 13
         },
         {
-            "add_timeframe": true,
-            "auto_refresh": false,
-            "background_color": "gray",
             "bgcolor": "gray",
-            "content": "Load Information",
             "font_size": "18",
             "height": 10,
             "html": "Load Information",
-            "isShared": false,
-            "refresh_every": 30000,
-            "show_tick": true,
+            "id": 7,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
             "tick_pos": "50%",
-            "title": false,
             "type": "note",
             "width": 43,
             "x": 34,
             "y": 1
         },
         {
-            "add_timeframe": true,
-            "error": null,
             "height": 13,
-            "isShared": false,
+            "id": 8,
             "legend": false,
-            "markers": [],
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
             "tile_def": {
-                "markers": [],
                 "requests": [
                     {
                         "q": "avg:gitlab.pipelines_created_total{*}",
@@ -275,36 +205,20 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
             "title_text": "Pipelines Created",
             "type": "timeseries",
-            "viz": "timeseries",
             "width": 43,
             "x": 79,
-            "y": 29,
-            "yaxis": {
-                "includeZero": true,
-                "label": "",
-                "max": "auto",
-                "min": "auto",
-                "scale": "linear"
-            }
+            "y": 29
         },
         {
-            "add_timeframe": true,
-            "error": null,
             "height": 13,
-            "isShared": false,
+            "id": 9,
             "legend": false,
-            "markers": [],
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
             "tile_def": {
-                "markers": [],
                 "requests": [
                     {
                         "q": "sum:gitlab.transaction.event_create_repository_total{*}",
@@ -325,83 +239,53 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "Repositories Created Count",
+            "title_text": "New Repositories Created ",
             "type": "timeseries",
-            "viz": "timeseries",
             "width": 43,
             "x": 79,
-            "y": 45,
-            "yaxis": {
-                "includeZero": true,
-                "label": "",
-                "max": "auto",
-                "min": "auto",
-                "scale": "linear"
-            }
+            "y": 45
         },
         {
-            "add_timeframe": true,
-            "auto_refresh": false,
-            "background_color": "gray",
             "bgcolor": "gray",
-            "content": "Project Information",
             "font_size": "18",
             "height": 10,
             "html": "Project Information",
-            "isShared": false,
-            "refresh_every": 30000,
-            "show_tick": true,
+            "id": 10,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
             "tick_pos": "50%",
-            "title": false,
             "type": "note",
             "width": 43,
             "x": 79,
             "y": 1
         },
         {
-            "add_timeframe": true,
-            "auto_refresh": false,
-            "background_color": "gray",
             "bgcolor": "gray",
-            "content": "Users",
             "font_size": "18",
             "height": 8,
             "html": "Users",
-            "isShared": false,
-            "refresh_every": 30000,
-            "show_tick": true,
+            "id": 11,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
             "tick_pos": "50%",
-            "title": false,
             "type": "note",
             "width": 31,
             "x": 1,
             "y": 39
         },
         {
-            "add_timeframe": true,
-            "error": null,
             "height": 13,
-            "isShared": false,
+            "id": 12,
             "legend": false,
-            "markers": [],
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
             "tile_def": {
-                "markers": [],
                 "requests": [
                     {
-                        "q": "count_nonzero(avg:gitlab.user_session_logins_total{*} by {host})",
+                        "q": "avg:gitlab.user_session_logins_total{*}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -425,30 +309,15 @@
             "title_size": "16",
             "title_text": "User Logins ",
             "type": "timeseries",
-            "viz": "timeseries",
             "width": 31,
             "x": 1,
-            "y": 49,
-            "yaxis": {
-                "includeZero": true,
-                "label": "",
-                "max": "auto",
-                "min": "auto",
-                "scale": "linear"
-            }
+            "y": 49
         },
         {
-            "add_timeframe": true,
-            "error": null,
             "height": 13,
-            "isShared": false,
+            "id": 13,
             "legend": false,
-            "markers": [],
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
             "tile_def": {
-                "markers": [],
                 "requests": [
                     {
                         "q": "avg:gitlab.unicorn.workers{*} by {host}",
@@ -457,7 +326,7 @@
                             "type": "solid",
                             "width": "normal"
                         },
-                        "type": "bars"
+                        "type": "line"
                     }
                 ],
                 "viz": "timeseries",
@@ -469,39 +338,23 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
             "title_text": "Unicorn Workers",
             "type": "timeseries",
-            "viz": "timeseries",
             "width": 43,
             "x": 34,
-            "y": 45,
-            "yaxis": {
-                "includeZero": true,
-                "label": "",
-                "max": "auto",
-                "min": "auto",
-                "scale": "linear"
-            }
+            "y": 45
         },
         {
-            "add_timeframe": true,
-            "error": null,
             "height": 13,
-            "isShared": false,
+            "id": 14,
             "legend": false,
-            "markers": [],
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
             "tile_def": {
-                "markers": [],
                 "requests": [
                     {
-                        "q": "avg:gitlab.transaction.event_push_branch_total{*}.as_count()",
+                        "q": "sum:gitlab.transaction.event_push_branch_total{*}.as_count()",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -519,45 +372,29 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
             "title_text": "Branches Pushed",
             "type": "timeseries",
-            "viz": "timeseries",
             "width": 43,
             "x": 79,
-            "y": 13,
-            "yaxis": {
-                "includeZero": true,
-                "label": "",
-                "max": "auto",
-                "min": "auto",
-                "scale": "linear"
-            }
+            "y": 13
         },
         {
-            "add_timeframe": true,
-            "error": null,
             "height": 13,
-            "isShared": false,
+            "id": 15,
             "legend": false,
-            "markers": [],
-            "sharedGlobalTime": {
-                "live_span": "1h"
-            },
             "tile_def": {
-                "markers": [],
                 "requests": [
                     {
-                        "q": "avg:gitlab.sql_duration_seconds.sum{*} by {controller}",
+                        "q": "p90:gitlab.sql_duration_seconds{*}.as_count(), p75:gitlab.sql_duration_seconds{*}.as_count(), p50:gitlab.sql_duration_seconds{*}.as_count(), min:gitlab.sql_duration_seconds{*}.as_count(), max:gitlab.sql_duration_seconds{*}.as_count()",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
                             "width": "normal"
                         },
-                        "type": "bars"
+                        "type": "line"
                     }
                 ],
                 "viz": "timeseries",
@@ -569,23 +406,14 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
             "title_text": "SQL Execution Time",
             "type": "timeseries",
-            "viz": "timeseries",
             "width": 43,
             "x": 34,
-            "y": 29,
-            "yaxis": {
-                "includeZero": true,
-                "label": "",
-                "max": "auto",
-                "min": "auto",
-                "scale": "linear"
-            }
+            "y": 29
         }
     ]
 }
