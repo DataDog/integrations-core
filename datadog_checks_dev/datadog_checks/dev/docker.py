@@ -215,7 +215,11 @@ class ComposeFileUp(LazyFunction):
             self.command.append(self.service_name)
 
     def __call__(self):
-        return run_command(self.command, check=True)
+        output = run_command(self.command, check=True)
+        if output.code != 0 and 'unexpected EOF' in str(output.stderr):
+            # retry
+            output = run_command(self.command, check=True)
+        return output
 
 
 class ComposeFileLogs(LazyFunction):
