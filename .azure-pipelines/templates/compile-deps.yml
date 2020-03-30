@@ -28,7 +28,7 @@ steps:
     cp $OUTPUT_FILE $BUILD_ARTIFACTSTAGINGDIRECTORY/
     ls -la $BUILD_ARTIFACTSTAGINGDIRECTORY
 
-    python -m pip download -r $OUTPUT_FILE
+    python -m pip download --no-deps -r $OUTPUT_FILE
 
   displayName: 'Compile Deps'
 
