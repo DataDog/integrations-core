@@ -26,9 +26,11 @@ steps:
     python -m piptools compile --generate-hashes --output-file $OUTPUT_FILE /tmp/agent_requirements_filtered.in
 
     cp $OUTPUT_FILE $BUILD_ARTIFACTSTAGINGDIRECTORY/
-    ls -la $BUILD_ARTIFACTSTAGINGDIRECTORY
 
-    python -m pip download --no-deps -r $OUTPUT_FILE
+    DOWNLOAD_FILE="download-${{ parameters.sys_platform }}-py$PYTHON_MAJOR_VERSION.txt"
+    python -m pip download --no-deps -r $OUTPUT_FILE | tee $BUILD_ARTIFACTSTAGINGDIRECTORY/$DOWNLOAD_FILE
+
+    ls -la $BUILD_ARTIFACTSTAGINGDIRECTORY
 
   displayName: 'Compile Deps'
 
