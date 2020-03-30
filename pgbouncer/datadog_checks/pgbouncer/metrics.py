@@ -17,7 +17,7 @@ STATS_METRICS = {
         ('total_sent', ('pgbouncer.stats.bytes_sent_per_second', RATE)),
         ('total_query_time', ('pgbouncer.stats.total_query_time', RATE)),
         ('total_xact_time', ('pgbouncer.stats.total_transaction_time', RATE)),  # >= 1.8
-        ('total_wait_time', ('pgbouncer.stats.total_wait_time' GAUGE)),
+        ('total_wait_time', ('pgbouncer.stats.total_wait_time', RATE)),
         ('avg_req', ('pgbouncer.stats.avg_req', GAUGE)),  # < 1.8
         ('avg_xact_count', ('pgbouncer.stats.avg_transaction_count', GAUGE)),  # >= 1.8
         ('avg_query_count', ('pgbouncer.stats.avg_query_count', GAUGE)),  # >= 1.8
