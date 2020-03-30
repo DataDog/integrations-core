@@ -80,10 +80,13 @@ instances:
     ## Each filter in the list is composed of three parameters.
     ## 'resource' is one of vm/host/datastore/datacenter/cluster on which to apply the filter
     ## 'patterns' is a list of matching regex, if any of those matches, the resource will be monitored.
+    ## 'type' is either whitelist (default) or blacklist. If a resource is both whitelisted and blacklisted it will be
+    ##        considered blacklisted.
     ## 'property' is the kind of property on which to apply the filter and must be one of those values:
     ##    - name (default) to filter on the resource name (defined by vCenter)
     ##    - inventory_path to filter on the full inventory path
     ##      (ex: \/<Datacenter_name>\/vm\/<FOLDER_NAME>\/.* for all vms in the folder <FOLDER_NAME>)
+    ##    - tag to filter only the resources with a given tag.
     ##    - hostname to filter on the ESXi Host name (only valid for if 'resource' equals 'vm')
     ##    - guest_hostname to filter on the VM hostname (only valid for if 'resource' equals 'vm' and
     ##      if VMware tools are installed)
@@ -102,6 +105,16 @@ instances:
     #     property: hostname
     #     patterns:
     #       - <HOSTNAME_REGEX>
+    #   - resource: vm
+    #     property: tag
+    #     type: blacklist
+    #     patterns:
+    #       - '^env:staging$'
+    #   - resource: vm
+    #     property: tag
+    #     type: whitelist
+    #     patterns:
+    #       - '^env:.*$'
     #   - resource: vm
     #     property: guest_hostname
     #     patterns:

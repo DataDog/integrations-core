@@ -7,9 +7,16 @@ from pyVmomi import vim
 from six import iteritems
 
 from datadog_checks.base import to_native_string
+from datadog_checks.vsphere.cache import TagsCache
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
-from datadog_checks.vsphere.types import InfrastructureData, MetricFilters, MetricName, ResourceFilters
+from datadog_checks.vsphere.types import (
+    InfrastructureData,
+    MetricFilters,
+    MetricName,
+    ResourceFilters,
+    ResoureFilterKey,
+)
 
 METRIC_TO_INSTANCE_TAG_MAPPING = {
     # Structure:
@@ -51,40 +58,66 @@ def match_any_regex(string, regexes):
     return False
 
 
-def is_resource_excluded_by_filters(mor, infrastructure_data, resource_filters):
-    # type: (vim.ManagedEntity, InfrastructureData, ResourceFilters) -> bool
+def is_resource_collected_by_filters(mor, infrastructure_data, resource_filters, tags_cache):
+    # type: (vim.ManagedEntity, InfrastructureData, ResourceFilters, TagsCache) -> bool
     resource_type = MOR_TYPE_AS_STRING[type(mor)]
 
-    if not [f for f in resource_filters if f[0] == resource_type]:
-        # No filter for this resource, collect everything
+    if not [f for f in resource_filters if f.resource == resource_type and f.is_whitelist]:
+        # No whitelist filter specified for this resource, consider that the resource matches the whitelist
+        match_whitelist = True
+    else:
+        match_whitelist = _does_resource_match_filters(
+            mor, infrastructure_data, resource_filters, tags_cache, is_whitelist=True
+        )
+
+    match_blacklist = _does_resource_match_filters(
+        mor, infrastructure_data, resource_filters, tags_cache, is_whitelist=False
+    )
+
+    if match_blacklist:
+        # If resources matches one of the blacklisted patterns, do not collect it
         return False
 
-    name_filter = resource_filters.get((resource_type, 'name'))
-    inventory_path_filter = resource_filters.get((resource_type, 'inventory_path'))
-    hostname_filter = resource_filters.get((resource_type, 'hostname'))
-    guest_hostname_filter = resource_filters.get((resource_type, 'guest_hostname'))
+    # Otherwise, collect it if it matches one of the whitelisted patterns.
+    return match_whitelist
+
+
+def _does_resource_match_filters(mor, infrastructure_data, resource_filters, tags_cache, is_whitelist=True):
+    # type: (vim.ManagedEntity, InfrastructureData, ResourceFilters, TagsCache, bool) -> bool
+    resource_type = MOR_TYPE_AS_STRING[type(mor)]
+
+    name_filter = resource_filters.get(ResoureFilterKey(resource_type, 'name', is_whitelist))
+    inventory_path_filter = resource_filters.get(ResoureFilterKey(resource_type, 'inventory_path', is_whitelist))
+    tag_filter = resource_filters.get(ResoureFilterKey(resource_type, 'tag', is_whitelist))
+    hostname_filter = resource_filters.get(ResoureFilterKey(resource_type, 'hostname', is_whitelist))
+    guest_hostname_filter = resource_filters.get(ResoureFilterKey(resource_type, 'guest_hostname', is_whitelist))
 
     if name_filter:
         mor_name = infrastructure_data[mor].get("name", "")
         if match_any_regex(mor_name, name_filter):
-            return False
+            return True
     if inventory_path_filter:
         path = make_inventory_path(mor, infrastructure_data)
         if match_any_regex(path, inventory_path_filter):
-            return False
+            return True
+    if tag_filter:
+        resource_tags = tags_cache.get_mor_tags(mor)
+        for resource_tag in resource_tags:
+            if match_any_regex(resource_tag, tag_filter):
+                return True
 
     if hostname_filter and isinstance(mor, vim.VirtualMachine):
         host = infrastructure_data[mor].get("runtime.host")
         if host and host in infrastructure_data:
             hostname = infrastructure_data[host].get("name", "")
             if match_any_regex(hostname, hostname_filter):
-                return False
+                return True
     if guest_hostname_filter and isinstance(mor, vim.VirtualMachine):
         guest_hostname = infrastructure_data.get(mor, {}).get("guest.hostName", "")
         if match_any_regex(guest_hostname, guest_hostname_filter):
-            return False
+            return True
 
-    return True
+    return False
 
 
 def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):

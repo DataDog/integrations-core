@@ -8,6 +8,7 @@ from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import CheckLoggingAdapter
 from datadog_checks.vsphere.constants import (
     ALLOWED_FILTER_PROPERTIES,
+    ALLOWED_FILTER_TYPES,
     DEFAULT_BATCH_COLLECTOR_SIZE,
     DEFAULT_MAX_QUERY_METRICS,
     DEFAULT_METRICS_PER_QUERY,
@@ -27,6 +28,7 @@ from datadog_checks.vsphere.types import (
     MetricFilters,
     ResourceFilterConfig,
     ResourceFilters,
+    ResoureFilterKey,
 )
 
 
@@ -121,8 +123,15 @@ class VSphereConfig(object):
         allowed_resource_types = [MOR_TYPE_AS_STRING[k] for k in self.collected_resource_types]
 
         for resource_filter in all_resource_filters:
+            # Optional fields:
+            if 'type' not in resource_filter:
+                resource_filter['type'] = 'whitelist'
+            if 'property' not in resource_filter:
+                resource_filter['property'] = 'name'
+
+            # Check required fields and their types
             for (field, field_type) in iteritems(
-                {'resource': string_types, 'property': string_types, 'patterns': list}
+                {'resource': string_types, 'property': string_types, 'type': string_types, 'patterns': list}
             ):
                 if field not in resource_filter:
                     self.log.warning(
@@ -135,6 +144,7 @@ class VSphereConfig(object):
                     )
                     continue
 
+            # Check `resource` validity
             if resource_filter['resource'] not in allowed_resource_types:
                 self.log.warning(
                     "Ignoring filter %r because resource %s is not collected when collection_type is %s.",
@@ -144,6 +154,7 @@ class VSphereConfig(object):
                 )
                 continue
 
+            # Check `property` validity
             allowed_prop_names = ALLOWED_FILTER_PROPERTIES
             if resource_filter['resource'] == MOR_TYPE_AS_STRING[vim.VirtualMachine]:
                 allowed_prop_names += EXTRA_FILTER_PROPERTIES_FOR_VMS
@@ -159,11 +170,22 @@ class VSphereConfig(object):
                 )
                 continue
 
-            filter_key = (resource_filter['resource'], resource_filter['property'])
+            # Check `type` validity
+            if resource_filter['type'] not in ALLOWED_FILTER_TYPES:
+                self.log.warning(
+                    "Ignoring filter %r because type '%s' is not valid. Should be one of %r.",
+                    resource_filter,
+                    resource_filter['type'],
+                    ALLOWED_FILTER_TYPES,
+                )
+            is_whitelist = resource_filter['type'] == 'whitelist'
+
+            filter_key = ResoureFilterKey(resource_filter['resource'], resource_filter['property'], is_whitelist)
             if filter_key in formatted_resource_filters:
                 self.log.warning(
-                    "Ignoring filter %r because you already have a filter for resource type %s and property %s.",
+                    "Ignoring filter %r because you already have a `%s` filter for resource type %s and property %s.",
                     resource_filter,
+                    resource_filter['type'],
                     resource_filter['resource'],
                     resource_filter['property'],
                 )
