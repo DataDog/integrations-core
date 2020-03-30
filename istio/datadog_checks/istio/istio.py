@@ -328,10 +328,7 @@ class Istio(OpenMetricsBaseCheck):
                     }
                 ],
                 # The following metrics have been blakclisted due to high cardinality of tags
-                'ignore_metrics': [
-                    'galley_mcp_source_message_size_bytes',
-                    'galley_mcp_source_request_acks_total',
-                ],
+                'ignore_metrics': ['galley_mcp_source_message_size_bytes', 'galley_mcp_source_request_acks_total'],
             }
         )
         process_galley_instance['ignore_metrics'].extend(instance.get('ignore_metrics', []))
