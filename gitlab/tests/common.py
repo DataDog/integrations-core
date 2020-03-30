@@ -4,7 +4,7 @@
 
 import os
 
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -52,9 +52,9 @@ METRICS = [
     "transaction.new_redis_connections_total",
     "transaction.view_duration_total",
     "transaction.rails_queue_duration_total",
-    "http_requests_total",
-    "http_request_duration_seconds.sum",
-    "http_request_duration_seconds.count",
+    "rack.http_requests_total",
+    "rack.http_request_duration_seconds.sum",
+    "rack.http_request_duration_seconds.count",
     "ruby.file_descriptors",
     "ruby.memory_bytes",
     "ruby.sampler_duration_seconds_total",
@@ -93,8 +93,8 @@ METRICS = [
 
 METRICS_TO_TEST = [
     "unicorn.workers",
-    "http_requests_total",
-    "http_request_duration_seconds.sum",
+    "rack.http_requests_total",
+    "rack.http_request_duration_seconds.sum",
     "ruby.process_start_time_seconds",
     "sql_duration_seconds.sum",
 ]

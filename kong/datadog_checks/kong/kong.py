@@ -4,7 +4,7 @@
 import simplejson as json
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 
 class Kong(AgentCheck):

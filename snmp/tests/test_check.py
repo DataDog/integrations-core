@@ -105,16 +105,16 @@ def test_snmpget(aggregator):
 
 
 def test_custom_mib(aggregator):
-    instance = common.generate_instance_config(common.DUMMY_MIB_OID)
+    instance = common.generate_instance_config([oid for oid, _, _ in common.DUMMY_MIB_OID])
     instance["community_string"] = "dummy"
 
     check = SnmpCheck('snmp', common.MIBS_FOLDER, [instance])
     check.check(instance)
 
     # Test metrics
-    for metric in common.DUMMY_MIB_OID:
+    for metric, metric_type, value in common.DUMMY_MIB_OID:
         metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
-        aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, at_least=1)
+        aggregator.assert_metric(metric_name, metric_type=metric_type, count=1, value=value, tags=common.CHECK_TAGS)
 
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
@@ -648,7 +648,7 @@ def test_profile_sys_object_no_metrics():
     """If an instance is created without metrics and there is no profile defined, an error is raised."""
     instance = common.generate_instance_config([])
     with pytest.raises(ConfigurationError):
-        SnmpCheck('snmp', {}, [instance])
+        SnmpCheck('snmp', {'profiles': {}}, [instance])
 
 
 def test_discovery(aggregator):
@@ -842,6 +842,18 @@ def test_metric_tags_misconfiguration():
     with pytest.raises(ConfigurationError):
         common.create_check(instance)
 
+    instance['metric_tags'] = [{'tags': {'foo': 'bar'}, 'symbol': 'sysName', 'MIB': 'SNMPv2-MIB'}]
+    with pytest.raises(ConfigurationError):
+        common.create_check(instance)
+
+    instance['metric_tags'] = [{'tags': 'foo', 'match': 'bar', 'symbol': 'sysName', 'MIB': 'SNMPv2-MIB'}]
+    with pytest.raises(ConfigurationError):
+        common.create_check(instance)
+
+    instance['metric_tags'] = [{'tags': {'foo': 'bar'}, 'match': '(', 'symbol': 'sysName', 'MIB': 'SNMPv2-MIB'}]
+    with pytest.raises(ConfigurationError):
+        common.create_check(instance)
+
 
 def test_metric_tag_multiple(aggregator, caplog):
     metrics = common.SUPPORTED_METRIC_TYPES
@@ -864,3 +876,32 @@ def test_metric_tag_multiple(aggregator, caplog):
             break
     else:
         raise AssertionError('Expected WARNING log with message `{}`'.format(expected_message))
+
+
+def test_metric_tag_matching(aggregator):
+    metrics = common.SUPPORTED_METRIC_TYPES
+    instance = common.generate_instance_config(metrics)
+    instance['metric_tags'] = [
+        {
+            'MIB': 'SNMPv2-MIB',
+            'symbol': 'sysName',
+            'match': '(\\d\\d)(.*)',
+            'tags': {'host_prefix': '\\1', 'host': '\\2'},
+        }
+    ]
+    check = common.create_check(instance)
+
+    check.check(instance)
+
+    tags = list(common.CHECK_TAGS)
+    tags.append('host:ba948911b9')
+    tags.append('host_prefix:41')
+
+    for metric in common.SUPPORTED_METRIC_TYPES:
+        metric_name = "snmp." + metric['name']
+        aggregator.assert_metric(metric_name, tags=tags, count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
+
+    aggregator.all_metrics_asserted()

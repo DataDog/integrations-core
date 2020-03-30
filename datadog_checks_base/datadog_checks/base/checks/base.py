@@ -33,6 +33,7 @@ from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
 from ..utils.proxy import config_proxy_skip
+from ..utils.secrets import SecretsSanitizer
 
 try:
     import datadog_agent
@@ -337,6 +338,30 @@ class AgentCheck(object):
         self._log_deprecation('in_developer_mode')
         return False
 
+    def register_secret(self, secret):
+        # type: (str) -> None
+        """
+        Register a secret to be scrubbed by `.sanitize()`.
+        """
+        if not hasattr(self, '_sanitizer'):
+            # Configure lazily so that checks that don't use sanitization aren't affected.
+            self._sanitizer = SecretsSanitizer()
+            self.log.setup_sanitization(sanitize=self.sanitize)
+
+        self._sanitizer.register(secret)
+
+    def sanitize(self, text):
+        # type: (str) -> str
+        """
+        Scrub any registered secrets in `text`.
+        """
+        try:
+            sanitizer = self._sanitizer
+        except AttributeError:
+            return text
+        else:
+            return sanitizer.sanitize(text)
+
     def get_instance_proxy(self, instance, uri, proxies=None):
         # type: (InstanceType, str, ProxySettings) -> ProxySettings
         # TODO: Remove with Agent 5
@@ -351,11 +376,11 @@ class AgentCheck(object):
         return config_proxy_skip(proxies, uri, skip)
 
     def _context_uid(self, mtype, name, tags=None, hostname=None):
-        # type: (int, str, List[str], str) -> str
+        # type: (int, str, Sequence[str], str) -> str
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
 
     def submit_histogram_bucket(self, name, value, lower_bound, upper_bound, monotonic, hostname, tags):
-        # type: (str, float, int, int, bool, str, List[str]) -> None
+        # type: (str, float, int, int, bool, str, Sequence[str]) -> None
         if value is None:
             # ignore metric sample
             return
@@ -381,7 +406,7 @@ class AgentCheck(object):
         )
 
     def _submit_metric(self, mtype, name, value, tags=None, hostname=None, device_name=None, raw=False):
-        # type: (int, str, float, List[str], str, str, bool) -> None
+        # type: (int, str, float, Sequence[str], str, str, bool) -> None
         if value is None:
             # ignore metric sample
             return
@@ -415,7 +440,7 @@ class AgentCheck(object):
         aggregator.submit_metric(self, self.check_id, mtype, self._format_namespace(name, raw), value, tags, hostname)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
-        # type: (str, float, List[str], str, str, bool) -> None
+        # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample a gauge metric.
 
         :param str name: the name of the metric.
@@ -431,7 +456,7 @@ class AgentCheck(object):
         )
 
     def count(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
-        # type: (str, float, List[str], str, str, bool) -> None
+        # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample a raw count metric.
 
         :param str name: the name of the metric.
@@ -447,7 +472,7 @@ class AgentCheck(object):
         )
 
     def monotonic_count(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
-        # type: (str, float, List[str], str, str, bool) -> None
+        # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample an increasing counter metric.
 
         :param str name: the name of the metric.
@@ -463,7 +488,7 @@ class AgentCheck(object):
         )
 
     def rate(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
-        # type: (str, float, List[str], str, str, bool) -> None
+        # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample a point, with the rate calculated at the end of the check.
 
         :param str name: the name of the metric.
@@ -479,7 +504,7 @@ class AgentCheck(object):
         )
 
     def histogram(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
-        # type: (str, float, List[str], str, str, bool) -> None
+        # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample a histogram metric.
 
         :param str name: the name of the metric.
@@ -495,7 +520,7 @@ class AgentCheck(object):
         )
 
     def historate(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
-        # type: (str, float, List[str], str, str, bool) -> None
+        # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample a histogram based on rate metrics.
 
         :param str name: the name of the metric.
@@ -511,7 +536,7 @@ class AgentCheck(object):
         )
 
     def increment(self, name, value=1, tags=None, hostname=None, device_name=None, raw=False):
-        # type: (str, float, List[str], str, str, bool) -> None
+        # type: (str, float, Sequence[str], str, str, bool) -> None
         """Increment a counter metric.
 
         :param str name: the name of the metric.
@@ -528,7 +553,7 @@ class AgentCheck(object):
         )
 
     def decrement(self, name, value=-1, tags=None, hostname=None, device_name=None, raw=False):
-        # type: (str, float, List[str], str, str, bool) -> None
+        # type: (str, float, Sequence[str], str, str, bool) -> None
         """Decrement a counter metric.
 
         :param str name: the name of the metric.
@@ -545,7 +570,7 @@ class AgentCheck(object):
         )
 
     def service_check(self, name, status, tags=None, hostname=None, message=None, raw=False):
-        # type: (str, ServiceCheckStatus, List[str], str, str, bool) -> None
+        # type: (str, ServiceCheckStatus, Sequence[str], str, str, bool) -> None
         """Send the status of a service.
 
         :param str name: the name of the service check.
@@ -562,6 +587,8 @@ class AgentCheck(object):
             message = ''
         else:
             message = to_native_string(message)
+
+        message = self.sanitize(message)
 
         aggregator.submit_service_check(
             self, self.check_id, self._format_namespace(name, raw), status, tags, hostname, message
@@ -608,7 +635,7 @@ class AgentCheck(object):
         return is_affirmative(datadog_agent.get_config('enable_metadata_collection'))
 
     def set_external_tags(self, external_tags):
-        # type: (List[ExternalTagType]) -> None
+        # type: (Sequence[ExternalTagType]) -> None
         # Example of external_tags format
         # [
         #     ('hostname', {'src_name': ['test:t1']}),
@@ -773,7 +800,9 @@ class AgentCheck(object):
 
             result = ''
         except Exception as e:
-            result = json.dumps([{'message': str(e), 'traceback': traceback.format_exc()}])
+            message = self.sanitize(str(e))
+            tb = self.sanitize(traceback.format_exc())
+            result = json.dumps([{'message': message, 'traceback': tb}])
         finally:
             if self.metric_limiter:
                 self.metric_limiter.reset()

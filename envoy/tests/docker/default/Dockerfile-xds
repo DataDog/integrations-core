@@ -1,8 +1,10 @@
 FROM gcr.io/istio-testing/go-control-plane-ci:08-20-2019
 
 RUN go get github.com/envoyproxy/go-control-plane/envoy/api/v2
+RUN go get github.com/envoyproxy/go-control-plane/pkg/cache/v2
+RUN go get github.com/census-instrumentation/opencensus-proto/gen-go/trace/v1
 
 COPY controlplane.go /go-control-plane/controlplane.go
-RUN go build 
+RUN go build
 
 ENTRYPOINT /go-control-plane/go-control-plane

@@ -7,8 +7,8 @@ from copy import deepcopy
 import requests
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.errors import CheckException
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base.errors import CheckException
 
 
 class GitlabRunnerCheck(OpenMetricsBaseCheck):

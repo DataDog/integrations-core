@@ -178,7 +178,6 @@ istio.galley.process.start_time_seconds,gauge,,second,,Start time of the process
 istio.galley.process.virtual_memory_bytes,gauge,,byte,,Virtual memory size in bytes.,0,istio,
 istio.galley.endpoint_no_pod,gauge,,,,Endpoints without an associated pod.,-1,istio,
 istio.galley.mcp_source.clients_total,gauge,,,,The number of streams currently connected.,0,istio,
-istio.galley.mcp_source.request_acks_total,gauge,,,,The number of request acks received by the source.,0,istio,
 istio.galley.runtime_processor.event_span_duration_milliseconds,gauge,,millisecond,,The duration between each incoming event.,0,istio,
 istio.galley.runtime_processor.events_processed_total,gauge,,,,The number of events that have been processed.,0,istio,
 istio.galley.runtime_processor.snapshot_events_total,gauge,,,,The number of events per snapshot.,0,istio,

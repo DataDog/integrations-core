@@ -66,7 +66,7 @@ def info(endpoint):
 
     \b
     Example:
-    $ ddev meta prom info :8080/_status/vars
+    `$ ddev meta prom info :8080/_status/vars`
     """
     endpoint = sanitize_endpoint(endpoint)
 

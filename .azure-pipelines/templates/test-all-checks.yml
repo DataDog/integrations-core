@@ -75,6 +75,9 @@ jobs:
     - checkName: cockroachdb
       displayName: CockroachDB
       os: linux
+    - checkName: confluent_platform
+      displayName: Confluent Platform
+      os: linux
     - checkName: consul
       displayName: Consul
       os: linux
@@ -314,6 +317,9 @@ jobs:
       os: linux
     - checkName: redisdb
       displayName: Redis
+      os: linux
+    - checkName: rethinkdb
+      displayName: RethinkDB
       os: linux
     - checkName: riak
       displayName: Riak

@@ -30,13 +30,16 @@ def test_files_changed():
     with mock.patch('datadog_checks.dev.tooling.git.chdir') as chdir:
         with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
             run.return_value = mock.MagicMock()
-            expected = ['foo', 'bar', 'baz']
-            run.return_value.stdout = "\n".join(expected)
+            run.return_value.stdout = '''
+M	foo
+R100	bar	baz
+R100	foo2	foo3
+            '''
             set_root('/foo/')
             retval = files_changed()
             chdir.assert_called_once_with('/foo/')
-            run.assert_called_once_with('git diff --name-only master...', capture='out')
-            assert retval == expected
+            run.assert_called_once_with('git diff --name-status master...', capture='out')
+            assert retval == ['bar', 'baz', 'foo', 'foo2', 'foo3']
 
 
 def test_get_commits_since():

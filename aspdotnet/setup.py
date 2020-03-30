@@ -24,7 +24,7 @@ def get_requirements(fpath):
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base>=4.2.0'
+CHECKS_BASE_REQ = 'datadog_checks_base>=11.2.0'
 
 setup(
     name='datadog-aspdotnet',

@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-from datadog_checks.checks.win.wmi import WinWMICheck
-from datadog_checks.utils.containers import hash_mutable
-from datadog_checks.utils.timeout import TimeoutException
+from datadog_checks.base.checks.win.wmi import WinWMICheck
+from datadog_checks.base.utils.containers import hash_mutable
+from datadog_checks.base.utils.timeout import TimeoutException
 
 
 class WMICheck(WinWMICheck):

@@ -20,6 +20,7 @@ from datadog_checks.base.utils.common import (
 )
 from datadog_checks.base.utils.containers import iter_unique
 from datadog_checks.base.utils.limiter import Limiter
+from datadog_checks.base.utils.secrets import SecretsSanitizer
 
 
 class Item:
@@ -183,3 +184,30 @@ class TestBytesUnicode:
         # type: () -> None
         with pytest.deprecated_call():
             to_string(b'example')
+
+
+class TestSecretsSanitizer:
+    def test_default(self):
+        # type: () -> None
+        secret = 's3kr3t'
+        sanitizer = SecretsSanitizer()
+        assert sanitizer.sanitize(secret) == secret
+
+    def test_sanitize(self):
+        # type: () -> None
+        secret = 's3kr3t'
+        sanitizer = SecretsSanitizer()
+        sanitizer.register(secret)
+        assert all(letter == '*' for letter in sanitizer.sanitize(secret))
+
+    def test_sanitize_multiple(self):
+        # type: () -> None
+        pwd1 = 's3kr3t'
+        pwd2 = 'admin123'
+        sanitizer = SecretsSanitizer()
+        sanitizer.register(pwd1)
+        sanitizer.register(pwd2)
+        message = 'Could not authenticate with password {}, did you try {}?'.format(pwd1, pwd2)
+        sanitized = sanitizer.sanitize(message)
+        assert pwd1 not in sanitized
+        assert pwd2 not in sanitized

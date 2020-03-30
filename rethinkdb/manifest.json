@@ -1,0 +1,33 @@
+{
+  "display_name": "RethinkDB",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "rethinkdb",
+  "metric_prefix": "rethinkdb.",
+  "metric_to_check": "rethinkdb.config.servers",
+  "creates_events": false,
+  "short_description": "Collect status, performance and other metrics from a RethinkDB cluster.",
+  "guid": "a09f3ed3-c947-413c-a9c6-0dcb641ea890",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-RethinkDB Integration",
+  "categories": [
+    "data store"
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "rethinkdb",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json"
+  }
+}

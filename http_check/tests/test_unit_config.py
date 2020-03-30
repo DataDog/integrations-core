@@ -4,8 +4,8 @@
 import pytest
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.base.utils.headers import headers as agent_headers
 from datadog_checks.http_check.config import DEFAULT_EXPECTED_CODE, from_instance
-from datadog_checks.utils.headers import headers as agent_headers
 
 
 def test_from_instance():

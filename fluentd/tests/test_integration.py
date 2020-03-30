@@ -10,8 +10,9 @@ from datadog_checks.fluentd import Fluentd
 
 from .common import BAD_PORT, BAD_URL, CHECK_NAME, DEFAULT_INSTANCE, EXPECTED_GAUGES, HOST
 
+pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
-@pytest.mark.usefixtures("dd_environment")
+
 def test_fluentd_exception(aggregator):
     instance = {"monitor_agent_url": BAD_URL, "plugin_ids": ["plg2"], "tags": ["test"]}
     check = Fluentd(CHECK_NAME, {}, [instance])
@@ -24,7 +25,6 @@ def test_fluentd_exception(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures("dd_environment")
 def test_fluentd_with_tag_by_type(aggregator):
     instance = copy.deepcopy(DEFAULT_INSTANCE)
     instance["tag_by"] = "type"
@@ -43,7 +43,6 @@ def test_fluentd_with_tag_by_type(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures("dd_environment")
 def test_fluentd_with_tag_by_plugin_id(aggregator):
     instance = copy.deepcopy(DEFAULT_INSTANCE)
     instance["tag_by"] = "plugin_id"
@@ -62,7 +61,6 @@ def test_fluentd_with_tag_by_plugin_id(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures("dd_environment")
 def test_fluentd_with_custom_tags(aggregator):
     instance = copy.deepcopy(DEFAULT_INSTANCE)
     custom_tags = ['test', 'tast:tast']

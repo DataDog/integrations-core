@@ -8,6 +8,7 @@ import os
 import mock
 import pytest
 
+from datadog_checks.base import ensure_bytes
 from datadog_checks.dev import get_here
 from datadog_checks.twistlock import TwistlockCheck
 
@@ -46,6 +47,10 @@ class MockResponse:
         self.text = j
         self._json = j
         self.status_code = 200
+
+    @property
+    def content(self):
+        return ensure_bytes(self._json)
 
     def json(self):
         return json.loads(self._json)

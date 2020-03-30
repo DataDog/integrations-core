@@ -5,6 +5,7 @@ parameters:
   test: true
   test_e2e: true
   benchmark: true
+  latest_metrics: false
   validate: false
   repo: 'core'
   pip_cache_config: null
@@ -40,4 +41,5 @@ jobs:
       test: ${{ parameters.test }}
       test_e2e: ${{ parameters.test_e2e }}
       benchmark: ${{ parameters.benchmark }}
+      latest_metrics: ${{ parameters.latest_metrics }}
       repo: ${{ parameters.repo }}

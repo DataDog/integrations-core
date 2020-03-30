@@ -11,13 +11,13 @@ from ....subprocess import SubprocessError, run_command
 from ....utils import basepath, chdir, get_next
 from ...constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
 from ...github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
-from ...jira import JiraClient
+from ...trello import TrelloClient
 from ...utils import format_commit_id
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 
-def create_jira_issue(
-    client: JiraClient,
+def create_trello_card(
+    client: TrelloClient,
     teams: List[str],
     pr_title: str,
     pr_url: str,
@@ -33,12 +33,12 @@ def create_jira_issue(
         if member:
             echo_info(f'Randomly assigned issue to {member}')
         if dry_run:
-            echo_success(f'Will create an issue for team {team}: ', nl=False)
+            echo_success(f'Will create a card for team {team}: ', nl=False)
             echo_info(pr_title)
             continue
         creation_attempts = 3
         for attempt in range(3):
-            rate_limited, error, response = client.create_issue(team, pr_title, body, member)
+            rate_limited, error, response = client.create_card(team, pr_title, body, member)
             if rate_limited:
                 wait_time = 10
                 echo_warning(
@@ -58,8 +58,8 @@ def create_jira_issue(
                 )
                 time.sleep(wait_time)
             else:
-                issue_key = response.json().get('key')
-                echo_success(f'Created issue {issue_key} for team {team}')
+                echo_success(f'Created card for team {team}: ', nl=False)
+                echo_info(response.json().get('url'))
                 break
 
 
@@ -115,16 +115,16 @@ def get_commits_between(base_ref: str, target_ref: str, *, root: str) -> List[Tu
 
 def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
     """Return a member to assign to the created issue.
-    In practice, it returns one jira user which is not the PR author, for the given team.
-    For it to work, you need a `jira_users_$team` table in your ddev configuration,
-    with keys being github users and values being their corresponding jira IDs (not names).
+    In practice, it returns one trello user which is not the PR author, for the given team.
+    For it to work, you need a `trello_users_$team` table in your ddev configuration,
+    with keys being github users and values being their corresponding trello IDs (not names).
 
     For example::
-        [jira_users_integrations]
+        [trello_users_integrations]
         john = "xxxxxxxxxxxxxxxxxxxxx"
         alice = "yyyyyyyyyyyyyyyyyyyy"
     """
-    users = config.get(f'jira_users_{team.lower()}')
+    users = config.get(f'trello_users_{team.lower()}')
     if not users:
         return None
     member = random.choice([key for user, key in users.items() if user != author])
@@ -132,7 +132,7 @@ def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
 
 
 @click.command(
-    context_settings=CONTEXT_SETTINGS, short_help='Create a Jira issue for each change that needs to be tested'
+    context_settings=CONTEXT_SETTINGS, short_help='Create a Trello card for each change that needs to be tested'
 )
 @click.argument('base_ref')
 @click.argument('target_ref')
@@ -141,12 +141,10 @@ def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
 @click.pass_context
 def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str, dry_run: bool) -> None:
     """
-    Create a Jira issue for changes since a previous release (referenced by BASE_REF)
-    that need to be tested for the next release (referenced by TARGET_REF).
+    Create a Trello card for changes since a previous release (referenced by `BASE_REF`)
+    that need to be tested for the next release (referenced by `TARGET_REF`).
 
-    Usage
-    -----
-    BASE_REF and TARGET_REF can be any valid git references. It practice, you should use either:
+    `BASE_REF` and `TARGET_REF` can be any valid git references. It practice, you should use either:
 
     * A tag: `7.16.1`, `7.17.0-rc.4`, ...
 
@@ -160,35 +158,35 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
 
     * Create cards for changes between a previous Agent release and `master` (useful when preparing an initial RC):
 
-        $ ddev release testable 7.16.1 origin/master
+        `$ ddev release testable 7.16.1 origin/master`
 
     * Create cards for changes between a previous RC and `master` (useful when preparing a new RC, and a separate
     release branch was not created yet):
 
-        $ ddev release testable 7.17.0-rc.2 origin/master
+        `$ ddev release testable 7.17.0-rc.2 origin/master`
 
     * Create cards for changes between a previous RC and a release branch (useful to only review changes in a
     release branch that has diverged from `master`):
 
-        $ ddev release testable 7.17.0-rc.4 7.17.x
+        `$ ddev release testable 7.17.0-rc.4 7.17.x`
 
     * Create cards for changes between two arbitrary tags, e.g. between RCs:
 
-        $ ddev release testable 7.17.0-rc.4 7.17.0-rc.5
+        `$ ddev release testable 7.17.0-rc.4 7.17.0-rc.5`
 
     TIP: run with `ddev -x release testable` to force the use of the current directory.
-
-    Prerequisites
-    -------------
     To avoid GitHub's public API rate limits, you need to set
     `github.user`/`github.token` in your config file or use the
     `DD_GITHUB_USER`/`DD_GITHUB_TOKEN` environment variables.
 
     \b
-    To use Jira:
-    1. Go to `https://id.atlassian.com/manage/api-tokens` and create an API token.
-    2. Run `ddev config set jira.user` and enter your jira email.
-    3. Run `ddev config set jira.token` and paste your API token.
+    To use Trello:
+    1. Go to `https://trello.com/app-key` and copy your API key.
+    2. Run `ddev config set trello.key` and paste your API key.
+    3. Go to `https://trello.com/1/authorize?key=key&name=name&scope=read,write&expiration=never&response_type=token`,
+       where `key` is your API key and `name` is the name to give your token, e.g. ReleaseTestingYourName.
+       Authorize access and copy your token.
+    4. Run `ddev config set trello.token` and paste your token.
     """
     root = get_root()
     repo = basepath(root)
@@ -223,7 +221,8 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
 
     commit_ids: Set[str] = set()
     user_config = ctx.obj
-    jira = JiraClient(user_config)
+    trello = TrelloClient(user_config)
+
     for i, (commit_hash, commit_subject) in enumerate(commits, 1):
         commit_id = parse_pr_number(commit_subject)
         if commit_id is not None:
@@ -294,13 +293,13 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
         pr_author = pr_data.get('user', {}).get('login', '')
         pr_body = pr_data.get('body', '')
 
-        jira_config = user_config['jira']
-        if not (jira_config['user'] and jira_config['token']):
-            abort('Error: You are not authenticated for Jira. Please set your jira ddev config')
+        trello_config = user_config['trello']
+        if not (trello_config['key'] and trello_config['token']):
+            abort('Error: You are not authenticated for Trello. Please set your trello ddev config')
 
-        teams = [jira.label_team_map[label] for label in pr_labels if label in jira.label_team_map]
+        teams = [trello.label_team_map[label] for label in pr_labels if label in trello.label_team_map]
         if teams:
-            create_jira_issue(jira, teams, pr_title, pr_url, pr_body, dry_run, pr_author, user_config)
+            create_trello_card(trello, teams, pr_title, pr_url, pr_body, dry_run, pr_author, user_config)
             continue
 
         finished = False
@@ -359,6 +358,6 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
                 echo_warning(f'Exited at {format_commit_id(commit_id)}')
                 return
             else:
-                create_jira_issue(jira, [value], pr_title, pr_url, pr_body, dry_run, pr_author, user_config)
+                create_trello_card(trello, [value], pr_title, pr_url, pr_body, dry_run, pr_author, user_config)
 
             finished = True
