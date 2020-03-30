@@ -411,10 +411,9 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         """
         Retrieve node spec from kubelet.
         """
-        node_spec = self.perform_kubelet_query(self.node_spec_url).json()
-        # TODO: report allocatable for cpu, mem, and pod capacity
-        # if we can get it locally or thru the DCA instead of the /nodes endpoint directly
-        return node_spec
+        node_spec = self.perform_kubelet_query(self.node_spec_url)
+        node_spec.raise_for_status()
+        return node_spec.json()
 
     def _retrieve_stats(self):
         """
@@ -429,7 +428,13 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             return {}
 
     def _report_node_metrics(self, instance_tags):
-        node_spec = self._retrieve_node_spec()
+        try:
+            node_spec = self._retrieve_node_spec()
+        except requests.HTTPError:
+            # ignore HTTPError, for supporting k8s 1.18 in a degrated mode
+            self.log.warning('kubelet check "/spec" endpoint not available')
+            return
+
         num_cores = node_spec.get('num_cores', 0)
         memory_capacity = node_spec.get('memory_capacity', 0)
 

@@ -8,6 +8,8 @@ from datetime import datetime
 
 import mock
 import pytest
+import requests
+
 from six import iteritems
 from urllib3.exceptions import InsecureRequestWarning
 
@@ -767,6 +769,18 @@ def test_report_node_metrics(monkeypatch):
         mock.call('kubernetes.memory.capacity', 512.0, ['foo:bar']),
     ]
     check.gauge.assert_has_calls(calls, any_order=False)
+
+
+def test_report_node_metrics_kubernetes1_18(monkeypatch, aggregator):
+    check = KubeletCheck('kubelet', {}, [{}])
+    check.kubelet_credentials = KubeletCredentials({'verify_tls': 'false'})
+    check.node_spec_url = "http://localhost:10255/spec"
+
+    get = mock.MagicMock(status_code=404, iter_lines=lambda **kwargs: "Error Code")
+    get.raise_for_status.side_effect = requests.HTTPError('error')
+    with mock.patch('requests.get', return_value=get):
+        check._report_node_metrics(['foo:bar'])
+        aggregator.assert_all_metrics_covered()
 
 
 def test_retrieve_pod_list_success(monkeypatch):
