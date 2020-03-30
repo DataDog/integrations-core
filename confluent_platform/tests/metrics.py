@@ -58,7 +58,7 @@ REST_JETTY_METRICS_OPTIONAL = [
     'confluent.kafka.rest.jetty.connections_closed_rate',
 ]
 
-REST_JERSEY_METRICS_OPTIONAL = [
+REST_JERSEY_METRICS = [
     'confluent.kafka.rest.jersey.brokers.list.request_error_rate',
     'confluent.kafka.rest.jersey.consumer.assign_v2.request_error_rate',
     'confluent.kafka.rest.jersey.consumer.assignment_v2.request_error_rate',
@@ -255,6 +255,7 @@ ALWAYS_PRESENT_METRICS = (
     BROKER_METRICS
     + CONNECT_METRICS
     + REST_JETTY_METRICS
+    + REST_JERSEY_METRICS
     + SCHEMA_REGISTRY_JETTY_METRICS
     + SCHEMA_REGISTRY_METRICS
     + PRODUCER_METRICS
@@ -272,7 +273,6 @@ ALWAYS_PRESENT_METRICS = (
 NOT_ALWAYS_PRESENT_METRICS = (
     BROKER_OPTIONAL_METRICS
     + SCHEMA_REGISTRY_JERSEY_METRICS
-    + REST_JERSEY_METRICS_OPTIONAL
     + REST_JETTY_METRICS_OPTIONAL
     + CONNECT_METRICS_OPTIONAL
     + CONSUMER_FETCH_METRICS

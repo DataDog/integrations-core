@@ -866,8 +866,8 @@ jmx_metrics:
   #   - Kafka Schema Registry: https://docs.confluent.io/current/schema-registry/monitoring.html
   - include:
       bean:
-        - kafka.rest:type=jetty-metrics
-        - kafka.schema.registry:type=jetty-metrics
+        - kafka.rest:type=jersey-metrics
+        - kafka.schema.registry:type=jersey-metrics
       attribute:
         brokers.list.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
