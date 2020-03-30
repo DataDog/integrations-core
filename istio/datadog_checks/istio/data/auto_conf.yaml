@@ -1,0 +1,14 @@
+ad_identifiers:
+  - proxyv2
+
+## All options defined here are available to all instances.
+#
+init_config:
+
+## Every instance is scheduled independent of the others.
+#
+instances:
+  - send_histograms_buckets: true
+
+    istio_mesh_endpoint: http://%%host%%:15090/stats/prometheus
+
