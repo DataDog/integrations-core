@@ -13,7 +13,7 @@ variables:
 jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Weekly Metrics Validation
+    job_name: Weekly_Metrics_Validation
     display: Linux
     check: 'airflow clickhouse'
     latest_metrics: true
