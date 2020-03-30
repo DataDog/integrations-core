@@ -16,7 +16,7 @@ from ...utils import (
     get_testable_checks,
     get_valid_integrations,
     has_e2e,
-)
+    get_readme_file)
 from ..console import CONTEXT_SETTINGS, abort, echo_info
 
 CSV_COLUMNS = [
@@ -95,6 +95,12 @@ def catalog(checks, out_file, markdown):
                     is_http = True
                 if 'self.set_metadata' in contents:
                     has_metadata = True
+
+        readme_file = get_readme_file(check)
+        if not has_logs and os.path.exists(readme_file):
+            with open(readme_file) as f:
+                if '# Log collection' in f.read():
+                    has_logs = True
 
         entry = {
             'name': check,
