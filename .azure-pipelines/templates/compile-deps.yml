@@ -30,6 +30,11 @@ steps:
 
   displayName: 'Compile Deps'
 
+- bash: |
+    set -e
+    python -m pip install --no-deps --require-hashes -r /tmp/agent_requirements_filtered.in
+  displayName: 'Install deps'
+
 - task: PublishBuildArtifacts@1
   inputs:
     pathtoPublish: '$(Build.ArtifactStagingDirectory)'
