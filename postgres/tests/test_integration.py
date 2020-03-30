@@ -79,6 +79,7 @@ def test_unsupported_replication(aggregator, integration_check, pg_instance):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_can_connect_service_check(aggregator, integration_check, pg_instance):
+    # First: check run with a valid postgres instance
     check = integration_check(pg_instance)
     expected_tags = pg_instance['tags'] + [
         'host:{}'.format(HOST),
@@ -86,6 +87,19 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
         'port:{}'.format(PORT),
         'db:{}'.format(DB_NAME),
     ]
+    check.check(pg_instance)
+    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags)
+    aggregator.reset()
+
+    # Second: keep the connection open but an unexpected error happens during check run
+    orig_db = check.db
+    check.db = mock.MagicMock(spec=('closed', 'status'), closed=False, status=psycopg2.extensions.STATUS_READY)
+    check.check(pg_instance)
+    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=expected_tags)
+    aggregator.reset()
+
+    # Third: connection still open but this time no error
+    check.db = orig_db
     check.check(pg_instance)
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags)
 

@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
-import socket
 from contextlib import closing
 
 import psycopg2
@@ -502,7 +501,7 @@ class PostgreSql(AgentCheck):
         service_check_tags = list(set(service_check_tags))
         return service_check_tags
 
-    def _connect(self, host, port, user, password, dbname, ssl, tags):
+    def _connect(self, host, port, user, password, dbname, ssl):
         """Get and memoize connections to instances"""
         if self.db and self.db.closed:
             # Reset the connection object to retry to connect
@@ -512,45 +511,29 @@ class PostgreSql(AgentCheck):
             if self.db.status != psycopg2.extensions.STATUS_READY:
                 # Some transaction went wrong and the connection is in an unhealthy state. Let's fix that
                 self.db.rollback()
-        elif host != "" and user != "":
-            try:
-                if host == 'localhost' and password == '':
-                    # Use ident method
-                    self.db = psycopg2.connect(
-                        "user=%s dbname=%s, application_name=%s" % (user, dbname, "datadog-agent")
-                    )
-                elif port != '':
-                    self.db = psycopg2.connect(
-                        host=host,
-                        port=port,
-                        user=user,
-                        password=password,
-                        database=dbname,
-                        sslmode=ssl,
-                        application_name="datadog-agent",
-                    )
-                else:
-                    self.db = psycopg2.connect(
-                        host=host,
-                        user=user,
-                        password=password,
-                        database=dbname,
-                        sslmode=ssl,
-                        application_name="datadog-agent",
-                    )
-
-            except Exception as e:
-                message = u'Error establishing postgres connection: %s' % (str(e))
-                service_check_tags = self._get_service_check_tags(host, tags)
-                self.service_check(
-                    self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=message
-                )
-                raise
         else:
-            if not host:
-                raise ConfigurationError('Please specify a Postgres host to connect to.')
-            elif not user:
-                raise ConfigurationError('Please specify a user to connect to Postgres as.')
+            if host == 'localhost' and password == '':
+                # Use ident method
+                self.db = psycopg2.connect("user=%s dbname=%s, application_name=%s" % (user, dbname, "datadog-agent"))
+            elif port != '':
+                self.db = psycopg2.connect(
+                    host=host,
+                    port=port,
+                    user=user,
+                    password=password,
+                    database=dbname,
+                    sslmode=ssl,
+                    application_name="datadog-agent",
+                )
+            else:
+                self.db = psycopg2.connect(
+                    host=host,
+                    user=user,
+                    password=password,
+                    database=dbname,
+                    sslmode=ssl,
+                    application_name="datadog-agent",
+                )
 
     def _get_custom_queries(self, tags, custom_queries):
         """
@@ -708,16 +691,21 @@ class PostgreSql(AgentCheck):
         custom_queries = instance.get('custom_queries', [])
 
         (host, port, dbname) = self.key
+        if not host:
+            raise ConfigurationError('Please specify a Postgres host to connect to.')
+        elif not user:
+            raise ConfigurationError('Please specify a user to connect to Postgres as.')
 
         self.log.debug("Custom metrics: %s", custom_metrics)
 
         tag_replication_role = is_affirmative(self.instance.get('tag_replication_role', False))
         tags = self.tags
 
+        service_check_tags = self._get_service_check_tags(host, tags)
         # Collect metrics
         try:
             # Check version
-            self._connect(host, port, user, password, dbname, ssl, tags)
+            self._connect(host, port, user, password, dbname, ssl)
             if tag_replication_role:
                 tags.extend(["replication_role:{}".format(self._get_replication_role())])
             self.log.debug("Running check against version %s", str(self.version))
@@ -734,12 +722,16 @@ class PostgreSql(AgentCheck):
                 collect_default_db,
             )
             self._get_custom_queries(tags, custom_queries)
-        except (psycopg2.InterfaceError, socket.error):
-            self.log.info("Connection error, will retry on next agent run")
+        except Exception as e:
+            self.log.error("Unable to collect postgres metrics.")
             self._clean_state()
-
-        if self.db is not None:
-            service_check_tags = self._get_service_check_tags(host, tags)
+            self.db = None
+            message = u'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
+                host, port, dbname, str(e)
+            )
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=message)
+            raise e
+        else:
             message = u'Established connection to postgres://%s:%s/%s' % (host, port, dbname)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags, message=message)
             try:
@@ -747,4 +739,4 @@ class PostgreSql(AgentCheck):
                 self.db.commit()
             except Exception as e:
                 self.log.warning("Unable to commit: %s", e)
-        self._version = None  # We don't want to cache versions between runs to capture minor updates for metadata
+            self._version = None  # We don't want to cache versions between runs to capture minor updates for metadata
