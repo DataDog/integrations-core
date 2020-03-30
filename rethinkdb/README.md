@@ -43,15 +43,41 @@ The RethinkDB check is included in the [Datadog Agent][3] package. No additional
 
 **Note**: this integration collects metrics from all servers in the cluster, so you only need a single Agent.
 
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `rethinkdb.d/conf.yaml` file to start collecting your RethinkDB logs:
+
+    ```yaml
+    logs:
+      - type: file
+        path: "<LOG_FILE_PATH>"
+        source: rethinkdb
+        service: "<SERVICE_NAME>"
+    ```
+
+    Change the `path` and `service` parameter values based on your environment. See the [sample rethinkdb.d/conf.yaml][7] for all available configuration options.
+
+3. [Restart the Agent][8].
+
+See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Docker environments.
+
 ### Validation
 
-[Run the Agent's status subcommand][9] and look for `rethinkdb` under the Checks section.
+[Run the Agent's status subcommand][10] and look for `rethinkdb` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][10] for a list of metrics provided by this check.
+See [metadata.csv][11] for a list of metrics provided by this check.
 
 ### Service Checks
 
@@ -67,7 +93,7 @@ RethinkDB does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][12].
 
 [1]: https://rethinkdb.com/
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
@@ -77,6 +103,7 @@ Need help? Contact [Datadog support][11].
 [6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [7]: https://github.com/DataDog/integrations-core/blob/master/rethinkdb/datadog_checks/rethinkdb/data/conf.yaml.example
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[10]: https://github.com/DataDog/integrations-core/blob/master/rethinkdb/metadata.csv
-[11]: https://docs.datadoghq.com/help
+[9]: https://docs.datadoghq.com/agent/docker/log/
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[11]: https://github.com/DataDog/integrations-core/blob/master/rethinkdb/metadata.csv
+[12]: https://docs.datadoghq.com/help
