@@ -14,7 +14,6 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
 from datadog_checks.base.checks.libs.timer import Timer
-from datadog_checks.base.stubs import datadog_agent
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache, TagsCache
@@ -38,6 +37,12 @@ from datadog_checks.vsphere.utils import (
     is_resource_excluded_by_filters,
     should_collect_per_instance_values,
 )
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
 
 SERVICE_CHECK_NAME = 'can_connect'
 
