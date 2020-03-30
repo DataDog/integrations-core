@@ -28,7 +28,7 @@ steps:
     cp $OUTPUT_FILE $BUILD_ARTIFACTSTAGINGDIRECTORY/
     ls -la $BUILD_ARTIFACTSTAGINGDIRECTORY
 
-    python -m pip install --no-deps --require-hashes -r /tmp/agent_requirements_filtered.in
+    python -m pip install --no-deps --require-hashes -r $OUTPUT_FILE
 
   displayName: 'Compile Deps'
 
