@@ -6,6 +6,10 @@ schedules:
     include:
     - master
 
+pr: none
+
+trigger: none
+
 variables:
   PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
   DDEV_COLOR: 1
