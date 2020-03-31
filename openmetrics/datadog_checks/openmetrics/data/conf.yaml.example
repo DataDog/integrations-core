@@ -105,10 +105,10 @@ instances:
     # type_overrides:
     #   - <METRIC_NAME>: <METRIC_TYPE>
 
-    ## @param send_histograms_buckets - boolean - optional - default: True
+    ## @param send_histograms_buckets - boolean - optional - default: true
     ## Set send_histograms_buckets to true to send the histograms bucket.
     #
-    # send_histograms_buckets: false
+    # send_histograms_buckets: true
 
     ## @param send_distribution_buckets - boolean - optional - default: false
     ## Set `send_distribution_buckets` to `true` to send histograms as Datadog distribution metrics.

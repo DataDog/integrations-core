@@ -85,8 +85,7 @@
 - name: send_histograms_buckets
   description: Set send_histograms_buckets to true to send the histograms bucket.
   value:
-    example: false
-    default: true
+    example: true
     type: boolean
 - name: send_distribution_buckets
   description: |
