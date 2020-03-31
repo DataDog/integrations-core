@@ -203,6 +203,103 @@ PILOT_METRICS = [
 ]
 
 
+MESH_METRICS_MAPPER = {
+    'istio_request_count': 'request.count',
+    'istio_request_duration': 'request.duration',
+    'istio_request_size': 'request.size',
+    'istio_response_size': 'response.size',
+    'istio_requests_total': 'request.count',
+    'istio_request_duration_seconds': 'request.duration',
+    'istio_request_bytes': 'request.size',
+    'istio_response_bytes': 'response.size',
+}
+
+
+MESH_MIXER_MAPPER = {
+    'go_gc_duration_seconds': 'go.gc_duration_seconds',
+    'go_goroutines': 'go.goroutines',
+    'go_info': 'go.info',
+    'go_memstats_alloc_bytes': 'go.memstats.alloc_bytes',
+    'go_memstats_alloc_bytes_total': 'go.memstats.alloc_bytes_total',
+    'go_memstats_buck_hash_sys_bytes': 'go.memstats.buck_hash_sys_bytes',
+    'go_memstats_frees_total': 'go.memstats.frees_total',
+    'go_memstats_gc_cpu_fraction': 'go.memstats.gc_cpu_fraction',
+    'go_memstats_gc_sys_bytes': 'go.memstats.gc_sys_bytes',
+    'go_memstats_heap_alloc_bytes': 'go.memstats.heap_alloc_bytes',
+    'go_memstats_heap_idle_bytes': 'go.memstats.heap_idle_bytes',
+    'go_memstats_heap_inuse_bytes': 'go.memstats.heap_inuse_bytes',
+    'go_memstats_heap_objects': 'go.memstats.heap_objects',
+    'go_memstats_heap_released_bytes': 'go.memstats.heap_released_bytes',
+    'go_memstats_heap_sys_bytes': 'go.memstats.heap_sys_bytes',
+    'go_memstats_last_gc_time_seconds': 'go.memstats.last_gc_time_seconds',
+    'go_memstats_lookups_total': 'go.memstats.lookups_total',
+    'go_memstats_mallocs_total': 'go.memstats.mallocs_total',
+    'go_memstats_mcache_inuse_bytes': 'go.memstats.mcache_inuse_bytes',
+    'go_memstats_mcache_sys_bytes': 'go.memstats.mcache_sys_bytes',
+    'go_memstats_mspan_inuse_bytes': 'go.memstats.mspan_inuse_bytes',
+    'go_memstats_mspan_sys_bytes': 'go.memstats.mspan_sys_bytes',
+    'go_memstats_next_gc_bytes': 'go.memstats.next_gc_bytes',
+    'go_memstats_other_sys_bytes': 'go.memstats.other_sys_bytes',
+    'go_memstats_stack_inuse_bytes': 'go.memstats.stack_inuse_bytes',
+    'go_memstats_stack_sys_bytes': 'go.memstats.stack_sys_bytes',
+    'go_memstats_sys_bytes': 'go.memstats.sys_bytes',
+    'go_threads': 'go.threads',
+    'grpc_server_handled_total': 'grpc.server.handled_total',
+    'grpc_server_handling_seconds': 'grpc.server.handling_seconds',
+    'grpc_server_msg_received_total': 'grpc.server.msg_received_total',
+    'grpc_server_msg_sent_total': 'grpc.server.msg_sent_total',
+    'grpc_server_started_total': 'grpc.server.started_total',
+    'mixer_adapter_dispatch_count': 'adapter.dispatch_count',
+    'mixer_adapter_dispatch_duration': 'adapter.dispatch_duration',
+    'mixer_adapter_old_dispatch_count': 'adapter.old_dispatch_count',
+    'mixer_adapter_old_dispatch_duration': 'adapter.old_dispatch_duration',
+    'mixer_config_resolve_actions': 'config.resolve_actions',
+    'mixer_config_resolve_count': 'config.resolve_count',
+    'mixer_config_resolve_duration': 'config.resolve_duration',
+    'mixer_config_resolve_rules': 'config.resolve_rules',
+    'process_cpu_seconds_total': 'process.cpu_seconds_total',
+    'process_max_fds': 'process.max_fds',
+    'process_open_fds': 'process.open_fds',
+    'process_resident_memory_bytes': 'process.resident_memory_bytes',
+    'process_start_time_seconds': 'process.start_time_seconds',
+    'process_virtual_memory_bytes': 'process.virtual_memory_bytes',
+    'grpc_io_server_completed_rpcs': 'grpc_io_server.completed_rpcs',
+    'grpc_io_server_received_bytes_per_rpc': 'grpc_io_server.received_bytes_per_rpc',
+    'grpc_io_server_sent_bytes_per_rpc': 'grpc_io_server.sent_bytes_per_rpc',
+    'grpc_io_server_server_latency': 'grpc_io_server.server_latency',
+    'mixer_config_attributes_total': 'config.attributes_total',
+    'mixer_config_handler_configs_total': 'config.handler_configs_total',
+    'mixer_config_instance_configs_total': 'config.instance_configs_total',
+    'mixer_config_rule_configs_total': 'config.rule_configs_total',
+    'mixer_dispatcher_destinations_per_request': 'dispatcher.destinations_per_request',
+    'mixer_dispatcher_instances_per_request': 'dispatcher.instances_per_request',
+    'mixer_handler_daemons_total': 'handler.daemons_total',
+    'mixer_handler_new_handlers_total': 'handler.new_handlers_total',
+    'mixer_mcp_sink_reconnections': 'mcp_sink.reconnections',
+    'mixer_mcp_sink_request_acks_total': 'mcp_sink.request_acks_total',
+    'mixer_runtime_dispatch_duration_seconds': 'runtime.dispatch_duration_seconds',
+    'mixer_runtime_dispatches_total': 'runtime.dispatches_total',
+}
+
+MOCK_INSTANCE = {
+    'istio_mesh_endpoint': 'http://localhost:42422/metrics',
+    'mixer_endpoint': 'http://localhost:9093/metrics',
+}
+
+
+NEW_MOCK_INSTANCE = {
+    'istio_mesh_endpoint': 'http://istio-telemetry:42422/metrics',
+    'mixer_endpoint': 'http://istio-telemetry:15014/metrics',
+    'pilot_endpoint': 'http://istio-pilot:15014/metrics',
+    'galley_endpoint': 'http://istio-galley:15014/metrics',
+    'citadel_endpoint': 'http://istio-citadel:15014/metrics',
+}
+
+NEW_MOCK_PILOT_ONLY_INSTANCE = {'pilot_endpoint': 'http://istio-pilot:15014/metrics'}
+
+NEW_MOCK_GALLEY_ONLY_INSTANCE = {'galley_endpoint': 'http://istio-galley:15014/metrics'}
+
+
 GALLEY_METRICS = [
     'istio.galley.go.gc_duration_seconds.count',
     'istio.galley.go.gc_duration_seconds.quantile',

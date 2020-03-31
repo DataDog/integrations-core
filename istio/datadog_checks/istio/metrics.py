@@ -78,7 +78,7 @@ GALLEY_METRICS = {
     'galley_validation_config_updates': 'validation.config_update',
     'galley_validation_passed': 'validation.passed',
     # These metrics supported Istio 1.5
-    'galley_validation_config_update_error': 'validation.config_update_error'
+    'galley_validation_config_update_error': 'validation.config_update_error',
 }
 
 
@@ -197,8 +197,12 @@ ISTIOD_METRICS = {
     'process_start_time_seconds': 'process.start_time_seconds',
     'process_virtual_memory_bytes': 'process.virtual_memory_bytes',
     'pilot_conflict_inbound_listener': 'pilot.conflict.inbound_listener',
-    'pilot_conflict_outbound_listener_http_over_current_tcp': ('pilot.conflict.outbound_listener.http_over_current_tcp'),
-    'pilot_conflict_outbound_listener_tcp_over_current_http': ('pilot.conflict.outbound_listener.tcp_over_current_http'),
+    'pilot_conflict_outbound_listener_http_over_current_tcp': (
+        'pilot.conflict.outbound_listener.http_over_current_tcp'
+    ),
+    'pilot_conflict_outbound_listener_tcp_over_current_http': (
+        'pilot.conflict.outbound_listener.tcp_over_current_http'
+    ),
     'pilot_conflict_outbound_listener_tcp_over_current_tcp': ('pilot.conflict.outbound_listener.tcp_over_current_tcp'),
     'pilot_destrule_subsets': 'pilot.destrule_subsets',
     'pilot_duplicate_envoy_clusters': 'pilot.duplicate_envoy_clusters',
@@ -246,7 +250,9 @@ ISTIOD_METRICS = {
     'mixer_runtime_dispatch_duration_seconds': 'mixer.runtime.dispatch_duration_seconds',
     'endpoint_no_pod': 'galley.endpoint_no_pod',
     'galley_mcp_source_clients_total': 'galley.mcp_source.clients_total',
-    'galley_runtime_processor_event_span_duration_milliseconds': ('galley.runtime_processor.event_span_duration_milliseconds'),
+    'galley_runtime_processor_event_span_duration_milliseconds': (
+        'galley.runtime_processor.event_span_duration_milliseconds'
+    ),
     'galley_runtime_processor_events_processed_total': 'galley.runtime_processor.events_processed_total',
     'galley_runtime_processor_snapshot_events_total': 'galley.runtime_processor.snapshot_events_total',
     'galley_runtime_processor_snapshot_lifetime_duration_milliseconds': (
@@ -264,7 +270,7 @@ ISTIOD_METRICS = {
     'galley_validation_config_updates': 'galley.validation.config_update',
     'galley_validation_passed': 'galley.validation.passed',
     # These metrics supported Istio 1.5
-    'galley_validation_config_update_error': 'galley.validation.config_update_error'
+    'galley_validation_config_update_error': 'galley.validation.config_update_error',
     'citadel_secret_controller_csr_err_count': 'citadel.secret_controller.csr_err_count',
     'citadel_secret_controller_secret_deleted_cert_count': ('citadel.secret_controller.secret_deleted_cert_count'),
     'citadel_secret_controller_svc_acc_created_cert_count': ('citadel.secret_controller.svc_acc_created_cert_count'),
