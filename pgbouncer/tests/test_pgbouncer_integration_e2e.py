@@ -67,11 +67,8 @@ def assert_metric_coverage(version, aggregator):
     aggregator.assert_metric('pgbouncer.pools.sv_tested')
     aggregator.assert_metric('pgbouncer.pools.sv_login')
     aggregator.assert_metric('pgbouncer.pools.maxwait')
-    aggregator.assert_metric('pgbouncer.pools.maxwait_us')
     aggregator.assert_metric('pgbouncer.stats.avg_recv')
     aggregator.assert_metric('pgbouncer.stats.avg_sent')
-    aggregator.assert_metric('pgbouncer.stats.total_wait_time')
-    aggregator.assert_metric('pgbouncer.stats.avg_wait_time')
 
     pgbouncer_pre18 = int(version[1]) < 8
     if pgbouncer_pre18:
@@ -79,6 +76,7 @@ def assert_metric_coverage(version, aggregator):
         aggregator.assert_metric('pgbouncer.stats.avg_query')
         aggregator.assert_metric('pgbouncer.stats.requests_per_second')
     else:
+        aggregator.assert_metric('pgbouncer.pools.maxwait_us')
         aggregator.assert_metric('pgbouncer.stats.avg_transaction_time')
         aggregator.assert_metric('pgbouncer.stats.avg_query_time')
         aggregator.assert_metric('pgbouncer.stats.avg_transaction_count')
@@ -86,6 +84,8 @@ def assert_metric_coverage(version, aggregator):
         aggregator.assert_metric('pgbouncer.stats.queries_per_second')
         aggregator.assert_metric('pgbouncer.stats.transactions_per_second')
         aggregator.assert_metric('pgbouncer.stats.total_transaction_time')
+        aggregator.assert_metric('pgbouncer.stats.total_wait_time')
+        aggregator.assert_metric('pgbouncer.stats.avg_wait_time')
 
     aggregator.assert_metric('pgbouncer.stats.total_query_time')
     aggregator.assert_metric('pgbouncer.stats.bytes_received_per_second')
