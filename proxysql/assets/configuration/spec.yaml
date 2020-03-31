@@ -48,7 +48,7 @@ files:
         More information: https://github.com/sysown/proxysql/wiki/SSL-Support#ssl-configuration-for-frontends
     - name: validate_hostname
       value:
-        example: false
+        example: true
         type: boolean
       description: Whether or not to verify the certificate was issued for the given `host`
     - name: connect_timeout

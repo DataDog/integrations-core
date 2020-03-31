@@ -45,10 +45,10 @@ class ProxysqlCheck(AgentCheck):
 
         self.tls_verify = self.instance.get("tls_verify", False)
         self.validate_hostname = self.instance.get("validate_hostname", True)
-        self.tls_ca_cert = self.instance.get("tls_ca_cert", None)
+        self.tls_ca_cert = self.instance.get("tls_ca_cert")
         self.base_tags = self.instance.get("tags", [])
         self.connect_timeout = self.instance.get("connect_timeout", 10)
-        self.read_timeout = self.instance.get("read_timeout", None)
+        self.read_timeout = self.instance.get("read_timeout")
 
         manager_queries = [STATS_MYSQL_GLOBAL]
         if self.is_metadata_collection_enabled():
@@ -106,12 +106,13 @@ class ProxysqlCheck(AgentCheck):
                 ssl=ssl_context,
             )
             self.log.debug("Connected to ProxySQL")
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
             yield db
         except Exception:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
             self.log.exception("Can't connect to ProxySQL")
             raise
+        else:
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
         finally:
             if db:
                 db.close()

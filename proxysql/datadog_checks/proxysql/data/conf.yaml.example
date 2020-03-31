@@ -44,10 +44,10 @@ instances:
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
-    ## @param validate_hostname - boolean - optional - default: false
+    ## @param validate_hostname - boolean - optional - default: true
     ## Whether or not to verify the certificate was issued for the given `host`
     #
-    # validate_hostname: false
+    # validate_hostname: true
 
     ## @param connect_timeout - integer - optional - default: 10
     ## Timeout in seconds for connecting to ProxySQL.
