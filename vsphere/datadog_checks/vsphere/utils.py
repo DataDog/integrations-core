@@ -65,7 +65,6 @@ def is_resource_collected_by_filters(mor, infrastructure_data, resource_filters,
 
     # Extra logic to consider that no whitelist filters means "collect everything"
     if not whitelist_filters:
-        # No whitelist filter specified for this resource, consider that the resource matches the whitelist
         match_whitelist = True
 
     if match_blacklist:
