@@ -67,8 +67,8 @@ def is_resource_collected_by_filters(mor, infrastructure_data, resource_filters,
     if not whitelist_filters:
         match_whitelist = True
 
+    # If resources matches one of the blacklisted patterns, do not collect it
     if match_blacklist:
-        # If resources matches one of the blacklisted patterns, do not collect it
         return False
 
     # Otherwise, collect it if it matches one of the whitelisted patterns.
