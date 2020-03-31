@@ -42,6 +42,13 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 2. [Restart the Agent][5].
 
+##### Trace collection
+
+Datadog APM integrates with Elasticsearch to see the traces across your distributed system. Trace collection is enabled by default in the Datadog Agent v6+. To start collecting traces:
+
+1. [Enable trace collection in Datadog][6].
+2. [Instrument your application that makes requests to ElasticSearch][7].
+
 ##### Log collection
 
 _Available for Agent versions >6.0_
@@ -114,7 +121,7 @@ _Available for Agent versions >6.0_
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
 
 ##### Metric collection
 
@@ -124,11 +131,27 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | `<INIT_CONFIG>`      | blank or `{}`                      |
 | `<INSTANCE_CONFIG>`  | `{"url": "https://%%host%%:9200"}` |
 
+##### Trace collection
+
+APM for containerized apps is supported on hosts running Agent v6+ but requires extra configuration to begin collecting traces.
+
+Required environment variables on the Agent container:
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<DD_API_KEY>` | `api_key`                                                                  |
+| `<DD_APM_ENABLED>`      | true                                                              |
+| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
+
+See [Tracing Docker Applications][17] and the [Kubernetes Daemon Setup][18] for a complete list of available environment variables and configuration.
+
+Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
+
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][7].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][9].
 
 | Parameter      | Value                                                      |
 | -------------- | ---------------------------------------------------------- |
@@ -136,7 +159,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's status subcommand][8] and look for `elastic` under the Checks section.
+[Run the Agent's status subcommand][10] and look for `elastic` under the Checks section.
 
 ## Data Collected
 
@@ -146,11 +169,11 @@ By default, not all of the following metrics are sent by the Agent. To send all 
 - `index_stats` sends **elasticsearch.index.\*** metrics
 - `pending_task_stats` sends **elasticsearch.pending\_\*** metrics
 
-For version >=6.3.0, set `xpack.monitoring.collection.enabled` configuration to `true` in your Elasticsearch configuration in order to collect all `elasticsearch.thread_pool.write.*` metrics. See [Elasticsearch release notes - monitoring section][9].
+For version >=6.3.0, set `xpack.monitoring.collection.enabled` configuration to `true` in your Elasticsearch configuration in order to collect all `elasticsearch.thread_pool.write.*` metrics. See [Elasticsearch release notes - monitoring section][11].
 
 ### Metrics
 
-See [metadata.csv][10] for a list of metrics provided by this integration.
+See [metadata.csv][12] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -168,24 +191,28 @@ Returns `Critical` if the Agent cannot connect to Elasticsearch to collect metri
 
 ## Troubleshooting
 
-- [Agent can't connect][11]
-- [Why isn't Elasticsearch sending all my metrics?][12]
+- [Agent can't connect][13]
+- [Why isn't Elasticsearch sending all my metrics?][14]
 
 ## Further Reading
 
-To get a better idea of how (or why) to integrate your Elasticsearch cluster with Datadog, check out our [series of blog posts][13] about it.
+To get a better idea of how (or why) to integrate your Elasticsearch cluster with Datadog, check out our [series of blog posts][15] about it.
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/elastic/images/elasticsearch-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/elastic/datadog_checks/elastic/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[7]: https://docs.datadoghq.com/agent/docker/log/
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[9]: https://www.elastic.co/guide/en/elasticsearch/reference/6.3/release-notes-6.3.0.html
-[10]: https://github.com/DataDog/integrations-core/blob/master/elastic/metadata.csv
-[11]: https://docs.datadoghq.com/integrations/faq/elastic-agent-can-t-connect
-[12]: https://docs.datadoghq.com/integrations/faq/why-isn-t-elasticsearch-sending-all-my-metrics
-[13]: https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics
-[14]: https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-slowlog.html
+[6]: https://docs.datadoghq.com/tracing/send_traces/
+[7]: https://docs.datadoghq.com/tracing/setup/
+[8]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[9]: https://docs.datadoghq.com/agent/docker/log/
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[11]: https://www.elastic.co/guide/en/elasticsearch/reference/6.3/release-notes-6.3.0.html
+[12]: https://github.com/DataDog/integrations-core/blob/master/elastic/metadata.csv
+[13]: https://docs.datadoghq.com/integrations/faq/elastic-agent-can-t-connect
+[14]: https://docs.datadoghq.com/integrations/faq/why-isn-t-elasticsearch-sending-all-my-metrics
+[15]: https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics
+[16]: https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-slowlog.html
+[17]: https://docs.datadoghq.com/agent/docker/apm/?tab=java
+[18]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing

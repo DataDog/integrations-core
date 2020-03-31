@@ -12,7 +12,7 @@ import pymongo
 from six import PY3, iteritems, itervalues
 from six.moves.urllib.parse import unquote_plus, urlsplit
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import round_value
 
 from . import metrics
@@ -21,8 +21,6 @@ if PY3:
     long = int
 
 DEFAULT_TIMEOUT = 30
-GAUGE = AgentCheck.gauge
-RATE = AgentCheck.rate
 ALLOWED_CUSTOM_METRICS_TYPES = ['gauge', 'rate', 'count', 'monotonic_count']
 ALLOWED_CUSTOM_QUERIES_COMMANDS = ['aggregate', 'count', 'find']
 
@@ -83,18 +81,73 @@ class MongoDb(AgentCheck):
         10: ('REMOVED', 'Removed'),
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances=None):
+        super(MongoDb, self).__init__(name, init_config, instances)
 
         # Members' last replica set states
         self._last_state_by_server = {}
 
-        # List of metrics to collect per instance
-        self.metrics_to_collect_by_instance = {}
+        self.collection_metrics_names = (key.split('.')[1] for key in metrics.COLLECTION_METRICS)
 
-        self.collection_metrics_names = []
-        for key in metrics.COLLECTION_METRICS:
-            self.collection_metrics_names.append(key.split('.')[1])
+        if 'server' not in self.instance:
+            raise ConfigurationError("Missing 'server' in mongo config")
+
+        # x.509 authentication
+        ssl_params = {
+            'ssl': self.instance.get('ssl', None),
+            'ssl_keyfile': self.instance.get('ssl_keyfile', None),
+            'ssl_certfile': self.instance.get('ssl_certfile', None),
+            'ssl_cert_reqs': self.instance.get('ssl_cert_reqs', None),
+            'ssl_ca_certs': self.instance.get('ssl_ca_certs', None),
+        }
+        self.ssl_params = {key: value for key, value in iteritems(ssl_params) if value is not None}
+
+        self.server = self.instance['server']
+        (
+            self.username,
+            self.password,
+            self.db_name,
+            self.nodelist,
+            self.clean_server_name,
+            self.auth_source,
+        ) = self._parse_uri(self.server, sanitize_username=bool(self.ssl_params))
+
+        self.additional_metrics = self.instance.get('additional_metrics', [])
+
+        # Get the list of metrics to collect
+        self.collect_tcmalloc_metrics = 'tcmalloc' in self.additional_metrics
+        self.metrics_to_collect = self._build_metric_list_to_collect()
+
+        if not self.db_name:
+            self.log.info('No MongoDB database found in URI. Defaulting to admin.')
+            self.db_name = 'admin'
+
+        # Tagging
+        custom_tags = list(set(self.instance.get('tags', [])))
+        self.service_check_tags = ["db:%s" % self.db_name] + custom_tags
+
+        # ...add the `server` tag to the metrics' tags only
+        # (it's added in the backend for service checks)
+        self.tags = custom_tags + ['server:%s' % self.clean_server_name]
+
+        if self.nodelist:
+            host = self.nodelist[0][0]
+            port = self.nodelist[0][1]
+            self.service_check_tags = self.service_check_tags + ["host:%s" % host, "port:%s" % port]
+
+        self.timeout = float(self.instance.get('timeout', DEFAULT_TIMEOUT)) * 1000
+
+        # Authenticate
+        self.do_auth = True
+        self.use_x509 = self.ssl_params and not self.password
+        if not self.username:
+            self.log.debug(u"A username is required to authenticate to `%s`", self.server)
+            self.do_auth = False
+
+        self.replica_check = is_affirmative(self.instance.get('replica_check', True))
+        self.collections_indexes_stats = is_affirmative(self.instance.get('collections_indexes_stats'))
+        self.coll_names = self.instance.get('collections', [])
+        self.custom_queries = self.instance.get("custom_queries", [])
 
     @classmethod
     def get_library_versions(cls):
@@ -112,16 +165,16 @@ class MongoDb(AgentCheck):
         else:
             return 'UNKNOWN'
 
-    def _report_replica_set_state(self, state, clean_server_name, replset_name):
+    def _report_replica_set_state(self, state, replset_name):
         """
         Report the member's replica set state
         * Submit a service check.
         * Create an event on state change.
         """
-        last_state = self._last_state_by_server.get(clean_server_name, -1)
-        self._last_state_by_server[clean_server_name] = state
+        last_state = self._last_state_by_server.get(self.clean_server_name, -1)
+        self._last_state_by_server[self.clean_server_name] = state
         if last_state != state and last_state != -1:
-            return self.create_event(last_state, state, clean_server_name, replset_name)
+            return self.create_event(last_state, state, replset_name)
 
     def hostname_for_event(self, clean_server_name):
         """Return a reasonable hostname for a replset membership event to mention."""
@@ -134,17 +187,17 @@ class MongoDb(AgentCheck):
             hostname = self.hostname
         return hostname
 
-    def create_event(self, last_state, state, clean_server_name, replset_name):
+    def create_event(self, last_state, state, replset_name):
         """Create an event with a message describing the replication
             state of a mongo node"""
 
         status = self.get_state_description(state)
         short_status = self.get_state_name(state)
         last_short_status = self.get_state_name(last_state)
-        hostname = self.hostname_for_event(clean_server_name)
+        hostname = self.hostname_for_event(self.clean_server_name)
         msg_title = "%s is %s for %s" % (hostname, short_status, replset_name)
         msg = "MongoDB %s (%s) just reported as %s (%s) for %s; it was %s before."
-        msg = msg % (hostname, clean_server_name, status, short_status, replset_name, last_short_status)
+        msg = msg % (hostname, self.clean_server_name, status, short_status, replset_name, last_short_status)
 
         self.event(
             {
@@ -162,7 +215,7 @@ class MongoDb(AgentCheck):
             }
         )
 
-    def _build_metric_list_to_collect(self, additional_metrics):
+    def _build_metric_list_to_collect(self):
         """
         Build the metric list to collect based on the instance preferences.
         """
@@ -173,7 +226,7 @@ class MongoDb(AgentCheck):
             metrics_to_collect.update(default_metrics)
 
         # Additional metrics metrics
-        for option in additional_metrics:
+        for option in self.additional_metrics:
             additional_metrics = metrics.AVAILABLE_METRICS.get(option)
             if not additional_metrics:
                 if option in metrics.DEFAULT_METRICS:
@@ -190,14 +243,6 @@ class MongoDb(AgentCheck):
             metrics_to_collect.update(additional_metrics)
 
         return metrics_to_collect
-
-    def _get_metrics_to_collect(self, instance_key, additional_metrics):
-        """
-        Return and cache the list of metrics to collect.
-        """
-        if instance_key not in self.metrics_to_collect_by_instance:
-            self.metrics_to_collect_by_instance[instance_key] = self._build_metric_list_to_collect(additional_metrics)
-        return self.metrics_to_collect_by_instance[instance_key]
 
     def _resolve_metric(self, original_metric_name, metrics_to_collect, prefix=""):
         """
@@ -227,7 +272,7 @@ class MongoDb(AgentCheck):
         prefix and suffix according to its type.
         """
         metric_prefix = "mongodb." if not prefix else "mongodb.{0}.".format(prefix)
-        metric_suffix = "ps" if submit_method == RATE else ""
+        metric_suffix = "ps" if submit_method == metrics.RATE else ""
 
         # Replace case-sensitive metric name characters
         for pattern, repl in iteritems(metrics.CASE_SENSITIVE_METRIC_NAME_SUFFIXES):
@@ -240,7 +285,7 @@ class MongoDb(AgentCheck):
             metric_suffix=metric_suffix,
         )
 
-    def _authenticate(self, database, username, password, use_x509, server_name, service_check_tags):
+    def _authenticate(self, database):
         """
         Authenticate to the database.
 
@@ -254,20 +299,22 @@ class MongoDb(AgentCheck):
         authenticated = False
         try:
             # X.509
-            if use_x509:
-                self.log.debug(u"Authenticate `%s`  to `%s` using `MONGODB-X509` mechanism", username, database)
-                authenticated = database.authenticate(username, mechanism='MONGODB-X509')
+            if self.use_x509:
+                self.log.debug(u"Authenticate `%s`  to `%s` using `MONGODB-X509` mechanism", self.username, database)
+                authenticated = database.authenticate(self.username, mechanism='MONGODB-X509')
 
             # Username & password
             else:
-                authenticated = database.authenticate(username, password)
+                authenticated = database.authenticate(self.username, self.password)
 
         except pymongo.errors.PyMongoError as e:
             self.log.error(u"Authentication failed due to invalid credentials or configuration issues. %s", e)
 
         if not authenticated:
-            message = "Mongo: cannot connect with config %s" % server_name
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=message)
+            message = "Mongo: cannot connect with config %s" % self.clean_server_name
+            self.service_check(
+                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.service_check_tags, message=message
+            )
             raise Exception(message)
 
         return authenticated
@@ -298,12 +345,12 @@ class MongoDb(AgentCheck):
 
         return username, password, db_name, nodelist, clean_server_name, auth_source
 
-    def _collect_indexes_stats(self, instance, db, tags):
+    def _collect_indexes_stats(self, db, tags):
         """
         Collect indexes statistics for all collections in the configuration.
         This use the "$indexStats" command.
         """
-        for coll_name in instance.get('collections', []):
+        for coll_name in self.coll_names:
             try:
                 for stats in db[coll_name].aggregate([{"$indexStats": {}}], cursor={}):
                     idx_tags = tags + [
@@ -426,7 +473,7 @@ class MongoDb(AgentCheck):
             for metric_name, metric_value, submit_method in metric_info:
                 submit_method(metric_name, metric_value, tags=query_tags)
 
-    def check(self, instance):
+    def check(self, _):
         """
         Returns a dictionary that looks a lot like what's sent back by
         db.serverStatus()
@@ -442,96 +489,37 @@ class MongoDb(AgentCheck):
             else:
                 return (lag.microseconds + (lag.seconds + lag.days * 24 * 3600) * 10 ** 6) / 10.0 ** 6
 
-        if 'server' not in instance:
-            raise Exception("Missing 'server' in mongo config")
-
-        # x.509 authentication
-        ssl_params = {
-            'ssl': instance.get('ssl', None),
-            'ssl_keyfile': instance.get('ssl_keyfile', None),
-            'ssl_certfile': instance.get('ssl_certfile', None),
-            'ssl_cert_reqs': instance.get('ssl_cert_reqs', None),
-            'ssl_ca_certs': instance.get('ssl_ca_certs', None),
-        }
-
-        for key, param in list(iteritems(ssl_params)):
-            if param is None:
-                del ssl_params[key]
-
-        server = instance['server']
-        username, password, db_name, nodelist, clean_server_name, auth_source = self._parse_uri(
-            server, sanitize_username=bool(ssl_params)
-        )
-
-        additional_metrics = instance.get('additional_metrics', [])
-
-        # Get the list of metrics to collect
-        collect_tcmalloc_metrics = 'tcmalloc' in additional_metrics
-        metrics_to_collect = self._get_metrics_to_collect(server, additional_metrics)
-
-        # Tagging
-        tags = instance.get('tags', [])
-        # ...de-dupe tags to avoid a memory leak
-        tags = list(set(tags))
-
-        if not db_name:
-            self.log.info('No MongoDB database found in URI. Defaulting to admin.')
-            db_name = 'admin'
-
-        service_check_tags = ["db:%s" % db_name]
-        service_check_tags.extend(tags)
-
-        # ...add the `server` tag to the metrics' tags only
-        # (it's added in the backend for service checks)
-        tags.append('server:%s' % clean_server_name)
-
-        if nodelist:
-            host = nodelist[0][0]
-            port = nodelist[0][1]
-            service_check_tags = service_check_tags + ["host:%s" % host, "port:%s" % port]
-
-        timeout = float(instance.get('timeout', DEFAULT_TIMEOUT)) * 1000
         try:
             cli = pymongo.mongo_client.MongoClient(
-                server,
-                socketTimeoutMS=timeout,
-                connectTimeoutMS=timeout,
-                serverSelectionTimeoutMS=timeout,
+                self.server,
+                socketTimeoutMS=self.timeout,
+                connectTimeoutMS=self.timeout,
+                serverSelectionTimeoutMS=self.timeout,
                 read_preference=pymongo.ReadPreference.PRIMARY_PREFERRED,
-                **ssl_params
+                **self.ssl_params
             )
             # some commands can only go against the admin DB
             admindb = cli['admin']
-            db = cli[db_name]
+            db = cli[self.db_name]
         except Exception:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.service_check_tags)
             raise
 
-        # Authenticate
-        do_auth = True
-        use_x509 = ssl_params and not password
-
-        if not username:
-            self.log.debug(u"A username is required to authenticate to `%s`", server)
-            do_auth = False
-
-        if do_auth:
-            if auth_source:
+        if self.do_auth:
+            if self.auth_source:
                 msg = "authSource was specified in the the server URL: using '%s' as the authentication database"
-                self.log.info(msg, auth_source)
-                self._authenticate(
-                    cli[auth_source], username, password, use_x509, clean_server_name, service_check_tags
-                )
+                self.log.info(msg, self.auth_source)
+                self._authenticate(cli[self.auth_source])
             else:
-                self._authenticate(db, username, password, use_x509, clean_server_name, service_check_tags)
+                self._authenticate(db)
 
         try:
-            status = db.command('serverStatus', tcmalloc=collect_tcmalloc_metrics)
+            status = db.command('serverStatus', tcmalloc=self.collect_tcmalloc_metrics)
         except Exception:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.service_check_tags)
             raise
         else:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.service_check_tags)
 
         if status['ok'] == 0:
             raise Exception(status['errmsg'].__str__())
@@ -540,7 +528,7 @@ class MongoDb(AgentCheck):
         status['fsyncLocked'] = 1 if ops.get('fsyncLock') else 0
 
         status['stats'] = db.command('dbstats')
-        dbstats = {db_name: {'stats': status['stats']}}
+        dbstats = {self.db_name: {'stats': status['stats']}}
         try:
             mongo_version = cli.server_info().get('version', '0.0')
             self.set_metadata('version', mongo_version)
@@ -548,10 +536,11 @@ class MongoDb(AgentCheck):
             self.log.exception("Error when collecting the version from the mongo server.")
             mongo_version = '0.0'
 
+        tags = deepcopy(self.tags)
         # Handle replica data, if any
         # See
         # http://www.mongodb.org/display/DOCS/Replica+Set+Commands#ReplicaSetCommands-replSetGetStatus  # noqa
-        if is_affirmative(instance.get('replica_check', True)):
+        if self.replica_check:
             try:
                 data = {}
 
@@ -563,24 +552,20 @@ class MongoDb(AgentCheck):
                     # need a new connection to deal with replica sets
                     setname = replSet.get('set')
                     cli_rs = pymongo.mongo_client.MongoClient(
-                        server,
-                        socketTimeoutMS=timeout,
-                        connectTimeoutMS=timeout,
-                        serverSelectionTimeoutMS=timeout,
+                        self.server,
+                        socketTimeoutMS=self.timeout,
+                        connectTimeoutMS=self.timeout,
+                        serverSelectionTimeoutMS=self.timeout,
                         replicaset=setname,
                         read_preference=pymongo.ReadPreference.NEAREST,
-                        **ssl_params
+                        **self.ssl_params
                     )
 
-                    if do_auth:
-                        if auth_source:
-                            self._authenticate(
-                                cli_rs[auth_source], username, password, use_x509, server, service_check_tags
-                            )
+                    if self.do_auth:
+                        if self.auth_source:
+                            self._authenticate(cli_rs[self.auth_source])
                         else:
-                            self._authenticate(
-                                cli_rs[db_name], username, password, use_x509, server, service_check_tags
-                            )
+                            self._authenticate(cli_rs[self.db_name])
 
                     # Replication set information
                     replset_name = replSet['set']
@@ -618,7 +603,7 @@ class MongoDb(AgentCheck):
                     status['replSet'] = data
 
                     # Submit events
-                    self._report_replica_set_state(data['state'], clean_server_name, replset_name)
+                    self._report_replica_set_state(data['state'], replset_name)
 
             except Exception as e:
                 if "OperationFailure" in repr(e) and (
@@ -646,7 +631,7 @@ class MongoDb(AgentCheck):
             dbstats[db_n] = {'stats': db_aux.command('dbstats')}
 
         # Go through the metrics and save the values
-        for metric_name in metrics_to_collect:
+        for metric_name in self.metrics_to_collect:
             # each metric is of the form: x.y.z with z optional
             # and can be found at status[x][y][z]
             value = status
@@ -669,11 +654,11 @@ class MongoDb(AgentCheck):
                 )
 
             # Submit the metric
-            submit_method, metric_name_alias = self._resolve_metric(metric_name, metrics_to_collect)
+            submit_method, metric_name_alias = self._resolve_metric(metric_name, self.metrics_to_collect)
             submit_method(self, metric_name_alias, value, tags=tags)
 
         for st, value in iteritems(dbstats):
-            for metric_name in metrics_to_collect:
+            for metric_name in self.metrics_to_collect:
                 if not metric_name.startswith('stats.'):
                     continue
 
@@ -696,18 +681,18 @@ class MongoDb(AgentCheck):
                     u"db:{0}".format(st),
                 ]
 
-                submit_method, metric_name_alias = self._resolve_metric(metric_name, metrics_to_collect)
+                submit_method, metric_name_alias = self._resolve_metric(metric_name, self.metrics_to_collect)
                 submit_method(self, metric_name_alias, val, tags=metrics_tags)
 
-        if is_affirmative(instance.get('collections_indexes_stats')):
+        if self.collections_indexes_stats:
             if LooseVersion(mongo_version) >= LooseVersion("3.2"):
-                self._collect_indexes_stats(instance, db, tags)
+                self._collect_indexes_stats(db, tags)
             else:
                 msg = "'collections_indexes_stats' is only available starting from mongo 3.2: your mongo version is %s"
                 self.log.error(msg, mongo_version)
 
         # Report the usage metrics for dbs/collections
-        if 'top' in additional_metrics:
+        if 'top' in self.additional_metrics:
             try:
                 dbtop = admindb.command('top')
                 for ns, ns_metrics in iteritems(dbtop['totals']):
@@ -738,11 +723,13 @@ class MongoDb(AgentCheck):
                             )
 
                         # Submit the metric
-                        submit_method, metric_name_alias = self._resolve_metric(m, metrics_to_collect, prefix="usage")
+                        submit_method, metric_name_alias = self._resolve_metric(
+                            m, self.metrics_to_collect, prefix="usage"
+                        )
                         submit_method(self, metric_name_alias, value, tags=ns_tags)
                         # Keep old incorrect metric
                         if metric_name_alias.endswith('countps'):
-                            GAUGE(self, metric_name_alias[:-2], value, tags=ns_tags)
+                            self.gauge(metric_name_alias[:-2], value, tags=ns_tags)
             except Exception as e:
                 self.log.warning('Failed to record `top` metrics %s', e)
 
@@ -783,7 +770,7 @@ class MongoDb(AgentCheck):
                     self.log.warning(u"Failed to record `ReplicationInfo` metrics.")
 
             for m, value in iteritems(oplog_data):
-                submit_method, metric_name_alias = self._resolve_metric('oplog.%s' % m, metrics_to_collect)
+                submit_method, metric_name_alias = self._resolve_metric('oplog.%s' % m, self.metrics_to_collect)
                 submit_method(self, metric_name_alias, value, tags=tags)
 
         else:
@@ -792,16 +779,14 @@ class MongoDb(AgentCheck):
         # get collection level stats
         try:
             # Ensure that you're on the right db
-            db = cli[db_name]
-            # grab the collections from the configutation
-            coll_names = instance.get('collections', [])
+            db = cli[self.db_name]
             # loop through the collections
-            for coll_name in coll_names:
+            for coll_name in self.coll_names:
                 # grab the stats from the collection
                 stats = db.command("collstats", coll_name)
                 # loop through the metrics
                 for m in self.collection_metrics_names:
-                    coll_tags = tags + ["db:%s" % db_name, "collection:%s" % coll_name]
+                    coll_tags = tags + ["db:%s" % self.db_name, "collection:%s" % coll_name]
                     value = stats.get(m, None)
                     if not value:
                         continue
@@ -825,9 +810,8 @@ class MongoDb(AgentCheck):
             self.log.warning(u"Failed to record `collection` metrics.")
             self.log.exception(e)
 
-        custom_queries = instance.get("custom_queries", [])
-        custom_query_tags = tags + ["db:{}".format(db_name)]
-        for raw_query in custom_queries:
+        custom_query_tags = tags + ["db:{}".format(self.db_name)]
+        for raw_query in self.custom_queries:
             try:
                 self._collect_custom_metrics_for_query(db, raw_query, custom_query_tags)
             except Exception as e:

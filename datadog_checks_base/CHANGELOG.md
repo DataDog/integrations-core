@@ -1,5 +1,14 @@
 # CHANGELOG - datadog_checks_base
 
+## 11.3.1 / 2020-03-26
+
+* [Fixed] Cast to float before computing temporal percent. See [#6146](https://github.com/DataDog/integrations-core/pull/6146).
+
+## 11.3.0 / 2020-03-26
+
+* [Added] Use a faster JSON library. See [#6143](https://github.com/DataDog/integrations-core/pull/6143).
+* [Added] Add secrets sanitization helpers. See [#6107](https://github.com/DataDog/integrations-core/pull/6107).
+
 ## 11.2.0 / 2020-03-24
 
 * [Added] Add secrets sanitization helpers. See [#6107](https://github.com/DataDog/integrations-core/pull/6107).

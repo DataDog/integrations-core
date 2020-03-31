@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import os
 import time
 
@@ -25,7 +26,7 @@ def dd_environment(instance):
 
 @pytest.fixture(scope='session')
 def instance():
-    return {'server': common.MONGODB_SERVER}
+    return copy.deepcopy(common.DEFAULT_INSTANCE)
 
 
 @pytest.fixture(scope='session')
@@ -102,7 +103,7 @@ def instance_1valid_and_1invalid_custom_queries():
 
 @pytest.fixture
 def check():
-    return MongoDb('mongo', {}, {})
+    return lambda instance: MongoDb('mongo', {}, [instance])
 
 
 def setup_sharding(compose_file):

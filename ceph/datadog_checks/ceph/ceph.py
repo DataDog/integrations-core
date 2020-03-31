@@ -88,7 +88,7 @@ class Ceph(AgentCheck):
 
     def _extract_metrics(self, raw, tags):
         try:
-            raw_osd_perf = raw.get('osd_perf').get('osdstats', raw.get('osd_perf'))
+            raw_osd_perf = raw.get('osd_perf', {}).get('osdstats', raw.get('osd_perf'))
 
             for osdperf in raw_osd_perf['osd_perf_infos']:
                 local_tags = tags + ['ceph_osd:osd%s' % osdperf['id']]

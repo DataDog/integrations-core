@@ -57,6 +57,7 @@ def test_error_query(instance):
     check.log.error.assert_any_call('Error querying %s: %s', 'system.metrics', mock.ANY)
 
 
+@pytest.mark.latest_metrics
 @pytest.mark.parametrize(
     'metrics, ignored_columns, metric_source_url',
     [

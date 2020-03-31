@@ -13,6 +13,7 @@ from ...utils import (
     get_check_file,
     get_config_file,
     get_data_directory,
+    get_readme_file,
     get_testable_checks,
     get_valid_integrations,
     has_e2e,
@@ -29,6 +30,7 @@ CSV_COLUMNS = [
     'has_e2e',
     'tile_only',
     'has_tests',
+    'has_metadata',
 ]
 DOGWEB_DASHBOARDS = ('sqlserver', 'tomcat', 'pusher', 'sigsci', 'marathon', 'ibm_was', 'nginx', 'immunio')
 
@@ -74,6 +76,7 @@ def catalog(checks, out_file, markdown):
         is_prometheus = False
         is_http = False
         tile_only = False
+        has_metadata = False
 
         config_file = get_config_file(check)
         if not os.path.exists(config_file):
@@ -91,6 +94,14 @@ def catalog(checks, out_file, markdown):
                     is_prometheus = True
                 if 'self.http.' in contents:
                     is_http = True
+                if 'self.set_metadata' in contents:
+                    has_metadata = True
+
+        readme_file = get_readme_file(check)
+        if not has_logs and os.path.exists(readme_file):
+            with open(readme_file) as f:
+                if '# Log collection' in f.read():
+                    has_logs = True
 
         entry = {
             'name': check,
@@ -103,6 +114,7 @@ def catalog(checks, out_file, markdown):
             'has_e2e': has_e2e(check),
             'tile_only': tile_only,
             'has_tests': not tile_only and check in testable_checks,
+            'has_metadata': has_metadata,
         }
         integration_catalog.append(entry)
 

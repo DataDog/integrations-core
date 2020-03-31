@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from contextlib import contextmanager
+from typing import Iterator
 
 from six import string_types
 from six.moves.urllib.parse import urlparse
@@ -246,3 +247,11 @@ def _read_example_logs_config(check_root):
                 return option['example']
 
     raise ValueError('No logs example found')
+
+
+@contextmanager
+def temporarily_stop_service(service, compose_file, check=True):
+    # type: (str, str, bool) -> Iterator[None]
+    run_command(['docker-compose', '-f', compose_file, 'stop', service], capture=False, check=check)
+    yield
+    run_command(['docker-compose', '-f', compose_file, 'start', service], capture=False, check=check)
