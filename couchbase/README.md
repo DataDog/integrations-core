@@ -58,7 +58,7 @@ _Available for Agent versions >6.0_
    logs:
      - type: file
        path: /var/log/couchdb/couch.log
-       source: couchdb
+       source: couchbase
        service: couchbase
    ```
 
