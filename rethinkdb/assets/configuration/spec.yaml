@@ -42,3 +42,10 @@ files:
               type: string
 
           - template: instances/default
+
+      - template: logs
+        example:
+        - type: file
+          path: rethinkdb_data/log_file
+          source: rethinkdb
+          service: rethinkdb

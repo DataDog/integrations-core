@@ -16,7 +16,8 @@
   ],
   "public_title": "Datadog-RethinkDB Integration",
   "categories": [
-    "data store"
+    "data store",
+    "log collection"
   ],
   "type": "check",
   "is_public": false,
