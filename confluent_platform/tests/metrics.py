@@ -49,6 +49,16 @@ CONNECT_METRICS_OPTIONAL = [
     'confluent.kafka.connect.worker_rebalance.rebalance_max_time_ms',
 ]
 
+
+CONNECT_PER_CONNECTOR_METRICS = [
+    'confluent.kafka.connect.worker.connector_destroyed_task_count',
+    'confluent.kafka.connect.worker.connector_failed_task_count',
+    'confluent.kafka.connect.worker.connector_paused_task_count',
+    'confluent.kafka.connect.worker.connector_running_task_count',
+    'confluent.kafka.connect.worker.connector_total_task_count',
+    'confluent.kafka.connect.worker.connector_unassigned_task_count',
+]
+
 REST_JETTY_METRICS = [
     'confluent.kafka.rest.jetty.connections_active',
 ]
@@ -254,6 +264,7 @@ KSQL_QUERY_STATS = [
 ALWAYS_PRESENT_METRICS = (
     BROKER_METRICS
     + CONNECT_METRICS
+    + CONNECT_PER_CONNECTOR_METRICS
     + REST_JETTY_METRICS
     + REST_JERSEY_METRICS
     + SCHEMA_REGISTRY_JETTY_METRICS
