@@ -132,7 +132,7 @@ class WinPDHCounter(object):
         # create a table of the keys to the counter index, because we want to look up
         # by counter name. Some systems may have an odd number of entries, don't 
         # accidentaly index at val[len(val]
-        for idx in range(0, len(val), 2):
+        for idx in range(0, len(val) - 1, 2):
             WinPDHCounter.pdh_counter_dict[val[idx + 1]].append(val[idx])
 
     def _make_counter_path(self, machine_name, counter_name, instance_name, counters):
