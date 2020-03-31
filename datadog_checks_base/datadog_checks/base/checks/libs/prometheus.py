@@ -6,11 +6,16 @@ from prometheus_client.metrics_core import Metric
 from prometheus_client.parser import _parse_sample, _replace_help_escaping
 
 
+# This copies most of the code from upstream at that version:
+# https://github.com/prometheus/client_python/blob/049744296d216e6be65dc8f3d44650310f39c384/prometheus_client/parser.py#L144
+# but reverting the behavior to a compatible version, which doesn't change counters to have a total suffix. See
+# https://github.com/prometheus/client_python/commit/a4dd93bcc6a0422e10cfa585048d1813909c6786#diff-0adf47ea7f99c66d4866ccb4e557a865L158
 def text_fd_to_metric_families(fd):
     """Parse Prometheus text format from a file descriptor.
-    This is a laxer parser than the main Go parser,
-    so successful parsing does not imply that the parsed
-    text meets the specification.
+
+    This is a laxer parser than the main Go parser, so successful parsing does
+    not imply that the parsed text meets the specification.
+
     Yields Metric's.
     """
     name = ''
@@ -20,6 +25,7 @@ def text_fd_to_metric_families(fd):
     allowed_names = []
 
     def build_metric(name, documentation, typ, samples):
+        # This is where the change is happening: we don't munge counters as upstream does.
         metric = Metric(name, documentation, typ)
         metric.samples = samples
         return metric
