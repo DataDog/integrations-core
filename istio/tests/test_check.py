@@ -202,7 +202,7 @@ def test_istio(aggregator, mesh_mixture_fixture):
 
 
 def test_new_istio(aggregator, new_mesh_mixture_fixture):
-    check = Istio('istio', {},[NEW_MOCK_INSTANCE])
+    check = Istio('istio', {}, [NEW_MOCK_INSTANCE])
     check.check(NEW_MOCK_INSTANCE)
 
     for metric in MESH_METRICS + NEW_MIXER_METRICS + GALLEY_METRICS + PILOT_METRICS + CITADEL_METRICS:
