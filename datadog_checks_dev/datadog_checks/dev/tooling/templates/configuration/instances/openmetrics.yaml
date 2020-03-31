@@ -27,6 +27,7 @@
   value:
     type: string
     example: <PREFIX>_
+    default: null
 - name: health_service_check
   description: |
     Send a service check reporting about the health of the prometheus endpoint.
@@ -84,7 +85,8 @@
 - name: send_histograms_buckets
   description: Set send_histograms_buckets to true to send the histograms bucket.
   value:
-    example: true
+    example: false
+    default: true
     type: boolean
 - name: send_distribution_buckets
   description: |
@@ -104,7 +106,8 @@
     Set send_distribution_counts_as_monotonic to true to send histograms & summary
     counters as monotonic counters (instead of gauges).
   value:
-    example: false
+    example: true
+    default: false
     type: boolean
 - name: exclude_labels
   description: List of labels to be excluded

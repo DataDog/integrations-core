@@ -48,7 +48,7 @@ instances:
     ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
     #
-  - prometheus_url: http://service/prometheus
+  - prometheus_url: <PROMETHEUS_URL>
 
     ## @param namespace - string - required
     ## The namespace to be prepended to all metrics.
@@ -64,7 +64,7 @@ instances:
       - memory:mem
       - io
 
-    ## @param prometheus_metrics_prefix - string - optional - default: <PREFIX>_
+    ## @param prometheus_metrics_prefix - string - optional
     ## <PREFIX> for exposed Prometheus metrics.
     #
     # prometheus_metrics_prefix: <PREFIX>_
@@ -90,7 +90,7 @@ instances:
     #     - <EXTRA_LABEL_1>
     #     - <EXTRA_LABEL_2>
 
-    ## @param labels_mapper - list of strings - optional
+    ## @param labels_mapper - list of mappings - optional
     ## The label mapper allows you to rename labels.
     ## Format is <LABEL_TO_RENAME>: <NEW_LABEL_NAME>
     #
@@ -105,10 +105,10 @@ instances:
     # type_overrides:
     #   - <METRIC_NAME>: <METRIC_TYPE>
 
-    ## @param send_histograms_buckets - boolean - optional - default: true
+    ## @param send_histograms_buckets - boolean - optional - default: True
     ## Set send_histograms_buckets to true to send the histograms bucket.
     #
-    # send_histograms_buckets: true
+    # send_histograms_buckets: false
 
     ## @param send_distribution_buckets - boolean - optional - default: false
     ## Set `send_distribution_buckets` to `true` to send histograms as Datadog distribution metrics.
@@ -122,11 +122,11 @@ instances:
     #
     # send_monotonic_counter: true
 
-    ## @param send_distribution_counts_as_monotonic - boolean - optional - default: false
+    ## @param send_distribution_counts_as_monotonic - boolean - optional - default: False
     ## Set send_distribution_counts_as_monotonic to true to send histograms & summary
     ## counters as monotonic counters (instead of gauges).
     #
-    # send_distribution_counts_as_monotonic: false
+    # send_distribution_counts_as_monotonic: true
 
     ## @param exclude_labels - list of strings - optional
     ## List of labels to be excluded
