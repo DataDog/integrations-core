@@ -5,6 +5,7 @@ from datadog_checks.base import is_affirmative
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 
 from .legacy_1_4 import LegacyIstioCheck_1_4
+from .metrics import ISTIOD_METRICS
 
 
 class Istio(OpenMetricsBaseCheck):
@@ -23,7 +24,7 @@ class Istio(OpenMetricsBaseCheck):
             {
                 'prometheus_url': self.instance.get('istiod_endpoint'),
                 'namespace': 'istio.istiod',
-                'metrics': [],
+                'metrics': [ISTIOD_METRICS],
                 'metadata_metric_name': 'istio_build',
                 'metadata_label_map': {'version': 'tag'},
             }

@@ -52,6 +52,7 @@ CITADEL_METRICS = {
     'citadel_server_csr_parsing_err_count': 'server.csr_parsing_err_count',
     'citadel_server_id_extraction_err_count': 'server.id_extraction_err_count',
     'citadel_server_success_cert_issuance_count': 'server.success_cert_issuance_count',
+    'citadel_server_root_cert_expiry_timestamp': 'server.root_cert_expiry_timestamp',
 }
 
 
@@ -76,6 +77,8 @@ GALLEY_METRICS = {
     'galley_validation_config_load': 'validation.config_load',
     'galley_validation_config_updates': 'validation.config_update',
     'galley_validation_passed': 'validation.passed',
+    # These metrics supported Istio 1.5
+    'galley_validation_config_update_error': 'validation.config_update_error'
 }
 
 
@@ -156,3 +159,14 @@ PILOT_METRICS = {
     'pilot_xds_pushes': 'xds.pushes',
     'pilot_xds_write_timeout': 'xds.write_timeout',
 }
+
+ISTIOD_METRICS = {
+
+}
+
+# Add legacy metrics
+ISTIOD_METRICS.update(CITADEL_METRICS)
+ISTIOD_METRICS.update(GALLEY_METRICS)
+ISTIOD_METRICS.update(GENERIC_METRICS)
+ISTIOD_METRICS.update(MIXER_METRICS)
+ISTIOD_METRICS.update(PILOT_METRICS)
