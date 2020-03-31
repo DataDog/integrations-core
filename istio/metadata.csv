@@ -241,18 +241,18 @@ istio.citadel.process.resident_memory_bytes,gauge,,byte,,Resident memory size in
 istio.citadel.process.start_time_seconds,gauge,,second,,Start time of the process since unix epoch in seconds.,0,istio,
 istio.citadel.process.virtual_memory_bytes,gauge,,byte,,Virtual memory size in bytes.,0,istio,
 galley.validation.config_update_error,count,,error,, K8s webhook configuration update error,0,istio,
-citadel.server.root_cert_expiry_timestamp,gauge,,second,,The unix timestamp (in seconds) when Citadel root cert will expire. Negative in case of internal error,0,istio
-galley.validation.failed,count,,,,Count of resource validation failed,0,istio
-pilot.conflict.outbound_listener.http_over_https,gauge,,,,Number of conflicting HTTP listeners with well known HTTPS ports,0,istio
-pilot.inbound_updates,count,,,,Total number of updates received by pilot,0,istio
-pilot.k8s.cfg_events,count,,event,,Events from k8s config,0,istio
-pilot.k8s.reg_events,count,,event,,Events from k8s registry,0,istio
-pilot.proxy_queue_time.count,count,,,,Count of observation for when proxy is in a push queue before being dequeued,0,istio
-pilot.proxy_queue_time.sum,gauge,,,,Sum of observed values for when proxy is in a push queue before being dequeued,0,istio
-pilot.push.triggers,count,,event,,Total number of times a push was triggered,0,istio
-pilot.xds.eds_all_locality_endpoints,gauge,,,,Network endpoints for each cluster (across all localities) as of last push. Zero endpoints is an error,0,istio
-pilot.xds.push.time.count,count,,,,Count of observation of total time Pilot takes a push,0,istio
-pilot.xds.push.time.sum,gauge,,,,Sum of observed values of total time Pilot takes a push,0,istio
-process.virtual_memory_max_bytes,gauge,,byte,,Maximum amount of virtual memory available in bytes,0,istio
-sidecar_injection.requests_total,count,,request,,Total number of sidecar injection requests,0,istio
-sidecar_injection.success_total,coount,,request,,Total number of successful sidecar injection requests,0,istio
+citadel.server.root_cert_expiry_timestamp,gauge,,second,,The unix timestamp (in seconds) when Citadel root cert will expire. Negative in case of internal error,0,istio,
+galley.validation.failed,count,,,,Count of resource validation failed,0,istio,
+pilot.conflict.outbound_listener.http_over_https,gauge,,,,Number of conflicting HTTP listeners with well known HTTPS ports,0,istio,
+pilot.inbound_updates,count,,,,Total number of updates received by pilot,0,istio,
+pilot.k8s.cfg_events,count,,event,,Events from k8s config,0,istio,
+pilot.k8s.reg_events,count,,event,,Events from k8s registry,0,istio,
+pilot.proxy_queue_time.count,count,,,,Count of observation for when proxy is in a push queue before being dequeued,0,istio,
+pilot.proxy_queue_time.sum,gauge,,,,Sum of observed values for when proxy is in a push queue before being dequeued,0,istio,
+pilot.push.triggers,count,,event,,Total number of times a push was triggered,0,istio,
+pilot.xds.eds_all_locality_endpoints,gauge,,,,Network endpoints for each cluster (across all localities) as of last push. Zero endpoints is an error,0,istio,
+pilot.xds.push.time.count,count,,,,Count of observation of total time Pilot takes a push,0,istio,
+pilot.xds.push.time.sum,gauge,,,,Sum of observed values of total time Pilot takes a push,0,istio,
+process.virtual_memory_max_bytes,gauge,,byte,,Maximum amount of virtual memory available in bytes,0,istio,
+sidecar_injection.requests_total,count,,request,,Total number of sidecar injection requests,0,istio,
+sidecar_injection.success_total,count,,request,,Total number of successful sidecar injection requests,0,istio,
