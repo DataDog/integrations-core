@@ -67,10 +67,8 @@
     Format is <LABEL_TO_RENAME>: <NEW_LABEL_NAME>
   value:
     example:
-      - flavor: origin
-    type: array
-    items:
-      type: object
+      flavor: origin
+    type: object
 - name: type_overrides
   description: |
     Type override allows you to override a type in the prometheus payload
@@ -78,10 +76,8 @@
     Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, `summary`
   value:
     example:
-      - <METRIC_NAME>: <METRIC_TYPE>
-    type: array
-    items:
-      type: object
+      <METRIC_NAME>: <METRIC_TYPE>
+    type: object
 - name: send_histograms_buckets
   description: Set send_histograms_buckets to true to send the histograms bucket.
   value:

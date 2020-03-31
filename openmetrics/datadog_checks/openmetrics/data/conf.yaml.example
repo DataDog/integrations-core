@@ -90,20 +90,20 @@ instances:
     #     - <EXTRA_LABEL_1>
     #     - <EXTRA_LABEL_2>
 
-    ## @param labels_mapper - list of mappings - optional
+    ## @param labels_mapper - mapping - optional
     ## The label mapper allows you to rename labels.
     ## Format is <LABEL_TO_RENAME>: <NEW_LABEL_NAME>
     #
     # labels_mapper:
-    #   - flavor: origin
+    #   flavor: origin
 
-    ## @param type_overrides - list of mappings - optional
+    ## @param type_overrides - mapping - optional
     ## Type override allows you to override a type in the prometheus payload
     ## or type an untyped metrics (they're ignored by default).
     ## Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, `summary`
     #
     # type_overrides:
-    #   - <METRIC_NAME>: <METRIC_TYPE>
+    #   <METRIC_NAME>: <METRIC_TYPE>
 
     ## @param send_histograms_buckets - boolean - optional - default: true
     ## Set send_histograms_buckets to true to send the histograms bucket.
