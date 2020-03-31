@@ -8,7 +8,7 @@
   description: The namespace to be prepended to all metrics.
   value:
     type: string
-    example: "service"
+    example: service
 - name: metrics
   required: true
   description: |
