@@ -44,6 +44,13 @@ MEMORY_GAUGE_METRICS = [
 ]
 MEMORY_RATE_METRICS = ['pgpgin', 'pgpgout', 'pgmajfault', 'pgfault']
 IO_METRICS = {'io_service_bytes_recursive': 'ecs.fargate.io.bytes.', 'io_serviced_recursive': 'ecs.fargate.io.ops.'}
+NETWORK_GAUGE_METRICS = {
+    'rx_errors': 'ecs.fargate.net.rcvd_errors',
+    'tx_errors': 'ecs.fargate.net.sent_errors',
+    'rx_dropped': 'ecs.fargate.net.packet.in_dropped',
+    'tx_dropped': 'ecs.fargate.net.packet.out_dropped',
+}
+NETWORK_RATE_METRICS = {'rx_bytes': 'ecs.fargate.net.bytes_rcvd', 'tx_bytes': 'ecs.fargate.net.bytes_sent'}
 
 
 class FargateCheck(AgentCheck):
@@ -215,6 +222,19 @@ class FargateCheck(AgentCheck):
                         write_counter += blkio_stat["value"]
                 self.rate(metric_name + 'read', read_counter, tags)
                 self.rate(metric_name + 'write', write_counter, tags)
+
+            # Network metrics
+            networks = container_stats.get('networks', {})
+            for network_interface, network_stats in iteritems(networks):
+                network_tags = tags + ["interface:{}".format(network_interface)]
+                for field_name, metric_name in iteritems(NETWORK_GAUGE_METRICS):
+                    metric_value = network_stats.get(field_name)
+                    if metric_value is not None:
+                        self.gauge(metric_name, metric_value, network_tags)
+                for field_name, metric_name in iteritems(NETWORK_RATE_METRICS):
+                    metric_value = network_stats.get(field_name)
+                    if metric_value is not None:
+                        self.rate(metric_name, metric_value, network_tags)
 
         except Exception as e:
             self.warning("Cannot retrieve metrics for %s: %s", container_id, e)
