@@ -13,6 +13,7 @@ from ...utils import (
     get_check_file,
     get_config_file,
     get_data_directory,
+    get_readme_file,
     get_testable_checks,
     get_valid_integrations,
     has_e2e,
@@ -95,6 +96,12 @@ def catalog(checks, out_file, markdown):
                     is_http = True
                 if 'self.set_metadata' in contents:
                     has_metadata = True
+
+        readme_file = get_readme_file(check)
+        if not has_logs and os.path.exists(readme_file):
+            with open(readme_file) as f:
+                if '# Log collection' in f.read():
+                    has_logs = True
 
         entry = {
             'name': check,
