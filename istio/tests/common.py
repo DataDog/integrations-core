@@ -466,7 +466,6 @@ ISTIOD_METRICS = [
     'istio.pilot.eds_no_instances',
     'istio.pilot.endpoint_not_ready',
     'istio.pilot.inbound_updates',
-    'istio.pilot.info',
     'istio.pilot.k8s.cfg_events',
     'istio.pilot.k8s.reg_events',
     'istio.pilot.no_ip',

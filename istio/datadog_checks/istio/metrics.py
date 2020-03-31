@@ -287,7 +287,6 @@ ISTIOD_METRICS = {
     'galley_validation_failed': 'galley.validation.failed',
     'pilot_conflict_outbound_listener_http_over_https': 'pilot.conflict.outbound_listener.http_over_https',
     'pilot_inbound_updates': 'pilot.inbound_updates',
-    'pilot_info': 'pilot.info',
     'pilot_k8s_cfg_events': 'pilot.k8s.cfg_events',
     'pilot_k8s_reg_events': 'pilot.k8s.reg_events',
     'pilot_proxy_queue_time': 'pilot.proxy_queue_time',
