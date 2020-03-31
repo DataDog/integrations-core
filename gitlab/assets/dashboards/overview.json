@@ -17,7 +17,7 @@
     },
     "description": "This dashboard provides a high-level overview of your Gitlab instance so you can monitor metrics related to pipelines, repositories, requests, and more.\n\nFor further reading on monitoring Gitlab, see: [Official Gitlab integration docs](https://docs.datadoghq.com/integrations/gitlab/)\n\nClone this template to make changes and add your own graphs and widgets.",
     "id": 1014699,
-    "modified": "2020-03-30T18:03:40.950891+00:00",
+    "modified": "2020-03-31T13:31:51.668679+00:00",
     "new_id": "c9w-dnm-m3a",
     "read_only": false,
     "template_variables": [
@@ -44,33 +44,15 @@
             "y": 1
         },
         {
-            "check": "gitlab.liveness",
-            "group": "gitlab_host:localhost,gitlab_port:8086,optional:tag1,host:docker-desktop",
-            "group_by": [],
-            "grouping": "cluster",
-            "height": 9,
-            "id": 1,
-            "tags": [
-                "*"
-            ],
-            "title": true,
-            "title_align": "center",
-            "title_size": "16",
-            "title_text": "Liveness",
-            "type": "check_status",
-            "width": 14,
-            "x": 18,
-            "y": 1
-        },
-        {
             "check": "gitlab.readiness",
-            "group_by": [],
+            "group_by": [
+                "$gitlab_host",
+                "$gitlab_port"
+            ],
             "grouping": "cluster",
             "height": 8,
             "id": 2,
-            "tags": [
-                "*"
-            ],
+            "tags": [],
             "title": true,
             "title_align": "center",
             "title_size": "16",
@@ -82,13 +64,14 @@
         },
         {
             "check": "gitlab.health",
-            "group_by": [],
+            "group_by": [
+                "$gitlab_port",
+                "$gitlab_host"
+            ],
             "grouping": "cluster",
             "height": 8,
             "id": 3,
-            "tags": [
-                "*"
-            ],
+            "tags": [],
             "title": true,
             "title_align": "center",
             "title_size": "16",
@@ -100,13 +83,14 @@
         },
         {
             "check": "gitlab.prometheus_endpoint_up",
-            "group_by": [],
+            "group_by": [
+                "$gitlab_port",
+                "gitlab_host"
+            ],
             "grouping": "cluster",
             "height": 8,
             "id": 4,
-            "tags": [
-                "*"
-            ],
+            "tags": [],
             "title": true,
             "title_align": "center",
             "title_size": "16",
@@ -138,7 +122,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:gitlab.rack.http_requests_total{*} by {method}.as_count()",
+                        "q": "sum:gitlab.rack.http_requests_total{$gitlab_host,$gitlab_port} by {method}.as_count()",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -156,10 +140,11 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "Http requests",
+            "title_text": "HTTP requests",
             "type": "timeseries",
             "width": 43,
             "x": 34,
@@ -187,7 +172,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:gitlab.pipelines_created_total{*}",
+                        "q": "sum:gitlab.pipelines_created_total{*}.as_count()",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -205,6 +190,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -221,7 +207,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:gitlab.transaction.event_create_repository_total{*}",
+                        "q": "sum:gitlab.transaction.event_create_repository_total{$gitlab_host,$gitlab_port}.as_count()",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -239,6 +225,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -285,7 +272,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:gitlab.user_session_logins_total{*}",
+                        "q": "sum:gitlab.user_session_logins_total{$gitlab_host,$gitlab_port}.as_count()",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -320,7 +307,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:gitlab.unicorn.workers{*} by {host}",
+                        "q": "avg:gitlab.unicorn.workers{$gitlab_host,$gitlab_port}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -338,6 +325,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -354,7 +342,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:gitlab.transaction.event_push_branch_total{*}.as_count()",
+                        "q": "sum:gitlab.transaction.event_push_branch_total{$gitlab_host,$gitlab_port}.as_count()",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -372,6 +360,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -388,7 +377,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "p90:gitlab.sql_duration_seconds{*}.as_count(), p75:gitlab.sql_duration_seconds{*}.as_count(), p50:gitlab.sql_duration_seconds{*}.as_count(), min:gitlab.sql_duration_seconds{*}.as_count(), max:gitlab.sql_duration_seconds{*}.as_count()",
+                        "q": "p90:gitlab.sql_duration_seconds{$gitlab_host,$gitlab_port}.as_count(), p75:gitlab.sql_duration_seconds{$gitlab_host,$gitlab_port}.as_count(), p50:gitlab.sql_duration_seconds{$gitlab_host,$gitlab_port}.as_count(), min:gitlab.sql_duration_seconds{$gitlab_host,$gitlab_port}.as_count(), max:gitlab.sql_duration_seconds{$gitlab_host,$gitlab_port}.as_count()",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -406,6 +395,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -414,6 +404,25 @@
             "width": 43,
             "x": 34,
             "y": 29
+        },
+        {
+            "check": "gitlab.liveness",
+            "group_by": [
+                "$gitlab_host",
+                "$gitlab_port"
+            ],
+            "grouping": "cluster",
+            "height": 9,
+            "id": 16,
+            "tags": [],
+            "title": true,
+            "title_align": "center",
+            "title_size": "16",
+            "title_text": "Liveness",
+            "type": "check_status",
+            "width": 14,
+            "x": 18,
+            "y": 1
         }
     ]
 }
