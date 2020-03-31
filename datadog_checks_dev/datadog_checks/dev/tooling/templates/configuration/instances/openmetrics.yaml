@@ -3,7 +3,6 @@
   description: The URL where your application metrics are exposed by Prometheus.
   value:
     type: string
-    example: http://service/prometheus
 - name: namespace
   required: true
   description: The namespace to be prepended to all metrics.
