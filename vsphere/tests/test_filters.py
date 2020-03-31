@@ -9,10 +9,10 @@ from pyVmomi import vim
 from tests.mocked_api import MockedAPI
 
 from datadog_checks.vsphere import VSphereCheck
+from datadog_checks.vsphere.resource_filters import make_inventory_path
 from datadog_checks.vsphere.utils import (
     is_metric_excluded_by_filters,
     is_resource_collected_by_filters,
-    make_inventory_path,
     match_any_regex,
 )
 
@@ -65,10 +65,12 @@ def test_is_realtime_resource_collected_by_filters(realtime_instance):
         {'resource': 'vm', 'property': 'inventory_path', 'patterns': [u'\\/D\xe4tacenter\\/vm\\/m.*']},
         {'resource': 'vm', 'property': 'hostname', 'patterns': [r'10\.0\.0\.103']},
         {'resource': 'vm', 'property': 'guest_hostname', 'patterns': [r'ubuntu-test']},
+        {'resource': 'vm', 'property': 'tag', 'patterns': [r'env:production']},
         {'resource': 'host', 'property': 'name', 'patterns': [r'10\.0\.0\.103'], 'type': 'blacklist'},
     ]
 
     collected_resources = [
+        'VM2-1',
         '$VM3-2',
         '$VM5',
         '10.0.0.101',
@@ -81,11 +83,18 @@ def test_is_realtime_resource_collected_by_filters(realtime_instance):
     ]
 
     check = VSphereCheck('vsphere', {}, [realtime_instance])
+
     formatted_filters = check.config.resource_filters
 
     infra = MockedAPI(realtime_instance).get_infrastructure()
     resources = [m for m in infra if m.__class__ in (vim.VirtualMachine, vim.HostSystem)]
-
+    VM2_1 = next(r for r in resources if infra.get(r).get('name') == 'VM2-1')
+    check.tags_cache.set_all_tags({vim.VirtualMachine: {VM2_1._moId: ['env:production', 'tag:2']}})
     for resource in resources:
         is_collected = infra.get(resource).get('name') in collected_resources
-        assert is_resource_collected_by_filters(resource, infra, formatted_filters, check.tags_cache) == is_collected
+        assert (
+            is_resource_collected_by_filters(
+                resource, infra, formatted_filters, check.tags_cache.get_mor_tags(resource)
+            )
+            == is_collected
+        )

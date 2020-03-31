@@ -22,14 +22,8 @@ from datadog_checks.vsphere.constants import (
     MOR_TYPE_AS_STRING,
     REALTIME_RESOURCES,
 )
-from datadog_checks.vsphere.types import (
-    InstanceConfig,
-    MetricFilterConfig,
-    MetricFilters,
-    ResourceFilterConfig,
-    ResourceFilters,
-    ResoureFilterKey,
-)
+from datadog_checks.vsphere.resource_filters import FILTER_PROP_TO_FILTER_CLASS, ResourceFilter
+from datadog_checks.vsphere.types import InstanceConfig, MetricFilterConfig, MetricFilters, ResourceFilterConfig
 
 
 class VSphereConfig(object):
@@ -117,9 +111,12 @@ class VSphereConfig(object):
             )
 
     def _parse_resource_filters(self, all_resource_filters):
-        # type: (List[ResourceFilterConfig]) -> ResourceFilters
+        # type: (List[ResourceFilterConfig]) -> List[ResourceFilter]
 
-        formatted_resource_filters = {}  # type: ResourceFilters
+        # Keep a list of resource filters ids (tuple of resource, property and type) that are already registered.
+        # This is to prevent users to define the same filter twice with different patterns.
+        resource_filters_ids = []
+        formatted_resource_filters = []  # type: List[ResourceFilter]
         allowed_resource_types = [MOR_TYPE_AS_STRING[k] for k in self.collected_resource_types]
 
         for resource_filter in all_resource_filters:
@@ -178,10 +175,16 @@ class VSphereConfig(object):
                     resource_filter['type'],
                     ALLOWED_FILTER_TYPES,
                 )
-            is_whitelist = resource_filter['type'] == 'whitelist'
+            patterns = [re.compile(r) for r in resource_filter['patterns']]
+            FilterClass = FILTER_PROP_TO_FILTER_CLASS[resource_filter['property']]
 
-            filter_key = ResoureFilterKey(resource_filter['resource'], resource_filter['property'], is_whitelist)
-            if filter_key in formatted_resource_filters:
+            filter_instance = FilterClass(
+                resource_filter['resource'],
+                resource_filter['property'],
+                patterns,
+                is_whitelist=(resource_filter['type'] == 'whitelist'),
+            )
+            if filter_instance.unique_key() in resource_filters_ids:
                 self.log.warning(
                     "Ignoring filter %r because you already have a `%s` filter for resource type %s and property %s.",
                     resource_filter,
@@ -191,7 +194,8 @@ class VSphereConfig(object):
                 )
                 continue
 
-            formatted_resource_filters[filter_key] = [re.compile(r) for r in resource_filter['patterns']]
+            formatted_resource_filters.append(filter_instance)
+            resource_filters_ids.append(filter_instance.unique_key())
 
         return formatted_resource_filters
 

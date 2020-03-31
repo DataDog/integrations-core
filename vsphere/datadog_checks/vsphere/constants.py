@@ -3,9 +3,11 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from pyVmomi import vim
 
-ALLOWED_FILTER_PROPERTIES = ['name', 'inventory_path', 'tag']
 ALLOWED_FILTER_TYPES = ['whitelist', 'blacklist']
+ALLOWED_FILTER_PROPERTIES = ['name', 'inventory_path', 'tag']
 EXTRA_FILTER_PROPERTIES_FOR_VMS = ['hostname', 'guest_hostname']
+
+
 SHORT_ROLLUP = {
     "average": "avg",
     "summation": "sum",

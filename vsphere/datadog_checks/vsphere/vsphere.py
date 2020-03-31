@@ -168,7 +168,7 @@ class VSphereCheck(AgentCheck):
                 continue
 
             if not is_resource_collected_by_filters(
-                mor, infrastructure_data, self.config.resource_filters, self.tags_cache
+                mor, infrastructure_data, self.config.resource_filters, self.tags_cache.get_mor_tags(mor)
             ):
                 # The resource does not match the specified whitelist/blacklist patterns.
                 continue

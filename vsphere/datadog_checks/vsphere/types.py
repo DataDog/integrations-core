@@ -1,4 +1,4 @@
-from typing import Dict, List, NamedTuple, Optional, Pattern, Type, TypedDict
+from typing import Dict, List, Optional, Pattern, Type, TypedDict
 
 # CONFIG ALIASES
 from pyVmomi import vim
@@ -58,9 +58,6 @@ InfrastructureData = Dict[vim.ManagedEntity, InfrastructureDataItem]
 ResourceTags = Dict[Type[vim.ManagedEntity], Dict[str, List[str]]]
 TagAssociation = TypedDict('TagAssociation', {'tag_id': str, 'object_ids': List[Dict[str, str]]})
 
-ResoureFilterKey = NamedTuple('ResoureFilterKey', [('resource', str), ('property', str), ('is_whitelist', bool)])
-
-ResourceFilters = Dict[ResoureFilterKey, List[Pattern]]
 MetricFilters = Dict[str, List[Pattern]]
 
 MorBatch = Dict[vim.ManagedEntity, List[vim.PerformanceManager.MetricId]]
