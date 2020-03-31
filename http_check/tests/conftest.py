@@ -9,6 +9,7 @@ from mock import patch
 
 from datadog_checks.dev import docker_run, run_command
 from datadog_checks.dev.utils import ON_WINDOWS
+from datadog_checks.http_check import HTTPCheck
 
 from .common import CONFIG_E2E, HERE
 
@@ -68,7 +69,6 @@ def mock_hosts_e2e():
 
 @pytest.fixture(scope='session')
 def http_check():
-    from datadog_checks.http_check import HTTPCheck
 
     # Patch the function to return the certs located in the `tests/` folder
     with patch('datadog_checks.http_check.http_check.get_ca_certs_path', new=mock_get_ca_certs_path):
