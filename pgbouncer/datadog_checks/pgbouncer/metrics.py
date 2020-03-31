@@ -21,7 +21,7 @@ STATS_METRICS = {
         ('avg_req', ('pgbouncer.stats.avg_req', GAUGE)),  # < 1.8
         ('avg_xact_count', ('pgbouncer.stats.avg_transaction_count', GAUGE)),  # >= 1.8
         ('avg_query_count', ('pgbouncer.stats.avg_query_count', GAUGE)),  # >= 1.8
-        ('avg_wait_time', ('pgbouncer.stats.avg_wait_time', GAUGE)),
+        ('avg_wait_time', ('pgbouncer.stats.avg_wait_time', GAUGE)),  # >= 1.8
         ('avg_recv', ('pgbouncer.stats.avg_recv', GAUGE)),
         ('avg_sent', ('pgbouncer.stats.avg_sent', GAUGE)),
         ('avg_query', ('pgbouncer.stats.avg_query', GAUGE)),  # < 1.8
