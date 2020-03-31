@@ -160,7 +160,9 @@ PILOT_METRICS = {
     'pilot_xds_write_timeout': 'xds.write_timeout',
 }
 
+
 ISTIOD_METRICS = {
+    # Maintain namespace compatibility from legacy components
     # Generic metrics
     'go_gc_duration_seconds': 'go.gc_duration_seconds',
     'go_goroutines': 'go.goroutines',
@@ -268,9 +270,6 @@ ISTIOD_METRICS = {
     'galley_source_kube_event_success_total': 'galley.source_kube.event_success_total',
     'galley_validation_config_load': 'galley.validation.config_load',
     'galley_validation_config_updates': 'galley.validation.config_update',
-    'galley_validation_passed': 'galley.validation.passed',
-    # These metrics supported Istio 1.5
-    'galley_validation_config_update_error': 'galley.validation.config_update_error',
     'citadel_secret_controller_csr_err_count': 'citadel.secret_controller.csr_err_count',
     'citadel_secret_controller_secret_deleted_cert_count': ('citadel.secret_controller.secret_deleted_cert_count'),
     'citadel_secret_controller_svc_acc_created_cert_count': ('citadel.secret_controller.svc_acc_created_cert_count'),
@@ -281,5 +280,21 @@ ISTIOD_METRICS = {
     'citadel_server_csr_parsing_err_count': 'citadel.server.csr_parsing_err_count',
     'citadel_server_id_extraction_err_count': 'citadel.server.id_extraction_err_count',
     'citadel_server_success_cert_issuance_count': 'citadel.server.success_cert_issuance_count',
+    # These metrics supported Istio 1.5
+    'galley_validation_config_update_error': 'galley.validation.config_update_error',
     'citadel_server_root_cert_expiry_timestamp': 'citadel.server.root_cert_expiry_timestamp',
+    'galley_validation_passed': 'galley.validation.passed',
+    'galley_validation_failed': 'galley.validation.failed',
+    'pilot_conflict_outbound_listener_http_over_https': 'pilot.conflict.outbound_listener.http_over_https',
+    'pilot_inbound_updates': 'pilot.inbound_updates',
+    'pilot_info': 'pilot.info',
+    'pilot_k8s_cfg_events': 'pilot.k8s.cfg_events',
+    'pilot_k8s_reg_events': 'pilot.k8s.reg_events',
+    'pilot_proxy_queue_time': 'pilot.proxy_queue_time',
+    'pilot_push_triggers': 'pilot.push.triggers',
+    'pilot_xds_eds_all_locality_endpoints': 'pilot.xds.eds_all_locality_endpoints',
+    'pilot_xds_push_time': 'pilot.xds.push.time',
+    'process_virtual_memory_max_bytes': 'process.virtual_memory_max_bytes',
+    'sidecar_injection_requests_total': 'sidecar_injection.requests_total',
+    'sidecar_injection_success_total': 'sidecar_injection.success_total',
 }
