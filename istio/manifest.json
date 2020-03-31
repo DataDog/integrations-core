@@ -11,7 +11,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "istio.",
-  "metric_to_check": "istio.mixer.process.cpu_seconds_total",
+  "metric_to_check": ["istio.mixer.process.cpu_seconds_total", "istio.mesh.request.count"],
   "name": "istio",
   "public_title": "Datadog-Istio Integration",
   "short_description": "Collect performance schema metrics, query throughput, custom metrics, and more.",
