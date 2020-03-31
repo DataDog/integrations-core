@@ -98,7 +98,7 @@ The ProxySQL check does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][11].
 
 [1]: https://proxysql.com/
 [2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
@@ -110,3 +110,4 @@ Need help? Contact [Datadog support][7].
 [8]: https://github.com/DataDog/integrations-core/blob/master/proxysql/metadata.csv
 [9]: https://docs.datadoghq.com/agent/docker/log
 [10]: https://docs.datadoghq.com/help
+[11]: https://docs.datadoghq.com/help
