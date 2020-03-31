@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+CHECK_NAME = 'istio'
+
+
 MOCK_INSTANCE = {
     'istio_mesh_endpoint': 'http://localhost:42422/metrics',
     'mixer_endpoint': 'http://localhost:9093/metrics',
