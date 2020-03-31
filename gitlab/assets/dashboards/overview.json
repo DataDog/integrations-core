@@ -17,7 +17,7 @@
     },
     "description": "This dashboard provides a high-level overview of your Gitlab instance so you can monitor metrics related to pipelines, repositories, requests, and more.\n\nFor further reading on monitoring Gitlab, see: [Official Gitlab integration docs](https://docs.datadoghq.com/integrations/gitlab/)\n\nClone this template to make changes and add your own graphs and widgets.",
     "id": 1014699,
-    "modified": "2020-03-31T13:31:51.668679+00:00",
+    "modified": "2020-03-31T13:41:21.413244+00:00",
     "new_id": "c9w-dnm-m3a",
     "read_only": false,
     "template_variables": [
@@ -45,14 +45,14 @@
         },
         {
             "check": "gitlab.readiness",
-            "group_by": [
-                "$gitlab_host",
-                "$gitlab_port"
-            ],
+            "group_by": [],
             "grouping": "cluster",
             "height": 8,
             "id": 2,
-            "tags": [],
+            "tags": [
+                "$gitlab_port",
+                "$gitlab_host"
+            ],
             "title": true,
             "title_align": "center",
             "title_size": "16",
@@ -64,14 +64,14 @@
         },
         {
             "check": "gitlab.health",
-            "group_by": [
-                "$gitlab_port",
-                "$gitlab_host"
-            ],
+            "group_by": [],
             "grouping": "cluster",
             "height": 8,
             "id": 3,
-            "tags": [],
+            "tags": [
+                "$gitlab_port",
+                "$gitlab_host"
+            ],
             "title": true,
             "title_align": "center",
             "title_size": "16",
@@ -83,14 +83,14 @@
         },
         {
             "check": "gitlab.prometheus_endpoint_up",
-            "group_by": [
-                "$gitlab_port",
-                "gitlab_host"
-            ],
+            "group_by": [],
             "grouping": "cluster",
             "height": 8,
             "id": 4,
-            "tags": [],
+            "tags": [
+                "$gitlab_port",
+                "$gitlab_host"
+            ],
             "title": true,
             "title_align": "center",
             "title_size": "16",
@@ -172,7 +172,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:gitlab.pipelines_created_total{*}.as_count()",
+                        "q": "sum:gitlab.pipelines_created_total{$gitlab_host,$gitlab_port}.as_count()",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -407,14 +407,14 @@
         },
         {
             "check": "gitlab.liveness",
-            "group_by": [
-                "$gitlab_host",
-                "$gitlab_port"
-            ],
+            "group_by": [],
             "grouping": "cluster",
             "height": 9,
             "id": 16,
-            "tags": [],
+            "tags": [
+                "$gitlab_host",
+                "$gitlab_port"
+            ],
             "title": true,
             "title_align": "center",
             "title_size": "16",
