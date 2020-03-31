@@ -4,6 +4,7 @@
 from six import iteritems
 
 from datadog_checks.base import PDHBaseCheck
+
 try:
     import datadog_agent
 except ImportError:
