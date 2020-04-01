@@ -115,11 +115,11 @@ class SupervisordCheck(AgentCheck):
         # Filter monitored processes on configuration directives
         proc_regex = instance.get('proc_regex', [])
         if not isinstance(proc_regex, list):
-            raise Exception("'proc_regex' should be a list of strings.")
+            raise Exception("'proc_regex' should be a list of strings. e.g. %s" % [proc_regex])
 
         proc_names = instance.get('proc_names', [])
         if not isinstance(proc_names, list):
-            raise Exception("'proc_names' should be a list of strings.")
+            raise Exception("'proc_names' should be a list of strings. e.g. %s" % [proc_names])
 
         # Collect information on each monitored process
         monitored_processes = []
