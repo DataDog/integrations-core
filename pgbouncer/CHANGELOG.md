@@ -3,7 +3,7 @@
 ## 1.9.0 / 2020-04-01
 
 * [Added] Adding maxwait_us, total_wait_time, and avg_wait_time metrics. See [#6180](https://github.com/DataDog/integrations-core/pull/6180). Thanks [blaines](https://github.com/blaines).
-* [Added] pgbouncer metadata. See [#5761](https://github.com/DataDog/integrations-core/pull/5761).
+* [Added] Add pgbouncer version metadata. See [#5761](https://github.com/DataDog/integrations-core/pull/5761).
 * [Added] Refactor check code. See [#5737](https://github.com/DataDog/integrations-core/pull/5737).
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
