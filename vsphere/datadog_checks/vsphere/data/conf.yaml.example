@@ -21,6 +21,21 @@ instances:
     #
     password: <PASSWORD>
 
+    ## @param use_legacy_check_version - boolean - required
+    ## For backward compatibility reasons, it is possible to use a deprecated version of the vsphere integration by
+    ## setting this field to "true".
+    #
+    use_legacy_check_version: false
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## The vSphere integration is a cluster-level check where metrics are usually unrelated to the host
+    ## on which the agent runs. Setting this parameter to true, prevents the agent from attaching the hostname
+    ## (and the host tags) to the metrics. It is especially important to leave this parameter to "true" when you are
+    ## running the agent inside a vSphere VM as the VM tags are going to be unrelated to other metrics.
+    ##
+    #
+    empty_default_hostname: true
+
     ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
@@ -246,18 +261,3 @@ instances:
     ## Number of seconds between each refresh of the metrics metadata cache
     #
     # refresh_metrics_metadata_cache_interval: 1800
-
-    ## @param use_legacy_check_version - boolean - required
-    ## For backward compatibility reasons, it is possible to use a deprecated version of the vsphere integration by
-    ## setting this field to "true".
-    #
-    use_legacy_check_version: false
-
-    ## @param empty_default_hostname - boolean - optional - default: false
-    ## The vSphere integration is a cluster-level check where metrics are usually unrelated to the host
-    ## on which the agent runs. Setting this parameter to true, prevents the agent from attaching the hostname
-    ## (and the host tags) to the metrics. It is especially important to leave this parameter to "true" when you are
-    ## running the agent inside a vSphere VM as the VM tags are going to be unrelated to other metrics.
-    ##
-    #
-    empty_default_hostname: true
