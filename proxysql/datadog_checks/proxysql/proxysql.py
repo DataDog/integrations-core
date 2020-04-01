@@ -8,7 +8,8 @@ import pymysql.cursors
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.proxysql.queries import (
+
+from .queries import (
     STATS_COMMAND_COUNTERS,
     STATS_MEMORY_METRICS,
     STATS_MYSQL_CONNECTION_POOL,
@@ -17,7 +18,7 @@ from datadog_checks.proxysql.queries import (
     STATS_MYSQL_USERS,
     VERSION_METADATA,
 )
-from datadog_checks.proxysql.ssl_utils import make_insecure_ssl_client_context, make_secure_ssl_client_context
+from .ssl_utils import make_insecure_ssl_client_context, make_secure_ssl_client_context
 
 ADDITIONAL_METRICS_MAPPING = {
     'command_counters_metrics': STATS_COMMAND_COUNTERS,
