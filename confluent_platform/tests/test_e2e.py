@@ -5,13 +5,11 @@ from typing import Any
 
 import pytest
 
-from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 
 from .common import CHECK_CONFIG
 from .metrics import ALWAYS_PRESENT_METRICS, NOT_ALWAYS_PRESENT_METRICS
 
-# TODO: `rate`, `count` metrics are not tested yet in e2e since for the moment those aggregate metrics are not reported.
 # TODO: missing e2e coverage for following metrics. See metrics in metrics.yaml.
 #   - Kafka Connect Task Metrics
 #   - Kafka Connect Sink Metrics
@@ -42,4 +40,5 @@ def test_e2e(dd_agent_check):
 
     for instance in CHECK_CONFIG['instances']:
         tags = ['instance:confluent_platform-localhost-{}'.format(instance['port']), 'jmx_server:localhost']
-        aggregator.assert_service_check('confluent.can_connect', AgentCheck.OK, tags=tags)
+        # TODO: Assert the status "status=AgentCheck.OK"
+        aggregator.assert_service_check('confluent.can_connect', tags=tags)
