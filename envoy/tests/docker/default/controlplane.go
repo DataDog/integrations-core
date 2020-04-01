@@ -12,7 +12,7 @@ import (
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v2"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v2"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-	xds "github.com/envoyproxy/go-control-plane/pkg/server"
+	xds "github.com/envoyproxy/go-control-plane/pkg/server/v2"
 
 	"github.com/golang/protobuf/ptypes"
 )
