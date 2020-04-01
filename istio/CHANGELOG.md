@@ -1,5 +1,8 @@
 # CHANGELOG - istio
 
+## 3.0.0-beta.2 / 2020-04-01
+
+
 ## 3.0.0-beta.1 / 2020-04-01
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
