@@ -1,0 +1,32 @@
+name: JBoss/WildFly
+files:
+- name: jboss_wildfly.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/jmx
+      overrides:
+        service_check_prefix.required: true
+        service_check_prefix.value.example: jboss
+        service_check_prefix.description: |
+          Service check prefix to use.
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/jmx
+      overrides:
+        jmx_url.required: true
+        jmx_url.order: 10
+        host.required: false
+        port.required: false
+    - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /opt/jboss/wildfly/standalone/log/*.log
+      source: jboss_wildfly
+      service: <SERVICE_NAME>
+      log_processing_rules:
+      - type: multi_line
+        name: log_start_with_date
+        pattern: \d{4}-\d{2}-\d{2}
