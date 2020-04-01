@@ -58,7 +58,7 @@ def instance_all_metrics(instance_basic):
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    compose_file = os.path.join(get_here(), 'compose/docker-compose.yml')
+    compose_file = os.path.join(get_here(), 'compose', 'docker-compose.yml')
 
     with TempDir('proxysql-data') as tmp_dir:
         with docker_run(
