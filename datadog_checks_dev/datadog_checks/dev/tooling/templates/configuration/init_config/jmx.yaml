@@ -12,7 +12,7 @@
     type: boolean
 - name: service_check_prefix
   description: |
-    Custom service check prefix. e.g. `my_prefix.can_connect`
+    Custom service check prefix. e.g. `my_prefix` to get a service check called `my_prefix.can_connect`.
     If not set, the default service check used is the integration name.
   value:
     type: string
