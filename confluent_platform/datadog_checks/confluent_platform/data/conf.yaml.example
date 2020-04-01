@@ -12,11 +12,10 @@ init_config:
     #
     collect_default_metrics: true
 
-    ## @param service_check_prefix - string - optional
-    ## Custom service check prefix. e.g. `my_prefix` to get a service check called `my_prefix.can_connect`.
-    ## If not set, the default service check used is the integration name.
+    ## @param service_check_prefix - string - required
+    ## Service check prefix to use.
     #
-    # service_check_prefix: <SERVICE_CHECK_PREFIX>
+    service_check_prefix: confluent
 
     ## @param conf - list of mappings - optional
     ## The list of metrics to be collected by the integration

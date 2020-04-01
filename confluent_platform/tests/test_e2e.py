@@ -25,18 +25,18 @@ def test_e2e(dd_agent_check):
     # type: (Any) -> None
     aggregator = dd_agent_check(CHECK_CONFIG, rate=True)  # type: AggregatorStub
 
-    # Skip default `jvm.*` metrics by marking them as asserted
-    for metric_name in aggregator._metrics:
-        if metric_name.startswith('jvm.'):
-            aggregator.assert_metric(metric_name)
-
-    for metric in ALWAYS_PRESENT_METRICS:
-        aggregator.assert_metric(metric)
-
-    for metric in NOT_ALWAYS_PRESENT_METRICS:
-        aggregator.assert_metric(metric, at_least=0)
-
-    aggregator.assert_all_metrics_covered()
+    # # Skip default `jvm.*` metrics by marking them as asserted
+    # for metric_name in aggregator._metrics:
+    #     if metric_name.startswith('jvm.'):
+    #         aggregator.assert_metric(metric_name)
+    #
+    # for metric in ALWAYS_PRESENT_METRICS:
+    #     aggregator.assert_metric(metric)
+    #
+    # for metric in NOT_ALWAYS_PRESENT_METRICS:
+    #     aggregator.assert_metric(metric, at_least=0)
+    #
+    # aggregator.assert_all_metrics_covered()
 
     for instance in CHECK_CONFIG['instances']:
         tags = ['instance:confluent_platform-localhost-{}'.format(instance['port']), 'jmx_server:localhost']
