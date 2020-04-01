@@ -13,10 +13,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "gitlab.",
-  "metric_to_check": [
-    "gitlab.process_max_fds",
-    "gitlab.rack.http_requests_total"
-  ],
+  "metric_to_check": ["gitlab.process_max_fds", "gitlab.ruby.process_start_time_seconds"],
   "name": "gitlab",
   "public_title": "Datadog-Gitlab Integration",
   "short_description": "Track all your Gitlab metrics with Datadog",
