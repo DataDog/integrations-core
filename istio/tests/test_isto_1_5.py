@@ -26,7 +26,7 @@ def test_istio_proxy_mesh(aggregator, istio_proxy_mesh_fixture):
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_ISTIO_PROXY_MESH_INSTANCE])
     check.check(common.MOCK_ISTIO_PROXY_MESH_INSTANCE)
 
-    for metric in common.PROXY_MESH_METRICS:
+    for metric in common.PROXY_MESH_METRICS + common.MESH_MERICS_1_5:
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()

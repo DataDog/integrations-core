@@ -36,6 +36,10 @@ MESH_METRICS = [
     'istio.mesh.request.size.sum',
     'istio.mesh.response.size.count',
     'istio.mesh.response.size.sum',
+]
+
+
+MESH_MERICS_1_5 = [
     'istio.mesh.request.duration.milliseconds.count',
     'istio.mesh.request.duration.milliseconds.sum',
 ]
@@ -231,6 +235,7 @@ PILOT_METRICS = [
 
 
 MESH_METRICS_MAPPER = {
+    'istio_request_duration_milliseconds': 'request.duration.milliseconds',
     'istio_request_count': 'request.count',
     'istio_request_duration': 'request.duration',
     'istio_request_size': 'request.size',
