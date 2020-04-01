@@ -4,7 +4,7 @@
         "integration": "ProxySQL",
         "check": "proxysql.can_connect",
         "statuses": ["ok", "critical"],
-        "groups": ["server", "port"],
+        "groups": ["proxysql_server", "proxysql_port"],
         "name": "ProxySQL Can Connect",
         "description": "Returns `CRITICAL` if the Agent can't connect to ProxySQL, otherwise returns `OK`."
     },
@@ -13,7 +13,7 @@
         "integration": "ProxySQL",
         "check": "proxysql.backend.status",
         "statuses": ["ok", "warning", "critical"],
-        "groups": ["hostgroup", "srv_host", "srv_port"],
+        "groups": ["hostgroup", "srv_host", "srv_port", "proxysql_server", "proxysql_port"],
         "name": "Status of the MySQL backend servers from ProxySQL perspective.",
         "description": "Returns `CRITICAL` if ProxySQL considers the backend host as SHUNNED or OFFLINE_HARD. Returns `WARNING` if the backend host is `OFFLINE_SOFT`. Returns `OK` otherwise."
     }

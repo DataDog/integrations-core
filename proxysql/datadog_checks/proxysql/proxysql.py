@@ -47,9 +47,12 @@ class ProxysqlCheck(AgentCheck):
         self.tls_verify = self.instance.get("tls_verify", False)
         self.validate_hostname = self.instance.get("validate_hostname", True)
         self.tls_ca_cert = self.instance.get("tls_ca_cert")
-        self.base_tags = self.instance.get("tags", [])
         self.connect_timeout = self.instance.get("connect_timeout", 10)
         self.read_timeout = self.instance.get("read_timeout")
+
+        self.tags = self.instance.get("tags", [])
+        self.tags.append("proxysql_server:{}".format(self.host))
+        self.tags.append("proxysql_port:{}".format(self.port))
 
         manager_queries = [STATS_MYSQL_GLOBAL]
         if self.is_metadata_collection_enabled():
@@ -65,7 +68,7 @@ class ProxysqlCheck(AgentCheck):
                 )
             manager_queries.append(ADDITIONAL_METRICS_MAPPING[additional_group])
         self._connection = None
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=manager_queries, tags=self.base_tags)
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=manager_queries, tags=self.tags)
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):
@@ -84,9 +87,6 @@ class ProxysqlCheck(AgentCheck):
 
     @contextmanager
     def connect(self):
-        service_check_tags = ["server:{}".format(self.host), "port:{}".format(str(self.port))]
-        service_check_tags.extend(self.base_tags)
-
         if self.tls_verify:
             # If ca_cert is None, will load the default certificates
             ssl_context = make_secure_ssl_client_context(
@@ -109,11 +109,11 @@ class ProxysqlCheck(AgentCheck):
             self.log.debug("Connected to ProxySQL")
             yield db
         except Exception:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.tags)
             self.log.exception("Can't connect to ProxySQL")
             raise
         else:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.tags)
         finally:
             if db:
                 db.close()

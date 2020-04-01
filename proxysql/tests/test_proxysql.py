@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-from tests.conftest import PROXYSQL_VERSION
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.errors import ConfigurationError
@@ -18,6 +17,7 @@ from .common import (
     QUERY_RULES_TAGS_METRICS,
     USER_TAGS_METRICS,
 )
+from .conftest import PROXYSQL_VERSION
 
 
 def get_check(instance):
@@ -71,12 +71,21 @@ def test_service_checks_ok(aggregator, instance_basic, dd_run_check):
     dd_run_check(check)
 
     aggregator.assert_service_check(
-        'proxysql.can_connect', AgentCheck.OK, tags=['server:localhost', 'port:6032', 'application:test']
+        'proxysql.can_connect',
+        AgentCheck.OK,
+        tags=['proxysql_server:localhost', 'proxysql_port:6032', 'application:test'],
     )
     aggregator.assert_service_check(
         'proxysql.backend.status',
         AgentCheck.OK,
-        tags=['application:test', 'hostgroup:0', 'srv_host:db', 'srv_port:3306'],
+        tags=[
+            'proxysql_server:localhost',
+            'proxysql_port:6032',
+            'application:test',
+            'hostgroup:0',
+            'srv_host:db',
+            'srv_port:3306',
+        ],
     )
 
 
