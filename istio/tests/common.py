@@ -36,6 +36,8 @@ MESH_METRICS = [
     'istio.mesh.request.size.sum',
     'istio.mesh.response.size.count',
     'istio.mesh.response.size.sum',
+    'istio.mesh.request.duration.milliseconds.count',
+    'istio.mesh.request.duration.milliseconds.sum',
 ]
 
 

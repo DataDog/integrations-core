@@ -83,6 +83,8 @@ GALLEY_METRICS = {
 
 
 MESH_METRICS = {
+    # These metrics support Istio 1.5
+    'istio_request_duration_milliseconds': 'request.duration.milliseconds',
     # These metrics support Istio 1.0
     'istio_requests_total': 'request.count',
     'istio_request_duration_seconds': 'request.duration',
