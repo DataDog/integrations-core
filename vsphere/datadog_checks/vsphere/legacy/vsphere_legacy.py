@@ -976,6 +976,11 @@ class VSphereLegacyCheck(AgentCheck):
             self.gauge('vsphere.vm.count', vm_count, tags=tags)
 
     def check(self, instance):
+        self.warning(
+            "DEPRECATION NOTICE: You are using a deprecated version of the vSphere integration. "
+            "To use the newer version, please update your configuration file based on the provided example. "
+            "Look for the `use_legacy_check_version` configuration option."
+        )
         try:
             self.exception_printed = 0
 
