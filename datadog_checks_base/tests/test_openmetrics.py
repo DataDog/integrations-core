@@ -2147,7 +2147,7 @@ def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_pro
         assert mocked_prometheus_scraper_config['_label_mapping']['pod']['dd-agent-62bgh']['phase'] == 'Test'
 
 
-def test_label_join_benchmark_single(benchmark, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_to_match_single(benchmark, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
     """ Tests label join and hostname override on a metric """
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
@@ -2173,7 +2173,7 @@ def test_label_join_benchmark_single(benchmark, mocked_prometheus_check, mocked_
         # run with submit
         check.process(mocked_prometheus_scraper_config)
 
-def test_label_join_benchmark_multiple(benchmark, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+def test_label_to_match_multiple(benchmark, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
     """ Tests label join and hostname override on a metric """
     check = mocked_prometheus_check
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
