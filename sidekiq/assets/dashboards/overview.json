@@ -3,7 +3,7 @@
         "author_name": "Datadog"
     },
     "board_title": "Sidekiq Overview",
-    "created": "2020-03-24T20:11:01.574553+00:00",
+    "created": "2020-04-01T14:19:50.912045+00:00",
     "created_by": {
         "access_role": "st",
         "disabled": false,
@@ -15,10 +15,10 @@
         "title": null,
         "verified": true
     },
-    "description": "This dashboard provides a high-level overview of your Sidekiq jobs so you can monitor metrics related to jobs, queues, and batches.\n\nFor further reading on monitoring Sidekiq, see: [Official Sidekiq integration docs](https://docs.datadoghq.com/integrations/sidekiq/)\n\nClone this template to make changes and add your own graphs and widgets.",
-    "id": 1027646,
-    "modified": "2020-03-31T17:29:38.568661+00:00",
-    "new_id": "krb-c8v-dji",
+    "description": "This dashboard provides a high-level overview of your Sidekiq deployment so you can monitor metrics related to jobs, queues, and batches.\n\nFor further reading on monitoring Sidekiq, see our [official Sidekiq integration documentation](https://docs.datadoghq.com/integrations/sidekiq/).\n\nClone this template to make changes and add your own graphs and widgets.",
+    "id": 1038262,
+    "modified": "2020-04-01T14:25:57.195044+00:00",
+    "new_id": "u7k-5bn-7ui",
     "read_only": false,
     "template_variables": [
         {
@@ -29,12 +29,12 @@
     ],
     "widgets": [
         {
-            "height": 9,
+            "height": 7,
             "id": 0,
             "sizing": "zoom",
             "type": "image",
             "url": "https://static.datadoghq.com/static/images/saas_logos/bot/sidekiq@2x.png",
-            "width": 14,
+            "width": 25,
             "x": 1,
             "y": 1
         },
@@ -69,9 +69,9 @@
             "title_size": "16",
             "title_text": "Busy Jobs",
             "type": "timeseries",
-            "width": 39,
-            "x": 17,
-            "y": 42
+            "width": 41,
+            "x": 71,
+            "y": 39
         },
         {
             "height": 12,
@@ -102,11 +102,11 @@
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "New Dead Jobs",
+            "title_text": "Dead Jobs",
             "type": "timeseries",
-            "width": 39,
-            "x": 73,
-            "y": 57
+            "width": 41,
+            "x": 28,
+            "y": 54
         },
         {
             "height": 12,
@@ -137,11 +137,11 @@
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "New Failed Jobs",
+            "title_text": "Failed Jobs",
             "type": "timeseries",
-            "width": 39,
-            "x": 73,
-            "y": 42
+            "width": 41,
+            "x": 71,
+            "y": 54
         },
         {
             "height": 12,
@@ -168,15 +168,14 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "New Job Retries ",
+            "title_text": "Retries",
             "type": "timeseries",
-            "width": 39,
-            "x": 73,
-            "y": 27
+            "width": 41,
+            "x": 28,
+            "y": 24
         },
         {
             "height": 12,
@@ -207,11 +206,11 @@
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "Jobs Processed",
+            "title_text": "Processed Jobs",
             "type": "timeseries",
-            "width": 39,
-            "x": 73,
-            "y": 72
+            "width": 41,
+            "x": 71,
+            "y": 24
         },
         {
             "height": 12,
@@ -242,11 +241,11 @@
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "Jobs Enqueued",
+            "title_text": "Enqueued Jobs",
             "type": "timeseries",
-            "width": 39,
-            "x": 17,
-            "y": 57
+            "width": 41,
+            "x": 28,
+            "y": 9
         },
         {
             "height": 12,
@@ -273,15 +272,14 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "Jobs Scheduled",
+            "title_text": "Scheduled jobs",
             "type": "timeseries",
-            "width": 39,
-            "x": 17,
-            "y": 27
+            "width": 41,
+            "x": 28,
+            "y": 39
         },
         {
             "height": 12,
@@ -313,69 +311,41 @@
             "title_size": "16",
             "title_text": "Job Performance",
             "type": "timeseries",
-            "width": 39,
-            "x": 17,
-            "y": 12
-        },
-        {
-            "height": 12,
-            "id": 9,
-            "legend": false,
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:sidekiq.jobs.success{$worker} by {worker}.as_count()",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "bars"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": "16",
-            "title_text": "New Jobs Succeeded ",
-            "type": "timeseries",
-            "width": 39,
-            "x": 73,
-            "y": 12
+            "width": 41,
+            "x": 71,
+            "y": 9
         },
         {
             "bgcolor": "gray",
             "font_size": "18",
-            "height": 19,
-            "html": "Job \n\nStatuses",
-            "id": 11,
+            "height": 6,
+            "html": "Job Status",
+            "id": 9,
             "text_align": "center",
             "tick": true,
-            "tick_edge": "right",
+            "tick_edge": "bottom",
             "tick_pos": "50%",
             "type": "note",
-            "width": 14,
-            "x": 57,
-            "y": 12
+            "width": 41,
+            "x": 71,
+            "y": 1
         },
         {
             "height": 7,
-            "id": 12,
+            "id": 10,
             "tile_def": {
                 "autoscale": true,
                 "precision": 2,
                 "requests": [
                     {
-                        "aggregator": "avg",
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_green",
+                                "value": 0
+                            }
+                        ],
                         "q": "avg:sidekiq.processed{$worker}"
                     }
                 ],
@@ -385,51 +355,58 @@
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "Total Processed",
+            "title_text": "Processed",
             "type": "query_value",
             "width": 12,
-            "x": 35,
-            "y": 1
-        },
-        {
-            "bgcolor": "gray",
-            "font_size": "18",
-            "height": 9,
-            "html": "Historical \n\nValues",
-            "id": 13,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "right",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 16,
-            "x": 17,
-            "y": 1
-        },
-        {
-            "bgcolor": "gray",
-            "font_size": "18",
-            "height": 19,
-            "html": "Queue \n\nStatuses",
-            "id": 14,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "right",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 14,
             "x": 1,
-            "y": 12
+            "y": 17
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "18",
+            "height": 6,
+            "html": "Historical Information",
+            "id": 11,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 25,
+            "x": 1,
+            "y": 9
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "18",
+            "height": 6,
+            "html": "Queue Status",
+            "id": 12,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 41,
+            "x": 28,
+            "y": 1
         },
         {
             "height": 7,
-            "id": 15,
+            "id": 13,
             "tile_def": {
                 "autoscale": true,
                 "precision": 2,
                 "requests": [
                     {
-                        "aggregator": "avg",
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">",
+                                "palette": "white_on_red",
+                                "value": 0
+                            }
+                        ],
                         "q": "avg:sidekiq.failed{$worker}"
                     }
                 ],
@@ -442,18 +419,18 @@
             "title_text": "Failed",
             "type": "query_value",
             "width": 12,
-            "x": 48,
-            "y": 1
+            "x": 14,
+            "y": 17
         },
         {
             "height": 7,
-            "id": 16,
+            "id": 14,
             "tile_def": {
                 "autoscale": true,
                 "precision": 2,
                 "requests": [
                     {
-                        "aggregator": "avg",
+                        "aggregator": "last",
                         "q": "avg:sidekiq.dead{$worker}"
                     }
                 ],
@@ -466,18 +443,18 @@
             "title_text": "Dead",
             "type": "query_value",
             "width": 12,
-            "x": 61,
-            "y": 1
+            "x": 1,
+            "y": 47
         },
         {
             "height": 7,
-            "id": 17,
+            "id": 15,
             "tile_def": {
                 "autoscale": true,
                 "precision": 2,
                 "requests": [
                     {
-                        "aggregator": "avg",
+                        "aggregator": "last",
                         "q": "avg:sidekiq.retries{$worker}"
                     }
                 ],
@@ -490,18 +467,18 @@
             "title_text": "Retries",
             "type": "query_value",
             "width": 12,
-            "x": 74,
-            "y": 1
+            "x": 1,
+            "y": 37
         },
         {
             "height": 7,
-            "id": 19,
+            "id": 16,
             "tile_def": {
                 "autoscale": true,
                 "precision": 2,
                 "requests": [
                     {
-                        "aggregator": "avg",
+                        "aggregator": "last",
                         "q": "avg:sidekiq.enqueued{$worker}"
                     }
                 ],
@@ -514,18 +491,18 @@
             "title_text": "Enqueued",
             "type": "query_value",
             "width": 12,
-            "x": 87,
-            "y": 1
+            "x": 14,
+            "y": 27
         },
         {
             "height": 7,
-            "id": 20,
+            "id": 17,
             "tile_def": {
                 "autoscale": true,
                 "precision": 2,
                 "requests": [
                     {
-                        "aggregator": "avg",
+                        "aggregator": "last",
                         "q": "avg:sidekiq.scheduled{$worker}"
                     }
                 ],
@@ -538,8 +515,32 @@
             "title_text": "Scheduled",
             "type": "query_value",
             "width": 12,
-            "x": 100,
-            "y": 1
+            "x": 14,
+            "y": 37
+        },
+        {
+            "height": 7,
+            "id": 18,
+            "tile_def": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "last",
+                        "q": "avg:sidekiq.busy{$worker}"
+                    }
+                ],
+                "viz": "query_value"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "Busy",
+            "type": "query_value",
+            "width": 12,
+            "x": 1,
+            "y": 27
         }
     ]
 }
