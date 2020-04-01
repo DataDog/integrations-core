@@ -122,11 +122,11 @@ instances:
     #
     # send_monotonic_counter: true
 
-    ## @param send_distribution_counts_as_monotonic - boolean - optional - default: False
+    ## @param send_distribution_counts_as_monotonic - boolean - optional - default: false
     ## Set send_distribution_counts_as_monotonic to true to send histograms & summary
     ## counters as monotonic counters (instead of gauges).
     #
-    # send_distribution_counts_as_monotonic: true
+    # send_distribution_counts_as_monotonic: false
 
     ## @param exclude_labels - list of strings - optional
     ## List of labels to be excluded
