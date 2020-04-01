@@ -10,6 +10,11 @@
   value:
     type: integer
 
+- name: jmx_url
+  description: JMX URL to connect to. Can be used instead of host/port configs.
+  value:
+    type: string
+
 - name: user
   description: User to use when connecting to JMX.
   value:
