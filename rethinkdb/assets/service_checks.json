@@ -1,0 +1,77 @@
+[
+    {
+        "agent_version": "6.19.0",
+        "integration": "RethinkDB",
+        "groups": [
+            "host",
+            "port"
+        ],
+        "check": "rethinkdb.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to reach the configured RethinkDB server, `OK` otherwise."
+    },
+    {
+        "agent_version": "6.19.0",
+        "integration": "RethinkDB",
+        "groups": [
+            "database",
+            "table"
+        ],
+        "check": "rethinkdb.table_status.status.ready_for_outdated_reads",
+        "statuses": [
+            "ok",
+            "warning"
+        ],
+        "name": "Table Ready For Outdated Reads",
+        "description": "Returns `OK` if all shards of a table are ready to accept outdated read queries, `WARNING` otherwise."
+    },
+    {
+        "agent_version": "6.19.0",
+        "integration": "RethinkDB",
+        "groups": [
+            "database",
+            "table"
+        ],
+        "check": "rethinkdb.table_status.status.ready_for_reads",
+        "statuses": [
+            "ok",
+            "warning"
+        ],
+        "name": "Table Ready For Reads",
+        "description": "Returns `OK` if all shards of a table are ready to accept read queries, `WARNING` otherwise."
+    },
+    {
+        "agent_version": "6.19.0",
+        "integration": "RethinkDB",
+        "groups": [
+            "database",
+            "table"
+        ],
+        "check": "rethinkdb.table_status.status.ready_for_writes",
+        "statuses": [
+            "ok",
+            "warning"
+        ],
+        "name": "Table Ready For Writes",
+        "description": "Returns `OK` if all shards of a table are ready to accept write queries, `WARNING` otherwise."
+    },
+    {
+        "agent_version": "6.19.0",
+        "integration": "RethinkDB",
+        "groups": [
+            "database",
+            "table"
+        ],
+        "check": "rethinkdb.table_status.status.all_replicas_ready",
+        "statuses": [
+            "ok",
+            "warning"
+        ],
+        "name": "Table All Replicas Ready",
+        "description": "Returns `OK` if all replicas are ready for reads and writes, `WARNING` otherwise (e.g. if backfills are in progress)."
+    }
+]

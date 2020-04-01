@@ -47,14 +47,14 @@ instances:
     #       - <EXTRA_LABEL_1>
     #       - <EXTRA_LABEL_2>
 
-    ## @param labels_mapper - list of key:value elements - optional
+    ## @param labels_mapper - object - optional
     ## The label mapper allows you to rename labels.
     ## Format is <LABEL_TO_RENAME>: <NEW_LABEL_NAME>
     #
     # labels_mapper:
     #   flavor: origin
 
-    ## @param type_overrides - list of key:value elements - optional
+    ## @param type_overrides - object - optional
     ## Type override allows you to override a type in the prometheus payload
     ## or type an untyped metrics (they're ignored by default)
     ## Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, `summary`
@@ -123,8 +123,8 @@ instances:
     #
     # ssl_ca_cert: "<CA_CERT_PATH>"
 
-    ## @param extra_headers - list of key:value elements - optional
-    ## A list of additional HTTP headers to send in queries to the openmetrics endpoint.
+    ## @param extra_headers - object - optional
+    ## Additional HTTP headers to send in queries to the openmetrics endpoint.
     ## Can be combined with autodiscovery template variables. Eg: "Authorization: Bearer %%env_TOKEN%%".
     ## Note: if the "Authorization" header is present it will be replaced when "bearer_token_auth" is enabled.
     #

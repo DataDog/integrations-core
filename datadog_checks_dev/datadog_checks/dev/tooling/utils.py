@@ -68,6 +68,10 @@ def get_check_file(check_name):
     return os.path.join(get_root(), check_name, 'datadog_checks', check_name, check_name + '.py')
 
 
+def get_readme_file(check_name):
+    return os.path.join(get_root(), check_name, 'README.md')
+
+
 def check_root():
     """Check if root has already been set."""
     existing_root = get_root()

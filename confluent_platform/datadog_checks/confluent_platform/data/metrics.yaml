@@ -588,9 +588,11 @@ jmx_metrics:
   # https://kafka.apache.org/documentation/#connect_monitoring
   - include:
       domain: kafka.connect
-      # Recent metrics merged on 3 Oct 2019: https://github.com/apache/kafka/pull/6843
-      # Probably not present in the connector we are using for testing
-      bean_regex: kafka\.connect:type=connect-worker-metrics,connector=.*
+      bean_regex:
+        # The bean should `connect-worker-metrics` but in practice the type is `connector-metrics`
+        # We are supporting both while the issue is solved: https://issues.apache.org/jira/browse/KAFKA-9790
+        - kafka\.connect:type=connect-worker-metrics,connector=.*
+        - kafka\.connect:type=connector-metrics,connector=.*
       attribute:
         connector-destroyed-task-count:
           # The number of destroyed tasks of the connector on the worker.
@@ -866,8 +868,8 @@ jmx_metrics:
   #   - Kafka Schema Registry: https://docs.confluent.io/current/schema-registry/monitoring.html
   - include:
       bean:
-        - kafka.rest:type=jetty-metrics
-        - kafka.schema.registry:type=jetty-metrics
+        - kafka.rest:type=jersey-metrics
+        - kafka.schema.registry:type=jersey-metrics
       attribute:
         brokers.list.request-error-rate:
           # The average number of requests per second that resulted in HTTP error responses
