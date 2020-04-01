@@ -20,10 +20,15 @@ def make_inventory_path(mor, infrastructure_data):
 def match_any_regex(string, regexes):
     # type: (str, List[Pattern]) -> bool
     for regex in regexes:
-        match = regex.match(string)
-        if match:
+        if regex.match(string):
             return True
     return False
+
+
+def create_resource_filter(resource_type, property_name, patterns, is_whitelist=True):
+    FilterClass = FILTER_PROP_TO_FILTER_CLASS[property_name]
+    filter_instance = FilterClass(resource_type, property_name, patterns, is_whitelist)
+    return filter_instance
 
 
 class ResourceFilter:

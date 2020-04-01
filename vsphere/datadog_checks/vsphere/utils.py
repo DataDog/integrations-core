@@ -52,27 +52,22 @@ def is_resource_collected_by_filters(mor, infrastructure_data, resource_filters,
     whitelist_filters = [f for f in resource_filters if f.is_whitelist]
     blacklist_filters = [f for f in resource_filters if not f.is_whitelist]
 
-    match_whitelist = False
-    match_blacklist = False
-    for resource_filter in whitelist_filters:
-        if resource_filter.match(mor, infrastructure_data, resource_tags):
-            match_whitelist = True
-            break
+    # First check if the resource match any blacklist filter, if so do not collect it.
     for resource_filter in blacklist_filters:
         if resource_filter.match(mor, infrastructure_data, resource_tags):
-            match_blacklist = True
-            break
+            return False
 
     # Extra logic to consider that no whitelist filters means "collect everything"
     if not whitelist_filters:
-        match_whitelist = True
+        return True
 
-    # If resources matches one of the blacklisted patterns, do not collect it
-    if match_blacklist:
-        return False
+    # Finally check if the resource match any whitelist filter, if so collect it
+    for resource_filter in whitelist_filters:
+        if resource_filter.match(mor, infrastructure_data, resource_tags):
+            return True
 
-    # Otherwise, collect it if it matches one of the whitelisted patterns.
-    return match_whitelist
+    # Otherwise, do not collect it
+    return False
 
 
 def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):

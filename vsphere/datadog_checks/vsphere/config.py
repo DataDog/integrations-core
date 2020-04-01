@@ -22,7 +22,7 @@ from datadog_checks.vsphere.constants import (
     MOR_TYPE_AS_STRING,
     REALTIME_RESOURCES,
 )
-from datadog_checks.vsphere.resource_filters import FILTER_PROP_TO_FILTER_CLASS, ResourceFilter
+from datadog_checks.vsphere.resource_filters import ResourceFilter, create_resource_filter
 from datadog_checks.vsphere.types import InstanceConfig, MetricFilterConfig, MetricFilters, ResourceFilterConfig
 
 
@@ -176,9 +176,7 @@ class VSphereConfig(object):
                     ALLOWED_FILTER_TYPES,
                 )
             patterns = [re.compile(r) for r in resource_filter['patterns']]
-            FilterClass = FILTER_PROP_TO_FILTER_CLASS[resource_filter['property']]
-
-            filter_instance = FilterClass(
+            filter_instance = create_resource_filter(
                 resource_filter['resource'],
                 resource_filter['property'],
                 patterns,
