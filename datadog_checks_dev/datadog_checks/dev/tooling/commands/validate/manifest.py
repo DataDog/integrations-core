@@ -44,6 +44,10 @@ OPTIONAL_ATTRIBUTES = {
     'process_signatures',
 }
 
+METRIC_TO_CHECK_WHITELIST = {
+    'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
+}
+
 ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
 
 INTEGRATION_ID_REGEX = r'^[a-z][a-z0-9-]{0,254}(?<!-)$'
@@ -270,7 +274,7 @@ def manifest(ctx, fix, include_extras):
             if metric_to_check:
                 metrics_to_check = metric_to_check if isinstance(metric_to_check, list) else [metric_to_check]
                 for metric in metrics_to_check:
-                    if not is_metric_in_metadata_file(metric, check_name):
+                    if not is_metric_in_metadata_file(metric, check_name) and metric not in METRIC_TO_CHECK_WHITELIST:
                         file_failures += 1
                         display_queue.append((echo_failure, f'  metric_to_check not in metadata.csv: {metric!r}'))
 
