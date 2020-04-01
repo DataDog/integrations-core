@@ -21,7 +21,7 @@
       - memory:mem
       - io
     items:
-      type: string # TODO: metrics can be a string or a key:valueß
+      type: string
 - name: prometheus_metrics_prefix
   description: <PREFIX> for exposed Prometheus metrics.
   value:
