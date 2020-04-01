@@ -29,7 +29,7 @@ instances:
 
     ## @param empty_default_hostname - boolean - optional - default: false
     ## The vSphere integration is a cluster-level check where metrics are usually unrelated to the host
-    ## on which the agent runs. Setting this parameter to true, prevents the agent from attaching the hostname
+    ## on which the Agent runs. Setting this parameter to true, prevents the Agent from attaching the hostname
     ## (and the host tags) to the metrics. It is especially important to leave this parameter to "true" when you are
     ## running the agent inside a vSphere VM as the VM tags are going to be unrelated to other metrics.
     ##

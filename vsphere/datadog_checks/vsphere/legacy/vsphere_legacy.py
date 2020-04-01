@@ -147,8 +147,6 @@ class VSphereLegacyCheck(AgentCheck):
         self.latest_event_query = {}
         self.exception_printed = 0
 
-        self._has_logged_depreciation_warning = False
-
     def print_exception(self, msg):
         """ Print exceptions happening in separate threads
         Prevent from logging a ton of them if a potentially big number of them fail the same way
@@ -978,13 +976,11 @@ class VSphereLegacyCheck(AgentCheck):
             self.gauge('vsphere.vm.count', vm_count, tags=tags)
 
     def check(self, instance):
-        if not self._has_logged_depreciation_warning:
-            self.warning(
-                "DEPRECATION NOTICE: You are using a deprecated version of the vSphere integration. "
-                "To use the newer version, please update your configuration file based on the provided example. "
-                "Look for the `use_legacy_check_version` configuration option."
-            )
-            self._has_logged_depreciation_warning = True
+        self.warning(
+            "DEPRECATION NOTICE: You are using a deprecated version of the vSphere integration. "
+            "To use the newer version, please update your configuration file based on the provided example. "
+            "Look for the `use_legacy_check_version` configuration option."
+        )
         try:
             self.exception_printed = 0
 
