@@ -13,7 +13,7 @@ except ImportError:
     log = logging.getLogger(__name__)
     log.info('Agent does not provide filtering logic, disabling container filtering')
 
-    def is_excluded(name, image):
+    def is_excluded(name, image, namespace=""):
         return False
 
 
@@ -115,6 +115,7 @@ class PodListUtils(object):
         self.cache = {}
         self.pod_uid_by_name_tuple = {}
         self.container_id_by_name_tuple = {}
+        self.container_id_to_namespace = {}
 
         if podlist is None:
             return
@@ -139,6 +140,7 @@ class PodListUtils(object):
                     continue
                 self.containers[cid] = ctr
                 self.container_id_by_name_tuple[(namespace, pod_name, ctr.get('name'))] = cid
+                self.container_id_to_namespace[cid] = namespace
 
     def get_uid_by_name_tuple(self, name_tuple):
         """
@@ -190,7 +192,7 @@ class PodListUtils(object):
             self.cache[cid] = True
             return True
 
-        excluded = is_excluded(ctr.get("name"), ctr.get("image"))
+        excluded = is_excluded(ctr.get("name"), ctr.get("image"), self.container_id_to_namespace.get(cid, ""))
         self.cache[cid] = excluded
         return excluded
 

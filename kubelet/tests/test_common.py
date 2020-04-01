@@ -27,6 +27,7 @@ def test_container_filter(monkeypatch):
     long_cid = "docker://a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479"
     ctr_name = "datadog-agent"
     ctr_image = "datadog/agent-dev:haissam-tagger-pod-entity"
+    namespace = "default"
 
     pods = json.loads(mock_from_file('pods.json'))
     pod_list_utils = PodListUtils(pods)
@@ -55,7 +56,7 @@ def test_container_filter(monkeypatch):
     is_excluded.reset_mock()
     assert pod_list_utils.is_excluded(long_cid) is False
     is_excluded.assert_called_once()
-    is_excluded.assert_called_with(ctr_name, ctr_image)
+    is_excluded.assert_called_with(ctr_name, ctr_image, namespace)
 
     # Clear exclusion cache
     pod_list_utils.cache = {}
@@ -65,7 +66,7 @@ def test_container_filter(monkeypatch):
     is_excluded.return_value = True
     assert pod_list_utils.is_excluded(long_cid) is True
     is_excluded.assert_called_once()
-    is_excluded.assert_called_with(ctr_name, ctr_image)
+    is_excluded.assert_called_with(ctr_name, ctr_image, namespace)
 
 
 def test_filter_staticpods(monkeypatch):
