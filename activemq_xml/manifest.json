@@ -11,7 +11,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "activemq.",
-  "metric_to_check": "activemq.queue.size",
+  "metric_to_check": "activemq.queue.count",
   "name": "activemq_xml",
   "public_title": "Datadog-ActiveMQ XML Integration",
   "short_description": "Collect metrics for brokers and queues, producers and consumers, and more.",
