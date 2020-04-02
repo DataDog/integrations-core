@@ -71,7 +71,6 @@ files:
         example:
           - migrate_rx_objs
           - migrate_tx_objs
-        default: None
     - name: namespaces
       description: all namespaces are collected by default. If you want to collect specific namespaces specify them here.
       value:
