@@ -209,7 +209,6 @@ def test_section_with_option_order():
 
     files = consumer.render()
     contents, errors = files['test.yaml.example']
-    print(contents)
     assert not errors
     assert contents == normalize_yaml(
         """
