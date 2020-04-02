@@ -5,7 +5,7 @@
 from datadog_checks.base.utils.tagging import tagger
 
 try:
-    from containers import is_excluded
+    from containers import is_excluded as c_is_excluded
 except ImportError:
     # Don't fail on < 6.2
     import logging
@@ -13,7 +13,7 @@ except ImportError:
     log = logging.getLogger(__name__)
     log.info('Agent does not provide filtering logic, disabling container filtering')
 
-    def is_excluded(name, image, namespace=""):
+    def c_is_excluded(name, image, namespace=""):
         return False
 
 
@@ -192,7 +192,7 @@ class PodListUtils(object):
             self.cache[cid] = True
             return True
 
-        excluded = is_excluded(ctr.get("name"), ctr.get("image"), self.container_id_to_namespace.get(cid, ""))
+        excluded = c_is_excluded(ctr.get("name"), ctr.get("image"), self.container_id_to_namespace.get(cid, ""))
         self.cache[cid] = excluded
         return excluded
 
