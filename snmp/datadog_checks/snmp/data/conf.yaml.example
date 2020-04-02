@@ -349,5 +349,5 @@ instances:
     #    symbol: sysName
     #    match: (.*)-(.*)
     #    tags:
-    #        host: \\2
-    #        device_type: \\1
+    #        host: \2
+    #        device_type: \1
