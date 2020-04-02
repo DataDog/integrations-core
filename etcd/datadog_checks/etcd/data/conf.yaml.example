@@ -1,3 +1,5 @@
+# Non-code change -- should NOT trigger PR Changes for this check (same as before).
+
 init_config:
     ## @param proxy - object - optional
     ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
@@ -22,7 +24,7 @@ init_config:
 
 instances:
 
-  -  
+  -
     ## @param use_preview - boolean - optional - default: true
     ## Whether or not to preview the new version of the check supporting only ETCD 3+
     #
