@@ -10,7 +10,7 @@ from re import compile
 
 import requests
 from prometheus_client.samples import Sample
-from six import PY3, iteritems, itervalues, string_types
+from six import PY3, iteritems, string_types
 
 from ...config import is_affirmative
 from ...errors import CheckException
