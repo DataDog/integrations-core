@@ -2,7 +2,7 @@
 
 Red Hat OpenShift is an open source container application platform based on the Kubernetes container orchestrator for enterprise application development and deployment.
 
-> There is currently no separate `openshift` check, this README describes the necessary configuration to enable collection of OpenShift specific metrics in the Agent. Data described here are collected by the [`kube-apiserver` check][1], setting up this check is necessary to collect the `openshift.*` metrics.
+> There is currently no separate `openshift` check, this README describes the necessary configuration to enable collection of OpenShift specific metrics in the Agent. Data described here are collected by the [`kubernetes_apiserver` check][1], setting up this check is necessary to collect the `openshift.*` metrics.
 
 ## Setup
 
@@ -88,7 +88,7 @@ runAsUser:
 
 ### Validation
 
-See [kube_apiserver_metrics][1]
+See [kubernetes_apiserver][1]
 
 ## Data Collected
 
