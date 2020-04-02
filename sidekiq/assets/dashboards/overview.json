@@ -17,7 +17,7 @@
     },
     "description": "This dashboard provides a high-level overview of your Sidekiq deployment so you can monitor metrics related to jobs, queues, and batches.\n\nFor further reading on monitoring Sidekiq, see our [official Sidekiq integration documentation](https://docs.datadoghq.com/integrations/sidekiq/).\n\nClone this template to make changes and add your own graphs and widgets.",
     "id": 1038262,
-    "modified": "2020-04-01T14:25:57.195044+00:00",
+    "modified": "2020-04-02T13:20:04.555395+00:00",
     "new_id": "u7k-5bn-7ui",
     "read_only": false,
     "template_variables": [
@@ -63,7 +63,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -98,7 +97,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -133,7 +131,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -202,7 +199,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -237,7 +233,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -351,7 +346,6 @@
                 ],
                 "viz": "query_value"
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -412,7 +406,6 @@
                 ],
                 "viz": "query_value"
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -436,7 +429,6 @@
                 ],
                 "viz": "query_value"
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -460,7 +452,6 @@
                 ],
                 "viz": "query_value"
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -484,7 +475,6 @@
                 ],
                 "viz": "query_value"
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -508,7 +498,6 @@
                 ],
                 "viz": "query_value"
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -532,7 +521,6 @@
                 ],
                 "viz": "query_value"
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -541,6 +529,41 @@
             "width": 12,
             "x": 1,
             "y": 27
+        },
+        {
+            "height": 12,
+            "id": 20,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "diff(avg:sidekiq.jobs.success{*}.as_count())",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "Successful Jobs",
+            "type": "timeseries",
+            "width": 41,
+            "x": 71,
+            "y": 69
         }
     ]
 }
