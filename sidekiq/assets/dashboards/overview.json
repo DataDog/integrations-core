@@ -17,7 +17,7 @@
     },
     "description": "This dashboard provides a high-level overview of your Sidekiq deployment so you can monitor metrics related to jobs, queues, and batches.\n\nFor further reading on monitoring Sidekiq, see our [official Sidekiq integration documentation](https://docs.datadoghq.com/integrations/sidekiq/).\n\nClone this template to make changes and add your own graphs and widgets.",
     "id": 1038262,
-    "modified": "2020-04-02T13:20:04.555395+00:00",
+    "modified": "2020-04-02T13:22:38.897639+00:00",
     "new_id": "u7k-5bn-7ui",
     "read_only": false,
     "template_variables": [
@@ -564,6 +564,30 @@
             "width": 41,
             "x": 71,
             "y": 69
+        },
+        {
+            "height": 7,
+            "id": 21,
+            "tile_def": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "sum",
+                        "q": "avg:sidekiq.jobs.success{*}.as_count()"
+                    }
+                ],
+                "viz": "query_value"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "Succeeded",
+            "type": "query_value",
+            "width": 12,
+            "x": 14,
+            "y": 47
         }
     ]
 }
