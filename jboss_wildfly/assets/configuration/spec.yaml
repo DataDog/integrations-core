@@ -18,6 +18,7 @@ files:
         jmx_url.hidden: false
         jmx_url.description: JBoss/WildFly URL to connect to
         jmx_url.value.example: "service:jmx:remote+http://localhost:9990"
+        jmx_url.display_priority: 10
         host.required: false
         port.required: false
     - template: instances/default
