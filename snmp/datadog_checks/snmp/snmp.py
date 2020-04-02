@@ -64,11 +64,12 @@ class SnmpCheck(AgentCheck):
 
         profiles = self.init_config.get('profiles')
         if profiles is None:
-            profiles = get_default_profiles()
+            self.profiles = get_default_profiles()
+        else:
+            self.profiles = profiles  # type: Dict[str, Dict[str, Any]]
+            self._load_profiles()
 
-        self.profiles = profiles  # type: Dict[str, Dict[str, Any]]
-        self.profiles_by_oid = {}  # type: Dict[str, str]
-        self._load_profiles()
+        self.profiles_by_oid = self._get_profiles_mapping()
 
         self.instance['name'] = self._get_instance_name(self.instance)
         self._config = self._build_config(self.instance)
@@ -76,7 +77,7 @@ class SnmpCheck(AgentCheck):
     def _load_profiles(self):
         # type: () -> None
         """
-        Load the configured SNMP profiles and index them by sysObjectID, if possible.
+        Load the configured SNMP profiles.
         """
         for name, profile in self.profiles.items():
             try:
@@ -90,9 +91,18 @@ class SnmpCheck(AgentCheck):
                 raise ConfigurationError("Failed to expand base profiles in profile '{}': {}".format(name, exc))
 
             self.profiles[name] = {'definition': definition}
-            sys_object_oid = definition.get('sysobjectid')
+
+    def _get_profiles_mapping(self):
+        # type: () -> Dict[str, str]
+        """
+        Get the mapping from sysObjectID to profile.
+        """
+        profiles_by_oid = {}
+        for name, profile in self.profiles.items():
+            sys_object_oid = profile['definition'].get('sysobjectid')
             if sys_object_oid is not None:
-                self.profiles_by_oid[sys_object_oid] = name
+                profiles_by_oid[sys_object_oid] = name
+        return profiles_by_oid
 
     def _build_config(self, instance):
         # type: (dict) -> InstanceConfig

@@ -91,9 +91,9 @@ def recursively_expand_base_profiles(definition):
         definition.setdefault('metric_tags', []).extend(base_definition.get('metric_tags', []))
 
 
-def get_default_profiles():
+def _load_default_profiles():
     # type: () -> Dict[str, Any]
-    """Return all the profiles installed on the system."""
+    """Load all the profiles installed on the system."""
     profiles = {}
     paths = [_get_profiles_site_root(), _get_profiles_confd_root()]
 
@@ -110,9 +110,20 @@ def get_default_profiles():
             if is_abstract:
                 continue
 
-            profiles[base] = {'definition_file': os.path.join(path, filename)}
+            definition = _read_profile_definition(os.path.join(path, filename))
+            recursively_expand_base_profiles(definition)
+            profiles[base] = {'definition': definition}
 
     return profiles
+
+
+_default_profiles = _load_default_profiles()
+
+
+def get_default_profiles():
+    # type: () -> Dict[str, Any]
+    """Return all the profiles installed on the system."""
+    return _default_profiles
 
 
 def parse_as_oid_tuple(value):
