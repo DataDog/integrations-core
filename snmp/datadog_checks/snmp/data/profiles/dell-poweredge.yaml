@@ -7,6 +7,9 @@
 
 sysobjectid: 1.3.6.1.4.1.674.10892.1.*
 
+extends:
+  - idrac.yaml
+
 metrics:
   - MIB: MIB-Dell-10892
     table:
@@ -149,103 +152,3 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.1.1100.90.1.11
           name: networkDeviceIPAddress
         tag: ip_address
-
-  # iDRAC Specific
-  - MIB: IDRAC-MIB-SMIv2
-    table:
-      OID: 1.3.6.1.4.1.674.10892.5.4.200.10
-      name: systemStateTable
-    symbols:
-      - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.4
-        name: systemStateChassisStatus
-      - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.6
-        name: systemStatePowerUnitStatusRedundancy
-      - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.9
-        name: systemStatePowerSupplyStatusCombined
-      - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.15
-        name: systemStateAmperageStatusCombined
-      - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.18
-        name: systemStateCoolingUnitStatusRedundancy
-      - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.21
-        name: systemStateCoolingDeviceStatusCombined
-      - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.24
-        name: systemStateTemperatureStatusCombined
-      - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.27
-        name: systemStateMemoryDeviceStatusCombined
-      - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.30
-        name: systemStateChassisIntrusionStatusCombined
-      - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.42
-        name: systemStatePowerUnitStatusCombined
-      - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.44
-        name: systemStateCoolingUnitStatusCombined
-      - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.50
-        name: systemStateProcessorDeviceStatusCombined
-      - OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.63
-        name: systemStateTemperatureStatisticsStatusCombined
-    metric_tags:
-      - column:
-          OID: 1.3.6.1.4.1.674.10892.5.4.200.10.1.1
-          name: systemStatechassisIndex
-        tag: chassis_index
-  - MIB: IDRAC-MIB-SMIv2
-    table:
-      OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4
-      name: physicalDiskTable
-    symbols:
-      - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.4
-        name: physicalDiskState
-      - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.11
-        name: physicalDiskCapacityInMB
-      - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.17
-        name: physicalDiskUsedSpaceInMB
-      - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.19
-        name: physicalDiskFreeSpaceInMB
-    metric_tags:
-      - column:
-          OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.4.1.2
-          name: physicalDiskName
-        tag: disk_name
-  - MIB: IDRAC-MIB-SMIv2
-    table:
-      OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9
-      name: enclosurePowerSupplyTable
-    symbols:
-      - OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.4
-        name: enclosurePowerSupplyState
-    metric_tags:
-      - column:
-          OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.9.1.2
-          name: enclosurePowerSupplyName
-        tag: supply_name
-  - MIB: INTEL-LAN-ADAPTERS-MIB
-    table:
-      OID: 1.3.6.1.4.1.343.2.7.2.2.1.3
-      name: genericAdaptersTrafficStatsAttrTable
-    forced_type: monotonic_count
-    symbols:
-      - OID: 1.3.6.1.4.1.343.2.7.2.2.1.3.1.1
-        name: adapterRxPackets
-      - OID: 1.3.6.1.4.1.343.2.7.2.2.1.3.1.2
-        name: adapterTxPackets
-      - OID: 1.3.6.1.4.1.343.2.7.2.2.1.3.1.3
-        name: adapterRxBytes
-      - OID: 1.3.6.1.4.1.343.2.7.2.2.1.3.1.4
-        name: adapterTxBytes
-      - OID: 1.3.6.1.4.1.343.2.7.2.2.1.3.1.5
-        name: adapterRxErrors
-      - OID: 1.3.6.1.4.1.343.2.7.2.2.1.3.1.6
-        name: adapterTxErrors
-      - OID: 1.3.6.1.4.1.343.2.7.2.2.1.3.1.7
-        name: adapterRxDropped
-      - OID: 1.3.6.1.4.1.343.2.7.2.2.1.3.1.8
-        name: adapterTxDropped
-      - OID: 1.3.6.1.4.1.343.2.7.2.2.1.3.1.9
-        name: adapterRxMulticast
-      - OID: 1.3.6.1.4.1.343.2.7.2.2.1.3.1.10
-        name: adapterCollisions
-    metric_tags:
-      - column:
-          OID: 1.3.6.1.4.1.343.2.7.2.2.1.1.1.2
-          name: adapterName
-        table: genericAdaptersAttrTable
-        tag: adapter
