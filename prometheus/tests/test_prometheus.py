@@ -28,7 +28,9 @@ def test_prometheus_check(aggregator, instance, poll_mock):
         tags=['timestamp:123', 'node:host2', 'matched_label:foobar'],
         metric_type=aggregator.GAUGE,
     )
-    aggregator.assert_metric(CHECK_NAME + '.counter1', tags=['node:host2'], metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric(
+        CHECK_NAME + '.counter1_total', tags=['node:host2'], metric_type=aggregator.MONOTONIC_COUNT
+    )
     assert aggregator.metrics_asserted_pct == 100.0
 
 
@@ -50,7 +52,7 @@ def test_prometheus_check_counter_gauge(aggregator, instance, poll_mock):
         tags=['timestamp:123', 'node:host2', 'matched_label:foobar'],
         metric_type=aggregator.GAUGE,
     )
-    aggregator.assert_metric(CHECK_NAME + '.counter1', tags=['node:host2'], metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.counter1_total', tags=['node:host2'], metric_type=aggregator.GAUGE)
     assert aggregator.metrics_asserted_pct == 100.0
 
 
