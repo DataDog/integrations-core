@@ -609,7 +609,7 @@ def test_option_hidden_default():
     assert spec.data['files'][0]['options'][0]['options'][0]['hidden'] is False
 
 
-def test_option_order_not_number():
+def test_option_order_not_integer():
     spec = get_spec(
         """
         name: foo
@@ -628,7 +628,7 @@ def test_option_order_not_number():
     )
     spec.load()
 
-    assert 'test, test.yaml, instances, foo: Attribute `order` must be a number' in spec.errors
+    assert 'test, test.yaml, instances, foo: Attribute `order` must be a integer' in spec.errors
 
 
 def test_option_order_default():
