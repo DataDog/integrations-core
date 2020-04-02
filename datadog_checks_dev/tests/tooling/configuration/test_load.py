@@ -545,7 +545,6 @@ def test_option_required_not_boolean():
     assert 'test, test.yaml, instances, foo: Attribute `required` must be true or false' in spec.errors
 
 
-
 def test_option_required_default():
     spec = get_spec(
         """
