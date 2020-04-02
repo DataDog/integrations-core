@@ -628,7 +628,7 @@ def test_option_display_priority_not_integer():
     )
     spec.load()
 
-    assert 'test, test.yaml, instances, foo: Attribute `display_priority` must be a integer' in spec.errors
+    assert 'test, test.yaml, instances, foo: Attribute `display_priority` must be an integer' in spec.errors
 
 
 def test_option_display_priority_default():
