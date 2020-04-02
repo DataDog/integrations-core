@@ -46,6 +46,7 @@ OPTIONAL_ATTRIBUTES = {
 
 METRIC_TO_CHECK_WHITELIST = {
     'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
+    'riakcs.bucket_list_pool.workers',  # RiakCS 2.1 metric, but metadata.csv lists RiakCS 2.0 metrics only.
 }
 
 ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
