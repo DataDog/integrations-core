@@ -27,9 +27,6 @@ To configure this check for an Agent running on a host:
 
 2. [Restart the Agent][2].
 
-[1]: https://github.com/DataDog/integrations-core/blob/master/aerospike/datadog_checks/aerospike/data/conf.yaml.example
-[2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-
 <!-- xxz tab xxx -->
 <!-- xxx tab "Containerized" xxx -->
 
@@ -42,8 +39,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][3]
 | `<INTEGRATION_NAME>` | `aerospike`                          |
 | `<INIT_CONFIG>`      | blank or `{}`                        |
 | `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":"3000"}` |
-
-[3]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -71,7 +66,9 @@ Aerospike does not include any events.
 
 Need help? Contact [Datadog support][6].
 
-
+[1]: https://github.com/DataDog/integrations-core/blob/master/aerospike/datadog_checks/aerospike/data/conf.yaml.example
+[2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[3]: https://docs.datadoghq.com/agent/autodiscovery/integrations
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/aerospike/metadata.csv
 [6]: https://docs.datadoghq.com/help
