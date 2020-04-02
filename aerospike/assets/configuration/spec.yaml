@@ -14,7 +14,7 @@ files:
       required: true
       description: Aerospike port to connect to.
       value:
-        type: number
+        type: integer
         example: 3000
     - name: username
       value:
