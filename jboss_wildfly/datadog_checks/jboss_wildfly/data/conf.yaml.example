@@ -53,11 +53,6 @@ instances:
     #
     # port: <PORT>
 
-    ## @param jmx_url - string - required
-    ## JMX URL to connect to. Can be used instead of host/port configs.
-    #
-    jmx_url: <JMX_URL>
-
     ## @param user - string - optional
     ## User to use when connecting to JMX.
     #
