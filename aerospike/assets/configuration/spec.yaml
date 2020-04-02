@@ -124,7 +124,6 @@ files:
           - dc_rec_ship_attempts        # renamed dc_ship_attempt
           - dc_remote_ship_ok
           - dc_delete_ship_attempts    # renamed dc_ship_delete_success
-        default: None
     - template: instances/default
   - template: init_config
     options:
