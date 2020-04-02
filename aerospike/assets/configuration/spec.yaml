@@ -91,7 +91,6 @@ files:
         example:
           - example_datacenter
           - another_example_datacenter
-        default: None
     - name: namespace_metrics
       description: |
         All Namespace metrics collected by default. You probably don't want to do this,
