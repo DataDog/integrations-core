@@ -13,6 +13,7 @@ import mock
 import pytest
 import requests
 from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
+from prometheus_client.samples import Sample
 from six import iteritems
 from urllib3.exceptions import InsecureRequestWarning
 
@@ -632,6 +633,8 @@ def test_parse_one_counter(p_check, mocked_prometheus_scraper_config):
 
     expected_etcd_metric = CounterMetricFamily('go_memstats_mallocs_total', 'Total number of mallocs.')
     expected_etcd_metric.add_metric([], 18713)
+    # Fix up the _total change
+    expected_etcd_metric.name = 'go_memstats_mallocs_total'
 
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, text_content_type)
@@ -976,67 +979,67 @@ def test_decumulate_histogram_buckets(p_check, mocked_prometheus_scraper_config)
         'rest_client_request_latency_seconds_bucket', 'Request latency in seconds. Broken down by verb and URL.'
     )
     expected_metric.samples = [
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.004', 'lower_bound': '0.002', 'verb': 'GET'},
             81.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.001', 'lower_bound': '0', 'verb': 'GET'},
             254.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.002', 'lower_bound': '0.001', 'verb': 'GET'},
             367.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.008', 'lower_bound': '0.004', 'verb': 'GET'},
             25.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.016', 'lower_bound': '0.008', 'verb': 'GET'},
             11.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.032', 'lower_bound': '0.016', 'verb': 'GET'},
             6.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.064', 'lower_bound': '0.032', 'verb': 'GET'},
             4.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.128', 'lower_bound': '0.064', 'verb': 'GET'},
             6.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.256', 'lower_bound': '0.128', 'verb': 'GET'},
             1.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.512', 'lower_bound': '0.256', 'verb': 'GET'},
             0.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '+Inf', 'lower_bound': '0.512', 'verb': 'GET'},
             0.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_sum',
             {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'},
             2.185820220000001,
         ),
-        ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0),
+        Sample('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0),
     ]
 
     current_metric = metrics[0]
@@ -1065,17 +1068,17 @@ def test_decumulate_histogram_buckets_single_bucket(p_check, mocked_prometheus_s
         'rest_client_request_latency_seconds_bucket', 'Request latency in seconds. Broken down by verb and URL.'
     )
     expected_metric.samples = [
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '+Inf', 'lower_bound': '0', 'verb': 'GET'},
             755.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_sum',
             {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'},
             2.185820220000001,
         ),
-        ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0),
+        Sample('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0),
     ]
 
     current_metric = metrics[0]
@@ -1129,40 +1132,42 @@ def test_decumulate_histogram_buckets_multiple_contexts(p_check, mocked_promethe
     )
 
     expected_metric.samples = [
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '1', 'lower_bound': '0', 'verb': 'GET'},
             100.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '2', 'lower_bound': '1.0', 'verb': 'GET'},
             100.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '+Inf', 'lower_bound': '2.0', 'verb': 'GET'},
             100.0,
         ),
-        ('rest_client_request_latency_seconds_sum', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 256.0),
-        ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 300.0),
-        (
+        Sample('rest_client_request_latency_seconds_sum', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 256.0),
+        Sample('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 300.0),
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '1', 'lower_bound': '0', 'verb': 'POST'},
             50.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '2', 'lower_bound': '1.0', 'verb': 'POST'},
             50.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '+Inf', 'lower_bound': '2.0', 'verb': 'POST'},
             50.0,
         ),
-        ('rest_client_request_latency_seconds_sum', {'url': 'http://127.0.0.1:8080/api', 'verb': 'POST'}, 200.0),
-        ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'POST'}, 150.0),
+        Sample('rest_client_request_latency_seconds_sum', {'url': 'http://127.0.0.1:8080/api', 'verb': 'POST'}, 200.0),
+        Sample(
+            'rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'POST'}, 150.0
+        ),
     ]
 
     current_metric = metrics[0]
@@ -1192,33 +1197,33 @@ def test_decumulate_histogram_buckets_negative_buckets(p_check, mocked_prometheu
 
     expected_metric = HistogramMetricFamily('random_histogram_bucket', 'Nonsense histogram.')
     expected_metric.samples = [
-        (
+        Sample(
             'random_histogram_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '-Inf', 'lower_bound': '-inf', 'verb': 'GET'},
             0.0,
         ),
-        (
+        Sample(
             'random_histogram_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '-10.0', 'lower_bound': '-inf', 'verb': 'GET'},
             50.0,
         ),
-        (
+        Sample(
             'random_histogram_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '-2.0', 'lower_bound': '-10.0', 'verb': 'GET'},
             5.0,
         ),
-        (
+        Sample(
             'random_histogram_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '15.0', 'lower_bound': '-2.0', 'verb': 'GET'},
             10.0,
         ),
-        (
+        Sample(
             'random_histogram_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '+Inf', 'lower_bound': '15.0', 'verb': 'GET'},
             5.0,
         ),
-        ('random_histogram_sum', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 3.14),
-        ('random_histogram_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 70.0),
+        Sample('random_histogram_sum', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 3.14),
+        Sample('random_histogram_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 70.0),
     ]
 
     current_metric = metrics[0]
@@ -1246,12 +1251,12 @@ def test_decumulate_histogram_buckets_no_buckets(p_check, mocked_prometheus_scra
         'random_histogram_bucket', 'Request latency in seconds. Broken down by verb and URL.'
     )
     expected_metric.samples = [
-        (
+        Sample(
             'rest_client_request_latency_seconds_sum',
             {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'},
             2.185820220000001,
         ),
-        ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0),
+        Sample('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0),
     ]
 
     current_metric = metrics[0]
