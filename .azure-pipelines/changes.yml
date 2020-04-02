@@ -15,7 +15,7 @@ variables:
 jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 1
+    job_name: Changed_1
     display: Linux
     validate: true
     pip_cache_config:
@@ -26,7 +26,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 2
+    job_name: Changed_2
     display: Linux
     validate: true
     pip_cache_config:
@@ -37,7 +37,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 3
+    job_name: Changed_3
     display: Linux
     validate: true
     pip_cache_config:
@@ -48,7 +48,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 4
+    job_name: Changed_4
     display: Linux
     validate: true
     pip_cache_config:
@@ -59,7 +59,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 5
+    job_name: Changed_5
     display: Linux
     validate: true
     pip_cache_config:
@@ -70,7 +70,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 6
+    job_name: Changed_6
     display: Linux
     validate: true
     pip_cache_config:
@@ -81,7 +81,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 7
+    job_name: Changed_7
     display: Linux
     validate: true
     pip_cache_config:
@@ -92,7 +92,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 8
+    job_name: Changed_8
     display: Linux
     validate: true
     pip_cache_config:
@@ -103,7 +103,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 9
+    job_name: Changed_9
     display: Linux
     validate: true
     pip_cache_config:
@@ -114,7 +114,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 10
+    job_name: Changed_10
     display: Linux
     validate: true
     pip_cache_config:
@@ -125,7 +125,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 11
+    job_name: Changed_11
     display: Linux
     validate: true
     pip_cache_config:
@@ -136,7 +136,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 12
+    job_name: Changed_12
     display: Linux
     validate: true
     pip_cache_config:
@@ -147,7 +147,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 13
+    job_name: Changed_13
     display: Linux
     validate: true
     pip_cache_config:
@@ -158,7 +158,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 14
+    job_name: Changed_14
     display: Linux
     validate: true
     pip_cache_config:
@@ -169,7 +169,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 15
+    job_name: Changed_15
     display: Linux
     validate: true
     pip_cache_config:
@@ -180,7 +180,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 16
+    job_name: Changed_16
     display: Linux
     validate: true
     pip_cache_config:
@@ -191,7 +191,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 17
+    job_name: Changed_17
     display: Linux
     validate: true
     pip_cache_config:
@@ -202,7 +202,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 18
+    job_name: Changed_18
     display: Linux
     validate: true
     pip_cache_config:
@@ -213,7 +213,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 19
+    job_name: Changed_19
     display: Linux
     validate: true
     pip_cache_config:
@@ -224,7 +224,7 @@ jobs:
 
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed 20
+    job_name: Changed_20
     display: Linux
     validate: true
     pip_cache_config:
