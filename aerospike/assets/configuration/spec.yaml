@@ -54,7 +54,6 @@ files:
          cafile: <CA_FILE>
          certfile: <CERT_FILE>
          keyfile: <KEY_FILE>
-       default: None
     - name: timeout
       value:
         example: 10
