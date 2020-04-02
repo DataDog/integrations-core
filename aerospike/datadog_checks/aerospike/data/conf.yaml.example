@@ -7,7 +7,7 @@ instances:
     #
   - host: localhost
 
-    ## @param port - number - required
+    ## @param port - integer - required
     ## Aerospike port to connect to.
     #
     port: 3000
@@ -30,7 +30,7 @@ instances:
     #
     # tls_name: <TLS_NAME>
 
-    ## @param tls_config - mapping - optional - default: None
+    ## @param tls_config - mapping - optional
     ## Note TLS usage requires Aerospike Enterprise Edition
     ## Key value pairs with a choice of the following elements:
     ##
@@ -55,7 +55,7 @@ instances:
     #
     # timeout: 10
 
-    ## @param metrics - list of strings - optional - default: None
+    ## @param metrics - list of strings - optional
     ## All metrics collected by default. You probably don't want to do this,
     ## so list the ones you do want here. Check with:
     ## asinfo -v statistics -l
@@ -64,24 +64,24 @@ instances:
     #   - migrate_rx_objs
     #   - migrate_tx_objs
 
-    ## @param namespaces - list of strings - optional - default: None
+    ## @param namespaces - list of strings - optional
     ## all namespaces are collected by default. If you want to collect specific namespaces specify them here.
     #
     # namespaces:
     #   - example_namespace
     #   - another_example_namespace
 
-    ## @param datacenters - list of strings - optional - default: None
+    ## @param datacenters - list of strings - optional
     ## all datacenters are collected by default. If you want to collect specific datacenters specify them here.
     #
     # datacenters:
     #   - example_datacenter
     #   - another_example_datacenter
 
-    ## @param namespace_metrics - list of strings - optional - default: None
+    ## @param namespace_metrics - list of strings - optional
     ## All Namespace metrics collected by default. You probably don't want to do this,
     ## so list the ones you do want here. Check with:
-    ##   asinfo -v namespace/<NAME_SPACE> -l`.
+    ##   `asinfo -v namespace/<NAME_SPACE> -l`.
     #
     # namespace_metrics:
     #   - free-pct-disk
@@ -94,7 +94,7 @@ instances:
     #   - migrate-tx-partitions-initial
     #   - migrate-tx-partitions-remaining
 
-    ## @param datacenter_metrics - list of strings - optional - default: None
+    ## @param datacenter_metrics - list of strings - optional
     ## All datacenter metrics collected by default. Specify which metrics you want here.
     ## List datacenters using this command:
     ##   `asinfo -v dcs -l.`
