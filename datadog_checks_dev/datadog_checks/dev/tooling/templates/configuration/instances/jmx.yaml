@@ -12,6 +12,7 @@
 
 - name: jmx_url
   description: JMX URL to connect to. Can be used instead of host/port configs.
+  hidden: true
   value:
     type: string
 
