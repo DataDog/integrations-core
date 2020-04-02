@@ -8,6 +8,7 @@ from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import CheckLoggingAdapter
 from datadog_checks.vsphere.constants import (
     ALLOWED_FILTER_PROPERTIES,
+    ALLOWED_FILTER_TYPES,
     DEFAULT_BATCH_COLLECTOR_SIZE,
     DEFAULT_MAX_QUERY_METRICS,
     DEFAULT_METRICS_PER_QUERY,
@@ -21,13 +22,8 @@ from datadog_checks.vsphere.constants import (
     MOR_TYPE_AS_STRING,
     REALTIME_RESOURCES,
 )
-from datadog_checks.vsphere.types import (
-    InstanceConfig,
-    MetricFilterConfig,
-    MetricFilters,
-    ResourceFilterConfig,
-    ResourceFilters,
-)
+from datadog_checks.vsphere.resource_filters import ResourceFilter, create_resource_filter
+from datadog_checks.vsphere.types import InstanceConfig, MetricFilterConfig, MetricFilters, ResourceFilterConfig
 
 
 class VSphereConfig(object):
@@ -115,14 +111,24 @@ class VSphereConfig(object):
             )
 
     def _parse_resource_filters(self, all_resource_filters):
-        # type: (List[ResourceFilterConfig]) -> ResourceFilters
+        # type: (List[ResourceFilterConfig]) -> List[ResourceFilter]
 
-        formatted_resource_filters = {}  # type: ResourceFilters
+        # Keep a list of resource filters ids (tuple of resource, property and type) that are already registered.
+        # This is to prevent users to define the same filter twice with different patterns.
+        resource_filters_ids = []
+        formatted_resource_filters = []  # type: List[ResourceFilter]
         allowed_resource_types = [MOR_TYPE_AS_STRING[k] for k in self.collected_resource_types]
 
         for resource_filter in all_resource_filters:
+            # Optional fields:
+            if 'type' not in resource_filter:
+                resource_filter['type'] = 'whitelist'
+            if 'property' not in resource_filter:
+                resource_filter['property'] = 'name'
+
+            # Check required fields and their types
             for (field, field_type) in iteritems(
-                {'resource': string_types, 'property': string_types, 'patterns': list}
+                {'resource': string_types, 'property': string_types, 'type': string_types, 'patterns': list}
             ):
                 if field not in resource_filter:
                     self.log.warning(
@@ -135,6 +141,7 @@ class VSphereConfig(object):
                     )
                     continue
 
+            # Check `resource` validity
             if resource_filter['resource'] not in allowed_resource_types:
                 self.log.warning(
                     "Ignoring filter %r because resource %s is not collected when collection_type is %s.",
@@ -144,6 +151,7 @@ class VSphereConfig(object):
                 )
                 continue
 
+            # Check `property` validity
             allowed_prop_names = ALLOWED_FILTER_PROPERTIES
             if resource_filter['resource'] == MOR_TYPE_AS_STRING[vim.VirtualMachine]:
                 allowed_prop_names += EXTRA_FILTER_PROPERTIES_FOR_VMS
@@ -159,17 +167,33 @@ class VSphereConfig(object):
                 )
                 continue
 
-            filter_key = (resource_filter['resource'], resource_filter['property'])
-            if filter_key in formatted_resource_filters:
+            # Check `type` validity
+            if resource_filter['type'] not in ALLOWED_FILTER_TYPES:
                 self.log.warning(
-                    "Ignoring filter %r because you already have a filter for resource type %s and property %s.",
+                    "Ignoring filter %r because type '%s' is not valid. Should be one of %r.",
                     resource_filter,
+                    resource_filter['type'],
+                    ALLOWED_FILTER_TYPES,
+                )
+            patterns = [re.compile(r) for r in resource_filter['patterns']]
+            filter_instance = create_resource_filter(
+                resource_filter['resource'],
+                resource_filter['property'],
+                patterns,
+                is_whitelist=(resource_filter['type'] == 'whitelist'),
+            )
+            if filter_instance.unique_key() in resource_filters_ids:
+                self.log.warning(
+                    "Ignoring filter %r because you already have a `%s` filter for resource type %s and property %s.",
+                    resource_filter,
+                    resource_filter['type'],
                     resource_filter['resource'],
                     resource_filter['property'],
                 )
                 continue
 
-            formatted_resource_filters[filter_key] = [re.compile(r) for r in resource_filter['patterns']]
+            formatted_resource_filters.append(filter_instance)
+            resource_filters_ids.append(filter_instance.unique_key())
 
         return formatted_resource_filters
 

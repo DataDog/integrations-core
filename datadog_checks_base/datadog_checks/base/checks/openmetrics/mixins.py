@@ -9,14 +9,15 @@ from os.path import isfile
 from re import compile
 
 import requests
-from prometheus_client.parser import text_fd_to_metric_families
-from six import PY3, iteritems, itervalues, string_types
+from prometheus_client.samples import Sample
+from six import PY3, iteritems, string_types
 
 from ...config import is_affirmative
 from ...errors import CheckException
 from ...utils.common import to_native_string
 from ...utils.http import RequestsWrapper
 from .. import AgentCheck
+from ..libs.prometheus import text_fd_to_metric_families
 
 if PY3:
     long = int
@@ -146,8 +147,8 @@ class OpenMetricsScraperMixin(object):
         # }
         config['_active_label_mapping'] = {}
 
-        # `_watched_labels` holds the list of label to watch for enrichment
-        config['_watched_labels'] = set()
+        # `_watched_labels` holds the sets of labels to watch for enrichment
+        config['_watched_labels'] = {}
 
         config['_dry_run'] = True
 
@@ -202,6 +203,13 @@ class OpenMetricsScraperMixin(object):
             instance.get(
                 'send_distribution_counts_as_monotonic',
                 default_instance.get('send_distribution_counts_as_monotonic', False),
+            )
+        )
+
+        config['send_distribution_sums_as_monotonic'] = is_affirmative(
+            instance.get(
+                'send_distribution_sums_as_monotonic',
+                default_instance.get('send_distribution_sums_as_monotonic', False),
             )
         )
 
@@ -415,9 +423,27 @@ class OpenMetricsScraperMixin(object):
             if not scraper_config['label_joins']:
                 scraper_config['_dry_run'] = False
             elif not scraper_config['_watched_labels']:
-                # build the _watched_labels set
-                for val in itervalues(scraper_config['label_joins']):
-                    scraper_config['_watched_labels'].add(val['label_to_match'])
+                watched = scraper_config['_watched_labels']
+                watched['sets'] = {}
+                watched['keys'] = {}
+                watched['singles'] = set()
+                for key, val in iteritems(scraper_config['label_joins']):
+                    labels = []
+                    if 'labels_to_match' in val:
+                        labels = val['labels_to_match']
+                    elif 'label_to_match' in val:
+                        self.log.warning("`label_to_match` is being deprecated, please use `labels_to_match`")
+                        if isinstance(val['label_to_match'], list):
+                            labels = val['label_to_match']
+                        else:
+                            labels = [val['label_to_match']]
+
+                    if labels:
+                        s = frozenset(labels)
+                        watched['sets'][key] = s
+                        watched['keys'][key] = ','.join(s)
+                        if len(labels) == 1:
+                            watched['singles'].add(labels[0])
 
             for metric in self.parse_metric_family(response, scraper_config):
                 yield metric
@@ -479,49 +505,88 @@ class OpenMetricsScraperMixin(object):
 
     def _store_labels(self, metric, scraper_config):
         # If targeted metric, store labels
-        if metric.name in scraper_config['label_joins']:
-            matching_label = scraper_config['label_joins'][metric.name]['label_to_match']
-            for sample in metric.samples:
-                # metadata-only metrics that are used for label joins are always equal to 1
-                # this is required for metrics where all combinations of a state are sent
-                # but only the active one is set to 1 (others are set to 0)
-                # example: kube_pod_status_phase in kube-state-metrics
-                if sample[self.SAMPLE_VALUE] != 1:
-                    continue
+        if metric.name not in scraper_config['label_joins']:
+            return
+
+        watched = scraper_config['_watched_labels']
+        matching_labels = watched['sets'][metric.name]
+        mapping_key = watched['keys'][metric.name]
+
+        labels_to_get = scraper_config['label_joins'][metric.name]['labels_to_get']
+        get_all = '*' in labels_to_get
+        for sample in metric.samples:
+            # metadata-only metrics that are used for label joins are always equal to 1
+            # this is required for metrics where all combinations of a state are sent
+            # but only the active one is set to 1 (others are set to 0)
+            # example: kube_pod_status_phase in kube-state-metrics
+            if sample[self.SAMPLE_VALUE] != 1:
+                continue
+
+            sample_labels = sample[self.SAMPLE_LABELS]
+            sample_labels_keys = sample_labels.keys()
+
+            if matching_labels.issubset(sample_labels_keys):
                 label_dict = dict()
-                matching_value = None
-                for label_name, label_value in iteritems(sample[self.SAMPLE_LABELS]):
-                    if label_name == matching_label:
-                        matching_value = label_value
-                    elif label_name in scraper_config['label_joins'][metric.name]['labels_to_get']:
+
+                if get_all:
+                    for label_name, label_value in iteritems(sample_labels):
+                        if label_name in matching_labels:
+                            continue
                         label_dict[label_name] = label_value
-                try:
-                    if scraper_config['_label_mapping'][matching_label].get(matching_value):
-                        scraper_config['_label_mapping'][matching_label][matching_value].update(label_dict)
-                    else:
-                        scraper_config['_label_mapping'][matching_label][matching_value] = label_dict
-                except KeyError:
-                    if matching_value is not None:
-                        scraper_config['_label_mapping'][matching_label] = {matching_value: label_dict}
+                else:
+                    for label_name in labels_to_get:
+                        if label_name in sample_labels:
+                            label_dict[label_name] = sample_labels[label_name]
+
+                mapping_value = ','.join([sample_labels[l] for l in matching_labels])
+
+                scraper_config['_label_mapping'].setdefault(mapping_key, {}).setdefault(mapping_value, {}).update(
+                    label_dict
+                )
 
     def _join_labels(self, metric, scraper_config):
         # Filter metric to see if we can enrich with joined labels
-        if scraper_config['label_joins']:
-            for sample in metric.samples:
-                watched_labels = scraper_config['_watched_labels'].intersection(set(sample[self.SAMPLE_LABELS].keys()))
-                for label_name in watched_labels:
-                    # Set this label value as active
-                    if label_name not in scraper_config['_active_label_mapping']:
-                        scraper_config['_active_label_mapping'][label_name] = {}
-                    scraper_config['_active_label_mapping'][label_name][sample[self.SAMPLE_LABELS][label_name]] = True
-                    # If mapping found add corresponding labels
-                    try:
-                        for name, val in iteritems(
-                            scraper_config['_label_mapping'][label_name][sample[self.SAMPLE_LABELS][label_name]]
-                        ):
-                            sample[self.SAMPLE_LABELS][name] = val
-                    except KeyError:
-                        pass
+        if not scraper_config['label_joins']:
+            return
+
+        label_mapping = scraper_config['_label_mapping']
+        active_label_mapping = scraper_config['_active_label_mapping']
+
+        watched = scraper_config['_watched_labels']
+        sets = watched['sets']
+        keys = watched['keys']
+        singles = watched['singles']
+
+        for sample in metric.samples:
+            sample_labels = sample[self.SAMPLE_LABELS]
+            sample_labels_keys = sample_labels.keys()
+
+            # Match with single labels
+            matching_single_labels = singles.intersection(sample_labels_keys)
+            for label in matching_single_labels:
+                mapping_key = label
+                mapping_value = sample_labels[label]
+
+                active_label_mapping.setdefault(mapping_key, {})[mapping_value] = True
+
+                if mapping_key in label_mapping and mapping_value in label_mapping[mapping_key]:
+                    sample_labels.update(label_mapping[mapping_key][mapping_value])
+
+            # Match with tuples of labels
+            for key, mapping_key in iteritems(keys):
+                if mapping_key in matching_single_labels:
+                    continue
+
+                matching_labels = sets[key]
+
+                if matching_labels.issubset(sample_labels_keys):
+                    matching_values = [sample_labels[l] for l in matching_labels]
+                    mapping_value = ','.join(matching_values)
+
+                    active_label_mapping.setdefault(mapping_key, {})[mapping_value] = True
+
+                    if mapping_key in label_mapping and mapping_value in label_mapping[mapping_key]:
+                        sample_labels.update(label_mapping[mapping_key][mapping_value])
 
     def process_metric(self, metric, scraper_config, metric_transformers=None):
         """
@@ -705,7 +770,8 @@ class OpenMetricsScraperMixin(object):
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
             if sample[self.SAMPLE_NAME].endswith("_sum"):
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
-                self.gauge(
+                self._submit_distribution_count(
+                    scraper_config['send_distribution_sums_as_monotonic'],
                     "{}.{}.sum".format(scraper_config['namespace'], metric_name),
                     val,
                     tags=tags,
@@ -744,7 +810,8 @@ class OpenMetricsScraperMixin(object):
             custom_hostname = self._get_hostname(hostname, sample, scraper_config)
             if sample[self.SAMPLE_NAME].endswith("_sum") and not scraper_config['send_distribution_buckets']:
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname)
-                self.gauge(
+                self._submit_distribution_count(
+                    scraper_config['send_distribution_sums_as_monotonic'],
                     "{}.{}.sum".format(scraper_config['namespace'], metric_name),
                     val,
                     tags=tags,
@@ -841,7 +908,7 @@ class OpenMetricsScraperMixin(object):
             ]
             # Replacing the sample tuple
             sample[self.SAMPLE_LABELS]["lower_bound"] = str(matching_bucket_tuple[0])
-            metric.samples[i] = (sample[self.SAMPLE_NAME], sample[self.SAMPLE_LABELS], matching_bucket_tuple[2])
+            metric.samples[i] = Sample(sample[self.SAMPLE_NAME], sample[self.SAMPLE_LABELS], matching_bucket_tuple[2])
 
     def _submit_sample_histogram_buckets(self, metric_name, sample, scraper_config, hostname=None):
         if "lower_bound" not in sample[self.SAMPLE_LABELS] or "le" not in sample[self.SAMPLE_LABELS]:

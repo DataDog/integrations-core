@@ -1,0 +1,428 @@
+{
+    "author_info": {
+        "author_name": "Datadog"
+    },
+    "board_title": "Gitlab Overview",
+    "created": "2020-03-13T15:43:50.298533+00:00",
+    "created_by": {
+        "access_role": "st",
+        "disabled": false,
+        "email": "support@datadoghq.com",
+        "handle": "support@datadoghq.com",
+        "is_admin": false,
+        "name": "Datadog",
+        "role": null,
+        "title": null,
+        "verified": true
+    },
+    "description": "This dashboard provides a high-level overview of your Gitlab instance so you can monitor metrics related to pipelines, repositories, requests, and more.\n\nFor further reading on monitoring Gitlab, see: [Official Gitlab integration docs](https://docs.datadoghq.com/integrations/gitlab/)\n\nClone this template to make changes and add your own graphs and widgets.",
+    "id": 1014699,
+    "modified": "2020-03-31T13:41:21.413244+00:00",
+    "new_id": "c9w-dnm-m3a",
+    "read_only": false,
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "gitlab_host",
+            "prefix": "gitlab_host"
+        },
+        {
+            "default": "*",
+            "name": "gitlab_port",
+            "prefix": "gitlab_port"
+        }
+    ],
+    "widgets": [
+        {
+            "height": 9,
+            "id": 0,
+            "sizing": "zoom",
+            "type": "image",
+            "url": "https://static.datadoghq.com/static/images/saas_logos/bot/gitlab@2x.png",
+            "width": 15,
+            "x": 1,
+            "y": 1
+        },
+        {
+            "check": "gitlab.readiness",
+            "group_by": [],
+            "grouping": "cluster",
+            "height": 8,
+            "id": 2,
+            "tags": [
+                "$gitlab_port",
+                "$gitlab_host"
+            ],
+            "title": true,
+            "title_align": "center",
+            "title_size": "16",
+            "title_text": "Readiness",
+            "type": "check_status",
+            "width": 14,
+            "x": 18,
+            "y": 11
+        },
+        {
+            "check": "gitlab.health",
+            "group_by": [],
+            "grouping": "cluster",
+            "height": 8,
+            "id": 3,
+            "tags": [
+                "$gitlab_port",
+                "$gitlab_host"
+            ],
+            "title": true,
+            "title_align": "center",
+            "title_size": "16",
+            "title_text": "Health",
+            "type": "check_status",
+            "width": 14,
+            "x": 18,
+            "y": 20
+        },
+        {
+            "check": "gitlab.prometheus_endpoint_up",
+            "group_by": [],
+            "grouping": "cluster",
+            "height": 8,
+            "id": 4,
+            "tags": [
+                "$gitlab_port",
+                "$gitlab_host"
+            ],
+            "title": true,
+            "title_align": "center",
+            "title_size": "16",
+            "title_text": "Endpoint Up",
+            "type": "check_status",
+            "width": 14,
+            "x": 18,
+            "y": 29
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "18",
+            "height": 25,
+            "html": "Service Checks",
+            "id": 5,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "right",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 15,
+            "x": 1,
+            "y": 12
+        },
+        {
+            "height": 13,
+            "id": 6,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "sum:gitlab.rack.http_requests_total{$gitlab_host,$gitlab_port} by {method}.as_count()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "HTTP requests",
+            "type": "timeseries",
+            "width": 43,
+            "x": 34,
+            "y": 13
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "18",
+            "height": 10,
+            "html": "Load Information",
+            "id": 7,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 43,
+            "x": 34,
+            "y": 1
+        },
+        {
+            "height": 13,
+            "id": 8,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "sum:gitlab.pipelines_created_total{$gitlab_host,$gitlab_port}.as_count()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "Pipelines Created",
+            "type": "timeseries",
+            "width": 43,
+            "x": 79,
+            "y": 29
+        },
+        {
+            "height": 13,
+            "id": 9,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "sum:gitlab.transaction.event_create_repository_total{$gitlab_host,$gitlab_port}.as_count()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "New Repositories Created ",
+            "type": "timeseries",
+            "width": 43,
+            "x": 79,
+            "y": 45
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "18",
+            "height": 10,
+            "html": "Project Information",
+            "id": 10,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 43,
+            "x": 79,
+            "y": 1
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "18",
+            "height": 8,
+            "html": "Users",
+            "id": 11,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 31,
+            "x": 1,
+            "y": 39
+        },
+        {
+            "height": 13,
+            "id": 12,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "sum:gitlab.user_session_logins_total{$gitlab_host,$gitlab_port}.as_count()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "User Logins ",
+            "type": "timeseries",
+            "width": 31,
+            "x": 1,
+            "y": 49
+        },
+        {
+            "height": 13,
+            "id": 13,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:gitlab.unicorn.workers{$gitlab_host,$gitlab_port}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "Unicorn Workers",
+            "type": "timeseries",
+            "width": 43,
+            "x": 34,
+            "y": 45
+        },
+        {
+            "height": 13,
+            "id": 14,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "sum:gitlab.transaction.event_push_branch_total{$gitlab_host,$gitlab_port}.as_count()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "Branches Pushed",
+            "type": "timeseries",
+            "width": 43,
+            "x": 79,
+            "y": 13
+        },
+        {
+            "height": 13,
+            "id": 15,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "p90:gitlab.sql_duration_seconds{$gitlab_host,$gitlab_port}.as_count(), p75:gitlab.sql_duration_seconds{$gitlab_host,$gitlab_port}.as_count(), p50:gitlab.sql_duration_seconds{$gitlab_host,$gitlab_port}.as_count(), min:gitlab.sql_duration_seconds{$gitlab_host,$gitlab_port}.as_count(), max:gitlab.sql_duration_seconds{$gitlab_host,$gitlab_port}.as_count()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": "16",
+            "title_text": "SQL Execution Time",
+            "type": "timeseries",
+            "width": 43,
+            "x": 34,
+            "y": 29
+        },
+        {
+            "check": "gitlab.liveness",
+            "group_by": [],
+            "grouping": "cluster",
+            "height": 9,
+            "id": 16,
+            "tags": [
+                "$gitlab_host",
+                "$gitlab_port"
+            ],
+            "title": true,
+            "title_align": "center",
+            "title_size": "16",
+            "title_text": "Liveness",
+            "type": "check_status",
+            "width": 14,
+            "x": 18,
+            "y": 1
+        }
+    ]
+}

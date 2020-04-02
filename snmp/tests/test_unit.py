@@ -17,7 +17,7 @@ from datadog_checks.snmp import SnmpCheck
 from datadog_checks.snmp.config import InstanceConfig
 from datadog_checks.snmp.models import ObjectIdentity
 from datadog_checks.snmp.resolver import OIDTrie
-from datadog_checks.snmp.utils import get_default_profiles, oid_pattern_specificity, recursively_expand_base_profiles
+from datadog_checks.snmp.utils import _load_default_profiles, oid_pattern_specificity, recursively_expand_base_profiles
 
 from . import common
 from .utils import ClassInstantiationSpy, mock_profiles_confd_root
@@ -364,8 +364,8 @@ def test_default_profiles():
             with open(profile_file, 'w') as f:
                 f.write(yaml.safe_dump(profile))
 
-            profiles = get_default_profiles()
-            assert profiles['profile'] == {'definition_file': profile_file}
+            profiles = _load_default_profiles()
+            assert profiles['profile'] == {'definition': profile}
 
 
 def test_profile_override():
@@ -379,8 +379,8 @@ def test_profile_override():
             with open(profile_file, 'w') as f:
                 f.write(yaml.safe_dump(profile))
 
-            profiles = get_default_profiles()
-            assert profiles['generic-router'] == {'definition_file': profile_file}
+            profiles = _load_default_profiles()
+            assert profiles['generic-router'] == {'definition': profile}
 
 
 def test_discovery_tags():

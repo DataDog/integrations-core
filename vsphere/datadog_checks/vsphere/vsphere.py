@@ -34,7 +34,7 @@ from datadog_checks.vsphere.utils import (
     get_mapped_instance_tag,
     get_parent_tags_recursively,
     is_metric_excluded_by_filters,
-    is_resource_excluded_by_filters,
+    is_resource_collected_by_filters,
     should_collect_per_instance_values,
 )
 
@@ -171,8 +171,11 @@ class VSphereCheck(AgentCheck):
             if not isinstance(mor, tuple(self.config.collected_resource_types)):
                 # Do nothing for the resource types we do not collect
                 continue
-            if is_resource_excluded_by_filters(mor, infrastructure_data, self.config.resource_filters):
-                # The resource does not match the specified patterns
+
+            if not is_resource_collected_by_filters(
+                mor, infrastructure_data, self.config.resource_filters, self.tags_cache.get_mor_tags(mor)
+            ):
+                # The resource does not match the specified whitelist/blacklist patterns.
                 continue
 
             mor_name = to_native_string(properties.get("name", "unknown"))
