@@ -317,7 +317,7 @@ def has_legacy_signature(check):
         for fn in files:
             if fn.endswith('.py'):
                 with open(os.path.join(path, fn)) as test_file:
-                    for line in test_file:
+                    for num, line in enumerate(test_file):
                         if "__init__" in line and "agentConfig" in line:
-                            return True
+                            return str(fn), num
     return False

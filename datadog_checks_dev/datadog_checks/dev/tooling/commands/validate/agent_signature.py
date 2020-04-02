@@ -22,10 +22,14 @@ def legacy_signature(check):
         checks = sorted(get_valid_checks())
 
     has_failed = False
+
     for check in checks:
-        if has_legacy_signature(check):
+        check_failed = has_legacy_signature(check)
+        if check_failed:
             has_failed = True
-            echo_failure(f'Check {check} uses legacy agent signature.')
+            failed_file, failed_num = check_failed
+            echo_failure(f'Check {check} uses legacy agent signature in {failed_file} on line {failed_num}')
+
     if not has_failed:
         echo_success(f'All checks use the new agent signature.')
     return
