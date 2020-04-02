@@ -17,16 +17,10 @@
     },
     "description": "This dashboard provides a high-level overview of your Sidekiq deployment so you can monitor metrics related to jobs, queues, and batches.\n\nFor further reading on monitoring Sidekiq, see our [official Sidekiq integration documentation](https://docs.datadoghq.com/integrations/sidekiq/).\n\nClone this template to make changes and add your own graphs and widgets.",
     "id": 1038262,
-    "modified": "2020-04-02T13:22:38.897639+00:00",
+    "modified": "2020-04-02T14:59:50.008099+00:00",
     "new_id": "u7k-5bn-7ui",
     "read_only": false,
-    "template_variables": [
-        {
-            "default": "*",
-            "name": "worker",
-            "prefix": "worker"
-        }
-    ],
+    "template_variables": [],
     "widgets": [
         {
             "height": 7,
@@ -45,7 +39,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:sidekiq.busy{$worker}",
+                        "q": "avg:sidekiq.busy{*}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -79,7 +73,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "diff(avg:sidekiq.dead{$worker})",
+                        "q": "diff(avg:sidekiq.dead{*})",
                         "style": {
                             "palette": "grey",
                             "type": "solid",
@@ -113,7 +107,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "diff(avg:sidekiq.failed{$worker})",
+                        "q": "diff(avg:sidekiq.failed{*})",
                         "style": {
                             "palette": "warm",
                             "type": "solid",
@@ -147,7 +141,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "diff(avg:sidekiq.retries{$worker})",
+                        "q": "diff(avg:sidekiq.retries{*})",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -181,7 +175,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "diff(avg:sidekiq.processed{$worker})",
+                        "q": "diff(avg:sidekiq.processed{*})",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -215,7 +209,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:sidekiq.enqueued{$worker}",
+                        "q": "avg:sidekiq.enqueued{*}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -249,7 +243,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:sidekiq.scheduled{$worker}",
+                        "q": "avg:sidekiq.scheduled{*}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -283,7 +277,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:sidekiq.jobs.perform.median{$worker}, avg:sidekiq.jobs.perform.avg{$worker}, avg:sidekiq.jobs.perform.count{$worker}, avg:sidekiq.jobs.perform.max{$worker}",
+                        "q": "avg:sidekiq.jobs.perform.median{*}, avg:sidekiq.jobs.perform.avg{*}, avg:sidekiq.jobs.perform.count{*}, avg:sidekiq.jobs.perform.max{*}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -306,9 +300,9 @@
             "title_size": "16",
             "title_text": "Job Performance",
             "type": "timeseries",
-            "width": 41,
-            "x": 71,
-            "y": 9
+            "width": 25,
+            "x": 1,
+            "y": 46
         },
         {
             "bgcolor": "gray",
@@ -330,22 +324,16 @@
             "id": 10,
             "tile_def": {
                 "autoscale": true,
-                "precision": 2,
+                "precision": 0,
                 "requests": [
                     {
                         "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_green",
-                                "value": 0
-                            }
-                        ],
-                        "q": "avg:sidekiq.processed{$worker}"
+                        "q": "avg:sidekiq.processed{*}"
                     }
                 ],
                 "viz": "query_value"
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -353,13 +341,13 @@
             "type": "query_value",
             "width": 12,
             "x": 1,
-            "y": 17
+            "y": 61
         },
         {
             "bgcolor": "gray",
             "font_size": "18",
             "height": 6,
-            "html": "Historical Information",
+            "html": "Summary",
             "id": 11,
             "text_align": "center",
             "tick": true,
@@ -394,26 +382,20 @@
                 "requests": [
                     {
                         "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "palette": "white_on_red",
-                                "value": 0
-                            }
-                        ],
-                        "q": "avg:sidekiq.failed{$worker}"
+                        "q": "avg:sidekiq.busy{*}"
                     }
                 ],
                 "viz": "query_value"
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "Failed",
+            "title_text": "Busy",
             "type": "query_value",
             "width": 12,
             "x": 14,
-            "y": 17
+            "y": 27
         },
         {
             "height": 7,
@@ -424,7 +406,7 @@
                 "requests": [
                     {
                         "aggregator": "last",
-                        "q": "avg:sidekiq.dead{$worker}"
+                        "q": "avg:sidekiq.dead{*}"
                     }
                 ],
                 "viz": "query_value"
@@ -436,30 +418,7 @@
             "type": "query_value",
             "width": 12,
             "x": 1,
-            "y": 47
-        },
-        {
-            "height": 7,
-            "id": 15,
-            "tile_def": {
-                "autoscale": true,
-                "precision": 2,
-                "requests": [
-                    {
-                        "aggregator": "last",
-                        "q": "avg:sidekiq.retries{$worker}"
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": "16",
-            "title_text": "Retries",
-            "type": "query_value",
-            "width": 12,
-            "x": 1,
-            "y": 37
+            "y": 27
         },
         {
             "height": 7,
@@ -470,7 +429,7 @@
                 "requests": [
                     {
                         "aggregator": "last",
-                        "q": "avg:sidekiq.enqueued{$worker}"
+                        "q": "avg:sidekiq.enqueued{*}"
                     }
                 ],
                 "viz": "query_value"
@@ -482,7 +441,7 @@
             "type": "query_value",
             "width": 12,
             "x": 14,
-            "y": 27
+            "y": 17
         },
         {
             "height": 7,
@@ -493,7 +452,7 @@
                 "requests": [
                     {
                         "aggregator": "last",
-                        "q": "avg:sidekiq.scheduled{$worker}"
+                        "q": "avg:sidekiq.scheduled{*}"
                     }
                 ],
                 "viz": "query_value"
@@ -504,40 +463,17 @@
             "title_text": "Scheduled",
             "type": "query_value",
             "width": 12,
-            "x": 14,
-            "y": 37
-        },
-        {
-            "height": 7,
-            "id": 18,
-            "tile_def": {
-                "autoscale": true,
-                "precision": 2,
-                "requests": [
-                    {
-                        "aggregator": "last",
-                        "q": "avg:sidekiq.busy{$worker}"
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": "16",
-            "title_text": "Busy",
-            "type": "query_value",
-            "width": 12,
             "x": 1,
-            "y": 27
+            "y": 17
         },
         {
             "height": 12,
-            "id": 20,
+            "id": 19,
             "legend": false,
             "tile_def": {
                 "requests": [
                     {
-                        "q": "diff(avg:sidekiq.jobs.success{*}.as_count())",
+                        "q": "avg:sidekiq.jobs.success{*}.as_count()",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -563,18 +499,19 @@
             "type": "timeseries",
             "width": 41,
             "x": 71,
-            "y": 69
+            "y": 9
         },
         {
             "height": 7,
-            "id": 21,
+            "id": 20,
             "tile_def": {
                 "autoscale": true,
+                "custom_unit": "%",
                 "precision": 2,
                 "requests": [
                     {
                         "aggregator": "sum",
-                        "q": "avg:sidekiq.jobs.success{*}.as_count()"
+                        "q": "100*avg:sidekiq.failed{*}/avg:sidekiq.processed{*}"
                     }
                 ],
                 "viz": "query_value"
@@ -583,11 +520,26 @@
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "Succeeded",
+            "title_text": "Failure Rate",
             "type": "query_value",
             "width": 12,
             "x": 14,
-            "y": 47
+            "y": 61
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "18",
+            "height": 6,
+            "html": "Analytics",
+            "id": 21,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 25,
+            "x": 1,
+            "y": 38
         }
     ]
 }
