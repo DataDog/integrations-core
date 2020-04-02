@@ -1,9 +1,11 @@
-from typing import Dict, List, Optional, Pattern, Tuple, Type, TypedDict
+from typing import Dict, List, Optional, Pattern, Type, TypedDict
 
 # CONFIG ALIASES
 from pyVmomi import vim
 
-ResourceFilterConfig = TypedDict('ResourceFilterConfig', {'resource': str, 'property': str, 'patterns': List[str]})
+ResourceFilterConfig = TypedDict(
+    'ResourceFilterConfig', {'resource': str, 'property': str, 'type': str, 'patterns': List[str]}
+)
 MetricFilterConfig = Dict[str, List[str]]
 
 InstanceConfig = TypedDict(
@@ -56,7 +58,6 @@ InfrastructureData = Dict[vim.ManagedEntity, InfrastructureDataItem]
 ResourceTags = Dict[Type[vim.ManagedEntity], Dict[str, List[str]]]
 TagAssociation = TypedDict('TagAssociation', {'tag_id': str, 'object_ids': List[Dict[str, str]]})
 
-ResourceFilters = Dict[Tuple[str, str], List[Pattern]]
 MetricFilters = Dict[str, List[Pattern]]
 
 MorBatch = Dict[vim.ManagedEntity, List[vim.PerformanceManager.MetricId]]

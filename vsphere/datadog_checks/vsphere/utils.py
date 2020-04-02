@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import List, Pattern, Type
+from typing import List, Type
 
 from pyVmomi import vim
 from six import iteritems
@@ -9,7 +9,8 @@ from six import iteritems
 from datadog_checks.base import to_native_string
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import MOR_TYPE_AS_STRING, REFERENCE_METRIC, SHORT_ROLLUP
-from datadog_checks.vsphere.types import InfrastructureData, MetricFilters, MetricName, ResourceFilters
+from datadog_checks.vsphere.resource_filters import ResourceFilter, match_any_regex
+from datadog_checks.vsphere.types import InfrastructureData, MetricFilters, MetricName
 
 METRIC_TO_INSTANCE_TAG_MAPPING = {
     # Structure:
@@ -42,49 +43,31 @@ def format_metric_name(counter):
     )
 
 
-def match_any_regex(string, regexes):
-    # type: (str, List[Pattern]) -> bool
-    for regex in regexes:
-        match = regex.match(string)
-        if match:
-            return True
-    return False
-
-
-def is_resource_excluded_by_filters(mor, infrastructure_data, resource_filters):
-    # type: (vim.ManagedEntity, InfrastructureData, ResourceFilters) -> bool
+def is_resource_collected_by_filters(mor, infrastructure_data, resource_filters, resource_tags):
+    # type: (vim.ManagedEntity, InfrastructureData, List[ResourceFilter], List[str]) -> bool
     resource_type = MOR_TYPE_AS_STRING[type(mor)]
+    # Limit filters to those for the resource_type of the mor
+    resource_filters = [f for f in resource_filters if f.resource_type == resource_type]
 
-    if not [f for f in resource_filters if f[0] == resource_type]:
-        # No filter for this resource, collect everything
-        return False
+    whitelist_filters = [f for f in resource_filters if f.is_whitelist]
+    blacklist_filters = [f for f in resource_filters if not f.is_whitelist]
 
-    name_filter = resource_filters.get((resource_type, 'name'))
-    inventory_path_filter = resource_filters.get((resource_type, 'inventory_path'))
-    hostname_filter = resource_filters.get((resource_type, 'hostname'))
-    guest_hostname_filter = resource_filters.get((resource_type, 'guest_hostname'))
-
-    if name_filter:
-        mor_name = infrastructure_data[mor].get("name", "")
-        if match_any_regex(mor_name, name_filter):
-            return False
-    if inventory_path_filter:
-        path = make_inventory_path(mor, infrastructure_data)
-        if match_any_regex(path, inventory_path_filter):
+    # First check if the resource match any blacklist filter, if so do not collect it.
+    for resource_filter in blacklist_filters:
+        if resource_filter.match(mor, infrastructure_data, resource_tags):
             return False
 
-    if hostname_filter and isinstance(mor, vim.VirtualMachine):
-        host = infrastructure_data[mor].get("runtime.host")
-        if host and host in infrastructure_data:
-            hostname = infrastructure_data[host].get("name", "")
-            if match_any_regex(hostname, hostname_filter):
-                return False
-    if guest_hostname_filter and isinstance(mor, vim.VirtualMachine):
-        guest_hostname = infrastructure_data.get(mor, {}).get("guest.hostName", "")
-        if match_any_regex(guest_hostname, guest_hostname_filter):
-            return False
+    # Extra logic to consider that no whitelist filters means "collect everything"
+    if not whitelist_filters:
+        return True
 
-    return True
+    # Finally check if the resource match any whitelist filter, if so collect it
+    for resource_filter in whitelist_filters:
+        if resource_filter.match(mor, infrastructure_data, resource_tags):
+            return True
+
+    # Otherwise, do not collect it
+    return False
 
 
 def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
@@ -100,15 +83,6 @@ def is_metric_excluded_by_filters(metric_name, mor_type, metric_filters):
         return False
 
     return True
-
-
-def make_inventory_path(mor, infrastructure_data):
-    # type: (vim.ManagedEntity, InfrastructureData) -> str
-    mor_name = infrastructure_data[mor].get('name', '')
-    mor_parent = infrastructure_data[mor].get('parent')
-    if mor_parent:
-        return make_inventory_path(mor_parent, infrastructure_data) + '/' + mor_name
-    return ''
 
 
 def get_parent_tags_recursively(mor, infrastructure_data):
