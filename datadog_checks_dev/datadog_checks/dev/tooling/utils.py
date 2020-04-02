@@ -318,6 +318,6 @@ def has_legacy_signature(check):
             if fn.endswith('.py'):
                 with open(os.path.join(path, fn)) as test_file:
                     for line in test_file:
-                        if "init" in line and "agentConfig" in line:
+                        if "__init__" in line and "agentConfig" in line:
                             return True
     return False
