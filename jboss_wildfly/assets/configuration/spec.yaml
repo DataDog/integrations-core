@@ -16,7 +16,7 @@ files:
     - template: instances/jmx
       overrides:
         jmx_url.required: true
-        jmx_url.order: 10
+        jmx_url.hidden: false
         host.required: false
         port.required: false
     - template: instances/default
