@@ -252,7 +252,7 @@ def options_validator(options, loader, file_name, *sections):
         option.setdefault('display_priority', 0)
         if not isinstance(option['display_priority'], int):
             loader.errors.append(
-                '{}, {}, {}{}: Attribute `display_priority` must be a integer'.format(
+                '{}, {}, {}{}: Attribute `display_priority` must be an integer'.format(
                     loader.source, file_name, sections_display, option_name
                 )
             )
