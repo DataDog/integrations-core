@@ -81,7 +81,6 @@ files:
         example:
           - example_namespace
           - another_example_namespace
-        default: None
     - name: datacenters
       description: all datacenters are collected by default. If you want to collect specific datacenters specify them here.
       value:
