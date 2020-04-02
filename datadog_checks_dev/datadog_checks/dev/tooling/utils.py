@@ -313,6 +313,9 @@ def has_e2e(check):
 
 
 def has_legacy_signature(check):
+    """
+    Validate that the given check does not use the legacy agent signature (contains agentConfig)
+    """
     for path, _, files in os.walk(get_check_directory(check)):
         for fn in files:
             if fn.endswith('.py'):
