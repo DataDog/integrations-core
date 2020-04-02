@@ -43,7 +43,7 @@ init_config:
 instances:
 
     ## @param jmx_url - string - required
-    ## JBoss/WildFly URL to connect to
+    ## JBoss/WildFly URL to connect to.
     #
   - jmx_url: service:jmx:remote+http://localhost:9990
 
