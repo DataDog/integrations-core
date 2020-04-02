@@ -17,7 +17,7 @@
     },
     "description": "This dashboard provides a high-level overview of your Sidekiq deployment so you can monitor metrics related to jobs, queues, and batches.\n\nFor further reading on monitoring Sidekiq, see our [official Sidekiq integration documentation](https://docs.datadoghq.com/integrations/sidekiq/).\n\nClone this template to make changes and add your own graphs and widgets.",
     "id": 1038262,
-    "modified": "2020-04-02T15:03:13.932880+00:00",
+    "modified": "2020-04-02T18:40:12.613606+00:00",
     "new_id": "u7k-5bn-7ui",
     "read_only": false,
     "template_variables": [],
@@ -64,7 +64,7 @@
             "type": "timeseries",
             "width": 41,
             "x": 28,
-            "y": 24
+            "y": 39
         },
         {
             "height": 12,
@@ -166,7 +166,7 @@
             "type": "timeseries",
             "width": 41,
             "x": 71,
-            "y": 24
+            "y": 39
         },
         {
             "height": 12,
@@ -200,7 +200,7 @@
             "type": "timeseries",
             "width": 41,
             "x": 71,
-            "y": 39
+            "y": 9
         },
         {
             "height": 12,
@@ -268,7 +268,7 @@
             "type": "timeseries",
             "width": 41,
             "x": 28,
-            "y": 39
+            "y": 24
         },
         {
             "height": 12,
@@ -333,7 +333,6 @@
                 ],
                 "viz": "query_value"
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -387,7 +386,6 @@
                 ],
                 "viz": "query_value"
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -422,7 +420,7 @@
         },
         {
             "height": 7,
-            "id": 16,
+            "id": 15,
             "tile_def": {
                 "autoscale": true,
                 "precision": 2,
@@ -445,7 +443,7 @@
         },
         {
             "height": 7,
-            "id": 17,
+            "id": 16,
             "tile_def": {
                 "autoscale": true,
                 "precision": 2,
@@ -468,7 +466,7 @@
         },
         {
             "height": 12,
-            "id": 19,
+            "id": 17,
             "legend": false,
             "tile_def": {
                 "requests": [
@@ -491,7 +489,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": "16",
@@ -499,11 +496,11 @@
             "type": "timeseries",
             "width": 41,
             "x": 71,
-            "y": 9
+            "y": 24
         },
         {
             "height": 7,
-            "id": 20,
+            "id": 18,
             "tile_def": {
                 "autoscale": true,
                 "custom_unit": "%",
@@ -511,7 +508,7 @@
                 "requests": [
                     {
                         "aggregator": "sum",
-                        "q": "100*avg:sidekiq.failed{*}/avg:sidekiq.processed{*}"
+                        "q": "100*diff(avg:sidekiq.failed{*})/diff(avg:sidekiq.processed{*})"
                     }
                 ],
                 "viz": "query_value"
@@ -531,7 +528,7 @@
             "font_size": "18",
             "height": 6,
             "html": "Analytics",
-            "id": 21,
+            "id": 19,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
