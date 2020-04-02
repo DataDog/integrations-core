@@ -48,12 +48,6 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
    unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
    ```
 
-3. Update your `LD_LIBRARY_PATH` to include the location of the Instant Client libraries when starting/restarting the agent:
-
-   ```shell
-   export LD_LIBRARY_PATH=/opt/oracle/instantclient/lib:$LD_LIBRARY_PATH
-   ```
-
 **Note:** Agent 6 uses Upstart or systemd to orchestrate the `datadog-agent` service. Environment variables may need to be added to the service configuration files at the default locations of `/etc/init/datadog-agent.conf` (Upstart) or `/lib/systemd/system/datadog-agent.service` (systemd). See documentation on [Upstart][5] or [systemd][6] for more information on how to configure these settings.
 
 The following is an example of adding `LD_LIBRARY_PATH` to the Datadog Agent service configuration files (`/etc/init/datadog-agent.conf`) on a system using Upstart.
