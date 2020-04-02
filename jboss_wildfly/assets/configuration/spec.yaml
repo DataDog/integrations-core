@@ -8,8 +8,7 @@ files:
       overrides:
         service_check_prefix.required: true
         service_check_prefix.value.example: jboss
-        service_check_prefix.description: |
-          Service check prefix to use.
+        service_check_prefix.description: Service check prefix to use.
     - template: init_config/default
   - template: instances
     options:
@@ -17,6 +16,8 @@ files:
       overrides:
         jmx_url.required: true
         jmx_url.hidden: false
+        jmx_url.description: JBoss/WildFly URL to connect to
+        jmx_url.value.example: "service:jmx:remote+http://localhost:9990"
         host.required: false
         port.required: false
     - template: instances/default

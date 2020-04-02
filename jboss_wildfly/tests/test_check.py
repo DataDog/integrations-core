@@ -57,7 +57,6 @@ def test_e2e(dd_agent_check):
         aggregator.assert_metric(metric)
 
     tags = ['instance:jboss_wildfly']
-    # TODO: Add `jmx_url` as tag. Need to be implemented in JMX Fetch first.
     # TODO: Assert the status "status=AgentCheck.OK"
     # JMXFetch is currently sending the service check status as string, but should be number.
     # Add "status=AgentCheck.OK" once that's fixed

@@ -54,9 +54,9 @@ instances:
     # port: <PORT>
 
     ## @param jmx_url - string - required
-    ## JMX URL to connect to. Can be used instead of host/port configs.
+    ## JBoss/WildFly URL to connect to
     #
-    jmx_url: <JMX_URL>
+    jmx_url: service:jmx:remote+http://localhost:9990
 
     ## @param user - string - optional
     ## User to use when connecting to JMX.
