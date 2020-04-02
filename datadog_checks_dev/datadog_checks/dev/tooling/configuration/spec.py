@@ -249,8 +249,8 @@ def options_validator(options, loader, file_name, *sections):
                 )
             )
 
-        option.setdefault('order', float('+inf'))
-        if not isinstance(option['order'], (int, float)):
+        option.setdefault('order', 0)
+        if not isinstance(option['order'], int):
             loader.errors.append(
                 '{}, {}, {}{}: Attribute `order` must be a number'.format(
                     loader.source, file_name, sections_display, option_name

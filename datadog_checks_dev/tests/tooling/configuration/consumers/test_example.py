@@ -181,27 +181,29 @@ def test_section_with_option_order():
           options:
           - template: init_config
             options:
-            - name: last1
-              description: last1 words
+            - name: fourth
+              description: fourth words
+              order: -5
               value:
                 type: string
-            - name: last2
-              description: last2 words
+            - name: fifth
+              description: fifth words
+              order: -50
               value:
                 type: string
             - name: third
               description: third words
-              order: 3
+              # default order: 0
               value:
                 type: string
             - name: first
               description: first words
-              order: 1
+              order: 100
               value:
                 type: number
             - name: second
               description: second words
-              order: 2
+              order: 10
               value:
                 type: number
         """
@@ -231,15 +233,15 @@ def test_section_with_option_order():
             #
             # third: <THIRD>
 
-            ## @param last1 - string - optional
-            ## last1 words
+            ## @param fourth - string - optional
+            ## fourth words
             #
-            # last1: <LAST1>
+            # fourth: <FOURTH>
 
-            ## @param last2 - string - optional
-            ## last2 words
+            ## @param fifth - string - optional
+            ## fifth words
             #
-            # last2: <LAST2>
+            # fifth: <FIFTH>
         """
     )
 

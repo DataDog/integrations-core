@@ -161,7 +161,7 @@ def write_option(option, writer, indent='', start_list=False):
 
         if 'options' in option:
             multiple = option['multiple']
-            options = sorted(option['options'], key=lambda opt: opt['order'])
+            options = sorted(option['options'], key=lambda opt: -opt['order'])
             next_indent = indent + '    '
             writer.write(indent, option_name, ':', '\n')
             if options:

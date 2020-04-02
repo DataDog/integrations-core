@@ -649,7 +649,7 @@ def test_option_order_default():
     )
     spec.load()
 
-    assert spec.data['files'][0]['options'][0]['options'][0]['order'] == float('+inf')
+    assert spec.data['files'][0]['options'][0]['options'][0]['order'] == 0
 
 
 def test_option_deprecation_not_mapping():
@@ -2676,7 +2676,7 @@ def test_template_mapping():
         # Defaults should be post-populated
         'required': False,
         'hidden': False,
-        'order': float('+inf'),
+        'order': 0,
         'deprecation': {},
         'metadata_tags': [],
         'secret': False,
