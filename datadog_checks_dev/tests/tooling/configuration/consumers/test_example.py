@@ -170,7 +170,7 @@ def test_section_hidden():
     )
 
 
-def test_section_with_option_order():
+def test_section_with_option_display_priority():
     consumer = get_example_consumer(
         """
         name: foo
