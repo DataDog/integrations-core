@@ -109,7 +109,6 @@ files:
           - migrate-rx-partitions-remaining
           - migrate-tx-partitions-initial
           - migrate-tx-partitions-remaining
-        default: None
     - name: datacenter_metrics
       description: |
         All datacenter metrics collected by default. Specify which metrics you want here.
