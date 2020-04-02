@@ -609,7 +609,7 @@ def test_option_hidden_default():
     assert spec.data['files'][0]['options'][0]['options'][0]['hidden'] is False
 
 
-def test_option_order_not_integer():
+def test_option_display_priority_not_integer():
     spec = get_spec(
         """
         name: foo
@@ -631,7 +631,7 @@ def test_option_order_not_integer():
     assert 'test, test.yaml, instances, foo: Attribute `display_priority` must be a integer' in spec.errors
 
 
-def test_option_order_default():
+def test_option_display_priority_default():
     spec = get_spec(
         """
         name: foo
