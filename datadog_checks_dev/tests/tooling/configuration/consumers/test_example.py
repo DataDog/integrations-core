@@ -183,27 +183,27 @@ def test_section_with_option_order():
             options:
             - name: fourth
               description: fourth words
-              order: -5
+              display_priority: -5
               value:
                 type: string
             - name: fifth
               description: fifth words
-              order: -50
+              display_priority: -50
               value:
                 type: string
             - name: third
               description: third words
-              # default order: 0
+              # default display_priority: 0
               value:
                 type: string
             - name: first
               description: first words
-              order: 100
+              display_priority: 100
               value:
                 type: number
             - name: second
               description: second words
-              order: 10
+              display_priority: 10
               value:
                 type: number
         """

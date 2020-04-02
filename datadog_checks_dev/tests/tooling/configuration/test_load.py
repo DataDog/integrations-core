@@ -623,12 +623,12 @@ def test_option_order_not_integer():
             options:
             - name: foo
               description: words
-              order: 'abc'
+              display_priority: 'abc'
         """
     )
     spec.load()
 
-    assert 'test, test.yaml, instances, foo: Attribute `order` must be a integer' in spec.errors
+    assert 'test, test.yaml, instances, foo: Attribute `display_priority` must be a integer' in spec.errors
 
 
 def test_option_order_default():
@@ -649,7 +649,7 @@ def test_option_order_default():
     )
     spec.load()
 
-    assert spec.data['files'][0]['options'][0]['options'][0]['order'] == 0
+    assert spec.data['files'][0]['options'][0]['options'][0]['display_priority'] == 0
 
 
 def test_option_deprecation_not_mapping():
@@ -2676,7 +2676,7 @@ def test_template_mapping():
         # Defaults should be post-populated
         'required': False,
         'hidden': False,
-        'order': 0,
+        'display_priority': 0,
         'deprecation': {},
         'metadata_tags': [],
         'secret': False,
