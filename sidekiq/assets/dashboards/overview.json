@@ -17,7 +17,7 @@
     },
     "description": "This dashboard provides a high-level overview of your Sidekiq deployment so you can monitor metrics related to jobs, queues, and batches.\n\nFor further reading on monitoring Sidekiq, see our [official Sidekiq integration documentation](https://docs.datadoghq.com/integrations/sidekiq/).\n\nClone this template to make changes and add your own graphs and widgets.",
     "id": 1038262,
-    "modified": "2020-04-02T14:59:50.008099+00:00",
+    "modified": "2020-04-02T15:03:13.932880+00:00",
     "new_id": "u7k-5bn-7ui",
     "read_only": false,
     "template_variables": [],
@@ -63,8 +63,8 @@
             "title_text": "Busy Jobs",
             "type": "timeseries",
             "width": 41,
-            "x": 71,
-            "y": 39
+            "x": 28,
+            "y": 24
         },
         {
             "height": 12,
@@ -165,7 +165,7 @@
             "title_text": "Retries",
             "type": "timeseries",
             "width": 41,
-            "x": 28,
+            "x": 71,
             "y": 24
         },
         {
@@ -200,7 +200,7 @@
             "type": "timeseries",
             "width": 41,
             "x": 71,
-            "y": 24
+            "y": 39
         },
         {
             "height": 12,
