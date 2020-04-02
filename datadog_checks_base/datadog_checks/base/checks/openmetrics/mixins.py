@@ -533,9 +533,9 @@ class OpenMetricsScraperMixin(object):
 
                 mapping_value = ','.join([sample_labels[l] for l in matching_labels])
 
-                scraper_config[
-                    '_label_mapping'
-                ].setdefault(mapping_key, {}).setdefault(mapping_value, {}).update(label_dict)
+                scraper_config['_label_mapping'].setdefault(mapping_key, {}).setdefault(mapping_value, {}).update(
+                    label_dict
+                )
 
     def _join_labels(self, metric, scraper_config):
         # Filter metric to see if we can enrich with joined labels
