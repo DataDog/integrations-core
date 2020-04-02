@@ -170,6 +170,81 @@ def test_section_hidden():
     )
 
 
+def test_section_with_option_order():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: init_config
+            options:
+            - name: last1
+              description: last1 words
+              value:
+                type: string
+            - name: last2
+              description: last2 words
+              value:
+                type: string
+            - name: third
+              description: third words
+              order: 3
+              value:
+                type: string
+            - name: first
+              description: first words
+              order: 1
+              value:
+                type: number
+            - name: second
+              description: second words
+              order: 2
+              value:
+                type: number
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    print(contents)
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## All options defined here are available to all instances.
+        #
+        init_config:
+
+            ## @param first - number - optional
+            ## first words
+            #
+            # first: <FIRST>
+
+            ## @param second - number - optional
+            ## second words
+            #
+            # second: <SECOND>
+
+            ## @param third - string - optional
+            ## third words
+            #
+            # third: <THIRD>
+
+            ## @param last1 - string - optional
+            ## last1 words
+            #
+            # last1: <LAST1>
+
+            ## @param last2 - string - optional
+            ## last2 words
+            #
+            # last2: <LAST2>
+        """
+    )
+
+
 def test_section_example():
     consumer = get_example_consumer(
         """

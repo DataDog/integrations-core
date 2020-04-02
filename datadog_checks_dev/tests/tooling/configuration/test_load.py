@@ -545,6 +545,7 @@ def test_option_required_not_boolean():
     assert 'test, test.yaml, instances, foo: Attribute `required` must be true or false' in spec.errors
 
 
+
 def test_option_required_default():
     spec = get_spec(
         """
@@ -607,6 +608,49 @@ def test_option_hidden_default():
     spec.load()
 
     assert spec.data['files'][0]['options'][0]['options'][0]['hidden'] is False
+
+
+def test_option_order_not_number():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+              order: 'abc'
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, instances, foo: Attribute `order` must be a number' in spec.errors
+
+
+def test_option_order_default():
+    spec = get_spec(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: instances
+            description: words
+            options:
+            - name: foo
+              description: words
+        """
+    )
+    spec.load()
+
+    assert spec.data['files'][0]['options'][0]['options'][0]['order'] == float('+inf')
 
 
 def test_option_deprecation_not_mapping():
@@ -2633,6 +2677,7 @@ def test_template_mapping():
         # Defaults should be post-populated
         'required': False,
         'hidden': False,
+        'order': float('+inf'),
         'deprecation': {},
         'metadata_tags': [],
         'secret': False,
