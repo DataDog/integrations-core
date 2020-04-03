@@ -18,7 +18,7 @@ pytestmark = pytest.mark.unit
 
 
 def mock_server(url, transport=None):
-    return MockXmlRcpServer(url, transport=transport)
+    return MockXmlRcpServer(url, transport)
 
 
 def test_check(aggregator, check):
