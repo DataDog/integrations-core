@@ -10,7 +10,7 @@ import pyperclip
 
 from ....utils import dir_exists, file_exists, path_join, running_on_ci
 from ...e2e import E2E_SUPPORTED_TYPES, derive_interface, start_environment, stop_environment
-from ...e2e.agent import DEFAULT_PYTHON_VERSION, DEFAULT_SAMPLING_COLLECTION_INTERVAL
+from ...e2e.agent import DEFAULT_PYTHON_VERSION, DEFAULT_SAMPLING_COLLECTION_INTERVAL, DEFAULT_AGENT_VERSION
 from ...git import get_current_branch
 from ...testing import complete_envs, get_available_tox_envs, get_tox_env_python_version
 from ...utils import complete_testable_checks, get_tox_file
@@ -130,7 +130,14 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
 
     env_type = metadata['env_type']
 
-    agent_ver = agent or os.getenv('DDEV_E2E_AGENT', '6')
+    agent_ver = agent
+    if not agent_ver:
+        if python < 3:
+            agent_ver = os.getenv('DDEV_E2E_AGENT_PY3')
+        else:
+            agent_ver = os.getenv('DDEV_E2E_AGENT_PY2')
+        agent_ver = agent_ver or os.getenv('DDEV_E2E_AGENT', str(DEFAULT_AGENT_VERSION))
+
     agent_build = ctx.obj.get(f'agent{agent_ver}', agent_ver)
     if isinstance(agent_build, dict):
         agent_build = agent_build.get(env_type, env_type)
