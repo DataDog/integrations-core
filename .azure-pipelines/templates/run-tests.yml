@@ -20,6 +20,8 @@ steps:
       if [ "${{ parameters.repo }}" == "core" ] && [ "$ENV_TEST_BASE" != "prod" ]; then
           ENV_TEST_OPTS='--base'
       fi
+      echo DDEV_E2E_AGENT_PY2 $DDEV_E2E_AGENT_PY2
+      echo DDEV_E2E_AGENT_PY3 $DDEV_E2E_AGENT_PY3
       ddev env test $ENV_TEST_OPTS --new-env --junit ${{ parameters.check }}
     displayName: 'Run E2E tests'
     env:
