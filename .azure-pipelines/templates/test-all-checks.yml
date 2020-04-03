@@ -345,12 +345,12 @@ jobs:
 #    - checkName: spark
 #      displayName: Spark
 #      os: linux
-#    - checkName: sqlserver
-#      displayName: SQL Server (Linux)
-#      os: linux
-#    - checkName: sqlserver
-#      displayName: SQL Server (Windows)
-#      os: windows
+    - checkName: sqlserver
+      displayName: SQL Server (Linux)
+      os: linux
+    - checkName: sqlserver
+      displayName: SQL Server (Windows)
+      os: windows
 #    - checkName: squid
 #      displayName: Squid
 #      os: linux
