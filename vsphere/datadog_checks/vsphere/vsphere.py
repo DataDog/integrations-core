@@ -12,7 +12,7 @@ from typing import Any, Dict, Generator, Iterable, List, Set, Type, cast
 from pyVmomi import vim, vmodl
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
+from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
@@ -178,7 +178,7 @@ class VSphereCheck(AgentCheck):
                 # The resource does not match the specified whitelist/blacklist patterns.
                 continue
 
-            mor_name = to_native_string(properties.get("name", "unknown"))
+            mor_name = to_string(properties.get("name", "unknown"))
             mor_type_str = MOR_TYPE_AS_STRING[type(mor)]
             hostname = None
             tags = []
@@ -188,14 +188,14 @@ class VSphereCheck(AgentCheck):
                 if power_state != vim.VirtualMachinePowerState.poweredOn:
                     # Skipping because the VM is not powered on
                     # TODO: Sometimes VM are "poweredOn" but "disconnected" and thus have no metrics
-                    self.log.debug("Skipping VM %s in state %s", mor_name, to_native_string(power_state))
+                    self.log.debug("Skipping VM %s in state %s", mor_name, to_string(power_state))
                     continue
 
                 # Hosts are not considered as parents of the VMs they run, we use the `runtime.host` property
                 # to get the name of the ESXi host
                 runtime_host = properties.get("runtime.host")
                 runtime_host_props = infrastructure_data[runtime_host] if runtime_host else {}
-                runtime_hostname = to_native_string(runtime_host_props.get("name", "unknown"))
+                runtime_hostname = to_string(runtime_host_props.get("name", "unknown"))
                 tags.append('vsphere_host:{}'.format(runtime_hostname))
 
                 if self.config.use_guest_hostname:
@@ -258,7 +258,7 @@ class VSphereCheck(AgentCheck):
                     continue
 
                 if not result.value:
-                    self.log.debug("Skipping metric %s because the value is empty", to_native_string(metric_name))
+                    self.log.debug("Skipping metric %s because the value is empty", to_string(metric_name))
                     continue
 
                 # Get the most recent value that isn't negative
@@ -267,7 +267,7 @@ class VSphereCheck(AgentCheck):
                     self.log.debug(
                         "Skipping metric %s because the value returned by vCenter"
                         " is negative (i.e. the metric is not yet available).",
-                        to_native_string(metric_name),
+                        to_string(metric_name),
                     )
                     continue
 
@@ -292,7 +292,7 @@ class VSphereCheck(AgentCheck):
                     hostname = None
                 else:
                     # Tags are (mostly) submitted as external host tags.
-                    hostname = to_native_string(mor_props.get('hostname'))
+                    hostname = to_string(mor_props.get('hostname'))
                     if self.config.excluded_host_tags:
                         tags.extend([t for t in mor_tags if t.split(":", 1)[0] in self.config.excluded_host_tags])
 
@@ -304,7 +304,7 @@ class VSphereCheck(AgentCheck):
                     value /= 100.0
 
                 # vSphere "rates" should be submitted as gauges (rate is precomputed).
-                self.gauge(to_native_string(metric_name), value, hostname=hostname, tags=tags)
+                self.gauge(to_string(metric_name), value, hostname=hostname, tags=tags)
 
     def query_metrics_wrapper(self, query_specs):
         # type: (List[vim.PerformanceManager.QuerySpec]) -> List[vim.PerformanceManager.EntityMetricBase]

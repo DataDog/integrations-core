@@ -18,7 +18,7 @@ from pyVmomi import vmodl  # pylint: disable=E0611
 from six import itervalues
 from six.moves import range
 
-from datadog_checks.base import AgentCheck, ensure_unicode, to_native_string
+from datadog_checks.base import AgentCheck, ensure_unicode, to_string
 from datadog_checks.base.checks.libs.thread_pool import SENTINEL, Pool
 from datadog_checks.base.checks.libs.timer import Timer
 from datadog_checks.base.checks.libs.vmware.all_metrics import ALL_METRICS
@@ -878,7 +878,7 @@ class VSphereLegacyCheck(AgentCheck):
                     if not hostname:  # no host tags available
                         tags.extend(mor['tags'])
                     else:
-                        hostname = to_native_string(hostname)
+                        hostname = to_string(hostname)
                         if self.excluded_host_tags:
                             tags.extend(mor["excluded_host_tags"])
 
