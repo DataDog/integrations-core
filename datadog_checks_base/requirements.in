@@ -12,7 +12,7 @@ protobuf==3.7.0
 pysocks==1.7.0
 pytz==2019.3
 pywin32==227; sys_platform == 'win32'
-pyyaml==5.1
+pyyaml==5.3
 requests==2.22.0
 requests-kerberos==0.12.0
 requests_ntlm==1.1.0
