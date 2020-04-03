@@ -20,6 +20,7 @@ variables:
   DDEV_COLOR: 1
   DDEV_E2E_AGENT_PY3: datadog/agent:7.18.1-jmx
   DDEV_E2E_AGENT_PY2: datadog/agent:6.18.1-jmx
+  ENV_TEST_BASE: prod
 
 jobs:
 - template: './templates/test-all-checks.yml'

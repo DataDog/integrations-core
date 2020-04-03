@@ -17,7 +17,7 @@ steps:
 - ${{ if eq(parameters.test_e2e, 'true') }}:
   - script: |
       ENV_TEST_OPTS=''
-      if [ "${{ parameters.repo }}" == "core" ]; then
+      if [ "${{ parameters.repo }}" == "core" ] && [ "$ENV_TEST_BASE" != "prod" ]; then
           ENV_TEST_OPTS='--base'
       fi
       ddev env test $ENV_TEST_OPTS --new-env --junit ${{ parameters.check }}
