@@ -3,8 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import logging
 
-from mock import MagicMock
 import pytest
+from mock import MagicMock
 from pyVmomi import vim
 
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
@@ -40,14 +40,7 @@ def test_create_session(realtime_instance):
 
 
 @pytest.mark.usefixtures("mock_rest_api")
-@pytest.mark.parametrize(
-    ("batch_size", "number_of_batches"),
-    [
-        (25, 40),
-        (100, 10),
-        (101, 10)
-    ]
-)
+@pytest.mark.parametrize(("batch_size", "number_of_batches"), [(25, 40), (100, 10), (101, 10)])
 def test_make_batch(realtime_instance, batch_size, number_of_batches):
     realtime_instance['batch_tags_collector_size'] = batch_size
     config = VSphereConfig(realtime_instance, logger)
