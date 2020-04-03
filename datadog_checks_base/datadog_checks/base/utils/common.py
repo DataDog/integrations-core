@@ -28,12 +28,7 @@ def ensure_unicode(s):
     return s
 
 
-# Note on renaming `to_string` to `to_native_string`.
-# `to_string` will be deprecated at some point.
-# `to_native_string` is a new feature. When used, it means the integration release won't work
-# with old agent with old base package.
-
-
+# `to_native_string` added in `datadog_checks_base` version 11.2.0
 if TYPE_CHECKING:
     to_native_string = str
 else:
