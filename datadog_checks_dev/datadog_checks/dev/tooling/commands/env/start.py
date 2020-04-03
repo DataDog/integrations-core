@@ -133,9 +133,9 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     agent_ver = agent
     if not agent_ver:
         if python < 3:
-            agent_ver = os.getenv('DDEV_E2E_AGENT_PY3')
-        else:
             agent_ver = os.getenv('DDEV_E2E_AGENT_PY2')
+        else:
+            agent_ver = os.getenv('DDEV_E2E_AGENT_PY3')
         agent_ver = agent_ver or os.getenv('DDEV_E2E_AGENT', str(DEFAULT_AGENT_VERSION))
 
     agent_build = ctx.obj.get(f'agent{agent_ver}', agent_ver)
