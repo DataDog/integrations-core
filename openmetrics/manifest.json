@@ -21,6 +21,9 @@
   "type": "check",
   "integration_id": "openmetrics",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json"

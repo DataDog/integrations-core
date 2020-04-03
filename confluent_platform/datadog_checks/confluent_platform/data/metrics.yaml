@@ -195,6 +195,24 @@ jmx_metrics:
         Mean:
           alias: confluent.$domain.request.$name.avg
           metric_type: gauge
+        50thPercentile:
+          alias: confluent.$domain.request.$name.50percentile
+          metric_type: gauge
+        75thPercentile:
+          alias: confluent.$domain.request.$name.75percentile
+          metric_type: gauge
+        95thPercentile:
+          alias: confluent.$domain.request.$name.95percentile
+          metric_type: gauge
+        98thPercentile:
+          alias: confluent.$domain.request.$name.98percentile
+          metric_type: gauge
+        99thPercentile:
+          alias: confluent.$domain.request.$name.99percentile
+          metric_type: gauge
+        999thPercentile:
+          alias: confluent.$domain.request.$name.999percentile
+          metric_type: gauge
 
   # Components Metrics:
   #   - Confluent Global Producer Metrics: https://docs.confluent.io/current/kafka/monitoring.html#global-connection-metrics

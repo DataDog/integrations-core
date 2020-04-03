@@ -2731,6 +2731,7 @@ def test_template_array():
         'aws_host',
         'aws_service',
         'tls_verify',
+        'tls_use_host_header',
         'tls_ignore_warning',
         'tls_cert',
         'tls_private_key',
