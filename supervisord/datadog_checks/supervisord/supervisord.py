@@ -91,7 +91,7 @@ class SupervisordCheck(AgentCheck):
                 )
             else:
                 msg = (
-                    'Cannot connect to {}. Make sure sure supervisor '
+                    'Cannot connect to {}. Make sure supervisor '
                     'is running and socket is enabled and socket file'
                     ' has the right permissions.'.format(sock)
                 )
