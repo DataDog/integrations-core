@@ -130,12 +130,17 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
 
     env_type = metadata['env_type']
 
+    echo_failure('agent_ver: {}'.format(agent))
+    echo_failure('DDEV_E2E_AGENT_PY2: {}'.format(os.getenv('DDEV_E2E_AGENT_PY2')))
+    echo_failure('DDEV_E2E_AGENT_PY3: {}'.format(os.getenv('DDEV_E2E_AGENT_PY3')))
+
     if not agent:
         if python < 3:
             agent = os.getenv('DDEV_E2E_AGENT_PY2')
         else:
             agent = os.getenv('DDEV_E2E_AGENT_PY3')
         agent = agent or os.getenv('DDEV_E2E_AGENT', str(DEFAULT_AGENT_VERSION))
+    echo_failure('agent_ver: {}'.format(agent))
 
     agent_ver = agent
     agent_build = ctx.obj.get(f'agent{agent_ver}', agent_ver)
