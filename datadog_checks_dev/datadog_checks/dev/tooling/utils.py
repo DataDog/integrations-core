@@ -312,15 +312,15 @@ def has_e2e(check):
     return False
 
 
-def has_legacy_signature(check):
+def find_legacy_signature(check):
     """
     Validate that the given check does not use the legacy agent signature (contains agentConfig)
     """
     for path, _, files in os.walk(get_check_directory(check)):
-        for fn in files:
-            if fn.endswith('.py'):
-                with open(os.path.join(path, fn)) as test_file:
+        for f in files:
+            if f.endswith('.py'):
+                with open(os.path.join(path, f)) as test_file:
                     for num, line in enumerate(test_file):
                         if "__init__" in line and "agentConfig" in line:
-                            return str(fn), num
-    return False
+                            return str(f), num
+    return None

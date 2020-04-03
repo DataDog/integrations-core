@@ -4,7 +4,7 @@
 
 import click
 
-from ...utils import complete_valid_checks, get_valid_checks, has_legacy_signature
+from ...utils import complete_valid_checks, get_valid_checks, find_legacy_signature
 from ..console import CONTEXT_SETTINGS, echo_failure, echo_success
 
 
@@ -24,8 +24,8 @@ def legacy_signature(check):
     has_failed = False
 
     for check in checks:
-        check_failed = has_legacy_signature(check)
-        if check_failed:
+        check_failed = find_legacy_signature(check)
+        if check_failed is not None:
             has_failed = True
             failed_file, failed_num = check_failed
             echo_failure(f"Check `{check}` uses legacy agent signature in `{failed_file}` on line {failed_num}")
