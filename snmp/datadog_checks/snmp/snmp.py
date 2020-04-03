@@ -23,6 +23,7 @@ from .compat import read_persistent_cache, write_persistent_cache
 from .config import InstanceConfig, ParsedMatchMetricTags, ParsedMetric, ParsedMetricTag, ParsedTableMetric
 from .exceptions import PySnmpError
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
+from .models import OID
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
 from .types import ForceableMetricType
 from .utils import (
@@ -172,7 +173,7 @@ class SnmpCheck(AgentCheck):
                 time.sleep(interval - time_elapsed)
 
     def fetch_results(self, config, all_oids, bulk_oids):
-        # type: (InstanceConfig, list, list) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], Optional[str]]
+        # type: (InstanceConfig, List[OID], List[OID]) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], Optional[str]]
         """
         Perform a snmpwalk on the domain specified by the oids, on the device
         configured in instance.
@@ -191,7 +192,7 @@ class SnmpCheck(AgentCheck):
                 self.log.debug('Running SNMP command getBulk on OID %r', oid)
                 binds = snmp_bulk(
                     config,
-                    oid,
+                    oid.as_object_type(),
                     self._NON_REPEATERS,
                     self._MAX_REPETITIONS,
                     enforce_constraints,
@@ -213,7 +214,7 @@ class SnmpCheck(AgentCheck):
         return results, error
 
     def fetch_oids(self, config, oids, enforce_constraints):
-        # type: (InstanceConfig, list, bool) -> Tuple[List[Any], Optional[str]]
+        # type: (InstanceConfig, List[OID], bool) -> Tuple[List[Any], Optional[str]]
         # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
         # It returns the wrong value when the OID passed is referring to a specific leaf.
         # For example:
@@ -225,7 +226,7 @@ class SnmpCheck(AgentCheck):
         all_binds = []
         while first_oid < len(oids):
             try:
-                oids_batch = oids[first_oid : first_oid + self.oid_batch_size]
+                oids_batch = [oid.as_object_type() for oid in oids[first_oid : first_oid + self.oid_batch_size]]
                 self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
 
                 var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)

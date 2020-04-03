@@ -347,41 +347,38 @@ class InstanceConfig:
         self,
         metrics,  # type: List[Dict[str, Any]]
         warning,  # type: Callable[..., None]
-        object_identity_factory=None,  # type: Callable[..., ObjectIdentity]  # For unit tests purposes.
     ):
-        # type: (...) -> Tuple[list, list, List[Union[ParsedMetric, ParsedTableMetric]]]
+        # type: (...) -> Tuple[List[OID], List[OID], List[Union[ParsedMetric, ParsedTableMetric]]]
         """Parse configuration and returns data to be used for SNMP queries.
 
         `oids` is a dictionnary of SNMP tables to symbols to query.
         """
-        if object_identity_factory is None:
-            object_identity_factory = ObjectIdentity
-
-        table_oids = {}  # type: Dict[Tuple[str, str], Tuple[Any, List[Any]]]
+        table_oids = {}  # type: Dict[Tuple[str, str], Tuple[OID, List[OID]]]
         parsed_metrics = []  # type: List[Union[ParsedMetric, ParsedTableMetric]]
 
-        def extract_symbol(mib, symbol):  # type: ignore
+        def extract_symbol(mib, symbol):
+            # type: (str, Union[str, dict]) -> Tuple[OID, str]
             if isinstance(symbol, dict):
                 symbol_oid = symbol['OID']
-                symbol = symbol['name']
-                self._resolver.register(OID(symbol_oid).as_tuple(), symbol)
-                identity = object_identity_factory(symbol_oid)
+                symbol_name = symbol['name']
+                oid = OID(symbol_oid)
+                self._resolver.register(oid.as_tuple(), symbol_name)
             else:
-                identity = object_identity_factory(mib, symbol)
+                oid = OID(ObjectIdentity(mib, symbol))
+                symbol_name = symbol
 
-            return identity, symbol
+            return oid, symbol_name
 
-        def get_table_symbols(mib, table):  # type: ignore
-            identity, table = extract_symbol(mib, table)
+        def get_table_symbols(mib, table):
+            # type: (str, str) -> Tuple[List[OID], str]
+            table_oid, table = extract_symbol(mib, table)
             key = (mib, table)
 
             if key in table_oids:
-                return table_oids[key][1], table
-
-            table_object = ObjectType(identity)
-            symbols = []
-
-            table_oids[key] = (table_object, symbols)
+                symbols = table_oids[key][1]
+            else:
+                symbols = []
+                table_oids[key] = (table_oid, symbols)
 
             return symbols, table
 
@@ -425,23 +422,16 @@ class InstanceConfig:
                     if 'column' in metric_tag:
                         # In case it's a column, we need to query it as well
                         mib = metric_tag.get('MIB', metric['MIB'])
-                        identity, column = extract_symbol(mib, metric_tag['column'])
+                        oid, column = extract_symbol(mib, metric_tag['column'])
                         column_tags.append((tag_key, column))
 
-                        try:
-                            object_type = ObjectType(identity)
-                        except Exception as e:
-                            warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
+                        if 'table' in metric_tag:
+                            tag_symbols, _ = get_table_symbols(mib, metric_tag['table'])
+                            tag_symbols.append(oid)
+                        elif mib != metric['MIB']:
+                            raise ConfigurationError('When tagging from a different MIB, the table must be specified')
                         else:
-                            if 'table' in metric_tag:
-                                tag_symbols, _ = get_table_symbols(mib, metric_tag['table'])
-                                tag_symbols.append(object_type)
-                            elif mib != metric['MIB']:
-                                raise ConfigurationError(
-                                    'When tagging from a different MIB, the table must be specified'
-                                )
-                            else:
-                                symbols.append(object_type)
+                            symbols.append(oid)
 
                     elif 'index' in metric_tag:
                         index_tags.append((tag_key, metric_tag['index']))
@@ -461,21 +451,16 @@ class InstanceConfig:
                                     )
 
                 for symbol in metric['symbols']:
-                    identity, parsed_metric_name = extract_symbol(metric['MIB'], symbol)
-
-                    try:
-                        symbols.append(ObjectType(identity))
-                    except Exception as e:
-                        warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
-
+                    oid, parsed_metric_name = extract_symbol(metric['MIB'], symbol)
+                    symbols.append(oid)
                     parsed_table_metric = ParsedTableMetric(parsed_metric_name, index_tags, column_tags, forced_type)
                     parsed_metrics.append(parsed_table_metric)
 
             elif 'OID' in metric:
-                oid_object = ObjectType(object_identity_factory(metric['OID']))
+                oid = OID(metric['OID'])
 
-                table_oids[metric['OID']] = (oid_object, [])
-                self._resolver.register(OID(metric['OID']).as_tuple(), metric['name'])
+                table_oids[metric['OID']] = (oid, [])
+                self._resolver.register(oid.as_tuple(), metric['name'])
 
                 parsed_metric = ParsedMetric(metric['name'], metric_tags, forced_type, enforce_scalar=False)
                 parsed_metrics.append(parsed_metric)
@@ -483,27 +468,27 @@ class InstanceConfig:
             else:
                 raise ConfigurationError('Unsupported metric in config file: {}'.format(metric))
 
-        all_oids = []
-        bulk_oids = []
+        all_oids = []  # type: List[OID]
+        bulk_oids = []  # type: List[OID]
 
         # Use bulk for SNMP version > 1 and there are enough symbols
         bulk_limit = self.bulk_threshold if self._auth_data.mpModel else 0
 
-        for table, symbols in table_oids.values():
+        for table_oid, symbols in table_oids.values():
             if not symbols:
                 # No table to browse, just one symbol
-                all_oids.append(table)
+                all_oids.append(table_oid)
             elif bulk_limit and len(symbols) > bulk_limit:
-                bulk_oids.append(table)
+                bulk_oids.append(table_oid)
             else:
                 all_oids.extend(symbols)
 
         return all_oids, bulk_oids, parsed_metrics
 
     def parse_metric_tags(self, metric_tags):
-        # type: (List[Dict[str, Any]]) -> Tuple[List[Any], List[Any]]
+        # type: (List[Dict[str, Any]]) -> Tuple[List[OID], List[Any]]
         """Parse configuration for global metric_tags."""
-        oids = []
+        oids = []  # type: List[OID]
         parsed_metric_tags = []
 
         for tag in metric_tags:
@@ -539,14 +524,12 @@ class InstanceConfig:
 
             if 'MIB' in tag:
                 mib = tag['MIB']
-                identity = ObjectIdentity(mib, symbol)
+                oid = OID(ObjectIdentity(mib, symbol))
             else:
-                oid = tag['OID']
-                identity = ObjectIdentity(oid)
-                self._resolver.register(OID(oid).as_tuple(), symbol)
+                oid = OID(tag['OID'])
+                self._resolver.register(oid.as_tuple(), symbol)
 
-            object_type = ObjectType(identity)
-            oids.append(object_type)
+            oids.append(oid)
             parsed_metric_tags.append(parsed)
 
         return oids, parsed_metric_tags
@@ -556,10 +539,9 @@ class InstanceConfig:
         if self._uptime_metric_added:
             return
         # Reference sysUpTimeInstance directly, see http://oidref.com/1.3.6.1.2.1.1.3.0
-        uptime_oid = '1.3.6.1.2.1.1.3.0'
-        oid_object = ObjectType(ObjectIdentity(uptime_oid))
-        self.all_oids.append(oid_object)
-        self._resolver.register(OID(uptime_oid).as_tuple(), 'sysUpTimeInstance')
+        uptime_oid = OID('1.3.6.1.2.1.1.3.0')
+        self.all_oids.append(uptime_oid)
+        self._resolver.register(uptime_oid.as_tuple(), 'sysUpTimeInstance')
 
         parsed_metric = ParsedMetric('sysUpTimeInstance', [], 'gauge')
         self.parsed_metrics.append(parsed_metric)
