@@ -1,14 +1,19 @@
-schedules:
-- cron: "0 5 * * *"
-  displayName: Nightly
-  always: true
+#schedules:
+#- cron: "0 5 * * *"
+#  displayName: Nightly
+#  always: true
+#  branches:
+#    include:
+#    - master
+
+trigger:
   branches:
     include:
     - master
 
 pr: none
 
-trigger: none
+#trigger: none
 
 variables:
   PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
