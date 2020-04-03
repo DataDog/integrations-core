@@ -39,6 +39,7 @@ if TYPE_CHECKING:
 else:
     to_native_string = ensure_unicode if PY3 else ensure_bytes
 
+# TODO: `to_string` will be deprecated with Agent 6.21/7.21
 to_string = to_native_string
 
 
