@@ -1,11 +1,10 @@
 instances:
 
-  - host: 10.254.227.148
+  - host: localhost
     port: 1099
     user: admin
     password: admin
-    name: vtpie_console_broker_01
-    max_returned_metrics: 2000
+    name: broker_01
 
 init_config:
 
@@ -17,9 +16,9 @@ init_config:
     - include:
         domain: org.apache.activemq.artemis
         bean_regex:
-          - org.apache.activemq.artemis:broker="vtpie-console-broker01"
+          - org.apache.activemq.artemis:broker="broker01"
         tags:
-          broker: vtpie-console-broker01
+          broker: broker01
         attribute:
           ConnectionCount:
             alias: activemq.broker.ConnectionCount
