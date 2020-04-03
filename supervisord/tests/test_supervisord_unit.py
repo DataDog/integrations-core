@@ -17,11 +17,7 @@ from .common import TEST_CASES
 pytestmark = pytest.mark.unit
 
 
-def mock_server(url):
-    return MockXmlRcpServer(url)
-
-
-def mock_server_proxy(url, transport):
+def mock_server(url, transport=None):
     return MockXmlRcpServer(url, transport=transport)
 
 
@@ -29,7 +25,7 @@ def test_check(aggregator, check):
     """Integration test for supervisord check. Using a mocked supervisord."""
 
     with patch.object(xmlrpclib, 'Server', side_effect=mock_server), patch.object(
-        xmlrpclib, 'ServerProxy', side_effect=mock_server_proxy
+        xmlrpclib, 'ServerProxy', side_effect=mock_server
     ):
         for tc in TEST_CASES:
             for instance in tc['instances']:
@@ -107,7 +103,7 @@ class MockXmlRcpServer:
      server.
      """
 
-    def __init__(self, url, transport=None):
+    def __init__(self, url, transport):
         self.supervisor = MockSupervisor(url, transport)
 
 
