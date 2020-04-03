@@ -10,8 +10,7 @@ import (
 	core "github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	endpoint "github.com/envoyproxy/go-control-plane/envoy/api/v2/endpoint"
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v2"
-	"github.com/envoyproxy/go-control-plane/pkg/cache/v2"
-	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
+	"github.com/envoyproxy/go-control-plane/pkg/cache"
 	xds "github.com/envoyproxy/go-control-plane/pkg/server"
 
 	"github.com/golang/protobuf/ptypes"
@@ -53,7 +52,7 @@ func main() {
 		LbEndpoints: []*endpoint.LbEndpoint{&dummyLbEndpoint},
 	}
 
-	clusterResource := []types.Resource{
+	clusterResource := []cache.Resource{
 		&api.Cluster{
 			Name:                 "dummy_dynamic_cluster",
 			ConnectTimeout:       ptypes.DurationProto(time.Second),

@@ -130,14 +130,10 @@ class WinPDHCounter(object):
         # for more detail
 
         # create a table of the keys to the counter index, because we want to look up
-        # by counter name.
-
-        idx = 0
-        idx_max = len(val)
-        while idx < idx_max:
-            # counter index is idx , counter name is idx + 1
+        # by counter name. Some systems may have an odd number of entries, don't
+        # accidentaly index at val[len(val]
+        for idx in range(0, len(val) - 1, 2):
             WinPDHCounter.pdh_counter_dict[val[idx + 1]].append(val[idx])
-            idx += 2
 
     def _make_counter_path(self, machine_name, counter_name, instance_name, counters):
         """

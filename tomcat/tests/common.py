@@ -8,22 +8,9 @@ CHECK_NAME = "tomcat"
 HERE = get_here()
 
 """
-These metrics cannot be added to E2E yet because they are rate and count types.
-They are visiable in the console but not to this test.
-
-Metrics To add to e2e test:
-    "tomcat.bytes_sent",
-    "tomcat.bytes_rcvd",
-    "tomcat.error_count",
-    "tomcat.request_count",
-    "tomcat.processing_time",
-    "tomcat.servlet.processing_time",
-    "tomcat.servlet.error_count",
-    "tomcat.servlet.request_count",
+Metrics that are not produced by our e2e tests:
     "tomcat.cache.access_count",
     "tomcat.cache.hits_count",
-    "tomcat.jsp.count",
-    "tomcat.jsp.reload_count",
 """
 
 
@@ -33,6 +20,17 @@ TOMCAT_E2E_METRICS = [
     "tomcat.threads.busy",
     "tomcat.threads.count",
     "tomcat.threads.max",
+    # Rates
+    "tomcat.bytes_sent",
+    "tomcat.bytes_rcvd",
+    "tomcat.error_count",
+    "tomcat.request_count",
+    "tomcat.processing_time",
+    "tomcat.servlet.processing_time",
+    "tomcat.servlet.error_count",
+    "tomcat.servlet.request_count",
+    "tomcat.jsp.count",
+    "tomcat.jsp.reload_count",
     # JVM
     "jvm.buffer_pool.direct.capacity",
     "jvm.buffer_pool.direct.count",

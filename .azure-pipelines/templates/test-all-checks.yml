@@ -312,11 +312,17 @@ jobs:
     - checkName: prometheus
       displayName: Prometheus
       os: linux
+    - checkName: proxysql
+      displayName: ProxySQL
+      os: linux
     - checkName: rabbitmq
       displayName: RabbitMQ
       os: linux
     - checkName: redisdb
       displayName: Redis
+      os: linux
+    - checkName: rethinkdb
+      displayName: RethinkDB
       os: linux
     - checkName: riak
       displayName: Riak

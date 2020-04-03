@@ -62,11 +62,13 @@ setup(
     include_package_data=True,
     extras_require={
         'deps': get_requirements(
-            'requirements.in', exclude=['kubernetes', 'pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton'],
+            'requirements.in',
+            exclude=['kubernetes', 'orjson', 'pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton'],
         ),
         'http': get_requirements(
             'requirements.in', only=['pysocks', 'requests-kerberos', 'requests_ntlm', 'win-inet-pton'],
         ),
+        'json': get_requirements('requirements.in', only=['orjson']),
         'kube': get_requirements('requirements.in', only=['kubernetes']),
     },
 )

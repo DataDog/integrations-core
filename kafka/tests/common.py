@@ -13,25 +13,11 @@ HOST_IP = socket.gethostbyname(HOST)
 
 
 """
-Rate type metrics that do not work in our e2e:
+Metrics that do not work in our e2e:
     "kafka.consumer.bytes_in",
     "kafka.consumer.kafka_commits",
     "kafka.consumer.messages_in",
     "kafka.consumer.zookeeper_commits",
-    "kafka.messages_in.rate",
-    "kafka.net.bytes_in.rate",
-    "kafka.net.bytes_out.rate",
-    "kafka.net.bytes_rejected.rate",
-    "kafka.replication.isr_expands.rate",
-    "kafka.replication.isr_shrinks.rate",
-    "kafka.replication.leader_elections.rate",
-    "kafka.replication.unclean_leader_elections.rate",
-    "kafka.request.fetch.failed.rate",
-    "kafka.request.fetch.failed_per_second",
-    "kafka.request.fetch.time.99percentile",
-    "kafka.request.fetch.time.avg",
-    "kafka.request.produce.failed.rate",
-    "kafka.request.produce.failed_per_second",
 """
 
 KAFKA_E2E_METRICS = [
@@ -58,6 +44,21 @@ KAFKA_E2E_METRICS = [
     "kafka.replication.offline_partitions_count",
     "kafka.replication.partition_count",
     "kafka.replication.under_replicated_partitions",
+    # Rates
+    "kafka.messages_in.rate",
+    "kafka.net.bytes_in.rate",
+    "kafka.net.bytes_out.rate",
+    "kafka.net.bytes_rejected.rate",
+    "kafka.replication.isr_expands.rate",
+    "kafka.replication.isr_shrinks.rate",
+    "kafka.replication.leader_elections.rate",
+    "kafka.replication.unclean_leader_elections.rate",
+    "kafka.request.fetch.failed.rate",
+    "kafka.request.produce.failed.rate",
+    "kafka.session.zookeeper.disconnect.rate",
+    "kafka.session.zookeeper.expire.rate",
+    "kafka.session.zookeeper.readonly.rate",
+    "kafka.session.zookeeper.sync.rate",
     # JVM metrics:
     "jvm.buffer_pool.direct.capacity",
     "jvm.buffer_pool.direct.count",

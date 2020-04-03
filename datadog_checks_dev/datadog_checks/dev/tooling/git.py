@@ -39,11 +39,14 @@ def files_changed():
     Return the list of file changed in the current branch compared to `master`
     """
     with chdir(get_root()):
-        result = run_command('git diff --name-only master...', capture='out')
-    changed_files = result.stdout.splitlines()
+        result = run_command('git diff --name-status master...', capture='out')
+    status_lines = result.stdout.splitlines()
 
-    # Remove empty lines
-    return [f for f in changed_files if f]
+    changed_files = []
+    for l in status_lines:
+        files = l.split('\t')[1:]  # skip first element representing the type of change
+        changed_files.extend(files)
+    return sorted([f for f in changed_files if f])
 
 
 def get_commits_since(check_name, target_tag=None):

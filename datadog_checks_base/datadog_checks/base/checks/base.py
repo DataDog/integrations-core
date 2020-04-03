@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import functools
 import importlib
 import inspect
 import json
@@ -633,6 +634,26 @@ class AgentCheck(object):
     def is_metadata_collection_enabled():
         # type: () -> bool
         return is_affirmative(datadog_agent.get_config('enable_metadata_collection'))
+
+    @classmethod
+    def metadata_entrypoint(cls, method):
+        # type: (Callable[..., None]) -> Callable[..., None]
+        """
+        Mark a method as a metadata entrypoint.
+
+        This decorator provides automatic no-op behavior in case metadata collection is disabled on the Agent.
+        """
+
+        @functools.wraps(method)
+        def entrypoint(self, *args, **kwargs):
+            # type: (AgentCheck, *Any, **Any) -> None
+            if not self.is_metadata_collection_enabled():
+                return
+
+            # NOTE: error handling still at the discretion of the wrapped method.
+            method(self, *args, **kwargs)
+
+        return entrypoint
 
     def set_external_tags(self, external_tags):
         # type: (Sequence[ExternalTagType]) -> None

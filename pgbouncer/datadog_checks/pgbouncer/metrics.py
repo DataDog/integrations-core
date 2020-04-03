@@ -17,9 +17,11 @@ STATS_METRICS = {
         ('total_sent', ('pgbouncer.stats.bytes_sent_per_second', RATE)),
         ('total_query_time', ('pgbouncer.stats.total_query_time', RATE)),
         ('total_xact_time', ('pgbouncer.stats.total_transaction_time', RATE)),  # >= 1.8
+        ('total_wait_time', ('pgbouncer.stats.total_wait_time', RATE)),  # >= 1.8
         ('avg_req', ('pgbouncer.stats.avg_req', GAUGE)),  # < 1.8
         ('avg_xact_count', ('pgbouncer.stats.avg_transaction_count', GAUGE)),  # >= 1.8
         ('avg_query_count', ('pgbouncer.stats.avg_query_count', GAUGE)),  # >= 1.8
+        ('avg_wait_time', ('pgbouncer.stats.avg_wait_time', GAUGE)),  # >= 1.8
         ('avg_recv', ('pgbouncer.stats.avg_recv', GAUGE)),
         ('avg_sent', ('pgbouncer.stats.avg_sent', GAUGE)),
         ('avg_query', ('pgbouncer.stats.avg_query', GAUGE)),  # < 1.8
@@ -40,6 +42,7 @@ POOLS_METRICS = {
         ('sv_tested', ('pgbouncer.pools.sv_tested', GAUGE)),
         ('sv_login', ('pgbouncer.pools.sv_login', GAUGE)),
         ('maxwait', ('pgbouncer.pools.maxwait', GAUGE)),
+        ('maxwait_us', ('pgbouncer.pools.maxwait_us', GAUGE)),  # >= 1.8
     ],
     'query': """SHOW POOLS""",
 }

@@ -14,6 +14,44 @@ from datadog_checks.ecs_fargate import FargateCheck
 HERE = os.path.dirname(os.path.abspath(__file__))
 INSTANCE_TAGS = ['foo:bar']
 
+EXPECTED_CONTAINER_METRICS = [
+    'ecs.fargate.io.ops.write',
+    'ecs.fargate.io.bytes.write',
+    'ecs.fargate.io.ops.read',
+    'ecs.fargate.io.bytes.read',
+    'ecs.fargate.cpu.user',
+    'ecs.fargate.cpu.system',
+    'ecs.fargate.cpu.percent',
+    'ecs.fargate.mem.cache',
+    'ecs.fargate.mem.active_file',
+    'ecs.fargate.mem.inactive_file',
+    'ecs.fargate.mem.pgpgout',
+    'ecs.fargate.mem.limit',
+    'ecs.fargate.mem.pgfault',
+    'ecs.fargate.mem.active_anon',
+    'ecs.fargate.mem.usage',
+    'ecs.fargate.mem.rss',
+    'ecs.fargate.mem.pgpgin',
+    'ecs.fargate.mem.pgmajfault',
+    'ecs.fargate.mem.mapped_file',
+    'ecs.fargate.mem.max_usage',
+]
+
+EXTRA_EXPECTED_CONTAINER_METRICS = [
+    'ecs.fargate.cpu.limit',
+    'ecs.fargate.mem.hierarchical_memory_limit',
+    'ecs.fargate.mem.hierarchical_memsw_limit',
+]
+
+EXTRA_NETWORK_METRICS = [
+    'ecs.fargate.net.rcvd_errors',
+    'ecs.fargate.net.sent_errors',
+    'ecs.fargate.net.packet.in_dropped',
+    'ecs.fargate.net.packet.out_dropped',
+    'ecs.fargate.net.bytes_rcvd',
+    'ecs.fargate.net.bytes_sent',
+]
+
 
 @pytest.fixture
 def instance():
@@ -178,49 +216,21 @@ def test_successful_check(check, instance, aggregator):
         ],
     ]
 
-    expected_container_metrics = [
-        'ecs.fargate.io.ops.write',
-        'ecs.fargate.io.bytes.write',
-        'ecs.fargate.io.ops.read',
-        'ecs.fargate.io.bytes.read',
-        'ecs.fargate.cpu.user',
-        'ecs.fargate.cpu.system',
-        'ecs.fargate.cpu.percent',
-        'ecs.fargate.mem.cache',
-        'ecs.fargate.mem.active_file',
-        'ecs.fargate.mem.inactive_file',
-        'ecs.fargate.mem.pgpgout',
-        'ecs.fargate.mem.limit',
-        'ecs.fargate.mem.pgfault',
-        'ecs.fargate.mem.active_anon',
-        'ecs.fargate.mem.usage',
-        'ecs.fargate.mem.rss',
-        'ecs.fargate.mem.pgpgin',
-        'ecs.fargate.mem.pgmajfault',
-        'ecs.fargate.mem.mapped_file',
-        'ecs.fargate.mem.max_usage',
-    ]
-
     extra_expected_metrics_for_container = [
-        [
-            'ecs.fargate.cpu.limit',
-            'ecs.fargate.mem.hierarchical_memory_limit',
-            'ecs.fargate.mem.hierarchical_memsw_limit',
-        ],
-        [
-            'ecs.fargate.cpu.limit',
-            'ecs.fargate.mem.hierarchical_memory_limit',
-            'ecs.fargate.mem.hierarchical_memsw_limit',
-        ],
+        EXTRA_EXPECTED_CONTAINER_METRICS,
+        EXTRA_EXPECTED_CONTAINER_METRICS,
         [],  # pause container get fewer metrics
     ]
 
     for i in range(3):
         tags = common_tags + container_tags[i]
-        for metric in expected_container_metrics:
+        for metric in EXPECTED_CONTAINER_METRICS:
             aggregator.assert_metric(metric, count=1, tags=tags)
         for metric in extra_expected_metrics_for_container[i]:
             aggregator.assert_metric(metric, count=1, tags=tags)
+
+    for metric in EXTRA_NETWORK_METRICS:
+        aggregator.assert_metric(metric, count=3)  # 3 network interfaces
 
     aggregator.assert_all_metrics_covered()
 

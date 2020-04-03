@@ -86,6 +86,13 @@ db.createUser({
 
 2. [Restart the Agent][5].
 
+##### Trace collection
+
+Datadog APM integrates with Mongo to see the traces across your distributed system. Trace collection is enabled by default in the Datadog Agent v6+. To start collecting traces:
+
+1. [Enable trace collection in Datadog][6].
+2. [Instrument your application that makes requests to Mongo][7].
+
 ##### Log collection
 
 _Available for Agent versions >6.0_
@@ -112,7 +119,7 @@ _Available for Agent versions >6.0_
 
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][8] for guidance on applying the parameters below.
 
 ##### Metric collection
 
@@ -120,13 +127,30 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `mongo`                                                                                                                                                                         |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                                                                                                   |
-| `<INSTANCE_CONFIG>`  | `{"server": "mongodb://datadog:<UNIQUEPASSWORD>@%%host%%:%%port%%/<DB_NAME>", "replica_check": true, "additional_metrics": ["metrics.commands","tcmalloc","top","collection"]}` |
+| `<INSTANCE_CONFIG>`  | `{"server": "mongodb://datadog:<UNIQUEPASSWORD>@%%host%%:%%port%%/<DB_NAME>", "replica_check": true, "additional_metrics": "metrics.commands","tcmalloc","top","collection"]}` |
+
+##### Trace collection
+
+APM for containerized apps is supported on hosts running Agent v6+ but requires extra configuration to begin collecting traces.
+
+Required environment variables on the Agent container:
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<DD_API_KEY>` | `api_key`                                                                  |
+| `<DD_APM_ENABLED>`      | true                                                              |
+| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
+
+See [Tracing Docker Applications][16] and the [Kubernetes Daemon Setup][17] for a complete list of available environment variables and configuration.
+
+Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
+
 
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][7].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][9].
 
 | Parameter      | Value                                       |
 | -------------- | ------------------------------------------- |
@@ -134,15 +158,15 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Validation
 
-[Run the Agent's status subcommand][8] and look for `mongo` under the Checks section.
+[Run the Agent's status subcommand][10] and look for `mongo` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][9] for a list of metrics provided by this check.
+See [metadata.csv][11] for a list of metrics provided by this check.
 
-See the [MongoDB 3.0 Manual][10] for more detailed descriptions of some of these metrics.
+See the [MongoDB 3.0 Manual][12] for more detailed descriptions of some of these metrics.
 
 **NOTE**: The following metrics are NOT collected by default, use the `additional_metrics` parameter in your `mongo.d/conf.yaml` file to collect them:
 
@@ -174,25 +198,29 @@ Returns `CRITICAL` if the Agent cannot connect to MongoDB to collect metrics, ot
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][13].
 
 ## Further Reading
 
 Read our series of blog posts about collecting metrics from MongoDB with Datadog:
 
-- [Monitoring MongoDB performance metrics (WiredTiger)][12]
-- [Monitoring MongoDB performance metrics (MMAP)][13]
+- [Monitoring MongoDB performance metrics (WiredTiger)][14]
+- [Monitoring MongoDB performance metrics (MMAP)][15]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/mongo/images/mongo_dashboard.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/mongo/datadog_checks/mongo/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[7]: https://docs.datadoghq.com/agent/docker/log/
-[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[9]: https://github.com/DataDog/integrations-core/blob/master/mongo/metadata.csv
-[10]: https://docs.mongodb.org/manual/reference/command/dbStats
-[11]: https://docs.datadoghq.com/help
-[12]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger
-[13]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap
+[6]: https://docs.datadoghq.com/tracing/send_traces/
+[7]: https://docs.datadoghq.com/tracing/setup/
+[8]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[9]: https://docs.datadoghq.com/agent/docker/log/
+[10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[11]: https://github.com/DataDog/integrations-core/blob/master/mongo/metadata.csv
+[12]: https://docs.mongodb.org/manual/reference/command/dbStats
+[13]: https://docs.datadoghq.com/help
+[14]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger
+[15]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap
+[16]: https://docs.datadoghq.com/agent/docker/apm/?tab=java
+[17]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing

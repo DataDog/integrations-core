@@ -12,7 +12,7 @@ datadog-cacti==1.6.0; sys_platform == 'linux2'
 datadog-cassandra-nodetool==1.5.1
 datadog-cassandra==1.4.0
 datadog-ceph==1.8.0; sys_platform != 'win32'
-datadog-checks-base==11.2.0
+datadog-checks-base==11.3.1
 datadog-checks-downloader==2.4.0
 datadog-cilium==1.0.2
 datadog-cisco-aci==1.8.3
@@ -89,7 +89,7 @@ datadog-openstack-controller==1.8.1
 datadog-openstack==1.9.0
 datadog-oracle==2.0.0
 datadog-pdh-check==1.9.0; sys_platform == 'win32'
-datadog-pgbouncer==1.8.0; sys_platform != 'win32'
+datadog-pgbouncer==1.9.0; sys_platform != 'win32'
 datadog-php-fpm==1.8.0
 datadog-postfix==1.6.1; sys_platform != 'win32'
 datadog-postgres==3.5.3

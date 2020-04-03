@@ -74,7 +74,7 @@ def get_temporal_percent(transformers, column_name, **modifiers):
     rate = transformers['rate'](transformers, column_name, **modifiers)
 
     def temporal_percent(_, value, **kwargs):
-        rate(_, total_time_to_temporal_percent(value, scale=scale), **kwargs)
+        rate(_, total_time_to_temporal_percent(float(value), scale=scale), **kwargs)
 
     return temporal_percent
 

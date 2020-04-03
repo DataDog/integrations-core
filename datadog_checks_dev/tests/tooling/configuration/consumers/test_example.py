@@ -170,6 +170,82 @@ def test_section_hidden():
     )
 
 
+def test_section_with_option_display_priority():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: init_config
+            options:
+            - name: fourth
+              description: fourth words
+              display_priority: -5
+              value:
+                type: string
+            - name: fifth
+              description: fifth words
+              display_priority: -50
+              value:
+                type: string
+            - name: third
+              description: third words
+              # default display_priority: 0
+              value:
+                type: string
+            - name: first
+              description: first words
+              display_priority: 100
+              value:
+                type: number
+            - name: second
+              description: second words
+              display_priority: 10
+              value:
+                type: number
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## All options defined here are available to all instances.
+        #
+        init_config:
+
+            ## @param first - number - optional
+            ## first words
+            #
+            # first: <FIRST>
+
+            ## @param second - number - optional
+            ## second words
+            #
+            # second: <SECOND>
+
+            ## @param third - string - optional
+            ## third words
+            #
+            # third: <THIRD>
+
+            ## @param fourth - string - optional
+            ## fourth words
+            #
+            # fourth: <FOURTH>
+
+            ## @param fifth - string - optional
+            ## fifth words
+            #
+            # fifth: <FIFTH>
+        """
+    )
+
+
 def test_section_example():
     consumer = get_example_consumer(
         """
@@ -1056,5 +1132,99 @@ def test_compact_example_nested():
             #   - "foo"
             #   - {foo: bar, bar: baz}
             #   - [2, 3]
+        """
+    )
+
+
+def test_option_default_example_override_null():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: words
+            value:
+              type: string
+              example: something
+              default: null
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - string - optional
+        ## words
+        #
+        # foo: something
+        """
+    )
+
+
+def test_option_default_example_override_string():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: words
+            value:
+              type: string
+              example: something
+              default: bar
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - string - optional - default: bar
+        ## words
+        #
+        # foo: something
+        """
+    )
+
+
+def test_option_default_example_override_non_string():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: words
+            value:
+              type: string
+              example: something
+              default:
+                foo: [bar, baz]
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - string - optional - default: {'foo': ['bar', 'baz']}
+        ## words
+        #
+        # foo: something
         """
     )

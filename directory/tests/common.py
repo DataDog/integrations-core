@@ -49,6 +49,14 @@ def get_config_stubs(dir_name, filegauges=False):
         },
         {
             'directory': dir_name,
+            'dirtagname': "recursive_pattern_check",
+            'pattern': "*.log",
+            'recursive': True,
+            'filegauges': filegauges,
+            'tags': ['optional:tag1'],
+        },
+        {
+            'directory': dir_name,
             'dirtagname': "glob_pattern_check",
             'pattern': "*.log",
             'filegauges': filegauges,
