@@ -86,7 +86,7 @@
 - name: send_distribution_buckets
   description: |
     Set `send_distribution_buckets` to `true` to send histograms as Datadog distribution metrics.
-    
+
     Learn more about distribution metrics: https://docs.datadoghq.com/developers/metrics/distributions/
   value:
     example: false
@@ -100,6 +100,13 @@
   description: |
     Set send_distribution_counts_as_monotonic to true to send histograms & summary
     counters as monotonic counters (instead of gauges).
+  value:
+    example: false
+    type: boolean
+- name: send_distribution_sums_as_monotonic
+  description: |
+    Set send_distribution_sums_as_monotonic to true to send histograms & summary
+    sum as monotonic counters (instead of gauges).
   value:
     example: false
     type: boolean
