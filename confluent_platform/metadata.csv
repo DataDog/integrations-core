@@ -37,16 +37,52 @@ confluent.kafka.log.log_flush_rate_and_time_ms.rate,gauge,,millisecond,,Log flus
 confluent.kafka.log.log_flush_rate_and_time_ms.avg,gauge,,millisecond,,Log flush rate avg.,0,confluent_platform,log flush avg
 confluent.kafka.network.request.total_time_ms.rate,gauge,,millisecond,,Total time in ms to serve the specified request (rate).,0,confluent_platform,net req tot rate
 confluent.kafka.network.request.total_time_ms.avg,gauge,,millisecond,,Total time in ms to serve the specified request (avg).,0,confluent_platform,net req tot avg
+confluent.kafka.network.request.total_time_ms.50percentile,gauge,,millisecond,,Total time in ms to serve the specified request (50percentile).,0,confluent_platform,net req tot 50p
+confluent.kafka.network.request.total_time_ms.75percentile,gauge,,millisecond,,Total time in ms to serve the specified request (75percentile).,0,confluent_platform,net req tot 75p
+confluent.kafka.network.request.total_time_ms.95percentile,gauge,,millisecond,,Total time in ms to serve the specified request (95percentile).,0,confluent_platform,net req tot 95p
+confluent.kafka.network.request.total_time_ms.98percentile,gauge,,millisecond,,Total time in ms to serve the specified request (98percentile).,0,confluent_platform,net req tot 98p
+confluent.kafka.network.request.total_time_ms.999percentile,gauge,,millisecond,,Total time in ms to serve the specified request (999percentile).,0,confluent_platform,net req tot 999p
+confluent.kafka.network.request.total_time_ms.99percentile,gauge,,millisecond,,Total time in ms to serve the specified request (99percentile).,0,confluent_platform,net req tot 99p
 confluent.kafka.network.request.request_queue_time_ms.rate,gauge,,millisecond,,Time the request waits in the request queue (rate).,0,confluent_platform,net req req queue rate
 confluent.kafka.network.request.request_queue_time_ms.avg,gauge,,millisecond,,Time the request waits in the request queue (avg).,0,confluent_platform,net req req queue avg
-confluent.kafka.network.request.local_time_ms.rate,gauge,,millisecond,,Time the request is processed at the leader,0,confluent_platform,net req local rate
-confluent.kafka.network.request.local_time_ms.avg,gauge,,millisecond,,Time the request is processed at the leader,0,confluent_platform,net req local avg
-confluent.kafka.network.request.remote_time_ms.rate,gauge,,millisecond,,Time the request waits for the follower. This is non-zero for produce requests when acks=all,0,confluent_platform,net req remote rate
-confluent.kafka.network.request.remote_time_ms.avg,gauge,,millisecond,,Time the request waits for the follower. This is non-zero for produce requests when acks=all,0,confluent_platform,net req remote avg
+confluent.kafka.network.request.request_queue_time_ms.50percentile,gauge,,millisecond,,Time the request waits in the request queue (50percentile).,0,confluent_platform,net req req queue 50p
+confluent.kafka.network.request.request_queue_time_ms.75percentile,gauge,,millisecond,,Time the request waits in the request queue (75percentile).,0,confluent_platform,net req req queue 75p
+confluent.kafka.network.request.request_queue_time_ms.95percentile,gauge,,millisecond,,Time the request waits in the request queue (95percentile).,0,confluent_platform,net req req queue 95p
+confluent.kafka.network.request.request_queue_time_ms.98percentile,gauge,,millisecond,,Time the request waits in the request queue (98percentile).,0,confluent_platform,net req req queue 98p
+confluent.kafka.network.request.request_queue_time_ms.999percentile,gauge,,millisecond,,Time the request waits in the request queue (999percentile).,0,confluent_platform,net req req queue 999p
+confluent.kafka.network.request.request_queue_time_ms.99percentile,gauge,,millisecond,,Time the request waits in the request queue (99percentile).,0,confluent_platform,net req req queue 99p
+confluent.kafka.network.request.local_time_ms.rate,gauge,,millisecond,,Time the request is processed at the leader (rate).,0,confluent_platform,net req local rate
+confluent.kafka.network.request.local_time_ms.avg,gauge,,millisecond,,Time the request is processed at the leader (avg).,0,confluent_platform,net req local avg
+confluent.kafka.network.request.local_time_ms.50percentile,gauge,,millisecond,,Time the request is processed at the leader (50percentile).,0,confluent_platform,net req local 50p
+confluent.kafka.network.request.local_time_ms.75percentile,gauge,,millisecond,,Time the request is processed at the leader (75percentile).,0,confluent_platform,net req local 75p
+confluent.kafka.network.request.local_time_ms.95percentile,gauge,,millisecond,,Time the request is processed at the leader (95percentile).,0,confluent_platform,net req local 95p
+confluent.kafka.network.request.local_time_ms.98percentile,gauge,,millisecond,,Time the request is processed at the leader (98percentile).,0,confluent_platform,net req local 98p
+confluent.kafka.network.request.local_time_ms.999percentile,gauge,,millisecond,,Time the request is processed at the leader (999percentile).,0,confluent_platform,net req local 999p
+confluent.kafka.network.request.local_time_ms.99percentile,gauge,,millisecond,,Time the request is processed at the leader (99percentile).,0,confluent_platform,net req local 99p
+confluent.kafka.network.request.remote_time_ms.rate,gauge,,millisecond,,Time the request waits for the follower. This is non-zero for produce requests when acks=all (rate).,0,confluent_platform,net req remote rate
+confluent.kafka.network.request.remote_time_ms.avg,gauge,,millisecond,,Time the request waits for the follower. This is non-zero for produce requests when acks=all (avg).,0,confluent_platform,net req remote avg
+confluent.kafka.network.request.remote_time_ms.50percentile,gauge,,millisecond,,Time the request waits for the follower. This is non-zero for produce requests when acks=all (50percentile).,0,confluent_platform,net req remote 50p
+confluent.kafka.network.request.remote_time_ms.75percentile,gauge,,millisecond,,Time the request waits for the follower. This is non-zero for produce requests when acks=all (75percentile).,0,confluent_platform,net req remote 75p
+confluent.kafka.network.request.remote_time_ms.95percentile,gauge,,millisecond,,Time the request waits for the follower. This is non-zero for produce requests when acks=all (95percentile).,0,confluent_platform,net req remote 95p
+confluent.kafka.network.request.remote_time_ms.98percentile,gauge,,millisecond,,Time the request waits for the follower. This is non-zero for produce requests when acks=all (98percentile).,0,confluent_platform,net req remote 98p
+confluent.kafka.network.request.remote_time_ms.999percentile,gauge,,millisecond,,Time the request waits for the follower. This is non-zero for produce requests when acks=all (999percentile).,0,confluent_platform,net req remote 999p
+confluent.kafka.network.request.remote_time_ms.99percentile,gauge,,millisecond,,Time the request waits for the follower. This is non-zero for produce requests when acks=all (99percentile).,0,confluent_platform,net req remote 99p
 confluent.kafka.network.request.response_queue_time_ms.rate,gauge,,millisecond,,Time the request waits in the response queue (rate).,0,confluent_platform,net req response queue rate
 confluent.kafka.network.request.response_queue_time_ms.avg,gauge,,millisecond,,Time the request waits in the response queue (avg).,0,confluent_platform,net req response queue avg
+confluent.kafka.network.request.response_queue_time_ms.50percentile,gauge,,millisecond,,Time the request waits in the response queue (50percentile).,0,confluent_platform,net req response queue 50p
+confluent.kafka.network.request.response_queue_time_ms.75percentile,gauge,,millisecond,,Time the request waits in the response queue (75percentile).,0,confluent_platform,net req response queue 75p
+confluent.kafka.network.request.response_queue_time_ms.95percentile,gauge,,millisecond,,Time the request waits in the response queue (95percentile).,0,confluent_platform,net req response queue 95p
+confluent.kafka.network.request.response_queue_time_ms.98percentile,gauge,,millisecond,,Time the request waits in the response queue (98percentile).,0,confluent_platform,net req response queue 98p
+confluent.kafka.network.request.response_queue_time_ms.999percentile,gauge,,millisecond,,Time the request waits in the response queue (999percentile).,0,confluent_platform,net req response queue 999p
+confluent.kafka.network.request.response_queue_time_ms.99percentile,gauge,,millisecond,,Time the request waits in the response queue (99percentile).,0,confluent_platform,net req response queue 99p
 confluent.kafka.network.request.response_send_time_ms.rate,gauge,,millisecond,,Time to send the response (rate).,0,confluent_platform,net req response send rate
 confluent.kafka.network.request.response_send_time_ms.avg,gauge,,millisecond,,Time to send the response (avg).,0,confluent_platform,net req response send avg
+confluent.kafka.network.request.response_send_time_ms.50percentile,gauge,,millisecond,,Time to send the response (50percentile).,0,confluent_platform,net req response send 50p
+confluent.kafka.network.request.response_send_time_ms.75percentile,gauge,,millisecond,,Time to send the response (75percentile).,0,confluent_platform,net req response send 75p
+confluent.kafka.network.request.response_send_time_ms.95percentile,gauge,,millisecond,,Time to send the response (95percentile).,0,confluent_platform,net req response send 95p
+confluent.kafka.network.request.response_send_time_ms.98percentile,gauge,,millisecond,,Time to send the response (98percentile).,0,confluent_platform,net req response send 98p
+confluent.kafka.network.request.response_send_time_ms.999percentile,gauge,,millisecond,,Time to send the response (999percentile).,0,confluent_platform,net req response send 999p
+confluent.kafka.network.request.response_send_time_ms.99percentile,gauge,,millisecond,,Time to send the response (99percentile).,0,confluent_platform,net req response send 99p
 confluent.kafka.producer.batch_size_avg,gauge,,byte,,The average number of bytes sent per partition per-request.,0,confluent_platform,producer batch size avg
 confluent.kafka.producer.batch_size_max,gauge,,byte,,The max number of bytes sent per partition per-request.,0,confluent_platform,producer batch size max
 confluent.kafka.producer.io_ratio,gauge,,fraction,,The fraction of time the I/O thread spent doing I/O,0,confluent_platform,producer io ratio
