@@ -1,0 +1,111 @@
+jmx_metrics:
+  - include:
+      domain: org.apache.activemq.artemis
+      bean_regex:
+        - org.apache.activemq.artemis:broker="broker01"
+      tags:
+        broker: broker01
+      attribute:
+        ConnectionCount:
+          alias: activemq.broker.ConnectionCount
+          metric_type: gauge
+        TotalConnectionCount:
+          alias: activemq.broker.TotalConnectionCount
+          metric_type: gauge
+        TotalConsumerCount:
+          alias: activemq.broker.TotalConsumerCount
+          metric_type: gauge
+        TotalMessageCount:
+          alias: activemq.broker.TotalMessageCount
+          metric_type: gauge
+        TotalMessagesAcknowledged:
+          alias: activemq.broker.TotalMessagesAcknowledged
+          metric_type: gauge
+        TotalMessagesAdded:
+          alias: activemq.broker.TotalMessagesAdded
+          metric_type: gauge
+
+  - include:
+      domain: org.apache.activemq.artemis
+      bean_regex:
+        - org.apache.activemq.artemis:broker="(.*)",component=addresses,address="(.*)"
+      tags:
+        broker: $1
+        address: $2
+      attribute:
+        MessageCount:
+          alias: activemq.address.MessageCount
+          metric_type: gauge
+        NumberOfMessages:
+          alias: activemq.address.MessageCount
+          metric_type: gauge
+        UnRoutedMessageCount:
+          alias: activemq.address.MessageCount
+          metric_type: gauge
+
+  - include:
+      domain: org.apache.activemq.artemis
+      bean_regex:
+      - org.apache.activemq.artemis:broker="(.*)",component=addresses,address="(.*)",subcomponent=queues,routing-type="anycast",queue="(.*)"
+      tags:
+        broker: $1
+        address: $2
+        queue: $3
+      attribute:
+        ConsumerCount:
+          alias: activemq.queue.ConsumerCount
+          metric_type: gauge
+        DeliveringCount:
+          alias: activemq.queue.DeliveringCount
+          metric_type: gauge
+        DeliveringSize:
+          alias: activemq.queue.DeliveringSize
+          metric_type: gauge
+        DurableDeliveringCount:
+          alias: activemq.queue.DurableDeliveringCount
+          metric_type: gauge
+        DurableDeliveringSize:
+          alias: activemq.queue.DurableDeliveringSize
+          metric_type: gauge
+        DurableMessageCount:
+          alias: activemq.queue.DurableMessageCount
+          metric_type: gauge
+        DurablePersistentSize:
+          alias: activemq.queue.DurablePersistentSize
+          metric_type: gauge
+        DurableScheduledCount:
+          alias: activemq.queue.DurableScheduledCount
+          metric_type: gauge
+        DurableScheduledSize:
+          alias: activemq.queue.DurableScheduledSize
+          metric_type: gauge
+        MaxConsumers:
+          alias: activemq.queue.MaxConsumers
+          metric_type: gauge
+        MessageCount:
+          alias: activemq.queue.MessageCount
+          metric_type: gauge
+        MessagesAcknowledged:
+          alias: activemq.queue.MessagesAcknowledged
+          metric_type: gauge
+        MessagesAdded:
+          alias: activemq.queue.MessagesAdded
+          metric_type: gauge
+        MessagesExpired:
+          alias: activemq.queue.MessagesExpired
+          metric_type: gauge
+        MessagesKilled:
+          alias: activemq.queue.MessagesKilled
+          metric_type: gauge
+        ProducedRate:
+          alias: activemq.queue.ProducedRate
+          metric_type: gauge
+        RingSize:
+          alias: activemq.queue.RingSize
+          metric_type: gauge
+        ScheduledCount:
+          alias: activemq.queue.ScheduledCount
+          metric_type: gauge
+        ScheduledSize:
+          alias: activemq.queue.ScheduledSize
+          metric_type: gauge
