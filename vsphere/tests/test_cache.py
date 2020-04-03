@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import logging
 
+import mock
 import pytest
 from mock import MagicMock, patch
 from pyVmomi import vim
@@ -94,9 +95,10 @@ def test_tags_cache(realtime_instance):
     cache = TagsCache(float('inf'))
     config = VSphereConfig(realtime_instance, logger)
     mock_api = VSphereRestAPI(config, log=logger)
+    mock_mors = [mock.MagicMock(spec=vim.VirtualMachine, _moId="foo")]
 
     with cache.update():
-        cache.set_all_tags(mock_api.get_resource_tags())
+        cache.set_all_tags(mock_api.get_resource_tags_for_mors(mock_mors))
 
     vm_mor = vim.VirtualMachine(moId='VM4-4-1')
     vm2_mor = vim.VirtualMachine(moId='i-dont-have-tags')
