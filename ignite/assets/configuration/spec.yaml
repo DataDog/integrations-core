@@ -14,3 +14,13 @@ files:
         port.value.example: 49112
         port.description: Ignite JMX port to connect to.
     - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: <IGNITE_HOME>/work/log/ignite-*.log
+      source: ignite
+      service: ignite
+      log_processing_rules:
+      - type: multi_line
+        name: new_log_start_with_date
+        pattern: \d{4}\-\d{2}\-\d{2}
