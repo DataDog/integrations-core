@@ -1,9 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-sidekiq.jobs.perform.count,gauge,,,,Count performance of Sidekiq jobs,0,sidekiq,jobs perform count
-sidekiq.jobs.perform.avg,gauge,,,,Average performance of Sidekiq jobs,0,sidekiq,jobs perform avg
-sidekiq.jobs.perform.max,gauge,,,,Max performance of Sidekiq jobs,0,sidekiq,jobs perform max
-sidekiq.jobs.perform.median,gauge,,,,Median performance of Sidekiq jobs,0,sidekiq,jobs perform median
-sidekiq.jobs.perform.95percentile,gauge,,,,95th percentile of performance of Sidekiq jobs,0,sidekiq,jobs perform perc
+sidekiq.jobs.perform.count,gauge,,,,Count of the amount of time spent in a worker,0,sidekiq,jobs perform count
+sidekiq.jobs.perform.avg,gauge,,,,Average amount of time spent in a worker,0,sidekiq,jobs perform avg
+sidekiq.jobs.perform.max,gauge,,,,Max amount of time spent in a worker,0,sidekiq,jobs perform max
+sidekiq.jobs.perform.median,gauge,,,,Median amount of time spent in a worker,0,sidekiq,jobs perform median
+sidekiq.jobs.perform.95percentile,gauge,,,,95th percentile of amount of time spent in a worker,0,sidekiq,jobs perform perc
 sidekiq.jobs.count,count,,,,Count of Sidekiq jobs,0,sidekiq,jobs count
 sidekiq.jobs.success,count,,,,Count of successful Sidekiq jobs,0,sidekiq,jobs success
 sidekiq.jobs.failure,count,,,,Count of failed Sidekiq jobs,-1,sidekiq,jobs failure
