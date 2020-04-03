@@ -178,6 +178,10 @@ def get_data_directory(check_name):
         return os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data')
 
 
+def get_check_directory(check_name):
+    return os.path.join(get_root(), check_name, 'datadog_checks', check_name)
+
+
 def get_test_directory(check_name):
     return os.path.join(get_root(), check_name, 'tests')
 
@@ -348,3 +352,17 @@ def has_e2e(check):
                     if 'pytest.mark.e2e' in test_file.read():
                         return True
     return False
+
+
+def find_legacy_signature(check):
+    """
+    Validate that the given check does not use the legacy agent signature (contains agentConfig)
+    """
+    for path, _, files in os.walk(get_check_directory(check)):
+        for f in files:
+            if f.endswith('.py'):
+                with open(os.path.join(path, f)) as test_file:
+                    for num, line in enumerate(test_file):
+                        if "__init__" in line and "agentConfig" in line:
+                            return str(f), num
+    return None
