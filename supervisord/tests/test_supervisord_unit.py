@@ -21,10 +21,18 @@ def mock_server(url):
     return MockXmlRcpServer(url)
 
 
+def mock_server_proxy(url, transport):
+    return MockXmlRcpServer(url, transport=transport)
+
+
 def test_check(aggregator, check):
     """Integration test for supervisord check. Using a mocked supervisord."""
 
-    with patch.object(xmlrpclib, 'Server', side_effect=mock_server):
+    with patch.object(
+        xmlrpclib, 'Server', side_effect=mock_server
+    ), patch.object(
+        xmlrpclib, 'ServerProxy', side_effect=mock_server_proxy
+    ):
         for tc in TEST_CASES:
             for instance in tc['instances']:
                 name = instance['name']
@@ -101,8 +109,8 @@ class MockXmlRcpServer:
      server.
      """
 
-    def __init__(self, url):
-        self.supervisor = MockSupervisor(url)
+    def __init__(self, url, transport=None):
+        self.supervisor = MockSupervisor(url, transport)
 
 
 class MockSupervisor:
@@ -216,8 +224,9 @@ class MockSupervisor:
         ],
     }
 
-    def __init__(self, url):
+    def __init__(self, url, transport):
         self.url = url
+        self.transport = transport
 
     def getAllProcessInfo(self):
         self._validate_request()
@@ -232,11 +241,19 @@ class MockSupervisor:
 
     def _validate_request(self, proc=None):
         '''Validates request and simulates errors when not valid'''
-        if 'invalid_host' in self.url:
+
+        # Password not part of URL if connecting via socket
+        transport_password = self.transport.password if self.transport else ""
+
+        # `host` is optional connecting via socket
+        transport_socket = self.transport.serverurl if self.transport else ""
+
+        # if 'socket_file' in self.url:
+        if 'invalid_host' in self.url or 'invalid_socket' in transport_socket:
             # Simulate connecting to an invalid host/port in order to
             # raise `socket.error: [Errno 111] Connection refused`
             socket().connect(('localhost', 38837))
-        elif 'invalid_pass' in self.url:
+        elif 'invalid_pass' in self.url or 'invalid_pass' in transport_password:
             # Simulate xmlrpc exception for invalid credentials
             raise xmlrpclib.ProtocolError(self.url[7:], 401, 'Unauthorized', None)
         elif proc is not None and 'invalid' in proc:
