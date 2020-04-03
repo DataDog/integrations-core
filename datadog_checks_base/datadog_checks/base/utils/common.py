@@ -28,17 +28,18 @@ def ensure_unicode(s):
         s = s.decode('utf-8')
     return s
 
+# Note on renaming `to_string` to `to_native_string`.
+# `to_string` will be deprecated at some point.
+# `to_native_string` is a new feature. When used, it means the integration release won't work
+# with old agent with old base package.
+
 
 if TYPE_CHECKING:
     to_native_string = str
 else:
     to_native_string = ensure_unicode if PY3 else ensure_bytes
 
-
-def to_string(value):
-    # type: (Any) -> str
-    warnings.warn('`to_string` is deprecated, please use `to_native_string` instead.', category=DeprecationWarning)
-    return to_native_string(value)
+to_string = to_native_string
 
 
 def compute_percent(part, total):
