@@ -180,11 +180,6 @@ class TestBytesUnicode:
         else:
             assert to_native_string(binary) == binary
 
-    def test_to_string_deprecated(self):
-        # type: () -> None
-        with pytest.deprecated_call():
-            to_string(b'example')
-
 
 class TestSecretsSanitizer:
     def test_default(self):
