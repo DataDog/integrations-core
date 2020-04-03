@@ -122,6 +122,10 @@ setIgniteHome() {
        [ "${IGNITE_HOME}" != "${IGNITE_HOME_TMP}/" ]; then
         echo $0", WARN: IGNITE_HOME environment variable may be pointing to wrong folder: $IGNITE_HOME"
     fi
+
+    if [ -d /opt/ignite/apache-ignite/libs/optional/ignite-log4j ]; then
+        mv /opt/ignite/apache-ignite/libs/optional/ignite-log4j /opt/ignite/apache-ignite/libs/
+    fi
 }
 
 #
