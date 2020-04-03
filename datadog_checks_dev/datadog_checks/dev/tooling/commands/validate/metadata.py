@@ -1,14 +1,12 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import csv
 import re
 from collections import defaultdict
-from io import open
 
 import click
 
-from ...utils import complete_valid_checks, get_metadata_file, get_metric_sources, load_manifest
+from ...utils import complete_valid_checks, get_metadata_file, get_metric_sources, load_manifest, read_metadata_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
@@ -244,94 +242,88 @@ def metadata(check, check_duplicates):
 
         metric_prefix_error_shown = False
 
-        with open(metadata_file, 'r', encoding='utf-8') as f:
-            reader = csv.DictReader(f, delimiter=',')
+        for line, row in read_metadata_rows(metadata_file):
+            # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
+            if None in row.values():
+                errors = True
+                echo_failure(f"{current_check}:{line} {row['metric_name']} Has the wrong amount of columns")
+                continue
 
-            # Read header
-            reader._fieldnames = reader.fieldnames
-
-            for line, row in enumerate(reader, 2):
-                # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
-                if None in row.values():
+            # all headers exist, no invalid headers
+            all_keys = set(row)
+            if all_keys != ALL_HEADERS:
+                invalid_headers = all_keys.difference(ALL_HEADERS)
+                if invalid_headers:
                     errors = True
-                    echo_failure(f"{current_check}:{line} {row['metric_name']} Has the wrong amount of columns")
-                    continue
+                    echo_failure(f'{current_check}:{line} Invalid column {invalid_headers}')
 
-                # all headers exist, no invalid headers
-                all_keys = set(row)
-                if all_keys != ALL_HEADERS:
-                    invalid_headers = all_keys.difference(ALL_HEADERS)
-                    if invalid_headers:
-                        errors = True
-                        echo_failure(f'{current_check}:{line} Invalid column {invalid_headers}')
+                missing_headers = ALL_HEADERS.difference(all_keys)
+                if missing_headers:
+                    errors = True
+                    echo_failure(f'{current_check}:{line} Missing columns {missing_headers}')
 
-                    missing_headers = ALL_HEADERS.difference(all_keys)
-                    if missing_headers:
-                        errors = True
-                        echo_failure(f'{current_check}:{line} Missing columns {missing_headers}')
+                continue
 
-                    continue
+            errors = errors or check_duplicate_values(
+                current_check, line, row, 'metric_name', duplicate_name_set, fail=True
+            )
 
-                errors = errors or check_duplicate_values(
-                    current_check, line, row, 'metric_name', duplicate_name_set, fail=True
+            if check_duplicates:
+                check_duplicate_values(current_check, line, row, 'short_name', duplicate_short_name_set)
+                check_duplicate_values(current_check, line, row, 'description', duplicate_description_set)
+
+            normalized_metric_name = normalize_metric_name(row['metric_name'])
+            if row['metric_name'] != normalized_metric_name:
+                errors = True
+                echo_failure(
+                    f"Metric name '{row['metric_name']}' is not valid,"
+                    "it should be normalized as {normalized_metric_name}"
                 )
 
-                if check_duplicates:
-                    check_duplicate_values(current_check, line, row, 'short_name', duplicate_short_name_set)
-                    check_duplicate_values(current_check, line, row, 'description', duplicate_description_set)
+            # metric_name header
+            if metric_prefix:
+                if not row['metric_name'].startswith(metric_prefix):
+                    prefix = row['metric_name'].split('.')[0]
+                    metric_prefix_count[prefix] += 1
+            else:
+                errors = True
+                if not metric_prefix_error_shown and current_check not in PROVIDER_INTEGRATIONS:
+                    metric_prefix_error_shown = True
+                    echo_failure(f'{current_check}:{line} metric_prefix does not exist in manifest')
 
-                normalized_metric_name = normalize_metric_name(row['metric_name'])
-                if row['metric_name'] != normalized_metric_name:
-                    errors = True
-                    echo_failure(
-                        f"Metric name '{row['metric_name']}' is not valid,"
-                        "it should be normalized as {normalized_metric_name}"
-                    )
+            # metric_type header
+            if row['metric_type'] and row['metric_type'] not in VALID_METRIC_TYPE:
+                errors = True
+                echo_failure(f"{current_check}:{line} `{row['metric_type']}` is an invalid metric_type.")
 
-                # metric_name header
-                if metric_prefix:
-                    if not row['metric_name'].startswith(metric_prefix):
-                        prefix = row['metric_name'].split('.')[0]
-                        metric_prefix_count[prefix] += 1
-                else:
-                    errors = True
-                    if not metric_prefix_error_shown and current_check not in PROVIDER_INTEGRATIONS:
-                        metric_prefix_error_shown = True
-                        echo_failure(f'{current_check}:{line} metric_prefix does not exist in manifest')
+            # unit_name header
+            if row['unit_name'] and row['unit_name'] not in VALID_UNIT_NAMES:
+                errors = True
+                echo_failure(f"{current_check}:{line} `{row['unit_name']}` is an invalid unit_name.")
 
-                # metric_type header
-                if row['metric_type'] and row['metric_type'] not in VALID_METRIC_TYPE:
-                    errors = True
-                    echo_failure(f"{current_check}:{line} `{row['metric_type']}` is an invalid metric_type.")
+            # orientation header
+            if row['orientation'] and row['orientation'] not in VALID_ORIENTATION:
+                errors = True
+                echo_failure(f"{current_check}:{line} `{row['orientation']}` is an invalid orientation.")
 
-                # unit_name header
-                if row['unit_name'] and row['unit_name'] not in VALID_UNIT_NAMES:
-                    errors = True
-                    echo_failure(f"{current_check}:{line} `{row['unit_name']}` is an invalid unit_name.")
+            # empty required fields
+            for header in REQUIRED_HEADERS:
+                if not row[header]:
+                    empty_count[header] += 1
 
-                # orientation header
-                if row['orientation'] and row['orientation'] not in VALID_ORIENTATION:
-                    errors = True
-                    echo_failure(f"{current_check}:{line} `{row['orientation']}` is an invalid orientation.")
-
-                # empty required fields
-                for header in REQUIRED_HEADERS:
-                    if not row[header]:
-                        empty_count[header] += 1
-
-                # empty description field, description is recommended
-                if not row['description']:
-                    empty_warning_count['description'] += 1
-                # exceeds max allowed length of description
-                elif len(row['description']) > MAX_DESCRIPTION_LENGTH:
-                    errors = True
-                    echo_failure(
-                        f"{current_check}:{line} `{row['metric_name']}` exceeds the max length: "
-                        "{MAX_DESCRIPTION_LENGTH} for descriptions."
-                    )
-                if row['interval'] and not row['interval'].isdigit():
-                    errors = True
-                    echo_failure(f"{current_check}: interval should be an int, found '{row['interval']}'")
+            # empty description field, description is recommended
+            if not row['description']:
+                empty_warning_count['description'] += 1
+            # exceeds max allowed length of description
+            elif len(row['description']) > MAX_DESCRIPTION_LENGTH:
+                errors = True
+                echo_failure(
+                    f"{current_check}:{line} `{row['metric_name']}` exceeds the max length: "
+                    "{MAX_DESCRIPTION_LENGTH} for descriptions."
+                )
+            if row['interval'] and not row['interval'].isdigit():
+                errors = True
+                echo_failure(f"{current_check}: interval should be an int, found '{row['interval']}'")
 
         for header, count in empty_count.items():
             errors = True
