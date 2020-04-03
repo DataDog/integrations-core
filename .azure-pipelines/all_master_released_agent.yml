@@ -6,12 +6,12 @@
 #    include:
 #    - master
 
-trigger:
+pr:
   branches:
     include:
-    - alex/test_agent_versions
+    - master
 
-pr: none
+trigger: none
 
 #trigger: none
 

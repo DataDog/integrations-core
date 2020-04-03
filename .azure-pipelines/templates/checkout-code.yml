@@ -14,8 +14,8 @@ steps:
 # we checkout the branches we need which also gets us out of a
 # detached HEAD state. This may be fixed soon, see:
 # https://developercommunity.visualstudio.com/content/problem/373462/git-get-sources-shallow-fetch-is-broken-subject-to.html
-#- script: git checkout master
-#  displayName: 'Checkout master'
+- script: git checkout master
+  displayName: 'Checkout master'
 
 # Switch to the pull request branch last. Also see:
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables#system-variables
