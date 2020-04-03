@@ -26,9 +26,6 @@ SECRET_KEYS = {
 }
 
 DEFAULT_CONFIG = {
-    'core': os.path.join('~', 'dd', 'integrations-core'),
-    'extras': os.path.join('~', 'dd', 'integrations-extras'),
-    'agent': os.path.join('~', 'dd', 'datadog-agent'),
     'repo': 'core',
     'color': bool(int(os.environ['DDEV_COLOR'])) if 'DDEV_COLOR' in os.environ else None,
     'dd_api_key': os.getenv('DD_API_KEY'),
@@ -39,6 +36,11 @@ DEFAULT_CONFIG = {
     'github': {'user': '', 'token': ''},
     'pypi': {'user': '', 'pass': ''},
     'trello': {'key': '', 'token': ''},
+    'repos': {
+        'core': os.path.join('~', 'dd', 'integrations-core'),
+        'extras': os.path.join('~', 'dd', 'integrations-extras'),
+        'agent': os.path.join('~', 'dd', 'datadog-agent'),
+    },
     'orgs': {
         'default': {
             'api_key': os.getenv('DD_API_KEY'),
