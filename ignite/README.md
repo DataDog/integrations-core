@@ -12,6 +12,12 @@ The Ignite check is included in the [Datadog Agent][2] package. No additional in
 
 ### Configuration
 
+#### Ignite setup
+
+JMX metrics exporter is enabled by default, but you may need to choose the port exposed, or enable authentication depending on your network security. The official docker image uses `49112` by default.
+
+#### Host
+
 1. Edit the `ignite.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your ignite performance data. See the [sample ignite.d/conf.yaml][2] for all available configuration options.
 
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
