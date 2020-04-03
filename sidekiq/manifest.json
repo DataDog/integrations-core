@@ -24,9 +24,11 @@
   "integration_id": "sidekiq",
   "assets": {
     "configuration": {
-      "spec":"assets/configuration/spec.yaml"
+      "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "Sidekiq Overview": "assets/dashboards/overview.json"
+    },
     "saved_views": {},
     "monitors": {},
     "service_checks": "assets/service_checks.json"
