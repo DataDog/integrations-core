@@ -26,6 +26,7 @@ steps:
       DD_API_KEY: $(DD_API_KEY)
       DDEV_E2E_AGENT_PY3: $(DDEV_E2E_AGENT_PY3)
       DDEV_E2E_AGENT_PY2: $(DDEV_E2E_AGENT_PY2)
+      ENV_TEST_BASE: $(ENV_TEST_BASE)
 
 - ${{ if eq(parameters.benchmark, 'true') }}:
   - script: ddev test --bench --junit ${{ parameters.check }}
