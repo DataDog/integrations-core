@@ -10,14 +10,7 @@ import mock
 import pytest
 from six import PY3
 
-from datadog_checks.base.utils.common import (
-    ensure_bytes,
-    ensure_unicode,
-    pattern_filter,
-    round_value,
-    to_native_string,
-    to_string,
-)
+from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, pattern_filter, round_value, to_native_string
 from datadog_checks.base.utils.containers import iter_unique
 from datadog_checks.base.utils.limiter import Limiter
 from datadog_checks.base.utils.secrets import SecretsSanitizer
