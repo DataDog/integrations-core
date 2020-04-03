@@ -8,6 +8,7 @@ from ipaddress import ip_address, ip_network
 
 import requests
 from requests import auth as requests_auth
+from requests_toolbelt.adapters import host_header_ssl
 from six import iteritems, string_types
 from six.moves.urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
@@ -64,6 +65,7 @@ STANDARD_FIELDS = {
     'skip_proxy': False,
     'tls_ca_cert': None,
     'tls_cert': None,
+    'tls_use_host_header': False,
     'tls_ignore_warning': False,
     'tls_private_key': None,
     'tls_verify': True,
@@ -91,6 +93,7 @@ KERBEROS_STRATEGIES = {}
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
+        'tls_use_host_header',
         'ignore_tls_warning',
         'log_requests',
         'logger',
@@ -171,6 +174,9 @@ class RequestsWrapper(object):
 
         if config['extra_headers']:
             update_headers(headers, config['extra_headers'])
+
+        # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
+        self.tls_use_host_header = is_affirmative(config['tls_use_host_header']) and 'Host' in headers
 
         # http://docs.python-requests.org/en/master/user/authentication/
         auth_type = config['auth_type'].lower()
@@ -257,7 +263,7 @@ class RequestsWrapper(object):
         # https://en.wikipedia.org/wiki/HTTP_persistent_connection#Advantages
         # http://docs.python-requests.org/en/master/user/advanced/#session-objects
         # http://docs.python-requests.org/en/master/user/advanced/#keep-alive
-        self.persist_connections = is_affirmative(config['persist_connections'])
+        self.persist_connections = self.tls_use_host_header or is_affirmative(config['persist_connections'])
         self._session = None
 
         # Whether or not to log request information like method and url
@@ -338,6 +344,11 @@ class RequestsWrapper(object):
     def session(self):
         if self._session is None:
             self._session = requests.Session()
+
+            # Enables HostHeaderSSLAdapter
+            # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
+            if self.tls_use_host_header:
+                self._session.mount('https://', host_header_ssl.HostHeaderSSLAdapter())
 
             # Attributes can't be passed to the constructor
             for option, value in iteritems(self.options):

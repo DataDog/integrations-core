@@ -4,6 +4,7 @@
 from __future__ import division
 
 import datetime as dt
+import itertools
 from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -141,9 +142,13 @@ class VSphereCheck(AgentCheck):
         """
         if not self.api_rest:
             return
+        mors_iterator = itertools.chain.from_iterable(
+            self.infrastructure_cache.get_mors(resource_type) for resource_type in self.config.collected_resource_types
+        )
+
         t0 = Timer()
         try:
-            mor_tags = self.api_rest.get_resource_tags()
+            mor_tags = self.api_rest.get_resource_tags_for_mors(mors_iterator)
         except Exception as e:
             self.log.error("Failed to collect tags: %s", e)
             return
@@ -518,11 +523,6 @@ class VSphereCheck(AgentCheck):
                 )
                 pass
 
-        # Refresh the tags cache
-        if self.api_rest and self.tags_cache.is_expired():
-            with self.tags_cache.update():
-                self.refresh_tags_cache()
-
         # Refresh the metrics metadata cache
         if self.metrics_metadata_cache.is_expired():
             with self.metrics_metadata_cache.update():
@@ -534,6 +534,11 @@ class VSphereCheck(AgentCheck):
                 self.refresh_infrastructure_cache()
             # Submit host tags as soon as we have fresh data
             self.submit_external_host_tags()
+
+        # Refresh the tags cache
+        if self.api_rest and self.tags_cache.is_expired():
+            with self.tags_cache.update():
+                self.refresh_tags_cache()
 
         # Collect and submit events
         if self.config.should_collect_events:

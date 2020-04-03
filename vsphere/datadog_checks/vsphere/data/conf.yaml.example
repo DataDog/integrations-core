@@ -250,6 +250,12 @@ instances:
     #
     # max_historical_metrics: 256
 
+    ## @param batch_tags_collector_size - integer - optional - default: 200
+    ## To fetch tags from your resources, queries are batched. If tags cannot be collected
+    ## it might be that the batch size is too big.
+    #
+    # batch_tags_collector_size: 200
+
     ## @param batch_property_collector_size - integer - optional - default: 500
     ## This value is used to determine the maximum number of MORs returned by vCenter in the same API call,
     ## when exploring the infrastructure.

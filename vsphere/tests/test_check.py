@@ -57,10 +57,11 @@ def test_external_host_tags(aggregator, realtime_instance):
     config = VSphereConfig(realtime_instance, MagicMock())
     check.api = MockedAPI(config)
     check.api_rest = VSphereRestAPI(config, MagicMock())
-    with check.tags_cache.update():
-        check.refresh_tags_cache()
+
     with check.infrastructure_cache.update():
         check.refresh_infrastructure_cache()
+    with check.tags_cache.update():
+        check.refresh_tags_cache()
 
     fixture_file = os.path.join(HERE, 'fixtures', 'host_tags_values.json')
     with open(fixture_file, 'r') as f:
@@ -253,7 +254,7 @@ def test_refresh_tags_cache_should_not_raise_exception(aggregator, dd_run_check,
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     check.log = MagicMock()
     check.api_rest = MagicMock()
-    check.api_rest.get_resource_tags.side_effect = APIConnectionError("Some error")
+    check.api_rest.get_resource_tags_for_mors.side_effect = APIConnectionError("Some error")
 
     check.refresh_tags_cache()
 

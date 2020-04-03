@@ -171,6 +171,12 @@
     example: true
     type: boolean
   description: Instructs the check to validate the TLS certificate of services.
+- name: tls_use_host_header
+  value:
+    example: false
+    type: boolean
+  description: |
+    If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
 - name: tls_ignore_warning
   value:
     example: false

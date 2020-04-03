@@ -132,7 +132,7 @@ instances:
     ## Set send_distribution_sums_as_monotonic to true to send histograms & summary
     ## sum as monotonic counters (instead of gauges).
     #
-    # send_distribution_sums_as_monotonic: true
+    # send_distribution_sums_as_monotonic: false
 
     ## @param exclude_labels - list of strings - optional
     ## List of labels to be excluded
@@ -318,6 +318,11 @@ instances:
     ## Instructs the check to validate the TLS certificate of services.
     #
     # tls_verify: true
+
+    ## @param tls_use_host_header - boolean - optional - default: false
+    ## If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
+    #
+    # tls_use_host_header: false
 
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
