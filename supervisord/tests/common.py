@@ -184,7 +184,12 @@ TEST_CASES = [
     },
     {
         'instances': [
-            {'name': 'server0', 'socket': 'unix:///correct/path/supervisor.sock', 'user': 'invalid_user', 'pass': 'invalid_pass'}
+            {
+                'name': 'server0',
+                'socket': 'unix:///correct/path/supervisor.sock',
+                'user': 'invalid_user',
+                'pass': 'invalid_pass',
+            }
         ],
         'error_message': """Username or password to server0 are incorrect.""",
     },

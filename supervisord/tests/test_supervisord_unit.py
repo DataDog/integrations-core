@@ -28,9 +28,7 @@ def mock_server_proxy(url, transport):
 def test_check(aggregator, check):
     """Integration test for supervisord check. Using a mocked supervisord."""
 
-    with patch.object(
-        xmlrpclib, 'Server', side_effect=mock_server
-    ), patch.object(
+    with patch.object(xmlrpclib, 'Server', side_effect=mock_server), patch.object(
         xmlrpclib, 'ServerProxy', side_effect=mock_server_proxy
     ):
         for tc in TEST_CASES:
