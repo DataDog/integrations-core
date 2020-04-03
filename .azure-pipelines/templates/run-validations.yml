@@ -2,8 +2,8 @@ parameters:
   repo: 'core'
 
 steps:
-- script: ddev validate ci
-  displayName: 'Validate CI configuration'
+#- script: ddev validate ci
+#  displayName: 'Validate CI configuration'
 
 - ${{ if eq(parameters.repo, 'core') }}:
   - script: ddev validate agent-reqs
