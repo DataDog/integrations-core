@@ -5,9 +5,8 @@ from __future__ import division
 
 import os
 import re
-import warnings
 from decimal import ROUND_HALF_UP, Decimal
-from typing import TYPE_CHECKING, Any, Text, Union
+from typing import TYPE_CHECKING, Text, Union
 
 from six import PY3, iteritems, text_type
 from six.moves.urllib.parse import urlparse
@@ -27,6 +26,7 @@ def ensure_unicode(s):
     if isinstance(s, bytes):
         s = s.decode('utf-8')
     return s
+
 
 # Note on renaming `to_string` to `to_native_string`.
 # `to_string` will be deprecated at some point.

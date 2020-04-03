@@ -37,9 +37,7 @@ METRIC_TO_INSTANCE_TAG_MAPPING = {
 def format_metric_name(counter):
     # type: (vim.PerformanceManager.PerfCounterInfo) -> MetricName
     return "{}.{}.{}".format(
-        to_string(counter.groupInfo.key),
-        to_string(counter.nameInfo.key),
-        SHORT_ROLLUP[str(counter.rollupType)],
+        to_string(counter.groupInfo.key), to_string(counter.nameInfo.key), SHORT_ROLLUP[str(counter.rollupType)],
     )
 
 
