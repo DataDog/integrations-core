@@ -42,7 +42,7 @@ instances:
     #
     # ssl_ca_certs: <CA_CERT_PATH>
 
-    ## @param tags - list of key:value elements - optional
+    ## @param tags - list of strings following the pattern: "key:value" - optional
     ## List of tags to attach to every metric, event, and service check emitted by this Integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/

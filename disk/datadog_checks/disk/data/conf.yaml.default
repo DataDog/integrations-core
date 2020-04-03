@@ -17,7 +17,7 @@ instances:
     #
     # all_partitions: false
 
-    ## @param tags - list of key:value string - optional
+    ## @param tags - list of strings following the pattern: "key:value" - optional
     ## List of tags to attach to every metric and service check emitted by this integration.
     ##
     ## Learn more about tagging at https://docs.datadoghq.com/tagging

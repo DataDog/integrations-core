@@ -82,7 +82,7 @@ instances:
     ## @param bulk_threshold - integer - optional - default: 5
     bulk_threshold: 5
 
-    ## @param tags - list of key:value element - optional
+    ## @param tags - list of strings following the pattern: "key:value" - optional
     tags:
        - "<KEY_1>:<VALUE_1>"
        - "<KEY_2>:<VALUE_2>"

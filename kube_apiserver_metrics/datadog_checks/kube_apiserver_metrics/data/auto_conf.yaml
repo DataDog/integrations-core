@@ -26,7 +26,7 @@ instances:
     #
     # ssl_verify: false
 
-    ## @param tags - list of key:value element - optional
+    ## @param tags - list of strings following the pattern: "key:value" - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/

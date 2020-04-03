@@ -29,7 +29,7 @@ instances:
   - services:
       - "<SERVICE_NAME_1>"
       - "<SERVICE_NAME_2>"
-  ## @param tags - list of key:value element - optional
+  ## @param tags - list of strings following the pattern: "key:value" - optional
   ## List of tags to attach to every service check emitted by this integration.
   ##
   ## Learn more about tagging at https://docs.datadoghq.com/tagging

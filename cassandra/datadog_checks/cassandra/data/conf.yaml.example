@@ -16,7 +16,7 @@ instances:
     #
     cassandra_aliasing: true
 
-    ## @param tags - list of key:value element - optional
+    ## @param tags - list of strings following the pattern: "key:value" - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ## The 'environment' tag depends on the <cluster_name> in Cassandra configuration:
     ##   - if the environment information (eg 'prod' or 'test') is included in the <cluster_name>, just use <cluster_name>.

@@ -12,7 +12,7 @@ instances:
     #
   - agent_endpoint: http://%%host%%:9090/metrics
 
-    ## @param tags - list of key:value elements - optional
+    ## @param tags - list of strings following the pattern: "key:value" - optional
     ## List of tags to attach to every metrics, events and service checks emitted by this integration.
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
     #

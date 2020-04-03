@@ -63,7 +63,7 @@ instances:
     #
     # tls_verify: false
 
-    ## @param tags - list of key:value strings - optional
+    ## @param tags - list of strings following the pattern: "key:value" - optional
     ## List of tags to attach to every metric and service check emitted by this instance.
     ##
     ## Learn more about tagging at https://docs.datadoghq.com/tagging
