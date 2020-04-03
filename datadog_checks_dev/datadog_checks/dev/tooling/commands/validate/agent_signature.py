@@ -4,7 +4,7 @@
 
 import click
 
-from ...utils import complete_valid_checks, get_valid_checks, find_legacy_signature
+from ...utils import complete_valid_checks, find_legacy_signature, get_valid_checks
 from ..console import CONTEXT_SETTINGS, echo_failure, echo_success
 
 
