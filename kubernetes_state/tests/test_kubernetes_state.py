@@ -256,6 +256,12 @@ def check_with_join_kube_labels(instance):
     return _check(instance)
 
 
+@pytest.fixture
+def check_with_join_standard_tag_labels(instance):
+    instance['join_standard_tags'] = True
+    return _check(instance)
+
+
 def assert_not_all_zeroes(aggregator, metric_name):
     for m in aggregator.metrics(metric_name):
         if m.value != 0:
@@ -412,6 +418,47 @@ def test_join_kube_labels(aggregator, instance, check_with_join_kube_labels):
             'label_release:jaundiced-numbat',
             'namespace:default',
             'optional:tag1',
+        ],
+        value=1,
+    )
+
+
+def test_join_standard_tags_labels(aggregator, instance, check_with_join_standard_tag_labels):
+    # run check twice to have pod/node mapping
+    for _ in range(2):
+        check_with_join_standard_tag_labels.check(instance)
+
+    aggregator.assert_metric(
+        NAMESPACE + '.container.waiting',
+        tags=[
+            'container:registry-creds',
+            'kube_container_name:registry-creds',
+            'kube_namespace:kube-system',
+            'namespace:kube-system',
+            'node:minikube',
+            'optional:tag1',
+            'phase:pending',
+            'pod:registry-creds-hq249',
+            'pod_name:registry-creds-hq249',
+            'pod_phase:pending',
+            "env:dev",
+            "service:registry-creds",
+            "version:v1.8"
+        ],
+        value=1,
+    )
+
+    aggregator.assert_metric(
+        NAMESPACE + '.deployment.replicas',
+        tags=[
+            'deployment:tiller-deploy',
+            'kube_deployment:tiller-deploy',
+            'kube_namespace:kube-system',
+            'namespace:kube-system',
+            'optional:tag1',
+            "env:dev",
+            "service:tiller",
+            "version:xyz"
         ],
         value=1,
     )
@@ -656,7 +703,7 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=90707.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=90948.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=914.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1288.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)

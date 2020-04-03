@@ -70,7 +70,7 @@ kube_deployment_created{deployment="tiller-deploy",namespace="kube-system"} 1.50
 # HELP kube_deployment_labels Kubernetes labels converted to Prometheus labels.
 # TYPE kube_deployment_labels gauge
 kube_deployment_labels{deployment="failingtest",label_app="failingtest",namespace="default"} 1
-kube_deployment_labels{deployment="tiller-deploy",label_app="helm",label_name="tiller",namespace="kube-system"} 1
+kube_deployment_labels{deployment="tiller-deploy",label_tags_datadoghq_com_env="dev",label_tags_datadoghq_com_service="tiller",label_tags_datadoghq_com_version="xyz",label_app="helm",label_name="tiller",namespace="kube-system"} 1
 kube_deployment_labels{deployment="kube-dns",label_addonmanager_kubernetes_io_mode="Reconcile",label_k8s_app="kube-dns",label_version="v20",namespace="kube-system"} 1
 kube_deployment_labels{deployment="jaundiced-numbat-kube-state-metrics",label_app="kube-state-metrics",label_chart="kube-state-metrics-0.3.1",label_heritage="Tiller",label_release="jaundiced-numbat",namespace="default"} 1
 # HELP kube_deployment_metadata_generation Sequence number representing a specific generation of the desired state.
@@ -526,7 +526,7 @@ kube_pod_labels{label_controller_uid="f2d4c3f7-c32c-11e7-a7e7-080027bdd864",labe
 kube_pod_labels{label_app="failingtest",label_pod_template_hash="91416680",namespace="default",pod="failingtest-f585bbd4-2fsml"} 1
 kube_pod_labels{label_k8s_app="kube-dns",label_pod_template_hash="1326421443",namespace="kube-system",pod="kube-dns-1326421443-hj4hx"} 1
 kube_pod_labels{label_addonmanager_kubernetes_io_mode="Reconcile",label_app="kubernetes-dashboard",label_version="v1.6.3",namespace="kube-system",pod="kubernetes-dashboard-zhtjl"} 1
-kube_pod_labels{label_addonmanager_kubernetes_io_mode="Reconcile",label_name="registry-creds",label_version="v1.8",namespace="kube-system",pod="registry-creds-hq249"} 1
+kube_pod_labels{label_addonmanager_kubernetes_io_mode="Reconcile",label_tags_datadoghq_com_env="dev",label_tags_datadoghq_com_service="registry-creds",label_tags_datadoghq_com_version="v1.8",label_name="registry-creds",label_version="v1.8",namespace="kube-system",pod="registry-creds-hq249"} 1
 kube_pod_labels{label_app="helm",label_name="tiller",label_pod_template_hash="1651615695",namespace="kube-system",pod="tiller-deploy-1651615695-dcphn"} 1
 kube_pod_labels{label_app="jaundiced-numbat-dd-k8state",label_controller_revision_hash="3690254688",label_pod_template_generation="1",namespace="default",pod="jaundiced-numbat-dd-k8state-b6s77"} 1
 kube_pod_labels{label_component="kube-addon-manager",label_kubernetes_io_minikube_addons="addon-manager",label_version="v6.4",namespace="kube-system",pod="kube-addon-manager-minikube"} 1
