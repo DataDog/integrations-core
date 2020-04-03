@@ -7,6 +7,8 @@ files:
       - template: instances/openmetrics
   - template: init_config/openmetrics
     options:
+      - overrides:
+          prometheus_url.value.example: http://<GITLAB_URL>/-/metrics
       - name: gitlab_url
         required: true
         description: |
@@ -15,11 +17,8 @@ files:
           the authorization token: http://localhost/?token=<TOKEN>
         value:
           type: string
-      - overrides:
-        prometheus_url.example: http://<GITLAB_URL>/-/metrics
-        metrics: ''
       - name: allowed_metrics
-      - example: |
+        example: |
        allowed_metrics:
         - go_gc_duration_seconds
         - go_gc_duration_seconds_sum
