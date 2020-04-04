@@ -37,7 +37,7 @@ datadog-etcd==2.2.1
 datadog-exchange-server==1.6.0; sys_platform == 'win32'
 datadog-external-dns==1.0.0
 datadog-flink==1.1.0
-datadog-fluentd==1.6.0
+datadog-fluentd==1.7.0
 datadog-gearmand==1.4.0; sys_platform != 'win32'
 datadog-gitlab-runner==2.7.1
 datadog-gitlab==2.8.1
