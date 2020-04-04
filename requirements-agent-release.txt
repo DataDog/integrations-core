@@ -102,7 +102,7 @@ datadog-proxysql==1.0.0
 datadog-rabbitmq==1.13.1
 datadog-redisdb==2.0.2
 datadog-rethinkdb==1.0.0
-datadog-riak==1.7.0
+datadog-riak==1.7.1
 datadog-riakcs==2.2.0
 datadog-sap-hana==1.1.0
 datadog-scylla==1.0.2
