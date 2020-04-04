@@ -1,0 +1,77 @@
+## WARNING: This configuration files is for SNMP v1, v2 and v3
+## Check carefully all variables depending of your SNMP version.
+## To learn more about SNMP v3 configuration check:
+## http://snmplabs.com/pysnmp/docs/api-reference.html#user-based
+
+init_config:
+
+
+
+instances:
+  -
+    # ip_address: <IP_ADDRESS>
+    network_address: 192.168.64.0/29
+
+    # ignored_ip_addresses:
+    #   - <IP_ADDRESS_1>
+    #   - <IP_ADDRESS_2>
+
+    ## @param snmp_version - integer - optional - default: 2
+    ## If you are using SNMP v1 set snmp_version to 1 (required)
+    ## If you are using SNMP v3 set snmp_version to 3 (required)
+    #
+    snmp_version: 3
+
+    # timeout: 1
+    # retries: 5
+    # discovery_interval: 3600
+    # discovery_allowed_failures: 3
+    # workers: 5
+    # enforce_mib_constraints: true
+    # bulk_threshold: 5
+
+    ## SNMP v3 specific configuration
+    user: User1
+    authProtocol: usmHMACSHAAuthProtocol
+    authKey: AuthPass1
+    privProtocol: usmAesCfb128Protocol
+    privKey: PrivPass1
+
+
+    # use_global_metrics: true
+    metrics:
+      - MIB: UDP-MIB
+        symbol: udpInDatagrams
+      - MIB: TCP-MIB
+        symbol: tcpActiveOpens
+      - OID: 1.3.6.1.2.1.6.5
+        name: tcpPassiveOpens
+      - OID: 1.3.6.1.2.1.6.5
+        name: tcpPassiveOpens
+        metric_tags:
+          - TCP
+
+  -
+    # ip_address: <IP_ADDRESS>
+    network_address: 192.168.64.0/29
+    snmp_version: 3
+
+    ## SNMP v3 specific configuration
+    user: User2
+    authProtocol: usmHMACSHAAuthProtocol
+    authKey: AuthPass2
+    privProtocol: usmAesCfb128Protocol
+    privKey: PrivPass2
+
+    # use_global_metrics: true
+    metrics:
+      - MIB: UDP-MIB
+        symbol: udpInDatagrams
+      - MIB: TCP-MIB
+        symbol: tcpActiveOpens
+      - OID: 1.3.6.1.2.1.6.5
+        name: tcpPassiveOpens
+      - OID: 1.3.6.1.2.1.6.5
+        name: tcpPassiveOpens
+        metric_tags:
+          - TCP
