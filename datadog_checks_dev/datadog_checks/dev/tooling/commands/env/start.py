@@ -58,7 +58,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
 
     base_package = None
     if base:
-        core_dir = os.path.expanduser(ctx.obj.get('repos', {}).get('core', ''))
+        core_dir = os.path.expanduser(ctx.obj.get('core') or ctx.obj.get('repos', {}).get('core', ''))
         if not dir_exists(core_dir):
             if core_dir:
                 abort(f'`{core_dir}` directory does not exist.')
