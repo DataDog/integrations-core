@@ -105,7 +105,7 @@ datadog-rethinkdb==1.0.0
 datadog-riak==1.7.1
 datadog-riakcs==2.2.1
 datadog-sap-hana==1.1.0
-datadog-scylla==1.0.2
+datadog-scylla==1.0.3
 datadog-sidekiq==1.0.0
 datadog-snmp==2.6.0
 datadog-solr==1.2.0
