@@ -126,7 +126,7 @@ datadog-tomcat==1.2.1
 datadog-twemproxy==1.5.0
 datadog-twistlock==1.6.0
 datadog-varnish==1.6.1
-datadog-vault==2.2.1
+datadog-vault==2.3.0
 datadog-vertica==1.4.0
 datadog-vsphere==5.0.2
 datadog-win32-event-log==2.3.2; sys_platform == 'win32'
