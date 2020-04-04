@@ -157,6 +157,7 @@ class GoExpvar(AgentCheck):
             if len(values) == 0:
                 self.warning("No results matching path %s", path)
                 continue
+            self.log.debug("%s result(s) matching path %s", len(values), path)
 
             tag_by_path = alias is not None
 
@@ -169,10 +170,13 @@ class GoExpvar(AgentCheck):
                 try:
                     float(value)
                 except (TypeError, ValueError):
-                    self.log.warning("Unreportable value for path %s: %s", path, value)
+                    self.log.warning("Unreportable value for path %s: %s", actual_path, value)
                     continue
 
                 if count >= max_metrics:
+                    self.log.debug(
+                        "Exceeded maximum allowed metrics (%s) while processing: %s", max_metrics, metric_name
+                    )
                     self.warning(
                         "Reporting more metrics than the allowed maximum. "
                         "Please contact support@datadoghq.com for more information."
