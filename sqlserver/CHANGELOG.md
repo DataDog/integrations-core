@@ -1,5 +1,9 @@
 # CHANGELOG - sqlserver
 
+## 1.16.3 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.16.2 / 2020-03-10
 
 * [Fixed] Streamline exception handling. See [#6003](https://github.com/DataDog/integrations-core/pull/6003).
