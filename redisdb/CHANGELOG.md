@@ -1,5 +1,9 @@
 # CHANGELOG - redisdb
 
+## 2.0.2 / 2020-04-04
+
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 2.0.1 / 2020-02-10
 
 * [Fixed] Handle error in config_get. See [#5676](https://github.com/DataDog/integrations-core/pull/5676).
