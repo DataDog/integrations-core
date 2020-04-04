@@ -1,5 +1,9 @@
 # CHANGELOG - Cassandra Nodetool Check
 
+## 1.5.2 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.5.1 / 2019-12-02
 
 * [Fixed] Remove shlex. See [#5068](https://github.com/DataDog/integrations-core/pull/5068).
