@@ -1,5 +1,11 @@
 # CHANGELOG - http_check
 
+## 4.7.0 / 2020-04-04
+
+* [Added] Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Update reference to `disable_ssl_validation`. See [#5945](https://github.com/DataDog/integrations-core/pull/5945).
+
 ## 4.6.4 / 2020-02-22
 
 * [Fixed] Apply strptime thread-safety fix only on Python 2. See [#5618](https://github.com/DataDog/integrations-core/pull/5618).
