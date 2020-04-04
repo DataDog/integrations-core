@@ -1,5 +1,10 @@
 # CHANGELOG - Squid
 
+## 1.5.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 1.5.0 / 2020-02-22
 
 * [Added] Add version metadata. See [#5603](https://github.com/DataDog/integrations-core/pull/5603).
