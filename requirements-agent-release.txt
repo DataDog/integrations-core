@@ -130,7 +130,7 @@ datadog-vault==2.3.0
 datadog-vertica==1.4.1
 datadog-vsphere==5.1.0
 datadog-win32-event-log==2.3.3; sys_platform == 'win32'
-datadog-windows-service==2.5.1; sys_platform == 'win32'
+datadog-windows-service==2.5.2; sys_platform == 'win32'
 datadog-wmi-check==1.7.2; sys_platform == 'win32'
 datadog-yarn==1.12.0
 datadog-zk==2.4.0; sys_platform != 'win32'
