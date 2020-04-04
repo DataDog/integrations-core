@@ -7,18 +7,17 @@
 * [Added] Add OpenMetrics config spec template. See [#6142](https://github.com/DataDog/integrations-core/pull/6142).
 * [Added] Add validation for checks to not use the legacy agent signature. See [#6086](https://github.com/DataDog/integrations-core/pull/6086).
 * [Added] Validate `metric_to_check` is listed in `metadata.csv`. See [#6170](https://github.com/DataDog/integrations-core/pull/6170).
-* [Added] Add display_priority to config spec. See [#6229](https://github.com/DataDog/integrations-core/pull/6229).
-* [Added] Add jmx_url to config spec. See [#6230](https://github.com/DataDog/integrations-core/pull/6230).
+* [Added] Add `display_priority` to config spec. See [#6229](https://github.com/DataDog/integrations-core/pull/6229).
+* [Added] Add `jmx_url` to JMX config spec template. See [#6230](https://github.com/DataDog/integrations-core/pull/6230).
 * [Added] Trigger CI if contents of `tests/` changes. See [#6223](https://github.com/DataDog/integrations-core/pull/6223).
 * [Added] Add `service_check_prefix` config to jmx. See [#6163](https://github.com/DataDog/integrations-core/pull/6163).
 * [Added] Consider log collection for `meta catalog`. See [#6191](https://github.com/DataDog/integrations-core/pull/6191).
 * [Added] Add metadata to integrations catalog. See [#6169](https://github.com/DataDog/integrations-core/pull/6169).
 * [Added] Add `default` value field for config specs. See [#6178](https://github.com/DataDog/integrations-core/pull/6178).
-* [Added] Add RethinkDB integration. See [#5715](https://github.com/DataDog/integrations-core/pull/5715).
+* [Added] Add utility for temporarily stopping Docker services. See [#5715](https://github.com/DataDog/integrations-core/pull/5715).
 * [Added] Add `ddev test` option to verify support of new metrics. See [#6141](https://github.com/DataDog/integrations-core/pull/6141).
 * [Fixed] Add `send_distribution_sums_as_monotonic` to openmetrics config spec. See [#6247](https://github.com/DataDog/integrations-core/pull/6247).
-* [Fixed] Fix typo. See [#6234](https://github.com/DataDog/integrations-core/pull/6234).
-* [Fixed] Include moved files to changed files. See [#6174](https://github.com/DataDog/integrations-core/pull/6174).
+* [Fixed] Include moved files to changed files for testing purposes. See [#6174](https://github.com/DataDog/integrations-core/pull/6174).
 
 ## 3.2.0 / 2020-03-24
 
