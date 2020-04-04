@@ -1,5 +1,12 @@
 # CHANGELOG - cassandra
 
+## 1.5.0 / 2020-04-04
+
+* [Added] Add e2e testing and TotalBlockedTasks metric. See [#5957](https://github.com/DataDog/integrations-core/pull/5957).
+* [Added] Add node up/down default metrics. See [#5948](https://github.com/DataDog/integrations-core/pull/5948). Thanks [djova](https://github.com/djova).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+* [Fixed] Pattern needs to be quoted. See [#6110](https://github.com/DataDog/integrations-core/pull/6110). Thanks [allyunion](https://github.com/allyunion).
+
 ## 1.4.0 / 2020-01-13
 
 * [Added] Add multi_line log_processing_rules. See [#5426](https://github.com/DataDog/integrations-core/pull/5426).
