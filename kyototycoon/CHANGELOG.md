@@ -1,5 +1,9 @@
 # CHANGELOG - kyototycoon
 
+## 1.9.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.9.0 / 2019-12-02
 
 * [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).

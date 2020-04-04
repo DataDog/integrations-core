@@ -1,5 +1,9 @@
 # CHANGELOG - wmi_check
 
+## 1.7.3 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.7.2 / 2020-02-25
 
 * [Fixed] Bump minimum base check on wmi checks. See [#5860](https://github.com/DataDog/integrations-core/pull/5860).

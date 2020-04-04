@@ -1,5 +1,9 @@
 # CHANGELOG - Scylla
 
+## 1.0.3 / 2020-04-04
+
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 1.0.2 / 2020-02-26
 
 * [Fixed] Fix discrepancies in `batchlog_manager`, `execution_stages`, `io_queue` and `query_processor` metric group names. See [#5885](https://github.com/DataDog/integrations-core/pull/5885).

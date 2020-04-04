@@ -1,5 +1,11 @@
 # CHANGELOG - activemq_xml
 
+## 1.6.0 / 2020-04-04
+
+* [Added] Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).
+* [Added] Add config specs to activemq xml. See [#6116](https://github.com/DataDog/integrations-core/pull/6116).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.5.0 / 2019-12-02
 
 * [Added] Standardize logging format. See [#4896](https://github.com/DataDog/integrations-core/pull/4896).

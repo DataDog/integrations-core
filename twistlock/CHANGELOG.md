@@ -1,5 +1,9 @@
 # CHANGELOG - Twistlock
 
+## 1.6.0 / 2020-04-04
+
+* [Added] Use a faster JSON library. See [#6143](https://github.com/DataDog/integrations-core/pull/6143).
+
 ## 1.5.0 / 2020-01-13
 
 * [Added] Add Prisma Cloud compatibility. See [#5360](https://github.com/DataDog/integrations-core/pull/5360).

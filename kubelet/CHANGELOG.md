@@ -1,5 +1,12 @@
 # CHANGELOG - kubelet
 
+## 4.0.0 / 2020-04-04
+
+* [Fixed] Update prometheus_client. See [#6200](https://github.com/DataDog/integrations-core/pull/6200).
+* [Fixed] Fix support for kubernetes v1.18. See [#6203](https://github.com/DataDog/integrations-core/pull/6203).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Changed] Pass namespace to `is_excluded`. See [#6217](https://github.com/DataDog/integrations-core/pull/6217).
+
 ## 3.6.0 / 2020-02-22
 
 * [Added] Add pod tags to volume metrics. See [#5453](https://github.com/DataDog/integrations-core/pull/5453).

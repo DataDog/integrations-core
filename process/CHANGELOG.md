@@ -1,5 +1,10 @@
 # CHANGELOG - process
 
+## 1.13.0 / 2020-04-04
+
+* [Added] Upgrade psutil to 5.7.0. See [#6243](https://github.com/DataDog/integrations-core/pull/6243).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.12.0 / 2020-03-13
 
 * [Added] Improve check performance. See [#5920](https://github.com/DataDog/integrations-core/pull/5920).

@@ -1,5 +1,9 @@
 # CHANGELOG - mapreduce
 
+## 1.9.0 / 2020-04-04
+
+* [Added] Version metadata. See [#5448](https://github.com/DataDog/integrations-core/pull/5448).
+
 ## 1.8.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).

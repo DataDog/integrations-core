@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_apiserver_metrics
 
+## 1.2.3 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.2.2 / 2020-01-13
 
 * [Fixed] Update Kube_apiserver_metrics annotations documentation. See [#5199](https://github.com/DataDog/integrations-core/pull/5199).

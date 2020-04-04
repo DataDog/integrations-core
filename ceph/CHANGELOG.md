@@ -1,5 +1,12 @@
 # CHANGELOG - ceph
 
+## 2.0.0 / 2020-04-04
+
+* [Fixed] Fix response handling. See [#6152](https://github.com/DataDog/integrations-core/pull/6152).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+* [Changed] Account for "osdstats" key in newer versions. See [#5855](https://github.com/DataDog/integrations-core/pull/5855).
+
 ## 1.8.0 / 2019-10-11
 
 * [Added] Adhere to logging call convention. See [#4738](https://github.com/DataDog/integrations-core/pull/4738).
