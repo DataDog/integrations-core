@@ -5,7 +5,7 @@ datadog-aerospike==1.7.0; sys_platform != 'win32'
 datadog-airflow==1.2.0
 datadog-amazon-msk==1.0.0
 datadog-ambari==1.2.1; sys_platform != 'win32'
-datadog-apache==1.10.1
+datadog-apache==1.11.0
 datadog-aspdotnet==1.4.0; sys_platform == 'win32'
 datadog-btrfs==1.8.1; sys_platform != 'win32'
 datadog-cacti==1.6.0; sys_platform == 'linux2'
