@@ -2,7 +2,7 @@ datadog-active-directory==1.7.0; sys_platform == 'win32'
 datadog-activemq-xml==1.6.0
 datadog-activemq==1.4.0
 datadog-aerospike==1.7.0; sys_platform != 'win32'
-datadog-airflow==1.1.0
+datadog-airflow==1.2.0
 datadog-amazon-msk==1.0.0
 datadog-ambari==1.2.0; sys_platform != 'win32'
 datadog-apache==1.10.1
