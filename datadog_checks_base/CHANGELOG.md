@@ -12,7 +12,7 @@
 * [Fixed] Update prometheus_client. See [#6200](https://github.com/DataDog/integrations-core/pull/6200).
 * [Fixed] Fix failing style checks. See [#6207](https://github.com/DataDog/integrations-core/pull/6207).
 * [Fixed] Prevent out of bounds on systems with an odd number of counter strings. See [#6052](https://github.com/DataDog/integrations-core/pull/6052). Thanks [AdrianFletcher](https://github.com/AdrianFletcher).
-* [Fixed] Julia/ai 547 base pdh agent signature fix. See [#6162](https://github.com/DataDog/integrations-core/pull/6162).
+* [Fixed] Update pdh agent signature. See [#6162](https://github.com/DataDog/integrations-core/pull/6162).
 
 ## 11.3.1 / 2020-03-26
 
