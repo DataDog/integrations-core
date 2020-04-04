@@ -1,5 +1,9 @@
 # CHANGELOG - cacti
 
+## 1.6.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.6.0 / 2019-12-02
 
 * [Added] Standardize logging format. See [#4901](https://github.com/DataDog/integrations-core/pull/4901).
