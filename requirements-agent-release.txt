@@ -28,7 +28,7 @@ datadog-directory==1.5.1
 datadog-disk==2.8.0
 datadog-dns-check==1.5.1
 datadog-dotnetclr==1.5.0; sys_platform == 'win32'
-datadog-druid==1.2.0
+datadog-druid==1.2.1
 datadog-ecs-fargate==2.6.0
 datadog-eks-fargate==1.0.0
 datadog-elastic==1.16.0
