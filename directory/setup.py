@@ -27,11 +27,6 @@ def get_requirements(fpath):
         return f.readlines()
 
 
-def fn():
-    # XXX trigger CI
-    pass
-
-
 CHECKS_BASE_REQ = 'datadog_checks_base'
 
 setup(
