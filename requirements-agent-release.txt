@@ -15,7 +15,7 @@ datadog-ceph==2.0.0; sys_platform != 'win32'
 datadog-checks-base==11.3.1
 datadog-checks-downloader==2.4.0
 datadog-cilium==1.1.0
-datadog-cisco-aci==1.8.3
+datadog-cisco-aci==1.8.4
 datadog-clickhouse==1.1.0
 datadog-cockroachdb==1.1.0
 datadog-confluent-platform==1.0.0
