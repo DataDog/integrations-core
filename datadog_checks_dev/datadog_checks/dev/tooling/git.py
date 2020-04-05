@@ -75,9 +75,15 @@ def git_show_file(path, ref):
         return run_command(command, capture=True).stdout
 
 
-def git_commit(targets, message, force=False, sign=False):
+def git_commit(targets, message, force=False, sign=False, update=False):
     """
     Commit the changes for the given targets.
+
+    `targets` - be files or directiries
+    `message` - the commit message
+    `force` - (optional) force the commit
+    `sign` - sign with `-S` option
+    `update` - only commit updated files already tracked by git, via `-u`
     """
     root = get_root()
     target_paths = []
@@ -85,7 +91,10 @@ def git_commit(targets, message, force=False, sign=False):
         target_paths.append(os.path.join(root, t))
 
     with chdir(root):
-        result = run_command(f"git add{' -f' if force else ''} {' '.join(target_paths)}")
+        if updated:
+            result = run_command(f"git add{' -f' if force else ''} -u {' '.join(target_paths)}")
+        else:
+            result = run_command(f"git add{' -f' if force else ''} {' '.join(target_paths)}")
         if result.code != 0:
             return result
 
