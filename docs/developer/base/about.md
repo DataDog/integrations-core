@@ -2,8 +2,9 @@
 
 -----
 
-The package `datadog-checks-base` provides all the functionality and utilities necessary for writing Agent Integrations.
-Most importantly it provides the [AgentCheck](api.md#agentcheck) base class from which every Check must be inherited.
+The [Base package][datadog-checks-base] provides all the functionality and utilities necessary for writing
+Agent Integrations. Most importantly it provides the [AgentCheck](api.md#datadog_checks.base.checks.base.AgentCheck) base class from which
+every Check must be inherited.
 
 You would use it like so:
 
@@ -18,15 +19,14 @@ class AwesomeCheck(AgentCheck):
         self.gauge('test', 1.23, tags=['foo:bar'])
 ```
 
-The `check` method is what the [Datadog Agent](https://docs.datadoghq.com/agent/) will execute.
+The `check` method is what the [Datadog Agent][] will execute.
 
 In this example we created a Check and gave it a namespace of `awesome`. This means that by default, every submission's
 name will be prefixed with `awesome.`.
 
-We submitted a [gauge](https://docs.datadoghq.com/developers/metrics/types/?tab=gauge#metric-type-definition) metric named
-`awesome.test` with a value of `1.23` tagged by `foo:bar`.
+We submitted a [gauge][metric-type-gauge] metric named `awesome.test` with a value of `1.23` tagged by `foo:bar`.
 
-The magic hidden by the usability of the API is that this actually calls a [C binding](https://github.com/DataDog/datadog-agent/tree/master/rtloader) which
+The magic hidden by the usability of the API is that this actually calls a [C binding][rtloader] which
 communicates with the Agent (written in Go).
 
 <br>

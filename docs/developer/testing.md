@@ -4,8 +4,7 @@
 
 The entrypoint for testing any integration is the command `ddev test`, which accepts an arbitrary number of integrations as arguments.
 
-Under the hood, we use [tox](https://github.com/tox-dev/tox) for environment management and [pytest](https://github.com/pytest-dev/pytest)
-as our test framework.
+Under the hood, we use [tox][tox-github] for environment management and [pytest][pytest-github] as our test framework.
 
 ## Discovery
 
@@ -134,7 +133,7 @@ automatically resolve the most common errors caught by the style checker.
 
 ## Advanced
 
-There are a number of shortcut options available that correspond to [pytest options](https://docs.pytest.org/en/latest/usage.html).
+There are a number of shortcut options available that correspond to [pytest options][pytest-usage].
 
 - `--marker`/`-m` (`pytest`: `-m`) - Only run tests matching a given marker expression e.g. `ddev test elastic:py38-7.2 -m unit`
 - `--filter`/`-k` (`pytest`: `-k`) - Only run tests matching a given substring expression e.g.`ddev test redisdb -k replication`

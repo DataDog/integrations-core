@@ -9,7 +9,7 @@
 </div>
 
 A new minor version of the Agent is released every 6 weeks (approximately). Each release
-ships a snapshot of [integrations-core](https://github.com/DataDog/integrations-core).
+ships a snapshot of [integrations-core][].
 
 ## Setup
 

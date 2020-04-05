@@ -4,9 +4,8 @@
 
 ## tox
 
-Our [tox plugin](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/plugin/tox.py)
-dynamically adds environments based on the presence of options defined in the `[testenv]` section of each integration's
-`tox.ini` file.
+Our [tox plugin][datadog-checks-dev-plugin-tox] dynamically adds environments based on the presence of
+options defined in the `[testenv]` section of each integration's `tox.ini` file.
 
 ### Style
 
@@ -19,9 +18,8 @@ Setting `dd_check_style` to `true` will enable 2 environments for enforcing our 
 
 ## pytest
 
-Our [pytest plugin](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/plugin/pytest.py)
-makes a few [fixtures](https://docs.pytest.org/en/latest/fixture.html) available globally for use during tests. Also, it's responsible
-for managing the control flow of E2E environments.
+Our [pytest plugin][datadog-checks-dev-plugin-pytest] makes a few [fixtures][pytest-fixtures] available globally
+for use during tests. Also, it's responsible for managing the control flow of E2E environments.
 
 ### Fixtures
 
@@ -29,12 +27,12 @@ for managing the control flow of E2E environments.
 
 The stubs provided by each fixture will automatically have their state reset before each test.
 
-- [aggregator](../base/api.md#aggregator)
-- [datadog_agent](../base/api.md#datadog-agent)
+- [aggregator](../base/api.md#datadog_checks.base.stubs.aggregator.AggregatorStub)
+- [datadog_agent](../base/api.md#datadog_checks.base.stubs.datadog_agent.DatadogAgentStub)
 
 #### Check execution
 
-Most tests will execute checks via the `run` method of the [AgentCheck interface](../base/api.md#agentcheck)
+Most tests will execute checks via the `run` method of the [AgentCheck interface](../base/api.md#datadog_checks.base.checks.base.AgentCheck)
 (if the check [is stateful](../guidelines/conventions.md#stateful-checks)).
 
 A consequence of this is that, unlike the `check` method, exceptions are not propagated to the caller meaning not only can an exception
@@ -64,14 +62,14 @@ def test_config(dd_run_check):
 ##### Agent check runner
 
 The `dd_agent_check` fixture will run the integration with a given configuration on a live Agent and return a populated
-[aggregator](../base/api.md#aggregator). It accepts a single `dict` configuration representing either:
+[aggregator](../base/api.md#datadog_checks.base.stubs.aggregator.AggregatorStub). It accepts a single `dict` configuration representing either:
 
 - a single instance
 - a full configuration with top level keys `instances`, `init_config`, etc.
 
 Internally, this is a wrapper around `ddev env check` and you can pass through any supported options or flags.
 
-This fixture can only be used from tests [marked](http://doc.pytest.org/en/latest/example/markers.html) as `e2e`. For example:
+This fixture can only be used from tests [marked][pytest-markers] as `e2e`. For example:
 
 ```python
 @pytest.mark.e2e
@@ -128,6 +126,5 @@ is desired. This fixture is responsible for starting and stopping environments a
 
 - `env_type` - This is the type of interface that will be used to interact with the Agent. Currently, we support `docker` (default) and `local`.
 - `env_vars` - A `dict` of environment variables and their values that will be present when starting the Agent.
-- `docker_volumes` - A `list` of `str` representing [Docker volume mounts](https://docs.docker.com/storage/volumes/#choose-the--v-or---mount-flag)
-  if `env_type` is `docker` e.g. `/local/path:/agent/container/path:ro`.
+- `docker_volumes` - A `list` of `str` representing [Docker volume mounts][docker-volume-docs] if `env_type` is `docker` e.g. `/local/path:/agent/container/path:ro`.
 - `logs_config` - A `list` of configs that will be used by the Logs Agent. You will never need to use this directly, but rather via [higher level abstractions](test.md#logs).

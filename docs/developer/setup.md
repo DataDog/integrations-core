@@ -6,8 +6,7 @@ This will be relatively painless, we promise!
 
 ## Integrations
 
-You will need to clone [integrations-core](https://github.com/DataDog/integrations-core) and/or
-[integrations-extras](https://github.com/DataDog/integrations-extras) depending on which integrations
+You will need to clone [integrations-core][] and/or [integrations-extras][] depending on which integrations
 you intend to work on.
 
 ## Python
@@ -17,7 +16,7 @@ To work on any integration you must install Python 3.8+.
 After installation, restart your terminal and ensure that your newly installed Python comes first in your `PATH`.
 
 === "macOS"
-    We recommend using [Homebrew](https://brew.sh).
+    We recommend using [Homebrew][homebrew-home].
 
     First update the formulae and Homebrew itself:
 
@@ -48,7 +47,7 @@ After installation, restart your terminal and ensure that your newly installed P
 === "Windows"
     Windows users have it the easiest.
 
-    Simply download the latest x86-64 executable installer from https://www.python.org/downloads/windows and run it.
+    Simply download the [latest x86-64 executable installer][python-downloads-windows] and run it.
     When prompted, be sure to select the option to add to your `PATH`. Also, it is recommended that you choose the per-user installation method.
 
     Verify successful `PATH` modification:
@@ -60,7 +59,7 @@ After installation, restart your terminal and ensure that your newly installed P
 === "Linux"
     Ah, you enjoy difficult things. Are you using Gentoo?
 
-    We recommend using either [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or [pyenv](https://github.com/pyenv/pyenv). Whatever you do, never modify the system Python.
+    We recommend using either [Miniconda][miniconda-docs] or [pyenv][pyenv-github]. Whatever you do, never modify the system Python.
 
     Verify successful `PATH` modification:
 
@@ -72,14 +71,14 @@ After installation, restart your terminal and ensure that your newly installed P
 
 ### Installation
 
-You have 2 options to install the CLI provided by the package [datadog-checks-dev](ddev/layers.md).
+You have 2 options to install the CLI provided by the package [datadog-checks-dev](ddev/about.md).
 
 !!! warning
     For either option, if you are on macOS/Linux do not use `sudo`! Doing so will result in a broken installation.
 
 #### Development
 
-If you cloned [integrations-core](https://github.com/DataDog/integrations-core) and want to always use the version based on the current branch, run:
+If you cloned [integrations-core][] and want to always use the version based on the current branch, run:
 
 ```
 python -m pip install -e "path/to/datadog_checks_dev[cli]"
@@ -90,7 +89,7 @@ python -m pip install -e "path/to/datadog_checks_dev[cli]"
 
 #### Stable
 
-The latest released version may be installed from [PyPI](https://pypi.org):
+The latest released version may be installed from [PyPI][]:
 
 ```
 python -m pip install --upgrade "datadog-checks-dev[cli]"
@@ -119,24 +118,24 @@ ddev config set repo extras
 Docker is used in nearly every integration's test suite therefore we simply require it to avoid confusion.
 
 === "macOS"
-    1. Install [Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/install).
+    1. Install [Docker Desktop for Mac][docker-install-mac].
     1. Right-click the Docker taskbar item and update **Preferences > File Sharing** with any locations you need to open.
 
 === "Windows"
-    1. Install [Docker Desktop for Windows](https://docs.docker.com/docker-for-windows/install).
+    1. Install [Docker Desktop for Windows][docker-install-windows].
     1. Right-click the Docker taskbar item and update **Settings > Shared Drives** with any locations you need to open e.g. `C:\`.
 
 === "Linux"
     1. Install Docker Engine for your distribution:
 
         === "Ubuntu"
-            [Docker CE for Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu)
+            [Docker CE for Ubuntu][docker-install-ubuntu]
         === "Debian"
-            [Docker CE for Debian](https://docs.docker.com/install/linux/docker-ce/debian)
+            [Docker CE for Debian][docker-install-debian]
         === "Fedora"
-            [Docker CE for Fedora](https://docs.docker.com/install/linux/docker-ce/fedora)
+            [Docker CE for Fedora][docker-install-fedora]
         === "CentOS"
-            [Docker CE for CentOS](https://docs.docker.com/install/linux/docker-ce/centos)
+            [Docker CE for CentOS][docker-install-centos]
 
     1. Add your user to the `docker` group:
 

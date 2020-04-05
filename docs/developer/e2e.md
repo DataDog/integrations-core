@@ -3,7 +3,7 @@
 -----
 
 Any integration that makes use of our [pytest plugin](ddev/plugins.md#pytest) in its test suite supports
-end-to-end testing on a live [Datadog Agent](https://docs.datadoghq.com/agent/).
+end-to-end testing on a live [Datadog Agent][].
 
 The entrypoint for E2E management is the command group `ddev env`.
 
@@ -59,7 +59,7 @@ default_service1               Up 5 seconds                      80/tcp, 10000/t
 
 You can select a particular build of the Agent to use with the `--agent`/`-a` option. Any Docker image is valid e.g. `datadog/agent:7.17.0`.
 
-A custom nightly build will be used by default, which is re-built on every commit to the [Datadog Agent repository](https://github.com/DataDog/datadog-agent).
+A custom nightly build will be used by default, which is re-built on every commit to the [Datadog Agent repository][datadog-agent].
 
 ### Integration version
 
@@ -118,7 +118,7 @@ Collector
 
 ### Debugging
 
-You may start an [interactive debugging session](https://docs.python.org/3/library/pdb.html) using the `--breakpoint`/`-b` option.
+You may start an [interactive debugging session][python-pdb] using the `--breakpoint`/`-b` option.
 
 The option accepts an integer representing the line number at which to break. For convenience, `0` and `-1` are shortcuts to
 the first and last line of the integration's `check` method, respectively.
@@ -148,9 +148,8 @@ $ ddev env check envoy py38 -b 0
 
 ## Refreshing state
 
-Testing and manual check runs always reflect the current state of code and configuration however, if you want to see the
-result of changes [in-app](https://app.datadoghq.com/metric/explorer), you will need to refresh the environment by
-running `ddev env reload <INTEGRATION> <ENVIRONMENT>`.
+Testing and manual check runs always reflect the current state of code and configuration however, if you want to see the result
+of changes [in-app][], you will need to refresh the environment by running `ddev env reload <INTEGRATION> <ENVIRONMENT>`.
 
 ## Removal
 

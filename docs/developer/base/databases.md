@@ -2,7 +2,7 @@
 
 -----
 
-What _is_ a database, you may wonder. Well, the answer to that question is [fascinating](https://lmgtfy.com/?q=What+is+a+database%3F&iie=1)!
+What _is_ a database, you may wonder. Well, the answer to that question is [fascinating][database-troll]!
 
 No matter the database you wish to monitor, the base package provides a standard way to define and collect data from arbitrary queries.
 

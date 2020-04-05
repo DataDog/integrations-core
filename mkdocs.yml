@@ -1,35 +1,20 @@
-# Project information
 site_name: Agent Integrations
 site_description: The home of Agent Integrations developer documentation
 site_author: Datadog
 site_url: https://datadoghq.dev/integrations-core/
-copyright: 'Copyright &copy; Datadog, Inc. 2020-present'
-
-# Repository
 repo_name: datadog/integrations-core
 repo_url: https://github.com/DataDog/integrations-core
 edit_uri: blob/master/docs/developer
+copyright: 'Copyright &copy; Datadog, Inc. 2020-present'
 
-# Configuration
 docs_dir: docs/developer
 site_dir: site
-extra_css:
-  - assets/css/custom.css
-extra_javascript:
-  - assets/js/custom.js
-  - https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js
-  - https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js
-  - https://cdnjs.cloudflare.com/ajax/libs/js-sequence-diagrams/1.0.6/sequence-diagram-min.js
-  - https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.6.5/flowchart.min.js
 theme:
   name: material
-  static_templates:
-    - 404.html
   language: en
   features:
     - tabs
-    # https://github.com/squidfunk/mkdocs-material/issues/1507
-    # https://github.com/squidfunk/mkdocs-material/issues/1498#issuecomment-600914073
+    # https://github.com/facelessuser/pymdown-extensions/issues/876#issuecomment-610164436
     # - instant
   palette:
     primary: deep purple
@@ -42,19 +27,39 @@ theme:
   favicon: assets/images/favicon.ico
   logo: assets/images/logo.svg
 
-# Customization
-extra:
-  social:
-    - icon: fontawesome/solid/blog
-      link: https://www.datadoghq.com/blog/engineering/
-    - icon: fontawesome/brands/github-alt
-      link: https://github.com/DataDog
-    - icon: fontawesome/brands/twitter
-      link: https://twitter.com/datadoghq
-    - icon: fontawesome/brands/instagram
-      link: https://www.instagram.com/datadoghq
+nav:
+  - Home: index.md
+  - Setup: setup.md
+  - Testing: testing.md
+  - E2E: e2e.md
+  - Base Package:
+    - About: base/about.md
+    - HTTP: base/http.md
+    - Databases: base/databases.md
+    - Metadata: base/metadata.md
+    - API: base/api.md
+  - Dev Package:
+    - What's in the box?: ddev/about.md
+    - Test framework: ddev/test.md
+    - Plugins: ddev/plugins.md
+    - Configuration: ddev/configuration.md
+    - CLI: ddev/cli.md
+  - Guidelines:
+    - Pull requests: guidelines/pr.md
+    - Style: guidelines/style.md
+    - Conventions: guidelines/conventions.md
+  - Meta:
+    - CI: meta/ci.md
+    - CD: meta/cd.md
+    - Docs: meta/docs.md
+    - Config specs: meta/config_specs.md
+    - Status: meta/status.md
+  - Process:
+    - Integration release: process/integration_release.md
+    - Agent release: process/agent_release.md
+  - FAQ:
+    - FAQ: faq/faq.md
 
-# Plugins https://github.com/mkdocs/mkdocs/wiki/MkDocs-Plugins
 plugins:
   # Built-in
   - search:
@@ -72,9 +77,9 @@ plugins:
             show_root_heading: yes
             show_source: true
 
-# Extensions
 markdown_extensions:
   # Built-in
+  - markdown.extensions.abbr:
   - markdown.extensions.admonition:
   - markdown.extensions.footnotes:
   - markdown.extensions.tables:
@@ -83,6 +88,8 @@ markdown_extensions:
       toc_depth: "2-6"
   # Extra
   - mkdocs-click:
+  - mkpatcher:
+      location: docs/developer/.scripts
   - pymdownx.arithmatex:
   - pymdownx.betterem:
       smart_enable: all
@@ -92,29 +99,31 @@ markdown_extensions:
   - pymdownx.emoji:
       # https://github.com/twitter/twemoji
       # https://raw.githubusercontent.com/facelessuser/pymdown-extensions/master/pymdownx/twemoji_db.py
-      emoji_index: !!python/name:pymdownx.emoji.twemoji
-      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
   - pymdownx.highlight:
       guess_lang: false
       linenums_style: pymdownx-inline
       use_pygments: true
   - pymdownx.inlinehilite:
+  - pymdownx.keys:
   - pymdownx.magiclink:
       repo_url_shortener: true
       repo_url_shorthand: true
+      social_url_shortener: true
       social_url_shorthand: true
       provider: github
       user: DataDog
       repo: integrations-core
   - pymdownx.mark:
+  - pymdownx.progressbar:
   - pymdownx.smartsymbols:
+  - pymdownx.snippets:
+      base_path: docs/developer/.snippets
   - pymdownx.superfences:
       custom_fences:
-        - name: flow
-          class: uml-flowchart
-          format: !!python/name:pymdownx.superfences.fence_code_format
-        - name: sequence
-          class: uml-sequence-diagram
+        - name: mermaid
+          class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
         - name: math
           class: arithmatex
@@ -124,33 +133,17 @@ markdown_extensions:
       custom_checkbox: true
   - pymdownx.tilde:
 
-# Page tree
-nav:
-  - Home: index.md
-  - Setup: setup.md
-  - Testing: testing.md
-  - E2E: e2e.md
-  - Base Package:
-    - About: base/about.md
-    - HTTP: base/http.md
-    - Databases: base/databases.md
-    - API: base/api.md
-  - Dev Package:
-    - "What's in the box?": ddev/layers.md
-    - Test framework: ddev/test.md
-    - Plugins: ddev/plugins.md
-    - Configuration: ddev/configuration.md
-    - CLI: ddev/cli.md
-  - Guidelines:
-    - Style: guidelines/style.md
-    - Pull requests: guidelines/pr.md
-    - Conventions: guidelines/conventions.md
-  - Meta:
-    - Config specs: meta/config_specs.md
-    - CI: meta/ci.md
-    - CD: meta/cd.md
-  - Process:
-    - Integration release: process/integration_release.md
-    - Agent release: process/agent_release.md
-  - FAQ:
-    - FAQ: faq/faq.md
+extra:
+  social:
+    - icon: fontawesome/solid/blog
+      link: https://www.datadoghq.com/blog/engineering/
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/DataDog
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/datadoghq
+    - icon: fontawesome/brands/instagram
+      link: https://www.instagram.com/datadoghq
+extra_css:
+  - assets/css/custom.css
+extra_javascript:
+  - assets/js/custom.js

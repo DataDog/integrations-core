@@ -4,21 +4,21 @@
 
 These are all the checkers used by our [style enforcement](../ddev/plugins.md#style).
 
-## [black](https://github.com/psf/black)
+## [black][black-github]
 
-An opinionated formatter, like JavaScript's [prettier](https://github.com/prettier/prettier) and Golang's [gofmt](https://golang.org/cmd/gofmt).
+An opinionated formatter, like JavaScript's [prettier][prettier-github] and Golang's [gofmt][gofmt-docs].
 
-## [isort](https://github.com/timothycrosley/isort)
+## [isort][isort-github]
 
 A tool to sort imports lexicographically, by section, and by type. We use the 5 standard sections: `__future__`, stdlib, third party, first party, and local.
 
 `datadog_checks` is configured as a first party namespace.
 
-## [flake8](https://github.com/PyCQA/flake8)
+## [flake8][flake8-github]
 
-An easy-to-use wrapper around [pycodestyle](https://github.com/PyCQA/pycodestyle) and [pyflakes](https://github.com/PyCQA/pyflakes). We select everything it provides and only ignore a few things to give precedence to other tools.
+An easy-to-use wrapper around [pycodestyle][pycodestyle-github] and [pyflakes][pyflakes-github]. We select everything it provides and only ignore a few things to give precedence to other tools.
 
-### [bugbear](https://github.com/PyCQA/flake8-bugbear)
+### [bugbear][flake8-bugbear-github]
 
 A `flake8` plugin for finding likely bugs and design problems in programs. We enable:
 
@@ -31,7 +31,7 @@ A `flake8` plugin for finding likely bugs and design problems in programs. We en
 - `B306`: `BaseException.message` has been deprecated as of Python 2.6 and is removed in Python 3. Use `str(e)` to access the user-readable message. Use `e.args` to access arguments passed to the exception.
 - `B902`: Invalid first argument used for method. Use `self` for instance methods, and `cls` for class methods.
 
-### [logging-format](https://github.com/globality-corp/flake8-logging-format)
+### [logging-format][flake8-logging-format-github]
 
 A `flake8` plugin for ensuring a consistent logging format. We enable:
 
@@ -44,6 +44,6 @@ A `flake8` plugin for ensuring a consistent logging format. We enable:
 -  `G201`: Logging statements should not use `error(..., exc_info=True)` (use `exception(...)` instead)
 -  `G202`: Logging statements should not use redundant `exc_info=True` in `exception`
 
-## [Mypy](https://github.com/python/mypy)
+## [Mypy][mypy-github]
 
 A type checker allowing a mix of dynamic and static typing. This is optional for now.

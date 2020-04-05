@@ -1,20 +1,23 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 import click
 
-from ....utils import chdir, copy_path, dir_exists, path_join, temp_dir
+from ....utils import chdir, create_file, copy_path, dir_exists, path_join, temp_dir
 from ...constants import get_root
 from ...git import get_git_email, get_git_user, get_latest_commit_hash
-from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, run_or_abort
+from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning, run_or_abort
 
 PRODUCTION_BRANCH = 'gh-pages'
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Push built documentation')
 @click.argument('branch', required=False)
+@click.option('--yes', '-y', is_flag=True)
 @click.pass_context
-def push(ctx, branch):
+def push(ctx, branch, yes):
     """Push built documentation."""
     # We allow specifying a branch in case you want to quickly showcase changes to others
     if not branch:
@@ -33,11 +36,20 @@ def push(ctx, branch):
     git_email = get_git_email()
     latest_commit_hash = get_latest_commit_hash()
     repo_name = ctx.obj['repo_name']
-    remote = f'https://{github_token}@github.com/DataDog/{repo_name}.git'
+
+    if 'GITHUB_ACTIONS' in os.environ:
+        remote = f'https://{os.getenv("GITHUB_ACTOR")}:{github_token}@github.com/DataDog/{repo_name}.git'
+    else:
+        remote = f'https://{github_token}@github.com/DataDog/{repo_name}.git'
 
     echo_waiting('Copying site to a temporary directory...')
     with temp_dir() as d:
         temp_repo_dir = copy_path(site_dir, d)
+
+        # https://help.github.com/en/github/working-with-github-pages/about-github-pages#static-site-generators
+        # https://github.com/mkdocs/mkdocs/pull/2060
+        echo_waiting('Writing .nojekyll at the root...')
+        create_file(path_join(temp_repo_dir, '.nojekyll'))
 
         with chdir(temp_repo_dir):
             echo_waiting('Configuring the temporary Git repository...')
@@ -55,7 +67,18 @@ def push(ctx, branch):
 
             echo_waiting(f'Committing site contents to branch {branch}...')
             run_or_abort('git add --all', capture=True)
-            run_or_abort(f'git commit --allow-empty -m "build docs at {latest_commit_hash}"', capture=True)
+
+            # If no changes, degrade gracefully
+            result = run_or_abort(
+                f'git commit -m "build docs at {latest_commit_hash}"', capture=True, ignore_exit_code=True
+            )
+            if result.code and 'nothing to commit' in result.stdout:
+                echo_warning('No documentation changes, skipping deployment.')
+                abort(code=0)
+
+            if branch == PRODUCTION_BRANCH and not yes and not click.confirm('Do you want to continue?'):
+                abort('Will not deploy')
+
             run_or_abort(f'git push upstream HEAD:{branch}', capture=True)
 
     echo_success('Success!')

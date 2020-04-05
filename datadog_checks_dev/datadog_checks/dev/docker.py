@@ -142,6 +142,8 @@ def docker_run(
       check for errors
     - **env_vars** (_dict_) - A dictionary to update `os.environ` with during execution
     - **wrappers** (_List[callable]_) - A list of context managers to use during execution
+    - **attempts** (_int_) - Number of attempts to run `up` successfully
+    - **attempts_wait** (_int_) - Time to wait between attempts
     """
     if compose_file and up:
         raise TypeError('You must select either a compose file or a custom setup callable, not both.')

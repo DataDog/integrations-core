@@ -16,6 +16,7 @@
         - historate
         - service_check
         - event
+        - set_metadata
 
 ## Stubs
 
@@ -33,7 +34,13 @@
         - assert_no_duplicate_metrics
         - assert_no_duplicate_service_checks
         - assert_no_duplicate_all reset
+        - reset
 
 ::: datadog_checks.base.stubs.datadog_agent.DatadogAgentStub
     rendering:
       heading_level: 3
+    selection:
+      members:
+        - assert_metadata
+        - assert_metadata_count
+        - reset

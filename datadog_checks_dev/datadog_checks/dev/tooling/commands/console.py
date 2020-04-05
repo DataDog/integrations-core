@@ -86,7 +86,7 @@ def abort(text=None, code=1, out=False):
     sys.exit(code)
 
 
-def run_or_abort(command, **kwargs):
+def run_or_abort(command, ignore_exit_code=False, **kwargs):
     try:
         result = run_command(command, **kwargs)
     except Exception:
@@ -95,7 +95,7 @@ def run_or_abort(command, **kwargs):
 
         abort(f'Error running command: {command}')
     else:
-        if result.code:
+        if not ignore_exit_code and result.code:
             abort(result.stdout + result.stderr, code=result.code)
 
         return result

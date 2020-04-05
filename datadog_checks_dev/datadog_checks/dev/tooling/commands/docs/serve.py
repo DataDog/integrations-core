@@ -17,11 +17,13 @@ from .utils import insert_verbosity_flag
 @click.option('--verbose', '-v', count=True, help='Increase verbosity (can be used additively)')
 def serve(no_open, verbose):
     """Serve and view documentation in a web browser."""
-    command = ['tox', '-e', 'docs', 'serve']
+    address = 'localhost:8000'
+
+    command = ['tox', '-e', 'docs', '--', 'serve', '--livereload', '--dev-addr', address]
     insert_verbosity_flag(command, verbose)
 
     if not no_open:
-        webbrowser.open_new_tab('http://localhost:8000')
+        webbrowser.open_new_tab(f'http://{address}')
 
     with chdir(get_root()):
         process = subprocess.run(command)

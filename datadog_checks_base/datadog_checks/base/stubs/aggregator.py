@@ -25,8 +25,12 @@ def normalize_tags(tags, sort=False):
 
 class AggregatorStub(object):
     """
-    Mainly used for unit testing checks, this stub makes possible to execute
-    a check without a running Agent.
+    This implements the methods defined by the Agent's
+    [C bindings](https://github.com/DataDog/datadog-agent/blob/master/rtloader/common/builtins/aggregator.c)
+    which in turn call the
+    [Go backend](https://github.com/DataDog/datadog-agent/blob/master/pkg/collector/python/aggregator.go).
+
+    It also provides utility methods for test assertions.
     """
 
     # Replicate the Enum we have on the Agent

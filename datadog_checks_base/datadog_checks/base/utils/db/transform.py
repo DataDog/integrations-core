@@ -106,8 +106,6 @@ def get_temporal_percent(transformers, column_name, **modifiers):
 
 def get_match(transformers, column_name, **modifiers):
     """
-    [//]: # (TODO: mkautodoc doesn't render tables for some reason, so we just indent to form a code block)
-
     This is used for querying unstructured data.
 
     For example, say you want to collect the fields named `foo` and `bar`. Typically, they would be stored like:

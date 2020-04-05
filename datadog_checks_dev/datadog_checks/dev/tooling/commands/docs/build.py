@@ -15,7 +15,7 @@ from .utils import insert_verbosity_flag
 @click.option('--verbose', '-v', count=True, help='Increase verbosity (can be used additively)')
 def build(verbose):
     """Build documentation."""
-    command = ['tox', '-e', 'docs', 'build']
+    command = ['tox', '-e', 'docs', '--', 'build', '--clean']
     insert_verbosity_flag(command, verbose)
 
     with chdir(get_root()):

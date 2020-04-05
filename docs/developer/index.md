@@ -19,9 +19,9 @@ If you are intrigued, continue reading. If not, continue all the same :point_dow
 
 To work on any integration (a.k.a. [Check](faq/faq.md#integration-vs-check)), you must [setup](setup.md) your development environment.
 
-After that you may immediately begin [testing](testing.md) or read through the [best practices](guidelines/style.md) we strive to follow.
+After that you may immediately begin [testing](testing.md) or read through the [best practices](guidelines/pr.md) we strive to follow.
 
-Also, feel free to check out how [ddev](ddev/layers.md) works and browse the [API](base/api.md) reference of the base package.
+Also, feel free to check out how [ddev](ddev/about.md) works and browse the [API](base/api.md) reference of the base package.
 
 ## Navigation
 
@@ -29,6 +29,6 @@ Desktop readers can use keyboard shortcuts to navigate.
 
 | Keys | Action |
 | --- | --- |
-| <ul><li><code>,</code> (comma)</li><li><code>p</code></li></ul> | Navigate to the "previous" page |
-| <ul><li><code>.</code> (period)</li><li><code>n</code></li></ul> | Navigate to the "next" page |
-| <ul><li><code>/</code></li><li><code>s</code></li></ul> | Display the search modal |
+| <ul><li><kbd>,</kbd> (comma)</li><li><kbd>p</kbd></li></ul> | Navigate to the "previous" page |
+| <ul><li><kbd>.</kbd> (period)</li><li><kbd>n</kbd></li></ul> | Navigate to the "next" page |
+| <ul><li><kbd>/</kbd></li><li><kbd>s</kbd></li></ul> | Display the search modal |

@@ -7,7 +7,7 @@ some are rarely touched (usually indicating feature-completeness).
 
 ## Versioning
 
-All releases adhere to [Semantic Versioning](https://semver.org).
+All releases adhere to [Semantic Versioning][semver-home].
 
 Tags in the form `<INTEGRATION_NAME>-<VERSION>` [are added](../meta/cd.md) to the Git repository. Therefore, it's
 possible to checkout and build the code for a certain version of a specific check.
@@ -75,8 +75,8 @@ To see all checks that need to be released, run `ddev release show ready`.
 
 ### PyPI
 
-If you released `datadog_checks_base` or `datadog_checks_dev` then you will need to upload to [PyPI](https://pypi.org)
-for use by [integrations-extras](https://github.com/DataDog/integrations-extras).
+If you released `datadog_checks_base` or `datadog_checks_dev` then you will need to upload to [PyPI][]
+for use by [integrations-extras][].
 
 ```
 ddev release upload datadog_checks_[base|dev]

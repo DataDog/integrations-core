@@ -3,7 +3,7 @@
 -----
 
 Whenever you need to make HTTP requests, the base class provides a convenience member that has the same interface as the
-popular [requests](https://github.com/psf/requests) library and ensures consistent behavior across all integrations.
+popular [requests][requests-github] library and ensures consistent behavior across all integrations.
 
 The wrapper automatically parses and uses configuration from the `instance`, `init_config`, and Agent config. Also, this
 is only done once during initialization and cached to reduce the overhead of every call.
@@ -39,9 +39,7 @@ class MyCheck(AgentCheck):
 
 Some options can be set globally in `init_config` (with `instances` taking precedence).
 For complete documentation of every option, see the associated configuration templates for the
-[instances](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/http.yaml) and
-[init_config](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/init_config/http.yaml)
-sections.
+[instances][config-spec-template-instances-http] and [init_config][config-spec-template-init-config-http] sections.
 
 ::: datadog_checks.base.utils.http.StandardFields
     rendering:
