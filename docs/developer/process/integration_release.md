@@ -102,6 +102,13 @@ You may also pass a comma-separated list of checks to skip using the `--exclude`
 ddev release make all --exclude datadog_checks_dev
 ```
 
+!!! warning
+    There is a known GitHub limitation where if an issue has too many labels (100), its state cannot be modified.
+    If you cannot merge the pull request:
+
+    1. Run the [remove-labels](../ddev/cli.md#remove-labels) command
+    1. After merging, manually add back the `changelog/no-changelog` label
+
 ## Betas
 
 Creating pre-releases is the same workflow except you do not open a pull request but rather release directly from a branch.
@@ -151,6 +158,35 @@ ddev agent requirements
 ## Troubleshooting
 
 - If you encounter errors when signing with your Yubikey, ensure you ran `gpg --import <YOUR_KEY_ID>.gpg.pub`.
+- If the [build pipeline](../meta/cd.md) failed, it is likely that you modified a file in the pull request
+  without re-signing. To resolve this, you'll need to bootstrap metadata for every integration:
+
+    1. Checkout and pull the most recent version of the `master` branch.
+
+        ```
+        git checkout master
+        git pull
+        ```
+
+    1. Sign everything.
+
+        ```
+        ddev release make all --sign-only
+        ```
+
+        You may need to touch your Yubikey multiple times.
+
+    1. Push your branch to GitHub.
+    1. Manually trigger a build.
+
+        ```
+        git tag <USERNAME>bootstrap-1.0.0 -m <USERNAME>bootstrap-1.0.0
+        ```
+
+        The tag name is irrelevant, it just needs to look like an integration release. Gitlab doesn't sync
+        deleted tags, so any subsequent manual trigger tags will need to increment the version number.
+
+    1. Delete the branch and tag, locally and on GitHub.
 
 ## Releasers
 

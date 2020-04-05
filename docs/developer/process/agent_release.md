@@ -2,16 +2,22 @@
 
 -----
 
+<div align="center">
+    <video preload="auto" autoplay loop muted>
+        <source src="https://media.giphy.com/media/12FdFGei62ZKKI/giphy.mp4" type="video/mp4"></source>
+    </video>
+</div>
+
 A new minor version of the Agent is released every 6 weeks (approximately). Each release
 ships a snapshot of [integrations-core](https://github.com/DataDog/integrations-core).
 
 ## Setup
 
-Configure your [GitHub](../ddev/configuration.md#github) and [Jira](../ddev/configuration.md#jira) auth.
+Configure your [GitHub](../ddev/configuration.md#github) and [Trello](../ddev/configuration.md#trello) auth.
 
 ## Freeze
 
-At midnight on the Friday before QA week we freeze, at which point the release manager will release
+At midnight (EDT/EST) on the Friday before QA week we freeze, at which point the release manager will release
 all integrations with pending changes then branch off.
 
 ### Release
