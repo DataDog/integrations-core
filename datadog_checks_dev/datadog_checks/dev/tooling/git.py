@@ -91,7 +91,7 @@ def git_commit(targets, message, force=False, sign=False, update=False):
         target_paths.append(os.path.join(root, t))
 
     with chdir(root):
-        if updated:
+        if update:
             result = run_command(f"git add{' -f' if force else ''} -u {' '.join(target_paths)}")
         else:
             result = run_command(f"git add{' -f' if force else ''} {' '.join(target_paths)}")
