@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.3.1 / 2020-04-05
+
+* [Fixed] Fix e2e config. See [#6261](https://github.com/DataDog/integrations-core/pull/6261).
+
 ## 3.3.0 / 2020-04-04
 
 * [Added] Allow arbitrary repos in CLI config. See [#6254](https://github.com/DataDog/integrations-core/pull/6254).
