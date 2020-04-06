@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.4.0 / 2020-04-06
+
+* [Added] Add Container App team to ddev trello tool. See [#6268](https://github.com/DataDog/integrations-core/pull/6268).
+
 ## 3.3.1 / 2020-04-05
 
 * [Fixed] Fix e2e config. See [#6261](https://github.com/DataDog/integrations-core/pull/6261).
