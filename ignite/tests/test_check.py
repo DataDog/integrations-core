@@ -8,7 +8,7 @@ import pytest
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     instance = {}
-    aggregator = dd_agent_check(instance)
+    aggregator = dd_agent_check(instance, rate=True)
     metrics = [
         'jvm.thread_count',
         'jvm.gc.survivor_size',
@@ -185,9 +185,60 @@ def test_e2e(dd_agent_check):
         'ignite.wal.last_rollover',
     ]
     for metric in metrics:
-        aggregator.assert_metric(metric)
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
+
+    counts = [
+        "ignite.cache.commits",
+        "ignite.cache.entry_processor.hits",
+        "ignite.cache.entry_processor.invocations",
+        "ignite.cache.entry_processor.misses",
+        "ignite.cache.entry_processor.puts",
+        "ignite.cache.entry_processor.read_only_invocations",
+        "ignite.cache.entry_processor.removals",
+        "ignite.cache.evictions",
+        "ignite.cache.gets",
+        "ignite.cache.hits",
+        "ignite.cache.misses",
+        "ignite.cache.offheap_evictions",
+        "ignite.cache.offheap_gets",
+        "ignite.cache.offheap_hits",
+        "ignite.cache.offheap_misses",
+        "ignite.cache.offheap_puts",
+        "ignite.cache.offheap_removals",
+        "ignite.cache.puts",
+        "ignite.cache.removals",
+        "ignite.cache.rollbacks",
+        "ignite.cache.write_behind_overflow_total",
+        "ignite.discovery.nodes_failed",
+        "ignite.discovery.nodes_joined",
+        "ignite.discovery.nodes_left",
+        "ignite.discovery.total_processed_messages",
+        "ignite.discovery.total_received_messages",
+        "ignite.jobs.cancelled.total",
+        "ignite.jobs.executed.total",
+        "ignite.jobs.execution_time.total",
+        "ignite.jobs.rejected.total",
+        "ignite.jobs.total_failover",
+        "ignite.pages_read",
+        "ignite.pages_replaced",
+        "ignite.pages_written",
+        "ignite.received_bytes",
+        "ignite.received_messages",
+        "ignite.sent_bytes",
+        "ignite.sent_messages",
+        "ignite.threads.completed_tasks",
+        "ignite.threads.tasks",
+        "ignite.total_allocated_pages",
+        "ignite.total_allocated_size",
+        "ignite.total_executed_tasks",
+        "ignite.total_started_threads",
+        "ignite.transaction.committed",
+        "ignite.transaction.rolledback",
+    ]
+
+    for metric in counts:
+        aggregator.assert_metric(metric, metric_type=aggregator.MONOTONIC_COUNT)
 
     aggregator.assert_all_metrics_covered()
 
-    # Uncomment when jmxfetch is fixed
-    # aggregator.assert_service_check("ignite.can_connect")
+    aggregator.assert_service_check("ignite.can_connect")
