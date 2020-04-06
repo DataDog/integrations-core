@@ -48,38 +48,6 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
    unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
    ```
 
-**Note:** Agent 6 uses Upstart or systemd to orchestrate the `datadog-agent` service. Environment variables may need to be added to the service configuration files at the default locations of `/etc/init/datadog-agent.conf` (Upstart) or `/lib/systemd/system/datadog-agent.service` (systemd). See documentation on [Upstart][5] or [systemd][6] for more information on how to configure these settings.
-
-The following is an example of adding `LD_LIBRARY_PATH` to the Datadog Agent service configuration files (`/etc/init/datadog-agent.conf`) on a system using Upstart.
-
-```conf
-description "Datadog Agent"
-
-start on started networking
-stop on runlevel [!2345]
-
-respawn
-respawn limit 10 5
-normal exit 0
-
-# Logging to console from the Agent is disabled since the Agent already logs using file or
-# syslog depending on its configuration. We make Upstart log what the process still outputs in order
-# to log panics/crashes to /var/log/upstart/datadog-agent.log
-console log
-env DD_LOG_TO_CONSOLE=false
-env LD_LIBRARY_PATH=/usr/lib/oracle/11.2/client64/lib/
-
-setuid dd-agent
-
-script
-  exec /opt/datadog-agent/bin/agent/agent start -p /opt/datadog-agent/run/agent.pid
-end script
-
-post-stop script
-  rm -f /opt/datadog-agent/run/agent.pid
-end script
-```
-
 #### Datadog User creation
 
 Create a read-only `datadog` user with proper access to your Oracle Database Server. Connect to your Oracle database with an administrative user (e.g. `SYSDBA` or `SYSOPER`) and run:
