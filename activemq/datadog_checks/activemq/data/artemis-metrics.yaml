@@ -2,9 +2,9 @@ jmx_metrics:
   - include:
       domain: org.apache.activemq.artemis
       bean_regex:
-        - org.apache.activemq.artemis:broker="broker01"
+        - org.apache.activemq.artemis:broker="(.*)"
       tags:
-        broker: broker01
+        broker: $1
       attribute:
         ConnectionCount:
           alias: activemq.broker.ConnectionCount
@@ -37,20 +37,21 @@ jmx_metrics:
           alias: activemq.address.MessageCount
           metric_type: gauge
         NumberOfMessages:
-          alias: activemq.address.MessageCount
+          alias: activemq.address.NumberOfMessages
           metric_type: gauge
         UnRoutedMessageCount:
-          alias: activemq.address.MessageCount
+          alias: activemq.address.UnRoutedMessageCount
           metric_type: gauge
 
   - include:
       domain: org.apache.activemq.artemis
       bean_regex:
-      - org.apache.activemq.artemis:broker="(.*)",component=addresses,address="(.*)",subcomponent=queues,routing-type="anycast",queue="(.*)"
+      - org.apache.activemq.artemis:broker="(.*)",component=addresses,address="(.*)",subcomponent=queues,routing-type="(.*)",queue="(.*)"
       tags:
         broker: $1
         address: $2
-        queue: $3
+        routing: $3
+        queue: $4
       attribute:
         ConsumerCount:
           alias: activemq.queue.ConsumerCount
