@@ -158,7 +158,7 @@ gitlab.puma.workers,gauge,,worker,,Total number of puma workers,0,gitlab,puma wo
 gitlab.puma.running_workers,gauge,,worker,,Number of booted puma workers,0,gitlab,puma running workers
 gitlab.puma.stale_workers,gauge,,worker,,Number of old puma workers,0,gitlab,puma old workers
 gitlab.puma.running,gauge,,thread,,Number of running puma threads,0,gitlab,puma run
-gitlab.puma.queued_connections,gauge,,connection,,Number of connections in that puma worker’s "todo" set waiting for a worker thread,0,gitlab,puma queued conn
+gitlab.puma.queued_connections,gauge,,connection,,Number of connections in that puma worker's "todo" set waiting for a worker thread,0,gitlab,puma queued conn
 gitlab.puma.active_connections,gauge,,thread,,Number of puma threads processing a request,0,gitlab,puma active conn
 gitlab.puma.pool_capacity,gauge,,request,,Number of requests the puma worker is capable of taking right now,0,gitlab,puma pool cap
 gitlab.puma.max_threads,gauge,,thread,,Maximum number of puma worker threads,0,gitlab,puma worker max
