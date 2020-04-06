@@ -21,7 +21,7 @@ def test_collect_metadata_instance(aggregator, datadog_agent, instance):
 
     check = Fluentd(CHECK_NAME, {}, [instance])
     check.check_id = CHECK_ID
-    check.check({})
+    check.check(None)
 
     major, minor, patch = FLUENTD_VERSION.split('.')
     version_metadata = {
@@ -42,7 +42,7 @@ def test_collect_metadata_missing_version(aggregator, datadog_agent, instance):
 
     check = Fluentd(CHECK_NAME, {}, [instance])
     check.check_id = CHECK_ID
-    check.check({})
+    check.check(None)
 
     datadog_agent.assert_metadata(CHECK_ID, {})
     datadog_agent.assert_metadata_count(0)
@@ -54,7 +54,7 @@ def test_collect_metadata_invalid_binary(datadog_agent, instance):
 
     check = Fluentd(CHECK_NAME, {}, [instance])
     check.check_id = CHECK_ID
-    check.check({})
+    check.check(None)
 
     datadog_agent.assert_metadata(CHECK_ID, {})
     datadog_agent.assert_metadata_count(0)
@@ -66,7 +66,7 @@ def test_collect_metadata_invalid_binary_with_endpoint(datadog_agent, instance):
 
     check = Fluentd(CHECK_NAME, {}, [instance])
     check.check_id = CHECK_ID
-    check.check({})
+    check.check(None)
 
     major, minor, patch = FLUENTD_VERSION.split('.')
     version_metadata = {

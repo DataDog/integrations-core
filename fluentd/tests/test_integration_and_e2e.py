@@ -27,8 +27,8 @@ def assert_basic_case(aggregator):
 def test_basic_case_integration(aggregator):
     instance = copy.deepcopy(INSTANCE_WITH_PLUGIN)
     check = Fluentd(CHECK_NAME, {}, [instance])
-    check.check({})
-    check.check({})
+    check.check(None)
+    check.check(None)
 
     assert_basic_case(aggregator)
 
