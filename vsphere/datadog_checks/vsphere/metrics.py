@@ -69,7 +69,7 @@ DATASTORE_METRICS = {
     'datastore.commandsAborted.summation',
     'disk.capacity.latest',
     'disk.provisioned.latest',
-    'disk.used.latest'
+    'disk.used.latest',
     'disk.numberReadAveraged.average',
     'disk.numberWriteAveraged.average',
 }
