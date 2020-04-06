@@ -21,7 +21,7 @@
     "autodiscovery"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "confluent-platform",
   "assets": {
     "configuration": {
