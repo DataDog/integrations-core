@@ -47,11 +47,17 @@ jmx_metrics:
       domain: org.apache.activemq.artemis
       bean_regex:
       - org.apache.activemq.artemis:broker="(.*)",component=addresses,address="(.*)",subcomponent=queues,routing-type="(.*)",queue="(.*)"
+      #- org.apache.activemq.artemis:broker="(.*)",component=addresses,address="(.*)",subcomponent=(queue|topic)s,routing-type="(.*)",(queue|topic)="(.*)"
       tags:
         broker: $1
         address: $2
         routing: $3
         queue: $4
+        #broker: $1
+        #address: $2
+        #subcomponent: $3
+        #routing: $4
+        #"$5": $6
       attribute:
         ConsumerCount:
           alias: activemq.queue.ConsumerCount
