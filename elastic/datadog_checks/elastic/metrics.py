@@ -202,6 +202,16 @@ STATS_METRICS = {
     'elasticsearch.fs.total.total_in_bytes': ('gauge', 'fs.total.total_in_bytes'),
     'elasticsearch.fs.total.free_in_bytes': ('gauge', 'fs.total.free_in_bytes'),
     'elasticsearch.fs.total.available_in_bytes': ('gauge', 'fs.total.available_in_bytes'),
+    'system.cpu.idle': ('gauge', 'os.cpu.percent'),
+    'system.load.1': ('gauge', 'os.cpu.load_average.1m'),
+    'system.load.5': ('gauge', 'os.cpu.load_average.5m'),
+    'system.load.15': ('gauge', 'os.cpu.load_average.15m'),
+    'system.mem.total': ('gauge', 'os.mem.total_in_bytes'),
+    'system.mem.free': ('gauge', 'os.mem.free_in_bytes'),
+    'system.mem.used': ('gauge', 'os.mem.used_in_bytes'),
+    'system.swap.total': ('gauge', 'os.swap.total_in_bytes'),
+    'system.swap.free': ('gauge', 'os.swap.free_in_bytes'),
+    'system.swap.used': ('gauge', 'os.swap.used_in_bytes'),
 }
 
 ADDITIONAL_METRICS_POST_7_2_0 = {
