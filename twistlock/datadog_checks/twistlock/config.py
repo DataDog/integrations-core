@@ -18,3 +18,5 @@ class Config:
         self.project = instance.get('project')
         if self.project:
             self.tags.append("project:{}".format(self.project))
+
+        self.batch_size = instance.get('batch_size', 50)

@@ -193,3 +193,8 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+    ## @param batch_size - integer - optional - default: 50
+    ## The number of objects requested for each API calls.
+    #
+    # batch_size: 50

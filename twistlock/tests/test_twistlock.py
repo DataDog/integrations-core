@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import json
 import os
 
 import mock
@@ -51,9 +50,6 @@ class MockResponse:
     @property
     def content(self):
         return ensure_bytes(self._json)
-
-    def json(self):
-        return json.loads(self._json)
 
 
 def mock_get_factory(fixture_group):

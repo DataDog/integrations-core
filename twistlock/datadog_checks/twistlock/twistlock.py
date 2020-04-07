@@ -102,7 +102,7 @@ class TwistlockCheck(AgentCheck):
         namespace = "{}.registry".format(self.NAMESPACE)
         service_check_name = "{}.can_connect".format(self.NAMESPACE)
         try:
-            scan_result = self._retrieve_json("/api/v1/registry")
+            scan_result = self._retrieve_batch_json("/api/v1/registry")
             self.service_check(service_check_name, AgentCheck.OK, tags=self.config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: %s", e)
@@ -128,7 +128,7 @@ class TwistlockCheck(AgentCheck):
         namespace = "{}.images".format(self.NAMESPACE)
         service_check_name = "{}.can_connect".format(self.NAMESPACE)
         try:
-            scan_result = self._retrieve_json("/api/v1/images")
+            scan_result = self._retrieve_batch_json("/api/v1/images")
             self.service_check(service_check_name, AgentCheck.OK, tags=self.config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: %s", e)
@@ -159,7 +159,7 @@ class TwistlockCheck(AgentCheck):
         namespace = "{}.hosts".format(self.NAMESPACE)
         service_check_name = "{}.can_connect".format(self.NAMESPACE)
         try:
-            scan_result = self._retrieve_json("/api/v1/hosts")
+            scan_result = self._retrieve_batch_json("/api/v1/hosts")
             self.service_check(service_check_name, AgentCheck.OK, tags=self.config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: %s", e)
@@ -183,7 +183,7 @@ class TwistlockCheck(AgentCheck):
         namespace = "{}.containers".format(self.NAMESPACE)
         service_check_name = "{}.can_connect".format(self.NAMESPACE)
         try:
-            scan_result = self._retrieve_json("/api/v1/containers")
+            scan_result = self._retrieve_batch_json("/api/v1/containers")
             self.service_check(service_check_name, AgentCheck.OK, tags=self.config.tags)
         except Exception as e:
             self.warning("cannot retrieve registry data: %s", e)
@@ -312,10 +312,12 @@ class TwistlockCheck(AgentCheck):
             scan_status = AgentCheck.CRITICAL
         self.service_check('{}.is_scanned'.format(prefix), scan_status, tags=tags, message=message)
 
-    def _retrieve_json(self, path):
+    def _retrieve_json(self, path, params=None):
         url = self.config.url + path
         project = self.config.project
-        qparams = {'project': project} if project else None
+        qparams = {'project': project} if project else {}
+        if params:
+            qparams.update(params)
         response = self.http.get(url, params=qparams)
         try:
             # it's possible to get a null response from the server
@@ -330,3 +332,14 @@ class TwistlockCheck(AgentCheck):
         except Exception as e:
             self.log.debug("cannot get a response: %s response is: %s", e, response.text)
             raise e
+
+    def _retrieve_batch_json(self, path):
+        offset = 0
+        limit = self.config.batch_size
+        while True:
+            data = self._retrieve_json(path, {'offset': offset, 'limit': limit})
+            for item in data:
+                yield item
+            if len(data) < limit:
+                break
+            offset += limit
