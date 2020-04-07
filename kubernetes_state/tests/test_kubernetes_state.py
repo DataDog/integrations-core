@@ -239,9 +239,9 @@ def instance():
     }
 
 
-def _check(instance):
+def _check(instance,mock_file="prometheus.txt"):
     check = KubernetesState(CHECK_NAME, {}, {}, [instance])
-    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
+    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file(mock_file), 'text/plain'))
     return check
 
 
@@ -257,9 +257,9 @@ def check_with_join_kube_labels(instance):
 
 
 @pytest.fixture
-def check_with_join_standard_tag_labels(instance):
+def check_with_join_standard_tag_labels(instance, ):
     instance['join_standard_tags'] = True
-    return _check(instance)
+    return _check(instance=instance, mock_file="ksm-standard-tags-gke.txt")
 
 
 def assert_not_all_zeroes(aggregator, metric_name):
@@ -428,37 +428,116 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
     for _ in range(2):
         check_with_join_standard_tag_labels.check(instance)
 
+    # Pod standard tags
     aggregator.assert_metric(
-        NAMESPACE + '.container.waiting',
+        NAMESPACE + '.container.ready',
         tags=[
-            'container:registry-creds',
-            'kube_container_name:registry-creds',
-            'kube_namespace:kube-system',
-            'namespace:kube-system',
-            'node:minikube',
+            'container:master',
+            'kube_container_name:master',
+            'kube_namespace:default',
+            'namespace:default',
             'optional:tag1',
-            'phase:pending',
-            'pod:registry-creds-hq249',
-            'pod_name:registry-creds-hq249',
-            'pod_phase:pending',
+            'node:gke-abcdef-cluster-default-pool-53c8a4ea-z9rw',
+            'phase:running',
+            'pod:redis-599d64fcb9-c654j',
+            'pod_name:redis-599d64fcb9-c654j',
+            'pod_phase:running',
             "env:dev",
-            "service:registry-creds",
-            "version:v1.8"
+            "service:redis",
+            "version:v1"
         ],
         value=1,
     )
 
+    # Deployment standard tags
     aggregator.assert_metric(
         NAMESPACE + '.deployment.replicas',
         tags=[
-            'deployment:tiller-deploy',
-            'kube_deployment:tiller-deploy',
-            'kube_namespace:kube-system',
-            'namespace:kube-system',
+            'deployment:redis',
+            'kube_deployment:redis',
+            'kube_namespace:default',
+            'namespace:default',
             'optional:tag1',
             "env:dev",
-            "service:tiller",
-            "version:xyz"
+            "service:redis",
+            "version:v1"
+        ],
+        value=1,
+    )
+
+    # ReplicaSet standard tags
+    aggregator.assert_metric(
+        NAMESPACE + '.replicaset.replicas_ready',
+        tags=[
+            'replicaset:redis-599d64fcb9',
+            'kube_replica_set:redis-599d64fcb9',
+            'kube_namespace:default',
+            'namespace:default',
+            'optional:tag1',
+            "env:dev",
+            "service:redis",
+            "version:v1"
+        ],
+        value=1,
+    )
+
+    # Daemonset standard tags
+    aggregator.assert_metric(
+        NAMESPACE + '.daemonset.desired',
+        tags=[
+            'daemonset:datadog-monitoring',
+            'kube_daemon_set:datadog-monitoring',
+            'kube_namespace:default',
+            'namespace:default',
+            'optional:tag1',
+            "env:dev",
+            "service:datadog-agent",
+            "version:7"
+        ],
+        value=3,
+    )
+
+    # StatefulSet standard tags
+    aggregator.assert_metric(
+        NAMESPACE + '.statefulset.replicas_ready',
+        tags=[
+            'statefulset:web',
+            'kube_namespace:default',
+            'namespace:default',
+            'optional:tag1',
+            "env:dev",
+            "service:web",
+            "version:v1"
+        ],
+        value=2,
+    )
+
+    # Job standard tags
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded',
+        tags=[
+            'job_name:curl-job',
+            'kube_namespace:default',
+            'namespace:default',
+            'optional:tag1',
+            "env:dev",
+            "service:curl-job",
+            "version:v1"
+        ],
+        value=1,
+    )
+
+    # CronJob standard tags
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded',
+        tags=[
+            'job_name:curl-cron-job',
+            'kube_namespace:default',
+            'namespace:default',
+            'optional:tag1',
+            "env:dev",
+            "service:curl-cron-job",
+            "version:v1"
         ],
         value=1,
     )

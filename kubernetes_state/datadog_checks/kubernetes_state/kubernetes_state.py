@@ -371,64 +371,38 @@ class KubernetesState(OpenMetricsBaseCheck):
                 }
             )
 
+        labels_to_get = [
+            "label_tags_datadoghq_com_env",
+            "label_tags_datadoghq_com_service",
+            "label_tags_datadoghq_com_version"
+        ]
+
         if join_standard_tags:
             ksm_instance['label_joins'].update(
                 {
                     "kube_pod_labels": {
                         "labels_to_match": ["pod", "namespace"],
-                        "labels_to_get": [
-                            "label_tags_datadoghq_com_env",
-                            "label_tags_datadoghq_com_service",
-                            "label_tags_datadoghq_com_version"
-                        ]
+                        "labels_to_get": labels_to_get
                     },
                     "kube_deployment_labels": {
                         "labels_to_match": ["deployment", "namespace"],
-                        "labels_to_get": [
-                            "label_tags_datadoghq_com_env",
-                            "label_tags_datadoghq_com_service",
-                            "label_tags_datadoghq_com_version"
-                        ]
+                        "labels_to_get": labels_to_get
                     },
                     "kube_replicaset_labels": {
                         "labels_to_match": ["replicaset", "namespace"],
-                        "labels_to_get": [
-                            "label_tags_datadoghq_com_env",
-                            "label_tags_datadoghq_com_service",
-                            "label_tags_datadoghq_com_version"
-                        ]
+                        "labels_to_get": labels_to_get
                     },
                     "kube_daemonset_labels": {
                         "labels_to_match": ["daemonset", "namespace"],
-                        "labels_to_get": [
-                            "label_tags_datadoghq_com_env",
-                            "label_tags_datadoghq_com_service",
-                            "label_tags_datadoghq_com_version"
-                        ]
+                        "labels_to_get": labels_to_get
                     },
                     "kube_statefulset_labels": {
                         "labels_to_match": ["statefulset", "namespace"],
-                        "labels_to_get": [
-                            "label_tags_datadoghq_com_env",
-                            "label_tags_datadoghq_com_service",
-                            "label_tags_datadoghq_com_version"
-                        ]
+                        "labels_to_get": labels_to_get
                     },
                     "kube_job_labels": {
-                        "labels_to_match": ["job", "namespace"],
-                        "labels_to_get": [
-                            "label_tags_datadoghq_com_env",
-                            "label_tags_datadoghq_com_service",
-                            "label_tags_datadoghq_com_version"
-                        ]
-                    },
-                    "kube_cronjob_labels": {
-                        "labels_to_match": ["cronjob", "namespace"],
-                        "labels_to_get": [
-                            "label_tags_datadoghq_com_env",
-                            "label_tags_datadoghq_com_service",
-                            "label_tags_datadoghq_com_version"
-                        ]
+                        "labels_to_match": ["job_name", "namespace"],
+                        "labels_to_get": labels_to_get
                     },
                 }
             )
