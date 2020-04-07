@@ -2722,6 +2722,7 @@ def test_template_array():
         'password',
         'ntlm_domain',
         'kerberos_auth',
+        'kerberos_cache',
         'kerberos_delegate',
         'kerberos_force_initiate',
         'kerberos_hostname',
