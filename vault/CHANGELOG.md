@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 2.3.1 / 2020-04-07
+
+* [Fixed] Add `kerberos_cache` to HTTP config options. See [#6279](https://github.com/DataDog/integrations-core/pull/6279).
+
 ## 2.3.0 / 2020-04-04
 
 * [Added] Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).
