@@ -10,55 +10,55 @@ from datadog_checks.elastic.metrics import health_stats_for_version, pshard_stat
 def test_stats_for_version():
     # v0.90
     metrics = stats_for_version([0, 90, 0])
-    assert len(metrics) == 143
+    assert len(metrics) == 133
 
     # v0.90.5
     metrics = stats_for_version([0, 90, 5])
-    assert len(metrics) == 144
+    assert len(metrics) == 134
 
     # v0.90.10
     metrics = stats_for_version([0, 90, 10])
-    assert len(metrics) == 142
+    assert len(metrics) == 132
 
     # v1
     metrics = stats_for_version([1, 0, 0])
-    assert len(metrics) == 150
+    assert len(metrics) == 140
 
     # v1.3.0
     metrics = stats_for_version([1, 3, 0])
-    assert len(metrics) == 152
+    assert len(metrics) == 142
 
     # v1.4.0
     metrics = stats_for_version([1, 4, 0])
-    assert len(metrics) == 172
+    assert len(metrics) == 162
 
     # v1.5.0
     metrics = stats_for_version([1, 5, 0])
-    assert len(metrics) == 175
+    assert len(metrics) == 165
 
     # v1.6.0
     metrics = stats_for_version([1, 6, 0])
-    assert len(metrics) == 183
+    assert len(metrics) == 173
 
     # v2
     metrics = stats_for_version([2, 0, 0])
-    assert len(metrics) == 182
+    assert len(metrics) == 172
 
     # v2.1.0
     metrics = stats_for_version([2, 1, 0])
-    assert len(metrics) == 187
+    assert len(metrics) == 177
 
     # v5
     metrics = stats_for_version([5, 0, 0])
-    assert len(metrics) == 190
+    assert len(metrics) == 180
 
     # v6.3.0
     metrics = stats_for_version([6, 3, 0])
-    assert len(metrics) == 190
+    assert len(metrics) == 180
 
     # v7.2.0
     metrics = stats_for_version([7, 2, 0])
-    assert len(metrics) == 187
+    assert len(metrics) == 177
 
 
 @pytest.mark.unit
