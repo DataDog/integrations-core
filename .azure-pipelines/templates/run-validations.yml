@@ -29,4 +29,4 @@ steps:
   displayName: 'Validate service check data'
 
 - script: ddev validate imports
-  displayName: 'Validate service check data'
+  displayName: 'Validate imports'
