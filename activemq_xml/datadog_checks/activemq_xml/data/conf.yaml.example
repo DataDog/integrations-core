@@ -169,6 +169,12 @@ instances:
     #
     # kerberos_auth: disabled
 
+    ## @param kerberos_cache - string - optional
+    ## Sets the KRB5CCNAME environment variable.
+    ## It should point to a credential cache with a valid TGT.
+    #
+    # kerberos_cache: <KERBEROS_CACHE>
+
     ## @param kerberos_delegate - boolean - optional - default: false
     ## Set to `true` to enable kerberos delegation of credentials to a server that requests delegation.
     ##
@@ -204,12 +210,6 @@ instances:
     ## Set the path to your Kerberos key tab file.
     #
     # kerberos_keytab: <KEYTAB_FILE_PATH>
-
-    ## @param kerberos_cache - string - optional
-    ## Sets the KRB5CCNAME environment variable.
-    ## It should point to a credential cache with a valid TGT.
-    #
-    # kerberos_cache: <KERBEROS_CACHE>
 
     ## @param aws_region - string - optional
     ## If your services require AWS Signature Version 4 Signing, set the region.
