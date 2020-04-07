@@ -1,12 +1,17 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections import defaultdict
+
 import requests
 
 
 class TrelloClient:
     API_URL = 'https://api.trello.com'
     CREATE_ENDPOINT = API_URL + '/1/cards'
+    BOARD_ENDPOINT = API_URL + '/1/boards/ICjijxr4/cards'
+    LISTS_ENDPOINT = API_URL + '/1/boards/ICjijxr4/lists'
+    LABELS_ENDPOINT = API_URL + '/1/boards/ICjijxr4/labels'
 
     def __init__(self, config):
         self.auth = {'key': config['trello']['key'] or None, 'token': config['trello']['token'] or None}
@@ -77,3 +82,55 @@ class TrelloClient:
             rate_limited = response.status_code == 429
 
         return rate_limited, error, response
+
+    def count_by_columns(self):
+        """
+        Output:
+
+            'Containers': Total (In Progress / Issues Found / Awaiting Build / Done)
+            'Core': Total (In Progress / Issues Found / Awaiting Build / Done)
+            'Integrations': Total (In Progress / Issues Found / Awaiting Build / Done)
+            'Logs':
+            'Platform':
+            'Networks':
+            'Processes':
+            'Trace':
+
+        """
+        columns = requests.get(self.LISTS_ENDPOINT, params=self.auth)
+        column_map = {c['id']: c['name'] for c in columns.json()}
+
+        map_label = {v: k for k, v in self.label_map.items()}
+        map_team_list = {v: k for k, v in self.team_list_map.items()}
+
+        counts = {k: {'Total': 0,
+                      'In Progress': 0,
+                      'Issues Found': 0,
+                      'Awaiting Build': 0,
+                      'Done': 0} for k in map_label.values()}
+
+        cards = requests.get(self.BOARD_ENDPOINT, params=self.auth)
+        for card in cards.json():
+            labels = card.get('labels', [])
+            for label in labels:
+                if label['name'] in self.label_map:
+                    team = label['name']
+                    counts[team]['Total'] += 1
+                    if card['idList'] in map_team_list:
+                        # Team's Inbox
+                        counts[team]['In Progress'] += 1
+                    elif card['idList'] == '55d1fe4cd3192ab85fa0f7ea':
+                        # INPROGRESS
+                        counts[team]['In Progress'] += 1
+                    elif card['idList'] == '58f0c271cbf2d534bd626916':
+                        # HAVE BUGS
+                        counts[team]['Issues Found'] += 1
+                    elif card['idList'] == '5d5a8a50ca7a0189ae8ac5ac':
+                        # WAITING
+                        counts[team]['Awaiting Build'] += 1
+                    elif card['idList'] == '5dfb4eef503607473af708ab':
+                        # Done
+                        counts[team]['Done'] += 1
+
+        for k, v in counts.items():
+            print(k, v)

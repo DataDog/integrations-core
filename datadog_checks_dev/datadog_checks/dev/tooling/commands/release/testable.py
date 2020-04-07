@@ -138,8 +138,9 @@ def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
 @click.argument('target_ref')
 @click.option('--milestone', help='The PR milestone to filter by')
 @click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
+@click.option('--counts', '-c', is_flag=True, help='Only show the counts on the board')
 @click.pass_context
-def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str, dry_run: bool) -> None:
+def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str, dry_run: bool, counts: bool) -> None:
     """
     Create a Trello card for changes since a previous release (referenced by `BASE_REF`)
     that need to be tested for the next release (referenced by `TARGET_REF`).
@@ -222,6 +223,10 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
     commit_ids: Set[str] = set()
     user_config = ctx.obj
     trello = TrelloClient(user_config)
+
+    if counts:
+        trello.count_by_columns()
+        return
 
     for i, (commit_hash, commit_subject) in enumerate(commits, 1):
         commit_id = parse_pr_number(commit_subject)
