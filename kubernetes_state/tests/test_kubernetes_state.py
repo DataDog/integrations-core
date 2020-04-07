@@ -239,7 +239,7 @@ def instance():
     }
 
 
-def _check(instance,mock_file="prometheus.txt"):
+def _check(instance, mock_file="prometheus.txt"):
     check = KubernetesState(CHECK_NAME, {}, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file(mock_file), 'text/plain'))
     return check
