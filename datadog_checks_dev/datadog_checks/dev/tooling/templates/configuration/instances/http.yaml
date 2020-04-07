@@ -102,6 +102,12 @@
       - disabled
 
     See https://github.com/requests/requests-kerberos#mutual-authentication
+- name: kerberos_cache
+  value:
+    type: string
+  description: |
+    Sets the KRB5CCNAME environment variable.
+    It should point to a credential cache with a valid TGT.
 - name: kerberos_delegate
   value:
     example: false
