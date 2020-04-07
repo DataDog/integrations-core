@@ -471,6 +471,7 @@ CLUSTER_PENDING_TASKS = {
 
 NODE_OS_METRICS = {
     'system.mem.free': ('gauge', 'os.mem.free_in_bytes'),
+    'system.mem.usable': ('gauge', 'os.mem.free_in_bytes'),
     'system.mem.used': ('gauge', 'os.mem.used_in_bytes'),
     'system.swap.free': ('gauge', 'os.swap.free_in_bytes'),
     'system.swap.used': ('gauge', 'os.swap.used_in_bytes'),
