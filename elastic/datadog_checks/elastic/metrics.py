@@ -599,11 +599,11 @@ def node_system_stats_for_version(version):
     """
     Get the proper set of os metrics for the specified ES version
     """
-    os_stats = dict(NODE_SYSTEM_METRICS)
+    node_system_stats = dict(NODE_SYSTEM_METRICS)
 
     if version >= [1, 0, 0]:
-        os_stats.update(NODE_SYSTEM_METRICS_POST_1)
+        node_system_stats.update(NODE_SYSTEM_METRICS_POST_1)
     if version >= [5, 0, 0]:
-        os_stats.update(NODE_SYSTEM_METRICS_POST_5)
+        node_system_stats.update(NODE_SYSTEM_METRICS_POST_5)
 
-    return os_stats
+    return node_system_stats
