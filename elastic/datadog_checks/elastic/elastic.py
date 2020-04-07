@@ -15,9 +15,9 @@ from .metrics import (
     CLUSTER_PENDING_TASKS,
     health_stats_for_version,
     index_stats_for_version,
+    node_os_stats_for_version,
     pshard_stats_for_version,
     stats_for_version,
-    node_os_stats_for_version,
 )
 
 
