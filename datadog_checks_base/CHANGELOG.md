@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 11.5.0 / 2020-04-07
+
+* [Added] Update PyYAML to 5.3.1. See [#6276](https://github.com/DataDog/integrations-core/pull/6276).
+
 ## 11.4.0 / 2020-04-04
 
 * [Added] Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).

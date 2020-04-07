@@ -1,18 +1,18 @@
 datadog-active-directory==1.7.0; sys_platform == 'win32'
-datadog-activemq-xml==1.6.0
+datadog-activemq-xml==1.6.1
 datadog-activemq==1.4.0
 datadog-aerospike==1.7.0; sys_platform != 'win32'
 datadog-airflow==1.2.0
 datadog-amazon-msk==1.0.0
 datadog-ambari==1.2.1; sys_platform != 'win32'
-datadog-apache==1.11.0
+datadog-apache==1.11.1
 datadog-aspdotnet==1.4.1; sys_platform == 'win32'
 datadog-btrfs==1.9.0; sys_platform != 'win32'
 datadog-cacti==1.6.1; sys_platform == 'linux2'
 datadog-cassandra-nodetool==1.5.2
 datadog-cassandra==1.5.0
 datadog-ceph==2.0.0; sys_platform != 'win32'
-datadog-checks-base==11.4.0
+datadog-checks-base==11.5.0
 datadog-checks-downloader==2.4.0
 datadog-cilium==1.1.0
 datadog-cisco-aci==1.8.4
@@ -37,7 +37,7 @@ datadog-etcd==2.2.1
 datadog-exchange-server==1.6.0; sys_platform == 'win32'
 datadog-external-dns==1.0.0
 datadog-flink==1.1.0
-datadog-fluentd==1.7.0
+datadog-fluentd==1.7.1
 datadog-gearmand==1.5.0; sys_platform != 'win32'
 datadog-gitlab-runner==2.7.2
 datadog-gitlab==3.0.0
@@ -58,7 +58,7 @@ datadog-istio==3.0.0
 datadog-jboss-wildfly==1.2.0
 datadog-kafka-consumer==2.4.0; sys_platform != 'win32'
 datadog-kafka==2.0.3
-datadog-kong==1.8.0
+datadog-kong==1.8.1
 datadog-kube-apiserver-metrics==1.2.3
 datadog-kube-controller-manager==1.6.1
 datadog-kube-dns==2.3.1
@@ -85,7 +85,7 @@ datadog-nfsstat==1.4.2; sys_platform == 'linux2'
 datadog-nginx-ingress-controller==1.2.2
 datadog-nginx==3.6.1
 datadog-openldap==1.4.1
-datadog-openmetrics==1.6.0
+datadog-openmetrics==1.6.1
 datadog-openstack-controller==1.8.1
 datadog-openstack==1.9.1
 datadog-oracle==2.0.1
@@ -126,7 +126,7 @@ datadog-tomcat==1.2.1
 datadog-twemproxy==1.5.0
 datadog-twistlock==1.6.0
 datadog-varnish==1.6.1
-datadog-vault==2.3.0
+datadog-vault==2.3.1
 datadog-vertica==1.4.1
 datadog-vsphere==5.1.0
 datadog-win32-event-log==2.3.3; sys_platform == 'win32'
