@@ -1,5 +1,9 @@
 # CHANGELOG - OpenMetrics
 
+## 1.6.1 / 2020-04-07
+
+* [Fixed] Add `kerberos_cache` to HTTP config options. See [#6279](https://github.com/DataDog/integrations-core/pull/6279).
+
 ## 1.6.0 / 2020-04-04
 
 * [Added] Add OpenMetrics config spec template. See [#6142](https://github.com/DataDog/integrations-core/pull/6142).
