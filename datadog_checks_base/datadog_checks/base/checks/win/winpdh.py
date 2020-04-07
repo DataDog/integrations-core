@@ -133,8 +133,13 @@ class WinPDHCounter(object):
         # by counter name. Some systems may have an odd number of entries, don't
         # accidentaly index at val[len(val]
         print("=== val: ", val)
-        for idx in range(0, len(val) - 1, 2):
+        idx = 0
+        idx_max = len(val)
+        while idx < idx_max:
+            # counter index is idx , counter name is idx + 1
             WinPDHCounter.pdh_counter_dict[val[idx + 1]].append(val[idx])
+            idx += 2
+        1/0
 
     def _make_counter_path(self, machine_name, counter_name, instance_name, counters):
         """
