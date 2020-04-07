@@ -10393,7 +10393,7 @@ MEDIA - Number of send-receive video channels started
 10908
 MEDIA - Average time spent in processing audio packets
 10910
- 
+
 10912
 MEDIA - Timer ticks/sec
 10914
@@ -10401,11 +10401,11 @@ MEDIA - Conference process rate
 10916
 MEDIA - Average ICE Address Binding Time
 10918
- 
+
 10920
 MEDIA - Average ICE Connectivity Check Time
 10922
- 
+
 10924
 MEDIA - Audio packets received from transport provider/sec
 10926
@@ -10535,11 +10535,11 @@ MEDIA - Total conference processed/sec
 11050
 MEDIA - Average Conference Processing Time
 11052
- 
+
 11054
 MEDIA - Average Transport Processing Time
 11056
- 
+
 11058
 MEDIA - Number of audio channels with 20ms send ptime
 11060
@@ -10563,69 +10563,69 @@ MEDIA - Number of audio channels with 200ms receive ptime
 11078
 MEDIA - Average Siren Encode Time(100ns)
 11080
- 
+
 11082
 MEDIA - Average Siren Decode Time(100ns)
 11084
- 
+
 11086
 MEDIA - Average Scale SRTP encrypt large packet Time(100ns)
 11088
- 
+
 11090
 MEDIA - Average Scale SRTP encrypt small packet Time(100ns)
 11092
- 
+
 11094
 MEDIA - Average Scale SRTP inc auth large packet Time(100ns)
 11096
- 
+
 11098
 MEDIA - Average Scale SRTP inc auth small packet Time(100ns)
 11100
- 
+
 11102
 MEDIA - Average Scale SRTP final auth large packet Time(100ns)
 11104
- 
+
 11106
 MEDIA - Average Scale SRTP final auth small packet Time(100ns)
 11108
- 
+
 11110
 MEDIA - Average Scale SRTP decrypt large packet Time(100ns)
 11112
- 
+
 11114
 MEDIA - Average Scale SRTP decrypt small packet Time(100ns)
 11116
- 
+
 11118
 MEDIA - Average SRTP auth check large packet Time(100ns)
 11120
- 
+
 11122
 MEDIA - Average SRTP auth check small packet Time(100ns)
 11124
- 
+
 11126
 MEDIA - Number of packets dropped in transport
 11128
 MEDIA - Average time(100ns) to send a packet
 11130
- 
+
 11132
 MEDIA - Average time(us) process audio router
 11134
- 
+
 11136
 MEDIA - Average time(us) process video router
 11138
- 
+
 11140
 MEDIA - Average time(us) process channel router
 11142
- 
+
 11144
 MEDIA - Counter1
 11146
@@ -10645,19 +10645,19 @@ MEDIA - Value4
 11160
 MEDIA - Average value1
 11162
- 
+
 11164
 MEDIA - Average value2
 11166
- 
+
 11168
 MEDIA - Average value3
 11170
- 
+
 11172
 MEDIA - Average value4
 11174
- 
+
 11176
 MEDIA - Number of audio mixes/sec
 11178
@@ -10691,7 +10691,7 @@ MEDIA - Total number of CBufferTransportIOContext objects posted
 11206
 MEDIA - Number of conference across core moves/sec
 11208
- 
+
 11210
 MEDIA - Number of conferences across core moves
 11212
@@ -18697,7 +18697,7 @@ In - Teredo Server Error Packets: Authentication Error
 18186
 Out - Teredo Server: RA-Primary
 18188
-Out - Teredo Server: RA-Secondary 
+Out - Teredo Server: RA-Secondary
 18190
 In - Teredo Server Total Packets: Success + Error / sec
 18138
@@ -20252,4 +20252,5 @@ Outgoing HTTP Bytes/sec
 Outgoing HTTP Messages
 16526
 Outgoing HTTP Bytes
+
 
