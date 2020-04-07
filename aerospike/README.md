@@ -11,22 +11,28 @@ Get metrics from Aerospike Database in real time to:
 
 ### Installation
 
-The Aerospike check is included in the [Datadog Agent][1] package.
+The Aerospike check is included in the Datadog Agent package.
 No additional installation is needed on your server.
 
 ### Configuration
 
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
+
 #### Host
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
+To configure this check for an Agent running on a host:
 
 1. Edit the `aerospike.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your aerospike performance data. See the [sample aerospike.d/conf.yaml][1] for all available configuration options.
 
 2. [Restart the Agent][2].
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Containerized" xxx -->
+
 #### Containerized
 
-For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
+For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying the parameters below.
 
 | Parameter            | Value                                |
 | -------------------- | ------------------------------------ |
@@ -34,15 +40,18 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 | `<INIT_CONFIG>`      | blank or `{}`                        |
 | `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":"3000"}` |
 
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
+
 ### Validation
 
-[Run the Agent's status subcommand][3] and look for `aerospike` under the Checks section.
+[Run the Agent's status subcommand][4] and look for `aerospike` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][4] for a list of metrics provided by this integration.
+See [metadata.csv][5] for a list of metrics provided by this integration.
 
 ### Service Checks
 
@@ -55,11 +64,11 @@ Aerospike does not include any events.
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][5].
+Need help? Contact [Datadog support][6].
 
 [1]: https://github.com/DataDog/integrations-core/blob/master/aerospike/datadog_checks/aerospike/data/conf.yaml.example
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[4]: https://github.com/DataDog/integrations-core/blob/master/aerospike/metadata.csv
-[5]: https://docs.datadoghq.com/help
-[6]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[3]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/aerospike/metadata.csv
+[6]: https://docs.datadoghq.com/help
