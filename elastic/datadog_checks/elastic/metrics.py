@@ -469,7 +469,7 @@ CLUSTER_PENDING_TASKS = {
     'elasticsearch.pending_tasks_time_in_queue': ('gauge', 'pending_tasks_time_in_queue'),
 }
 
-NODE_OS_METRICS = {
+NODE_SYSTEM_METRICS = {
     'system.mem.free': ('gauge', 'os.mem.free_in_bytes'),
     'system.mem.usable': ('gauge', 'os.mem.free_in_bytes'),
     'system.mem.used': ('gauge', 'os.mem.used_in_bytes'),
@@ -479,12 +479,12 @@ NODE_OS_METRICS = {
     'system.net.bytes_sent': ('gauge', 'transport.tx_size_in_bytes'),
 }
 
-NODE_OS_METRICS_POST_1 = {
+NODE_SYSTEM_METRICS_POST_1 = {
     'system.mem.total': ('gauge', 'os.mem.total_in_bytes'),
     'system.swap.total': ('gauge', 'os.swap.total_in_bytes'),
 }
 
-NODE_OS_METRICS_POST_5 = {
+NODE_SYSTEM_METRICS_POST_5 = {
     'system.cpu.idle': ('gauge', 'os.cpu.percent', lambda v: (100 - v)),
     'system.load.1': ('gauge', 'os.cpu.load_average.1m'),
     'system.load.5': ('gauge', 'os.cpu.load_average.5m'),
@@ -595,15 +595,15 @@ def index_stats_for_version(version):
     return index_stats
 
 
-def node_os_stats_for_version(version):
+def node_system_stats_for_version(version):
     """
     Get the proper set of os metrics for the specified ES version
     """
-    os_stats = dict(NODE_OS_METRICS)
+    os_stats = dict(NODE_SYSTEM_METRICS)
 
     if version >= [1, 0, 0]:
-        os_stats.update(NODE_OS_METRICS_POST_1)
+        os_stats.update(NODE_SYSTEM_METRICS_POST_1)
     if version >= [5, 0, 0]:
-        os_stats.update(NODE_OS_METRICS_POST_5)
+        os_stats.update(NODE_SYSTEM_METRICS_POST_5)
 
     return os_stats
