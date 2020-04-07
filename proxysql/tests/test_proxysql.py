@@ -5,7 +5,7 @@ import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.errors import ConfigurationError
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.proxysql import ProxysqlCheck
 
 from .common import (
