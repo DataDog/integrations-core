@@ -176,6 +176,12 @@ instances:
     #
     # kerberos_keytab: <KEYTAB_FILE_PATH>
 
+    ## @param kerberos_cache - string - optional
+    ## Sets the KRB5CCNAME environment variable.
+    ## It should point to a credential cache with a valid TGT.
+    #
+    # kerberos_cache: <KERBEROS_CACHE>
+
     ## @param aws_region - string - optional
     ## If your services require AWS Signature Version 4 Signing, set the region.
     ##
