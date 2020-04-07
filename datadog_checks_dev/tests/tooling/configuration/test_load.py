@@ -2727,6 +2727,7 @@ def test_template_array():
         'kerberos_hostname',
         'kerberos_principal',
         'kerberos_keytab',
+        'kerberos_cache',
         'aws_region',
         'aws_host',
         'aws_service',
