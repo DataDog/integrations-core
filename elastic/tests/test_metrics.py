@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.elastic.metrics import (
     health_stats_for_version,
-    node_os_stats_for_version,
+    node_system_stats_for_version,
     pshard_stats_for_version,
     stats_for_version,
 )
@@ -173,51 +173,51 @@ def test_health_stats_for_version():
 
 
 @pytest.mark.unit
-def test_node_os_stats_for_version():
+def test_node_system_stats_for_version():
     # v0.90
-    metrics = node_os_stats_for_version([0, 90, 0])
     assert len(metrics) == 4
+    metrics = node_system_stats_for_version([0, 90, 0])
 
     # v0.90.5
-    metrics = node_os_stats_for_version([0, 90, 5])
     assert len(metrics) == 4
+    metrics = node_system_stats_for_version([0, 90, 5])
 
     # v0.90.10
-    metrics = node_os_stats_for_version([0, 90, 10])
     assert len(metrics) == 4
+    metrics = node_system_stats_for_version([0, 90, 10])
 
     # v1
-    metrics = node_os_stats_for_version([1, 0, 0])
     assert len(metrics) == 6
+    metrics = node_system_stats_for_version([1, 0, 0])
 
     # v1.3.0
-    metrics = node_os_stats_for_version([1, 3, 0])
     assert len(metrics) == 6
+    metrics = node_system_stats_for_version([1, 3, 0])
 
     # v1.4.0
-    metrics = node_os_stats_for_version([1, 4, 0])
     assert len(metrics) == 6
+    metrics = node_system_stats_for_version([1, 4, 0])
 
     # v1.5.0
-    metrics = node_os_stats_for_version([1, 5, 0])
     assert len(metrics) == 6
+    metrics = node_system_stats_for_version([1, 5, 0])
 
     # v1.6.0
-    metrics = node_os_stats_for_version([1, 6, 0])
     assert len(metrics) == 6
+    metrics = node_system_stats_for_version([1, 6, 0])
 
     # v2
-    metrics = node_os_stats_for_version([2, 0, 0])
     assert len(metrics) == 6
+    metrics = node_system_stats_for_version([2, 0, 0])
 
     # v2.1.0
-    metrics = node_os_stats_for_version([2, 1, 0])
     assert len(metrics) == 6
+    metrics = node_system_stats_for_version([2, 1, 0])
 
     # v5
-    metrics = node_os_stats_for_version([5, 0, 0])
     assert len(metrics) == 10
+    metrics = node_system_stats_for_version([5, 0, 0])
 
     # v6.3.0
-    metrics = node_os_stats_for_version([6, 3, 0])
     assert len(metrics) == 10
+    metrics = node_system_stats_for_version([6, 3, 0])
