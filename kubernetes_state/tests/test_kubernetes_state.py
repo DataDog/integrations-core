@@ -257,7 +257,7 @@ def check_with_join_kube_labels(instance):
 
 
 @pytest.fixture
-def check_with_join_standard_tag_labels(instance, ):
+def check_with_join_standard_tag_labels(instance,):
     instance['join_standard_tags'] = True
     return _check(instance=instance, mock_file="ksm-standard-tags-gke.txt")
 
@@ -444,7 +444,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
             'pod_phase:running',
             "env:dev",
             "service:redis",
-            "version:v1"
+            "version:v1",
         ],
         value=1,
     )
@@ -460,7 +460,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
             'optional:tag1',
             "env:dev",
             "service:redis",
-            "version:v1"
+            "version:v1",
         ],
         value=1,
     )
@@ -476,7 +476,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
             'optional:tag1',
             "env:dev",
             "service:redis",
-            "version:v1"
+            "version:v1",
         ],
         value=1,
     )
@@ -492,7 +492,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
             'optional:tag1',
             "env:dev",
             "service:datadog-agent",
-            "version:7"
+            "version:7",
         ],
         value=3,
     )
@@ -507,7 +507,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
             'optional:tag1',
             "env:dev",
             "service:web",
-            "version:v1"
+            "version:v1",
         ],
         value=2,
     )
@@ -522,7 +522,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
             'optional:tag1',
             "env:dev",
             "service:curl-job",
-            "version:v1"
+            "version:v1",
         ],
         value=1,
     )
@@ -537,7 +537,7 @@ def test_join_standard_tags_labels(aggregator, instance, check_with_join_standar
             'optional:tag1',
             "env:dev",
             "service:curl-cron-job",
-            "version:v1"
+            "version:v1",
         ],
         value=1,
     )
