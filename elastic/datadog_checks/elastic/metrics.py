@@ -475,6 +475,8 @@ NODE_OS_METRICS = {
     'system.mem.used': ('gauge', 'os.mem.used_in_bytes'),
     'system.swap.free': ('gauge', 'os.swap.free_in_bytes'),
     'system.swap.used': ('gauge', 'os.swap.used_in_bytes'),
+    'system.net.bytes_rcvd': ('gauge', 'transport.rx_size_in_bytes'),
+    'system.net.bytes_sent': ('gauge', 'transport.tx_size_in_bytes'),
 }
 
 NODE_OS_METRICS_POST_1 = {
