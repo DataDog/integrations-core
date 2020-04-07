@@ -3,7 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.elastic.metrics import health_stats_for_version, pshard_stats_for_version, stats_for_version, node_os_stats_for_version
+from datadog_checks.elastic.metrics import (
+    health_stats_for_version,
+    node_os_stats_for_version,
+    pshard_stats_for_version,
+    stats_for_version,
+)
 
 
 @pytest.mark.unit
