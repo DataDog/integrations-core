@@ -1,32 +1,8 @@
 {
-    "author_info": {
-        "author_name": "Datadog"
-    }, 
-    "board_title": "Amazon ECS on AWS Fargate - Overview",
-    "created": "2020-01-22T22:21:55.684065+00:00", 
-    "created_by": {
-        "access_role": "adm", 
-        "disabled": false, 
-        "email": "support@datadoghq.com", 
-        "handle": "support@datadoghq.com", 
-        "is_admin": true, 
-        "name": "Datadog", 
-        "role": null, 
-        "title": null, 
-        "verified": true
-    }, 
+    "title": "Amazon ECS on AWS Fargate - Overview",
     "description": "## Amazon Fargate\n\nThis dashboard displays key metrics from your Amazon ECS cluster on AWS Fargate, such as cpu, memory, IO usage, and network.\n\nFurther reading on ECS-Fargate:\n\n- [Datadog ECS-Fargate integration docs](https://docs.datadoghq.com/integrations/ecs_fargate/)\n- [Integration setup docs](https://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate/?tab=rediswebui)\n", 
-    "disableCog": false, 
-    "disableEditing": false, 
-    "id": 954592, 
-    "isIntegration": false, 
-    "isShared": false, 
-    "modified": "2020-01-22T23:22:21.534129+00:00", 
-    "new_id": "qid-j4c-duh", 
-    "originalHeight": 80, 
-    "originalWidth": "calc(100% - 32px)", 
-    "read_only": false, 
     "template_variables": [], 
+    "layout_type": "free",
     "widgets": [
         {
             "id": 1,
