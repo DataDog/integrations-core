@@ -4,8 +4,6 @@
 
 import logging
 
-from pymqi import QueueManager
-
 from datadog_checks.ibm_mq.config import IBMMQConfig
 
 try:
@@ -17,7 +15,7 @@ log = logging.getLogger(__file__)
 
 
 def get_queue_manager_connection(config):
-    # type: (IBMMQConfig) -> QueueManager
+    # type: (IBMMQConfig) -> pymqi.QueueManager
     """
     Get the queue manager connection
     """
@@ -28,7 +26,7 @@ def get_queue_manager_connection(config):
 
 
 def get_normal_connection(config):
-    # type: (IBMMQConfig) -> QueueManager
+    # type: (IBMMQConfig) -> pymqi.QueueManager
     """
     Get the connection either with a username and password or without
     """
@@ -48,7 +46,7 @@ def get_normal_connection(config):
 
 
 def get_ssl_connection(config):
-    # type: (IBMMQConfig) -> QueueManager
+    # type: (IBMMQConfig) -> pymqi.QueueManager
     """
     Get the connection with SSL
     """
