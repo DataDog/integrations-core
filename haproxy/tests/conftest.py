@@ -14,6 +14,7 @@ from datadog_checks.haproxy import HAProxy
 from .common import (
     CHECK_CONFIG,
     CHECK_CONFIG_OPEN,
+    CONFIG_TCPSOCKET,
     HAPROXY_VERSION,
     HERE,
     PASSWORD,
@@ -21,7 +22,6 @@ from .common import (
     STATS_URL_OPEN,
     USERNAME,
     platform_supports_sockets,
-    CONFIG_TCPSOCKET,
 )
 
 log = logging.getLogger('test_haproxy')
