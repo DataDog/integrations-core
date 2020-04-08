@@ -78,7 +78,7 @@ def dd_environment():
                     config = deepcopy(CHECK_CONFIG)
                     unixsocket_url = 'unix://{0}'.format(host_socket_path)
                     config['unixsocket_url'] = unixsocket_url
-                    yield {'init_config': {}, 'instances': [config, CONFIG_TCPSOCKET]}
+                    yield {'instances': [config, CONFIG_TCPSOCKET]}
         else:
             yield deepcopy(CHECK_CONFIG_OPEN)
 
