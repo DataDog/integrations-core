@@ -276,7 +276,7 @@ init_config:
   #  - prometheus_evaluator_iterations_total
   #  - prometheus_local_storage_checkpoint_duration_seconds
   #  - prometheus_local_storage_checkpoint_last_duration_seconds
-  # - prometheus_local_storage_checkpoint_last_size_bytes
+  #  - prometheus_local_storage_checkpoint_last_size_bytes
   #  - prometheus_local_storage_checkpoint_series_chunks_written
   #  - prometheus_local_storage_checkpointing
   #  - prometheus_local_storage_chunk_ops_total
