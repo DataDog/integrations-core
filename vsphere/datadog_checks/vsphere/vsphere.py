@@ -56,7 +56,7 @@ MAX_QUERY_METRICS_OPTION = "config.vpxd.stats.maxQueryMetrics"
 
 
 REALTIME_RESOURCES = [vim.VirtualMachine, vim.HostSystem]
-HISTORICAL_RESOURCES = [vim.Datastore]
+HISTORICAL_RESOURCES = [vim.Datastore, vim.ClusterComputeResource]
 ALL_RESOURCES_WITH_METRICS = REALTIME_RESOURCES + HISTORICAL_RESOURCES
 ALL_RESOURCES_WITH_NO_METRICS = [vim.ComputeResource, vim.Folder,vim.Datacenter]
 
@@ -115,6 +115,11 @@ class VSphereCheck(AgentCheck):
         self.max_historical_metrics = init_config.get("max_historical_metrics", DEFAULT_MAX_QUERY_METRICS)
         self.metrics_per_query = init_config.get("metrics_per_query", DEFAULT_METRICS_PER_QUERY)
 
+        # Vcenter configuration cluster name list
+        self.cluster_list = {}
+        # cluster mors based on cluster name list to be monitored
+        self.monitor_cluster_mors = {}
+
         # Caching resources, timeouts
         self.cache_times = {}
         for instance in self.instances:
@@ -133,6 +138,7 @@ class VSphereCheck(AgentCheck):
             }
 
             self.event_config[i_key] = instance.get('event_config')
+            self.cluster_list[i_key] = instance.get('cluster_list',[])
 
         # managed entity raw view
         self.registry = {}
@@ -308,6 +314,87 @@ class VSphereCheck(AgentCheck):
 
         return external_host_tags
 
+    def getClusters(self,instance):
+        server_instance = self._get_server_instance(instance)
+        content = server_instance.content
+        viewType = [vim.ClusterComputeResource]  # object types to look for
+        view_ref = content.viewManager.CreateContainerView(content.rootFolder, viewType, True)
+
+        collector = content.propertyCollector
+
+        # Specify the root object from where we collect the rest of the objects
+        obj_spec = vmodl.query.PropertyCollector.ObjectSpec()
+        obj_spec.obj = view_ref
+        obj_spec.skip = True
+
+        # Specify the attribute of the root object to traverse to obtain all the attributes
+        traversal_spec = vmodl.query.PropertyCollector.TraversalSpec()
+        traversal_spec.path = "view"
+        traversal_spec.skip = False
+        traversal_spec.type = view_ref.__class__
+        obj_spec.selectSet = [traversal_spec]
+
+        property_spec = vmodl.query.PropertyCollector.PropertySpec()
+        property_spec.type = vim.ClusterComputeResource
+        property_spec.pathSet = ["name"]
+
+        # Create our filter spec from the above specs
+        filter_spec = vmodl.query.PropertyCollector.FilterSpec()
+        filter_spec.objectSet = [obj_spec]
+        filter_spec.propSet = [property_spec]
+
+        retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
+
+        # Collect the objects and their properties
+        res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
+        objects = res.objects
+        # Results can be paginated
+        while res.token is not None:
+            res = collector.ContinueRetrievePropertiesEx(res.token)
+            objects.extend(res.objects)
+
+        cluster_mors = {}
+        for obj in objects:
+            if obj.missingSet:
+                for prop in obj.missingSet:
+                    self.log.warning(
+                        "Unable to retrieve property %s for object %s: %s",
+                                            prop.path,str(obj.obj),str(prop.fault))
+
+            if obj.propSet:
+                properties = {}
+                for prop in obj.propSet:
+                    properties.update({prop.name : prop.val})
+
+                cluster_name = properties.get("name")
+                self.log.debug("Discovered cluster : %s",cluster_name)
+                if cluster_name:
+                    cluster_mors[cluster_name] = obj.obj
+
+        return cluster_mors
+
+    def getClustersToMonitor(self,instance):
+        monitor_clusters = []
+        i_key = self._instance_key(instance)
+        if i_key not in self.monitor_cluster_mors:
+            vcenter_clusters = self.cluster_list[i_key]
+            if vcenter_clusters:
+                self.log.info("Vcenter Cluster list : %s",vcenter_clusters)
+                cluster_mors = self.getClusters(instance)
+                self.log.info("Completed enumeration of clusters for vcenter instance %s" % i_key)
+                for vcenter_cluster in vcenter_clusters:
+                    cluster_mor = cluster_mors.get(vcenter_cluster)
+                    if cluster_mor:
+                        monitor_clusters.append(cluster_mor)
+            else:
+                self.log.warning("Empty cluster list in vcenter configuration.")
+            #update the cluster monitor list
+            self.monitor_cluster_mors[i_key] = monitor_clusters
+        else:
+            monitor_clusters = self.monitor_cluster_mors[i_key]
+
+        return monitor_clusters
+
     def _discover_mor(self, instance, tags, regexes=None, include_only_marked=False):
         """
         Explore vCenter infrastructure to discover hosts, virtual machines
@@ -358,15 +445,101 @@ class VSphereCheck(AgentCheck):
 
             return []
 
-        def _collect_mors_and_attributes(server_instance):
-            resources = list()
-            #add the metric types including both real time and historical
-            resources.extend(ALL_RESOURCES_WITH_METRICS)
-            #add the non metric types for parents info
-            resources.extend(ALL_RESOURCES_WITH_NO_METRICS)
+        def createObjectSpecs(clusters):
+            #Create list of cluster based object specification to define the starting point of navigation
+            obj_specs = []
+            for cluster in clusters:
+                obj_spec = vmodl.query.PropertyCollector.ObjectSpec()
+                obj_spec.obj = cluster
+                obj_spec.skip = False
+
+                #Create a hierarchy based traversal specification to identify the path for collection
+                host2VmTraversal = vmodl.query.PropertyCollector.TraversalSpec()
+                host2VmTraversal.type = vim.HostSystem
+                host2VmTraversal.path = 'vm'
+                host2VmTraversal.skip = False
+                host2VmTraversal.name = 'host2VmTraversal'
+
+                cluster2HostTraversal = vmodl.query.PropertyCollector.TraversalSpec()
+                cluster2HostTraversal.type = vim.ClusterComputeResource
+                cluster2HostTraversal.path = 'host'
+                cluster2HostTraversal.skip = False
+                cluster2HostTraversal.name = 'cluster2HostTraversal'
+                cluster2HostTraversal.selectSet = [host2VmTraversal]
+
+                cluster2DsTraversal = vmodl.query.PropertyCollector.TraversalSpec()
+                cluster2DsTraversal.type = vim.ClusterComputeResource
+                cluster2DsTraversal.path = 'datastore'
+                cluster2DsTraversal.skip = False
+                cluster2DsTraversal.name = 'cluster2DsTraversal'
+
+                obj_spec.selectSet = [cluster2HostTraversal,cluster2DsTraversal]
+                obj_specs.append(obj_spec)
+
+                return obj_specs
+
+        def createPropertySpecs(mor_types):
+            #Create a list of property specifications based on attributes we want to retrieve per entity type
+            property_specs = []
+            for mor_type in mor_types:
+                property_spec = vmodl.query.PropertyCollector.PropertySpec()
+                property_spec.type = mor_type
+                property_spec.pathSet = ["name", "parent", "customValue"]
+                if mor_type == vim.VirtualMachine:
+                    property_spec.pathSet.append("runtime.powerState")
+                    property_spec.pathSet.append("runtime.host")
+                    property_spec.pathSet.append("config.instanceUuid")
+                elif mor_type == vim.HostSystem:
+                    property_spec.pathSet.append("summary.hardware.uuid")
+                elif mor_type == vim.Datastore:
+                    property_spec.pathSet.append("summary.url")
+                property_specs.append(property_spec)
+
+            return property_specs
+
+        def _collect_metric_mors_and_attributes(server_instance,clusters):
+            obj_specs = createObjectSpecs(clusters)
+            property_specs = createPropertySpecs(ALL_RESOURCES_WITH_METRICS)
+            #Add the list of object and property specifications to the property filter specification
+            filter_spec = vmodl.query.PropertyCollector.FilterSpec()
+            filter_spec.objectSet = obj_specs
+            filter_spec.propSet = property_specs
+
+            retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
+            # To limit the number of objects retrieved per call.
+            # If batch_collector_size is 0, collect maximum number of objects.
+            retr_opts.maxObjects = self.batch_collector_size or None
+
+            collector = server_instance.content.propertyCollector
+            # Collect the objects and their properties
+            res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
+            objects = res.objects
+            # Results can be paginated
+            while res.token is not None:
+                res = collector.ContinueRetrievePropertiesEx(res.token)
+                objects.extend(res.objects)
+
+            mor_attrs = {}
+            error_counter = 0
+            for obj in objects:
+                if obj.missingSet and error_counter < 10:
+                    for prop in obj.missingSet:
+                        error_counter += 1
+                        self.log.error(
+                            "Unable to retrieve property %s for object %s: %s",
+                                                prop.path,str(obj.obj),str(prop.fault))
+                        if error_counter == 10:
+                            self.log.error("Too many errors during object collection, stop logging")
+                            break
+                mor_attrs[obj.obj] = {prop.name: prop.val for prop in obj.propSet} if obj.propSet else {}
+
+            return mor_attrs
+
+        def _collect_non_metric_mors_and_attributes(server_instance):
+            #collect the non metric types for parents info
 
             content = server_instance.content
-            view_ref = content.viewManager.CreateContainerView(content.rootFolder, resources, True)
+            view_ref = content.viewManager.CreateContainerView(content.rootFolder, ALL_RESOURCES_WITH_NO_METRICS, True)
 
             # Object used to query MORs as well as the attributes we require in one API call
             # See https://code.vmware.com/apis/358/vsphere#/doc/vmodl.query.PropertyCollector.html
@@ -384,22 +557,8 @@ class VSphereCheck(AgentCheck):
             traversal_spec.type = view_ref.__class__
             obj_spec.selectSet = [traversal_spec]
 
-            property_specs = []
             # Specify which attributes we want to retrieve per object
-            for resource in resources:
-                property_spec = vmodl.query.PropertyCollector.PropertySpec()
-                property_spec.type = resource
-                property_spec.pathSet = ["name", "parent", "customValue"]
-                if resource == vim.VirtualMachine:
-                    property_spec.pathSet.append("runtime.powerState")
-                    property_spec.pathSet.append("runtime.host")
-                    property_spec.pathSet.append("config.instanceUuid")
-                elif resource == vim.HostSystem:
-                    property_spec.pathSet.append("summary.hardware.uuid")
-                elif resource == vim.Datastore:
-                    property_spec.pathSet.append("summary.url")
-
-                property_specs.append(property_spec)
+            property_specs = createPropertySpecs(ALL_RESOURCES_WITH_NO_METRICS)
 
             # Create our filter spec from the above specs
             filter_spec = vmodl.query.PropertyCollector.FilterSpec()
@@ -435,14 +594,19 @@ class VSphereCheck(AgentCheck):
 
             return mor_attrs
 
-        def _get_all_objs(server_instance, regexes=None, include_only_marked=False, tags=[]):
+        def _get_all_objs(server_instance, regexes=None, include_only_marked=False, tags=[], clusters = []):
             """
             Get all the vsphere objects of all types
             """
             obj_list = defaultdict(list)
+            all_mors = {}
+            # Collect metric mors and their required attributes
+            metric_mors = _collect_metric_mors_and_attributes(server_instance,clusters)
+            all_mors.update(metric_mors)
+            # Collect non metric mors and their required attributes
+            non_metric_mors = _collect_non_metric_mors_and_attributes(server_instance)
+            all_mors.update(non_metric_mors)
 
-            # Collect mors and their required attributes
-            all_mors = _collect_mors_and_attributes(server_instance)
             # Add rootFolder since it is not explored by the propertyCollector
             root_mor = server_instance.content.rootFolder
             all_mors[root_mor] = {"name": root_mor.name, "parent": None}
@@ -507,8 +671,12 @@ class VSphereCheck(AgentCheck):
             if i_key not in self.morlist_raw:
                 self.morlist_raw[i_key] = {}
 
-            all_objs = _get_all_objs(server_instance,regexes,include_only_marked,tags)
-            self.morlist_raw[i_key] = all_objs
+            clusters = self.getClustersToMonitor(instance)
+            if clusters:
+                all_objs = _get_all_objs(server_instance,regexes,include_only_marked,tags,clusters)
+                self.morlist_raw[i_key] = all_objs
+            else:
+                self.log.warning("Nothing to monitor , empty cluster list for vcenter instance %s",i_key)
 
         # enumerate and build inventory of resources...
         build_resource_registry(instance, tags, regexes, include_only_marked)
