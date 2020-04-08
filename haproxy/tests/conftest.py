@@ -21,7 +21,7 @@ from .common import (
     STATS_URL_OPEN,
     USERNAME,
     platform_supports_sockets,
-)
+    CONFIG_TCPSOCKET)
 
 log = logging.getLogger('test_haproxy')
 
@@ -78,7 +78,7 @@ def dd_environment():
                     config = deepcopy(CHECK_CONFIG)
                     unixsocket_url = 'unix://{0}'.format(host_socket_path)
                     config['unixsocket_url'] = unixsocket_url
-                    yield config
+                    yield {'init_config': {}, 'instances': [config, CONFIG_TCPSOCKET]}
         else:
             yield deepcopy(CHECK_CONFIG_OPEN)
 
