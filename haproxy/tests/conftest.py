@@ -21,7 +21,8 @@ from .common import (
     STATS_URL_OPEN,
     USERNAME,
     platform_supports_sockets,
-    CONFIG_TCPSOCKET)
+    CONFIG_TCPSOCKET,
+)
 
 log = logging.getLogger('test_haproxy')
 
