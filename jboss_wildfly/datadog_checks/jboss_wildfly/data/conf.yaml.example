@@ -44,9 +44,12 @@ instances:
 
     ## @param jmx_url - string - required
     ## JBoss/WildFly URL to connect to.
-    #
+    ## for Wildfly 10 and above: 
   - jmx_url: service:jmx:remote+http://localhost:9990
 
+    ## for older WildFly:
+    # jmx_url: service:jmx:http-remoting-jmx://localhost:9990
+    
     ## @param host - string - optional
     ## JMX hostname to connect to.
     #
