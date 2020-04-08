@@ -18,11 +18,13 @@ Place the JAR on the same machine as your Agent, and add the path to the `custom
 
    For Wildfly 9 and older:
 
-   `service:jmx:http-remoting-jmx://" + host + ":" + port `
-
+   `service:jmx:http-remoting-jmx://<host>:<port> `
+   
    For Wildfly 10+:
 
-   `service:jmx:remote+http://" + host + ":" + port`
+   `service:jmx:remote+http://<host>:<port>`
+
+Please refer to the [WildFly JMX subsystem configuration page](https://docs.jboss.org/author/display/WFLY9/JMX%20subsystem%20configuration.html) for more information
 
 ### Configuration
 
