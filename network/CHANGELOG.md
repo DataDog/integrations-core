@@ -1,5 +1,9 @@
 # CHANGELOG - network
 
+## 1.15.1 / 2020-04-08
+
+* [Fixed] Fix error message. See [#6285](https://github.com/DataDog/integrations-core/pull/6285).
+
 ## 1.15.0 / 2020-04-04
 
 * [Added] Upgrade psutil to 5.7.0. See [#6243](https://github.com/DataDog/integrations-core/pull/6243).
