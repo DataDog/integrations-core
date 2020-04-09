@@ -101,7 +101,8 @@ instances:
     ##    - name (default) to filter on the resource name (defined by vCenter)
     ##    - inventory_path to filter on the full inventory path
     ##      (ex: \/<Datacenter_name>\/vm\/<FOLDER_NAME>\/.* for all vms in the folder <FOLDER_NAME>)
-    ##    - tag to filter only the resources with a given tag.
+    ##    - tag to filter only the resources with a given tag. Datadog has stricter rules (i.e no space), but the filter
+    ##          is applied on the value coming from vCenter directly.
     ##    - hostname to filter on the ESXi Host name (only valid for if 'resource' equals 'vm')
     ##    - guest_hostname to filter on the VM hostname (only valid for if 'resource' equals 'vm' and
     ##      if VMware tools are installed)
