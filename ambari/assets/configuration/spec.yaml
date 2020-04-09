@@ -23,6 +23,7 @@ files:
       description: The URL of the Ambari Server, include http:// or https://
       value:
         type: string
+      display_priority: 10
     - name: services
       description: |
         Required if collecting component metrics or service status.
@@ -43,8 +44,10 @@ files:
           <SERVICE_NAME_2>:
             <COMPONENT_NAME_1>: []
             <COMPONENT_NAME_2>: []
-
     - template: instances/http
+      overrides:
+        username.display_priority: 5
+        password.display_priority: 5
     - template: instances/default
   - template: logs
     example:
