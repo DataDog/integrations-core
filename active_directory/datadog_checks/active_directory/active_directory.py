@@ -113,8 +113,7 @@ DEFAULT_COUNTERS = [
     ["NTDS", None, "LDAP Successful Binds/sec", "active_directory.ldap.successful_binds_persec", "gauge"],
     ["NTDS", None, "LDAP Searches/sec", "active_directory.ldap.searches_persec", "gauge"],
     # ["NTDS", None, "Kerberos Authentications/sec", "active_directory.kerberos.auths_persec", "gauge"],
-    # ["NTDS", None, "NTLM Authentications/sec", "active_directory.ntlm.auths_persec", "gauge"],
-
+    #   ["NTDS", None, "NTLM Authentications/sec", "active_directory.ntlm.auths_persec", "gauge"],
 ]
 
 
