@@ -11,7 +11,9 @@ files:
     - template: instances/jmx
       overrides:
         host.value.example: localhost
+        host.description: Tomcat JMX hostname to connect to.
         port.value.example: 9012
+        port.description: Tomcat JMX port to connect to.
     - template: instances/default
   - template: logs
     example:

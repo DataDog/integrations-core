@@ -44,12 +44,12 @@ init_config:
 instances:
 
     ## @param host - string - required
-    ## JMX hostname to connect to.
+    ## Tomcat JMX hostname to connect to.
     #
   - host: localhost
 
     ## @param port - integer - required
-    ## JMX port to connect to.
+    ## Tomcat JMX port to connect to.
     #
     port: 9012
 
