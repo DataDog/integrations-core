@@ -155,7 +155,8 @@ class VSphereCheck(AgentCheck):
         filtered_infra_data = {
             mor: props
             for mor, props in iteritems(infrastructure_data)
-            if is_resource_collected_by_filters(mor, infrastructure_data, resource_filters_without_tags)
+            if isinstance(mor, tuple(self.config.collected_resource_types))
+            and is_resource_collected_by_filters(mor, infrastructure_data, resource_filters_without_tags)
         }
 
         t0 = Timer()
@@ -186,19 +187,16 @@ class VSphereCheck(AgentCheck):
         )
         self.log.debug("Infrastructure cache refreshed in %.3f seconds.", t0.total())
 
-        # Limit the content of infrastructure_data to the resource types that this check instance monitors
-        filtered_infra_data = {
-            k: v
-            for k, v in iteritems(infrastructure_data)
-            if isinstance(k, tuple(self.config.collected_resource_types))
-        }
-
         all_tags = {}
         if self.config.should_collect_tags:
-            all_tags = self.collect_tags(filtered_infra_data)
+            all_tags = self.collect_tags(infrastructure_data)
         self.infrastructure_cache.set_all_tags(all_tags)
 
-        for mor, properties in iteritems(filtered_infra_data):
+        for mor, properties in iteritems(infrastructure_data):
+            if not isinstance(mor, tuple(self.config.collected_resource_types)):
+                # Do nothing for the resource types we do not collect
+                continue
+
             if not is_resource_collected_by_filters(
                 mor, infrastructure_data, self.config.resource_filters, self.infrastructure_cache.get_mor_tags(mor)
             ):
