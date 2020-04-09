@@ -61,12 +61,12 @@ instances:
   - url: <URL>
 
     ## @param username - string - optional
-    ## The username to use if services are behind basic or digest auth.
+    ## Username created to connect to the Ambari server if using basic authentication
     #
     # username: <USERNAME>
 
     ## @param password - string - optional
-    ## The password to use if services are behind basic or NTLM auth.
+    ## Password associated with the Ambari server user if using basic authentication
     #
     # password: <PASSWORD>
 
@@ -88,6 +88,36 @@ instances:
     #   <SERVICE_NAME_2>:
     #     <COMPONENT_NAME_1>: []
     #     <COMPONENT_NAME_2>: []
+
+    ## @param auth_type - string - optional - default: basic
+    ## The type of authentication to use. The available types (and related options) are:
+    ##
+    ##   - basic
+    ##     |__ username
+    ##     |__ password
+    ##   - digest
+    ##     |__ username
+    ##     |__ password
+    ##   - ntlm
+    ##     |__ ntlm_domain
+    ##     |__ password
+    ##   - kerberos
+    ##     |__ kerberos_auth
+    ##     |__ kerberos_cache
+    ##     |__ kerberos_delegate
+    ##     |__ kerberos_force_initiate
+    ##     |__ kerberos_hostname
+    ##     |__ kerberos_keytab
+    ##     |__ kerberos_principal
+    ##   - aws
+    ##     |__ aws_region
+    ##     |__ aws_host
+    ##     |__ aws_service
+    ##
+    ## The `aws` auth type relies on boto3 to automatically gather AWS credentials (e.g. from `.aws/credentials`).
+    ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
+    #
+    # auth_type: basic
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -119,36 +149,6 @@ instances:
     ## settings enabled and attempt to reach services directly.
     #
     # skip_proxy: false
-
-    ## @param auth_type - string - optional - default: basic
-    ## The type of authentication to use. The available types (and related options) are:
-    ##
-    ##   - basic
-    ##     |__ username
-    ##     |__ password
-    ##   - digest
-    ##     |__ username
-    ##     |__ password
-    ##   - ntlm
-    ##     |__ ntlm_domain
-    ##     |__ password
-    ##   - kerberos
-    ##     |__ kerberos_auth
-    ##     |__ kerberos_cache
-    ##     |__ kerberos_delegate
-    ##     |__ kerberos_force_initiate
-    ##     |__ kerberos_hostname
-    ##     |__ kerberos_keytab
-    ##     |__ kerberos_principal
-    ##   - aws
-    ##     |__ aws_region
-    ##     |__ aws_host
-    ##     |__ aws_service
-    ##
-    ## The `aws` auth type relies on boto3 to automatically gather AWS credentials (e.g. from `.aws/credentials`).
-    ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
-    #
-    # auth_type: basic
 
     ## @param ntlm_domain - string - optional
     ## If your services use NTLM authentication, you can specify

@@ -44,10 +44,14 @@ files:
           <SERVICE_NAME_2>:
             <COMPONENT_NAME_1>: []
             <COMPONENT_NAME_2>: []
+      display_priority: 5
     - template: instances/http
       overrides:
-        username.display_priority: 5
-        password.display_priority: 5
+        username.display_priority: 9
+        username.description: Username created to connect to the Ambari server if using basic authentication
+        password.display_priority: 9
+        password.description: Password associated with the Ambari server user if using basic authentication
+        auth_type.display_priority: 4
     - template: instances/default
   - template: logs
     example:
