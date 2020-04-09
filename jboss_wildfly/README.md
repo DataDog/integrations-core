@@ -24,7 +24,7 @@ Place the JAR on the same machine as your Agent, and add the path to the `custom
 
    `service:jmx:remote+http://<HOST>:<PORT>`
 
-Please refer to the [WildFly JMX subsystem configuration page](https://docs.jboss.org/author/display/WFLY9/JMX%20subsystem%20configuration.html) for more information
+Refer to the [WildFly JMX subsystem configuration page](https://docs.jboss.org/author/display/WFLY9/JMX%20subsystem%20configuration.html) for more information.
 
 ### Configuration
 
