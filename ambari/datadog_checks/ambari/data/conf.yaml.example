@@ -7,10 +7,10 @@ init_config:
     #
     # collect_service_metrics: true
 
-    ## @param collect_service_status - boolean - optional - default: true
-    ## Change to `false` to omit collecting services status
+    ## @param collect_service_status - boolean - optional - default: false
+    ## Change to `true` to collect services status
     #
-    # collect_service_status: true
+    # collect_service_status: false
 
     ## @param proxy - mapping - optional
     ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
