@@ -272,11 +272,6 @@ instances:
     #
     # refresh_infrastructure_cache_interval: 300
 
-    ## @param refresh_tags_cache_interval - integer - optional - default: 300
-    ## Number of seconds between each refresh of the tags cache
-    #
-    # refresh_tags_cache_interval: 300
-
     ## @param refresh_metrics_metadata_cache_interval - integer - optional - default: 1800
     ## Number of seconds between each refresh of the metrics metadata cache
     #
