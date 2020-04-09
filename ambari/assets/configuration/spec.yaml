@@ -1,0 +1,95 @@
+name: Ambari
+files:
+- name: ambari.yaml
+  options:
+  - template: init_config
+    options:
+      - name: collect_service_metrics
+        description: Change to `false` to omit collecting service level metrics
+        value:
+          example: true
+          type: boolean
+      - name: collect_service_status
+        description: Change to `false` to omit collecting services status
+        value:
+          example: true
+          type: boolean
+      - template: init_config/http
+      - template: init_config/default
+  - template: instances
+    options:
+    - name: url
+      required: true
+      description: The URL of the Ambari Server, include http:// or https://
+      value:
+        type: string
+    - name: services
+      description: |
+        Required if collecting component metrics or service status.
+        Note that each level of values is required.  This is essentially whitelisting
+        metrics headers that are pulled for each components listed under their respective services.
+        Listing no components or no metrics under a service will cause that service to be skipped for
+        components metrics check.
+      value:
+        type: object
+        example:
+          <SERVICE_NAME_1>:
+            <COMPONENT_NAME_1>:
+              - <METRIC_HEADER_1>
+              - <METRIC_HEADER_2>
+            <COMPONENT_NAME_2>:
+              - <METRIC_HEADER_1>
+              - <METRIC_HEADER_2>
+          <SERVICE_NAME_2>:
+            <COMPONENT_NAME_1>: []
+            <COMPONENT_NAME_2>: []
+
+    - template: instances/http
+    - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: <PATH_TO_AIRFLOW>/logs/dag_processor_manager/dag_processor_manager.log
+      source: airflow
+      service: <SERVICE_NAME>
+      log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_date
+          pattern: \[\d{4}\-\d{2}\-\d{2}
+    - type: file
+      path: <PATH_TO_AIRFLOW>/logs/scheduler/*/*.log
+      source: airflow
+      service: <SERVICE_NAME>
+      log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_date
+          pattern: \[\d{4}\-\d{2}\-\d{2}
+
+#init_config:
+#    ## @param collect_service_metrics - boolean - optional - default: true
+#    ## Change to `false` to omit collecting service level metrics
+#    #
+#    # collect_service_metrics: true
+#
+#    ## @param collect_service_status - boolean - optional - default: false
+#    ## Change to `false` to omit collecting services status
+#    #
+#    # collect_service_status: false
+
+    ## @param services - object - optional
+    ## Required if collecting component metrics or service status.
+    ## Note that each level of values is required.  This is essentially whitelisting
+    ## metrics headers that are pulled for each components listed under their respective services.
+    ## Listing no components or no metrics under a service will cause that service to be skipped for components metrics check.
+    #
+    # services:
+    #     <SERVICE_NAME_1>:
+    #       <COMPONENT_NAME_1>:
+    #         - <METRIC_HEADER_1>
+    #         - <METRIC_HEADER_2>
+    #       <COMPONENT_NAME_2>:
+    #         - <METRIC_HEADER_1>
+    #         - <METRIC_HEADER_2>
+    #     <SERVICE_NAME_2>:
+    #       <COMPONENT_NAME_1>: []
+    #       <COMPONENT_NAME_2>: []
