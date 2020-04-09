@@ -14,15 +14,15 @@ Depending on your server setup (particularly when using the `remote+http` JMX sc
 
 Place the JAR on the same machine as your Agent, and add the path to the `custom_jar_paths` option.
 
-   **Note**: The JMX url scheme is different according to your WildFly version.
+**Note**: The JMX url scheme is different according to your WildFly version: 
 
-   For Wildfly 9 and older:
+- For Wildfly 9 and older:
 
-   `service:jmx:http-remoting-jmx://<host>:<port> `
+   `service:jmx:http-remoting-jmx://<HOST>:<PORT> `
    
-   For Wildfly 10+:
+- For Wildfly 10+:
 
-   `service:jmx:remote+http://<host>:<port>`
+   `service:jmx:remote+http://<HOST>:<PORT>`
 
 Please refer to the [WildFly JMX subsystem configuration page](https://docs.jboss.org/author/display/WFLY9/JMX%20subsystem%20configuration.html) for more information
 
