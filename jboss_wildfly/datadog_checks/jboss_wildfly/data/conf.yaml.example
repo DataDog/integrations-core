@@ -43,7 +43,9 @@ init_config:
 instances:
 
     ## @param jmx_url - string - required
-    ## JBoss/WildFly URL to connect to.
+    ## JBoss/WildFly URL to connect to:
+    ## - For Wildfly 9 and older use: `jmx_url: service:jmx:http-remoting-jmx://<HOST>:<PORT>`
+    ## - For Wildfly 10+ use: `jmx_url: service:jmx:remote+http://<HOST>:<PORT>`
     #
   - jmx_url: service:jmx:remote+http://localhost:9990
 
