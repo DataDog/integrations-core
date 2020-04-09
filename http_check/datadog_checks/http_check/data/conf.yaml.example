@@ -341,9 +341,7 @@ instances:
     #   X-Auth-Token: <AUTH_TOKEN>
 
     ## @param tls_use_host_header - boolean - optional - default: false
-    ## If set to true, the Host header is used to match 
-    ## against the SSL Certificate CN or SAN.
-    ## Requires persist_connections set to true.
+    ## If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
     #
     # tls_use_host_header: false
 
