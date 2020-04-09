@@ -1,0 +1,21 @@
+name: Tomcat
+files:
+- name: tomcat.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/jmx
+      - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/jmx
+      overrides:
+        host.value.example: localhost
+        port.value.example: 9012
+    - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/tomcat/*.log
+      source: tomcat
+      service: <SERVICE_NAME>
