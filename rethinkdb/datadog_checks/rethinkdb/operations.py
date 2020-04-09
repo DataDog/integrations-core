@@ -37,6 +37,11 @@ r = rethinkdb.r
 system = r.db('rethinkdb')
 
 
+def _format_server_tags(tags):
+    # type: (List[str]) -> List[str]
+    return ['server_tag:{}'.format(tag) for tag in tags]
+
+
 def get_connected_server_raw_version(conn, **kwargs):
     # type: (rethinkdb.net.Connection, **Any) -> Optional[str]
     """
@@ -116,7 +121,7 @@ def get_servers_statistics(conn, **kwargs):
         server_stats = row['left']  # type: ServerStats
         server = row['right']  # type: Server
         tags = ['server:{}'.format(server['name'])]
-        tags.extend(server['tags'])
+        tags.extend(_format_server_tags(server['tags']))
         yield server_stats, tags
 
 
@@ -207,7 +212,7 @@ def get_replicas_statistics(conn, **kwargs):
             'server:{}'.format(server['name']),
             'state:{}'.format(replica['state']),
         ]
-        tags.extend(server['tags'])
+        tags.extend(_format_server_tags(server['tags']))
 
         yield replica_stats, tags
 
