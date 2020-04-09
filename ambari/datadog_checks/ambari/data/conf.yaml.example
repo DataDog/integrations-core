@@ -363,18 +363,50 @@ instances:
 #
 # logs:
 #   - type: file
-#     path: <PATH_TO_AIRFLOW>/logs/dag_processor_manager/dag_processor_manager.log
-#     source: airflow
-#     service: <SERVICE_NAME>
+#     path: /var/log/ambari-server/ambari-alerts.log
+#     source: ambari
+#     service: ambari
 #     log_processing_rules:
 #     - type: multi_line
 #       name: new_log_start_with_date
-#       pattern: \[\d{4}\-\d{2}\-\d{2}
+#       pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
 #   - type: file
-#     path: <PATH_TO_AIRFLOW>/logs/scheduler/*/*.log
-#     source: airflow
-#     service: <SERVICE_NAME>
+#     path: /var/log/ambari-server/ambari-audit.log
+#     source: ambari
+#     service: ambari
 #     log_processing_rules:
 #     - type: multi_line
 #       name: new_log_start_with_date
-#       pattern: \[\d{4}\-\d{2}\-\d{2}
+#       pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+#   - type: file
+#     path: /var/log/ambari-server/config-changes.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/ambari-eclipselink.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/server-check-database.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/ambari-server-command.log
+#     source: ambari
+#     service: ambari
+#     log_processing_rules:
+#     - type: multi_line
+#       name: new_log_start_with_date
+#       pattern: (INFO|ERROR|WARN)
+#   - type: file
+#     path: /var/log/ambari-server/ambari-server-pkgmgr.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/ambari-server.log
+#     source: ambari
+#     service: ambari
+#   - type: file
+#     path: /var/log/ambari-server/ambari-stack-merger.log
+#     source: ambari
+#     service: ambari
