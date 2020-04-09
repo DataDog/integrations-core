@@ -53,7 +53,7 @@ def config(ctx, check, sync, verbose):
         if not file_exists(spec_path):
             validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter)
             if verbose:
-                check_display_queue.append(lambda: echo_info(f'No spec found', indent=True))
+                check_display_queue.append(lambda: echo_warning(f'No spec found', indent=True))
             if check_display_queue:
                 echo_info(f'{check}:')
             for display in check_display_queue:
@@ -110,8 +110,11 @@ def config(ctx, check, sync, verbose):
                                 )
                             )
 
-        if check_display_queue:
+        if check_display_queue or verbose:
             echo_info(f'{check}:')
+            if verbose:
+                # check_display_queue.append(lambda: echo_info(f'Valid spec', indent=True))
+                check_display_queue.append(lambda **kwargs: echo_info(f'Valid spec', **kwargs))
             for display in check_display_queue:
                 display(indent=True)
 
