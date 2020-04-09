@@ -151,7 +151,7 @@ Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the 
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][9].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
 
 | Parameter      | Value                                                      |
 | -------------- | ---------------------------------------------------------- |
@@ -205,8 +205,8 @@ To get a better idea of how (or why) to integrate your Elasticsearch cluster wit
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/tracing/send_traces/
 [7]: https://docs.datadoghq.com/tracing/setup/
-[8]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[9]: https://docs.datadoghq.com/agent/docker/log/
+[8]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[9]: https://docs.datadoghq.com/agent/kubernetes/log/
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://www.elastic.co/guide/en/elasticsearch/reference/6.3/release-notes-6.3.0.html
 [12]: https://github.com/DataDog/integrations-core/blob/master/elastic/metadata.csv

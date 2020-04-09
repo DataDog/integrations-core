@@ -182,7 +182,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][8]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][9].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
 
 | Parameter      | Value                                     |
 | -------------- | ----------------------------------------- |
@@ -252,7 +252,7 @@ Additional helpful documentation, links, and articles:
 [5]: https://nginx.org/en/docs/http/ngx_http_api_module.html
 [6]: https://github.com/DataDog/integrations-core/blob/master/nginx/datadog_checks/nginx/data/conf.yaml.example
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[8]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[8]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [9]: https://docs.datadoghq.com/agent/docker/log
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv

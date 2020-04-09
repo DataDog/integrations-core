@@ -72,7 +72,7 @@ For containerized environments, see the [Autodiscovery with JMX][9] guide.
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
 
 | Parameter      | Value                                                  |
 | -------------- | ------------------------------------------------------ |
@@ -114,9 +114,9 @@ Need help? Contact [Datadog support][4].
 [5]: https://github.com/DataDog/integrations-core/blob/master/cassandra/datadog_checks/cassandra/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://docs.datadoghq.com/agent/logs/advanced_log_collection/?tab=exclude_at_match#multi-line-aggregation
-[8]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[8]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [9]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
-[10]: https://docs.datadoghq.com/agent/docker/log/
+[10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/cassandra/metadata.csv
 [13]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics

@@ -80,4 +80,4 @@ Need help? Contact [Datadog support][7].
 [7]: https://docs.datadoghq.com/help
 [8]: https://docs.scylladb.com/getting-started/logging/
 [9]: https://github.com/DataDog/integrations-core/blob/master/scylla/datadog_checks/scylla/data/conf.yaml.example
-[10]: https://docs.datadoghq.com/agent/docker/log/
+[10]: https://docs.datadoghq.com/agent/kubernetes/log/

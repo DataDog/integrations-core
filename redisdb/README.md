@@ -81,7 +81,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][13].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][13].
 
 | Parameter      | Value                                               |
 | -------------- | --------------------------------------------------- |
@@ -158,7 +158,7 @@ Additional helpful documentation, links, and articles:
 
 - [How to monitor Redis performance metrics][12]
 
-[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[1]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/redisdb/datadog_checks/redisdb/data/conf.yaml.example
@@ -170,6 +170,6 @@ Additional helpful documentation, links, and articles:
 [10]: https://docs.datadoghq.com/integrations/faq/redis-integration-error-unknown-command-config
 [11]: https://docs.datadoghq.com/developers/integrations
 [12]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics
-[13]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#setup
+[13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [14]: https://docs.datadoghq.com/agent/docker/apm/?tab=java
 [15]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing

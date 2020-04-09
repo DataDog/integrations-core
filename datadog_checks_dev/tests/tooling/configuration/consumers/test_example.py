@@ -35,7 +35,7 @@ def test_option_no_section():
         ## @param ad_identifiers - list of strings - required
         ## A list of container identifiers that are used by Autodiscovery to identify
         ## which container the check should be run against. For more information, see:
-        ## https://docs.datadoghq.com/agent/autodiscovery/ad_identifiers/
+        ## https://docs.datadoghq.com/agent/guide/ad_identifiers/
         #
         ad_identifiers:
           - httpd

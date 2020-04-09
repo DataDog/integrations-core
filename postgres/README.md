@@ -251,8 +251,8 @@ Additional helpful documentation, links, and articles:
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/tracing/send_traces/
 [6]: https://docs.datadoghq.com/tracing/setup/
-[7]: https://docs.datadoghq.com/agent/autodiscovery/integrations/
-[8]: https://docs.datadoghq.com/agent/docker/log/
+[7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[8]: https://docs.datadoghq.com/agent/kubernetes/log/
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv
 [11]: https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained

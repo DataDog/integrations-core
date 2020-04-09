@@ -338,7 +338,7 @@ Need help? Contact [Datadog support][20].
 
 [1]: http://docs.datadoghq.com/integrations/amazon_eks/
 [2]: http://docs.datadoghq.com/integrations/system
-[3]: http://docs.datadoghq.com//agent/autodiscovery
+[3]: https://docs.datadoghq.com/getting_started/agent/autodiscovery/
 [4]: https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html
 [5]: http://docs.datadoghq.com/integrations/amazon_eks/#setup
 [6]: http://docs.datadoghq.com/agent/kubernetes
@@ -349,7 +349,7 @@ Need help? Contact [Datadog support][20].
 [11]: https://app.datadoghq.com/account/settings#integrations/amazon-ec2
 [12]: http://docs.datadoghq.com/integrations/kubernetes
 [13]: https://app.datadoghq.com/account/settings#api
-[14]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[14]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [15]: https://docs.datadoghq.com/integrations/#cat-autodiscovery
 [16]: https://docs.datadoghq.com/developers/dogstatsd
 [17]: http://docs.datadoghq.com/tracing/setup

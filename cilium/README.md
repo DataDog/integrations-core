@@ -83,7 +83,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][11
 
 ##### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
 
 | Parameter      | Value                                     |
 |----------------|-------------------------------------------|
@@ -113,7 +113,7 @@ Cilium does not include any events.
 Need help? Contact [Datadog support][8].
 
 [1]: https://cilium.io
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [3]: https://docs.datadoghq.com/agent
 [4]: https://github.com/DataDog/integrations-core/blob/master/cilium/datadog_checks/cilium/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
@@ -122,4 +122,4 @@ Need help? Contact [Datadog support][8].
 [8]: https://docs.datadoghq.com/help
 [9]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#create-manifest
 [10]: https://docs.datadoghq.com/agent/docker/log
-[11]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[11]: https://docs.datadoghq.com/agent/kubernetes/integrations

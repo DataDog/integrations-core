@@ -76,7 +76,7 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 Need help? Contact [Datadog support][6].
 
 [1]: https://docs.datadoghq.com/integrations/presto
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://github.com/DataDog/integrations-core/blob/master/presto/datadog_checks/presto/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/integrations/java

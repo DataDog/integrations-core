@@ -221,7 +221,7 @@ See the [Autodiscovery template variables documentation][12] to learn how to pas
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][13].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][13].
 
 | Parameter      | Value                                     |
 | -------------- | ----------------------------------------- |
@@ -418,8 +418,8 @@ Read our [series of blog posts][26] about monitoring MySQL with Datadog.
 [8]: https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html
 [9]: https://github.com/DataDog/integrations-core/blob/master/mysql/datadog_checks/mysql/data/conf.yaml.example
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[11]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[12]: https://docs.datadoghq.com/agent/autodiscovery/template_variables
+[11]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[12]: https://docs.datadoghq.com/agent/faq/template_variables/
 [13]: https://docs.datadoghq.com/agent/docker/log
 [14]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [15]: https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv
