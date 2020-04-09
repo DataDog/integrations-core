@@ -89,7 +89,7 @@ def setup_mapreduce():
 def requests_get_mock(*args, **kwargs):
     url = args[0]
     # The parameter that creates the query params (kwargs) is an unordered dict,
-    #   so the query params can be in any order
+    # so the query params can be in any order
     if url.startswith(YARN_APPS_URL_BASE):
         query = url[len(YARN_APPS_URL_BASE) :]
         if query in ["?states=RUNNING&applicationTypes=MAPREDUCE", "?applicationTypes=MAPREDUCE&states=RUNNING"]:
