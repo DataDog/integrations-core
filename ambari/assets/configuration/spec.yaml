@@ -10,9 +10,9 @@ files:
           example: true
           type: boolean
       - name: collect_service_status
-        description: Change to `false` to omit collecting services status
+        description: Change to `true` to collect services status
         value:
-          example: true
+          example: false
           type: boolean
       - template: init_config/http
       - template: init_config/default
