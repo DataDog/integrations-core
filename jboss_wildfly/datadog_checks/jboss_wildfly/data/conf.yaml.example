@@ -50,8 +50,6 @@ instances:
     #
   - jmx_url: service:jmx:remote+http://localhost:9990
 
-    
-    
     ## @param host - string - optional
     ## JMX hostname to connect to.
     #
