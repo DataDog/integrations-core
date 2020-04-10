@@ -1,6 +1,6 @@
-name: OpenMetrics
+name: Istio
 files:
-  - name: openmetrics.yaml
+  - name: istio.yaml
     options:
     - template: init_config
       options:
@@ -48,3 +48,5 @@ files:
             example: http://istio-citadel.istio-system:15014/metrics
             type: string
         - template: instances/openmetrics
+          overrides:
+            prometheus_url.hidden: true
