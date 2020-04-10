@@ -99,7 +99,7 @@ Required environment variables on the Agent container:
 | `<DD_APM_ENABLED>`      | true                                                              |
 | `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Docker Applications][14] and the [Kubernetes Daemon Setup][15] for a complete list of available environment variables and configuration.
+See [Tracing Kubernetes Applications][14] and the [Kubernetes Daemon Setup][15] for a complete list of available environment variables and configuration.
 
 Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
 
@@ -171,5 +171,5 @@ Additional helpful documentation, links, and articles:
 [11]: https://docs.datadoghq.com/developers/integrations
 [12]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics
 [13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
-[14]: https://docs.datadoghq.com/agent/docker/apm/?tab=java
+[14]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [15]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing

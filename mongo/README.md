@@ -141,7 +141,7 @@ Required environment variables on the Agent container:
 | `<DD_APM_ENABLED>`      | true                                                              |
 | `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Docker Applications][16] and the [Kubernetes Daemon Setup][17] for a complete list of available environment variables and configuration.
+See [Tracing Kubernetes Applications][16] and the [Kubernetes Daemon Setup][17] for a complete list of available environment variables and configuration.
 
 Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
 
@@ -222,5 +222,5 @@ Read our series of blog posts about collecting metrics from MongoDB with Datadog
 [13]: https://docs.datadoghq.com/help
 [14]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger
 [15]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap
-[16]: https://docs.datadoghq.com/agent/docker/apm/?tab=java
+[16]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [17]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing

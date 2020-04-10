@@ -143,7 +143,7 @@ Required environment variables on the Agent container:
 | `<DD_APM_ENABLED>`      | true                                                              |
 | `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Docker Applications][17] and the [Kubernetes Daemon Setup][18] for a complete list of available environment variables and configuration.
+See [Tracing Kubernetes Applications][17] and the [Kubernetes Daemon Setup][18] for a complete list of available environment variables and configuration.
 
 Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
 
@@ -214,5 +214,5 @@ To get a better idea of how (or why) to integrate your Elasticsearch cluster wit
 [14]: https://docs.datadoghq.com/integrations/faq/why-isn-t-elasticsearch-sending-all-my-metrics
 [15]: https://www.datadoghq.com/blog/monitor-elasticsearch-performance-metrics
 [16]: https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-slowlog.html
-[17]: https://docs.datadoghq.com/agent/docker/apm/?tab=java
+[17]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [18]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing

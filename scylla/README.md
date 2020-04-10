@@ -47,8 +47,8 @@ Scylla has different modes of outputting logs depending on the environment it's 
 
 3. [Restart the Agent][4].
 
-See [Datadog's documentation][10] for additional information on how to configure the Agent for log collection in Docker environments.
-  
+See [Datadog's documentation][10] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+
 ### Validation
 
 [Run the Agent's status subcommand][5] and look for `scylla` under the Checks section.

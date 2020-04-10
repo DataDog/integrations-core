@@ -195,7 +195,7 @@ Required environment variables on the Agent container:
 | `<DD_APM_ENABLED>`      | true                                                              |
 | `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Docker Applications][18] and the [Kubernetes Daemon Setup][19] for a complete list of available environment variables and configuration.
+See [Tracing Kubernetes Applications][18] and the [Kubernetes Daemon Setup][19] for a complete list of available environment variables and configuration.
 
 Then, [instrument your application container][6] and set `DD_AGENT_HOST` to the name of your Agent container.
 
@@ -262,5 +262,5 @@ Additional helpful documentation, links, and articles:
 [15]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog
 [16]: https://www.postgresql.org/docs/11/runtime-config-logging.html
 [17]: https://www.postgresql.org/message-id/20100210180532.GA20138@depesz.com
-[18]: https://docs.datadoghq.com/agent/docker/apm/?tab=java
+[18]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [19]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
