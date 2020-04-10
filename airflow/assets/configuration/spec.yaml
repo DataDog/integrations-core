@@ -10,7 +10,7 @@ files:
     options:
     - name: url
       required: true
-      description: url used to connect to the Airflow instance.
+      description: URL used to connect to the Airflow instance.
       value:
         type: string
     - template: instances/http
