@@ -5,7 +5,6 @@ import re
 from collections import defaultdict
 
 import click
-from datadog_checks.base import ensure_unicode
 from ...utils import complete_valid_checks, get_metadata_file, get_metric_sources, load_manifest, read_metadata_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning
 
@@ -316,7 +315,7 @@ def metadata(check, check_duplicates):
                 empty_warning_count['description'] += 1
 
             # see if there is unicode in the description
-            elif not ensure_unicode(row['description'].isascii()):
+            elif not row['description'].isascii():
                 echo_failure(
                     f"{current_check}:{line} `{row['metric_name']}`\'s description contains unicode characters."
                 )
@@ -328,7 +327,6 @@ def metadata(check, check_duplicates):
                     f"{current_check}:{line} `{row['metric_name']}` exceeds the max length: "
                     "{MAX_DESCRIPTION_LENGTH} for descriptions."
                 )
-
             if row['interval'] and not row['interval'].isdigit():
                 errors = True
                 echo_failure(f"{current_check}: interval should be an int, found '{row['interval']}'")
