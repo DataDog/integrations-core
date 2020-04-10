@@ -135,6 +135,21 @@ class WinPDHCounter(object):
         for idx in range(0, len(val) - 1, 2):
             WinPDHCounter.pdh_counter_dict[val[idx + 1]].append(val[idx])
 
+        print("WinPDHCounter.pdh_counter_dict1", WinPDHCounter.pdh_counter_dict)
+
+        val = val + ['']
+        for idx in range(0, len(val) - 1, 2):
+            WinPDHCounter.pdh_counter_dict[val[idx + 1]].append(val[idx])
+
+        print("WinPDHCounter.pdh_counter_dict2", WinPDHCounter.pdh_counter_dict)
+
+        val = val + ['abc']
+        for idx in range(0, len(val) - 1, 2):
+            WinPDHCounter.pdh_counter_dict[val[idx + 1]].append(val[idx])
+
+        print("WinPDHCounter.pdh_counter_dict3", WinPDHCounter.pdh_counter_dict)
+        1/0
+
     def _make_counter_path(self, machine_name, counter_name, instance_name, counters):
         """
         When handling non english versions, the counters don't work quite as documented.
