@@ -50,6 +50,72 @@ instances:
     #
   - aci_url: localhost
 
+    ## @param username - string - optional
+    ## Authentication can use either a user auth or a certificate.
+    ## If using the user auth, enter the `username` and `pwd` configuration.
+    #
+    # username: <USERNAME>
+
+    ## @param pwd - string - optional
+    ## Authentication can use either a user auth or a certificate.
+    ## If using the user auth, enter the `username` and `pwd` configuration.
+    #
+    # pwd: <PWD>
+
+    ## @param tenant - list of strings - optional
+    ## List of tenants to collect data from
+    #
+    # tenant:
+    #   - <TENANT_1>
+    #   - <TENANT_2>
+
+    ## @param aci_urls - list of strings - optional
+    ## Add multiple urls if there are multiple controllers,
+    ## the check balances its requests between them.
+    #
+    # aci_urls:
+    #   - <HOST>:<PORT>
+
+    ## @param cert_name - string - optional
+    ## Certificate Authentication. When adding a cert to the ACI, it requires a name.
+    #
+    # cert_name: <CERT_NAME>
+
+    ## @param cert_key_password - string - optional
+    ## If there is a password to the key, add it here
+    #
+    # cert_key_password: <CERT_KEY_PASSWORD>
+
+    ## @param cert_key - string - optional
+    ## When using Certificate Authentication, add the whole cert in the configuration file.
+    ## Example:
+    ##
+    ## cert_key: >
+    ##   -----BEGIN PRIVATE KEY-----
+    ##   MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAOLJKRals8tGoy7K
+    ##   ljG6/hMcoe16W6MPn47Q601ttoFkMoSJZ1Jos6nxn32KXfG6hCiB0bmf1iyZtaMa
+    ##   idae/ceT7ZNGvqcVffpDianq9r08hClhnU8mTojl38fsvHf//yqZNzn1ZUcLsY9e
+    ##   wG6wl7CsbWCafxaw+PfaCB1uWlnhAgMBAAECgYAI+tQgrHEBFIvzl1v5HiFfWlvj
+    ##   DlxAiabUvdsDVtvKJdCGRPaNYc3zZbjd/LOZlbwT6ogGZJjTbUau7acVk3gS8uKl
+    ##   ydWWODSuxVYxY8Poxt9SIksOAk5WmtMgIg2bTltTb8z3AWAT3qZrHth03la5Zbix
+    ##   ynEngzyj1+ND7YwQAQJBAP00t8/1aqub+rfza+Ddd8OYSMARFH22oxgy2W1O+Gwc
+    ##   Y8Gn3z6TkadfhPxFaUPnBPx8wm3mN+XeSB1nf0KCAWECQQDlSc7jQ/Ps5rxcoekB
+    ##   ldB+VmuR8TfcWdrWSOdHUiLyoJoj+Z7yfrf70gONPP9tUnwX6MYdT8YwzHK34aWv
+    ##   8KiBAkBHddlql5jDVgIsaEbJ77cdPJ1Ll4Zw9FqTOcajUuZJnLmKrhYTUxKIaize
+    ##   BbjvsQN3Pr6gxZiBB3rS0aLY4lgBAkApsH3ZfKWBUYK2JQpEq4S5M+VjJ8TMX9oW
+    ##   VDMZGKoaC3F7UQvBc6DoPItAxvJ6YiEGB+Ddu3+Bp+rD3FdP4iYBAkBh17O56A/f
+    ##   QX49RjRCRIT0w4nvZ3ph9gHEe50E4+Ky5CLQNOPLD/RbBXSEzez8cGysVvzDO3DZ
+    ##   /iN4a8gloY3d
+    ##   -----END PRIVATE KEY-----
+    #
+    # cert_key: <CERT_KEY>
+
+    ## @param cert_key_path - string - optional
+    ## Certificate Authentication:
+    ## If you want to keep the cert in a separate file, enter the file path here
+    #
+    # cert_key_path: <CERT_KEY_PATH>
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
@@ -110,16 +176,6 @@ instances:
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
     # auth_type: basic
-
-    ## @param username - string - optional
-    ## The username to use if services are behind basic or digest auth.
-    #
-    # username: <USERNAME>
-
-    ## @param password - string - optional
-    ## The password to use if services are behind basic or NTLM auth.
-    #
-    # password: <PASSWORD>
 
     ## @param ntlm_domain - string - optional
     ## If your services use NTLM authentication, you can specify
