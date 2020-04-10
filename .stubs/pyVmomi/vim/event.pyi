@@ -11,5 +11,4 @@ class EventFilterSpec:
 
 class EventManager:
     latestEvent: Event
-    def QueryEvents(self, filer: EventFilterSpec) -> List[Event]:
-        pass
+    def QueryEvents(self, filer: EventFilterSpec) -> List[Event]: ...
