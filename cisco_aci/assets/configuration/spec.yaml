@@ -16,6 +16,7 @@ files:
         example: localhost
       display_priority: 10
     - name: pwd
+      required: true
       description: |
         Authentication can use either a user auth or a certificate.
         If using the user auth, enter the `username` and `pwd` configuration.
@@ -85,6 +86,7 @@ files:
         username.description: |
             Authentication can use either a user auth or a certificate.
             If using the user auth, enter the `username` and `pwd` configuration.
+        username.required: true
         username.example: datadog
         password.hidden: true
         ntlm_domain.hidden: true

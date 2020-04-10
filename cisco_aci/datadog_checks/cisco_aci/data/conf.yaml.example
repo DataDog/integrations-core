@@ -50,17 +50,17 @@ instances:
     #
   - aci_url: localhost
 
-    ## @param username - string - optional
+    ## @param username - string - required
     ## Authentication can use either a user auth or a certificate.
     ## If using the user auth, enter the `username` and `pwd` configuration.
     #
-    # username: <USERNAME>
+    username: <USERNAME>
 
-    ## @param pwd - string - optional
+    ## @param pwd - string - required
     ## Authentication can use either a user auth or a certificate.
     ## If using the user auth, enter the `username` and `pwd` configuration.
     #
-    # pwd: <PWD>
+    pwd: <PWD>
 
     ## @param tenant - list of strings - optional
     ## List of tenants to collect data from
