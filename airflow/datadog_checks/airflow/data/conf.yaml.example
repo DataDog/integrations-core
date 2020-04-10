@@ -46,7 +46,7 @@ init_config:
 instances:
 
     ## @param url - string - required
-    ## url used to connect to the Airflow instance.
+    ## URL used to connect to the Airflow instance.
     #
   - url: <URL>
 
