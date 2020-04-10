@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 5.1.1 / 2020-04-10
+
+* [Fixed] Fix tags race conditions with filtering. See [#6297](https://github.com/DataDog/integrations-core/pull/6297).
+
 ## 5.1.0 / 2020-04-04
 
 * [Added] resource filters: allow blacklist and tag filtering. See [#6194](https://github.com/DataDog/integrations-core/pull/6194).
