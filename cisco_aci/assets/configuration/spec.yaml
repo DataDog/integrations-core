@@ -88,6 +88,7 @@ files:
             If using the user auth, enter the `username` and `pwd` configuration.
         username.required: true
         username.value.example: datadog
+        auth_type.hidden: true
         password.hidden: true
         ntlm_domain.hidden: true
         kerberos_auth.hidden: true
