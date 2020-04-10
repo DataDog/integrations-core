@@ -10,12 +10,14 @@ files:
         Master URL to probe for service health status
         If you are using gitlab CE and not EE, use this url with
         the authorization token: http://localhost/?token=<TOKEN>
-      example: <GITLAB_URL>
+      value:
+        type: string
     - name: api_token
       description: |
-            A Gitlab API token for this instance.
-            Used to collect the Gitlab version.
-      example: <TOKEN>
+        A Gitlab API token for this instance.
+        Used to collect the Gitlab version.
+      value:
+        type: string
     - template: instances/openmetrics
       overrides:
         prometheus_url.value.example: http://<GITLAB_URL>/-/metrics

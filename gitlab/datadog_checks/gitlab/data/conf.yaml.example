@@ -2,16 +2,18 @@
 #
 instances:
 
+    ## @param gitlab_url - string - required
     ## Master URL to probe for service health status
     ## If you are using gitlab CE and not EE, use this url with
     ## the authorization token: http://localhost/?token=<TOKEN>
     #
-gitlab_url: <GITLAB_URL>
+  - gitlab_url: <GITLAB_URL>
 
+    ## @param api_token - string - optional
     ## A Gitlab API token for this instance.
     ## Used to collect the Gitlab version.
     #
-    # api_token: <TOKEN>
+    # api_token: <API_TOKEN>
 
     ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
