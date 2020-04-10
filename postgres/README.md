@@ -203,7 +203,7 @@ Then, [instrument your application container][6] and set `DD_AGENT_HOST` to the 
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection documentation][8].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
 
 | Parameter      | Value                                               |
 | -------------- | --------------------------------------------------- |
@@ -252,7 +252,7 @@ Additional helpful documentation, links, and articles:
 [5]: https://docs.datadoghq.com/tracing/send_traces/
 [6]: https://docs.datadoghq.com/tracing/setup/
 [7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[8]: https://docs.datadoghq.com/agent/docker/log/
+[8]: https://docs.datadoghq.com/agent/kubernetes/log//
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv
 [11]: https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained

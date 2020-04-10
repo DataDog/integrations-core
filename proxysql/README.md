@@ -108,6 +108,6 @@ Need help? Contact [Datadog support][11].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/proxysql/metadata.csv
-[9]: https://docs.datadoghq.com/agent/docker/log
+[9]: https://docs.datadoghq.com/agent/kubernetes/log/
 [10]: https://docs.datadoghq.com/help
 [11]: https://docs.datadoghq.com/help
