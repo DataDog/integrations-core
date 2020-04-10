@@ -54,7 +54,7 @@ instances:
     ## Authentication can use either a user auth or a certificate.
     ## If using the user auth, enter the `username` and `pwd` configuration.
     #
-    username: <USERNAME>
+    username: datadog
 
     ## @param pwd - string - required
     ## Authentication can use either a user auth or a certificate.

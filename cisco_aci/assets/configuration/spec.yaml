@@ -87,7 +87,7 @@ files:
             Authentication can use either a user auth or a certificate.
             If using the user auth, enter the `username` and `pwd` configuration.
         username.required: true
-        username.example: datadog
+        username.value.example: datadog
         password.hidden: true
         ntlm_domain.hidden: true
         kerberos_auth.hidden: true
