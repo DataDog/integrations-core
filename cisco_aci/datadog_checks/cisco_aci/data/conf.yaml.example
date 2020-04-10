@@ -42,6 +42,11 @@ init_config:
     # service: <SERVICE>
 
 ## Every instance is scheduled independent of the others.
+##
+## This check makes a lot of API calls.
+## It could sometimes help to add a minimum collection interval:
+##
+##   min_collection_interval: 180
 #
 instances:
 

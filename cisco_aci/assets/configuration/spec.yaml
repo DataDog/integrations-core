@@ -7,6 +7,15 @@ files:
       - template: init_config/http
       - template: init_config/default
   - template: instances
+    overrides:
+      description: |
+        Every instance is scheduled independent of the others.
+
+        This check makes a lot of API calls.
+        It could sometimes help to add a minimum collection interval:
+
+          min_collection_interval: 180
+
     options:
     - name: aci_url
       required: true
