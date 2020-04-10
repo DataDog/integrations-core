@@ -18,7 +18,6 @@ files:
         Used to collect the Gitlab version.
       value:
         type: string
-      example: <TOKEN>
     - template: instances/openmetrics
       overrides:
         prometheus_url.value.example: http://<GITLAB_URL>/-/metrics
