@@ -20,7 +20,8 @@ files:
     - name: catalog_checks
       description: Set to true to perform checks against the Consul service Catalog.
       value:
-        type: string
+        type: boolean
+        example: false
     - name: network_latency_checks
       description: |
         Whether to enable network latency metrics collection. When enabled

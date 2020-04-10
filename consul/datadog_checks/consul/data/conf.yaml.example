@@ -42,11 +42,6 @@ init_config:
     # service: <SERVICE>
 
 ## Every instance is scheduled independent of the others.
-##
-## This check makes a lot of API calls.
-## It could sometimes help to add a minimum collection interval:
-##
-##   min_collection_interval: 180
 #
 instances:
 
@@ -57,10 +52,10 @@ instances:
     #
   - url: http://localhost:8500
 
-    ## @param catalog_checks - string - optional
+    ## @param catalog_checks - boolean - optional - default: false
     ## Set to true to perform checks against the Consul service Catalog.
     #
-    # catalog_checks: <CATALOG_CHECKS>
+    # catalog_checks: false
 
     ## @param network_latency_checks - boolean - optional - default: false
     ## Whether to enable network latency metrics collection. When enabled
