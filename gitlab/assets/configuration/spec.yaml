@@ -22,6 +22,8 @@ files:
       overrides:
         prometheus_url.value.example: http://<GITLAB_URL>/-/metrics
         metrics.hidden: true
+        namespace.hidden: true
+        send_distribution_counts_as_monotonic.value.example: true
   - template: init_config
     options:
       - template: init_config/openmetrics

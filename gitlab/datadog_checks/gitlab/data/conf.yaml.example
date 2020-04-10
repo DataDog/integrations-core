@@ -20,11 +20,6 @@ instances:
     #
     prometheus_url: http://<GITLAB_URL>/-/metrics
 
-    ## @param namespace - string - required
-    ## The namespace to be prepended to all metrics.
-    #
-    namespace: service
-
     ## @param prometheus_metrics_prefix - string - optional
     ## <PREFIX> for exposed Prometheus metrics.
     #
@@ -83,11 +78,11 @@ instances:
     #
     # send_monotonic_counter: true
 
-    ## @param send_distribution_counts_as_monotonic - boolean - optional - default: false
+    ## @param send_distribution_counts_as_monotonic - boolean - optional - default: true
     ## Set send_distribution_counts_as_monotonic to true to send histograms & summary
     ## counters as monotonic counters (instead of gauges).
     #
-    # send_distribution_counts_as_monotonic: false
+    # send_distribution_counts_as_monotonic: true
 
     ## @param send_distribution_sums_as_monotonic - boolean - optional - default: false
     ## Set send_distribution_sums_as_monotonic to true to send histograms & summary
