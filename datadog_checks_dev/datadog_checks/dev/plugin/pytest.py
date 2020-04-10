@@ -78,7 +78,7 @@ def dd_environment_runner(request):
         fixture_def = request._fixturemanager._arg2fixturedefs[E2E_FIXTURE_NAME][0]
 
         # Make the underlying function a no-op
-        fixture_def.func = lambda: None
+        fixture_def.func = lambda *args, **kwargs: None
         return
 
     try:
