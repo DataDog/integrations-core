@@ -5,6 +5,7 @@ import re
 from collections import defaultdict
 
 import click
+
 from ...utils import complete_valid_checks, get_metadata_file, get_metric_sources, load_manifest, read_metadata_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning
 
