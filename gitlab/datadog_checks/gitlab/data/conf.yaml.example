@@ -417,6 +417,7 @@ init_config:
     #
     # timeout: 10
 
+    ## @param allowed_metrics - list of strings - optional
     ## List of legacy metrics to extract from Prometheus.
     #
     # allowed_metrics:
