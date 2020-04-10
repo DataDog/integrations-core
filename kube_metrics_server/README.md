@@ -26,7 +26,7 @@ For containerized environments, see the [Kubernetes Autodiscovery Integration Te
 
 | Parameter            | Value                                                |
 | -------------------- | ---------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `prometheus`                                         |
+| `<INTEGRATION_NAME>` | `kube_metrics_server `                                         |
 | `<INIT_CONFIG>`      | blank or `{}`                                        |
 | `<INSTANCE_CONFIG>`  | `{"prometheus_url": "https://%%host%%:443/metrics"}` |
 
