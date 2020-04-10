@@ -253,7 +253,7 @@ Additional helpful documentation, links, and articles:
 [6]: https://github.com/DataDog/integrations-core/blob/master/nginx/datadog_checks/nginx/data/conf.yaml.example
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/agent/kubernetes/integrations
-[9]: https://docs.datadoghq.com/agent/docker/log
+[9]: https://docs.datadoghq.com/agent/kubernetes/log
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/nginx/metadata.csv
 [12]: https://docs.datadoghq.com/logs/faq/why-do-my-logs-not-have-the-expected-timestamp

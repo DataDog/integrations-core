@@ -121,5 +121,5 @@ Need help? Contact [Datadog support][8].
 [7]: https://github.com/DataDog/integrations-core/blob/master/cilium/metadata.csv
 [8]: https://docs.datadoghq.com/help
 [9]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#create-manifest
-[10]: https://docs.datadoghq.com/agent/docker/log
+[10]: https://docs.datadoghq.com/agent/kubernetes/log
 [11]: https://docs.datadoghq.com/agent/kubernetes/integrations

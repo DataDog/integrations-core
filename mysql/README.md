@@ -420,7 +420,7 @@ Read our [series of blog posts][26] about monitoring MySQL with Datadog.
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [11]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [12]: https://docs.datadoghq.com/agent/faq/template_variables/
-[13]: https://docs.datadoghq.com/agent/docker/log
+[13]: https://docs.datadoghq.com/agent/kubernetes/log
 [14]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [15]: https://github.com/DataDog/integrations-core/blob/master/mysql/metadata.csv
 [16]: https://github.com/DataDog/integrations-core/blob/master/mysql/assets/SERVICE_CHECK_CLARIFICATION.md
