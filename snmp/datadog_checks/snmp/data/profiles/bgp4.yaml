@@ -1,0 +1,31 @@
+extends:
+  - _base.yaml
+
+#Peer
+
+#This table contains one entry per neightbor (BGP peer) and information about the connections with BGP peers.
+metrics:
+  - MIB: BGP4-MIB
+    table: bgpPeerTable
+    symbols:
+      - bgpPeerInUpdates
+      - bgpPeerOutUpdates
+      - bgpPeerInTotalMessages
+      - bgpPeerOutTotalMessages
+      - bgpPeerFsmEstablishedTransitions
+      - bgpPeerFsmEstablishedTime
+      - bgpPeerConnectRetryInterval
+      - bgpPeerHoldTime
+      - bgpPeerKeepAlive
+      - bgpPeerHoldTimeConfigured
+      - bgpPeerKeepAliveConfigured
+      - bgpPeerMinASOriginationInterval
+      - bgpPeerMinRouteAdvertisementInterval
+      - bgpPeerInUpdateElapsedTime
+      - bgpPeerAdminStatus
+      - bgpPeerNegotiatedVersion
+      - bgpPeerRemoteAs
+      - bgpPeerState
+    metric_tags:
+      - tag: neighbor
+        column: bgpPeerRemoteAddr
