@@ -113,7 +113,6 @@ def config(ctx, check, sync, verbose):
         if check_display_queue or verbose:
             echo_info(f'{check}:')
             if verbose:
-                # check_display_queue.append(lambda: echo_info(f'Valid spec', indent=True))
                 check_display_queue.append(lambda **kwargs: echo_info(f'Valid spec', **kwargs))
             for display in check_display_queue:
                 display(indent=True)
