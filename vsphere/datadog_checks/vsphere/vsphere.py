@@ -4,20 +4,19 @@
 from __future__ import division
 
 import datetime as dt
-import itertools
 from collections import defaultdict
 from concurrent.futures import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Dict, Generator, Iterable, List, Set, Type, cast
 
 from pyVmomi import vim, vmodl
-from six import iteritems
+from six import iteritems, iterkeys
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
-from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache, TagsCache
+from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import (
     DEFAULT_MAX_QUERY_METRICS,
@@ -28,7 +27,15 @@ from datadog_checks.vsphere.constants import (
 )
 from datadog_checks.vsphere.legacy.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
-from datadog_checks.vsphere.types import CounterId, InstanceConfig, MetricName, MorBatch
+from datadog_checks.vsphere.resource_filters import TagFilter
+from datadog_checks.vsphere.types import (
+    CounterId,
+    InfrastructureData,
+    InstanceConfig,
+    MetricName,
+    MorBatch,
+    ResourceTags,
+)
 from datadog_checks.vsphere.utils import (
     MOR_TYPE_AS_STRING,
     format_metric_name,
@@ -73,7 +80,6 @@ class VSphereCheck(AgentCheck):
         self.metrics_metadata_cache = MetricsMetadataCache(
             interval_sec=self.config.refresh_metrics_metadata_cache_interval
         )
-        self.tags_cache = TagsCache(interval_sec=self.config.refresh_tags_cache_interval)
         self.api = cast(VSphereAPI, None)
         self.api_rest = cast(VSphereRestAPI, None)
         # Do not override `AgentCheck.hostname`
@@ -135,25 +141,34 @@ class VSphereCheck(AgentCheck):
         # Apparently only when the server restarts?
         # https://pubs.vmware.com/vsphere-50/index.jsp?topic=%2Fcom.vmware.wssdk.pg.doc_50%2FPG_Ch16_Performance.18.5.html
 
-    def refresh_tags_cache(self):
-        # type: () -> None
+    def collect_tags(self, infrastructure_data):
+        # type: (InfrastructureData) -> ResourceTags
         """
         Fetch the all tags, build tags for each monitored resources and store all of that into the tags_cache.
         """
         if not self.api_rest:
-            return
-        mors_iterator = itertools.chain.from_iterable(
-            self.infrastructure_cache.get_mors(resource_type) for resource_type in self.config.collected_resource_types
-        )
+            return {}
+
+        # In order to be more efficient in tag collection, the infrastructure data is filtered as much as possible.
+        # All filters are applied except the ones based on tags of course.
+        resource_filters_without_tags = [f for f in self.config.resource_filters if not isinstance(f, TagFilter)]
+        filtered_infra_data = {
+            mor: props
+            for mor, props in iteritems(infrastructure_data)
+            if isinstance(mor, tuple(self.config.collected_resource_types))
+            and is_resource_collected_by_filters(mor, infrastructure_data, resource_filters_without_tags)
+        }
 
         t0 = Timer()
+        mors_iterator = iterkeys(filtered_infra_data)
         try:
             mor_tags = self.api_rest.get_resource_tags_for_mors(mors_iterator)
         except Exception as e:
             self.log.error("Failed to collect tags: %s", e)
-            return
+            return {}
+
         self.gauge('datadog.vsphere.query_tags.time', t0.total(), tags=self.config.base_tags, raw=True)
-        self.tags_cache.set_all_tags(mor_tags)
+        return mor_tags
 
     def refresh_infrastructure_cache(self):
         # type: () -> None
@@ -172,13 +187,18 @@ class VSphereCheck(AgentCheck):
         )
         self.log.debug("Infrastructure cache refreshed in %.3f seconds.", t0.total())
 
+        all_tags = {}
+        if self.config.should_collect_tags:
+            all_tags = self.collect_tags(infrastructure_data)
+        self.infrastructure_cache.set_all_tags(all_tags)
+
         for mor, properties in iteritems(infrastructure_data):
             if not isinstance(mor, tuple(self.config.collected_resource_types)):
                 # Do nothing for the resource types we do not collect
                 continue
 
             if not is_resource_collected_by_filters(
-                mor, infrastructure_data, self.config.resource_filters, self.tags_cache.get_mor_tags(mor)
+                mor, infrastructure_data, self.config.resource_filters, self.infrastructure_cache.get_mor_tags(mor)
             ):
                 # The resource does not match the specified whitelist/blacklist patterns.
                 continue
@@ -219,7 +239,7 @@ class VSphereCheck(AgentCheck):
             if hostname:
                 mor_payload['hostname'] = hostname
 
-            self.infrastructure_cache.set_mor_data(mor, mor_payload)
+            self.infrastructure_cache.set_mor_props(mor, mor_payload)
 
     def submit_metrics_callback(self, query_results):
         # type: (List[vim.PerformanceManager.EntityMetricBase]) -> None
@@ -288,7 +308,7 @@ class VSphereCheck(AgentCheck):
                     instance_tag_key = get_mapped_instance_tag(metric_name)
                     tags.append('{}:{}'.format(instance_tag_key, instance_value))
 
-                vsphere_tags = self.tags_cache.get_mor_tags(results_per_mor.entity)
+                vsphere_tags = self.infrastructure_cache.get_mor_tags(results_per_mor.entity)
                 mor_tags = mor_props['tags'] + vsphere_tags
 
                 if resource_type in HISTORICAL_RESOURCES:
@@ -445,12 +465,13 @@ class VSphereCheck(AgentCheck):
         for resource_type in REALTIME_RESOURCES:
             for mor in self.infrastructure_cache.get_mors(resource_type):
                 mor_props = self.infrastructure_cache.get_mor_props(mor)
+                mor_tags = self.infrastructure_cache.get_mor_tags(mor)
                 hostname = mor_props.get('hostname')
                 # Safeguard if some mors have a None hostname
                 if not hostname:
                     continue
 
-                mor_tags = mor_props['tags'] + self.tags_cache.get_mor_tags(mor)
+                mor_tags = mor_props['tags'] + mor_tags
                 tags = [t for t in mor_tags if t.split(':')[0] not in self.config.excluded_host_tags]
                 tags.extend(self.config.base_tags)
                 external_host_tags.append((hostname, {self.__NAMESPACE__: tags}))
@@ -534,11 +555,6 @@ class VSphereCheck(AgentCheck):
                 self.refresh_infrastructure_cache()
             # Submit host tags as soon as we have fresh data
             self.submit_external_host_tags()
-
-        # Refresh the tags cache
-        if self.api_rest and self.tags_cache.is_expired():
-            with self.tags_cache.update():
-                self.refresh_tags_cache()
 
         # Collect and submit events
         if self.config.should_collect_events:
