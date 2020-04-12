@@ -52,6 +52,13 @@ def value_type_string(value):
         return value_type
 
 
+def option_enabled(option):
+    if 'enabled' in option:
+        return bool(option['enabled'])
+
+    return option['required']
+
+
 def write_description(option, writer, indent, option_type):
     description = option['description']
     deprecation = option['deprecation']
@@ -147,7 +154,7 @@ def write_option(option, writer, indent='', start_list=False):
         example_indent = '  ' if example_type is list and example else ''
         for i, line in enumerate(option_yaml.splitlines()):
             writer.write(indent)
-            if not required:
+            if not option_enabled(option):
                 writer.write('# ')
 
             if i > 0:
@@ -171,7 +178,7 @@ def write_option(option, writer, indent='', start_list=False):
 
                     writer.write('\n')
                     if i == 0 and multiple:
-                        if opt['required']:
+                        if option_enabled(opt):
                             write_option(opt, writer, next_indent, start_list=True)
                         else:
                             writer.write(next_indent[:-2], '-\n')
@@ -188,7 +195,7 @@ def write_option(option, writer, indent='', start_list=False):
 
             example_indent = '  ' if type(example) is list and example else ''
             for i, line in enumerate(option_yaml.splitlines()):
-                if not option['required']:
+                if not option_enabled(option):
                     writer.write(indent, '# ')
 
                 if i > 0:
