@@ -2,11 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
-from typing import List
+from typing import Dict, List, Tuple, Any
 
 from six import iteritems
-
-from datadog_checks.base.utils.containers import hash_mutable
 
 from ... import AgentCheck
 from .sampler import WMISampler
@@ -60,11 +58,10 @@ class WinWMICheck(AgentCheck):
         self.metrics = self.instance.get('metrics')  # type: List[str]
         self.filters = self.instance.get('filters')
         self.tag_by = self.instance.get('tag_by', "")  # type: List[str]
-        self.tag_queries = tuple(self.instance.get('tag_queries', ()))
+        self.tag_queries = self.instance.get('tag_queries', [])  # type: List[str]
 
         self.wmi_sampler = None  # type: WMISampler
-        self._wmi_props = None
-        self.instance_hash = hash_mutable(self.instance)
+        self._wmi_props = None  # type: Tuple[Dict, List[str]]
 
     def _format_tag_query(self, wmi_obj=None):
         """
@@ -118,18 +115,19 @@ class WinWMICheck(AgentCheck):
             )
             raise TypeError
 
-    def _get_tag_query_tag(self, wmi_obj):
+    def _get_tag_query_tag(self, wmi_obj, tag_query):
+        # type: (Any, str) -> str
         """
         Design a query based on the given WMIObject to extract a tag.
 
         Returns: tag or TagQueryUniquenessFailure exception.
         """
         self.log.debug(
-            u"`tag_queries` parameter found. wmi_object=%s - query=%s", wmi_obj, self.tag_queries,
+            u"`tag_queries` parameter found. wmi_object=%s - query=%s", wmi_obj, tag_query,
         )
 
         # Extract query information
-        target_class, target_property, filters = self._format_tag_query(sampler, wmi_obj, self.tag_queries)
+        target_class, target_property, filters = self._format_tag_query(wmi_obj)
 
         # Create a specific sampler
         with WMISampler(
@@ -138,7 +136,7 @@ class WinWMICheck(AgentCheck):
             tag_query_sampler.sample()
 
             # Extract tag
-            self._raise_on_invalid_tag_query_result(tag_query_sampler, wmi_obj, self.tag_queries)
+            self._raise_on_invalid_tag_query_result(wmi_obj)
 
             link_value = str(tag_query_sampler[0][target_property]).lower()
 
@@ -148,6 +146,7 @@ class WinWMICheck(AgentCheck):
         return tag
 
     def extract_metrics(self, constant_tags):
+        # type (List[str]) -> List[WMIMetric]
         return self._extract_metrics(self.wmi_sampler, self.tag_by, self.tag_queries, constant_tags)
 
     def _extract_metrics(self, wmi_sampler, tag_by=None, tag_queries=None, constant_tags=None):
@@ -187,7 +186,7 @@ class WinWMICheck(AgentCheck):
             # Tag with `tag_queries` parameter
             for query in tag_queries:
                 try:
-                    tags.append(self._get_tag_query_tag(wmi_sampler, wmi_obj, query))
+                    tags.append(self._get_tag_query_tag(wmi_obj, query))
                 except TagQueryUniquenessFailure:
                     continue
 
@@ -224,6 +223,7 @@ class WinWMICheck(AgentCheck):
         return extracted_metrics
 
     def _submit_metrics(self, metrics, metric_name_and_type_by_property):
+        # type: (List[WMIMetric], Tuple[Dict, List[str]]) -> None
         """
         Resolve metric names and types and submit it.
         """
@@ -261,6 +261,7 @@ class WinWMICheck(AgentCheck):
         return "{host}:{namespace}:{wmi_class}".format(host=host, namespace=namespace, wmi_class=wmi_class)
 
     def get_running_wmi_sampler(self, properties):
+        # type (List[str]]) -> WMISampler
         return self._get_running_wmi_sampler(
             wmi_class=self.wmi_class,
             properties=properties,
@@ -300,10 +301,10 @@ class WinWMICheck(AgentCheck):
         """
         Create and cache a (metric name, metric type) by WMI property map and a property list.
         """
-        metrics = metrics or self.metrics
-        tag_queries = tag_queries or self.tag_queries
-
         if not self._wmi_props:
+            metrics = metrics or self.metrics
+            tag_queries = tag_queries or self.tag_queries
+
             metric_name_by_property = dict(
                 (wmi_property.lower(), (metric_name, metric_type)) for wmi_property, metric_name, metric_type in metrics
             )

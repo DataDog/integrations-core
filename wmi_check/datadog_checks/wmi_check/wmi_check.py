@@ -27,14 +27,14 @@ class WMICheck(WinWMICheck):
         constant_tags.extend(self.custom_tags)
 
         # Create or retrieve an existing WMISampler
-        metric_name_and_type_by_property, properties = self._get_wmi_properties()
+        metric_name_and_type_by_property, properties = self._get_wmi_properties()  # type: Tuple[Dict, List[str]]
 
-        wmi_sampler = self.get_running_wmi_sampler()
+        wmi_sampler = self.get_running_wmi_sampler(properties)
 
         # Sample, extract & submit metrics
         try:
             wmi_sampler.sample()
-            extracted_metrics = self.extract_metrics(constant_tags=constant_tags)
+            extracted_metrics = self.extract_metrics(constant_tags=constant_tags)  # type: List[WMIMetric]
         except TimeoutException:
             self.log.warning(
                 "WMI query timed out. class=%s - properties=%s - filters=%s - tag_queries=%s",
