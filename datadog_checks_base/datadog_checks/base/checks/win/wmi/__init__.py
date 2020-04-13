@@ -63,8 +63,8 @@ class WinWMICheck(AgentCheck):
         self.wmi_sampler = None  # type: WMISampler
         self._wmi_props = None  # type: Tuple[Dict, List[str]]
 
-    def _format_tag_query(self, wmi_obj, tag_query):
-        # type: (Any, str) -> Tuple[str, str, List[Dict]]
+    def _format_tag_query(self, sampler, wmi_obj, tag_query):
+        # type: (WMISampler, Any, str) -> Tuple[str, str, List[Dict]]
         """
         Format `tag_query` or raise on incorrect parameters.
         """
@@ -80,7 +80,7 @@ class WinWMICheck(AgentCheck):
             raise
         except TypeError:
             wmi_property = tag_query[0]
-            wmi_class = self.wmi_sampler.class_name
+            wmi_class = sampler.class_name
             self.log.error(
                 u"Incorrect 'link source property' in `tag_queries` parameter: `%s` is not a property of `%s`",
                 wmi_property,
@@ -116,8 +116,8 @@ class WinWMICheck(AgentCheck):
             )
             raise TypeError
 
-    def _get_tag_query_tag(self, wmi_obj, tag_query):
-        # type: (Any, str) -> str
+    def _get_tag_query_tag(self, sampler, wmi_obj, tag_query):
+        # type: (WMISampler, Any, str) -> str
         """
         Design a query based on the given WMIObject to extract a tag.
 
@@ -128,11 +128,11 @@ class WinWMICheck(AgentCheck):
         )
 
         # Extract query information
-        target_class, target_property, filters = self._format_tag_query(wmi_obj, tag_query)
+        target_class, target_property, filters = self._format_tag_query(sampler, wmi_obj, tag_query)
 
         # Create a specific sampler
         with WMISampler(
-            self.log, target_class, [target_property], filters=filters, **self.wmi_sampler.connection
+            self.log, target_class, [target_property], filters=filters, **sampler.connection
         ) as tag_query_sampler:
             tag_query_sampler.sample()
 
@@ -183,7 +183,7 @@ class WinWMICheck(AgentCheck):
             # Tag with `tag_queries` parameter
             for query in tag_queries:
                 try:
-                    tags.append(self._get_tag_query_tag(wmi_obj, query))
+                    tags.append(self._get_tag_query_tag(wmi_sampler, wmi_obj, query))
                 except TagQueryUniquenessFailure:
                     continue
 
