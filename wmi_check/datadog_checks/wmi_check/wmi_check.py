@@ -3,7 +3,6 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 from datadog_checks.base.checks.win.wmi import WinWMICheck
-from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.base.utils.timeout import TimeoutException
 
 
@@ -14,68 +13,35 @@ class WMICheck(WinWMICheck):
     Windows only.
     """
 
-    def __init__(self, name, init_config, agentConfig, instances):
-        WinWMICheck.__init__(self, name, init_config, agentConfig, instances)
-        self.wmi_samplers = {}
-        self.wmi_props = {}
+    def __init__(self, name, init_config, instances):
+        super(WinWMICheck, self).__init__(name, init_config, instances)
+        self.custom_tags = self.instance.get('tags', [])
 
-    def check(self, instance):
+    def check(self, _):
         """
         Fetch WMI metrics.
         """
-
-        # Connection information
-        host = instance.get('host', "localhost")
-        namespace = instance.get('namespace', "root\\cimv2")
-        provider = instance.get('provider')
-        username = instance.get('username', "")
-        password = instance.get('password', "")
-
-        # WMI instance
-        wmi_class = instance.get('class')
-        metrics = instance.get('metrics')
-        filters = instance.get('filters')
-        tag_by = instance.get('tag_by', "")
-        tag_queries = instance.get('tag_queries', [])
-
-        constant_tags = instance.get('constant_tags')
-        custom_tags = instance.get('tags', [])
-        if constant_tags is None:
-            constant_tags = list(custom_tags)
-        else:
-            constant_tags.extend(custom_tags)
+        constant_tags = self.instance.get('constant_tags', [])
+        if constant_tags:
             self.log.warning("`constant_tags` is being deprecated, please use `tags`")
+        constant_tags.extend(self.custom_tags)
 
         # Create or retrieve an existing WMISampler
-        instance_hash = hash_mutable(instance)
-        instance_key = self._get_instance_key(host, namespace, wmi_class, instance_hash)
+        metric_name_and_type_by_property, properties = self._get_wmi_properties()
 
-        metric_name_and_type_by_property, properties = self._get_wmi_properties(instance_key, metrics, tag_queries)
-
-        wmi_sampler = self._get_running_wmi_sampler(
-            instance_key,
-            wmi_class,
-            properties,
-            tag_by=tag_by,
-            filters=filters,
-            host=host,
-            namespace=namespace,
-            provider=provider,
-            username=username,
-            password=password,
-        )
+        wmi_sampler = self.get_running_wmi_sampler()
 
         # Sample, extract & submit metrics
         try:
             wmi_sampler.sample()
-            metrics = self._extract_metrics(wmi_sampler, tag_by, tag_queries, constant_tags)
+            extracted_metrics = self.extract_metrics(constant_tags=constant_tags)
         except TimeoutException:
             self.log.warning(
                 "WMI query timed out. class=%s - properties=%s - filters=%s - tag_queries=%s",
-                wmi_class,
+                self.wmi_class,
                 properties,
-                filters,
-                tag_queries,
+                self.filters,
+                self.tag_queries,
             )
         else:
-            self._submit_metrics(metrics, metric_name_and_type_by_property)
+            self._submit_metrics(extracted_metrics, metric_name_and_type_by_property)

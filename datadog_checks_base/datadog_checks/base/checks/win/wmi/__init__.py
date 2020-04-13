@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
 
+from datadog_checks.base.utils.containers import hash_mutable
 from six import iteritems
 
 from ... import AgentCheck
@@ -44,51 +45,66 @@ class WinWMICheck(AgentCheck):
 
     def __init__(self, *args, **kwargs):  # To support optional agentConfig
         super(WinWMICheck, self).__init__(*args, **kwargs)
-        self.wmi_samplers = {}
-        self.wmi_props = {}
 
-    def _format_tag_query(self, sampler, wmi_obj, tag_query):
+        # Connection information
+        self.host = self.instance.get('host', "localhost")
+        self.namespace = self.instance.get('namespace', "root\\cimv2")
+        self.provider = self.instance.get('provider')
+        self.username = self.instance.get('username', "")
+        self.password = self.instance.get('password', "")
+
+        # WMI instance
+        self.wmi_class = self.instance.get('class')
+        self.metrics = self.instance.get('metrics')
+        self.filters = self.instance.get('filters')
+        self.tag_by = self.instance.get('tag_by', "")
+        self.tag_queries = tuple(self.instance.get('tag_queries', ()))
+
+        self.wmi_sampler = None  # type: WMISampler
+        self._wmi_props = None
+        self.instance_hash = hash_mutable(self.instance)
+
+    def _format_tag_query(self, wmi_obj=None):
         """
         Format `tag_query` or raise on incorrect parameters.
         """
         try:
-            link_source_property = int(wmi_obj[tag_query[0]])
-            target_class = tag_query[1]
-            link_target_class_property = tag_query[2]
-            target_property = tag_query[3]
+            link_source_property = int(wmi_obj[self.tag_queries[0]])
+            target_class = self.tag_queries[1]
+            link_target_class_property = self.tag_queries[2]
+            target_property = self.tag_queries[3]
         except IndexError:
             self.log.error(
                 u"Wrong `tag_queries` parameter format. " "Please refer to the configuration file for more information."
             )
             raise
         except TypeError:
-            wmi_property = tag_query[0]
-            wmi_class = sampler.class_name
+            wmi_property = self.tag_queries[0]
             self.log.error(
                 u"Incorrect 'link source property' in `tag_queries` parameter: `%s` is not a property of `%s`",
                 wmi_property,
-                wmi_class,
+                self.wmi_class,
             )
             raise
 
-        return (target_class, target_property, [{link_target_class_property: link_source_property}])
+        return target_class, target_property, [{link_target_class_property: link_source_property}]
 
-    def _raise_on_invalid_tag_query_result(self, sampler, wmi_obj, tag_query):
+    def _raise_on_invalid_tag_query_result(self, wmi_obj):
         """
         """
-        target_property = sampler.property_names[0]
-        target_class = sampler.class_name
+        target_property = self.wmi_sampler.property_names[0]
+        target_class = self.wmi_sampler.class_name
 
-        if len(sampler) != 1:
+        if len(self.wmi_sampler) != 1:
             message = "no result was returned"
-            if len(sampler):
+            if len(self.wmi_sampler):
                 message = "multiple results returned (one expected)"
 
             self.log.warning(
                 u"Failed to extract a tag from `tag_queries` parameter: %s. wmi_object=%s - query=%s",
                 message,
                 wmi_obj,
-                tag_query,
+                self.tag_queries,
             )
             raise TagQueryUniquenessFailure
 
@@ -100,27 +116,27 @@ class WinWMICheck(AgentCheck):
             )
             raise TypeError
 
-    def _get_tag_query_tag(self, sampler, wmi_obj, tag_query):
+    def _get_tag_query_tag(self, wmi_obj):
         """
         Design a query based on the given WMIObject to extract a tag.
 
         Returns: tag or TagQueryUniquenessFailure exception.
         """
         self.log.debug(
-            u"`tag_queries` parameter found. wmi_object=%s - query=%s", wmi_obj, tag_query,
+            u"`tag_queries` parameter found. wmi_object=%s - query=%s", wmi_obj, self.tag_queries,
         )
 
         # Extract query information
-        target_class, target_property, filters = self._format_tag_query(sampler, wmi_obj, tag_query)
+        target_class, target_property, filters = self._format_tag_query(sampler, wmi_obj, self.tag_queries)
 
         # Create a specific sampler
         with WMISampler(
-            self.log, target_class, [target_property], filters=filters, **sampler.connection
+            self.log, target_class, [target_property], filters=filters, **self.wmi_sampler.connection
         ) as tag_query_sampler:
             tag_query_sampler.sample()
 
             # Extract tag
-            self._raise_on_invalid_tag_query_result(tag_query_sampler, wmi_obj, tag_query)
+            self._raise_on_invalid_tag_query_result(tag_query_sampler, wmi_obj, self.tag_queries)
 
             link_value = str(tag_query_sampler[0][target_property]).lower()
 
@@ -129,7 +145,10 @@ class WinWMICheck(AgentCheck):
         self.log.debug(u"Extracted `tag_queries` tag: '%s'", tag)
         return tag
 
-    def _extract_metrics(self, wmi_sampler, tag_by, tag_queries, constant_tags):
+    def extract_metrics(self, constant_tags):
+        return self._extract_metrics(self.wmi_sampler, self.tag_by, self.tag_queries, constant_tags)
+
+    def _extract_metrics(self, wmi_sampler, tag_by=None, tag_queries=None, constant_tags=None):
         """
         Extract and tag metrics from the WMISampler.
 
@@ -143,6 +162,10 @@ class WinWMICheck(AgentCheck):
         ]
         ```
         """
+        wmi_sampler = wmi_sampler or self.wmi_sampler
+        tag_by = tag_by or self.tag_by
+        tag_queries = tag_queries or self.tag_queries
+
         if len(wmi_sampler) > 1 and not tag_by:
             raise MissingTagBy(
                 u"WMI query returned multiple rows but no `tag_by` value was given."
@@ -153,7 +176,7 @@ class WinWMICheck(AgentCheck):
                 )
             )
 
-        metrics = []
+        extracted_metrics = []
         tag_by = tag_by.lower()
 
         for wmi_obj in wmi_sampler:
@@ -185,7 +208,7 @@ class WinWMICheck(AgentCheck):
                     continue
 
                 try:
-                    metrics.append(WMIMetric(wmi_property, float(wmi_value), tags))
+                    extracted_metrics.append(WMIMetric(wmi_property, float(wmi_value), tags))
                 except ValueError:
                     self.log.warning(
                         u"When extracting metrics with WMI, found a non digit value for property '%s'.", wmi_property,
@@ -196,7 +219,7 @@ class WinWMICheck(AgentCheck):
                         u"When extracting metrics with WMI, found a missing property '%s'", wmi_property,
                     )
                     continue
-        return metrics
+        return extracted_metrics
 
     def _submit_metrics(self, metrics, metric_name_and_type_by_property):
         """
@@ -233,36 +256,59 @@ class WinWMICheck(AgentCheck):
             return "{host}:{namespace}:{wmi_class}-{other}".format(
                 host=host, namespace=namespace, wmi_class=wmi_class, other=other
             )
-
         return "{host}:{namespace}:{wmi_class}".format(host=host, namespace=namespace, wmi_class=wmi_class)
 
-    def _get_running_wmi_sampler(self, instance_key, wmi_class, properties, tag_by="", **kwargs):
+    def get_running_wmi_sampler(self, properties):
+        return self._get_running_wmi_sampler(
+            wmi_class=self.wmi_class,
+            properties=properties,
+            tag_by=self.tag_by,
+            filters=self.filters,
+            host=self.host,
+            namespace=self.namespace,
+            provider=self.provider,
+            username=self.username,
+            password=self.password
+        )
+
+    def _get_running_wmi_sampler(self, instance_key=None, wmi_class=None, properties=None, tag_by="", **kwargs):
         """
         Return a running WMISampler for the given (class, properties).
 
         If no matching WMISampler is running yet, start one and cache it.
         """
+        wmi_class = wmi_class or self.wmi_class
+        tag_by = tag_by or self.tag_by
         properties = list(properties) + [tag_by] if tag_by else list(properties)
 
-        if instance_key not in self.wmi_samplers:
-            wmi_sampler = WMISampler(self.log, wmi_class, properties, **kwargs)
-            wmi_sampler.start()
-            self.wmi_samplers[instance_key] = wmi_sampler
+        kwargs['filters'] = kwargs.get('filters', self.filters)
+        kwargs['host'] = kwargs.get('host', self.host)
+        kwargs['namespace'] = kwargs.get('namespace', self.namespace)
+        kwargs['provider'] = kwargs.get('provider', self.provider)
+        kwargs['username'] = kwargs.get('username', self.username)
+        kwargs['password'] = kwargs.get('password', self.password)
 
-        return self.wmi_samplers[instance_key]
+        if not self.wmi_sampler:
+            self.wmi_sampler = WMISampler(self.log, wmi_class, properties, **kwargs)
+            self.wmi_sampler.start()
 
-    def _get_wmi_properties(self, instance_key, metrics, tag_queries):
+        return self.wmi_sampler
+
+    def _get_wmi_properties(self, instance_key=None, metrics=None, tag_queries=None):
         """
         Create and cache a (metric name, metric type) by WMI property map and a property list.
         """
-        if instance_key not in self.wmi_props:
+        metrics = metrics or self.metrics
+        tag_queries = tag_queries or self.tag_queries
+
+        if not self._wmi_props:
             metric_name_by_property = dict(
                 (wmi_property.lower(), (metric_name, metric_type)) for wmi_property, metric_name, metric_type in metrics
             )
             properties = map(lambda x: x[0], metrics + tag_queries)
-            self.wmi_props[instance_key] = (metric_name_by_property, properties)
+            self._wmi_props = (metric_name_by_property, properties)
 
-        return self.wmi_props[instance_key]
+        return self._wmi_props
 
 
 def from_time(
