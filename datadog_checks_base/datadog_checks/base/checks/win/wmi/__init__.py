@@ -90,14 +90,14 @@ class WinWMICheck(AgentCheck):
 
         return target_class, target_property, [{link_target_class_property: link_source_property}]
 
-    def _raise_on_invalid_tag_query_result(self, wmi_obj, tag_query):
-        # type: (Any, str) -> None
-        target_property = self.wmi_sampler.property_names[0]
-        target_class = self.wmi_sampler.class_name
+    def _raise_on_invalid_tag_query_result(self, sampler, wmi_obj, tag_query):
+        # type: (WMISampler, Any, str) -> None
+        target_property = sampler.property_names[0]
+        target_class = sampler.class_name
 
-        if len(self.wmi_sampler) != 1:
+        if len(sampler) != 1:
             message = "no result was returned"
-            if len(self.wmi_sampler):
+            if len(sampler):
                 message = "multiple results returned (one expected)"
 
             self.log.warning(
@@ -137,7 +137,7 @@ class WinWMICheck(AgentCheck):
             tag_query_sampler.sample()
 
             # Extract tag
-            self._raise_on_invalid_tag_query_result(wmi_obj, tag_query)
+            self._raise_on_invalid_tag_query_result(tag_query_sampler, wmi_obj, tag_query)
 
             link_value = str(tag_query_sampler[0][target_property]).lower()
 
