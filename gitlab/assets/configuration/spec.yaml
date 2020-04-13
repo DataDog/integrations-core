@@ -24,7 +24,9 @@ files:
         metrics.hidden: true
         namespace.hidden: true
         send_distribution_counts_as_monotonic.value.example: true
-        send_distribution_counts_as_monotonic.required: false
+        send_distribution_counts_as_monotonic.enabled: true
+        send_monotonic_counter.value.example: true
+        send_monotonic_counter.enabled: true
   - template: init_config
     options:
       - template: init_config/openmetrics
