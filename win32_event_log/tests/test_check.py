@@ -8,6 +8,7 @@ from mock import patch
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.win32_event_log import Win32EventLogWMI
+
 from .common import INSTANCE
 
 log = logging.getLogger(__file__)
