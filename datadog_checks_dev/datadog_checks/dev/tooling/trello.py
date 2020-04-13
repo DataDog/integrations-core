@@ -12,6 +12,7 @@ class TrelloClient:
         self.auth = {'key': config['trello']['key'] or None, 'token': config['trello']['token'] or None}
         self.team_list_map = {
             'Containers': '5ae1cab495edd80852396c71',
+            'Container App': '5e8b36a8060eeb1cb3fa5a9c',
             'Core': '5ae1e3d62a5167779e65e87d',
             'Integrations': '5ae1e3e2c81fff836d00497e',
             'Logs': '5aeca4c19707c4222bf6d883',
@@ -27,11 +28,13 @@ class TrelloClient:
             'team/networks': 'Networks',
             'team/processes': 'Processes',
             'team/containers': 'Containers',
+            'team/container-app': 'Container App',
             'team/integrations': 'Integrations',
             'team/logs': 'Logs',
         }
         self.label_map = {
             'Containers': '5e7910856f8e4363e3b51708',
+            'Container App': '5e8b36f72f642272e75edd34',
             'Core': '5e79105d4c45a45adb9e7730',
             'Integrations': '5e790ff25bd3dd48da67608d',
             'Logs': '5e79108febd27f4864c003ff',

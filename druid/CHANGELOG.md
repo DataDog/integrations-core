@@ -1,5 +1,9 @@
 # CHANGELOG - druid
 
+## 1.2.1 / 2020-04-04
+
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 1.2.0 / 2019-12-02
 
 * [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).

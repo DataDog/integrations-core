@@ -20,7 +20,7 @@ These requirements are used during the code review process as a checklist. This 
 
 ## Prerequisites
 
-* Python 3.7+ needs to be available on your system; Python 2.7 is optional but recommended.
+* Python 3.8+ needs to be available on your system; Python 2.7 is optional but recommended.
 * Docker to run the full test suite.
 
 In general, creating and activating [Python virtual environments][1] to isolate the development environment is good practice; however, it is not mandatory. For more information, see the [Python Environment documentation][2].

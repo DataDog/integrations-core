@@ -1,5 +1,23 @@
 # CHANGELOG - datadog_checks_base
 
+## 11.5.0 / 2020-04-07
+
+* [Added] Update PyYAML to 5.3.1. See [#6276](https://github.com/DataDog/integrations-core/pull/6276).
+
+## 11.4.0 / 2020-04-04
+
+* [Added] Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).
+* [Added] Upgrade psutil to 5.7.0. See [#6243](https://github.com/DataDog/integrations-core/pull/6243).
+* [Added] Allow automatic joins to all kube_{object}_labels in KSM check. See [#5650](https://github.com/DataDog/integrations-core/pull/5650).
+* [Added] Allow option to submit histogram/summary sum metric as monotonic count. See [#6127](https://github.com/DataDog/integrations-core/pull/6127).
+* [Added] Add `@metadata_entrypoint` decorator. See [#6084](https://github.com/DataDog/integrations-core/pull/6084).
+* [Added] Add RethinkDB integration. See [#5715](https://github.com/DataDog/integrations-core/pull/5715).
+* [Fixed] Revert `to_native_string` to `to_string` for integrations. See [#6238](https://github.com/DataDog/integrations-core/pull/6238).
+* [Fixed] Update prometheus_client. See [#6200](https://github.com/DataDog/integrations-core/pull/6200).
+* [Fixed] Fix failing style checks. See [#6207](https://github.com/DataDog/integrations-core/pull/6207).
+* [Fixed] Prevent out of bounds on systems with an odd number of counter strings. See [#6052](https://github.com/DataDog/integrations-core/pull/6052). Thanks [AdrianFletcher](https://github.com/AdrianFletcher).
+* [Fixed] Update pdh agent signature. See [#6162](https://github.com/DataDog/integrations-core/pull/6162).
+
 ## 11.3.1 / 2020-03-26
 
 * [Fixed] Cast to float before computing temporal percent. See [#6146](https://github.com/DataDog/integrations-core/pull/6146).

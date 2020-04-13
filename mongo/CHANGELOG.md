@@ -1,5 +1,12 @@
 # CHANGELOG - mongo
 
+## 1.14.0 / 2020-04-04
+
+* [Added] Add config specs. See [#6145](https://github.com/DataDog/integrations-core/pull/6145).
+* [Fixed] Use new agent signature. See [#6085](https://github.com/DataDog/integrations-core/pull/6085).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+* [Fixed] Replace deprecated method `database_names` by `list_database_names`. See [#5864](https://github.com/DataDog/integrations-core/pull/5864).
+
 ## 1.13.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).

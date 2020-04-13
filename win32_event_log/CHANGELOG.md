@@ -1,5 +1,9 @@
 # CHANGELOG - win32_event_log
 
+## 2.3.3 / 2020-04-04
+
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 2.3.2 / 2020-02-25
 
 * [Fixed] Bump minimum base check on wmi checks. See [#5860](https://github.com/DataDog/integrations-core/pull/5860).

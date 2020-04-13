@@ -1,5 +1,12 @@
 # CHANGELOG - activemq
 
+## 1.4.0 / 2020-04-04
+
+* [Added] Add `service_check_prefix` config to jmx. See [#6163](https://github.com/DataDog/integrations-core/pull/6163).
+* [Added] Add config specs to activemq. See [#6115](https://github.com/DataDog/integrations-core/pull/6115).
+* [Fixed] Fix e2e test. See [#6167](https://github.com/DataDog/integrations-core/pull/6167).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 1.3.0 / 2019-12-02
 
 * [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).

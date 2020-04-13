@@ -32,7 +32,6 @@ InstanceConfig = TypedDict(
         'tags': List[str],
         'refresh_infrastructure_cache_interval': int,
         'refresh_metrics_metadata_cache_interval': int,
-        'refresh_tags_cache_interval': int,
         'resource_filters': List[ResourceFilterConfig],
         'metric_filters': MetricFilterConfig,
         'collect_per_instance_filters': MetricFilterConfig,

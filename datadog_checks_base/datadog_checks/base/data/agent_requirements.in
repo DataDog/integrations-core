@@ -56,7 +56,7 @@ python3-gearman==0.1.0; sys_platform != 'win32' and python_version > '3.0'
 pytz==2019.3
 pyvmomi==v6.5.0.2017.5-1
 pywin32==227; sys_platform == 'win32'
-pyyaml==5.3
+pyyaml==5.3.1
 redis==3.3.11
 requests==2.22.0
 requests-kerberos==0.12.0

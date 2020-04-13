@@ -1,5 +1,10 @@
 # CHANGELOG - kafka
 
+## 2.0.3 / 2020-04-04
+
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+* [Fixed] Fix metric name for e2e test. See [#5985](https://github.com/DataDog/integrations-core/pull/5985).
+
 ## 2.0.2 / 2019-10-11
 
 * [Fixed] Fix the missing Kafka producer metrics. See [#4737](https://github.com/DataDog/integrations-core/pull/4737). Thanks [Epokhe](https://github.com/Epokhe).

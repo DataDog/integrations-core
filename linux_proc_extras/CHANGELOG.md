@@ -1,5 +1,9 @@
 # CHANGELOG - linux_proc_extras
 
+## 1.2.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.2.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3534](https://github.com/DataDog/integrations-core/pull/3534).

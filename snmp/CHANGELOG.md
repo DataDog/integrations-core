@@ -1,5 +1,12 @@
 # CHANGELOG - snmp
 
+## 2.6.1 / 2020-04-04
+
+* [Fixed] Small profiles cleanups. See [#6233](https://github.com/DataDog/integrations-core/pull/6233).
+* [Fixed] Remove duplicated idrac metrics from poweredge profile. See [#6232](https://github.com/DataDog/integrations-core/pull/6232).
+* [Fixed] Only load installed profiles once. See [#6231](https://github.com/DataDog/integrations-core/pull/6231).
+* [Fixed] Fix tag matching documentation. See [#6226](https://github.com/DataDog/integrations-core/pull/6226).
+
 ## 2.6.0 / 2020-03-24
 
 * [Added] Support regular expressions in dynamic tags. See [#6096](https://github.com/DataDog/integrations-core/pull/6096).

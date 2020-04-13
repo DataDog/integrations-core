@@ -1,5 +1,9 @@
 # CHANGELOG - windows_service
 
+## 2.5.2 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 2.5.1 / 2020-02-25
 
 * [Fixed] Bump minimun agent version. See [#5834](https://github.com/DataDog/integrations-core/pull/5834).
