@@ -2,9 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
+from typing import List
+
+from six import iteritems
 
 from datadog_checks.base.utils.containers import hash_mutable
-from six import iteritems
 
 from ... import AgentCheck
 from .sampler import WMISampler
@@ -47,17 +49,17 @@ class WinWMICheck(AgentCheck):
         super(WinWMICheck, self).__init__(*args, **kwargs)
 
         # Connection information
-        self.host = self.instance.get('host', "localhost")
-        self.namespace = self.instance.get('namespace', "root\\cimv2")
-        self.provider = self.instance.get('provider')
-        self.username = self.instance.get('username', "")
-        self.password = self.instance.get('password', "")
+        self.host = self.instance.get('host', "localhost")  # type: str
+        self.namespace = self.instance.get('namespace', "root\\cimv2")  # type: str
+        self.provider = self.instance.get('provider')  # type: int
+        self.username = self.instance.get('username', "")  # type: str
+        self.password = self.instance.get('password', "")  # type: str
 
         # WMI instance
-        self.wmi_class = self.instance.get('class')
-        self.metrics = self.instance.get('metrics')
+        self.wmi_class = self.instance.get('class')  # type: str
+        self.metrics = self.instance.get('metrics')  # type: List[str]
         self.filters = self.instance.get('filters')
-        self.tag_by = self.instance.get('tag_by', "")
+        self.tag_by = self.instance.get('tag_by', "")  # type: List[str]
         self.tag_queries = tuple(self.instance.get('tag_queries', ()))
 
         self.wmi_sampler = None  # type: WMISampler
@@ -268,7 +270,7 @@ class WinWMICheck(AgentCheck):
             namespace=self.namespace,
             provider=self.provider,
             username=self.username,
-            password=self.password
+            password=self.password,
         )
 
     def _get_running_wmi_sampler(self, instance_key=None, wmi_class=None, properties=None, tag_by="", **kwargs):
