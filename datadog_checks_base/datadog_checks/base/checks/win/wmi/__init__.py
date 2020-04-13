@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
-from typing import Dict, List, Tuple, Any
+from typing import Any, Dict, List, Tuple
 
 from six import iteritems
 
@@ -57,7 +57,7 @@ class WinWMICheck(AgentCheck):
         self.wmi_class = self.instance.get('class')  # type: str
         self.metrics = self.instance.get('metrics')  # type: List[str]
         self.filters = self.instance.get('filters')
-        self.tag_by = self.instance.get('tag_by', "")  # type: List[str]
+        self.tag_by = self.instance.get('tag_by', "")  # type: str
         self.tag_queries = self.instance.get('tag_queries', [])  # type: List[str]
 
         self.wmi_sampler = None  # type: WMISampler

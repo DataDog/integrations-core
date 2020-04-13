@@ -67,7 +67,7 @@ instances:
     #
     # provider: 64
 
-    ## @param tag_by - list of strings - optional
+    ## @param tag_by - string - optional
     ## The `tag_by` parameter lets you tag each metric with a property from the WMI class you're using.
     ## This is only useful when you will have multiple values for your WMI query.
     #
