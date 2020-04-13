@@ -41,7 +41,8 @@ files:
             Define the galley endpoint in order to collect all Prometheus metrics on the Galley process.
             Only available for Istio >= v1.1.
           value:
-            example: http://istio-citadel.istio-system:15014/metrics
+            default: null
+            example: http://istio-galley.istio-system:15014/metrics
             type: string
         - name: citadel_endpoint
           description: |
