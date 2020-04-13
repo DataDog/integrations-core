@@ -4,8 +4,8 @@ files:
     options:
     - template: init_config
       options:
-        - template: init_config/default
         - template: init_config/openmetrics
+        - template: init_config/default
     - template: instances
       options:
         - name: istio_mesh_endpoint
@@ -50,4 +50,3 @@ files:
         - template: instances/openmetrics
           overrides:
             prometheus_url.hidden: true
-        - template: instances/default
