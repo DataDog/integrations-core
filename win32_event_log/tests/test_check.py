@@ -8,6 +8,7 @@ from mock import patch
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.win32_event_log import Win32EventLogWMI
+from .common import INSTANCE
 
 log = logging.getLogger(__file__)
 
@@ -78,27 +79,18 @@ def mock_to_time():
 
 @pytest.fixture
 def check():
-    check = Win32EventLogWMI('win32_event_log', {}, {})
+    check = Win32EventLogWMI('win32_event_log', {}, {}, [INSTANCE])
     return check
 
 
 def test_check(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggregator):
-    instance = {
-        'host': ".",
-        'tags': ["mytag1", "mytag2"],
-        'sites': ["Default Web Site", "Failing site"],
-        'logfile': ["Application"],
-        'type': ["Error", "Warning"],
-        'source_name': ["MSSQLSERVER"],
-    }
-
-    check.check(instance)
-    check.check(instance)
+    check.check(INSTANCE)
+    check.check(INSTANCE)
 
     aggregator.assert_event(
         'SomeMessage',
         count=1,
-        tags=instance['tags'],
+        tags=INSTANCE['tags'],
         msg_title='Application/MSQLSERVER',
         event_type='win32_log_event',
         alert_type='error',
