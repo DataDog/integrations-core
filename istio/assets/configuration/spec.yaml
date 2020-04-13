@@ -25,6 +25,7 @@ files:
             If using Istio < v1.1, replace port 15014 with port 9093. See the changes here:
             https://istio.io/about/notes/1.1/#configuration-management
           value:
+            default: null
             example: http://istio-telemetry.istio-system:15014/metrics
             type: string
         - name: pilot_endpoint
