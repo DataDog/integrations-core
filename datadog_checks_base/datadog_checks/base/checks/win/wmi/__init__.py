@@ -90,9 +90,8 @@ class WinWMICheck(AgentCheck):
 
         return target_class, target_property, [{link_target_class_property: link_source_property}]
 
-    def _raise_on_invalid_tag_query_result(self, wmi_obj):
-        """
-        """
+    def _raise_on_invalid_tag_query_result(self, wmi_obj, tag_query):
+        # type: (Any, str) -> None
         target_property = self.wmi_sampler.property_names[0]
         target_class = self.wmi_sampler.class_name
 
@@ -105,7 +104,7 @@ class WinWMICheck(AgentCheck):
                 u"Failed to extract a tag from `tag_queries` parameter: %s. wmi_object=%s - query=%s",
                 message,
                 wmi_obj,
-                self.tag_queries,
+                tag_query,
             )
             raise TagQueryUniquenessFailure
 
@@ -138,7 +137,7 @@ class WinWMICheck(AgentCheck):
             tag_query_sampler.sample()
 
             # Extract tag
-            self._raise_on_invalid_tag_query_result(wmi_obj)
+            self._raise_on_invalid_tag_query_result(wmi_obj, tag_query)
 
             link_value = str(tag_query_sampler[0][target_property]).lower()
 

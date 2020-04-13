@@ -6,11 +6,12 @@ import pytest
 from mock import patch
 
 from datadog_checks.wmi_check import WMICheck
+from .common import INSTANCE
 
 
 @pytest.fixture
 def check():
-    return WMICheck('wmi_check', {}, {}, None)
+    return WMICheck('wmi_check', {}, {}, [INSTANCE])
 
 
 class MockSampler:
