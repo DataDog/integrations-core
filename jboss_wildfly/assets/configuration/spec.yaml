@@ -9,7 +9,6 @@ files:
         service_check_prefix.required: true
         service_check_prefix.value.example: jboss
         service_check_prefix.description: Service check prefix to use.
-    - template: init_config/default
   - template: instances
     options:
     - template: instances/jmx
@@ -21,7 +20,6 @@ files:
         jmx_url.display_priority: 10
         host.required: false
         port.required: false
-    - template: instances/default
   - template: logs
     example:
     - type: file

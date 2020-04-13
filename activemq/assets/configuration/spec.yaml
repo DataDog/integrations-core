@@ -5,14 +5,12 @@ files:
   - template: init_config
     options:
       - template: init_config/jmx
-      - template: init_config/default
   - template: instances
     options:
     - template: instances/jmx
       overrides:
         host.value.example: localhost
         port.value.example: 1616
-    - template: instances/default
   - template: logs
     example:
     - type: file
