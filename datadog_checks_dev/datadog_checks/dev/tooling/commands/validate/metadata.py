@@ -316,7 +316,7 @@ def metadata(check, check_duplicates):
                 empty_warning_count['description'] += 1
 
             # check if there is unicode
-            elif not row['description'].isascii() and row['metric_name'].isascii() and row['metric_type'].isascii():
+            elif not (row['description'].isascii() and row['metric_name'].isascii() and row['metric_type'].isascii()):
                 errors = True
                 echo_failure(f"{current_check}:{line} `{row['metric_name']}` contains unicode characters.")
 
