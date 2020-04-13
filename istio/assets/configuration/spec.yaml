@@ -33,6 +33,7 @@ files:
             Define the pilot endpoint in order to collect all Prometheus metrics on the Pilot process.
             Only available for Istio >= v1.1.
           value:
+            default: null
             example: http://istio-pilot.istio-system:15014/metrics
             type: string
         - name: galley_endpoint
