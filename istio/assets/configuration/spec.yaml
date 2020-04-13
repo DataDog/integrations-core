@@ -5,7 +5,6 @@ files:
     - template: init_config
       options:
         - template: init_config/openmetrics
-        - template: init_config/default
     - template: instances
       options:
         - name: istio_mesh_endpoint
