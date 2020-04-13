@@ -50,3 +50,4 @@ files:
         - template: instances/openmetrics
           overrides:
             prometheus_url.hidden: true
+        - template: instances/default
