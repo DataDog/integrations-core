@@ -49,6 +49,7 @@ files:
             Define the citadel endpoint in order to collect all Prometheus metrics on the Citadel process.
             Only available for Istio >= v1.1.
           value:
+            default: null
             example: http://istio-citadel.istio-system:15014/metrics
             type: string
         - template: instances/openmetrics
