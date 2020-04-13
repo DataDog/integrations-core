@@ -15,6 +15,7 @@ files:
             the CPP extension to process Protocol buffer messages coming from the api. Depending
             on the metrics volume, the check may run very slowly.
           value:
+            default: null
             example: http://istio-telemetry.istio-system:42422/metrics
             type: string
         - name: mixer_endpoint
