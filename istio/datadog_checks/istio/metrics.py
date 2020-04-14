@@ -77,14 +77,10 @@ GALLEY_METRICS = {
     'galley_validation_config_load': 'validation.config_load',
     'galley_validation_config_updates': 'validation.config_update',
     'galley_validation_passed': 'validation.passed',
-    # These metrics supported Istio 1.5
-    'galley_validation_config_update_error': 'validation.config_update_error',
 }
 
 
 MESH_METRICS = {
-    # These metrics support Istio 1.5
-    'istio_request_duration_milliseconds': 'request.duration.milliseconds',
     # These metrics support Istio 1.0
     'istio_requests_total': 'request.count',
     'istio_request_duration_seconds': 'request.duration',
