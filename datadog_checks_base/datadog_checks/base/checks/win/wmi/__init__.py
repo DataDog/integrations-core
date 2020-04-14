@@ -69,8 +69,6 @@ class WinWMICheck(AgentCheck):
 
         # WMI instance
         self.wmi_class = self.instance.get('class', '')  # type: str
-        if not self.wmi_class:
-            raise ConfigurationError("wmi_class is a required configuration option")
         self.metrics_to_capture = self.instance.get('metrics', [])  # type: List[List[str]]
         self.filters = self.instance.get('filters', [])  # type: List[Dict[str, WMIFilter]]
         self.tag_by = self.instance.get('tag_by', "")  # type: str
