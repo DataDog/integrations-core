@@ -80,15 +80,6 @@ instances:
     #
     # citadel_endpoint: http://istio-citadel.istio-system:15014/metrics
 
-    ## @param metrics - list of strings - optional
-    ## List of metrics to be fetched from the prometheus endpoint, if there's a
-    ## value it'll be renamed. This list should contain at least one metric.
-    #
-    # metrics:
-    #   - processor:cpu
-    #   - memory:mem
-    #   - io
-
     ## @param prometheus_metrics_prefix - string - optional
     ## <PREFIX> for exposed Prometheus metrics.
     #
