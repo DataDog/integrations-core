@@ -65,7 +65,7 @@ For containerized environments, see the [Autodiscovery with JMX][9] guide.
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see the [Kubernetes log collection documentation][10].
 
 | Parameter      | Value                                                      |
 | -------------- | ---------------------------------------------------------- |
@@ -103,6 +103,6 @@ Need help? Contact [Datadog support][5].
 [7]: https://docs.jboss.org/author/display/WFLY9/JMX%20subsystem%20configuration.html
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent
 [9]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
-[10]: https://docs.datadoghq.com/agent/docker/log/
+[10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/jboss_wildfly/metadata.csv

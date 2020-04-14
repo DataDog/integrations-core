@@ -50,7 +50,7 @@ local Prometheus endpoint is available.
 Need help? Contact [Datadog support][8].
 
 [1]: https://docs.gitlab.com/runner/monitoring/README.html
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/gitlab_runner/datadog_checks/gitlab_runner/data/conf.yaml.example

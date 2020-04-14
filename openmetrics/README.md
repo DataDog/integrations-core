@@ -55,7 +55,7 @@ Need help? Contact [Datadog support][7].
 - [Configuring a OpenMetrics Check][8]
 - [Writing a custom OpenMetrics Check][9]
 
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [3]: https://docs.datadoghq.com/getting_started/integrations/prometheus/?tab=docker#configuration
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/openmetrics/datadog_checks/openmetrics/data/conf.yaml.example

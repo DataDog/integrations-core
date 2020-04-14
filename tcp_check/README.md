@@ -78,7 +78,7 @@ To create alert conditions on this service check in Datadog, click **Network** o
 Need help? Contact [Datadog support][10].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/tcp_check/images/netgraphs.png
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/tcp_check/datadog_checks/tcp_check/data/conf.yaml.example

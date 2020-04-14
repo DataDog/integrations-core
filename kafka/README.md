@@ -91,7 +91,7 @@ For containerized environments, see the [Autodiscovery with JMX][10] guide.
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][11].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][11].
 
 | Parameter      | Value                                              |
 | -------------- | -------------------------------------------------- |
@@ -152,7 +152,7 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [9]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
 [10]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
-[11]: https://docs.datadoghq.com/agent/docker/log/
+[11]: https://docs.datadoghq.com/agent/kubernetes/log/
 [12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [13]: https://github.com/DataDog/integrations-core/blob/master/kafka/metadata.csv
 [14]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka
