@@ -30,6 +30,15 @@ INSTANCE = {
     'tags': ['tag:value'],
 }
 
+FULL_INSTANCE = {
+    'host': HOST,
+    'port': PORT,
+    'metrics': ['cluster_size', 'batch_error'],
+    'namespaces': ['test'],
+    'datacenters': ['test'],
+    'tags': ['tag:value'],
+}
+
 DATACENTER_METRICS = [
     'dc_state=CLUSTER_UP',
     'dc_timelag=0',
