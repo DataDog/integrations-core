@@ -1,5 +1,10 @@
 # CHANGELOG - gearmand
 
+## 1.5.0 / 2020-04-04
+
+* [Added] Collect version metadata. See [#5927](https://github.com/DataDog/integrations-core/pull/5927).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.4.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).

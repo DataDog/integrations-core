@@ -4,18 +4,12 @@
 
 import logging
 import re
+from typing import Dict, List, Pattern
 
 from six import iteritems
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.config import is_affirmative
-
-# compatibility layer for agents under 6.6.0
-try:
-    from datadog_checks.errors import ConfigurationError
-except ImportError:
-    ConfigurationError = Exception
 
 try:
     import pymqi
@@ -59,21 +53,35 @@ class IBMMQConfig:
     ]
 
     def __init__(self, instance):
-        self.channel = instance.get('channel')
-        self.queue_manager_name = instance.get('queue_manager', 'default')
+        self.channel = instance.get('channel')  # type: str
+        self.queue_manager_name = instance.get('queue_manager', 'default')  # type: str
 
-        self.host = instance.get('host', 'localhost')
-        self.port = instance.get('port', '1414')
-        self.host_and_port = "{}({})".format(self.host, self.port)
+        if not self.channel or not self.queue_manager_name:
+            msg = "channel, queue_manager are required configurations"
+            raise ConfigurationError(msg)
 
-        self.username = instance.get('username')
-        self.password = instance.get('password')
+        host = instance.get('host')  # type: str
+        port = instance.get('port')  # type: str
+        self.connection_name = instance.get('connection_name')  # type: str
+        if (host or port) and self.connection_name:
+            raise ConfigurationError(
+                'Specify only one host/port or connection_name configuration, '
+                '(host={}, port={}, connection_name={}).'.format(host, port, self.connection_name)
+            )
 
-        self.queues = instance.get('queues', [])
-        self.queue_patterns = instance.get('queue_patterns', [])
-        self.queue_regex = [re.compile(regex) for regex in instance.get('queue_regex', [])]
+        if not self.connection_name:
+            host = host or 'localhost'
+            port = port or '1414'
+            self.connection_name = "{}({})".format(host, port)
 
-        self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))
+        self.username = instance.get('username')  # type: str
+        self.password = instance.get('password')  # type: str
+
+        self.queues = instance.get('queues', [])  # type: List[str]
+        self.queue_patterns = instance.get('queue_patterns', [])  # type: List[str]
+        self.queue_regex = [re.compile(regex) for regex in instance.get('queue_regex', [])]  # type: List[Pattern]
+
+        self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))  # type: bool
 
         if int(self.auto_discover_queues) + int(bool(self.queue_patterns)) + int(bool(self.queue_regex)) > 1:
             log.warning(
@@ -81,28 +89,43 @@ class IBMMQConfig:
                 "together."
             )
 
-        self.channels = instance.get('channels', [])
+        self.channels = instance.get('channels', [])  # type: List[str]
 
-        self.channel_status_mapping = self.get_channel_status_mapping(instance.get('channel_status_mapping'))
+        self.channel_status_mapping = self.get_channel_status_mapping(
+            instance.get('channel_status_mapping')
+        )  # type: Dict[str, str]
 
-        self.custom_tags = instance.get('tags', [])
+        custom_tags = instance.get('tags', [])  # type: List[str]
+        tags = [
+            "queue_manager:{}".format(self.queue_manager_name),
+            "connection_name:{}".format(self.connection_name),
+        ]  # type: List[str]
+        tags.extend(custom_tags)
+        if host or port:
+            # 'host' is reserved and 'mq_host' is used instead
+            tags.extend({"mq_host:{}".format(host), "port:{}".format(port)})
+        self.tags_no_channel = tags
+        self.tags = tags + ["channel:{}".format(self.channel)]  # type: List[str]
 
-        self.ssl = is_affirmative(instance.get('ssl_auth', False))
-        self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')
+        self.ssl = is_affirmative(instance.get('ssl_auth', False))  # type: bool
+        self.ssl_cipher_spec = instance.get('ssl_cipher_spec', 'TLS_RSA_WITH_AES_256_CBC_SHA')  # type: str
 
         self.ssl_key_repository_location = instance.get(
             'ssl_key_repository_location', '/var/mqm/ssl-db/client/KeyringClient'
-        )
+        )  # type: str
 
         self.mq_installation_dir = instance.get('mq_installation_dir', '/opt/mqm/')
 
-        self._queue_tag_re = instance.get('queue_tag_re', {})
+        self._queue_tag_re = instance.get('queue_tag_re', {})  # type: Dict[str, str]
         self.queue_tag_re = self._compile_tag_re()
 
-    def check_properly_configured(self):
-        if not self.channel or not self.queue_manager_name or not self.host or not self.port:
-            msg = "channel, queue_manager, host and port are all required configurations"
-            raise ConfigurationError(msg)
+        raw_mqcd_version = instance.get('mqcd_version', 6)
+        try:
+            self.mqcd_version = getattr(pymqi.CMQC, 'MQCD_VERSION_{}'.format(raw_mqcd_version))  # type: int
+        except (ValueError, AttributeError):
+            raise ConfigurationError(
+                "mqcd_version must be a number between 1 and 9. {} found.".format(raw_mqcd_version)
+            )
 
     def add_queues(self, new_queues):
         # add queues without duplication
@@ -119,23 +142,6 @@ class IBMMQConfig:
             except TypeError:
                 log.warning('%s is not a valid regular expression and will be ignored', regex_str)
         return queue_tag_list
-
-    @property
-    def tags(self):
-        return [
-            "queue_manager:{}".format(self.queue_manager_name),
-            "mq_host:{}".format(self.host),  # 'host' is reserved and 'mq_host' is used instead
-            "port:{}".format(self.port),
-            "channel:{}".format(self.channel),
-        ] + self.custom_tags
-
-    @property
-    def tags_no_channel(self):
-        return [
-            "queue_manager:{}".format(self.queue_manager_name),
-            "mq_host:{}".format(self.host),  # 'host' is reserved and 'mq_host' is used instead
-            "port:{}".format(self.port),
-        ] + self.custom_tags
 
     @staticmethod
     def get_channel_status_mapping(channel_status_mapping_raw):

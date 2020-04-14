@@ -2,7 +2,7 @@
 
 Red Hat OpenShift is an open source container application platform based on the Kubernetes container orchestrator for enterprise application development and deployment.
 
-> There is currently no separate `openshift` check, this README describes the necessary configuration to enable collection of OpenShift specific metrics in the Agent. Data described here are collected by the [`kube-apiserver-metrics` check][1], setting up this check is necessary to collect the `openshift.*` metrics.
+> There is currently no separate `openshift` check, this README describes the necessary configuration to enable collection of OpenShift specific metrics in the Agent. Data described here are collected by the [`kubernetes_apiserver` check][1], setting up this check is necessary to collect the `openshift.*` metrics.
 
 ## Setup
 
@@ -88,7 +88,7 @@ runAsUser:
 
 ### Validation
 
-See [kube_apiserver_metrics][1]
+See [kubernetes_apiserver][1]
 
 ## Data Collected
 
@@ -108,7 +108,7 @@ The OpenShift check does not include any Service Checks.
 
 Need help? Contact [Datadog support][11].
 
-[1]: https://github.com/DataDog/integrations-core/tree/master/kube_apiserver_metrics
+[1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/kubernetes_apiserver.d/conf.yaml.example
 [2]: https://docs.datadoghq.com/agent/kubernetes
 [3]: https://docs.openshift.org/latest/admin_guide/manage_scc.html
 [4]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup

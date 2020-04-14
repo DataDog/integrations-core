@@ -6,7 +6,7 @@
             "host",
             "instance"
         ],
-        "check": "jboss_wildfly.can_connect",
+        "check": "jboss.can_connect",
         "statuses": [
             "ok",
             "critical"

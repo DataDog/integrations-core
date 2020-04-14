@@ -5,6 +5,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 from collections import OrderedDict
+from typing import Any
 
 import mock
 import pytest
@@ -12,7 +13,7 @@ from six import PY3
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base import __version__ as base_package_version
-from datadog_checks.base import to_string
+from datadog_checks.base import to_native_string
 from datadog_checks.base.checks.base import datadog_agent
 
 
@@ -43,11 +44,91 @@ def test_load_config():
     assert AgentCheck.load_config("raw_foo: bar") == {'raw_foo': 'bar'}
 
 
+@pytest.mark.parametrize(
+    'enable_metadata_collection, expected_is_metadata_collection_enabled',
+    [(None, False), ('true', True), ('false', False)],
+)
+def test_is_metadata_collection_enabled(enable_metadata_collection, expected_is_metadata_collection_enabled):
+    check = AgentCheck()
+    with mock.patch('datadog_checks.base.checks.base.datadog_agent.get_config') as get_config:
+        get_config.return_value = enable_metadata_collection
+
+        assert check.is_metadata_collection_enabled() is expected_is_metadata_collection_enabled
+        assert AgentCheck.is_metadata_collection_enabled() is expected_is_metadata_collection_enabled
+
+        get_config.assert_called_with('enable_metadata_collection')
+
+
 def test_log_critical_error():
     check = AgentCheck()
 
     with pytest.raises(NotImplementedError):
         check.log.critical('test')
+
+
+class TestSecretsSanitization:
+    def test_default(self, caplog):
+        # type: (Any) -> None
+        secret = 's3kr3t'
+        check = AgentCheck()
+
+        message = 'hello, {}'.format(secret)
+        assert check.sanitize(message) == message
+
+        check.log.error(message)
+        assert secret in caplog.text
+
+    def test_sanitize_text(self):
+        # type: () -> None
+        secret = 'p@$$w0rd'
+        check = AgentCheck()
+        check.register_secret(secret)
+
+        sanitized = check.sanitize('hello, {}'.format(secret))
+        assert secret not in sanitized
+
+    def text_sanitize_logs(self, caplog):
+        # type: (Any) -> None
+        secret = 'p@$$w0rd'
+        check = AgentCheck()
+        check.register_secret(secret)
+
+        check.log.error('hello, %s', secret)
+        assert secret not in caplog.text
+
+    def test_sanitize_service_check_message(self, aggregator, caplog):
+        # type: (Any, Any) -> None
+        secret = 'p@$$w0rd'
+        check = AgentCheck()
+        check.register_secret(secret)
+        sanitized = check.sanitize(secret)
+
+        check.service_check('test.can_check', status=AgentCheck.CRITICAL, message=secret)
+
+        aggregator.assert_service_check('test.can_check', status=AgentCheck.CRITICAL, message=sanitized)
+
+    def test_sanitize_exception_tracebacks(self):
+        # type: () -> None
+        class MyCheck(AgentCheck):
+            def __init__(self, *args, **kwargs):
+                # type: (*Any, **Any) -> None
+                super(MyCheck, self).__init__(*args, **kwargs)
+                self.password = 'p@$$w0rd'
+                self.register_secret(self.password)
+
+            def check(self, instance):
+                # type: (Any) -> None
+                try:
+                    # Simulate a failing call in a dependency.
+                    raise Exception('Could not establish connection with Password={}'.format(self.password))
+                except Exception as exc:
+                    raise RuntimeError('Unexpected error while executing check: {}'.format(exc))
+
+        check = MyCheck('my_check', {}, [{}])
+        result = json.loads(check.run())[0]
+
+        assert check.password not in result['message']
+        assert check.password not in result['traceback']
 
 
 def test_warning_ok():
@@ -391,7 +472,7 @@ class TestEvents:
             'timestamp': 1,
         }
         check.event(event)
-        aggregator.assert_event(to_string(msg_text), tags=['∆', 'Ω-bar'])
+        aggregator.assert_event(to_native_string(msg_text), tags=['∆', 'Ω-bar'])
 
     def test_namespace(self, aggregator):
         check = AgentCheck()

@@ -5,6 +5,7 @@ import json
 import logging
 import re
 from collections import OrderedDict
+from typing import Any
 
 import mock
 import pytest
@@ -15,6 +16,7 @@ from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
 pytestmark = pytest.mark.metadata
 
 SET_CHECK_METADATA_METHOD = 'datadog_checks.base.stubs.datadog_agent.set_check_metadata'
+GET_CONFIG_METHOD = 'datadog_checks.base.stubs.datadog_agent.get_config'
 
 # The order is used to derive the display name for the regex tests
 NON_STANDARD_VERSIONS = OrderedDict()
@@ -24,7 +26,7 @@ class TestAttribute:
     def test_default(self):
         check = AgentCheck('test', {}, [{}])
 
-        assert check._metadata_manager is None
+        assert not hasattr(check, '_metadata_manager')
 
     def test_no_check_id_error(self):
         check = AgentCheck('test', {}, [{}])
@@ -499,3 +501,41 @@ class TestConfig:
             assert data.pop('is_set', None) is True
             assert data.pop('value', None) == 'bar'
             assert not data
+
+
+class TestMetadataEntrypoint:
+    def test_no_op_if_collection_disabled(self):
+        # type: () -> None
+
+        class MyCheck(AgentCheck):
+            @AgentCheck.metadata_entrypoint
+            def process_metadata(self, message):
+                # type: (str) -> None
+                self.set_metadata('my_message', message)
+
+            def check(self, instance):
+                # type: (Any) -> None
+                self.process_metadata(message='Hello, world')
+
+        with mock.patch(GET_CONFIG_METHOD, return_value=False):
+            check = MyCheck('test', {}, [{}])
+
+            with mock.patch(SET_CHECK_METADATA_METHOD) as m:
+                check.check({})
+                m.assert_not_called()
+
+    def test_exceptions_pass_through(self):
+        # type: (Any) -> None
+        class MyCheck(AgentCheck):
+            @AgentCheck.metadata_entrypoint
+            def process_metadata(self):
+                # type: () -> None
+                raise RuntimeError('Something went wrong')
+
+            def check(self, instance):
+                # type: (Any) -> None
+                self.process_metadata()
+
+        check = MyCheck('test', {}, [{}])
+        with pytest.raises(RuntimeError):
+            check.check({})

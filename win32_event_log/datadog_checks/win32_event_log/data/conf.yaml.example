@@ -111,7 +111,6 @@ instances:
 ## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file and channel_path if windows_event
 ## service - mandatory - Name of the service owning the log
 ## source  - mandatory - Attribute that defines which integration is sending the logs
-## sourcecategory - optional - Multiple value attribute. Can be used to refine the source attribtue
 ## tags: - optional - Add tags to each logs collected
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
@@ -121,10 +120,8 @@ instances:
 #     channel_path: <CHANNEL_1>
 #     source: <CHANNEL_1>
 #     service: <SERVICE_NAME>
-#     sourcecategory: windowsevent
 #
 #   - type: windows_event
 #     channel_path: <CHANNEL_2>
 #     source: <CHANNEL_2>
 #     service: <SERVICE_NAME>
-#     sourcecategory: windowsevent

@@ -4,7 +4,7 @@
 import psutil
 from six import iteritems
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 
 class SystemCore(AgentCheck):

@@ -5,8 +5,10 @@ parameters:
   test: true
   test_e2e: false
   benchmark: false
+  latest_metrics: false
   validate: false
   repo: 'core'
+  pip_cache_config: null
 
 jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Windows'
@@ -23,6 +25,7 @@ jobs:
   - template: './install-deps.yml'
     parameters:
       repo: ${{ parameters.repo }}
+      pip_cache_config: ${{ parameters.pip_cache_config }}
 
   - template: './set-up-integrations.yml'
     parameters:
@@ -40,4 +43,5 @@ jobs:
       test: ${{ parameters.test }}
       test_e2e: ${{ parameters.test_e2e }}
       benchmark: ${{ parameters.benchmark }}
+      latest_metrics: ${{ parameters.latest_metrics }}
       repo: ${{ parameters.repo }}

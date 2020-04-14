@@ -21,13 +21,11 @@ SECRET_KEYS = {
     'orgs.*.app_key',
     'github.token',
     'pypi.pass',
-    'jira.token',
+    'trello.key',
+    'trello.token',
 }
 
 DEFAULT_CONFIG = {
-    'core': os.path.join('~', 'dd', 'integrations-core'),
-    'extras': os.path.join('~', 'dd', 'integrations-extras'),
-    'agent': os.path.join('~', 'dd', 'datadog-agent'),
     'repo': 'core',
     'color': bool(int(os.environ['DDEV_COLOR'])) if 'DDEV_COLOR' in os.environ else None,
     'dd_api_key': os.getenv('DD_API_KEY'),
@@ -37,7 +35,12 @@ DEFAULT_CONFIG = {
     'agent5': {'docker': 'datadog/dev-dd-agent:master', 'local': 'latest'},
     'github': {'user': '', 'token': ''},
     'pypi': {'user': '', 'pass': ''},
-    'jira': {'user': '', 'token': ''},
+    'trello': {'key': '', 'token': ''},
+    'repos': {
+        'core': os.path.join('~', 'dd', 'integrations-core'),
+        'extras': os.path.join('~', 'dd', 'integrations-extras'),
+        'agent': os.path.join('~', 'dd', 'datadog-agent'),
+    },
     'orgs': {
         'default': {
             'api_key': os.getenv('DD_API_KEY'),

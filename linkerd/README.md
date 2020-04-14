@@ -24,11 +24,21 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
 
+##### Linkerd v1
+
 | Parameter            | Value                                                                 |
 | -------------------- | --------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `linkerd`                                                             |
 | `<INIT_CONFIG>`      | blank or `{}`                                                         |
 | `<INSTANCE_CONFIG>`  | `{"prometheus_url": "http://%%host%%:9990/admin/metrics/prometheus"}` |
+
+##### Linkerd v2
+
+| Parameter            | Value                                                                 |
+| -------------------- | --------------------------------------------------------------------- |
+| `<INTEGRATION_NAME>` | `linkerd`                                                             |
+| `<INIT_CONFIG>`      | blank or `{}`                                                         |
+| `<INSTANCE_CONFIG>`  | `{"prometheus_url": "http://%%host%%:4191/metrics"}`                  |
 
 ### Validation
 

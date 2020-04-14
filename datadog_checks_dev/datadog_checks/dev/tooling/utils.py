@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import csv
+import io
 import json
 import os
 import re
@@ -66,6 +68,10 @@ def get_check_file(check_name):
     return os.path.join(get_root(), check_name, 'datadog_checks', check_name, check_name + '.py')
 
 
+def get_readme_file(check_name):
+    return os.path.join(get_root(), check_name, 'README.md')
+
+
 def check_root():
     """Check if root has already been set."""
     existing_root = get_root()
@@ -89,7 +95,7 @@ def initialize_root(config, agent=False, core=False, extras=False, here=False):
     config['repo_name'] = REPO_CHOICES[repo_choice]
 
     message = None
-    root = os.path.expanduser(config.get(repo_choice, ''))
+    root = os.path.expanduser(config.get(repo_choice) or config.get('repos', {}).get(repo_choice, ''))
     if here or not dir_exists(root):
         if not here:
             repo = 'datadog-agent' if repo_choice == 'agent' else f'integrations-{repo_choice}'
@@ -172,6 +178,10 @@ def get_data_directory(check_name):
         return os.path.join(get_root(), check_name, 'datadog_checks', check_name, 'data')
 
 
+def get_check_directory(check_name):
+    return os.path.join(get_root(), check_name, 'datadog_checks', check_name)
+
+
 def get_test_directory(check_name):
     return os.path.join(get_root(), check_name, 'tests')
 
@@ -203,6 +213,28 @@ def get_config_files(check_name):
     return sorted(files)
 
 
+def get_check_files(check_name, file_suffix='.py', abs_file_path=True, include_dirs=None):
+    """Return generator of filenames from within a given check.
+
+    By default, only includes files within 'datadog_checks' and 'tests' directories, this
+    can be expanded by adding to the `include_dirs` arg.
+    """
+    base_dirs = ['datadog_checks', 'tests']
+    if include_dirs is not None:
+        base_dirs += include_dirs
+
+    bases = [os.path.join(get_root(), check_name, base) for base in base_dirs]
+
+    for base in bases:
+        for root, _, files in os.walk(base):
+            for f in files:
+                if f.endswith(file_suffix):
+                    if abs_file_path:
+                        yield os.path.join(root, f)
+                    else:
+                        yield f
+
+
 def get_valid_checks():
     return {path for path in os.listdir(get_root()) if file_exists(get_version_file(path))}
 
@@ -221,6 +253,20 @@ def get_metric_sources():
 
 def read_metric_data_file(check_name):
     return read_file(os.path.join(get_root(), check_name, 'metadata.csv'))
+
+
+def read_metadata_rows(metadata_file):
+    """
+    Iterate over the rows of a `metadata.csv` file.
+    """
+    with io.open(metadata_file, 'r', encoding='utf-8') as f:
+        reader = csv.DictReader(f, delimiter=',')
+
+        # Read header
+        reader._fieldnames = reader.fieldnames
+
+        for line_no, row in enumerate(reader, 2):
+            yield line_no, row
 
 
 def read_version_file(check_name):
@@ -306,3 +352,17 @@ def has_e2e(check):
                     if 'pytest.mark.e2e' in test_file.read():
                         return True
     return False
+
+
+def find_legacy_signature(check):
+    """
+    Validate that the given check does not use the legacy agent signature (contains agentConfig)
+    """
+    for path, _, files in os.walk(get_check_directory(check)):
+        for f in files:
+            if f.endswith('.py'):
+                with open(os.path.join(path, f)) as test_file:
+                    for num, line in enumerate(test_file):
+                        if "__init__" in line and "agentConfig" in line:
+                            return str(f), num
+    return None

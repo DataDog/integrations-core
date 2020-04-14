@@ -91,7 +91,7 @@ class SupervisordCheck(AgentCheck):
                 )
             else:
                 msg = (
-                    'Cannot connect to {}. Make sure sure supervisor '
+                    'Cannot connect to {}. Make sure supervisor '
                     'is running and socket is enabled and socket file'
                     ' has the right permissions.'.format(sock)
                 )
@@ -115,11 +115,11 @@ class SupervisordCheck(AgentCheck):
         # Filter monitored processes on configuration directives
         proc_regex = instance.get('proc_regex', [])
         if not isinstance(proc_regex, list):
-            raise Exception("Empty or invalid proc_regex.")
+            raise Exception("'proc_regex' should be a list of strings. e.g. %s" % [proc_regex])
 
         proc_names = instance.get('proc_names', [])
         if not isinstance(proc_names, list):
-            raise Exception("Empty or invalid proc_names.")
+            raise Exception("'proc_names' should be a list of strings. e.g. %s" % [proc_names])
 
         # Collect information on each monitored process
         monitored_processes = []
@@ -163,15 +163,15 @@ class SupervisordCheck(AgentCheck):
     @staticmethod
     def _connect(instance):
         sock = instance.get('socket')
+        user = instance.get('user')
+        password = instance.get('pass')
         if sock is not None:
             host = instance.get('host', DEFAULT_SOCKET_IP)
-            transport = supervisor.xmlrpc.SupervisorTransport(None, None, sock)
+            transport = supervisor.xmlrpc.SupervisorTransport(user, password, sock)
             server = xmlrpclib.ServerProxy(host, transport=transport)
         else:
             host = instance.get('host', DEFAULT_HOST)
             port = instance.get('port', DEFAULT_PORT)
-            user = instance.get('user')
-            password = instance.get('pass')
             auth = '{}:{}@'.format(user, password) if user and password else ''
             server = xmlrpclib.Server('http://{}{}:{}/RPC2'.format(auth, host, port))
         return server.supervisor

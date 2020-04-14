@@ -123,3 +123,24 @@ instances:
     #
     # extra_headers:
     #   <HEADER_NAME>: <HEADER_VALUE>
+
+## Log Section (Available for Agent >=6.0)
+##
+## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
+## service - mandatory - Name of the service that generated the log
+## source  - mandatory - Attribute that defines which Integration sent the logs
+## tags: - optional - Add tags to the collected logs
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
+# logs:
+#   - type: file
+#     path: <LOG_FILE_PATH>
+#     source: scylla
+#     service: <SERVICE>
+#     #To handle multi line that starts with yyyy-mm-dd or yyyy-dd-mm use the following pattern
+#     #log_processing_rules:
+#     #  - type: multi_line
+#     #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+#     #    name: new_log_start_with_date

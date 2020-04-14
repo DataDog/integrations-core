@@ -1,5 +1,22 @@
 # CHANGELOG - vsphere
 
+## 5.1.1 / 2020-04-10
+
+* [Fixed] Fix tags race conditions with filtering. See [#6297](https://github.com/DataDog/integrations-core/pull/6297).
+
+## 5.1.0 / 2020-04-04
+
+* [Added] resource filters: allow blacklist and tag filtering. See [#6194](https://github.com/DataDog/integrations-core/pull/6194).
+* [Added] Add type annotations. See [#6036](https://github.com/DataDog/integrations-core/pull/6036).
+* [Fixed] Limit tags collection logic to the monitored resources only. See [#6248](https://github.com/DataDog/integrations-core/pull/6248).
+* [Fixed] Revert `to_native_string` to `to_string` for integrations. See [#6238](https://github.com/DataDog/integrations-core/pull/6238).
+* [Fixed] Deprecating the legacy implementation. See [#6215](https://github.com/DataDog/integrations-core/pull/6215).
+* [Fixed] Fix hostname resolution. See [#6190](https://github.com/DataDog/integrations-core/pull/6190).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Fix ssl context. See [#6075](https://github.com/DataDog/integrations-core/pull/6075).
+* [Fixed] Rename `to_string()` utility to `to_native_string()`. See [#5996](https://github.com/DataDog/integrations-core/pull/5996).
+* [Fixed] Improve logging of the legacy implementation. See [#5993](https://github.com/DataDog/integrations-core/pull/5993).
+
 ## 5.0.2 / 2020-02-29
 
 * [Fixed] Disconnect vSphere connection to the server on refresh. See [#5929](https://github.com/DataDog/integrations-core/pull/5929).

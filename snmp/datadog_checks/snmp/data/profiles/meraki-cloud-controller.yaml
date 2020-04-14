@@ -1,6 +1,9 @@
 # Profile for Meraki Cloud devices
 #
+# We don't extend from base for now, as sysName is useless for meraki.
+
 sysobjectid: 1.3.6.1.4.1.29671.*
+
 metrics:
   - MIB: MERAKI-CLOUD-CONTROLLER-MIB
     table:

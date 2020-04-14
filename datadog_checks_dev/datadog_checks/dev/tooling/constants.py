@@ -47,6 +47,8 @@ VERSION_BUMP = {
     'beta': lambda v: semver.bump_prerelease(v, 'beta'),
 }
 
+CHANGELOG_TYPES_ORDERED = ['Added', 'Fixed', 'Security', 'Changed', 'Deprecated', 'Removed']
+
 AGENT_V5_ONLY = {'agent_metrics', 'docker_daemon', 'go-metro', 'kubernetes', 'ntp'}
 
 BETA_PACKAGES = {'datadog_checks_dev', 'datadog_checks_downloader'}
@@ -80,7 +82,7 @@ NOT_TILES = [
 
 # If a file changes in a PR with any of these file extensions,
 # a test will run against the check containing the file
-TESTABLE_FILE_EXTENSIONS = ('.py', '.ini', '.in', '.txt', '.yml', '.yaml')
+TESTABLE_FILE_PATTERNS = ('*.py', '*.ini', '*.in', '*.txt', '*.yml', '*.yaml', '**/tests/*')
 NON_TESTABLE_FILES = ('auto_conf.yaml', 'metrics.yaml', 'agent_requirements.in')
 
 REQUIREMENTS_IN = 'requirements.in'

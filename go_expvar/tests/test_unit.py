@@ -20,6 +20,7 @@ CHECK_GAUGES = [
     '{}.memstats.heap_objects',
     '{}.memstats.heap_released',
     '{}.memstats.heap_sys',
+    '{}.memstats.total_alloc',
 ]
 
 # this is a histogram
@@ -33,7 +34,7 @@ CHECK_RATES = [
     '{}.memstats.pause_total_ns',
 ]
 
-CHECK_COUNT = ['{}.memstats.total_alloc']
+CHECK_COUNT = ['{}.memstats.total_alloc.count']
 
 CHECK_GAUGES_CUSTOM_MOCK = {
     '{}.gauge1': ['metric_tag1:metric_value1', 'metric_tag2:metric_value2', 'path:random_walk'],

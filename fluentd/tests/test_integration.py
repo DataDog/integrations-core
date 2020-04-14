@@ -10,13 +10,14 @@ from datadog_checks.fluentd import Fluentd
 
 from .common import BAD_PORT, BAD_URL, CHECK_NAME, DEFAULT_INSTANCE, EXPECTED_GAUGES, HOST
 
+pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
-@pytest.mark.usefixtures("dd_environment")
+
 def test_fluentd_exception(aggregator):
     instance = {"monitor_agent_url": BAD_URL, "plugin_ids": ["plg2"], "tags": ["test"]}
     check = Fluentd(CHECK_NAME, {}, [instance])
     with pytest.raises(Exception):
-        check.check(instance)
+        check.check(None)
 
     sc_tags = ['fluentd_host:{}'.format(HOST), 'fluentd_port:{}'.format(BAD_PORT), 'test']
     aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=Fluentd.CRITICAL, tags=sc_tags, count=1)
@@ -24,12 +25,11 @@ def test_fluentd_exception(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures("dd_environment")
 def test_fluentd_with_tag_by_type(aggregator):
     instance = copy.deepcopy(DEFAULT_INSTANCE)
     instance["tag_by"] = "type"
     check = Fluentd(CHECK_NAME, {}, [instance])
-    check.check(instance)
+    check.check(None)
 
     for m in EXPECTED_GAUGES:
         metric_name = '{0}.{1}'.format(CHECK_NAME, m)
@@ -43,13 +43,12 @@ def test_fluentd_with_tag_by_type(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures("dd_environment")
 def test_fluentd_with_tag_by_plugin_id(aggregator):
     instance = copy.deepcopy(DEFAULT_INSTANCE)
     instance["tag_by"] = "plugin_id"
 
     check = Fluentd(CHECK_NAME, {}, [instance])
-    check.check(instance)
+    check.check(None)
 
     for m in EXPECTED_GAUGES:
         metric_name = '{0}.{1}'.format(CHECK_NAME, m)
@@ -62,14 +61,13 @@ def test_fluentd_with_tag_by_plugin_id(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures("dd_environment")
 def test_fluentd_with_custom_tags(aggregator):
     instance = copy.deepcopy(DEFAULT_INSTANCE)
     custom_tags = ['test', 'tast:tast']
     instance["tags"] = custom_tags
     check = Fluentd(CHECK_NAME, {}, [instance])
 
-    check.check(instance)
+    check.check(None)
 
     for m in EXPECTED_GAUGES:
         metric_name = '{0}.{1}'.format(CHECK_NAME, m)

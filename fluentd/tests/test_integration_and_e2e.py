@@ -22,12 +22,13 @@ def assert_basic_case(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_basic_case_integration(aggregator):
     instance = copy.deepcopy(INSTANCE_WITH_PLUGIN)
     check = Fluentd(CHECK_NAME, {}, [instance])
-    check.check(instance)
-    check.check(instance)
+    check.check(None)
+    check.check(None)
 
     assert_basic_case(aggregator)
 

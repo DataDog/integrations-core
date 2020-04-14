@@ -55,3 +55,10 @@ def test_e2e(dd_agent_check):
     ]
     for metric in metrics:
         aggregator.assert_metric(metric)
+
+    tags = ['instance:jboss_wildfly']
+    # TODO: Assert the status "status=AgentCheck.OK"
+    # JMXFetch is currently sending the service check status as string, but should be number.
+    # Add "status=AgentCheck.OK" once that's fixed
+    # See https://github.com/DataDog/jmxfetch/pull/287
+    aggregator.assert_service_check('jboss.can_connect', tags=tags)

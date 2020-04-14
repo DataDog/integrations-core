@@ -24,7 +24,7 @@ def get_requirements(fpath):
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base'
+CHECKS_BASE_REQ = 'datadog_checks_base>=11.0.0'
 
 setup(
     name='datadog-gitlab',
@@ -47,8 +47,8 @@ setup(
         'Intended Audience :: System Administrators',
         'Topic :: System :: Monitoring',
         'License :: OSI Approved :: BSD License',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.7',
     ],
     # The package we're going to ship
     packages=['datadog_checks.gitlab'],

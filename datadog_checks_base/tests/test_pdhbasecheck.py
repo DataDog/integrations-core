@@ -72,7 +72,7 @@ def test_multi_instance_counter(aggregator, pdh_mocks_fixture):  # noqa F811
 def test_multi_instance_counter_specific_instances(aggregator, pdh_mocks_fixture):  # noqa F811
     initialize_pdh_tests()
     instance = DEFAULT_INSTANCE
-    c = PDHBaseCheck("testcheck", {}, {}, [instance], MULTI_INSTANCE_COUNTER_WITH_INSTANCES)
+    c = PDHBaseCheck("testcheck", {}, [instance], MULTI_INSTANCE_COUNTER_WITH_INSTANCES)
     c.check(instance)
     for t in ['test.processor_time_0', 'test.processor_time_1']:
         aggregator.assert_metric(t, tags=None, count=1)
@@ -83,7 +83,7 @@ def test_multi_instance_counter_specific_instances(aggregator, pdh_mocks_fixture
 def test_returns_partial_metrics(aggregator, pdh_mocks_fixture):  # noqa F811
     initialize_pdh_tests()
     instance = DEFAULT_INSTANCE
-    c = PDHBaseCheck("testcheck", {}, {}, [instance], PARTIAL_COUNTER_LIST)
+    c = PDHBaseCheck("testcheck", {}, [instance], PARTIAL_COUNTER_LIST)
     c.check(instance)
 
     aggregator.assert_metric("active_directory.ldap.client_sessions", tags=None, count=1)
@@ -96,7 +96,7 @@ def test_returns_partial_metrics(aggregator, pdh_mocks_fixture):  # noqa F811
 @requires_windows
 def test_default_admin_share():
     initialize_pdh_tests()
-    c = PDHBaseCheck("testcheck", {}, {}, [DEFAULT_INSTANCE], SINGLE_INSTANCE_COUNTER)
+    c = PDHBaseCheck("testcheck", {}, [DEFAULT_INSTANCE], SINGLE_INSTANCE_COUNTER)
     nr = c._get_netresource('1.1.1.1')
     assert nr.lpRemoteName == '\\\\1.1.1.1\\c$'
     assert nr.dwType == 0
@@ -108,7 +108,7 @@ def test_custom_admin_share():
     initialize_pdh_tests()
     instance = copy.deepcopy(DEFAULT_INSTANCE)
     instance['admin_share'] = 'ipc$'
-    c = PDHBaseCheck("testcheck", {}, {}, [instance], SINGLE_INSTANCE_COUNTER)
+    c = PDHBaseCheck("testcheck", {}, [instance], SINGLE_INSTANCE_COUNTER)
     nr = c._get_netresource('1.2.3.4')
     assert nr.lpRemoteName == '\\\\1.2.3.4\\ipc$'
 
@@ -118,6 +118,6 @@ def test_no_admin_share():
     initialize_pdh_tests()
     instance = copy.deepcopy(DEFAULT_INSTANCE)
     instance['admin_share'] = ''
-    c = PDHBaseCheck("testcheck", {}, {}, [instance], SINGLE_INSTANCE_COUNTER)
+    c = PDHBaseCheck("testcheck", {}, [instance], SINGLE_INSTANCE_COUNTER)
     nr = c._get_netresource('1.2.3.4')
     assert nr.lpRemoteName == '\\\\1.2.3.4'

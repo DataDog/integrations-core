@@ -1,5 +1,10 @@
 parameters:
-  repo: 'core'
+  - name: repo
+    default: 'core'
+  - name: pip_cache_config
+    displayName: 'Pip cache configuration'
+    type: object
+    default: null
 
 steps:
 # Install the Python version with which to use globally last as
@@ -15,6 +20,22 @@ steps:
     versionSpec: '3.8'
   displayName: 'Use Python 3.8'
 
+- ${{ if parameters.pip_cache_config }}:
+  # Notes on caching...
+  # - 1 immutable cache entry per cache `key`.
+  # - Restore `pip/.cache` folder from the entry that matches `key`.
+  # - If none matched, bootstrap new entry -- either partial (for a matching `restoreKey`), or from scratch.
+  # - NOTE: pip will still refresh any outdated cached packages when installing.
+  # - Once job finishes, and pip cache folder changed, store result in a *new* cache entry that will be
+  # used as a base for future jobs that match this `key`.
+  # For details, see: https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching
+  - task: Cache@2
+    inputs:
+      key: ${{ parameters.pip_cache_config.key }}
+      restoreKeys: ${{ parameters.pip_cache_config.restoreKeys }}
+      path: ${{ parameters.pip_cache_config.path }}
+    displayName: 'Cache pip dependencies'
+
 - script: python -m pip install --disable-pip-version-check --upgrade pip setuptools
   displayName: 'Upgrade Python packaging tools'
 
@@ -29,5 +50,5 @@ steps:
   - script: pip install datadog-checks-dev[cli]
     displayName: 'Install ddev from PyPI'
 
-- script: ddev config set ${{ parameters.repo }} . && ddev config set repo ${{ parameters.repo }}
+- script: ddev config set repos.${{ parameters.repo }} . && ddev config set repo ${{ parameters.repo }}
   displayName: 'Configure ddev'

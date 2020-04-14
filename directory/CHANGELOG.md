@@ -1,5 +1,10 @@
 # CHANGELOG - directory
 
+## 1.5.1 / 2020-04-04
+
+* [Fixed] Fix filegauge inconsistencies. See [#6060](https://github.com/DataDog/integrations-core/pull/6060).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.5.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).

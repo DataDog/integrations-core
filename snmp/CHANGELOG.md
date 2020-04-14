@@ -1,5 +1,33 @@
 # CHANGELOG - snmp
 
+## 2.6.1 / 2020-04-04
+
+* [Fixed] Small profiles cleanups. See [#6233](https://github.com/DataDog/integrations-core/pull/6233).
+* [Fixed] Remove duplicated idrac metrics from poweredge profile. See [#6232](https://github.com/DataDog/integrations-core/pull/6232).
+* [Fixed] Only load installed profiles once. See [#6231](https://github.com/DataDog/integrations-core/pull/6231).
+* [Fixed] Fix tag matching documentation. See [#6226](https://github.com/DataDog/integrations-core/pull/6226).
+
+## 2.6.0 / 2020-03-24
+
+* [Added] Support regular expressions in dynamic tags. See [#6096](https://github.com/DataDog/integrations-core/pull/6096).
+* [Added] Aruba, Arista and PDU profiles. See [#6002](https://github.com/DataDog/integrations-core/pull/6002).
+* [Added] Load all profiles by default. See [#6051](https://github.com/DataDog/integrations-core/pull/6051).
+* [Added] Add checkpoint firewall profile. See [#6021](https://github.com/DataDog/integrations-core/pull/6021).
+* [Added] Add types to compat module. See [#6029](https://github.com/DataDog/integrations-core/pull/6029).
+* [Added] Refactor and add types to `OIDResolver`. See [#6017](https://github.com/DataDog/integrations-core/pull/6017).
+* [Added] Add `OID` helper class. See [#6000](https://github.com/DataDog/integrations-core/pull/6000).
+* [Added] Add Cisco ASA 5525 profile and refactor cisco base profile. See [#5958](https://github.com/DataDog/integrations-core/pull/5958).
+* [Added] Move PySNMP imports to a dedicated module. See [#5990](https://github.com/DataDog/integrations-core/pull/5990).
+* [Added] Add Palo Alto and generic host resources SNMP profiles. See [#5914](https://github.com/DataDog/integrations-core/pull/5914).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Implement `str()` for `OID` instances. See [#6046](https://github.com/DataDog/integrations-core/pull/6046).
+* [Fixed] Move metric types to new module. See [#6044](https://github.com/DataDog/integrations-core/pull/6044).
+* [Fixed] Isolate logic for converting SNMP values to metrics. See [#6031](https://github.com/DataDog/integrations-core/pull/6031).
+* [Fixed] Move PySNMP imports to a separate `pysnmp_types` module. See [#6013](https://github.com/DataDog/integrations-core/pull/6013).
+* [Fixed] Drop unused log argument on InstanceConfig. See [#6007](https://github.com/DataDog/integrations-core/pull/6007).
+* [Fixed] Add OIDs to router profiles. See [#5991](https://github.com/DataDog/integrations-core/pull/5991).
+* [Fixed] Validate and cast `discovery_interval` to a number. See [#5887](https://github.com/DataDog/integrations-core/pull/5887).
+
 ## 2.5.0 / 2020-02-27
 
 * [Added] Query discovered devices in threads. See [#5462](https://github.com/DataDog/integrations-core/pull/5462).

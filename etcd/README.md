@@ -29,11 +29,11 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 For containerized environments, see the [Autodiscovery Integration Templates][6] for guidance on applying the parameters below.
 
-| Parameter            | Value                             |
-| -------------------- | --------------------------------- |
-| `<INTEGRATION_NAME>` | `etcd`                            |
-| `<INIT_CONFIG>`      | blank or `{}`                     |
-| `<INSTANCE_CONFIG>`  | `{"url": "http://%%host%%:2379"}` |
+| Parameter            | Value                                                |
+| -------------------- | ---------------------------------------------------- |
+| `<INTEGRATION_NAME>` | `etcd`                                               |
+| `<INIT_CONFIG>`      | blank or `{}`                                        |
+| `<INSTANCE_CONFIG>`  | `{"prometheus_url": "http://%%host%%:2379/metrics"}` |
 
 ### Validation
 

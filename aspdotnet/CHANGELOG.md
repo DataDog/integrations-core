@@ -1,5 +1,9 @@
 # CHANGELOG - Aspdotnet
 
+## 1.4.1 / 2020-04-04
+
+* [Fixed] Update to Agent 6 signature. See [#5939](https://github.com/DataDog/integrations-core/pull/5939).
+
 ## 1.4.0 / 2019-12-02
 
 * [Added] Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).

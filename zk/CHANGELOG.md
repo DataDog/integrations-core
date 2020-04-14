@@ -1,5 +1,14 @@
 # CHANGELOG - zk
 
+## 2.4.2 / 2020-04-13
+
+* [Fixed] Handle non-integers when parsing latency values. See [#6323](https://github.com/DataDog/integrations-core/pull/6323).
+
+## 2.4.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 2.4.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).

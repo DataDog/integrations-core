@@ -4,7 +4,7 @@
 
 import os
 
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
@@ -23,3 +23,5 @@ INSTANCE2 = {'server': HOST, 'port': PORT, 'tags': TAGS2}
 BAD_INSTANCE = {'server': HOST, 'port': BAD_PORT, 'tags': TAGS2}
 
 CHECK_NAME = 'gearmand'
+
+GEARMAND_VERSION = os.getenv('GEARMAND_VERSION')

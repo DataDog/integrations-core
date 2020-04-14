@@ -6,8 +6,8 @@ import os
 import mock
 import pytest
 
+from datadog_checks.base.utils.common import ensure_unicode
 from datadog_checks.kubernetes_state import KubernetesState
-from datadog_checks.utils.common import ensure_unicode
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIXTURES_PATH = os.path.join(HERE, 'fixtures')
@@ -231,14 +231,29 @@ def mock_from_file(fname):
 
 @pytest.fixture
 def instance():
-    return {'host': 'foo', 'kube_state_url': 'http://foo', 'tags': ['optional:tag1'], 'telemetry': False}
+    return {
+        'host': 'foo',
+        'kube_state_url': 'http://foo',
+        'tags': ['optional:tag1'],
+        'telemetry': False,
+    }
+
+
+def _check(instance):
+    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
+    return check
 
 
 @pytest.fixture
 def check(instance):
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
-    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
-    return check
+    return _check(instance)
+
+
+@pytest.fixture
+def check_with_join_kube_labels(instance):
+    instance['join_kube_labels'] = True
+    return _check(instance)
 
 
 def assert_not_all_zeroes(aggregator, metric_name):
@@ -359,6 +374,47 @@ def test_update_kube_state_metrics_v040(aggregator, instance, check):
 
     # FIXME: the original assert for resourcequota wasn't working, following line should be uncommented
     # assert resourcequota_was_collected(aggregator)
+
+
+def test_join_kube_labels(aggregator, instance, check_with_join_kube_labels):
+    # run check twice to have pod/node mapping
+    for _ in range(2):
+        check_with_join_kube_labels.check(instance)
+
+    aggregator.assert_metric(
+        NAMESPACE + '.container.ready',
+        tags=[
+            'container:kube-state-metrics',
+            'kube_container_name:kube-state-metrics',
+            'kube_namespace:default',
+            'label_app:kube-state-metrics',
+            'label_pod_template_hash:639670438',
+            'label_release:jaundiced-numbat',
+            'namespace:default',
+            'node:minikube',
+            'optional:tag1',
+            'phase:running',
+            'pod:jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj',
+            'pod_name:jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj',
+            'pod_phase:running',
+        ],
+        value=1,
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.deployment.replicas',
+        tags=[
+            'deployment:jaundiced-numbat-kube-state-metrics',
+            'kube_deployment:jaundiced-numbat-kube-state-metrics',
+            'kube_namespace:default',
+            'label_app:kube-state-metrics',
+            'label_chart:kube-state-metrics-0.3.1',
+            'label_heritage:tiller',
+            'label_release:jaundiced-numbat',
+            'namespace:default',
+            'optional:tag1',
+        ],
+        value=1,
+    )
 
 
 def test_join_custom_labels(aggregator, instance, check):

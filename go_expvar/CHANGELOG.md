@@ -1,5 +1,15 @@
 # CHANGELOG - go_expvar
 
+## 1.8.0 / 2020-04-04
+
+* [Added] Add additional logging. See [#6128](https://github.com/DataDog/integrations-core/pull/6128).
+* [Added] Add go_expvar.memstats.total_alloc.count . See [#6005](https://github.com/DataDog/integrations-core/pull/6005).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
+## 1.7.2 / 2020-03-05
+
+* [Fixed] Revert "Submit total_alloc as monotonic count". See [#5972](https://github.com/DataDog/integrations-core/pull/5972).
+
 ## 1.7.1 / 2020-02-22
 
 * [Fixed] Submit total_alloc as monotonic count. See [#5703](https://github.com/DataDog/integrations-core/pull/5703).

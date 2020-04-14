@@ -4,8 +4,8 @@
 
 from copy import deepcopy
 
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.errors import CheckException
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base.errors import CheckException
 
 
 class Istio(OpenMetricsBaseCheck):
@@ -299,7 +299,6 @@ class Istio(OpenMetricsBaseCheck):
                     {
                         'endpoint_no_pod': 'endpoint_no_pod',
                         'galley_mcp_source_clients_total': 'mcp_source.clients_total',
-                        'galley_mcp_source_request_acks_total': 'mcp_source.request_acks_total',
                         'galley_runtime_processor_event_span_duration_milliseconds': (
                             'runtime_processor.event_span_duration_milliseconds'
                         ),
@@ -328,7 +327,8 @@ class Istio(OpenMetricsBaseCheck):
                         'galley_validation_passed': 'validation.passed',
                     }
                 ],
-                'ignore_metrics': ['galley_mcp_source_message_size_bytes'],
+                # The following metrics have been blakclisted due to high cardinality of tags
+                'ignore_metrics': ['galley_mcp_source_message_size_bytes', 'galley_mcp_source_request_acks_total'],
             }
         )
         process_galley_instance['ignore_metrics'].extend(instance.get('ignore_metrics', []))

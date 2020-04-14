@@ -1,0 +1,23 @@
+name: ActiveMQ
+files:
+- name: activemq.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/jmx
+  - template: instances
+    options:
+    - template: instances/jmx
+      overrides:
+        host.value.example: localhost
+        port.value.example: 1616
+  - template: logs
+    example:
+    - type: file
+      path: <ACTIVEMQ_BASEDIR>/data/activemq.log
+      source: activemq
+      service: <SERVICE_NAME>
+    - type: file
+      path: <ACTIVEMQ_BASEDIR>/data/audit.log
+      source: activemq
+      service: <SERVICE_NAME>

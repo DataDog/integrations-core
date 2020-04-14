@@ -52,8 +52,8 @@ def dd_environment():
             with TempDir() as temp_dir:
                 host_socket_path = os.path.join(temp_dir, 'datadog-haproxy-stats.sock')
                 env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy.cfg')
-                if os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] >= ['1', '7']:
-                    env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy-1_7.cfg')
+                if os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] >= ['1', '6']:
+                    env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy-1_6.cfg')
                 env['HAPROXY_SOCKET_DIR'] = temp_dir
 
                 with docker_run(

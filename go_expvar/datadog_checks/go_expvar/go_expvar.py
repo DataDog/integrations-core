@@ -47,6 +47,7 @@ DEFAULT_GAUGE_MEMSTAT_METRICS = [
     "HeapInuse",
     "HeapReleased",
     "HeapObjects",
+    "TotalAlloc",
 ]
 
 DEFAULT_RATE_MEMSTAT_METRICS = [
@@ -59,13 +60,9 @@ DEFAULT_RATE_MEMSTAT_METRICS = [
     "NumGC",
 ]
 
-DEFAULT_COUNTER_METRICS = ["TotalAlloc"]
-
-DEFAULT_METRICS = (
-    [{PATH: "memstats/%s" % path, TYPE: GAUGE} for path in DEFAULT_GAUGE_MEMSTAT_METRICS]
-    + [{PATH: "memstats/%s" % path, TYPE: RATE} for path in DEFAULT_RATE_MEMSTAT_METRICS]
-    + [{PATH: "memstats/%s" % path, TYPE: MONOTONIC_COUNTER} for path in DEFAULT_COUNTER_METRICS]
-)
+DEFAULT_METRICS = [{PATH: "memstats/%s" % path, TYPE: GAUGE} for path in DEFAULT_GAUGE_MEMSTAT_METRICS] + [
+    {PATH: "memstats/%s" % path, TYPE: RATE} for path in DEFAULT_RATE_MEMSTAT_METRICS
+]
 
 GO_EXPVAR_URL_PATH = "/debug/vars"
 
@@ -160,6 +157,7 @@ class GoExpvar(AgentCheck):
             if len(values) == 0:
                 self.warning("No results matching path %s", path)
                 continue
+            self.log.debug("%s result(s) matching path %s", len(values), path)
 
             tag_by_path = alias is not None
 
@@ -172,10 +170,13 @@ class GoExpvar(AgentCheck):
                 try:
                     float(value)
                 except (TypeError, ValueError):
-                    self.log.warning("Unreportable value for path %s: %s", path, value)
+                    self.log.warning("Unreportable value for path %s: %s", actual_path, value)
                     continue
 
                 if count >= max_metrics:
+                    self.log.debug(
+                        "Exceeded maximum allowed metrics (%s) while processing: %s", max_metrics, metric_name
+                    )
                     self.warning(
                         "Reporting more metrics than the allowed maximum. "
                         "Please contact support@datadoghq.com for more information."
@@ -183,6 +184,12 @@ class GoExpvar(AgentCheck):
                     return
 
                 SUPPORTED_TYPES[metric_type](self, metric_name, value, metric_tags + path_tag)
+
+                # Submit 'go_expvar.memstats.total_alloc' as a monotonic count
+                if 'memstats.total_alloc' in metric_name:
+                    self.monotonic_count(metric_name + '.count', value, metric_tags + path_tag)
+                    count += 1
+
                 count += 1
 
     def deep_get(self, content, keys, traversed_path=None):

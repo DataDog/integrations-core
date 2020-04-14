@@ -5,7 +5,7 @@
 
 from six import PY2
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 # Python 3 compatibility is a different library
 # It's a drop in replacement but has a different name
@@ -118,3 +118,22 @@ class Gearman(AgentCheck):
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=str(e), tags=tags)
             raise
+
+        if self.is_metadata_collection_enabled():
+            self._collect_metadata(client)
+
+    def _collect_metadata(self, client):
+        try:
+            resp = client.get_version()
+        except Exception as e:
+            self.log.warning('Error retrieving version information: %s', e)
+            return
+
+        if not resp.startswith('OK '):
+            self.log.warning('Error retrieving version information from server, response: %s', resp)
+            return
+
+        # strip off the 'OK ' text
+        server_version = resp[3:]
+        if server_version:
+            self.set_metadata('version', server_version)

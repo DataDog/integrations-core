@@ -78,25 +78,27 @@ def set_value(ctx, key, value):
     you will be prompted, with the input hidden if it is sensitive.
 
     \b
-    $ ddev config set github.user foo
-    New setting:
-    [github]
-    user = "foo"
+    `$ ddev config set github.user foo`
+
+        New setting:
+        [github]
+        user = "foo"
 
     You can also assign values on a per-org basis.
 
     \b
-    $ ddev config set orgs.<ORG_NAME>.api_key
-    New setting:
-    [orgs.<ORG_NAME>]
-    api_key = "***********"
+    `$ ddev config set orgs.<ORG_NAME>.api_key`
+
+        New setting:
+        [orgs.<ORG_NAME>]
+        api_key = "***********"
     """
     scrubbing = False
     if value is None:
         scrubbing = any(fnmatch(key, pattern) for pattern in SECRET_KEYS)
         value = click.prompt(f'Value for `{key}`', hide_input=scrubbing)
 
-    if key in ('core', 'extras', 'agent') and not value.startswith('~'):
+    if key in ('repos.core', 'repos.extras', 'repos.agent') and not value.startswith('~'):
         value = os.path.abspath(value)
 
     user_config = new_config = ctx.obj

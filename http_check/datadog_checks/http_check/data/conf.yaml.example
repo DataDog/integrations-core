@@ -340,6 +340,11 @@ instances:
     #   Host: <ALTERNATIVE_HOSTNAME>
     #   X-Auth-Token: <AUTH_TOKEN>
 
+    ## @param tls_use_host_header - boolean - optional - default: false
+    ## If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
+    #
+    # tls_use_host_header: false
+
     ## @param timeout - integer - optional - default: 10
     ## The timeout for connecting to services.
     #

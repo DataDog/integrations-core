@@ -5,6 +5,7 @@ from __future__ import absolute_import
 
 import json
 import os
+import re
 from base64 import urlsafe_b64encode
 
 import pytest
@@ -77,7 +78,7 @@ def dd_environment_runner(request):
         fixture_def = request._fixturemanager._arg2fixturedefs[E2E_FIXTURE_NAME][0]
 
         # Make the underlying function a no-op
-        fixture_def.func = lambda: None
+        fixture_def.func = lambda *args, **kwargs: None
         return
 
     try:
@@ -177,24 +178,23 @@ def dd_agent_check(request, aggregator):
                     check_command.append(str(value))
 
         result = run_command(check_command, capture=True)
-        if AGENT_COLLECTOR_SEPARATOR not in result.stdout:
+
+        matches = re.findall(AGENT_COLLECTOR_SEPARATOR + r'\n(.*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
+
+        if not matches:
             raise ValueError(
                 '{}{}\nCould not find `{}` in the output'.format(
                     result.stdout, result.stderr, AGENT_COLLECTOR_SEPARATOR
                 )
             )
 
-        _, _, collector_output = result.stdout.partition(AGENT_COLLECTOR_SEPARATOR)
-        collector_output = collector_output.strip()
-        if not collector_output.endswith(']'):
-            # JMX needs some additional cleanup
-            collector_output = collector_output[: collector_output.rfind('} ]\n') + 3]
-        try:
-            collector = json.loads(collector_output)
-        except json.decoder.JSONDecodeError as e:
-            raise Exception("Error loading json: {}\nCollector Json Output:\n{}".format(e, collector_output))
+        for raw_json in matches:
+            try:
+                collector = json.loads(raw_json)
+            except Exception as e:
+                raise Exception("Error loading json: {}\nCollector Json Output:\n{}".format(e, raw_json))
 
-        replay_check_run(collector, aggregator)
+            replay_check_run(collector, aggregator)
 
         return aggregator
 
@@ -237,3 +237,21 @@ def pytest_configure(config):
     config.addinivalue_line('markers', 'unit: marker for unit tests')
     config.addinivalue_line('markers', 'integration: marker for integration tests')
     config.addinivalue_line('markers', 'e2e: marker for end-to-end Datadog Agent tests')
+    config.addinivalue_line("markers", "latest_metrics: marker for verifying support of new metrics")
+
+
+def pytest_addoption(parser):
+    parser.addoption("--run-latest-metrics", action="store_true", default=False, help="run check_metrics tests")
+
+
+def pytest_collection_modifyitems(config, items):
+    # at test collection time, this function gets called by pytest, see:
+    # https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option
+    # if the particular option is not present, it will skip all tests marked `latest_metrics`
+    if config.getoption("--run-latest-metrics"):
+        # --run-check-metrics given in cli: do not skip slow tests
+        return
+    skip_latest_metrics = pytest.mark.skip(reason="need --run-latest-metrics option to run")
+    for item in items:
+        if "latest_metrics" in item.keywords:
+            item.add_marker(skip_latest_metrics)

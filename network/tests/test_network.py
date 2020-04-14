@@ -12,6 +12,7 @@ import mock
 import pytest
 from six import PY3, iteritems
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.dev import EnvVars
 
 from . import common
@@ -338,3 +339,9 @@ def test_proc_permissions_error(aggregator, check, caplog):
         assert 'Unable to read /proc/net/dev.' in caplog.text
         assert 'Unable to read /proc/net/netstat.' in caplog.text
         assert 'Unable to read /proc/net/snmp.' in caplog.text
+
+
+def test_invalid_excluded_interfaces(check):
+    instance = {'excluded_interfaces': None}
+    with pytest.raises(ConfigurationError):
+        check.check(instance)

@@ -140,6 +140,12 @@ instances:
     #
     # kerberos_auth: disabled
 
+    ## @param kerberos_cache - string - optional
+    ## Sets the KRB5CCNAME environment variable.
+    ## It should point to a credential cache with a valid TGT.
+    #
+    # kerberos_cache: <KERBEROS_CACHE>
+
     ## @param kerberos_delegate - boolean - optional - default: false
     ## Set to `true` to enable kerberos delegation of credentials to a server that requests delegation.
     ##
@@ -206,6 +212,11 @@ instances:
     ## Instructs the check to validate the TLS certificate of services.
     #
     # tls_verify: true
+
+    ## @param tls_use_host_header - boolean - optional - default: false
+    ## If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
+    #
+    # tls_use_host_header: false
 
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
@@ -317,7 +328,6 @@ instances:
 ## source  - required - Attribute that defines which Integration sent the logs
 ## service - required - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
-## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
 ## tags - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/

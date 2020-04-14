@@ -1,6 +1,5 @@
 # Generic profile for routers
 #
-sysobjectid: 1.3.6.1.4.*
 
 extends:
   - _base.yaml
@@ -8,3 +7,5 @@ extends:
   - _generic-router-ip.yaml
   - _generic-router-tcp.yaml
   - _generic-router-udp.yaml
+
+sysobjectid: 1.3.6.1.4.*

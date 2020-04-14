@@ -2,8 +2,8 @@ import os
 
 import pytest
 
+from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev.utils import ON_LINUX, ON_MACOS
-from datadog_checks.utils.common import get_docker_hostname
 
 AGG_STATUSES_BY_SERVICE = (
     (['status:available', 'service:a', 'haproxy_service:a'], 1),
@@ -62,7 +62,11 @@ requires_shareable_unix_socket = pytest.mark.skipif(
     not platform_supports_sharing_unix_sockets_through_docker,
     reason='AF_UNIX sockets cannot be bind-mounted between a macOS host and a linux guest in docker',
 )
-haproxy_less_than_1_7 = os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '7']
+haproxy_less_than_1_6 = os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '6']
+requires_haproxy_tcp_stats = pytest.mark.skipif(
+    haproxy_less_than_1_6 or not platform_supports_sockets,
+    reason="Multiple `stats socket` definitions aren't supported in 1.4",
+)
 
 CONFIG_UNIXSOCKET = {'collect_aggregates_only': False}
 
@@ -83,6 +87,7 @@ CHECK_CONFIG = {
 CHECK_CONFIG_OPEN = {'url': STATS_URL_OPEN, 'collect_aggregates_only': False, 'collect_status_metrics': True}
 
 BACKEND_SERVICES = ['anotherbackend', 'datadog']
+FRONTEND_SERVICES = ['public']
 
 BACKEND_LIST = ['singleton:8080', 'singleton:8081', 'otherserver']
 
@@ -90,6 +95,12 @@ BACKEND_TO_ADDR = {
     'singleton:8080': '127.0.0.1:8080',
     'singleton:8081': '127.0.0.1:8081',
     'otherserver': '127.0.0.1:1234',
+}
+
+STICKTABLE_TYPES = {
+    'anotherbackend': 'ip',
+    'datadog': 'integer',
+    'public': 'string',
 }
 
 

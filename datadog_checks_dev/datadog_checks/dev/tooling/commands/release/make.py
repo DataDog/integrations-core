@@ -28,9 +28,9 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
     """Perform a set of operations needed to release checks:
 
     \b
-      * update the version in __about__.py
+      * update the version in `__about__.py`
       * update the changelog
-      * update the requirements-agent-release.txt file
+      * update the `requirements-agent-release.txt` file
       * update in-toto metadata
       * commit the above changes
 

@@ -8,12 +8,13 @@ import copy
 import re
 import socket
 import time
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 
 from six import PY2, iteritems
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
+from datadog_checks.base.errors import CheckException
 
 STATS_URL = "/;csv;norefresh"
 EVENT_TYPE = SOURCE_TYPE_NAME = 'haproxy'
@@ -49,6 +50,25 @@ class Services(object):
         'no_check': AgentCheck.UNKNOWN,
         'maint': AgentCheck.OK,
     }
+
+
+class StickTable(namedtuple("StickTable", ["name", "type", "size", "used"])):
+
+    SHOWTABLE_RE = re.compile(
+        r"# table: (?P<name>[^ ,]+), type: (?P<type>[^ ,]+), size:(?P<size>[0-9]+), used:(?P<used>[0-9]+)$"
+    )
+
+    @classmethod
+    def parse(cls, line):
+        items = cls.SHOWTABLE_RE.match(line)
+        if not items:
+            return None
+        return StickTable(
+            name=items.group('name'),
+            type=items.group('type'),
+            size=int(items.group('size')),
+            used=int(items.group('used')),
+        )
 
 
 class HAProxy(AgentCheck):
@@ -102,10 +122,11 @@ class HAProxy(AgentCheck):
         url = instance.get('url')
         self.log.debug('Processing HAProxy data for %s', url)
         parsed_url = urlparse(url)
+        tables = None
 
         if parsed_url.scheme == 'unix' or parsed_url.scheme == 'tcp':
-            info, data = self._fetch_socket_data(parsed_url)
-            self._collect_version_from_socket(info)
+            info, data, tables = self._fetch_socket_data(parsed_url)
+            self._set_version_metadata(self._collect_version_from_socket(info))
             uptime = self._collect_uptime_from_socket(info)
         else:
             try:
@@ -145,6 +166,14 @@ class HAProxy(AgentCheck):
 
         if uptime is not None and uptime < startup_grace_period:
             return
+
+        if tables:
+            self._process_stick_table_metrics(
+                tables,
+                services_incl_filter=services_incl_filter,
+                services_excl_filter=services_excl_filter,
+                custom_tags=custom_tags,
+            )
 
         self._process_data(
             data,
@@ -236,11 +265,7 @@ class HAProxy(AgentCheck):
 
         return uptime
 
-    def _fetch_socket_data(self, parsed_url):
-        ''' Hit a given stats socket and return the stats lines '''
-
-        self.log.debug("Fetching haproxy stats from socket: %s", parsed_url.geturl())
-
+    def _run_socket_commands(self, parsed_url, commands):
         if parsed_url.scheme == 'tcp':
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             splitted_loc = parsed_url.netloc.split(':')
@@ -251,34 +276,60 @@ class HAProxy(AgentCheck):
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.connect(parsed_url.path)
 
-        sock.send(b"show info;show stat\r\n")
+        sock.send(b';'.join(commands) + b"\r\n")
 
         response = ""
         output = sock.recv(BUFSIZE)
         while output:
             response += output.decode("ASCII")
             output = sock.recv(BUFSIZE)
-        info, data = response.split('\n\n')[:2]
-
         sock.close()
 
-        return info, data.splitlines()
+        responses = response.split('\n\n')
+        if len(responses) != len(commands) + 1 or responses[len(responses) - 1] != '':
+            raise CheckException("Got a different number of responses than expected")
+
+        return tuple(r.splitlines() for r in responses[: len(commands)])
+
+    def _fetch_socket_data(self, parsed_url):
+        ''' Hit a given stats socket and return the stats lines '''
+
+        self.log.debug("Fetching haproxy stats from socket: %s", parsed_url.geturl())
+        info, stat = self._run_socket_commands(parsed_url, (b"show info", b"show stat"))
+
+        # the "show table" command was introduced in 1.5. Sending "show table"
+        # to a haproxy <1.5 results in no output at all even when multiple
+        # commands were sent, so we have to check the version and only send the
+        # command when supported
+        tables = []
+        try:
+            raw_version = self._collect_version_from_socket(info)
+            haproxy_major_version = tuple(int(vernum) for vernum in raw_version.split('.')[:2])
+
+            if len(haproxy_major_version) == 2 and haproxy_major_version >= (1, 5):
+                (tables,) = self._run_socket_commands(parsed_url, (b"show table",))
+        except (IndexError, ValueError) as e:
+            self.log.error("Could not parse version number '%s': %s", raw_version, e)
+            pass
+
+        return info, stat, tables
 
     def _collect_version_from_socket(self, info):
-        version = ''
-        for line in info.splitlines():
+        for line in info:
             key, value = line.split(':')
             if key == 'Version':
-                version = value
-                break
-        if version == '':
+                return value
+        return ''
+
+    def _set_version_metadata(self, version):
+        if not version:
             self.log.debug("unable to collect version info from socket")
         else:
             self.log.debug("HAProxy version is %s", version)
             self.set_metadata('version', version)
 
     def _collect_uptime_from_socket(self, info):
-        for line in info.splitlines():
+        for line in info:
             key, value = line.split(':')
             if key == 'Uptime_sec':
                 return int(value)
@@ -704,6 +755,26 @@ class HAProxy(AgentCheck):
                 except ValueError:
                     pass
 
+    def _process_stick_table_metrics(
+        self, data, services_incl_filter=None, services_excl_filter=None, custom_tags=None
+    ):
+        """
+        Stick table metrics processing. Two metrics will be created for each stick table (current and max size)
+        """
+
+        custom_tags = [] if not custom_tags else custom_tags
+
+        for line in data:
+            table = StickTable.parse(line)
+            if table is None:
+                continue
+            if self._is_service_excl_filtered(table.name, services_incl_filter, services_excl_filter):
+                continue
+
+            tags = ["haproxy_service:%s" % table.name, "stick_type:%s" % table.type] + custom_tags
+            self.gauge("haproxy.sticktable.size", float(table.size), tags=tags)
+            self.gauge("haproxy.sticktable.used", float(table.used), tags=tags)
+
     def _process_event(self, data, url, services_incl_filter=None, services_excl_filter=None, custom_tags=None):
         '''
         Main event processing loop. An event will be created for a service
@@ -741,17 +812,16 @@ class HAProxy(AgentCheck):
             self.host_status[url][key] = data_status
 
     def _create_event(self, status, hostname, lastchg, service_name, back_or_front, custom_tags=None):
-        HAProxy_agent = self.hostname.decode('utf-8')
         custom_tags = [] if custom_tags is None else custom_tags
         if status == 'down':
             alert_type = "error"
-            title = "%s reported %s:%s %s" % (HAProxy_agent, service_name, hostname, status.upper())
+            title = "%s reported %s:%s %s" % (self.hostname, service_name, hostname, status.upper())
         else:
             if status == "up":
                 alert_type = "success"
             else:
                 alert_type = "info"
-            title = "%s reported %s:%s back and %s" % (HAProxy_agent, service_name, hostname, status.upper())
+            title = "%s reported %s:%s back and %s" % (self.hostname, service_name, hostname, status.upper())
 
         tags = ["haproxy_service:%s" % service_name]
         if back_or_front == Services.BACKEND:
@@ -762,7 +832,7 @@ class HAProxy(AgentCheck):
         return {
             'timestamp': int(time.time() - lastchg),
             'event_type': EVENT_TYPE,
-            'host': HAProxy_agent,
+            'host': self.hostname,
             'msg_title': title,
             'alert_type': alert_type,
             "source_type_name": SOURCE_TYPE_NAME,

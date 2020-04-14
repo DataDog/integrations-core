@@ -1,5 +1,9 @@
 # CHANGELOG - disk
 
+## 2.8.0 / 2020-04-04
+
+* [Added] Upgrade psutil to 5.7.0. See [#6243](https://github.com/DataDog/integrations-core/pull/6243).
+
 ## 2.7.0 / 2020-02-22
 
 * [Added] Read udev disk labels from the blkid cache file. See [#5515](https://github.com/DataDog/integrations-core/pull/5515).

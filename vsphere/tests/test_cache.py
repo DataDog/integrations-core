@@ -9,7 +9,7 @@ from pyVmomi import vim
 from six import iteritems
 
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
-from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache, TagsCache, VSphereCache
+from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache, VSphereCache
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES_WITH_METRICS
 
@@ -74,29 +74,23 @@ def test_metrics_metadata_cache():
         assert cache.get_metadata(k) == v
 
 
-@pytest.mark.usefixtures("mock_type")
-def test_infrastructure_cache():
+@pytest.mark.usefixtures("mock_type", "mock_rest_api")
+def test_infrastructure_cache(realtime_instance):
     cache = InfrastructureCache(float('inf'))
-    mors = {MagicMock(spec=k): object() for k in ALL_RESOURCES_WITH_METRICS * 2}
+    config = VSphereConfig(realtime_instance, logger)
+    mock_api = VSphereRestAPI(config, log=logger)
+
+    mors = {MagicMock(spec=k, _moId="foo"): object() for k in ALL_RESOURCES_WITH_METRICS * 2}
     with cache.update():
         for k, v in iteritems(mors):
-            cache.set_mor_data(k, v)
+            cache.set_mor_props(k, v)
+        cache.set_all_tags(mock_api.get_resource_tags_for_mors(mors))
 
     for r in ALL_RESOURCES_WITH_METRICS:
         assert len(list(cache.get_mors(r))) == 2
 
     for k, v in iteritems(mors):
         assert cache.get_mor_props(k) == v
-
-
-@pytest.mark.usefixtures("mock_type", "mock_rest_api")
-def test_tags_cache(realtime_instance):
-    cache = TagsCache(float('inf'))
-    config = VSphereConfig(realtime_instance, logger)
-    mock_api = VSphereRestAPI(config, log=logger)
-
-    with cache.update():
-        cache.set_all_tags(mock_api.get_resource_tags())
 
     vm_mor = vim.VirtualMachine(moId='VM4-4-1')
     vm2_mor = vim.VirtualMachine(moId='i-dont-have-tags')

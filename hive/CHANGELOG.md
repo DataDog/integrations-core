@@ -1,5 +1,13 @@
 # CHANGELOG - Hive
 
+## 1.2.0 / 2020-04-04
+
+* [Added] Add `service_check_prefix` config to jmx. See [#6163](https://github.com/DataDog/integrations-core/pull/6163).
+* [Added] Use config spec. See [#5979](https://github.com/DataDog/integrations-core/pull/5979).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+* [Fixed] Fix JMX spec doc. See [#6074](https://github.com/DataDog/integrations-core/pull/6074).
+* [Fixed] Remove examples from jmx template. See [#6006](https://github.com/DataDog/integrations-core/pull/6006).
+
 ## 1.1.2 / 2019-12-04
 
 * [Fixed] Fix bean name of directsql_errors metric. See [#5141](https://github.com/DataDog/integrations-core/pull/5141).

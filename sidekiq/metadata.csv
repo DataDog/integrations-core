@@ -1,0 +1,22 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+sidekiq.jobs.perform.count,gauge,,,,Count of the amount of time spent in a worker,0,sidekiq,jobs perform count
+sidekiq.jobs.perform.avg,gauge,,,,Average amount of time spent in a worker,0,sidekiq,jobs perform avg
+sidekiq.jobs.perform.max,gauge,,,,Max amount of time spent in a worker,0,sidekiq,jobs perform max
+sidekiq.jobs.perform.median,gauge,,,,Median amount of time spent in a worker,0,sidekiq,jobs perform median
+sidekiq.jobs.perform.95percentile,gauge,,,,95th percentile of amount of time spent in a worker,0,sidekiq,jobs perform perc
+sidekiq.jobs.count,count,,,,Count of Sidekiq jobs,0,sidekiq,jobs count
+sidekiq.jobs.success,count,,,,Count of successful Sidekiq jobs,0,sidekiq,jobs success
+sidekiq.jobs.failure,count,,,,Count of failed Sidekiq jobs,-1,sidekiq,jobs failure
+sidekiq.processed,count,,,,Number of job executions completed (success or failure),0,sidekiq,job execution processed
+sidekiq.failures,count,,,,Number of job executions which raised an error,-1,sidekiq,jobs execution failures
+sidekiq.enqueued,count,,,,Total size of all known queues,0,sidekiq,jobs enqueued
+sidekiq.retries,count,,,,Total retries size,0,sidekiq,job retries
+sidekiq.dead,count,,,,Total Dead Size,0,sidekiq,jobs dead
+sidekiq.scheduled,count,,,,Total Scheduled Size,0,sidekiq,jobs scheduled
+sidekiq.busy,count,,,,Total Busy Size,0,sidekiq,jobs busy
+sidekiq.jobs.expired,count,,,,Count of when a job is expired,0,sidekiq,jobs expired
+sidekiq.jobs.recovered.push,count,,,,Count of when a job is recovered by reliable_push after network outage,0,sidekiq,jobs recovered push
+sidekiq.jobs.recovered.fetch,count,,,,Count of when a job is recovered by super_fetch after process crash,0,sidekiq,jobs recovered fetch
+sidekiq.batch.created,count,,,,Count of when a batch is created,0,sidekiq,batches created
+sidekiq.batch.complete,count,,,,Count of when a batch is completed,0,sidekiq,batches complete
+sidekiq.batch.success,count,,,,Count of when a batch is successful,0,sidekiq,batches successful

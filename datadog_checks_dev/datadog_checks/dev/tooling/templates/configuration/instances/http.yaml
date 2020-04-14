@@ -102,6 +102,12 @@
       - disabled
 
     See https://github.com/requests/requests-kerberos#mutual-authentication
+- name: kerberos_cache
+  value:
+    type: string
+  description: |
+    Sets the KRB5CCNAME environment variable.
+    It should point to a credential cache with a valid TGT.
 - name: kerberos_delegate
   value:
     example: false
@@ -171,6 +177,12 @@
     example: true
     type: boolean
   description: Instructs the check to validate the TLS certificate of services.
+- name: tls_use_host_header
+  value:
+    example: false
+    type: boolean
+  description: |
+    If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
 - name: tls_ignore_warning
   value:
     example: false

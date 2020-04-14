@@ -8,8 +8,8 @@ import mock
 import pytest
 from requests.exceptions import HTTPError
 
+from datadog_checks.base.utils.common import ensure_unicode
 from datadog_checks.istio import Istio
-from datadog_checks.utils.common import ensure_unicode
 
 from .common import CITADEL_METRICS, GALLEY_METRICS, MESH_METRICS, MIXER_METRICS, NEW_MIXER_METRICS, PILOT_METRICS
 

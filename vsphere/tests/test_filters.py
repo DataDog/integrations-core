@@ -9,10 +9,10 @@ from pyVmomi import vim
 from tests.mocked_api import MockedAPI
 
 from datadog_checks.vsphere import VSphereCheck
+from datadog_checks.vsphere.resource_filters import make_inventory_path
 from datadog_checks.vsphere.utils import (
     is_metric_excluded_by_filters,
-    is_resource_excluded_by_filters,
-    make_inventory_path,
+    is_resource_collected_by_filters,
     match_any_regex,
 )
 
@@ -59,51 +59,42 @@ def test_make_inventory_path():
 
 
 @pytest.mark.usefixtures("mock_type")
-def test_is_realtime_resource_excluded_by_filters(realtime_instance):
+def test_is_realtime_resource_collected_by_filters(realtime_instance):
     realtime_instance['resource_filters'] = [
         {'resource': 'vm', 'property': 'name', 'patterns': [r'^\$VM5$', r'^VM4-2\d$']},
-        {'resource': 'vm', 'property': 'inventory_path', 'patterns': [r'\/Dätacenter\/vm\/m.*']},
+        {'resource': 'vm', 'property': 'inventory_path', 'patterns': [u'\\/D\xe4tacenter\\/vm\\/m.*']},
         {'resource': 'vm', 'property': 'hostname', 'patterns': [r'10\.0\.0\.103']},
         {'resource': 'vm', 'property': 'guest_hostname', 'patterns': [r'ubuntu-test']},
+        {'resource': 'vm', 'property': 'tag', 'patterns': [r'env:production']},
+        {'resource': 'host', 'property': 'name', 'patterns': [r'10\.0\.0\.103'], 'type': 'blacklist'},
     ]
 
-    excluded_resources = [
-        'VM1-4',
+    collected_resources = [
         'VM2-1',
-        'VM1-3',
-        'VM2-2',
-        'VM1-5',
-        'VM1-2',
-        'VM-0',
-        u'VM1-1ä',
-        'VM4-2',
-        'VM4-4',
-        'VM4-14',
-        'VM4-9',
-        'VM4-15',
-        'VM4-5',
-        'VM4-3',
-        'VM4-12',
-        'VM4-11',
-        'VM4-6',
-        'VM4-13',
-        'VM4-1',
-        'VM4-19',
-        'VM4-18',
-        'VM4-7',
-        'VM4-17',
-        'VM4-10',
-        'VM4-16',
-        'VM4-8',
+        '$VM3-2',
+        '$VM5',
+        '10.0.0.101',
+        '10.0.0.102',
+        '10.0.0.104',
+        u'VM1-6ê',
+        'VM3-1',
+        'VM4-20',
+        'migrationTest',
     ]
 
     check = VSphereCheck('vsphere', {}, [realtime_instance])
+
     formatted_filters = check.config.resource_filters
 
     infra = MockedAPI(realtime_instance).get_infrastructure()
     resources = [m for m in infra if m.__class__ in (vim.VirtualMachine, vim.HostSystem)]
-
+    VM2_1 = next(r for r in resources if infra.get(r).get('name') == 'VM2-1')
+    check.infrastructure_cache.set_all_tags({vim.VirtualMachine: {VM2_1._moId: ['env:production', 'tag:2']}})
     for resource in resources:
-        is_excluded = infra.get(resource).get('name') in excluded_resources
-        if not is_resource_excluded_by_filters(resource, infra, formatted_filters) == is_excluded:
-            assert is_resource_excluded_by_filters(resource, infra, formatted_filters)
+        is_collected = infra.get(resource).get('name') in collected_resources
+        assert (
+            is_resource_collected_by_filters(
+                resource, infra, formatted_filters, check.infrastructure_cache.get_mor_tags(resource)
+            )
+            == is_collected
+        )

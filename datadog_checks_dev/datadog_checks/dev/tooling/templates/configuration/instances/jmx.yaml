@@ -1,0 +1,94 @@
+- name: host
+  required: true
+  description: JMX hostname to connect to.
+  value:
+    type: string
+
+- name: port
+  required: true
+  description: JMX port to connect to.
+  value:
+    type: integer
+
+- name: jmx_url
+  description: JMX URL to connect to. Can be used instead of host/port configs.
+  hidden: true
+  value:
+    type: string
+
+- name: user
+  description: User to use when connecting to JMX.
+  value:
+    type: string
+
+- name: password
+  description: Password to use when connecting to JMX.
+  value:
+    type: string
+
+- name: process_name_regex
+  description: |
+    Instead of using a host and port, the Agent can connect using the attach API.
+    This requires the JDK to be installed and the path to tools.jar to be set below.
+    Note: It needs to be set when process_name_regex parameter is set
+    e.g. .*process_name.*
+  value:
+    type: string
+
+- name: tools_jar_path
+  description: |
+    The tool.jar path to be used with the `process_name_regex` parameter,
+    for example: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+  value:
+    type: string
+
+- name: name
+  description: Set the instance name to be used as the `instance` tag.
+  value:
+    type: string
+
+- name: java_bin_path
+  description: "`java_bin_path` should be set if the Agent cannot find your java executable."
+  value:
+    type: string
+
+- name: java_options
+  description: 'A list of Java JVM options, for example: "-Xmx200m -Xms50m".'
+  value:
+    type: string
+
+- name: trust_store_path
+  description: |
+    The path to your trusted store.
+    `trust_store_path` should be set if SSL is enabled.
+  value:
+    type: string
+
+- name: trust_store_password
+  description: |
+    The password for your TrustStore.jks file.
+    `trust_store_password` should be set if SSL is enabled.
+  value:
+    type: string
+
+- name: key_store_path
+  description: |
+    The path to your key store.
+    `key_store_path` should be set if client authentication is enabled on the target JVM.
+  value:
+    type: string
+
+- name: key_store_password
+  description: |
+    The password to your key store.
+    `key_store_password` should be set if client authentication is enabled on the target JVM.
+  value:
+    type: string
+
+- name: rmi_registry_ssl
+  description: Whether or not the Agent should connect to the RMI registry using SSL.
+  value:
+    example: false
+    type: boolean
+
+- template: instances/default

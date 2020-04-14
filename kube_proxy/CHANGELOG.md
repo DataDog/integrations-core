@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_proxy
 
+## 3.3.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 3.3.0 / 2020-01-13
 
 * [Added] Make OpenMetrics use the RequestsWrapper. See [#5414](https://github.com/DataDog/integrations-core/pull/5414).

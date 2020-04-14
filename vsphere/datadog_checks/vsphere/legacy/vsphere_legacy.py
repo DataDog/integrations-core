@@ -18,8 +18,7 @@ from pyVmomi import vmodl  # pylint: disable=E0611
 from six import itervalues
 from six.moves import range
 
-from datadog_checks.base import ensure_unicode, to_string
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base import AgentCheck, ensure_unicode, to_string
 from datadog_checks.base.checks.libs.thread_pool import SENTINEL, Pool
 from datadog_checks.base.checks.libs.timer import Timer
 from datadog_checks.base.checks.libs.vmware.all_metrics import ALL_METRICS
@@ -977,6 +976,11 @@ class VSphereLegacyCheck(AgentCheck):
             self.gauge('vsphere.vm.count', vm_count, tags=tags)
 
     def check(self, instance):
+        self.warning(
+            "DEPRECATION NOTICE: You are using a deprecated version of the vSphere integration. "
+            "To use the newer version, please update your configuration file based on the provided example. "
+            "Look for the `use_legacy_check_version` configuration option."
+        )
         try:
             self.exception_printed = 0
 
@@ -1006,6 +1010,8 @@ class VSphereLegacyCheck(AgentCheck):
 
             if self.exception_printed > 0:
                 self.log.error("One thread in the pool crashed, check the logs")
-        except Exception:
-            self.terminate_pool()
+        except Exception as e:
+            self.log.error("An exception occured while collecting vSphere metrics: %s", e)
+            if self.pool:
+                self.terminate_pool()
             raise

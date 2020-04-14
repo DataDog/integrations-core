@@ -6,6 +6,7 @@ from __future__ import division
 import os
 import re
 from decimal import ROUND_HALF_UP, Decimal
+from typing import TYPE_CHECKING, Text, Union
 
 from six import PY3, iteritems, text_type
 from six.moves.urllib.parse import urlparse
@@ -14,18 +15,27 @@ from .constants import MILLISECOND
 
 
 def ensure_bytes(s):
+    # type: (Union[Text, bytes]) -> bytes
     if isinstance(s, text_type):
         s = s.encode('utf-8')
     return s
 
 
 def ensure_unicode(s):
+    # type: (Union[Text, bytes]) -> Text
     if isinstance(s, bytes):
         s = s.decode('utf-8')
     return s
 
 
-to_string = ensure_unicode if PY3 else ensure_bytes
+# `to_native_string` added in `datadog_checks_base` version 11.2.0
+if TYPE_CHECKING:
+    to_native_string = str
+else:
+    to_native_string = ensure_unicode if PY3 else ensure_bytes
+
+# TODO: `to_string` will be deprecated with Agent 6.21/7.21
+to_string = to_native_string
 
 
 def compute_percent(part, total):

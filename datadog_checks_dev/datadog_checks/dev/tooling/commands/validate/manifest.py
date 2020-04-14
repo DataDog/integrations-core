@@ -10,7 +10,7 @@ import click
 
 from ....utils import file_exists, read_file, write_file
 from ...constants import get_root
-from ...utils import parse_version_parts
+from ...utils import get_metadata_file, parse_version_parts, read_metadata_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 
 REQUIRED_ATTRIBUTES = {
@@ -44,9 +44,25 @@ OPTIONAL_ATTRIBUTES = {
     'process_signatures',
 }
 
+METRIC_TO_CHECK_WHITELIST = {
+    'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
+    'riakcs.bucket_list_pool.workers',  # RiakCS 2.1 metric, but metadata.csv lists RiakCS 2.0 metrics only.
+}
+
 ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
 
 INTEGRATION_ID_REGEX = r'^[a-z][a-z0-9-]{0,254}(?<!-)$'
+
+
+def is_metric_in_metadata_file(metric, check):
+    """
+    Return True if `metric` is listed in the check's `metadata.csv` file, False otherwise.
+    """
+    metadata_file = get_metadata_file(check)
+    for _, row in read_metadata_rows(metadata_file):
+        if row['metric_name'] == metric:
+            return True
+    return False
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `manifest.json` files')
@@ -253,6 +269,15 @@ def manifest(ctx, fix, include_extras):
             if len(short_description) > 80:
                 file_failures += 1
                 display_queue.append((echo_failure, '  should contain 80 characters maximum: short_description'))
+
+            # metric_to_check
+            metric_to_check = decoded.get('metric_to_check')
+            if metric_to_check:
+                metrics_to_check = metric_to_check if isinstance(metric_to_check, list) else [metric_to_check]
+                for metric in metrics_to_check:
+                    if not is_metric_in_metadata_file(metric, check_name) and metric not in METRIC_TO_CHECK_WHITELIST:
+                        file_failures += 1
+                        display_queue.append((echo_failure, f'  metric_to_check not in metadata.csv: {metric!r}'))
 
             # support
             correct_support = 'contrib' if is_extras else 'core'

@@ -1,5 +1,9 @@
 # CHANGELOG - cisco_aci
 
+## 1.8.4 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.8.3 / 2020-02-22
 
 * [Fixed] Update request wrapper with password and A6 signature. See [#5684](https://github.com/DataDog/integrations-core/pull/5684).

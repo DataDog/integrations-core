@@ -14,6 +14,8 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 To use the Oracle integration, either install the Oracle Instant Client libraries, or download the Oracle JDBC Driver. Due to licensing restrictions, these libraries are not included in the Datadog Agent, but can be downloaded directly from Oracle.
 
+**Note**: JPype, one of the libraries used by the Agent, depends specifically on the [Microsoft Visual C++ Runtime 2015][13]. Make sure this runtime is installed on your system.
+
 ##### JDBC Driver
 
 - [Download the JDBC Driver][2] jar file.
@@ -45,44 +47,6 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
    unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
    unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
    ```
-
-3. Update your `LD_LIBRARY_PATH` to include the location of the Instant Client libraries when starting/restarting the agent:
-
-   ```shell
-   export LD_LIBRARY_PATH=/opt/oracle/instantclient/lib:$LD_LIBRARY_PATH
-   ```
-
-**Note:** Agent 6 uses Upstart or systemd to orchestrate the `datadog-agent` service. Environment variables may need to be added to the service configuration files at the default locations of `/etc/init/datadog-agent.conf` (Upstart) or `/lib/systemd/system/datadog-agent.service` (systemd). See documentation on [Upstart][5] or [systemd][6] for more information on how to configure these settings.
-
-The following is an example of adding `LD_LIBRARY_PATH` to the Datadog Agent service configuration files (`/etc/init/datadog-agent.conf`) on a system using Upstart.
-
-```conf
-description "Datadog Agent"
-
-start on started networking
-stop on runlevel [!2345]
-
-respawn
-respawn limit 10 5
-normal exit 0
-
-# Logging to console from the Agent is disabled since the Agent already logs using file or
-# syslog depending on its configuration. We make Upstart log what the process still outputs in order
-# to log panics/crashes to /var/log/upstart/datadog-agent.log
-console log
-env DD_LOG_TO_CONSOLE=false
-env LD_LIBRARY_PATH=/usr/lib/oracle/11.2/client64/lib/
-
-setuid dd-agent
-
-script
-  exec /opt/datadog-agent/bin/agent/agent start -p /opt/datadog-agent/run/agent.pid
-end script
-
-post-stop script
-  rm -f /opt/datadog-agent/run/agent.pid
-end script
-```
 
 #### Datadog User creation
 
@@ -271,3 +235,4 @@ Need help? Contact [Datadog support][12].
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
 [12]: https://docs.datadoghq.com/help
+[13]: https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads

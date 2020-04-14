@@ -1,0 +1,24 @@
+name: Hive
+files:
+- name: hive.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/jmx
+  - template: instances
+    options:
+    - template: instances/jmx
+      overrides:
+        host.description: HiveServer2 or Hive Metastore JMX host to connect to.
+        port.value.example: 8809
+        port.description: HiveServer2 or Hive Metastore JMX port to connect to.
+  - template: logs
+    example:
+    - type: file
+      path: /tmp/<USER>/hive.log
+      source: hive
+      service: <SERVICE_NAME>
+      log_processing_rules:
+      - type: multi_line
+        name: new_log_start_with_date
+        pattern: \d{4}\-\d{2}\-\d{2}

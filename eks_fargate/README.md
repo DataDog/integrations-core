@@ -190,7 +190,10 @@ spec:
             cpu: "200m"
 ```
 
-**Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
+**Notes**:
+
+- Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
+- Container metrics are not available in Fargate because the `cgroups` volume from the host can't be mounted into the Agent.
 
 ### DogStatsD
 
@@ -333,8 +336,8 @@ eks_fargate does not include any events.
 
 Need help? Contact [Datadog support][20].
 
-[1]: http://docs.datadoghq.com//integrations/amazon_eks/
-[2]: http://docs.datadoghq.com//integrations/system
+[1]: http://docs.datadoghq.com/integrations/amazon_eks/
+[2]: http://docs.datadoghq.com/integrations/system
 [3]: http://docs.datadoghq.com//agent/autodiscovery
 [4]: https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html
 [5]: http://docs.datadoghq.com/integrations/amazon_eks/#setup

@@ -9,10 +9,10 @@ from copy import deepcopy
 
 from six import iteritems
 
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.config import is_affirmative
-from datadog_checks.errors import CheckException
-from datadog_checks.utils.common import to_string
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.common import to_string
 
 try:
     # this module is only available in agent 6
@@ -177,6 +177,7 @@ class KubernetesState(OpenMetricsBaseCheck):
 
         extra_labels = ksm_instance.get('label_joins', {})
         hostname_override = is_affirmative(ksm_instance.get('hostname_override', True))
+        join_kube_labels = is_affirmative(ksm_instance.get('join_kube_labels', False))
 
         ksm_instance.update(
             {
@@ -359,6 +360,16 @@ class KubernetesState(OpenMetricsBaseCheck):
             ksm_instance['ignore_metrics'].extend(experimental_metrics_mapping.keys())
 
         ksm_instance['prometheus_url'] = endpoint
+
+        if join_kube_labels:
+            ksm_instance['label_joins'].update(
+                {
+                    'kube_pod_labels': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['*']},
+                    'kube_deployment_labels': {'labels_to_match': ['deployment', 'namespace'], 'labels_to_get': ['*']},
+                    'kube_daemonset_labels': {'labels_to_match': ['daemonset', 'namespace'], 'labels_to_get': ['*']},
+                }
+            )
+
         ksm_instance['label_joins'].update(extra_labels)
         if hostname_override:
             ksm_instance['label_to_hostname'] = 'node'

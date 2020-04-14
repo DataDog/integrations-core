@@ -6,9 +6,7 @@ from os.path import abspath, exists, join, relpath
 from re import compile as re_compile
 from time import time
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
-from datadog_checks.errors import ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 from .traverse import walk
 
@@ -34,6 +32,7 @@ class DirectoryCheck(AgentCheck):
     """
 
     SOURCE_TYPE_NAME = 'system'
+    MAX_FILEGAUGE_COUNT = 20
 
     def check(self, instance):
         try:
@@ -98,6 +97,7 @@ class DirectoryCheck(AgentCheck):
         dirtags.extend(tags)
         directory_bytes = 0
         directory_files = 0
+        max_filegauge_balance = self.MAX_FILEGAUGE_COUNT
 
         # If we do not want to recursively search sub-directories only get the root.
         walker = walk(directory) if recursive else (next(walk(directory)),)
@@ -106,7 +106,8 @@ class DirectoryCheck(AgentCheck):
         get_length = len
 
         for root, dirs, files in walker:
-            directory_files += get_length(files)
+            matched_files = []
+            adjust_max_filegauge = False
 
             if exclude_dirs_pattern is not None:
                 if dirs_patterns_full:
@@ -114,17 +115,22 @@ class DirectoryCheck(AgentCheck):
                 else:
                     dirs[:] = [d for d in dirs if not exclude_dirs_pattern.search(d.name)]
 
-            for file_entry in files:
-                if pattern:
-                    # Check if the path of the file relative to the directory
-                    # matches the pattern. Also check if the absolute path of the
-                    # filename matches the pattern, for compatibility with previous
-                    # agent versions.
+            if pattern is not None:
+                # Check if the path of the file relative to the directory
+                # matches the pattern. Also check if the absolute path of the
+                # filename matches the pattern, for compatibility with previous
+                # agent versions.
+                for file_entry in files:
                     filename = join(root, file_entry.name)
-                    if not (fnmatch(filename, pattern) or fnmatch(relpath(filename, directory), pattern)):
-                        directory_files -= 1
-                        continue
+                    if fnmatch(filename, pattern) or fnmatch(relpath(filename, directory), pattern):
+                        matched_files.append(file_entry)
+            else:
+                matched_files = list(files)
 
+            matched_files_length = get_length(matched_files)
+            directory_files += matched_files_length
+
+            for file_entry in matched_files:
                 # We're just looking to count the files.
                 if countonly:
                     continue
@@ -137,7 +143,7 @@ class DirectoryCheck(AgentCheck):
                 else:
                     # file specific metrics
                     directory_bytes += file_stat.st_size
-                    if filegauges and directory_files <= 20:
+                    if filegauges and matched_files_length <= max_filegauge_balance:
                         filetags = ['{}:{}'.format(filetagname, join(root, file_entry.name))]
                         filetags.extend(dirtags)
                         self.gauge('system.disk.directory.file.bytes', file_stat.st_size, tags=filetags)
@@ -147,6 +153,7 @@ class DirectoryCheck(AgentCheck):
                         self.gauge(
                             'system.disk.directory.file.created_sec_ago', time() - file_stat.st_ctime, tags=filetags
                         )
+                        adjust_max_filegauge = True
                     else:
                         self.histogram('system.disk.directory.file.bytes', file_stat.st_size, tags=dirtags)
                         self.histogram(
@@ -155,6 +162,8 @@ class DirectoryCheck(AgentCheck):
                         self.histogram(
                             'system.disk.directory.file.created_sec_ago', time() - file_stat.st_ctime, tags=dirtags
                         )
+            if adjust_max_filegauge:
+                max_filegauge_balance -= matched_files_length
 
         # number of files
         self.gauge('system.disk.directory.files', directory_files, tags=dirtags)

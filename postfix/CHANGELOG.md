@@ -1,5 +1,10 @@
 # CHANGELOG - postfix
 
+## 1.6.2 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 1.6.1 / 2020-02-22
 
 * [Fixed] Fix possible IndexError. See [#5494](https://github.com/DataDog/integrations-core/pull/5494).

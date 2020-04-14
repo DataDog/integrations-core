@@ -15,12 +15,11 @@ from kubeutil import get_connection_info
 from six import iteritems
 from urllib3.exceptions import InsecureRequestWarning
 
+from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
+from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.date import UTC, parse_rfc3339
 from datadog_checks.base.utils.tagging import tagger
 from datadog_checks.base.utils.warnings_util import disable_warnings_ctx
-from datadog_checks.checks import AgentCheck
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.errors import CheckException
 
 from .cadvisor import CadvisorScraper
 from .common import CADVISOR_DEFAULT_PORT, KubeletCredentials, PodListUtils, replace_container_rt_prefix, urljoin
@@ -412,10 +411,8 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
         """
         Retrieve node spec from kubelet.
         """
-        node_spec = self.perform_kubelet_query(self.node_spec_url).json()
-        # TODO: report allocatable for cpu, mem, and pod capacity
-        # if we can get it locally or thru the DCA instead of the /nodes endpoint directly
-        return node_spec
+        node_resp = self.perform_kubelet_query(self.node_spec_url)
+        return node_resp
 
     def _retrieve_stats(self):
         """
@@ -430,7 +427,17 @@ class KubeletCheck(CadvisorPrometheusScraperMixin, OpenMetricsBaseCheck, Cadviso
             return {}
 
     def _report_node_metrics(self, instance_tags):
-        node_spec = self._retrieve_node_spec()
+        try:
+            node_resp = self._retrieve_node_spec()
+            node_resp.raise_for_status()
+        except requests.HTTPError as e:
+            if node_resp.status_code == 404:
+                # ignore HTTPError, for supporting k8s >= 1.18 in a degrated mode
+                # in 1.18 the /spec can be reactivated from the kubelet config
+                # in 1.19 the /spec will removed.
+                return
+            raise e
+        node_spec = node_resp.json()
         num_cores = node_spec.get('num_cores', 0)
         memory_capacity = node_spec.get('memory_capacity', 0)
 
