@@ -22,7 +22,7 @@ instances:
     password: <PASSWORD>
 
     ## @param use_legacy_check_version - boolean - required
-    ## For backward compatibility reasons, it is possible to use a deprecated version of the vsphere integration by
+    ## For backward compatibility reasons, it is possible to use a deprecated version of the vSphere integration by
     ## setting this field to "true".
     #
     use_legacy_check_version: false
@@ -101,7 +101,8 @@ instances:
     ##    - name (default) to filter on the resource name (defined by vCenter)
     ##    - inventory_path to filter on the full inventory path
     ##      (ex: \/<Datacenter_name>\/vm\/<FOLDER_NAME>\/.* for all vms in the folder <FOLDER_NAME>)
-    ##    - tag to filter only the resources with a given tag.
+    ##    - tag to filter only the resources with a given tag. Datadog has stricter rules (i.e no space), but the filter
+    ##          is applied on the value coming from vCenter directly.
     ##    - hostname to filter on the ESXi Host name (only valid for if 'resource' equals 'vm')
     ##    - guest_hostname to filter on the VM hostname (only valid for if 'resource' equals 'vm' and
     ##      if VMware tools are installed)
@@ -163,7 +164,7 @@ instances:
     #     - <CLUSTER_REGEX>            # Only possible with "collection_type: historical"
 
     ## @param collect_per_instance_filters - object - optional - default: none
-    ## Some vsphere metrics can be tagged with instance values.
+    ## Some vSphere metrics can be tagged with instance values.
     ## For each resource type (vm, host, datastore, cluster) to collect,
     ## you can choose which metrics you want to collect the instance value as tags using a list of regex.
     ## See https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/metrics.py
@@ -270,11 +271,6 @@ instances:
     ## Consider increasing this value if your environment is large, as caching can take some time to complete.
     #
     # refresh_infrastructure_cache_interval: 300
-
-    ## @param refresh_tags_cache_interval - integer - optional - default: 300
-    ## Number of seconds between each refresh of the tags cache
-    #
-    # refresh_tags_cache_interval: 300
 
     ## @param refresh_metrics_metadata_cache_interval - integer - optional - default: 1800
     ## Number of seconds between each refresh of the metrics metadata cache

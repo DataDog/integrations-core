@@ -128,9 +128,9 @@ datadog-twistlock==1.6.0
 datadog-varnish==1.6.1
 datadog-vault==2.3.1
 datadog-vertica==1.4.1
-datadog-vsphere==5.1.0
+datadog-vsphere==5.1.2
 datadog-win32-event-log==2.3.3; sys_platform == 'win32'
 datadog-windows-service==2.5.2; sys_platform == 'win32'
 datadog-wmi-check==1.7.3; sys_platform == 'win32'
 datadog-yarn==1.12.1
-datadog-zk==2.4.1; sys_platform != 'win32'
+datadog-zk==2.4.2; sys_platform != 'win32'

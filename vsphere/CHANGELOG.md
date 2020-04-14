@@ -1,5 +1,14 @@
 # CHANGELOG - vsphere
 
+## 5.1.2 / 2020-04-14
+
+* [Fixed] Renew REST API session on failure. See [#6330](https://github.com/DataDog/integrations-core/pull/6330).
+* [Fixed] Fix vsphere capitalization. See [#6278](https://github.com/DataDog/integrations-core/pull/6278).
+
+## 5.1.1 / 2020-04-10
+
+* [Fixed] Fix tags race conditions with filtering. See [#6297](https://github.com/DataDog/integrations-core/pull/6297).
+
 ## 5.1.0 / 2020-04-04
 
 * [Added] resource filters: allow blacklist and tag filtering. See [#6194](https://github.com/DataDog/integrations-core/pull/6194).

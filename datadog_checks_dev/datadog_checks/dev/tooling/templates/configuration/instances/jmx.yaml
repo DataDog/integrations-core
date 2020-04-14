@@ -90,3 +90,5 @@
   value:
     example: false
     type: boolean
+
+- template: instances/default
