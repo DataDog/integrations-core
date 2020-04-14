@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from six import iteritems
 
@@ -44,24 +44,25 @@ class WinWMICheck(AgentCheck):
     """
 
     def __init__(self, *args, **kwargs):  # To support optional agentConfig
+        # type: (List[Any], Dict[Any]) -> None
         super(WinWMICheck, self).__init__(*args, **kwargs)
 
         # Connection information
         self.host = self.instance.get('host', "localhost")  # type: str
         self.namespace = self.instance.get('namespace', "root\\cimv2")  # type: str
-        self.provider = self.instance.get('provider')  # type: int
+        self.provider = self.instance.get('provider')  # type: Optional[int]
         self.username = self.instance.get('username', "")  # type: str
         self.password = self.instance.get('password', "")  # type: str
 
         # WMI instance
         self.wmi_class = self.instance.get('class')  # type: str
-        self.metrics = self.instance.get('metrics')  # type: List[str]
+        self.metrics_to_capture = self.instance.get('metrics')  # type: List[str]
         self.filters = self.instance.get('filters')
         self.tag_by = self.instance.get('tag_by', "")  # type: str
         self.tag_queries = self.instance.get('tag_queries', [])  # type: List[List[str]]
 
-        self.wmi_sampler = None  # type: WMISampler
-        self._wmi_props = None  # type: Tuple[Dict, List[str]]
+        self.wmi_sampler = None  # type: Optional[WMISampler]
+        self._wmi_props = None  # type: Optional[Tuple[Dict, List[str]]]
 
     def _format_tag_query(self, sampler, wmi_obj, tag_query):
         # type: (WMISampler, Any, List[str]) -> Tuple[str, str, List[Dict]]
@@ -147,7 +148,7 @@ class WinWMICheck(AgentCheck):
         return tag
 
     def extract_metrics(self, constant_tags):
-        # type (List[str]) -> List[WMIMetric]
+        # type: (List[str]) -> List[WMIMetric]
         return self._extract_metrics(self.wmi_sampler, self.tag_by, self.tag_queries, constant_tags)
 
     def _extract_metrics(self, wmi_sampler, tag_by, tag_queries, constant_tags):
@@ -287,7 +288,7 @@ class WinWMICheck(AgentCheck):
         return self.wmi_sampler
 
     def get_wmi_properties(self):
-        return self._get_wmi_properties(None, self.metrics, self.tag_queries)
+        return self._get_wmi_properties(None, self.metrics_to_capture, self.tag_queries)
 
     def _get_wmi_properties(self, instance_key, metrics, tag_queries):
         """
