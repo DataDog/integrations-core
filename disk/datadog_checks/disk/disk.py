@@ -105,6 +105,7 @@ class Disk(AgentCheck):
                 device_name = device_name.strip('\\').lower()
 
             tags.append('device:{}'.format(device_name))
+            tags.append('device_name:{}'.format(os.path.basename(part.device)))
             for metric_name, metric_value in iteritems(self._collect_part_metrics(part, disk_usage)):
                 self.gauge(metric_name, metric_value, tags=tags)
 
@@ -250,6 +251,7 @@ class Disk(AgentCheck):
                 write_time_pct = disk.write_time * 100 / 1000
                 metric_tags = [] if self._custom_tags is None else self._custom_tags[:]
                 metric_tags.append('device:{}'.format(disk_name))
+                metric_tags.append('device_name:{}'.format(os.path.basename(disk_name)))
                 if self.devices_label.get(disk_name):
                     metric_tags.append(self.devices_label.get(disk_name))
                 self.rate(self.METRIC_DISK.format('read_time_pct'), read_time_pct, tags=metric_tags)

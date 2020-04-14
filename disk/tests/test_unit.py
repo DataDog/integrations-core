@@ -11,7 +11,7 @@ from six import iteritems
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.disk import Disk
 
-from .common import DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
+from .common import DEFAULT_DEVICE_BASE_NAME, DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
 from .mocks import MockDiskMetrics, mock_blkid_output
 
 
@@ -56,6 +56,7 @@ def test_default(aggregator, gauge_metrics, rate_metrics):
                 DEFAULT_FILE_SYSTEM,
                 'filesystem:{}'.format(DEFAULT_FILE_SYSTEM),
                 'device:{}'.format(DEFAULT_DEVICE_NAME),
+                'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME),
             ]
         else:
             tags = []
@@ -64,7 +65,11 @@ def test_default(aggregator, gauge_metrics, rate_metrics):
             aggregator.assert_metric(name, value=value, tags=tags)
 
         for name, value in iteritems(rate_metrics):
-            aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME)])
+            aggregator.assert_metric(
+                name,
+                value=value,
+                tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME)],
+            )
 
     aggregator.assert_all_metrics_covered()
 
@@ -90,10 +95,18 @@ def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics
     c.check(instance_basic_mount)
 
     for name, value in iteritems(gauge_metrics):
-        aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_MOUNT_POINT)])
+        aggregator.assert_metric(
+            name,
+            value=value,
+            tags=['device:{}'.format(DEFAULT_MOUNT_POINT), 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME)],
+        )
 
     for name, value in iteritems(rate_metrics):
-        aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME)])
+        aggregator.assert_metric(
+            name,
+            value=value,
+            tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME)],
+        )
 
     aggregator.assert_all_metrics_covered()
 
@@ -115,14 +128,28 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
         c.check(instance)
 
     # Assert metrics
-    tags = ['type:dev', 'tag:two', 'device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1', 'label:mylab']
+    tags = [
+        'type:dev',
+        'tag:two',
+        'device:{}'.format(DEFAULT_DEVICE_NAME),
+        'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME),
+        'optional:tags1',
+        'label:mylab',
+    ]
 
     for name, value in iteritems(gauge_metrics):
         aggregator.assert_metric(name, value=value, tags=tags)
 
     for name, value in iteritems(rate_metrics):
         aggregator.assert_metric(
-            name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1', 'label:mylab']
+            name,
+            value=value,
+            tags=[
+                'device:{}'.format(DEFAULT_DEVICE_NAME),
+                'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME),
+                'optional:tags1',
+                'label:mylab',
+            ],
         )
 
     aggregator.assert_all_metrics_covered()
@@ -155,6 +182,7 @@ def test_min_disk_size(aggregator, gauge_metrics, rate_metrics):
 
     for name in rate_metrics:
         aggregator.assert_metric_has_tag(name, 'device:{}'.format(DEFAULT_DEVICE_NAME))
+        aggregator.assert_metric_has_tag(name, 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME))
 
     aggregator.assert_all_metrics_covered()
 
