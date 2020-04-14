@@ -14,7 +14,7 @@ nginx.cache.bypass.responses,gauge,,response,,The total number of responses not 
 nginx.cache.bypass.responses_count,count,,response,,The total number of responses not taken from the cache (shown as count),0,nginx,cache bypass responses
 nginx.cache.bypass.responses_written,gauge,,response,,The total number of responses written to the cache,0,nginx,cache bypass responses_written
 nginx.cache.bypass.responses_written_count,count,,response,,The total number of responses written to the cache (shown as count),0,nginx,cache bypass responses_written
-nginx.cache.cold,gauge,,response,,A boolean value indicating whether the “cache loader” process is still loading data from disk into the cache,0,nginx,cache cold
+nginx.cache.cold,gauge,,response,,A boolean value indicating whether the "cache loader" process is still loading data from disk into the cache,0,nginx,cache cold
 nginx.cache.expired.bytes,gauge,,byte,,The total number of bytes read from the proxied server,0,nginx,cache expired bytes
 nginx.cache.expired.bytes_count,count,,byte,,The total number of bytes read from the proxied server (shown as count),0,nginx,cache expired bytes
 nginx.cache.expired.bytes_written,gauge,,byte,,The total number of bytes written to the cache,0,nginx,cache expired bytes_written
@@ -121,8 +121,8 @@ nginx.stream.upstream.peers.active,gauge,,connection,,The current number of conn
 nginx.stream.upstream.peers.backup,gauge,,,,A boolean value indicating whether the server is a backup server.,0,nginx,stream upstr peers backup
 nginx.stream.upstream.peers.connections,gauge,,connection,,The total number of client connections forwarded to this server.,0,nginx,stream upstr peers conn
 nginx.stream.upstream.peers.connections_count,count,,connection,,The total number of client connections forwarded to this server (shown as count).,0,nginx,stream upstr peers conn
-nginx.stream.upstream.peers.downstart,gauge,,millisecond,,The time (time since Epoch) when the server became “unavail” or “checking” or “unhealthy”,0,nginx,stream upstr peers downstart
-nginx.stream.upstream.peers.downtime,gauge,,millisecond,,Total time the server was in the “unavail” or “checking” or “unhealthy” states.,-1,nginx,stream upstr peers downtime
+nginx.stream.upstream.peers.downstart,gauge,,millisecond,,The time (time since Epoch) when the server became "unavail" or "checking" or "unhealthy",0,nginx,stream upstr peers downstart
+nginx.stream.upstream.peers.downtime,gauge,,millisecond,,Total time the server was in the "unavail" or "checking" or "unhealthy" states.,-1,nginx,stream upstr peers downtime
 nginx.stream.upstream.peers.fails,gauge,,error,,The total number of unsuccessful attempts to communicate with the server.,-1,nginx,stream upstr peers fails
 nginx.stream.upstream.peers.fails_count,count,,error,,The total number of unsuccessful attempts to communicate with the server (shown as count).,-1,nginx,stream upstr peers fails
 nginx.stream.upstream.peers.health_checks.checks,gauge,,request,,The total number of health check requests made.,0,nginx,stream upstr peers health checks
@@ -130,24 +130,24 @@ nginx.stream.upstream.peers.health_checks.checks_count,count,,request,,The total
 nginx.stream.upstream.peers.health_checks.fails,gauge,,error,,The number of failed health checks.,-1,nginx,stream upstr peers health fails
 nginx.stream.upstream.peers.health_checks.fails_count,count,,error,,The number of failed health checks (shown as count).,-1,nginx,stream upstr peers health fails
 nginx.stream.upstream.peers.health_checks.last_passed,gauge,,,,Boolean indicating if the last health check request was successful and passed tests.,0,nginx,stream upstr peers health last
-nginx.stream.upstream.peers.health_checks.unhealthy,gauge,,,,How many times the server became unhealthy (state “unhealthy”).,-1,nginx,stream upstr peers health last
-nginx.stream.upstream.peers.health_checks.unhealthy_count,count,,,,How many times the server became unhealthy (state “unhealthy”) (shown as count).,-1,nginx,stream upstr peers health last
+nginx.stream.upstream.peers.health_checks.unhealthy,gauge,,,,How many times the server became unhealthy (state "unhealthy").,-1,nginx,stream upstr peers health last
+nginx.stream.upstream.peers.health_checks.unhealthy_count,count,,,,How many times the server became unhealthy (state "unhealthy") (shown as count).,-1,nginx,stream upstr peers health last
 nginx.stream.upstream.peers.id,gauge,,,,The ID of the server.,0,nginx,stream upstr peers id
 nginx.stream.upstream.peers.received,gauge,,byte,,The total number of bytes received from this server.,0,nginx,stream upstr peers rcvd
 nginx.stream.upstream.peers.received_count,count,,byte,,The total number of bytes received from this server (shown as count).,0,nginx,stream upstr peers rcvd
 nginx.stream.upstream.peers.selected,gauge,,millisecond,,The time (time since Epoch) when the server was last selected to process a connection.,0,nginx,stream upstr peers selected
 nginx.stream.upstream.peers.sent,gauge,,byte,,The total number of bytes sent to this server.,0,nginx,stream upstr peers sent
 nginx.stream.upstream.peers.sent_count,count,,byte,,The total number of bytes sent to this server (shown as count).,0,nginx,stream upstr peers sent
-nginx.stream.upstream.peers.unavail,gauge,,,,How many times the server became unavailable for client connections (state “unavail”).,0,nginx,stream upstr peers unavail
-nginx.stream.upstream.peers.unavail_count,count,,,,How many times the server became unavailable for client connections (state “unavail”) (shown as count).,0,nginx,stream upstr peers unavail
+nginx.stream.upstream.peers.unavail,gauge,,,,How many times the server became unavailable for client connections (state "unavail").,0,nginx,stream upstr peers unavail
+nginx.stream.upstream.peers.unavail_count,count,,,,How many times the server became unavailable for client connections (state "unavail") (shown as count).,0,nginx,stream upstr peers unavail
 nginx.stream.upstream.peers.weight,gauge,,,,Weight of the server.,0,nginx,stream upstr peers weight
 nginx.stream.upstream.zombies,gauge,,host,,The current number of servers removed from the group but still processing active client connections.,0,nginx,stream upstr zombies
 nginx.timestamp,gauge,,millisecond,,Current time since Epoch.,0,nginx,timestamp
 nginx.upstream.keepalive,gauge,,connection,,The current number of idle keepalive connections.,0,nginx,upstr keepalive
 nginx.upstream.peers.active,gauge,,connection,,The current number of active connections.,0,nginx,upstr peers active
 nginx.upstream.peers.backup,gauge,,,,A boolean value indicating whether the server is a backup server.,0,nginx,upstr peers backup
-nginx.upstream.peers.downstart,gauge,,millisecond,,The time (since Epoch) when the server became “unavail” or “unhealthy”.,0,nginx,upstr peers downstart
-nginx.upstream.peers.downtime,gauge,,millisecond,,Total time the server was in the “unavail” and “unhealthy” states.,0,nginx,upstr peers downtime
+nginx.upstream.peers.downstart,gauge,,millisecond,,The time (since Epoch) when the server became "unavail" or "unhealthy".,0,nginx,upstr peers downstart
+nginx.upstream.peers.downtime,gauge,,millisecond,,Total time the server was in the "unavail" and "unhealthy" states.,0,nginx,upstr peers downtime
 nginx.upstream.peers.fails,gauge,,,,The total number of unsuccessful attempts to communicate with the server.,-1,nginx,upstr peers fails
 nginx.upstream.peers.fails_count,count,,,,The total number of unsuccessful attempts to communicate with the server (shown as count).,-1,nginx,upstr peers fails
 nginx.upstream.peers.health_checks.checks,gauge,,,,The total number of health check requests made.,0,nginx,upstr peers health chk
@@ -155,8 +155,8 @@ nginx.upstream.peers.health_checks.checks_count,count,,,,The total number of hea
 nginx.upstream.peers.health_checks.fails,gauge,,,,The number of failed health checks.,-1,nginx,upstr peers health chk fail
 nginx.upstream.peers.health_checks.fails_count,count,,,,The number of failed health checks (shown as count).,-1,nginx,upstr peers health chk fail
 nginx.upstream.peers.health_checks.last_passed,gauge,,,,Boolean indicating if the last health check request was successful and passed tests.,0,nginx,upstr peers health chk last passed
-nginx.upstream.peers.health_checks.unhealthy,gauge,,,,How many times the server became unhealthy (state “unhealthy”).,-1,nginx,upstr peers health chk unhealthy
-nginx.upstream.peers.health_checks.unhealthy_count,count,,,,How many times the server became unhealthy (state “unhealthy”) (shown as count).,-1,nginx,upstr peers health chk unhealthy
+nginx.upstream.peers.health_checks.unhealthy,gauge,,,,How many times the server became unhealthy (state "unhealthy").,-1,nginx,upstr peers health chk unhealthy
+nginx.upstream.peers.health_checks.unhealthy_count,count,,,,How many times the server became unhealthy (state "unhealthy") (shown as count).,-1,nginx,upstr peers health chk unhealthy
 nginx.upstream.peers.id,gauge,,,,The ID of the server.,0,nginx,upstr peers id
 nginx.upstream.peers.received,gauge,,byte,,The total amount of data received from this server.,0,nginx,upstr peers rec
 nginx.upstream.peers.received_count,count,,byte,,The total amount of data received from this server (shown as count).,0,nginx,upstr peers rec
@@ -177,7 +177,7 @@ nginx.upstream.peers.responses.total_count,count,,response,,The total number of 
 nginx.upstream.peers.selected,gauge,,millisecond,,The time (since Epoch) when the server was last selected to process a request (1.7.5).,0,nginx,upstr peers sel
 nginx.upstream.peers.sent,gauge,,byte,,The total amount of data sent to this server.,0,nginx,upstr peers sent
 nginx.upstream.peers.sent_count,count,,byte,,The total amount of data sent to this server (shown as count).,0,nginx,upstr peers sent
-nginx.upstream.peers.unavail,gauge,,,,How many times the server became unavailable for client requests (state “unavail”) due to the number of unsuccessful attempts reaching the max_fails threshold.,0,nginx,upstr peers unavail
-nginx.upstream.peers.unavail_count,count,,,,How many times the server became unavailable for client requests (state “unavail”) due to the number of unsuccessful attempts reaching the max_fails threshold (shown as count).,0,nginx,upstr peers unavail
+nginx.upstream.peers.unavail,gauge,,,,How many times the server became unavailable for client requests (state "unavail") due to the number of unsuccessful attempts reaching the max_fails threshold.,0,nginx,upstr peers unavail
+nginx.upstream.peers.unavail_count,count,,,,How many times the server became unavailable for client requests (state "unavail") due to the number of unsuccessful attempts reaching the max_fails threshold (shown as count).,0,nginx,upstr peers unavail
 nginx.upstream.peers.weight,gauge,,,,Weight of the server.,0,nginx,upstr peers weight
 nginx.version,gauge,,,,Version of nginx.,0,nginx,version

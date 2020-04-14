@@ -19,7 +19,7 @@ cassandra.currently_blocked_tasks,gauge,10,task,,The number of currently blocked
 cassandra.currently_blocked_tasks.count,gauge,10,task,,The number of currently blocked tasks for the thread pool.,-1,cassandra,blocked tasks
 cassandra.db.droppable_tombstone_ratio,gauge,10,fraction,,The estimate of the droppable tombstone ratio.,-1,cassandra,droppable data
 cassandra.dropped.one_minute_rate,gauge,10,thread,,The tasks dropped during execution for the thread pool.,-1,cassandra,dropped
-cassandra.exceptions.count,gauge,10,error,,The number of exceptions thrown from ‘Storage’ metrics.,-1,cassandra,exceptions
+cassandra.exceptions.count,gauge,10,error,,The number of exceptions thrown from 'Storage' metrics.,-1,cassandra,exceptions
 cassandra.key_cache_hit_rate,gauge,10,fraction,,The key cache hit rate.,1,cassandra,hit
 cassandra.latency.75th_percentile,gauge,10,microsecond,,The client request latency - p75.,-1,cassandra,request latency p75
 cassandra.latency.95th_percentile,gauge,10,microsecond,,The client request latency - p95.,-1,cassandra,request latency p95
@@ -54,7 +54,7 @@ cassandra.tombstone_scanned_histogram.95th_percentile,gauge,10,record,read,Numbe
 cassandra.total_blocked_tasks,gauge,10,task,,Total blocked tasks,0,cassandra,total blocked tasks
 cassandra.total_blocked_tasks.count,count,10,task,,Total count of blocked tasks,0,cassandra,total count blocked tasks
 cassandra.total_commit_log_size,gauge,10,byte,,The size used on disk by commit logs.,0,cassandra,commit logs size
-cassandra.total_disk_space_used.count,gauge,10,byte,,Total disk space used by SSTables including obsolete ones waiting to be GC’d.,0,cassandra,total sstable
+cassandra.total_disk_space_used.count,gauge,10,byte,,Total disk space used by SSTables including obsolete ones waiting to be GC'd.,0,cassandra,total sstable
 cassandra.view_lock_acquire_time.75th_percentile,gauge,10,microsecond,,The time taken acquiring a partition lock for materialized view updates - p75.,-1,cassandra,MV lock acquire time p75
 cassandra.view_lock_acquire_time.95th_percentile,gauge,10,microsecond,,The time taken acquiring a partition lock for materialized view updates - p95.,-1,cassandra,MV lock acquire time p95
 cassandra.view_lock_acquire_time.one_minute_rate,gauge,10,request,second,The number of requests to acquire a partition lock for materialized view updates.,0,cassandra,MV lock acquire count
