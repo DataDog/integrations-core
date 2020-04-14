@@ -58,13 +58,13 @@ class WinWMICheck(AgentCheck):
         self.metrics = self.instance.get('metrics')  # type: List[str]
         self.filters = self.instance.get('filters')
         self.tag_by = self.instance.get('tag_by', "")  # type: str
-        self.tag_queries = self.instance.get('tag_queries', [])  # type: List[str]
+        self.tag_queries = self.instance.get('tag_queries', [])  # type: List[List[str]]
 
         self.wmi_sampler = None  # type: WMISampler
         self._wmi_props = None  # type: Tuple[Dict, List[str]]
 
     def _format_tag_query(self, sampler, wmi_obj, tag_query):
-        # type: (WMISampler, Any, str) -> Tuple[str, str, List[Dict]]
+        # type: (WMISampler, Any, List[str]) -> Tuple[str, str, List[Dict]]
         """
         Format `tag_query` or raise on incorrect parameters.
         """
@@ -91,7 +91,7 @@ class WinWMICheck(AgentCheck):
         return target_class, target_property, [{link_target_class_property: link_source_property}]
 
     def _raise_on_invalid_tag_query_result(self, sampler, wmi_obj, tag_query):
-        # type: (WMISampler, Any, str) -> None
+        # type: (WMISampler, Any, List[str]) -> None
         target_property = sampler.property_names[0]
         target_class = sampler.class_name
 
@@ -117,7 +117,7 @@ class WinWMICheck(AgentCheck):
             raise TypeError
 
     def _get_tag_query_tag(self, sampler, wmi_obj, tag_query):
-        # type: (WMISampler, Any, str) -> str
+        # type: (WMISampler, Any, List[str]) -> str
         """
         Design a query based on the given WMIObject to extract a tag.
 
