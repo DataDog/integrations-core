@@ -55,3 +55,4 @@ files:
           overrides:
             prometheus_url.hidden: true
             namespace.hidden: true
+            metrics.required: false
