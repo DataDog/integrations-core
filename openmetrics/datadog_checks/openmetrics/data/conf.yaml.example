@@ -50,6 +50,20 @@ instances:
     #
   - prometheus_url: <PROMETHEUS_URL>
 
+    ## @param namespace - string - required
+    ## The namespace to be prepended to all metrics.
+    #
+    namespace: service
+
+    ## @param metrics - list of strings - required
+    ## List of metrics to be fetched from the prometheus endpoint, if there's a
+    ## value it'll be renamed. This list should contain at least one metric.
+    #
+    metrics:
+      - processor:cpu
+      - memory:mem
+      - io
+
     ## @param prometheus_metrics_prefix - string - optional
     ## <PREFIX> for exposed Prometheus metrics.
     #
