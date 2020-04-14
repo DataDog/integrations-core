@@ -11,9 +11,8 @@ Get metrics from OpenStack service in real time to:
 
 ## Setup
 
-{{< tabs >}} 
-
-{{% tab "OpenStack v13 and Above" %}}
+<!-- xxx tabs xxx -->  
+<!-- xxx tab "OpenStack v13 and Above" --> 
 ### Installation
 
 OpenStack versions v13+ are covered by the OpenStack Controller check. This check is included in the [Datadog Agent][2] package, so you do not need to install anything else on your server.
@@ -106,8 +105,8 @@ Need help? Contact [Datadog support][6].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/openstack_controller/metadata.csv
 [6]: https://docs.datadoghq.com/help
-{{% /tab %}}
-{{% tab "OpenStack v12 and Below" %}}
+<!-- xxz tab xxx -->
+<!-- xxx tab "OpenStack v12 and Below" xxx -->
 ### Installation
 
 To capture your OpenStack metrics, [install the Agent][2] on your hosts running hypervisors.
@@ -268,4 +267,5 @@ See also these other Datadog blog posts:
 [9]: https://www.datadoghq.com/blog/openstack-monitoring-nova
 [10]: https://www.datadoghq.com/blog/install-openstack-in-two-commands
 [11]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones
-{{%/tab %}} {{< /tabs >}}
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx --> 
