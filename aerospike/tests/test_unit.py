@@ -3,7 +3,7 @@ import copy
 import mock
 import pytest
 
-from datadog_checks import aerospike
+from datadog_checks.aerospike import AerospikeCheck
 
 from . import common
 
@@ -27,7 +27,7 @@ METRICS = [
 
 
 def test_datacenter_metrics(aggregator):
-    check = aerospike.AerospikeCheck('aerospike', {}, [common.INSTANCE])
+    check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
     original_get_info = check.get_info
 
     def mock_get_info(command, separator=";"):
@@ -55,7 +55,7 @@ def connection_uses_tls():
     tls_config = {'cafile': 'my-ca-file', 'certfile': 'my-certfile', 'keyfile': 'my-keyfile'}
     instance['tls_config'] = copy.deepcopy(tls_config)
 
-    check = aerospike.AerospikeCheck('aerospike', {}, [common.INSTANCE])
+    check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
     tls_config['enable'] = True
 
     assert check._tls_config == tls_config
