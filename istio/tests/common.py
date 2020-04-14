@@ -224,7 +224,6 @@ PILOT_METRICS = [
 
 
 MESH_METRICS_MAPPER = {
-    'istio_request_duration_milliseconds': 'request.duration.milliseconds',
     'istio_request_count': 'request.count',
     'istio_request_duration': 'request.duration',
     'istio_request_size': 'request.size',
