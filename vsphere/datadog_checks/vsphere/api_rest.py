@@ -14,7 +14,7 @@ from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES_WITH_METRICS
 from datadog_checks.vsphere.types import ResourceTags, TagAssociation
 
-from .api import APIResponseError
+from .api import APIResponseError, smart_retry
 
 MOR_TYPE_MAPPING_FROM_STRING = {
     'HostSystem': vim.HostSystem,
@@ -47,7 +47,7 @@ class VSphereRestAPI(object):
         self._client.connect_session()
 
     def make_batch(self, mors):
-        # type: (Iterator[vim.ManagedEntity]) -> Iterator[List[vim.ManagedEntity]]
+        # type: (List[vim.ManagedEntity]) -> Iterator[List[vim.ManagedEntity]]
         batch = []  # type: List[vim.ManagedEntity]
         size = self.config.batch_tags_collector_size
         for mor in mors:
@@ -59,9 +59,9 @@ class VSphereRestAPI(object):
             if batch:
                 yield batch
 
-    # Don't retry, mors is an iterator and will be consumed during the function call.
+    @smart_retry
     def get_resource_tags_for_mors(self, mors):
-        # type: (Iterator[vim.ManagedEntity]) -> ResourceTags
+        # type: (List[vim.ManagedEntity]) -> ResourceTags
         """
         Get resource tags.
 
