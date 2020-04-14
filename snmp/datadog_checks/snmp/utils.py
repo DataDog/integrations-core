@@ -7,7 +7,7 @@ from typing import Any, Dict, Mapping, Sequence, Tuple, Union
 import yaml
 
 from .compat import get_config
-from .exceptions import CouldNotDecodeOID, SmiError
+from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
 from .pysnmp_types import ObjectIdentity, ObjectName, ObjectType, endOfMibView, noSuchInstance
 
 
@@ -136,7 +136,9 @@ def parse_as_oid_tuple(value):
     Raises:
     -------
     CouldNotDecodeOID:
-        If `value` is of an unsupported type, or if it is supported by the OID could not be inferred from it.
+        If `value` is of an unsupported type.
+    UnresolvedOID:
+        If `value` refers to an OID passed in MIB symbol that has not been resolved yet.
     """
     if isinstance(value, (list, tuple)):
         # Eg: `(1, 3, 6, 1, 2, 1, 1, 1, 0)`
@@ -166,9 +168,7 @@ def parse_as_oid_tuple(value):
         try:
             object_name = value.getOid()  # type: ObjectName
         except SmiError as exc:
-            # Not resolved yet. Probably us building an `ObjectIdentity` instance manually...
-            # We should be using our `OID` model in that case, so let's fail.
-            raise CouldNotDecodeOID('Could not infer OID from `ObjectIdentity`: {!r}'.format(exc))
+            raise UnresolvedOID(exc)
 
         return parse_as_oid_tuple(object_name)
 
@@ -178,9 +178,7 @@ def parse_as_oid_tuple(value):
         try:
             object_identity = value[0]
         except SmiError as exc:
-            # Not resolved yet. Probably us building an `ObjectType` instance manually...
-            # We should be using our `OID` model in that case, so let's fail.
-            raise CouldNotDecodeOID('Could not infer OID from `ObjectType`: {!r}'.format(exc))
+            raise UnresolvedOID(exc)
 
         return parse_as_oid_tuple(object_identity)
 

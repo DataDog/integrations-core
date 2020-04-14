@@ -5,10 +5,11 @@
 Define our own models and interfaces for dealing with SNMP data.
 """
 
-from typing import Any, Sequence, Tuple, Union
+from typing import Any, Optional, Sequence, Tuple, Union
 
-from .exceptions import CouldNotDecodeOID
-from .pysnmp_types import ObjectIdentity, ObjectName, ObjectType
+from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
+from .pysnmp_types import MibViewController, ObjectIdentity, ObjectName, ObjectType
+from .types import MIBSymbol
 from .utils import format_as_oid_string, parse_as_oid_tuple
 
 
@@ -21,22 +22,71 @@ class OID(object):
 
     def __init__(self, value):
         # type: (Union[Sequence[int], str, ObjectName, ObjectIdentity, ObjectType]) -> None
+        parts = None  # type: Optional[Tuple[int, ...]]
+
         try:
             parts = parse_as_oid_tuple(value)
         except CouldNotDecodeOID:
-            raise  # Explicitly re-raise this exception.
+            raise  # Invalid input.
+        except UnresolvedOID:
+            if isinstance(value, ObjectType):
+                # An unresolved `ObjectType(ObjectIdentity('<MIB>', '<symbol>'))`.
+                parts = None
+            elif isinstance(value, ObjectIdentity):
+                # An unresolved `ObjectIdentity('<MIB>', '<symbol>')`.
+                parts = None
+            else:  # pragma: no cover
+                raise RuntimeError('Unexpectedly treated {!r} as an unresolved OID'.format(value))
 
-        # Let's make extra sure we didn't mess up.
-        if not isinstance(parts, tuple):
-            raise RuntimeError(
-                'Expected result {!r} of parsing value {!r} to be a tuple, but got {}'.format(parts, value, type(parts))
-            )  # pragma: no cover
+        # Resolve the `ObjectIdentity` which we can use to resolve the MIB name of the OID (for metric naming).
+        # PySNMP objects may contain MIB information already, so check for them in priority.
+        if isinstance(value, ObjectType):
+            # No other choice than to use private API here.
+            object_identity = value._ObjectType__args[0]
+            if not isinstance(object_identity, ObjectIdentity):  # pragma: no cover
+                raise RuntimeError('Expected {!r} to be an `ObjectIdentity` instance'.format(object_identity))
+        elif isinstance(value, ObjectIdentity):
+            object_identity = value
+        else:
+            # Fallback.
+            if parts is None:  # pragma: no cover
+                raise RuntimeError('`parts` should have been set')
+            object_identity = ObjectIdentity(parts)
 
         self._parts = parts
+        self._object_identity = object_identity  # type: ObjectIdentity
+
+    def resolve(self, mib_view_controller):
+        # type: (MibViewController) -> None
+        if self._parts is not None:
+            # Client code should only call this if they're certain the
+            # underlying OID isn't resolved yet.
+            raise RuntimeError('Already resolved as {}'.format(self._parts))
+
+        self._object_identity.resolveWithMib(mib_view_controller)
+        self._parts = parse_as_oid_tuple(self._object_identity)
 
     def as_tuple(self):
         # type: () -> Tuple[int, ...]
+        if self._parts is None:
+            raise UnresolvedOID('OID parts are not available yet')
         return self._parts
+
+    def as_object_type(self):
+        # type: () -> ObjectType
+        return ObjectType(self._object_identity)
+
+    def get_mib_symbol(self):
+        # type: () -> MIBSymbol
+        try:
+            result = self._object_identity.getMibSymbol()  # type: Tuple[str, str, Sequence[ObjectName]]
+        except SmiError as exc:
+            raise UnresolvedOID(exc)
+
+        _, name, indexes = result
+        prefix = tuple(index.prettyPrint() for index in indexes)
+
+        return MIBSymbol(name, prefix)
 
     def __eq__(self, other):
         # type: (Any) -> bool
