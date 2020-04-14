@@ -83,27 +83,26 @@ def test_f5(aggregator):
         'ifInDiscards',
     ]
 
-    ltm_totals = [
+    # TODO: add simulation data for these metrics.
+
+    ltm_gauges = [
         'ltmVirtualServNumber',
-        'ltmRouteDomainStatNumber',
-        'ltmNodeAddrNumber',
-        'ltmPoolNumber',
-        'ltmPoolMemberNumber',
-    ]
-
-    ltm_route_domain_gauges = [
-        'ltmRouteDomainStatClientCurConns',
-        'ltmRouteDomainStatConnLimit',
-    ]
-
-    ltm_gauges_without_simulation_data = [
         'ltmVirtualServEnabled',
+        'ltmVirtualServStatClientCurConns',
+        'ltmVirtualServStatVsUsageRatio5s',
+        'ltmVirtualServStatVsUsageRatio1m',
+        'ltmVirtualServStatVsUsageRatio5m',
+        'ltmVirtualServStatCurrentConnsPerSec',
+        'ltmVirtualServStatDurationRateExceeded',
+        'ltmVirtualServConnLimit',
+        'ltmNodeAddrNumber',
         'ltmNodeAddrSessionStatus',
         'ltmNodeAddrConnLimit',
         'ltmNodeAddrRatio',
         'ltmNodeAddrDynamicRatio',
         'ltmNodeAddrMonitorState',
         'ltmNodeAddrMonitorStatus',
+        'ltmPoolNumber',
         'ltmPoolDisallowNat',
         'ltmPoolSimpleTimeout',
         'ltmPoolIpTosToClient',
@@ -121,6 +120,7 @@ def test_f5(aggregator):
         'ltmPoolMinUpMemberAction',
         'ltmPoolMinActiveMembers' 'ltmPoolActiveMemberCnt',
         'ltmPoolDisallowSnat',
+        'ltmPoolMemberNumber',
         'ltmPoolMemberMonitorState',
         'ltmPoolMemberMonitorStatus',
         'ltmPoolMemberSessionStatus',
@@ -131,25 +131,19 @@ def test_f5(aggregator):
         'ltmPoolMemberDynamicRatio',
     ]
 
-    ltm_route_domain_counts = [
-        'ltmRouteDomainStatConnectionFlowMiss',
-        'ltmRouteDomainStatClientPktsIn',
-        'ltmRouteDomainStatClientBytesIn',
-        'ltmRouteDomainStatClientPktsOut',
-        'ltmRouteDomainStatClientBytesOut',
-        'ltmRouteDomainStatClientMaxConns',
-        'ltmRouteDomainStatClientTotConns',
-        'ltmRouteDomainStatClientEvictedConns',
-        'ltmRouteDomainStatClientSlowKilled',
-        'ltmRouteDomainStatServerPktsIn',
-        'ltmRouteDomainStatServerBytesIn',
-        'ltmRouteDomainStatServerPktsOut',
-        'ltmRouteDomainStatServerBytesOut',
-        'ltmRouteDomainStatServerMaxConns',
-        'ltmRouteDomainStatServerTotConns',
-        'ltmRouteDomainStatServerCurConns',
-        'ltmRouteDomainStatServerEvictedConns',
-        'ltmRouteDomainStatServerSlowKilled',
+    ltm_counts = [
+        'ltmVirtualServStatClientTotConns',
+        'ltmVirtualServStatClientEvictedConns',
+        'ltmVirtualServStatClientSlowKilled',
+        'ltmVirtualServStatTotRequests',
+    ]
+
+    ltm_rates = [
+        'ltmVirtualServStatNoNodesErrors',
+        'ltmVirtualServStatClientPktsIn',
+        'ltmVirtualServStatClientBytesIn',
+        'ltmVirtualServStatClientPktsOut',
+        'ltmVirtualServStatClientBytesOut',
     ]
 
     interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
@@ -180,24 +174,14 @@ def test_f5(aggregator):
                 count=1,
             )
 
-    for metric in ltm_totals:
+    for metric in ltm_gauges:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    for metric in ltm_route_domain_gauges:
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags + ['route_domain:/Common/0'], count=1,
-        )
+    for metric in ltm_rates:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
 
-    for metric in ltm_gauges_without_simulation_data:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=0)
-
-    for metric in ltm_route_domain_counts:
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric),
-            metric_type=aggregator.MONOTONIC_COUNT,
-            tags=tags + ['route_domain:/Common/0'],
-            count=1,
-        )
+    for metric in ltm_counts:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
