@@ -35,14 +35,14 @@ tokumx.ft.cachetable.evictions.partial.leaf.clean.bytesps,gauge,,byte,second,Rat
 tokumx.ft.cachetable.evictions.partial.leaf.clean.countps,gauge,,event,second,Rate of partial evictions of leaf nodes.,0,tokumx,ft cachetb evct part leaf clean rate
 tokumx.ft.cachetable.evictions.partial.nonleaf.clean.bytesps,gauge,,byte,second,Rate of partial evictions of nonleaf nodes.,0,tokumx,ft cachetb evct part nonleaf clean b rate
 tokumx.ft.cachetable.evictions.partial.nonleaf.clean.countps,gauge,,event,second,Rate of partial evictions of nonleaf nodes.,0,tokumx,ft cachetb evct part nonleaf clean rate
-tokumx.ft.cachetable.miss.countps,gauge,,miss,second,Rate of internal cache misses. This metric is similar to MongoDB’s btree misses and page faults.,-1,tokumx,ft cachetb miss rate
+tokumx.ft.cachetable.miss.countps,gauge,,miss,second,Rate of internal cache misses. This metric is similar to MongoDB's btree misses and page faults.,-1,tokumx,ft cachetb miss rate
 tokumx.ft.cachetable.miss.full.countps,gauge,,miss,second,Rate of full internal cache misses.,-1,tokumx,ft cachetb full miss rate
 tokumx.ft.cachetable.miss.full.timeps,gauge,,fraction,,Fraction of time (microseconds/second) the database has had to wait for a disk read to complete for a full cache miss.,-1,tokumx,ft cachetb full miss frct
 tokumx.ft.cachetable.miss.partial.countps,gauge,,miss,second,Rate of partial internal cache misses.,-1,tokumx,ft cachetb part miss rate
 tokumx.ft.cachetable.miss.partial.timeps,gauge,,fraction,,Fraction of time (microseconds/second) the database has had to wait for a disk read to complete for a partial cache miss.,-1,tokumx,ft cachetb part miss frct
 tokumx.ft.cachetable.miss.timeps,gauge,,fraction,,Fraction of time (microseconds/second) the database has had to wait for a disk read to complete for cache misses.,-1,tokumx,ft cachetb miss frct
 tokumx.ft.cachetable.size.current,gauge,,byte,,Total amount of uncompressed data currently in the database's internal cache.,0,tokumx,ft cachetb size
-tokumx.ft.cachetable.size.limit,gauge,,byte,,Total amount of uncompressed data that will fit in TokuMX’s internal cache.,0,tokumx,ft cachetb size limit
+tokumx.ft.cachetable.size.limit,gauge,,byte,,Total amount of uncompressed data that will fit in TokuMX's internal cache.,0,tokumx,ft cachetb size limit
 tokumx.ft.cachetable.size.writing,gauge,,byte,,Total size of nodes that are currently queued up to be written to disk for eviction.,0,tokumx,ft cachetb size writing
 tokumx.ft.checkpoint.begin.timeps,gauge,,fraction,,Fraction of time (microseconds/second) that a begin checkpoint phase has spent blocking other threads.,0,tokumx,ft chkpt beg frct
 tokumx.ft.checkpoint.countps,gauge,,event,second,Rate at which checkpoints are completed.,0,tokumx,ft chkpt rate
@@ -59,7 +59,7 @@ tokumx.ft.checkpoint.write.nonleaf.timeps,gauge,,fraction,,The fraction of time 
 tokumx.ft.compressionRatio.leaf,gauge,,fraction,,The size ratio of leaf nodes before and after compression.,1,tokumx,ft comp ratio leaf
 tokumx.ft.compressionRatio.nonleaf,gauge,,fraction,,The size ratio of nonleaf nodes before and after compression.,1,tokumx,ft comp ratio nonleaf
 tokumx.ft.compressionRatio.overall,gauge,,fraction,,The size ratio of nodes before and after compression.,1,tokumx,ft comp ratio
-tokumx.ft.fsync.countps,gauge,,operation,second,The rate at which the database flushed the operating system’s file buffers to disk.,0,tokumx,ft fsync rate
+tokumx.ft.fsync.countps,gauge,,operation,second,The rate at which the database flushed the operating system's file buffers to disk.,0,tokumx,ft fsync rate
 tokumx.ft.fsync.timeps,gauge,,fraction,,The fraction of time (microseconds/second) used to fsync to disk.,0,tokumx,ft fsync frct
 tokumx.ft.locktree.size.current,gauge,,byte,,Total memory the locktree is currently using.,0,tokumx,ft ltree size
 tokumx.ft.locktree.size.limit,gauge,,byte,,Maximum number of bytes that the locktree is allowed to use.,0,tokumx,ft ltree size limit
@@ -116,7 +116,7 @@ tokumx.opcountersRepl.updateps,gauge,,operation,second,The number of replicated 
 tokumx.stats.coll.count,gauge,,document,,The number of objects or documents in this collection.,0,tokumx,stats coll cnt
 tokumx.stats.coll.nindexes,gauge,,index,,The number of indexes on this collection.,0,tokumx,stats coll num idx
 tokumx.stats.coll.nindexesbeingbuilt,gauge,,index,,The number of indexes currently being built.,0,tokumx,stats coll num idx building
-tokumx.stats.coll.size,gauge,,byte,,"The total size in memory of all records in a collection. Does not include the record header, but does include the record’s padding. Does not include the size of any indexes associated with the collection.",0,tokumx,stats coll size
+tokumx.stats.coll.size,gauge,,byte,,"The total size in memory of all records in a collection. Does not include the record header, but does include the record's padding. Does not include the size of any indexes associated with the collection.",0,tokumx,stats coll size
 tokumx.stats.coll.storageSize,gauge,,byte,,The total amount of storage allocated to this collection for document storage.,0,tokumx,stats coll strg size
 tokumx.stats.coll.totalIndexSize,gauge,,byte,,The total size of all indexes on this collection.,0,tokumx,stats coll total idx size
 tokumx.stats.coll.totalIndexStorageSize,gauge,,byte,,The total size on disk of all indexes on this collection (after compression).,0,tokumx,stats coll total idx strg size

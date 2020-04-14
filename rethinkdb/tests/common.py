@@ -27,10 +27,10 @@ TAGS = ['env:testing']
 SERVERS = {'server0', 'server1', 'server2'}  # type: Set[ServerName]
 BOOTSTRAP_SERVER = 'server0'  # type: ServerName
 SERVER_PORTS = {'server0': 28015, 'server1': 28016, 'server2': 28017, 'proxy': 28018}  # type: Dict[ServerName, int]
-SERVER_TAGS = {
-    'server0': ['default', 'us'],
-    'server1': ['default', 'us', 'primary'],
-    'server2': ['default', 'eu'],
+FORMATTED_SERVER_TAGS = {
+    'server0': ['server_tag:default', 'server_tag:us'],
+    'server1': ['server_tag:default', 'server_tag:us', 'server_tag:primary'],
+    'server2': ['server_tag:default', 'server_tag:eu'],
 }  # type: Dict[ServerName, List[str]]
 
 # Users.

@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 4.7.1 / 2020-04-09
+
+* [Fixed] Fix new option name in config sample. See [#6296](https://github.com/DataDog/integrations-core/pull/6296).
+
 ## 4.7.0 / 2020-04-04
 
 * [Added] Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).
