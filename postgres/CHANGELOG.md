@@ -1,5 +1,10 @@
 # CHANGELOG - postgres
 
+## 3.5.4 / 2020-04-04
+
+* [Fixed] Fix service check on unexpected exception. See [#6196](https://github.com/DataDog/integrations-core/pull/6196).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 3.5.3 / 2020-02-26
 
 * [Fixed] Rollback db connection when we get a 'FeatureNotSupported' exception. See [#5882](https://github.com/DataDog/integrations-core/pull/5882).

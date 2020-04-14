@@ -14,6 +14,7 @@ from .common import (
     CURRENT_ISSUE_TYPES_SUBMITTED_IF_DISCONNECTED_SERVERS,
     CURRENT_ISSUES_METRICS,
     DATABASE,
+    FORMATTED_SERVER_TAGS,
     HEROES_TABLE,
     HEROES_TABLE_PRIMARY_REPLICA,
     HEROES_TABLE_REPLICAS_BY_SHARD,
@@ -23,7 +24,6 @@ from .common import (
     REPLICA_STATISTICS_METRICS,
     SERVER_STATISTICS_METRICS,
     SERVER_STATUS_METRICS,
-    SERVER_TAGS,
     SERVERS,
     TABLE_STATISTICS_METRICS,
     TABLE_STATUS_METRICS,
@@ -79,7 +79,7 @@ def _assert_statistics_metrics(aggregator, disconnected_servers):
         aggregator.assert_metric(metric, metric_type=typ, count=1, tags=TAGS)
 
     for server in SERVERS:
-        tags = TAGS + ['server:{}'.format(server)] + SERVER_TAGS[server]
+        tags = TAGS + ['server:{}'.format(server)] + FORMATTED_SERVER_TAGS[server]
         for metric, typ in SERVER_STATISTICS_METRICS:
             count = 0 if server in disconnected_servers else 1
             aggregator.assert_metric(metric, metric_type=typ, count=count, tags=tags)
@@ -92,7 +92,7 @@ def _assert_statistics_metrics(aggregator, disconnected_servers):
         tags = (
             TAGS
             + ['table:{}'.format(HEROES_TABLE), 'database:{}'.format(DATABASE), 'server:{}'.format(server)]
-            + SERVER_TAGS[server]
+            + FORMATTED_SERVER_TAGS[server]
         )
 
         for metric, typ in REPLICA_STATISTICS_METRICS:

@@ -1,5 +1,9 @@
 # CHANGELOG - oracle
 
+## 2.0.1 / 2020-04-04
+
+* [Fixed] Lazy import of JDBC libraries. See [#6118](https://github.com/DataDog/integrations-core/pull/6118).
+
 ## 2.0.0 / 2020-02-22
 
 * [Changed] Migrate to QueryManager. See [#5529](https://github.com/DataDog/integrations-core/pull/5529).

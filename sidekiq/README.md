@@ -57,27 +57,10 @@ No additional installation is needed on your server.
        mappings:
          - match: "sidekiq.sidekiq.*"
            name: "sidekiq.*"
-         - match: "sidekiq.jobs.*.perform.avg"
-           name: "sidekiq.jobs.perform.avg"
+         - match: "sidekiq.jobs.*.perform"
+           name: "sidekiq.jobs.perform"
            tags:
              worker: "$1"
-         - match: "sidekiq.jobs.*.perform.count"
-           name: "sidekiq.jobs.perform.count"
-           tags:
-             worker: "$1"
-         - match: "sidekiq.jobs.*.perform.max"
-           name: "sidekiq.jobs.perform.max"
-           tags:
-             worker: "$1"
-         - match: "sidekiq.jobs.*.perform.median"
-           name: "sidekiq.jobs.perform.median"
-           tags:
-             worker: "$1"
-         - match: "sidekiq.jobs.*.perform.95percentile"
-           name: "sidekiq.jobs.perform.95percentile"
-           tags:
-             worker: "$1"
-
     ```
 
 4. [Restart the Agent][8].

@@ -1,5 +1,11 @@
 # CHANGELOG - Envoy
 
+## 1.14.0 / 2020-04-04
+
+* [Added] Update doc about whitelist and blacklist. See [#5875](https://github.com/DataDog/integrations-core/pull/5875).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 1.13.0 / 2020-02-22
 
 * [Added] Add support for more metrics in Envoy integration. See [#5537](https://github.com/DataDog/integrations-core/pull/5537). Thanks [csssuf](https://github.com/csssuf).

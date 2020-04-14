@@ -24,6 +24,7 @@ InstanceConfig = TypedDict(
         'threads_count': int,
         'metrics_per_query': int,
         'batch_property_collector_size': int,
+        'batch_tags_collector_size': int,
         'collect_events': bool,
         'collect_tags': bool,
         'tags_prefix': str,
@@ -31,7 +32,6 @@ InstanceConfig = TypedDict(
         'tags': List[str],
         'refresh_infrastructure_cache_interval': int,
         'refresh_metrics_metadata_cache_interval': int,
-        'refresh_tags_cache_interval': int,
         'resource_filters': List[ResourceFilterConfig],
         'metric_filters': MetricFilterConfig,
         'collect_per_instance_filters': MetricFilterConfig,
@@ -56,7 +56,7 @@ InfrastructureDataItem = TypedDict(
 InfrastructureData = Dict[vim.ManagedEntity, InfrastructureDataItem]
 
 ResourceTags = Dict[Type[vim.ManagedEntity], Dict[str, List[str]]]
-TagAssociation = TypedDict('TagAssociation', {'tag_id': str, 'object_ids': List[Dict[str, str]]})
+TagAssociation = TypedDict('TagAssociation', {'object_id': Dict[str, str], 'tag_ids': List[str]})
 
 MetricFilters = Dict[str, List[Pattern]]
 

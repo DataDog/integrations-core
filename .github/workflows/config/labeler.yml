@@ -29,4 +29,4 @@ changelog/no-changelog:
 - all:^(?![^/]+/datadog_checks/.*|[^/]+/setup\.py).*
 
 integration/$1:
-- ^(?!\.azure-pipelines|\.github|\.gitlab|\.in-toto|docs)([^/]+)/.*
+- ^(?!\.azure-pipelines|\.github|\.gitlab|\.in-toto|\.stubs|docs)([^/]+)/.*

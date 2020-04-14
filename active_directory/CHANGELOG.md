@@ -1,5 +1,11 @@
 # CHANGELOG - active_directory
 
+## 1.7.0 / 2020-04-04
+
+* [Added] Active Directory to not use agentConfig. See [#5938](https://github.com/DataDog/integrations-core/pull/5938).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 1.6.0 / 2019-12-02
 
 * [Added] Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).

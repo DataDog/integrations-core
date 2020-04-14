@@ -1228,3 +1228,58 @@ def test_option_default_example_override_non_string():
         # foo: something
         """
     )
+
+
+def test_enabled_override_required():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: init_config
+            options:
+            - name: foo
+              description: foo words
+              required: false
+              enabled: true
+              value:
+                type: string
+          - template: instances
+            options:
+            - name: bar
+              description: bar words
+              required: true
+              enabled: false
+              value:
+                type: string
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## All options defined here are available to all instances.
+        #
+        init_config:
+
+            ## @param foo - string - optional
+            ## foo words
+            #
+            foo: <FOO>
+
+        ## Every instance is scheduled independent of the others.
+        #
+        instances:
+
+          -
+            ## @param bar - string - required
+            ## bar words
+            #
+            # bar: <BAR>
+        """
+    )

@@ -77,46 +77,49 @@ class MetricsMetadataCache(VSphereCache):
 
 class InfrastructureCache(VSphereCache):
     """A VSphere cache dedicated to store the infrastructure data from a user environment.
+    Tags and properties coming from the SOAP API are stored separately for easier manipulation.
+    'tags' is only populated if configured correctly in the conf.yaml file.
     Data is stored like this:
 
     _content = {
-        vim.VirtualMachine: {
-            <MOR_REFERENCE>: <MOR_PROPS_DICT>
+        'mors': {
+            vim.VirtualMachine: {
+                <MOR_REFERENCE>: <MOR_PROPS_DICT>
+            },
+            ...
         },
+        'tags': {
+            <RESOURCE_TYPE>: {
+                <RESOURCE_MOR_ID>: ['<CATEGORY_NAME>:<TAG_NAME>', ...]
+            },
+        }
         ...
     }
     """
 
-    def get_mor_props(self, mor, default=None):
-        # type: (vim.ManagedEntity, Dict[str, Any]) -> Dict[str, Any]
-        mor_type = type(mor)
-        return self._content.get(mor_type, {}).get(mor, default)
+    @property
+    def _mors(self):
+        # type: () -> Dict[Type[vim.ManagedEntity], Dict[vim.ManagedEntity, Any]]
+        if 'mors' not in self._content:
+            self._content['mors'] = {}
+        return self._content['mors']
 
-    def get_mors(self, resource_type):
-        # type: (Type[vim.ManagedEntity]) -> Iterator[vim.ManagedEntity]
-        return iterkeys(self._content.get(resource_type, {}))
+    @_mors.setter
+    def _mors(self, value):
+        # type: (Dict[vim.ManagedEntity, Dict[str, Any]]) -> None
+        self._content['mors'] = value
 
-    def set_mor_data(self, mor, mor_data):
-        # type: (vim.ManagedEntity, Dict[str, Any]) -> None
-        mor_type = type(mor)
-        if mor_type not in self._content:
-            self._content[mor_type] = {}
-        self._content[mor_type][mor] = mor_data
+    @property
+    def _tags(self):
+        # type: () -> ResourceTags
+        if 'tags' not in self._content:
+            self._content['tags'] = {}
+        return self._content['tags']
 
-
-class TagsCache(VSphereCache):
-    """
-    A VSphere cache dedicated to store the tags data.
-
-    Data is stored like this:
-
-    _content = {
-        <RESOURCE_TYPE>: {
-            <RESOURCE_MOR_ID>: ['<CATEGORY_NAME>:<TAG_NAME>', ...]
-        },
-        ...
-    }
-    """
+    @_tags.setter
+    def _tags(self, value):
+        # type: (ResourceTags) -> None
+        self._content['tags'] = value
 
     def get_mor_tags(self, mor):
         # type: (vim.ManagedEntity) -> List[str]
@@ -124,8 +127,24 @@ class TagsCache(VSphereCache):
         :return: list of mor tags or empty list if mor is not found.
         """
         mor_type = type(mor)
-        return self._content.get(mor_type, {}).get(mor._moId, [])
+        return self._tags.get(mor_type, {}).get(mor._moId, [])
 
     def set_all_tags(self, mor_tags):
         # type: (ResourceTags) -> None
-        self._content = mor_tags
+        self._tags = mor_tags
+
+    def get_mor_props(self, mor, default=None):
+        # type: (vim.ManagedEntity, Dict[str, Any]) -> Dict[str, Any]
+        mor_type = type(mor)
+        return self._mors.get(mor_type, {}).get(mor, default)
+
+    def get_mors(self, resource_type):
+        # type: (Type[vim.ManagedEntity]) -> Iterator[vim.ManagedEntity]
+        return iterkeys(self._mors.get(resource_type, {}))
+
+    def set_mor_props(self, mor, mor_data):
+        # type: (vim.ManagedEntity, Dict[str, Any]) -> None
+        mor_type = type(mor)
+        if mor_type not in self._mors:
+            self._mors[mor_type] = {}
+        self._mors[mor_type][mor] = mor_data

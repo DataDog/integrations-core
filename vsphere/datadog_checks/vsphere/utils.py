@@ -41,9 +41,11 @@ def format_metric_name(counter):
     )
 
 
-def is_resource_collected_by_filters(mor, infrastructure_data, resource_filters, resource_tags):
+def is_resource_collected_by_filters(mor, infrastructure_data, resource_filters, resource_tags=None):
     # type: (vim.ManagedEntity, InfrastructureData, List[ResourceFilter], List[str]) -> bool
     resource_type = MOR_TYPE_AS_STRING[type(mor)]
+    resource_tags = resource_tags or []
+
     # Limit filters to those for the resource_type of the mor
     resource_filters = [f for f in resource_filters if f.resource_type == resource_type]
 

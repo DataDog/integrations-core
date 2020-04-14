@@ -57,8 +57,7 @@ def test_external_host_tags(aggregator, realtime_instance):
     config = VSphereConfig(realtime_instance, MagicMock())
     check.api = MockedAPI(config)
     check.api_rest = VSphereRestAPI(config, MagicMock())
-    with check.tags_cache.update():
-        check.refresh_tags_cache()
+
     with check.infrastructure_cache.update():
         check.refresh_infrastructure_cache()
 
@@ -253,9 +252,57 @@ def test_refresh_tags_cache_should_not_raise_exception(aggregator, dd_run_check,
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     check.log = MagicMock()
     check.api_rest = MagicMock()
-    check.api_rest.get_resource_tags.side_effect = APIConnectionError("Some error")
+    check.api_rest.get_resource_tags_for_mors.side_effect = APIConnectionError("Some error")
 
-    check.refresh_tags_cache()
+    check.collect_tags({})
 
     # Error logged, but `refresh_tags_cache` should NOT raise any exception
     check.log.error.assert_called_once_with("Failed to collect tags: %s", mock.ANY)
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_renew_rest_api_session_on_failure(aggregator, dd_run_check, realtime_instance):
+    realtime_instance.update({'collect_tags': True})
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    config = VSphereConfig(realtime_instance, MagicMock())
+    check.api_rest = VSphereRestAPI(config, MagicMock())
+    check.api_rest.make_batch = MagicMock(side_effect=[Exception, []])
+    check.api_rest.smart_connect = MagicMock()
+
+    tags = check.collect_tags({})
+    assert tags
+    assert check.api_rest.make_batch.call_count == 2
+    assert check.api_rest.smart_connect.call_count == 1
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_tags_filters_when_tags_are_not_yet_collected(aggregator, dd_run_check, realtime_instance):
+    realtime_instance['collect_tags'] = True
+    realtime_instance['resource_filters'] = [
+        {'resource': 'vm', 'property': 'tag', 'patterns': [r'my_cat_name_1:my_tag_name_1']},
+        {'resource': 'host', 'property': 'name', 'type': 'blacklist', 'patterns': [r'.*']},
+    ]
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    # Assert that only a single resource was collected
+    aggregator.assert_metric('vsphere.cpu.usage.avg', count=1)
+    # Assert that the resource that was collected is the one with the correct tag
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-4')
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_tags_filters_with_prefix_when_tags_are_not_yet_collected(aggregator, dd_run_check, realtime_instance):
+    realtime_instance['collect_tags'] = True
+    realtime_instance['resource_filters'] = [
+        {'resource': 'vm', 'property': 'tag', 'patterns': [r'foo_my_cat_name_1:my_tag_name_1']},
+        {'resource': 'host', 'property': 'name', 'type': 'blacklist', 'patterns': [r'.*']},
+    ]
+    realtime_instance['tags_prefix'] = 'foo_'
+
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    # Assert that only a single resource was collected
+    aggregator.assert_metric('vsphere.cpu.usage.avg', count=1)
+    # Assert that the resource that was collected is the one with the correct tag
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-4')

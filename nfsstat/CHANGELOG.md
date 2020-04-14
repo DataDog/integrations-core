@@ -1,5 +1,9 @@
 # CHANGELOG - Nfsstat
 
+## 1.4.2 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.4.1 / 2019-05-30
 
 * [Fixed] Fix non-ascii mounted folder name. See [#3805](https://github.com/DataDog/integrations-core/pull/3805).

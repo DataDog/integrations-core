@@ -1,5 +1,10 @@
 # CHANGELOG - haproxy
 
+## 2.8.0 / 2020-04-04
+
+* [Added] Gather stick-table metrics. See [#6158](https://github.com/DataDog/integrations-core/pull/6158).
+* [Fixed] Revert `to_native_string` to `to_string` for integrations. See [#6238](https://github.com/DataDog/integrations-core/pull/6238).
+
 ## 2.7.2 / 2020-03-24
 
 * [Fixed] Fix event submission on Python 3. See [#6138](https://github.com/DataDog/integrations-core/pull/6138).

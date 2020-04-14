@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab_runner
 
+## 2.7.2 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 2.7.1 / 2020-02-22
 
 * [Fixed] Fix metric validation. See [#5581](https://github.com/DataDog/integrations-core/pull/5581).

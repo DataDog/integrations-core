@@ -51,7 +51,7 @@ class Network(AgentCheck):
         self._excluded_ifaces = instance.get('excluded_interfaces', [])
         if not isinstance(self._excluded_ifaces, list):
             raise ConfigurationError(
-                "Expected 'excluded_interfaces' to be a list, got '{}'".format(self._excluded_ifaces)
+                "Expected 'excluded_interfaces' to be a list, got '{}'".format(type(self._excluded_ifaces).__name__)
             )
 
         self._collect_cx_state = instance.get('collect_connection_state', False)

@@ -1,5 +1,9 @@
 # CHANGELOG - hdfs_namenode
 
+## 1.11.1 / 2020-04-04
+
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 1.11.0 / 2020-02-22
 
 * [Added] Add log section to hdfs integrations. See [#4632](https://github.com/DataDog/integrations-core/pull/4632).

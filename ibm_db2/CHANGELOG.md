@@ -1,5 +1,9 @@
 # CHANGELOG - IBM Db2
 
+## 1.4.1 / 2020-04-04
+
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 1.4.0 / 2020-01-30
 
 * [Added] Add parameters for SSL configuration. See [#5587](https://github.com/DataDog/integrations-core/pull/5587).

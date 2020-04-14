@@ -314,6 +314,12 @@ def metadata(check, check_duplicates):
             # empty description field, description is recommended
             if not row['description']:
                 empty_warning_count['description'] += 1
+
+            # check if there is unicode
+            elif not (row['description'].isascii() and row['metric_name'].isascii() and row['metric_type'].isascii()):
+                errors = True
+                echo_failure(f"{current_check}:{line} `{row['metric_name']}` contains unicode characters.")
+
             # exceeds max allowed length of description
             elif len(row['description']) > MAX_DESCRIPTION_LENGTH:
                 errors = True

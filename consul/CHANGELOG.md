@@ -1,5 +1,11 @@
 # CHANGELOG - consul
 
+## 1.13.0 / 2020-04-04
+
+* [Added] Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).
+* [Added] Add new metric to count services. See [#5992](https://github.com/DataDog/integrations-core/pull/5992).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 1.12.2 / 2020-02-25
 
 * [Fixed] Change new added tag. See [#5856](https://github.com/DataDog/integrations-core/pull/5856).

@@ -1,5 +1,10 @@
 # CHANGELOG - ECS Fargate
 
+## 2.7.0 / 2020-04-04
+
+* [Added] Collect network metrics for ECS Fargate. See [#6216](https://github.com/DataDog/integrations-core/pull/6216).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 2.6.0 / 2020-01-13
 
 * [Fixed] Fix CPU metrics. See [#5404](https://github.com/DataDog/integrations-core/pull/5404).
