@@ -7,15 +7,15 @@ files:
     - name: gitlab_url
       required: true
       description: |
-        Master URL to probe for service health status
-        If you are using gitlab CE and not EE, use this url with
+        The master URL to probe for service health status
+        If you are using gitlab CE and not EE, use this URL with
         the authorization token: http://localhost/?token=<TOKEN>
       value:
         type: string
     - name: api_token
       description: |
-        A Gitlab API token for this instance.
-        Used to collect the Gitlab version.
+        The Gitlab API token for this instance
+        used to collect the Gitlab version.
       value:
         type: string
     - template: instances/openmetrics
@@ -31,7 +31,7 @@ files:
     options:
       - template: init_config/openmetrics
       - name: allowed_metrics
-        description: List of legacy metrics to extract from Prometheus.
+        description: The list of legacy metrics to extract from Prometheus.
         value:
           type: array
           items:

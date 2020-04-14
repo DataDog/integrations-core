@@ -3,15 +3,15 @@
 instances:
 
     ## @param gitlab_url - string - required
-    ## Master URL to probe for service health status
-    ## If you are using gitlab CE and not EE, use this url with
+    ## The master URL to probe for service health status
+    ## If you are using gitlab CE and not EE, use this URL with
     ## the authorization token: http://localhost/?token=<TOKEN>
     #
   - gitlab_url: <GITLAB_URL>
 
     ## @param api_token - string - optional
-    ## A Gitlab API token for this instance.
-    ## Used to collect the Gitlab version.
+    ## The Gitlab API token for this instance
+    ## used to collect the Gitlab version.
     #
     # api_token: <API_TOKEN>
 
@@ -424,7 +424,7 @@ init_config:
     # timeout: 10
 
     ## @param allowed_metrics - list of strings - optional
-    ## List of legacy metrics to extract from Prometheus.
+    ## The list of legacy metrics to extract from Prometheus.
     #
     # allowed_metrics:
     #   - go_gc_duration_seconds
