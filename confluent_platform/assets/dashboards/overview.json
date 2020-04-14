@@ -3,7 +3,7 @@
         "author_name": "Datadog"
     },
     "board_title": "Confluent Platform Overview",
-    "created": "2020-03-27T17:49:42.876533+00:00",
+    "created": "2020-04-14T14:05:36.816349+00:00",
     "created_by": {
         "access_role": "st",
         "disabled": false,
@@ -16,9 +16,9 @@
         "verified": true
     },
     "description": "Default Dashboard for monitoring Confluent Platform including:\n\n* Brokers\n* Producers and Consumers (Java-based)\n* Kafka Connect\n* Schema Registry\n* REST Proxy\n* KSQLDB",
-    "id": 1032750,
-    "modified": "2020-04-03T16:57:38.661003+00:00",
-    "new_id": "fmc-5zz-stw",
+    "id": 1053943,
+    "modified": "2020-04-14T14:47:32.837099+00:00",
+    "new_id": "gi5-jub-nfu",
     "read_only": false,
     "template_variables": [],
     "widgets": [
@@ -54,7 +54,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:confluent.kafka.server.topic.bytes_in_per_sec.rate{*} by {host}",
+                        "q": "sum:confluent.kafka.server.topic.bytes_in_per_sec.rate{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -88,7 +88,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:confluent.kafka.server.topic.bytes_out_per_sec.rate{*} by {host}",
+                        "q": "sum:confluent.kafka.server.topic.bytes_out_per_sec.rate{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -123,7 +123,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:confluent.kafka.network.request.total_time_ms.75percentile{request:fetchconsumer} by {host}, avg:confluent.kafka.network.request.total_time_ms.95percentile{request:fetchconsumer} by {host}, avg:confluent.kafka.network.request.total_time_ms.99percentile{request:fetchconsumer} by {host}",
+                        "q": "avg:confluent.kafka.network.request.total_time_ms.75percentile{request:fetchconsumer} by {instance}, avg:confluent.kafka.network.request.total_time_ms.95percentile{request:fetchconsumer} by {instance}, avg:confluent.kafka.network.request.total_time_ms.99percentile{request:fetchconsumer} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -158,7 +158,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:confluent.kafka.network.request.total_time_ms.75percentile{request:produce} by {host}, avg:confluent.kafka.network.request.total_time_ms.95percentile{request:produce} by {host}, avg:confluent.kafka.network.request.total_time_ms.99percentile{request:produce} by {host}",
+                        "q": "avg:confluent.kafka.network.request.total_time_ms.75percentile{request:produce} by {instance}, avg:confluent.kafka.network.request.total_time_ms.95percentile{request:produce} by {instance}, avg:confluent.kafka.network.request.total_time_ms.99percentile{request:produce} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -252,7 +252,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:confluent.kafka.producer.topic.byte_rate{*} by {host}",
+                        "q": "sum:confluent.kafka.producer.topic.byte_rate{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -287,7 +287,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:confluent.kafka.producer.batch_size_avg{*} by {host}",
+                        "q": "avg:confluent.kafka.producer.batch_size_avg{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -337,7 +337,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:confluent.kafka.consumer.fetch.bytes_consumed_rate{*} by {host}",
+                        "q": "avg:confluent.kafka.consumer.fetch.bytes_consumed_rate{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -372,7 +372,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "max:confluent.kafka.consumer.fetch.records_lag_max{*} by {host}",
+                        "q": "max:confluent.kafka.consumer.fetch.records_lag_max{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -422,7 +422,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:confluent.kafka.connect.worker.connector_count{*} by {host}",
+                        "q": "sum:confluent.kafka.connect.worker.connector_count{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -443,7 +443,7 @@
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "Worker Count by Host",
+            "title_text": "Connector Count by Worker",
             "type": "timeseries",
             "width": 33,
             "x": 95,
@@ -457,7 +457,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:confluent.kafka.connect.worker_rebalance.rebalance_avg_time_ms{*} by {host}",
+                        "q": "avg:confluent.kafka.connect.worker_rebalance.rebalance_avg_time_ms{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -492,7 +492,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:confluent.kafka.connect.worker.connector_failed_task_count{*} by {host}",
+                        "q": "sum:confluent.kafka.connect.worker.connector_failed_task_count{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -527,7 +527,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:confluent.kafka.connect.worker.connector_running_task_count{*} by {host}",
+                        "q": "sum:confluent.kafka.connect.worker.connector_running_task_count{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -577,7 +577,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:confluent.kafka.schema.registry.jetty.connections_active{*} by {host}",
+                        "q": "sum:confluent.kafka.schema.registry.jetty.connections_opened_rate{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -598,7 +598,7 @@
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "Active TCP Connections",
+            "title_text": "HTTP Request Rate by Instance",
             "type": "timeseries",
             "width": 33,
             "x": 95,
@@ -612,7 +612,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:confluent.kafka.schema.registry.jersey.request_error_rate{*} by {host}",
+                        "q": "avg:confluent.kafka.schema.registry.jersey.request_error_rate{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -633,7 +633,7 @@
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "Request Error Rate by Host",
+            "title_text": "Request Error Rate by Instance",
             "type": "timeseries",
             "width": 33,
             "x": 95,
@@ -662,7 +662,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:confluent.kafka.rest.jersey.request_error_rate{*} by {host}",
+                        "q": "avg:confluent.kafka.rest.jersey.request_error_rate{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -683,7 +683,7 @@
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "Request Error Rate by Host",
+            "title_text": "Request Error Rate by Instance",
             "type": "timeseries",
             "width": 33,
             "x": 129,
@@ -697,7 +697,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:confluent.kafka.rest.jetty.connections_active{*} by {host}",
+                        "q": "avg:confluent.kafka.rest.jetty.connections_opened_rate{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -718,7 +718,7 @@
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "Active TCP Connections",
+            "title_text": "HTTP Request Rate by Instance",
             "type": "timeseries",
             "width": 33,
             "x": 129,
@@ -765,7 +765,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:confluent.ksql.query_stats.num_active_queries{*} by {host}",
+                        "q": "sum:confluent.ksql.query_stats.num_active_queries{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -786,7 +786,7 @@
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "Active Queries by Host",
+            "title_text": "Active Queries by Instance",
             "type": "timeseries",
             "width": 33,
             "x": 163,
@@ -800,7 +800,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:confluent.ksql.query_stats.error_rate{*} by {host}",
+                        "q": "avg:confluent.ksql.query_stats.error_rate{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -821,7 +821,7 @@
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "Query Error Rate by Host",
+            "title_text": "Query Error Rate by Instance",
             "type": "timeseries",
             "width": 33,
             "x": 163,
@@ -835,7 +835,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:confluent.ksql.query_stats.bytes_consumed_total{*} by {host}",
+                        "q": "sum:confluent.ksql.query_stats.bytes_consumed_total{*} by {instance}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -856,7 +856,7 @@
             "title": true,
             "title_align": "left",
             "title_size": "16",
-            "title_text": "Bytes Consumed by Host",
+            "title_text": "Bytes Consumed by Instance",
             "type": "timeseries",
             "width": 33,
             "x": 163,
