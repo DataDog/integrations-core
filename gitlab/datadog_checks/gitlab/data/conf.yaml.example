@@ -423,6 +423,13 @@ init_config:
     #
     # timeout: 10
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
     ## @param allowed_metrics - list of strings - optional
     ## The list of legacy metrics to extract from Prometheus.
     #
