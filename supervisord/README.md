@@ -140,4 +140,4 @@ Need help? Contact [Datadog support][8].
 [7]: https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv
 [8]: https://docs.datadoghq.com/help
 [9]: https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor
-[10]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[10]: https://docs.datadoghq.com/agent/kubernetes/integrations

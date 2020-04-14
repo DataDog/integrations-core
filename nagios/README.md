@@ -81,7 +81,7 @@ Need help? Contact [Datadog support][9].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/developers/metrics/custom_metrics/
 [6]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
-[7]: https://docs.datadoghq.com/agent/autodiscovery/integrations/
+[7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://docs.datadoghq.com/help
 [10]: https://www.datadoghq.com/blog/nagios-monitoring

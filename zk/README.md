@@ -92,7 +92,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][12].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][12].
 
 | Parameter      | Value                                           |
 | -------------- | ----------------------------------------------- |
@@ -149,7 +149,7 @@ The Agent submits this service check if `expected_mode` is configured in `zk.yam
 Need help? Contact [Datadog support][11].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/zk/images/zk_dashboard.png
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/zk/datadog_checks/zk/data/conf.yaml.example
@@ -159,4 +159,4 @@ Need help? Contact [Datadog support][11].
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
 [11]: https://docs.datadoghq.com/help
-[12]: https://docs.datadoghq.com/agent/docker/log/
+[12]: https://docs.datadoghq.com/agent/kubernetes/log/

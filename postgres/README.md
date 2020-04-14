@@ -95,9 +95,9 @@ Follow the instructions below to configure this check for an Agent running on a 
        ## Password associated with the Datadog user.
        #
        password: "<PASSWORD>"
-           
+
        ## @param dbname - string - optional - default: postgres
-       ## Name of the PostgresSQL database to monitor. 
+       ## Name of the PostgresSQL database to monitor.
        ## Note: If omitted, the default system postgres database is queried.
        #
        dbname: "<DB_NAME>"
@@ -195,7 +195,7 @@ Required environment variables on the Agent container:
 | `<DD_APM_ENABLED>`      | true                                                              |
 | `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Docker Applications][18] and the [Kubernetes Daemon Setup][19] for a complete list of available environment variables and configuration.
+See [Tracing Kubernetes Applications][18] and the [Kubernetes Daemon Setup][19] for a complete list of available environment variables and configuration.
 
 Then, [instrument your application container][6] and set `DD_AGENT_HOST` to the name of your Agent container.
 
@@ -203,7 +203,7 @@ Then, [instrument your application container][6] and set `DD_AGENT_HOST` to the 
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection documentation][8].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
 
 | Parameter      | Value                                               |
 | -------------- | --------------------------------------------------- |
@@ -251,8 +251,8 @@ Additional helpful documentation, links, and articles:
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/tracing/send_traces/
 [6]: https://docs.datadoghq.com/tracing/setup/
-[7]: https://docs.datadoghq.com/agent/autodiscovery/integrations/
-[8]: https://docs.datadoghq.com/agent/docker/log/
+[7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[8]: https://docs.datadoghq.com/agent/kubernetes/log/
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv
 [11]: https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained
@@ -262,5 +262,5 @@ Additional helpful documentation, links, and articles:
 [15]: https://www.datadoghq.com/blog/collect-postgresql-data-with-datadog
 [16]: https://www.postgresql.org/docs/11/runtime-config-logging.html
 [17]: https://www.postgresql.org/message-id/20100210180532.GA20138@depesz.com
-[18]: https://docs.datadoghq.com/agent/docker/apm/?tab=java
+[18]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [19]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing

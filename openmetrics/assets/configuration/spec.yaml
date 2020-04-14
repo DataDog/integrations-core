@@ -8,3 +8,6 @@ files:
     - template: instances
       options:
         - template: instances/openmetrics
+          overrides:
+            namespace.hidden: false
+            metrics.hidden: false

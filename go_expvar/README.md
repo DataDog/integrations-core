@@ -81,7 +81,7 @@ Need help? Contact [Datadog support][11].
 [9]: https://docs.datadoghq.com/developers/metrics/custom_metrics
 [10]: https://docs.datadoghq.com/account_management/billing/custom_metrics
 [11]: https://docs.datadoghq.com/help
-[12]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[12]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [14]: https://github.com/DataDog/integrations-core/blob/master/go_expvar/metadata.csv
 [15]: https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog

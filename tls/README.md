@@ -68,4 +68,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://github.com/DataDog/integrations-core/blob/master/tls/metadata.csv
 [7]: https://github.com/DataDog/integrations-core/blob/master/tls/assets/service_checks.json
 [8]: https://docs.datadoghq.com/help
-[9]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[9]: https://docs.datadoghq.com/agent/kubernetes/integrations

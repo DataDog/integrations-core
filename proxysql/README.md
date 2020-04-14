@@ -69,7 +69,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 ##### Log collection
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][9].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
 
 | Parameter      | Value                                     |
 |----------------|-------------------------------------------|
@@ -101,13 +101,13 @@ The ProxySQL check does not include any events.
 Need help? Contact [Datadog support][11].
 
 [1]: https://proxysql.com/
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [3]: https://docs.datadoghq.com/agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/proxysql/datadog_checks/proxysql/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/proxysql/metadata.csv
-[9]: https://docs.datadoghq.com/agent/docker/log
+[9]: https://docs.datadoghq.com/agent/kubernetes/log/
 [10]: https://docs.datadoghq.com/help
 [11]: https://docs.datadoghq.com/help

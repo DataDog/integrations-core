@@ -83,4 +83,4 @@ To get a better idea of how (or why) to visualize StatsD metrics with Counts Gra
 [7]: https://docs.datadoghq.com/help
 [8]: https://www.datadoghq.com/blog/statsd
 [9]: https://www.datadoghq.com/blog/visualize-statsd-metrics-counts-graphing
-[10]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[10]: https://docs.datadoghq.com/agent/kubernetes/integrations

@@ -70,4 +70,4 @@ for more details about how to test and develop Agent based integrations.
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://github.com/DataDog/integrations-core/blob/master/coredns/metadata.csv
 [6]: http://docs.datadoghq.com/help
-[7]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[7]: https://docs.datadoghq.com/agent/kubernetes/integrations
