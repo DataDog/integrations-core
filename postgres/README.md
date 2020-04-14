@@ -95,9 +95,9 @@ Follow the instructions below to configure this check for an Agent running on a 
        ## Password associated with the Datadog user.
        #
        password: "<PASSWORD>"
-           
+
        ## @param dbname - string - optional - default: postgres
-       ## Name of the PostgresSQL database to monitor. 
+       ## Name of the PostgresSQL database to monitor.
        ## Note: If omitted, the default system postgres database is queried.
        #
        dbname: "<DB_NAME>"
@@ -252,7 +252,7 @@ Additional helpful documentation, links, and articles:
 [5]: https://docs.datadoghq.com/tracing/send_traces/
 [6]: https://docs.datadoghq.com/tracing/setup/
 [7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
-[8]: https://docs.datadoghq.com/agent/kubernetes/log//
+[8]: https://docs.datadoghq.com/agent/kubernetes/log/
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv
 [11]: https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained
