@@ -24,77 +24,83 @@ def run_profile_check(recording_name):
     check.check(instance)
 
 
-def test_f5(aggregator):
+def test_f5_testme(aggregator):
     run_profile_check('f5')
 
     gauges = [
-        'sysStatMemoryTotal',
-        'sysStatMemoryUsed',
-        'sysGlobalTmmStatMemoryTotal',
-        'sysGlobalTmmStatMemoryUsed',
-        'sysGlobalHostOtherMemoryTotal',
-        'sysGlobalHostOtherMemoryUsed',
-        'sysGlobalHostSwapTotal',
-        'sysGlobalHostSwapUsed',
-        'sysTcpStatOpen',
-        'sysTcpStatCloseWait',
-        'sysTcpStatFinWait',
-        'sysTcpStatTimeWait',
-        'sysUdpStatOpen',
-        'sysClientsslStatCurConns',
+        # 'sysStatMemoryTotal',
+        # 'sysStatMemoryUsed',
+        # 'sysGlobalTmmStatMemoryTotal',
+        # 'sysGlobalTmmStatMemoryUsed',
+        # 'sysGlobalHostOtherMemoryTotal',
+        # 'sysGlobalHostOtherMemoryUsed',
+        # 'sysGlobalHostSwapTotal',
+        # 'sysGlobalHostSwapUsed',
+        # 'sysTcpStatOpen',
+        # 'sysTcpStatCloseWait',
+        # 'sysTcpStatFinWait',
+        # 'sysTcpStatTimeWait',
+        # 'sysUdpStatOpen',
+        # 'sysClientsslStatCurConns',
     ]
     counts = [
-        'sysTcpStatAccepts',
-        'sysTcpStatAcceptfails',
-        'sysTcpStatConnects',
-        'sysTcpStatConnfails',
-        'sysUdpStatAccepts',
-        'sysUdpStatAcceptfails',
-        'sysUdpStatConnects',
-        'sysUdpStatConnfails',
-        'sysClientsslStatEncryptedBytesIn',
-        'sysClientsslStatEncryptedBytesOut',
-        'sysClientsslStatDecryptedBytesIn',
-        'sysClientsslStatDecryptedBytesOut',
-        'sysClientsslStatHandshakeFailures',
+        # 'sysTcpStatAccepts',
+        # 'sysTcpStatAcceptfails',
+        # 'sysTcpStatConnects',
+        # 'sysTcpStatConnfails',
+        # 'sysUdpStatAccepts',
+        # 'sysUdpStatAcceptfails',
+        # 'sysUdpStatConnects',
+        # 'sysUdpStatConnfails',
+        # 'sysClientsslStatEncryptedBytesIn',
+        # 'sysClientsslStatEncryptedBytesOut',
+        # 'sysClientsslStatDecryptedBytesIn',
+        # 'sysClientsslStatDecryptedBytesOut',
+        # 'sysClientsslStatHandshakeFailures',
     ]
     cpu_rates = [
-        'sysMultiHostCpuUser',
-        'sysMultiHostCpuNice',
-        'sysMultiHostCpuSystem',
-        'sysMultiHostCpuIdle',
-        'sysMultiHostCpuIrq',
-        'sysMultiHostCpuSoftirq',
-        'sysMultiHostCpuIowait',
+        # 'sysMultiHostCpuUser',
+        # 'sysMultiHostCpuNice',
+        # 'sysMultiHostCpuSystem',
+        # 'sysMultiHostCpuIdle',
+        # 'sysMultiHostCpuIrq',
+        # 'sysMultiHostCpuSoftirq',
+        # 'sysMultiHostCpuIowait',
     ]
-    if_gauges = ['ifAdminStatus', 'ifOperStatus']
+    if_gauges = [
+        # 'ifAdminStatus',
+        # 'ifOperStatus',
+    ]
     if_counts = [
-        'ifHCInOctets',
-        'ifInErrors',
-        'ifHCOutOctets',
-        'ifOutErrors',
-        'ifHCInBroadcastPkts',
-        'ifHCOutUcastPkts',
-        'ifHCOutMulticastPkts',
-        'ifOutDiscards',
-        'ifHCInUcastPkts',
-        'ifHCInMulticastPkts',
-        'ifHCOutBroadcastPkts',
-        'ifInDiscards',
+        # 'ifHCInOctets',
+        # 'ifInErrors',
+        # 'ifHCOutOctets',
+        # 'ifOutErrors',
+        # 'ifHCInBroadcastPkts',
+        # 'ifHCOutUcastPkts',
+        # 'ifHCOutMulticastPkts',
+        # 'ifOutDiscards',
+        # 'ifHCInUcastPkts',
+        # 'ifHCInMulticastPkts',
+        # 'ifHCOutBroadcastPkts',
+        # 'ifInDiscards',
     ]
 
     # TODO: add simulation data for these metrics.
 
-    ltm_gauges = [
-        'ltmVirtualServNumber',
+    ltm_virtual_server_gauges = [
         'ltmVirtualServEnabled',
+        'ltmVirtualServConnLimit',
         'ltmVirtualServStatClientCurConns',
         'ltmVirtualServStatVsUsageRatio5s',
         'ltmVirtualServStatVsUsageRatio1m',
         'ltmVirtualServStatVsUsageRatio5m',
         'ltmVirtualServStatCurrentConnsPerSec',
         'ltmVirtualServStatDurationRateExceeded',
-        'ltmVirtualServConnLimit',
+    ]
+
+    ltm_gauges = [
+        'ltmVirtualServNumber',
         'ltmNodeAddrNumber',
         'ltmNodeAddrSessionStatus',
         'ltmNodeAddrConnLimit',
@@ -120,9 +126,11 @@ def test_f5(aggregator):
         'ltmPoolQueueDepthLimit',
         'ltmPoolQueueTimeLimit',
         'ltmPoolActionOnServiceDown',
-        'ltmPoolMinUpMembers' 'ltmPoolMinUpMembersEnable',
+        'ltmPoolMinUpMembers',
+        'ltmPoolMinUpMembersEnable',
         'ltmPoolMinUpMemberAction',
-        'ltmPoolMinActiveMembers' 'ltmPoolActiveMemberCnt',
+        'ltmPoolMinActiveMembers',
+        'ltmPoolActiveMemberCnt',
         'ltmPoolDisallowSnat',
         'ltmPoolMemberNumber',
         'ltmPoolMemberMonitorState',
@@ -135,21 +143,27 @@ def test_f5(aggregator):
         'ltmPoolMemberDynamicRatio',
     ]
 
-    ltm_counts = [
+    ltm_virtual_server_counts = [
         'ltmVirtualServStatClientTotConns',
         'ltmVirtualServStatClientEvictedConns',
         'ltmVirtualServStatClientSlowKilled',
         'ltmVirtualServStatTotRequests',
+    ]
+
+    ltm_counts = [
         'ltmNodeAddrStatServerTotConns',
         'ltmNodeAddrStatTotRequests',
     ]
 
-    ltm_rates = [
+    ltm_virtual_server_rates = [
         'ltmVirtualServStatNoNodesErrors',
         'ltmVirtualServStatClientPktsIn',
         'ltmVirtualServStatClientBytesIn',
         'ltmVirtualServStatClientPktsOut',
         'ltmVirtualServStatClientBytesOut',
+    ]
+
+    ltm_rates = [
         'ltmNodeAddrStatServerPktsIn',
         'ltmNodeAddrStatServerBytesIn',
         'ltmNodeAddrStatServerPktsOut',
@@ -192,6 +206,32 @@ def test_f5(aggregator):
 
     for metric in ltm_counts:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
+
+    servers = ['server1', 'server2', 'server3']
+    for server in servers:
+        for metric in ltm_virtual_server_gauges:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric),
+                metric_type=aggregator.GAUGE,
+                tags=tags + ['server:{}'.format(server)],
+                count=1,
+            )
+
+        for metric in ltm_virtual_server_rates:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric),
+                metric_type=aggregator.RATE,
+                tags=tags + ['server:{}'.format(server)],
+                count=1,
+            )
+
+        for metric in ltm_virtual_server_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric),
+                metric_type=aggregator.MONOTONIC_COUNT,
+                tags=tags + ['server:{}'.format(server)],
+                count=1,
+            )
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
