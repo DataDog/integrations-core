@@ -274,10 +274,16 @@ class AerospikeCheck(AgentCheck):
                 continue
 
             # match only works at the beginning
-            ns_metric_name_match = re.match(r'{(\w+)}-(\w+):', line)
+            # ':' or ';' are not allowed in namespace-name: https://www.aerospike.com/docs/guide/limitations.html
+            ns_metric_name_match = re.match(r'{([^\}:;]+)}-(\w+):', line)
             if ns_metric_name_match:
                 ns = ns_metric_name_match.groups()[0]
                 metric_name = ns_metric_name_match.groups()[1]
+            else:
+                self.log.warning("Invalid data. Namespace and/or metric name not found in line: `%s`", line)
+                # Since the data come by pair and the order matters it's safer to return right away than submitting
+                # possibly wrong metrics.
+                return
 
             # need search because this isn't at the beginning
             ops_per_sec = re.search(r'(\w+\/\w+)', line)
