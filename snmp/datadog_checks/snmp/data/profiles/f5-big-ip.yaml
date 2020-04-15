@@ -357,49 +357,75 @@ metrics:
       OID: 1.3.6.1.4.1.3375.2.2.5.1.2
       name: ltmPoolTable
     symbols:
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.10
-        name: ltmPoolDisallowNat
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.11
-        name: ltmPoolSimpleTimeout
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.12
-        name: ltmPoolIpTosToClient
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.13
-        name: ltmPoolIpTosToServer
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.14
-        name: ltmPoolLinkQosToClient
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.15
-        name: ltmPoolLinkQosToServer
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.16
-        name: ltmPoolDynamicRatioSum
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.22
-        name: ltmPoolSlowRampTime
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.23
-        name: ltmPoolMemberCnt
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.24
-        name: ltmPoolQueueOnConnectionLimit
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.25
-        name: ltmPoolQueueDepthLimit
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.26
-        name: ltmPoolQueueTimeLimit
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.3
-        name: ltmPoolActionOnServiceDown
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.4
-        name: ltmPoolMinUpMembers
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.5
-        name: ltmPoolMinUpMembersEnable
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.6
-        name: ltmPoolMinUpMemberAction
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.7
-        name: ltmPoolMinActiveMembers
       - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.8
         name: ltmPoolActiveMemberCnt
-      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.9
-        name: ltmPoolDisallowSnat
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.16
+        name: ltmPoolDynamicRatioSum
+      - OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.23
+        name: ltmPoolMemberCnt
+    forced_type: gauge
     metric_tags:
       - tag: pool
         column:
           OID: 1.3.6.1.4.1.3375.2.2.5.1.2.1.1
           name: ltmPoolName
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.2.5.2.3
+      name: ltmPoolStatTable
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.2
+        name: ltmPoolStatServerPktsIn
+      - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.3
+        name: ltmPoolStatServerBytesIn
+      - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.4
+        name: ltmPoolStatServerPktsOut
+      - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.5
+        name: ltmPoolStatServerBytesOut
+    metric_tags:
+      - tag: pool
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.1
+          name: ltmPoolStatName
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.2.5.2.3
+      name: ltmPoolStatTable
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.7
+        name: ltmPoolStatServerTotConns
+      - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.23
+        name: ltmPoolStatConnqServiced
+      - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.30
+        name: ltmPoolStatTotRequests
+    forced_type: monotonic_count
+    metric_tags:
+      - tag: pool
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.1
+          name: ltmPoolStatName
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.2.5.2.3
+      name: ltmPoolStatTable
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.8
+        name: ltmPoolStatServerCurConns
+      - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.18
+        name: ltmPoolStatConnqDepth
+      - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.19
+        name: ltmPoolStatConnqAgeHead
+      - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.30
+        name: ltmPoolStatCurSessions
+    forced_type: gauge
+    metric_tags:
+      - tag: pool
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.1
+          name: ltmPoolStatName
 
   # Pool members.
 
@@ -429,6 +455,7 @@ metrics:
         name: ltmPoolMemberPriority
       - OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.9
         name: ltmPoolMemberDynamicRatio
+    forced_type: gauge
     metric_tags:
       - tag: pool
         column:
