@@ -102,9 +102,14 @@ class WaitAndUnsealVault(WaitFor):
             err = run_command("docker exec vault-leader vault operator unseal {}".format(k), capture=True).stderr
             if err:
                 raise Exception("Can't unseal vault-leader. \n{}".format(err))
+
+            time.sleep(2)
+
             err = run_command("docker exec vault-replica vault operator unseal {}".format(k), capture=True).stderr
             if err:
                 raise Exception("Can't unseal vault-replica. \n{}".format(err))
+
+            time.sleep(2)
 
         root_token = [line for line in result if 'Initial Root Token' in line]
         if not root_token:
