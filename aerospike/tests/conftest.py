@@ -52,7 +52,7 @@ def dd_environment():
         COMPOSE_FILE,
         conditions=[CheckDockerLogs(COMPOSE_FILE, ['service ready: soon there will be cake!']), WaitFor(init_db)],
     ):
-        yield FULL_INSTANCE
+        yield INSTANCE
 
 
 @pytest.fixture

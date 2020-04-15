@@ -313,6 +313,7 @@ aerospike.xdr_ship_success,gauge,,,,Number of records successfully shipped to re
 aerospike.xdr_uninitialized_destination_error,gauge,,,,Number of records in the digest log not shipped because the destination cluster has not been initialized for a DC that is configured for a namespace.,0,aerospike,
 aerospike.xdr_unknown_namespace_error,gauge,,,,Number of records in the digest log not shipped because they belong to an unknown namespace on the source cluster.,0,aerospike,
 aerospike.xdr_uptime,gauge,,second,,Time the XDR process has been running. Deprecated in 3.11.1.1,0,aerospike,
+
 aerospike.namespace.available_bin_names,gauge,,,,Remaining number of unique bins that the user can create for this namespace.,0,aerospike,
 aerospike.namespace.current_time,gauge,,,,Current time represented as Aerospike epoch time.,0,aerospike,
 aerospike.namespace.ldc_gc_rate,gauge,,,,,0,aerospike,
@@ -601,7 +602,7 @@ aerospike.system_total_cpu_pct,gauge,,,,Percentage of CPU usage by all running p
 aerospike.system_user_cpu_pct,gauge,,,,Percentage of CPU usage by processes running in user mode.,0,aerospike,
 aerospike.time_since_rebalance,gauge,,,,Number of seconds since the last reclustering event, either triggered via the recluster info command or by a cluster disruption (such as a node being add/removed or a network disruption).,0,aerospike,
 aerospike.xdr_ship_destination_permanent_error,gauge,,,,Number of permanent errors from the remote cluster(s) while shipping records.,0,aerospike,
-aerospike.dc_as_open_conn,gauge,,,,Number of open connection to the Aerospike DC.,0,aerospike,
+
 aerospike.set.memory_data_bytes,gauge,,byte,,Memory used by this set for the data part (does not include index part). Value will be 0 if data is not stored in memory. ,0,aerospike,
 aerospike.set.objects,gauge,,record,,Total number of objects (master and all replicas) in this set on this node.,0,aerospike,Set Objects
 aerospike.set.stop_writes_count,gauge,,,,Total count this set has hit stop_writes,0,aerospike,

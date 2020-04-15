@@ -9,22 +9,6 @@ from . import common
 
 pytestmark = pytest.mark.unit
 
-METRICS = [
-    'aerospike.datacenter.dc_timelag',
-    'aerospike.datacenter.dc_rec_ship_attempts',
-    'aerospike.datacenter.dc_delete_ship_attempts',
-    'aerospike.datacenter.dc_remote_ship_ok',
-    'aerospike.datacenter.dc_err_ship_client',
-    'aerospike.datacenter.dc_err_ship_server',
-    'aerospike.datacenter.dc_esmt_bytes_shipped',
-    'aerospike.datacenter.dc_esmt_ship_avg_comp_pct',
-    'aerospike.datacenter.dc_latency_avg_ship',
-    'aerospike.datacenter.dc_remote_ship_avg_sleep',
-    'aerospike.datacenter.dc_open_conn',
-    'aerospike.datacenter.dc_recs_inflight',
-    'aerospike.datacenter.dc_size',
-]
-
 
 def test_datacenter_metrics(aggregator):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
@@ -34,7 +18,7 @@ def test_datacenter_metrics(aggregator):
         if command == 'dcs':
             return ['test']
         elif command.startswith("dc/"):
-            return common.DATACENTER_METRICS
+            return common.MOCK_DATACENTER_METRICS
 
         return original_get_info(command, separator)
 
@@ -46,7 +30,7 @@ def test_datacenter_metrics(aggregator):
     check.collect_latency = mock.MagicMock()
     check.collect_version = mock.MagicMock()
     check.check(common.INSTANCE)
-    for metric in METRICS:
+    for metric in common.DATACENTER_METRICS:
         aggregator.assert_metric(metric)
 
 
