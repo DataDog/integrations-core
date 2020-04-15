@@ -281,6 +281,8 @@ class AerospikeCheck(AgentCheck):
                 metric_name = ns_metric_name_match.groups()[1]
             else:
                 self.log.warning("Invalid data. Namespace and/or metric name not found in line: `%s`", line)
+                # Since the data come by pair and the order matters it's safer to return right away than submitting
+                # possibly wrong metrics.
                 return
 
             # need search because this isn't at the beginning
