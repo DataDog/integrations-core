@@ -14,7 +14,7 @@ class WMICheck(WinWMICheck):
     """
 
     def __init__(self, name, init_config, instances):
-        super(WinWMICheck, self).__init__(name, init_config, instances)
+        super(WMICheck, self).__init__(name, init_config, instances)
         self.custom_tags = self.instance.get('tags', [])
         self.filters = self.instance.get('filters', [])
 
