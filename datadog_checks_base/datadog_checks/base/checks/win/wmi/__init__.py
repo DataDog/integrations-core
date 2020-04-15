@@ -276,7 +276,7 @@ class WinWMICheck(AgentCheck):
         return "{host}:{namespace}:{wmi_class}".format(host=host, namespace=namespace, wmi_class=wmi_class)
 
     def get_running_wmi_sampler(self, properties):
-        # type: (List[str]) -> WMISampler
+        # type: (Iterable[str]) -> WMISampler
         return self._get_running_wmi_sampler(
             instance_key=None,
             wmi_class=self.wmi_class,
