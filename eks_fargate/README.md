@@ -250,6 +250,14 @@ spec:
 
 **Note**: Don't forget to replace `<YOUR_DATADOG_API_KEY>` with the [Datadog API key from your organization][13].
 
+### Live Containers
+
+Datadog Agent 6.19+ supports live containers in the EKS Fargate integration. Live containers appear in the [Containers][21] page.
+
+### Live Processes
+
+Datadog Agent 6.19+ supports live processes in the EKS Fargate integration. Live processes appear in the [Processes][22] page. To enable live processes, [enable `shareProcessNamespace` in the pod spec][23].
+
 ## Traces Collection
 
 Set up the container port `8126` over your Agent container to collect traces from your application container. [Read more about how to set up tracing][17].
@@ -356,3 +364,6 @@ Need help? Contact [Datadog support][20].
 [18]: http://docs.datadoghq.com/agent/cluster_agent/setup
 [19]: http://docs.datadoghq.com/agent/cluster_agent/event_collection
 [20]: https://docs.datadoghq.com/help
+[21]: https://app.datadoghq.com/containers
+[22]: https://app.datadoghq.com/process
+[23]: https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/
