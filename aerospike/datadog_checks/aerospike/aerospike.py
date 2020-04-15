@@ -270,7 +270,7 @@ class AerospikeCheck(AgentCheck):
             timestamp = re.match(r'(\d+:\d+:\d+)', line)
             if timestamp:
                 metric_values = line.split(",")[1:]
-                ns_latencies[ns]["metric_values"] = ns_latencies[ns].get("metric_values", []) + list(metric_values)
+                ns_latencies[ns].setdefault("metric_values", []).extend(metric_values)
                 continue
 
             # match only works at the beginning
