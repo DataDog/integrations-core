@@ -11,14 +11,14 @@ jboss.jdbc_preparedstatementcache.miss,gauge,10,miss,,number of times that a sta
 jboss.jdbc_preparedstatementcache.hit,gauge,10,hit,,number of times that statements from the cache were used,0,jboss_wildfly,jboss ps cache hit
 jboss.transactions.aborted,gauge,10,transaction,,total number of transactions which have rolled back.,0,jboss_wildfly,jboss tx rollback
 jboss.transactions.application_rollbacks,gauge,10,transaction,,number of transactions rolled back by the application.,0,jboss_wildfly,jboss tx rollback app
-jboss.transactions.committed,gauge,10,transaction,,number of committed transactions.,0,jboss_wildfly,jboss tx commit
+jboss.transactions.committed,gauge,10,transaction,,number of committed transactions.,0,jboss_wildfly,jboss tx commit
 jboss.transactions.heuristics,gauge,10,transaction,,number of transactions which have terminated with heuristic outcomes,0,jboss_wildfly,jboss tx heuristic
 jboss.transactions.inflight,gauge,10,transaction,,total number of inflight (active) transactions.,0,jboss_wildfly,jboss tx inflight
-jboss.transactions.nested,gauge,10,transaction,,number of nested (sub) transactions created so far.,0,jboss_wildfly,jboss tx nested
+jboss.transactions.nested,gauge,10,transaction,,number of nested (sub) transactions created so far.,0,jboss_wildfly,jboss tx nested
 jboss.transactions.resource_rollbacks,gauge,10,transaction,,number of transactions rolled back by participants.,0,jboss_wildfly,jboss tx rollback resource
 jboss.transactions.system_rollbacks,gauge,10,transaction,,number of transactions that were rolled back due to an internal system error.,0,jboss_wildfly,jboss tx rollback system
 jboss.transactions.timed_out,gauge,10,transaction,,total number of transactions rolled back due to timeout.,0,jboss_wildfly,jboss tx timeout
-jboss.transactions.count,gauge,10,transaction,,number of transactions (top-level and nested) created so far.,0,jboss_wildfly,jboss tx count
+jboss.transactions.count,gauge,10,transaction,,number of transactions (top-level and nested) created so far.,0,jboss_wildfly,jboss tx count
 jboss.undertow_listener.error_count,gauge,10,request,,number of 500 responses that have been sent,0,jboss_wildfly,jboss undertow errors
 jboss.undertow_listener.processing_time,gauge,10,nanosecond,,total processing time of all requests handed by this listener,0,jboss_wildfly,jboss undertow process time
 jboss.undertow_listener.request_count,gauge,10,request,,number of requests served,0,jboss_wildfly,jboss undertow requests

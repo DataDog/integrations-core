@@ -2,14 +2,21 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from six import iteritems
+
+from datadog_checks.base import ConfigurationError
+from datadog_checks.base.errors import CheckException
 
 from ... import AgentCheck
 from .sampler import WMISampler
 
 WMIMetric = namedtuple('WMIMetric', ['name', 'value', 'tags'])
+WMIProperties = Tuple[Dict[str, Tuple[str, str]], Iterable[str]]
+TagQuery = List[str]
+WMIObject = Dict
+WMIFilter = Union[str, List[str]]
 
 
 class InvalidWMIQuery(Exception):
@@ -44,26 +51,34 @@ class WinWMICheck(AgentCheck):
     """
 
     def __init__(self, *args, **kwargs):  # To support optional agentConfig
+        # type: (List[Any], Dict[str, Any]) -> None
         super(WinWMICheck, self).__init__(*args, **kwargs)
+
+        if not self.instance:
+            # This should not happen and is here for legacy purposes.
+            # Once all checks are updated to use the agent 6 signature we can change self.instance type in base class
+            # to not be optional and remove this check.
+            raise ConfigurationError("No instance configuration provided")
 
         # Connection information
         self.host = self.instance.get('host', "localhost")  # type: str
         self.namespace = self.instance.get('namespace', "root\\cimv2")  # type: str
-        self.provider = self.instance.get('provider')  # type: int
+        self.provider = self.instance.get('provider')  # type: Optional[int]
         self.username = self.instance.get('username', "")  # type: str
         self.password = self.instance.get('password', "")  # type: str
 
         # WMI instance
-        self.wmi_class = self.instance.get('class')  # type: str
-        self.metrics = self.instance.get('metrics')  # type: List[str]
-        self.filters = self.instance.get('filters')
+        self.wmi_class = self.instance.get('class', '')  # type: str
+        self.metrics_to_capture = self.instance.get('metrics', [])  # type: List[List[str]]
+        self.filters = self.instance.get('filters', [])  # type: List[Dict[str, WMIFilter]]
         self.tag_by = self.instance.get('tag_by', "")  # type: str
-        self.tag_queries = self.instance.get('tag_queries', [])  # type: List[str]
+        self.tag_queries = self.instance.get('tag_queries', [])  # type: List[TagQuery]
 
-        self.wmi_sampler = None  # type: WMISampler
-        self._wmi_props = None  # type: Tuple[Dict, List[str]]
+        self._wmi_sampler = None  # type: Optional[WMISampler]
+        self._wmi_props = None  # type: Optional[Tuple[Dict[str, Tuple[str, str]], Iterable[str]]]
 
-    def _format_tag_query(self, wmi_obj=None):
+    def _format_tag_query(self, sampler, wmi_obj, tag_query):
+        # type: (WMISampler, WMIObject, TagQuery) -> Tuple[str, str, List[Dict]]
         """
         Format `tag_query` or raise on incorrect parameters.
         """
@@ -88,11 +103,10 @@ class WinWMICheck(AgentCheck):
 
         return target_class, target_property, [{link_target_class_property: link_source_property}]
 
-    def _raise_on_invalid_tag_query_result(self, wmi_obj):
-        """
-        """
-        target_property = self.wmi_sampler.property_names[0]
-        target_class = self.wmi_sampler.class_name
+    def _raise_on_invalid_tag_query_result(self, sampler, wmi_obj, tag_query):
+        # type: (WMISampler, WMIObject, TagQuery) -> None
+        target_property = sampler.property_names[0]
+        target_class = sampler.class_name
 
         if len(self.wmi_sampler) != 1:
             message = "no result was returned"
@@ -115,8 +129,8 @@ class WinWMICheck(AgentCheck):
             )
             raise TypeError
 
-    def _get_tag_query_tag(self, wmi_obj, tag_query):
-        # type: (Any, str) -> str
+    def _get_tag_query_tag(self, sampler, wmi_obj, tag_query):
+        # type: (WMISampler, WMIObject, TagQuery) -> str
         """
         Design a query based on the given WMIObject to extract a tag.
 
@@ -146,10 +160,13 @@ class WinWMICheck(AgentCheck):
         return tag
 
     def extract_metrics(self, constant_tags):
-        # type (List[str]) -> List[WMIMetric]
-        return self._extract_metrics(self.wmi_sampler, self.tag_by, self.tag_queries, constant_tags)
+        # type: (List[str]) -> List[WMIMetric]
+        if not self._wmi_sampler:
+            raise CheckException("A running sampler is needed before you can extract metrics")
+        return self._extract_metrics(self._wmi_sampler, self.tag_by, self.tag_queries, constant_tags)
 
-    def _extract_metrics(self, wmi_sampler, tag_by=None, tag_queries=None, constant_tags=None):
+    def _extract_metrics(self, wmi_sampler, tag_by, tag_queries, constant_tags):
+        # type: (WMISampler, str, List[List[str]], List[str]) -> List[WMIMetric]
         """
         Extract and tag metrics from the WMISampler.
 
@@ -223,7 +240,7 @@ class WinWMICheck(AgentCheck):
         return extracted_metrics
 
     def _submit_metrics(self, metrics, metric_name_and_type_by_property):
-        # type: (List[WMIMetric], Tuple[Dict, List[str]]) -> None
+        # type: (List[WMIMetric], Dict[str, Tuple[str, str]]) -> None
         """
         Resolve metric names and types and submit it.
         """
@@ -232,7 +249,7 @@ class WinWMICheck(AgentCheck):
                 metric.name not in metric_name_and_type_by_property
                 and metric.name.lower() not in metric_name_and_type_by_property
             ):
-                # Only report the metrics that were specified in the configration
+                # Only report the metrics that were specified in the configuration
                 # Ignore added properties like 'Timestamp_Sys100NS', `Frequency_Sys100NS`, etc ...
                 continue
 
@@ -251,6 +268,7 @@ class WinWMICheck(AgentCheck):
             func(metric_name, metric.value, metric.tags)
 
     def _get_instance_key(self, host, namespace, wmi_class, other=None):
+        # type: (str, str, str, Any) -> str
         """
         Return an index key for a given instance. Useful for caching.
         """
@@ -261,8 +279,9 @@ class WinWMICheck(AgentCheck):
         return "{host}:{namespace}:{wmi_class}".format(host=host, namespace=namespace, wmi_class=wmi_class)
 
     def get_running_wmi_sampler(self, properties):
-        # type (List[str]]) -> WMISampler
+        # type: (List[str]) -> WMISampler
         return self._get_running_wmi_sampler(
+            instance_key=None,
             wmi_class=self.wmi_class,
             properties=properties,
             tag_by=self.tag_by,
@@ -274,41 +293,35 @@ class WinWMICheck(AgentCheck):
             password=self.password,
         )
 
-    def _get_running_wmi_sampler(self, instance_key=None, wmi_class=None, properties=None, tag_by="", **kwargs):
+    def _get_running_wmi_sampler(self, instance_key, wmi_class, properties, tag_by="", **kwargs):
+        # type: (Any, str, List[str], str, Any) -> WMISampler
         """
         Return a running WMISampler for the given (class, properties).
 
         If no matching WMISampler is running yet, start one and cache it.
         """
-        wmi_class = wmi_class or self.wmi_class
-        tag_by = tag_by or self.tag_by
-        properties = list(properties) + [tag_by] if tag_by else list(properties)
+        if not self._wmi_sampler:
+            properties = list(properties) + [tag_by] if tag_by else list(properties)
+            self._wmi_sampler = WMISampler(self.log, wmi_class, properties, **kwargs)
+            self._wmi_sampler.start()
 
-        kwargs['filters'] = kwargs.get('filters', self.filters)
-        kwargs['host'] = kwargs.get('host', self.host)
-        kwargs['namespace'] = kwargs.get('namespace', self.namespace)
-        kwargs['provider'] = kwargs.get('provider', self.provider)
-        kwargs['username'] = kwargs.get('username', self.username)
-        kwargs['password'] = kwargs.get('password', self.password)
+        return self._wmi_sampler
 
-        if not self.wmi_sampler:
-            self.wmi_sampler = WMISampler(self.log, wmi_class, properties, **kwargs)
-            self.wmi_sampler.start()
+    def get_wmi_properties(self):
+        # type: () -> WMIProperties
+        return self._get_wmi_properties(None, self.metrics_to_capture, self.tag_queries)
 
-        return self.wmi_sampler
-
-    def _get_wmi_properties(self, instance_key=None, metrics=None, tag_queries=None):
+    def _get_wmi_properties(self, instance_key, metrics, tag_queries):
+        # type: (Any, List[List[str]], List[List[str]]) -> WMIProperties
         """
         Create and cache a (metric name, metric type) by WMI property map and a property list.
         """
         if not self._wmi_props:
-            metrics = metrics or self.metrics
-            tag_queries = tag_queries or self.tag_queries
-
             metric_name_by_property = dict(
                 (wmi_property.lower(), (metric_name, metric_type)) for wmi_property, metric_name, metric_type in metrics
-            )
-            properties = map(lambda x: x[0], metrics + tag_queries)
+            )  # type: Dict[str, Tuple[str, str]]
+            properties = map(lambda x: x[0], metrics + tag_queries)  # type: Iterable[str]
+
             self._wmi_props = (metric_name_by_property, properties)
 
         return self._wmi_props
@@ -317,6 +330,7 @@ class WinWMICheck(AgentCheck):
 def from_time(
     year=None, month=None, day=None, hours=None, minutes=None, seconds=None, microseconds=None, timezone=None
 ):
+    # type: (Optional[int], Optional[int], Optional[int], Optional[int], Optional[int], Optional[int], Optional[int], Optional[int]) -> str
     """Convenience wrapper to take a series of date/time elements and return a WMI time
     of the form `yyyymmddHHMMSS.mmmmmm+UUU`. All elements may be int, string or
     omitted altogether. If omitted, they will be replaced in the output string
@@ -328,11 +342,12 @@ def from_time(
     :param minutes: The minutes element of the date/time
     :param seconds: The seconds element of the date/time
     :param microseconds: The microseconds element of the date/time
-    :param timezone: The timeezone element of the date/time
+    :param timezone: The timezone element of the date/time
     :returns: A WMI datetime string of the form: `yyyymmddHHMMSS.mmmmmm+UUU`
     """
 
     def str_or_stars(i, length):
+        # type: (Optional[int], int) -> str
         if i is None:
             return "*" * length
         else:
@@ -366,6 +381,7 @@ def from_time(
 
 
 def to_time(wmi_time):
+    # type: (str) -> Tuple[Optional[int], Optional[int], Optional[int], Optional[int], Optional[int], Optional[int], Optional[int], Optional[str]]
     """Convenience wrapper to take a WMI datetime string of the form
     yyyymmddHHMMSS.mmmmmm+UUU and return a 9-tuple containing the
     individual elements, or None where string contains placeholder
@@ -377,6 +393,7 @@ def to_time(wmi_time):
     """
 
     def int_or_none(s, start, end):
+        # type: (str, int, int) -> Optional[int]
         try:
             return int(s[start:end])
         except ValueError:
@@ -389,7 +406,7 @@ def to_time(wmi_time):
     minutes = int_or_none(wmi_time, 10, 12)
     seconds = int_or_none(wmi_time, 12, 14)
     microseconds = int_or_none(wmi_time, 15, 21)
-    timezone = wmi_time[22:]
+    timezone = wmi_time[22:]  # type: Optional[str]
 
     if timezone == "***":
         timezone = None
