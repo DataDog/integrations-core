@@ -128,9 +128,21 @@ def test_check_with_event_format(mock_from_time, mock_to_time, check, mock_get_w
 
     check.check(instance)
     check.check(instance)
+    message = """%%%
+```
+Logfile: Application
+Message: SomeMessage
+SourceName: MSQLSERVER
+EventCode: 1000.0
+Message: SomeMessage
+InsertionStrings: [insertionstring]
+TimeGenerated: 21001224113047.000000-480
+Type: Error
+```
+%%%"""
 
     aggregator.assert_event(
-        'SomeMessage',
+        message,
         count=1,
         tags=instance['tags'],
         msg_title='Application/MSQLSERVER',
