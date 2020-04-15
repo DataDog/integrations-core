@@ -12,7 +12,10 @@ from .metrics import CITADEL_METRICS, GALLEY_METRICS, GENERIC_METRICS, MESH_METR
 
 
 class Istio(OpenMetricsBaseCheck):
-    def __init__(self, name, init_config, instances=None):
+
+    DEFAULT_METRIC_LIMIT = 0
+
+    def __init__(self, name, init_config, instances):
 
         # Create instances we can use in OpenMetricsBaseCheck
         generic_instances = None
@@ -20,7 +23,7 @@ class Istio(OpenMetricsBaseCheck):
             generic_instances = self.create_generic_instances(instances)
 
         # Set up OpenMetricsBaseCheck with our generic instances
-        super(Istio, self).__init__(name, init_config, instances=generic_instances)
+        super(Istio, self).__init__(name, init_config, generic_instances)
 
     def check(self, instance):
         """
