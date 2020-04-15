@@ -95,6 +95,8 @@ def test_check(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggreg
     check.check(instance)
     check.check(instance)
 
+    print("aggregator._events: ", aggregator._events)
+    1/0
     aggregator.assert_event(
         'SomeMessage',
         count=1,
