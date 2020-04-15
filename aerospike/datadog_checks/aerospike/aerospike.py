@@ -279,6 +279,9 @@ class AerospikeCheck(AgentCheck):
             if ns_metric_name_match:
                 ns = ns_metric_name_match.groups()[0]
                 metric_name = ns_metric_name_match.groups()[1]
+            else:
+                self.log.warning("Invalid data. Namespace and/or metric name not found in line: `%s`", line)
+                return
 
             # need search because this isn't at the beginning
             ops_per_sec = re.search(r'(\w+\/\w+)', line)
