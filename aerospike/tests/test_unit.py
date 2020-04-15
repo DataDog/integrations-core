@@ -65,7 +65,7 @@ def connection_uses_tls():
         assert client.called_with({'host': check._host, 'tls': tls_config})
 
 
-def test_collect_latency(aggregator):
+def test_collect_latency_parser(aggregator):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
     check.get_info = mock.MagicMock(return_value=[
         'error-no-data-yet-or-back-too-small',
@@ -73,9 +73,9 @@ def test_collect_latency(aggregator):
         '11:53:57,0.0,0.00,0.00,0.00',
         '{ns-1}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
         '11:53:57,0.0,0.00,0.00,0.00',
-        '{ns-2}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+        '{ns-2_foo}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
         '11:53:57,0.0,0.00,0.00,0.00',
-        '{ns-2}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+        '{ns-2_foo}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
         '11:53:57,0.0,0.00,0.00,0.00',
         'error-no-data-yet-or-back-too-small',
         'error-no-data-yet-or-back-too-small',
@@ -93,7 +93,7 @@ def test_collect_latency(aggregator):
         'aerospike.namespace.latency.write_over_64ms',
     ]
 
-    for ns in ['ns-1', 'ns-2']:
+    for ns in ['ns-1', 'ns-2_foo']:
         for metric in metrics:
             aggregator.assert_metric(metric, tags=['namespace:{}'.format(ns), 'tag:value'])
 
