@@ -26,88 +26,89 @@ class Win32EventLogWMI(WinWMICheck):
     NAMESPACE = "root\\CIMV2"
     EVENT_CLASS = "Win32_NTLogEvent"
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        WinWMICheck.__init__(self, name, init_config, agentConfig, instances=instances)
+    def __init__(self, name, init_config, instances):
+        if not instances:
+            raise ConfigurationError("No instance configuration provided")
+        instances[0].update({
+            'class': self.EVENT_CLASS,
+            'namespace': self.NAMESPACE
+        })
+        super(Win32EventLogWMI, self).__init__(self, name, init_config, instances=instances)
+
         # Settings
+        self.instance_tags = self.instance.get('tags', [])
+        self.notify = self.instance.get('notify', [])
+
         self._tag_event_id = is_affirmative(init_config.get('tag_event_id', False))
         self._verbose = init_config.get('verbose', True)
-        self._default_event_priority = init_config.get('default_event_priority', 'normal')
 
-        # State
-        self.last_ts = {}
+        default_event_priority = init_config.get('default_event_priority', 'normal')
+        self.event_priority = self.instance.get('event_priority', default_event_priority)
 
-    def check(self, instance):
-        # Connect to the WMI provider
-        host = instance.get('host', "localhost")
-        username = instance.get('username', "")
-        password = instance.get('password', "")
-        instance_tags = instance.get('tags', [])
-        notify = instance.get('notify', [])
-        event_priority = instance.get('event_priority', self._default_event_priority)
-        if (event_priority.lower() != 'normal') and (event_priority.lower() != 'low'):
-            event_priority = 'normal'
+        self.ltypes = self.instance.get('type', [])
+        self.source_names = self.instance.get('source_name', [])
+        self.log_files = self.instance.get('log_file', [])
+        self.event_ids = self.instance.get('event_id', [])
+        self.event_format = self.instance.get('event_format')
+        self.message_filters = self.instance.get('message_filters', [])
 
-        user = instance.get('user')
-        ltypes = instance.get('type', [])
-        source_names = instance.get('source_name', [])
-        log_files = instance.get('log_file', [])
-        event_ids = instance.get('event_id', [])
-        event_format = instance.get('event_format')
-        message_filters = instance.get('message_filters', [])
-
-        if not (source_names or event_ids or message_filters or log_files or ltypes):
+        if not (self.source_names or self.event_ids or self.message_filters or self.log_files or self.ltypes):
             raise ConfigurationError(
                 'At least one of the following filters must be set: '
                 'source_name, event_id, message_filters, log_file, type'
             )
 
-        instance_hash = hash_mutable(instance)
-        instance_key = self._get_instance_key(host, self.NAMESPACE, self.EVENT_CLASS, instance_hash)
+        # State
+        self.last_ts = None
 
-        # Store the last timestamp by instance
-        if instance_key not in self.last_ts:
+    def check(self, _):
+        # Connect to the WMI provider
+        if (self.event_priority.lower() != 'normal') and (self.event_priority.lower() != 'low'):
+            event_priority = 'normal'
+
+        # Store the last timestamp
+        if self.last_ts is None:
             # If system boot was withing 600s of dd agent start then use boottime as last_ts
             if uptime() <= 600:
-                self.last_ts[instance_key] = datetime.utcnow() - timedelta(seconds=uptime())
+                self.last_ts = datetime.utcnow() - timedelta(seconds=uptime())
             else:
-                self.last_ts[instance_key] = datetime.utcnow()
+                self.last_ts = datetime.utcnow()
             return
 
         # Event properties
         event_properties = list(self.EVENT_PROPERTIES)
-
-        if event_format is not None:
+        if self.event_format is not None:
             event_properties.extend(list(set(self.EXTRA_EVENT_PROPERTIES) & set(event_format)))
         else:
             event_properties.extend(self.EXTRA_EVENT_PROPERTIES)
 
         # Event filters
-        query = {}
         filters = []
-        last_ts = self.last_ts[instance_key]
+        query = {}
+        last_ts = self.last_ts
         query['TimeGenerated'] = ('>=', self._dt_to_wmi(last_ts))
-        if user:
-            query['User'] = ('=', user)
-        if ltypes:
+        if self.username:
+            query['User'] = ('=', self.username)
+        if self.ltypes:
             query['Type'] = []
-            for ltype in ltypes:
+            for ltype in self.ltypes:
                 query['Type'].append(('=', ltype))
-        if source_names:
+        if self.source_names:
             query['SourceName'] = []
-            for source_name in source_names:
+            for source_name in self.source_names:
                 query['SourceName'].append(('=', source_name))
-        if log_files:
+        if self.log_files:
             query['LogFile'] = []
-            for log_file in log_files:
+            for log_file in self.log_files:
                 query['LogFile'].append(('=', log_file))
-        if event_ids:
+        if self.event_ids:
             query['EventCode'] = []
-            for event_id in event_ids:
+            for event_id in self.event_ids:
                 query['EventCode'].append(('=', event_id))
-        if message_filters:
+        if self.message_filters:
             query['NOT Message'] = []
             query['Message'] = []
-            for filt in message_filters:
+            for filt in self.message_filters:
                 if filt[0] == '-':
                     query['NOT Message'].append(('LIKE', filt[1:]))
                 else:
@@ -115,16 +116,10 @@ class Win32EventLogWMI(WinWMICheck):
 
         filters.append(query)
 
-        wmi_sampler = self._get_running_wmi_sampler(
-            instance_key,
-            self.EVENT_CLASS,
-            event_properties,
+        wmi_sampler = self.get_running_wmi_sampler(
+            properties=event_properties,
             filters=filters,
-            host=host,
-            namespace=self.NAMESPACE,
-            username=username,
-            password=password,
-            and_props=['Message'],
+            and_props=['Message']
         )
 
         wmi_sampler.reset_filter(new_filters=filters)
@@ -136,14 +131,14 @@ class Win32EventLogWMI(WinWMICheck):
                 self.EVENT_CLASS,
                 event_properties,
                 filters,
-                instance_tags,
+                self.instance_tags,
             )
         else:
             for ev in wmi_sampler:
                 # for local events we dont need to specify a hostname
-                hostname = None if (host == "localhost" or host == ".") else host
+                hostname = None if (self.host == "localhost" or self.host == ".") else self.host
                 log_ev = LogEvent(
-                    ev, self.log, hostname, instance_tags, notify, self._tag_event_id, event_format, event_priority
+                    ev, self.log, hostname, self.instance_tags, self.notify, self._tag_event_id, self.event_format, self.event_priority
                 )
 
                 # Since WQL only compares on the date and NOT the time, we have to
@@ -155,12 +150,12 @@ class Win32EventLogWMI(WinWMICheck):
                     self.log.debug('Skipping event after %s. ts=%s', last_ts, log_ev.timestamp)
 
             # Update the last time checked
-            self.last_ts[instance_key] = datetime.utcnow()
+            self.last_ts = datetime.utcnow()
 
     def _dt_to_wmi(self, dt):
-        ''' A wrapper around wmi.from_time to get a WMI-formatted time from a
-            time struct.
-        '''
+        """
+        A wrapper around wmi.from_time to get a WMI-formatted time from a time struct.
+        """
         return from_time(
             year=dt.year,
             month=dt.month,
