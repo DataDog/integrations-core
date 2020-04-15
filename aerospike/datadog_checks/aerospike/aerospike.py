@@ -292,7 +292,7 @@ class AerospikeCheck(AgentCheck):
                     latency = metric_name + '_over_' + latency
                     metric_names.append(latency)
 
-            ns_latencies[ns]["metric_names"] = ns_latencies[ns].get("metric_names", []) + list(metric_names)
+            ns_latencies[ns].setdefault("metric_names", []).extend(metric_names)
 
         for ns, v in iteritems(ns_latencies):
             metric_names = v.get("metric_names", [])
