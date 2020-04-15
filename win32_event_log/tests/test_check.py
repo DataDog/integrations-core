@@ -105,6 +105,7 @@ def test_check(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggreg
         source_type_name='event viewer',
     )
 
+
 def test_check_with_event_format(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggregator):
     instance = {
         'host': ".",
@@ -122,7 +123,7 @@ def test_check_with_event_format(mock_from_time, mock_to_time, check, mock_get_w
             'InsertionStrings',
             'TimeGenerated',
             'Type',
-        ]
+        ],
     }
 
     check.check(instance)

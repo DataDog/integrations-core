@@ -189,7 +189,7 @@ class LogEvent(object):
         self._format = event_format
         self.event_priority = event_priority
 
-    @@staticmethod
+    @staticmethod
     def _normalize_event(event):
         for field in INTEGER_PROPERTIES:
             if field in event:
