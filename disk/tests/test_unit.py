@@ -196,7 +196,7 @@ def test_labels_from_blkid_cache_file(aggregator, instance_blkid_cache_file, gau
     c = Disk('disk', {}, [instance_blkid_cache_file])
     c.check(instance_blkid_cache_file)
     for metric in chain(gauge_metrics, rate_metrics):
-        aggregator.assert_metric(metric, tags=['device:/dev/sda1', 'label:MYLABEL'])
+        aggregator.assert_metric(metric, tags=['device:/dev/sda1', 'device_name:sda1', 'label:MYLABEL'])
 
 
 @pytest.mark.skipif(not Platform.is_linux(), reason='disk labels are only available on Linux')
@@ -210,4 +210,4 @@ def test_blkid_cache_file_contains_no_labels(
     c = Disk('disk', {}, [instance_blkid_cache_file_no_label])
     c.check(instance_blkid_cache_file_no_label)
     for metric in chain(gauge_metrics, rate_metrics):
-        aggregator.assert_metric(metric, tags=['device:/dev/sda1'])
+        aggregator.assert_metric(metric, tags=['device:/dev/sda1', 'device_name:sda1'])
