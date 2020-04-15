@@ -26,7 +26,7 @@ class FakeWmiSampler:
     def sample(self):
         self._wmi_objects = [
             {
-                'EventCode': 0,
+                'EventCode': 1000.0,
                 'EventIdentifier': 0,
                 'EventType': 0,
                 'InsertionStrings': '[insertionstring]',
