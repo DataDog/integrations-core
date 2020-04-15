@@ -67,19 +67,21 @@ def connection_uses_tls():
 
 def test_collect_latency_parser(aggregator):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
-    check.get_info = mock.MagicMock(return_value=[
-        'error-no-data-yet-or-back-too-small',
-        '{ns-1}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-        '11:53:57,0.0,0.00,0.00,0.00',
-        '{ns-1}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-        '11:53:57,0.0,0.00,0.00,0.00',
-        '{ns-2_foo}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-        '11:53:57,0.0,0.00,0.00,0.00',
-        '{ns-2_foo}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-        '11:53:57,0.0,0.00,0.00,0.00',
-        'error-no-data-yet-or-back-too-small',
-        'error-no-data-yet-or-back-too-small',
-    ])
+    check.get_info = mock.MagicMock(
+        return_value=[
+            'error-no-data-yet-or-back-too-small',
+            '{ns-1}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+            '11:53:57,0.0,0.00,0.00,0.00',
+            '{ns-1}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+            '11:53:57,0.0,0.00,0.00,0.00',
+            '{ns-2_foo}-read:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+            '11:53:57,0.0,0.00,0.00,0.00',
+            '{ns-2_foo}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+            '11:53:57,0.0,0.00,0.00,0.00',
+            'error-no-data-yet-or-back-too-small',
+            'error-no-data-yet-or-back-too-small',
+        ]
+    )
     check.collect_latency(None)
 
     metrics = [
@@ -102,17 +104,21 @@ def test_collect_latency_parser(aggregator):
 
 def test_collect_latency_invalid_data(aggregator):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
-    check.get_info = mock.MagicMock(return_value=[
-        'error-no-data-yet-or-back-too-small',
-        'xxxread:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-        '11:53:57,0.0,0.00,0.00,0.00',
-        '{ns-2}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
-        '11:53:57,0.0,0.00,0.00,0.00',
-    ])
+    check.get_info = mock.MagicMock(
+        return_value=[
+            'error-no-data-yet-or-back-too-small',
+            'xxxread:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+            '11:53:57,0.0,0.00,0.00,0.00',
+            '{ns-2}-write:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+            '11:53:57,0.0,0.00,0.00,0.00',
+        ]
+    )
     check.log = mock.MagicMock()
     check.collect_latency(None)
 
-    check.log.warning.assert_called_with('Invalid data. Namespace and/or metric name not found in line: `%s`',
-                                         'xxxread:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms')
+    check.log.warning.assert_called_with(
+        'Invalid data. Namespace and/or metric name not found in line: `%s`',
+        'xxxread:11:53:47-GMT,ops/sec,>1ms,>8ms,>64ms',
+    )
 
     aggregator.assert_all_metrics_covered()  # no metric
