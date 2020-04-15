@@ -274,7 +274,8 @@ class AerospikeCheck(AgentCheck):
                 continue
 
             # match only works at the beginning
-            ns_metric_name_match = re.match(r'{(\w+)}-(\w+):', line)
+            # ':' or ';' are not allowed in namespace-name: https://www.aerospike.com/docs/guide/limitations.html
+            ns_metric_name_match = re.match(r'{([^\}:;]+)}-(\w+):', line)
             if ns_metric_name_match:
                 ns = ns_metric_name_match.groups()[0]
                 metric_name = ns_metric_name_match.groups()[1]
