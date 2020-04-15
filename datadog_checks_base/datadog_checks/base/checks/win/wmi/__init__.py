@@ -275,7 +275,7 @@ class WinWMICheck(AgentCheck):
         return "{host}:{namespace}:{wmi_class}".format(host=host, namespace=namespace, wmi_class=wmi_class)
 
     def get_running_wmi_sampler(self, properties, filters, **kwargs):
-        # type: (List[str]) -> WMISampler
+        # type: (Iterable[str], List[Dict[str, WMIFilter]], Dict) -> WMISampler
         return self._get_running_wmi_sampler(
             instance_key=None,
             wmi_class=self.wmi_class,
@@ -291,7 +291,7 @@ class WinWMICheck(AgentCheck):
         )
 
     def _get_running_wmi_sampler(self, instance_key, wmi_class, properties, tag_by="", **kwargs):
-        # type: (Any, str, List[str], str, Any) -> WMISampler
+        # type: (Any, str, Iterable[str], str, Any) -> WMISampler
         """
         Return a running WMISampler for the given (class, properties).
 

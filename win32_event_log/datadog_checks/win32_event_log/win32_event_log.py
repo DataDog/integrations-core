@@ -39,11 +39,13 @@ class Win32EventLogWMI(WinWMICheck):
         self.instance_tags = self.instance.get('tags', [])
         self.notify = self.instance.get('notify', [])
 
-        self._tag_event_id = is_affirmative(init_config.get('tag_event_id', False))
-        self._verbose = init_config.get('verbose', True)
+        self.tag_event_id = is_affirmative(init_config.get('tag_event_id', False))
+        self.verbose = init_config.get('verbose', True)
 
         default_event_priority = init_config.get('default_event_priority', 'normal')
         self.event_priority = self.instance.get('event_priority', default_event_priority)
+        if (self.event_priority.lower() != 'normal') and (self.event_priority.lower() != 'low'):
+            self.event_priority = 'normal'
 
         self.ltypes = self.instance.get('type', [])
         self.source_names = self.instance.get('source_name', [])
@@ -62,10 +64,6 @@ class Win32EventLogWMI(WinWMICheck):
         self.last_ts = None
 
     def check(self, _):
-        # Connect to the WMI provider
-        if (self.event_priority.lower() != 'normal') and (self.event_priority.lower() != 'low'):
-            event_priority = 'normal'
-
         # Store the last timestamp
         if self.last_ts is None:
             # If system boot was withing 600s of dd agent start then use boottime as last_ts
@@ -78,7 +76,7 @@ class Win32EventLogWMI(WinWMICheck):
         # Event properties
         event_properties = list(self.EVENT_PROPERTIES)
         if self.event_format is not None:
-            event_properties.extend(list(set(self.EXTRA_EVENT_PROPERTIES) & set(event_format)))
+            event_properties.extend(list(set(self.EXTRA_EVENT_PROPERTIES) & set(self.event_format)))
         else:
             event_properties.extend(self.EXTRA_EVENT_PROPERTIES)
 
@@ -138,7 +136,7 @@ class Win32EventLogWMI(WinWMICheck):
                 # for local events we dont need to specify a hostname
                 hostname = None if (self.host == "localhost" or self.host == ".") else self.host
                 log_ev = LogEvent(
-                    ev, self.log, hostname, self.instance_tags, self.notify, self._tag_event_id, self.event_format, self.event_priority
+                    ev, self.log, hostname, self.instance_tags, self.notify, self.tag_event_id, self.event_format, self.event_priority
                 )
 
                 # Since WQL only compares on the date and NOT the time, we have to
@@ -255,14 +253,15 @@ class LogEvent(object):
         return event_dict
 
     def is_after(self, ts):
-        ''' Compare this event's timestamp to a give timestamp. '''
+        """ Compare this event's timestamp to a give timestamp. """
         if self.timestamp >= int(calendar.timegm(ts.timetuple())):
             return True
         return False
 
     def _wmi_to_ts(self, wmi_ts):
-        ''' Convert a wmi formatted timestamp into an epoch.
-        '''
+        """
+        Convert a wmi formatted timestamp into an epoch.
+        """
         year, month, day, hour, minute, second, microsecond, tz = to_time(wmi_ts)
         tz_delta = timedelta(minutes=int(tz))
         if '+' in wmi_ts:
@@ -275,8 +274,9 @@ class LogEvent(object):
         return int(calendar.timegm(dt.timetuple()))
 
     def _tags(self, tags, event_code):
-        ''' Inject additional tags into the list already supplied to LogEvent.
-        '''
+        """
+        Inject additional tags into the list already supplied to LogEvent.
+        """
         tags_list = []
         if tags is not None:
             tags_list += list(tags)
