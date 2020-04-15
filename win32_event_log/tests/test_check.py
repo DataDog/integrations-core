@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
 import logging
 
 import pytest
@@ -80,7 +81,7 @@ def mock_to_time():
 
 @pytest.fixture
 def check():
-    check = Win32EventLogWMI('win32_event_log', {}, {}, [INSTANCE])
+    check = Win32EventLogWMI('win32_event_log', {}, [INSTANCE])
     return check
 
 
@@ -99,38 +100,47 @@ def test_check(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggreg
     )
 
 
-def test_no_filters(check):
+def test_no_filters():
     instance = {}
 
     with pytest.raises(ConfigurationError):
-        check.check(instance)
+        Win32EventLogWMI('win32_event_log', {}, [instance])
 
 
-def test_filter_source_name(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
-    instance = {'source_name': ['MSSQLSERVER']}
+def test_filter_source_name(mock_from_time, mock_to_time, mock_get_wmi_sampler):
+    instance = copy.deepcopy(INSTANCE)
+    instance['source_name'] = ['MSSQLSERVER']
+    check = Win32EventLogWMI('win32_event_log', {}, [instance])
+    check.check(instance)
+
+
+def test_filter_event_id(mock_from_time, mock_to_time, mock_get_wmi_sampler):
+    instance = copy.deepcopy(INSTANCE)
+    instance['event_id'] = ['789']
+    check = Win32EventLogWMI('win32_event_log', {}, [instance])
 
     check.check(instance)
 
 
-def test_filter_event_id(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
-    instance = {'event_id': ['789']}
+def test_filter_message_filters(mock_from_time, mock_to_time, mock_get_wmi_sampler):
+    instance = copy.deepcopy(INSTANCE)
+    instance.update({'message_filters': ['ok']})
+    check = Win32EventLogWMI('win32_event_log', {}, [instance])
 
     check.check(instance)
 
 
-def test_filter_message_filters(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
-    instance = {'message_filters': ['ok']}
+def test_filter_log_file(mock_from_time, mock_to_time, mock_get_wmi_sampler):
+    instance = copy.deepcopy(INSTANCE)
+    instance.update({'log_file': ['log']})
+    check = Win32EventLogWMI('win32_event_log', {}, [instance])
 
     check.check(instance)
 
 
-def test_filter_log_file(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
-    instance = {'log_file': ['log']}
-
-    check.check(instance)
-
-
-def test_filter_type(mock_from_time, mock_to_time, check, mock_get_wmi_sampler):
-    instance = {'type': ['type']}
+def test_filter_type(mock_from_time, mock_to_time, mock_get_wmi_sampler):
+    instance = copy.deepcopy(INSTANCE)
+    instance.update({'type': ['type']})
+    check = Win32EventLogWMI('win32_event_log', {}, [instance])
 
     check.check(instance)
