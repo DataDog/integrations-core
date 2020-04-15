@@ -28,7 +28,7 @@ class FakeWmiSampler:
             {
                 'EventCode': 1000.0,
                 'EventIdentifier': 10.0,
-                'EventType': 20.0,
+                'EventType': 20,
                 'InsertionStrings': '[insertionstring]',
                 'Logfile': 'Application',
                 'Message': 'SomeMessage',
@@ -119,6 +119,8 @@ def test_check_with_event_format(mock_from_time, mock_to_time, check, mock_get_w
             'Message',
             'SourceName',
             'EventCode',
+            'EventIdentifier',
+            'EventType',
             'Message',
             'InsertionStrings',
             'TimeGenerated',
@@ -134,6 +136,8 @@ Logfile: Application
 Message: SomeMessage
 SourceName: MSQLSERVER
 EventCode: 1000
+EventIdentifier: 10
+EventType: 20
 Message: SomeMessage
 InsertionStrings: [insertionstring]
 TimeGenerated: 21001224113047.000000-480
