@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-'''
+"""
 Monitor the Windows Event Log
-'''
+"""
 import calendar
 from datetime import datetime, timedelta
 
@@ -12,7 +12,6 @@ from uptime import uptime
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.checks.win.wmi import WinWMICheck, from_time, to_time
-from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.base.utils.timeout import TimeoutException
 
 SOURCE_TYPE_NAME = 'event viewer'
@@ -29,10 +28,7 @@ class Win32EventLogWMI(WinWMICheck):
     def __init__(self, name, init_config, instances):
         if not instances:
             raise ConfigurationError("No instance configuration provided")
-        instances[0].update({
-            'class': self.EVENT_CLASS,
-            'namespace': self.NAMESPACE
-        })
+        instances[0].update({'class': self.EVENT_CLASS, 'namespace': self.NAMESPACE})
         super(Win32EventLogWMI, self).__init__(self, name, init_config, instances=instances)
 
         # Settings
@@ -114,11 +110,7 @@ class Win32EventLogWMI(WinWMICheck):
 
         filters.append(query)
 
-        wmi_sampler = self.get_running_wmi_sampler(
-            properties=event_properties,
-            filters=filters,
-            and_props=['Message']
-        )
+        wmi_sampler = self.get_running_wmi_sampler(properties=event_properties, filters=filters, and_props=['Message'])
 
         wmi_sampler.reset_filter(new_filters=filters)
         try:
@@ -136,7 +128,14 @@ class Win32EventLogWMI(WinWMICheck):
                 # for local events we dont need to specify a hostname
                 hostname = None if (self.host == "localhost" or self.host == ".") else self.host
                 log_ev = LogEvent(
-                    ev, self.log, hostname, self.instance_tags, self.notify, self.tag_event_id, self.event_format, self.event_priority
+                    ev,
+                    self.log,
+                    hostname,
+                    self.instance_tags,
+                    self.notify,
+                    self.tag_event_id,
+                    self.event_format,
+                    self.event_priority,
                 )
 
                 # Since WQL only compares on the date and NOT the time, we have to
