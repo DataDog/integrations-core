@@ -20,6 +20,13 @@ from datadog_checks.base.utils.timeout import TimeoutException, timeout
 IGNORE_CASE = re.I if platform.system() == 'Windows' else 0
 
 
+def _base_device_name(device):
+    if Platform.is_win32():
+        return device.strip('\\').lower()
+    else:
+        return os.path.basename(device)
+
+
 class Disk(AgentCheck):
     """ Collects metrics about the machine's disks. """
 
@@ -105,7 +112,7 @@ class Disk(AgentCheck):
                 device_name = device_name.strip('\\').lower()
 
             tags.append('device:{}'.format(device_name))
-            tags.append('device_name:{}'.format(os.path.basename(part.device)))
+            tags.append('device_name:{}'.format(_base_device_name(part.device)))
             for metric_name, metric_value in iteritems(self._collect_part_metrics(part, disk_usage)):
                 self.gauge(metric_name, metric_value, tags=tags)
 
@@ -251,7 +258,7 @@ class Disk(AgentCheck):
                 write_time_pct = disk.write_time * 100 / 1000
                 metric_tags = [] if self._custom_tags is None else self._custom_tags[:]
                 metric_tags.append('device:{}'.format(disk_name))
-                metric_tags.append('device_name:{}'.format(os.path.basename(disk_name)))
+                metric_tags.append('device_name:{}'.format(_base_device_name(disk_name)))
                 if self.devices_label.get(disk_name):
                     metric_tags.append(self.devices_label.get(disk_name))
                 self.rate(self.METRIC_DISK.format('read_time_pct'), read_time_pct, tags=metric_tags)
