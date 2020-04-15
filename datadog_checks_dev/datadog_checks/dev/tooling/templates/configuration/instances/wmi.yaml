@@ -1,0 +1,8 @@
+- name: host
+  required: false
+  description: |
+    The host the Datadog Active Directory check connects to.
+    "." means the current host
+  value:
+    example: .
+    type: string
