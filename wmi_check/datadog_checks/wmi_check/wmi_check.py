@@ -16,6 +16,7 @@ class WMICheck(WinWMICheck):
     def __init__(self, name, init_config, instances):
         super(WinWMICheck, self).__init__(name, init_config, instances)
         self.custom_tags = self.instance.get('tags', [])
+        self.filters = self.instance.get('filters', [])
 
     def check(self, _):
         """
@@ -29,7 +30,7 @@ class WMICheck(WinWMICheck):
         # Create or retrieve an existing WMISampler
         metric_name_and_type_by_property, properties = self.get_wmi_properties()
 
-        wmi_sampler = self.get_running_wmi_sampler(properties)
+        wmi_sampler = self.get_running_wmi_sampler(properties, self.filters)
 
         # Sample, extract & submit metrics
         try:
