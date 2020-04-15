@@ -174,7 +174,7 @@ class AgentCheck(object):
         self.name = name  # type: str
         self.init_config = init_config  # type: InitConfigType
         self.agentConfig = agentConfig  # type: AgentConfigType
-        self.instance = instance  # type: Optional[InstanceType]
+        self.instance = instance  # type: InstanceType
         self.instances = instances  # type: List[InstanceType]
         self.warnings = []  # type: List[str]
         self.metrics = defaultdict(list)  # type: DefaultDict[str, List[str]]
