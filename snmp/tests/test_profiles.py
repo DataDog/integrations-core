@@ -102,6 +102,10 @@ def test_f5(aggregator):
         'ltmNodeAddrDynamicRatio',
         'ltmNodeAddrMonitorState',
         'ltmNodeAddrMonitorStatus',
+        'ltmNodeAddrStatServerCurConns',
+        'ltmNodeAddrStatCurSessions',
+        'ltmNodeAddrStatCurrentConnsPerSec',
+        'ltmNodeAddrStatDurationRateExceeded',
         'ltmPoolNumber',
         'ltmPoolDisallowNat',
         'ltmPoolSimpleTimeout',
@@ -136,6 +140,8 @@ def test_f5(aggregator):
         'ltmVirtualServStatClientEvictedConns',
         'ltmVirtualServStatClientSlowKilled',
         'ltmVirtualServStatTotRequests',
+        'ltmNodeAddrStatServerTotConns',
+        'ltmNodeAddrStatTotRequests',
     ]
 
     ltm_rates = [
@@ -144,6 +150,10 @@ def test_f5(aggregator):
         'ltmVirtualServStatClientBytesIn',
         'ltmVirtualServStatClientPktsOut',
         'ltmVirtualServStatClientBytesOut',
+        'ltmNodeAddrStatServerPktsIn',
+        'ltmNodeAddrStatServerBytesIn',
+        'ltmNodeAddrStatServerPktsOut',
+        'ltmNodeAddrStatServerBytesOut',
     ]
 
     interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
