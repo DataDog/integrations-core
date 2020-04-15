@@ -141,6 +141,7 @@ Type: Error
 ```
 %%%"""
 
+    print("aggregator._events: ", aggregator._events)
     aggregator.assert_event(
         message,
         count=1,
