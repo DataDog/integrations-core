@@ -133,7 +133,7 @@ def test_check_with_event_format(mock_from_time, mock_to_time, check, mock_get_w
 Logfile: Application
 Message: SomeMessage
 SourceName: MSQLSERVER
-EventCode: 1000.0
+EventCode: 1000
 Message: SomeMessage
 InsertionStrings: [insertionstring]
 TimeGenerated: 21001224113047.000000-480
