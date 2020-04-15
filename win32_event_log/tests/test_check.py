@@ -27,8 +27,8 @@ class FakeWmiSampler:
         self._wmi_objects = [
             {
                 'EventCode': 1000.0,
-                'EventIdentifier': 0,
-                'EventType': 0,
+                'EventIdentifier': 10.0,
+                'EventType': 20.0,
                 'InsertionStrings': '[insertionstring]',
                 'Logfile': 'Application',
                 'Message': 'SomeMessage',
@@ -106,7 +106,6 @@ def test_check(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggreg
     check.check(instance)
 
     print("aggregator._events: ", aggregator._events)
-    1/0
     aggregator.assert_event(
         'SomeMessage',
         count=1,
@@ -116,6 +115,7 @@ def test_check(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggreg
         alert_type='error',
         source_type_name='event viewer',
     )
+    1/0
 
 
 def test_no_filters(check):
