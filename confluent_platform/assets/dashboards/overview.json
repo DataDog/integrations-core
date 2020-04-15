@@ -15,7 +15,7 @@
         "title": null,
         "verified": true
     },
-    "description": "Default Dashboard for monitoring Confluent Platform including:\n\n* Brokers\n* Producers and Consumers (Java-based)\n* Kafka Connect\n* Schema Registry\n* REST Proxy\n* KSQLDB",
+    "description": "The default Dashboard for monitoring Confluent Platform including:\n\n* Brokers,\n* Producers, and Consumers (Java-based)\n* Kafka Connect\n* Schema Registry\n* REST Proxy\n* KSQLDB",
     "id": 1053943,
     "modified": "2020-04-14T14:47:32.837099+00:00",
     "new_id": "gi5-jub-nfu",
