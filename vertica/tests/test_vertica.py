@@ -24,8 +24,9 @@ def test_check_e2e(dd_agent_check, instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_check(aggregator, instance):
+def test_check(aggregator, datadog_agent, instance):
     check = VerticaCheck('vertica', {}, [instance])
+    check.check_id = 'test:123'
     check.check(instance)
 
     for metric in ALL_METRICS:
@@ -33,6 +34,10 @@ def test_check(aggregator, instance):
         aggregator.assert_metric_has_tag(metric, 'foo:bar')
 
     aggregator.assert_all_metrics_covered()
+
+    version_metadata = {'version.scheme': 'semver', 'version.major': os.environ['VERTICA_VERSION'][0]}
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata) + 4)
 
 
 @pytest.mark.usefixtures('dd_environment')
