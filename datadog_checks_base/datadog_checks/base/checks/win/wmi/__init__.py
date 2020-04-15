@@ -291,7 +291,7 @@ class WinWMICheck(AgentCheck):
         )
 
     def _get_running_wmi_sampler(self, instance_key, wmi_class, properties, tag_by="", **kwargs):
-        # type: (Any, str, List[str], str, Any) -> WMISampler
+        # type: (Any, str, Iterable[str], str, Any) -> WMISampler
         """
         Return a running WMISampler for the given (class, properties).
 
