@@ -16,14 +16,18 @@ from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 from datadog_checks.base.utils.timeout import TimeoutException, timeout
 
-# See: https://github.com/DataDog/integrations-core/pull/1109#discussion_r167133580
-IGNORE_CASE = re.I if platform.system() == 'Windows' else 0
+if platform.system() == 'Windows':
+    # See: https://github.com/DataDog/integrations-core/pull/1109#discussion_r167133580
+    IGNORE_CASE = re.I
 
-
-def _base_device_name(device):
-    if Platform.is_win32():
+    def _base_device_name(device):
         return device.strip('\\').lower()
-    else:
+
+
+else:
+    IGNORE_CASE = 0
+
+    def _base_device_name(device):
         return os.path.basename(device)
 
 
