@@ -166,9 +166,12 @@ metrics:
       OID: 1.3.6.1.4.1.3375.2.1.1.2.9.29
       name: sysClientsslStatHandshakeFailures
 
-  # Metrics from F5-BIGIP-LOCAL-MIB provide monitoring information on load balancing
-  # of servers, nodes, and pools.
-  # LTM stands for "Local Traffic Management."
+  # Metrics from F5-BIGIP-LOCAL-MIB provide monitoring information about virtual servers, nodes, and pools.
+  # These concepts are related to the LTM (Local Traffic Management) features of BIG IP devices.
+  # TL;DR:
+  # * Virtual servers act as load balancers that are assigned pools of nodes (= servers).
+  # * Clients can use a virtual server as an entrypoint to an application service that spans multiple machines.
+  # Learn more: https://techdocs.f5.com/kb/en-us/products/big-ip_ltm/manuals/product/ltm-basics-11-6-0.html
 
   # Virtual servers.
 
