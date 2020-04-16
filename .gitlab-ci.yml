@@ -29,7 +29,7 @@ release-manual:
   image: $TAGGER_IMAGE
   only:
     # Integration release tags e.g. any_check-X.Y.Z-rc.N
-    - .*
+    - alex/test_ci_pipeline
   script:
     # Get tagger info
     - tagger=$(git show "$CI_COMMIT_TAG" | head -2 | tail -1)
