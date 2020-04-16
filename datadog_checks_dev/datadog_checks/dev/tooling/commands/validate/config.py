@@ -28,9 +28,10 @@ IGNORE_DEFAULT_INSTANCE = {'ceph', 'dotnetclr', 'gunicorn', 'marathon', 'pgbounc
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate default configuration files')
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
-@click.option('--sync', is_flag=True, help='Generate example configuration files based on specifications')
+@click.option('--sync', '-s', is_flag=True, help='Generate example configuration files based on specifications')
+@click.option('--verbose', '-v', is_flag=True, help='Verbose mode')
 @click.pass_context
-def config(ctx, check, sync):
+def config(ctx, check, sync, verbose):
     """Validate default configuration files."""
     repo_choice = ctx.obj['repo_choice']
     if check:
@@ -51,6 +52,8 @@ def config(ctx, check, sync):
         spec_path = get_config_spec(check)
         if not file_exists(spec_path):
             validate_config_legacy(check, check_display_queue, files_failed, files_warned, file_counter)
+            if verbose:
+                check_display_queue.append(lambda: echo_warning('No spec found', indent=True))
             if check_display_queue:
                 echo_info(f'{check}:')
             for display in check_display_queue:
@@ -107,8 +110,10 @@ def config(ctx, check, sync):
                                 )
                             )
 
-        if check_display_queue:
+        if check_display_queue or verbose:
             echo_info(f'{check}:')
+            if verbose:
+                check_display_queue.append(lambda **kwargs: echo_info('Valid spec', **kwargs))
             for display in check_display_queue:
                 display(indent=True)
 
