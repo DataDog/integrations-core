@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 
 import mock
@@ -50,12 +53,12 @@ def test_datacenter_metrics(aggregator):
         aggregator.assert_metric(metric)
 
 
-def connection_uses_tls():
+def test_connection_uses_tls():
     instance = copy.deepcopy(common.INSTANCE)
     tls_config = {'cafile': 'my-ca-file', 'certfile': 'my-certfile', 'keyfile': 'my-keyfile'}
     instance['tls_config'] = copy.deepcopy(tls_config)
 
-    check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
+    check = AerospikeCheck('aerospike', {}, [instance])
     tls_config['enable'] = True
 
     assert check._tls_config == tls_config
