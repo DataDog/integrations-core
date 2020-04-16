@@ -38,17 +38,6 @@ LAZY_METRICS = [
     'aerospike.namespace.tps.write',
 ]
 
-NEW_INSTANCE = {
-    'host': HOST,
-    'port': PORT,
-    'metrics': ['cluster_size', 'batch_error'],
-    'namespace_metrics': ALL_METRICS,
-    'namespaces': ['test'],
-    'datacenters': ['test'],
-    'tags': ['tag:value'],
-}
-
-
 INSTANCE = {
     'host': HOST,
     'port': PORT,
