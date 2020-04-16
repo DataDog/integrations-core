@@ -8,7 +8,7 @@ from .metrics import ISTIOD_METRICS
 
 
 class Istio(OpenMetricsBaseCheck):
-    
+
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
