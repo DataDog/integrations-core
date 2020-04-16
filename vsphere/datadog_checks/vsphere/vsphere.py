@@ -517,7 +517,7 @@ class VSphereCheck(AgentCheck):
                 self.set_metadata('version', version_info.version_str)
         except Exception:
             # Explicitly do not attach any host to the service checks.
-            self.log.exception("The vCenter API is not responding. The check will not run. %s")
+            self.log.exception("The vCenter API is not responding. The check will not run.")
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.base_tags, hostname=None)
             raise
         else:
