@@ -542,7 +542,7 @@ aerospike.namespace.re_repl_timeout,gauge,,,,Number of re-replications that ende
 aerospike.namespace.record_proto_compression_ratio,gauge,,,,Measures the average compressed size to uncompressed size ratio for protocol message data in single-record transaction client responses.,0,aerospike,
 aerospike.namespace.record_proto_uncompressed_pct,gauge,,,,Measures the percentage of single-record transaction client responses with uncompressed protocol message data.,0,aerospike,
 aerospike.namespace.retransmit_all_batch_sub_dep_res,gauge,,,,Number of retransmits that occurred during batch sub transactions that were being duplicate resolved.,0,aerospike,
-aerospike.namespace.retransmit_all_delete_dep_res,gauge,,,,Number of retransmits that occurred during delete transactions that were being duplicate resolved.,0,aerospike,
+aerospike.namespace.retransmit_all_delete_dup_res,gauge,,,,Number of retransmits that occurred during delete transactions that were being duplicate resolved.,0,aerospike,
 aerospike.namespace.retransmit_all_delete_repl_write,gauge,,,,Number of retransmits that occurred during delete transactions that were being replica written.,0,aerospike,
 aerospike.namespace.retransmit_all_read_dup_res,gauge,,,,Number of retransmits that occurred during read transactions that were being duplicate resolved,0,aerospike,
 aerospike.namespace.retransmit_all_udf_dup_res,gauge,,,,Number of retransmits that occurred during client initiated udf transactions that were being duplicate resolved.,0,aerospike,
