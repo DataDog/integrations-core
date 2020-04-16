@@ -6,7 +6,6 @@
 Monitor the Windows Event Log
 '''
 import calendar
-from copy import deepcopy
 from datetime import datetime, timedelta
 
 from uptime import uptime
@@ -180,7 +179,7 @@ class Win32EventLogWMI(WinWMICheck):
 
 class LogEvent(object):
     def __init__(self, ev, log, hostname, tags, notify_list, tag_event_id, event_format, event_priority):
-        self.event = LogEvent._normalize_event(deepcopy(ev))
+        self.event = self._normalize_event(ev.copy())
         self.log = log
         self.hostname = hostname
         self.tags = self._tags(tags, self.event['EventCode']) if tag_event_id else tags
