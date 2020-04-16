@@ -11,7 +11,15 @@ COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 HOST = get_docker_hostname()
 PORT = 3000
 
-NAMESPACE_METRICS = ['objects', 'hwm_breached', 'client_write_error', 'client_write_success', 'tombstones']
+NAMESPACE_METRICS = [
+    'objects',
+    'hwm_breached',
+    'client_write_error',
+    'client_write_success',
+    'tombstones',
+    'cluster_clock_skew_stop_writes_sec',
+    'retransmit_all_batch_sub_dep_res',
+]
 
 SET_METRICS = ['tombstones', 'memory_data_bytes', 'truncate_lut', 'objects', 'stop_writes_count']
 
@@ -61,11 +69,6 @@ INSTANCE = {
     'tags': ['tag:value'],
 }
 
-FULL_INSTANCE = {
-    'host': HOST,
-    'port': PORT,
-}
-
 MOCK_DATACENTER_METRICS = [
     'dc_state=CLUSTER_UP',
     'dc_timelag=0',
@@ -81,6 +84,8 @@ MOCK_DATACENTER_METRICS = [
     'dc_open_conn=192',
     'dc_recs_inflight=216',
     'dc_size=3',
+    'dc_as_open_conn=3',
+    'dc_as_size=2',
 ]
 
 
@@ -98,4 +103,6 @@ DATACENTER_METRICS = [
     'aerospike.datacenter.dc_open_conn',
     'aerospike.datacenter.dc_recs_inflight',
     'aerospike.datacenter.dc_size',
+    'aerospike.datacenter.dc_as_open_conn',
+    'aerospike.datacenter.dc_as_size',
 ]
