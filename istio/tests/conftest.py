@@ -64,7 +64,6 @@ def dd_environment():
                     requests.get(page)
                 yield instance
 
-
 class MockResponse:
     """
     MockResponse is used to simulate the object requests.Response commonly returned by requests.get
