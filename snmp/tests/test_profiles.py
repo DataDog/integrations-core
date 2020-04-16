@@ -86,8 +86,6 @@ def test_f5_testme(aggregator):
         # 'ifInDiscards',
     ]
 
-    # TODO: add simulation data for these metrics.
-
     ltm_gauges = [
         'ltmVirtualServNumber',
         'ltmNodeAddrNumber',
@@ -175,8 +173,6 @@ def test_f5_testme(aggregator):
         'ltmPoolMemberSessionStatus',
         'ltmPoolMemberConnLimit',
         'ltmPoolMemberRatio',
-        'ltmPoolMemberWeight',
-        'ltmPoolMemberPriority',
         'ltmPoolMemberDynamicRatio',
         'ltmPoolMemberStatServerCurConns',
         'ltmPoolMemberStatConnqDepth',
