@@ -178,6 +178,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         extra_labels = ksm_instance.get('label_joins', {})
         hostname_override = is_affirmative(ksm_instance.get('hostname_override', True))
         join_kube_labels = is_affirmative(ksm_instance.get('join_kube_labels', False))
+        join_standard_tags = is_affirmative(ksm_instance.get('join_standard_tags', False))
 
         ksm_instance.update(
             {
@@ -367,6 +368,44 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_pod_labels': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['*']},
                     'kube_deployment_labels': {'labels_to_match': ['deployment', 'namespace'], 'labels_to_get': ['*']},
                     'kube_daemonset_labels': {'labels_to_match': ['daemonset', 'namespace'], 'labels_to_get': ['*']},
+                }
+            )
+
+        labels_to_get = [
+            "label_tags_datadoghq_com_env",
+            "label_tags_datadoghq_com_service",
+            "label_tags_datadoghq_com_version",
+        ]
+
+        if join_standard_tags:
+            ksm_instance['label_joins'].update(
+                {
+                    "kube_pod_labels": {"labels_to_match": ["pod", "namespace"], "labels_to_get": labels_to_get},
+                    "kube_deployment_labels": {
+                        "labels_to_match": ["deployment", "namespace"],
+                        "labels_to_get": labels_to_get,
+                    },
+                    "kube_replicaset_labels": {
+                        "labels_to_match": ["replicaset", "namespace"],
+                        "labels_to_get": labels_to_get,
+                    },
+                    "kube_daemonset_labels": {
+                        "labels_to_match": ["daemonset", "namespace"],
+                        "labels_to_get": labels_to_get,
+                    },
+                    "kube_statefulset_labels": {
+                        "labels_to_match": ["statefulset", "namespace"],
+                        "labels_to_get": labels_to_get,
+                    },
+                    "kube_job_labels": {"labels_to_match": ["job_name", "namespace"], "labels_to_get": labels_to_get},
+                }
+            )
+
+            ksm_instance.setdefault("labels_mapper", {}).update(
+                {
+                    "label_tags_datadoghq_com_env": "env",
+                    "label_tags_datadoghq_com_service": "service",
+                    "label_tags_datadoghq_com_version": "version",
                 }
             )
 
