@@ -18,6 +18,9 @@ NAMESPACE_METRICS = [
     'client_write_success',
     'tombstones',
     'retransmit_all_batch_sub_dup_res',
+    'truncate_lut',
+    'tps.write',
+    'tps.read'
 ]
 
 SET_METRICS = ['tombstones', 'memory_data_bytes', 'truncate_lut', 'objects', 'stop_writes_count']

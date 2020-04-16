@@ -68,8 +68,6 @@ def _test_check(aggregator):
     for metric in LAZY_METRICS:
         aggregator.assert_metric(metric)
 
-    aggregator.assert_metric('aerospike.namespace.tps.read')
-
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_service_check('aerospike.can_connect', AerospikeCheck.OK)
