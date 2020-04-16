@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import copy
 
 from datadog_checks.dev import get_docker_hostname
 
@@ -27,7 +26,8 @@ ALL_METRICS = NAMESPACE_METRICS + SET_METRICS
 
 STATS_METRICS = [
     'cluster_size',
-    'batch_error',
+    'cluster_principal',
+    'batch_index_errors',
     'cluster_generation',
     'cluster_clock_skew_stop_writes_sec',
     'proccess_cpu_pct',
@@ -47,8 +47,8 @@ LAZY_METRICS = [
 INSTANCE = {
     'host': HOST,
     'port': PORT,
-    'metrics': copy.deepcopy(STATS_METRICS),
-    'namespace_metrics': copy.deepcopy(ALL_METRICS),
+    'metrics': STATS_METRICS,
+    'namespace_metrics': ALL_METRICS,
     'namespaces': ['test'],
     'datacenters': ['test'],
     'tags': ['tag:value'],
