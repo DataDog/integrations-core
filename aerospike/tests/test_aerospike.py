@@ -59,11 +59,11 @@ def _test_check(aggregator):
     for metric in NAMESPACE_METRICS:
         aggregator.assert_metric("aerospike.namespace.{}".format(metric))
 
-    for metric in SET_METRICS:
-        aggregator.assert_metric("aerospike.set.{}".format(metric))
-
     for metrics in STATS_METRICS:
         aggregator.assert_metric("aerospike.{}".format(metric))
+
+    for metric in SET_METRICS:
+        aggregator.assert_metric("aerospike.set.{}".format(metric))
 
     for metric in LAZY_METRICS:
         aggregator.assert_metric(metric)

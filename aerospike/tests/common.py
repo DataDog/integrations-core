@@ -23,6 +23,8 @@ NAMESPACE_METRICS = [
 
 SET_METRICS = ['tombstones', 'memory_data_bytes', 'truncate_lut', 'objects', 'stop_writes_count']
 
+ALL_METRICS = NAMESPACE_METRICS + SET_METRICS
+
 STATS_METRICS = [
     'cluster_size',
     'batch_error',
@@ -30,8 +32,6 @@ STATS_METRICS = [
     'cluster_clock_skew_stop_writes_sec',
     'proccess_cpu_pct',
 ]
-
-ALL_METRICS = NAMESPACE_METRICS + SET_METRICS
 
 LAZY_METRICS = [
     'aerospike.namespace.latency.write_over_64ms',
