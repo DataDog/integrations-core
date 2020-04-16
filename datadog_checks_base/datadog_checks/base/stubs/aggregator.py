@@ -338,7 +338,7 @@ class AggregatorStub(object):
                             )
                         )
 
-        assert not errors, "Metadata assertion errors using metadata.csv: " + "\n\t- ".join([""] + sorted(list(errors)))
+        assert not errors, "Metadata assertion errors using metadata.csv:\n" + "\n\t- ".join(sorted(errors))
 
     def assert_no_duplicate_all(self):
         """
