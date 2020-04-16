@@ -1,4 +1,4 @@
-FROM ubuntu:19.04
+FROM ubuntu:18.04
 
 # Update sources and install required packages
 RUN apt-get update \
