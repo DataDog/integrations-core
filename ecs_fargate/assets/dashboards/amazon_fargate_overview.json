@@ -38,7 +38,7 @@
             "sizing": "zoom", 
             "title": false, 
             "type": "image", 
-            "url": "https://static.datadoghq.com/static/images/saas_logos/bot/amazon_fargate@2x.png", 
+            "url": "/static/images/saas_logos/bot/amazon_fargate@2x.png", 
             "width": 11, 
             "x": 1, 
             "y": 1
