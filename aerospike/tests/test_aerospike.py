@@ -57,15 +57,15 @@ def test_e2e(dd_agent_check, instance):
 def _test_check(aggregator):
 
     for metric in NAMESPACE_METRICS:
-        aggregator.assert_metric(f"aerospike.namespace.{metric}")
+        aggregator.assert_metric("aerospike.namespace.{}".format(metric))
 
     for metric in SET_METRICS:
-        aggregator.assert_metric(f"aerospike.set.{metric}")
+        aggregator.assert_metric("aerospike.set.{}".format(metric))
 
     for metric in LAZY_METRICS:
         aggregator.assert_metric(metric)
 
-    aggregator.assert_metric('aerospike.namespace.tps.write', at_least=0)
+    aggregator.assert_metric('aerospike.cluster_size')
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_service_check('aerospike.can_connect', AerospikeCheck.OK)

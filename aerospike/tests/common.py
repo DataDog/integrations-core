@@ -13,7 +13,7 @@ PORT = 3000
 
 NAMESPACE_METRICS = ['objects', 'hwm_breached', 'client_write_error', 'client_write_success', 'tombstones']
 
-SET_METRICS = ['memory_data_bytes', 'truncate_lut', 'objects', 'stop_writes_count']
+SET_METRICS = ['tombstones', 'memory_data_bytes', 'truncate_lut', 'objects', 'stop_writes_count']
 
 ALL_METRICS = NAMESPACE_METRICS + SET_METRICS
 
@@ -27,6 +27,7 @@ LAZY_METRICS = [
     'aerospike.namespace.latency.read_over_1ms',
     'aerospike.namespace.latency.read_ops_sec',
     'aerospike.namespace.tps.read',
+    'aerospike.namespace.tps.write',
 ]
 
 NEW_INSTANCE = {
@@ -63,7 +64,6 @@ INSTANCE = {
 FULL_INSTANCE = {
     'host': HOST,
     'port': PORT,
-    'tags': ['tag:value'],
 }
 
 MOCK_DATACENTER_METRICS = [
