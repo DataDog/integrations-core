@@ -26,10 +26,10 @@ ALL_METRICS = NAMESPACE_METRICS + SET_METRICS
 
 STATS_METRICS = [
     'cluster_size',
-    'batch_index_errors',
+    'batch_index_initiate',
     'cluster_generation',
     'cluster_clock_skew_stop_writes_sec',
-    'proccess_cpu_pct',
+    'uptime',
 ]
 
 LAZY_METRICS = [
