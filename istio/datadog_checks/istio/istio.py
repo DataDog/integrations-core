@@ -8,8 +8,6 @@ from .legacy_1_4 import LegacyIstioCheck_1_4
 
 class Istio(OpenMetricsBaseCheck):
 
-    __NAMESPACE__ = 'istio'
-
     DEFAULT_METRIC_LIMIT = 0
 
     def __new__(cls, name, init_config, instances):
