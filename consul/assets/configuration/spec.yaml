@@ -96,3 +96,9 @@ files:
 
     - template: instances/http
     - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/consul_server.log
+      source: consul
+      service: <SERVICE_NAME>
