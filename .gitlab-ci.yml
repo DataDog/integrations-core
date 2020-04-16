@@ -29,7 +29,7 @@ release-manual:
   image: $TAGGER_IMAGE
   only:
     # Integration release tags e.g. any_check-X.Y.Z-rc.N
-    - /.*-\d+\.\d+\.\d+(-(rc|pre|alpha|beta)\.\d+)?$/
+    - .*
   script:
     # Get tagger info
     - tagger=$(git show "$CI_COMMIT_TAG" | head -2 | tail -1)
@@ -37,11 +37,13 @@ release-manual:
     # tagging releases. To prevent multiple redundant builds we don't trigger
     # the pipeline unless the tag was applied manually.
     - |
+      echo "Start release-manual (after tagger var assignement)"
       if [[ "$tagger" =~ "Tagger: $TAGGER_NAME <$TAGGER_EMAIL>" ]]; then
           echo "Skipping, packages have already been built"
       else
           ./.gitlab/tagger/build-packages.sh
       fi
+      echo "End release-manual"
   tags: [ "runner:main", "size:large" ]
 
 reminder-image-builder:
