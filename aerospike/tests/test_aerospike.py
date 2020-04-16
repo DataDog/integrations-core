@@ -56,10 +56,12 @@ def test_e2e(dd_agent_check, instance):
 
 def _test_check(aggregator):
 
+    print(STATS_METRICS)
     for metric in NAMESPACE_METRICS:
         aggregator.assert_metric("aerospike.namespace.{}".format(metric))
 
     for metrics in STATS_METRICS:
+        print(metric)
         aggregator.assert_metric("aerospike.{}".format(metric))
 
     for metric in SET_METRICS:
