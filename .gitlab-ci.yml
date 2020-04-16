@@ -33,6 +33,7 @@ release-manual:
   script:
     # Get tagger info
     - echo CI_COMMIT_TAG $CI_COMMIT_TAG
+    - echo abc | tail
     - git show "$CI_COMMIT_TAG"
     - git show "$CI_COMMIT_TAG" | cat -A
     - git show "$CI_COMMIT_TAG" | grep '^Tagger:'
