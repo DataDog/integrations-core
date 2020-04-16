@@ -8,7 +8,7 @@ from .metrics import ISTIOD_METRICS
 
 
 class Istio(OpenMetricsBaseCheck):
-
+    
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
@@ -29,7 +29,6 @@ class Istio(OpenMetricsBaseCheck):
                 'metadata_label_map': {'version': 'tag'},
             }
         )
-
         super(Istio, self).__init__(name, init_config, instances)
 
     def __new__(cls, name, init_config, instances):
