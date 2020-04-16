@@ -4,7 +4,7 @@
 
 from copy import deepcopy
 
-from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
 
 from .constants import CITADEL_NAMESPACE, GALLEY_NAMESPACE, MESH_NAMESPACE, MIXER_NAMESPACE, PILOT_NAMESPACE
