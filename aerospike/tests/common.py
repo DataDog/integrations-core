@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import copy
 
 from datadog_checks.dev import get_docker_hostname
 
@@ -46,8 +47,8 @@ LAZY_METRICS = [
 INSTANCE = {
     'host': HOST,
     'port': PORT,
-    'metrics': STATS_METRICS,
-    'namespace_metrics': ALL_METRICS,
+    'metrics': copy.deepcopy(STATS_METRICS),
+    'namespace_metrics': copy.deepcopy(ALL_METRICS),
     'namespaces': ['test'],
     'datacenters': ['test'],
     'tags': ['tag:value'],
