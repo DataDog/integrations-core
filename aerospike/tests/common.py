@@ -41,8 +41,6 @@ LAZY_METRICS = [
     'aerospike.namespace.latency.read_over_8ms',
     'aerospike.namespace.latency.read_over_1ms',
     'aerospike.namespace.latency.read_ops_sec',
-    'aerospike.namespace.tps.read',
-    'aerospike.namespace.tps.write',
 ]
 
 INSTANCE = {
