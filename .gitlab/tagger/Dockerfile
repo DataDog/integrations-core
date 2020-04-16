@@ -28,6 +28,9 @@ RUN mkdir -p ~/.ssh \
 
 # Environment
 ENV DDEV_ROOT ~/datadog_checks_dev
+# Locales are required to be set to use click
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
 
 # Assumes the build context is `integrations-core/datadog_checks_dev`
 COPY . ${DDEV_ROOT}
