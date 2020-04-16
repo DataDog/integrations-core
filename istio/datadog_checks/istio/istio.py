@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
+
 from .legacy_1_4 import LegacyIstioCheck_1_4
 from .metrics import ISTIOD_METRICS
 
