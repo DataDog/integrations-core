@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020 - Present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base import OpenMetricsBaseCheck
 
 from .legacy_1_4 import LegacyIstioCheck_1_4
 
