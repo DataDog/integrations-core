@@ -12,10 +12,7 @@ files:
         Every instance is scheduled independent of the others.
 
         This check makes a lot of API calls.
-        It could sometimes help to add a minimum collection interval:
-
-          min_collection_interval: 180
-
+        It could sometimes help to add a minimum collection interval.
     options:
     - name: aci_url
       required: true
@@ -110,4 +107,9 @@ files:
         aws_region.hidden: true
         aws_host.hidden: true
         aws_service.hidden: true
-    - template: instances/default
+    - template: instances/tags
+    - template: instances/service
+    - template: instances/global
+      overrides:
+        min_collection_interval.value.default: 15
+        min_collection_interval.value.example: 180
