@@ -88,6 +88,12 @@ def test_f5_testme(aggregator):
 
     # TODO: add simulation data for these metrics.
 
+    ltm_gauges = [
+        'ltmVirtualServNumber',
+        'ltmNodeAddrNumber',
+        'ltmPoolNumber',
+    ]
+
     ltm_virtual_server_gauges = [
         'ltmVirtualServEnabled',
         'ltmVirtualServConnLimit',
@@ -99,9 +105,19 @@ def test_f5_testme(aggregator):
         'ltmVirtualServStatDurationRateExceeded',
     ]
 
-    ltm_gauges = [
-        'ltmVirtualServNumber',
-        'ltmNodeAddrNumber',
+    ltm_virtual_server_counts = [
+        'ltmVirtualServStatClientTotConns',
+        'ltmVirtualServStatClientEvictedConns',
+        'ltmVirtualServStatClientSlowKilled',
+        'ltmVirtualServStatTotRequests',
+    ]
+
+    ltm_virtual_server_rates = [
+        'ltmVirtualServStatNoNodesErrors',
+        'ltmVirtualServStatClientPktsIn',
+        'ltmVirtualServStatClientBytesIn',
+        'ltmVirtualServStatClientPktsOut',
+        'ltmVirtualServStatClientBytesOut',
     ]
 
     ltm_nodes_gauges = [
@@ -117,27 +133,42 @@ def test_f5_testme(aggregator):
         'ltmNodeAddrStatDurationRateExceeded',
     ]
 
+    ltm_nodes_counts = [
+        'ltmNodeAddrStatServerTotConns',
+        'ltmNodeAddrStatTotRequests',
+    ]
+
+    ltm_nodes_rates = [
+        'ltmNodeAddrStatServerPktsIn',
+        'ltmNodeAddrStatServerBytesIn',
+        'ltmNodeAddrStatServerPktsOut',
+        'ltmNodeAddrStatServerBytesOut',
+    ]
+
+    ltm_pool_gauges = [
+        'ltmPoolDynamicRatioSum',
+        'ltmPoolMemberCnt',
+        'ltmPoolActiveMemberCnt',
+        'ltmPoolStatServerCurConns',
+        'ltmPoolStatConnqDepth',
+        'ltmPoolStatConnqAgeHead',
+        'ltmPoolStatCurSessions',
+    ]
+
+    ltm_pool_counts = [
+        'ltmPoolStatServerTotConns',
+        'ltmPoolStatConnqServiced',
+        'ltmPoolStatTotRequests',
+    ]
+
+    ltm_pool_rates = [
+        'ltmPoolStatServerPktsIn',
+        'ltmPoolStatServerBytesIn',
+        'ltmPoolStatServerPktsOut',
+        'ltmPoolStatServerBytesOut',
+    ]
+
     _ = [
-        # 'ltmPoolNumber',
-        # 'ltmPoolDisallowNat',
-        # 'ltmPoolSimpleTimeout',
-        # 'ltmPoolIpTosToClient',
-        # 'ltmPoolIpTosToServer',
-        # 'ltmPoolLinkQosToClient',
-        # 'ltmPoolLinkQosToServer',
-        # 'ltmPoolDynamicRatioSum',
-        # 'ltmPoolSlowRampTime',
-        # 'ltmPoolMemberCnt',
-        # 'ltmPoolQueueOnConnectionLimit',
-        # 'ltmPoolQueueDepthLimit',
-        # 'ltmPoolQueueTimeLimit',
-        # 'ltmPoolActionOnServiceDown',
-        # 'ltmPoolMinUpMembers',
-        # 'ltmPoolMinUpMembersEnable',
-        # 'ltmPoolMinUpMemberAction',
-        # 'ltmPoolMinActiveMembers',
-        # 'ltmPoolActiveMemberCnt',
-        # 'ltmPoolDisallowSnat',
         # 'ltmPoolMemberNumber',
         # 'ltmPoolMemberMonitorState',
         # 'ltmPoolMemberMonitorStatus',
@@ -147,33 +178,6 @@ def test_f5_testme(aggregator):
         # 'ltmPoolMemberWeight',
         # 'ltmPoolMemberPriority',
         # 'ltmPoolMemberDynamicRatio',
-    ]
-
-    ltm_virtual_server_counts = [
-        'ltmVirtualServStatClientTotConns',
-        'ltmVirtualServStatClientEvictedConns',
-        'ltmVirtualServStatClientSlowKilled',
-        'ltmVirtualServStatTotRequests',
-    ]
-
-    ltm_nodes_counts = [
-        'ltmNodeAddrStatServerTotConns',
-        'ltmNodeAddrStatTotRequests',
-    ]
-
-    ltm_virtual_server_rates = [
-        'ltmVirtualServStatNoNodesErrors',
-        'ltmVirtualServStatClientPktsIn',
-        'ltmVirtualServStatClientBytesIn',
-        'ltmVirtualServStatClientPktsOut',
-        'ltmVirtualServStatClientBytesOut',
-    ]
-
-    ltm_nodes_rates = [
-        'ltmNodeAddrStatServerPktsIn',
-        'ltmNodeAddrStatServerBytesIn',
-        'ltmNodeAddrStatServerPktsOut',
-        'ltmNodeAddrStatServerBytesOut',
     ]
 
     interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
@@ -214,26 +218,38 @@ def test_f5_testme(aggregator):
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=server_tags, count=1,
             )
-        for metric in ltm_virtual_server_rates:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=server_tags, count=1,
-            )
         for metric in ltm_virtual_server_counts:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=server_tags, count=1,
+            )
+        for metric in ltm_virtual_server_rates:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=server_tags, count=1,
             )
 
     nodes = ['node1', 'node2', 'node3']
     for node in nodes:
         node_tags = tags + ['node:{}'.format(node)]
+        for metric in ltm_nodes_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=node_tags, count=1)
         for metric in ltm_nodes_counts:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=node_tags, count=1
             )
-        for metric in ltm_nodes_gauges:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=node_tags, count=1)
         for metric in ltm_nodes_rates:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=node_tags, count=1)
+
+    pools = ['pool1', 'pool2']
+    for pool in pools:
+        pool_tags = tags + ['pool:{}'.format(pool)]
+        for metric in ltm_pool_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=pool_tags, count=1)
+        for metric in ltm_pool_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=pool_tags, count=1
+            )
+        for metric in ltm_pool_rates:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=pool_tags, count=1)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
