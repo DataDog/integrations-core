@@ -2,7 +2,7 @@ version: "3"
 
 services:
   hadoop-single-node:
-    image: sequenceiq/hadoop-docker:2.7.1
+    image: ouyi/hadoop-docker:latest
     hostname: ${HOSTNAME}
     container_name: dd-test-mapreduce
     environment:
