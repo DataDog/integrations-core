@@ -34,6 +34,7 @@ release-manual:
     # Get tagger info
     - echo CI_COMMIT_TAG $CI_COMMIT_TAG
     - git show "$CI_COMMIT_TAG"
+    - git show "$CI_COMMIT_TAG" | grep '^Tagger:'
     - git show "$CI_COMMIT_TAG" | head -2
     - git show "$CI_COMMIT_TAG" | head -2 | cat -e
     - git show "$CI_COMMIT_TAG" | head -2 | tail -1
