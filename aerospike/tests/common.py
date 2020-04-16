@@ -23,6 +23,14 @@ NAMESPACE_METRICS = [
 
 SET_METRICS = ['tombstones', 'memory_data_bytes', 'truncate_lut', 'objects', 'stop_writes_count']
 
+STATS_METRICS = [
+    'cluster_size',
+    'batch_error',
+    'cluster_generation',
+    'cluster_clock_skew_stop_writes_sec',
+    'proccess_cpu_pct',
+]
+
 ALL_METRICS = NAMESPACE_METRICS + SET_METRICS
 
 LAZY_METRICS = [
@@ -41,18 +49,8 @@ LAZY_METRICS = [
 INSTANCE = {
     'host': HOST,
     'port': PORT,
-    'metrics': ['cluster_size', 'batch_error'],
-    'namespace_metrics': [
-        'objects',
-        'hwm_breached',
-        'client_write_error',
-        'client_write_success',
-        'objects',
-        'tombstones',
-        'stop_writes_count',
-        'truncate_lut',
-        'memory_data_bytes',
-    ],
+    'metrics': STATS_METRICS,
+    'namespace_metrics': ALL_METRICS,
     'namespaces': ['test'],
     'datacenters': ['test'],
     'tags': ['tag:value'],
