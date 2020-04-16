@@ -202,7 +202,7 @@ snmp.cpiPduOutOfService,gauge,,,,[Chatsworth] Whether the PDU is in-service.,0,s
 snmp.cpiPduUpgrade,gauge,,,,[Chatsworth] Indicates if the PDU firmware is being upgraded.,0,snmp,
 snmp.cpiPduChainRole,gauge,,,,[Chatsworth] Get the role of the PDU in a daisy chain.,0,snmp,
 snmp.cpiPduTotalPower,gauge,,,,[Chatsworth] Get the power in volt-amps for the entire PDU.,0,snmp,
-snmp.cpiPduEasStatus,gauge,,,,[Chatsworth] Indicates if the Electronic Access Control system is ready|inactive|error state.,0,snmp,
+snmp.cpiPduEasStatus,gauge,,,,"[Chatsworth] Indicates if the Electronic Access Control system is ready, inactive, or error state.",0,snmp,
 snmp.cpiPduDoorStatus,gauge,,,,[Chatsworth] Indicates if the door sensor is closed or open.,0,snmp,
 snmp.cpiPduLockStatus,gauge,,,,[Chatsworth] Indicates if the lock is closed or open.,0,snmp,
 snmp.cpiPduSensorValue,gauge,,,,[Chatsworth] The value of the sensor.,0,snmp,

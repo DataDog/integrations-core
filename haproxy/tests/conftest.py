@@ -14,6 +14,7 @@ from datadog_checks.haproxy import HAProxy
 from .common import (
     CHECK_CONFIG,
     CHECK_CONFIG_OPEN,
+    CONFIG_TCPSOCKET,
     HAPROXY_VERSION,
     HERE,
     PASSWORD,
@@ -78,7 +79,7 @@ def dd_environment():
                     config = deepcopy(CHECK_CONFIG)
                     unixsocket_url = 'unix://{0}'.format(host_socket_path)
                     config['unixsocket_url'] = unixsocket_url
-                    yield config
+                    yield {'instances': [config, CONFIG_TCPSOCKET]}
         else:
             yield deepcopy(CHECK_CONFIG_OPEN)
 

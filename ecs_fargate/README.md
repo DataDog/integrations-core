@@ -265,7 +265,7 @@ Monitor Fargate logs by using the `awslogs` log driver and a Lambda function to 
 
 ### Trace Collection
 
-1. Follow the [instructions above](#installation) to add the Datadog Agent container to your task definition with the additional environment variable `DD_APM_ENABLED` set to `true`.
+1. Follow the [instructions above](#installation) to add the Datadog Agent container to your task definition with the additional environment variable `DD_APM_ENABLED` set to `true` and set up a host port that uses **8126** with **tcp** protocol under port mappings.
 
 2. [Instrument your application][32] based on your setup.
 

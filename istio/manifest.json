@@ -24,6 +24,9 @@
   "type": "check",
   "integration_id": "istio",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "Istio base dashboard": "assets/dashboards/istio_overview.json"

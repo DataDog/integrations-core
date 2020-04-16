@@ -1,5 +1,9 @@
 # CHANGELOG - win32_event_log
 
+## 2.3.4 / 2020-04-16
+
+* [Fixed] Normalize integers. See [#6357](https://github.com/DataDog/integrations-core/pull/6357).
+
 ## 2.3.3 / 2020-04-04
 
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
