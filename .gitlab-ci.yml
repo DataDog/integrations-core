@@ -32,10 +32,11 @@ release-manual:
     - alex/test_ci_pipeline
   script:
     # Get tagger info
-    - echo CI_COMMIT_TAG $CI_COMMIT_TAG
-    - git show "$CI_COMMIT_TAG"
-    - git show "$CI_COMMIT_TAG" | head -2
-    - git show "$CI_COMMIT_TAG" | head -2 | tail -1
+    - |
+      echo CI_COMMIT_TAG $CI_COMMIT_TAG
+      git show "$CI_COMMIT_TAG"
+      git show "$CI_COMMIT_TAG" | head -2
+      git show "$CI_COMMIT_TAG" | head -2 | tail -1
     - tagger=$(git show "$CI_COMMIT_TAG" | head -2 | tail -1)
     - echo tagger $tagger
     # The automatic release builder will trigger this job as a side-effect of
