@@ -58,7 +58,7 @@ def test_connection_uses_tls():
     tls_config = {'cafile': 'my-ca-file', 'certfile': 'my-certfile', 'keyfile': 'my-keyfile'}
     instance['tls_config'] = copy.deepcopy(tls_config)
 
-    check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
+    check = AerospikeCheck('aerospike', {}, [instance])
     tls_config['enable'] = True
 
     assert check._tls_config == tls_config
