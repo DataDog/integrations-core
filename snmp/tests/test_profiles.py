@@ -92,6 +92,7 @@ def test_f5_testme(aggregator):
         'ltmVirtualServNumber',
         'ltmNodeAddrNumber',
         'ltmPoolNumber',
+        'ltmPoolMemberNumber',
     ]
 
     ltm_virtual_server_gauges = [
@@ -168,16 +169,34 @@ def test_f5_testme(aggregator):
         'ltmPoolStatServerBytesOut',
     ]
 
-    _ = [
-        # 'ltmPoolMemberNumber',
-        # 'ltmPoolMemberMonitorState',
-        # 'ltmPoolMemberMonitorStatus',
-        # 'ltmPoolMemberSessionStatus',
-        # 'ltmPoolMemberConnLimit',
-        # 'ltmPoolMemberRatio',
-        # 'ltmPoolMemberWeight',
-        # 'ltmPoolMemberPriority',
-        # 'ltmPoolMemberDynamicRatio',
+    ltm_pool_member_gauges = [
+        'ltmPoolMemberMonitorState',
+        'ltmPoolMemberMonitorStatus',
+        'ltmPoolMemberSessionStatus',
+        'ltmPoolMemberConnLimit',
+        'ltmPoolMemberRatio',
+        'ltmPoolMemberWeight',
+        'ltmPoolMemberPriority',
+        'ltmPoolMemberDynamicRatio',
+        'ltmPoolMemberStatServerCurConns',
+        'ltmPoolMemberStatConnqDepth',
+        'ltmPoolMemberStatConnqAgeHead',
+        'ltmPoolMemberStatCurSessions',
+        'ltmPoolMemberStatCurrentConnsPerSec',
+        'ltmPoolMemberStatDurationRateExceeded',
+    ]
+
+    ltm_pool_member_counts = [
+        'ltmPoolMemberStatServerTotConns',
+        'ltmPoolMemberStatTotRequests',
+        'ltmPoolMemberStatConnqServiced',
+    ]
+
+    ltm_pool_member_rates = [
+        'ltmPoolMemberStatServerPktsIn',
+        'ltmPoolMemberStatServerBytesIn',
+        'ltmPoolMemberStatServerPktsOut',
+        'ltmPoolMemberStatServerBytesOut',
     ]
 
     interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
@@ -250,6 +269,22 @@ def test_f5_testme(aggregator):
             )
         for metric in ltm_pool_rates:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=pool_tags, count=1)
+
+    pool_members = [('pool1', 'node1'), ('pool1', 'node2'), ('pool2', 'node3')]
+    for pool, node in pool_members:
+        pool_member_tags = tags + ['pool:{}'.format(pool), 'node:{}'.format(node)]
+        for metric in ltm_pool_member_gauges:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=pool_member_tags, count=1
+            )
+        for metric in ltm_pool_member_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=pool_member_tags, count=1
+            )
+        for metric in ltm_pool_member_rates:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=pool_member_tags, count=1
+            )
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()

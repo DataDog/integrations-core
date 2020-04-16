@@ -461,3 +461,80 @@ metrics:
         column:
           OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.1
           name: ltmPoolMemberPoolName
+      - tag: node
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.3.2.1.19
+          name: ltmPoolMemberNodeName
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.2.5.4.3
+      name: ltmPoolMemberStatTable
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.5
+        name: ltmPoolMemberStatServerPktsIn
+      - OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.6
+        name: ltmPoolMemberStatServerBytesIn
+      - OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.7
+        name: ltmPoolMemberStatServerPktsOut
+      - OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.8
+        name: ltmPoolMemberStatServerBytesOut
+    metric_tags:
+      - tag: pool
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.1
+          name: ltmPoolMemberStatPoolName
+      - tag: node
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.28
+          name: ltmPoolMemberStatNodeName
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.2.5.4.3
+      name: ltmPoolMemberStatTable
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.10
+        name: ltmPoolMemberStatServerTotConns
+      - OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.19
+        name: ltmPoolMemberStatTotRequests
+      - OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.27
+        name: ltmPoolMemberStatConnqServiced
+    forced_type: monotonic_count
+    metric_tags:
+      - tag: pool
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.1
+          name: ltmPoolMemberStatPoolName
+      - tag: node
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.28
+          name: ltmPoolMemberStatNodeName
+
+  - MIB: F5-BIGIP-LOCAL-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.2.5.4.3
+      name: ltmPoolMemberStatTable
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.11
+        name: ltmPoolMemberStatServerCurConns
+      - OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.22
+        name: ltmPoolMemberStatConnqDepth
+      - OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.23
+        name: ltmPoolMemberStatConnqAgeHead
+      - OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.29
+        name: ltmPoolMemberStatCurSessions
+      - OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.30
+        name: ltmPoolMemberStatCurrentConnsPerSec
+      - OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.31
+        name: ltmPoolMemberStatDurationRateExceeded
+    forced_type: gauge
+    metric_tags:
+      - tag: pool
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.1
+          name: ltmPoolMemberStatPoolName
+      - tag: node
+        column:
+          OID: 1.3.6.1.4.1.3375.2.2.5.4.3.1.28
+          name: ltmPoolMemberStatNodeName
