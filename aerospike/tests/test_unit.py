@@ -71,19 +71,8 @@ def test_collect_latency_parser(aggregator):
     )
     check.collect_latency(None)
 
-    metrics = [
-        'aerospike.namespace.latency.read_ops_sec',
-        'aerospike.namespace.latency.read_over_1ms',
-        'aerospike.namespace.latency.read_over_8ms',
-        'aerospike.namespace.latency.read_over_64ms',
-        'aerospike.namespace.latency.write_ops_sec',
-        'aerospike.namespace.latency.write_over_1ms',
-        'aerospike.namespace.latency.write_over_8ms',
-        'aerospike.namespace.latency.write_over_64ms',
-    ]
-
     for ns in ['ns-1', 'ns-2_foo']:
-        for metric in metrics:
+        for metric in common.LAZY_METRICS:
             aggregator.assert_metric(metric, tags=['namespace:{}'.format(ns), 'tag:value'])
 
     aggregator.assert_all_metrics_covered()
