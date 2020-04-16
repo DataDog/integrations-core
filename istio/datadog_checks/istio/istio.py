@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2020 - Present
+# (C) Datadog, Inc. 2018-Present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from datadog_checks.base import OpenMetricsBaseCheck
