@@ -17,7 +17,6 @@ NAMESPACE_METRICS = [
     'client_write_error',
     'client_write_success',
     'tombstones',
-    'cluster_clock_skew_stop_writes_sec',
     'retransmit_all_batch_sub_dep_res',
 ]
 
