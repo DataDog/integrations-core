@@ -1,0 +1,17 @@
+{ 
+  "name": "Redis error and Warning",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:redis status:(error OR warn) ",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": ["source", "host", "service", "status", "@pid"],
+  "options": {
+    "columns": ["status", "host", "@pid"],
+    "show_date_column": true,
+    "show_message_column": true,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}
