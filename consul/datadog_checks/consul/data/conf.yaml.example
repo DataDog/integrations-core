@@ -46,20 +46,20 @@ init_config:
 instances:
 
     ## @param url - string - required
-    ## Where your Consul HTTP Server Lives
-    ## Point the URL at the leader to get metrics about your Consul Cluster.
-    ## Remind to use https instead of http if your Consul setup is configured to do so.
+    ## Where your Consul HTTP server lives,
+    ## point the URL at the leader to get metrics about your Consul cluster.
+    ## Use HTTPS instead of HTTP if your Consul setup is configured to do so.
     #
   - url: http://localhost:8500
 
     ## @param catalog_checks - boolean - optional - default: false
-    ## Set to true to perform checks against the Consul service Catalog.
+    ## Set to true to perform checks against the Consul service catalog.
     #
     # catalog_checks: false
 
     ## @param network_latency_checks - boolean - optional - default: false
     ## Whether to enable network latency metrics collection. When enabled
-    ## consul network coordinates is retrieved and latency calculated for
+    ## Consul network coordinates is retrieved and latency calculated for
     ## each node and between data centers.
     ## See https://www.consul.io/docs/internals/coordinates.html
     #
@@ -68,7 +68,7 @@ instances:
     ## @param self_leader_check - boolean - optional - default: false
     ## Whether to enable self leader checks. Each instance with this enabled
     ## watches for itself to become the leader and emits an event when that
-    ## happens. It is safe/expected to enable this on all nodes in a consul
+    ## happens. It is safe/expected to enable this on all nodes in a Consul
     ## cluster since only the new leader emits the (single) event. This
     ## flag takes precedence over new_leader_checks.
     #
@@ -87,16 +87,16 @@ instances:
 
     ## @param new_leader_checks - boolean - optional - default: false
     ## Whether to enable new leader checks from this instance
-    ## Note: if this is set on multiple instances/agents in the same cluster
-    ## you will receive one event per leader change per instance. See
+    ## Note: If this is set on multiple instances or Agents in the same cluster
+    ## you receive one event per leader change per instance. See
     ## self_leader_check for a more robust option.
     #
     # new_leader_checks: false
 
     ## @param service_whitelist - list of strings - optional
     ## Services to restrict catalog querying to
-    ## The default settings query up to 50 services. So if you have more than
-    ## this many in your Consul service catalog, fill this whitelist.
+    ## the default settings query up to 50 services. If you have more than
+    ## services in your Consul service catalog, use this whitelist.
     #
     # service_whitelist:
     #   - <SERVICE_1>
