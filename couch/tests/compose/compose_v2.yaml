@@ -1,8 +1,48 @@
-version: '3.5'
+version: "3.5"
+
+networks:
+  network:
 
 services:
-  couch:
-    image: datadog/docker-library:couch_${COUCH_VERSION}
+  couchdb-0:
+    container_name: couchdb-0
+    image: couchdb:${COUCH_VERSION}
+    environment:
+      NODENAME: couchdb-0.example.com
+      COUCHDB_USER: ${COUCH_USER}
+      COUCHDB_PASSWORD: ${COUCH_PASSWORD}
+    networks:
+      network:
+        aliases:
+          - couchdb-0.example.com
     ports:
-      - ${COUCH_PORT}:5984
-    command: --admin=dduser:pawprint --with-haproxy
+      - "${COUCH_PORT}:5984"
+      - "5986:5986"
+  couchdb-1:
+    container_name: couchdb-1
+    image: couchdb:${COUCH_VERSION}
+    environment:
+      NODENAME: couchdb-1.example.com
+      COUCHDB_USER: ${COUCH_USER}
+      COUCHDB_PASSWORD: ${COUCH_PASSWORD}
+    networks:
+      network:
+        aliases:
+          - couchdb-1.example.com
+    ports:
+      - "15984:5984"
+      - "15986:5986"
+  couchdb-2:
+    container_name: couchdb-2
+    image: couchdb:${COUCH_VERSION}
+    environment:
+      NODENAME: couchdb-2.example.com
+      COUCHDB_USER: ${COUCH_USER}
+      COUCHDB_PASSWORD: ${COUCH_PASSWORD}
+    networks:
+      network:
+        aliases:
+          - couchdb-2.example.com
+    ports:
+      - "25984:5984"
+      - "25986:5986"

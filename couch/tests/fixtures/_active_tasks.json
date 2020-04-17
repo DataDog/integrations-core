@@ -1,6 +1,6 @@
 [
     {
-      "node": "node1@127.0.0.1",
+      "node": "couchdb@couchdb-0.example.com",
       "pid": "<0.10672.0>",
       "changes_done": 0,
       "database": "shards/80000000-9fffffff/kennel.1525771285",
@@ -12,7 +12,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node1@127.0.0.1",
+      "node": "couchdb@couchdb-0.example.com",
       "pid": "<0.10674.0>",
       "changes_done": 0,
       "database": "shards/c0000000-dfffffff/kennel.1525771285",
@@ -24,7 +24,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node1@127.0.0.1",
+      "node": "couchdb@couchdb-0.example.com",
       "pid": "<0.10676.0>",
       "changes_done": 0,
       "database": "shards/e0000000-ffffffff/kennel.1525771285",
@@ -36,7 +36,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node1@127.0.0.1",
+      "node": "couchdb@couchdb-0.example.com",
       "pid": "<0.10678.0>",
       "changes_done": 0,
       "database": "shards/20000000-3fffffff/kennel.1525771285",
@@ -48,7 +48,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node1@127.0.0.1",
+      "node": "couchdb@couchdb-0.example.com",
       "pid": "<0.10680.0>",
       "changes_done": 0,
       "database": "shards/a0000000-bfffffff/kennel.1525771285",
@@ -60,7 +60,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node1@127.0.0.1",
+      "node": "couchdb@couchdb-0.example.com",
       "pid": "<0.10682.0>",
       "changes_done": 0,
       "database": "shards/60000000-7fffffff/kennel.1525771285",
@@ -72,7 +72,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node2@127.0.0.1",
+      "node": "couchdb@couchdb-1.example.com",
       "pid": "<0.11052.0>",
       "changes_done": 0,
       "database": "shards/00000000-1fffffff/kennel.1525771285",
@@ -84,7 +84,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node2@127.0.0.1",
+      "node": "couchdb@couchdb-1.example.com",
       "pid": "<0.11079.0>",
       "changes_done": 0,
       "database": "shards/e0000000-ffffffff/kennel.1525771285",
@@ -96,7 +96,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node2@127.0.0.1",
+      "node": "couchdb@couchdb-1.example.com",
       "pid": "<0.11081.0>",
       "changes_done": 0,
       "database": "shards/80000000-9fffffff/kennel.1525771285",
@@ -108,7 +108,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node2@127.0.0.1",
+      "node": "couchdb@couchdb-1.example.com",
       "pid": "<0.11083.0>",
       "changes_done": 0,
       "database": "shards/40000000-5fffffff/kennel.1525771285",
@@ -120,7 +120,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node2@127.0.0.1",
+      "node": "couchdb@couchdb-1.example.com",
       "pid": "<0.11087.0>",
       "changes_done": 0,
       "database": "shards/a0000000-bfffffff/kennel.1525771285",
@@ -132,7 +132,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node2@127.0.0.1",
+      "node": "couchdb@couchdb-1.example.com",
       "pid": "<0.11089.0>",
       "changes_done": 0,
       "database": "shards/c0000000-dfffffff/kennel.1525771285",
@@ -144,7 +144,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node3@127.0.0.1",
+      "node": "couchdb@couchdb-2.example.com",
       "pid": "<0.10439.0>",
       "changes_done": 0,
       "database": "shards/e0000000-ffffffff/kennel.1525771285",
@@ -156,7 +156,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node3@127.0.0.1",
+      "node": "couchdb@couchdb-2.example.com",
       "pid": "<0.10445.0>",
       "changes_done": 0,
       "database": "shards/40000000-5fffffff/kennel.1525771285",
@@ -168,7 +168,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node3@127.0.0.1",
+      "node": "couchdb@couchdb-2.example.com",
       "pid": "<0.10453.0>",
       "changes_done": 0,
       "database": "shards/a0000000-bfffffff/kennel.1525771285",
@@ -180,7 +180,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node3@127.0.0.1",
+      "node": "couchdb@couchdb-2.example.com",
       "pid": "<0.10455.0>",
       "changes_done": 0,
       "database": "shards/80000000-9fffffff/kennel.1525771285",
@@ -192,7 +192,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node3@127.0.0.1",
+      "node": "couchdb@couchdb-2.example.com",
       "pid": "<0.10457.0>",
       "changes_done": 0,
       "database": "shards/60000000-7fffffff/kennel.1525771285",
@@ -204,7 +204,7 @@
       "updated_on": 1525771365
     },
     {
-      "node": "node1@127.0.0.1",
+      "node": "couchdb@couchdb-0.example.com",
       "changes_done": 44461,
       "database": "my_db",
       "pid": "<0.218.0>",
