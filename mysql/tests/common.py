@@ -14,6 +14,8 @@ TESTS_HELPER_DIR = os.path.join(ROOT, 'datadog_checks_tests_helper')
 MYSQL_VERSION_PARSED = parse_version(os.getenv('MYSQL_VERSION'))
 
 CHECK_NAME = 'mysql'
+MASTER_CONTAINER_NAME = 'mysql-master'
+SLAVE_CONTAINER_NAME = 'mysql-slave'
 
 HOST = get_docker_hostname()
 PORT = 13306

@@ -6,6 +6,7 @@ import os
 import mock
 import pymysql
 import pytest
+from pkg_resources import parse_version
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
@@ -45,7 +46,6 @@ def dd_environment(config_e2e):
 
     with TempDir('logs') as logs_host_path:
         e2e_metadata = {'docker_volumes': ['{}:{}'.format(logs_host_path, logs_path)]}
-
         with docker_run(
             os.path.join(common.HERE, 'compose', COMPOSE_FILE),
             env_vars={
@@ -57,14 +57,35 @@ def dd_environment(config_e2e):
                 'MYSQL_LOGS_PATH': logs_path,
                 'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
             },
-            conditions=[
-                WaitFor(init_master, wait=2),
-                WaitFor(init_slave, wait=2),
-                CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
-                populate_database,
-            ],
+            conditions=build_wait_conditions(),
         ):
             yield config_e2e, e2e_metadata
+
+
+def build_wait_conditions():
+    master_logs = []
+    # The order matters for log conditions
+    if MYSQL_FLAVOR == 'mariadb':
+        master_logs.append("MariaDB setup finished!")
+        master_logs.append("Starting MariaDB")
+    else:
+        if common.MYSQL_VERSION_PARSED < parse_version('8.0'):
+            master_logs.append("MySQL init process done")
+            master_logs.append("ready for connections")
+        else:
+            master_logs.append("MySQL setup finished!")
+            master_logs.append("Starting MySQL")
+
+    conditions = []
+    for log in master_logs:
+        conditions.append(CheckDockerLogs(common.MASTER_CONTAINER_NAME, [log]))
+    conditions.append(
+        CheckDockerLogs(common.SLAVE_CONTAINER_NAME, ["ready for connections", "mariadb successfully initialized"])
+    )
+    conditions.append(WaitFor(init_master, wait=2))
+    conditions.append(WaitFor(init_slave, wait=2, attempts=180))
+    conditions.append(populate_database)
+    return conditions
 
 
 @pytest.fixture(scope='session')
