@@ -25,7 +25,6 @@ from .exceptions import PySnmpError
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
 from .models import OID
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
-from .types import ForceableMetricType
 from .utils import (
     OIDPrinter,
     get_default_profiles,
@@ -495,7 +494,7 @@ class SnmpCheck(AgentCheck):
         return tags
 
     def submit_metric(self, name, snmp_value, forced_type, tags):
-        # type: (str, Any, Optional[ForceableMetricType], List[str]) -> None
+        # type: (str, Any, Optional[str], List[str]) -> None
         """
         Convert the values reported as pysnmp-Managed Objects to values and
         report them to the aggregator.

@@ -6,7 +6,6 @@ Type declarations, for type checking purposes only.
 """
 from typing import Literal, NamedTuple, Tuple, TypedDict
 
-ForceableMetricType = Literal['gauge', 'percent']
 MetricDefinition = TypedDict(
     'MetricDefinition', {'type': Literal['gauge', 'rate', 'counter', 'monotonic_count'], 'value': float}
 )
