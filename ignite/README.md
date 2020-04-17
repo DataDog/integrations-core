@@ -50,7 +50,7 @@ _Available for Agent versions >6.0_
          log_processing_rules:
            - type: multi_line
              name: new_log_start_with_date
-             pattern: \d{4}\-\d{2}\-\d{2}
+             pattern: \[\d{4}\-\d{2}\-\d{2}
    ```
 
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample ignite.d/conf.yaml][4] for all available configuration options.

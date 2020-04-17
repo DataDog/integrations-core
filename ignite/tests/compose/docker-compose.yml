@@ -11,3 +11,4 @@ services:
     volumes:
      - ./config.xml:/config.xml
      - ./functions.sh:/opt/ignite/apache-ignite/bin/include/functions.sh
+     - $LOG_DIR:/opt/ignite/apache-ignite/work/log
