@@ -62,24 +62,25 @@ class SnmpCheck(AgentCheck):
 
         self.ignore_nonincreasing_oid = is_affirmative(self.init_config.get('ignore_nonincreasing_oid', False))
 
-        profiles = self.init_config.get('profiles')
-        if profiles is None:
-            self.profiles = get_default_profiles()
-        else:
-            self.profiles = profiles  # type: Dict[str, Dict[str, Any]]
-            self._load_profiles()
-
+        self.profiles = self._load_profiles()
         self.profiles_by_oid = self._get_profiles_mapping()
 
         self.instance['name'] = self._get_instance_name(self.instance)
         self._config = self._build_config(self.instance)
 
     def _load_profiles(self):
-        # type: () -> None
+        # type: () -> Dict[str, Dict[str, Any]]
         """
         Load the configured SNMP profiles.
         """
-        for name, profile in self.profiles.items():
+        configured_profiles = self.init_config.get('profiles')
+
+        if configured_profiles is None:
+            return get_default_profiles()
+
+        profiles = {}
+
+        for name, profile in configured_profiles.items():
             try:
                 definition = get_profile_definition(profile)
             except Exception as exc:
@@ -90,7 +91,9 @@ class SnmpCheck(AgentCheck):
             except Exception as exc:
                 raise ConfigurationError("Failed to expand base profiles in profile '{}': {}".format(name, exc))
 
-            self.profiles[name] = {'definition': definition}
+            profiles[name] = {'definition': definition}
+
+        return profiles
 
     def _get_profiles_mapping(self):
         # type: () -> Dict[str, str]
@@ -209,7 +212,7 @@ class SnmpCheck(AgentCheck):
             results[metric][indexes] = value
         self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
         # Freeze the result
-        results.default_factory = None
+        results.default_factory = None  # type: ignore
         return results, error
 
     def fetch_oids(self, config, oids, enforce_constraints):
@@ -400,7 +403,7 @@ class SnmpCheck(AgentCheck):
 
     def extract_metric_tags(self, metric_tags, results):
         # type: (List[Union[ParsedMetricTag, ParsedMatchMetricTags]], Dict[str, dict]) -> List[str]
-        extracted_tags = []
+        extracted_tags = []  # type: List[str]
         for tag in metric_tags:
             if tag.symbol not in results:
                 self.log.debug('Ignoring tag %s', tag.symbol)
