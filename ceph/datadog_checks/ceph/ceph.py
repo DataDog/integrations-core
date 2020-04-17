@@ -87,14 +87,14 @@ class Ceph(AgentCheck):
             return
 
     def _extract_metrics(self, raw, tags):
-        try:
-            raw_osd_perf = raw.get('osd_perf', {}).get('osdstats', raw.get('osd_perf'))
+        raw_osd_perf = raw.get('osd_perf', {}).get('osdstats', raw.get('osd_perf', {}))
 
-            for osdperf in raw_osd_perf['osd_perf_infos']:
-                local_tags = tags + ['ceph_osd:osd%s' % osdperf['id']]
-                self._publish(osdperf, self.gauge, ['perf_stats', 'apply_latency_ms'], local_tags)
-                self._publish(osdperf, self.gauge, ['perf_stats', 'commit_latency_ms'], local_tags)
-        except (KeyError, TypeError):
+        for osdperf in raw_osd_perf.get('osd_perf_infos', []):
+            local_tags = tags + ['ceph_osd:osd%s' % osdperf['id']]
+            self._publish(osdperf, self.gauge, ['perf_stats', 'apply_latency_ms'], local_tags)
+            self._publish(osdperf, self.gauge, ['perf_stats', 'commit_latency_ms'], local_tags)
+
+        if not  raw_osd_perf.get('osd_perf_infos'):
             self.log.debug('Error retrieving osdperf metrics. Received {}', raw.get('osd_perf', {}))
 
         try:
