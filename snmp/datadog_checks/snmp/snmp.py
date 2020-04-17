@@ -496,6 +496,12 @@ class SnmpCheck(AgentCheck):
 
         return tags
 
+    def monotonic_count_and_rate(self, metric, value, tags):
+        # type: (str, Any, List[str]) -> None
+        """Specific submission method which sends a metric both as a monotonic cound and a rate."""
+        self.monotonic_count(metric, value, tags=tags)
+        self.rate("{}.rate".format(metric), value, tags=tags)
+
     def submit_metric(self, name, snmp_value, forced_type, tags):
         # type: (str, Any, Optional[str], List[str]) -> None
         """
@@ -512,8 +518,7 @@ class SnmpCheck(AgentCheck):
         if forced_type is not None:
             metric = as_metric_with_forced_type(snmp_value, forced_type)
             if metric is None:
-                self.warning('Invalid forced-type specified: %s in %s', forced_type, name)
-                raise ConfigurationError('Invalid forced-type in config file: {}'.format(name))
+                raise ConfigurationError('Invalid forced-type {!r} for metric {!r}'.format(forced_type, name))
         else:
             metric = as_metric_with_inferred_type(snmp_value)
 
