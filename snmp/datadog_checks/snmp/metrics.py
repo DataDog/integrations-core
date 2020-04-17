@@ -84,4 +84,7 @@ def as_metric_with_forced_type(value, forced_type):
     if forced_type == 'monotonic_count':
         return {'type': 'monotonic_count', 'value': int(value)}
 
+    if forced_type == 'monotonic_count_and_rate':
+        return {'type': 'monotonic_count_and_rate', 'value': int(value)}
+
     return None
