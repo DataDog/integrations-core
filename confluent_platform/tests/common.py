@@ -49,3 +49,4 @@ INSTANCES = [
 
 CHECK_CONFIG = load_jmx_config()
 CHECK_CONFIG['instances'] = INSTANCES
+CHECK_CONFIG['init_config']['collect_default_metrics'] = False
