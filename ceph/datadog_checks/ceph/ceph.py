@@ -94,11 +94,10 @@ class Ceph(AgentCheck):
             self._publish(osdperf, self.gauge, ['perf_stats', 'apply_latency_ms'], local_tags)
             self._publish(osdperf, self.gauge, ['perf_stats', 'commit_latency_ms'], local_tags)
 
-        if not  raw_osd_perf.get('osd_perf_infos'):
+        if not raw_osd_perf.get('osd_perf_infos'):
             self.log.debug('Error retrieving osdperf metrics. Received {}', raw.get('osd_perf', {}))
-
-        try:
             health = {'num_near_full_osds': 0, 'num_full_osds': 0}
+
             # In luminous, there are no more overall summary and detail fields, but rather
             # one summary and one detail field per check type in the checks field
             # For example, for near full osds, we have:
@@ -116,17 +115,20 @@ class Ceph(AgentCheck):
             # }
             # The percentage used per osd does not appear anymore in the message,
             # so we won't send the metric osd.pct_used
-            if 'checks' in raw['health_detail']:
-                checks = raw['health_detail']['checks']
-                for check_name, check_detail in iteritems(checks):
+            health_detail = raw.get('health_detail', {})
+            if not health_detail or not ('checks' in health_detail or 'summary' in health_detail):
+                self.log.debug('Error retrieving health metrics')
+
+            if 'checks' in health_detail:
+                for check_name, check_detail in iteritems(health_detail['checks']):
                     if check_name == 'OSD_NEARFULL':
                         health['num_near_full_osds'] = len(check_detail['detail'])
                     if check_name == 'OSD_FULL':
                         health['num_full_osds'] = len(check_detail['detail'])
             else:
                 # Health summary will be empty if no bad news
-                if raw['health_detail']['summary'] != []:
-                    for osdhealth in raw['health_detail']['detail']:
+                if health_detail.get('summary'):
+                    for osdhealth in health_detail.get('detail', []):
                         osd, pct = self._osd_pct_used(osdhealth)
                         if osd:
                             local_tags = tags + ['ceph_osd:%s' % osd.replace('.', '')]
@@ -142,79 +144,72 @@ class Ceph(AgentCheck):
 
             self._publish(health, self.gauge, ['num_full_osds'], tags)
             self._publish(health, self.gauge, ['num_near_full_osds'], tags)
-        except KeyError:
-            self.log.debug('Error retrieving health metrics')
 
-        try:
-            for osdinfo in raw['osd_pool_stats']:
-                name = osdinfo.get('pool_name')
-                local_tags = tags + ['ceph_pool:%s' % name]
-                ops = 0
-                try:
-                    self._publish(osdinfo, self.gauge, ['client_io_rate', 'read_op_per_sec'], local_tags)
-                    ops += osdinfo['client_io_rate']['read_op_per_sec']
-                except KeyError:
-                    osdinfo['client_io_rate'].update({'read_op_per_sec': 0})
-                    self._publish(osdinfo, self.gauge, ['client_io_rate', 'read_op_per_sec'], local_tags)
-
-                try:
-                    self._publish(osdinfo, self.gauge, ['client_io_rate', 'write_op_per_sec'], local_tags)
-                    ops += osdinfo['client_io_rate']['write_op_per_sec']
-                except KeyError:
-                    osdinfo['client_io_rate'].update({'write_op_per_sec': 0})
-                    self._publish(osdinfo, self.gauge, ['client_io_rate', 'write_op_per_sec'], local_tags)
-
-                try:
-                    osdinfo['client_io_rate']['op_per_sec']
-                    self._publish(osdinfo, self.gauge, ['client_io_rate', 'op_per_sec'], local_tags)
-                except KeyError:
-                    osdinfo['client_io_rate'].update({'op_per_sec': ops})
-                    self._publish(osdinfo, self.gauge, ['client_io_rate', 'op_per_sec'], local_tags)
-
-                try:
-                    osdinfo['client_io_rate']['read_bytes_sec']
-                    self._publish(osdinfo, self.gauge, ['client_io_rate', 'read_bytes_sec'], local_tags)
-                except KeyError:
-                    osdinfo['client_io_rate'].update({'read_bytes_sec': 0})
-                    self._publish(osdinfo, self.gauge, ['client_io_rate', 'read_bytes_sec'], local_tags)
-
-                try:
-                    osdinfo['client_io_rate']['write_bytes_sec']
-                    self._publish(osdinfo, self.gauge, ['client_io_rate', 'write_bytes_sec'], local_tags)
-                except KeyError:
-                    osdinfo['client_io_rate'].update({'write_bytes_sec': 0})
-                    self._publish(osdinfo, self.gauge, ['client_io_rate', 'write_bytes_sec'], local_tags)
-        except KeyError:
+        pool_stats = raw.get('osd_pool_stats', {})
+        if not pool_stats:
             self.log.debug('Error retrieving osd_pool_stats metrics')
 
-        try:
-            osdstatus = raw['status']['osdmap']['osdmap']
+        for osdinfo in pool_stats:
+            name = osdinfo.get('pool_name')
+            local_tags = tags + ['ceph_pool:%s' % name]
+            ops = 0
+            try:
+                self._publish(osdinfo, self.gauge, ['client_io_rate', 'read_op_per_sec'], local_tags)
+                ops += osdinfo['client_io_rate']['read_op_per_sec']
+            except KeyError:
+                osdinfo['client_io_rate'].update({'read_op_per_sec': 0})
+                self._publish(osdinfo, self.gauge, ['client_io_rate', 'read_op_per_sec'], local_tags)
+
+            try:
+                self._publish(osdinfo, self.gauge, ['client_io_rate', 'write_op_per_sec'], local_tags)
+                ops += osdinfo['client_io_rate']['write_op_per_sec']
+            except KeyError:
+                osdinfo['client_io_rate'].update({'write_op_per_sec': 0})
+                self._publish(osdinfo, self.gauge, ['client_io_rate', 'write_op_per_sec'], local_tags)
+
+            if 'op_per_sec' not in osdinfo['client_io_rate']:
+                osdinfo['client_io_rate'].update({'op_per_sec': ops})
+            self._publish(osdinfo, self.gauge, ['client_io_rate', 'op_per_sec'], local_tags)
+
+            if 'op_per_sec' not in osdinfo['read_bytes_sec']:
+                osdinfo['client_io_rate'].update({'read_bytes_sec': 0})
+            self._publish(osdinfo, self.gauge, ['client_io_rate', 'read_bytes_sec'], local_tags)
+
+            if 'op_per_sec' not in osdinfo['write_bytes_sec']:
+                osdinfo['client_io_rate'].update({'write_bytes_sec': 0})
+            self._publish(osdinfo, self.gauge, ['client_io_rate', 'write_bytes_sec'], local_tags)
+
+        status = raw.get('status', {})
+
+        if 'osdmap' in status.get('osdmap'):
+            osdstatus = status['osdmap']['osdmap']
             self._publish(osdstatus, self.gauge, ['num_osds'], tags)
             self._publish(osdstatus, self.gauge, ['num_in_osds'], tags)
             self._publish(osdstatus, self.gauge, ['num_up_osds'], tags)
-
-        except KeyError:
+        else:
             self.log.debug('Error retrieving osdstatus metrics')
 
-        try:
-            pgstatus = raw['status']['pgmap']
+        pgstatus = status.get('pgmap', {})
+        if pgstatus:
             self._publish(pgstatus, self.gauge, ['num_pgs'], tags)
-            for pgstate in pgstatus['pgs_by_state']:
-                s_name = pgstate['state_name'].replace("+", "_")
-                self.gauge(self.NAMESPACE + '.pgstate.' + s_name, pgstate['count'], tags)
-        except KeyError:
+        else:
             self.log.debug('Error retrieving pgstatus metrics')
+        for pgstate in pgstatus.get('pgs_by_state', {}):
+            s_name = pgstate.get('state_name', "").replace("+", "_")
+            if s_name:
+                self.gauge(self.NAMESPACE + '.pgstate.' + s_name, pgstate['count'], tags)
 
-        try:
-            num_mons = len(raw['mon_status']['monmap']['mons'])
-            self.gauge(self.NAMESPACE + '.num_mons', num_mons, tags)
-        except KeyError:
+        mon_status = raw.get('mon_status', {})
+        mons = mon_status.get('monmap', {}).get('mons', None)
+        if mons is not None:
+            self.gauge(self.NAMESPACE + '.num_mons', len(mons), tags)
+        else:
             self.log.debug('Error retrieving mon_status metrics')
 
-        try:
-            num_mons_active = len(raw['mon_status']['quorum'])
-            self.gauge(self.NAMESPACE + '.num_mons.active', num_mons_active, tags)
-        except KeyError:
+        mons_active = mon_status.get('quorum', None)
+        if mons_active is not None:
+            self.gauge(self.NAMESPACE + '.num_mons.active', len(mons_active), tags)
+        else:
             self.log.debug('Error retrieving mon_status quorum metrics')
 
         try:
