@@ -18,14 +18,14 @@ files:
         type: string
         example: http://localhost:8500
     - name: catalog_checks
-      description: Set to true to perform checks against the Consul service Catalog.
+      description: Set to true to perform checks against the Consul service catalog.
       value:
         type: boolean
         example: false
     - name: network_latency_checks
       description: |
         Whether to enable network latency metrics collection. When enabled
-        consul network coordinates is retrieved and latency calculated for
+        Consul network coordinates is retrieved and latency calculated for
         each node and between data centers.
         See https://www.consul.io/docs/internals/coordinates.html
       value:
@@ -36,7 +36,7 @@ files:
       description: |
         Whether to enable self leader checks. Each instance with this enabled
         watches for itself to become the leader and emits an event when that
-        happens. It is safe/expected to enable this on all nodes in a consul
+        happens. It is safe/expected to enable this on all nodes in a Consul
         cluster since only the new leader emits the (single) event. This
         flag takes precedence over new_leader_checks.
       value:
@@ -59,8 +59,8 @@ files:
     - name: new_leader_checks
       description: |
         Whether to enable new leader checks from this instance
-        Note: if this is set on multiple instances/agents in the same cluster
-        you will receive one event per leader change per instance. See
+        Note: If this is set on multiple instances or Agents in the same cluster
+        you receive one event per leader change per instance. See
         self_leader_check for a more robust option.
       value:
         type: boolean
@@ -69,8 +69,8 @@ files:
     - name: service_whitelist
       description: |
         Services to restrict catalog querying to
-        The default settings query up to 50 services. So if you have more than
-        this many in your Consul service catalog, fill this whitelist.
+        the default settings query up to 50 services. If you have more than
+        services in your Consul service catalog, use this whitelist.
       value:
         type: array
         items:
