@@ -17,7 +17,8 @@
   "public_title": "Datadog-ignite Integration",
   "categories": [
     "caching",
-    "data store"
+    "data store",
+    "log collection"
   ],
   "type": "check",
   "is_public": false,
