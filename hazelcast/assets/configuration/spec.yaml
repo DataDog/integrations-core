@@ -9,9 +9,17 @@ files:
         is_jmx.value.example: false
   - template: instances
     options:
+    - name: mc_health_check_endpoint
+      description: |
+        Hazelcast Management Center health check endpoint with which
+        to poll for the `hazelcast.mc_cluster_state` service check.
+      value:
+        type: string
     - template: instances/jmx
       overrides:
+        host.display_priority: 10
         host.description: Hazelcast or Hazelcast Management Center server with which to connect.
+        port.display_priority: 9
         port.description: Hazelcast or Hazelcast Management Center port with which to connect.
         port.value.example: 1099
   - template: logs

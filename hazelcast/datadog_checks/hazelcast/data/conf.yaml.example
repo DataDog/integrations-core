@@ -53,6 +53,12 @@ instances:
     #
     port: 1099
 
+    ## @param mc_health_check_endpoint - string - optional
+    ## Hazelcast Management Center health check endpoint with which
+    ## to poll for the `hazelcast.mc_cluster_state` service check.
+    #
+    # mc_health_check_endpoint: <MC_HEALTH_CHECK_ENDPOINT>
+
     ## @param user - string - optional
     ## User to use when connecting to JMX.
     #
