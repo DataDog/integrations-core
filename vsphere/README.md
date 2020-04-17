@@ -22,10 +22,10 @@ Then, edit the `vsphere.d/conf.yaml` file in the `conf.d/` folder at the root of
 init_config:
 
 instances:
-  - name: main-vcenter # how metrics are tagged, i.e. 'vcenter_server:main-vcenter'
-    host: <VCENTER_HOSTNAME>          # e.g. myvcenter.example.com
-    username: <USER_YOU_JUST_CREATED> # e.g. datadog-readonly@vsphere.local
-    password: <PASSWORD>
+  - name: main-vcenter
+    host: "<VCENTER_HOSTNAME>"
+    username: "<USER_YOU_JUST_CREATED>"
+    password: "<PASSWORD>"
 ```
 
 [Restart the Agent][5] to start sending vSphere metrics and events to Datadog.
@@ -67,9 +67,11 @@ The following scenarios are possible when using the vSphere integration:
 
 ## Data Collected
 
+Depending of the `collection_level` value you set in your check configuration, not all metrics below are collected. See the [Vsphere Data Collection Levels documentation][8] to discover for a given collection level which metrics are collected.
+
 ### Metrics
 
-See [metadata.csv][8] for a list of metrics provided by this check.
+See [metadata.csv][9] for a list of metrics provided by this check.
 
 ### Events
 
@@ -99,11 +101,11 @@ Returns CRITICAL if the Agent cannot connect to vCenter to collect metrics, othe
 
 ## Troubleshooting
 
-- [Can I limit the number of VMs that are pulled in via the VMWare integration?][9]
+- [Can I limit the number of VMs that are pulled in via the VMWare integration?][10]
 
 ## Further Reading
 
-See our [blog post][10] on monitoring vSphere environments with Datadog.
+See our [blog post][11] on monitoring vSphere environments with Datadog.
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/vsphere/images/vsphere_graph.png
 [2]: https://app.datadoghq.com/account/settings#agent
@@ -112,6 +114,7 @@ See our [blog post][10] on monitoring vSphere environments with Datadog.
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://pubs.vmware.com/vsphere-51/index.jsp?topic=%2Fcom.vmware.powercli.cmdletref.doc%2FSet-CustomField.html
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[8]: https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv
-[9]: https://docs.datadoghq.com/integrations/faq/can-i-limit-the-number-of-vms-that-are-pulled-in-via-the-vmware-integration
-[10]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers
+[8]: https://pubs.vmware.com/vsphere-50/index.jsp?topic=%2Fcom.vmware.vsphere.monitoring.doc_50%2FGUID-25800DE4-68E5-41CC-82D9-8811E27924BC.html
+[9]: https://github.com/DataDog/integrations-core/blob/master/vsphere/metadata.csv
+[10]: https://docs.datadoghq.com/integrations/faq/can-i-limit-the-number-of-vms-that-are-pulled-in-via-the-vmware-integration
+[11]: https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/#auto-discovery-across-vm-and-app-layers
