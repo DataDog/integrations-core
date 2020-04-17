@@ -94,7 +94,7 @@ class Ceph(AgentCheck):
             self._publish(osdperf, self.gauge, ['perf_stats', 'apply_latency_ms'], local_tags)
             self._publish(osdperf, self.gauge, ['perf_stats', 'commit_latency_ms'], local_tags)
 
-        if not  raw_osd_perf.get('osd_perf_infos'):
+        if not raw_osd_perf.get('osd_perf_infos'):
             self.log.debug('Error retrieving osdperf metrics. Received {}', raw.get('osd_perf', {}))
 
         try:
