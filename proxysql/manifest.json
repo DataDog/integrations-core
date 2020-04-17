@@ -27,7 +27,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "ProxySQL - Overview": "assets/dashboards/-_overview.json"
+    },
     "saved_views": {},
     "monitors": {},
     "service_checks": "assets/service_checks.json"
