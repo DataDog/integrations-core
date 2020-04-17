@@ -495,6 +495,7 @@ class SnmpCheck(AgentCheck):
         return tags
 
     def monotonic_count_and_rate(self, metric, value, tags):
+        # type: (str, Any, List[str]) -> None
         """Specific submission method which sends a metric both as a monotonic cound and a rate."""
         self.monotonic_count(metric, value, tags=tags)
         self.rate("{}.rate".format(metric), value, tags=tags)
