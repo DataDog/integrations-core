@@ -448,7 +448,7 @@ class SnmpCheck(AgentCheck):
                         # For backward compatibility reason, we publish the first value for OID.
                         continue
                 val = result[0][1]
-                metric_tags = tags + metric.metric_tags
+                metric_tags = tags + metric.tags
                 self.submit_metric(name, val, metric.forced_type, metric_tags)
 
     def get_index_tags(
