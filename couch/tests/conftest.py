@@ -58,8 +58,8 @@ def dd_environment():
         conditions=[
             CheckEndpoints([common.URL]),
             lambda: generate_data(couch_version),
-            WaitFor(send_replication, args=(couch_version,), attempts=120),
-            WaitFor(get_replication, args=(couch_version,), attempts=120),
+            WaitFor(send_replication, args=(couch_version,), wait=2, attempts=60),
+            WaitFor(get_replication, args=(couch_version,), wait=2, attempts=70),
         ],
     ):
         if couch_version == '1':
