@@ -27,7 +27,9 @@ def snmp_get(config, oids, lookup_mib):
     # type: (InstanceConfig, list, bool) -> list
     """Call SNMP GET on a list of oids."""
 
-    def callback(snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx):
+    def callback(  # type: ignore
+        snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx
+    ):
         var_binds = vbProcessor.unmakeVarBinds(snmpEngine, varBinds, lookup_mib)
 
         cbCtx['error'] = errorIndication
@@ -58,7 +60,9 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
     # type: (InstanceConfig, list, bool, bool) -> Generator
     """Call SNMP GETNEXT on a list of oids. It will iterate on the results if it happens to be under the same prefix."""
 
-    def callback(snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx):
+    def callback(  # type: ignore
+        snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx
+    ):
         var_bind_table = [vbProcessor.unmakeVarBinds(snmpEngine, row, lookup_mib) for row in varBindTable]
         if ignore_nonincreasing_oid and errorIndication and isinstance(errorIndication, errind.OidNotIncreasing):
             errorIndication = None
@@ -106,7 +110,9 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
     # type: (InstanceConfig, hlapi.ObjectType, int, int, bool, bool) -> Generator
     """Call SNMP GETBULK on an oid."""
 
-    def callback(snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx):
+    def callback(  # type: ignore
+        snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx
+    ):
         var_bind_table = [vbProcessor.unmakeVarBinds(snmpEngine, row, lookup_mib) for row in varBindTable]
         if ignore_nonincreasing_oid and errorIndication and isinstance(errorIndication, errind.OidNotIncreasing):
             errorIndication = None
