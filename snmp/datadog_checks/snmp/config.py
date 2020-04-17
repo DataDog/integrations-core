@@ -31,18 +31,18 @@ from .types import ForceableMetricType
 
 class ParsedMetric(object):
 
-    __slots__ = ('name', 'metric_tags', 'forced_type', 'enforce_scalar')
+    __slots__ = ('name', 'tags', 'forced_type', 'enforce_scalar')
 
     def __init__(
         self,
         name,  # type: str
-        metric_tags,  # type: List[Dict[str, Any]]
+        tags=None,  # type: List[str]
         forced_type=None,  # type: ForceableMetricType
         enforce_scalar=True,  # type: bool
     ):
         # type: (...) -> None
         self.name = name
-        self.metric_tags = metric_tags
+        self.tags = tags or []
         self.forced_type = forced_type
         self.enforce_scalar = enforce_scalar
 
@@ -399,7 +399,7 @@ class InstanceConfig:
                     except Exception as e:
                         warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
                     else:
-                        parsed_metric = ParsedMetric(parsed_metric_name, metric_tags, forced_type)
+                        parsed_metric = ParsedMetric(parsed_metric_name, tags=metric_tags, forced_type=forced_type)
                         parsed_metrics.append(parsed_metric)
 
                     continue
@@ -462,7 +462,9 @@ class InstanceConfig:
                 table_oids[metric['OID']] = (oid, [])
                 self._resolver.register(oid.as_tuple(), metric['name'])
 
-                parsed_metric = ParsedMetric(metric['name'], metric_tags, forced_type, enforce_scalar=False)
+                parsed_metric = ParsedMetric(
+                    metric['name'], tags=metric_tags, forced_type=forced_type, enforce_scalar=False
+                )
                 parsed_metrics.append(parsed_metric)
 
             else:
@@ -543,6 +545,6 @@ class InstanceConfig:
         self.all_oids.append(uptime_oid)
         self._resolver.register(uptime_oid.as_tuple(), 'sysUpTimeInstance')
 
-        parsed_metric = ParsedMetric('sysUpTimeInstance', [], 'gauge')
+        parsed_metric = ParsedMetric('sysUpTimeInstance', forced_type='gauge')
         self.parsed_metrics.append(parsed_metric)
         self._uptime_metric_added = True
