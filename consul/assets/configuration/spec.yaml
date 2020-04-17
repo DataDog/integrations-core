@@ -11,7 +11,7 @@ files:
     - name: url
       required: true
       description: |
-        Where your Consul HTTP Server Lives
+        Where your Consul HTTP server lives,
         Point the URL at the leader to get metrics about your Consul Cluster.
         Remind to use https instead of http if your Consul setup is configured to do so.
       value:
