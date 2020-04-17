@@ -10,7 +10,7 @@ from typing import Any, Optional, Set
 from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 
 from .compat import total_time_to_temporal_percent
-from .types import ForceableMetricType, MetricDefinition
+from .types import MetricDefinition
 
 # SNMP value types that we explicitly support.
 SNMP_COUNTER_CLASSES = {
@@ -71,7 +71,7 @@ def as_metric_with_inferred_type(value):
 
 
 def as_metric_with_forced_type(value, forced_type):
-    # type: (Any, ForceableMetricType) -> Optional[MetricDefinition]
+    # type: (Any, str) -> Optional[MetricDefinition]
     if forced_type == 'gauge':
         return {'type': 'gauge', 'value': int(value)}
 
