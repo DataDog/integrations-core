@@ -2,10 +2,10 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, List
 
+from . import event
+from . import fault
+from . import view
 from ..vmodl.query import PropertyCollector
-from . import event as event
-from . import fault as fault
-from . import view as view
 from .event import EventManager
 from .option import OptionManager
 from .view import ViewManager
@@ -19,7 +19,7 @@ class ManagedEntity(ManagedObject):
     """
 
     _moId: str
-    obj = None
+    obj: None
     name: str
 
 class ServiceInstanceContent:
@@ -93,6 +93,7 @@ class ComputeResource(ManagedEntity): ...
 class Folder(ManagedEntity): ...
 
 class VirtualMachinePowerState(Enum):
-    poweredOff = 1
-    poweredOn = 2
-    suspended = 3
+    poweredOff: int
+    poweredOn: int
+    suspended: int
+
