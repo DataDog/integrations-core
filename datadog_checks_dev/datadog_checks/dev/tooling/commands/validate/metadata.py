@@ -277,7 +277,7 @@ def metadata(check, check_duplicates):
                 errors = True
                 echo_failure(
                     f"{current_check}:{line} Metric name '{row['metric_name']}' is not valid,"
-                    "it should be normalized as {normalized_metric_name}"
+                    f"it should be normalized as {normalized_metric_name}"
                 )
 
             # metric_name header
@@ -334,7 +334,7 @@ def metadata(check, check_duplicates):
                 errors = True
                 echo_failure(
                     f"{current_check}:{line} `{row['metric_name']}` exceeds the max length: "
-                    "{MAX_DESCRIPTION_LENGTH} for descriptions."
+                    f"{MAX_DESCRIPTION_LENGTH} for descriptions."
                 )
             if row['interval'] and not row['interval'].isdigit():
                 errors = True
