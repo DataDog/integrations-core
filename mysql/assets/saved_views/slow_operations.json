@@ -1,5 +1,5 @@
 { 
-  "name": "MySQL operations",
+  "name": "MySQL slow operations",
   "type": "logs",
   "page": "stream",
   "query": "source:mysql @db.operation:* @duration:>1s",
