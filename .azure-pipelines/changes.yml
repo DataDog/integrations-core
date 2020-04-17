@@ -1,6 +1,7 @@
 trigger: none
 
 pr:
+  autoCancel: false
   branches:
     include:
     - master
@@ -16,7 +17,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_0
-    display: Linux
+    display: Linux_0
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -27,7 +28,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_1
-    display: Linux
+    display: Linux_1
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -38,7 +39,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_2
-    display: Linux
+    display: Linux_2
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -49,7 +50,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_3
-    display: Linux
+    display: Linux_3
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -60,7 +61,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_4
-    display: Linux
+    display: Linux_4
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -71,7 +72,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_5
-    display: Linux
+    display: Linux_5
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -82,7 +83,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_6
-    display: Linux
+    display: Linux_6
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -93,7 +94,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_7
-    display: Linux
+    display: Linux_7
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -104,7 +105,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_8
-    display: Linux
+    display: Linux_8
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -115,7 +116,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_9
-    display: Linux
+    display: Linux_9
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -126,7 +127,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_10
-    display: Linux
+    display: Linux_10
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -137,7 +138,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_11
-    display: Linux
+    display: Linux_11
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -148,7 +149,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_12
-    display: Linux
+    display: Linux_12
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -159,7 +160,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_13
-    display: Linux
+    display: Linux_13
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -170,7 +171,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_14
-    display: Linux
+    display: Linux_14
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -181,7 +182,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_15
-    display: Linux
+    display: Linux_15
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -192,7 +193,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_16
-    display: Linux
+    display: Linux_16
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -203,7 +204,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_17
-    display: Linux
+    display: Linux_17
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -214,7 +215,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_18
-    display: Linux
+    display: Linux_18
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -225,7 +226,7 @@ jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
     job_name: Changed_19
-    display: Linux
+    display: Linux_19
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
