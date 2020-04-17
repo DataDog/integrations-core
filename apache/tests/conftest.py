@@ -10,9 +10,9 @@ import requests
 
 from datadog_checks.apache import Apache
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 
-from .common import BASE_URL, CHECK_NAME, HERE, STATUS_CONFIG, STATUS_URL
+from .common import AUTO_STATUS_URL, BASE_URL, CHECK_NAME, HERE, STATUS_CONFIG, STATUS_URL
 
 
 @pytest.fixture(scope="session")
@@ -24,7 +24,7 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'apache.yaml'),
         env_vars=env,
-        conditions=[CheckEndpoints([STATUS_URL]), generate_metrics],
+        conditions=[CheckEndpoints([STATUS_URL]), generate_metrics, WaitFor(check_status_page_ready)],
         mount_logs=True,
         sleep=20,
     ):
@@ -34,6 +34,11 @@ def dd_environment():
 def generate_metrics():
     for _ in range(0, 100):
         requests.get(BASE_URL)
+
+
+def check_status_page_ready():
+    resp = requests.get(AUTO_STATUS_URL)
+    assert 'ReqPerSec: ' in resp.content.decode('utf-8')
 
 
 @pytest.fixture
