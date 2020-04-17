@@ -12,6 +12,7 @@ import subprocess
 
 import requests
 import six
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 from datadog_checks.downloader.download import REPOSITORY_URL_PREFIX
 
@@ -49,6 +50,7 @@ def cleanup():
     delete_files(current_jsons)
 
 
+@retry(wait=wait_exponential(min=2, max=60), stop=stop_after_attempt(10))
 def download(package):
     # -v:     CRITICAL
     # -vv:    ERROR
