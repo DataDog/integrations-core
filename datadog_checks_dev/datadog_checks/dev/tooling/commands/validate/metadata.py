@@ -276,7 +276,7 @@ def metadata(check, check_duplicates):
             if row['metric_name'] != normalized_metric_name:
                 errors = True
                 echo_failure(
-                    f"Metric name '{row['metric_name']}' is not valid,"
+                    f"{current_check}:{line} Metric name '{row['metric_name']}' is not valid,"
                     "it should be normalized as {normalized_metric_name}"
                 )
 
@@ -300,6 +300,11 @@ def metadata(check, check_duplicates):
             if row['unit_name'] and row['unit_name'] not in VALID_UNIT_NAMES:
                 errors = True
                 echo_failure(f"{current_check}:{line} `{row['unit_name']}` is an invalid unit_name.")
+
+            # per_unit_name header
+            if row['per_unit_name'] and row['per_unit_name'] not in VALID_UNIT_NAMES:
+                errors = True
+                echo_failure(f"{current_check}:{line} `{row['per_unit_name']}` is an invalid per_unit_name.")
 
             # orientation header
             if row['orientation'] and row['orientation'] not in VALID_ORIENTATION:
@@ -333,7 +338,7 @@ def metadata(check, check_duplicates):
                 )
             if row['interval'] and not row['interval'].isdigit():
                 errors = True
-                echo_failure(f"{current_check}: interval should be an int, found '{row['interval']}'")
+                echo_failure(f"{current_check}:{line} interval should be an int, found '{row['interval']}'")
 
         for header, count in empty_count.items():
             errors = True
