@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-import time
 
 import pytest
 
@@ -30,7 +29,7 @@ def dd_environment():
         compose_file=compose_file,
         conditions=[
             CheckDockerLogs(compose_file, 'spawning ceph --cluster ceph -w', wait=5),
-            CheckDockerLogs(compose_file, 'Running on http://0.0.0.0:5000/')
+            CheckDockerLogs(compose_file, 'Running on http://0.0.0.0:5000/'),
         ],
     ):
         # Clean the disk space warning
