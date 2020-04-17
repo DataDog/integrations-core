@@ -338,7 +338,7 @@ def metadata(check, check_duplicates):
                 )
             if row['interval'] and not row['interval'].isdigit():
                 errors = True
-                echo_failure(f"{current_check}:{line} interval should be an int, found '{row['interval']}'")
+                echo_failure(f"{current_check}:{line} interval should be an int, found '{row['interval']}'.")
 
         for header, count in empty_count.items():
             errors = True
