@@ -1,5 +1,5 @@
 { 
-  "name": "Redis error and Warning",
+  "name": "Redis error and warning",
   "type": "logs",
   "page": "stream",
   "query": "source:redis status:(error OR warn) ",
