@@ -2,7 +2,7 @@
   "name": "NGINX pages with error faced by bots",
   "type": "logs",
   "page": "analytics",
-  "query": "source:nginx-ingress-controller @http.useragent_details.browser.family:*bot* @http.status_code:[400 TO 599]",
+  "query": "source:nginx @http.useragent_details.browser.family:*bot* @http.status_code:[400 TO 599]",
   "timerange": {
     "interval_ms": 3600000
   },
