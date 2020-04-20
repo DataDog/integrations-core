@@ -8,42 +8,48 @@ from datadog_checks.snmp.pysnmp_types import MibViewController, ObjectIdentity, 
 
 
 @pytest.mark.unit
-def test_oid():
-    # type: () -> None
-    oid = OID((1, 3, 6, 1, 2, 1, 0))
-    assert oid.as_tuple() == (1, 3, 6, 1, 2, 1, 0)
-    assert repr(oid) == "OID('1.3.6.1.2.1.0')"
-    assert str(oid) == '1.3.6.1.2.1.0'
-
-
-@pytest.mark.unit
 @pytest.mark.parametrize(
-    'value, expected_tuple',
+    'value',
     [
-        pytest.param((1, 3, 6, 1, 2, 1, 0), (1, 3, 6, 1, 2, 1, 0), id='tuple'),
-        pytest.param('1.3.6.1.2.1.0', (1, 3, 6, 1, 2, 1, 0), id='string'),
-        pytest.param((1, '3', 6, '1', 2, 1, '0'), (1, 3, 6, 1, 2, 1, 0), id='mixed-tuple'),
-        pytest.param('.1.3.6.1.2.1.0', (1, 3, 6, 1, 2, 1, 0), id='string-with-leading-dot'),
-        pytest.param(ObjectName((1, 3, 6, 1, 2, 1, 0)), (1, 3, 6, 1, 2, 1, 0), id='object-name-tuple'),
-        pytest.param(ObjectName('1.3.6.1.2.1.0'), (1, 3, 6, 1, 2, 1, 0), id='object-name-string'),
+        pytest.param((1, 3, 6, 1, 2, 1, 1, 2), id='int-tuple'),
+        pytest.param(('1', '3', '6', '1', '2', '1', '1', '2'), id='string-tuple',),
+        pytest.param((1, '3', 6, '1', 2, 1, '1', 2), id='mixed-tuple'),
+        pytest.param('1.3.6.1.2.1.1.2', id='string'),
+        pytest.param('.1.3.6.1.2.1.1.2', id='string-leading-dot'),
+        pytest.param(ObjectName((1, 3, 6, 1, 2, 1, 1, 2)), id='object-name-tuple'),
+        pytest.param(ObjectName('1.3.6.1.2.1.1.2'), id='object-name-string'),
+        pytest.param(ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2)), id='object-identity-tuple'),
+        pytest.param(ObjectIdentity('1.3.6.1.2.1.1.2'), id='object-identity-string'),
+        pytest.param(ObjectType(ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2))), id='object-type'),
         pytest.param(
-            lambda controller: ObjectIdentity((1, 3, 6, 1, 2, 1, 0)).resolveWithMib(controller),
-            (1, 3, 6, 1, 2, 1, 0),
+            lambda controller: ObjectIdentity('SNMPv2-MIB', 'sysObjectID').resolveWithMib(controller),
             id='resolved-object-identity',
         ),
         pytest.param(
-            lambda controller: ObjectType(ObjectIdentity((1, 3, 6, 1, 2, 1, 0))).resolveWithMib(controller),
-            (1, 3, 6, 1, 2, 1, 0),
+            lambda controller: ObjectType(ObjectIdentity('SNMPv2-MIB', 'sysObjectID')).resolveWithMib(controller),
             id='resolved-object-type',
         ),
     ],
 )
-def test_oid_parse_valid(value, expected_tuple):
-    # type: (Any, Tuple[int, ...]) -> None
-    mib_view_controller = MibViewController(SnmpEngine().getMibBuilder())
+def test_oid_from_resolvable_parts(value):
+    # type: (Any) -> None
     if callable(value):
+        mib_view_controller = MibViewController(SnmpEngine().getMibBuilder())
         value = value(mib_view_controller)
-    assert OID(value).as_tuple() == expected_tuple
+
+    oid = OID(value)
+    assert oid.as_tuple() == (1, 3, 6, 1, 2, 1, 1, 2)
+    assert repr(oid) == "OID('1.3.6.1.2.1.1.2')"
+    assert str(oid) == '1.3.6.1.2.1.1.2'
+
+
+def test_oid_from_unresolved_symbol():
+    # type: () -> None
+    oid = OID(ObjectIdentity('SNMPv2-MIB', 'sysDescr'))
+    with pytest.raises(UnresolvedOID):
+        oid.as_tuple()
+    with pytest.raises(UnresolvedOID):
+        str(oid)
 
 
 @pytest.mark.unit
@@ -71,13 +77,9 @@ def test_oid_parse_invalid(value):
         pytest.param(ObjectType(ObjectIdentity((1, 3, 6, 1, 2, 1, 0))), (1, 3, 6, 1, 2, 1, 0), id='object-type'),
     ],
 )
-def test_oid_from_unresolved_instance(value, expected_tuple):
+def test_oid_as_object_type(value, expected_tuple):
     # type: (Any, Tuple[int, ...]) -> None
     oid = OID(value)
-
-    with pytest.raises(UnresolvedOID):
-        oid.as_tuple()
-
     object_type = oid.as_object_type()
 
     # Verify returned ObjectType instance is valid by decoding it.
