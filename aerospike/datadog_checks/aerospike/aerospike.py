@@ -7,6 +7,7 @@
 from __future__ import absolute_import
 
 import re
+from collections import defaultdict
 
 from six import iteritems
 
@@ -254,12 +255,11 @@ class AerospikeCheck(AgentCheck):
 
         ns = None
 
-        metric_names = []
-
-        metric_values = []
+        ns_latencies = defaultdict(dict)
 
         while data:
             line = data.pop(0)
+            metric_names = []
 
             if line.startswith("error-"):
                 continue
@@ -269,14 +269,21 @@ class AerospikeCheck(AgentCheck):
 
             timestamp = re.match(r'(\d+:\d+:\d+)', line)
             if timestamp:
-                metric_values += line.split(",")[1:]
+                metric_values = line.split(",")[1:]
+                ns_latencies[ns].setdefault("metric_values", []).extend(metric_values)
                 continue
 
             # match only works at the beginning
-            ns_metric_name_match = re.match(r'{(\w+)}-(\w+):', line)
+            # ':' or ';' are not allowed in namespace-name: https://www.aerospike.com/docs/guide/limitations.html
+            ns_metric_name_match = re.match(r'{([^\}:;]+)}-(\w+):', line)
             if ns_metric_name_match:
                 ns = ns_metric_name_match.groups()[0]
                 metric_name = ns_metric_name_match.groups()[1]
+            else:
+                self.log.warning("Invalid data. Namespace and/or metric name not found in line: `%s`", line)
+                # Since the data come by pair and the order matters it's safer to return right away than submitting
+                # possibly wrong metrics.
+                return
 
             # need search because this isn't at the beginning
             ops_per_sec = re.search(r'(\w+\/\w+)', line)
@@ -291,12 +298,16 @@ class AerospikeCheck(AgentCheck):
                     latency = metric_name + '_over_' + latency
                     metric_names.append(latency)
 
+            ns_latencies[ns].setdefault("metric_names", []).extend(metric_names)
+
+        for ns, v in iteritems(ns_latencies):
+            metric_names = v.get("metric_names", [])
+            metric_values = v.get("metric_values", [])
             namespace_tags = ['namespace:{}'.format(ns)]
             namespace_tags.extend(self._tags)
-
-        if len(metric_names) == len(metric_values):
-            for i in range(len(metric_names)):
-                self.send(NAMESPACE_LATENCY_METRIC_TYPE, metric_names[i], metric_values[i], namespace_tags)
+            if len(metric_names) == len(metric_values):
+                for i in range(len(metric_names)):
+                    self.send(NAMESPACE_LATENCY_METRIC_TYPE, metric_names[i], metric_values[i], namespace_tags)
 
     def collect_throughput(self, namespaces):
         data = self.get_info('throughput:')

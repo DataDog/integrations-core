@@ -94,8 +94,8 @@ class Ceph(AgentCheck):
                 local_tags = tags + ['ceph_osd:osd%s' % osdperf['id']]
                 self._publish(osdperf, self.gauge, ['perf_stats', 'apply_latency_ms'], local_tags)
                 self._publish(osdperf, self.gauge, ['perf_stats', 'commit_latency_ms'], local_tags)
-        except KeyError:
-            self.log.debug('Error retrieving osdperf metrics')
+        except (KeyError, TypeError):
+            self.log.debug('Error retrieving osdperf metrics. Received {}', raw.get('osd_perf', {}))
 
         try:
             health = {'num_near_full_osds': 0, 'num_full_osds': 0}

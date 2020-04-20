@@ -45,6 +45,7 @@ services:
     image: confluentinc/cp-schema-registry:5.4.0
     hostname: schema-registry
     container_name: schema-registry
+    restart: on-failure  # Schema registry might fail to Zookeeper, restarting "fixes" the issue.
     depends_on:
       - zookeeper
       - broker
@@ -54,6 +55,7 @@ services:
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
+      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081"
       SCHEMA_REGISTRY_JMX_HOSTNAME: "localhost"
       SCHEMA_REGISTRY_JMX_PORT: 31007
 

@@ -38,7 +38,7 @@ sudo apt-get install -y --no-install-recommends \
 
 mkdir -p $TMP_DIR
 pushd $TMP_DIR
-  curl -LO $MQ_URL
+  curl --retry 20 --retry-delay 5 -LO $MQ_URL
   tar -zxvf ./*.tar.gz
   pushd MQServer
     sudo ./mqlicense.sh -text_only -accept
