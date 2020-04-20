@@ -1,0 +1,17 @@
+{ 
+  "name": "Mongo operations",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:mongodb @db.operation:*",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": ["source", "host", "service", "status", "@db.instance", "@db.operation", "@mongo.collection", "@mongo.planSummary.type", "@mongo.query.type", "@mongo.context", "@duration"],
+  "options": {
+    "columns": ["status", "host", "@db.operation", "@db.instance"],
+    "show_date_column": true,
+    "show_message_column": true,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}
