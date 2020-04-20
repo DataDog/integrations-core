@@ -4,7 +4,7 @@
 import ipaddress
 import re
 from collections import defaultdict
-from typing import Any, Callable, DefaultDict, Dict, Iterator, List, Optional, Pattern, Set, Tuple, Union
+from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Pattern, Set, Tuple, Union
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
@@ -96,14 +96,6 @@ class ParsedMatchMetricTags(object):
                 yield '{}:{}'.format(name, matched.expand(match))
 
 
-def _no_op(*args, **kwargs):
-    # type: (*Any, **Any) -> None
-    """
-    A 'do-nothing' replacement for the `warning()` AgentCheck function, suitable for when those
-    functions are not available (e.g. in unit tests).
-    """
-
-
 class InstanceConfig:
     """Parse and hold configuration about a single instance."""
 
@@ -116,7 +108,6 @@ class InstanceConfig:
     def __init__(
         self,
         instance,  # type: dict
-        warning=_no_op,  # type: Callable[..., None]
         global_metrics=None,  # type: List[dict]
         mibs_path=None,  # type: str
         profiles=None,  # type: Dict[str, dict]
@@ -188,7 +179,7 @@ class InstanceConfig:
 
         self._auth_data = self.get_auth_data(instance)
 
-        self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics, warning)
+        self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
             self.all_oids.extend(tag_oids)
@@ -196,7 +187,7 @@ class InstanceConfig:
         if profile:
             if profile not in profiles:
                 raise ConfigurationError("Unknown profile '{}'".format(profile))
-            self.refresh_with_profile(profiles[profile], warning)
+            self.refresh_with_profile(profiles[profile])
             self.add_profile_tag(profile)
 
         self._context_data = ContextData(*self.get_context_data(instance))
@@ -212,10 +203,10 @@ class InstanceConfig:
         # type: (ObjectType) -> Tuple[str, Tuple[str, ...]]
         return self._resolver.resolve_oid(oid)
 
-    def refresh_with_profile(self, profile, warning):
-        # type: (Dict[str, Any], Callable[..., None]) -> None
+    def refresh_with_profile(self, profile):
+        # type: (Dict[str, Any]) -> None
         metrics = profile['definition'].get('metrics', [])
-        all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics, warning)
+        all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics)
 
         metric_tags = profile['definition'].get('metric_tags', [])
         tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
@@ -345,7 +336,6 @@ class InstanceConfig:
     def parse_metrics(
         self,
         metrics,  # type: List[Dict[str, Any]]
-        warning,  # type: Callable[..., None]
     ):
         # type: (...) -> Tuple[List[OID], List[OID], List[Union[ParsedMetric, ParsedTableMetric]]]
         """Parse configuration and returns data to be used for SNMP queries.
@@ -393,13 +383,9 @@ class InstanceConfig:
                 if 'symbol' in metric:
                     to_query = metric['symbol']
 
-                    try:
-                        _, parsed_metric_name = get_table_symbols(metric['MIB'], to_query)
-                    except Exception as e:
-                        warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
-                    else:
-                        parsed_metric = ParsedMetric(parsed_metric_name, tags=metric_tags, forced_type=forced_type)
-                        parsed_metrics.append(parsed_metric)
+                    _, parsed_metric_name = get_table_symbols(metric['MIB'], to_query)
+                    parsed_metric = ParsedMetric(parsed_metric_name, tags=metric_tags, forced_type=forced_type)
+                    parsed_metrics.append(parsed_metric)
 
                     continue
 
