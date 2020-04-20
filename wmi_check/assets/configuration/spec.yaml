@@ -11,7 +11,7 @@ files:
     - name: class
       required: true
       description: |
-        `class` is the name of the WMI class, for example `Win32_OperatingSystem`.
+        The name of the WMI class, for example `Win32_OperatingSystem`.
         You can find many of the standard class names on the MSDN docs:
 
         https://msdn.microsoft.com/en-us/library/windows/desktop/aa394084.aspx
@@ -23,13 +23,13 @@ files:
         list of metrics you want to capture, with each item in the list being a set of:
         [<WMI_PROPERTY_NAME>, <METRIC_NAME>, <METRIC_TYPE>]
 
-          * <WMI_PROPERTY_NAME> is something like `NumberOfUsers` or `ThreadCount`.
+         * <WMI_PROPERTY_NAME> is something like `NumberOfUsers` or `ThreadCount`.
                                 The standard properties are also available on the MSDN docs
                                 for each class.
 
-          * <METRIC_NAME> is the name you want to show up in Datadog.
+         * <METRIC_NAME> is the name you want to show up in Datadog.
 
-          * <METRIC_TYPE> is from the standard choices for all agent checks, such as gauge, rate, histogram or counter.
+         * <METRIC_TYPE> is from the standard choices for all agent checks, such as gauge, rate, histogram or counter.
       value:
         type: array
         items:
@@ -48,7 +48,7 @@ files:
         example: cimv2
     - name: filters
       description: |
-        `filters` parameter is a list of filters on the WMI query you may want.
+        A list of filters on the WMI query you may want.
         Filters can be in one of these forms:
           [{<FILTER_PROPERTY>: <FILTER_VALUE>},...] or
           [{FILTER_PROPERTY>: [<FILTER_OPERATOR>, <FILTER_VALUE>]},...]
@@ -70,7 +70,7 @@ files:
           - {<FILTER_PROPERTY>: <FILTER_VALUE>}
     - name: provider
       description: |
-        `provider` set the WMI provider.
+        The WMI provider.
         It is used to request WMI data from the non-default provider. Available options are: `32` or `64`.
 
         See https://msdn.microsoft.com/en-us/library/aa393067.aspx

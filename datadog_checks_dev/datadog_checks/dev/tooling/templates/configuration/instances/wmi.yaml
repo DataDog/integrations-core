@@ -1,7 +1,7 @@
 - name: host
   required: false
   description: |
-    Is the optional target of the WMI query.
+    The optional target of the WMI query.
     If you set this option, make sure that Remote Management is enabled on the target host:
 
     https://technet.microsoft.com/en-us/library/Hh921475.aspx
