@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   zookeeper:
-    image: zookeeper:3.6.0
+    image: zookeeper:${ZK_VERSION}
     ports:
       - 2181:2181
 
