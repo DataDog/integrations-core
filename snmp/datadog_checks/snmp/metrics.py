@@ -9,8 +9,8 @@ from typing import Any, Optional
 
 from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 
-from .pysnmp_inspect import is_gauge, is_counter, is_opaque
 from .compat import total_time_to_temporal_percent
+from .pysnmp_inspect import is_counter, is_gauge, is_opaque
 from .types import MetricDefinition
 
 
