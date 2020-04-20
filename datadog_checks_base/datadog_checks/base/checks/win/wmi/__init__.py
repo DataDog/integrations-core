@@ -13,7 +13,7 @@ from ... import AgentCheck
 from .sampler import WMISampler
 
 WMIMetric = namedtuple('WMIMetric', ['name', 'value', 'tags'])
-WMIProperties = Tuple[Dict[str, Tuple[str, str]], Iterable[str]]
+WMIProperties = Tuple[Dict[str, Tuple[str, str]], Iterator[str]]
 TagQuery = List[str]
 WMIObject = Dict
 WMIFilter = Union[str, List[str]]
@@ -51,7 +51,7 @@ class WinWMICheck(AgentCheck):
     """
 
     def __init__(self, *args, **kwargs):  # To support optional agentConfig
-        # type: (List[Any], Dict[str, Any]) -> None
+        # type: (*Any, **Any) -> None
         super(WinWMICheck, self).__init__(*args, **kwargs)
 
         if not self.instance:
@@ -74,7 +74,7 @@ class WinWMICheck(AgentCheck):
         self.tag_queries = self.instance.get('tag_queries', [])  # type: List[TagQuery]
 
         self._wmi_sampler = None  # type: Optional[WMISampler]
-        self._wmi_props = None  # type: Optional[Tuple[Dict[str, Tuple[str, str]], Iterable[str]]]
+        self._wmi_props = None  # type: Optional[WMIProperties]
 
     def _format_tag_query(self, sampler, wmi_obj, tag_query):
         # type: (WMISampler, WMIObject, TagQuery) -> Tuple[str, str, List[Dict]]
@@ -275,7 +275,7 @@ class WinWMICheck(AgentCheck):
         return "{host}:{namespace}:{wmi_class}".format(host=host, namespace=namespace, wmi_class=wmi_class)
 
     def get_running_wmi_sampler(self, properties, filters, **kwargs):
-        # type: (Iterable[str], List[Dict[str, WMIFilter]], Dict) -> WMISampler
+        # type: (Iterable[str], List[Dict[str, WMIFilter]], **Any) -> WMISampler
         return self._get_running_wmi_sampler(
             instance_key=None,
             wmi_class=self.wmi_class,
@@ -327,7 +327,7 @@ class WinWMICheck(AgentCheck):
 def from_time(
     year=None, month=None, day=None, hours=None, minutes=None, seconds=None, microseconds=None, timezone=None
 ):
-    # type: (Optional[int], Optional[int], Optional[int], Optional[int], Optional[int], Optional[int], Optional[int], Optional[int]) -> str
+    # type: (int, int, int, int, int, int, int, int) -> str
     """Convenience wrapper to take a series of date/time elements and return a WMI time
     of the form `yyyymmddHHMMSS.mmmmmm+UUU`. All elements may be int, string or
     omitted altogether. If omitted, they will be replaced in the output string
