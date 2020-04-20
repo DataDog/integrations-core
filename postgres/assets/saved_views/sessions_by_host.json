@@ -1,0 +1,21 @@
+{ 
+  "name": "Postgres sessions by Host",
+  "type": "logs",
+  "page": "analytics",
+  "query": "source:postgresql",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": ["source", "host", "service", "status", "@db.instance", "@db.operation", "@db.user", "@postgres.session_id", "@duration"],
+  "options": {
+    "group_bys": [
+      { "facet": "host" }
+    ],
+    "aggregations": [
+      { "metric": "@postgres.session_id", "type": "cardinality" }
+    ],
+    "step_ms": "30000",
+    "limit": "50",
+    "widget": "timeseries"
+  }
+}
