@@ -276,7 +276,7 @@ def metadata(check, check_duplicates):
             if row['metric_name'] != normalized_metric_name:
                 errors = True
                 echo_failure(
-                    f"{current_check}:{line} Metric name '{row['metric_name']}' is not valid,"
+                    f"{current_check}:{line} Metric name '{row['metric_name']}' is not valid, "
                     f"it should be normalized as {normalized_metric_name}"
                 )
 
