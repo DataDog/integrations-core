@@ -20,6 +20,7 @@ class Istio(OpenMetricsBaseCheck):
 
         # Support additional configured metric mappings
         metrics = instance.get('metrics', []) + [ISTIOD_METRICS]
+
         # Include default and user configured labels
         exclude_labels = instance.get('exclude_labels', [])
         exclude_labels.extend(BLACKLIST_LABELS)
