@@ -34,6 +34,9 @@
     "dashboards": {
       "Vault - Overview": "assets/dashboards/vault_overview.json"
     },
+    "saved_views": {
+      "service_name_overview": "assets/saved_views/service_name_overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }
