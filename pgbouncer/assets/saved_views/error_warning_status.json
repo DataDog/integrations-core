@@ -6,7 +6,7 @@
   "timerange": {
     "interval_ms": 3600000
   },
-  "visible_facets": ["source", "host", "service", "status", "@pid"],
+  "visible_facets": ["source", "service", "host", "status", "@db.user", "@db.instance", "@network.destination.ip", "@network.destination.port"],
   "options": {
     "columns": ["status", "host"],
     "show_date_column": true,
