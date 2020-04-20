@@ -2,7 +2,7 @@
     "author_info": {
         "author_name": "Datadog"
     },
-    "board_title": "ProxySQL - Overview",
+    "board_title": "ProxySQL Overview",
     "created": "2020-04-16T12:34:15.438086+00:00",
     "created_by": {
         "access_role": "adm",
@@ -17,7 +17,7 @@
     },
     "description": "This dashboard provides a high-level view of your ProxySQL environment, with in-depth performance indicators regarding the query cache or the latency.\n\n- [How to monitor ProxySQL with Datadog](https://docs.datadoghq.com/integrations/proxysql/) \n\nClone this template dashboard to make changes and add your own graph widgets. ",
     "id": 1057249,
-    "modified": "2020-04-17T08:51:33.799812+00:00",
+    "modified": "2020-04-20T07:58:38.845603+00:00",
     "new_id": "258-j85-hpt",
     "read_only": false,
     "template_variables": [
@@ -39,14 +39,14 @@
     ],
     "widgets": [
         {
-            "height": 16,
+            "height": 8,
             "id": 0,
             "sizing": "zoom",
             "type": "image",
             "url": "https://static.datadoghq.com/static/images/saas_logos/bot/proxysql@2x.png",
             "width": 22,
             "x": 1,
-            "y": 2
+            "y": 10
         },
         {
             "check": "proxysql.can_connect",
@@ -56,7 +56,7 @@
                 "proxysql_port"
             ],
             "grouping": "cluster",
-            "height": 16,
+            "height": 10,
             "id": 1,
             "tags": [
                 "$proxysql_port",
@@ -69,13 +69,13 @@
             "type": "check_status",
             "width": 22,
             "x": 1,
-            "y": 21
+            "y": 20
         },
         {
             "check": "proxysql.backend.status",
             "group_by": [],
             "grouping": "cluster",
-            "height": 16,
+            "height": 10,
             "id": 2,
             "tags": [
                 "$proxysql_server",
@@ -88,7 +88,7 @@
             "type": "check_status",
             "width": 22,
             "x": 1,
-            "y": 41
+            "y": 32
         },
         {
             "bgcolor": "gray",
@@ -112,6 +112,11 @@
             "tile_def": {
                 "requests": [
                     {
+                        "metadata": {
+                            "avg:proxysql.pool.latency_ms{*} by {hostgroup}": {
+                                "alias": "Latency"
+                            }
+                        },
                         "q": "avg:proxysql.pool.latency_ms{*} by {hostgroup}",
                         "style": {
                             "palette": "dog_classic",
@@ -130,6 +135,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": 16,
@@ -146,6 +152,11 @@
             "tile_def": {
                 "requests": [
                     {
+                        "metadata": {
+                            "sum:proxysql.pool.connections_used{$proxysql_server,$proxysql_port} by {hostgroup}": {
+                                "alias": "Used connections"
+                            }
+                        },
                         "q": "sum:proxysql.pool.connections_used{$proxysql_server,$proxysql_port} by {hostgroup}",
                         "style": {
                             "palette": "dog_classic",
@@ -172,7 +183,7 @@
             "type": "timeseries",
             "width": 47,
             "x": 25,
-            "y": 26
+            "y": 27
         },
         {
             "height": 13,
@@ -218,7 +229,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": 16,
@@ -226,7 +236,7 @@
             "type": "timeseries",
             "width": 47,
             "x": 25,
-            "y": 42
+            "y": 44
         },
         {
             "bgcolor": "gray",
@@ -269,7 +279,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": 16,
@@ -287,6 +296,11 @@
             "tile_def": {
                 "requests": [
                     {
+                        "metadata": {
+                            "avg:proxysql.query_cache.memory_bytes{$proxysql_server,$proxysql_port}": {
+                                "alias": "Memory usage"
+                            }
+                        },
                         "q": "avg:proxysql.query_cache.memory_bytes{$proxysql_server,$proxysql_port}",
                         "style": {
                             "palette": "dog_classic",
@@ -313,7 +327,7 @@
             "type": "timeseries",
             "width": 47,
             "x": 75,
-            "y": 26
+            "y": 27
         },
         {
             "height": 13,
@@ -323,6 +337,11 @@
             "tile_def": {
                 "requests": [
                     {
+                        "metadata": {
+                            "avg:proxysql.query_cache.bytes_out{$proxysql_server,$proxysql_port}": {
+                                "alias": "Bytes out"
+                            }
+                        },
                         "q": "avg:proxysql.query_cache.bytes_out{$proxysql_server,$proxysql_port}",
                         "style": {
                             "palette": "dog_classic",
@@ -349,12 +368,12 @@
             "type": "timeseries",
             "width": 47,
             "x": 75,
-            "y": 42
+            "y": 44
         },
         {
             "columns": "[\"host\", \"service\", \"source\"]",
-            "height": 55,
-            "id": 12,
+            "height": 57,
+            "id": 11,
             "indexes": [],
             "message_display": "expanded-md",
             "query": "source:proxysql",
@@ -367,7 +386,7 @@
             "title": true,
             "title_align": "left",
             "title_size": 16,
-            "title_text": "Log Stream",
+            "title_text": "Log stream",
             "type": "log_stream",
             "width": 47,
             "x": 125,
