@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   zookeeper:
-    image: zookeeper:3.6.0
+    image: wurstmeister/zookeeper
     ports:
       - 2181:2181
 
