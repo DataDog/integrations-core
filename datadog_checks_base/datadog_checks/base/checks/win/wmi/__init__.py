@@ -54,7 +54,6 @@ class WinWMICheck(AgentCheck):
 
         # WMI instance
         self.wmi_class = self.instance.get('class', '')  # type: str
-        self.tag_by = self.instance.get('tag_by', "")  # type: str
 
         self._wmi_sampler = None  # type: Optional[WMISampler]
         self._wmi_props = None  # type: Optional[WMIProperties]
@@ -253,17 +252,18 @@ class WinWMICheck(AgentCheck):
 
     def get_running_wmi_sampler(self, properties, filters, **kwargs):
         # type: (List[str], List[Dict[str, WMIFilter]], **Any) -> WMISampler
+        tag_by = kwargs.pop('tag_by', "")
         return self._get_running_wmi_sampler(
             instance_key=None,
             wmi_class=self.wmi_class,
             properties=properties,
-            tag_by=self.tag_by,
             filters=filters,
             host=self.host,
             namespace=self.namespace,
             provider=self.provider,
             username=self.username,
             password=self.password,
+            tag_by=tag_by
             **kwargs
         )
 
