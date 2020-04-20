@@ -40,22 +40,33 @@ metrics:
     name: ifXTable
   forced_type: monotonic_count
   symbols:
-  - OID: 1.3.6.1.2.1.31.1.1.1.6
-    name: ifHCInOctets
   - OID: 1.3.6.1.2.1.31.1.1.1.7
     name: ifHCInUcastPkts
   - OID: 1.3.6.1.2.1.31.1.1.1.8
     name: ifHCInMulticastPkts
   - OID: 1.3.6.1.2.1.31.1.1.1.9
     name: ifHCInBroadcastPkts
-  - OID: 1.3.6.1.2.1.31.1.1.1.10
-    name: ifHCOutOctets
   - OID: 1.3.6.1.2.1.31.1.1.1.11
     name: ifHCOutUcastPkts
   - OID: 1.3.6.1.2.1.31.1.1.1.12
     name: ifHCOutMulticastPkts
   - OID: 1.3.6.1.2.1.31.1.1.1.13
     name: ifHCOutBroadcastPkts
+  metric_tags:
+  - column:
+      OID: 1.3.6.1.2.1.31.1.1.1.1
+      name: ifName
+    tag: interface
+- MIB: IF-MIB
+  table:
+    OID: 1.3.6.1.2.1.31.1.1
+    name: ifXTable
+  forced_type: monotonic_count_and_rate
+  symbols:
+  - OID: 1.3.6.1.2.1.31.1.1.1.6
+    name: ifHCInOctets
+  - OID: 1.3.6.1.2.1.31.1.1.1.10
+    name: ifHCOutOctets
   metric_tags:
   - column:
       OID: 1.3.6.1.2.1.31.1.1.1.1

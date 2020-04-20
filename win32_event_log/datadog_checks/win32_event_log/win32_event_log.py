@@ -17,6 +17,10 @@ from datadog_checks.base.utils.timeout import TimeoutException
 SOURCE_TYPE_NAME = 'event viewer'
 EVENT_TYPE = 'win32_log_event'
 
+# Integer properties to normalize.
+# Source: https://docs.microsoft.com/en-us/previous-versions/windows/desktop/eventlogprov/win32-ntlogevent
+INTEGER_PROPERTIES = ['EventCode', 'EventIdentifier', 'EventType', 'RecordNumber']
+
 
 class Win32EventLogWMI(WinWMICheck):
     # WMI information
@@ -111,7 +115,6 @@ class Win32EventLogWMI(WinWMICheck):
         filters.append(query)
 
         wmi_sampler = self.get_running_wmi_sampler(properties=event_properties, filters=filters, and_props=['Message'])
-
         wmi_sampler.reset_filter(new_filters=filters)
         try:
             wmi_sampler.sample()
@@ -167,7 +170,7 @@ class Win32EventLogWMI(WinWMICheck):
 
 class LogEvent(object):
     def __init__(self, ev, log, hostname, tags, notify_list, tag_event_id, event_format, event_priority):
-        self.event = ev
+        self.event = self._normalize_event(ev.copy())
         self.log = log
         self.hostname = hostname
         self.tags = self._tags(tags, self.event['EventCode']) if tag_event_id else tags
@@ -175,6 +178,13 @@ class LogEvent(object):
         self.timestamp = self._wmi_to_ts(self.event['TimeGenerated'])
         self._format = event_format
         self.event_priority = event_priority
+
+    @staticmethod
+    def _normalize_event(event):
+        for field in INTEGER_PROPERTIES:
+            if field in event:
+                event[field] = int(event[field])
+        return event
 
     @property
     def _msg_title(self):

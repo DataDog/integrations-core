@@ -109,7 +109,7 @@ Need help? Contact [Datadog support][9].
 
 - [Monitor key TokuMX metrics for MongoDB applications][10].
 
-[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[1]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://www.mongodb.org/display/DOCS/Security+and+Authentication
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

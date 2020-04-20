@@ -23,10 +23,10 @@ HOSTNAME_TO_PORT_MAPPING = {
 
 
 @pytest.fixture(scope='session', autouse=True)
-def dd_environment():
+def dd_environment(instance_e2e):
     with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=5):
         e2e_metadata = {'docker_volumes': ['{}:{}'.format(CA_CERT, CA_CERT)]}
-        yield {'server': 'valid.mock'}, e2e_metadata
+        yield instance_e2e, e2e_metadata
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -152,7 +152,7 @@ def instance_remote_ok():
     return {'server': 'https://valid.mock', 'ca_cert': CA_CERT}
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def instance_e2e():
     return {'server': 'https://localhost', 'port': 4443, 'server_hostname': 'valid.mock', 'ca_cert': CA_CERT}
 
