@@ -3,6 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 from datadog_checks.base.checks.win.wmi import WinWMICheck
+from datadog_checks.pgbouncer.metrics.types import WMIFilter, TagQuery, WMIProperties
+from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.timeout import TimeoutException
 
 
@@ -15,8 +17,11 @@ class WMICheck(WinWMICheck):
 
     def __init__(self, name, init_config, instances):
         super(WMICheck, self).__init__(name, init_config, instances)
-        self.custom_tags = self.instance.get('tags', [])
-        self.filters = self.instance.get('filters', [])
+        self.custom_tags = self.instance.get('tags', [])  # type: List[str]
+        self.filters = self.instance.get('filters', [])  # type:  List[Dict[str, WMIFilter]]
+        self.metrics_to_capture = self.instance.get('metrics', [])  # type: List[List[str]]
+        self.tag_by = self.instance.get('tag_by', "")  # type: str
+        self.tag_queries = self.instance.get('tag_queries', [])  # type: List[TagQuery]
 
     def check(self, _):
         """
@@ -46,3 +51,13 @@ class WMICheck(WinWMICheck):
             )
         else:
             self._submit_metrics(extracted_metrics, metric_name_and_type_by_property)
+
+    def extract_metrics(self, constant_tags):
+        # type: (List[str]) -> List[WMIMetric]
+        if not self._wmi_sampler:
+            raise CheckException("A running sampler is needed before you can extract metrics")
+        return self._extract_metrics(self._wmi_sampler, self.tag_by, self.tag_queries, constant_tags)
+
+    def get_wmi_properties(self):
+        # type: () -> WMIProperties
+        return self._get_wmi_properties(None, self.metrics_to_capture, self.tag_queries)
