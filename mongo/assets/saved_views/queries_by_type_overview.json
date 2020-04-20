@@ -1,0 +1,21 @@
+{ 
+  "name": "Mongo queries by type overview",
+  "type": "logs",
+  "page": "analytics",
+  "query": "source:mongodb @db.operation:*",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": ["source", "host", "service", "status", "@db.operation","@duration"],
+  "options": {
+    "group_bys": [
+      { "facet": "@db.operation" }
+    ],
+    "aggregations": [
+      { "metric": "count", "type": "count" }
+    ],
+    "step_ms": "30000",
+    "limit": "50",
+    "widget": "timeseries"
+  }
+}
