@@ -2,12 +2,9 @@ version: '3.5'
 
 services:
   zookeeper:
-    image: zookeeper:3.6.0
+    image: wurstmeister/zookeeper
     ports:
       - 2181:2181
-    environment:
-      ZOO_TICK_TIME: 5000
-      ZOO_CLIENT_PORT: 2181
 
   kafka:
     image: "wurstmeister/kafka:${KAFKA_VERSION}"
