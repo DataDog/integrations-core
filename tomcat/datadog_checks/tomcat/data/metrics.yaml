@@ -46,6 +46,17 @@ jmx_metrics:
             alias: tomcat.servlet.request_count
             metric_type: counter
     - include:
+        # Deprecated metric available in Tomcat 7
+        # https://github.com/apache/tomcat/blob/7.0.x/java/org/apache/catalina/core/StandardContext.java#L5293-L5297
+        type: Cache
+        attribute:
+          accessCount:
+            alias: tomcat.cache.access_count
+            metric_type: counter
+          hitsCounts:
+            alias: tomcat.cache.hits_count
+            metric_type: counter
+    - include:
         type: StringCache
         attribute:
           accessCount:
