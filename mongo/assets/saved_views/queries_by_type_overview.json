@@ -2,14 +2,14 @@
   "name": "Mongo queries by type overview",
   "type": "logs",
   "page": "analytics",
-  "query": "source:mongodb @db.operation:*",
+  "query": "source:mongodb",
   "timerange": {
     "interval_ms": 3600000
   },
   "visible_facets": ["source", "host", "service", "status", "@db.instance", "@db.operation", "@mongo.collection", "@mongo.planSummary.type", "@mongo.query.type", "@mongo.context", "@duration"],
   "options": {
     "group_bys": [
-      { "facet": "@db.operation" }
+      { "facet": "@mongo.query.type" }
     ],
     "aggregations": [
       { "metric": "count", "type": "count" }
