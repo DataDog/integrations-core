@@ -50,6 +50,8 @@ def test_oid_from_unresolved_symbol():
         oid.as_tuple()
     with pytest.raises(UnresolvedOID):
         str(oid)
+    with pytest.raises(UnresolvedOID):
+        oid.get_mib_symbol()
 
 
 @pytest.mark.unit

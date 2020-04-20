@@ -32,11 +32,7 @@ def parts_from_object_identity(object_identity):
     # type: (ObjectIdentity) -> Optional[Tuple[int, ...]]
     # Aim for `ObjectIdentity('1.2.3...')`.
     args = _get_constructor_arguments(object_identity)
-
-    try:
-        oid_str = args[0]
-    except IndexError:
-        return None
+    oid_str = args[0]
 
     try:
         return parse_as_oid_tuple(oid_str)
