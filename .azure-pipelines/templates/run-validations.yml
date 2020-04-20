@@ -27,3 +27,6 @@ steps:
 
 - script: ddev validate service-checks
   displayName: 'Validate service check data'
+
+- script: ddev validate imports
+  displayName: 'Validate imports'

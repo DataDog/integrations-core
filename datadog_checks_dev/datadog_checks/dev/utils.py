@@ -5,6 +5,7 @@
 Utilities functions abstracting common operations, specially designed to be used
 by Integrations within tests.
 """
+import csv
 import inspect
 import os
 import platform
@@ -315,3 +316,14 @@ def get_ip():
         # doesn't even have to be reachable
         s.connect(('10.255.255.255', 1))
         return s.getsockname()[0]
+
+
+def get_metadata_metrics():
+    # Only called in tests of a check, so just go back one frame
+    root = find_check_root(depth=1)
+    metadata_path = os.path.join(root, 'metadata.csv')
+    metrics = {}
+    with open(metadata_path) as f:
+        for row in csv.DictReader(f):
+            metrics[row['metric_name']] = row
+    return metrics

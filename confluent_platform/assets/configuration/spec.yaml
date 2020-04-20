@@ -10,7 +10,6 @@ files:
         service_check_prefix.value.example: confluent
         service_check_prefix.description: |
           Service check prefix to use.
-    - template: init_config/default
   - template: instances
     overrides:
       description: |
@@ -29,7 +28,6 @@ files:
         The list of metrics collected by default are listed in `metrics.yaml`.
     options:
     - template: instances/jmx
-    - template: instances/default
   - template: logs
     example:
     - type: file

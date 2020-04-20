@@ -60,7 +60,7 @@ Additional helpful documentation, links, and articles:
 - [Monitor CockroachDB performance metrics with Datadog][10]
 
 [1]: https://www.cockroachlabs.com/product/cockroachdb
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files
 [5]: https://github.com/DataDog/integrations-core/blob/master/cockroachdb/datadog_checks/cockroachdb/data/conf.yaml.example

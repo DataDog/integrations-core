@@ -231,7 +231,7 @@ Need help? Contact [Datadog support][12].
 [6]: https://www.freedesktop.org/software/systemd/man/systemd.service.html#Command%20lines
 [7]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[9]: https://docs.datadoghq.com/agent/autodiscovery/integrations/
+[9]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
 [12]: https://docs.datadoghq.com/help

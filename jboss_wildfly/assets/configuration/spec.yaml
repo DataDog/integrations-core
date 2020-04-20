@@ -9,19 +9,20 @@ files:
         service_check_prefix.required: true
         service_check_prefix.value.example: jboss
         service_check_prefix.description: Service check prefix to use.
-    - template: init_config/default
   - template: instances
     options:
     - template: instances/jmx
       overrides:
         jmx_url.required: true
         jmx_url.hidden: false
-        jmx_url.description: JBoss/WildFly URL to connect to.
+        jmx_url.description: |-
+          JBoss/WildFly URL to connect to:
+          - For Wildfly 9 and older use: `jmx_url: service:jmx:http-remoting-jmx://<HOST>:<PORT>`
+          - For Wildfly 10+ use: `jmx_url: service:jmx:remote+http://<HOST>:<PORT>`
         jmx_url.value.example: "service:jmx:remote+http://localhost:9990"
         jmx_url.display_priority: 10
         host.required: false
         port.required: false
-    - template: instances/default
   - template: logs
     example:
     - type: file

@@ -157,7 +157,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][18].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][18].
 
 | Parameter      | Value                                                |
 | -------------- | ---------------------------------------------------- |
@@ -191,7 +191,7 @@ Need help? Contact [Datadog support][16].
 - [How to monitor Fluentd with Datadog][17]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/fluentd/images/snapshot-fluentd.png
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/fluentd/datadog_checks/fluentd/data/conf.yaml.example
@@ -207,4 +207,4 @@ Need help? Contact [Datadog support][16].
 [15]: https://github.com/DataDog/integrations-core/blob/master/fluentd/metadata.csv
 [16]: https://docs.datadoghq.com/help
 [17]: https://www.datadoghq.com/blog/monitor-fluentd-datadog
-[18]: https://docs.datadoghq.com/agent/docker/log/
+[18]: https://docs.datadoghq.com/agent/kubernetes/log/

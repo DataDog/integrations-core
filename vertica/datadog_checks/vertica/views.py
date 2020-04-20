@@ -179,3 +179,12 @@ class ResourcePoolStatus:
         'running_query_count',
     )
     query = 'SELECT {} FROM v_monitor.{}'.format(', '.join(fields), name)
+
+
+class Version:
+    """
+    https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/AdministratorsGuide/Diagnostics/DeterminingYourVersionOfVertica.htm
+    """
+
+    name = 'version'
+    query = 'SELECT version()'

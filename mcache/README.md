@@ -61,7 +61,7 @@ Required environment variables on the Agent container:
 | `<DD_APM_ENABLED>`      | true                                                              |
 | `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
 
-See [Tracing Docker Applications][14] and the [Kubernetes Daemon Setup][15] for a complete list of available environment variables and configuration.
+See [Tracing Kubernetes Applications][14] and the [Kubernetes Daemon Setup][15] for a complete list of available environment variables and configuration.
 
 Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
 
@@ -115,7 +115,7 @@ Need help? Contact [Datadog support][10].
 - [Instrument Memcached performance metrics with DogStatsD][12]
 - [Monitoring ElastiCache performance metrics with Redis or Memcached][13]
 
-[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[1]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/mcache/datadog_checks/mcache/data/conf.yaml.example
@@ -128,5 +128,5 @@ Need help? Contact [Datadog support][10].
 [11]: https://www.datadoghq.com/blog/speed-up-web-applications-memcached
 [12]: https://www.datadoghq.com/blog/instrument-memcached-performance-metrics-dogstatsd
 [13]: https://www.datadoghq.com/blog/monitoring-elasticache-performance-metrics-with-redis-or-memcached
-[14]: https://docs.datadoghq.com/agent/docker/apm/?tab=java
+[14]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [15]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing

@@ -33,3 +33,4 @@
     type: array
     items:
       type: object
+- template: init_config/default

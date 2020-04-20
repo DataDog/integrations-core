@@ -100,7 +100,7 @@ Need help? Contact [Datadog support][11].
 To get a better idea of how (or why) to monitor process resource consumption with Datadog, check out this [series of blog posts][12] about it.
 
 [1]: https://docs.datadoghq.com/monitoring/#process
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [3]: https://github.com/DataDog/integrations-core/blob/master/process/datadog_checks/process/data/conf.yaml.example
 [4]: https://github.com/DataDog/integrations-core/blob/master/process/datadog_checks/process/process.py#L117
 [5]: https://github.com/DataDog/docker-dd-agent

@@ -113,7 +113,7 @@ Additional helpful documentation, links, and articles:
 - [Monitor your Istio service mesh with Datadog][9]
 - [Learn how Datadog collects key metrics to monitor Istio][14]
 
-[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[1]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/istio/datadog_checks/istio/data/conf.yaml.example
