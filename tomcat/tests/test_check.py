@@ -36,7 +36,8 @@ JVM_METRICS = [
 ]
 
 COUNTER_METRICS = [
-    # TODO: JMXFetch is not reporting in-app type for JMX `counter` type
+    # TODO: JMXFetch is not reporting in-app type for JMX `counter` type.
+    #       Remove this exclusion list when fixed.
     'tomcat.bytes_rcvd',
     'tomcat.bytes_sent',
     'tomcat.error_count',
