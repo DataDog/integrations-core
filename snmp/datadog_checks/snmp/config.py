@@ -334,8 +334,7 @@ class InstanceConfig:
             yield host
 
     def parse_metrics(
-        self,
-        metrics,  # type: List[Dict[str, Any]]
+        self, metrics,  # type: List[Dict[str, Any]]
     ):
         # type: (...) -> Tuple[List[OID], List[OID], List[Union[ParsedMetric, ParsedTableMetric]]]
         """Parse configuration and returns data to be used for SNMP queries.
