@@ -18,7 +18,7 @@ def test_istio(aggregator, mesh_mixture_fixture):
     for metric in common.MESH_METRICS + common.MESH_METRICS_1_4 + common.MIXER_METRICS:
         aggregator.assert_metric(metric)
 
-    _assert_tags_excluded(aggregator)
+    _assert_tags_excluded(aggregator, [])
 
     aggregator.assert_all_metrics_covered()
 
@@ -37,7 +37,7 @@ def test_new_istio(aggregator, new_mesh_mixture_fixture):
     ):
         aggregator.assert_metric(metric)
 
-    _assert_tags_excluded(aggregator)
+    _assert_tags_excluded(aggregator, [])
 
     aggregator.assert_all_metrics_covered()
 
@@ -49,7 +49,7 @@ def test_pilot_only_istio(aggregator, new_pilot_fixture):
     for metric in common.PILOT_METRICS:
         aggregator.assert_metric(metric)
 
-    _assert_tags_excluded(aggregator)
+    _assert_tags_excluded(aggregator, [])
 
     aggregator.assert_all_metrics_covered()
 
@@ -61,7 +61,7 @@ def test_galley_only_istio(aggregator, new_galley_fixture):
     for metric in common.GALLEY_METRICS:
         aggregator.assert_metric(metric)
 
-    _assert_tags_excluded(aggregator)
+    _assert_tags_excluded(aggregator, [])
 
     aggregator.assert_all_metrics_covered()
 

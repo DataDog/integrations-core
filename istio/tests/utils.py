@@ -4,7 +4,7 @@
 from datadog_checks.istio.constants import BLACKLIST_LABELS
 
 
-def _assert_tags_excluded(aggregator, addl_blacklist=None):
+def _assert_tags_excluded(aggregator, addl_blacklist):
     """
     Test excluded labels
     """

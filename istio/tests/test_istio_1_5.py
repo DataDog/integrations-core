@@ -30,7 +30,7 @@ def test_istio_proxy_mesh(aggregator, istio_proxy_mesh_fixture):
     for metric in common.MESH_METRICS + common.MESH_MERICS_1_5:
         aggregator.assert_metric(metric)
 
-    _assert_tags_excluded(aggregator)
+    _assert_tags_excluded(aggregator, [])
 
     aggregator.assert_all_metrics_covered()
 
