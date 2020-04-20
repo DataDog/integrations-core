@@ -55,7 +55,9 @@ jmx_metrics:
             alias: tomcat.string_cache.hit_count
             metric_type: counter
     - include:
-        bean_regex: Catalina:type=WebResourceRoot,host=.*,context=.*,name=Cache
+        # Example Bean: `Catalina:type=WebResourceRoot,host=localhost,context=/docs,name=Cache`
+        type: WebResourceRoot
+        name: Cache
         attribute:
           hitCount:
             alias: tomcat.web.cache.hit_count
