@@ -14,7 +14,8 @@ import yaml
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck
-from datadog_checks.snmp.config import InstanceConfig, ParsedMetric, ParsedTableMetric
+from datadog_checks.snmp.config import InstanceConfig
+from datadog_checks.snmp.parsing import ParsedSymbolMetric, ParsedTableMetric
 from datadog_checks.snmp.resolver import OIDTrie
 from datadog_checks.snmp.utils import _load_default_profiles, oid_pattern_specificity, recursively_expand_base_profiles
 
@@ -29,12 +30,12 @@ def test_parse_metrics(lcd_mock):
     # type: (Any) -> None
     lcd_mock.configure.return_value = ('addr', None)
 
-    # Unsupported metric
-    metrics = [{"foo": "bar"}]  # type: list
     config = InstanceConfig(
         {"ip_address": "127.0.0.1", "community_string": "public", "metrics": [{"OID": "1.2.3", "name": "foo"}]}
     )
 
+    # Unsupported metric.
+    metrics = [{"foo": "bar"}]  # type: list
     with pytest.raises(Exception):
         config.parse_metrics(metrics)
 
@@ -44,7 +45,7 @@ def test_parse_metrics(lcd_mock):
     assert len(oids) == 1
     assert len(parsed_metrics) == 1
     foo = parsed_metrics[0]
-    assert isinstance(foo, ParsedMetric)
+    assert isinstance(foo, ParsedSymbolMetric)
     assert foo.name == 'foo'
 
     # MIB with no symbol or table
@@ -58,7 +59,7 @@ def test_parse_metrics(lcd_mock):
     assert len(oids) == 1
     assert len(parsed_metrics) == 1
     foo = parsed_metrics[0]
-    assert isinstance(foo, ParsedMetric)
+    assert isinstance(foo, ParsedSymbolMetric)
     assert foo.name == 'foo'
 
     # MIB with table, no symbols

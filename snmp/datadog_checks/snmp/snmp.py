@@ -11,7 +11,7 @@ import threading
 import time
 from collections import defaultdict
 from concurrent import futures
-from typing import Any, DefaultDict, Dict, List, Optional, Tuple, Union
+from typing import Any, DefaultDict, Dict, List, Optional, Tuple
 
 from six import iteritems
 
@@ -20,10 +20,11 @@ from datadog_checks.base.errors import CheckException
 
 from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, write_persistent_cache
-from .config import InstanceConfig, ParsedMatchMetricTags, ParsedMetric, ParsedMetricTag, ParsedTableMetric
+from .config import InstanceConfig
 from .exceptions import PySnmpError
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
 from .models import OID
+from .parsing import ParsedMetric, ParsedMetricTag, ParsedTableMetric
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
 from .utils import (
     OIDPrinter,
@@ -401,7 +402,7 @@ class SnmpCheck(AgentCheck):
         return error
 
     def extract_metric_tags(self, metric_tags, results):
-        # type: (List[Union[ParsedMetricTag, ParsedMatchMetricTags]], Dict[str, dict]) -> List[str]
+        # type: (List[ParsedMetricTag], Dict[str, dict]) -> List[str]
         extracted_tags = []  # type: List[str]
         for tag in metric_tags:
             if tag.symbol not in results:
@@ -421,7 +422,7 @@ class SnmpCheck(AgentCheck):
 
     def report_metrics(
         self,
-        metrics,  # type: List[Union[ParsedMetric, ParsedTableMetric]]
+        metrics,  # type: List[ParsedMetric]
         results,  # type: Dict[str, Dict[Tuple[str, ...], Any]]
         tags,  # type: List[str]
     ):
