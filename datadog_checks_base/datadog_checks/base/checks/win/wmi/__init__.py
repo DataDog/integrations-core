@@ -1,22 +1,13 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from collections import namedtuple
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 from six import iteritems
 
-from datadog_checks.base import ConfigurationError
-from datadog_checks.base.errors import CheckException
-
 from ... import AgentCheck
 from .sampler import WMISampler
-
-WMIMetric = namedtuple('WMIMetric', ['name', 'value', 'tags'])
-WMIProperties = Tuple[Dict[str, Tuple[str, str]], Iterator[str]]
-TagQuery = List[str]
-WMIObject = Dict
-WMIFilter = Union[str, List[str]]
+from .types import TagQuery, WMIFilter, WMIMetric, WMIObject, WMIProperties
 
 
 class InvalidWMIQuery(Exception):
@@ -54,12 +45,6 @@ class WinWMICheck(AgentCheck):
         # type: (*Any, **Any) -> None
         super(WinWMICheck, self).__init__(*args, **kwargs)
 
-        if not self.instance:
-            # This should not happen and is here for legacy purposes.
-            # Once all checks are updated to use the agent 6 signature we can change self.instance type in base class
-            # to not be optional and remove this check.
-            raise ConfigurationError("No instance configuration provided")
-
         # Connection information
         self.host = self.instance.get('host', "localhost")  # type: str
         self.namespace = self.instance.get('namespace', "root\\cimv2")  # type: str
@@ -69,9 +54,7 @@ class WinWMICheck(AgentCheck):
 
         # WMI instance
         self.wmi_class = self.instance.get('class', '')  # type: str
-        self.metrics_to_capture = self.instance.get('metrics', [])  # type: List[List[str]]
         self.tag_by = self.instance.get('tag_by', "")  # type: str
-        self.tag_queries = self.instance.get('tag_queries', [])  # type: List[TagQuery]
 
         self._wmi_sampler = None  # type: Optional[WMISampler]
         self._wmi_props = None  # type: Optional[WMIProperties]
@@ -158,12 +141,6 @@ class WinWMICheck(AgentCheck):
 
         self.log.debug(u"Extracted `tag_queries` tag: '%s'", tag)
         return tag
-
-    def extract_metrics(self, constant_tags):
-        # type: (List[str]) -> List[WMIMetric]
-        if not self._wmi_sampler:
-            raise CheckException("A running sampler is needed before you can extract metrics")
-        return self._extract_metrics(self._wmi_sampler, self.tag_by, self.tag_queries, constant_tags)
 
     def _extract_metrics(self, wmi_sampler, tag_by, tag_queries, constant_tags):
         # type: (WMISampler, str, List[List[str]], List[str]) -> List[WMIMetric]
@@ -275,7 +252,7 @@ class WinWMICheck(AgentCheck):
         return "{host}:{namespace}:{wmi_class}".format(host=host, namespace=namespace, wmi_class=wmi_class)
 
     def get_running_wmi_sampler(self, properties, filters, **kwargs):
-        # type: (Iterable[str], List[Dict[str, WMIFilter]], **Any) -> WMISampler
+        # type: (List[str], List[Dict[str, WMIFilter]], **Any) -> WMISampler
         return self._get_running_wmi_sampler(
             instance_key=None,
             wmi_class=self.wmi_class,
@@ -291,22 +268,18 @@ class WinWMICheck(AgentCheck):
         )
 
     def _get_running_wmi_sampler(self, instance_key, wmi_class, properties, tag_by="", **kwargs):
-        # type: (Any, str, Iterable[str], str, Any) -> WMISampler
+        # type: (Any, str, List[str], str, Any) -> WMISampler
         """
         Return a running WMISampler for the given (class, properties).
 
         If no matching WMISampler is running yet, start one and cache it.
         """
         if not self._wmi_sampler:
-            properties = list(properties) + [tag_by] if tag_by else list(properties)
-            self._wmi_sampler = WMISampler(self.log, wmi_class, properties, **kwargs)
+            property_list = list(properties) + [tag_by] if tag_by else list(properties)
+            self._wmi_sampler = WMISampler(self.log, wmi_class, property_list, **kwargs)
             self._wmi_sampler.start()
 
         return self._wmi_sampler
-
-    def get_wmi_properties(self):
-        # type: () -> WMIProperties
-        return self._get_wmi_properties(None, self.metrics_to_capture, self.tag_queries)
 
     def _get_wmi_properties(self, instance_key, metrics, tag_queries):
         # type: (Any, List[List[str]], List[List[str]]) -> WMIProperties
@@ -317,8 +290,11 @@ class WinWMICheck(AgentCheck):
             metric_name_by_property = dict(
                 (wmi_property.lower(), (metric_name, metric_type)) for wmi_property, metric_name, metric_type in metrics
             )  # type: Dict[str, Tuple[str, str]]
-            properties = map(lambda x: x[0], metrics + tag_queries)  # type: Iterable[str]
+            properties = map(lambda x: x[0], metrics + tag_queries)  # type: List[str]
 
+            # (expression has type
+            # "         Tuple[Dict[str, Tuple[str, str]], List[str]]", variable has type
+            # "Optional[Tuple[Dict[str, Tuple[str, str]], List[str]]]"
             self._wmi_props = (metric_name_by_property, properties)
 
         return self._wmi_props
