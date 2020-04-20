@@ -46,13 +46,22 @@ jmx_metrics:
             alias: tomcat.servlet.request_count
             metric_type: counter
     - include:
-        type: Cache
+        type: StringCache
         attribute:
           accessCount:
-            alias: tomcat.cache.access_count
+            alias: tomcat.string_cache.access_count
             metric_type: counter
-          hitsCounts:
-            alias: tomcat.cache.hits_count
+          hitCount:
+            alias: tomcat.string_cache.hit_count
+            metric_type: counter
+    - include:
+        bean_regex: Catalina:type=WebResourceRoot,host=.*,context=.*,name=Cache
+        attribute:
+          hitCount:
+            alias: tomcat.web.cache.hit_count
+            metric_type: counter
+          lookupCount:
+            alias: tomcat.web.cache.lookup_count
             metric_type: counter
     - include:
         type: JspMonitor

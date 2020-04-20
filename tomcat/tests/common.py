@@ -7,13 +7,6 @@ CHECK_NAME = "tomcat"
 
 HERE = get_here()
 
-"""
-Metrics that are not produced by our e2e tests:
-    "tomcat.cache.access_count",
-    "tomcat.cache.hits_count",
-"""
-
-
 TOMCAT_E2E_METRICS = [
     # Tomcat
     "tomcat.max_time",
@@ -31,6 +24,10 @@ TOMCAT_E2E_METRICS = [
     "tomcat.servlet.request_count",
     "tomcat.jsp.count",
     "tomcat.jsp.reload_count",
+    "tomcat.string_cache.access_count",
+    "tomcat.string_cache.hit_count",
+    "tomcat.web.cache.hit_count",
+    "tomcat.web.cache.lookup_count",
     # JVM
     "jvm.buffer_pool.direct.capacity",
     "jvm.buffer_pool.direct.count",
