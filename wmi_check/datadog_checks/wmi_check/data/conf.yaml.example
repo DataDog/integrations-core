@@ -36,11 +36,13 @@ instances:
     metrics:
       - [<WMI_PROPERTY_NAME>, <METRIC_NAME>, <METRIC_TYPE>]
 
-    ## @param host - string - optional - default: .
-    ## The host the Datadog Active Directory check connects to.
-    ## "." means the current host
+    ## @param host - string - optional - default: localhost
+    ## Is the optional target of the WMI query.
+    ## If you set this option, make sure that Remote Management is enabled on the target host:
+    ##
+    ## https://technet.microsoft.com/en-us/library/Hh921475.aspx
     #
-    # host: .
+    # host: localhost
 
     ## @param namespace - string - optional - default: cimv2
     ## The optional WMI namespace to connect to.
