@@ -1,0 +1,221 @@
+# Default metrics collected by this check. You should not have to modify this.
+jmx_metrics:
+
+  # Gauges
+  - include:
+      exclude_tags:
+        - name
+      attribute:
+        Value:
+          alias: hivemq.$1
+          metric_type: gauge
+      bean_regex:
+        - "metrics:name=com\\.hivemq\\.(\
+          cache\\.payload_persistence\\.average_load_penalty|\
+          cache\\.payload_persistence\\.eviction_count|\
+          cache\\.payload_persistence\\.hit_count|\
+          cache\\.payload_persistence\\.hit_rate|\
+          cache\\.payload_persistence\\.load_count|\
+          cache\\.payload_persistence\\.load_exception_count|\
+          cache\\.payload_persistence\\.load_exception_rate|\
+          cache\\.payload_persistence\\.load_success_count|\
+          cache\\.payload_persistence\\.miss_count|\
+          cache\\.payload_persistence\\.miss_rate|\
+          cache\\.payload_persistence\\.request_count|\
+          cache\\.payload_persistence\\.total_load_time|\
+          cache\\.shared_subscription\\.average_load_penalty|\
+          cache\\.shared_subscription\\.eviction_count|\
+          cache\\.shared_subscription\\.hit_count|\
+          cache\\.shared_subscription\\.hit_rate|\
+          cache\\.shared_subscription\\.load_count|\
+          cache\\.shared_subscription\\.load_exception_count|\
+          cache\\.shared_subscription\\.load_exception_rate|\
+          cache\\.shared_subscription\\.load_success_count|\
+          cache\\.shared_subscription\\.miss_count|\
+          cache\\.shared_subscription\\.miss_rate|\
+          cache\\.shared_subscription\\.request_count|\
+          cache\\.shared_subscription\\.total_load_time|\
+          cpu_cores\\.licensed|\
+          cpu_cores\\.used|\
+          messages\\.pending\\.qos_0\\.count|\
+          messages\\.pending\\.total\\.count|\
+          messages\\.queued\\.count|\
+          messages\\.retained\\.current|\
+          messages\\.retained\\.pending\\.total\\.count|\
+          messages\\.retained\\.queued\\.count|\
+          networking\\.bytes\\.read\\.current|\
+          networking\\.bytes\\.read\\.total|\
+          networking\\.bytes\\.write\\.current|\
+          networking\\.bytes\\.write\\.total|\
+          networking\\.connections\\.current|\
+          overload_protection\\.clients\\.average_credits|\
+          overload_protection\\.clients\\.backpressure_active|\
+          overload_protection\\.clients\\.using_credits|\
+          overload_protection\\.credits\\.per_tick|\
+          overload_protection\\.level|\
+          persistence\\.executor\\.client_session\\.tasks|\
+          persistence\\.executor\\.noempty_queues|\
+          persistence\\.executor\\.outgoing_message_flow\\.tasks|\
+          persistence\\.executor\\.queued_messages\\.tasks|\
+          persistence\\.executor\\.request_event_bus\\.tasks|\
+          persistence\\.executor\\.retained_messages\\.tasks|\
+          persistence\\.executor\\.running\\.threads|\
+          persistence\\.executor\\.subscription\\.tasks|\
+          persistence\\.executor\\.total\\.tasks|\
+          persistence\\.payload_entries\\.count|\
+          persistence\\.removable_entries\\.count|\
+          qos_0_memory\\.exceeded\\.per_client|\
+          qos_0_memory\\.max|\
+          qos_0_memory\\.used|\
+          sessions\\.overall\\.current|\
+          system\\.max_file_descriptor|\
+          system\\.open_file_descriptor|\
+          system\\.os\\.file_descriptors\\.max|\
+          system\\.os\\.file_descriptors\\.open|\
+          system\\.os\\.global\\.memory\\.available|\
+          system\\.os\\.global\\.memory\\.swap\\.total|\
+          system\\.os\\.global\\.memory\\.swap\\.used|\
+          system\\.os\\.global\\.memory\\.total|\
+          system\\.os\\.global\\.uptime|\
+          system\\.os\\.process\\.disk\\.bytes_read|\
+          system\\.os\\.process\\.disk\\.bytes_written|\
+          system\\.os\\.process\\.memory\\.resident_set_size|\
+          system\\.os\\.process\\.memory\\.virtual|\
+          system\\.os\\.process\\.threads\\.count|\
+          system\\.os\\.process\\.time_spent\\.kernel|\
+          system\\.os\\.process\\.time_spent\\.user|\
+          system\\.physical_memory\\.free|\
+          system\\.physical_memory\\.total|\
+          system\\.process_cpu\\.load|\
+          system\\.process_cpu\\.time|\
+          system\\.swap_space\\.free|\
+          system\\.swap_space\\.total|\
+          system\\.system_cpu\\.load|\
+          topic_alias\\.count\\.total|\
+          topic_alias\\.memory\\.usage)"
+
+  # Counters
+  - include:
+      exclude_tags:
+        - name
+      attribute:
+        Count:
+          alias: hivemq.$1
+          metric_type: monotonic_count
+      bean_regex:
+        - "metrics:name=com\\.hivemq\\.(\
+          cluster\\.name_request\\.retry\\.count|\
+          extension\\.managed_executor\\.running|\
+          extension\\.managed_executor\\.scheduled\\.overrun|\
+          extension\\.services\\.publish_service_publishes|\
+          extension\\.services\\.publish_service_publishes_to_client|\
+          extension\\.services\\.rate_limit_exceeded\\.count|\
+          keep_alive\\.disconnect\\.count|\
+          messages\\.dropped\\.count|\
+          messages\\.dropped\\.count|\
+          messages\\.dropped\\.internal_error\\.count|\
+          messages\\.dropped\\.internal_error\\.count|\
+          messages\\.dropped\\.message_too_large\\.count|\
+          messages\\.dropped\\.mqtt_packet_too_large\\.count|\
+          messages\\.dropped\\.mqtt_packet_too_large\\.count|\
+          messages\\.dropped\\.not_writable\\.count|\
+          messages\\.dropped\\.not_writable\\.count|\
+          messages\\.dropped\\.publish_inbound_intercepted\\.count|\
+          messages\\.dropped\\.publish_inbound_intercepted\\.count|\
+          messages\\.dropped\\.qos_0_memory_exceeded\\.count|\
+          messages\\.dropped\\.qos_0_memory_exceeded\\.count|\
+          messages\\.dropped\\.queue_full\\.count|\
+          messages\\.dropped\\.queue_full\\.count|\
+          messages\\.expired_messages|\
+          messages\\.incoming\\.auth\\.count|\
+          messages\\.incoming\\.connect\\.count|\
+          messages\\.incoming\\.connect\\.mqtt3\\.count|\
+          messages\\.incoming\\.connect\\.mqtt5\\.count|\
+          messages\\.incoming\\.disconnect\\.count|\
+          messages\\.incoming\\.pingreq\\.count|\
+          messages\\.incoming\\.puback\\.count|\
+          messages\\.incoming\\.pubcomp\\.count|\
+          messages\\.incoming\\.publish\\.count|\
+          messages\\.incoming\\.pubrec\\.count|\
+          messages\\.incoming\\.pubrel\\.count|\
+          messages\\.incoming\\.subscribe\\.count|\
+          messages\\.incoming\\.total\\.count|\
+          messages\\.incoming\\.unsubscribe\\.count|\
+          messages\\.outgoing\\.auth\\.count|\
+          messages\\.outgoing\\.connack\\.count|\
+          messages\\.outgoing\\.disconnect\\.count|\
+          messages\\.outgoing\\.pingresp\\.count|\
+          messages\\.outgoing\\.puback\\.count|\
+          messages\\.outgoing\\.pubcomp\\.count|\
+          messages\\.outgoing\\.publish\\.count|\
+          messages\\.outgoing\\.pubrec\\.count|\
+          messages\\.outgoing\\.pubrel\\.count|\
+          messages\\.outgoing\\.suback\\.count|\
+          messages\\.outgoing\\.total\\.count|\
+          messages\\.outgoing\\.unsuback\\.count|\
+          networking\\.connections_closed\\.graceful\\.count|\
+          networking\\.connections_closed\\.total\\.count|\
+          networking\\.connections_closed\\.ungraceful\\.count|\
+          payload_persistence\\.cleanup_executor\\.running|\
+          payload_persistence\\.cleanup_executor\\.scheduled\\.overrun|\
+          persistence_executor\\.running|\
+          persistence_scheduled_executor\\.running|\
+          persistence_scheduled_executor\\.scheduled\\.overrun|\
+          persistence\\.executor\\.queue_misses|\
+          publish\\.without_matching_subscribers|\
+          sessions\\.persistent\\.active|\
+          single_writer_executor\\.running|\
+          subscriptions\\.overall\\.current)"
+
+  # Histograms
+  - include:
+      exclude_tags:
+        - name
+      attribute:
+        50thPercentile:
+          alias: hivemq.$1.50th_percentile
+          metric_type: gauge
+        75thPercentile:
+          alias: hivemq.$1.75th_percentile
+          metric_type: gauge
+        95thPercentile:
+          alias: hivemq.$1.95th_percentile
+          metric_type: gauge
+        98thPercentile:
+          alias: hivemq.$1.98th_percentile
+          metric_type: gauge
+        99thPercentile:
+          alias: hivemq.$1.99th_percentile
+          metric_type: gauge
+        999thPercentile:
+          alias: hivemq.$1.999th_percentile
+          metric_type: gauge
+        Count:
+          alias: hivemq.$1.count
+          metric_type: gauge
+        Max:
+          alias: hivemq.$1.max
+          metric_type: gauge
+        Mean:
+          alias: hivemq.$1.mean
+          metric_type: gauge
+        Min:
+          alias: hivemq.$1.min
+          metric_type: gauge
+        StdDev:
+          alias: hivemq.$1.std_dev
+          metric_type: gauge
+        SnapshotSize:
+          alias: hivemq.$1.snapshot_size
+          metric_type: gauge
+      bean_regex:
+        - "metrics:name=com\\.hivemq\\.(\
+          extension\\.managed_executor\\.scheduled\\.percent_of_period|\
+          messages\\.incoming\\.publish\\.bytes|\
+          messages\\.incoming\\.total\\.bytes|\
+          messages\\.outgoing\\.publish\\.bytes|\
+          messages\\.outgoing\\.total\\.bytes|\
+          messages\\.retained\\.mean|\
+          networking\\.connections\\.mean|\
+          payload_persistence\\.cleanup_executor\\.scheduled\\.percent_of_period|\
+          persistence_scheduled_executor\\.scheduled\\.percent_of_period)"

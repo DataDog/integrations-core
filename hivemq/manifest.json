@@ -1,0 +1,33 @@
+{
+  "display_name": "HiveMQ",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "hivemq",
+  "metric_prefix": "hivemq.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "905e4d87-2777-4253-ad44-f91ee66ad888",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-HiveMQ Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "hivemq",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json"
+  }
+}
