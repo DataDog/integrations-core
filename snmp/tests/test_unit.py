@@ -28,21 +28,19 @@ pytestmark = pytest.mark.unit
 def test_parse_metrics(lcd_mock):
     # type: (Any) -> None
     lcd_mock.configure.return_value = ('addr', None)
-    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
-    check = SnmpCheck('snmp', {}, [instance])
+
     # Unsupported metric
     metrics = [{"foo": "bar"}]  # type: list
     config = InstanceConfig(
-        {"ip_address": "127.0.0.1", "community_string": "public", "metrics": [{"OID": "1.2.3", "name": "foo"}]},
-        warning=check.warning,
+        {"ip_address": "127.0.0.1", "community_string": "public", "metrics": [{"OID": "1.2.3", "name": "foo"}]}
     )
 
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, check.warning)
+        config.parse_metrics(metrics)
 
     # Simple OID
     metrics = [{"OID": "1.2.3", "name": "foo"}]
-    oids, _, parsed_metrics = config.parse_metrics(metrics, check.warning)
+    oids, _, parsed_metrics = config.parse_metrics(metrics)
     assert len(oids) == 1
     assert len(parsed_metrics) == 1
     foo = parsed_metrics[0]
@@ -52,11 +50,11 @@ def test_parse_metrics(lcd_mock):
     # MIB with no symbol or table
     metrics = [{"MIB": "foo_mib"}]
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, check.warning)
+        config.parse_metrics(metrics)
 
     # MIB with symbol
     metrics = [{"MIB": "foo_mib", "symbol": "foo"}]
-    oids, _, parsed_metrics = config.parse_metrics(metrics, check.warning)
+    oids, _, parsed_metrics = config.parse_metrics(metrics)
     assert len(oids) == 1
     assert len(parsed_metrics) == 1
     foo = parsed_metrics[0]
@@ -66,11 +64,11 @@ def test_parse_metrics(lcd_mock):
     # MIB with table, no symbols
     metrics = [{"MIB": "foo_mib", "table": "foo"}]
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, check.warning)
+        config.parse_metrics(metrics)
 
     # MIB with table and symbols
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"]}]
-    oids, _, parsed_metrics = config.parse_metrics(metrics, check.warning)
+    oids, _, parsed_metrics = config.parse_metrics(metrics)
     assert len(oids) == 2
     assert len(parsed_metrics) == 2
     foo, bar = parsed_metrics
@@ -82,16 +80,16 @@ def test_parse_metrics(lcd_mock):
     # MIB with table, symbols, bad metrics_tags
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"], "metric_tags": [{}]}]
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, check.warning)
+        config.parse_metrics(metrics)
 
     # MIB with table, symbols, bad metrics_tags
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "test"}]}]
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, check.warning)
+        config.parse_metrics(metrics)
 
     # Table with manual OID
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": [{"OID": "1.2.3", "name": "foo"}]}]
-    oids, _, parsed_metrics = config.parse_metrics(metrics, check.warning)
+    oids, _, parsed_metrics = config.parse_metrics(metrics)
     assert len(oids) == 1
     assert len(parsed_metrics) == 1
     foo = parsed_metrics[0]
@@ -107,7 +105,7 @@ def test_parse_metrics(lcd_mock):
             "metric_tags": [{"tag": "test", "index": "1"}],
         },
     ]
-    oids, _, parsed_metrics = config.parse_metrics(metrics, check.warning)
+    oids, _, parsed_metrics = config.parse_metrics(metrics)
     assert len(oids) == 2
     assert len(parsed_metrics) == 2
     foo, bar = parsed_metrics
@@ -127,7 +125,7 @@ def test_parse_metrics(lcd_mock):
             "metric_tags": [{"tag": "test", "column": "baz"}],
         }
     ]
-    oids, _, parsed_metrics = config.parse_metrics(metrics, check.warning)
+    oids, _, parsed_metrics = config.parse_metrics(metrics)
     assert len(oids) == 3
     assert len(parsed_metrics) == 2
     foo, bar = parsed_metrics
@@ -147,7 +145,7 @@ def test_parse_metrics(lcd_mock):
             "metric_tags": [{"tag": "test", "column": {"name": "baz", "OID": "1.5.6"}}],
         }
     ]
-    oids, _, parsed_metrics = config.parse_metrics(metrics, check.warning)
+    oids, _, parsed_metrics = config.parse_metrics(metrics)
     assert len(oids) == 3
     assert len(parsed_metrics) == 2
     foo, bar = parsed_metrics
