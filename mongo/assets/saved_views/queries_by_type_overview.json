@@ -6,7 +6,7 @@
   "timerange": {
     "interval_ms": 3600000
   },
-  "visible_facets": ["source", "host", "service", "status", "@db.operation","@duration"],
+  "visible_facets": ["source", "host", "service", "status", "@db.instance", "@db.operation", "@mongo.collection", "@mongo.planSummary.type", "@mongo.query.type", "@mongo.context", "@duration"],
   "options": {
     "group_bys": [
       { "facet": "@db.operation" }
