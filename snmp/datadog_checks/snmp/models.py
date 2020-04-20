@@ -5,7 +5,7 @@
 Define our own models and interfaces for dealing with SNMP data.
 """
 
-from typing import Any, Optional, Sequence, Tuple, Union
+from typing import Optional, Sequence, Tuple, Union
 
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
 from .pysnmp_types import MibViewController, ObjectIdentity, ObjectName, ObjectType
@@ -87,10 +87,6 @@ class OID(object):
         prefix = tuple(index.prettyPrint() for index in indexes)
 
         return MIBSymbol(name, prefix)
-
-    def __eq__(self, other):
-        # type: (Any) -> bool
-        return isinstance(other, OID) and self.as_tuple() == other.as_tuple()
 
     def __str__(self):
         # type: () -> str
