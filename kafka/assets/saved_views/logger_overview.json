@@ -1,0 +1,21 @@
+{ 
+  "name": "Kafka logger overview",
+  "type": "logs",
+  "page": "analytics",
+  "query": "source:redis",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": ["source", "host", "service", "status", "@pid"],
+  "options": {
+    "group_bys": [
+      { "facet": "@logger.name" }
+    ],
+    "aggregations": [
+      { "metric": "count", "type": "count" }
+    ],
+    "step_ms": "30000",
+    "limit": "50",
+    "widget": "timeseries"
+  }
+}
