@@ -4,6 +4,7 @@
 from datadog_checks.istio import Istio
 
 from . import common
+from .utils import _assert_tags_excluded
 
 
 def test_istiod(aggregator, istiod_mixture_fixture):
@@ -28,6 +29,27 @@ def test_istio_proxy_mesh(aggregator, istio_proxy_mesh_fixture):
 
     for metric in common.MESH_METRICS + common.MESH_MERICS_1_5:
         aggregator.assert_metric(metric)
+
+    _assert_tags_excluded(aggregator)
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_istio_proxy_mesh_exclude(aggregator, istio_proxy_mesh_fixture):
+    """
+    Test proxy mesh check
+    """
+    exclude_tags = ['destination_app', 'destination_principal']
+    instance = common.MOCK_ISTIO_PROXY_MESH_INSTANCE
+    instance['exclude_labels'] = exclude_tags
+
+    check = Istio(common.CHECK_NAME, {}, [instance])
+    check.check(instance)
+
+    for metric in common.MESH_METRICS + common.MESH_MERICS_1_5:
+        aggregator.assert_metric(metric)
+
+    _assert_tags_excluded(aggregator, exclude_tags)
 
     aggregator.assert_all_metrics_covered()
 
