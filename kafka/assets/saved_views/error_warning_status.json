@@ -6,7 +6,7 @@
   "timerange": {
     "interval_ms": 3600000
   },
-  "visible_facets": ["source", "host", "service", "status", "@logger.name", "@logger.thread_name", "@error.kind", ],
+  "visible_facets": ["source", "host", "service", "status", "@logger.name", "@logger.thread_name", "@error.kind"],
   "options": {
     "columns": ["status", "host"],
     "show_date_column": true,
