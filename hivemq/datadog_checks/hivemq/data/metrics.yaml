@@ -1,0 +1,212 @@
+# Default metrics collected by this check. You should not have to modify this.
+jmx_metrics:
+
+  # Gauges
+  - include:
+      attribute:
+        Value:
+          alias: hivemq.$name
+          metric_type: gauge
+      bean:
+        - metrics:name=com.hivemq.cache.payload-persistence.averageLoadPenalty
+        - metrics:name=com.hivemq.cache.payload-persistence.evictionCount
+        - metrics:name=com.hivemq.cache.payload-persistence.hitCount
+        - metrics:name=com.hivemq.cache.payload-persistence.hitRate
+        - metrics:name=com.hivemq.cache.payload-persistence.loadCount
+        - metrics:name=com.hivemq.cache.payload-persistence.loadExceptionCount
+        - metrics:name=com.hivemq.cache.payload-persistence.loadExceptionRate
+        - metrics:name=com.hivemq.cache.payload-persistence.loadSuccessCount
+        - metrics:name=com.hivemq.cache.payload-persistence.missCount
+        - metrics:name=com.hivemq.cache.payload-persistence.missRate
+        - metrics:name=com.hivemq.cache.payload-persistence.requestCount
+        - metrics:name=com.hivemq.cache.payload-persistence.totalLoadTime
+        - metrics:name=com.hivemq.cache.shared-subscription.averageLoadPenalty
+        - metrics:name=com.hivemq.cache.shared-subscription.evictionCount
+        - metrics:name=com.hivemq.cache.shared-subscription.hitCount
+        - metrics:name=com.hivemq.cache.shared-subscription.hitRate
+        - metrics:name=com.hivemq.cache.shared-subscription.loadCount
+        - metrics:name=com.hivemq.cache.shared-subscription.loadExceptionCount
+        - metrics:name=com.hivemq.cache.shared-subscription.loadExceptionRate
+        - metrics:name=com.hivemq.cache.shared-subscription.loadSuccessCount
+        - metrics:name=com.hivemq.cache.shared-subscription.missCount
+        - metrics:name=com.hivemq.cache.shared-subscription.missRate
+        - metrics:name=com.hivemq.cache.shared-subscription.requestCount
+        - metrics:name=com.hivemq.cache.shared-subscription.totalLoadTime
+        - metrics:name=com.hivemq.cpu-cores.licensed
+        - metrics:name=com.hivemq.cpu-cores.used
+        - metrics:name=com.hivemq.messages.pending.qos-0.count
+        - metrics:name=com.hivemq.messages.pending.total.count
+        - metrics:name=com.hivemq.messages.queued.count
+        - metrics:name=com.hivemq.messages.retained.current
+        - metrics:name=com.hivemq.messages.retained.pending.total.count
+        - metrics:name=com.hivemq.messages.retained.queued.count
+        - metrics:name=com.hivemq.networking.bytes.read.current
+        - metrics:name=com.hivemq.networking.bytes.read.total
+        - metrics:name=com.hivemq.networking.bytes.write.current
+        - metrics:name=com.hivemq.networking.bytes.write.total
+        - metrics:name=com.hivemq.networking.connections.current
+        - metrics:name=com.hivemq.overload-protection.clients.average-credits
+        - metrics:name=com.hivemq.overload-protection.clients.backpressure-active
+        - metrics:name=com.hivemq.overload-protection.clients.using-credits
+        - metrics:name=com.hivemq.overload-protection.credits.per-tick
+        - metrics:name=com.hivemq.overload-protection.level
+        - metrics:name=com.hivemq.persistence.executor.client-session.tasks
+        - metrics:name=com.hivemq.persistence.executor.noempty-queues
+        - metrics:name=com.hivemq.persistence.executor.outgoing-message-flow.tasks
+        - metrics:name=com.hivemq.persistence.executor.queued-messages.tasks
+        - metrics:name=com.hivemq.persistence.executor.request-event-bus.tasks
+        - metrics:name=com.hivemq.persistence.executor.retained-messages.tasks
+        - metrics:name=com.hivemq.persistence.executor.running.threads
+        - metrics:name=com.hivemq.persistence.executor.subscription.tasks
+        - metrics:name=com.hivemq.persistence.executor.total.tasks
+        - metrics:name=com.hivemq.persistence.payload-entries.count
+        - metrics:name=com.hivemq.persistence.removable-entries.count
+        - metrics:name=com.hivemq.qos-0-memory.exceeded.per-client
+        - metrics:name=com.hivemq.qos-0-memory.max
+        - metrics:name=com.hivemq.qos-0-memory.used
+        - metrics:name=com.hivemq.sessions.overall.current
+        - metrics:name=com.hivemq.system.max-file-descriptor
+        - metrics:name=com.hivemq.system.open-file-descriptor
+        - metrics:name=com.hivemq.system.os.file-descriptors.max
+        - metrics:name=com.hivemq.system.os.file-descriptors.open
+        - metrics:name=com.hivemq.system.os.global.memory.available
+        - metrics:name=com.hivemq.system.os.global.memory.swap.total
+        - metrics:name=com.hivemq.system.os.global.memory.swap.used
+        - metrics:name=com.hivemq.system.os.global.memory.total
+        - metrics:name=com.hivemq.system.os.global.uptime
+        - metrics:name=com.hivemq.system.os.process.disk.bytes-read
+        - metrics:name=com.hivemq.system.os.process.disk.bytes-written
+        - metrics:name=com.hivemq.system.os.process.memory.resident-set-size
+        - metrics:name=com.hivemq.system.os.process.memory.virtual
+        - metrics:name=com.hivemq.system.os.process.threads.count
+        - metrics:name=com.hivemq.system.os.process.time-spent.kernel
+        - metrics:name=com.hivemq.system.os.process.time-spent.user
+        - metrics:name=com.hivemq.system.physical-memory.free
+        - metrics:name=com.hivemq.system.physical-memory.total
+        - metrics:name=com.hivemq.system.process-cpu.load
+        - metrics:name=com.hivemq.system.process-cpu.time
+        - metrics:name=com.hivemq.system.swap-space.free
+        - metrics:name=com.hivemq.system.swap-space.total
+        - metrics:name=com.hivemq.system.system-cpu.load
+        - metrics:name=com.hivemq.topic-alias.count.total
+        - metrics:name=com.hivemq.topic-alias.memory.usage
+
+  # Counters
+  - include:
+      attribute:
+        Count:
+          alias: hivemq.$name
+          metric_type: monotonic_count
+      bean:
+        - metrics:name=com.hivemq.cluster.name-request.retry.count
+        - metrics:name=com.hivemq.extension.managed-executor.running
+        - metrics:name=com.hivemq.extension.managed-executor.scheduled.overrun
+        - metrics:name=com.hivemq.extension.services.publish-service-publishes
+        - metrics:name=com.hivemq.extension.services.publish-service-publishes-to-client
+        - metrics:name=com.hivemq.extension.services.rate-limit-exceeded.count
+        - metrics:name=com.hivemq.keep-alive.disconnect.count
+        - metrics:name=com.hivemq.messages.dropped.count
+        - metrics:name=com.hivemq.messages.dropped.count
+        - metrics:name=com.hivemq.messages.dropped.internal-error.count
+        - metrics:name=com.hivemq.messages.dropped.internal-error.count
+        - metrics:name=com.hivemq.messages.dropped.message-too-large.count
+        - metrics:name=com.hivemq.messages.dropped.mqtt-packet-too-large.count
+        - metrics:name=com.hivemq.messages.dropped.mqtt-packet-too-large.count
+        - metrics:name=com.hivemq.messages.dropped.not-writable.count
+        - metrics:name=com.hivemq.messages.dropped.not-writable.count
+        - metrics:name=com.hivemq.messages.dropped.publish-inbound-intercepted.count
+        - metrics:name=com.hivemq.messages.dropped.publish-inbound-intercepted.count
+        - metrics:name=com.hivemq.messages.dropped.qos-0-memory-exceeded.count
+        - metrics:name=com.hivemq.messages.dropped.qos-0-memory-exceeded.count
+        - metrics:name=com.hivemq.messages.dropped.queue-full.count
+        - metrics:name=com.hivemq.messages.dropped.queue-full.count
+        - metrics:name=com.hivemq.messages.expired-messages
+        - metrics:name=com.hivemq.messages.incoming.auth.count
+        - metrics:name=com.hivemq.messages.incoming.connect.count
+        - metrics:name=com.hivemq.messages.incoming.connect.mqtt3.count
+        - metrics:name=com.hivemq.messages.incoming.connect.mqtt5.count
+        - metrics:name=com.hivemq.messages.incoming.disconnect.count
+        - metrics:name=com.hivemq.messages.incoming.pingreq.count
+        - metrics:name=com.hivemq.messages.incoming.puback.count
+        - metrics:name=com.hivemq.messages.incoming.pubcomp.count
+        - metrics:name=com.hivemq.messages.incoming.publish.count
+        - metrics:name=com.hivemq.messages.incoming.pubrec.count
+        - metrics:name=com.hivemq.messages.incoming.pubrel.count
+        - metrics:name=com.hivemq.messages.incoming.subscribe.count
+        - metrics:name=com.hivemq.messages.incoming.total.count
+        - metrics:name=com.hivemq.messages.incoming.unsubscribe.count
+        - metrics:name=com.hivemq.messages.outgoing.auth.count
+        - metrics:name=com.hivemq.messages.outgoing.connack.count
+        - metrics:name=com.hivemq.messages.outgoing.disconnect.count
+        - metrics:name=com.hivemq.messages.outgoing.pingresp.count
+        - metrics:name=com.hivemq.messages.outgoing.puback.count
+        - metrics:name=com.hivemq.messages.outgoing.pubcomp.count
+        - metrics:name=com.hivemq.messages.outgoing.publish.count
+        - metrics:name=com.hivemq.messages.outgoing.pubrec.count
+        - metrics:name=com.hivemq.messages.outgoing.pubrel.count
+        - metrics:name=com.hivemq.messages.outgoing.suback.count
+        - metrics:name=com.hivemq.messages.outgoing.total.count
+        - metrics:name=com.hivemq.messages.outgoing.unsuback.count
+        - metrics:name=com.hivemq.networking.connections-closed.graceful.count
+        - metrics:name=com.hivemq.networking.connections-closed.total.count
+        - metrics:name=com.hivemq.networking.connections-closed.ungraceful.count
+        - metrics:name=com.hivemq.payload-persistence.cleanup-executor.running
+        - metrics:name=com.hivemq.payload-persistence.cleanup-executor.scheduled.overrun
+        - metrics:name=com.hivemq.persistence-executor.running
+        - metrics:name=com.hivemq.persistence-scheduled-executor.running
+        - metrics:name=com.hivemq.persistence-scheduled-executor.scheduled.overrun
+        - metrics:name=com.hivemq.persistence.executor.queue-misses
+        - metrics:name=com.hivemq.publish.without-matching-subscribers
+        - metrics:name=com.hivemq.sessions.persistent.active
+        - metrics:name=com.hivemq.single-writer-executor.running
+        - metrics:name=com.hivemq.subscriptions.overall.current
+
+  # Histograms
+  - include:
+      attribute:
+        50thPercentile:
+          alias: hivemq.$name.50_Percentile
+          metric_type: gauge
+        75thPercentile:
+          alias: hivemq.$name.75_Percentile
+          metric_type: gauge
+        95thPercentile:
+          alias: hivemq.$name.95_Percentile
+          metric_type: gauge
+        98thPercentile:
+          alias: hivemq.$name.98_Percentile
+          metric_type: gauge
+        99thPercentile:
+          alias: hivemq.$name.99_Percentile
+          metric_type: gauge
+        999thPercentile:
+          alias: hivemq.$name.999_Percentile
+          metric_type: gauge
+        Count:
+          alias: hivemq.$name.Count
+          metric_type: gauge
+        Max:
+          alias: hivemq.$name.Max
+          metric_type: gauge
+        Mean:
+          alias: hivemq.$name.Mean
+          metric_type: gauge
+        Min:
+          alias: hivemq.$name.Min
+          metric_type: gauge
+        StdDev:
+          alias: hivemq.$name.StdDev
+          metric_type: gauge
+        SnapshotSize:
+          alias: hivemq.$name.SnapshotSize
+          metric_type: gauge
+      bean:
+        - metrics:name=com.hivemq.extension.managed-executor.scheduled.percent-of-period
+        - metrics:name=com.hivemq.messages.incoming.publish.bytes
+        - metrics:name=com.hivemq.messages.incoming.total.bytes
+        - metrics:name=com.hivemq.messages.outgoing.publish.bytes
+        - metrics:name=com.hivemq.messages.outgoing.total.bytes
+        - metrics:name=com.hivemq.messages.retained.mean
+        - metrics:name=com.hivemq.networking.connections.mean
+        - metrics:name=com.hivemq.payload-persistence.cleanup-executor.scheduled.percent-of-period
+        - metrics:name=com.hivemq.persistence-scheduled-executor.scheduled.percent-of-period

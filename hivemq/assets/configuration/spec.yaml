@@ -1,0 +1,34 @@
+name: HiveMQ
+files:
+- name: hivemq.yaml
+  options:
+  - template: init_config
+    options:
+    - name: is_jmx
+      required: true
+      description: Whether or not this file is a configuration for a JMX integration.
+      value:
+        example: true
+        type: boolean
+    - name: collect_default_metrics
+      required: true
+      description: Whether or not the check should collect all default metrics.
+      value:
+        example: true
+        type: boolean
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/jmx
+      overrides:
+        port.value.example: 9010
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/hivemq.log
+      source: hivemq
+      service: <SERVICE>
+      log_processing_rules:
+      - type: multi_line
+        name: log_start_with_date
+        pattern: \d{4}-\d{2}-\d{2}
