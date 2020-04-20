@@ -4,6 +4,8 @@
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
+
 from .common import TOMCAT_E2E_METRICS
 
 JVM_METRICS = [
@@ -34,7 +36,7 @@ JVM_METRICS = [
 ]
 
 COUNTER_METRICS = [
-    # TODO: JMXFetch `counter` is reporter the wrong type.
+    # TODO: JMXFetch is not reporting in-app type for JMX `counter` type
     'tomcat.bytes_rcvd',
     'tomcat.bytes_sent',
     'tomcat.error_count',
@@ -62,5 +64,4 @@ def test(dd_agent_check):
 
     aggregator.assert_all_metrics_covered()
 
-    from datadog_checks.dev.utils import get_metadata_metrics
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_METRICS + COUNTER_METRICS)
