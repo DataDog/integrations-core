@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2013-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from typing import Any, Dict, List
 
 from datadog_checks.base.checks.win.wmi import WinWMICheck
-from datadog_checks.pgbouncer.metrics.types import WMIFilter, TagQuery, WMIProperties
+from datadog_checks.base.checks.win.wmi.types import TagQuery, WMIFilter, WMIMetric, WMIProperties
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.timeout import TimeoutException
 
@@ -16,14 +17,16 @@ class WMICheck(WinWMICheck):
     """
 
     def __init__(self, name, init_config, instances):
+        # type: (str, Dict[str, Any], List[Dict[str, Any]]) -> None
         super(WMICheck, self).__init__(name, init_config, instances)
         self.custom_tags = self.instance.get('tags', [])  # type: List[str]
-        self.filters = self.instance.get('filters', [])  # type:  List[Dict[str, WMIFilter]]
+        self.filters = self.instance.get('filters', [])  # type: List[Dict[str, WMIFilter]]
         self.metrics_to_capture = self.instance.get('metrics', [])  # type: List[List[str]]
         self.tag_by = self.instance.get('tag_by', "")  # type: str
         self.tag_queries = self.instance.get('tag_queries', [])  # type: List[TagQuery]
 
     def check(self, _):
+        # type: (Any) -> None
         """
         Fetch WMI metrics.
         """

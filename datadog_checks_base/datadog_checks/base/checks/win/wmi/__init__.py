@@ -64,21 +64,22 @@ class WinWMICheck(AgentCheck):
         Format `tag_query` or raise on incorrect parameters.
         """
         try:
-            link_source_property = int(wmi_obj[self.tag_queries[0]])
-            target_class = self.tag_queries[1]
-            link_target_class_property = self.tag_queries[2]
-            target_property = self.tag_queries[3]
+            link_source_property = int(wmi_obj[tag_query[0]])
+            target_class = tag_query[1]
+            link_target_class_property = tag_query[2]
+            target_property = tag_query[3]
         except IndexError:
             self.log.error(
                 u"Wrong `tag_queries` parameter format. " "Please refer to the configuration file for more information."
             )
             raise
         except TypeError:
-            wmi_property = self.tag_queries[0]
+            wmi_property = tag_query[0]
+            wmi_class = sampler.class_name
             self.log.error(
                 u"Incorrect 'link source property' in `tag_queries` parameter: `%s` is not a property of `%s`",
                 wmi_property,
-                self.wmi_class,
+                wmi_class,
             )
             raise
 
@@ -89,16 +90,16 @@ class WinWMICheck(AgentCheck):
         target_property = sampler.property_names[0]
         target_class = sampler.class_name
 
-        if len(self.wmi_sampler) != 1:
+        if len(sampler) != 1:
             message = "no result was returned"
-            if len(self.wmi_sampler):
+            if len(sampler):
                 message = "multiple results returned (one expected)"
 
             self.log.warning(
                 u"Failed to extract a tag from `tag_queries` parameter: %s. wmi_object=%s - query=%s",
                 message,
                 wmi_obj,
-                self.tag_queries,
+                tag_query,
             )
             raise TagQueryUniquenessFailure
 
@@ -122,16 +123,16 @@ class WinWMICheck(AgentCheck):
         )
 
         # Extract query information
-        target_class, target_property, filters = self._format_tag_query(wmi_obj)
+        target_class, target_property, filters = self._format_tag_query(sampler, wmi_obj, tag_query)
 
         # Create a specific sampler
         with WMISampler(
-            self.log, target_class, [target_property], filters=filters, **self.wmi_sampler.connection
+            self.log, target_class, [target_property], filters=filters, **sampler.connection
         ) as tag_query_sampler:
             tag_query_sampler.sample()
 
             # Extract tag
-            self._raise_on_invalid_tag_query_result(wmi_obj)
+            self._raise_on_invalid_tag_query_result(tag_query_sampler, wmi_obj, tag_query)
 
             link_value = str(tag_query_sampler[0][target_property]).lower()
 
@@ -155,10 +156,6 @@ class WinWMICheck(AgentCheck):
         ]
         ```
         """
-        wmi_sampler = wmi_sampler or self.wmi_sampler
-        tag_by = tag_by or self.tag_by
-        tag_queries = tag_queries or self.tag_queries
-
         if len(wmi_sampler) > 1 and not tag_by:
             raise MissingTagBy(
                 u"WMI query returned multiple rows but no `tag_by` value was given."
@@ -178,7 +175,7 @@ class WinWMICheck(AgentCheck):
             # Tag with `tag_queries` parameter
             for query in tag_queries:
                 try:
-                    tags.append(self._get_tag_query_tag(wmi_obj, query))
+                    tags.append(self._get_tag_query_tag(wmi_sampler, wmi_obj, query))
                 except TagQueryUniquenessFailure:
                     continue
 
