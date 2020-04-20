@@ -1,0 +1,17 @@
+{ 
+  "name": "Vault error and warning",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:vault status:(error OR warn) ",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": ["source", "host", "service", "status", "@vault.service"],
+  "options": {
+    "columns": ["status", "host", "@vault.service"],
+    "show_date_column": true,
+    "show_message_column": true,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}
