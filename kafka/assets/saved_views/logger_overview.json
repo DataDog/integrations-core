@@ -6,7 +6,7 @@
   "timerange": {
     "interval_ms": 3600000
   },
-  "visible_facets": ["source", "host", "service", "status", "@pid"],
+  "visible_facets": ["source", "host", "service", "status", "@logger.name", "@logger.thread_name", "@error.kind"],
   "options": {
     "group_bys": [
       { "facet": "@logger.name" }
