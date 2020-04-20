@@ -263,7 +263,7 @@ class WinWMICheck(AgentCheck):
             provider=self.provider,
             username=self.username,
             password=self.password,
-            tag_by=tag_by
+            tag_by=tag_by,
             **kwargs
         )
 
