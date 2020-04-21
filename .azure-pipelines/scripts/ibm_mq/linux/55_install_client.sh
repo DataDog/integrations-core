@@ -38,13 +38,22 @@ sudo apt-get install -y --no-install-recommends \
 
 mkdir -p $TMP_DIR
 pushd $TMP_DIR
-  curl --retry 20 --retry-delay 5 -LO $MQ_URL
+
+  n=0
+  until [ $n -ge 20 ]
+  do
+     curl -LO $MQ_URL && break
+     n=$((n+1))
+     sleep 5
+  done
+
   tar -zxvf ./*.tar.gz
   pushd MQServer
     sudo ./mqlicense.sh -text_only -accept
     sudo rpm -ivh --force-debian *.rpm
     sudo /opt/mqm/bin/setmqinst -p /opt/mqm -i
   popd
+
 popd
 
 ls /opt/mqm
