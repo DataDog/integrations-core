@@ -3,658 +3,648 @@
         "author_name": "Datadog"
     },
     "board_title": "Amazon Fargate Overview",
-    "created": "2020-04-08T22:45:20.744093+00:00",
+    "created": "2020-04-21T21:08:15.396904+00:00",
     "created_by": {
-        "access_role": "adm", 
-        "disabled": false, 
-        "email": "support@datadoghq.com", 
-        "handle": "support@datadoghq.com", 
-        "is_admin": true, 
-        "name": "Datadog", 
-        "role": null, 
-        "title": null, 
+        "access_role": "st",
+        "disabled": false,
+        "email": "support@datadoghq.com",
+        "handle": "support@datadoghq.com",
+        "is_admin": false,
+        "name": "Datadog",
+        "role": null,
+        "title": null,
         "verified": true
-    }, 
+    },
     "description": "## Amazon Fargate\n\nThis dashboard displays key metrics from your Amazon ECS cluster on AWS Fargate, such as cpu, memory, IO usage, and network.\n\nFurther reading on ECS-Fargate:\n\n- [Datadog ECS-Fargate integration docs](https://docs.datadoghq.com/integrations/ecs_fargate/)\n- [Integration setup docs](https://docs.datadoghq.com/integrations/faq/integration-setup-ecs-fargate/?tab=rediswebui)\n",
-    "modified": "2020-04-08T22:45:38.474918+00:00",
+    "modified": "2020-04-21T21:16:19.604409+00:00",
+    "read_only": false,
     "template_variables": [],
     "widgets": [
         {
-            "add_timeframe": true, 
-            "board_id": "qid-j4c-duh", 
-            "height": 7, 
-            "isShared": false, 
-            "margin": "", 
-            "scaleFactor": 1, 
-            "sizing": "zoom", 
-            "title": false, 
-            "type": "image", 
-            "url": "/static/images/saas_logos/bot/amazon_fargate@2x.png", 
-            "width": 11, 
-            "x": 1, 
+            "height": 7,
+            "id": 0,
+            "sizing": "zoom",
+            "type": "image",
+            "url": "/static/images/saas_logos/bot/amazon_fargate@2x.png",
+            "width": 11,
+            "x": 1,
             "y": 1
-        }, 
+        },
         {
-            "title_size": "16",
-            "title": true,
-            "title_align": "left",
-            "title_text": "Total CPU time consumed per container",
             "height": 13,
+            "id": 1,
+            "legend": false,
             "tile_def": {
-                "viz": "timeseries",
                 "requests": [
                     {
                         "q": "avg:ecs.fargate.cpu.user{*} by {container_id}",
                         "style": {
-                            "width": "normal",
                             "palette": "dog_classic",
-                            "type": "solid"
+                            "type": "solid",
+                            "width": "normal"
                         },
                         "type": "line"
                     }
                 ],
+                "viz": "timeseries",
                 "yaxis": {
-                    "max": "auto",
-                    "scale": "linear",
                     "includeZero": true,
                     "label": "",
-                    "min": "auto"
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
                 }
             },
-            "width": 47,
-            "legend": false,
-            "y": 9,
-            "x": 1,
-            "type": "timeseries",
-            "id": 1
-        },
-        {
-            "font_size": "24",
-            "bgcolor": "gray",
-            "type": "note",
-            "tick_edge": "bottom",
-            "text_align": "center",
-            "height": 5,
-            "width": 95,
-            "html": "CPU",
-            "y": 2,
-            "x": 1,
-            "tick": true,
-            "tick_pos": "50%",
-            "id": 2
-        },
-        {
-            "title_size": "16",
             "title": true,
             "title_align": "left",
-            "title_text": "CPU percent usage per container",
+            "title_size": 16,
+            "title_text": "Total CPU time consumed per container",
+            "type": "timeseries",
+            "width": 47,
+            "x": 98,
+            "y": 9
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "24",
+            "height": 5,
+            "html": "CPU",
+            "id": 2,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 95,
+            "x": 98,
+            "y": 2
+        },
+        {
             "height": 13,
+            "id": 3,
+            "legend": false,
             "tile_def": {
-                "viz": "timeseries",
                 "requests": [
                     {
                         "q": "avg:ecs.fargate.cpu.percent{*} by {container_id}",
                         "style": {
-                            "width": "normal",
                             "palette": "dog_classic",
-                            "type": "solid"
+                            "type": "solid",
+                            "width": "normal"
                         },
                         "type": "line"
                     }
                 ],
+                "viz": "timeseries",
                 "yaxis": {
-                    "max": "auto",
-                    "scale": "linear",
                     "includeZero": true,
                     "label": "",
-                    "min": "auto"
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
                 }
             },
-            "width": 47,
-            "legend": false,
-            "y": 9,
-            "x": 49,
-            "type": "timeseries",
-            "id": 3
-        },
-        {
-            "font_size": "24",
-            "bgcolor": "gray",
-            "type": "note",
-            "tick_edge": "bottom",
-            "text_align": "center",
-            "height": 5,
-            "width": 96,
-            "html": "Memory",
-            "y": 66,
-            "x": 1,
-            "tick": true,
-            "tick_pos": "50%",
-            "id": 4
-        },
-        {
-            "font_size": "24",
-            "bgcolor": "gray",
-            "type": "note",
-            "tick_edge": "bottom",
-            "text_align": "center",
-            "height": 5,
-            "width": 95,
-            "html": "IO Read/Write",
-            "y": 26,
-            "x": 1,
-            "tick": true,
-            "tick_pos": "50%",
-            "id": 5
-        },
-        {
-            "title_size": "16",
             "title": true,
             "title_align": "left",
-            "title_text": "Average memory usage per container",
+            "title_size": 16,
+            "title_text": "CPU percent usage per container",
+            "type": "timeseries",
+            "width": 47,
+            "x": 146,
+            "y": 9
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "24",
+            "height": 5,
+            "html": "Memory",
+            "id": 4,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 83,
+            "x": 13,
+            "y": 2
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "24",
+            "height": 5,
+            "html": "IO Read/Write",
+            "id": 5,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 95,
+            "x": 1,
+            "y": 42
+        },
+        {
             "height": 13,
+            "id": 6,
+            "legend": false,
             "tile_def": {
-                "viz": "timeseries",
                 "requests": [
                     {
                         "q": "avg:ecs.fargate.mem.usage{*} by {container_id}",
                         "style": {
-                            "width": "normal",
                             "palette": "dog_classic",
-                            "type": "solid"
+                            "type": "solid",
+                            "width": "normal"
                         },
                         "type": "line"
                     }
                 ],
+                "viz": "timeseries",
                 "yaxis": {
-                    "max": "auto",
-                    "scale": "linear",
                     "includeZero": true,
                     "label": "",
-                    "min": "auto"
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
                 }
             },
-            "width": 47,
-            "legend": false,
-            "y": 72,
-            "x": 1,
-            "type": "timeseries",
-            "id": 6
-        },
-        {
-            "title_size": "16",
             "title": true,
             "title_align": "left",
-            "title_text": "Average number of read operations per container",
+            "title_size": 16,
+            "title_text": "Average memory usage per container",
+            "type": "timeseries",
+            "width": 47,
+            "x": 1,
+            "y": 9
+        },
+        {
             "height": 13,
+            "id": 7,
+            "legend": false,
             "tile_def": {
-                "viz": "timeseries",
                 "requests": [
                     {
                         "q": "avg:ecs.fargate.io.ops.read{*} by {container_id}",
                         "style": {
-                            "width": "normal",
                             "palette": "dog_classic",
-                            "type": "solid"
+                            "type": "solid",
+                            "width": "normal"
                         },
                         "type": "line"
                     }
                 ],
+                "viz": "timeseries",
                 "yaxis": {
-                    "max": "auto",
-                    "scale": "linear",
                     "includeZero": true,
                     "label": "",
-                    "min": "auto"
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
                 }
             },
-            "width": 47,
-            "legend": false,
-            "y": 33,
-            "x": 1,
-            "type": "timeseries",
-            "id": 7
-        },
-        {
-            "title_size": "16",
             "title": true,
             "title_align": "left",
-            "title_text": "Average number of write operations per container",
+            "title_size": 16,
+            "title_text": "Average number of read operations per container",
+            "type": "timeseries",
+            "width": 47,
+            "x": 1,
+            "y": 49
+        },
+        {
             "height": 13,
+            "id": 8,
+            "legend": false,
+            "legend_size": "0",
             "tile_def": {
-                "viz": "timeseries",
                 "requests": [
                     {
                         "q": "avg:ecs.fargate.io.ops.write{*} by {container_id}",
                         "style": {
-                            "width": "normal",
                             "palette": "dog_classic",
-                            "type": "solid"
+                            "type": "solid",
+                            "width": "normal"
                         },
                         "type": "line"
                     }
                 ],
+                "viz": "timeseries",
                 "yaxis": {
-                    "max": "auto",
-                    "scale": "linear",
                     "includeZero": true,
                     "label": "",
-                    "min": "auto"
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
                 }
             },
-            "width": 47,
-            "legend": false,
-            "y": 33,
-            "x": 49,
-            "legend_size": "0",
-            "type": "timeseries",
-            "id": 8
-        },
-        {
-            "title_size": "16",
             "title": true,
             "title_align": "left",
-            "title_text": "Average number of bytes read per container",
+            "title_size": 16,
+            "title_text": "Average number of write operations per container",
+            "type": "timeseries",
+            "width": 47,
+            "x": 49,
+            "y": 49
+        },
+        {
             "height": 13,
+            "id": 9,
+            "legend": false,
+            "legend_size": "0",
             "tile_def": {
-                "viz": "timeseries",
                 "requests": [
                     {
                         "q": "avg:ecs.fargate.io.bytes.read{*} by {container_id}",
                         "style": {
-                            "width": "normal",
                             "palette": "dog_classic",
-                            "type": "solid"
+                            "type": "solid",
+                            "width": "normal"
                         },
                         "type": "line"
                     }
                 ],
+                "viz": "timeseries",
                 "yaxis": {
-                    "max": "auto",
-                    "scale": "linear",
                     "includeZero": true,
                     "label": "",
-                    "min": "auto"
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
                 }
             },
-            "width": 47,
-            "legend": false,
-            "y": 49,
-            "x": 1,
-            "legend_size": "0",
-            "type": "timeseries",
-            "id": 9
-        },
-        {
-            "title_size": "16",
             "title": true,
             "title_align": "left",
-            "title_text": "Average number of bytes write per container",
+            "title_size": 16,
+            "title_text": "Average number of bytes read per container",
+            "type": "timeseries",
+            "width": 47,
+            "x": 1,
+            "y": 65
+        },
+        {
             "height": 13,
+            "id": 10,
+            "legend": false,
+            "legend_size": "0",
             "tile_def": {
-                "viz": "timeseries",
                 "requests": [
                     {
                         "q": "avg:ecs.fargate.io.bytes.write{*} by {container_id}",
                         "style": {
-                            "width": "normal",
                             "palette": "dog_classic",
-                            "type": "solid"
+                            "type": "solid",
+                            "width": "normal"
                         },
                         "type": "line"
                     }
                 ],
+                "viz": "timeseries",
                 "yaxis": {
-                    "max": "auto",
-                    "scale": "linear",
                     "includeZero": true,
                     "label": "",
-                    "min": "auto"
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
                 }
             },
-            "width": 47,
-            "legend": false,
-            "y": 49,
-            "x": 49,
-            "legend_size": "0",
-            "type": "timeseries",
-            "id": 10
-        },
-        {
-            "title_size": "16",
             "title": true,
             "title_align": "left",
-            "title_text": "Average memory cache per container",
+            "title_size": 16,
+            "title_text": "Average number of bytes write per container",
+            "type": "timeseries",
+            "width": 47,
+            "x": 49,
+            "y": 65
+        },
+        {
             "height": 13,
+            "id": 11,
+            "legend": false,
+            "legend_size": "0",
             "tile_def": {
-                "viz": "timeseries",
                 "requests": [
                     {
                         "q": "avg:ecs.fargate.mem.cache{*} by {container_id}",
                         "style": {
-                            "width": "normal",
                             "palette": "dog_classic",
-                            "type": "solid"
+                            "type": "solid",
+                            "width": "normal"
                         },
                         "type": "line"
                     }
                 ],
+                "viz": "timeseries",
                 "yaxis": {
-                    "max": "auto",
-                    "scale": "linear",
                     "includeZero": true,
                     "label": "",
-                    "min": "auto"
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
                 }
             },
-            "width": 47,
-            "legend": false,
-            "y": 72,
-            "x": 50,
-            "legend_size": "0",
-            "type": "timeseries",
-            "id": 11
-        },
-        {
-            "title_size": "16",
             "title": true,
             "title_align": "left",
-            "title_text": "Average # of charging events to the mem cgroup",
+            "title_size": 16,
+            "title_text": "Average memory cache per container",
+            "type": "timeseries",
+            "width": 47,
+            "x": 49,
+            "y": 9
+        },
+        {
             "height": 13,
+            "id": 12,
+            "legend": false,
+            "legend_size": "0",
             "tile_def": {
-                "viz": "timeseries",
                 "requests": [
                     {
                         "q": "avg:ecs.fargate.mem.pgpgin{*} by {container_id}",
                         "style": {
-                            "width": "normal",
                             "palette": "dog_classic",
-                            "type": "solid"
+                            "type": "solid",
+                            "width": "normal"
                         },
                         "type": "line"
                     }
                 ],
+                "viz": "timeseries",
                 "yaxis": {
-                    "max": "auto",
-                    "scale": "linear",
                     "includeZero": true,
                     "label": "",
-                    "min": "auto"
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
                 }
             },
-            "width": 47,
-            "legend": false,
-            "y": 88,
-            "x": 1,
-            "legend_size": "0",
-            "type": "timeseries",
-            "id": 12
-        },
-        {
-            "title_size": "16",
             "title": true,
             "title_align": "left",
-            "title_text": "Average # of bytes of anonymous and swap cache memory",
+            "title_size": 16,
+            "title_text": "Average # of charging events to the mem cgroup",
+            "type": "timeseries",
+            "width": 47,
+            "x": 1,
+            "y": 25
+        },
+        {
             "height": 13,
+            "id": 13,
+            "legend": false,
+            "legend_size": "0",
             "tile_def": {
-                "viz": "timeseries",
                 "requests": [
                     {
                         "q": "avg:ecs.fargate.mem.rss{*} by {container_id}",
                         "style": {
-                            "width": "normal",
                             "palette": "dog_classic",
-                            "type": "solid"
+                            "type": "solid",
+                            "width": "normal"
                         },
                         "type": "line"
                     }
                 ],
+                "viz": "timeseries",
                 "yaxis": {
-                    "max": "auto",
-                    "scale": "linear",
                     "includeZero": true,
                     "label": "",
-                    "min": "auto"
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
                 }
             },
-            "width": 47,
-            "legend": false,
-            "y": 88,
-            "x": 50,
-            "legend_size": "0",
-            "type": "timeseries",
-            "id": 13
-        },
-        {
-            "font_size": "24",
-            "bgcolor": "gray",
-            "type": "note",
-            "tick_edge": "bottom",
-            "text_align": "center",
-            "height": 5,
-            "width": 96,
-            "html": "Network",
-            "y": 105,
-            "x": 1,
-            "tick": true,
-            "tick_pos": "50%",
-            "id": 34
-        },
-        {
-            "title_size": "16",
             "title": true,
             "title_align": "left",
-            "title_text": "Average bytes sent per container",
+            "title_size": 16,
+            "title_text": "Average # of bytes of anonymous and swap cache memory",
+            "type": "timeseries",
+            "width": 47,
+            "x": 49,
+            "y": 25
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "24",
+            "height": 5,
+            "html": "Network",
+            "id": 14,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 96,
+            "x": 98,
+            "y": 26
+        },
+        {
             "height": 13,
+            "id": 15,
+            "legend": false,
+            "legend_size": "0",
             "tile_def": {
-                "viz": "timeseries",
                 "requests": [
                     {
                         "q": "avg:ecs.fargate.net.bytes_sent{*} by {container_id}",
                         "style": {
-                            "width": "normal",
                             "palette": "dog_classic",
-                            "type": "solid"
+                            "type": "solid",
+                            "width": "normal"
                         },
                         "type": "line"
                     }
                 ],
+                "viz": "timeseries",
                 "yaxis": {
-                    "max": "auto",
-                    "scale": "linear",
                     "includeZero": true,
                     "label": "",
-                    "min": "auto"
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
                 }
             },
-            "width": 47,
-            "legend": false,
-            "time": {},
-            "y": 111,
-            "x": 1,
-            "legend_size": "0",
-            "type": "timeseries",
-            "id": 35
-        },
-        {
-            "title_size": "16",
             "title": true,
             "title_align": "left",
-            "title_text": "Average bytes received per container",
+            "title_size": 16,
+            "title_text": "Average bytes sent per container",
+            "type": "timeseries",
+            "width": 47,
+            "x": 98,
+            "y": 33
+        },
+        {
             "height": 13,
+            "id": 16,
+            "legend": false,
+            "legend_size": "0",
             "tile_def": {
-                "viz": "timeseries",
                 "requests": [
                     {
                         "q": "avg:ecs.fargate.net.bytes_rcvd{*} by {container_id}",
                         "style": {
-                            "width": "normal",
                             "palette": "dog_classic",
-                            "type": "solid"
+                            "type": "solid",
+                            "width": "normal"
                         },
                         "type": "line"
                     }
                 ],
+                "viz": "timeseries",
                 "yaxis": {
-                    "max": "auto",
-                    "scale": "linear",
                     "includeZero": true,
                     "label": "",
-                    "min": "auto"
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
                 }
             },
-            "width": 47,
-            "legend": false,
-            "time": {},
-            "y": 111,
-            "x": 50,
-            "legend_size": "0",
-            "type": "timeseries",
-            "id": 36
-        },
-        {
-            "title_size": "16",
             "title": true,
             "title_align": "left",
-            "title_text": "Average ingoing packets dropped by container",
+            "title_size": 16,
+            "title_text": "Average bytes received per container",
+            "type": "timeseries",
+            "width": 47,
+            "x": 147,
+            "y": 33
+        },
+        {
             "height": 13,
+            "id": 17,
+            "legend": false,
+            "legend_size": "0",
             "tile_def": {
-                "viz": "timeseries",
                 "requests": [
                     {
                         "q": "avg:ecs.fargate.net.packet.in_dropped{*} by {container_id}",
                         "style": {
-                            "width": "normal",
                             "palette": "dog_classic",
-                            "type": "solid"
+                            "type": "solid",
+                            "width": "normal"
                         },
                         "type": "line"
                     }
                 ],
+                "viz": "timeseries",
                 "yaxis": {
-                    "max": "auto",
-                    "scale": "linear",
                     "includeZero": true,
                     "label": "",
-                    "min": "auto"
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
                 }
             },
-            "width": 47,
-            "legend": false,
-            "time": {},
-            "y": 127,
-            "x": 1,
-            "legend_size": "0",
-            "type": "timeseries",
-            "id": 37
-        },
-        {
-            "title_size": "16",
             "title": true,
             "title_align": "left",
-            "title_text": "Average outgoing packets dropped by container",
+            "title_size": 16,
+            "title_text": "Average ingoing packets dropped by container",
+            "type": "timeseries",
+            "width": 47,
+            "x": 98,
+            "y": 49
+        },
+        {
             "height": 13,
+            "id": 18,
+            "legend": false,
+            "legend_size": "0",
             "tile_def": {
-                "viz": "timeseries",
                 "requests": [
                     {
                         "q": "avg:ecs.fargate.net.packet.out_dropped{*} by {container_id}",
                         "style": {
-                            "width": "normal",
                             "palette": "dog_classic",
-                            "type": "solid"
+                            "type": "solid",
+                            "width": "normal"
                         },
                         "type": "line"
                     }
                 ],
+                "viz": "timeseries",
                 "yaxis": {
-                    "max": "auto",
-                    "scale": "linear",
                     "includeZero": true,
                     "label": "",
-                    "min": "auto"
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
                 }
             },
-            "width": 47,
-            "legend": false,
-            "time": {},
-            "y": 127,
-            "x": 50,
-            "legend_size": "0",
-            "type": "timeseries",
-            "id": 38
-        },
-        {
-            "title_size": "16",
             "title": true,
             "title_align": "left",
-            "title_text": "Average sent errors by container",
+            "title_size": 16,
+            "title_text": "Average outgoing packets dropped by container",
+            "type": "timeseries",
+            "width": 47,
+            "x": 147,
+            "y": 49
+        },
+        {
             "height": 13,
+            "id": 19,
+            "legend": false,
+            "legend_size": "0",
             "tile_def": {
-                "viz": "timeseries",
                 "requests": [
                     {
                         "q": "avg:ecs.fargate.net.sent_errors{*} by {container_id}",
                         "style": {
-                            "width": "normal",
                             "palette": "dog_classic",
-                            "type": "solid"
+                            "type": "solid",
+                            "width": "normal"
                         },
                         "type": "line"
                     }
                 ],
+                "viz": "timeseries",
                 "yaxis": {
-                    "max": "auto",
-                    "scale": "linear",
                     "includeZero": true,
                     "label": "",
-                    "min": "auto"
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
                 }
             },
-            "width": 47,
-            "legend": false,
-            "time": {},
-            "y": 143,
-            "x": 1,
-            "legend_size": "0",
-            "type": "timeseries",
-            "id": 39
-        },
-        {
-            "title_size": "16",
             "title": true,
             "title_align": "left",
-            "title_text": "Average received errors by container",
+            "title_size": 16,
+            "title_text": "Average sent errors by container",
+            "type": "timeseries",
+            "width": 47,
+            "x": 98,
+            "y": 65
+        },
+        {
             "height": 13,
+            "id": 20,
+            "legend": false,
+            "legend_size": "0",
             "tile_def": {
-                "viz": "timeseries",
                 "requests": [
                     {
                         "q": "avg:ecs.fargate.net.rcvd_errors{*} by {container_id}",
                         "style": {
-                            "width": "normal",
                             "palette": "dog_classic",
-                            "type": "solid"
+                            "type": "solid",
+                            "width": "normal"
                         },
                         "type": "line"
                     }
                 ],
+                "viz": "timeseries",
                 "yaxis": {
-                    "max": "auto",
-                    "scale": "linear",
                     "includeZero": true,
                     "label": "",
-                    "min": "auto"
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
                 }
             },
-            "width": 47,
-            "legend": false,
-            "time": {},
-            "y": 143,
-            "x": 50,
-            "legend_size": "0",
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Average received errors by container",
             "type": "timeseries",
-            "id": 40
+            "width": 47,
+            "x": 147,
+            "y": 65
         }
     ]
 }
