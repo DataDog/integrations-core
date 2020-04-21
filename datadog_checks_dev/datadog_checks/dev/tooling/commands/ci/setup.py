@@ -60,6 +60,4 @@ def setup(checks, changed):
             cmd = [script_file]
             if script_file.endswith('.py'):
                 cmd.insert(0, 'python')
-            elif script_file.endswith('.sh'):
-                cmd.insert(0, 'bash')
             subprocess.run(cmd, shell=True, check=True)
