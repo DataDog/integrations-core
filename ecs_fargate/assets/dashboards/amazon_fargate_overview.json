@@ -2,7 +2,7 @@
     "author_info": {
         "author_name": "Datadog"
     },
-    "board_title": "Amazon ECS on AWS Fargate - Overview",
+    "board_title": "Amazon Fargate Overview",
     "created": "2020-04-08T22:45:20.744093+00:00",
     "created_by": {
         "access_role": "adm", 
