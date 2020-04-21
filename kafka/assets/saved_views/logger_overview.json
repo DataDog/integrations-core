@@ -2,7 +2,7 @@
   "name": "Kafka logger overview",
   "type": "logs",
   "page": "analytics",
-  "query": "source:redis",
+  "query": "source:kafka",
   "timerange": {
     "interval_ms": 3600000
   },
