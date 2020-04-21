@@ -1,19 +1,17 @@
-# (C) Datadog, Inc. 2010-present
+# (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-"""
-Helpers to parse the `metric_tags` section of a config file.
-"""
 import re
 from typing import List, TypedDict
 
 from datadog_checks.base import ConfigurationError
 
-from ..exceptions import UnresolvedOID
-from ..models import OID
-from ..pysnmp_types import ObjectIdentity
-from ..resolver import OIDResolver
-from .parsed_metrics import ParsedMatchMetricTag, ParsedMetricTag, ParsedSimpleMetricTag
+from ...models import OID
+from ...pysnmp_types import ObjectIdentity
+from ...resolver import OIDResolver
+from ..parsed_metrics import ParsedMatchMetricTag, ParsedMetricTag, ParsedSimpleMetricTag
+from .models import MetricTagParseResult
+from .types import MetricTag
 
 MetricTagsParseResult = TypedDict(
     'MetricTagsParseResult', {'oids': List[OID], 'parsed_metric_tags': List[ParsedMetricTag]}
@@ -32,63 +30,49 @@ def parse_metric_tags(metric_tags, resolver):
         if 'symbol' not in metric_tag:
             raise ConfigurationError('A metric tag must specify a symbol: {}'.format(metric_tag))
 
-        oid = parse_oid(metric_tag)
-        oids.append(oid)
+        result = _parse_metric_tag(metric_tag)
 
-        try:
-            parts = oid.as_tuple()
-        except UnresolvedOID:
-            pass
-        else:
-            resolver.register(parts, metric_tag['symbol'])
+        for name, oid in result.oids_to_resolve.items():
+            resolver.register(oid.as_tuple(), name)
 
-        parsed_metric_tag = parse_metric_tag(metric_tag)
-        parsed_metric_tags.append(parsed_metric_tag)
+        oids.append(result.oid)
+        parsed_metric_tags.append(result.parsed_metric_tag)
 
     return {'oids': oids, 'parsed_metric_tags': parsed_metric_tags}
 
 
-# Helpers.
+def _parse_metric_tag(metric_tag):
+    # type: (MetricTag) -> MetricTagParseResult
+    oids_to_resolve = {}
 
-
-MetricTag = TypedDict(
-    'MetricTag',
-    {
-        'symbol': str,
-        'MIB': str,
-        'OID': str,
-        # Simple tag.
-        'tag': str,
-        # Regex matching.
-        'match': str,
-        'tags': List[str],
-    },
-    total=False,
-)
-
-
-def parse_oid(metric_tag):
-    # type: (MetricTag) -> OID
     if 'MIB' in metric_tag:
-        return OID(ObjectIdentity(metric_tag['MIB'], metric_tag['symbol']))
+        oid = OID(ObjectIdentity(metric_tag['MIB'], metric_tag['symbol']))
+    elif 'OID' in metric_tag:
+        oid = OID(metric_tag['OID'])
+        oids_to_resolve[metric_tag['symbol']] = oid
+    else:
+        raise ConfigurationError('A metric tag must specify an OID or a MIB: {}'.format(metric_tag))
 
-    if 'OID' in metric_tag:
-        return OID(metric_tag['OID'])
-
-    raise ConfigurationError('A metric tag must specify an OID or a MIB: {}'.format(metric_tag))
-
-
-def parse_metric_tag(metric_tag):
-    # type: (MetricTag) -> ParsedMetricTag
     if 'tag' in metric_tag:
-        return ParsedSimpleMetricTag(name=metric_tag['tag'], symbol=metric_tag['symbol'])
-
-    if 'tags' not in metric_tag or 'match' not in metric_tag:
+        parsed_metric_tag = _parse_simple_metric_tag(metric_tag)
+    elif 'match' in metric_tag and 'tags' in metric_tag:
+        parsed_metric_tag = _parse_regex_metric_tag(metric_tag)
+    else:
         raise ConfigurationError(
             'A metric tag must specify either a tag, '
             'or a mapping of tags and a regular expression: {}'.format(metric_tag)
         )
 
+    return MetricTagParseResult(oid=oid, parsed_metric_tag=parsed_metric_tag, oids_to_resolve=oids_to_resolve)
+
+
+def _parse_simple_metric_tag(metric_tag):
+    # type: (MetricTag) -> ParsedMetricTag
+    return ParsedSimpleMetricTag(name=metric_tag['tag'], symbol=metric_tag['symbol'])
+
+
+def _parse_regex_metric_tag(metric_tag):
+    # type: (MetricTag) -> ParsedMetricTag
     match = metric_tag['match']
     tags = metric_tag['tags']
 
