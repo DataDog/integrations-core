@@ -43,6 +43,7 @@ pushd $TMP_DIR
   # curl: (56) OpenSSL SSL_read: SSL_ERROR_SYSCALL, errno 110
   for i in 2 4 8 16 32; do
     curl --verbose -LO $MQ_URL && break
+    echo "[INFO] Wait $i seconds and retry curl download"
     sleep $i
   done
 
