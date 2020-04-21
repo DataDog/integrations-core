@@ -79,6 +79,28 @@ class MockResponse:
 
 
 @pytest.fixture
+def istio_proxy_mesh_fixture():
+    mesh_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', '1.5', 'istio-proxy.txt')
+    responses = []
+    with open(mesh_file_path, 'r') as f:
+        responses.append(f.read())
+
+    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+        yield
+
+
+@pytest.fixture
+def istiod_mixture_fixture():
+    mesh_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', '1.5', 'istiod.txt')
+    responses = []
+    with open(mesh_file_path, 'r') as f:
+        responses.append(f.read())
+
+    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+        yield
+
+
+@pytest.fixture
 def mesh_mixture_fixture():
     mesh_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'istio', 'mesh.txt')
     mixer_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'istio', 'mixer.txt')
