@@ -9,6 +9,17 @@ from .types import OIDMetric
 
 def parse_oid_metric(metric):
     # type: (OIDMetric) -> ParseResult
+    """
+    Parse a fully resolved OID/name metric.
+
+    Example:
+
+    ```
+    metrics:
+      - OID: 1.3.6.1.2.1.2.1
+        name: ifNumber
+    ```
+    """
     name = metric['name']
     oid = OID(metric['OID'])
 

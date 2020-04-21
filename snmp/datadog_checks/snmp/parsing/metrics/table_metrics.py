@@ -35,7 +35,7 @@ def parse_table_metric(metric):
         column_tags.extend(parsed_table_metric_tag.column_tags)
         table_batches = merge_table_batches(table_batches, parsed_table_metric_tag.table_batches)
 
-        for index, mapping in parsed_table_metric_tag.index_mappings_to_register.items():
+        for index, mapping in parsed_table_metric_tag.index_mappings.items():
             # Need to do manual resolution.
             for symbol in metric['symbols']:
                 index_mappings.append(IndexMapping(symbol['name'], index=index, mapping=mapping))
@@ -65,7 +65,7 @@ def parse_table_metric(metric):
         parsed_metrics.append(parsed_table_metric)
 
     table_batches = merge_table_batches(
-        table_batches, {TableBatchKey(mib, parsed_table.name): TableBatch(parsed_table.oid, oids=table_oids)}
+        table_batches, {TableBatchKey(mib, table=parsed_table.name): TableBatch(parsed_table.oid, oids=table_oids)}
     )
 
     return ParseResult(
@@ -81,7 +81,7 @@ def merge_table_batches(target, source):
     # type: (TableBatches, TableBatches) -> TableBatches
     merged = {}
 
-    # Extend batches in `target` with OIDs from `source` that share the same keu.
+    # Extend batches in `target` with OIDs from `source` that share the same key.
     for key in target:
         batch = target[key]
         if key in source:

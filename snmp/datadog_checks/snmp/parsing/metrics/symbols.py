@@ -24,15 +24,15 @@ def parse_symbol(mib, symbol):
     This can either be the unresolved name of a symbol:
 
     ```
-    symbol: ifInErrors
+    symbol: ifNumber
     ```
 
-    Or a resolved {OID, name} object:
+    Or a resolved OID/name object:
 
     ```
     symbol:
-        OID: 1.3.6.1.2.1.2.2.1.14
-        name: ifInErrors
+        OID: 1.3.6.1.2.1.2.1
+        name: ifNumber
     ```
     """
     if isinstance(symbol, str):

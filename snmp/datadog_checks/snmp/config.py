@@ -270,7 +270,7 @@ class InstanceConfig:
         # Use bulk for SNMP version > 1 only.
         bulk_threshold = self.bulk_threshold if self._auth_data.mpModel else 0
         result = parse_metrics(metrics, resolver=self._resolver, bulk_threshold=bulk_threshold)
-        return result['all_oids'], result['bulk_oids'], result['parsed_metrics']
+        return result['oids'], result['bulk_oids'], result['parsed_metrics']
 
     def parse_metric_tags(self, metric_tags):
         # type: (list) -> Tuple[List[OID], List[ParsedMetricTag]]

@@ -29,7 +29,7 @@ IndexMapping = NamedTuple('IndexMapping', [('tag', str), ('index', int), ('mappi
 
 # Table OID batching.
 
-TableBatchKey = NamedTuple('TableBatchKey', [('mib', str), ('name', str)])
+TableBatchKey = NamedTuple('TableBatchKey', [('mib', str), ('table', str)])
 TableBatch = NamedTuple('TableBatch', [('table_oid', OID), ('oids', List[OID])])
 TableBatches = Dict[TableBatchKey, TableBatch]
 

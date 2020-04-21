@@ -15,7 +15,7 @@ from .table_metrics import parse_table_metric
 from .types import Metric, OIDMetric, SymbolMetric, TableMetric
 
 MetricsParseResult = TypedDict(
-    'MetricsParseResult', {'all_oids': List[OID], 'bulk_oids': List[OID], 'parsed_metrics': List[ParsedMetric]},
+    'MetricsParseResult', {'oids': List[OID], 'bulk_oids': List[OID], 'parsed_metrics': List[ParsedMetric]},
 )
 
 
@@ -24,18 +24,18 @@ def parse_metrics(metrics, resolver, bulk_threshold=0):
     """
     Parse the `metrics` section of a config file, and return OIDs to fetch and metrics to submit.
     """
-    all_oids = []
+    oids = []
     bulk_oids = []
     parsed_metrics = []  # type: List[ParsedMetric]
 
     for metric in metrics:
         result = parse_metric(metric)
 
+        for oid in result.oids_to_fetch:
+            oids.append(oid)
+
         for name, oid in result.oids_to_resolve.items():
             resolver.register(oid.as_tuple(), name)
-
-        for oid in result.oids_to_fetch:
-            all_oids.append(oid)
 
         for index_mapping in result.index_mappings:
             resolver.register_index(tag=index_mapping.tag, index=index_mapping.index, mapping=index_mapping.mapping)
@@ -45,17 +45,17 @@ def parse_metrics(metrics, resolver, bulk_threshold=0):
             if should_query_in_bulk:
                 bulk_oids.append(batch.table_oid)
             else:
-                all_oids.extend(batch.oids)
+                oids.extend(batch.oids)
 
         parsed_metrics.extend(result.parsed_metrics)
 
-    return {'all_oids': all_oids, 'bulk_oids': bulk_oids, 'parsed_metrics': parsed_metrics}
+    return {'oids': oids, 'bulk_oids': bulk_oids, 'parsed_metrics': parsed_metrics}
 
 
 def parse_metric(metric):
     # type: (Metric) -> ParseResult
     """
-    Parse a single metric in the `metrics` section.
+    Parse a single metric in the `metrics` section of a config file.
 
     Can either be:
 
@@ -79,7 +79,7 @@ def parse_metric(metric):
           name: ifInErrors
     ```
 
-    * A table metric (see `parse_table_metric()` for details):
+    * A table metric (see parsing for table metrics for all possible options):
 
     ```
     metrics:
@@ -108,4 +108,4 @@ def parse_metric(metric):
         metric = cast(TableMetric, metric)
         return parse_table_metric(metric)
 
-    raise ConfigurationError('When specifying a MIB, you must specify either table or symbol')
+    raise ConfigurationError('When specifying a MIB, you must specify either a table or a symbol')

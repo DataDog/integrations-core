@@ -25,17 +25,17 @@ class ParsedTableMetricTag(object):
         oids_to_fetch=None,  # type: List[OID]
         oids_to_resolve=None,  # type: Dict[str, OID]
         table_batches=None,  # type: TableBatches
-        index_tags=None,  # type: List[IndexTag]
         column_tags=None,  # type: List[ColumnTag]
-        index_mappings_to_register=None,  # type: Dict[int, dict]
+        index_tags=None,  # type: List[IndexTag]
+        index_mappings=None,  # type: Dict[int, dict]
     ):
         # type: (...) -> None
         self.oids_to_fetch = oids_to_fetch or []
         self.oids_to_resolve = oids_to_resolve or {}
         self.table_batches = table_batches or {}
-        self.index_tags = index_tags or []
         self.column_tags = column_tags or []
-        self.index_mappings_to_register = index_mappings_to_register or {}
+        self.index_tags = index_tags or []
+        self.index_mappings = index_mappings or {}
 
 
 def parse_table_metric_tag(mib, metric_tag):
@@ -51,7 +51,7 @@ def parse_table_metric_tag(mib, metric_tag):
 
     ```
     metric_tags:
-    - tag: sensor_type
+      - tag: sensor_type
         column: entPhySensorType
         # OR
         column:
@@ -74,10 +74,11 @@ def parse_table_metric_tag(mib, metric_tag):
           name: adapterName
     ```
 
-    * A reference to an column that contains an integer index.
+    * A reference to an OID by its index in the table entry.
 
     An optional `mapping` can be used to map index values to human-readable strings.
-    Examples using ipIfStatsTable in IP-MIB:
+
+    Example using ipIfStatsTable in IP-MIB:
 
     ```
     metric_tags:
@@ -99,10 +100,6 @@ def parse_table_metric_tag(mib, metric_tag):
     if 'tag' not in metric_tag:
         raise ConfigurationError('When specifying metric tags, you must specify a tag')
 
-    if 'index' in metric_tag:
-        metric_tag = cast(IndexTableMetricTag, metric_tag)
-        return parse_index_metric_tag(metric_tag)
-
     if 'column' in metric_tag:
         metric_tag = cast(ColumnTableMetricTag, metric_tag)
         metric_tag_mib = metric_tag.get('MIB', mib)
@@ -115,20 +112,16 @@ def parse_table_metric_tag(mib, metric_tag):
 
         return parse_column_metric_tag(metric_tag, mib=mib)
 
+    if 'index' in metric_tag:
+        metric_tag = cast(IndexTableMetricTag, metric_tag)
+        return parse_index_metric_tag(metric_tag)
+
     raise ConfigurationError('When specifying metric tags, you must specify either and index or a column')
-
-
-def parse_index_metric_tag(metric_tag):
-    # type: (IndexTableMetricTag) -> ParsedTableMetricTag
-    index_tags = [IndexTag(name=metric_tag['tag'], index=metric_tag['index'])]
-    index_mappings_to_register = {metric_tag['index']: metric_tag['mapping']} if 'mapping' in metric_tag else None
-
-    return ParsedTableMetricTag(index_tags=index_tags, index_mappings_to_register=index_mappings_to_register)
 
 
 def parse_column_metric_tag(metric_tag, mib):
     # type: (ColumnTableMetricTag, str) -> ParsedTableMetricTag
-    parsed_column = parse_symbol(metric_tag.get('MIB', mib), metric_tag['column'])
+    parsed_column = parse_symbol(mib, metric_tag['column'])
 
     return ParsedTableMetricTag(
         oids_to_fetch=[parsed_column.oid],
@@ -139,17 +132,27 @@ def parse_column_metric_tag(metric_tag, mib):
 
 def parse_other_table_column_metric_tag(metric_tag, mib, table):
     # type: (ColumnTableMetricTag, str, str) -> ParsedTableMetricTag
-    parsed_metric_tag = parse_column_metric_tag({'tag': metric_tag['tag'], 'column': metric_tag['column']}, mib=mib)
-
-    column_oid = parsed_metric_tag.oids_to_fetch[0]
-    oids_to_resolve = parsed_metric_tag.oids_to_resolve
-
+    parsed_metric_tag = parse_column_metric_tag(metric_tag, mib=mib)
     parsed_table = parse_symbol(mib, table)
+
+    oids_to_resolve = parsed_metric_tag.oids_to_resolve
     oids_to_resolve.update(parsed_table.oids_to_resolve)
 
+    batches = {
+        TableBatchKey(mib, table=parsed_table.name): TableBatch(parsed_table.oid, oids=parsed_metric_tag.oids_to_fetch)
+    }
+
     return ParsedTableMetricTag(
-        oids_to_fetch=[column_oid],
+        oids_to_fetch=parsed_metric_tag.oids_to_fetch,
         oids_to_resolve=oids_to_resolve,
-        table_batches={TableBatchKey(mib, parsed_table.name): TableBatch(parsed_table.oid, oids=[column_oid])},
+        table_batches=batches,
         column_tags=parsed_metric_tag.column_tags,
     )
+
+
+def parse_index_metric_tag(metric_tag):
+    # type: (IndexTableMetricTag) -> ParsedTableMetricTag
+    index_tags = [IndexTag(name=metric_tag['tag'], index=metric_tag['index'])]
+    index_mappings = {metric_tag['index']: metric_tag['mapping']} if 'mapping' in metric_tag else None
+
+    return ParsedTableMetricTag(index_tags=index_tags, index_mappings=index_mappings)

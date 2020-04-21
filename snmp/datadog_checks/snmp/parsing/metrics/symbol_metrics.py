@@ -10,7 +10,15 @@ from .types import SymbolMetric
 def parse_symbol_metric(metric):
     # type: (SymbolMetric) -> ParseResult
     """
-    Parse a symbol metric, given by a MIB name and a symbol string or object.
+    Parse a symbol metric (= an OID in a MIB).
+
+    Example:
+
+    ```
+    metrics:
+      - MIB: IF-MIB
+        symbol: <string or OID/name object>
+    ```
     """
     mib = metric['MIB']
     symbol = metric['symbol']

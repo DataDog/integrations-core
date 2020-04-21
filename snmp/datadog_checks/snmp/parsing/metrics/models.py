@@ -10,20 +10,15 @@ from .types import IndexMapping, TableBatches
 
 class ParseResult(object):
     """
-    A unified container for any data that can come out of the process of parsing metrics.
+    A container for data gathered as part of parsing metrics.
     """
 
     def __init__(
         self,
-        # A list of OIDs that should be queried.
         oids_to_fetch=None,  # type: List[OID]
-        # OIDs that should be registered on the resolver.
         oids_to_resolve=None,  # type: Dict[str, OID]
-        # Index mappings that should be registered on the resolver.
         index_mappings=None,  # type: List[IndexMapping]
-        # A data structure for efficiently storing the set of of OIDs to query for a given MIB table.
         table_batches=None,  # type: TableBatches
-        # Metadata about metrics that should be sent to the Agent once OIDs have been fetched.
         parsed_metrics=None,  # type: Sequence[ParsedMetric]
     ):
         # type: (...) -> None
