@@ -1,6 +1,6 @@
-Write-Output "$env:DDEV_SCRIPTS_PATH\common.bat"
+Write-Output "$env:DDEV_SCRIPTS_PATH\common.ps1"
 
-. "$env:DDEV_SCRIPTS_PATH\common.bat"
+. "$env:DDEV_SCRIPTS_PATH\common.ps1"
 
 :: Install with TCP/IP enabled, see: https://chocolatey.org/packages/sql-server-2017
 Retry-Command -ScriptBlock {

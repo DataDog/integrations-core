@@ -1,5 +1,7 @@
 # Borrowed from https://stackoverflow.com/questions/45470999/powershell-try-catch-and-retry
 
+Write-Output "hello from common.ps1"
+
 # Retry-Command:
 #
 # Usage 1:
