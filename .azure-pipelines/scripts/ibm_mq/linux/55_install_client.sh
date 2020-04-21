@@ -39,12 +39,9 @@ sudo apt-get install -y --no-install-recommends \
 mkdir -p $TMP_DIR
 pushd $TMP_DIR
 
-  n=0
-  until [ $n -ge 10 ]
-  do
-     curl -LO $MQ_URL && break
-     n=$((n+1))
-     sleep 10
+  for i in 2 4 8 16 32; do
+    curl -LO $MQ_URL && break
+    sleep $i
   done
 
   tar -zxvf ./*.tar.gz
