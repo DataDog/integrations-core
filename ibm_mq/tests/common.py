@@ -96,14 +96,11 @@ INSTANCE_QUEUE_REGEX_TAG = {
 }
 
 E2E_METADATA = {
-    # This script makes the necessary setup to be able to compile pymqi on the agent machine
+    'docker_volumes': [
+        '{}/scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE),
+    ],
     'start_commands': [
-        'apt-get update',
-        'apt-get install gcc -y',
-        'mkdir /opt/mqm',
-        'curl -L -o /opt/mqm/mq-client.tar.gz '
-        'https://ddintegrations.blob.core.windows.net/ibm-mq/9.1.0.4-IBM-MQC-Redist-LinuxX64.tar.gz',
-        'tar -C /opt/mqm -xf /opt/mqm/mq-client.tar.gz',
+        'bash /tmp/start_commands.sh',
     ],
     'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib', 'C_INCLUDE_PATH': '/opt/mqm/inc'},
 }
