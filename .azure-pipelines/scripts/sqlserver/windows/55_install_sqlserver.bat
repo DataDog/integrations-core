@@ -20,7 +20,7 @@ if %ERRORLEVEL% neq 0 (
    )
 )
 
-echo Success
+echo sql-server-2017 installed successfully
 
 :: Set password
 sqlcmd -Q "ALTER LOGIN sa with PASSWORD = 'Password12!';ALTER LOGIN sa ENABLE;"
