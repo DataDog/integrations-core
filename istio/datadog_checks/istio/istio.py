@@ -32,6 +32,7 @@ class Istio(OpenMetricsBaseCheck):
         )
 
         super(Istio, self).__init__(name, init_config, instances)
+        self.log.info("Collecting metrics from istiod deployment, all other endpoints are ignored.")
 
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
@@ -39,8 +40,3 @@ class Istio(OpenMetricsBaseCheck):
             return super(Istio, cls).__new__(cls)
         else:
             return LegacyIstioCheck_1_4(name, init_config, instances)
-
-    def check(self, instance):
-        self.log.info("Collecting metrics from istiod deployment, all other endpoints are ignored.")
-        scraper_config = self.get_scraper_config(instance)
-        self.process(scraper_config)
