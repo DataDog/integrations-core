@@ -84,8 +84,10 @@ def dd_environment(get_instance):
         sys.stderr.write("ZK boot complete.\n")
 
     compose_file = os.path.join(HERE, 'compose', 'zk.yaml')
-    if get_version() >= [3, 5, 0]:
-        compose_file = os.path.join(HERE, 'compose', 'zk35plus.yaml')
+    if [3, 5, 0] <= get_version() < [3, 6, 0]:
+        compose_file = os.path.join(HERE, 'compose', 'zk35.yaml')
+    elif get_version() >= [3, 6, 0]:
+        compose_file = os.path.join(HERE, 'compose', 'zk36plus.yaml')
 
     with docker_run(compose_file, conditions=[condition]):
         yield get_instance

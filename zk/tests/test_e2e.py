@@ -14,13 +14,15 @@ def test_e2e(dd_agent_check, get_instance):
     aggregator = dd_agent_check(get_instance, rate=True)
 
     zk_version = os.environ.get("ZK_VERSION") or "3.4.10"
-    metrics_to_check = []
-    if zk_version and LooseVersion(zk_version) >= LooseVersion("3.4.0"):
-        metrics_to_check = common.MNTR_METRICS
-    if zk_version and LooseVersion(zk_version) <= LooseVersion("3.5.0"):
-        metrics_to_check.extend(common.METRICS_34)
-    for mname in metrics_to_check:
-        aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"])
+    if zk_version and LooseVersion(zk_version) < LooseVersion("3.5.0"):
+        for mname in common.MNTR_METRICS:
+            aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"])
+    if zk_version and LooseVersion(zk_version) < LooseVersion("3.6.0"):
+        for mname in common.METRICS_34:
+            aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"])
+    if zk_version and LooseVersion(zk_version) >= LooseVersion("3.6.0"):
+        for mname in common.METRICS_36:
+            aggregator.assert_metric(mname)
 
     common.assert_service_checks_ok(aggregator)
 

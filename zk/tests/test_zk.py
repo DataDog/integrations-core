@@ -28,9 +28,15 @@ def test_check(aggregator, dd_environment, get_instance):
         aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"])
 
     zk_version = os.environ.get("ZK_VERSION") or "3.4.10"
-    if zk_version and LooseVersion(zk_version) > LooseVersion("3.4.0"):
+    if zk_version and LooseVersion(zk_version) < LooseVersion("3.5.0"):
         for mname in common.MNTR_METRICS:
             aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"])
+    if zk_version and LooseVersion(zk_version) < LooseVersion("3.6.0"):
+        for mname in common.METRICS_34:
+            aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"])
+    if zk_version and LooseVersion(zk_version) >= LooseVersion("3.6.0"):
+        for mname in common.METRICS_36:
+            aggregator.assert_metric(mname)
 
     common.assert_service_checks_ok(aggregator)
 
