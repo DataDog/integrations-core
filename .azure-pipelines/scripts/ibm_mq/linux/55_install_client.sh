@@ -40,7 +40,7 @@ mkdir -p $TMP_DIR
 pushd $TMP_DIR
 
   for i in 2 4 8 16 32; do
-    curl -LO $MQ_URL && break
+    curl --verbose -LO $MQ_URL && break
     sleep $i
   done
 
