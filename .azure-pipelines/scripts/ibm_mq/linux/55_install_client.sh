@@ -40,11 +40,11 @@ mkdir -p $TMP_DIR
 pushd $TMP_DIR
 
   n=0
-  until [ $n -ge 20 ]
+  until [ $n -ge 10 ]
   do
      curl -LO $MQ_URL && break
      n=$((n+1))
-     sleep 5
+     sleep 10
   done
 
   tar -zxvf ./*.tar.gz
