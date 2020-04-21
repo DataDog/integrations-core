@@ -1,14 +1,26 @@
 :: Install with TCP/IP enabled, see: https://chocolatey.org/packages/sql-server-2017
 
-set sleep_time=5
-set n_retries=5
+@echo off
+set TRIES=3
+set INTERVAL=10
 
-for /l %%x in (1, 1, %n_retries%) do (
-  choco install sql-server-2017 --params="'/TCPENABLED:1'"
-  if not ERRORLEVEL 1 EXIT /B 0
-  echo "Wait %sleep_time% seconds and retry sql-server install ..."
-  timeout /t %sleep_time% /nobreak > nul
+:retry
+
+choco install sql-server-2017 --params="'/TCPENABLED:1'"
+
+if %ERRORLEVEL% neq 0 (
+   set /A TRIES=%TRIES%-1
+   if %TRIES% gtr 1 (
+       echo Failed, retrying in %INTERVAL% seconds...
+       timeout /t %INTERVAL%
+       goto retry
+   ) else (
+       echo Failed, aborting
+       exit /b 1
+   )
 )
+
+echo Success
 
 :: Set password
 sqlcmd -Q "ALTER LOGIN sa with PASSWORD = 'Password12!';ALTER LOGIN sa ENABLE;"
