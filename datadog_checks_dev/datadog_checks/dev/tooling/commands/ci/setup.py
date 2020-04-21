@@ -38,6 +38,9 @@ def setup(checks, changed):
     check_envs = list(get_tox_envs(checks, every=True, sort=True, changed_only=changed))
     echo_info(f'Configuring these envs: {check_envs}')
 
+    new_envs = os.environ.copy()
+    new_envs["DDEV_SCRIPTS_PATH"] = scripts_path
+
     for check, _ in check_envs:
         check_scripts_path = os.path.join(scripts_path, check)
 
@@ -57,4 +60,4 @@ def setup(checks, changed):
         for script in scripts:
             script_file = os.path.join(check_scripts_path, cur_platform, script)
             display_action(script_file)
-            subprocess.run([script_file], shell=True, check=True)
+            subprocess.run([script_file], shell=True, check=True, env=new_envs)

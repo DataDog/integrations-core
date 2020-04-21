@@ -1,17 +1,9 @@
+call "$env:DDEV_SCRIPTS_PATH\common.bat"
 
 :: Install with TCP/IP enabled, see: https://chocolatey.org/packages/sql-server-2017
-$counter = 0
-do {
-    $counter++
-    try {
-        choco install sql-server-2017 --params="'/TCPENABLED:1'"
-        return
-    } catch {
-        Write-Error $_.Exception.InnerException.Message -ErrorAction Continue
-        Start-Sleep -Milliseconds [math]::pow( 2, $counter )
-    }
-} while ($cnt -lt 5)
-
+Retry-Command -ScriptBlock {
+    choco install sql-server-2017 --params="'/TCPENABLED:1'"
+} -Maximum 5
 
 :: Set password
 sqlcmd -Q "ALTER LOGIN sa with PASSWORD = 'Password12!';ALTER LOGIN sa ENABLE;"
