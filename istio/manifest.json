@@ -14,7 +14,7 @@
   "metric_to_check": [
     "istio.mixer.process.cpu_seconds_total",
     "istio.mesh.request.count",
-    "istio.galley.endpoint_no_pod",
+    "istio.galley.endpoint_no_pod"
   ],
   "name": "istio",
   "public_title": "Datadog-Istio Integration",
