@@ -1,6 +1,6 @@
 # This script makes the necessary setup to be able to compile pymqi on the agent machine
 
-MQ_URL=https://ddintegrations.blob.core.windows.net/ibm-mq/mqadv_dev90_linux_x86-64.tar.gz
+MQ_URL=https://ddintegrations.blob.core.windows.net/ibm-mq/9.1.0.4-IBM-MQC-Redist-LinuxX64.tar.gz
 
 apt-get update
 apt-get install gcc -y
