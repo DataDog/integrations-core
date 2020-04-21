@@ -1,0 +1,713 @@
+{
+    "title": "OpenStack Controller - Overview",
+    "description": "## OpenStack Controller - Overview\n\nPreset dashboard for the OpenStack Controller integration. Used for OpenStack deployments greater v13 and higher. \n\n[See integration docs for more details](https://docs.datadoghq.com/integrations/openstack_controller/)",
+    "widgets": [
+        {
+            "id": 0,
+            "definition": {
+                "type": "note",
+                "content": "#\n#\n#\n#\n#\n[Hypervisors](https://www.datadoghq.com/blog/openstack-monitoring-nova/#hypervisor-metrics)",
+                "background_color": "yellow",
+                "font_size": "36",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "right"
+            },
+            "layout": {
+                "x": 0,
+                "y": 12,
+                "width": 19,
+                "height": 52
+            }
+        },
+        {
+            "id": 1,
+            "definition": {
+                "type": "toplist",
+                "requests": [
+                    {
+                        "q": "top(avg:openstack.nova.server.memory_rss{*} by {project_name}, 10, 'mean', 'desc')",
+                        "conditional_formats": [
+                            {
+                                "comparator": "<",
+                                "value": 200,
+                                "palette": "red"
+                            }
+                        ]
+                    }
+                ],
+                "title": "Top memory RSS by project in $aggregate",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                }
+            },
+            "layout": {
+                "x": 21,
+                "y": 12,
+                "width": 46,
+                "height": 16
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "check_status",
+                "title": "Keystone",
+                "title_size": "13",
+                "title_align": "center",
+                "check": "openstack.keystone.api.up",
+                "grouping": "cluster",
+                "tags": [
+                    "*"
+                ],
+                "time": {
+                    "live_span": "4h"
+                }
+            },
+            "layout": {
+                "x": 38,
+                "y": 2,
+                "width": 14,
+                "height": 8
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "note",
+                "content": "APIs",
+                "background_color": "yellow",
+                "font_size": "36",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "right"
+            },
+            "layout": {
+                "x": 21,
+                "y": 2,
+                "width": 14,
+                "height": 8
+            }
+        },
+        {
+            "id": 4,
+            "definition": {
+                "type": "check_status",
+                "title": "Hypervisors",
+                "title_size": "13",
+                "title_align": "center",
+                "check": "openstack.nova.hypervisor.up",
+                "grouping": "cluster",
+                "tags": [
+                    "$aggregate"
+                ],
+                "time": {
+                    "live_span": "1h"
+                }
+            },
+            "layout": {
+                "x": 86,
+                "y": 2,
+                "width": 14,
+                "height": 8
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "check_status",
+                "title": "Neutron",
+                "title_size": "13",
+                "title_align": "center",
+                "check": "openstack.neutron.api.up",
+                "grouping": "cluster",
+                "tags": [
+                    "*"
+                ],
+                "time": {
+                    "live_span": "10m"
+                }
+            },
+            "layout": {
+                "x": 70,
+                "y": 2,
+                "width": 14,
+                "height": 8
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "check_status",
+                "title": "Nova",
+                "title_size": "13",
+                "title_align": "center",
+                "check": "openstack.nova.api.up",
+                "grouping": "cluster",
+                "tags": [
+                    "*"
+                ],
+                "time": {
+                    "live_span": "10m"
+                }
+            },
+            "layout": {
+                "x": 54,
+                "y": 2,
+                "width": 14,
+                "height": 8
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "note",
+                "content": "#\n#\n#\n[Project](https://www.datadoghq.com/blog/openstack-monitoring-nova/#tenant-metrics)",
+                "background_color": "yellow",
+                "font_size": "36",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "right"
+            },
+            "layout": {
+                "x": 0,
+                "y": 70,
+                "width": 19,
+                "height": 33
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:openstack.nova.limits.total_cores_used{$project}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    },
+                    {
+                        "q": "avg:openstack.nova.limits.max_total_cores{$project}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Cores used vs max by $project",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": true,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 69,
+                "y": 70,
+                "width": 46,
+                "height": 16
+            }
+        },
+        {
+            "id": 9,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:openstack.nova.limits.total_instances_used{$project}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    },
+                    {
+                        "q": "avg:openstack.nova.limits.max_total_instances{$project}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Instances used vs max by $project",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": true,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 69,
+                "y": 87,
+                "width": 46,
+                "height": 16
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:openstack.nova.limits.total_ram_used{$project}*1024000",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    },
+                    {
+                        "q": "avg:openstack.nova.limits.max_total_ram_size{$project}*1024000",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "RAM used vs max by $project (GB)",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": true,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 21,
+                "y": 87,
+                "width": 46,
+                "height": 16
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:openstack.nova.limits.total_floating_ips_used{$project}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    },
+                    {
+                        "q": "avg:openstack.nova.limits.max_total_floating_ips{$project}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Floating IPs used vs max by $project",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": true,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 21,
+                "y": 70,
+                "width": 46,
+                "height": 16
+            }
+        },
+        {
+            "id": 12,
+            "definition": {
+                "type": "hostmap",
+                "requests": {
+                    "fill": {
+                        "q": "avg:openstack.nova.hypervisor_load.1{*} by {host}"
+                    }
+                },
+                "title": "Hypervisor load map by $aggregate",
+                "title_size": "16",
+                "title_align": "left",
+                "no_metric_hosts": false,
+                "no_group_hosts": true,
+                "group": [
+                    "aggregate"
+                ],
+                "style": {
+                    "palette": "hostmap_blues",
+                    "palette_flip": false
+                }
+            },
+            "layout": {
+                "x": 21,
+                "y": 29,
+                "width": 46,
+                "height": 18
+            }
+        },
+        {
+            "id": 13,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:openstack.nova.local_gb_used{*} by {host}",
+                        "display_type": "area"
+                    },
+                    {
+                        "q": "avg:openstack.nova.free_disk_gb{*} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "purple"
+                        }
+                    }
+                ],
+                "title": "Used vs free disk by physical host",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 21,
+                "y": 48,
+                "width": 46,
+                "height": 16
+            }
+        },
+        {
+            "id": 14,
+            "definition": {
+                "type": "change",
+                "requests": [
+                    {
+                        "q": "sum:openstack.nova.running_vms{$aggregate} by {hypervisor}",
+                        "change_type": "absolute",
+                        "compare_to": "hour_before",
+                        "increase_good": true,
+                        "order_by": "change",
+                        "order_dir": "desc",
+                        "show_present": true
+                    }
+                ],
+                "title": "Change in running VMs by hypervisor in $aggregate",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                }
+            },
+            "layout": {
+                "x": 69,
+                "y": 29,
+                "width": 46,
+                "height": 18
+            }
+        },
+        {
+            "id": 15,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:openstack.nova.current_workload{*} by {hypervisor}",
+                        "display_type": "bars"
+                    }
+                ],
+                "title": "Nova current workload by hypervisor",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 69,
+                "y": 12,
+                "width": 46,
+                "height": 16
+            }
+        },
+        {
+            "id": 16,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:openstack.nova.vcpus{$aggregate} by {host}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "warm"
+                        }
+                    },
+                    {
+                        "q": "sum:openstack.nova.vcpus_used{$aggregate} by {hypervisor}",
+                        "display_type": "area"
+                    }
+                ],
+                "title": "VCPUs used vs available by hypervisor",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 69,
+                "y": 48,
+                "width": 46,
+                "height": 16
+            }
+        },
+        {
+            "id": 17,
+            "definition": {
+                "type": "note",
+                "content": "[Nova Server](https://www.datadoghq.com/blog/openstack-monitoring-nova/#nova-server-metrics)",
+                "background_color": "yellow",
+                "font_size": "36",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 121,
+                "y": 77,
+                "width": 38,
+                "height": 7
+            }
+        },
+        {
+            "id": 18,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:openstack.nova.server.hdd_read_req{$project} by {host}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "HDD read rate by instance for $project",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 117,
+                "y": 87,
+                "width": 46,
+                "height": 16
+            }
+        },
+        {
+            "id": 19,
+            "definition": {
+                "type": "image",
+                "url": "https://app.datadoghq.com/static/images/saas_logos/bot/openstack.png",
+                "sizing": "fit"
+            },
+            "layout": {
+                "x": 0,
+                "y": 0,
+                "width": 19,
+                "height": 10
+            }
+        },
+        {
+            "id": 20,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:rabbitmq.queue.memory{*} by {rabbitmq_queue}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "title": "RabbitMQ queue memory",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 117,
+                "y": 12,
+                "width": 46,
+                "height": 16
+            }
+        },
+        {
+            "id": 21,
+            "definition": {
+                "type": "note",
+                "content": "\n\n\n\n[RabbitMQ](https://www.datadoghq.com/blog/openstack-monitoring-nova/#rabbitmq-metrics)",
+                "background_color": "yellow",
+                "font_size": "36",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 120,
+                "y": 2,
+                "width": 40,
+                "height": 8
+            }
+        },
+        {
+            "id": 22,
+            "definition": {
+                "type": "toplist",
+                "requests": [
+                    {
+                        "q": "top(sum:rabbitmq.queue.consumers{*} by {rabbitmq_queue}, 50, 'mean', 'asc')",
+                        "style": {
+                            "palette": "dog_classic"
+                        }
+                    }
+                ],
+                "title": "Consumers by queue",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                }
+            },
+            "layout": {
+                "x": 117,
+                "y": 29,
+                "width": 46,
+                "height": 18
+            }
+        },
+        {
+            "id": 23,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:rabbitmq.queue.consumer_utilisation{*} by {rabbitmq_queue}",
+                        "display_type": "area",
+                        "style": {
+                            "palette": "cool"
+                        }
+                    }
+                ],
+                "title": "RabbitMQ consumer utilization",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {
+                    "live_span": "1h"
+                },
+                "show_legend": false,
+                "legend_size": "0"
+            },
+            "layout": {
+                "x": 117,
+                "y": 48,
+                "width": 46,
+                "height": 16
+            }
+        }
+    ],
+    "template_variables": [
+        {
+            "name": "project",
+            "default": "*",
+            "prefix": "project_name"
+        },
+        {
+            "name": "aggregate",
+            "default": "*",
+            "prefix": "aggregate"
+        }
+    ],
+    "layout_type": "free",
+    "is_read_only": false,
+    "notify_list": [],
+    "id": "353-yhx-zwb"
+}
