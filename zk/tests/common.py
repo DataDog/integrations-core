@@ -3,10 +3,30 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import os
+from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
 
 from datadog_checks.zk import ZookeeperCheck
 
 ZK_VERSION = os.environ['ZK_VERSION']
+
+
+STAT_METRICS = [
+    'zookeeper.latency.min',
+    'zookeeper.latency.avg',
+    'zookeeper.latency.max',
+    'zookeeper.bytes_received',
+    'zookeeper.bytes_sent',
+    'zookeeper.connections',
+    'zookeeper.connections',
+    'zookeeper.outstanding_requests',
+    'zookeeper.zxid.epoch',
+    'zookeeper.zxid.count',
+    'zookeeper.nodes',
+    'zookeeper.instances',
+    'zookeeper.packets.received',
+    'zookeeper.packets.sent',
+]
+
 
 MNTR_METRICS = [
     'zookeeper.packets_sent',
@@ -287,3 +307,20 @@ METRICS_36 = METRICS_34 + [
 def assert_service_checks_ok(aggregator):
     aggregator.assert_service_check("zookeeper.ruok", status=ZookeeperCheck.OK)
     aggregator.assert_service_check("zookeeper.mode", status=ZookeeperCheck.OK)
+
+
+def assert_stat_metrics(aggregator):
+    for mname in STAT_METRICS:
+        aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"])
+
+
+def assert_mntr_metrics_by_version(aggregator):
+    zk_version = os.environ.get("ZK_VERSION") or "3.4.10"
+    metrics_to_check = METRICS_34
+    if zk_version and LooseVersion(zk_version) >= LooseVersion("3.6"):
+        metrics_to_check = METRICS_36
+
+    for metric in metrics_to_check:
+        aggregator.assert_metric(metric)
+        aggregator.assert_metric_has_tag_prefix(metric, tag_prefix='mode')
+        aggregator.assert_metric_has_tag_prefix(metric, tag_prefix='mytag')

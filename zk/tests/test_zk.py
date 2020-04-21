@@ -2,9 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import os
-from distutils.version import LooseVersion  # pylint: disable=E0611,E0401
-
 import mock
 import pytest
 
@@ -24,19 +21,8 @@ def test_check(aggregator, dd_environment, get_instance):
     zk_check.check(get_instance)
 
     # Test metrics
-    for mname in conftest.STAT_METRICS:
-        aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"])
-
-    zk_version = os.environ.get("ZK_VERSION") or "3.4.10"
-    if zk_version and LooseVersion(zk_version) < LooseVersion("3.5.0"):
-        for mname in common.MNTR_METRICS:
-            aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"])
-    if zk_version and LooseVersion(zk_version) < LooseVersion("3.6.0"):
-        for mname in common.METRICS_34:
-            aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"])
-    if zk_version and LooseVersion(zk_version) >= LooseVersion("3.6.0"):
-        for mname in common.METRICS_36:
-            aggregator.assert_metric(mname)
+    common.assert_stat_metrics(aggregator)
+    common.assert_mntr_metrics_by_version(aggregator)
 
     common.assert_service_checks_ok(aggregator)
 
