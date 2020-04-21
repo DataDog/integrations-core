@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+# CHANGED
 '''
 Check the performance counters from SQL Server
 For information on how to report the metrics available in the sys.dm_os_performance_counters table see
