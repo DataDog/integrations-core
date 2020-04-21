@@ -1,4 +1,4 @@
-call "$env:DDEV_SCRIPTS_PATH\common.bat"
+. "$env:DDEV_SCRIPTS_PATH\common.bat"
 
 :: Install with TCP/IP enabled, see: https://chocolatey.org/packages/sql-server-2017
 Retry-Command -ScriptBlock {
