@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
+import logging
 import os
 from time import sleep
 
@@ -21,6 +21,8 @@ from .common import (
     GITLAB_URL,
     HERE,
 )
+
+logger = logging.getLogger(__file__)
 
 
 @pytest.fixture(scope="session")
@@ -43,7 +45,10 @@ def dd_environment():
     ):
         # run pre-test commands
         for _ in range(100):
-            requests.get(GITLAB_URL)
+            try:
+                requests.get(GITLAB_URL)
+            except Exception as e:
+                logger.warning('Error making request to %s: %s', GITLAB_URL, e)
         sleep(2)
 
         yield CONFIG
