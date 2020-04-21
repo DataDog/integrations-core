@@ -6,7 +6,7 @@ import os
 
 import pytest
 
-from datadog_checks.dev import docker_run, get_docker_hostname, get_here, run_command, TempDir
+from datadog_checks.dev import TempDir, docker_run, get_docker_hostname, get_here, run_command
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.utils import load_jmx_config
 
