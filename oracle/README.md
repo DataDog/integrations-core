@@ -12,9 +12,15 @@ Get metrics from Oracle Database servers in real time to visualize and monitor a
 
 #### Prerequisite
 
-To use the Oracle integration, either install the Oracle Instant Client libraries, or download the Oracle JDBC Driver. Due to licensing restrictions, these libraries are not included in the Datadog Agent, but can be downloaded directly from Oracle.
+To use the Oracle integration, either install the Oracle Instant Client libraries, or download the Oracle JDBC Driver. 
+Due to licensing restrictions, these libraries are not included in the Datadog Agent, but can be downloaded directly from Oracle.
 
-**Note**: JPype, one of the libraries used by the Agent, depends specifically on the [Microsoft Visual C++ Runtime 2015][13]. Make sure this runtime is installed on your system.
+**Note**: If you are using JDBC connection JPype, one of the libraries used by the Agent, depends specifically on:
+
+  * [Microsoft Visual C++ Runtime 2015][13]. 
+  * Java 8 or newer
+
+Make sure these runtime are installed on your system.
 
 ##### JDBC Driver
 
