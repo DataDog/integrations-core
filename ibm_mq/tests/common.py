@@ -96,12 +96,8 @@ INSTANCE_QUEUE_REGEX_TAG = {
 }
 
 E2E_METADATA = {
-    'docker_volumes': [
-        '{}/scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE),
-    ],
-    'start_commands': [
-        'bash /tmp/start_commands.sh',
-    ],
+    'docker_volumes': ['{}/scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE)],
+    'start_commands': ['bash /tmp/start_commands.sh'],
     'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib', 'C_INCLUDE_PATH': '/opt/mqm/inc'},
 }
 
