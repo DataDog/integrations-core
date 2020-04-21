@@ -75,7 +75,25 @@ DATASTORE_METRICS = {
 }
 
 # All metrics that can be collected from Clusters.
-CLUSTER_METRICS = {}
+CLUSTER_METRICS = {
+    'cpu.usage.average',
+    'cpu.usagemhz.average',
+    'mem.usage.average',
+    'vmop.numClone.latest',
+    'vmop.numCreate.latest',
+    'vmop.numDestroy.latest',
+    'vmop.numPoweroff.latest',
+    'vmop.numPoweron.latest',
+    'vmop.numRebootGuest.latest',
+    'vmop.numRegister.latest',
+    'vmop.numReset.latest',
+    'vmop.numSVMotion.latest',
+    'vmop.numShutdownGuest.latest',
+    'vmop.numStandbyGuest.latest',
+    'vmop.numSuspend.latest',
+    'vmop.numUnregister.latest',
+    'vmop.numVMotion.latest',
+    }
 
 ALLOWED_METRICS_FOR_MOR = {
     vim.VirtualMachine: VM_METRICS,

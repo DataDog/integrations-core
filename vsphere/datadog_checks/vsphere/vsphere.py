@@ -59,7 +59,7 @@ MAX_QUERY_METRICS_OPTION = "config.vpxd.stats.maxQueryMetrics"
 REALTIME_RESOURCES = [vim.VirtualMachine, vim.HostSystem]
 HISTORICAL_RESOURCES = [vim.Datastore, vim.ClusterComputeResource]
 ALL_RESOURCES_WITH_METRICS = REALTIME_RESOURCES + HISTORICAL_RESOURCES
-ALL_RESOURCES_WITH_NO_METRICS = [vim.ComputeResource, vim.Folder,vim.Datacenter]
+ALL_RESOURCES_WITH_NO_METRICS = [vim.Folder,vim.Datacenter]
 
 # Time after which we reap the jobs that clog the queue
 # TODO: use it
@@ -380,6 +380,25 @@ class VSphereCheck(AgentCheck):
 
         return cluster_mors
 
+    def addClusterUuid(self,instance,cluster_name):
+        i_key = self._instance_key(instance)
+        cluster_cache = self.cache_uuids[i_key].get(vim.ClusterComputeResource)
+        if cluster_name:
+            cluster_uuid = cluster_cache.get(cluster_name,None)
+            if cluster_uuid is None:
+                try:
+                    cluster_name_bytes = cluster_name.encode('utf-8')
+                    cluster_uuid = str(uuid.uuid5(uuid.NAMESPACE_OID, cluster_name_bytes))
+                    cluster_cache.update({cluster_name : cluster_uuid})
+                    self.log.debug(u"Added uuid : %s for cluster : %s",cluster_uuid,cluster_name)
+                except UnicodeError:
+                    self.log.warning(u"Unable to generate uuid for cluster %s",cluster_name)
+                    pass
+            else:
+                self.log.debug(u"uuid already added for cluster %s",cluster_name)
+        else:
+            self.log.warning(u"unable to add uuid for empty cluster name")
+
     def getClustersToMonitor(self,instance):
         monitor_clusters = []
         i_key = self._instance_key(instance)
@@ -393,6 +412,9 @@ class VSphereCheck(AgentCheck):
                     cluster_mor = cluster_mors.get(vcenter_cluster)
                     if cluster_mor:
                         monitor_clusters.append(cluster_mor)
+                        self.addClusterUuid(instance,vcenter_cluster)
+                    else:
+                        self.log.warning("Invalid cluster name %s",vcenter_cluster)
             else:
                 self.log.warning(u"Empty cluster list in vcenter configuration.")
             #update the cluster monitor list
@@ -483,7 +505,7 @@ class VSphereCheck(AgentCheck):
                 obj_spec.selectSet = [cluster2HostTraversal,cluster2DsTraversal]
                 obj_specs.append(obj_spec)
 
-                return obj_specs
+            return obj_specs
 
         def createPropertySpecs(mor_types):
             #Create a list of property specifications based on attributes we want to retrieve per entity type
@@ -505,6 +527,34 @@ class VSphereCheck(AgentCheck):
 
             return property_specs
 
+        def createPropertyOptions():
+            retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
+            # To limit the number of objects retrieved per call.
+            # If batch_collector_size is 0, collect maximum number of objects.
+            retr_opts.maxObjects = self.batch_collector_size or None
+            return retr_opts
+
+        def collectProperties(server_instance,filter_spec,retr_opts):
+            mor_properties = {}
+            # Collect the objects and their properties
+            collector = server_instance.content.propertyCollector
+            res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
+            objects = res.objects
+            # Results can be paginated
+            while res.token is not None:
+                res = collector.ContinueRetrievePropertiesEx(res.token)
+                objects.extend(res.objects)
+
+            for obj in objects:
+                if obj.missingSet:
+                    for prop in obj.missingSet:
+                        self.log.warning(u"Unable to retrieve property %s for object %s: %s",
+                                                        prop.path,str(obj.obj),str(prop.fault))
+
+                mor_properties[obj.obj] = {prop.name: prop.val for prop in obj.propSet} if obj.propSet else {}
+
+            return mor_properties
+
         def _collect_metric_mors_and_attributes(server_instance,clusters):
             obj_specs = createObjectSpecs(clusters)
             property_specs = createPropertySpecs(ALL_RESOURCES_WITH_METRICS)
@@ -513,45 +563,14 @@ class VSphereCheck(AgentCheck):
             filter_spec.objectSet = obj_specs
             filter_spec.propSet = property_specs
 
-            retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
-            # To limit the number of objects retrieved per call.
-            # If batch_collector_size is 0, collect maximum number of objects.
-            retr_opts.maxObjects = self.batch_collector_size or None
-
-            collector = server_instance.content.propertyCollector
-            # Collect the objects and their properties
-            res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
-            objects = res.objects
-            # Results can be paginated
-            while res.token is not None:
-                res = collector.ContinueRetrievePropertiesEx(res.token)
-                objects.extend(res.objects)
-
-            mor_attrs = {}
-            error_counter = 0
-            for obj in objects:
-                if obj.missingSet and error_counter < 10:
-                    for prop in obj.missingSet:
-                        error_counter += 1
-                        self.log.error(
-                            u"Unable to retrieve property %s for object %s: %s",
-                                                prop.path,str(obj.obj),str(prop.fault))
-                        if error_counter == 10:
-                            self.log.error(u"Too many errors during object collection, stop logging")
-                            break
-                mor_attrs[obj.obj] = {prop.name: prop.val for prop in obj.propSet} if obj.propSet else {}
-
+            retr_opts = createPropertyOptions()
+            mor_attrs = collectProperties(server_instance,filter_spec,retr_opts)
             return mor_attrs
 
         def _collect_non_metric_mors_and_attributes(server_instance):
             #collect the non metric types for parents info
-
             content = server_instance.content
             view_ref = content.viewManager.CreateContainerView(content.rootFolder, ALL_RESOURCES_WITH_NO_METRICS, True)
-
-            # Object used to query MORs as well as the attributes we require in one API call
-            # See https://code.vmware.com/apis/358/vsphere#/doc/vmodl.query.PropertyCollector.html
-            collector = content.propertyCollector
 
             # Specify the root object from where we collect the rest of the objects
             obj_spec = vmodl.query.PropertyCollector.ObjectSpec()
@@ -573,37 +592,12 @@ class VSphereCheck(AgentCheck):
             filter_spec.objectSet = [obj_spec]
             filter_spec.propSet = property_specs
 
-            retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
-            # To limit the number of objects retrieved per call.
-            # If batch_collector_size is 0, collect maximum number of objects.
-            retr_opts.maxObjects = self.batch_collector_size or None
-
-            # Collect the objects and their properties
-            res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
-            objects = res.objects
-            # Results can be paginated
-            while res.token is not None:
-                res = collector.ContinueRetrievePropertiesEx(res.token)
-                objects.extend(res.objects)
-
-            mor_attrs = {}
-            error_counter = 0
-            for obj in objects:
-                if obj.missingSet and error_counter < 10:
-                    for prop in obj.missingSet:
-                        error_counter += 1
-                        self.log.error(
-                            u"Unable to retrieve property %s for object %s: %s",
-                                                prop.path,str(obj.obj),str(prop.fault))
-                        if error_counter == 10:
-                            self.log.error(u"Too many errors during object collection, stop logging")
-                            break
-                mor_attrs[obj.obj] = {prop.name: prop.val for prop in obj.propSet} if obj.propSet else {}
-
+            retr_opts = createPropertyOptions()
+            mor_attrs = collectProperties(server_instance,filter_spec,retr_opts)
             return mor_attrs
 
         def getDatastoreUuid(mor,properties,datastore_cache):
-            ds_uuid = ""
+            ds_uuid = None
             mor_name = str(mor)
             ds_type = properties.get("summary.type")
             ds_info = properties.get("info")
@@ -630,6 +624,16 @@ class VSphereCheck(AgentCheck):
 
             return ds_uuid
 
+        def getClusterUuid(properties,cluster_cache):
+            cluster_uuid = None
+            cluster_name = properties.get("name")
+            if cluster_name and cluster_cache:
+                cluster_uuid = cluster_cache.get(cluster_name,None)
+                if cluster_uuid:
+                    self.log.debug(u"uuid found for cluster %s",cluster_name)
+
+            return cluster_uuid
+
         def _get_all_objs(server_instance, regexes=None, include_only_marked=False, tags=[], clusters = [], uuid_cache = {}):
             """
             Get all the vsphere objects of all types
@@ -637,20 +641,25 @@ class VSphereCheck(AgentCheck):
             obj_list = defaultdict(list)
             all_mors = {}
             # Collect metric mors and their required attributes
+            self.log.debug(u"No. of clusters %d",len(clusters))
             metric_mors = _collect_metric_mors_and_attributes(server_instance,clusters)
+            self.log.debug(u"count of metric mors %d",len(metric_mors))
+
             all_mors.update(metric_mors)
             # Collect non metric mors and their required attributes
             non_metric_mors = _collect_non_metric_mors_and_attributes(server_instance)
+            self.log.debug(u"count of non metric mors %d",len(non_metric_mors))
             all_mors.update(non_metric_mors)
 
             # Add rootFolder since it is not explored by the propertyCollector
             root_mor = server_instance.content.rootFolder
             all_mors[root_mor] = {"name": root_mor.name, "parent": None}
+            self.log.debug(u"Total count of mors %d",len(all_mors))
 
-            metric_resources_tuple = tuple(ALL_RESOURCES_WITH_METRICS)
             for mor, properties in all_mors.items():
                 instance_tags = []
-                if isinstance(mor, metric_resources_tuple) and not self._is_excluded(mor, properties, regexes, include_only_marked):
+                mor_type = type(mor)
+                if  mor_type in ALL_RESOURCES_WITH_METRICS and not self._is_excluded(mor, properties, regexes, include_only_marked):
                     hostname = properties.get("name", "unknown")
                     if properties.get("parent"):
                         instance_tags.extend(_get_parent_tags(mor, all_mors))
@@ -658,7 +667,6 @@ class VSphereCheck(AgentCheck):
                     vsphere_type = None
                     entity_type = None
                     entity_id = None
-                    mor_type = None
 
                     if isinstance(mor, vim.VirtualMachine):
                         power_state = properties.get("runtime.powerState")
@@ -675,29 +683,32 @@ class VSphereCheck(AgentCheck):
                             vsphere_type = u'vsphere_type:vm'
                             entity_id = properties.get("config.instanceUuid","")
                             entity_type = "vm"
-                            mor_type = vim.VirtualMachine
+
                     elif isinstance(mor, vim.HostSystem):
                         vsphere_type = u'vsphere_type:host'
-                        mor_type = vim.HostSystem
                         entity_type = "node"
                         entity_id = properties.get("summary.hardware.uuid","")
+
                     elif isinstance(mor, vim.Datastore):
                         vsphere_type = u'vsphere_type:datastore'
                         instance_tags.append(u'vsphere_datastore:{}'.format(properties.get("name", "unknown")))
                         hostname = None
-                        mor_type = vim.Datastore
                         entity_type = "container"
                         datastore_cache = uuid_cache.get(vim.Datastore,{})
                         entity_id = getDatastoreUuid(mor,properties,datastore_cache)
 
-                    if mor_type:
+                    elif isinstance(mor, vim.ClusterComputeResource):
+                        vsphere_type = u'vsphere_type:cluster'
+                        instance_tags.append(u'vsphere_cluster:{}'.format(properties.get("name", "unknown")))
+                        hostname = None
+                        entity_type = "cluster"
+                        cluster_cache = uuid_cache.get(vim.ClusterComputeResource,{})
+                        entity_id = getClusterUuid(properties,cluster_cache)
+
+                    if entity_type and entity_id:
                         if vsphere_type:
                             instance_tags.append(vsphere_type)
-                        obj_dict = dict(mor=mor, hostname=hostname, tags=tags+instance_tags)
-                        if entity_type:
-                            obj_dict.update(entity_type=entity_type)
-                        if entity_id:
-                            obj_dict.update(entity_id=entity_id)
+                        obj_dict = dict(mor=mor, hostname=hostname, entity_type=entity_type, entity_id=entity_id, tags=tags+instance_tags)
                         obj_list[mor_type].append(obj_dict)
 
             return obj_list
@@ -848,12 +859,13 @@ class VSphereCheck(AgentCheck):
                 if metric_name in ALLOWED_METRICS_FOR_MOR[mor_type]:
                     new_metadata[mor_type][counter.key] = dict(name = metric_name, unit=counter.unitInfo.key)
 
-        self.cache_times[i_key][METRICS_METADATA][LAST] = time.time()
-
         self.log.debug(u"Collected %d counters metadata in %.3f seconds.", len(counters), t.total())
         self.log.info(u"Finished metadata collection for instance {0}".format(i_key))
         # Reset metadata
         self.metrics_metadata[i_key] = new_metadata
+
+        #update the timestamp
+        self.cache_times[i_key][METRICS_METADATA][LAST] = time.time()
 
         # ## <TEST-INSTRUMENTATION>
         self.histogram('datadog.agent.vsphere.metric_metadata_collection.time', t.total(), tags=custom_tags)
@@ -959,7 +971,10 @@ class VSphereCheck(AgentCheck):
 
     def get_batch_size(self,resource_type):
         # return the max batch size based on resource type
-        if resource_type in REALTIME_RESOURCES or self.max_historical_metrics < 0:
+        if resource_type == vim.ClusterComputeResource:
+            # Collect cluster metrics one by one.
+            max_batch_size = 1
+        elif resource_type in REALTIME_RESOURCES or self.max_historical_metrics < 0:
             # Queries are not limited by vCenter
             max_batch_size = self.metrics_per_query
         else:
@@ -1050,11 +1065,18 @@ class VSphereCheck(AgentCheck):
         vm_count = 0
         for resource_type in ALL_RESOURCES_WITH_METRICS:
             mors = self.morlist[i_key].get(resource_type,{})
+            mor_count = len(mors)
+            if resource_type == vim.HostSystem:
+                self.log.debug(u"Host count %d",mor_count)
+            if resource_type == vim.ClusterComputeResource:
+                self.log.debug(u"Cluster count %d",mor_count)
+            if resource_type == vim.Datastore:
+                self.log.debug(u"Datastore count %d",mor_count)
             if resource_type == vim.VirtualMachine:
-                vm_count = len(mors)
-                n_mors += vm_count
-            else:
-                n_mors += len(mors)
+                self.log.debug(u"Vm count %d",mor_count)
+                vm_count = mor_count
+
+            n_mors += mor_count
 
         self.log.debug(u"Collecting metrics of %d mors",n_mors)
 
