@@ -25,6 +25,9 @@ class Istio(OpenMetricsBaseCheck):
         exclude_labels = instance.get('exclude_labels', [])
         exclude_labels.extend(BLACKLIST_LABELS)
 
+        # Support additional configured metric mappings
+        metrics = instance.get('metrics', []) + [ISTIOD_METRICS]
+
         instance.update(
             {
                 'prometheus_url': instance.get('istiod_endpoint'),
