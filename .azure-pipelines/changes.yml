@@ -124,10 +124,10 @@ jobs:
         pip | $(Agent.OS)
       path: $(PIP_CACHE_DIR)
 
-- template: './templates/test-single-linux.yml'
+- template: './templates/test-single-windows.yml'
   parameters:
     job_name: Changed_10
-    display: Linux_10
+    display: Windows_10
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -135,10 +135,10 @@ jobs:
         pip | $(Agent.OS)
       path: $(PIP_CACHE_DIR)
 
-- template: './templates/test-single-linux.yml'
+- template: './templates/test-single-windows.yml'
   parameters:
     job_name: Changed_11
-    display: Linux_11
+    display: Windows_11
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -146,10 +146,10 @@ jobs:
         pip | $(Agent.OS)
       path: $(PIP_CACHE_DIR)
 
-- template: './templates/test-single-linux.yml'
+- template: './templates/test-single-windows.yml'
   parameters:
     job_name: Changed_12
-    display: Linux_12
+    display: Windows_12
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -157,10 +157,10 @@ jobs:
         pip | $(Agent.OS)
       path: $(PIP_CACHE_DIR)
 
-- template: './templates/test-single-linux.yml'
+- template: './templates/test-single-windows.yml'
   parameters:
     job_name: Changed_13
-    display: Linux_13
+    display: Windows_13
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -168,10 +168,10 @@ jobs:
         pip | $(Agent.OS)
       path: $(PIP_CACHE_DIR)
 
-- template: './templates/test-single-linux.yml'
+- template: './templates/test-single-windows.yml'
   parameters:
     job_name: Changed_14
-    display: Linux_14
+    display: Windows_14
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -179,10 +179,10 @@ jobs:
         pip | $(Agent.OS)
       path: $(PIP_CACHE_DIR)
 
-- template: './templates/test-single-linux.yml'
+- template: './templates/test-single-windows.yml'
   parameters:
     job_name: Changed_15
-    display: Linux_15
+    display: Windows_15
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -190,10 +190,10 @@ jobs:
         pip | $(Agent.OS)
       path: $(PIP_CACHE_DIR)
 
-- template: './templates/test-single-linux.yml'
+- template: './templates/test-single-windows.yml'
   parameters:
     job_name: Changed_16
-    display: Linux_16
+    display: Windows_16
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -201,10 +201,10 @@ jobs:
         pip | $(Agent.OS)
       path: $(PIP_CACHE_DIR)
 
-- template: './templates/test-single-linux.yml'
+- template: './templates/test-single-windows.yml'
   parameters:
     job_name: Changed_17
-    display: Linux_17
+    display: Windows_17
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -212,10 +212,10 @@ jobs:
         pip | $(Agent.OS)
       path: $(PIP_CACHE_DIR)
 
-- template: './templates/test-single-linux.yml'
+- template: './templates/test-single-windows.yml'
   parameters:
     job_name: Changed_18
-    display: Linux_18
+    display: Windows_18
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
@@ -223,10 +223,10 @@ jobs:
         pip | $(Agent.OS)
       path: $(PIP_CACHE_DIR)
 
-- template: './templates/test-single-linux.yml'
+- template: './templates/test-single-windows.yml'
   parameters:
     job_name: Changed_19
-    display: Linux_19
+    display: Windows_19
     validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
