@@ -8,3 +8,13 @@
   value:
     example: localhost
     type: string
+- name: username
+  required: false
+  description: If authentication is needed, specify a `username` here.
+  value:
+    type: string
+- name: password
+  required: false
+  description: If authentication is needed, specify a `password` here.
+  value:
+    type: string

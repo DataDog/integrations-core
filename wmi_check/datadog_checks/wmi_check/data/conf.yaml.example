@@ -44,6 +44,16 @@ instances:
     #
     # host: localhost
 
+    ## @param username - string - optional
+    ## If authentication is needed, specify a `username` here.
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## If authentication is needed, specify a `password` here.
+    #
+    # password: <PASSWORD>
+
     ## @param namespace - string - optional - default: cimv2
     ## The optional WMI namespace to connect to.
     #
