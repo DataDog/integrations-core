@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 """
-Containers from parsed metric data.
+Containers from parsed metrics data.
 """
 
 from typing import Any, Dict, Iterator, List, Pattern, Tuple, Union
