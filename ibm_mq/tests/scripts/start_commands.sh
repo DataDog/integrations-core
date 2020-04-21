@@ -10,7 +10,7 @@ mkdir /opt/mqm
 # Retry necessary due to flaky download that might trigger:
 # curl: (56) OpenSSL SSL_read: SSL_ERROR_SYSCALL, errno 110
 for i in 2 4 8 16 32; do
-  curl -L -o $MQ_URL && break
+  curl -L -o /opt/mqm/mq-client.tar.gz $MQ_URL && break
   sleep $i
 done
 
