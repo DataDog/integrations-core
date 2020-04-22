@@ -12,10 +12,11 @@ from . import common
 
 @pytest.fixture(scope='session')
 def dd_environment():
+    ping_urls = ['http://{}:{}/ping'.format(common.HOST, common.HTTP_START_PORT + i) for i in range(6)]
+    replica_status_urls = ['http://{}:{}/replicas_status'.format(common.HOST, common.HTTP_START_PORT + i) for i in range(6)]
     with docker_run(
         common.COMPOSE_FILE,
-        endpoints=['http://{}:{}'.format(common.HOST, common.HTTP_START_PORT + i) for i in range(6)],
-        sleep=10,
+        endpoints=ping_urls + replica_status_urls,
     ):
         yield common.CONFIG
 
