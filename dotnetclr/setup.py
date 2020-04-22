@@ -16,7 +16,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base>=4.2.0'
+CHECKS_BASE_REQ = 'datadog_checks_base>=11.4.0'
 
 setup(
     name='datadog-dotnetclr',
