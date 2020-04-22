@@ -174,6 +174,16 @@ def test_ignore_ip_addresses():
         SnmpCheck('snmp', {}, [instance])
 
 
+def test_empty_values():
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance['user'] = ''
+    instance['enforce_mib_constraints'] = ''
+    instance['timeout'] = ''
+    instance['retries'] = ''
+    check = SnmpCheck('snmp', {}, [instance])
+    assert check._config.enforce_constraints
+
+
 def test_profile_error():
     instance = common.generate_instance_config([])
     instance['profile'] = 'profile1'
