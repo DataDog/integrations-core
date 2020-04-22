@@ -27,7 +27,7 @@
   "assets": {
     "monitors": {},
     "dashboards": {
-      "OpenStack Controller - Overview": "assets/dashboards/openstack_controller_screenboard.json"
+      "OpenStack Controller Overview": "assets/dashboards/openstack-controller.json"
     },
     "service_checks": "assets/service_checks.json"
   }
