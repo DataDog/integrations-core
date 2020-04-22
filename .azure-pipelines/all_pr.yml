@@ -1,4 +1,5 @@
 pr:
+  autoCancel: false
   branches:
     include:
     - master
