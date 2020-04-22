@@ -52,7 +52,7 @@ def test_connect_success(realtime_instance):
         connection = MagicMock()
         smart_connect = connect.SmartConnect
         smart_connect.return_value = connection
-        current_time = connection.CurrentTime
+        get_about_info = connection.content.about.version.__str__
 
         config = VSphereConfig(realtime_instance, MagicMock())
         api = VSphereAPI(config, MagicMock())
@@ -62,7 +62,7 @@ def test_connect_success(realtime_instance):
             pwd=realtime_instance['password'],
             sslContext=ANY,
         )
-        current_time.assert_called_once()
+        get_about_info.assert_called_once()
 
         assert api._conn == connection
 
@@ -72,8 +72,8 @@ def test_connect_failure(realtime_instance):
         connection = MagicMock()
         smart_connect = connect.SmartConnect
         smart_connect.return_value = connection
-        current_time = connection.CurrentTime
-        current_time.side_effect = Exception('foo')
+        version_info = connection.content.about.version.__str__
+        version_info.side_effect = Exception('foo')
 
         config = VSphereConfig(realtime_instance, MagicMock())
         with pytest.raises(APIConnectionError):
@@ -85,7 +85,7 @@ def test_connect_failure(realtime_instance):
             pwd=realtime_instance['password'],
             sslContext=ANY,
         )
-        current_time.assert_called_once()
+        version_info.assert_called_once()
 
 
 def test_get_infrastructure(realtime_instance):
