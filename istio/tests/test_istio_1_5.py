@@ -54,23 +54,6 @@ def test_istio_proxy_mesh_exclude(aggregator, istio_proxy_mesh_fixture):
     aggregator.assert_all_metrics_covered()
 
 
-def test_istio_proxy_mesh_exclude(aggregator, istio_proxy_mesh_fixture):
-    """
-    Test proxy mesh check
-    """
-    exclude_tags = ['destination_app', 'destination_principal']
-    instance = common.MOCK_ISTIO_PROXY_MESH_INSTANCE
-    instance['exclude_labels'] = exclude_tags
-
-    check = Istio(common.CHECK_NAME, {}, [instance])
-    check.check(instance)
-
-    for metric in common.MESH_METRICS + common.MESH_MERICS_1_5:
-        aggregator.assert_metric(metric)
-
-    aggregator.assert_all_metrics_covered()
-
-
 def test_version_metadata(datadog_agent, istiod_mixture_fixture):
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_ISTIOD_INSTANCE])
     check.check_id = 'test:123'
