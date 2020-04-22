@@ -79,7 +79,9 @@ class ZKConnectionFailure(Exception):
 class ZKMetric(tuple):
     """
     A Zookeeper metric.
-    Tuple with an optional metric type (default is 'gauge').
+    Tuple with optional values:
+      - `m_type`: metric type (default is 'gauge')
+      - `m_tags`: list of tags (default is None)
     """
 
     def __new__(cls, name, value, m_type="gauge", m_tags=None):
@@ -389,8 +391,6 @@ class ZookeeperCheck(AgentCheck):
 
             except ValueError as e:
                 self.log.warning("Cannot format `mntr` value. key=%s, value=%s", key, value)
-                print(line)
-                raise e
             except Exception:
                 self.log.exception("Unexpected exception occurred while parsing `mntr` command content:\n%s", buf)
 
