@@ -233,10 +233,10 @@ def _mysql_docker_repo():
         # Warning: This image is a bit flaky on CI (it has been removed
         # https://github.com/DataDog/integrations-core/pull/4669)
         if MYSQL_VERSION in ('5.6', '5.7'):
-            return 'bergerx/mysql-replication'
+            return 'mysql'
         elif MYSQL_VERSION == '8.0':
-            return 'bitnami/mysql'
+            return 'mysql'
     elif MYSQL_FLAVOR == 'mariadb':
-        return 'bitnami/mariadb'
+        return 'mariadb'
     else:
         raise ValueError('Unsupported MySQL flavor: {}'.format(MYSQL_FLAVOR))
