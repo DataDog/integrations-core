@@ -26,6 +26,7 @@ INTERMITTENT_METRICS = [
 
 LEGACY_METRICS = MESH_METRICS + MESH_METRICS_1_4 + NEW_MIXER_METRICS + GALLEY_METRICS + PILOT_METRICS + CITADEL_METRICS
 
+
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     version = os.environ.get('ISTIO_VERSION')
