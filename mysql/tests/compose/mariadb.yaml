@@ -21,6 +21,7 @@ services:
   mysql-slave:
     container_name: mysql-slave
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
+    restart: on-failure
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - MASTER_HOST=mysql-master
