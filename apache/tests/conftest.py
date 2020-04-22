@@ -42,7 +42,9 @@ def check_status_page_ready():
     This check help waiting for the full status page.
     """
     resp = requests.get(AUTO_STATUS_URL)
-    assert 'ReqPerSec: ' in resp.content.decode('utf-8')
+    data = resp.content.decode('utf-8')
+    assert 'ReqPerSec: ' in data
+    assert 'CPULoad: ' in data
 
 
 @pytest.fixture
