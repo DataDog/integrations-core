@@ -184,7 +184,7 @@ class InstanceConfig:
 
         self._auth_data = self.get_auth_data(instance)
 
-        self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
+        self.all_oids, self.next_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
             self.all_oids.extend(tag_oids)
@@ -211,7 +211,7 @@ class InstanceConfig:
     def refresh_with_profile(self, profile):
         # type: (Dict[str, Any]) -> None
         metrics = profile['definition'].get('metrics', [])
-        all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics)
+        all_oids, next_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics)
 
         metric_tags = profile['definition'].get('metric_tags', [])
         tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
@@ -223,6 +223,7 @@ class InstanceConfig:
 
         self.metrics.extend(metrics)
         self.all_oids.extend(all_oids)
+        self.next_oids.extend(next_oids)
         self.bulk_oids.extend(bulk_oids)
         self.parsed_metrics.extend(parsed_metrics)
         self.parsed_metric_tags.extend(parsed_metric_tags)
@@ -460,6 +461,7 @@ class InstanceConfig:
                 raise ConfigurationError('Unsupported metric in config file: {}'.format(metric))
 
         all_oids = []  # type: List[OID]
+        next_oids = []  # type: List[OID]
         bulk_oids = []  # type: List[OID]
 
         # Use bulk for SNMP version > 1 and there are enough symbols
@@ -472,9 +474,9 @@ class InstanceConfig:
             elif bulk_limit and len(symbols) > bulk_limit:
                 bulk_oids.append(table_oid)
             else:
-                all_oids.extend(symbols)
+                next_oids.extend(symbols)
 
-        return all_oids, bulk_oids, parsed_metrics
+        return all_oids, next_oids, bulk_oids, parsed_metrics
 
     def parse_metric_tags(self, metric_tags):
         # type: (List[Dict[str, Any]]) -> Tuple[List[OID], List[Any]]
