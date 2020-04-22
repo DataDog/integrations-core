@@ -28,7 +28,6 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {
-      "ProxySQL - Overview": "assets/dashboards/proxysql_overview.json",
       "ProxySQL Overview": "assets/dashboards/overview.json"
     },
     "saved_views": {},
