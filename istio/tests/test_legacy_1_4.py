@@ -14,7 +14,7 @@ def test_istio(aggregator, mesh_mixture_fixture):
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_INSTANCE])
     check.check(common.MOCK_INSTANCE)
 
-    for metric in common.MESH_METRICS + common.MIXER_METRICS:
+    for metric in common.MESH_METRICS + common.MESH_METRICS_1_4 + common.MIXER_METRICS:
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
@@ -26,6 +26,7 @@ def test_new_istio(aggregator, new_mesh_mixture_fixture):
 
     for metric in (
         common.MESH_METRICS
+        + common.MESH_METRICS_1_4
         + common.NEW_MIXER_METRICS
         + common.GALLEY_METRICS
         + common.PILOT_METRICS
