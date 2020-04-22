@@ -34,7 +34,9 @@ DEPLOYMENTS = [
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with terraform_run(os.path.join(HERE, 'terraform')) as outputs:
+    version = os.environ.get("ISTIO_VERSION")
+
+    with terraform_run(os.path.join(HERE, 'terraform', version)) as outputs:
         kubeconfig = outputs['kubeconfig']['value']
         with ExitStack() as stack:
             ip_ports = [
