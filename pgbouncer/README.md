@@ -78,7 +78,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 | Parameter            | Value                                                                                                  |
 | -------------------- | ------------------------------------------------------------------------------------------------------ |
-| `<INTEGRATION_NAME>` | `oracle`                                                                                               |
+| `<INTEGRATION_NAME>` | `pgbouncer`                                                                                               |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                          |
 | `<INSTANCE_CONFIG>`  | `{"database_url": "postgresql://datadog:<PASSWORD>@%%host%%:%%port%%/<DATABASE_URL>?sslmode=require"}` |
 
