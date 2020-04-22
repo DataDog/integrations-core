@@ -45,7 +45,21 @@ def dd_environment(config_e2e):
 
     with TempDir('logs') as logs_host_path:
         e2e_metadata = {'docker_volumes': ['{}:{}'.format(logs_host_path, logs_path)]}
+        conditions = [
+            WaitFor(init_master, wait=2),
+            WaitFor(init_slave, wait=2),
+        ]
+        if MYSQL_FLAVOR == 'mariadb':
+            conditions.append(CheckDockerLogs('mysql-master', ["MariaDB setup finished!"]))
+            # `Starting MariaDB` must be after "MariaDB setup finished!" since it occur multiple times
+            conditions.append(CheckDockerLogs('mysql-master', ["Starting MariaDB"]))
+        else:
+            conditions.append(CheckDockerLogs('mysql-master', ["MySQL setup finished!"]))
+            # `Starting MySQL` must be after "MySQL setup finished!" since it occur multiple times
+            conditions.append(CheckDockerLogs('mysql-master', ["Starting MySQL"]))
+        conditions.append(CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]))
 
+        conditions.append(populate_database)
         with docker_run(
             os.path.join(common.HERE, 'compose', COMPOSE_FILE),
             env_vars={
@@ -57,12 +71,7 @@ def dd_environment(config_e2e):
                 'MYSQL_LOGS_PATH': logs_path,
                 'WAIT_FOR_IT_SCRIPT_PATH': _wait_for_it_script(),
             },
-            conditions=[
-                WaitFor(init_master, wait=2),
-                WaitFor(init_slave, wait=2),
-                CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
-                populate_database,
-            ],
+            conditions=conditions,
         ):
             yield config_e2e, e2e_metadata
 
