@@ -64,23 +64,23 @@ mysql.innodb.buffer_pool_read_requests,gauge,,read,second,The number of logical 
 mysql.innodb.buffer_pool_reads,gauge,,read,second,"The number of logical reads that InnoDB could not satisfy from the buffer pool, and had to read directly from disk.",0,mysql,mysql innodb buffer_pool_reads
 mysql.binlog.cache_disk_use,gauge,,transaction,,"The number of transactions that used the temporary binary log cache but that exceeded the value of binlog_cache_size and used a temporary file to store statements from the transaction.",0,mysql,mysql binlog cache_disk_use
 mysql.binlog.cache_use,gauge,,transaction,,The number of transactions that used the binary log cache.,0,mysql,mysql binlog cache_use
-mysql.performance.handler_commit,gauge,,statement,second,The number of internal COMMIT statements.,0,mysql,mysql performance handler_commit
-mysql.performance.handler_delete,gauge,,statement,second,The number of internal DELETE statements.,0,mysql,mysql performance handler_delete
-mysql.performance.handler_prepare,gauge,,statement,second,The number of internal PREPARE statements.,0,mysql,mysql performance handler_prepare
-mysql.performance.handler_read_first,gauge,,statement,second,The number of internal READ_FIRST statements.,0,mysql,mysql performance handler_read_first
-mysql.performance.handler_read_key,gauge,,statement,second,The number of internal READ_KEY statements.,0,mysql,mysql performance handler_read_key
-mysql.performance.handler_read_next,gauge,,statement,second,The number of internal READ_NEXT statements.,0,mysql,mysql performance handler_read_next
-mysql.performance.handler_read_prev,gauge,,statement,second,The number of internal READ_PREV statements.,0,mysql,mysql performance handler_read_prev
-mysql.performance.handler_read_rnd,gauge,,statement,second,The number of internal READ_RND statements.,0,mysql,mysql performance handler_read_rnd
-mysql.performance.handler_read_rnd_next,gauge,,statement,second,The number of internal READ_RND_NEXT statements.,0,mysql,mysql performance handler_read_rnd_next
-mysql.performance.handler_rollback,gauge,,statement,second,The number of internal ROLLBACK statements.,0,mysql,mysql performance handler_rollback
-mysql.performance.handler_update,gauge,,statement,second,The number of internal UPDATE statements.,0,mysql,mysql performance handler_update
-mysql.performance.handler_write,gauge,,statement,second,The number of internal WRITE statements.,0,mysql,mysql performance handler_write
+mysql.performance.handler_commit,gauge,,operation,second,The number of internal COMMIT statements.,0,mysql,mysql performance handler_commit
+mysql.performance.handler_delete,gauge,,operation,second,The number of internal DELETE statements.,0,mysql,mysql performance handler_delete
+mysql.performance.handler_prepare,gauge,,operation,second,The number of internal PREPARE statements.,0,mysql,mysql performance handler_prepare
+mysql.performance.handler_read_first,gauge,,operation,second,The number of internal READ_FIRST statements.,0,mysql,mysql performance handler_read_first
+mysql.performance.handler_read_key,gauge,,operation,second,The number of internal READ_KEY statements.,0,mysql,mysql performance handler_read_key
+mysql.performance.handler_read_next,gauge,,operation,second,The number of internal READ_NEXT statements.,0,mysql,mysql performance handler_read_next
+mysql.performance.handler_read_prev,gauge,,operation,second,The number of internal READ_PREV statements.,0,mysql,mysql performance handler_read_prev
+mysql.performance.handler_read_rnd,gauge,,operation,second,The number of internal READ_RND statements.,0,mysql,mysql performance handler_read_rnd
+mysql.performance.handler_read_rnd_next,gauge,,operation,second,The number of internal READ_RND_NEXT statements.,0,mysql,mysql performance handler_read_rnd_next
+mysql.performance.handler_rollback,gauge,,operation,second,The number of internal ROLLBACK statements.,0,mysql,mysql performance handler_rollback
+mysql.performance.handler_update,gauge,,operation,second,The number of internal UPDATE statements.,0,mysql,mysql performance handler_update
+mysql.performance.handler_write,gauge,,operation,second,The number of internal WRITE statements.,0,mysql,mysql performance handler_write
 mysql.performance.opened_tables,gauge,,table,second,"The number of tables that have been opened. If Opened_tables is big, your table_open_cache value is probably too small.",0,mysql,mysql performance opened_tables
 mysql.performance.qcache_total_blocks,gauge,,block,,The total number of blocks in the query cache.,0,mysql,mysql performance qcache_total_blocks
 mysql.performance.qcache_free_blocks,gauge,,block,,"The number of free memory blocks in the query cache.",0,mysql,mysql performance qcache_free_blocks
 mysql.performance.qcache_free_memory,gauge,,byte,,"The amount of free memory for the query cache.",0,mysql,mysql performance qcache_free_memory
-mysql.performance.qcache_not_cached,gauge,,query,SECOND,"The number of noncached queries (not cacheable, or not cached due to the query_cache_type setting).",0,mysql,mysql performance qcache_not_cached
+mysql.performance.qcache_not_cached,gauge,,query,second,"The number of noncached queries (not cacheable, or not cached due to the query_cache_type setting).",0,mysql,mysql performance qcache_not_cached
 mysql.performance.qcache_queries_in_cache,gauge,,query,,"The number of queries registered in the query cache.",0,mysql,mysql performance qcache_queries_in_cache
 mysql.performance.select_full_join,gauge,,operation,second,"The number of joins that perform table scans because they do not use indexes. If this value is not 0, you should carefully check the indexes of your tables.",0,mysql,mysql performance select_full_join
 mysql.performance.select_full_range_join,gauge,,operation,second,"The number of joins that used a range search on a reference table.",0,mysql,mysql performance select_full_range_join
@@ -104,11 +104,11 @@ mysql.innodb.buffer_pool_pages_free,gauge,,page,,"The number of free pages in th
 mysql.innodb.buffer_pool_pages_total,gauge,,page,,"The total size of the InnoDB buffer pool, in pages.",0,mysql,mysql innodb buffer_pool_pages_total
 mysql.innodb.buffer_pool_read_ahead,gauge,,page,second,"The number of pages read into the InnoDB buffer pool by the read-ahead background thread.",0,mysql,mysql innodb buffer_pool_read_ahead
 mysql.innodb.buffer_pool_read_ahead_evicted,gauge,,page,second,"The number of pages read into the InnoDB buffer pool by the read-ahead background thread that were subsequently evicted without having been accessed by queries.",0,mysql,mysql innodb buffer_pool_read_ahead_evicted
-mysql.innodb.buffer_pool_read_ahead_rnd,gauge,,operation,,"The number of “random” read-aheads initiated by InnoDB. This happens when a query scans a large portion of a table but in random order.",0,mysql,mysql innodb buffer_pool_read_ahead_rnd
+mysql.innodb.buffer_pool_read_ahead_rnd,gauge,,operation,,"The number of random read-aheads initiated by InnoDB. This happens when a query scans a large portion of a table but in random order.",0,mysql,mysql innodb buffer_pool_read_ahead_rnd
 mysql.innodb.buffer_pool_wait_free,count,,wait,,"When InnoDB needs to read or create a page and no clean pages are available, InnoDB flushes some dirty pages first and waits for that operation to finish. This counter counts instances of these waits.",0,mysql,mysql innodb buffer_pool_wait_free
 mysql.innodb.buffer_pool_write_requests,gauge,,write,second,"The number of writes done to the InnoDB buffer pool.",0,mysql,mysql innodb buffer_pool_write_requests
 mysql.innodb.current_transactions,gauge,,transaction,,"Current InnoDB transactions",0,mysql,mysql innodb current_transactions
-mysql.innodb.data_fsyncs,gauge,,operation,rate,"The number of fsync() operations per second.",0,mysql,mysql innodb data_fsyncs
+mysql.innodb.data_fsyncs,gauge,,operation,second,"The number of fsync() operations per second.",0,mysql,mysql innodb data_fsyncs
 mysql.innodb.data_pending_fsyncs,gauge,,operation,,"The current number of pending fsync() operations.",0,mysql,mysql innodb data_pending_fsyncs
 mysql.innodb.data_pending_reads,gauge,,read,,"The current number of pending reads.",0,mysql,mysql innodb data_pending_reads
 mysql.innodb.data_pending_writes,gauge,,write,,"The current number of pending writes.",0,mysql,mysql innodb data_pending_writes
