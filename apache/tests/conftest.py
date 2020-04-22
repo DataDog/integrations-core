@@ -37,6 +37,10 @@ def generate_metrics():
 
 
 def check_status_page_ready():
+    """
+    Some status info we need for metrics do not appear immediately.
+    This check help waiting for the full status page.
+    """
     resp = requests.get(AUTO_STATUS_URL)
     assert 'ReqPerSec: ' in resp.content.decode('utf-8')
 
