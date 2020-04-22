@@ -172,7 +172,7 @@ mysql.galera.wsrep_local_recv_queue_avg,gauge,,,,"Shows the average size of the 
 mysql.galera.wsrep_flow_control_paused,gauge,,fraction,,"Shows the fraction of the time, since FLUSH STATUS was last called, that the node paused due to Flow Control.",0,mysql,mysql galera wsrep_flow_control_paused
 mysql.galera.wsrep_cert_deps_distance,gauge,,,,"Shows the average distance between the lowest and highest sequence number, or seqno, values that the node can possibly apply in parallel.",0,mysql,mysql galera wsrep_cert_deps_distance
 mysql.galera.wsrep_local_send_queue_avg,gauge,,,,"Show an average for the send queue length since the last FLUSH STATUS query.",0,mysql,mysql galera wsrep_local_send_queue_avg
-mysql.performance.qcache.utilization,gauge,,percent,,Fraction of the query cache memory currently being used.,0,mysql,mysql performance qcache utilization
+mysql.performance.qcache.utilization,gauge,,fraction,,Fraction of the query cache memory currently being used.,0,mysql,mysql performance qcache utilization
 mysql.performance.digest_95th_percentile.avg_us,gauge,,microsecond,,Query response time 95th percentile per schema.,0,mysql,mysql response time 95th
 mysql.performance.query_run_time.avg,gauge,,microsecond,,Avg query response time per schema.,0,mysql,mysql response time avg
 mysql.binlog.disk_use,gauge,,byte,,Total binary log file size.,0,mysql,mysql binlog disk
