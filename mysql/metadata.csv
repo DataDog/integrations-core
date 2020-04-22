@@ -167,7 +167,7 @@ mysql.innodb.s_lock_spin_rounds,gauge,,,second,"As shown in the SEMAPHORES secti
 mysql.innodb.s_lock_spin_waits,gauge,,wait,second,"As shown in the SEMAPHORES section of the SHOW ENGINE INNODB STATUS output.",0,mysql,mysql innodb s_lock_spin_waits
 mysql.innodb.x_lock_os_waits,gauge,,,second,"As shown in the SEMAPHORES section of the SHOW ENGINE INNODB STATUS output.",0,mysql,mysql innodb x_lock_os_waits
 mysql.innodb.x_lock_spin_rounds,gauge,,,,"As shown in the SEMAPHORES section of the SHOW ENGINE INNODB STATUS output.",0,mysql,mysql innodb x_lock_spin_rounds
-mysql.innodb.x_lock_spin_waits,gauge,,,,"As shown in the SEMAPHORES section of the SHOW ENGINE INNODB STATUS output.",0,mysql,mysql innodb x_lock_spin_waits
+mysql.innodb.x_lock_spin_waits,gauge,,wait,,"As shown in the SEMAPHORES section of the SHOW ENGINE INNODB STATUS output.",0,mysql,mysql innodb x_lock_spin_waits
 mysql.galera.wsrep_local_recv_queue_avg,gauge,,,,"Shows the average size of the local received queue since the last status query.",0,mysql,mysql galera wsrep_local_recv_queue_avg
 mysql.galera.wsrep_flow_control_paused,gauge,,percent,,"Shows the fraction of the time, since FLUSH STATUS was last called, that the node paused due to Flow Control.",0,mysql,mysql galera wsrep_flow_control_paused
 mysql.galera.wsrep_cert_deps_distance,gauge,,,,"Shows the average distance between the lowest and highest sequence number, or seqno, values that the node can possibly apply in parallel.",0,mysql,mysql galera wsrep_cert_deps_distance
