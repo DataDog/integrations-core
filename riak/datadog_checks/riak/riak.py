@@ -225,7 +225,7 @@ class Riak(AgentCheck):
 
         self.prev_coord_redirs_total = -1
         self.url = self.instance['url']
-        default_timeout = self.init_config.get('default_timeout', 5)
+        default_timeout = float(self.init_config.get('default_timeout', 5))
         self.timeout = float(self.instance.get('timeout', default_timeout))
         self.cacert = self.instance.get('cacert', None)
         self.disable_cert_verify = self.instance.get('disable_cert_verify', False)
