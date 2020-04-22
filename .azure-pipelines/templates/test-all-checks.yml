@@ -177,6 +177,9 @@ jobs:
     - checkName: ibm_was
       displayName: IBM WAS
       os: linux
+    - checkName: ignite
+      displayName: Ignite
+      os: linux
     - checkName: iis
       displayName: IIS
       os: windows
