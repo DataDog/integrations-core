@@ -156,7 +156,11 @@ services:
       - clickhouse-network
 
   clickhouse-zookeeper:
-    image: zookeeper:latest
+    # Using zookeeper `3.6.0` is raising this error:
+    #   Connection request from old client /172.30.0.7:51646; will be dropped if server is in r-o mode
+    # For now, we use zookeeper `3.5.7` instead
+    # Similar case: https://stackoverflow.com/a/22884698
+    image: zookeeper:3.5.7
     hostname: clickhouse-zookeeper
     container_name: clickhouse-zookeeper
     ports:
@@ -164,7 +168,14 @@ services:
       - "2182:2182"
     networks:
       - clickhouse-network
-
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # "You need to set advertised.listeners (or KAFKA_ADVERTISED_LISTENERS if you’re using Docker images) to
+      # the external address (host/IP) so that clients can correctly connect to it. Otherwise they’ll try to
+      # connect to the internal host address–and if that’s not reachable then problems ensue."
+      # Source: https://rmoff.net/2018/08/02/kafka-listeners-explained/
+      KAFKA_ADVERTISED_LISTENERS: CLICKHOUSE01://127.0.0.1:8124,CLICKHOUSE02://127.0.0.1:8125,CLICKHOUSE03://127.0.0.1:8126,CLICKHOUSE04://127.0.0.1:8127,CLICKHOUSE05://127.0.0.1:8128,CLICKHOUSE06://127.0.0.1:8129
+      ALLOW_PLAINTEXT_LISTENER: "yes"
   # The client is useful for debugging or running arbitrary commands.
   #
   # clickhouse-client:
