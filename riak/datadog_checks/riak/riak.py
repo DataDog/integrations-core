@@ -234,7 +234,9 @@ class Riak(AgentCheck):
 
     def check(self, _):
         try:
-            h = Http(timeout=self.timeout, ca_certs=self.cacert, disable_ssl_certificate_validation=self.disable_cert_verify)
+            h = Http(
+                timeout=self.timeout, ca_certs=self.cacert, disable_ssl_certificate_validation=self.disable_cert_verify
+            )
             resp, content = h.request(self.url, "GET")
         except (socket.timeout, socket.error, HttpLib2Error) as e:
             self.service_check(
