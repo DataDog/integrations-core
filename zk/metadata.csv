@@ -27,243 +27,243 @@ zookeeper.watch_count,gauge,,,,,0,zookeeper,watch count
 zookeeper.znode_count,gauge,,node,,The number of znodes in the ZooKeeper namespace (the data).,0,zookeeper,nodes
 zookeeper.zxid.count,gauge,,,,,0,zookeeper,
 zookeeper.zxid.epoch,gauge,,,,,0,zookeeper,
-zookeeper.add_dead_watcher_stall_time,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,add dead watcher stall time
-zookeeper.bytes_received_count,gauge,,byte,,[zookeeper version 3.6+ only] The number of bytes received,,zookeeper,bytes received count
-zookeeper.close_session_prep_time,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,close session prep time
-zookeeper.close_session_prep_time_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,close session prep time count
-zookeeper.close_session_prep_time_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,close session prep time sum
-zookeeper.commit_commit_proc_req_queued,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.commit_commit_proc_req_queued_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.commit_commit_proc_req_queued_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.commit_count,gauge,,,,[zookeeper version 3.6+ only] The number of commits performed on leader,,zookeeper,commit count
-zookeeper.commit_process_time,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,commit process time
-zookeeper.commit_process_time_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,commit process time count
-zookeeper.commit_process_time_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,commit process time sum
-zookeeper.commit_propagation_latency,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,commit propagation latency
-zookeeper.commit_propagation_latency_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,commit propagation latency count
-zookeeper.commit_propagation_latency_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,commit propagation latency sum
-zookeeper.concurrent_request_processing_in_commit_processor,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.concurrent_request_processing_in_commit_processor_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.concurrent_request_processing_in_commit_processor_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.connection_drop_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,connection drop count
-zookeeper.connection_drop_probability,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,connection drop probability
-zookeeper.connection_rejected,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,connection rejected
-zookeeper.connection_request_count,gauge,,,,[zookeeper version 3.6+ only] Number of incoming client connection requests,,zookeeper,connection request count
-zookeeper.connection_revalidate_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,connection revalidate count
-zookeeper.connection_token_deficit,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,connection token deficit
-zookeeper.connection_token_deficit_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,connection token deficit count
-zookeeper.connection_token_deficit_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,connection token deficit sum
-zookeeper.dbinittime,gauge,,,,[zookeeper version 3.6+ only] Time to reload database,,zookeeper,dbinittime
-zookeeper.dbinittime_count,gauge,,,,[zookeeper version 3.6+ only] Time to reload database,,zookeeper,dbinittime count
-zookeeper.dbinittime_sum,gauge,,,,[zookeeper version 3.6+ only] Time to reload database,,zookeeper,dbinittime sum
-zookeeper.dead_watchers_cleaner_latency,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,dead watchers cleaner latency
-zookeeper.dead_watchers_cleaner_latency_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,dead watchers cleaner latency count
-zookeeper.dead_watchers_cleaner_latency_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,dead watchers cleaner latency sum
-zookeeper.dead_watchers_cleared,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,dead watchers cleared
-zookeeper.dead_watchers_queued,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,dead watchers queued
-zookeeper.diff_count,gauge,,,,[zookeeper version 3.6+ only] Number of diff syncs performed,,zookeeper,diff count
-zookeeper.digest_mismatches_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,digest mismatches count
-zookeeper.election_time,gauge,,,,[zookeeper version 3.6+ only] Time between entering and leaving election,,zookeeper,election time
-zookeeper.election_time_count,gauge,,,,[zookeeper version 3.6+ only] Time between entering and leaving election,,zookeeper,election time count
-zookeeper.election_time_sum,gauge,,,,[zookeeper version 3.6+ only] Time between entering and leaving election,,zookeeper,election time sum
-zookeeper.ensemble_auth_fail,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,ensemble auth fail
-zookeeper.ensemble_auth_skip,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,ensemble auth skip
-zookeeper.ensemble_auth_success,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,ensemble auth success
-zookeeper.follower_sync_time,gauge,,,,[zookeeper version 3.6+ only] Time for follower to sync with leader,,zookeeper,follower sync time
-zookeeper.follower_sync_time_count,gauge,,,,[zookeeper version 3.6+ only] Time for follower to sync with leader,,zookeeper,follower sync time count
-zookeeper.follower_sync_time_sum,gauge,,,,[zookeeper version 3.6+ only] Time for follower to sync with leader,,zookeeper,follower sync time sum
-zookeeper.fsynctime,gauge,,,,[zookeeper version 3.6+ only] Time to fsync transaction log,,zookeeper,fsynctime
-zookeeper.fsynctime_count,gauge,,,,[zookeeper version 3.6+ only] Time to fsync transaction log,,zookeeper,fsynctime count
-zookeeper.fsynctime_sum,gauge,,,,[zookeeper version 3.6+ only] Time to fsync transaction log,,zookeeper,fsynctime sum
-zookeeper.global_sessions,gauge,,,,[zookeeper version 3.6+ only] Count of global sessions,,zookeeper,global sessions
-zookeeper.jvm_buffer_pool_capacity_bytes,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_buffer_pool_used_buffers,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_buffer_pool_used_bytes,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_classes_loaded,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_classes_loaded_total,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_classes_unloaded_total,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_gc_collection_seconds_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_gc_collection_seconds_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_info,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_memory_bytes_committed,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_memory_bytes_init,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_memory_bytes_max,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_memory_bytes_used,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_memory_pool_allocated_bytes_total,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_memory_pool_bytes_committed,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_memory_pool_bytes_init,gauge,,byte,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_memory_pool_bytes_max,gauge,,byte,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_memory_pool_bytes_used,gauge,,byte,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_threads_current,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_threads_daemon,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_threads_deadlocked,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_threads_deadlocked_monitor,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_threads_peak,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_threads_started_total,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.jvm_threads_state,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.large_requests_rejected,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,large requests rejected
-zookeeper.last_client_response_size,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,last client response size
-zookeeper.learner_commit_received_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,learner commit received count
-zookeeper.learner_proposal_received_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,learner proposal received count
-zookeeper.local_sessions,gauge,,,,[zookeeper version 3.6+ only] Count of local sessions,,zookeeper,local sessions
-zookeeper.local_write_committed_time_ms,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,local write committed time ms
-zookeeper.local_write_committed_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,local write committed time ms count
-zookeeper.local_write_committed_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,local write committed time ms sum
-zookeeper.looking_count,gauge,,,,[zookeeper version 3.6+ only] Number of transitions into looking state,,zookeeper,looking count
-zookeeper.max_client_response_size,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,max client response size
-zookeeper.min_client_response_size,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,min client response size
-zookeeper.netty_queued_buffer_capacity,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,netty queued buffer capacity
-zookeeper.netty_queued_buffer_capacity_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,netty queued buffer capacity count
-zookeeper.netty_queued_buffer_capacity_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,netty queued buffer capacity sum
-zookeeper.node_changed_watch_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.node_changed_watch_count_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.node_changed_watch_count_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.node_children_watch_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.node_children_watch_count_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.node_children_watch_count_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.node_created_watch_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.node_created_watch_count_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.node_created_watch_count_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.node_deleted_watch_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.node_deleted_watch_count_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.node_deleted_watch_count_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.om_commit_process_time_ms,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,om commit process time ms
-zookeeper.om_commit_process_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,om commit process time ms count
-zookeeper.om_commit_process_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,om commit process time ms sum
-zookeeper.om_proposal_process_time_ms,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,om proposal process time ms
-zookeeper.om_proposal_process_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,om proposal process time ms count
-zookeeper.om_proposal_process_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,om proposal process time ms sum
-zookeeper.outstanding_changes_queued,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,outstanding changes queued
-zookeeper.outstanding_changes_removed,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,outstanding changes removed
-zookeeper.outstanding_tls_handshake,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,outstanding tls handshake
-zookeeper.pending_session_queue_size,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,pending session queue size
-zookeeper.pending_session_queue_size_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,pending session queue size count
-zookeeper.pending_session_queue_size_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,pending session queue size sum
-zookeeper.prep_process_time,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.prep_process_time_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.prep_process_time_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.prep_processor_queue_size,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.prep_processor_queue_size_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.prep_processor_queue_size_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.prep_processor_queue_time_ms,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.prep_processor_queue_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.prep_processor_queue_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.prep_processor_request_queued,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.process_cpu_seconds_total,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,process cpu seconds total
-zookeeper.process_max_fds,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,process max fds
-zookeeper.process_open_fds,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,process open fds
-zookeeper.process_resident_memory_bytes,gauge,,byte,,[zookeeper version 3.6+ only],,zookeeper,process resident memory bytes
-zookeeper.process_start_time_seconds,gauge,,second,,[zookeeper version 3.6+ only],,zookeeper,process start time seconds
-zookeeper.process_virtual_memory_bytes,gauge,,byte,,[zookeeper version 3.6+ only],,zookeeper,process virtual memory bytes
-zookeeper.propagation_latency,gauge,,,,"[zookeeper version 3.6+ only] End-to-end latency for updates, from proposal on leader to committed-to-datatree on a given host",,zookeeper,propagation latency
-zookeeper.propagation_latency_count,gauge,,,,"[zookeeper version 3.6+ only] End-to-end latency for updates, from proposal on leader to committed-to-datatree on a given host",,zookeeper,propagation latency count
-zookeeper.propagation_latency_sum,gauge,,,,"[zookeeper version 3.6+ only] End-to-end latency for updates, from proposal on leader to committed-to-datatree on a given host",,zookeeper,propagation latency sum
-zookeeper.proposal_ack_creation_latency,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,proposal ack creation latency
-zookeeper.proposal_ack_creation_latency_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,proposal ack creation latency count
-zookeeper.proposal_ack_creation_latency_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,proposal ack creation latency sum
-zookeeper.proposal_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,proposal count
-zookeeper.proposal_latency,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,proposal latency
-zookeeper.proposal_latency_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,proposal latency count
-zookeeper.proposal_latency_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,proposal latency sum
-zookeeper.quit_leading_due_to_disloyal_voter,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,quit leading due to disloyal voter
-zookeeper.quorum_ack_latency,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,quorum ack latency
-zookeeper.quorum_ack_latency_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,quorum ack latency count
-zookeeper.quorum_ack_latency_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,quorum ack latency sum
-zookeeper.read_commit_proc_issued,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.read_commit_proc_issued_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.read_commit_proc_issued_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.read_commit_proc_req_queued,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.read_commit_proc_req_queued_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.read_commit_proc_req_queued_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.read_commitproc_time_ms,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,read commitproc time ms
-zookeeper.read_commitproc_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,read commitproc time ms count
-zookeeper.read_commitproc_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,read commitproc time ms sum
-zookeeper.read_final_proc_time_ms,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,read final proc time ms
-zookeeper.read_final_proc_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,read final proc time ms count
-zookeeper.read_final_proc_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,read final proc time ms sum
-zookeeper.readlatency,gauge,,,,[zookeeper version 3.6+ only] Read request latency,,zookeeper,readlatency
-zookeeper.readlatency_count,gauge,,,,[zookeeper version 3.6+ only] Read request latency,,zookeeper,readlatency count
-zookeeper.readlatency_sum,gauge,,,,[zookeeper version 3.6+ only] Read request latency,,zookeeper,readlatency sum
-zookeeper.reads_after_write_in_session_queue,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.reads_after_write_in_session_queue_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.reads_after_write_in_session_queue_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.reads_issued_from_session_queue,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.reads_issued_from_session_queue_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.reads_issued_from_session_queue_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.request_commit_queued,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,request commit queued
-zookeeper.request_throttle_wait_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,request throttle wait count
-zookeeper.requests_in_session_queue,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,requests in session queue
-zookeeper.requests_in_session_queue_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,requests in session queue count
-zookeeper.requests_in_session_queue_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,requests in session queue sum
-zookeeper.response_packet_cache_hits,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,response packet cache hits
-zookeeper.response_packet_cache_misses,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,response packet cache misses
-zookeeper.response_packet_get_children_cache_hits,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.response_packet_get_children_cache_misses,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.revalidate_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,revalidate count
-zookeeper.server_write_committed_time_ms,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.server_write_committed_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.server_write_committed_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.session_queues_drained,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,session queues drained
-zookeeper.session_queues_drained_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,session queues drained count
-zookeeper.session_queues_drained_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,session queues drained sum
-zookeeper.sessionless_connections_expired,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,sessionless connections expired
-zookeeper.snap_count,gauge,,,,[zookeeper version 3.6+ only] Number of snap syncs performed,,zookeeper,snap count
-zookeeper.snapshottime,gauge,,,,[zookeeper version 3.6+ only] Time to write a snapshot,,zookeeper,snapshottime
-zookeeper.snapshottime_count,gauge,,,,[zookeeper version 3.6+ only] Time to write a snapshot,,zookeeper,snapshottime count
-zookeeper.snapshottime_sum,gauge,,,,[zookeeper version 3.6+ only] Time to write a snapshot,,zookeeper,snapshottime sum
-zookeeper.stale_replies,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,stale replies
-zookeeper.stale_requests,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,stale requests
-zookeeper.stale_requests_dropped,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,stale requests dropped
-zookeeper.stale_sessions_expired,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,stale sessions expired
-zookeeper.startup_snap_load_time,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,startup snap load time
-zookeeper.startup_snap_load_time_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,startup snap load time count
-zookeeper.startup_snap_load_time_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,startup snap load time sum
-zookeeper.startup_txns_load_time,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,startup txns load time
-zookeeper.startup_txns_load_time_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,startup txns load time count
-zookeeper.startup_txns_load_time_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,startup txns load time sum
-zookeeper.startup_txns_loaded,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,startup txns loaded
-zookeeper.startup_txns_loaded_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,startup txns loaded count
-zookeeper.startup_txns_loaded_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,startup txns loaded sum
-zookeeper.sync_process_time,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,sync process time
-zookeeper.sync_process_time_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,sync process time count
-zookeeper.sync_process_time_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,sync process time sum
-zookeeper.sync_processor_batch_size,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,sync processor batch size
-zookeeper.sync_processor_batch_size_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,sync processor batch size count
-zookeeper.sync_processor_batch_size_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,sync processor batch size sum
-zookeeper.sync_processor_queue_and_flush_time_ms,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.sync_processor_queue_and_flush_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.sync_processor_queue_and_flush_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.sync_processor_queue_flush_time_ms,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.sync_processor_queue_flush_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.sync_processor_queue_flush_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.sync_processor_queue_size,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.sync_processor_queue_size_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.sync_processor_queue_size_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.sync_processor_queue_time_ms,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.sync_processor_queue_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.sync_processor_queue_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.sync_processor_request_queued,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.time_waiting_empty_pool_in_commit_processor_read_ms,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.time_waiting_empty_pool_in_commit_processor_read_ms_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.time_waiting_empty_pool_in_commit_processor_read_ms_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.tls_handshake_exceeded,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,tls handshake exceeded
-zookeeper.unrecoverable_error_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,unrecoverable error count
-zookeeper.updatelatency,gauge,,,,[zookeeper version 3.6+ only] Update request latency,,zookeeper,updatelatency
-zookeeper.updatelatency_count,gauge,,,,[zookeeper version 3.6+ only] Update request latency,,zookeeper,updatelatency count
-zookeeper.updatelatency_sum,gauge,,,,[zookeeper version 3.6+ only] Update request latency,,zookeeper,updatelatency sum
-zookeeper.uptime,gauge,,,,[zookeeper version 3.6+ only] Uptime that a peer has been in a table leading/following/observing state,,zookeeper,uptime
-zookeeper.write_batch_time_in_commit_processor,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.write_batch_time_in_commit_processor_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.write_batch_time_in_commit_processor_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.write_commit_proc_issued,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.write_commit_proc_issued_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.write_commit_proc_issued_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.write_commit_proc_req_queued,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.write_commit_proc_req_queued_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.write_commit_proc_req_queued_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.write_commitproc_time_ms,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.write_commitproc_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.write_commitproc_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.write_final_proc_time_ms,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.write_final_proc_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
-zookeeper.write_final_proc_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],,zookeeper,
+zookeeper.add_dead_watcher_stall_time,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,add dead watcher stall time
+zookeeper.bytes_received_count,gauge,,byte,,[zookeeper version 3.6+ only] The number of bytes received,0,zookeeper,bytes received count
+zookeeper.close_session_prep_time,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,close session prep time
+zookeeper.close_session_prep_time_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,close session prep time count
+zookeeper.close_session_prep_time_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,close session prep time sum
+zookeeper.commit_commit_proc_req_queued,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.commit_commit_proc_req_queued_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.commit_commit_proc_req_queued_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.commit_count,gauge,,,,[zookeeper version 3.6+ only] The number of commits performed on leader,0,zookeeper,commit count
+zookeeper.commit_process_time,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,commit process time
+zookeeper.commit_process_time_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,commit process time count
+zookeeper.commit_process_time_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,commit process time sum
+zookeeper.commit_propagation_latency,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,commit propagation latency
+zookeeper.commit_propagation_latency_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,commit propagation latency count
+zookeeper.commit_propagation_latency_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,commit propagation latency sum
+zookeeper.concurrent_request_processing_in_commit_processor,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.concurrent_request_processing_in_commit_processor_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.concurrent_request_processing_in_commit_processor_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.connection_drop_count,gauge,,,,[zookeeper version 3.6+ only],-1,zookeeper,connection drop count
+zookeeper.connection_drop_probability,gauge,,,,[zookeeper version 3.6+ only],-1,zookeeper,connection drop probability
+zookeeper.connection_rejected,gauge,,,,[zookeeper version 3.6+ only],-1,zookeeper,connection rejected
+zookeeper.connection_request_count,gauge,,,,[zookeeper version 3.6+ only] Number of incoming client connection requests,0,zookeeper,connection request count
+zookeeper.connection_revalidate_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,connection revalidate count
+zookeeper.connection_token_deficit,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,connection token deficit
+zookeeper.connection_token_deficit_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,connection token deficit count
+zookeeper.connection_token_deficit_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,connection token deficit sum
+zookeeper.dbinittime,gauge,,,,[zookeeper version 3.6+ only] Time to reload database,0,zookeeper,dbinittime
+zookeeper.dbinittime_count,gauge,,,,[zookeeper version 3.6+ only] Time to reload database,0,zookeeper,dbinittime count
+zookeeper.dbinittime_sum,gauge,,,,[zookeeper version 3.6+ only] Time to reload database,0,zookeeper,dbinittime sum
+zookeeper.dead_watchers_cleaner_latency,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,dead watchers cleaner latency
+zookeeper.dead_watchers_cleaner_latency_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,dead watchers cleaner latency count
+zookeeper.dead_watchers_cleaner_latency_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,dead watchers cleaner latency sum
+zookeeper.dead_watchers_cleared,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,dead watchers cleared
+zookeeper.dead_watchers_queued,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,dead watchers queued
+zookeeper.diff_count,gauge,,,,[zookeeper version 3.6+ only] Number of diff syncs performed,0,zookeeper,diff count
+zookeeper.digest_mismatches_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,digest mismatches count
+zookeeper.election_time,gauge,,,,[zookeeper version 3.6+ only] Time between entering and leaving election,0,zookeeper,election time
+zookeeper.election_time_count,gauge,,,,[zookeeper version 3.6+ only] Time between entering and leaving election,0,zookeeper,election time count
+zookeeper.election_time_sum,gauge,,,,[zookeeper version 3.6+ only] Time between entering and leaving election,0,zookeeper,election time sum
+zookeeper.ensemble_auth_fail,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,ensemble auth fail
+zookeeper.ensemble_auth_skip,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,ensemble auth skip
+zookeeper.ensemble_auth_success,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,ensemble auth success
+zookeeper.follower_sync_time,gauge,,,,[zookeeper version 3.6+ only] Time for follower to sync with leader,0,zookeeper,follower sync time
+zookeeper.follower_sync_time_count,gauge,,,,[zookeeper version 3.6+ only] Time for follower to sync with leader,0,zookeeper,follower sync time count
+zookeeper.follower_sync_time_sum,gauge,,,,[zookeeper version 3.6+ only] Time for follower to sync with leader,0,zookeeper,follower sync time sum
+zookeeper.fsynctime,gauge,,,,[zookeeper version 3.6+ only] Time to fsync transaction log,0,zookeeper,fsynctime
+zookeeper.fsynctime_count,gauge,,,,[zookeeper version 3.6+ only] Time to fsync transaction log,0,zookeeper,fsynctime count
+zookeeper.fsynctime_sum,gauge,,,,[zookeeper version 3.6+ only] Time to fsync transaction log,0,zookeeper,fsynctime sum
+zookeeper.global_sessions,gauge,,,,[zookeeper version 3.6+ only] Count of global sessions,0,zookeeper,global sessions
+zookeeper.jvm_buffer_pool_capacity_bytes,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_buffer_pool_used_buffers,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_buffer_pool_used_bytes,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_classes_loaded,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_classes_loaded_total,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_classes_unloaded_total,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_gc_collection_seconds_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_gc_collection_seconds_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_info,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_memory_bytes_committed,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_memory_bytes_init,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_memory_bytes_max,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_memory_bytes_used,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_memory_pool_allocated_bytes_total,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_memory_pool_bytes_committed,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_memory_pool_bytes_init,gauge,,byte,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_memory_pool_bytes_max,gauge,,byte,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_memory_pool_bytes_used,gauge,,byte,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_threads_current,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_threads_daemon,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_threads_deadlocked,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_threads_deadlocked_monitor,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_threads_peak,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_threads_started_total,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.jvm_threads_state,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.large_requests_rejected,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,large requests rejected
+zookeeper.last_client_response_size,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,last client response size
+zookeeper.learner_commit_received_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,learner commit received count
+zookeeper.learner_proposal_received_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,learner proposal received count
+zookeeper.local_sessions,gauge,,,,[zookeeper version 3.6+ only] Count of local sessions,0,zookeeper,local sessions
+zookeeper.local_write_committed_time_ms,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,local write committed time ms
+zookeeper.local_write_committed_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,local write committed time ms count
+zookeeper.local_write_committed_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,local write committed time ms sum
+zookeeper.looking_count,gauge,,,,[zookeeper version 3.6+ only] Number of transitions into looking state,0,zookeeper,looking count
+zookeeper.max_client_response_size,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,max client response size
+zookeeper.min_client_response_size,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,min client response size
+zookeeper.netty_queued_buffer_capacity,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,netty queued buffer capacity
+zookeeper.netty_queued_buffer_capacity_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,netty queued buffer capacity count
+zookeeper.netty_queued_buffer_capacity_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,netty queued buffer capacity sum
+zookeeper.node_changed_watch_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.node_changed_watch_count_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.node_changed_watch_count_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.node_children_watch_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.node_children_watch_count_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.node_children_watch_count_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.node_created_watch_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.node_created_watch_count_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.node_created_watch_count_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.node_deleted_watch_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.node_deleted_watch_count_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.node_deleted_watch_count_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.om_commit_process_time_ms,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,om commit process time ms
+zookeeper.om_commit_process_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,om commit process time ms count
+zookeeper.om_commit_process_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,om commit process time ms sum
+zookeeper.om_proposal_process_time_ms,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,om proposal process time ms
+zookeeper.om_proposal_process_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,om proposal process time ms count
+zookeeper.om_proposal_process_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,om proposal process time ms sum
+zookeeper.outstanding_changes_queued,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,outstanding changes queued
+zookeeper.outstanding_changes_removed,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,outstanding changes removed
+zookeeper.outstanding_tls_handshake,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,outstanding tls handshake
+zookeeper.pending_session_queue_size,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,pending session queue size
+zookeeper.pending_session_queue_size_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,pending session queue size count
+zookeeper.pending_session_queue_size_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,pending session queue size sum
+zookeeper.prep_process_time,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.prep_process_time_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.prep_process_time_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.prep_processor_queue_size,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.prep_processor_queue_size_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.prep_processor_queue_size_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.prep_processor_queue_time_ms,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.prep_processor_queue_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.prep_processor_queue_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.prep_processor_request_queued,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.process_cpu_seconds_total,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,process cpu seconds total
+zookeeper.process_max_fds,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,process max fds
+zookeeper.process_open_fds,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,process open fds
+zookeeper.process_resident_memory_bytes,gauge,,byte,,[zookeeper version 3.6+ only],0,zookeeper,process resident memory bytes
+zookeeper.process_start_time_seconds,gauge,,second,,[zookeeper version 3.6+ only],0,zookeeper,process start time seconds
+zookeeper.process_virtual_memory_bytes,gauge,,byte,,[zookeeper version 3.6+ only],0,zookeeper,process virtual memory bytes
+zookeeper.propagation_latency,gauge,,,,"[zookeeper version 3.6+ only] End-to-end latency for updates, from proposal on leader to committed-to-datatree on a given host",0,zookeeper,propagation latency
+zookeeper.propagation_latency_count,gauge,,,,"[zookeeper version 3.6+ only] End-to-end latency for updates, from proposal on leader to committed-to-datatree on a given host",0,zookeeper,propagation latency count
+zookeeper.propagation_latency_sum,gauge,,,,"[zookeeper version 3.6+ only] End-to-end latency for updates, from proposal on leader to committed-to-datatree on a given host",0,zookeeper,propagation latency sum
+zookeeper.proposal_ack_creation_latency,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,proposal ack creation latency
+zookeeper.proposal_ack_creation_latency_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,proposal ack creation latency count
+zookeeper.proposal_ack_creation_latency_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,proposal ack creation latency sum
+zookeeper.proposal_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,proposal count
+zookeeper.proposal_latency,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,proposal latency
+zookeeper.proposal_latency_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,proposal latency count
+zookeeper.proposal_latency_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,proposal latency sum
+zookeeper.quit_leading_due_to_disloyal_voter,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,quit leading due to disloyal voter
+zookeeper.quorum_ack_latency,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,quorum ack latency
+zookeeper.quorum_ack_latency_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,quorum ack latency count
+zookeeper.quorum_ack_latency_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,quorum ack latency sum
+zookeeper.read_commit_proc_issued,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.read_commit_proc_issued_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.read_commit_proc_issued_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.read_commit_proc_req_queued,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.read_commit_proc_req_queued_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.read_commit_proc_req_queued_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.read_commitproc_time_ms,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,read commitproc time ms
+zookeeper.read_commitproc_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,read commitproc time ms count
+zookeeper.read_commitproc_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,read commitproc time ms sum
+zookeeper.read_final_proc_time_ms,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,read final proc time ms
+zookeeper.read_final_proc_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,read final proc time ms count
+zookeeper.read_final_proc_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,read final proc time ms sum
+zookeeper.readlatency,gauge,,,,[zookeeper version 3.6+ only] Read request latency,0,zookeeper,readlatency
+zookeeper.readlatency_count,gauge,,,,[zookeeper version 3.6+ only] Read request latency,0,zookeeper,readlatency count
+zookeeper.readlatency_sum,gauge,,,,[zookeeper version 3.6+ only] Read request latency,0,zookeeper,readlatency sum
+zookeeper.reads_after_write_in_session_queue,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.reads_after_write_in_session_queue_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.reads_after_write_in_session_queue_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.reads_issued_from_session_queue,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.reads_issued_from_session_queue_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.reads_issued_from_session_queue_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.request_commit_queued,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,request commit queued
+zookeeper.request_throttle_wait_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,request throttle wait count
+zookeeper.requests_in_session_queue,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,requests in session queue
+zookeeper.requests_in_session_queue_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,requests in session queue count
+zookeeper.requests_in_session_queue_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,requests in session queue sum
+zookeeper.response_packet_cache_hits,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,response packet cache hits
+zookeeper.response_packet_cache_misses,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,response packet cache misses
+zookeeper.response_packet_get_children_cache_hits,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.response_packet_get_children_cache_misses,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.revalidate_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,revalidate count
+zookeeper.server_write_committed_time_ms,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.server_write_committed_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.server_write_committed_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.session_queues_drained,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,session queues drained
+zookeeper.session_queues_drained_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,session queues drained count
+zookeeper.session_queues_drained_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,session queues drained sum
+zookeeper.sessionless_connections_expired,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,sessionless connections expired
+zookeeper.snap_count,gauge,,,,[zookeeper version 3.6+ only] Number of snap syncs performed,0,zookeeper,snap count
+zookeeper.snapshottime,gauge,,,,[zookeeper version 3.6+ only] Time to write a snapshot,0,zookeeper,snapshottime
+zookeeper.snapshottime_count,gauge,,,,[zookeeper version 3.6+ only] Time to write a snapshot,0,zookeeper,snapshottime count
+zookeeper.snapshottime_sum,gauge,,,,[zookeeper version 3.6+ only] Time to write a snapshot,0,zookeeper,snapshottime sum
+zookeeper.stale_replies,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,stale replies
+zookeeper.stale_requests,gauge,,,,[zookeeper version 3.6+ only],-1,zookeeper,stale requests
+zookeeper.stale_requests_dropped,gauge,,,,[zookeeper version 3.6+ only],-1,zookeeper,stale requests dropped
+zookeeper.stale_sessions_expired,gauge,,,,[zookeeper version 3.6+ only],-1,zookeeper,stale sessions expired
+zookeeper.startup_snap_load_time,gauge,,,,[zookeeper version 3.6+ only],-1,zookeeper,startup snap load time
+zookeeper.startup_snap_load_time_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,startup snap load time count
+zookeeper.startup_snap_load_time_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,startup snap load time sum
+zookeeper.startup_txns_load_time,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,startup txns load time
+zookeeper.startup_txns_load_time_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,startup txns load time count
+zookeeper.startup_txns_load_time_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,startup txns load time sum
+zookeeper.startup_txns_loaded,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,startup txns loaded
+zookeeper.startup_txns_loaded_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,startup txns loaded count
+zookeeper.startup_txns_loaded_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,startup txns loaded sum
+zookeeper.sync_process_time,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,sync process time
+zookeeper.sync_process_time_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,sync process time count
+zookeeper.sync_process_time_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,sync process time sum
+zookeeper.sync_processor_batch_size,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,sync processor batch size
+zookeeper.sync_processor_batch_size_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,sync processor batch size count
+zookeeper.sync_processor_batch_size_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,sync processor batch size sum
+zookeeper.sync_processor_queue_and_flush_time_ms,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.sync_processor_queue_and_flush_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.sync_processor_queue_and_flush_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.sync_processor_queue_flush_time_ms,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.sync_processor_queue_flush_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.sync_processor_queue_flush_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.sync_processor_queue_size,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.sync_processor_queue_size_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.sync_processor_queue_size_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.sync_processor_queue_time_ms,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.sync_processor_queue_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.sync_processor_queue_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.sync_processor_request_queued,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.time_waiting_empty_pool_in_commit_processor_read_ms,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.time_waiting_empty_pool_in_commit_processor_read_ms_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.time_waiting_empty_pool_in_commit_processor_read_ms_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.tls_handshake_exceeded,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,tls handshake exceeded
+zookeeper.unrecoverable_error_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,unrecoverable error count
+zookeeper.updatelatency,gauge,,,,[zookeeper version 3.6+ only] Update request latency,0,zookeeper,updatelatency
+zookeeper.updatelatency_count,gauge,,,,[zookeeper version 3.6+ only] Update request latency,0,zookeeper,updatelatency count
+zookeeper.updatelatency_sum,gauge,,,,[zookeeper version 3.6+ only] Update request latency,0,zookeeper,updatelatency sum
+zookeeper.uptime,gauge,,,,[zookeeper version 3.6+ only] Uptime that a peer has been in a table leading/following/observing state,0,zookeeper,uptime
+zookeeper.write_batch_time_in_commit_processor,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.write_batch_time_in_commit_processor_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.write_batch_time_in_commit_processor_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.write_commit_proc_issued,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.write_commit_proc_issued_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.write_commit_proc_issued_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.write_commit_proc_req_queued,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.write_commit_proc_req_queued_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.write_commit_proc_req_queued_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.write_commitproc_time_ms,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.write_commitproc_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.write_commitproc_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.write_final_proc_time_ms,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.write_final_proc_time_ms_count,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
+zookeeper.write_final_proc_time_ms_sum,gauge,,,,[zookeeper version 3.6+ only],0,zookeeper,
