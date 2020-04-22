@@ -23,9 +23,7 @@
   "integration_id": "openstack-controller",
   "assets": {
     "monitors": {},
-    "dashboards": {
-      "OpenStack Controller Overview": "assets/dashboards/openstack-controller.json"
-    },
+    "dashboards": {},
     "service_checks": "assets/service_checks.json"
   }
 }
