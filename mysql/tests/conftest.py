@@ -82,8 +82,8 @@ def build_wait_conditions():
     conditions.append(
         CheckDockerLogs(common.SLAVE_CONTAINER_NAME, ["ready for connections", "mariadb successfully initialized"])
     )
-    conditions.append(init_master)
-    conditions.append(init_slave)
+    conditions.append(WaitFor(init_master, wait=2))
+    conditions.append(WaitFor(init_slave, wait=2))
     conditions.append(populate_database)
     return conditions
 
