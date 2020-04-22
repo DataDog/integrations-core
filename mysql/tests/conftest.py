@@ -63,11 +63,6 @@ def dd_environment(config_e2e):
 
 
 def build_wait_conditions():
-    conditions = [
-        WaitFor(init_master, wait=2),
-        WaitFor(init_slave, wait=2),
-    ]
-
     master_logs = []
     # The order matters for log conditions
     if MYSQL_FLAVOR == 'mariadb':
@@ -81,11 +76,14 @@ def build_wait_conditions():
             master_logs.append("MySQL setup finished!")
             master_logs.append("Starting MySQL")
 
+    conditions = []
     for log in master_logs:
         conditions.append(CheckDockerLogs(common.MASTER_CONTAINER_NAME, [log]))
     conditions.append(
         CheckDockerLogs(common.SLAVE_CONTAINER_NAME, ["ready for connections", "mariadb successfully initialized"])
     )
+    conditions.append(init_master)
+    conditions.append(init_slave)
     conditions.append(populate_database)
     return conditions
 
