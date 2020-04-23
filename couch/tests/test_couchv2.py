@@ -34,12 +34,6 @@ def gauges():
     with open("{}/../metadata.csv".format(common.HERE), mode) as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
-            # if row[0] in [
-            #     'couchdb.active_tasks.indexer.changes_done',
-            #     'couchdb.active_tasks.indexer.progress',
-            #     'couchdb.active_tasks.indexer.total_changes',
-            # ]:
-            #     continue
             if row[0] == 'metric_name':
                 # skip the header
                 continue
