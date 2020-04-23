@@ -24,17 +24,26 @@ Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [
 
 Add this configuration block to your `istio.d/conf.yaml` file to start gathering your Istio Metrics:
 
-```yaml
-init_config:
+1. To monitor the `istiod` deployment in Istio `v1.5+`, use the following configuration:
+    ```yaml
+    init_config:
+    
+    instances:
+      - istiod_endpoint: http://istiod.istio-system:8080/metrics
+    ```
+    
+2. To monitor Istio versions `v1.4` or earlier, use the following configuration:
+    ```yaml
+    init_config:
 
-instances:
-  - istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
-    mixer_endpoint: http://istio-telemetry.istio-system:15014/metrics
-    galley_endpoint: http://istio-galley.istio-system:15014/metrics
-    pilot_endpoint: http://istio-pilot.istio-system:15014/metrics
-    citadel_endpoint: http://istio-citadel.istio-system:15014/metrics
-    send_histograms_buckets: true
-```
+    instances:
+      - istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
+        mixer_endpoint: http://istio-telemetry.istio-system:15014/metrics
+        galley_endpoint: http://istio-galley.istio-system:15014/metrics
+        pilot_endpoint: http://istio-pilot.istio-system:15014/metrics
+        citadel_endpoint: http://istio-citadel.istio-system:15014/metrics
+        send_histograms_buckets: true
+    ```
 
 Each of the endpoints is optional, but at least one must be configured. See the [Istio documentation][5] to learn more about the Prometheus adapter.
 
