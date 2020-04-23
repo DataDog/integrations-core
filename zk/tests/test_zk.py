@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import logging
+import re
+
 import mock
 import pytest
 
@@ -12,17 +15,31 @@ from . import common, conftest
 pytestmark = pytest.mark.integration
 
 
-def test_check(aggregator, dd_environment, get_instance):
+def extract_nan_metrics(text):
+    log_pattern = r'Metric value \"(\S+)\" is not supported for metric (\S+)'
+    metrics = []
+    for line in text.splitlines():
+        m = re.search(log_pattern, line)
+        if m:
+            key = m.groups()[1]
+            metrics.append(ZookeeperCheck.normalize_metric_label(key))
+    return metrics
+
+
+def test_check(aggregator, dd_environment, get_instance, caplog):
     """
     Collect ZooKeeper metrics.
     """
+    caplog.set_level(logging.DEBUG)
     zk_check = ZookeeperCheck(conftest.CHECK_NAME, {}, {})
     zk_check.check(get_instance)
     zk_check.check(get_instance)
 
+    skipped_metrics = extract_nan_metrics(caplog.text)
+
     # Test metrics
     common.assert_stat_metrics(aggregator)
-    common.assert_mntr_metrics_by_version(aggregator)
+    common.assert_mntr_metrics_by_version(aggregator, skipped_metrics)
 
     common.assert_service_checks_ok(aggregator)
 

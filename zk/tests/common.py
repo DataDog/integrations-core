@@ -304,6 +304,60 @@ METRICS_36 = METRICS_34 + [
 ]
 
 
+# these metrics will report with `NaN` values, so we skip them
+METRICS_36_E2E_SKIPS = [
+    'zookeeper.close_session_prep_time',
+    'zookeeper.commit_commit_proc_req_queued',
+    'zookeeper.commit_process_time',
+    'zookeeper.commit_propagation_latency',
+    'zookeeper.concurrent_request_processing_in_commit_processor',
+    'zookeeper.connection_token_deficit',
+    'zookeeper.dead_watchers_cleaner_latency',
+    'zookeeper.election_time',
+    'zookeeper.follower_sync_time',
+    'zookeeper.fsynctime',
+    'zookeeper.local_write_committed_time_ms',
+    'zookeeper.netty_queued_buffer_capacity',
+    'zookeeper.node_changed_watch_count',
+    'zookeeper.node_children_watch_count',
+    'zookeeper.node_created_watch_count',
+    'zookeeper.node_deleted_watch_count',
+    'zookeeper.om_commit_process_time_ms',
+    'zookeeper.om_proposal_process_time_ms',
+    'zookeeper.pending_session_queue_size',
+    'zookeeper.prep_process_time',
+    'zookeeper.prep_processor_queue_time_ms',
+    'zookeeper.propagation_latency',
+    'zookeeper.proposal_ack_creation_latency',
+    'zookeeper.proposal_latency',
+    'zookeeper.quorum_ack_latency',
+    'zookeeper.read_commit_proc_issued',
+    'zookeeper.read_commit_proc_req_queued',
+    'zookeeper.read_commitproc_time_ms',
+    'zookeeper.read_final_proc_time_ms',
+    'zookeeper.readlatency',
+    'zookeeper.reads_after_write_in_session_queue',
+    'zookeeper.reads_issued_from_session_queue',
+    'zookeeper.requests_in_session_queue',
+    'zookeeper.server_write_committed_time_ms',
+    'zookeeper.session_queues_drained',
+    'zookeeper.startup_txns_load_time',
+    'zookeeper.startup_txns_loaded',
+    'zookeeper.sync_process_time',
+    'zookeeper.sync_processor_batch_size',
+    'zookeeper.sync_processor_queue_and_flush_time_ms',
+    'zookeeper.sync_processor_queue_flush_time_ms',
+    'zookeeper.sync_processor_queue_time_ms',
+    'zookeeper.time_waiting_empty_pool_in_commit_processor_read_ms',
+    'zookeeper.updatelatency',
+    'zookeeper.write_batch_time_in_commit_processor',
+    'zookeeper.write_commit_proc_issued',
+    'zookeeper.write_commit_proc_req_queued',
+    'zookeeper.write_commitproc_time_ms',
+    'zookeeper.write_final_proc_time_ms',
+]
+
+
 def assert_service_checks_ok(aggregator):
     aggregator.assert_service_check("zookeeper.ruok", status=ZookeeperCheck.OK)
     aggregator.assert_service_check("zookeeper.mode", status=ZookeeperCheck.OK)
@@ -314,13 +368,19 @@ def assert_stat_metrics(aggregator):
         aggregator.assert_metric(mname, tags=["mode:standalone", "mytag"])
 
 
-def assert_mntr_metrics_by_version(aggregator):
+def assert_mntr_metrics_by_version(aggregator, skip=None):
+    if skip is None:
+        skip = []
+    skip = set(skip)
+
     zk_version = os.environ.get("ZK_VERSION") or "3.4.10"
     metrics_to_check = METRICS_34
     if zk_version and LooseVersion(zk_version) >= LooseVersion("3.6"):
         metrics_to_check = METRICS_36
 
     for metric in metrics_to_check:
+        if metric in skip:
+            continue
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag_prefix(metric, tag_prefix='mode')
         aggregator.assert_metric_has_tag_prefix(metric, tag_prefix='mytag')

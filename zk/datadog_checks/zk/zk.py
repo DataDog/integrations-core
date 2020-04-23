@@ -379,11 +379,12 @@ class ZookeeperCheck(AgentCheck):
                 if key == 'zk_version':
                     continue
 
-                metric_name = self._normalize_metric_label(key)
+                metric_name = self.normalize_metric_label(key)
                 metric_type = "rate" if key in self._MNTR_RATES else "gauge"
 
                 if value == 'NaN':
-                    metric_value = float('nan')
+                    self.log.debug('Metric value "%s" is not supported for metric %s', value, key)
+                    continue
                 else:
                     metric_value = int(float(value))
 
@@ -397,7 +398,8 @@ class ZookeeperCheck(AgentCheck):
 
         return metrics, mode
 
-    def _normalize_metric_label(self, key):
+    @staticmethod
+    def normalize_metric_label(key):
         if re.match('zk', key):
             key = key.replace('zk', 'zookeeper', 1)
         return key.replace('_', '.', 1)
