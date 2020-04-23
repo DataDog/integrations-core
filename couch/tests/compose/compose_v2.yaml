@@ -29,8 +29,6 @@ services:
     ports:
       - "5984:5984"
       - "5986:5986"
-    volumes:
-      - "volume-0:/opt/couchdb/data"
   server-1:
     container_name: server-1
     environment:
@@ -46,8 +44,6 @@ services:
     ports:
       - "15984:5984"
       - "15986:5986"
-    volumes:
-      - "volume-1:/opt/couchdb/data"
   server-2:
     container_name: server-2
     environment:
@@ -63,10 +59,3 @@ services:
     ports:
       - "25984:5984"
       - "25986:5986"
-    volumes:
-      - "volume-2:/opt/couchdb/data"
-
-volumes:
-  volume-0:
-  volume-1:
-  volume-2:
