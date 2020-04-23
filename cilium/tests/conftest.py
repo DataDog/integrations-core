@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev.kube_port_forward import port_forward
-from datadog_checks.dev.terraform import terraform_run
+from datadog_checks.dev.kind import kind_run
 
 from .common import ADDL_AGENT_METRICS, AGENT_DEFAULT_METRICS, OPERATOR_AWS_METRICS, OPERATOR_METRICS
 
@@ -29,7 +29,7 @@ PORTS = [AGENT_PORT, OPERATOR_PORT]
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with terraform_run(os.path.join(HERE, 'terraform')) as outputs:
+    with kind_run(os.path.join(HERE, 'kind')) as outputs:
         kubeconfig = outputs['kubeconfig']['value']
         with ExitStack() as stack:
             ip_ports = [
