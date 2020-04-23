@@ -368,7 +368,7 @@ class CouchDB2:
         if stats is None:
             raise Exception("No stats could be retrieved from %s" % url)
 
-        print("stats:", stats)
+        print("url:", url, "/ stats:", stats)
         return stats
 
     def _get_system_stats(self, server, name, tags):
