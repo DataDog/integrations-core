@@ -4,7 +4,9 @@
 from collections import namedtuple
 from typing import Any, Dict, List, Tuple, Union
 
-WMIMetric = namedtuple('WMIMetric', ['name', 'value', 'tags'])
+from typing import NamedTuple
+
+WMIMetric = NamedTuple('WMIMetric', [('name', str), ('value', float), ('tags', List[str])])
 WMIProperties = Tuple[Dict[str, Tuple[str, str]], List[str]]
 TagQuery = List[str]
 WMIObject = Dict[str, Any]
