@@ -15,6 +15,7 @@ networks:
 
 services:
   server-0:
+    container_name: server-0
     environment:
       COUCHDB_PASSWORD: pawprint
       COUCHDB_SECRET: 0123456789abcdef0123456789abcdef
@@ -31,6 +32,7 @@ services:
     volumes:
       - "volume-0:/opt/couchdb/data"
   server-1:
+    container_name: server-1
     environment:
       COUCHDB_PASSWORD: pawprint
       COUCHDB_SECRET: 0123456789abcdef0123456789abcdef
@@ -47,6 +49,7 @@ services:
     volumes:
       - "volume-1:/opt/couchdb/data"
   server-2:
+    container_name: server-2
     environment:
       COUCHDB_PASSWORD: pawprint
       COUCHDB_SECRET: 0123456789abcdef0123456789abcdef

@@ -11,8 +11,8 @@ import pytest
 import requests
 
 from datadog_checks.couch import CouchDb
-from datadog_checks.dev import WaitFor, docker_run
-from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 
 from . import common
 
@@ -57,6 +57,8 @@ def dd_environment():
         env_vars={'COUCH_PORT': common.PORT},
         conditions=[
             CheckEndpoints([common.URL]),
+            CheckDockerLogs('server-0', ["Started replicator db changes listener"]),
+            lambda: enable_cluster(couch_version),
             lambda: generate_data(couch_version),
             # WaitFor(send_replication, args=(couch_version,), wait=2, attempts=60),
             # WaitFor(get_replication, args=(couch_version,), wait=3, attempts=40),
@@ -114,6 +116,39 @@ def get_replication(couch_version):
     return count > 0
 
 
+def enable_cluster(couch_version):
+    if couch_version == "1":
+        return
+    auth = (common.USER, common.PASSWORD)
+    headers = {'Accept': 'text/json'}
+
+    for node in ["couchdb-1.docker.com", "couchdb-2.docker.com"]:
+        cluster_setup = {
+            "action": "enable_cluster",
+            "username": common.USER,
+            "password": common.PASSWORD,
+            "bind_address": "0.0.0.0",
+            "port": 5984,
+            "node_count": 3,
+            "remote_node": node,
+            "remote_current_user": common.USER,
+            "remote_current_password": common.PASSWORD,
+        }
+        r = requests.post("{}/_cluster_setup".format(common.URL), json=cluster_setup, auth=auth, headers=headers)
+        r.raise_for_status()
+
+        add_node = {
+            "action": "add_node",
+            "username": common.USER,
+            "password": common.PASSWORD,
+            "host": node,
+            "port": 5984,
+            "singlenode": False,
+        }
+        r = requests.post("{}/_cluster_setup".format(common.URL), json=add_node, auth=auth, headers=headers)
+        r.raise_for_status()
+
+
 def generate_data(couch_version):
     """
     Generate data on the couch cluster to test metrics.
@@ -160,15 +195,15 @@ def generate_data(couch_version):
 
     if couch_version == "1":
         return
-
-    doc_url = "{}/_replicator/_all_docs".format(common.URL)
-    for _ in range(120):
-        try:
-            res = requests.get(doc_url, auth=auth, headers=headers)
-            data = res.json()
-            print("_replicator/_all_docs", data)
-            if data.get('rows'):
-                break
-        except Exception:
-            pass
-        sleep(1)
+    #
+    # doc_url = "{}/_replicator/_all_docs".format(common.URL)
+    # for _ in range(120):
+    #     try:
+    #         res = requests.get(doc_url, auth=auth, headers=headers)
+    #         data = res.json()
+    #         print("_replicator/_all_docs", data)
+    #         if data.get('rows'):
+    #             break
+    #     except Exception:
+    #         pass
+    #     sleep(1)
