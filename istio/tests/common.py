@@ -246,6 +246,10 @@ MESH_METRICS_MAPPER = {
     'istio_request_duration_seconds': 'request.duration',
     'istio_request_bytes': 'request.size',
     'istio_response_bytes': 'response.size',
+    'istio_tcp_connections_closed_total': 'tcp.connections_closed.total',
+    'istio_tcp_connections_opened_total': 'tcp.connections_opened.total',
+    'istio_tcp_received_bytes_total': 'tcp.received_bytes.total',
+    'istio_tcp_sent_bytes_total': 'tcp.send_bytes.total',
 }
 
 
