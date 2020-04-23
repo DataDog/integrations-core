@@ -11,7 +11,7 @@ from copy import deepcopy
 import redis
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.common import round_value
 
 DEFAULT_MAX_SLOW_ENTRIES = 128
@@ -101,10 +101,14 @@ class Redis(AgentCheck):
         'keyspace_misses': 'redis.stats.keyspace_misses',
     }
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(Redis, self).__init__(name, init_config, instances)
         self.connections = {}
-        self.last_timestamp_seen = defaultdict(int)
+        self.last_timestamp_seen = 0
+        custom_tags = self.instance.get('tags', [])
+        self.tags = self._get_tags(custom_tags)
+        if ("host" not in self.instance or "port" not in self.instance) and "unix_socket_path" not in self.instance:
+            raise ConfigurationError("You must specify a host/port couple or a unix_socket_path")
 
     def get_library_versions(self):
         return {"redis": redis.__version__}
@@ -128,9 +132,11 @@ class Redis(AgentCheck):
         if 'unix_socket_path' in instance:
             return instance.get('unix_socket_path'), instance.get('db')
         else:
-            return instance.get('host'), instance.get('port'), instance.get('db')
+            return instance.get('host'), self.instance.get('port'), instance.get('db')
 
-    def _get_conn(self, instance):
+    def _get_conn(self, instance=None):
+        if instance is None:
+            instance = self.instance
         no_cache = is_affirmative(instance.get('disable_connection_cache', False))
         key = self._generate_instance_key(instance)
 
@@ -167,29 +173,24 @@ class Redis(AgentCheck):
 
         return self.connections[key]
 
-    def _get_tags(self, custom_tags, instance):
-        tags = set(custom_tags or [])
-
-        if 'unix_socket_path' in instance:
-            tags_to_add = ["redis_host:%s" % instance.get("unix_socket_path"), "redis_port:unix_socket"]
+    def _get_tags(self, custom_tags):
+        if 'unix_socket_path' in self.instance:
+            tags_to_add = {"redis_host:%s" % self.instance.get("unix_socket_path"), "redis_port:unix_socket"}
         else:
-            tags_to_add = ["redis_host:%s" % instance.get('host'), "redis_port:%s" % instance.get('port')]
+            tags_to_add = {"redis_host:%s" % self.instance.get('host'), "redis_port:%s" % self.instance.get('port')}
 
-        tags = sorted(tags.union(tags_to_add))
-
+        tags = sorted(tags_to_add.union(custom_tags))
         return tags
 
-    def _check_db(self, instance, custom_tags=None):
-        conn = self._get_conn(instance)
-        tags = self._get_tags(custom_tags, instance)
-
+    def _check_db(self):
+        conn = self._get_conn()
         # Ping the database for info, and track the latency.
         # Process the service check: the check passes if we can connect to Redis
         start = time.time()
         try:
             info = conn.info()
             latency_ms = round_value((time.time() - start) * 1000, 2)
-            tags = sorted(tags + ["redis_role:%s" % info["role"]])
+            tags = sorted(self.tags + ["redis_role:%s" % info["role"]])
             self.gauge('redis.info.latency_ms', latency_ms, tags=tags)
             try:
                 config = conn.config_get("maxclients")
@@ -202,11 +203,11 @@ class Redis(AgentCheck):
             self._collect_metadata(info)
         except ValueError:
             status = AgentCheck.CRITICAL
-            self.service_check('redis.can_connect', status, tags=tags)
+            self.service_check('redis.can_connect', status, tags=self.tags)
             raise
         except Exception:
             status = AgentCheck.CRITICAL
-            self.service_check('redis.can_connect', status, tags=tags)
+            self.service_check('redis.can_connect', status, tags=self.tags)
             raise
 
         # Save the database statistics.
@@ -251,29 +252,29 @@ class Redis(AgentCheck):
             self.gauge('redis.net.instantaneous_ops_per_sec', info['instantaneous_ops_per_sec'], tags=tags)
 
         # Check some key lengths if asked
-        self._check_key_lengths(conn, instance, list(tags))
+        self._check_key_lengths(conn, list(tags))
 
         # Check replication
         self._check_replication(info, tags)
-        if instance.get("command_stats", False):
+        if self.instance.get("command_stats", False):
             self._check_command_stats(conn, tags)
 
-    def _check_key_lengths(self, conn, instance, tags):
+    def _check_key_lengths(self, conn, tags):
         """
         Compute the length of the configured keys across all the databases
         """
-        key_list = instance.get('keys')
+        key_list = self.instance.get('keys')
 
         if key_list is None:
             return
 
-        instance_db = instance.get('db')
+        instance_db = self.instance.get('db')
 
         if not isinstance(key_list, list) or not key_list:
             self.warning("keys in redis configuration is either not a list or empty")
             return
 
-        warn_on_missing_keys = is_affirmative(instance.get("warn_on_missing_keys", True))
+        warn_on_missing_keys = is_affirmative(self.instance.get("warn_on_missing_keys", True))
 
         # get all the available databases
         databases = list(conn.info('keyspace'))
@@ -304,7 +305,7 @@ class Redis(AgentCheck):
         lengths_overall = defaultdict(int)
 
         # don't overwrite the configured instance, use a copy
-        tmp_instance = deepcopy(instance)
+        tmp_instance = deepcopy(self.instance)
 
         for db in databases:
             lengths = defaultdict(lambda: defaultdict(int))
@@ -405,18 +406,15 @@ class Redis(AgentCheck):
             self.service_check('redis.replication.master_link_status', status, tags=tags)
             self.gauge('redis.replication.master_link_down_since_seconds', down_seconds, tags=tags)
 
-    def _check_slowlog(self, instance, custom_tags):
+    def _check_slowlog(self):
         """Retrieve length and entries from Redis' SLOWLOG
 
         This will parse through all entries of the SLOWLOG and select ones
         within the time range between the last seen entries and now
 
         """
-        conn = self._get_conn(instance)
-
-        tags = self._get_tags(custom_tags, instance)
-
-        if not instance.get(MAX_SLOW_ENTRIES_KEY):
+        conn = self._get_conn()
+        if not self.instance.get(MAX_SLOW_ENTRIES_KEY):
             try:
                 max_slow_entries = int(conn.config_get(MAX_SLOW_ENTRIES_KEY)[MAX_SLOW_ENTRIES_KEY])
                 if max_slow_entries > DEFAULT_MAX_SLOW_ENTRIES:
@@ -431,17 +429,14 @@ class Redis(AgentCheck):
             except redis.ResponseError:
                 max_slow_entries = DEFAULT_MAX_SLOW_ENTRIES
         else:
-            max_slow_entries = int(instance.get(MAX_SLOW_ENTRIES_KEY))
-
-        # Generate a unique id for this instance to be persisted across runs
-        ts_key = self._generate_instance_key(instance)
+            max_slow_entries = int(self.instance.get(MAX_SLOW_ENTRIES_KEY))
 
         # Get all slowlog entries
 
         slowlogs = conn.slowlog_get(max_slow_entries)
 
         # Find slowlog entries between last timestamp and now using start_time
-        slowlogs = [s for s in slowlogs if s['start_time'] > self.last_timestamp_seen[ts_key]]
+        slowlogs = [s for s in slowlogs if s['start_time'] > self.last_timestamp_seen]
 
         max_ts = 0
         # Slowlog entry looks like:
@@ -453,7 +448,7 @@ class Redis(AgentCheck):
             if slowlog['start_time'] > max_ts:
                 max_ts = slowlog['start_time']
 
-            slowlog_tags = list(tags)
+            slowlog_tags = list(self.tags)
             command = slowlog['command'].split()
             # When the "Garantia Data" custom Redis is used, redis-py returns
             # an empty `command` field
@@ -464,7 +459,7 @@ class Redis(AgentCheck):
             value = slowlog['duration']
             self.histogram('redis.slowlog.micros', value, tags=slowlog_tags)
 
-        self.last_timestamp_seen[ts_key] = max_ts
+        self.last_timestamp_seen = max_ts
 
     def _check_command_stats(self, conn, tags):
         """Get command-specific statistics from redis' INFO COMMANDSTATS command
@@ -486,13 +481,9 @@ class Redis(AgentCheck):
             self.gauge('redis.command.calls', calls, tags=command_tags)
             self.gauge('redis.command.usec_per_call', stats['usec_per_call'], tags=command_tags)
 
-    def check(self, instance):
-        if ("host" not in instance or "port" not in instance) and "unix_socket_path" not in instance:
-            raise Exception("You must specify a host/port couple or a unix_socket_path")
-        custom_tags = instance.get('tags', [])
-
-        self._check_db(instance, custom_tags)
-        self._check_slowlog(instance, custom_tags)
+    def check(self, _):
+        self._check_db()
+        self._check_slowlog()
 
     def _collect_metadata(self, info):
         if info and 'redis_version' in info:

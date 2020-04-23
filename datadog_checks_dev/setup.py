@@ -78,6 +78,7 @@ setup(
             'pylint',
             'Pillow',
             'pyperclip>=1.7.0',
+            'retrying',
             'semver',
             'setuptools>=38.6.0',
             'toml>=0.9.4, <1.0.0',

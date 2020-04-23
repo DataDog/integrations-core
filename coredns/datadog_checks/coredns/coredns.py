@@ -67,14 +67,14 @@ class CoreDNSCheck(OpenMetricsBaseCheck):
     Collect CoreDNS metrics from its Prometheus endpoint
     """
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances=None):
 
         # Create instances we can use in OpenMetricsBaseCheck
         generic_instances = None
         if instances is not None:
             generic_instances = self.create_generic_instances(instances)
 
-        super(CoreDNSCheck, self).__init__(name, init_config, agentConfig, instances=generic_instances)
+        super(CoreDNSCheck, self).__init__(name, init_config, instances=generic_instances)
 
     def create_generic_instances(self, instances):
         """
