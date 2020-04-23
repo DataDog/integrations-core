@@ -114,7 +114,7 @@ def send_replication():
         'create_target': True,
         'continuous': True,
     }
-    for i in range(3):
+    for i in range(10):
         print("Create Replication task {}".format(i))
         replication_body['_id'] = 'my_replication_id_{}'.format(i)
         r = requests.post(
