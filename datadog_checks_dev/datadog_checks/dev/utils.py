@@ -246,6 +246,23 @@ def find_check_root(depth=0):
     return root
 
 
+def get_check_name(root):
+    """
+    Get check name from path
+    """
+    while True:
+        if os.path.isfile(os.path.join(root, 'setup.py')):
+            check = os.path.basename(root)
+            break
+
+        new_root = os.path.dirname(root)
+        if new_root == root:
+            raise OSError('No Datadog Agent check found')
+
+        root = new_root
+    return check
+
+
 @contextmanager
 def temp_dir():
     # TODO: On Python 3.5+ just use `with TemporaryDirectory() as d:`.
