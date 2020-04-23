@@ -84,13 +84,15 @@ def send_replication(couch_version):
         'create_target': True,
         'continuous': True,
     }
-    r = requests.post(
-        replicator_url,
-        auth=(common.NODE1['user'], common.NODE1['password']),
-        headers={'Content-Type': 'application/json'},
-        json=replication_body,
-    )
-    r.raise_for_status()
+    for _ in range(100):
+        r = requests.post(
+            replicator_url,
+            auth=(common.NODE1['user'], common.NODE1['password']),
+            headers={'Content-Type': 'application/json'},
+            json=replication_body,
+        )
+        r.raise_for_status()
+        print("Replication task created:", r.json())
 
 
 def get_replication(couch_version):
@@ -160,6 +162,7 @@ def generate_data(couch_version):
         try:
             res = requests.get(doc_url, auth=auth, headers=headers)
             data = res.json()
+            print("_replicator/_all_docs", data)
             if data.get('rows'):
                 break
         except Exception:
