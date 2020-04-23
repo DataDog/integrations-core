@@ -34,6 +34,24 @@ def gauges():
     with open("{}/../metadata.csv".format(common.HERE), mode) as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
+            if row[0] in [
+                # 'couchdb.couchdb.document_purges.failure',
+                # 'couchdb.couchdb.document_purges.success',
+                # 'couchdb.couchdb.document_purges.total',
+                # 'couchdb.couchdb.database_purges',
+                # 'couchdb.couchdb.httpd.purge_requests',
+                'couchdb.active_tasks.indexer.changes_done',
+                'couchdb.active_tasks.indexer.progress',
+                'couchdb.active_tasks.indexer.total_changes',
+                'couchdb.active_tasks.replication.changes_pending',
+                'couchdb.active_tasks.replication.doc_write_failures',
+                'couchdb.active_tasks.replication.docs_read',
+                'couchdb.active_tasks.replication.docs_written',
+                'couchdb.active_tasks.replication.missing_revisions_found',
+                'couchdb.active_tasks.replication.revisions_checked',
+            ]:
+                continue
+            print("row[0]", row[0])
             if row[0] == 'metric_name':
                 # skip the header
                 continue
@@ -93,12 +111,12 @@ def _assert_check(aggregator, gauges):
         for gauge in gauges["erlang_gauges"]:
             aggregator.assert_metric(gauge)
 
-    for db, dd in {"kennel": "dummy", "_replicator": "_replicator", "_users": "_auth"}.items():
+    for db, dd in {"kennel": "dummy"}.items():
         for gauge in gauges["by_dd_gauges"]:
             expected_tags = ["design_document:{}".format(dd), "language:javascript", "db:{}".format(db)]
             aggregator.assert_metric(gauge, tags=expected_tags)
 
-    for db in ["_users", "_global_changes", "_replicator", "kennel"]:
+    for db in ["kennel"]:
         for gauge in gauges["by_db_gauges"]:
             expected_tags = ["db:{}".format(db)]
             aggregator.assert_metric(gauge, tags=expected_tags)
@@ -134,7 +152,7 @@ def test_db_whitelisting(aggregator, gauges):
         check.check(config)
 
     for _ in configs:
-        for db in ['_users', '_global_changes', '_replicator']:
+        for db in ['kennel_replica']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=0)
@@ -151,7 +169,7 @@ def test_db_blacklisting(aggregator, gauges):
 
     for node in [common.NODE1, common.NODE2, common.NODE3]:
         config = deepcopy(node)
-        config['db_blacklist'] = ['kennel']
+        config['db_blacklist'] = ['kennel_replica']
         configs.append(config)
 
     for config in configs:
@@ -159,13 +177,13 @@ def test_db_blacklisting(aggregator, gauges):
         check.check(config)
 
     for _ in configs:
-        for db in ['_users', '_global_changes', '_replicator']:
+        for db in ['kennel']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags)
 
         for gauge in gauges["by_db_gauges"]:
-            expected_tags = ["db:kennel"]
+            expected_tags = ["db:kennel_replica"]
             aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
 
@@ -190,12 +208,12 @@ def test_check_without_names(aggregator, gauges):
         for gauge in gauges["replication_tasks_gauges"]:
             aggregator.assert_metric(gauge)
 
-    for db, dd in {"kennel": "dummy", "_replicator": "_replicator", "_users": "_auth"}.items():
+    for db, dd in {"kennel": "dummy"}.items():
         expected_tags = ["design_document:{}".format(dd), "language:javascript", "db:{}".format(db)]
         for gauge in gauges["by_dd_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
 
-    for db in ["_users", "_global_changes", "_replicator", "kennel"]:
+    for db in ["kennel"]:
         expected_tags = ["db:{}".format(db)]
         for gauge in gauges["by_db_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
@@ -233,12 +251,12 @@ def test_only_max_nodes_are_scanned(aggregator, gauges):
         for gauge in gauges["cluster_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
 
-    for db in ["_users", "_global_changes", "_replicator"]:
+    for db in ["kennel"]:
         expected_tags = ["db:{}".format(db)]
         for gauge in gauges["by_db_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
 
-    for db, dd in {"_replicator": "_replicator", "_users": "_auth"}.items():
+    for db, dd in {"kennel": "dummy"}.items():
         expected_tags = ["design_document:{}".format(dd), "language:javascript", "db:{}".format(db)]
         for gauge in gauges["by_dd_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
@@ -256,7 +274,7 @@ def test_only_max_nodes_are_scanned(aggregator, gauges):
     for gauge in gauges["cluster_gauges"]:
         aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
-    for db in ['_users', '_global_changes', '_replicator', 'kennel']:
+    for db in ['kennel_replica', 'kennel']:
         expected_tags = [expected_tags[0], "db:{}".format(db)]
         for gauge in gauges["by_db_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags, count=0)
@@ -280,12 +298,12 @@ def test_only_max_dbs_are_scanned(aggregator, gauges):
         check = CouchDb(common.CHECK_NAME, {}, [config])
         check.check(config)
 
-    for db in ['kennel', '_replicator']:
+    for db in ['kennel_replica']:
         expected_tags = ["db:{}".format(db)]
         for gauge in gauges["by_db_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
-    for db in ['_global_changes', '_users']:
+    for db in ['kennel']:
         expected_tags = ["db:{}".format(db)]
         for gauge in gauges["by_db_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags, count=1)

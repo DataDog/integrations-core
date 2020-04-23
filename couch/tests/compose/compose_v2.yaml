@@ -1,8 +1,69 @@
-version: '3.5'
+#version: '3.5'
+#
+#services:
+#  couch:
+#    image: datadog/docker-library:couch_${COUCH_VERSION}
+#    ports:
+#      - ${COUCH_PORT}:5984
+#    command: --admin=dduser:pawprint --with-haproxy
+#
+
+version: "3.5"
+
+networks:
+  network:
 
 services:
-  couch:
-    image: datadog/docker-library:couch_${COUCH_VERSION}
+  server-0:
+    environment:
+      COUCHDB_PASSWORD: pawprint
+      COUCHDB_SECRET: 0123456789abcdef0123456789abcdef
+      COUCHDB_USER: dduser
+      NODENAME: couchdb-0.docker.com
+    image: couchdb:2.3.1
+    networks:
+      network:
+        aliases:
+          - couchdb-0.docker.com
     ports:
-      - ${COUCH_PORT}:5984
-    command: --admin=dduser:pawprint --with-haproxy
+      - "5984:5984"
+      - "5986:5986"
+    volumes:
+      - "volume-0:/opt/couchdb/data"
+  server-1:
+    environment:
+      COUCHDB_PASSWORD: pawprint
+      COUCHDB_SECRET: 0123456789abcdef0123456789abcdef
+      COUCHDB_USER: dduser
+      NODENAME: couchdb-1.docker.com
+    image: couchdb:2.3.1
+    networks:
+      network:
+        aliases:
+          - couchdb-1.docker.com
+    ports:
+      - "15984:5984"
+      - "15986:5986"
+    volumes:
+      - "volume-1:/opt/couchdb/data"
+  server-2:
+    environment:
+      COUCHDB_PASSWORD: pawprint
+      COUCHDB_SECRET: 0123456789abcdef0123456789abcdef
+      COUCHDB_USER: dduser
+      NODENAME: couchdb-2.docker.com
+    image: couchdb:2.3.1
+    networks:
+      network:
+        aliases:
+          - couchdb-2.docker.com
+    ports:
+      - "25984:5984"
+      - "25986:5986"
+    volumes:
+      - "volume-2:/opt/couchdb/data"
+
+volumes:
+  volume-0:
+  volume-1:
+  volume-2:

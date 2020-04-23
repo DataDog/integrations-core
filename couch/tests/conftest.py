@@ -58,8 +58,8 @@ def dd_environment():
         conditions=[
             CheckEndpoints([common.URL]),
             lambda: generate_data(couch_version),
-            WaitFor(send_replication, args=(couch_version,), wait=2, attempts=60),
-            WaitFor(get_replication, args=(couch_version,), wait=3, attempts=40),
+            # WaitFor(send_replication, args=(couch_version,), wait=2, attempts=60),
+            # WaitFor(get_replication, args=(couch_version,), wait=3, attempts=40),
         ],
     ):
         if couch_version == '1':
@@ -75,7 +75,7 @@ def send_replication(couch_version):
     if couch_version == '1':
         return
 
-    replicator_url = "{}/_replicator".format(common.NODE1['server'])
+    replicator_url = "{}/_replicate".format(common.NODE1['server'])
 
     replication_body = {
         '_id': 'my_replication_id',
@@ -123,7 +123,8 @@ def generate_data(couch_version):
     headers = {'Accept': 'text/json'}
 
     # Generate a test database
-    requests.put("{}/kennel".format(common.URL), auth=auth, headers=headers)
+    r = requests.put("{}/kennel".format(common.URL), auth=auth, headers=headers)
+    r.raise_for_status()
 
     # Populate the database
     data = {
@@ -133,7 +134,8 @@ def generate_data(couch_version):
             "by_data": {"map": "function(doc) { emit(doc.data, doc); }"},
         },
     }
-    requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
+    r = requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
+    r.raise_for_status()
 
     urls = [
         "{}/_node/node1@127.0.0.1/_stats".format(common.URL),

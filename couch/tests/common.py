@@ -52,8 +52,8 @@ BAD_CONFIG = {"server": "http://localhost:11111"}
 
 BAD_CONFIG_TAGS = ["instance:http://localhost:11111"]
 
-NODE1 = {"server": URL, "user": USER, "password": PASSWORD, "name": "node1@127.0.0.1"}
+NODE1 = {"server": URL, "user": USER, "password": PASSWORD, "name": "couchdb@couchdb-0.docker.com"}
 
-NODE2 = {"server": URL, "user": USER, "password": PASSWORD, "name": "node2@127.0.0.1"}
+NODE2 = {"server": URL, "user": USER, "password": PASSWORD, "name": "couchdb@couchdb-1.docker.com"}
 
-NODE3 = {"server": URL, "user": USER, "password": PASSWORD, "name": "node3@127.0.0.1"}
+NODE3 = {"server": URL, "user": USER, "password": PASSWORD, "name": "couchdb@couchdb-2.docker.com"}
