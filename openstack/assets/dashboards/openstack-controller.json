@@ -323,7 +323,7 @@
             "title": true,
             "title_align": "left",
             "title_size": 16,
-            "title_text": "RAM used vs max by $project (GB)",
+            "title_text": "RAM used vs max by $project",
             "type": "timeseries",
             "width": 46,
             "x": 21,
