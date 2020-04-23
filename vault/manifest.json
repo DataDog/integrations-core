@@ -2,9 +2,6 @@
   "categories": [
     "security",
     "configuration & deployment",
-    "aws",
-    "google cloud",
-    "azure",
     "autodiscovery"
   ],
   "creates_events": true,
