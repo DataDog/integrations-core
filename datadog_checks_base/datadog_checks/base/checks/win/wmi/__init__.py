@@ -292,9 +292,6 @@ class WinWMICheck(AgentCheck):
             )  # type: Dict[str, Tuple[str, str]]
             properties = map(lambda x: x[0], metrics + tag_queries)  # type: List[str]
 
-            # (expression has type
-            # "         Tuple[Dict[str, Tuple[str, str]], List[str]]", variable has type
-            # "Optional[Tuple[Dict[str, Tuple[str, str]], List[str]]]"
             self._wmi_props = (metric_name_by_property, properties)
 
         return self._wmi_props
