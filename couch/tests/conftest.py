@@ -159,7 +159,6 @@ def enable_cluster(couch_version):
         sleep(1)
 
 
-
 def generate_data(couch_version):
     """
     Generate data on the couch cluster to test metrics.
