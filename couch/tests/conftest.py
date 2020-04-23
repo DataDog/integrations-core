@@ -3,9 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
-from collections import defaultdict
 from copy import deepcopy
-from time import sleep
 
 import pytest
 import requests
