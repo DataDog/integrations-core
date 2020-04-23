@@ -104,7 +104,9 @@ def get_replication(couch_version):
 
     r = requests.get(task_url, auth=(common.NODE1['user'], common.NODE1['password']))
     r.raise_for_status()
-    count = len(r.json())
+    active_tasks = r.json()
+    print("active_tasks:", active_tasks)
+    count = len(active_tasks)
     return count > 0
 
 
