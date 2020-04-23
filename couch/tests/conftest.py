@@ -117,13 +117,14 @@ def send_replication():
     }
     for i in range(10):
         print("Create Replication task {}".format(i))
-        replication_body['_id'] = 'my_replication_id_{}'.format(i)
-        replication_body['target'] = replication_body['target'] + str(i)
+        body = replication_body.copy()
+        body['_id'] = 'my_replication_id_{}'.format(i)
+        body['target'] = body['target'] + str(i)
         r = requests.post(
             replicator_url,
             auth=(common.NODE1['user'], common.NODE1['password']),
             headers={'Content-Type': 'application/json'},
-            json=replication_body,
+            json=body,
         )
         r.raise_for_status()
         print("Replication task created:", r.json())
