@@ -3,19 +3,22 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import contextmanager
 
+import os
 import pytest
 from six import PY3
 
 from .env import environment_run
 from .structures import LazyFunction
 from .subprocess import run_command
-from .utils import chdir, copy_dir_contents, copy_path, get_here, path_join
+from .utils import get_check_name, get_here, path_join
 
 if PY3:
     from shutil import which
 else:
     from shutilwhich import which
 
+
+TOX_ENV = os.environ['TOX_ENV_NAME']
 
 @contextmanager
 def kind_run(directory, sleep=None, endpoints=None, conditions=None, env_vars=None, wrappers=None):
@@ -36,6 +39,7 @@ def kind_run(directory, sleep=None, endpoints=None, conditions=None, env_vars=No
     """
     if not which('kind'):
         pytest.skip('Kind not available')
+
     get_here()
     set_up = KindUp(directory)
     tear_down = KindDown(directory)
@@ -62,11 +66,14 @@ class KindUp(LazyFunction):
 
     def __init__(self, directory):
         self.directory = directory
-        self.cluster_name = 'cilium-testing'  # TODO: include name of integration
+        self.check_name = get_check_name(self.directory)
+        self.cluster_name = f'{self.check_name}-{TOX_ENV}-cluster'
 
     def __call__(self):
-        run_command(['kind', 'create', 'cluster', '--name', self.cluster_name], check=True)
-        run_command(['kind', 'config', 'use-context', 'kind-' + self.cluster_name], check=True)
+        env = os.environ.copy()
+        env['KUBECONFIG'] = path_join(self.directory, 'kubeconfig-template.yaml')
+        run_command(['kind', 'create', 'cluster', '--name', self.cluster_name], check=True, env=env)
+        run_command(['kubectl', 'config', 'use-context', 'kind-' + self.cluster_name], check=True, env=env)
         return
 
 
@@ -75,7 +82,8 @@ class KindDown(LazyFunction):
 
     def __init__(self, directory):
         self.directory = directory
-        self.cluster_name = 'cilium-testing'  # TODO: include name of integration
+        self.check_name = get_check_name(self.directory)
+        self.cluster_name = f'{self.check_name}-{TOX_ENV}-cluster'
 
     def __call__(self):
         return run_command(['kind', 'delete', 'cluster', '--name', self.cluster_name], check=True)

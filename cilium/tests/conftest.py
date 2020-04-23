@@ -24,32 +24,24 @@ OPERATOR_PORT = 6942
 AGENT_URL = "http://{}:{}/metrics".format(HOST, AGENT_PORT)
 OPERATOR_URL = "http://{}:{}/metrics".format(HOST, OPERATOR_PORT)
 
-PORTS = [AGENT_PORT, OPERATOR_PORT]
-
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with kind_run(os.path.join(HERE, 'kind')) as outputs:
-        kubeconfig = outputs['kubeconfig']['value']
-        with ExitStack() as stack:
-            ip_ports = [
-                stack.enter_context(port_forward(kubeconfig, 'cilium', 'cilium-operator', port)) for port in PORTS
+    with kind_run(os.path.join(HERE, 'kind')):
+        instances = {
+            'instances': [
+                {
+                    'agent_endpoint': 'http://{}:{}/metrics'.format(get_docker_hostname, AGENT_PORT),
+                    'metrics': ADDL_AGENT_METRICS + AGENT_DEFAULT_METRICS,
+                },
+                {
+                    'operator_endpoint': 'http://{}:{}/metrics'.format(get_docker_hostname, OPERATOR_PORT),
+                    'metrics': OPERATOR_METRICS + OPERATOR_AWS_METRICS,
+                },
             ]
+        }
 
-            instances = {
-                'instances': [
-                    {
-                        'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
-                        'metrics': ADDL_AGENT_METRICS + AGENT_DEFAULT_METRICS,
-                    },
-                    {
-                        'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
-                        'metrics': OPERATOR_METRICS + OPERATOR_AWS_METRICS,
-                    },
-                ]
-            }
-
-            yield instances
+        yield instances
 
 
 @pytest.fixture(scope="session")
