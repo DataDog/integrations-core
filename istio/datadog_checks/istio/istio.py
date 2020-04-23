@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2018-Present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck
 
+from .constants import BLACKLIST_LABELS
 from .legacy_1_4 import LegacyIstioCheck_1_4
 from .metrics import ISTIOD_METRICS
 
@@ -21,6 +21,13 @@ class Istio(OpenMetricsBaseCheck):
         # Support additional configured metric mappings
         metrics = instance.get('metrics', []) + [ISTIOD_METRICS]
 
+        # Include default and user configured labels
+        exclude_labels = instance.get('exclude_labels', [])
+        exclude_labels.extend(BLACKLIST_LABELS)
+
+        # Support additional configured metric mappings
+        metrics = instance.get('metrics', []) + [ISTIOD_METRICS]
+
         instance.update(
             {
                 'prometheus_url': instance.get('istiod_endpoint'),
@@ -28,6 +35,7 @@ class Istio(OpenMetricsBaseCheck):
                 'metrics': metrics,
                 'metadata_metric_name': 'istio_build',
                 'metadata_label_map': {'version': 'tag'},
+                'exclude_labels': exclude_labels,
             }
         )
 
