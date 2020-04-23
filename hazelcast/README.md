@@ -20,19 +20,19 @@ Follow the instructions below to configure this check for an Agent running on a 
 ##### Metric collection
 
 1. Edit the `hazelcast.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your hazelcast performance data.
+   Agent's configuration directory to start collecting your Hazelcast performance data.
    See the [sample hazelcast.d/conf.yaml][3] for all available configuration options.
 
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
    You can specify the metrics you are interested in by editing the configuration below.
-   To learn how to customize the metrics to collect visit the [JMX Checks documentation][4] for more detailed instructions.
+   To learn how to customize the metrics to collect, visit the [JMX Checks documentation][4] for more detailed instructions.
    If you need to monitor more metrics, contact [Datadog support][5].
 
-2. [Restart the Agent][6]
+2. [Restart the Agent][6].
 
 ##### Log collection
 
-1. Hazelcast support many different [logging adapters][7]. Here is an example of a `log4j2.properties` file:
+1. Hazelcast supports many different [logging adapters][7]. Here is an example of a `log4j2.properties` file:
 
    ```text
    rootLogger=file
@@ -69,7 +69,7 @@ Follow the instructions below to configure this check for an Agent running on a 
    #log4j.logger.com.hazelcast.hibernate=debug
    ```
 
-2. By default, our integration pipeline supports the following conversion [pattern][8]:
+2. By default, Datadog's integration pipeline supports the following conversion [pattern][8]:
 
    ```text
    %d{yyyy-MM-dd HH:mm:ss} [%thread] %level{length=10} %c{1}:%L - %m%n
@@ -77,7 +77,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 
     Clone and edit the [integration pipeline][9] if you have a different format.
 
-3. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+3. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
 
    ```yaml
    logs_enabled: true
