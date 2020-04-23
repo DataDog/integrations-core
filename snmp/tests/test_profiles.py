@@ -106,6 +106,7 @@ def test_f5(aggregator):
     ]
 
     ltm_virtual_server_counts = [
+        'ltmVirtualServStatNoNodesErrors',
         'ltmVirtualServStatClientTotConns',
         'ltmVirtualServStatClientEvictedConns',
         'ltmVirtualServStatClientSlowKilled',
@@ -113,7 +114,6 @@ def test_f5(aggregator):
     ]
 
     ltm_virtual_server_rates = [
-        'ltmVirtualServStatNoNodesErrors',
         'ltmVirtualServStatClientPktsIn',
         'ltmVirtualServStatClientBytesIn',
         'ltmVirtualServStatClientPktsOut',
