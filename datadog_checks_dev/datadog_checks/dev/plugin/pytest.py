@@ -134,6 +134,18 @@ def dd_environment_runner(request):
         # Exit testing and pass data back up to command
         pytest.exit(message)
 
+def get_check_name(root):
+    while True:
+        if os.path.isfile(os.path.join(root, 'setup.py')):
+            check = os.path.basename(root)
+            break
+
+        new_root = os.path.dirname(root)
+        if new_root == root:
+            raise OSError('No Datadog Agent check found')
+
+        root = new_root
+    return check
 
 @pytest.fixture
 def dd_agent_check(request, aggregator):
@@ -145,16 +157,7 @@ def dd_agent_check(request, aggregator):
 
     def run_check(config=None, **kwargs):
         root = os.path.dirname(request.module.__file__)
-        while True:
-            if os.path.isfile(os.path.join(root, 'setup.py')):
-                check = os.path.basename(root)
-                break
-
-            new_root = os.path.dirname(root)
-            if new_root == root:
-                raise OSError('No Datadog Agent check found')
-
-            root = new_root
+        check = get_check_name(root)
 
         python_path = os.environ[E2E_PARENT_PYTHON]
         env = os.environ['TOX_ENV_NAME']
