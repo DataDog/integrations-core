@@ -320,6 +320,7 @@ class CouchDB2:
             return []
 
         try:
+            print("membership nodes", nodes)
             idx = nodes.index(name)
         except ValueError:
             self.agent_check.log.error("Could not find node %r in %r", name, nodes)
