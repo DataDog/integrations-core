@@ -3,6 +3,9 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "rethinkdb",
+  "process_signatures": [
+    "rethinkdb"
+  ],
   "metric_prefix": "rethinkdb.",
   "metric_to_check": "rethinkdb.config.servers",
   "creates_events": false,

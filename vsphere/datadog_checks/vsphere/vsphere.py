@@ -10,7 +10,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Dict, Generator, Iterable, List, Set, Type, cast
 
 from pyVmomi import vim, vmodl
-from six import iteritems, iterkeys
+from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
@@ -160,9 +160,9 @@ class VSphereCheck(AgentCheck):
         }
 
         t0 = Timer()
-        mors_iterator = iterkeys(filtered_infra_data)
+        mors_list = list(filtered_infra_data.keys())
         try:
-            mor_tags = self.api_rest.get_resource_tags_for_mors(mors_iterator)
+            mor_tags = self.api_rest.get_resource_tags_for_mors(mors_list)
         except Exception as e:
             self.log.error("Failed to collect tags: %s", e)
             return {}
@@ -510,12 +510,14 @@ class VSphereCheck(AgentCheck):
     def check(self, _):
         # type: (Any) -> None
         self._hostname = datadog_agent.get_hostname()
-        # Assert the health of the vCenter API and submit the service_check accordingly
+        # Assert the health of the vCenter API by getting the version, and submit the service_check accordingly
         try:
-            self.api.check_health()
+            version_info = self.api.get_version()
+            if self.is_metadata_collection_enabled():
+                self.set_metadata('version', version_info.version_str)
         except Exception:
             # Explicitly do not attach any host to the service checks.
-            self.log.error("The vCenter API is not responding. The check will not run.")
+            self.log.exception("The vCenter API is not responding. The check will not run.")
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.base_tags, hostname=None)
             raise
         else:

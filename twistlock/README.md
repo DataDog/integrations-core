@@ -66,7 +66,7 @@ spec:
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][8].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
 
 | Parameter      | Value                                             |
 | -------------- | ------------------------------------------------- |
@@ -138,12 +138,12 @@ Twistlock sends service checks when a scan fails.
 Need help? Contact [Datadog support][10].
 
 [1]: https://www.twistlock.com
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [3]: https://github.com/DataDog/integrations-core/blob/master/twistlock/datadog_checks/twistlock/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection
 [7]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#create-manifest
-[8]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#setup
+[8]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [9]: https://github.com/DataDog/integrations-core/blob/master/twistlock/metadata.csv
 [10]: https://docs.datadoghq.com/help

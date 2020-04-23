@@ -14,13 +14,12 @@ import yaml
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck
-from datadog_checks.snmp.config import InstanceConfig
-from datadog_checks.snmp.models import ObjectIdentity
+from datadog_checks.snmp.config import InstanceConfig, ParsedMetric, ParsedTableMetric
 from datadog_checks.snmp.resolver import OIDTrie
 from datadog_checks.snmp.utils import _load_default_profiles, oid_pattern_specificity, recursively_expand_base_profiles
 
 from . import common
-from .utils import ClassInstantiationSpy, mock_profiles_confd_root
+from .utils import mock_profiles_confd_root
 
 pytestmark = pytest.mark.unit
 
@@ -29,89 +28,113 @@ pytestmark = pytest.mark.unit
 def test_parse_metrics(lcd_mock):
     # type: (Any) -> None
     lcd_mock.configure.return_value = ('addr', None)
-    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
-    check = SnmpCheck('snmp', {}, [instance])
+
     # Unsupported metric
     metrics = [{"foo": "bar"}]  # type: list
     config = InstanceConfig(
-        {"ip_address": "127.0.0.1", "community_string": "public", "metrics": [{"OID": "1.2.3", "name": "foo"}]},
-        warning=check.warning,
+        {"ip_address": "127.0.0.1", "community_string": "public", "metrics": [{"OID": "1.2.3", "name": "foo"}]}
     )
 
-    object_identity_factory = ClassInstantiationSpy(ObjectIdentity)
-
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, check.warning)
+        config.parse_metrics(metrics)
 
     # Simple OID
     metrics = [{"OID": "1.2.3", "name": "foo"}]
-    table, _, _ = config.parse_metrics(metrics, check.warning, object_identity_factory=object_identity_factory)
-    assert len(table) == 1
-    object_identity_factory.assert_called_once_with("1.2.3")
-    object_identity_factory.reset()
+    oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(oids) == 1
+    assert len(parsed_metrics) == 1
+    foo = parsed_metrics[0]
+    assert isinstance(foo, ParsedMetric)
+    assert foo.name == 'foo'
 
     # MIB with no symbol or table
     metrics = [{"MIB": "foo_mib"}]
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, check.warning)
+        config.parse_metrics(metrics)
 
     # MIB with symbol
     metrics = [{"MIB": "foo_mib", "symbol": "foo"}]
-    table, _, _ = config.parse_metrics(metrics, check.warning, object_identity_factory=object_identity_factory)
-    assert len(table) == 1
-    object_identity_factory.assert_called_once_with("foo_mib", "foo")
-    object_identity_factory.reset()
+    oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(oids) == 1
+    assert len(parsed_metrics) == 1
+    foo = parsed_metrics[0]
+    assert isinstance(foo, ParsedMetric)
+    assert foo.name == 'foo'
 
     # MIB with table, no symbols
     metrics = [{"MIB": "foo_mib", "table": "foo"}]
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, check.warning)
+        config.parse_metrics(metrics)
 
     # MIB with table and symbols
-    metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"]}]
-    table, _, _ = config.parse_metrics(metrics, check.warning, object_identity_factory=object_identity_factory)
-    assert len(table) == 2
-    object_identity_factory.assert_any_call("foo_mib", "foo")
-    object_identity_factory.assert_any_call("foo_mib", "bar")
-    object_identity_factory.reset()
+    metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"]}]
+    oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(oids) == 2
+    assert len(parsed_metrics) == 2
+    foo, bar = parsed_metrics
+    assert isinstance(foo, ParsedTableMetric)
+    assert foo.name == 'foo'
+    assert isinstance(foo, ParsedTableMetric)
+    assert bar.name == 'bar'
 
     # MIB with table, symbols, bad metrics_tags
-    metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{}]}]
+    metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"], "metric_tags": [{}]}]
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, check.warning)
+        config.parse_metrics(metrics)
 
     # MIB with table, symbols, bad metrics_tags
-    metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo"}]}]
+    metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "test"}]}]
     with pytest.raises(Exception):
-        config.parse_metrics(metrics, check.warning)
+        config.parse_metrics(metrics)
 
     # Table with manual OID
-    metrics = [{"MIB": "foo_mib", "table": "foo", "symbols": [{"OID": "1.2.3", "name": "foo"}]}]
-    table, _, _ = config.parse_metrics(metrics, check.warning, object_identity_factory=object_identity_factory)
-    assert len(table) == 1
-    object_identity_factory.assert_any_call("1.2.3")
-    object_identity_factory.reset()
+    metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": [{"OID": "1.2.3", "name": "foo"}]}]
+    oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(oids) == 1
+    assert len(parsed_metrics) == 1
+    foo = parsed_metrics[0]
+    assert isinstance(foo, ParsedTableMetric)
+    assert foo.name == 'foo'
 
     # MIB with table, symbols, metrics_tags index
     metrics = [
-        {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "index": "1"}]}
+        {
+            "MIB": "foo_mib",
+            "table": "foo_table",
+            "symbols": ["foo", "bar"],
+            "metric_tags": [{"tag": "test", "index": "1"}],
+        },
     ]
-    table, _, _ = config.parse_metrics(metrics, check.warning, object_identity_factory=object_identity_factory)
-    assert len(table) == 2
-    object_identity_factory.assert_any_call("foo_mib", "foo")
-    object_identity_factory.assert_any_call("foo_mib", "bar")
-    object_identity_factory.reset()
+    oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(oids) == 2
+    assert len(parsed_metrics) == 2
+    foo, bar = parsed_metrics
+    assert isinstance(foo, ParsedTableMetric)
+    assert foo.name == 'foo'
+    assert foo.index_tags == [('test', '1')]
+    assert isinstance(bar, ParsedTableMetric)
+    assert bar.name == 'bar'
+    assert bar.index_tags == [('test', '1')]
 
     # MIB with table, symbols, metrics_tags column
     metrics = [
-        {"MIB": "foo_mib", "table": "foo", "symbols": ["foo", "bar"], "metric_tags": [{"tag": "foo", "column": "baz"}]}
+        {
+            "MIB": "foo_mib",
+            "table": "foo_table",
+            "symbols": ["foo", "bar"],
+            "metric_tags": [{"tag": "test", "column": "baz"}],
+        }
     ]
-    table, _, _ = config.parse_metrics(metrics, check.warning, object_identity_factory=object_identity_factory)
-    assert len(table) == 3
-    object_identity_factory.assert_any_call("foo_mib", "foo")
-    object_identity_factory.assert_any_call("foo_mib", "bar")
-    object_identity_factory.assert_any_call("foo_mib", "baz")
-    object_identity_factory.reset()
+    oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(oids) == 3
+    assert len(parsed_metrics) == 2
+    foo, bar = parsed_metrics
+    assert isinstance(foo, ParsedTableMetric)
+    assert foo.name == 'foo'
+    assert foo.column_tags == [('test', 'baz')]
+    assert isinstance(bar, ParsedTableMetric)
+    assert bar.name == 'bar'
+    assert bar.column_tags == [('test', 'baz')]
 
     # MIB with table, symbols, metrics_tags column with OID
     metrics = [
@@ -119,15 +142,19 @@ def test_parse_metrics(lcd_mock):
             "MIB": "foo_mib",
             "table": "foo_table",
             "symbols": ["foo", "bar"],
-            "metric_tags": [{"tag": "foo", "column": {"name": "baz", "OID": "1.5.6"}}],
+            "metric_tags": [{"tag": "test", "column": {"name": "baz", "OID": "1.5.6"}}],
         }
     ]
-    table, _, _ = config.parse_metrics(metrics, check.warning, object_identity_factory=object_identity_factory)
-    assert len(table) == 3
-    object_identity_factory.assert_any_call("1.5.6")
-    object_identity_factory.assert_any_call("foo_mib", "foo")
-    object_identity_factory.assert_any_call("foo_mib", "bar")
-    object_identity_factory.reset()
+    oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(oids) == 3
+    assert len(parsed_metrics) == 2
+    foo, bar = parsed_metrics
+    assert isinstance(foo, ParsedTableMetric)
+    assert foo.name == 'foo'
+    assert foo.column_tags == [('test', 'baz')]
+    assert isinstance(bar, ParsedTableMetric)
+    assert bar.name == 'bar'
+    assert foo.column_tags == [('test', 'baz')]
 
 
 def test_ignore_ip_addresses():

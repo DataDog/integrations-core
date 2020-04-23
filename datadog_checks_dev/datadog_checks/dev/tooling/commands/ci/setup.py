@@ -57,4 +57,7 @@ def setup(checks, changed):
         for script in scripts:
             script_file = os.path.join(check_scripts_path, cur_platform, script)
             display_action(script_file)
-            subprocess.run([script_file], shell=True, check=True)
+            cmd = [script_file]
+            if script_file.endswith('.py'):
+                cmd.insert(0, 'python')
+            subprocess.run(cmd, shell=True, check=True)

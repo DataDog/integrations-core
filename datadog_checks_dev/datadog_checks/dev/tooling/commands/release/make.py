@@ -155,7 +155,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
         # commit the changes.
         # do not use [ci skip] so releases get built https://docs.gitlab.com/ee/ci/yaml/#skipping-jobs
         msg = f'[Release] Bumped {check} version to {version}'
-        git_commit(commit_targets, msg)
+        git_commit(commit_targets, msg, update=True)
 
         if not initial_release:
             # Reset version

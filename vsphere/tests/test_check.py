@@ -261,6 +261,21 @@ def test_refresh_tags_cache_should_not_raise_exception(aggregator, dd_run_check,
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_renew_rest_api_session_on_failure(aggregator, dd_run_check, realtime_instance):
+    realtime_instance.update({'collect_tags': True})
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    config = VSphereConfig(realtime_instance, MagicMock())
+    check.api_rest = VSphereRestAPI(config, MagicMock())
+    check.api_rest.make_batch = MagicMock(side_effect=[Exception, []])
+    check.api_rest.smart_connect = MagicMock()
+
+    tags = check.collect_tags({})
+    assert tags
+    assert check.api_rest.make_batch.call_count == 2
+    assert check.api_rest.smart_connect.call_count == 1
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
 def test_tags_filters_when_tags_are_not_yet_collected(aggregator, dd_run_check, realtime_instance):
     realtime_instance['collect_tags'] = True
     realtime_instance['resource_filters'] = [
@@ -291,3 +306,20 @@ def test_tags_filters_with_prefix_when_tags_are_not_yet_collected(aggregator, dd
     aggregator.assert_metric('vsphere.cpu.usage.avg', count=1)
     # Assert that the resource that was collected is the one with the correct tag
     aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-4')
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_version_metadata(aggregator, dd_run_check, realtime_instance, datadog_agent):
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    check.check_id = 'test:123'
+    dd_run_check(check)
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': '6',
+        'version.minor': '7',
+        'version.patch': '0',
+        'version.build': '123456789',
+        'version.raw': '6.7.0+123456789',
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)

@@ -47,7 +47,7 @@ The Amazon MSK check does not include any events.
 Need help? Contact [Datadog support][12].
 
 [1]: https://aws.amazon.com/msk
-[2]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
 [3]: https://docs.aws.amazon.com/msk/latest/developerguide/create-client-machine.html
 [4]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html#attach-iam-role
 [5]: https://console.aws.amazon.com/iam/home?#/policies/arn:aws:iam::aws:policy/AmazonMSKReadOnlyAccess

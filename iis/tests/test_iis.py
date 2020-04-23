@@ -23,7 +23,7 @@ from .common import (
 def test_basic_check(aggregator):
     instance = MINIMAL_INSTANCE
     c = IIS(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    c.check(None)
     iis_host = c.get_iishost()
 
     site_tags = ['Default_Web_Site', 'Exchange_Back_End', 'Total']
@@ -42,7 +42,7 @@ def test_basic_check(aggregator):
 def test_check_on_specific_websites(aggregator):
     instance = INSTANCE
     c = IIS(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    c.check(None)
     iis_host = c.get_iishost()
 
     site_tags = ['Default_Web_Site', 'Exchange_Back_End', 'Total']
@@ -65,7 +65,7 @@ def test_check_on_specific_websites(aggregator):
 def test_service_check_with_invalid_host(aggregator):
     instance = INVALID_HOST_INSTANCE
     c = IIS(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    c.check(None)
     iis_host = c.get_iishost()
 
     aggregator.assert_service_check('iis.site_up', IIS.CRITICAL, tags=["site:{0}".format('Total'), iis_host])
@@ -78,7 +78,7 @@ def test_check(aggregator):
     """
     instance = WIN_SERVICES_CONFIG
     c = IIS(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    c.check(None)
     iis_host = c.get_iishost()
 
     # Test metrics
@@ -117,7 +117,7 @@ def test_check_without_sites_specified(aggregator):
     # Run check
     instance = WIN_SERVICES_MINIMAL_CONFIG
     c = IIS(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    c.check(None)
     iis_host = c.get_iishost()
 
     site_tags = ['Default_Web_Site', 'Exchange_Back_End', 'Total']

@@ -82,6 +82,10 @@ def test_f5(aggregator):
         'ifHCOutBroadcastPkts',
         'ifInDiscards',
     ]
+    if_rates = [
+        'ifHCInOctets.rate',
+        'ifHCOutOctets.rate',
+    ]
 
     ltm_gauges = [
         'ltmVirtualServNumber',
@@ -203,13 +207,15 @@ def test_f5(aggregator):
     for metric in cpu_rates:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:0'] + tags, count=1)
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:1'] + tags, count=1)
-    for metric in if_counts:
-        for interface in interfaces:
+    for interface in interfaces:
+        interface_tags = ['interface:{}'.format(interface)] + tags
+        for metric in if_counts:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric),
-                metric_type=aggregator.MONOTONIC_COUNT,
-                tags=['interface:{}'.format(interface)] + tags,
-                count=1,
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=interface_tags, count=1,
+            )
+        for metric in if_rates:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=interface_tags, count=1
             )
     for metric in if_gauges:
         for interface in interfaces:
@@ -313,6 +319,10 @@ def test_router(aggregator):
         'ifHCOutMulticastPkts',
         'ifHCOutBroadcastPkts',
     ]
+    if_rates = [
+        'ifHCInOctets.rate',
+        'ifHCOutOctets.rate',
+    ]
     if_gauges = ['ifAdminStatus', 'ifOperStatus']
     ip_counts = [
         'ipSystemStatsHCInReceives',
@@ -381,6 +391,8 @@ def test_router(aggregator):
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
+        for metric in if_rates:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
         for metric in if_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
     for metric in tcp_counts:
@@ -434,6 +446,10 @@ def test_f5_router(aggregator):
         'ifHCOutMulticastPkts',
         'ifHCOutBroadcastPkts',
     ]
+    if_rates = [
+        'ifHCInOctets.rate',
+        'ifHCOutOctets.rate',
+    ]
     if_gauges = ['ifAdminStatus', 'ifOperStatus']
     # We only get a subset of metrics
     ip_counts = [
@@ -456,6 +472,8 @@ def test_f5_router(aggregator):
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
+        for metric in if_rates:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
         for metric in if_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
     for version in ['ipv4', 'ipv6']:
@@ -496,6 +514,10 @@ def test_3850(aggregator):
         'ifHCOutMulticastPkts',
         'ifHCOutBroadcastPkts',
     ]
+    if_rates = [
+        'ifHCInOctets.rate',
+        'ifHCOutOctets.rate',
+    ]
     if_gauges = ['ifAdminStatus', 'ifOperStatus']
     # We're not covering all interfaces
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 48)]
@@ -515,6 +537,8 @@ def test_3850(aggregator):
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
+        for metric in if_rates:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
     for metric in tcp_counts:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
@@ -660,6 +684,10 @@ def test_cisco_nexus(aggregator):
         'ifHCOutMulticastPkts',
         'ifHCOutBroadcastPkts',
     ]
+    if_rates = [
+        'ifHCInOctets.rate',
+        'ifHCOutOctets.rate',
+    ]
     if_gauges = ['ifAdminStatus', 'ifOperStatus']
 
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
@@ -676,6 +704,8 @@ def test_cisco_nexus(aggregator):
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
+        for metric in if_rates:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
         for metric in if_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
@@ -1057,6 +1087,10 @@ def test_proliant(aggregator):
         'ifHCOutMulticastPkts',
         'ifHCOutBroadcastPkts',
     ]
+    if_rates = [
+        'ifHCInOctets.rate',
+        'ifHCOutOctets.rate',
+    ]
 
     for interface in ['eth0', 'eth1']:
         if_tags = ['interface:{}'.format(interface)] + common_tags
@@ -1072,6 +1106,8 @@ def test_proliant(aggregator):
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
             )
+        for metric in if_rates:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
 
@@ -1168,6 +1204,10 @@ def test_cisco_asa_5525(aggregator):
         'ifHCOutMulticastPkts',
         'ifHCOutBroadcastPkts',
     ]
+    if_rates = [
+        'ifHCInOctets.rate',
+        'ifHCOutOctets.rate',
+    ]
     for metric in tcp_counts:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
@@ -1195,6 +1235,8 @@ def test_cisco_asa_5525(aggregator):
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=hc_tags, count=1
         )
+    for metric in if_rates:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=hc_tags, count=1)
 
     aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1)
 
@@ -1213,6 +1255,23 @@ def test_cisco_asa_5525(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
     sensor_tags = ['sensor_id:31', 'sensor_type:9'] + common_tags
     aggregator.assert_metric('snmp.entPhySensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
+
+    aggregator.assert_metric(
+        'snmp.cfwConnectionStatValue', metric_type=aggregator.GAUGE, tags=['stat_type:2'] + common_tags
+    )
+    aggregator.assert_metric(
+        'snmp.cfwConnectionStatValue', metric_type=aggregator.GAUGE, tags=['stat_type:5'] + common_tags
+    )
+
+    aggregator.assert_metric('snmp.crasNumDeclinedSessions', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.crasNumSessions', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.crasNumUsers', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric(
+        'snmp.crasNumSetupFailInsufResources', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags
+    )
+    aggregator.assert_metric('snmp.cipSecGlobalActiveTunnels', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.cipSecGlobalHcInOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
+    aggregator.assert_metric('snmp.cipSecGlobalHcOutOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()

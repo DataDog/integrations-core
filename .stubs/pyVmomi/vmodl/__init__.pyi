@@ -1,7 +1,7 @@
 from typing import Any
 
-from . import fault as fault
-from . import query as query
+from . import fault
+from . import query
 
 class DynamicProperty:
     name: str
