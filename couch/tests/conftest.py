@@ -135,7 +135,10 @@ def enable_cluster(couch_version):
             "remote_current_password": common.PASSWORD,
         }
         r = requests.post("{}/_cluster_setup".format(common.URL), json=cluster_setup, auth=auth, headers=headers)
+        print("_cluster_setup enable cluster: ", r.json())
         r.raise_for_status()
+
+        sleep(1)
 
         add_node = {
             "action": "add_node",
@@ -146,7 +149,11 @@ def enable_cluster(couch_version):
             "singlenode": False,
         }
         r = requests.post("{}/_cluster_setup".format(common.URL), json=add_node, auth=auth, headers=headers)
+        print("_cluster_setup add node: ", r.json())
         r.raise_for_status()
+
+        sleep(1)
+
 
 
 def generate_data(couch_version):
