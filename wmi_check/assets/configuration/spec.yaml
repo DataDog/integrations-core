@@ -39,7 +39,26 @@ files:
         compact_example: true
         example:
         - [<WMI_PROPERTY_NAME>, <METRIC_NAME>, <METRIC_TYPE>]
-    - template: instances/wmi
+    - name: host
+      required: false
+      description: |
+        The optional target of the WMI query.
+        If you set this option, make sure that Remote Management is enabled on the target host:
+
+        https://technet.microsoft.com/en-us/library/Hh921475.aspx
+      value:
+        example: localhost
+        type: string
+    - name: username
+      required: false
+      description: If authentication is needed, specify a `username` here.
+      value:
+        type: string
+    - name: password
+      required: false
+      description: If authentication is needed, specify a `password` here.
+      value:
+        type: string
     - name: namespace
       description: The optional WMI namespace to connect to.
       value:
