@@ -84,7 +84,9 @@ def send_replication(couch_version):
         'create_target': True,
         'continuous': True,
     }
-    for _ in range(100):
+    for i in range(100):
+        print("Create Replication task")
+        replication_body['_id'] = 'my_replication_id_{}'.format(i)
         r = requests.post(
             replicator_url,
             auth=(common.NODE1['user'], common.NODE1['password']),
