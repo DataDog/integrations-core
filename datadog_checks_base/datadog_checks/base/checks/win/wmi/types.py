@@ -8,4 +8,3 @@ WMIProperties = Tuple[Dict[str, Tuple[str, str]], List[str]]
 TagQuery = List[str]
 WMIObject = Dict[str, Any]
 WMIFilter = Union[str, List[str]]
-git 
