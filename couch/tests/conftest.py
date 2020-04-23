@@ -185,7 +185,9 @@ def generate_data(couch_version):
             for url in urls:
                 if not ready[url]:
                     res = requests.get(url, auth=auth, headers=headers)
-                    if res.json():
+                    data = res.json()
+                    print("node data", data)
+                    if data:
                         ready[url] = True
             if len(ready) and all(ready.values()):
                 break
