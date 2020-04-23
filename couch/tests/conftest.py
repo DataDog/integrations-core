@@ -51,13 +51,17 @@ def dd_environment():
     up.
     """
     couch_version = os.environ["COUCH_VERSION"][0]
+    if couch_version == "1":
+        startup_msg = 'CouchDB has started'
+    else:
+        startup_msg = 'Started replicator db changes listener'
 
     with docker_run(
         compose_file=os.path.join(common.HERE, 'compose', 'compose_v{}.yaml'.format(couch_version)),
         env_vars={'COUCH_PORT': common.PORT},
         conditions=[
             CheckEndpoints([common.URL]),
-            CheckDockerLogs('server-0', ["Started replicator db changes listener"]),
+            CheckDockerLogs('server-0', [startup_msg]),
             lambda: enable_cluster(couch_version),
             lambda: generate_data(couch_version),
             # WaitFor(send_replication, args=(couch_version,), wait=2, attempts=60),
