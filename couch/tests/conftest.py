@@ -50,26 +50,55 @@ def dd_environment():
     """
     couch_version = os.environ["COUCH_VERSION"][0]
     if couch_version == "1":
-        startup_msg = 'CouchDB has started'
-    else:
-        startup_msg = 'Started replicator db changes listener'
-
-    with docker_run(
-        compose_file=os.path.join(common.HERE, 'compose', 'compose_v{}.yaml'.format(couch_version)),
-        env_vars={'COUCH_PORT': common.PORT},
-        conditions=[
-            CheckEndpoints([common.URL]),
-            CheckDockerLogs('server-0', [startup_msg]),
-            WaitFor(enable_cluster, args=(couch_version,)),
-            WaitFor(generate_data, args=(couch_version,)),
-            # WaitFor(send_replication, args=(couch_version,), wait=2, attempts=60),
-            # WaitFor(get_replication, args=(couch_version,), wait=3, attempts=40),
-        ],
-    ):
-        if couch_version == '1':
+        with docker_run(
+            compose_file=os.path.join(common.HERE, 'compose', 'compose_v1.yaml'),
+            env_vars={'COUCH_PORT': common.PORT},
+            conditions=[
+                CheckEndpoints([common.URL]),
+                CheckDockerLogs('server-0', ['CouchDB has started']),
+                WaitFor(generate_data, args=(couch_version,)),
+                WaitFor(check_node_stats),
+            ],
+        ):
             yield common.BASIC_CONFIG
-        elif couch_version == '2':
+
+    else:
+        with docker_run(
+            compose_file=os.path.join(common.HERE, 'compose', 'compose_v2.yaml'),
+            env_vars={'COUCH_PORT': common.PORT},
+            conditions=[
+                CheckEndpoints([common.URL]),
+                CheckDockerLogs('server-0', ['Started replicator db changes listener']),
+                WaitFor(enable_cluster),
+                WaitFor(generate_data, args=(couch_version,)),
+                WaitFor(check_node_stats),
+                # WaitFor(send_replication, args=(couch_version,), wait=2, attempts=60),
+                # WaitFor(get_replication, args=(couch_version,), wait=3, attempts=40),
+            ],
+        ):
             yield common.BASIC_CONFIG_V2
+
+
+def generate_data(couch_version):
+    """
+    Generate data on the couch cluster to test metrics.
+    """
+    # pass in authentication info for version 2
+    auth = (common.USER, common.PASSWORD) if couch_version == "2" else None
+    headers = {'Accept': 'text/json'}
+
+    # Generate a test database
+    requests.put("{}/kennel".format(common.URL), auth=auth, headers=headers)
+
+    # Populate the database
+    data = {
+        "language": "javascript",
+        "views": {
+            "all": {"map": "function(doc) { emit(doc._id); }"},
+            "by_data": {"map": "function(doc) { emit(doc.data, doc); }"},
+        },
+    }
+    requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
 
 
 def send_replication(couch_version):
@@ -101,13 +130,10 @@ def send_replication(couch_version):
         print("Replication task created:", r.json())
 
 
-def get_replication(couch_version):
+def get_replication():
     """
     Attempt to get active replication tasks
     """
-    if couch_version == '1':
-        return
-
     task_url = "{}/_active_tasks".format(common.NODE1['server'])
 
     r = requests.get(task_url, auth=(common.NODE1['user'], common.NODE1['password']))
@@ -118,9 +144,7 @@ def get_replication(couch_version):
     return count > 0
 
 
-def enable_cluster(couch_version):
-    if couch_version == "1":
-        return
+def enable_cluster():
     auth = (common.USER, common.PASSWORD)
     headers = {'Accept': 'text/json'}
 
@@ -161,46 +185,14 @@ def enable_cluster(couch_version):
     assert len(membership['cluster_nodes']) == 3
 
 
-def generate_data(couch_version):
-    """
-    Generate data on the couch cluster to test metrics.
-    """
-    # pass in authentication info for version 2
-    auth = (common.USER, common.PASSWORD) if couch_version == "2" else None
+def check_node_stats():
+    auth = (common.USER, common.PASSWORD)
     headers = {'Accept': 'text/json'}
-
-    # Generate a test database
-    requests.put("{}/kennel".format(common.URL), auth=auth, headers=headers)
-
-    # Populate the database
-    data = {
-        "language": "javascript",
-        "views": {
-            "all": {"map": "function(doc) { emit(doc._id); }"},
-            "by_data": {"map": "function(doc) { emit(doc.data, doc); }"},
-        },
-    }
-    requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
-
+    # Check all nodes have stats
     for node in common.ALL_NODES:
         url = "{}/_node/{}/_stats".format(common.URL, node['name'])
         print("[INFO] url", url)
         res = requests.get(url, auth=auth, headers=headers)
         data = res.json()
         print("[INFO] node data", data)
-        assert data
-
-    if couch_version == "1":
-        return
-    #
-    # doc_url = "{}/_replicator/_all_docs".format(common.URL)
-    # for _ in range(120):
-    #     try:
-    #         res = requests.get(doc_url, auth=auth, headers=headers)
-    #         data = res.json()
-    #         print("_replicator/_all_docs", data)
-    #         if data.get('rows'):
-    #             break
-    #     except Exception:
-    #         pass
-    #     sleep(1)
+        assert "global_changes" in data
