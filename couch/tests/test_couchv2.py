@@ -34,24 +34,12 @@ def gauges():
     with open("{}/../metadata.csv".format(common.HERE), mode) as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
-            if row[0] in [
-                # 'couchdb.couchdb.document_purges.failure',
-                # 'couchdb.couchdb.document_purges.success',
-                # 'couchdb.couchdb.document_purges.total',
-                # 'couchdb.couchdb.database_purges',
-                # 'couchdb.couchdb.httpd.purge_requests',
-                'couchdb.active_tasks.indexer.changes_done',
-                'couchdb.active_tasks.indexer.progress',
-                'couchdb.active_tasks.indexer.total_changes',
-                # 'couchdb.active_tasks.replication.changes_pending',
-                # 'couchdb.active_tasks.replication.doc_write_failures',
-                # 'couchdb.active_tasks.replication.docs_read',
-                # 'couchdb.active_tasks.replication.docs_written',
-                # 'couchdb.active_tasks.replication.missing_revisions_found',
-                # 'couchdb.active_tasks.replication.revisions_checked',
-            ]:
-                continue
-            print("row[0]", row[0])
+            # if row[0] in [
+            #     'couchdb.active_tasks.indexer.changes_done',
+            #     'couchdb.active_tasks.indexer.progress',
+            #     'couchdb.active_tasks.indexer.total_changes',
+            # ]:
+            #     continue
             if row[0] == 'metric_name':
                 # skip the header
                 continue
@@ -243,8 +231,8 @@ def test_only_max_nodes_are_scanned(aggregator, gauges):
     for gauge in gauges["erlang_gauges"]:
         aggregator.assert_metric(gauge)
 
-    # for gauge in gauges["replication_tasks_gauges"]:
-    #     aggregator.assert_metric(gauge)
+    for gauge in gauges["replication_tasks_gauges"]:
+        aggregator.assert_metric(gauge)
 
     for config in [common.NODE1, common.NODE2]:
         expected_tags = ["instance:{}".format(config["name"])]
