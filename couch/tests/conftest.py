@@ -72,7 +72,7 @@ def dd_environment():
                 WaitFor(generate_data, args=(couch_version,)),
                 WaitFor(check_node_stats),
                 WaitFor(send_replication),
-                WaitFor(get_replication),
+                # WaitFor(get_replication),
             ],
         ):
             yield common.BASIC_CONFIG_V2
