@@ -57,3 +57,5 @@ NODE1 = {"server": URL, "user": USER, "password": PASSWORD, "name": "couchdb@cou
 NODE2 = {"server": URL, "user": USER, "password": PASSWORD, "name": "couchdb@couchdb-1.docker.com"}
 
 NODE3 = {"server": URL, "user": USER, "password": PASSWORD, "name": "couchdb@couchdb-2.docker.com"}
+
+ALL_NODES = [NODE1, NODE2, NODE3]

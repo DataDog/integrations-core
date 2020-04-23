@@ -63,7 +63,7 @@ def dd_environment():
             CheckEndpoints([common.URL]),
             CheckDockerLogs('server-0', [startup_msg]),
             WaitFor(enable_cluster, args=(couch_version,)),
-            lambda: generate_data(couch_version),
+            WaitFor(generate_data, args=(couch_version,)),
             # WaitFor(send_replication, args=(couch_version,), wait=2, attempts=60),
             # WaitFor(get_replication, args=(couch_version,), wait=3, attempts=40),
         ],
@@ -172,7 +172,7 @@ def generate_data(couch_version):
     headers = {'Accept': 'text/json'}
 
     # Generate a test database
-    r = requests.put("{}/kennel".format(common.URL), auth=auth, headers=headers)
+    requests.put("{}/kennel".format(common.URL), auth=auth, headers=headers)
 
     # Populate the database
     data = {
@@ -182,30 +182,15 @@ def generate_data(couch_version):
             "by_data": {"map": "function(doc) { emit(doc.data, doc); }"},
         },
     }
-    r = requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
+    requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
 
-    urls = [
-        "{}/_node/node1@127.0.0.1/_stats".format(common.URL),
-        "{}/_node/node2@127.0.0.1/_stats".format(common.URL),
-        "{}/_node/node3@127.0.0.1/_stats".format(common.URL),
-    ]
-
-    ready = defaultdict(bool)
-    for _ in range(120):
-        print("Waiting for stats to be generated on the nodes...")
-        try:
-            for url in urls:
-                if not ready[url]:
-                    res = requests.get(url, auth=auth, headers=headers)
-                    data = res.json()
-                    print("node data", data)
-                    if data:
-                        ready[url] = True
-            if len(ready) and all(ready.values()):
-                break
-        except Exception:
-            pass
-        sleep(1)
+    for node in common.ALL_NODES:
+        url = "{}/_node/{}/_stats".format(common.URL, node['name'])
+        print("[INFO] url", url)
+        res = requests.get(url, auth=auth, headers=headers)
+        data = res.json()
+        print("[INFO] node data", data)
+        assert data
 
     if couch_version == "1":
         return
