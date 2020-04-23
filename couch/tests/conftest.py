@@ -12,7 +12,7 @@ import requests
 
 from datadog_checks.couch import CouchDb
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
+from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints, WaitFor
 
 from . import common
 
@@ -62,7 +62,7 @@ def dd_environment():
         conditions=[
             CheckEndpoints([common.URL]),
             CheckDockerLogs('server-0', [startup_msg]),
-            lambda: enable_cluster(couch_version),
+            WaitFor(enable_cluster, args=(couch_version,)),
             lambda: generate_data(couch_version),
             # WaitFor(send_replication, args=(couch_version,), wait=2, attempts=60),
             # WaitFor(get_replication, args=(couch_version,), wait=3, attempts=40),
@@ -153,18 +153,14 @@ def enable_cluster(couch_version):
         )
 
     for data in requests_data:
-        for i in range(10):
-            print('cluster_setup make request ({}) {}: {}'.format(i, common.URL, data))
-            resp = requests.post("{}/_cluster_setup".format(common.URL), json=data, auth=auth, headers=headers)
-            resp_data = resp.json()
-            if resp_data.get('ok', False):
-                break
-            print('cluster_setup request error ({}): {}'.format(i, resp_data))
-            sleep(3)
-        else:
-            resp.raise_for_status()
+        resp = requests.post("{}/_cluster_setup".format(common.URL), json=data, auth=auth, headers=headers)
+        resp_data = resp.json()
+        print('[INFO] cluster setup resp', resp_data)
 
-    # for node in ["couchdb-1.docker.com", "couchdb-2.docker.com"]:
+    resp = requests.get("{}/_membership".format(common.URL), auth=auth, headers=headers)
+    membership = resp.json()
+    print("[INFO] membership", membership)
+    assert len(membership['cluster_nodes']) == 3
 
 
 def generate_data(couch_version):
@@ -177,7 +173,6 @@ def generate_data(couch_version):
 
     # Generate a test database
     r = requests.put("{}/kennel".format(common.URL), auth=auth, headers=headers)
-    r.raise_for_status()
 
     # Populate the database
     data = {
@@ -188,7 +183,6 @@ def generate_data(couch_version):
         },
     }
     r = requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
-    r.raise_for_status()
 
     urls = [
         "{}/_node/node1@127.0.0.1/_stats".format(common.URL),
