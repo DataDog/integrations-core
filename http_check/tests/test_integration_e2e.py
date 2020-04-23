@@ -6,6 +6,7 @@
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.http_check import HTTPCheck
 
 from .common import CONFIG, CONFIG_E2E
@@ -24,6 +25,7 @@ def test_check_coverage_e2e(dd_agent_check, mock_hosts_e2e):
     aggregator = dd_agent_check(CONFIG_E2E)
 
     assert_check_coverage(aggregator)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def assert_check_coverage(aggregator):

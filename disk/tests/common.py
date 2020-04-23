@@ -9,10 +9,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 if ON_WINDOWS:
     DEFAULT_DEVICE_NAME = 'c:'
+    DEFAULT_DEVICE_BASE_NAME = 'c:'
     DEFAULT_FILE_SYSTEM = 'ntfs'
     DEFAULT_MOUNT_POINT = 'c:'
 else:
     DEFAULT_DEVICE_NAME = '/dev/sda1'
+    DEFAULT_DEVICE_BASE_NAME = 'sda1'
     DEFAULT_FILE_SYSTEM = 'ext4'
     DEFAULT_MOUNT_POINT = '/'
 

@@ -1,6 +1,3 @@
-:: Install with TCP/IP enabled, see: https://chocolatey.org/packages/sql-server-2017
-choco install sql-server-2017 --params="'/TCPENABLED:1'"
-
 :: Set password
 sqlcmd -Q "ALTER LOGIN sa with PASSWORD = 'Password12!';ALTER LOGIN sa ENABLE;"
 

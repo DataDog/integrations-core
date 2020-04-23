@@ -40,7 +40,7 @@ def dd_environment(e2e_instance):
     """
     with docker_run(
         os.path.join(HERE, 'docker', 'docker-compose.yaml'),
-        conditions=[WaitFor(find_topics, attempts=30, wait=3), initialize_topics],
+        conditions=[WaitFor(find_topics, attempts=60, wait=3), WaitFor(initialize_topics)],
         env_vars={
             # Advertising the hostname doesn't work on docker:dind so we manually
             # resolve the IP address. This seems to also work outside docker:dind

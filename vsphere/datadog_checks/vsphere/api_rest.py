@@ -55,9 +55,8 @@ class VSphereRestAPI(object):
                 yield batch
                 batch = []
             batch.append(mor)
-        else:
-            if batch:
-                yield batch
+        if batch:
+            yield batch
 
     @smart_retry
     def get_resource_tags_for_mors(self, mors):
