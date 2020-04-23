@@ -126,8 +126,9 @@ def enable_cluster(couch_version):
     auth = (common.USER, common.PASSWORD)
     headers = {'Accept': 'text/json'}
 
+    requests_data = []
     for node in ["couchdb-1.docker.com", "couchdb-2.docker.com"]:
-        cluster_setup = {
+        requests_data.append({
             "action": "enable_cluster",
             "username": common.USER,
             "password": common.PASSWORD,
@@ -137,26 +138,20 @@ def enable_cluster(couch_version):
             "remote_node": node,
             "remote_current_user": common.USER,
             "remote_current_password": common.PASSWORD,
-        }
-        r = requests.post("{}/_cluster_setup".format(common.URL), json=cluster_setup, auth=auth, headers=headers)
-        print("_cluster_setup enable cluster: ", r.json())
-        r.raise_for_status()
-
-        sleep(1)
-
-        add_node = {
+        })
+        requests_data.append({
             "action": "add_node",
             "username": common.USER,
             "password": common.PASSWORD,
             "host": node,
             "port": 5984,
             "singlenode": False,
-        }
-        r = requests.post("{}/_cluster_setup".format(common.URL), json=add_node, auth=auth, headers=headers)
-        print("_cluster_setup add node: ", r.json())
-        r.raise_for_status()
+        })
 
-        sleep(1)
+    for idx, data in enumerate(requests_data):
+        r = requests.post("{}/_cluster_setup?rev={}".format(common.URL, idx), json=data, auth=auth, headers=headers)
+        print("cluster_setup query resp for %s %s:".format(common.URL, idx), r.json())
+        r.raise_for_status()
 
 
 def generate_data(couch_version):
