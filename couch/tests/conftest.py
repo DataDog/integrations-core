@@ -152,13 +152,19 @@ def enable_cluster(couch_version):
             }
         )
 
-    for data in enumerate(requests_data):
+    for data in requests_data:
         for i in range(10):
-            r = requests.post("{}/_cluster_setup".format(common.URL), json=data, auth=auth, headers=headers)
-            if r.status_code == 200:
+            print('cluster_setup make request ({}) {}: {}'.format(i, common.URL, data))
+            resp = requests.post("{}/_cluster_setup".format(common.URL), json=data, auth=auth, headers=headers)
+            resp_data = resp.json()
+            if resp_data.get('ok', False):
                 break
-            print('cluster_setup request error: ', r.json())
-            sleep(1)
+            print('cluster_setup request error ({}): {}'.format(i, resp_data))
+            sleep(3)
+        else:
+            resp.raise_for_status()
+
+    # for node in ["couchdb-1.docker.com", "couchdb-2.docker.com"]:
 
 
 def generate_data(couch_version):
