@@ -89,6 +89,7 @@ def generate_data(couch_version):
 
     # Generate a test database
     requests.put("{}/kennel".format(common.URL), auth=auth, headers=headers)
+    requests.put("{}/foo_document".format(common.URL), auth=auth, headers=headers)
 
     # Populate the database
     data = {

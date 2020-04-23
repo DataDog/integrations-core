@@ -231,9 +231,6 @@ def test_only_max_nodes_are_scanned(aggregator, gauges):
     for gauge in gauges["erlang_gauges"]:
         aggregator.assert_metric(gauge)
 
-    for gauge in gauges["replication_tasks_gauges"]:
-        aggregator.assert_metric(gauge)
-
     for config in [common.NODE1, common.NODE2]:
         expected_tags = ["instance:{}".format(config["name"])]
         for gauge in gauges["cluster_gauges"]:
