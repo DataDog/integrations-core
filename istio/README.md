@@ -22,7 +22,7 @@ Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [
 
 #### Metric Collection
 
-Add this configuration block to your `istio.d/conf.yaml` file to start gathering your Istio Metrics:
+Add one of the configuration blocks below to your `istio.d/conf.yaml` file to start gathering your Istio Metrics for your supported version:
 
 1. To monitor the `istiod` deployment in Istio `v1.5+`, use the following configuration:
     ```yaml
