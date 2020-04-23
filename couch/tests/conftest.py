@@ -57,7 +57,6 @@ def dd_environment():
                 CheckEndpoints([common.URL]),
                 CheckDockerLogs('server-0', ['CouchDB has started']),
                 WaitFor(generate_data, args=(couch_version,)),
-                WaitFor(check_node_stats),
             ],
         ):
             yield common.BASIC_CONFIG
