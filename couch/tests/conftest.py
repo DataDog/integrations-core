@@ -128,30 +128,37 @@ def enable_cluster(couch_version):
 
     requests_data = []
     for node in ["couchdb-1.docker.com", "couchdb-2.docker.com"]:
-        requests_data.append({
-            "action": "enable_cluster",
-            "username": common.USER,
-            "password": common.PASSWORD,
-            "bind_address": "0.0.0.0",
-            "port": 5984,
-            "node_count": 3,
-            "remote_node": node,
-            "remote_current_user": common.USER,
-            "remote_current_password": common.PASSWORD,
-        })
-        requests_data.append({
-            "action": "add_node",
-            "username": common.USER,
-            "password": common.PASSWORD,
-            "host": node,
-            "port": 5984,
-            "singlenode": False,
-        })
+        requests_data.append(
+            {
+                "action": "enable_cluster",
+                "username": common.USER,
+                "password": common.PASSWORD,
+                "bind_address": "0.0.0.0",
+                "port": 5984,
+                "node_count": 3,
+                "remote_node": node,
+                "remote_current_user": common.USER,
+                "remote_current_password": common.PASSWORD,
+            }
+        )
+        requests_data.append(
+            {
+                "action": "add_node",
+                "username": common.USER,
+                "password": common.PASSWORD,
+                "host": node,
+                "port": 5984,
+                "singlenode": False,
+            }
+        )
 
-    for idx, data in enumerate(requests_data):
-        r = requests.post("{}/_cluster_setup?rev={}".format(common.URL, idx), json=data, auth=auth, headers=headers)
-        print("cluster_setup query resp for %s %s:".format(common.URL, idx), r.json())
-        r.raise_for_status()
+    for data in enumerate(requests_data):
+        for i in range(10):
+            r = requests.post("{}/_cluster_setup".format(common.URL), json=data, auth=auth, headers=headers)
+            if r.status_code == 200:
+                break
+            print('cluster_setup request error: ', r.json())
+            sleep(1)
 
 
 def generate_data(couch_version):
