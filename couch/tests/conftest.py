@@ -72,6 +72,7 @@ def dd_environment():
                 WaitFor(generate_data, args=(couch_version,)),
                 WaitFor(check_node_stats),
                 WaitFor(send_replication),
+                WaitFor(get_replication),
             ],
         ):
             yield common.BASIC_CONFIG_V2
@@ -117,6 +118,7 @@ def send_replication():
     for i in range(10):
         print("Create Replication task {}".format(i))
         replication_body['_id'] = 'my_replication_id_{}'.format(i)
+        replication_body['target'] = replication_body['target'] + str(i)
         r = requests.post(
             replicator_url,
             auth=(common.NODE1['user'], common.NODE1['password']),
@@ -125,8 +127,6 @@ def send_replication():
         )
         r.raise_for_status()
         print("Replication task created:", r.json())
-
-    return get_replication()
 
 
 def get_replication():
