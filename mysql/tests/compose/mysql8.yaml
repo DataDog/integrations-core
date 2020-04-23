@@ -5,7 +5,7 @@ services:
     container_name: mysql-master
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
     environment:
-      - ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_REPLICATION_MODE=master
       - MYSQL_REPLICATION_USER=my_repl_user
       - MYSQL_REPLICATION_PASSWORD=my_repl_password
@@ -21,9 +21,8 @@ services:
   mysql-slave:
     container_name: mysql-slave
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
-    restart: on-failure
     environment:
-      - ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MASTER_HOST=mysql-master
       - MASTER_PORT=3306
       - MYSQL_REPLICATION_MODE=slave
