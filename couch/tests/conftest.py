@@ -72,8 +72,8 @@ def dd_environment():
                 WaitFor(enable_cluster),
                 WaitFor(generate_data, args=(couch_version,)),
                 WaitFor(check_node_stats),
-                # WaitFor(send_replication, args=(couch_version,), wait=2, attempts=60),
-                # WaitFor(get_replication, args=(couch_version,), wait=3, attempts=40),
+                WaitFor(send_replication),
+                WaitFor(get_replication),
             ],
         ):
             yield common.BASIC_CONFIG_V2
@@ -101,13 +101,10 @@ def generate_data(couch_version):
     requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
 
 
-def send_replication(couch_version):
+def send_replication():
     """
     Send replication task to trigger tasks
     """
-    if couch_version == '1':
-        return
-
     replicator_url = "{}/_replicate".format(common.NODE1['server'])
 
     replication_body = {
@@ -117,8 +114,8 @@ def send_replication(couch_version):
         'create_target': True,
         'continuous': True,
     }
-    for i in range(100):
-        print("Create Replication task")
+    for i in range(3):
+        print("Create Replication task {}".format(i))
         replication_body['_id'] = 'my_replication_id_{}'.format(i)
         r = requests.post(
             replicator_url,
@@ -194,5 +191,4 @@ def check_node_stats():
         print("[INFO] url", url)
         res = requests.get(url, auth=auth, headers=headers)
         data = res.json()
-        print("[INFO] node data", data)
         assert "global_changes" in data
