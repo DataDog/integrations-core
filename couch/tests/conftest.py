@@ -84,6 +84,7 @@ def enable_cluster():
 
     requests_data = []
     for node in [common.NODE1, common.NODE2]:
+        _, node_name = node['name'].split('@')
         requests_data.append(
             {
                 "action": "enable_cluster",
@@ -92,7 +93,7 @@ def enable_cluster():
                 "bind_address": "0.0.0.0",
                 "port": 5984,
                 "node_count": 3,
-                "remote_node": node,
+                "remote_node": node_name,
                 "remote_current_user": common.USER,
                 "remote_current_password": common.PASSWORD,
             }
@@ -102,7 +103,7 @@ def enable_cluster():
                 "action": "add_node",
                 "username": common.USER,
                 "password": common.PASSWORD,
-                "host": node,
+                "host": node_name,
                 "port": 5984,
                 "singlenode": False,
             }
@@ -123,7 +124,7 @@ def enable_cluster():
         "Membership response: {}".format(membership),
         "Last cluster setup response: {}".format(resp_data),
     ]
-    assert len(membership['cluster_nodes']) == expected_nb_nodes, "\n".join(error_msg)
+    assert actual_nb_nodes == expected_nb_nodes, "\n".join(error_msg)
 
 
 def generate_data(couch_version):
@@ -165,7 +166,7 @@ def send_replication():
     """
     Send replication task to trigger tasks
     """
-    replicator_url = "{}/_replicate".format(common.NODE1['server'])
+    replicator_url = "{}/_replicate".format(common.NODE0['server'])
 
     replication_body = {
         '_id': 'my_replication_id',
@@ -180,7 +181,7 @@ def send_replication():
         body['target'] = body['target'] + str(i)
         r = requests.post(
             replicator_url,
-            auth=(common.NODE1['user'], common.NODE1['password']),
+            auth=(common.NODE0['user'], common.NODE0['password']),
             headers={'Content-Type': 'application/json'},
             json=body,
         )
@@ -191,11 +192,10 @@ def get_replication():
     """
     Attempt to get active replication tasks
     """
-    task_url = "{}/_active_tasks".format(common.NODE1['server'])
+    task_url = "{}/_active_tasks".format(common.NODE0['server'])
 
-    r = requests.get(task_url, auth=(common.NODE1['user'], common.NODE1['password']))
+    r = requests.get(task_url, auth=(common.NODE0['user'], common.NODE0['password']))
     r.raise_for_status()
     active_tasks = r.json()
     count = len(active_tasks)
     assert count > 0, "Expect active tasks but none found.\nactive_tasks response: {}".format(active_tasks)
-

@@ -20,7 +20,7 @@ from . import common
 
 pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION != 2, reason='Test for version Couch v2')
 
-INSTANCES = [common.NODE1, common.NODE2, common.NODE3]
+INSTANCES = [common.NODE0, common.NODE1, common.NODE2]
 
 
 @pytest.fixture(scope="module")
@@ -103,11 +103,11 @@ def _assert_check(aggregator, gauges):
             expected_tags = ["db:{}".format(db)]
             aggregator.assert_metric(gauge, tags=expected_tags)
 
-    expected_tags = ["instance:{}".format(common.NODE1["name"])]
+    expected_tags = ["instance:{}".format(common.NODE0["name"])]
     # One for the version, one for the server stats
     aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=2)
 
-    for node in [common.NODE2, common.NODE3]:
+    for node in [common.NODE1, common.NODE2]:
         expected_tags = ["instance:{}".format(node["name"])]
         # One for the server stats, the version is already loaded
         aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=2)
@@ -124,7 +124,7 @@ def _assert_check(aggregator, gauges):
 def test_db_whitelisting(aggregator, gauges):
     configs = []
 
-    for n in [common.NODE1, common.NODE2, common.NODE3]:
+    for n in [common.NODE0, common.NODE1, common.NODE2]:
         node = deepcopy(n)
         node['db_whitelist'] = ['db0']
         configs.append(node)
@@ -150,7 +150,7 @@ def test_db_whitelisting(aggregator, gauges):
 def test_db_blacklisting(aggregator, gauges):
     configs = []
 
-    for node in [common.NODE1, common.NODE2, common.NODE3]:
+    for node in [common.NODE0, common.NODE1, common.NODE2]:
         config = deepcopy(node)
         config['db_blacklist'] = ['db0']
         configs.append(config)
@@ -174,12 +174,12 @@ def test_db_blacklisting(aggregator, gauges):
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_check_without_names(aggregator, gauges):
-    config = deepcopy(common.NODE1)
+    config = deepcopy(common.NODE0)
     config.pop('name')
     check = CouchDb(common.CHECK_NAME, {}, [config])
     check.check(config)
 
-    configs = [common.NODE1, common.NODE2, common.NODE3]
+    configs = [common.NODE0, common.NODE1, common.NODE2]
 
     for config in configs:
         expected_tags = ["instance:{}".format(config["name"])]
@@ -206,7 +206,7 @@ def test_check_without_names(aggregator, gauges):
     # One for the version, one for the server stats
     aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=1)
 
-    for node in [common.NODE2, common.NODE3]:
+    for node in [common.NODE1, common.NODE2]:
         expected_tags = ["instance:{}".format(node["name"])]
         # One for the server stats, the version is already loaded
         aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=1)
@@ -218,7 +218,7 @@ def test_check_without_names(aggregator, gauges):
 @pytest.mark.integration
 @pytest.mark.parametrize('number_nodes', [1, 2, 3])
 def test_only_max_nodes_are_scanned(aggregator, gauges, number_nodes):
-    config = deepcopy(common.NODE1)
+    config = deepcopy(common.NODE0)
     config.pop("name")
     config['max_nodes_per_check'] = number_nodes
 
@@ -242,7 +242,7 @@ def test_only_max_nodes_are_scanned(aggregator, gauges, number_nodes):
 @pytest.mark.integration
 @pytest.mark.parametrize('number_db', [1, 2, 3])
 def test_only_max_dbs_are_scanned(aggregator, gauges, number_db):
-    config = deepcopy(common.NODE1)
+    config = deepcopy(common.NODE0)
     config["max_dbs_per_check"] = number_db
 
     check = CouchDb(common.CHECK_NAME, {}, [config])
@@ -264,7 +264,7 @@ def test_only_max_dbs_are_scanned(aggregator, gauges, number_db):
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_replication_metrics(aggregator, gauges):
-    for config in [common.NODE1, common.NODE2, common.NODE3]:
+    for config in [common.NODE0, common.NODE1, common.NODE2]:
         check = CouchDb(common.CHECK_NAME, {}, [config])
         check.check(config)
 
@@ -284,10 +284,10 @@ def test_compaction_metrics(aggregator, gauges, active_tasks):
     def _get_active_tasks(server, name, tags):
         return active_tasks
 
-    check = CouchDb(common.CHECK_NAME, {}, [common.NODE1])
+    check = CouchDb(common.CHECK_NAME, {}, [common.NODE0])
     check.checker = couch.CouchDB2(check)
     check.checker._get_active_tasks = _get_active_tasks
-    check.check(common.NODE1)
+    check.check(common.NODE0)
 
     for gauge in gauges["compaction_tasks_gauges"]:
         aggregator.assert_metric(gauge)
@@ -308,13 +308,13 @@ def test_indexing_metrics(aggregator, gauges, active_tasks):
         return {}
 
     # run the check on all instances
-    for config in [common.NODE1, common.NODE2, common.NODE3]:
+    for config in [common.NODE0, common.NODE1, common.NODE2]:
         check = CouchDb(common.CHECK_NAME, {}, [config])
         check.checker = couch.CouchDB2(check)
         check.get = _get
         check.check(config)
 
-    for node in [common.NODE1, common.NODE2, common.NODE3]:
+    for node in [common.NODE0, common.NODE1, common.NODE2]:
         expected_tags = ['database:kennel', 'design_document:dummy', 'instance:{}'.format(node['name'])]
         for gauge in gauges["indexing_tasks_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
@@ -384,7 +384,7 @@ def test_view_compaction_metrics(aggregator, gauges):
 
     threads = []
     for _ in range(40):
-        t = LoadGenerator(common.NODE1['server'], (common.NODE1['user'], common.NODE1['password']))
+        t = LoadGenerator(common.NODE0['server'], (common.NODE0['user'], common.NODE0['password']))
         t.start()
         threads.append(t)
 
@@ -395,7 +395,7 @@ def test_view_compaction_metrics(aggregator, gauges):
             tries += 1
 
             try:
-                for config in [common.NODE1, common.NODE2, common.NODE3]:
+                for config in [common.NODE0, common.NODE1, common.NODE2]:
                     check = CouchDb(common.CHECK_NAME, {}, [config])
                     check.check(config)
             except Exception:
@@ -423,7 +423,7 @@ def test_view_compaction_metrics(aggregator, gauges):
 @pytest.mark.integration
 def test_config_tags(aggregator, gauges):
     TEST_TAG = "test_tag:test"
-    config = deepcopy(common.NODE1)
+    config = deepcopy(common.NODE0)
     config['tags'] = [TEST_TAG]
 
     check = CouchDb(common.CHECK_NAME, {}, [config])
