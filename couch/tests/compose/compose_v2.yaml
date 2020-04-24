@@ -1,61 +1,48 @@
-#version: '3.5'
-#
-#services:
-#  couch:
-#    image: datadog/docker-library:couch_${COUCH_VERSION}
-#    ports:
-#      - ${COUCH_PORT}:5984
-#    command: --admin=dduser:pawprint --with-haproxy
-#
-
 version: "3.5"
 
 networks:
   network:
 
 services:
-  server-0:
-    container_name: server-0
+  couchdb-0:
+    container_name: couchdb-0
+    image: couchdb:${COUCH_VERSION}
     environment:
-      COUCHDB_PASSWORD: pawprint
-      COUCHDB_SECRET: 0123456789abcdef0123456789abcdef
-      COUCHDB_USER: dduser
-      NODENAME: couchdb-0.docker.com
-    image: couchdb:2.3.1
+      NODENAME: couchdb-0.example.com
+      COUCHDB_USER: ${COUCH_USER}
+      COUCHDB_PASSWORD: ${COUCH_PASSWORD}
     networks:
       network:
         aliases:
-          - couchdb-0.docker.com
+          - couchdb-0.example.com
     ports:
-      - "5984:5984"
+      - "${COUCH_PORT}:5984"
       - "5986:5986"
-  server-1:
-    container_name: server-1
+  couchdb-1:
+    container_name: couchdb-1
+    image: couchdb:${COUCH_VERSION}
     environment:
-      COUCHDB_PASSWORD: pawprint
-      COUCHDB_SECRET: 0123456789abcdef0123456789abcdef
-      COUCHDB_USER: dduser
-      NODENAME: couchdb-1.docker.com
-    image: couchdb:2.3.1
+      NODENAME: couchdb-1.example.com
+      COUCHDB_USER: ${COUCH_USER}
+      COUCHDB_PASSWORD: ${COUCH_PASSWORD}
     networks:
       network:
         aliases:
-          - couchdb-1.docker.com
+          - couchdb-1.example.com
     ports:
       - "15984:5984"
       - "15986:5986"
-  server-2:
-    container_name: server-2
+  couchdb-2:
+    container_name: couchdb-2
+    image: couchdb:${COUCH_VERSION}
     environment:
-      COUCHDB_PASSWORD: pawprint
-      COUCHDB_SECRET: 0123456789abcdef0123456789abcdef
-      COUCHDB_USER: dduser
-      NODENAME: couchdb-2.docker.com
-    image: couchdb:2.3.1
+      NODENAME: couchdb-2.example.com
+      COUCHDB_USER: ${COUCH_USER}
+      COUCHDB_PASSWORD: ${COUCH_PASSWORD}
     networks:
       network:
         aliases:
-          - couchdb-2.docker.com
+          - couchdb-2.example.com
     ports:
       - "25984:5984"
       - "25986:5986"

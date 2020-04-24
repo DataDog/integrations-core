@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   couch:
-    container_name: server-0
+    container_name: couchdb-0
     image: couchdb:${COUCH_VERSION}
     ports:
       - ${COUCH_PORT}:5984

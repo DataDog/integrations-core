@@ -55,7 +55,7 @@ def dd_environment():
             env_vars={'COUCH_PORT': common.PORT},
             conditions=[
                 CheckEndpoints([common.URL]),
-                CheckDockerLogs('server-0', ['CouchDB has started']),
+                CheckDockerLogs('couchdb-0', ['CouchDB has started']),
                 WaitFor(generate_data, args=(couch_version,)),
             ],
         ):
@@ -64,10 +64,14 @@ def dd_environment():
     else:
         with docker_run(
             compose_file=os.path.join(common.HERE, 'compose', 'compose_v2.yaml'),
-            env_vars={'COUCH_PORT': common.PORT},
+            env_vars={
+                'COUCH_PORT': common.PORT,
+                'COUCH_USER': common.USER,
+                'COUCH_PASSWORD': common.PASSWORD,
+            },
             conditions=[
                 CheckEndpoints([common.URL]),
-                CheckDockerLogs('server-0', ['Started replicator db changes listener']),
+                CheckDockerLogs('couchdb-0', ['Started replicator db changes listener']),
                 WaitFor(enable_cluster),
                 WaitFor(generate_data, args=(couch_version,)),
                 WaitFor(check_node_stats),
@@ -149,7 +153,7 @@ def enable_cluster():
     headers = {'Accept': 'text/json'}
 
     requests_data = []
-    for node in ["couchdb-1.docker.com", "couchdb-2.docker.com"]:
+    for node in ["couchdb-1.example.com", "couchdb-2.example.com"]:
         requests_data.append(
             {
                 "action": "enable_cluster",
