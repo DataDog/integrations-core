@@ -52,6 +52,22 @@ def cleanup():
 
 @retry(wait=wait_exponential(min=2, max=60), stop=stop_after_attempt(10))
 def download(package):
+    """
+    TODO: Flaky downloader
+    Why we need a retry here?
+
+    The issue with the flake here is that:
+    - When downloading the first package, the datadog_checks_downloader will also download the signing metadata and
+      especially "timestamp.json" which gives the current "version". Anytime a new package is pushed, that version
+      gets increased.
+    - When downloading package A, datadog_checks_downloader will write to disk the current version of "timestamp.json"
+    - When downloading package B, datadog_checks_downloader will check the current version of timestamp.json against
+      the local one and will fail here if it finds an older version on the repo.
+
+    Retrying should help test not to fail, but the real issue describe above still need to be solved.
+    Users relying on it for automated deploys and install can face the same issue.
+    Source: https://github.com/DataDog/integrations-core/pull/6476#issuecomment-619059117
+    """
     # -v:     CRITICAL
     # -vv:    ERROR
     # -vvv:   WARNING
