@@ -107,7 +107,9 @@ For Istio versions `1.5` or higher:
 For Istio all other versions:
 
 `istio.pilot.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+
 `istio.galley.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+
 `istio.citadel.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
 
 ## Troubleshooting
