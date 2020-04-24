@@ -55,7 +55,7 @@ def dd_environment():
             env_vars={'COUCH_PORT': common.PORT},
             conditions=[
                 CheckEndpoints([common.URL]),
-                CheckDockerLogs('couchdb-0', ['CouchDB has started']),
+                CheckDockerLogs('couchdb-1', ['CouchDB has started']),
                 WaitFor(generate_data, args=(couch_version,)),
             ],
         ):
@@ -67,7 +67,7 @@ def dd_environment():
             env_vars={'COUCH_PORT': common.PORT, 'COUCH_USER': common.USER, 'COUCH_PASSWORD': common.PASSWORD},
             conditions=[
                 CheckEndpoints([common.URL]),
-                CheckDockerLogs('couchdb-0', ['Started replicator db changes listener']),
+                CheckDockerLogs('couchdb-1', ['Started replicator db changes listener']),
                 WaitFor(enable_cluster),
                 WaitFor(generate_data, args=(couch_version,)),
                 WaitFor(check_node_stats),
@@ -83,7 +83,7 @@ def enable_cluster():
     headers = {'Accept': 'text/json'}
 
     requests_data = []
-    for node in [common.NODE1, common.NODE2]:
+    for node in [common.NODE2, common.NODE3]:
         _, node_name = node['name'].split('@')
         requests_data.append(
             {
@@ -166,7 +166,7 @@ def send_replication():
     """
     Send replication task to trigger tasks
     """
-    replicator_url = "{}/_replicate".format(common.NODE0['server'])
+    replicator_url = "{}/_replicate".format(common.NODE1['server'])
 
     replication_body = {
         '_id': 'my_replication_id',
@@ -181,7 +181,7 @@ def send_replication():
         body['target'] = body['target'] + str(i)
         r = requests.post(
             replicator_url,
-            auth=(common.NODE0['user'], common.NODE0['password']),
+            auth=(common.NODE1['user'], common.NODE1['password']),
             headers={'Content-Type': 'application/json'},
             json=body,
         )
@@ -192,9 +192,9 @@ def get_replication():
     """
     Attempt to get active replication tasks
     """
-    task_url = "{}/_active_tasks".format(common.NODE0['server'])
+    task_url = "{}/_active_tasks".format(common.NODE1['server'])
 
-    r = requests.get(task_url, auth=(common.NODE0['user'], common.NODE0['password']))
+    r = requests.get(task_url, auth=(common.NODE1['user'], common.NODE1['password']))
     r.raise_for_status()
     active_tasks = r.json()
     count = len(active_tasks)

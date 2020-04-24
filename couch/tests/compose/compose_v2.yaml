@@ -4,20 +4,6 @@ networks:
   network:
 
 services:
-  couchdb-0:
-    container_name: couchdb-0
-    image: couchdb:${COUCH_VERSION}
-    environment:
-      NODENAME: couchdb-0.example.com
-      COUCHDB_USER: ${COUCH_USER}
-      COUCHDB_PASSWORD: ${COUCH_PASSWORD}
-    networks:
-      network:
-        aliases:
-          - couchdb-0.example.com
-    ports:
-      - "${COUCH_PORT}:5984"
-      - "5986:5986"
   couchdb-1:
     container_name: couchdb-1
     image: couchdb:${COUCH_VERSION}
@@ -30,8 +16,8 @@ services:
         aliases:
           - couchdb-1.example.com
     ports:
-      - "15984:5984"
-      - "15986:5986"
+      - "${COUCH_PORT}:5984"
+      - "5986:5986"
   couchdb-2:
     container_name: couchdb-2
     image: couchdb:${COUCH_VERSION}
@@ -43,6 +29,20 @@ services:
       network:
         aliases:
           - couchdb-2.example.com
+    ports:
+      - "15984:5984"
+      - "15986:5986"
+  couchdb-3:
+    container_name: couchdb-3
+    image: couchdb:${COUCH_VERSION}
+    environment:
+      NODENAME: couchdb-3.example.com
+      COUCHDB_USER: ${COUCH_USER}
+      COUCHDB_PASSWORD: ${COUCH_PASSWORD}
+    networks:
+      network:
+        aliases:
+          - couchdb-3.example.com
     ports:
       - "25984:5984"
       - "25986:5986"
