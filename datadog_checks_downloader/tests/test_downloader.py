@@ -12,9 +12,9 @@ import subprocess
 
 import requests
 import six
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 from datadog_checks.downloader.download import REPOSITORY_URL_PREFIX
-from tenacity import wait_exponential, retry, stop_after_attempt
 
 log = logging.getLogger('test_downloader')
 
