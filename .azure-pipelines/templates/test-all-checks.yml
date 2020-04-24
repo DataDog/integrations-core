@@ -104,6 +104,9 @@ jobs:
     - checkName: dns_check
       displayName: DNS
       os: linux
+    - checkName: dns_check
+      displayName: DNS
+      os: windows
     - checkName: dotnetclr
       displayName: .NET CLR
       os: windows
