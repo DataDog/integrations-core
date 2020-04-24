@@ -56,7 +56,7 @@
                     {
                         "conditional_formats": [
                             {
-                                "comparator": "<",
+                                "comparator": ">",
                                 "palette": "red",
                                 "value": "200"
                             }
