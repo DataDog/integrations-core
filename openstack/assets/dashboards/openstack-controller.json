@@ -290,7 +290,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:openstack.nova.limits.total_ram_used{$project}*1024000",
+                        "q": "avg:openstack.nova.limits.total_ram_used{$project}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
