@@ -34,6 +34,10 @@ MESH_METRICS = [
     'istio.mesh.request.size.sum',
     'istio.mesh.response.size.count',
     'istio.mesh.response.size.sum',
+    'istio.mesh.tcp.connections_closed.total',
+    'istio.mesh.tcp.connections_opened.total',
+    'istio.mesh.tcp.received_bytes.total',
+    'istio.mesh.tcp.send_bytes.total',
 ]
 
 MESH_METRICS_1_4 = [
