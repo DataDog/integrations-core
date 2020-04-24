@@ -102,10 +102,10 @@ jobs:
       displayName: Disk (Windows)
       os: windows
     - checkName: dns_check
-      displayName: DNS
+      displayName: DNS (Linux)
       os: linux
     - checkName: dns_check
-      displayName: DNS
+      displayName: DNS (Windows)
       os: windows
     - checkName: dotnetclr
       displayName: .NET CLR
