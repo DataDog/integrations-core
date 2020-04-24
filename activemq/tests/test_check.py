@@ -4,6 +4,7 @@
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from .common import ACTIVEMQ_E2E_METRICS
 
 
@@ -14,3 +15,6 @@ def test(dd_agent_check):
 
     for metric in ACTIVEMQ_E2E_METRICS:
         aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
