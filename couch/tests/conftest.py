@@ -83,7 +83,7 @@ def enable_cluster():
     headers = {'Accept': 'text/json'}
 
     requests_data = []
-    for node in ["couchdb-1.example.com", "couchdb-2.example.com"]:
+    for node in [common.NODE1, common.NODE2]:
         requests_data.append(
             {
                 "action": "enable_cluster",
