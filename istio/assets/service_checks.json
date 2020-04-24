@@ -58,9 +58,6 @@
         ],
         "name": "Istio citadel prometheus health",
         "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint. Returns `OK` otherwise."
-    },
+    }
     
 ]
-
-aggregator.assert_service_check('istio.galley.prometheus.health', Istio.OK)
-aggregator.assert_service_check('istio.citadel.prometheus.health', Istio.OK)
