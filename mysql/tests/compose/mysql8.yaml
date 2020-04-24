@@ -2,10 +2,9 @@ version: '3.5'
 
 services:
   mysql-master:
-    container_name: mysql-master
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
     environment:
-      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_REPLICATION_MODE=master
       - MYSQL_REPLICATION_USER=my_repl_user
       - MYSQL_REPLICATION_PASSWORD=my_repl_password
@@ -22,7 +21,7 @@ services:
     container_name: mysql-slave
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
     environment:
-      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - ALLOW_EMPTY_PASSWORD=yes
       - MASTER_HOST=mysql-master
       - MASTER_PORT=3306
       - MYSQL_REPLICATION_MODE=slave

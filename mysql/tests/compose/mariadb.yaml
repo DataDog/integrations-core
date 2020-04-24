@@ -2,16 +2,15 @@ version: '3.5'
 
 services:
   mysql-master:
-    container_name: mysql-master
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
     environment:
-      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-      - MYSQL_REPLICATION_MODE=master
-      - MYSQL_REPLICATION_USER=my_repl_user
-      - MYSQL_REPLICATION_PASSWORD=my_repl_password
-      - MYSQL_USER=my_user
-      - MYSQL_PASSWORD=my_password
-      - MYSQL_DATABASE=my_database
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MARIADB_REPLICATION_MODE=master
+      - MARIADB_REPLICATION_USER=my_repl_user
+      - MARIADB_REPLICATION_PASSWORD=my_repl_password
+      - MARIADB_USER=my_user
+      - MARIADB_PASSWORD=my_password
+      - MARIADB_DATABASE=my_database
     ports:
       - "${MYSQL_PORT}:3306"
     volumes:
@@ -21,16 +20,15 @@ services:
   mysql-slave:
     container_name: mysql-slave
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
-    restart: on-failure
     environment:
-      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - ALLOW_EMPTY_PASSWORD=yes
       - MASTER_HOST=mysql-master
       - MASTER_PORT=3306
-      - MYSQL_REPLICATION_MODE=slave
-      - MYSQL_REPLICATION_USER=my_repl_user
-      - MYSQL_REPLICATION_PASSWORD=my_repl_password
-      - MYSQL_MASTER_HOST=mysql-master
-      - MYSQL_MASTER_PORT_NUMBER=3306
+      - MARIADB_REPLICATION_MODE=slave
+      - MARIADB_REPLICATION_USER=my_repl_user
+      - MARIADB_REPLICATION_PASSWORD=my_repl_password
+      - MARIADB_MASTER_HOST=mysql-master
+      - MARIADB_MASTER_PORT_NUMBER=3306
     ports:
       - "${MYSQL_SLAVE_PORT}:3306"
     depends_on:

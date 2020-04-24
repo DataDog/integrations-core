@@ -2,7 +2,6 @@ version: '3.5'
 
 services:
   mysql-master:
-    container_name: mysql-master
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
@@ -16,7 +15,6 @@ services:
   mysql-slave:
     container_name: mysql-slave
     image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
-    restart: on-failure
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=1
       - MASTER_HOST=mysql-master
