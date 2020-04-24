@@ -7,7 +7,7 @@ from typing import DefaultDict, Dict, List, Optional, Tuple
 
 from .models import OID
 from .pysnmp_types import MibViewController
-from .types import MIBSymbol
+from .types import OIDMatch
 
 
 class OIDTreeNode(object):
@@ -109,14 +109,16 @@ class OIDResolver(object):
         self._index_resolvers[tag][index] = mapping
 
     def _resolve_from_mibs(self, oid):
-        # type: (OID) -> MIBSymbol
+        # type: (OID) -> OIDMatch
         if not self._enforce_constraints:
             # if enforce_constraints is false, then MIB resolution has not been done yet
             # so we need to do it manually. We have to specify the mibs that we will need
             # to resolve the name.
             oid.resolve(self._mib_view_controller)
 
-        return oid.get_mib_symbol()
+        mib_symbol = oid.get_mib_symbol()
+
+        return OIDMatch(name=mib_symbol.symbol, indexes=mib_symbol.prefix)
 
     def _resolve_tag_index(self, tail, name):
         # type: (Tuple[int, ...], str) -> Tuple[str, ...]
@@ -141,7 +143,7 @@ class OIDResolver(object):
         return tuple(tags)
 
     def resolve_oid(self, oid):
-        # type: (OID) -> Tuple[str, Tuple[str, ...]]
+        # type: (OID) -> OIDMatch
         """Resolve an OID to a name and its indexes.
 
         This will perform either:
@@ -163,4 +165,4 @@ class OIDResolver(object):
         tail = parts[len(prefix) :]
 
         tag_index = self._resolve_tag_index(tail, name=name)
-        return name, tag_index
+        return OIDMatch(name=name, indexes=tag_index)

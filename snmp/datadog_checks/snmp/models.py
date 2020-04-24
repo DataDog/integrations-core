@@ -76,10 +76,10 @@ class OID(object):
         except SmiError as exc:
             raise UnresolvedOID(exc)
 
-        _, name, indexes = result
+        mib, symbol, indexes = result
         prefix = tuple(index.prettyPrint() for index in indexes)
 
-        return MIBSymbol(name, prefix)
+        return MIBSymbol(mib, symbol, prefix)
 
     def __str__(self):
         # type: () -> str

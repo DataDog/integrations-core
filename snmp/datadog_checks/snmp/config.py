@@ -25,6 +25,7 @@ from .pysnmp_types import (
     usmHMACMD5AuthProtocol,
 )
 from .resolver import OIDResolver
+from .types import OIDMatch
 
 
 class ParsedMetric(object):
@@ -199,7 +200,7 @@ class InstanceConfig:
             )
 
     def resolve_oid(self, oid):
-        # type: (OID) -> Tuple[str, Tuple[str, ...]]
+        # type: (OID) -> OIDMatch
         return self._resolver.resolve_oid(oid)
 
     def refresh_with_profile(self, profile):
