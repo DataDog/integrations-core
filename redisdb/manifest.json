@@ -35,7 +35,7 @@
     "saved_views": {
       "error_warning_status": "assets/saved_views/error_warning_status.json",
       "pid_overview": "assets/saved_views/pid_overview.json",
-      "redis_patern": "assets/saved_views/redis_patern.json"
+      "redis_pattern": "assets/saved_views/redis_pattern.json"
     },
     "service_checks": "assets/service_checks.json"
   }
