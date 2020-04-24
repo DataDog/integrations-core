@@ -21,18 +21,9 @@ def dd_environment():
         build=True,
         mount_logs=True,
         conditions=[
-            CheckDockerLogs(
-                compose_file,
-                [
-                    # Management Center
-                    'Hazelcast Management Center successfully started',
-                    r'Members \[2',
-                    # Members connected to each other
-                    r'Members \{size:2',
-                ],
-                matches='all',
-                attempts=120,
-            )
+            CheckDockerLogs('hazelcast_management_center', ['Hazelcast Management Center successfully started']),
+            CheckDockerLogs('hazelcast_management_center', [r'Members \[']),
+            CheckDockerLogs('hazelcast2', [r'Members \{size:']),
         ],
     ):
         config = load_jmx_config()
