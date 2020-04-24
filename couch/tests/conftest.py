@@ -78,69 +78,6 @@ def dd_environment():
             yield common.BASIC_CONFIG_V2
 
 
-def generate_data(couch_version):
-    """
-    Generate data on the couch cluster to test metrics.
-    """
-    # pass in authentication info for version 2
-    auth = (common.USER, common.PASSWORD) if couch_version == "2" else None
-    headers = {'Accept': 'text/json'}
-
-    # Generate a test database
-    requests.put("{}/kennel".format(common.URL), auth=auth, headers=headers)
-    for i in range(5):
-        requests.put("{}/db{}".format(common.URL, i), auth=auth, headers=headers)
-
-    # Populate the database
-    data = {
-        "language": "javascript",
-        "views": {
-            "all": {"map": "function(doc) { emit(doc._id); }"},
-            "by_data": {"map": "function(doc) { emit(doc.data, doc); }"},
-        },
-    }
-    requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
-
-
-def send_replication():
-    """
-    Send replication task to trigger tasks
-    """
-    replicator_url = "{}/_replicate".format(common.NODE1['server'])
-
-    replication_body = {
-        '_id': 'my_replication_id',
-        'source': 'http://dduser:pawprint@127.0.0.1:5984/kennel',
-        'target': 'http://dduser:pawprint@127.0.0.1:5984/kennel_replica',
-        'create_target': True,
-        'continuous': True,
-    }
-    for i in range(5):
-        body = replication_body.copy()
-        body['_id'] = 'my_replication_id_{}'.format(i)
-        body['target'] = body['target'] + str(i)
-        r = requests.post(
-            replicator_url,
-            auth=(common.NODE1['user'], common.NODE1['password']),
-            headers={'Content-Type': 'application/json'},
-            json=body,
-        )
-        r.raise_for_status()
-
-
-def get_replication():
-    """
-    Attempt to get active replication tasks
-    """
-    task_url = "{}/_active_tasks".format(common.NODE1['server'])
-
-    r = requests.get(task_url, auth=(common.NODE1['user'], common.NODE1['password']))
-    r.raise_for_status()
-    active_tasks = r.json()
-    count = len(active_tasks)
-    assert count > 0, "Expect active tasks but none found.\nactive_tasks response: {}".format(active_tasks)
-
-
 def enable_cluster():
     auth = (common.USER, common.PASSWORD)
     headers = {'Accept': 'text/json'}
@@ -189,6 +126,30 @@ def enable_cluster():
     assert len(membership['cluster_nodes']) == expected_nb_nodes, "\n".join(error_msg)
 
 
+def generate_data(couch_version):
+    """
+    Generate data on the couch cluster to test metrics.
+    """
+    # pass in authentication info for version 2
+    auth = (common.USER, common.PASSWORD) if couch_version == "2" else None
+    headers = {'Accept': 'text/json'}
+
+    # Generate a test database
+    requests.put("{}/kennel".format(common.URL), auth=auth, headers=headers)
+    for i in range(5):
+        requests.put("{}/db{}".format(common.URL, i), auth=auth, headers=headers)
+
+    # Populate the database
+    data = {
+        "language": "javascript",
+        "views": {
+            "all": {"map": "function(doc) { emit(doc._id); }"},
+            "by_data": {"map": "function(doc) { emit(doc.data, doc); }"},
+        },
+    }
+    requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
+
+
 def check_node_stats():
     auth = (common.USER, common.PASSWORD)
     headers = {'Accept': 'text/json'}
@@ -198,3 +159,43 @@ def check_node_stats():
         res = requests.get(url, auth=auth, headers=headers)
         data = res.json()
         assert "global_changes" in data, "Invalid stats. Get stats url: {}".format(url)
+
+
+def send_replication():
+    """
+    Send replication task to trigger tasks
+    """
+    replicator_url = "{}/_replicate".format(common.NODE1['server'])
+
+    replication_body = {
+        '_id': 'my_replication_id',
+        'source': 'http://dduser:pawprint@127.0.0.1:5984/kennel',
+        'target': 'http://dduser:pawprint@127.0.0.1:5984/kennel_replica',
+        'create_target': True,
+        'continuous': True,
+    }
+    for i in range(5):
+        body = replication_body.copy()
+        body['_id'] = 'my_replication_id_{}'.format(i)
+        body['target'] = body['target'] + str(i)
+        r = requests.post(
+            replicator_url,
+            auth=(common.NODE1['user'], common.NODE1['password']),
+            headers={'Content-Type': 'application/json'},
+            json=body,
+        )
+        r.raise_for_status()
+
+
+def get_replication():
+    """
+    Attempt to get active replication tasks
+    """
+    task_url = "{}/_active_tasks".format(common.NODE1['server'])
+
+    r = requests.get(task_url, auth=(common.NODE1['user'], common.NODE1['password']))
+    r.raise_for_status()
+    active_tasks = r.json()
+    count = len(active_tasks)
+    assert count > 0, "Expect active tasks but none found.\nactive_tasks response: {}".format(active_tasks)
+
