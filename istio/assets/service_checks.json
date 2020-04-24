@@ -1,1 +1,66 @@
-[]
+[
+    {
+        "agent_version": "6.20.0",
+        "integration": "Istio",
+        "check": "istio.prometheus.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Istio prometheus health",
+        "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "6.20.0",
+        "integration": "Istio",
+        "check": "istio.pilot.prometheus.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Istio pilot prometheus health",
+        "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "6.20.0",
+        "integration": "Istio",
+        "check": "istio.galley.prometheus.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Istio galley prometheus health",
+        "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint. Returns `OK` otherwise."
+    },
+    {
+        "agent_version": "6.20.0",
+        "integration": "Istio",
+        "check": "istio.citadel.prometheus.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "name": "Istio citadel prometheus health",
+        "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint. Returns `OK` otherwise."
+    },
+    
+]
+
+aggregator.assert_service_check('istio.galley.prometheus.health', Istio.OK)
+aggregator.assert_service_check('istio.citadel.prometheus.health', Istio.OK)
