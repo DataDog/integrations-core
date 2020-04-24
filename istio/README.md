@@ -25,6 +25,9 @@ Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [
 Add one of the configuration blocks below to your `istio.d/conf.yaml` file to start gathering your Istio Metrics for your supported version:
 
 1. To monitor the `istiod` deployment in Istio `v1.5+`, use the following configuration:
+
+    _Available in Istio integration version v3.1.0, which will be included in Agent 7.20. See the [Integration Management documentation][15] for instructions to upgrade the integration manually_
+    
     ```yaml
     init_config:
     
@@ -136,3 +139,4 @@ Additional helpful documentation, links, and articles:
 [12]: https://docs.datadoghq.com/integrations/envoy/#log-collection
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [14]: https://www.datadoghq.com/blog/istio-metrics/
+[15]: https://docs.datadoghq.com/agent/guide/integration-management/#install
