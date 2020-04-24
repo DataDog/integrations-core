@@ -19,12 +19,14 @@ def test_integration(aggregator):
     """
     check = ActiveMQXML(CHECK_NAME, {}, [CONFIG])
     check.check(CONFIG)
+
     _test_check(aggregator)
 
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(CONFIG)
+
     _test_check(aggregator)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
