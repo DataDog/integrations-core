@@ -98,7 +98,7 @@ def _assert_check(aggregator, gauges):
             expected_tags = ["design_document:{}".format(dd), "language:javascript", "db:{}".format(db)]
             aggregator.assert_metric(gauge, tags=expected_tags)
 
-    for db in ["kennel", "kennel_replica0"]:
+    for db in ["kennel", "db1"]:
         for gauge in gauges["by_db_gauges"]:
             expected_tags = ["db:{}".format(db)]
             aggregator.assert_metric(gauge, tags=expected_tags)
@@ -151,7 +151,7 @@ def test_db_blacklisting(aggregator, gauges):
 
     for node in [common.NODE1, common.NODE2, common.NODE3]:
         config = deepcopy(node)
-        config['db_blacklist'] = ['kennel']
+        config['db_blacklist'] = ['db1']
         configs.append(config)
 
     for config in configs:
@@ -159,13 +159,13 @@ def test_db_blacklisting(aggregator, gauges):
         check.check(config)
 
     for _ in configs:
-        for db in ['kennel_replica0']:
+        for db in ['db2']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags)
 
         for gauge in gauges["by_db_gauges"]:
-            expected_tags = ["db:kennel"]
+            expected_tags = ["db:db1"]
             aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
 
