@@ -1,6 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 active_directory.dra.inbound.bytes.after_compression,gauge,,byte,,The compressed size (in bytes) of compressed replication data inbound from directory system agents (DSAs) in other sites (per second).,-1,active_directory,ad dra inbound comp
-active_directory.dra.inbound.bytes.before_compression,gauge,,byte,,The uncompressed size (in bytes) of compressed replication data inbound from DSAs in other sites (per second).,-1,active_directory,ad dra inbound precomp
 active_directory.dra.inbound.bytes.not_compressed,gauge,,byte,,"The uncompressed size (in bytes) of replication data that was not compressed at the source - that is, inbound from other DSAs in the same site (per second).",-1,active_directory,ad dra inbound not comp
 active_directory.dra.inbound.bytes.total,gauge,,byte,,The total number of bytes (per second) received through replication. It is the sum of the number of bytes of uncompressed data (never compressed) and compressed data (after compression).,-1,active_directory,ad dra inbound total
 active_directory.dra.inbound.objects.remaining,gauge,,object,,The number of objects remaining until the full synchronization process is completed.,-1,active_directory,ad dra sync full objs
