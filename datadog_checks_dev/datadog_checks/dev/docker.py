@@ -104,6 +104,7 @@ def docker_run(
     conditions=None,
     env_vars=None,
     wrappers=None,
+    retries=None,
 ):
     """This utility provides a convenient way to safely set up and tear down Docker environments.
 
@@ -136,6 +137,8 @@ def docker_run(
     :param env_vars: A dictionary to update ``os.environ`` with during execution.
     :type env_vars: ``dict``
     :param wrappers: A list of context managers to use during execution.
+    :param retries: Number of times we should retry in case of failure.
+    :type build: ``bool``
     """
     if compose_file and up:
         raise TypeError('You must select either a compose file or a custom setup callable, not both.')
@@ -197,6 +200,7 @@ def docker_run(
         conditions=docker_conditions,
         env_vars=env_vars,
         wrappers=wrappers,
+        retries=retries,
     ) as result:
         yield result
 

@@ -4,6 +4,8 @@
 import time
 from contextlib import contextmanager
 
+from retrying import retry
+
 from ._env import (
     deserialize_data,
     get_env_vars,
@@ -24,7 +26,7 @@ except ImportError:
 
 
 @contextmanager
-def environment_run(up, down, on_error=None, sleep=None, endpoints=None, conditions=None, env_vars=None, wrappers=None):
+def environment_run(up, down, on_error=None, sleep=None, endpoints=None, conditions=None, env_vars=None, wrappers=None, retries=None):
     """This utility provides a convenient way to safely set up and tear down arbitrary types of environments.
 
     :param up: A custom setup callable.
@@ -43,6 +45,8 @@ def environment_run(up, down, on_error=None, sleep=None, endpoints=None, conditi
     :param env_vars: A dictionary to update ``os.environ`` with during execution.
     :type env_vars: ``dict``
     :param wrappers: A list of context managers to use during execution.
+    :param retries: Number of times we should retry in case of failure.
+    :type build: ``bool``
     """
     if not callable(up):
         raise TypeError('The custom setup `{}` is not callable.'.format(repr(up)))
@@ -57,15 +61,24 @@ def environment_run(up, down, on_error=None, sleep=None, endpoints=None, conditi
     if env_vars is not None:
         wrappers.insert(0, EnvVars(env_vars))
 
+    def before_attempts(attempt):
+        print('Starting environment attempt {}'.format(attempt))
+
+    @retry(stop_max_attempt_number=retries, wait_exponential_multiplier=1000, before_attempts=before_attempts)
+    def up_with_retry():
+        return up()
+
+    up_fn = up if (retry is None) else up_with_retry
+
     with ExitStack() as stack:
         for wrapper in wrappers:
             stack.enter_context(wrapper)
 
         try:
             # Create an environment variable to store setup result
-            key = 'environment_result_{}'.format(up.__class__.__name__.lower())
+            key = 'environment_result_{}'.format(up_fn.__class__.__name__.lower())
             if set_up_env():
-                result = up()
+                result = up_fn()
                 # Store the serialized data in the environment
                 set_env_vars({key: serialize_data(result)})
 
