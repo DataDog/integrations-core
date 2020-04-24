@@ -126,7 +126,7 @@ def test_db_whitelisting(aggregator, gauges):
 
     for n in [common.NODE1, common.NODE2, common.NODE3]:
         node = deepcopy(n)
-        node['db_whitelist'] = ['kennel']
+        node['db_whitelist'] = ['db0', 'db2', 'db4']
         configs.append(node)
 
     for config in configs:
@@ -134,14 +134,15 @@ def test_db_whitelisting(aggregator, gauges):
         check.check(config)
 
     for _ in configs:
-        for db in ['kennel_replica0']:
+        for db in ['db0', 'db2', 'db4']:
+            expected_tags = ["db:{}".format(db)]
+            for gauge in gauges["by_db_gauges"]:
+                aggregator.assert_metric(gauge, tags=expected_tags)
+
+        for db in ['db1', 'db3']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=0)
-
-        for gauge in gauges["by_db_gauges"]:
-            expected_tags = ["db:kennel"]
-            aggregator.assert_metric(gauge, tags=expected_tags)
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -151,7 +152,7 @@ def test_db_blacklisting(aggregator, gauges):
 
     for node in [common.NODE1, common.NODE2, common.NODE3]:
         config = deepcopy(node)
-        config['db_blacklist'] = ['db1']
+        config['db_blacklist'] = ['db0', 'db2', 'db4']
         configs.append(config)
 
     for config in configs:
@@ -159,14 +160,15 @@ def test_db_blacklisting(aggregator, gauges):
         check.check(config)
 
     for _ in configs:
-        for db in ['db2']:
+        for db in ['db1', 'db3']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags)
 
-        for gauge in gauges["by_db_gauges"]:
-            expected_tags = ["db:db1"]
-            aggregator.assert_metric(gauge, tags=expected_tags, count=0)
+        for db in ['db0', 'db2', 'db4']:
+            expected_tags = ["db:{}".format(db)]
+            for gauge in gauges["by_db_gauges"]:
+                aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
 
 @pytest.mark.usefixtures('dd_environment')
