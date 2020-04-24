@@ -20,6 +20,8 @@ MAX_SLOW_ENTRIES_KEY = "slowlog-max-len"
 REPL_KEY = 'master_link_status'
 LINK_DOWN_KEY = 'master_link_down_since_seconds'
 
+DEFAULT_CLIENT_NAME = "unknown"
+
 
 class Redis(AgentCheck):
     db_key_pattern = re.compile(r'^db\d+')
@@ -240,6 +242,16 @@ class Redis(AgentCheck):
                 self.gauge(self.GAUGE_KEYS[info_name], info[info_name], tags=tags)
             elif info_name in self.RATE_KEYS:
                 self.rate(self.RATE_KEYS[info_name], info[info_name], tags=tags)
+
+        clients_by_name = defaultdict(int)
+        clients = conn.client_list()
+        for c in clients:
+            name = c["name"]
+            if name == "":
+                name = DEFAULT_CLIENT_NAME
+            clients_by_name[name] += 1
+        for name, count in clients_by_name.items():
+            self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
 
         for config_key, value in iteritems(config):
             metric_name = self.CONFIG_GAUGE_KEYS.get(config_key)
