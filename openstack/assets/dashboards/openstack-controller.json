@@ -299,7 +299,7 @@
                         "type": "area"
                     },
                     {
-                        "q": "avg:openstack.nova.limits.max_total_ram_size{$project}*1024000",
+                        "q": "avg:openstack.nova.limits.max_total_ram_size{$project}",
                         "style": {
                             "palette": "warm",
                             "type": "solid",
