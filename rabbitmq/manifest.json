@@ -31,7 +31,7 @@
     "dashboards": {},
     "saved_views": {
       "pid_overview": "assets/saved_views/status_overview.json",
-      "rabbitmq_patern": "assets/saved_views/rabbitmq_patern.json"
+      "rabbitmq_pattern": "assets/saved_views/rabbitmq_pattern.json"
     },
     "service_checks": "assets/service_checks.json"
   }
