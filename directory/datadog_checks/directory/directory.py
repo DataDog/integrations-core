@@ -129,12 +129,12 @@ class DirectoryCheck(AgentCheck):
 
             matched_files_length = get_length(matched_files)
             directory_files += matched_files_length
-
+            
+            # We're just looking to count the files.
+            if countonly:
+                continue
+            
             for file_entry in matched_files:
-                # We're just looking to count the files.
-                if countonly:
-                    continue
-
                 try:
                     file_stat = file_entry.stat()
 
