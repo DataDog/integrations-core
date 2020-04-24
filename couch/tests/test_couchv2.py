@@ -227,8 +227,7 @@ def test_only_max_nodes_are_scanned(aggregator, gauges, number_nodes):
 
     metrics = []
     for metric_list in aggregator._metrics.values():
-        for m in metric_list:
-            metrics.append(m)
+        metrics.extend(metric_list)
 
     instance_tags = set()
     for m in metrics:
@@ -251,8 +250,7 @@ def test_only_max_dbs_are_scanned(aggregator, gauges, number_db):
 
     metrics = []
     for metric_list in aggregator._metrics.values():
-        for m in metric_list:
-            metrics.append(m)
+        metrics.extend(metric_list)
 
     db_tags = set()
     for m in metrics:
