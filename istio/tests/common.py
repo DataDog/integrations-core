@@ -34,10 +34,6 @@ MESH_METRICS = [
     'istio.mesh.request.size.sum',
     'istio.mesh.response.size.count',
     'istio.mesh.response.size.sum',
-    'istio.mesh.tcp.connections_closed.total',
-    'istio.mesh.tcp.connections_opened.total',
-    'istio.mesh.tcp.received_bytes.total',
-    'istio.mesh.tcp.send_bytes.total',
 ]
 
 MESH_METRICS_1_4 = [
@@ -48,6 +44,11 @@ MESH_METRICS_1_4 = [
 MESH_MERICS_1_5 = [
     'istio.mesh.request.duration.milliseconds.count',
     'istio.mesh.request.duration.milliseconds.sum',
+    # TCP Metrics are supported in post 1.4 istio fixture
+    'istio.mesh.tcp.connections_closed.total',
+    'istio.mesh.tcp.connections_opened.total',
+    'istio.mesh.tcp.received_bytes.total',
+    'istio.mesh.tcp.send_bytes.total',
 ]
 
 
