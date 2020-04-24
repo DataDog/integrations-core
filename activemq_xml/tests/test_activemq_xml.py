@@ -7,6 +7,7 @@ import pytest
 
 from datadog_checks.activemq_xml import ActiveMQXML
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from .common import CHECK_NAME, CONFIG, GENERAL_METRICS, QUEUE_METRICS, SUBSCRIBER_METRICS, TOPIC_METRICS, URL
 
 
@@ -25,6 +26,8 @@ def test_integration(aggregator):
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(CONFIG)
     _test_check(aggregator)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def _test_check(aggregator):
