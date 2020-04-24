@@ -64,11 +64,7 @@ def dd_environment():
     else:
         with docker_run(
             compose_file=os.path.join(common.HERE, 'compose', 'compose_v2.yaml'),
-            env_vars={
-                'COUCH_PORT': common.PORT,
-                'COUCH_USER': common.USER,
-                'COUCH_PASSWORD': common.PASSWORD,
-            },
+            env_vars={'COUCH_PORT': common.PORT, 'COUCH_USER': common.USER, 'COUCH_PASSWORD': common.PASSWORD},
             conditions=[
                 CheckEndpoints([common.URL]),
                 CheckDockerLogs('couchdb-0', ['Started replicator db changes listener']),

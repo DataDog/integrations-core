@@ -26,4 +26,3 @@ def test_collect_metadata_instance(aggregator, datadog_agent, instance):
 
     datadog_agent.assert_metadata(common.CHECK_ID, version_metadata)
     datadog_agent.assert_metadata_count(5)
-
