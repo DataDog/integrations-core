@@ -9,6 +9,7 @@ import json
 import re
 import threading
 import time
+import weakref
 from collections import defaultdict
 from concurrent import futures
 from typing import Any, DefaultDict, Dict, List, Optional, Tuple
@@ -42,6 +43,56 @@ def reply_invalid(oid):
     return noSuchInstance.isSameTypeWith(oid) or noSuchObject.isSameTypeWith(oid)
 
 
+def discover_instances(config, interval, check_ref):
+    # type: (InstanceConfig, float, Any) -> None
+
+    while True:
+        start_time = time.time()
+        for host in config.network_hosts():
+            check = check_ref()
+            if check is None or not check._running:
+                return
+            instance = copy.deepcopy(config.instance)
+            instance.pop('network_address')
+            instance['ip_address'] = host
+
+            host_config = check._build_config(instance)
+
+            try:
+                sys_object_oid = check.fetch_sysobject_oid(host_config)
+            except Exception as e:
+                check.log.debug("Error scanning host %s: %s", host, e)
+                del check
+                continue
+
+            try:
+                profile = check._profile_for_sysobject_oid(sys_object_oid)
+            except ConfigurationError:
+                if not (host_config.all_oids or host_config.bulk_oids):
+                    check.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
+                    del check
+                    continue
+            else:
+                host_config.refresh_with_profile(check.profiles[profile])
+                host_config.add_profile_tag(profile)
+
+            config.discovered_instances[host] = host_config
+
+            write_persistent_cache(check.check_id, json.dumps(list(config.discovered_instances)))
+            del check
+
+        check = check_ref()
+        if check is None:
+            return
+        # Write again at the end of the loop, in case some host have been removed since last
+        write_persistent_cache(check.check_id, json.dumps(list(config.discovered_instances)))
+        del check
+
+        time_elapsed = time.time() - start_time
+        if interval - time_elapsed > 0:
+            time.sleep(interval - time_elapsed)
+
+
 class SnmpCheck(AgentCheck):
 
     SC_STATUS = 'snmp.can_check'
@@ -50,6 +101,7 @@ class SnmpCheck(AgentCheck):
     _executor = None
     _NON_REPEATERS = 0
     _MAX_REPETITIONS = 25
+    _thread_factory = threading.Thread
 
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
@@ -139,46 +191,6 @@ class SnmpCheck(AgentCheck):
             return ip
         else:
             return None
-
-    def discover_instances(self, interval):
-        # type: (float) -> None
-        config = self._config
-
-        while self._running:
-            start_time = time.time()
-            for host in config.network_hosts():
-                instance = copy.deepcopy(config.instance)
-                instance.pop('network_address')
-                instance['ip_address'] = host
-
-                host_config = self._build_config(instance)
-
-                try:
-                    sys_object_oid = self.fetch_sysobject_oid(host_config)
-                except Exception as e:
-                    self.log.debug("Error scanning host %s: %s", host, e)
-                    continue
-
-                try:
-                    profile = self._profile_for_sysobject_oid(sys_object_oid)
-                except ConfigurationError:
-                    if not (host_config.all_oids or config.next_oids or host_config.bulk_oids):
-                        self.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
-                        continue
-                else:
-                    host_config.refresh_with_profile(self.profiles[profile])
-                    host_config.add_profile_tag(profile)
-
-                config.discovered_instances[host] = host_config
-
-                write_persistent_cache(self.check_id, json.dumps(list(config.discovered_instances)))
-
-            # Write again at the end of the loop, in case some host have been removed since last
-            write_persistent_cache(self.check_id, json.dumps(list(config.discovered_instances)))
-
-            time_elapsed = time.time() - start_time
-            if interval - time_elapsed > 0:
-                time.sleep(interval - time_elapsed)
 
     def fetch_results(
         self,
@@ -347,7 +359,9 @@ class SnmpCheck(AgentCheck):
             message = 'discovery_interval could not be parsed as a number: {!r}'.format(raw_discovery_interval)
             raise ConfigurationError(message)
 
-        self._thread = threading.Thread(target=self.discover_instances, args=(discovery_interval,), name=self.name)
+        self._thread = self._thread_factory(
+            target=discover_instances, args=(self._config, discovery_interval, weakref.ref(self)), name=self.name
+        )
         self._thread.daemon = True
         self._thread.start()
         self._executor = futures.ThreadPoolExecutor(max_workers=self._config.workers)
