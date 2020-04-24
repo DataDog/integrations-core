@@ -63,7 +63,6 @@ files:
       description: The optional WMI namespace to connect to.
       value:
         type: string
-        default: cimv2
         example: cimv2
     - name: filters
       description: |
@@ -95,7 +94,6 @@ files:
         See https://msdn.microsoft.com/en-us/library/aa393067.aspx
       value:
         type: integer
-        default: 64
         example: 64
     - name: tag_by
       description: |
