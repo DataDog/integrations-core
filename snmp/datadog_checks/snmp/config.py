@@ -15,7 +15,6 @@ from .pysnmp_types import (
     DirMibSource,
     MibViewController,
     ObjectIdentity,
-    ObjectType,
     OctetString,
     SnmpEngine,
     UdpTransportTarget,
@@ -200,7 +199,7 @@ class InstanceConfig:
             )
 
     def resolve_oid(self, oid):
-        # type: (ObjectType) -> Tuple[str, Tuple[str, ...]]
+        # type: (OID) -> Tuple[str, Tuple[str, ...]]
         return self._resolver.resolve_oid(oid)
 
     def refresh_with_profile(self, profile):
@@ -350,7 +349,7 @@ class InstanceConfig:
                 symbol_oid = symbol['OID']
                 symbol_name = symbol['name']
                 oid = OID(symbol_oid)
-                self._resolver.register(oid.as_tuple(), symbol_name)
+                self._resolver.register(oid, symbol_name)
             else:
                 oid = OID(ObjectIdentity(mib, symbol))
                 symbol_name = symbol
@@ -444,7 +443,7 @@ class InstanceConfig:
                 oid = OID(metric['OID'])
 
                 table_oids[metric['OID']] = (oid, [])
-                self._resolver.register(oid.as_tuple(), metric['name'])
+                self._resolver.register(oid, metric['name'])
 
                 parsed_metric = ParsedMetric(
                     metric['name'], tags=metric_tags, forced_type=forced_type, enforce_scalar=False
@@ -513,7 +512,7 @@ class InstanceConfig:
                 oid = OID(ObjectIdentity(mib, symbol))
             else:
                 oid = OID(tag['OID'])
-                self._resolver.register(oid.as_tuple(), symbol)
+                self._resolver.register(oid, symbol)
 
             oids.append(oid)
             parsed_metric_tags.append(parsed)
@@ -527,7 +526,7 @@ class InstanceConfig:
         # Reference sysUpTimeInstance directly, see http://oidref.com/1.3.6.1.2.1.1.3.0
         uptime_oid = OID('1.3.6.1.2.1.1.3.0')
         self.all_oids.append(uptime_oid)
-        self._resolver.register(uptime_oid.as_tuple(), 'sysUpTimeInstance')
+        self._resolver.register(uptime_oid, 'sysUpTimeInstance')
 
         parsed_metric = ParsedMetric('sysUpTimeInstance', forced_type='gauge')
         self.parsed_metrics.append(parsed_metric)
