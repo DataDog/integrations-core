@@ -98,7 +98,7 @@ Checks are organized in regular Python packages under the `datadog_checks` names
 
 ### Implement check logic
 
-Let's say you want to create an Agent Check composed only of a Service Check named `awesome.search` that searches for a string on a web page. It will result in `OK` if the string is present, `WARNING` if the page is accessible but the string was not found, and `CRITICAL` if the page is inaccessible. See the [Metric Submission: Custom Agent Check](https://docs.datadoghq.com/developers/metrics/agent_metrics_submission/) if you want to learn how to submit metrics with your Agent Check.
+Let's say you want to create an Agent Check composed only of a Service Check named `awesome.search` that searches for a string on a web page. It will result in `OK` if the string is present, `WARNING` if the page is accessible but the string was not found, and `CRITICAL` if the page is inaccessible. See the [Metric Submission: Custom Agent Check][5] if you want to learn how to submit metrics with your Agent Check.
 
 The code contained within `awesome/datadog_checks/awesome/awesome.py` would look something like this:
 
@@ -137,7 +137,7 @@ class AwesomeCheck(AgentCheck):
                 self.service_check('awesome.search', self.WARNING)
 ```
 
-To learn more about the base Python class, see the [Python API documentation][5].
+To learn more about the base Python class, see the [Python API documentation][6].
 
 ### Writing tests
 
@@ -146,9 +146,9 @@ There are two basic types of tests:
 - Unit tests for specific functionality.
 - Integration tests that execute the `check` method and verify proper metrics collection.
 
-Tests are _required_ if you want your integration to be included in `integrations-extras`. Note that [pytest][6] and [tox][7] are used to run the tests.
+Tests are _required_ if you want your integration to be included in `integrations-extras`. Note that [pytest][7] and [tox][8] are used to run the tests.
 
-For more information, see the [Datadog Checks Dev documentation][8].
+For more information, see the [Datadog Checks Dev documentation][9].
 
 #### Unit test
 
@@ -183,7 +183,7 @@ def test_config():
     c.check({'url': 'http://foobar', 'search_string': 'foo'})
 ```
 
-`pytest` has the concept of _markers_ that can be used to group tests into categories. Notice that  `test_config` is marked as a `unit` test.
+`pytest` has the concept of _markers_ that can be used to group tests into categories. Notice that `test_config` is marked as a `unit` test.
 
 The scaffolding has already been set up to run all tests located in `awesome/tests`. Run the tests:
 
@@ -270,10 +270,10 @@ The check is almost done. Let's add the final touches by adding the integration 
 In order for your check to be complete you need to populate a set of assets provided by the ddev scaffolding . They already have the correct format but you must fill out the documents with the relevant information:
 
 - **A `README.md` file**: This contains the documentation for your Check, how to set it up, which data it collects, etc..
-- **A `conf.yaml` file**: This contains all configuration options for your Agent check. [See the configuration file reference documentation to learn its logic.](https://github.com/DataDog/integrations-core/blob/master/docs/dev/check_references.md#configuration-file)
-- **A `manifest.json` file**: This contains the metadata for your Agent Check like its title, its categories... [See the manifest reference documentation to lean more.](https://github.com/DataDog/integrations-core/blob/master/docs/dev/check_references.md#manifest-file)
-- **A `metadata.csv` file**: This contains the list of all metrics collected by your Agent Check. [See the metrics metadata reference documentation to learn more.](https://github.com/DataDog/integrations-core/blob/master/docs/dev/check_references.md#metrics-metadata-file)
-- **A `service_check.json` file**: This contains the list of all Service Checks collected by your Agent check. [See the Service Check reference documentation to learn more.](https://github.com/DataDog/integrations-core/blob/master/docs/dev/check_references.md#service-check-file)
+- **A `conf.yaml` file**: This contains all configuration options for your Agent check. [See the configuration file reference documentation to learn its logic.][10]
+- **A `manifest.json` file**: This contains the metadata for your Agent Check like its title, its categories... [See the manifest reference documentation to lean more.][11]
+- **A `metadata.csv` file**: This contains the list of all metrics collected by your Agent Check. [See the metrics metadata reference documentation to learn more.][12]
+- **A `service_check.json` file**: This contains the list of all Service Checks collected by your Agent check. [See the Service Check reference documentation to learn more.][13]
 
 For this example, those files would have the following shape:
 
@@ -291,11 +291,10 @@ init_config:
 ## of the init_config part.
 
 instances:
-
-    ## @param url - string - required
-    ## The URL you want to check
-    ## (Note the indentation with the hyphen)
-    #
+  ## @param url - string - required
+  ## The URL you want to check
+  ## (Note the indentation with the hyphen)
+  #
   - url: http://example.org
 
     ## @param search_string - string - required
@@ -318,18 +317,16 @@ instances:
     ## Optional flags you can set
     #
     options:
-
       ## @param follow_redirects - boolean - optional - default: false
       ## Set to true to follow 301 Redirect
       #
       # follow_redirects: false
-
 ```
 
 {{% /tab %}}
 {{% tab "Manifest" %}}
 
-The `awesome/manifest.json` for the Awesome service check. Note that the `guid` must be unique (and valid), so do *not* use the one from this example—the tooling will generate one for you in any case:
+The `awesome/manifest.json` for the Awesome service check. Note that the `guid` must be unique (and valid), so do _not_ use the one from this example—the tooling will generate one for you in any case:
 
 ```json
 {
@@ -343,15 +340,9 @@ The `awesome/manifest.json` for the Awesome service check. Note that the `guid` 
   "short_description": "",
   "guid": "x16b8750-df1e-46c0-839a-2056461b604x",
   "support": "contrib",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
+  "supported_os": ["linux", "mac_os", "windows"],
   "public_title": "Datadog-awesome Integration",
-  "categories": [
-    "web"
-  ],
+  "categories": ["web"],
   "type": "check",
   "is_public": false,
   "integration_id": "awesome",
@@ -378,15 +369,15 @@ The example integration contains a service check, so you need to add it to the `
 
 ```json
 [
-    {
-        "agent_version": "6.0.0",
-        "integration": "awesome",
-        "check": "awesome.search",
-        "statuses": ["ok", "warning", "critical"],
-        "groups": [],
-        "name": "Awesome search!",
-        "description": "Returns `CRITICAL` if the check can't access the page, `WARNING` if the search string was not found, or `OK` otherwise."
-    }
+  {
+    "agent_version": "6.0.0",
+    "integration": "awesome",
+    "check": "awesome.search",
+    "statuses": ["ok", "warning", "critical"],
+    "groups": [],
+    "name": "Awesome search!",
+    "description": "Returns `CRITICAL` if the check can't access the page, `WARNING` if the search string was not found, or `OK` otherwise."
+  }
 ]
 ```
 
@@ -395,7 +386,7 @@ The example integration contains a service check, so you need to add it to the `
 
 ## Building
 
-`setup.py` provides the setuptools setup script that helps us package and build the wheel. To learn more about Python packaging, take a look at [the official Python documentation][15].
+`setup.py` provides the setuptools setup script that helps us package and build the wheel. To learn more about Python packaging, take a look at [the official Python documentation][14].
 
 Once your `setup.py` is ready, create a wheel:
 
@@ -408,7 +399,7 @@ The wheel contains only the files necessary for the functioning of the integrati
 
 ## Installing
 
-The wheel is installed via the Agent `integration` command, available in [Agent v6.10.0 and up][16]. Depending on your environment, you may need to execute this command as a specific user or with particular privileges:
+The wheel is installed via the Agent `integration` command, available in [Agent v6.10.0 and up][15]. Depending on your environment, you may need to execute this command as a specific user or with particular privileges:
 
 **Linux** (as `dd-agent`):
 
@@ -440,17 +431,14 @@ For Agent versions >= 6.12:
 [2]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/python.md
 [3]: https://github.com/DataDog/integrations-extras
 [4]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev
-[5]: https://github.com/DataDog/datadog-agent/blob/6.2.x/docs/dev/checks/python/check_api.md
-[6]: https://docs.pytest.org/en/latest
-[7]: https://tox.readthedocs.io/en/latest
-[8]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev#development
-[9]: https://github.com/DataDog/documentation/blob/master/CONTRIBUTING.md
-[10]: https://docs.datadoghq.com/integrations
-[11]: https://www.uuidgenerator.net
-[12]: https://docs.datadoghq.com/developers/metrics/metrics_type/
-[13]: https://docs.datadoghq.com/developers/metrics/metrics_units/
-[14]: https://docs.datadoghq.com/getting_started/tagging
-[15]: https://packaging.python.org/tutorials/distributing-packages
-[16]: https://docs.datadoghq.com/agent/
-[17]: https://en.wikipedia.org/wiki/YAML
-[18]: http://yaml-online-parser.appspot.com/
+[5]: https://docs.datadoghq.com/developers/metrics/agent_metrics_submission/
+[6]: https://github.com/DataDog/datadog-agent/blob/6.2.x/docs/dev/checks/python/check_api.md
+[7]: https://docs.pytest.org/en/latest
+[8]: https://tox.readthedocs.io/en/latest
+[9]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev#development
+[10]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/check_references.md#configuration-file
+[11]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/check_references.md#manifest-file
+[12]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/check_references.md#metrics-metadata-file
+[13]: https://github.com/DataDog/integrations-core/blob/master/docs/dev/check_references.md#service-check-file
+[14]: https://packaging.python.org/tutorials/distributing-packages
+[15]: https://docs.datadoghq.com/agent/

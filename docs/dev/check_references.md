@@ -20,7 +20,7 @@ Configuration blocks in either section take the following form:
 Configuration blocks follow a few guidelines:
 
 - Description must not be empty
-- Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>`, as per the documentation [contributing guidelines][9]:
+- Placeholders should always follow this format: `<THIS_IS_A_PLACEHOLDER>`, as per the documentation [contributing guidelines][1]:
 - All required parameters are **not** commented by default.
 - All optional parameters are commented by default.
 - If a placeholder has a default value for an integration (like the status endpoint of an integration), it can be used instead of a generic placeholder.
@@ -65,7 +65,7 @@ You can add a block comment anywhere in the configuration file with the followin
 - Comments start with `##` (note the space)
 - Comments should be indented like any variable (the hyphen doesn't count)
 
-For more information about YAML syntax, see [Wikipedia][17]. Feel free to play around with the [Online YAML Parser][18], too!
+For more information about YAML syntax, see [Wikipedia][2]. Feel free to play around with the [Online YAML Parser][3], too!
 
 ## Manifest file
 
@@ -76,10 +76,10 @@ The complete list of mandatory and optional attributes for the `manifest.json` f
 | Attribute                   | Type            | Mandatory/Optional | Description                                                                                                                                                                                                              |
 | --------------------------- | --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `integration_id`            | String          | Mandatory          | The unique identifying name of this integration. Usually kebab case of the Display Name                                                                                                                                  |
-| `categories`                | Array of String | Mandatory          | Integration categories used on the [public documentation integrations page][10].                                                                                                                                         |
+| `categories`                | Array of String | Mandatory          | Integration categories used on the [public documentation integrations page][4].                                                                                                                                          |
 | `creates_events`            | Boolean         | Mandatory          | If the integration should be able to create events. If this is set to `false`, attempting to create an event from the integration results in an error.                                                                   |
-| `display_name`              | String          | Mandatory          | Title displayed on the corresponding integration tile in the Datadog application and on the [public documentation integrations page][10]                                                                                 |
-| `guid`                      | String          | Mandatory          | Unique ID for the integration. [Generate a UUID][11]                                                                                                                                                                     |
+| `display_name`              | String          | Mandatory          | Title displayed on the corresponding integration tile in the Datadog application and on the [public documentation integrations page][4]                                                                                  |
+| `guid`                      | String          | Mandatory          | Unique ID for the integration. [Generate a UUID][5]                                                                                                                                                                      |
 | `is_public`                 | Boolean         | Mandatory          | If set to `false` the integration `README.md` content is not indexed by bots in the Datadog public documentation.                                                                                                        |
 | `maintainer`                | String          | Mandatory          | Email of the owner of the integration.                                                                                                                                                                                   |
 | `manifest_version`          | String          | Mandatory          | Version of the current manifest.                                                                                                                                                                                         |
@@ -109,9 +109,9 @@ Descriptions of each column of the `metadata.csv` file:
 | Column name     | Mandatory/Optional | Description                                                                                                                                                                                                                                                                                                                             |
 | --------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `metric_name`   | Mandatory          | Name of the metric.                                                                                                                                                                                                                                                                                                                     |
-| `metric_type`   | Mandatory          | [Type of the metric][12].                                                                                                                                                                                                                                                                                                               |
+| `metric_type`   | Mandatory          | [Type of the metric][6].                                                                                                                                                                                                                                                                                                                |
 | `interval`      | Optional           | Collection interval of the metric in second.                                                                                                                                                                                                                                                                                            |
-| `unit_name`     | Optional           | Unit of the metric. [Complete list of supported units][13].                                                                                                                                                                                                                                                                             |
+| `unit_name`     | Optional           | Unit of the metric. [Complete list of supported units][7].                                                                                                                                                                                                                                                                              |
 | `per_unit_name` | Optional           | If there is a unit sub-division, i.e `request per second`                                                                                                                                                                                                                                                                               |
 | `description`   | Optional           | Description of the metric.                                                                                                                                                                                                                                                                                                              |
 | `orientation`   | Mandatory          | Set to `1` if the metric should go up, i.e `myapp.turnover`. Set to `0` if the metric variations are irrelevant. Set to `-1` if the metric should go down, i.e `myapp.latency`.                                                                                                                                                         |
@@ -130,6 +130,15 @@ The `service_checks.json` file contains the following mandatory attributes:
 | `integration`   | The name of the integration that emits this service check. Must be the non-normalized `display_name` from `manifest.json`. |
 | `check`         | Name of the Service Check. It must be unique.                                                                              |
 | `statuses`      | List of different status of the check, to choose among `ok`, `warning`, and `critical`. `unknown` is also a possibility.   |
-| `groups`        | [Tags][14] sent with the Service Check.                                                                                    |
+| `groups`        | [Tags][8] sent with the Service Check.                                                                                     |
 | `name`          | Displayed name of the Service Check. The displayed name must be self-explanatory and unique across all integrations.       |
 | `description`   | Description of the Service Check                                                                                           |
+
+[1]: https://github.com/DataDog/documentation/blob/master/CONTRIBUTING.md
+[2]: https://en.wikipedia.org/wiki/YAML
+[3]: http://yaml-online-parser.appspot.com/
+[4]: https://docs.datadoghq.com/integrations
+[5]: https://www.uuidgenerator.net
+[6]: https://docs.datadoghq.com/developers/metrics/metrics_type/
+[7]: https://docs.datadoghq.com/developers/metrics/metrics_units/
+[8]: https://docs.datadoghq.com/getting_started/tagging
