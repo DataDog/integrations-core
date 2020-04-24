@@ -116,7 +116,7 @@ def send_replication():
         'continuous': True,
     }
     for i in range(5):
-        print("Create Replication task {}".format(i))
+        print("[INFO] create replication task {}".format(i))
         body = replication_body.copy()
         body['_id'] = 'my_replication_id_{}'.format(i)
         body['target'] = body['target'] + str(i)
@@ -127,7 +127,7 @@ def send_replication():
             json=body,
         )
         r.raise_for_status()
-        print("Replication task created:", r.json())
+        print("[INFO] replication task created:", r.json())
 
 
 def get_replication():
@@ -139,7 +139,7 @@ def get_replication():
     r = requests.get(task_url, auth=(common.NODE1['user'], common.NODE1['password']))
     r.raise_for_status()
     active_tasks = r.json()
-    print("active_tasks:", active_tasks)
+    print("[INFO] active_tasks response:", active_tasks)
     count = len(active_tasks)
     return count > 0
 
@@ -181,7 +181,7 @@ def enable_cluster():
 
     resp = requests.get("{}/_membership".format(common.URL), auth=auth, headers=headers)
     membership = resp.json()
-    print("[INFO] membership", membership)
+    print("[INFO] membership response:", membership)
     assert len(membership['cluster_nodes']) == 3
 
 
@@ -191,7 +191,7 @@ def check_node_stats():
     # Check all nodes have stats
     for node in common.ALL_NODES:
         url = "{}/_node/{}/_stats".format(common.URL, node['name'])
-        print("[INFO] url", url)
+        print("[INFO] get stats url:", url)
         res = requests.get(url, auth=auth, headers=headers)
         data = res.json()
         assert "global_changes" in data
