@@ -29,17 +29,28 @@ def test_get_current_branch():
 def test_files_changed():
     with mock.patch('datadog_checks.dev.tooling.git.chdir') as chdir:
         with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
-            run.return_value = mock.MagicMock()
-            run.return_value.stdout = '''
+            name_status_out = mock.MagicMock()
+            name_status_out.stdout = '''
 M	foo
 R100	bar	baz
 R100	foo2	foo3
             '''
+            name_only_out = mock.MagicMock()
+            name_only_out.stdout = '''
+file1
+file2
+'''
+
+            run.side_effect = [name_status_out, name_only_out]
             set_root('/foo/')
             retval = files_changed()
             chdir.assert_called_once_with('/foo/')
-            run.assert_called_once_with('git diff --name-status master...', capture='out')
-            assert retval == ['bar', 'baz', 'foo', 'foo2', 'foo3']
+            calls = [
+                mock.call('git diff --name-status master...', capture='out'),
+                mock.call('git diff --name-only master', capture='out'),
+            ]
+            run.assert_has_calls(calls, any_order=True)
+            assert retval == ['bar', 'baz', 'file1', 'file2', 'foo', 'foo2', 'foo3']
 
 
 def test_get_commits_since():
