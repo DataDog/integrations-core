@@ -126,7 +126,7 @@ def test_db_whitelisting(aggregator, gauges):
 
     for n in [common.NODE1, common.NODE2, common.NODE3]:
         node = deepcopy(n)
-        node['db_whitelist'] = ['db0', 'db2', 'db4']
+        node['db_whitelist'] = ['db0']
         configs.append(node)
 
     for config in configs:
@@ -134,12 +134,12 @@ def test_db_whitelisting(aggregator, gauges):
         check.check(config)
 
     for _ in configs:
-        for db in ['db0', 'db2', 'db4']:
+        for db in ['db0']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags)
 
-        for db in ['db1', 'db3']:
+        for db in ['db1']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=0)
@@ -152,7 +152,7 @@ def test_db_blacklisting(aggregator, gauges):
 
     for node in [common.NODE1, common.NODE2, common.NODE3]:
         config = deepcopy(node)
-        config['db_blacklist'] = ['db0', 'db2', 'db4']
+        config['db_blacklist'] = ['db0']
         configs.append(config)
 
     for config in configs:
@@ -160,12 +160,12 @@ def test_db_blacklisting(aggregator, gauges):
         check.check(config)
 
     for _ in configs:
-        for db in ['db1', 'db3']:
+        for db in ['db1']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags)
 
-        for db in ['db0', 'db2', 'db4']:
+        for db in ['db0']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=0)
