@@ -35,6 +35,7 @@ REQUIRES = [
     'six',
     "shutilwhich==1.1.0; python_version < '3.0'",
     "subprocess32==3.5.4; python_version < '3.0'",
+    'tenacity',
 ]
 
 
