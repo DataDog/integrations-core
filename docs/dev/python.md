@@ -7,7 +7,7 @@ This document covers how to setup a Python environment to work on Agent-based In
 
 ## Python 2 or Python 3?
 
-Integrations run either within the Agent's embedded Python environment or within the testing environment. The current version of the embedded environment is recorded in the [Omnibus code][1]. The Agent and testing environments are Python 2, but an eventual upgrade to Python 3 is inevitable, thus new Integrations must be compatible with both versions.
+Integrations run either within the Agent's embedded Python environment or within the testing environment. The current version of the embedded environment is recorded in the [Omnibus code][1]. The Agent and testing environments are Python 2 for Agent v6, and Python 3 for Agent v7. Make sure your Integrations are compatible with both versions.
 
 ## Install Python
 
