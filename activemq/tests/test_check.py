@@ -4,8 +4,9 @@
 
 import pytest
 
+from datadog_checks.dev.tooling.jmx import JVM_E2E_METRICS
 from datadog_checks.dev.utils import get_metadata_metrics
-from .common import ACTIVEMQ_E2E_METRICS, JVM_E2E_METRICS
+from .common import ACTIVEMQ_E2E_METRICS
 
 
 @pytest.mark.e2e
@@ -17,4 +18,5 @@ def test(dd_agent_check):
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS)
+    # TODO: At the moment, JMX reported metrics are NOT in-app metrics, hence we can't assert the type yet.
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False, exclude=JVM_E2E_METRICS)
