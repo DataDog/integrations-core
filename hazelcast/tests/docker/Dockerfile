@@ -8,5 +8,4 @@ RUN apk update && \
     mkdir /tmp/log4j2 && \
     cd /tmp/log4j2 && \
     curl -LO https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/${LOG4J2_VERSION}/log4j-api-${LOG4J2_VERSION}.jar && \
-    curl -LO https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/${LOG4J2_VERSION}/log4j-core-${LOG4J2_VERSION}.jar && \
-    cd -
+    curl -LO https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/${LOG4J2_VERSION}/log4j-core-${LOG4J2_VERSION}.jar
