@@ -7,7 +7,6 @@ services:
       dockerfile: Dockerfile
       args:
         HAZELCAST_VERSION: ${HAZELCAST_VERSION}
-        LOG4J2_VERSION: "2.13.2"
     container_name: hazelcast1
     environment:
       CLASSPATH: /tmp/log4j2/*
