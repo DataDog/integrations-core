@@ -1,25 +1,26 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+"""
+Helpers to parse the `metric_tags` section of a config file.
+"""
 import re
-from typing import List, TypedDict
+from typing import Dict, List, NamedTuple, TypedDict
 
 from datadog_checks.base import ConfigurationError
 
-from ...models import OID
-from ...pysnmp_types import ObjectIdentity
-from ...resolver import OIDResolver
-from ..parsed_metrics import ParsedMatchMetricTag, ParsedMetricTag, ParsedSimpleMetricTag
-from .models import MetricTagParseResult
-from .types import MetricTag
+from ..models import OID
+from ..pysnmp_types import ObjectIdentity
+from ..resolver import OIDResolver
+from .parsed_metrics import ParsedMatchMetricTag, ParsedMetricTag, ParsedSimpleMetricTag
 
-MetricTagsParseResult = TypedDict(
-    'MetricTagsParseResult', {'oids': List[OID], 'parsed_metric_tags': List[ParsedMetricTag]}
+ParseMetricTagsResult = TypedDict(
+    'ParseMetricTagsResult', {'oids': List[OID], 'parsed_metric_tags': List[ParsedMetricTag]}
 )
 
 
 def parse_metric_tags(metric_tags, resolver):
-    # type: (List[MetricTag], OIDResolver) -> MetricTagsParseResult
+    # type: (List[MetricTag], OIDResolver) -> ParseMetricTagsResult
     """
     Parse the `metric_tags` section of a config file, and return OIDs to fetch and metric tags to submit.
     """
@@ -39,6 +40,29 @@ def parse_metric_tags(metric_tags, resolver):
         parsed_metric_tags.append(result.parsed_metric_tag)
 
     return {'oids': oids, 'parsed_metric_tags': parsed_metric_tags}
+
+
+# Helpers below.
+# Also some type definitions to make sure we only manipulate known fields with correct types.
+
+MetricTagParseResult = NamedTuple(
+    'MetricTagParseResult', [('oid', OID), ('parsed_metric_tag', ParsedMetricTag), ('oids_to_resolve', Dict[str, OID])]
+)
+
+MetricTag = TypedDict(
+    'MetricTag',
+    {
+        'symbol': str,
+        'MIB': str,
+        'OID': str,
+        # Simple tag.
+        'tag': str,
+        # Regex matching.
+        'match': str,
+        'tags': List[str],
+    },
+    total=False,
+)
 
 
 def _parse_metric_tag(metric_tag):

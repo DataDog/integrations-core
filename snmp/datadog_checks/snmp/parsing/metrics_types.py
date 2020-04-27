@@ -1,9 +1,12 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import Dict, List, NamedTuple, TypedDict, Union
+"""
+Type definitions for items in the `metrics` section of a config file.
 
-from ...models import OID
+Helps us ensure we only manipulate known fields with the correct types.
+"""
+from typing import Dict, List, TypedDict, Union
 
 # Symbols.
 
@@ -21,17 +24,6 @@ ColumnTableMetricTag = TypedDict(
 )
 
 TableMetricTag = Union[IndexTableMetricTag, ColumnTableMetricTag]
-
-IndexTag = NamedTuple('IndexTag', [('name', str), ('index', int)])
-ColumnTag = NamedTuple('ColumnTag', [('name', str), ('column', str)])
-IndexMapping = NamedTuple('IndexMapping', [('tag', str), ('index', int), ('mapping', dict)])
-
-
-# Table OID batching.
-
-TableBatchKey = NamedTuple('TableBatchKey', [('mib', str), ('table', str)])
-TableBatch = NamedTuple('TableBatch', [('table_oid', OID), ('oids', List[OID])])
-TableBatches = Dict[TableBatchKey, TableBatch]
 
 
 # Metrics.
