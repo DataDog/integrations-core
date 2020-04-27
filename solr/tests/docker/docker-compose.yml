@@ -1,7 +1,7 @@
 version: '3'
 services:
   solr:
-    image: solr:7.7.2
+    image: solr:${SOLR_VERSION}
     ports:
      - 8983:8983
      - 18983:18983
@@ -11,5 +11,6 @@ services:
     environment:
       ENABLE_REMOTE_JMX_OPTS: "true"
       RMI_PORT: 18983
+      # `java.rmi.server.hostname=localhost` is needed to local connect to JMX endpoint
       SOLR_OPTS: >-
         -Djava.rmi.server.hostname=localhost
