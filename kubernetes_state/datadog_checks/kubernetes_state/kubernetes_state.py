@@ -337,7 +337,7 @@ class KubernetesState(OpenMetricsBaseCheck):
                         'labels_to_get': ['phase'],
                     },
                     'kube_persistentvolume_info': {
-                        'labels_to_match': ['persistentvolume'], # Persistent Volumes are not namespaced
+                        'labels_to_match': ['persistentvolume'],  # Persistent Volumes are not namespaced
                         'labels_to_get': ['storageclass'],
                     },
                     'kube_persistentvolumeclaim_info': {
