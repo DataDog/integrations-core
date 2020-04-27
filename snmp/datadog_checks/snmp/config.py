@@ -49,6 +49,11 @@ class InstanceConfig:
         profiles = {} if profiles is None else profiles
         profiles_by_oid = {} if profiles_by_oid is None else profiles_by_oid
 
+        # Clean empty or null values. This will help templating.
+        for key, value in list(instance.items()):
+            if value in (None, ""):
+                instance.pop(key)
+
         self.instance = instance
         self.tags = instance.get('tags', [])
         self.metrics = instance.get('metrics', [])
