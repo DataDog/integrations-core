@@ -1,9 +1,14 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import os
+
 from datadog_checks.dev import get_docker_hostname
+from packaging import version
 
 HOST = get_docker_hostname()
+SOLR_VERSION_RAW = os.environ['SOLR_VERSION']
+SOLR_VERSION = version.parse(SOLR_VERSION_RAW)
 
 JVM_METRICS = [
     "jvm.thread_count",
@@ -34,7 +39,16 @@ JVM_METRICS = [
     "jvm.non_heap_memory",
 ]
 
-SOLR_METRICS = [
+SOLR_COMMON_METRICS = [
+    "solr.search_handler.errors",
+    "solr.search_handler.requests",
+    "solr.search_handler.time",
+    "solr.search_handler.timeouts",
+    "solr.searcher.numdocs",
+    "solr.searcher.warmup",
+]
+
+SOLR_7_PLUS_METRICS = [
     "solr.document_cache.evictions",
     "solr.document_cache.hits",
     "solr.document_cache.inserts",
@@ -47,11 +61,23 @@ SOLR_METRICS = [
     "solr.query_result_cache.hits",
     "solr.query_result_cache.inserts",
     "solr.query_result_cache.lookups",
-    "solr.search_handler.errors",
-    "solr.search_handler.requests",
-    "solr.search_handler.time",
-    "solr.search_handler.timeouts",
     "solr.searcher.maxdocs",
-    "solr.searcher.numdocs",
-    "solr.searcher.warmup",
 ]
+
+SOLR_6_METRICS = [
+    "solr.cache.evictions",
+    "solr.cache.hits",
+    "solr.cache.inserts",
+    "solr.cache.lookups",
+    "solr.search_handler.avg_requests_per_sec",
+    "solr.search_handler.avg_time_per_req",
+    "solr.searcher.maxdoc",
+]
+
+
+if SOLR_VERSION.major == 6:
+    SOLR_METRICS = SOLR_COMMON_METRICS + SOLR_6_METRICS
+elif SOLR_VERSION.major >= 7:
+    SOLR_METRICS = SOLR_COMMON_METRICS + SOLR_7_PLUS_METRICS
+else:
+    SOLR_METRICS = []
