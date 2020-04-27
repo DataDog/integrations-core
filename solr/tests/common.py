@@ -47,6 +47,7 @@ SOLR_COMMON_METRICS = [
     "solr.search_handler.timeouts",
     "solr.searcher.numdocs",
     "solr.searcher.warmup",
+    "solr.search_handler.avg_requests_per_sec",
 ]
 
 SOLR_7_PLUS_METRICS = [
@@ -62,6 +63,13 @@ SOLR_7_PLUS_METRICS = [
     "solr.query_result_cache.hits",
     "solr.query_result_cache.inserts",
     "solr.query_result_cache.lookups",
+    "solr.search_handler.request_times.50percentile",
+    "solr.search_handler.request_times.75percentile",
+    "solr.search_handler.request_times.95percentile",
+    "solr.search_handler.request_times.98percentile",
+    "solr.search_handler.request_times.99percentile",
+    "solr.search_handler.request_times.999percentile",
+    "solr.search_handler.request_times.one_minute_rate",
     "solr.searcher.maxdocs",
 ]
 
@@ -70,7 +78,6 @@ SOLR_6_METRICS = [
     "solr.cache.hits",
     "solr.cache.inserts",
     "solr.cache.lookups",
-    "solr.search_handler.avg_requests_per_sec",
     "solr.search_handler.avg_time_per_req",
     "solr.searcher.maxdoc",
 ]
