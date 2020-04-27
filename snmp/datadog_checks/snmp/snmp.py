@@ -101,11 +101,17 @@ class SnmpCheck(AgentCheck):
         """
         Get the mapping from sysObjectID to profile.
         """
-        profiles_by_oid = {}
+        profiles_by_oid = {}  # type: Dict[str, str]
         for name, profile in self.profiles.items():
             sys_object_oid = profile['definition'].get('sysobjectid')
             if sys_object_oid is not None:
-                profiles_by_oid[sys_object_oid] = name
+                profile_matches = [prof_name for oid, prof_name in profiles_by_oid.items() if oid == sys_object_oid]
+                for profile_name in profile_matches:
+                    raise ConfigurationError(
+                        "Profile {} has the same sysObjectID ({}) as {}".format(name, sys_object_oid, profile_name)
+                    )
+                else:
+                    profiles_by_oid[sys_object_oid] = name
         return profiles_by_oid
 
     def _build_config(self, instance):
