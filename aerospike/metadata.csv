@@ -578,6 +578,14 @@ aerospike.namespace.xdr_from_proxy_delete_timeout,gauge,,transaction,,Number of 
 aerospike.namespace.xdr_from_proxy_write_error,gauge,,transaction,,Number of errors for XDR write transactions proxied from another node.,0,aerospike,
 aerospike.namespace.xdr_from_proxy_write_success,gauge,,transaction,,Number of successful XDR write transactions proxied from another node.,0,aerospike,
 aerospike.namespace.xdr_from_proxy_write_timeout,gauge,,transaction,,Number of timeouts for XDR write transactions proxied from another node.,0,aerospike,
+aerospike.namespace.latency.read_ops_sec,gauge,,transaction,,Read operations per sec.,-1,aerospike,read ops sec
+aerospike.namespace.latency.read_over_1ms,gauge,,transaction,,Read latency over 1ms.,-1,aerospike,read latency 1ms
+aerospike.namespace.latency.read_over_64ms,gauge,,transaction,,Read latency over 4ms.,-1,aerospike,read latency 4ms
+aerospike.namespace.latency.read_over_8ms,gauge,,transaction,,Read latency over 8ms.,-1,aerospike,read latency 8ms
+aerospike.namespace.latency.write_ops_sec,gauge,,transaction,,Write operations per sec.,-1,aerospike,write ops sec
+aerospike.namespace.latency.write_over_1ms,gauge,,transaction,,Write latency over 1ms.,-1,aerospike,write latency 1ms
+aerospike.namespace.latency.write_over_64ms,gauge,,transaction,,Write latency over 4ms.,-1,aerospike,write latency 4ms
+aerospike.namespace.latency.write_over_8ms,gauge,,transaction,,Write latency over 8ms.,-1,aerospike,write latency 8ms
 aerospike.set.tombstones,gauge,,,,Total number of tombstones (master and all replicas) in this set on this node.,0,aerospike,
 aerospike.set.truncate_lut,gauge,,,,The "most covering" truncate_lut for this set.,0,aerospike,
 aerospike.batch_index_delay,gauge,,,,Number of times a batch index response buffer has been delayed (WOULDBLOCK on the send).,0,aerospike,
