@@ -47,7 +47,6 @@ SOLR_COMMON_METRICS = [
     "solr.search_handler.timeouts",
     "solr.searcher.numdocs",
     "solr.searcher.warmup",
-
 ]
 
 SOLR_7_PLUS_METRICS = [
