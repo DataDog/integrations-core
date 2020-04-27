@@ -22,6 +22,8 @@ solr.search_handler.request_times.98percentile,gauge,10,request,second,Request p
 solr.search_handler.request_times.99percentile,gauge,10,request,second,Request processing time in milliseconds (99percentile).,-1,solr,search reqs proces time 99p
 solr.search_handler.request_times.999percentile,gauge,10,request,second,Request processing time in milliseconds (999percentile).,-1,solr,search reqs proces time 999p
 solr.search_handler.request_times.one_minute_rate,gauge,10,request,second,Requests per second received over the past minutes.,1,solr,search reqs proces time
+solr.search_handler.request_times.mean_rate,gauge,10,request,second,Average number of requests received per second since the Solr core was first created.,1,solr,search reqs mean rate
+solr.search_handler.request_times.mean,gauge,10,millisecond,request,The average time per request.,-1,solr,search time mean
 solr.search_handler.avg_requests_per_sec,gauge,10,request,second,Average number of requests received per second since the Solr core was first created.,1,solr,search reqs per sec
 solr.search_handler.avg_time_per_req,gauge,10,millisecond,request,The average time per request.,-1,solr,search time per req
 solr.search_handler.errors,gauge,10,error,second,Number of errors per second encountered by the handler.,-1,solr,search errors
