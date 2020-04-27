@@ -10,7 +10,7 @@ aliases:
 
 To consider an Agent-based integration complete, and thus ready to be included in the core repository and bundled with the Agent package, a number of prerequisites must be met:
 
-- A `README.md` file with the right format
+- A `README.md` file with the correct format and contents
 - A battery of tests verifying metrics collection
 - A `metadata.csv` file listing all of the collected metrics
 - A complete `manifest.json` file
@@ -90,7 +90,7 @@ After answering the questions, the output matches that of the dry-run above, exc
 
 A Check is a Python class with the following requirements:
 
-- If running with Agent v7+ it should be Python 3 compatible, Python 2 otherwise for Agent v5 and v6.
+- Integrations run via Agent v7+ must be Python 3 compatible; however, Agents v5 and v6 still use Python 2.7.
 - It must derive from `AgentCheck`
 - It must provide a method with this signature: `check(self, instance)`
 
@@ -152,7 +152,7 @@ For more information, see the [Datadog Checks Dev documentation][9].
 
 #### Unit test
 
-The first part of the `check` method retrieves and verifies two pieces of information needed from the configuration file. This is a good candidate for a unit test. Open the file at `awesome/tests/test_awesome.py` and replace the contents with something like this:
+The first part of the `check` method retrieves and verifies two elements from the configuration file. This is a good candidate for a unit test. Open the file at `awesome/tests/test_awesome.py` and replace the contents with something like this:
 
 ```python
 import pytest
@@ -265,9 +265,9 @@ ddev test -m integration awesome
 
 The check is almost done. Let's add the final touches by adding the integration configurations.
 
-### Create the check assets
+### Create the Check assets
 
-In order for your check to be complete you need to populate a set of assets provided by the ddev scaffolding . They already have the correct format but you must fill out the documents with the relevant information from the file:
+The set of assets created by the ddev scaffolding must be populated in order for a check to be considered for inclusion:
 
 - **`README.md`**: This contains the documentation for your Check, how to set it up, which data it collects, etc..
 - **`conf.yaml`**: This contains all configuration options for your Agent check. [See the configuration file reference documentation to learn its logic.][10]
@@ -275,7 +275,7 @@ In order for your check to be complete you need to populate a set of assets prov
 - **`metadata.csv`**: This contains the list of all metrics collected by your Agent Check. [See the metrics metadata reference documentation to learn more.][12]
 - **`service_check.json`**: This contains the list of all Service Checks collected by your Agent check. [See the Service Check reference documentation to learn more.][13]
 
-For this example, those files would have the following shape:
+For this example, those files would have the following form:
 
 {{< tabs >}}
 {{% tab "Configuration file" %}}
@@ -326,7 +326,7 @@ instances:
 {{% /tab %}}
 {{% tab "Manifest" %}}
 
-The `awesome/manifest.json` for the Awesome service check. Note that the `guid` must be unique (and valid), so do _not_ use the one from this example—the tooling will generate one for you in any case:
+The `awesome/manifest.json` for the Awesome Service Check. Note that the `guid` must be unique (and valid), so do _not_ use the one from this example (the tooling will generate one for you in any case):
 
 ```json
 {
