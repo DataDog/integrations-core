@@ -12,6 +12,6 @@ activemq.topic.size,gauge,10,,,The size of a topic.,0,activemq_xml,topic size
 activemq.subscriber.count,gauge,,,,The number of subscribers.,0,activemq_xml,sub count
 activemq.subscriber.dequeue_counter,gauge,,message,,The number of messages sent to and acknowledged by the client.,0,activemq_xml,sub deq cntr
 activemq.subscriber.dispatched_counter,gauge,,message,,The number of messages sent to the client.,0,activemq_xml,sub disptchd cntr
-activemq.subscriber.dipatched_queue_size,gauge,,message,,The number of messages dispatched that are awaiting acknowledgement.,0,activemq_xml,sub disptchd que size
+activemq.subscriber.dispatched_queue_size,gauge,,message,,The number of messages dispatched that are awaiting acknowledgement.,0,activemq_xml,sub disptchd que size
 activemq.subscriber.enqueue_counter,gauge,,message,,The number of messages that matched the subscription.,0,activemq_xml,sub enq cntr
 activemq.subscriber.pending_queue_size,gauge,,message,,The number of messages pending delivery.,0,activemq_xml,sub pend que size

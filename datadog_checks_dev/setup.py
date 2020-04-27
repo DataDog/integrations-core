@@ -35,6 +35,7 @@ REQUIRES = [
     'six',
     "shutilwhich==1.1.0; python_version < '3.0'",
     "subprocess32==3.5.4; python_version < '3.0'",
+    'tenacity',
 ]
 
 
@@ -78,7 +79,6 @@ setup(
             'pylint',
             'Pillow',
             'pyperclip>=1.7.0',
-            'retrying',
             'semver',
             'setuptools>=38.6.0',
             'toml>=0.9.4, <1.0.0',

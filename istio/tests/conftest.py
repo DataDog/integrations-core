@@ -113,8 +113,8 @@ def istiod_mixture_fixture():
 
 @pytest.fixture
 def mesh_mixture_fixture():
-    mesh_file_path = os.path.join(HERE, 'fixtures', 'istio', 'mesh.txt')
-    mixer_file_path = os.path.join(HERE, 'fixtures', 'istio', 'mixer.txt')
+    mesh_file_path = os.path.join(HERE, 'fixtures', '0.5', 'mesh.txt')
+    mixer_file_path = os.path.join(HERE, 'fixtures', '0.5', 'mixer.txt')
     responses = []
     with open(mesh_file_path, 'r') as f:
         responses.append(f.read())
