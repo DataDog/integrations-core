@@ -4,7 +4,7 @@
 
 import pytest
 
-from datadog_checks.dev.tooling.jmx import JVM_E2E_METRICS
+from datadog_checks.dev.jmx import JVM_E2E_METRICS
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import ACTIVEMQ_E2E_METRICS
