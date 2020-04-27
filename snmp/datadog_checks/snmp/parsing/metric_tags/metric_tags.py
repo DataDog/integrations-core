@@ -73,17 +73,20 @@ def _parse_simple_metric_tag(metric_tag):
 
 def _parse_regex_metric_tag(metric_tag):
     # type: (MetricTag) -> ParsedMetricTag
+    symbol = metric_tag['symbol']
     match = metric_tag['match']
     tags = metric_tag['tags']
 
     if not isinstance(tags, dict):
         raise ConfigurationError(
-            'Specified tags needs to be a mapping of tag name to regular ' 'expression matching: {}'.format(metric_tag)
+            'Specified tags needs to be a mapping of tag name to regular expression matching: {}'.format(metric_tag)
         )
 
     try:
         pattern = re.compile(match)
-    except re.error as e:
-        raise ConfigurationError('Failed compile regular expression {}: {}'.format(match, e))
+    except re.error as exc:
+        raise ConfigurationError(
+            'Failed to compile regular expression {!r} on metric tag {!r}: {}'.format(match, symbol, exc)
+        )
 
-    return ParsedMatchMetricTag(tags, symbol=metric_tag['symbol'], pattern=pattern)
+    return ParsedMatchMetricTag(tags, symbol=symbol, pattern=pattern)
