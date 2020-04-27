@@ -9,4 +9,7 @@ services:
       - solr-precreate
       - gettingstarted
     environment:
-     - ENABLE_REMOTE_JMX_OPTS=true
+      ENABLE_REMOTE_JMX_OPTS: "true"
+      RMI_PORT: 18983
+      SOLR_OPTS: >-
+        -Djava.rmi.server.hostname=localhost

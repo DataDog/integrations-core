@@ -21,6 +21,6 @@ solr.search_handler.errors,gauge,10,error,second,Number of errors per second enc
 solr.search_handler.requests,gauge,10,request,second,Number of requests per second processed by the handler.,0,solr,search requests
 solr.search_handler.time,gauge,10,,,The sum of all request processing times (in milliseconds) per second.,0,solr,search time
 solr.search_handler.timeouts,gauge,10,timeout,second,Number of responses per second received with partial results.,-1,solr,search timeouts
-solr.searcher.maxdoc,gauge,10,document,,One greater than the largest possible document number.,0,solr,max doc id
+solr.searcher.maxdocs,gauge,10,document,,One greater than the largest possible document number.,0,solr,max doc id
 solr.searcher.numdocs,gauge,10,document,,The total number of indexed documents.,0,solr,num docs
 solr.searcher.warmup,gauge,10,millisecond,,The time spent warming up.,-1,solr,warmup time
