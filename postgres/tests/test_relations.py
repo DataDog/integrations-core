@@ -3,7 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import psycopg2
 import pytest
-from .common import HOST, DB_NAME, PORT
+
+from .common import DB_NAME, HOST, PORT
 
 RELATION_METRICS = [
     'postgresql.seq_scans',
@@ -138,7 +139,7 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
 @pytest.mark.usefixtures('dd_environment')
 def test_locks_metrics(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = ['persons']
-    pg_instance['dbname'] = 'datadog_test'
+    pg_instance['query_timeout'] = 1000  # One of the relation queries waits for the table to not be locked
 
     check = integration_check(pg_instance)
     with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
@@ -155,4 +156,5 @@ def test_locks_metrics(aggregator, integration_check, pg_instance):
         'table:persons',
         'schema:public',
     ]
+
     aggregator.assert_metric('postgresql.locks', count=1, tags=expected_tags)
