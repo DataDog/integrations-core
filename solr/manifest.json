@@ -10,7 +10,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "solr.",
-  "metric_to_check": "solr.cache.hits",
+  "metric_to_check": "solr.searcher.numdocs",
   "name": "solr",
   "process_signatures": [
     "solr start"
