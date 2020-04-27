@@ -8,6 +8,7 @@ Define our own models and interfaces for dealing with SNMP data.
 from typing import Optional, Sequence, Tuple, Union
 
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
+from .pysnmp_inspect import object_identity_from_object_type
 from .pysnmp_types import MibViewController, ObjectIdentity, ObjectName, ObjectType
 from .types import MIBSymbol
 from .utils import format_as_oid_string, parse_as_oid_tuple
@@ -41,10 +42,7 @@ class OID(object):
         # Resolve the `ObjectIdentity` which we can use to resolve the MIB name of the OID (for metric naming).
         # PySNMP objects may contain MIB information already, so check for them in priority.
         if isinstance(value, ObjectType):
-            # No other choice than to use private API here.
-            object_identity = value._ObjectType__args[0]
-            if not isinstance(object_identity, ObjectIdentity):  # pragma: no cover
-                raise RuntimeError('Expected {!r} to be an `ObjectIdentity` instance'.format(object_identity))
+            object_identity = object_identity_from_object_type(value)
         elif isinstance(value, ObjectIdentity):
             object_identity = value
         else:

@@ -510,12 +510,14 @@ class VSphereCheck(AgentCheck):
     def check(self, _):
         # type: (Any) -> None
         self._hostname = datadog_agent.get_hostname()
-        # Assert the health of the vCenter API and submit the service_check accordingly
+        # Assert the health of the vCenter API by getting the version, and submit the service_check accordingly
         try:
-            self.api.check_health()
+            version_info = self.api.get_version()
+            if self.is_metadata_collection_enabled():
+                self.set_metadata('version', version_info.version_str)
         except Exception:
             # Explicitly do not attach any host to the service checks.
-            self.log.error("The vCenter API is not responding. The check will not run.")
+            self.log.exception("The vCenter API is not responding. The check will not run.")
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.base_tags, hostname=None)
             raise
         else:

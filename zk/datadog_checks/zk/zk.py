@@ -79,11 +79,15 @@ class ZKConnectionFailure(Exception):
 class ZKMetric(tuple):
     """
     A Zookeeper metric.
-    Tuple with an optional metric type (default is 'gauge').
+    Tuple with optional values:
+      - `m_type`: metric type (default is 'gauge')
+      - `m_tags`: list of tags (default is None)
     """
 
-    def __new__(cls, name, value, m_type="gauge"):
-        return super(ZKMetric, cls).__new__(cls, [name, value, m_type])
+    def __new__(cls, name, value, m_type="gauge", m_tags=None):
+        if m_tags is None:
+            m_tags = []
+        return super(ZKMetric, cls).__new__(cls, [name, value, m_type, m_tags])
 
 
 class ZookeeperCheck(AgentCheck):
@@ -96,7 +100,8 @@ class ZookeeperCheck(AgentCheck):
     # example match:
     # "Zookeeper version: 3.4.10-39d3a4f269333c922ed3db283be479f9deacaa0f, built on 03/23/2017 10:13 GMT"
     # This regex matches the entire version rather than <major>.<minor>.<patch>
-    metadata_version_pattern = re.compile('Zookeeper version: ([^,]+)')
+    METADATA_VERSION_PATTERN = re.compile('Zookeeper version: ([^,]+)')
+    METRIC_TAGGED_PATTERN = re.compile(r'(\w+){(\w+)="(.+)"}\s+(\S+)')
 
     SOURCE_TYPE_NAME = 'zookeeper'
 
@@ -162,9 +167,9 @@ class ZookeeperCheck(AgentCheck):
 
             # Write the data
             if mode != 'inactive':
-                for metric, value, m_type in metrics:
+                for metric, value, m_type, m_tags in metrics:
                     submit_metric = getattr(self, m_type)
-                    submit_metric(metric, value, tags=tags + new_tags)
+                    submit_metric(metric, value, tags=tags + m_tags + new_tags)
 
             if report_instance_mode:
                 self.report_instance_mode(hostname, mode, tags)
@@ -197,9 +202,9 @@ class ZookeeperCheck(AgentCheck):
                 metrics, mode = self.parse_mntr(mntr_out)
                 mode_tag = "mode:%s" % mode
                 if mode != 'inactive':
-                    for metric, value, m_type in metrics:
+                    for metric, value, m_type, m_tags in metrics:
                         submit_metric = getattr(self, m_type)
-                        submit_metric(metric, value, tags=tags + [mode_tag])
+                        submit_metric(metric, value, tags=tags + m_tags + [mode_tag])
 
                 if report_instance_mode:
                     self.report_instance_mode(hostname, mode, tags)
@@ -260,10 +265,9 @@ class ZookeeperCheck(AgentCheck):
         # >= 3.4.4.
         start_line = buf.readline()
         # this is to grab the additional version information
-        total_match = self.metadata_version_pattern.search(start_line)
+        total_match = self.METADATA_VERSION_PATTERN.search(start_line)
         if total_match is None:
             return (None, None, "inactive", None)
-            raise Exception("Could not parse version from stat command output: %s" % start_line)
         else:
             version = total_match.group(1).split("-")[0]
             # grabs the entire version number for inventories.
@@ -352,33 +356,50 @@ class ZookeeperCheck(AgentCheck):
         buf.seek(0)
         first = buf.readline()  # First is version string or error
         if first == 'This ZooKeeper instance is not currently serving requests':
-            return (None, 'inactive')
+            return None, 'inactive'
 
         metrics = []
         mode = 'inactive'
 
         for line in buf:
             try:
-                key, value = line.split()
+                tags = []
+                m = re.match(self.METRIC_TAGGED_PATTERN, line)
+                if m:
+                    key, tag_name, tag_val, value = m.groups()
+                    tags.append('{}:{}'.format(tag_name, tag_val))
+                else:
+                    key, value = line.split()
 
                 if key == "zk_server_state":
                     mode = value.lower()
                     continue
 
-                metric_name = self._normalize_metric_label(key)
+                # we are parsing version from the `stat` output for now
+                if key == 'zk_version':
+                    continue
+
+                metric_name = self.normalize_metric_label(key)
                 metric_type = "rate" if key in self._MNTR_RATES else "gauge"
-                metric_value = int(value)
-                metrics.append(ZKMetric(metric_name, metric_value, metric_type))
+
+                if value == 'NaN':
+                    self.log.debug('Metric value "%s" is not supported for metric %s', value, key)
+                    continue
+                else:
+                    metric_value = int(float(value))
+
+                metrics.append(ZKMetric(metric_name, metric_value, metric_type, tags))
 
             except ValueError:
                 self.log.warning("Cannot format `mntr` value. key=%s, value=%s", key, value)
-                continue
+
             except Exception:
                 self.log.exception("Unexpected exception occurred while parsing `mntr` command content:\n%s", buf)
 
-        return (metrics, mode)
+        return metrics, mode
 
-    def _normalize_metric_label(self, key):
+    @staticmethod
+    def normalize_metric_label(key):
         if re.match('zk', key):
             key = key.replace('zk', 'zookeeper', 1)
         return key.replace('_', '.', 1)

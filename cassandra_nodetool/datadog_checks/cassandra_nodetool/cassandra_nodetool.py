@@ -44,36 +44,38 @@ class CassandraNodetoolCheck(AgentCheck):
         r'(?P<rack>.*)'
     )
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
-        self.nodetool_cmd = init_config.get("nodetool", "/usr/bin/nodetool")
-
-    def check(self, instance):
+    def __init__(self, name, init_config, instances):
+        super(CassandraNodetoolCheck, self).__init__(name, init_config, instances)
         # Allow to specify a complete command for nodetool such as `docker exec container nodetool`
-        nodetool_cmd = instance.get("nodetool", self.nodetool_cmd).split()
-        host = instance.get("host", DEFAULT_HOST)
-        port = instance.get("port", DEFAULT_PORT)
-        keyspaces = instance.get("keyspaces", [])
-        username = instance.get("username", "")
-        password = instance.get("password", "")
-        ssl = instance.get("ssl", False)
-        tags = instance.get("tags", [])
+        default_nodetool_cmd = init_config.get("nodetool", "/usr/bin/nodetool")
+        nodetool_cmd = self.instance.get('nodetool', default_nodetool_cmd).split()
+        host = self.instance.get("host", DEFAULT_HOST)
+        port = self.instance.get("port", DEFAULT_PORT)
+        username = self.instance.get("username", "")
+        password = self.instance.get("password", "")
+        ssl = self.instance.get("ssl", False)
 
+        # Build the nodetool command
+        cmd = nodetool_cmd + ['-h', host, '-p', str(port)]
+        if username and password:
+            cmd += ['-u', username, '-pw', password]
+        # add ssl if requested
+        if ssl:
+            cmd += ['--ssl']
+        self.nodetool_cmd = cmd
+
+        self.tags = self.instance.get("tags", [])
+        self.keyspaces = self.instance.get("keyspaces", [])
+
+    def check(self, _):
         # Flag to send service checks only once and not for every keyspace
         send_service_checks = True
 
-        if not keyspaces:
+        if not self.keyspaces:
             self.log.info("No keyspaces set in the configuration: no metrics will be sent")
 
-        for keyspace in keyspaces:
-            # Build the nodetool command
-            cmd = nodetool_cmd + ['-h', host, '-p', str(port)]
-            if username and password:
-                cmd += ['-u', username, '-pw', password]
-            # add ssl if requested
-            if ssl:
-                cmd += ['--ssl']
-            cmd += ['status', '--', keyspace]
+        for keyspace in self.keyspaces:
+            cmd = self.nodetool_cmd + ['status', '--', keyspace]
 
             # Execute the command
             out, err, code = get_subprocess_output(cmd, self.log, False, log_debug=False)
@@ -102,19 +104,21 @@ class CassandraNodetoolCheck(AgentCheck):
                         percent_up_by_dc[node['datacenter']] += owns
                     percent_total_by_dc[node['datacenter']] += owns
                     self.gauge(
-                        'cassandra.nodetool.status.owns', owns, tags=tags + node_tags + ['keyspace:%s' % keyspace]
+                        'cassandra.nodetool.status.owns', owns, tags=self.tags + node_tags + ['keyspace:%s' % keyspace]
                     )
 
                 # Send service check only once for each node
                 if send_service_checks:
                     status = AgentCheck.OK if node['status'] == 'U' else AgentCheck.CRITICAL
-                    self.service_check('cassandra.nodetool.node_up', status, tags + node_tags)
+                    self.service_check('cassandra.nodetool.node_up', status, self.tags + node_tags)
 
-                self.gauge('cassandra.nodetool.status.status', 1 if node['status'] == 'U' else 0, tags=tags + node_tags)
+                self.gauge(
+                    'cassandra.nodetool.status.status', 1 if node['status'] == 'U' else 0, tags=self.tags + node_tags
+                )
                 self.gauge(
                     'cassandra.nodetool.status.load',
                     float(node['load']) * TO_BYTES[node['load_unit']],
-                    tags=tags + node_tags,
+                    tags=self.tags + node_tags,
                 )
 
             # All service checks have been sent, don't resend
@@ -125,13 +129,13 @@ class CassandraNodetoolCheck(AgentCheck):
                 self.gauge(
                     'cassandra.nodetool.status.replication_availability',
                     percent_up,
-                    tags=tags + ['keyspace:%s' % keyspace, 'datacenter:%s' % datacenter],
+                    tags=self.tags + ['keyspace:%s' % keyspace, 'datacenter:%s' % datacenter],
                 )
             for datacenter, percent_total in percent_total_by_dc.items():
                 self.gauge(
                     'cassandra.nodetool.status.replication_factor',
                     int(round(percent_total / 100)),
-                    tags=tags + ['keyspace:%s' % keyspace, 'datacenter:%s' % datacenter],
+                    tags=self.tags + ['keyspace:%s' % keyspace, 'datacenter:%s' % datacenter],
                 )
 
     def _process_nodetool_output(self, output):

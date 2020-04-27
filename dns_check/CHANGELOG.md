@@ -1,5 +1,9 @@
 # CHANGELOG - dns_check
 
+## 1.5.2 / 2020-04-24
+
+* [Fixed] Fix missing `time.clock` attribute in Python 3.8. See [#6478](https://github.com/DataDog/integrations-core/pull/6478).
+
 ## 1.5.1 / 2020-04-04
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).

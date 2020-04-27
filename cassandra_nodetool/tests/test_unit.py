@@ -36,7 +36,7 @@ def test_check_old_format(mock_output, aggregator):
 
 
 def _check(mock_output, aggregator):
-    integration = CassandraNodetoolCheck(common.CHECK_NAME, {}, {})
+    integration = CassandraNodetoolCheck(common.CHECK_NAME, {}, [common.CONFIG_INSTANCE])
     integration.check(common.CONFIG_INSTANCE)
 
     # test per datacenter metrics
@@ -92,9 +92,7 @@ def _check(mock_output, aggregator):
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()
 
-    config_with_port = common.CONFIG_INSTANCE.copy()
-    config_with_port['port'] = 7199
-    integration = CassandraNodetoolCheck(common.CHECK_NAME, {}, {})
+    integration = CassandraNodetoolCheck(common.CHECK_NAME, {}, [common.CONFIG_INSTANCE])
     integration.check(common.CONFIG_INSTANCE)
 
     assert all(

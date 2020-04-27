@@ -5,6 +5,7 @@ from datadog_checks.istio import Istio
 from datadog_checks.istio.constants import MESH_NAMESPACE, MIXER_NAMESPACE
 
 from . import common
+from .utils import _assert_tags_excluded
 
 
 def test_istio(aggregator, mesh_mixture_fixture):
@@ -14,8 +15,10 @@ def test_istio(aggregator, mesh_mixture_fixture):
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_INSTANCE])
     check.check(common.MOCK_INSTANCE)
 
-    for metric in common.MESH_METRICS + common.MIXER_METRICS:
+    for metric in common.MESH_METRICS + common.MESH_METRICS_1_4 + common.MIXER_METRICS:
         aggregator.assert_metric(metric)
+
+    _assert_tags_excluded(aggregator, [])
 
     aggregator.assert_all_metrics_covered()
 
@@ -26,12 +29,15 @@ def test_new_istio(aggregator, new_mesh_mixture_fixture):
 
     for metric in (
         common.MESH_METRICS
+        + common.MESH_METRICS_1_4
         + common.NEW_MIXER_METRICS
         + common.GALLEY_METRICS
         + common.PILOT_METRICS
         + common.CITADEL_METRICS
     ):
         aggregator.assert_metric(metric)
+
+    _assert_tags_excluded(aggregator, [])
 
     aggregator.assert_all_metrics_covered()
 
@@ -43,6 +49,8 @@ def test_pilot_only_istio(aggregator, new_pilot_fixture):
     for metric in common.PILOT_METRICS:
         aggregator.assert_metric(metric)
 
+    _assert_tags_excluded(aggregator, [])
+
     aggregator.assert_all_metrics_covered()
 
 
@@ -52,6 +60,8 @@ def test_galley_only_istio(aggregator, new_galley_fixture):
 
     for metric in common.GALLEY_METRICS:
         aggregator.assert_metric(metric)
+
+    _assert_tags_excluded(aggregator, [])
 
     aggregator.assert_all_metrics_covered()
 
