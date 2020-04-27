@@ -73,7 +73,8 @@ class KindUp(LazyFunction):
         env = os.environ.copy()
         env['KUBECONFIG'] = path_join(self.directory, 'kubeconfig-template.yaml')
         run_command(['kind', 'create', 'cluster', '--name', self.cluster_name], check=True, env=env)
-        run_command(['kubectl', 'config', 'use-context', 'kind-' + self.cluster_name], check=True, env=env)
+        run_command(['kind', 'export', 'kubeconfig', '--name', self.cluster_name], check=True, env=env)
+        run_command(['python', path_join(self.directory, 'script.py')])
         return
 
 

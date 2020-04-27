@@ -31,12 +31,10 @@ def dd_environment():
         instances = {
             'instances': [
                 {
-                    'agent_endpoint': 'http://{}:{}/metrics'.format(get_docker_hostname, AGENT_PORT),
-                    'metrics': ADDL_AGENT_METRICS + AGENT_DEFAULT_METRICS,
+                    'agent_endpoint': 'http://{}:{}/metrics'.format(HOST, AGENT_PORT),
                 },
                 {
-                    'operator_endpoint': 'http://{}:{}/metrics'.format(get_docker_hostname, OPERATOR_PORT),
-                    'metrics': OPERATOR_METRICS + OPERATOR_AWS_METRICS,
+                    'operator_endpoint': 'http://{}:{}/metrics'.format(HOST, OPERATOR_PORT),
                 },
             ]
         }
