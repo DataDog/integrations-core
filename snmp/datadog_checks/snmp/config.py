@@ -14,7 +14,6 @@ from .pysnmp_types import (
     ContextData,
     DirMibSource,
     MibViewController,
-    ObjectType,
     OctetString,
     SnmpEngine,
     UdpTransportTarget,
@@ -25,6 +24,7 @@ from .pysnmp_types import (
     usmHMACMD5AuthProtocol,
 )
 from .resolver import OIDResolver
+from .types import OIDMatch
 
 
 class InstanceConfig:
@@ -131,7 +131,7 @@ class InstanceConfig:
             )
 
     def resolve_oid(self, oid):
-        # type: (ObjectType) -> Tuple[str, Tuple[str, ...]]
+        # type: (OID) -> OIDMatch
         return self._resolver.resolve_oid(oid)
 
     def refresh_with_profile(self, profile):
@@ -285,7 +285,7 @@ class InstanceConfig:
         # Reference sysUpTimeInstance directly, see http://oidref.com/1.3.6.1.2.1.1.3.0
         uptime_oid = OID('1.3.6.1.2.1.1.3.0')
         self.all_oids.append(uptime_oid)
-        self._resolver.register(uptime_oid.as_tuple(), 'sysUpTimeInstance')
+        self._resolver.register(uptime_oid, 'sysUpTimeInstance')
 
         parsed_metric = ParsedSymbolMetric('sysUpTimeInstance', forced_type='gauge')
         self.parsed_metrics.append(parsed_metric)
