@@ -91,4 +91,4 @@ if SOLR_VERSION.major == 6:
 elif SOLR_VERSION.major >= 7:
     SOLR_METRICS = SOLR_COMMON_METRICS + SOLR_7_PLUS_METRICS
 else:
-    SOLR_METRICS = []
+    raise Exception('Version not supported: {}'.format(SOLR_VERSION))
