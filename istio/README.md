@@ -112,7 +112,17 @@ The Istio check does not include any events.
 
 ### Service Checks
 
-The Istio check does not include any service checks.
+For Istio versions `1.5` or higher:
+
+`istio.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+
+For all other versions of Istio:
+
+`istio.pilot.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+
+`istio.galley.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+
+`istio.citadel.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
 
 ## Troubleshooting
 
