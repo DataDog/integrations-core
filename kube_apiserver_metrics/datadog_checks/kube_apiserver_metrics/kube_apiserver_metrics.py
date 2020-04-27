@@ -20,7 +20,10 @@ METRICS = {
     'apiserver_admission_webhook_admission_latencies_seconds': 'admission_webhook_admission_latencies_seconds',
     'apiserver_admission_step_admission_latencies_seconds': 'admission_step_admission_latencies_seconds',
     'apiserver_admission_controller_admission_duration_seconds': 'admission_controller_admission_duration_seconds',
-    'apiserver_admission_step_admission_latencies_seconds_summary': 'admission_step_admission_latencies_seconds_summary',
+    # fmt: off
+    'apiserver_admission_step_admission_latencies_seconds_summary':
+        'admission_step_admission_latencies_seconds_summary',
+    # fmt: on
 }
 
 
