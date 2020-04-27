@@ -11,7 +11,7 @@ from semver import VersionInfo
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.util import PartialFormatter, fmt
 
-from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics, USER, PASSWORD
+from .common import DB_NAME, HOST, PASSWORD, PORT, POSTGRES_VERSION, USER, check_bgw_metrics, check_common_metrics
 from .utils import requires_over_10
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']

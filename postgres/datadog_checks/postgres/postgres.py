@@ -527,7 +527,7 @@ class PostgreSql(AgentCheck):
                     database=dbname,
                     sslmode=ssl,
                     application_name="datadog-agent",
-                    options='-c statement_timeout=%s' % query_timeout if query_timeout else None
+                    options='-c statement_timeout=%s' % query_timeout if query_timeout else None,
                 )
             else:
                 self.db = psycopg2.connect(
@@ -537,7 +537,7 @@ class PostgreSql(AgentCheck):
                     database=dbname,
                     sslmode=ssl,
                     application_name="datadog-agent",
-                    options='-c statement_timeout=%s' % query_timeout if query_timeout else None
+                    options='-c statement_timeout=%s' % query_timeout if query_timeout else None,
                 )
 
     def _get_custom_queries(self, tags, custom_queries):
