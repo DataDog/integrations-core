@@ -105,10 +105,10 @@ class SnmpCheck(AgentCheck):
         for name, profile in self.profiles.items():
             sys_object_oid = profile['definition'].get('sysobjectid')
             if sys_object_oid is not None:
-                profile_matches = [prof_name for oid, prof_name in profiles_by_oid.items() if oid == sys_object_oid]
-                for profile_name in profile_matches:
+                profile_match = profiles_by_oid.get(sys_object_oid)
+                if profile_match:
                     raise ConfigurationError(
-                        "Profile {} has the same sysObjectID ({}) as {}".format(name, sys_object_oid, profile_name)
+                        "Profile {} has the same sysObjectID ({}) as {}".format(name, sys_object_oid, profile_match)
                     )
                 else:
                     profiles_by_oid[sys_object_oid] = name
