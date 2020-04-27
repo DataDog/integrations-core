@@ -137,23 +137,17 @@ def test_connections_metrics(aggregator, integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_locks_metrics(aggregator, integration_check, pg_instance):
+def test_locks_metrics_no_relations(aggregator, integration_check, pg_instance):
+    """
+    Since 4.0.0, to prevent tag explosion, lock metrics are not collected anymore unless relations are specified
+    """
     check = integration_check(pg_instance)
     with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute('LOCK persons')
             check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + [
-        'server:{}'.format(HOST),
-        'port:{}'.format(PORT),
-        'db:datadog_test',
-        'lock_mode:AccessExclusiveLock',
-        'lock_type:relation',
-        'table:persons',
-        'schema:public',
-    ]
-    aggregator.assert_metric('postgresql.locks', count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.locks', count=0)
 
 
 @pytest.mark.integration

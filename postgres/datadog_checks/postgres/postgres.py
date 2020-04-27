@@ -458,7 +458,7 @@ class PostgreSql(AgentCheck):
         bgw_instance_metrics = self._get_bgw_metrics()
         archiver_instance_metrics = self._get_archiver_metrics()
 
-        metric_scope = [CONNECTION_METRICS, LOCK_METRICS]
+        metric_scope = [CONNECTION_METRICS]
 
         if collect_function_metrics:
             metric_scope.append(FUNCTION_METRICS)
@@ -468,7 +468,7 @@ class PostgreSql(AgentCheck):
         # Do we need relation-specific metrics?
         relations_config = {}
         if relations:
-            metric_scope += [REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
+            metric_scope += [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
             relations_config = self._build_relations_config(relations)
 
         replication_metrics = self._get_replication_metrics()
