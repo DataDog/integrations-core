@@ -139,7 +139,7 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
 @pytest.mark.usefixtures('dd_environment')
 def test_locks_metrics(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = ['persons']
-    pg_instance['query_timeout'] = 1000  # One of the relation queries waits for the table to not be locked
+    pg_instance['timeout'] = 1000  # One of the relation queries waits for the table to not be locked
 
     check = integration_check(pg_instance)
     with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
