@@ -267,13 +267,13 @@ The check is almost done. Let's add the final touches by adding the integration 
 
 ### Create the check assets
 
-In order for your check to be complete you need to populate a set of assets provided by the ddev scaffolding . They already have the correct format but you must fill out the documents with the relevant information:
+In order for your check to be complete you need to populate a set of assets provided by the ddev scaffolding . They already have the correct format but you must fill out the documents with the relevant information from the file:
 
-- **A `README.md` file**: This contains the documentation for your Check, how to set it up, which data it collects, etc..
-- **A `conf.yaml` file**: This contains all configuration options for your Agent check. [See the configuration file reference documentation to learn its logic.][10]
-- **A `manifest.json` file**: This contains the metadata for your Agent Check like its title, its categories... [See the manifest reference documentation to lean more.][11]
-- **A `metadata.csv` file**: This contains the list of all metrics collected by your Agent Check. [See the metrics metadata reference documentation to learn more.][12]
-- **A `service_check.json` file**: This contains the list of all Service Checks collected by your Agent check. [See the Service Check reference documentation to learn more.][13]
+- **`README.md`**: This contains the documentation for your Check, how to set it up, which data it collects, etc..
+- **`conf.yaml`**: This contains all configuration options for your Agent check. [See the configuration file reference documentation to learn its logic.][10]
+- **`manifest.json`**: This contains the metadata for your Agent Check like its title, its categories... [See the manifest reference documentation to lean more.][11]
+- **`metadata.csv`**: This contains the list of all metrics collected by your Agent Check. [See the metrics metadata reference documentation to learn more.][12]
+- **`service_check.json`**: This contains the list of all Service Checks collected by your Agent check. [See the Service Check reference documentation to learn more.][13]
 
 For this example, those files would have the following shape:
 
