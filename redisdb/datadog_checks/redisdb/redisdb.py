@@ -5,7 +5,7 @@ from __future__ import division
 
 import re
 import time
-from collections import defaultdict
+from collections import Counter, defaultdict
 from copy import deepcopy
 
 import redis
@@ -243,20 +243,16 @@ class Redis(AgentCheck):
             elif info_name in self.RATE_KEYS:
                 self.rate(self.RATE_KEYS[info_name], info[info_name], tags=tags)
 
-        clients_by_name = defaultdict(int)
-        clients = conn.client_list()
-        for c in clients:
-            name = c["name"]
-            if name == "":
-                name = DEFAULT_CLIENT_NAME
-            clients_by_name[name] += 1
-        for name, count in clients_by_name.items():
-            self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
-
         for config_key, value in iteritems(config):
             metric_name = self.CONFIG_GAUGE_KEYS.get(config_key)
             if metric_name is not None:
                 self.gauge(metric_name, value, tags=tags)
+
+        # Save client connections statistics
+        clients = conn.client_list()
+        clients_by_name = Counter(client["name"] or DEFAULT_CLIENT_NAME for client in clients)
+        for name, count in clients_by_name.items():
+            self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
 
         # Save the number of commands.
         self.rate('redis.net.commands', info['total_commands_processed'], tags=tags)
