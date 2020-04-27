@@ -328,14 +328,20 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_verticalpodautoscaler_labels',
                 ],
                 'label_joins': {
-                    'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']},
-                    'kube_pod_status_phase': {'label_to_match': 'pod', 'labels_to_get': ['phase']},
+                    'kube_pod_info': {
+                        'labels_to_match': ['pod', 'namespace'],
+                        'labels_to_get': ['node'],
+                    },
+                    'kube_pod_status_phase': {
+                        'labels_to_match': ['pod', 'namespace'],
+                        'labels_to_get': ['phase'],
+                    },
                     'kube_persistentvolume_info': {
-                        'label_to_match': 'persistentvolume',
+                        'labels_to_match': ['persistentvolume'], # Persistent Volumes are not namespaced
                         'labels_to_get': ['storageclass'],
                     },
                     'kube_persistentvolumeclaim_info': {
-                        'label_to_match': 'persistentvolumeclaim',
+                        'labels_to_match': ['persistentvolumeclaim', 'namespace'],
                         'labels_to_get': ['storageclass'],
                     },
                 },
