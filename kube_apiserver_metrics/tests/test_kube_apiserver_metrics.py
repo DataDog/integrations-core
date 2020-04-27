@@ -73,6 +73,15 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.apiserver_dropped_requests_total',
         NAMESPACE + '.http_requests_total',
         NAMESPACE + '.authenticated_user_requests',
+        NAMESPACE + '.rest_client_request_latency_seconds.sum',
+        NAMESPACE + '.rest_client_request_latency_seconds.count',
+        NAMESPACE + '.admission_webhook_admission_latencies_seconds.sum',
+        NAMESPACE + '.admission_webhook_admission_latencies_seconds.count',
+        NAMESPACE + '.admission_step_admission_latencies_seconds.sum',
+        NAMESPACE + '.admission_step_admission_latencies_seconds.count',
+        NAMESPACE + '.admission_step_admission_latencies_seconds_summary.sum',
+        NAMESPACE + '.admission_step_admission_latencies_seconds_summary.count',
+        NAMESPACE + '.admission_step_admission_latencies_seconds_summary.quantile',
     ]
     COUNT_METRICS = [
         NAMESPACE + '.audit_event.count',

@@ -9,6 +9,20 @@ from six import iteritems
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
 
+METRICS = {
+    'apiserver_current_inflight_requests': 'current_inflight_requests',
+    'apiserver_longrunning_gauge': 'longrunning_gauge',
+    'go_threads': 'go_threads',
+    'go_goroutines': 'go_goroutines',
+    'APIServiceRegistrationController_depth': 'APIServiceRegistrationController_depth',
+    'etcd_object_counts': 'etcd_object_counts',
+    'rest_client_request_latency_seconds': 'rest_client_request_latency_seconds',
+    'apiserver_admission_webhook_admission_latencies_seconds': 'admission_webhook_admission_latencies_seconds',
+    'apiserver_admission_step_admission_latencies_seconds': 'admission_step_admission_latencies_seconds',
+    'apiserver_admission_controller_admission_duration_seconds': 'admission_controller_admission_duration_seconds',
+    'apiserver_admission_step_admission_latencies_seconds_summary': 'admission_step_admission_latencies_seconds_summary',
+}
+
 
 class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     """
@@ -42,21 +56,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
             init_config,
             agentConfig,
             instances=instances,
-            default_instances={
-                "kube_apiserver": {
-                    'namespace': 'kube_apiserver',
-                    'metrics': [
-                        {
-                            'apiserver_current_inflight_requests': 'current_inflight_requests',
-                            'apiserver_longrunning_gauge': 'longrunning_gauge',
-                            'go_threads': 'go_threads',
-                            'go_goroutines': 'go_goroutines',
-                            'APIServiceRegistrationController_depth': 'APIServiceRegistrationController_depth',
-                            'etcd_object_counts': 'etcd_object_counts',
-                        }
-                    ],
-                }
-            },
+            default_instances={"kube_apiserver": {'namespace': 'kube_apiserver', 'metrics': [METRICS]}},
             default_namespace="kube_apiserver",
         )
 
