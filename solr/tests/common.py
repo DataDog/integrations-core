@@ -3,8 +3,9 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 
-from datadog_checks.dev import get_docker_hostname
 from packaging import version
+
+from datadog_checks.dev import get_docker_hostname
 
 HOST = get_docker_hostname()
 SOLR_VERSION_RAW = os.environ['SOLR_VERSION']
