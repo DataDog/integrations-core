@@ -21,6 +21,8 @@ NAMESPACE_METRICS = [
     'truncate_lut',
     'tps.write',
     'tps.read',
+    'migrate_sleep',
+    'ops_sub_write_success',
 ]
 
 SET_METRICS = ['tombstones', 'memory_data_bytes', 'truncate_lut', 'objects', 'stop_writes_count']
