@@ -21,7 +21,6 @@ NAMESPACE_METRICS = [
     'truncate_lut',
     'tps.write',
     'tps.read',
-    'migrate_sleep',
     'ops_sub_write_success',
 ]
 
