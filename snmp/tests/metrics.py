@@ -128,3 +128,22 @@ DISK_GAUGES = [
     'physicalDiskUsedSpaceInMB',
     'physicalDiskFreeSpaceInMB',
 ]
+
+FRU_METRICS = [
+    "cefcFRUPowerAdminStatus",
+    "cefcFRUPowerOperStatus",
+    "cefcFRUCurrent",
+]
+
+CPU_METRICS = [
+    "cpmCPUTotalMonIntervalValue",
+    "cpmCPUMemoryUsed",
+    "cpmCPUMemoryFree",
+]
+
+CIE_METRICS = [
+    "cieIfLastInTime",
+    "cieIfLastOutTime",
+    "cieIfInputQueueDrops",
+    "cieIfOutputQueueDrops",
+]
