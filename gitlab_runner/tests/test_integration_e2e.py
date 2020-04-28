@@ -4,6 +4,7 @@
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab_runner import GitlabRunnerCheck
 
 from .common import ALLOWED_METRICS, CONFIG, CUSTOM_TAGS, GITLAB_RUNNER_TAGS
@@ -27,6 +28,8 @@ def assert_check(aggregator):
             aggregator.assert_metric("gitlab_runner.{}".format(metric))
         else:
             aggregator.assert_metric("gitlab_runner.{}".format(metric), tags=CUSTOM_TAGS, count=2)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.usefixtures("dd_environment")
