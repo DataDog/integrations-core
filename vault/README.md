@@ -10,6 +10,18 @@ This check monitors [Vault][1] cluster health and leader changes.
 
 The Vault check is included in the [Datadog Agent][3] package. No additional installation is needed on your server.
 
+#### Prerequisites
+
+For Vault check to work, you need to provide a) a Vault client token or b) enable unauthenticated access to vault metrics.
+
+a) 
+
+https://www.vaultproject.io/docs/commands/token/create.html
+
+b) Set `unauthenticated_metrics_access` configuration to `true`.
+
+This will allows unauthenticated access to the `/v1/sys/metrics` endpoint.
+
 ### Configuration
 
 #### Host

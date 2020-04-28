@@ -22,6 +22,15 @@ def test_integration(aggregator, check, instance, global_tags):
     assert_collection(aggregator, global_tags)
 
 
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_integration_noauth(aggregator, check, noauth_instance, global_tags):
+    check = check(noauth_instance)
+    run_check(check)
+
+    assert_collection(aggregator, global_tags)
+
+
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, e2e_instance, global_tags):
     aggregator = dd_agent_check(e2e_instance, rate=True)

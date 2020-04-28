@@ -24,6 +24,8 @@ INSTANCES = {
 }
 HEALTH_ENDPOINT = '{}/sys/health'.format(INSTANCES['main']['api_url'])
 
+AUTH_TYPE = os.environ['AUTH_TYPE']
+
 
 class MockResponse:
     def __init__(self, j, status_code=200):
@@ -36,3 +38,10 @@ class MockResponse:
     def raise_for_status(self):
         if self.status_code >= 300:
             raise requests.exceptions.HTTPError
+
+
+def get_vault_server_config_file():
+    if AUTH_TYPE == 'no-auth':
+        return './vault_server_config_noauth.json'
+    else:
+        return './vault_server_config.json'
