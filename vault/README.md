@@ -14,13 +14,13 @@ The Vault check is included in the [Datadog Agent][3] package. No additional ins
 
 For Vault check to work properly, you need to a) enable unauthenticated access to vault metrics or b) provide a Vault client token.
 
-a) Set [`unauthenticated_metrics_access`][15] configuration to `true`.
+a) Set [`unauthenticated_metrics_access`][14] configuration to `true`.
 
 This will allow unauthenticated access to the `/v1/sys/metrics` endpoint.
 
 b) Use a Vault client token.
 
-Below is an example using JWT auth method, but you can also use other [auth methods][16].
+Below is an example using JWT auth method, but you can also use other [auth methods][15].
 
 The capabilities needed for Vault integration to work properly are the following:
 
@@ -220,6 +220,5 @@ Additional helpful documentation, links, and articles:
 [11]: https://learn.hashicorp.com/vault/operations/troubleshooting-vault#enabling-audit-devices
 [12]: https://learn.hashicorp.com/vault/operations/troubleshooting-vault#vault-server-logs
 [13]: https://learn.hashicorp.com/vault/operations/troubleshooting-vault#not-finding-the-server-logs
-[14]: https://www.vaultproject.io/docs/commands/token/create.html
-[15]: https://www.vaultproject.io/docs/configuration/listener/tcp#unauthenticated_metrics_access
-[16]: https://www.vaultproject.io/docs/auth
+[14]: https://www.vaultproject.io/docs/configuration/listener/tcp#unauthenticated_metrics_access
+[15]: https://www.vaultproject.io/docs/auth
