@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.vault import Vault
 
+from .common import noauth_required
 from .metrics import METRICS
 from .utils import run_check
 
@@ -22,6 +23,7 @@ def test_integration(aggregator, check, instance, global_tags):
     assert_collection(aggregator, global_tags)
 
 
+@noauth_required
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_integration_noauth(aggregator, check, noauth_instance, global_tags):

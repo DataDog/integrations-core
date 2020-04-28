@@ -40,8 +40,10 @@ def instance():
 
 
 @pytest.fixture(scope='session')
-def noauth_instance():
-    return INSTANCES['main']
+def no_token_instance():
+    inst = INSTANCES['main'].copy()
+    inst['no_token'] = True
+    return inst
 
 
 @pytest.fixture(scope='session')
