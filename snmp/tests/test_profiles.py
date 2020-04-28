@@ -18,8 +18,8 @@ from .metrics import (
     IF_RATES,
     IFX_COUNTS,
     IP_COUNTS,
-    IPX_COUNTS,
     IP_IF_COUNTS,
+    IPX_COUNTS,
     SYSTEM_STATUS_GAUGES,
     TCP_COUNTS,
     TCP_GAUGES,
@@ -431,54 +431,19 @@ def test_dell_poweredge(aggregator):
         aggregator.assert_metric('snmp.networkDeviceStatus', metric_type=aggregator.GAUGE, tags=tags, at_least=1)
 
     # Intel Adapter
-    if_counts = [
-        'adapterRxPackets',
-        'adapterTxPackets',
-        'adapterRxBytes',
-        'adapterTxBytes',
-        'adapterRxErrors',
-        'adapterTxErrors',
-        'adapterRxDropped',
-        'adapterTxDropped',
-        'adapterRxMulticast',
-        'adapterCollisions',
-    ]
-
     interfaces = ['eth0', 'en1']
     for interface in interfaces:
         tags = ['adapter:{}'.format(interface)] + common_tags
-        for count in if_counts:
+        for count in ADAPTER_IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(count), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
 
     # IDRAC
-    status_gauges = [
-        'systemStateChassisStatus',
-        'systemStatePowerUnitStatusRedundancy',
-        'systemStatePowerSupplyStatusCombined',
-        'systemStateAmperageStatusCombined',
-        'systemStateCoolingUnitStatusRedundancy',
-        'systemStateCoolingDeviceStatusCombined',
-        'systemStateTemperatureStatusCombined',
-        'systemStateMemoryDeviceStatusCombined',
-        'systemStateChassisIntrusionStatusCombined',
-        'systemStatePowerUnitStatusCombined',
-        'systemStateCoolingUnitStatusCombined',
-        'systemStateProcessorDeviceStatusCombined',
-        'systemStateTemperatureStatisticsStatusCombined',
-    ]
-    disk_gauges = [
-        'physicalDiskState',
-        'physicalDiskCapacityInMB',
-        'physicalDiskUsedSpaceInMB',
-        'physicalDiskFreeSpaceInMB',
-    ]
-
     indexes = ['26', '29']
     for index in indexes:
         tags = ['chassis_index:{}'.format(index)] + common_tags
-        for gauge in status_gauges:
+        for gauge in SYSTEM_STATUS_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
     powers = ['supply1', 'supply2']
     for power in powers:
@@ -487,7 +452,7 @@ def test_dell_poweredge(aggregator):
     disks = ['disk1', 'disk2']
     for disk in disks:
         tags = ['disk_name:{}'.format(disk)] + common_tags
-        for gauge in disk_gauges:
+        for gauge in DISK_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
