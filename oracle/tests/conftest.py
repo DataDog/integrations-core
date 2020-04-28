@@ -87,8 +87,8 @@ def dd_environment():
             WaitFor(create_user),
         ],
         env_vars={'ORACLE_DATABASE_VERSION': ORACLE_DATABASE_VERSION},
-        attempts=5,
-        attempts_wait=3,
+        attempts=20,
+        attempts_wait=5,
     ):
         yield instance, e2e_metadata
 
