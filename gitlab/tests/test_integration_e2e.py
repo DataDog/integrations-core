@@ -38,7 +38,9 @@ def assert_check(aggregator, metrics):
     for metric in metrics:
         aggregator.assert_metric("gitlab.{}".format(metric))
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude="gitlab.rack.http_requests_total")
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_metric_type=False, exclude="gitlab.rack.http_requests_total"
+    )
 
 
 @pytest.mark.parametrize(
