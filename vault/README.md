@@ -125,7 +125,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INIT_CONFIG>`      | blank or `{}`                            |
 | `<INSTANCE_CONFIG>`  | `{"api_url": "http://%%host%%:8200/v1"}` |
 
-`INSTANCE_CONFIG` need to be customized depending on your vault authentication config. See example in Host section above. 
+`INSTANCE_CONFIG` needs to be customized depending on your vault authentication config. See example in Host section above. 
 
 #### Log Collection
 
