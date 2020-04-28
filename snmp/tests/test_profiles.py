@@ -649,38 +649,21 @@ def test_proliant(aggregator):
         for metric in drive_gauges:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    if_counts = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards']
-    if_gauges = ['ifAdminStatus', 'ifOperStatus']
-    ifx_counts = [
-        'ifHCInOctets',
-        'ifHCInUcastPkts',
-        'ifHCInMulticastPkts',
-        'ifHCInBroadcastPkts',
-        'ifHCOutOctets',
-        'ifHCOutUcastPkts',
-        'ifHCOutMulticastPkts',
-        'ifHCOutBroadcastPkts',
-    ]
-    if_rates = [
-        'ifHCInOctets.rate',
-        'ifHCOutOctets.rate',
-    ]
-
     for interface in ['eth0', 'eth1']:
         if_tags = ['interface:{}'.format(interface)] + common_tags
-        for metric in if_counts:
+        for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
             )
 
-        for metric in if_gauges:
+        for metric in IF_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
-        for metric in ifx_counts:
+        for metric in IFX_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
             )
-        for metric in if_rates:
+        for metric in IF_RATES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
@@ -753,79 +736,48 @@ def test_cisco_asa_5525(aggregator):
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-asa-5525', 'snmp_host:kept']
 
-    tcp_counts = [
-        'tcpActiveOpens',
-        'tcpPassiveOpens',
-        'tcpAttemptFails',
-        'tcpEstabResets',
-        'tcpHCInSegs',
-        'tcpHCOutSegs',
-        'tcpRetransSegs',
-        'tcpInErrs',
-        'tcpOutRsts',
-    ]
-    tcp_gauges = ['tcpCurrEstab']
-    udp_counts = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
-    if_counts = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards']
-    if_gauges = ['ifAdminStatus', 'ifOperStatus']
-    ifx_counts = [
-        'ifHCInOctets',
-        'ifHCInUcastPkts',
-        'ifHCInMulticastPkts',
-        'ifHCInBroadcastPkts',
-        'ifHCOutOctets',
-        'ifHCOutUcastPkts',
-        'ifHCOutMulticastPkts',
-        'ifHCOutBroadcastPkts',
-    ]
-    if_rates = [
-        'ifHCInOctets.rate',
-        'ifHCOutOctets.rate',
-    ]
-    for metric in tcp_counts:
+    for metric in TCP_COUNTS:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
         )
 
-    for metric in tcp_gauges:
+    for metric in TCP_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
-    for metric in udp_counts:
+    for metric in UDP_COUNTS:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
         )
 
     if_tags = ['interface:0x42010aa40033'] + common_tags
-    for metric in if_counts:
+    for metric in IF_COUNTS:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
         )
 
-    for metric in if_gauges:
+    for metric in IF_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
     hc_tags = ['interface:Jaded oxen acted acted'] + common_tags
-    for metric in ifx_counts:
+    for metric in IFX_COUNTS:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=hc_tags, count=1
         )
-    for metric in if_rates:
+    for metric in IF_RATES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=hc_tags, count=1)
 
     aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1)
 
-    fru_metrics = ["cefcFRUPowerAdminStatus", "cefcFRUPowerOperStatus", "cefcFRUCurrent"]
     frus = [3, 4, 5, 7, 16, 17, 24, 25]
     for fru in frus:
         tags = ['fru:{}'.format(fru)] + common_tags
-        for metric in fru_metrics:
+        for metric in FRU_METRICS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     cpus = [7746]
-    cpu_metrics = ["cpmCPUTotalMonIntervalValue", "cpmCPUMemoryUsed", "cpmCPUMemoryFree"]
     for cpu in cpus:
         tags = ['cpu:{}'.format(cpu)] + common_tags
-        for metric in cpu_metrics:
+        for metric in CPU_METRICS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
     sensor_tags = ['sensor_id:31', 'sensor_type:9'] + common_tags
     aggregator.assert_metric('snmp.entPhySensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
