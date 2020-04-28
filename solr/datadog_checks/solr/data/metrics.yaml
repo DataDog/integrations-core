@@ -126,11 +126,32 @@ jmx_metrics:
       category: QUERY
       name: requestTimes
       attribute:
-        avgRequestsPerSecond:
-          alias: solr.search_handler.avg_requests_per_sec
+        Mean:
+          alias: solr.search_handler.request_times.mean
           metric_type: gauge
-        avgTimePerRequest:
-          alias: solr.search_handler.avg_time_per_req
+        MeanRate:
+          alias: solr.search_handler.request_times.mean_rate
+          metric_type: gauge
+        50thPercentile:
+          alias: solr.search_handler.request_times.50percentile
+          metric_type: gauge
+        75thPercentile:
+          alias: solr.search_handler.request_times.75percentile
+          metric_type: gauge
+        95thPercentile:
+          alias: solr.search_handler.request_times.95percentile
+          metric_type: gauge
+        98thPercentile:
+          alias: solr.search_handler.request_times.98percentile
+          metric_type: gauge
+        99thPercentile:
+          alias: solr.search_handler.request_times.99percentile
+          metric_type: gauge
+        999thPercentile:
+          alias: solr.search_handler.request_times.999percentile
+          metric_type: gauge
+        OneMinuteRate:
+          alias: solr.search_handler.request_times.one_minute_rate
           metric_type: gauge
 
 
