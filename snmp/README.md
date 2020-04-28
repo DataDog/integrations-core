@@ -136,6 +136,7 @@ Profiles can be used interchangeably, such that devices that share MIB dependenc
 * [HPE Proliant][16]
 * [Palo Alto][17]
 * [Checkpoint Firewall][18]
+* [Isilon][24]
 
 ### Validation
 
@@ -192,3 +193,4 @@ Additional helpful documentation, links, and articles:
 [21]: https://docs.datadoghq.com/help
 [22]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
 [23]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
+[24]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/isilon.yaml
