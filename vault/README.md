@@ -14,7 +14,7 @@ The Vault check is included in the [Datadog Agent][3] package. No additional ins
 
 For Vault check to work properly, you need to a) enable unauthenticated access to vault metrics or b) provide a Vault client token.
 
-a) Set [`unauthenticated_metrics_access`][14] configuration to `true`.
+a) Set Vault [`unauthenticated_metrics_access`][14] configuration to `true`.
 
 This will allow unauthenticated access to the `/v1/sys/metrics` endpoint.
 
@@ -30,14 +30,14 @@ path "sys/metrics*" {
 }
 ```
 
-Setup policy and role.
+Setup policy and role:
 
 ```text
 $ policy write metrics /home/metrics_policy.hcl  # containing `sys/metrics` capabilities described above
 $ auth enable jwt
 $ write auth/jwt/config jwt_supported_algs=RS256 jwt_validation_pubkeys=@<PATH_TO_PUBLIC_PEM>
 $ write auth/jwt/role/datadog role_type=jwt bound_audiences=<AUDIENCE> user_claim=name token_policies=metrics
-$ agent -config=/home/agent_config.hcl
+$ agent -config=<PATH>/agent_config.hcl
 ```
 
 Content of `/home/agent_config.hcl`:
@@ -90,7 +90,7 @@ Follow the instructions below to configure this check for an Agent running on a 
         no_token: true
     ```
 
-    Configuration for running the integration with a token:
+    Configuration for running the integration with a client token:
 
     ```yaml
     init_config:
