@@ -33,11 +33,11 @@ path "sys/metrics*" {
 Setup policy and role:
 
 ```text
-$ policy write metrics /home/metrics_policy.hcl  # containing `sys/metrics` capabilities described above
-$ auth enable jwt
-$ write auth/jwt/config jwt_supported_algs=RS256 jwt_validation_pubkeys=@<PATH_TO_PUBLIC_PEM>
-$ write auth/jwt/role/datadog role_type=jwt bound_audiences=<AUDIENCE> user_claim=name token_policies=metrics
-$ agent -config=<PATH>/agent_config.hcl
+$ vault policy write metrics /home/metrics_policy.hcl  # containing `sys/metrics` capabilities described above
+$ vault auth enable jwt
+$ vault write auth/jwt/config jwt_supported_algs=RS256 jwt_validation_pubkeys=@<PATH_TO_PUBLIC_PEM>
+$ vault write auth/jwt/role/datadog role_type=jwt bound_audiences=<AUDIENCE> user_claim=name token_policies=metrics
+$ vault agent -config=<PATH>/agent_config.hcl
 ```
 
 Content of `/home/agent_config.hcl`:
