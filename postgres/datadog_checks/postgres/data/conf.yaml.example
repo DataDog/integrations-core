@@ -52,7 +52,7 @@ instances:
     #
     # ssl: false
 
-    ## @param timeout - integer - optional
+    ## @param query_timeout - integer - optional
     ## Abort any statement that takes more than the specified number of milliseconds, starting from the time the command
     ## arrives at the server from the client. A value of zero (the default) turns this off.
     ## Cancelled queries won't log any metrics
