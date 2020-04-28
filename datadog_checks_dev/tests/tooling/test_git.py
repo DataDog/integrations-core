@@ -60,7 +60,7 @@ file2
                 mock.call('git diff --name-status master...', capture='out'),
                 mock.call('git diff --name-only master', capture='out'),
             ]
-            run.assert_has_calls(calls, any_order=True)
+            run.assert_has_calls(calls)
             assert retval == ['bar', 'baz', 'file1', 'file2', 'foo', 'foo2', 'foo3']
 
 
@@ -77,18 +77,8 @@ R100	foo2	foo3
             set_root('/foo/')
             retval = files_changed(include_uncommitted=False)
 
-            chdir.assert_has_calls(
-                [
-                    # since chdir is a context manager, we need to also assert __enter__/__exit__
-                    mock.call('/foo/'),
-                    mock.call().__enter__(),
-                    mock.call().__exit__(None, None, None),
-                ]
-            )
-            calls = [
-                mock.call('git diff --name-status master...', capture='out'),
-            ]
-            run.assert_has_calls(calls, any_order=True)
+            chdir.assert_called_once_with('/foo/')
+            run.assert_called_once_with('git diff --name-status master...', capture='out')
             assert retval == ['bar', 'baz', 'foo', 'foo2', 'foo3']
 
 
