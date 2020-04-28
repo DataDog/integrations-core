@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+# Generic TCP metrics for routers
+# _generic-router-tcp.yaml
 TCP_COUNTS = [
     'tcpActiveOpens',
     'tcpPassiveOpens',
@@ -14,7 +16,13 @@ TCP_COUNTS = [
     'tcpOutRsts',
 ]
 TCP_GAUGES = ['tcpCurrEstab']
+
+# Generic UDP metrics for routers
+# _generic-router-udp.yaml
 UDP_COUNTS = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagrams']
+
+# Generic network interfaces metrics for routers.
+# _generic-router-if.yaml
 IF_COUNTS = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards']
 IFX_COUNTS = [
     'ifHCInOctets',
@@ -32,6 +40,8 @@ IF_RATES = [
 ]
 IF_GAUGES = ['ifAdminStatus', 'ifOperStatus']
 
+# Generic IP metrics for routers
+# _generic-router-ip.yaml
 IP_COUNTS = [
     'ipSystemStatsHCInReceives',
     'ipSystemStatsInHdrErrors',
@@ -95,7 +105,8 @@ IP_IF_COUNTS = [
     'ipIfStatsHCOutBcastPkts',
 ]
 
-
+# IDRAC profile metrics
+# idrac.yaml
 ADAPTER_IF_COUNTS = [
     'adapterRxPackets',
     'adapterTxPackets',
@@ -108,7 +119,6 @@ ADAPTER_IF_COUNTS = [
     'adapterRxMulticast',
     'adapterCollisions',
 ]
-
 SYSTEM_STATUS_GAUGES = [
     'systemStateChassisStatus',
     'systemStatePowerUnitStatusRedundancy',
@@ -124,8 +134,6 @@ SYSTEM_STATUS_GAUGES = [
     'systemStateProcessorDeviceStatusCombined',
     'systemStateTemperatureStatisticsStatusCombined',
 ]
-
-
 DISK_GAUGES = [
     'physicalDiskState',
     'physicalDiskCapacityInMB',
@@ -133,18 +141,18 @@ DISK_GAUGES = [
     'physicalDiskFreeSpaceInMB',
 ]
 
+# Base profile metrics for Cisco devices
+# _base_cisco.yaml
 FRU_METRICS = [
     "cefcFRUPowerAdminStatus",
     "cefcFRUPowerOperStatus",
     "cefcFRUCurrent",
 ]
-
 CPU_METRICS = [
     "cpmCPUTotalMonIntervalValue",
     "cpmCPUMemoryUsed",
     "cpmCPUMemoryFree",
 ]
-
 CIE_METRICS = [
     "cieIfLastInTime",
     "cieIfLastOutTime",
