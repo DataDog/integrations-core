@@ -139,9 +139,9 @@ def docker_run(
     :param env_vars: A dictionary to update ``os.environ`` with during execution.
     :type env_vars: ``dict``
     :param wrappers: A list of context managers to use during execution.
-    :param attempts: Number of time we should attempts to run
+    :param attempts: Number attempts to run `up`
     :type attempts: int
-    :param attempts_wait: Time wait between attempts we should retry to run
+    :param attempts_wait: Time wait between attempts
     :type attempts_wait: int
     """
     if compose_file and up:
