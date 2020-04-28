@@ -679,7 +679,7 @@ def test_discovery(aggregator):
             aggregator.reset()
     finally:
         check._running = False
-        check._thread.join()
+        del check
 
     for metric in common.SUPPORTED_METRIC_TYPES:
         metric_name = "snmp." + metric['name']
