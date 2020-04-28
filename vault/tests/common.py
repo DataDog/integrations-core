@@ -42,13 +42,13 @@ class MockResponse:
 
 
 def get_vault_server_config_file():
-    if AUTH_TYPE == 'no-auth':
+    if AUTH_TYPE == 'noauth':
         return './vault_server_config_noauth.json'
     else:
         return './vault_server_config.json'
 
 
-auth_required = pytest.mark.skipif(AUTH_TYPE == 'no-auth', reason='Test only if auth is required to retrieve metrics')
+auth_required = pytest.mark.skipif(AUTH_TYPE == 'noauth', reason='Test only if auth is required to retrieve metrics')
 noauth_required = pytest.mark.skipif(
-    AUTH_TYPE != 'no-auth', reason='Test only if auth is NOT required to retrieve metrics'
+    AUTH_TYPE != 'noauth', reason='Test only if auth is NOT required to retrieve metrics'
 )
