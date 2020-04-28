@@ -516,7 +516,7 @@ class PostgreSql(AgentCheck):
                 # Use ident method
                 connection_string = "user=%s dbname=%s, application_name=%s" % (user, dbname, "datadog-agent")
                 if query_timeout:
-                    connection_string += "options='-c statement_timeout=%s'" % query_timeout
+                    connection_string += " options='-c statement_timeout=%s'" % query_timeout
                 self.db = psycopg2.connect(connection_string)
             elif port != '':
                 self.db = psycopg2.connect(
