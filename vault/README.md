@@ -12,15 +12,58 @@ The Vault check is included in the [Datadog Agent][3] package. No additional ins
 
 #### Prerequisites
 
-For Vault check to work, you need to provide a) a Vault client token or b) enable unauthenticated access to vault metrics.
+For Vault check to work properly, you need to a) enable unauthenticated access to vault metrics or b) provide a Vault client token.
 
-a) 
+a) Set [`unauthenticated_metrics_access`][15] configuration to `true`.
 
-https://www.vaultproject.io/docs/commands/token/create.html
+This will allow unauthenticated access to the `/v1/sys/metrics` endpoint.
 
-b) Set `unauthenticated_metrics_access` configuration to `true`.
+b) Use a Vault client token.
 
-This will allows unauthenticated access to the `/v1/sys/metrics` endpoint.
+Below is an example using JWT auth method, but you can also use other [auth methods][16].
+
+The capabilities needed for Vault integration to work properly are the following:
+
+```text
+path "sys/metrics*" {
+  capabilities = ["read", "list"]
+}
+```
+
+Setup policy and role.
+
+```text
+$ policy write metrics /home/metrics_policy.hcl  # containing `sys/metrics` capabilities described above
+$ auth enable jwt
+$ write auth/jwt/config jwt_supported_algs=RS256 jwt_validation_pubkeys=@<PATH_TO_PUBLIC_PEM>
+$ write auth/jwt/role/datadog role_type=jwt bound_audiences=<AUDIENCE> user_claim=name token_policies=metrics
+$ agent -config=/home/agent_config.hcl
+```
+
+Content of `/home/agent_config.hcl`:
+```
+exit_after_auth = true
+pid_file = "/tmp/agent_pid"
+
+auto_auth {
+  method "jwt" {
+    config = {
+      path = "/home/jwt/claim"
+      role = "datadog"
+    }
+  }
+
+  sink "file" {
+    config = {
+      path = "/home/sink/token"
+    }
+  }
+}
+
+vault {
+  address = "http://0.0.0.0:8200"
+}
+```
 
 ### Configuration
 
@@ -29,6 +72,46 @@ This will allows unauthenticated access to the `/v1/sys/metrics` endpoint.
 Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
 
 1. Edit the `vault.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4] to start collecting your vault performance data. See the [sample vault.d/conf.yaml][5] for all available configuration options.
+
+    Configuration for running the integration without token (with vault config `unauthenticated_metrics_access` set to true):
+
+    ```yaml
+    init_config:
+
+    instances:
+        ## @param api_url - string - required
+        ## URL of the Vault to query.
+        #
+      - api_url: http://localhost:8200/v1
+
+        ## @param no_token - boolean - optional - default: false
+        ## Attempt metric collection without a token.
+        #
+        no_token: true
+    ```
+
+    Configuration for running the integration with a token:
+
+    ```yaml
+    init_config:
+
+    instances:
+        ## @param api_url - string - required
+        ## URL of the Vault to query.
+        #
+      - api_url: http://localhost:8200/v1
+
+        ## @param client_token - string - optional
+        ## Client token necessary to collect metrics.
+        #
+        client_token: <CLIENT_TOKEN>
+
+        ## @param client_token_path - string - optional
+        ## Path to a file containing the client token. Overrides `client_token`.
+        ## The token will be re-read after every authorization error.
+        #
+        # client_token_path: <CLIENT_TOKEN_PATH>
+    ```
 
 2. [Restart the Agent][6].
 
@@ -137,3 +220,6 @@ Additional helpful documentation, links, and articles:
 [11]: https://learn.hashicorp.com/vault/operations/troubleshooting-vault#enabling-audit-devices
 [12]: https://learn.hashicorp.com/vault/operations/troubleshooting-vault#vault-server-logs
 [13]: https://learn.hashicorp.com/vault/operations/troubleshooting-vault#not-finding-the-server-logs
+[14]: https://www.vaultproject.io/docs/commands/token/create.html
+[15]: https://www.vaultproject.io/docs/configuration/listener/tcp#unauthenticated_metrics_access
+[16]: https://www.vaultproject.io/docs/auth
