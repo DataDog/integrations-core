@@ -12,12 +12,13 @@ from .common import (
     CLIENT_LIB,
     COMPOSE_FILE,
     CONTAINER_NAME,
+    HERE,
     HOST,
     ORACLE_DATABASE_VERSION,
     PASSWORD,
     PORT,
     USER,
-    HERE)
+)
 
 INSTANT_CLIENT_URL = (
     "https://ddintegrations.blob.core.windows.net/oracle/instantclient-basiclite-linux.x64-19.3.0.0.0dbru.zip"
