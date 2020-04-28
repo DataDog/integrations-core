@@ -994,3 +994,11 @@ def test_chatsworth(aggregator):
         )
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_apc_ups(aggregator):
+    run_profile_check('apc_ups')
+
+    common_tags = common.CHECK_TAGS + ['snmp_profile:apc_ups']
+    tags = [] + common_tags
+    aggregator.assert_metric('snmp.upsAdvBatteryNumOfBadBattPacks', metric_type=aggregator.GAUGE, tags=tags, count=1)
