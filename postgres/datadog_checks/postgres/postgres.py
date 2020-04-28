@@ -515,25 +515,19 @@ class PostgreSql(AgentCheck):
             if host == 'localhost' and password == '':
                 # Use ident method
                 self.db = psycopg2.connect("user=%s dbname=%s, application_name=%s" % (user, dbname, "datadog-agent"))
-            elif port != '':
-                self.db = psycopg2.connect(
-                    host=host,
-                    port=port,
-                    user=user,
-                    password=password,
-                    database=dbname,
-                    sslmode=ssl,
-                    application_name="datadog-agent",
-                )
             else:
-                self.db = psycopg2.connect(
-                    host=host,
-                    user=user,
-                    password=password,
-                    database=dbname,
-                    sslmode=ssl,
-                    application_name="datadog-agent",
-                )
+                args = {
+                    'host': host,
+                    'port': port,
+                    'user': user,
+                    'password': password,
+                    'database': dbname,
+                    'sslmode': ssl,
+                    'application_name': "datadog-agent",
+                }
+                if port:
+                    args['port'] = port
+                self.db = psycopg2.connect(**args)
 
     def _get_custom_queries(self, tags, custom_queries):
         """
