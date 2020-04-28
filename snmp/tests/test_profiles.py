@@ -246,8 +246,10 @@ def test_3850(aggregator):
         for metric in CIE_METRICS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
-
-    aggregator.assert_metric('snmp.ciscoEnvMonTemperatureStatusValue', metric_type=aggregator.GAUGE, tags=['temp_descr:quaintly oxen Jaded but their'] + common_tags)
+    for temp in range(3):
+        for switch in range(1, 3)
+        env_tag = [f'temp_descr:Switch {switch} - Temp Sensor {temp}, GREEN ']
+        aggregator.assert_metric('snmp.ciscoEnvMonTemperatureStatusValue', metric_type=aggregator.GAUGE, tags=env_tag + common_tags)
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
