@@ -57,7 +57,7 @@ instances:
     ## arrives at the server from the client. A value of zero (the default) turns this off.
     ## Cancelled queries won't log any metrics
     #
-    # timeout: 1000
+    # query_timeout: 1000
 
     ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.

@@ -683,7 +683,7 @@ class PostgreSql(AgentCheck):
 
         user = self.instance.get('username', '')
         password = self.instance.get('password', '')
-        query_timeout = self.instance.get('timeout')
+        query_timeout = self.instance.get('query_timeout')
 
         table_count_limit = self.instance.get('table_count_limit', TABLE_COUNT_LIMIT)
         collect_function_metrics = is_affirmative(self.instance.get('collect_function_metrics', False))
