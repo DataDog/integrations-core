@@ -6,6 +6,9 @@ extends:
   - _generic-router-tcp.yaml
   - _generic-router-udp.yaml
 
+tags: 
+  "vendor:cisco"
+
 metrics:
   - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
     table:

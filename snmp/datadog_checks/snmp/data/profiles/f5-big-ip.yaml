@@ -6,6 +6,9 @@ extends:
 
 sysobjectid: 1.3.6.1.4.1.3375.2.1.3.4.*
 
+tags:
+  "vendor:f5"
+
 metrics:
   # Memory stats
   - MIB: F5-BIGIP-SYSTEM-MIB

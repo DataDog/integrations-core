@@ -4,6 +4,9 @@
 
 sysobjectid: 1.3.6.1.4.1.29671.*
 
+tags:
+  "vendor:cisco_meraki"
+
 metrics:
   - MIB: MERAKI-CLOUD-CONTROLLER-MIB
     table:

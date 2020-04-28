@@ -5,6 +5,9 @@ extends:
 
 sysobjectid: 1.3.6.1.4.1.30065.*
 
+tags:
+  "vendor:arista"
+
 metrics:
   ### Sensor
 

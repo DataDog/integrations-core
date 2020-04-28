@@ -4,6 +4,9 @@ extends:
 
 sysobjectid: 1.3.6.1.4.1.2620.1.*
 
+tags:
+  "vendor:checkpoint"
+
 metrics:
     # CPU
   - MIB: CHECKPOINT-MIB
