@@ -81,10 +81,11 @@ def test_redis_default(aggregator, redis_auth, redis_instance):
     for name in aggregator.metric_names:
         if name in DB_TAGGED_METRICS:
             aggregator.assert_metric(name, tags=expected_db)
-        elif name != 'redis.key.length':
+        elif name not in ('redis.key.length', 'redis.net.connections'):
             aggregator.assert_metric(name, tags=expected)
 
     aggregator.assert_metric('redis.key.length', 3, count=1, tags=expected_db + ['key:test_list', 'key_type:list'])
+    aggregator.assert_metric('redis.net.connections', count=1, tags=expected + ['source:unknown'])
 
     aggregator.assert_metric('redis.net.maxclients')
 
