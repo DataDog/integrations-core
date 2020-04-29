@@ -518,7 +518,6 @@ class PostgreSql(AgentCheck):
             else:
                 args = {
                     'host': host,
-                    'port': port,
                     'user': user,
                     'password': password,
                     'database': dbname,
