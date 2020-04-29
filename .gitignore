@@ -53,6 +53,7 @@ coverage.xml
 .pytest_cache/
 .benchmarks/
 .junit/
+.kube/
 
 # Translations
 *.mo

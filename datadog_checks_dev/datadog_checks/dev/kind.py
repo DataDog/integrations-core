@@ -10,7 +10,7 @@ from six import PY3
 from .env import environment_run
 from .structures import LazyFunction
 from .subprocess import run_command
-from .utils import get_check_name, get_here, path_join
+from .utils import find_check_root, get_check_name, get_here, path_join
 
 if PY3:
     from shutil import which
@@ -66,18 +66,20 @@ class KindUp(LazyFunction):
 
     def __init__(self, directory):
         self.directory = directory
+        self.check_root = find_check_root(path=self.directory)
         self.check_name = get_check_name(self.directory)
         self.cluster_name = '{}-{}-cluster'.format(self.check_name, TOX_ENV)
 
     def __call__(self):
+        kube_path = path_join(self.check_root, '.kube', 'config')
         env = os.environ.copy()
+        env['KUBECONFIG'] = kube_path
+        # Create cluster
         run_command(['kind', 'create', 'cluster', '--name', self.cluster_name], check=True, env=env)
-        kubeconfig = run_command(
-            ['kind', 'get', 'kubeconfig', '--name', self.cluster_name], check=True, env=env, capture=True
-        ).stdout
+        # Connect to cluster
         run_command(['kind', 'export', 'kubeconfig', '--name', self.cluster_name], check=True, env=env)
         run_command(['python', path_join(self.directory, 'script.py')])
-        return kubeconfig
+        return kube_path
 
 
 class KindDown(LazyFunction):

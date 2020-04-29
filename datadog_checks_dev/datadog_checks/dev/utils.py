@@ -224,7 +224,7 @@ def load_jmx_config():
     return example_config
 
 
-def find_check_root(depth=0):
+def find_check_root(depth=0, path=None):
     # Account for this call
     depth += 1
 
@@ -232,7 +232,10 @@ def find_check_root(depth=0):
     for _ in range(depth):
         frame = frame.f_back
 
-    root = get_parent_dir(frame.f_code.co_filename)
+    root = path
+    if root is None:
+        root = get_parent_dir(frame.f_code.co_filename)
+
     while True:
         if file_exists(path_join(root, 'setup.py')):
             break
