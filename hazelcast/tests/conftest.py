@@ -26,13 +26,13 @@ def dd_environment():
             CheckDockerLogs('hazelcast_management_center', ['Started communication with member']),
             CheckDockerLogs('hazelcast2', [r'Hazelcast JMX agent enabled']),
             CheckDockerLogs('hazelcast2', [r'is STARTED']),
-            WaitFor(trigger_some_tcp_data, attempts=1),
+            WaitFor(trigger_some_tcp_data),
         ],
         attempts=5,
         attempts_wait=5,
     ):
         config = load_jmx_config()
-        config['instances'] = [common.INSTANCE_MEMBER_JMX, common.INSTANCE_MC_JMX, common.INSTANCE_MC_PYTHON]
+        config['instances'] = common.INSTANCE_MEMBERS + [common.INSTANCE_MC_JMX, common.INSTANCE_MC_PYTHON]
         yield config, {'use_jmx': True}
 
 

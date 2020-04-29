@@ -55,6 +55,29 @@ services:
     networks:
       - dd_hazelcast
 
+  hazelcast3:
+    image: hazelcast/hazelcast:${HAZELCAST_VERSION}
+    container_name: hazelcast3
+    environment:
+      JAVA_OPTS: >-
+        -Dhazelcast.config=/tmp/hazelcast.xml
+        -Dhazelcast.jmx=true
+        -Dhazelcast.metrics.enabled=true
+        -Dhazelcast.metrics.jmx.enabled=true
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.port=1100
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.rmi.port=1100
+        -Djava.rmi.server.hostname=localhost
+    ports:
+      - "5703:5701"
+      - "1100:1100"
+    volumes:
+      - ./hazelcast.xml:/tmp/hazelcast.xml
+    networks:
+      - dd_hazelcast
+
   hazelcast_management_center:
     image: hazelcast/management-center:${HAZELCAST_VERSION}
     container_name: hazelcast_management_center
