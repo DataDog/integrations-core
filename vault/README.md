@@ -49,7 +49,7 @@ pid_file = "/tmp/agent_pid"
 auto_auth {
   method "jwt" {
     config = {
-      path = "/home/jwt/claim"
+      path = "<JWT_CLAIM_PATH>"
       role = "datadog"
     }
   }
