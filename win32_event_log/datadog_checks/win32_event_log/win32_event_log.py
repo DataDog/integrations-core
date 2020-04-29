@@ -33,7 +33,7 @@ class Win32EventLogWMI(WinWMICheck):
     def __init__(self, name, init_config, instances):
         # type: (str, Dict, List[Dict]) -> None
         instances[0].update({'class': self.EVENT_CLASS, 'namespace': self.NAMESPACE})
-        super(Win32EventLogWMI, self).__init__(self, name, init_config, instances=instances)
+        super(Win32EventLogWMI, self).__init__(name, init_config, instances=instances)
 
         # Settings
         self.instance_tags = self.instance.get('tags', [])  # type: List[str]
