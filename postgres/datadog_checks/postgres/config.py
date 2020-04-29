@@ -1,13 +1,14 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from datadog_checks.base import ConfigurationError, is_affirmative, AgentCheck
-
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
 from six import iteritems
 
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
+
 
 class PostgresConfig:
     RATE = AgentCheck.rate

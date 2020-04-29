@@ -7,7 +7,7 @@ from contextlib import closing
 import psycopg2
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
 
 from .config import PostgresConfig
 from .util import (
@@ -426,7 +426,11 @@ class PostgreSql(AgentCheck):
         else:
             if self.config.host == 'localhost' and self.config.password == '':
                 # Use ident method
-                connection_string = "user=%s dbname=%s, application_name=%s" % (self.config.user, self.config.dbname, "datadog-agent")
+                connection_string = "user=%s dbname=%s, application_name=%s" % (
+                    self.config.user,
+                    self.config.dbname,
+                    "datadog-agent",
+                )
                 if self.config.query_timeout:
                     connection_string += " options='-c statement_timeout=%s'" % self.config.query_timeout
                 self.db = psycopg2.connect(connection_string)
