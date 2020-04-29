@@ -6,7 +6,7 @@ gitlab.banzai.cacheless_render_real_duration_seconds.sum,gauge,,second,,The sum 
 gitlab.cache.misses_total,count,,second,,The cache read miss count,0,gitlab,cache read miss
 gitlab.cache.operation_duration_seconds.count,count,,second,,The count of cache access time,0,gitlab,cache access time count
 gitlab.cache.operation_duration_seconds.sum,gauge,,second,,The sum of cache access time,0,gitlab,cache access time sum
-gitlab.cache.operations_total,count,,,,The count of cache operations by controller/action,0,gitlab,cache operations total
+gitlab.cache_operations_total,count,,,,The count of cache operations by controller/action,0,gitlab,cache operations total
 gitlab.job.waiter_started_total,count,,job,,The number of batches of jobs started where a web request is waiting for the jobs to complete,0,gitlab,job waiter started
 gitlab.job.waiter_timeouts_total,count,,job,,The number of batches of jobs that timed out where a web request is waiting for the jobs to complete,-1,gitlab,job waiter timeouts
 gitlab.database.transaction_seconds.count,count,,second,,The count of time spent in database transactions in seconds,0,gitlab,cache operations total count

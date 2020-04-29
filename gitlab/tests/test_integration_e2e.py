@@ -38,10 +38,6 @@ def assert_check(aggregator, metrics):
     for metric in metrics:
         aggregator.assert_metric("gitlab.{}".format(metric))
 
-    aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), check_metric_type=False, exclude="gitlab.rack.http_requests_total"
-    )
-
 
 @pytest.mark.parametrize(
     'raw_version, version_metadata, count',
@@ -105,9 +101,11 @@ def test_check_integration(aggregator, mock_data):
 def test_e2e_legacy(dd_agent_check):
     aggregator = dd_agent_check(LEGACY_CONFIG, rate=True)
     assert_check(aggregator, ALLOWED_METRICS)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(CONFIG, rate=True)
     assert_check(aggregator, METRICS_TO_TEST)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=["gitlab.rack.http_requests_total"])

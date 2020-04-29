@@ -40,7 +40,7 @@ METRICS = [
     "cache.misses_total",
     "cache.operation_duration_seconds.count",
     "cache.operation_duration_seconds.sum",
-    "cache.operations_total",
+    "cache_operations_total",
     "job.waiter_started_total",
     "job.waiter_timeouts_total",
     "rails_queue_duration_seconds.count",

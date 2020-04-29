@@ -7,7 +7,7 @@ METRICS_MAP = {
     "gitlab_banzai_cacheless_render_real_duration_seconds": "banzai.cacheless_render_real_duration_seconds",
     "gitlab_cache_misses_total": "cache.misses_total",
     "gitlab_cache_operation_duration_seconds": "cache.operation_duration_seconds",
-    "gitlab_cache_operations_total": "cache.operations_total",
+    "gitlab_cache_operations_total": "cache_operations_total",
     "job_waiter_started_total": "job.waiter_started_total",
     "job_waiter_timeouts_total": "job.waiter_timeouts_total",
     "gitlab_database_transaction_seconds": "database.transaction_seconds",
