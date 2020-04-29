@@ -2,14 +2,15 @@ version: "3"
 
 services:
   hazelcast1:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        HAZELCAST_VERSION: ${HAZELCAST_VERSION}
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#      args:
+#        HAZELCAST_VERSION: ${HAZELCAST_VERSION}
+    image: hazelcast/hazelcast:${HAZELCAST_VERSION}
     container_name: hazelcast1
     environment:
-      CLASSPATH: /tmp/log4j2/*
+#      CLASSPATH: /tmp/log4j2/*
       JAVA_OPTS: >-
         -Dhazelcast.jmx=true
         -Dhazelcast.metrics.enabled=true
@@ -20,14 +21,14 @@ services:
         -Dcom.sun.management.jmxremote.authenticate=false
         -Dcom.sun.management.jmxremote.rmi.port=1098
         -Djava.rmi.server.hostname=localhost
-        -Dhazelcast.logging.type=log4j2
-        -Dlog4j.configurationFile=/tmp/log4j2.properties
+#        -Dhazelcast.logging.type=log4j2
+#        -Dlog4j.configurationFile=/tmp/log4j2.properties
     ports:
       - "5701:5701"
       - "1098:1098"
-    volumes:
-      - ./log4j2.properties:/tmp/log4j2.properties
-      - ${DD_LOG_1}:/var/log/hazelcast.log
+#    volumes:
+#      - ./log4j2.properties:/tmp/log4j2.properties
+#      - ${DD_LOG_1}:/var/log/hazelcast.log
     networks:
       - dd_hazelcast
 
@@ -56,7 +57,7 @@ services:
     container_name: hazelcast_management_center
     environment:
       MC_CONTEXT_PATH: /
-      MC_INIT_CMD: "./mc-conf.sh cluster add -H=/data -ma hazelcast1:5701,hazelcast2:5702 -cn dev"
+      MC_INIT_CMD: "./mc-conf.sh cluster add -H=/data -ma hazelcast1:5701,hazelcast2:5701 -cn dev"
       JAVA_OPTS: >-
         -Dhazelcast.metrics.enabled=true
         -Dhazelcast.metrics.jmx.enabled=true
