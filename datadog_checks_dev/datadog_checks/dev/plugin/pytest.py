@@ -178,6 +178,9 @@ def dd_agent_check(request, aggregator):
                     check_command.append(str(value))
 
         result = run_command(check_command, capture=True)
+        print("==============")
+        print(result.stdout)
+        print("==============")
 
         matches = re.findall(AGENT_COLLECTOR_SEPARATOR + r'\n(.*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
 
