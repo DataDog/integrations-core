@@ -22,9 +22,11 @@ def dd_environment():
         mount_logs=True,
         conditions=[
             CheckDockerLogs('hazelcast_management_center', ['Hazelcast Management Center successfully started']),
-            CheckDockerLogs('hazelcast_management_center', [r'Members \[']),
-            CheckDockerLogs('hazelcast2', [r'Members \{size:']),
+            CheckDockerLogs('hazelcast_management_center', ['Started communication with member']),
+            CheckDockerLogs('hazelcast2', [r'Hazelcast JMX agent enabled']),
+            CheckDockerLogs('hazelcast2', [r'is STARTED']),
         ],
+        # Add some sleep to be sure JMX server metrics have been populated
         sleep=10,
     ):
         config = load_jmx_config()
