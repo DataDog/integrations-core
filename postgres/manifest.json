@@ -35,6 +35,9 @@
   "type": "check",
   "integration_id": "postgres",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "saved_views": {
@@ -43,6 +46,6 @@
       "postgres_pattern": "assets/saved_views/postgres_pattern.json",
       "sessions_by_host": "assets/saved_views/sessions_by_host.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
   }
 }
