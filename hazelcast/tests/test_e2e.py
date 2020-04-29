@@ -12,9 +12,6 @@ pytestmark = [pytest.mark.e2e]
 def test(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
 
-    for m in sorted(aggregator._metrics.keys()):
-        print("metric: ", m)
-
     assert_service_checks_ok(aggregator)
 
     for metric in METRICS:
