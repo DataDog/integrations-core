@@ -24,7 +24,6 @@ METRICS = (
     'hazelcast.member.available_processors',
     'hazelcast.member.backup_timeout_millis',
     'hazelcast.member.backup_timeouts',
-    'hazelcast.member.bytes_read',
     'hazelcast.member.bytes_received',
     'hazelcast.member.bytes_send',
     'hazelcast.member.bytes_transceived',
@@ -223,3 +222,5 @@ METRICS = (
     'jvm.os.open_file_descriptors',
     'jvm.thread_count',
 )
+
+FLAKY_METRICS = ('hazelcast.member.bytes_read',)
