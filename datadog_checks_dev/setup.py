@@ -29,6 +29,7 @@ REQUIRES = [
     'PyYAML>=5.3',
     'pytest',
     'pytest-benchmark>=3.2.1',
+    'pytest-check',
     'pytest-cov>=2.6.1',
     'pytest-mock',
     'requests>=2.22.0',

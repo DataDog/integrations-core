@@ -28,8 +28,10 @@ def test_lighttpd(aggregator, check, instance):
 
     aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=Lighttpd.OK, tags=tags)
 
+    aggregator.assert_metric('abcd')
+
     for gauge in CHECK_GAUGES:
-        aggregator.assert_metric(gauge, tags=['instance:first'], count=1)
+        aggregator.assert_metric(gauge + "hey", tags=['instance:first'], count=1)
     aggregator.assert_all_metrics_covered()
 
 
