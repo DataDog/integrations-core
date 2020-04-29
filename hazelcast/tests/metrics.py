@@ -80,7 +80,6 @@ METRICS = (
     'hazelcast.member.heartbeat_packets_received',
     'hazelcast.member.heartbeat_packets_sent',
     'hazelcast.member.idle_time_millis',
-    'hazelcast.member.idle_time_ms',
     'hazelcast.member.imbalance_detected_count',
     'hazelcast.member.in_progress_count',
     'hazelcast.member.invocation_scan_period_millis',
@@ -225,4 +224,5 @@ FLAKY_METRICS = (
     'hazelcast.member.bytes_read',
     'hazelcast.member.bytes_written',
     'hazelcast.member.connection_type',
+    'hazelcast.member.idle_time_ms',
 )
