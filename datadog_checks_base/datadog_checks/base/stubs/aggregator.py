@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
-import pytest_check as check
-
 from collections import OrderedDict, defaultdict
 
+import pytest_check as check
 from six import iteritems
 
 from ..utils.common import ensure_unicode, to_native_string
