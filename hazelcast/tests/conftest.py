@@ -4,9 +4,10 @@
 import os
 
 import pytest
+from jmxquery import JMXConnection, JMXQuery
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 from datadog_checks.dev.utils import load_jmx_config
 from datadog_checks.hazelcast import HazelcastCheck
 
@@ -25,13 +26,19 @@ def dd_environment():
             CheckDockerLogs('hazelcast_management_center', ['Started communication with member']),
             CheckDockerLogs('hazelcast2', [r'Hazelcast JMX agent enabled']),
             CheckDockerLogs('hazelcast2', [r'is STARTED']),
+            WaitFor(jmx_metrics_ready),
         ],
-        # Add some sleep to be sure JMX server metrics have been populated
-        sleep=10,
     ):
         config = load_jmx_config()
         config['instances'] = [common.INSTANCE_MEMBER_JMX, common.INSTANCE_MC_JMX, common.INSTANCE_MC_PYTHON]
         yield config, {'use_jmx': True}
+
+
+def jmx_metrics_ready():
+    jmx_connection = JMXConnection("service:jmx:rmi:///jndi/rmi://{}:{}/jmxrmi".format(common.HOST, common.MEMBER_PORT))
+    jmx_query = [JMXQuery('com.hazelcast:type=Metrics,*/bytesRead')]
+    metrics = jmx_connection.query(jmx_query)
+    assert len(metrics) >= 0
 
 
 @pytest.fixture(scope='session')
