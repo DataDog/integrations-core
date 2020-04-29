@@ -43,7 +43,7 @@ class WMICheck(WinWMICheck):
         # Sample, extract & submit metrics
         try:
             wmi_sampler.sample()
-            extracted_metrics = self.extract_metrics(constant_tags=constant_tags)
+            extracted_metrics = self.extract_metrics(constant_tags, wmi_sampler)
         except TimeoutException:
             self.log.warning(
                 "WMI query timed out. class=%s - properties=%s - filters=%s - tag_queries=%s",
@@ -55,11 +55,9 @@ class WMICheck(WinWMICheck):
         else:
             self._submit_metrics(extracted_metrics, metric_name_and_type_by_property)
 
-    def extract_metrics(self, constant_tags):
-        # type: (List[str]) -> List[WMIMetric]
-        if not self._wmi_sampler:
-            raise CheckException("A running sampler is needed before you can extract metrics")
-        return self._extract_metrics(self._wmi_sampler, self.tag_by, self.tag_queries, constant_tags)
+    def extract_metrics(self, constant_tags, wmi_sampler):
+        # type: (List[str], WMISampler) -> List[WMIMetric]
+        return self._extract_metrics(wmi_sampler, self.tag_by, self.tag_queries, constant_tags)
 
     def get_wmi_properties(self):
         # type: () -> WMIProperties
