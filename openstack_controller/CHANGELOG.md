@@ -1,5 +1,8 @@
 # CHANGELOG - Openstack_controller
 
+## 1.8.2-rc.1 / 2020-04-29
+
+
 ## 1.8.1 / 2020-02-25
 
 * [Fixed] Bump datadog_checks_base dependency to 11.0.0. See [#5838](https://github.com/DataDog/integrations-core/pull/5838).

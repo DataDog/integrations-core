@@ -87,7 +87,7 @@ datadog-nginx-ingress-controller==1.2.2
 datadog-nginx==3.6.1
 datadog-openldap==1.4.1
 datadog-openmetrics==1.6.1
-datadog-openstack-controller==1.8.1
+datadog-openstack-controller==1.8.2-rc.1
 datadog-openstack==1.9.1
 datadog-oracle==2.0.1
 datadog-pdh-check==1.9.1; sys_platform == 'win32'
