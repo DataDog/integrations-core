@@ -58,7 +58,7 @@ def run_command(command, capture=None, check=False, encoding='utf-8', shell=Fals
         stdout, stderr = mock_context_manager, mock_context_manager
 
     with stdout() as stdout, stderr() as stderr:
-        process = Popen(command, stdout=stdout, stderr=stderr, shell=shell, env=env)
+        process = Popen(command, bufsize=0, stdout=stdout, stderr=stderr, shell=shell, env=env)
         process.wait()
 
         if stdout is None:
