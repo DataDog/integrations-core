@@ -24,6 +24,7 @@ Below is an example using JWT auth method, but you can also use other [auth meth
 
 The capabilities needed for Vault integration to work properly are the following:
 
+Content of `metrics_policy.hcl`:
 ```text
 path "sys/metrics*" {
   capabilities = ["read", "list"]
@@ -33,14 +34,14 @@ path "sys/metrics*" {
 Setup policy and role:
 
 ```text
-$ vault policy write metrics /home/metrics_policy.hcl  # containing `sys/metrics` capabilities described above
+$ vault policy write metrics /path/to/metrics_policy.hcl
 $ vault auth enable jwt
 $ vault write auth/jwt/config jwt_supported_algs=RS256 jwt_validation_pubkeys=@<PATH_TO_PUBLIC_PEM>
 $ vault write auth/jwt/role/datadog role_type=jwt bound_audiences=<AUDIENCE> user_claim=name token_policies=metrics
-$ vault agent -config=<PATH>/agent_config.hcl
+$ vault agent -config=/path/to/agent_config.hcl
 ```
 
-Content of `/home/agent_config.hcl`:
+Content of `agent_config.hcl`:
 ```
 exit_after_auth = true
 pid_file = "/tmp/agent_pid"
@@ -55,7 +56,7 @@ auto_auth {
 
   sink "file" {
     config = {
-      path = "/home/sink/token"
+      path = "<CLIENT_TOKEN_PATH>"
     }
   }
 }
