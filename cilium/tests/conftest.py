@@ -24,17 +24,23 @@ OPERATOR_PORT = 6942
 AGENT_URL = "http://{}:{}/metrics".format(HOST, AGENT_PORT)
 OPERATOR_URL = "http://{}:{}/metrics".format(HOST, OPERATOR_PORT)
 
+PORTS = [AGENT_PORT, OPERATOR_PORT]
+
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with kind_run(os.path.join(HERE, 'kind')):
+    with kind_run(os.path.join(HERE, 'kind')) as kubeconfig:
+        with ExitStack() as stack:
+            ip_ports = [
+                stack.enter_context(port_forward(kubeconfig, 'cilium', 'cilium-operator', port)) for port in PORTS
+            ]
         instances = {
             'instances': [
                 {
-                    'agent_endpoint': 'http://{}:{}/metrics'.format(HOST, AGENT_PORT),
+                    'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
                 },
                 {
-                    'operator_endpoint': 'http://{}:{}/metrics'.format(HOST, OPERATOR_PORT),
+                    'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
                 },
             ]
         }

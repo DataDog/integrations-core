@@ -71,11 +71,11 @@ class KindUp(LazyFunction):
 
     def __call__(self):
         env = os.environ.copy()
-        env['KUBECONFIG'] = path_join(self.directory, 'kubeconfig-template.yaml')
-        run_command(['kind', 'create', 'cluster', '--name', self.cluster_name], check=True, env=env)
-        run_command(['kind', 'export', 'kubeconfig', '--name', self.cluster_name], check=True, env=env)
+        run_command(['kind', 'create', 'cluster', '--name', self.cluster_name, '--kubeconfig', path_join(self.directory, 'kubeconfig-template.yaml')], check=True, env=env)
+        kubeconfig = run_command(['kind', 'get', 'kubeconfig', '--name', self.cluster_name], check=True, env=env, capture=True).stdout
+        run_command(['kind', 'export', 'kubeconfig', '--name', self.cluster_name, '--kubeconfig', path_join(self.directory, 'kubeconfig-template.yaml')], check=True, env=env)
         run_command(['python', path_join(self.directory, 'script.py')])
-        return
+        return kubeconfig
 
 
 class KindDown(LazyFunction):
