@@ -32,7 +32,7 @@ def dd_environment():
         attempts_wait=5,
     ):
         config = load_jmx_config()
-        config['instances'] = [common.INSTANCE_MEMBER_JMX, common.INSTANCE_MC_JMX, common.INSTANCE_MC_PYTHON]
+        config['instances'] = common.INSTANCE_MEMBERS + [common.INSTANCE_MC_JMX, common.INSTANCE_MC_PYTHON]
         yield config, {'use_jmx': True}
 
 
