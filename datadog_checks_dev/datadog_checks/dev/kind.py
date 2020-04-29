@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from contextlib import contextmanager
 
-import os
 import pytest
 from six import PY3
 
@@ -19,6 +19,7 @@ else:
 
 
 TOX_ENV = os.environ['TOX_ENV_NAME']
+
 
 @contextmanager
 def kind_run(directory, sleep=None, endpoints=None, conditions=None, env_vars=None, wrappers=None):
@@ -57,22 +58,23 @@ def kind_run(directory, sleep=None, endpoints=None, conditions=None, env_vars=No
 
 
 class KindUp(LazyFunction):
-    """Create the kind cluster and use its context, calling 
-    `kind create cluster --name <integration>-testing`, and
-    `kind config use-context kind-<name>`.
+    """Create the kind cluster and use its context, calling
+    `kind create cluster --name <integration>-testing`
 
-    It also returns the outputs as a `dict`.
+    It also returns the kubeconfig as a `string`.
     """
 
     def __init__(self, directory):
         self.directory = directory
         self.check_name = get_check_name(self.directory)
-        self.cluster_name = f'{self.check_name}-{TOX_ENV}-cluster'
+        self.cluster_name = '{}-{}-cluster'.format(self.check_name, TOX_ENV)
 
     def __call__(self):
         env = os.environ.copy()
         run_command(['kind', 'create', 'cluster', '--name', self.cluster_name], check=True, env=env)
-        kubeconfig = run_command(['kind', 'get', 'kubeconfig', '--name', self.cluster_name], check=True, env=env, capture=True).stdout
+        kubeconfig = run_command(
+            ['kind', 'get', 'kubeconfig', '--name', self.cluster_name], check=True, env=env, capture=True
+        ).stdout
         run_command(['kind', 'export', 'kubeconfig', '--name', self.cluster_name], check=True, env=env)
         run_command(['python', path_join(self.directory, 'script.py')])
         return kubeconfig
@@ -84,7 +86,7 @@ class KindDown(LazyFunction):
     def __init__(self, directory):
         self.directory = directory
         self.check_name = get_check_name(self.directory)
-        self.cluster_name = f'{self.check_name}-{TOX_ENV}-cluster'
+        self.cluster_name = '{}-{}-cluster'.format(self.check_name, TOX_ENV)
 
     def __call__(self):
         return run_command(['kind', 'delete', 'cluster', '--name', self.cluster_name], check=True)

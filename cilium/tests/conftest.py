@@ -7,10 +7,8 @@ import mock
 import pytest
 
 from datadog_checks.base.utils.common import get_docker_hostname
-from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.kind import kind_run
-
-from .common import ADDL_AGENT_METRICS, AGENT_DEFAULT_METRICS, OPERATOR_AWS_METRICS, OPERATOR_METRICS
+from datadog_checks.dev.kube_port_forward import port_forward
 
 try:
     from contextlib import ExitStack
@@ -36,12 +34,8 @@ def dd_environment():
             ]
         instances = {
             'instances': [
-                {
-                    'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
-                },
-                {
-                    'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
-                },
+                {'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0])},
+                {'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1])},
             ]
         }
 
