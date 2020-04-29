@@ -49,7 +49,6 @@ METRICS = (
     'hazelcast.member.completed_tasks',
     'hazelcast.member.completed_total_count',
     'hazelcast.member.connection_listener_count',
-    'hazelcast.member.connection_type',
     'hazelcast.member.count',
     'hazelcast.member.created_count',
     'hazelcast.member.daemon_thread_count',
@@ -225,4 +224,5 @@ METRICS = (
 FLAKY_METRICS = (
     'hazelcast.member.bytes_read',
     'hazelcast.member.bytes_written',
+    'hazelcast.member.connection_type',
 )
