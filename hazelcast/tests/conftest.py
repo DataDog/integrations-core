@@ -28,7 +28,6 @@ def dd_environment():
             CheckDockerLogs('hazelcast2', [r'is STARTED']),
             WaitFor(trigger_some_tcp_data, attempts=1),
         ],
-        # Add some sleep to be sure JMX server metrics have been populated
         attempts=5,
         attempts_wait=5,
     ):
