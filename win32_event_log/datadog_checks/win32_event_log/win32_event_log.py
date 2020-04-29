@@ -7,6 +7,7 @@ Monitor the Windows Event Log
 """
 import calendar
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Text, Tuple, Union
 
 from uptime import uptime
 
@@ -30,29 +31,28 @@ class Win32EventLogWMI(WinWMICheck):
     EVENT_CLASS = "Win32_NTLogEvent"
 
     def __init__(self, name, init_config, instances):
-        if not instances:
-            raise ConfigurationError("No instance configuration provided")
+        # type: (str, Dict, List[Dict]) -> None
         instances[0].update({'class': self.EVENT_CLASS, 'namespace': self.NAMESPACE})
         super(Win32EventLogWMI, self).__init__(self, name, init_config, instances=instances)
 
         # Settings
-        self.instance_tags = self.instance.get('tags', [])
-        self.notify = self.instance.get('notify', [])
+        self.instance_tags = self.instance.get('tags', [])  # type: List[str]
+        self.notify = self.instance.get('notify', [])  # type: List  # What is this and why is not a documented param
 
-        self.tag_event_id = is_affirmative(init_config.get('tag_event_id', False))
-        self.verbose = init_config.get('verbose', True)
+        self.tag_event_id = is_affirmative(init_config.get('tag_event_id', False))  # type: bool
 
-        default_event_priority = init_config.get('default_event_priority', 'normal')
-        self.event_priority = self.instance.get('event_priority', default_event_priority)
+        default_event_priority = init_config.get('default_event_priority', 'normal')  # type: str
+        self.event_priority = self.instance.get('event_priority', default_event_priority)  # type: str
         if (self.event_priority.lower() != 'normal') and (self.event_priority.lower() != 'low'):
             self.event_priority = 'normal'
 
-        self.ltypes = self.instance.get('type', [])
-        self.source_names = self.instance.get('source_name', [])
-        self.log_files = self.instance.get('log_file', [])
-        self.event_ids = self.instance.get('event_id', [])
-        self.event_format = self.instance.get('event_format')
-        self.message_filters = self.instance.get('message_filters', [])
+        self.ltypes = self.instance.get('type', [])  # type: List[str]
+        self.source_names = self.instance.get('source_name', [])  # type: List
+        self.log_files = self.instance.get('log_file', [])  # type: List
+
+        self.event_ids = self.instance.get('event_id', [])  # type: List
+        self.event_format = self.instance.get('event_format')  # type: List[str]
+        self.message_filters = self.instance.get('message_filters', [])  # type: List[str]
 
         if not (self.source_names or self.event_ids or self.message_filters or self.log_files or self.ltypes):
             raise ConfigurationError(
@@ -61,9 +61,10 @@ class Win32EventLogWMI(WinWMICheck):
             )
 
         # State
-        self.last_ts = None
+        self.last_ts = None  # type: Optional[datetime]
 
     def check(self, _):
+        # type: (Any) -> None
         # Store the last timestamp
         if self.last_ts is None:
             # If system boot was withing 600s of dd agent start then use boottime as last_ts
@@ -82,35 +83,29 @@ class Win32EventLogWMI(WinWMICheck):
 
         # Event filters
         filters = []
-        query = {}
+        query = {}  # type: Dict[str, Union[List[Tuple[str, str]], Tuple[str, str]]]
         last_ts = self.last_ts
         query['TimeGenerated'] = ('>=', self._dt_to_wmi(last_ts))
         if self.username:
             query['User'] = ('=', self.username)
         if self.ltypes:
-            query['Type'] = []
-            for ltype in self.ltypes:
-                query['Type'].append(('=', ltype))
+            query['Type'] = [('=', ltype) for ltype in self.ltypes]
         if self.source_names:
-            query['SourceName'] = []
-            for source_name in self.source_names:
-                query['SourceName'].append(('=', source_name))
+            query['SourceName'] = [('=', source_name) for source_name in self.source_names]
         if self.log_files:
-            query['LogFile'] = []
-            for log_file in self.log_files:
-                query['LogFile'].append(('=', log_file))
+            query['LogFile'] = [('=', log_file) for log_file in self.log_files]
         if self.event_ids:
-            query['EventCode'] = []
-            for event_id in self.event_ids:
-                query['EventCode'].append(('=', event_id))
+            query['EventCode'] = [('=', event_id) for event_id in self.event_ids]
         if self.message_filters:
-            query['NOT Message'] = []
-            query['Message'] = []
+            not_message = []
+            message = []
             for filt in self.message_filters:
                 if filt[0] == '-':
-                    query['NOT Message'].append(('LIKE', filt[1:]))
+                    not_message.append(('LIKE', filt[1:]))
                 else:
-                    query['Message'].append(('LIKE', filt))
+                    message.append(('LIKE', filt))
+            query['NOT Message'] = not_message
+            query['Message'] = message
 
         filters.append(query)
 
@@ -153,6 +148,7 @@ class Win32EventLogWMI(WinWMICheck):
             self.last_ts = datetime.utcnow()
 
     def _dt_to_wmi(self, dt):
+        # type: (datetime) -> str
         """
         A wrapper around wmi.from_time to get a WMI-formatted time from a time struct.
         """
@@ -170,6 +166,7 @@ class Win32EventLogWMI(WinWMICheck):
 
 class LogEvent(object):
     def __init__(self, ev, log, hostname, tags, notify_list, tag_event_id, event_format, event_priority):
+        # type: (Dict, Any, Optional[str], List[str], List, bool, List[str], str) -> None
         self.event = self._normalize_event(ev.copy())
         self.log = log
         self.hostname = hostname
@@ -181,6 +178,7 @@ class LogEvent(object):
 
     @staticmethod
     def _normalize_event(event):
+        # type: (Dict) -> Dict
         for field in INTEGER_PROPERTIES:
             if field in event:
                 event[field] = int(event[field])
@@ -188,10 +186,12 @@ class LogEvent(object):
 
     @property
     def _msg_title(self):
+        # type: () -> str
         return '{logfile}/{source}'.format(logfile=self.event['Logfile'], source=self.event['SourceName'])
 
     @property
     def _msg_text(self):
+        # type: () -> Text
         """
         Generate the event's body to send to Datadog.
 
@@ -202,7 +202,7 @@ class LogEvent(object):
         msg_text = u""
 
         if self._format:
-            msg_text_fields = ["%%%\n```"]
+            msg_text_fields = ["%%%\n```"]  # type: List[Text]
 
             for event_property in self._format:
                 property_value = self.event.get(event_property)
@@ -232,6 +232,7 @@ class LogEvent(object):
 
     @property
     def _alert_type(self):
+        # type: () -> str
         event_type = self.event['Type']
         # Convert to a Datadog alert type
         if event_type == 'Warning':
@@ -242,9 +243,11 @@ class LogEvent(object):
 
     @property
     def _aggregation_key(self):
+        # type: () -> Any
         return self.event['SourceName']
 
     def to_event_dict(self):
+        # type: () -> Dict[str, Any]
         event_dict = {
             'timestamp': self.timestamp,
             'event_type': EVENT_TYPE,
@@ -262,12 +265,14 @@ class LogEvent(object):
         return event_dict
 
     def is_after(self, ts):
+        # type: (datetime) -> bool
         """ Compare this event's timestamp to a give timestamp. """
         if self.timestamp >= int(calendar.timegm(ts.timetuple())):
             return True
         return False
 
     def _wmi_to_ts(self, wmi_ts):
+        # type: (str) -> int
         """
         Convert a wmi formatted timestamp into an epoch.
         """
@@ -283,6 +288,7 @@ class LogEvent(object):
         return int(calendar.timegm(dt.timetuple()))
 
     def _tags(self, tags, event_code):
+        # type: (List[str], str) -> List[str]
         """
         Inject additional tags into the list already supplied to LogEvent.
         """
