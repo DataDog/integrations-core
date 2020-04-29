@@ -27,7 +27,8 @@ def dd_environment():
             CheckDockerLogs('hazelcast2', [r'is STARTED']),
         ],
         # Add some sleep to be sure JMX server metrics have been populated
-        sleep=10,
+        attempts=5,
+        attempts_wait=5,
     ):
         config = load_jmx_config()
         config['instances'] = [common.INSTANCE_MEMBER_JMX, common.INSTANCE_MC_JMX, common.INSTANCE_MC_PYTHON]
