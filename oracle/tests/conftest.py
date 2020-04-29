@@ -20,10 +20,6 @@ from .common import (
     USER,
 )
 
-INSTANT_CLIENT_URL = (
-    "https://ddintegrations.blob.core.windows.net/oracle/instantclient-basiclite-linux.x64-19.3.0.0.0dbru.zip"
-)
-
 E2E_METADATA_ORACLE_CLIENT = {
     'docker_volumes': ['{}/scripts/start_commands_oracle.sh:/tmp/start_commands.sh'.format(HERE)],
     'start_commands': ['bash /tmp/start_commands.sh'],
