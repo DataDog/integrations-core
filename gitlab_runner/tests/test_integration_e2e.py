@@ -29,8 +29,6 @@ def assert_check(aggregator):
         else:
             aggregator.assert_metric("gitlab_runner.{}".format(metric), tags=CUSTOM_TAGS, count=2)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
 
 @pytest.mark.usefixtures("dd_environment")
 def test_check(aggregator):
@@ -47,3 +45,4 @@ def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(CONFIG, rate=True)
 
     assert_check(aggregator)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

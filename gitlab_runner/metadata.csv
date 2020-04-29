@@ -4,7 +4,7 @@ gitlab_runner.ci_docker_machines_provider_machine_creation_duration_seconds_sum,
 gitlab_runner.ci_docker_machines_provider_machine_creation_duration_seconds_count,gauge,,request,second,The count of Docker machine creation time. Applies to GitLab Runner < 1.11.0,0,gitlab_runner,count docker machine creation time
 gitlab_runner.ci_docker_machines_provider_machine_states,gauge,,request,second,The current number of CI machines per state in this provider. Applies to GitLab Runner < 1.11.0,0,gitlab_runner,total docker machines per state
 gitlab_runner.ci_runner_builds,gauge,,,,The current number of running builds. Applies to GitLab Runner < 1.11.0,0,gitlab_runner,ci current running builds
-gitlab_runner.ci_runner_errors,gauge,,request,second,The number of caught errors. Applies to GitLab Runner < 1.11.0,0,gitlab_runner,ci errors
+gitlab_runner.ci_runner_errors,count,,request,second,The number of caught errors. Applies to GitLab Runner < 1.11.0,0,gitlab_runner,ci errors
 gitlab_runner.ci_runner_version_info,gauge,,request,,A metric with a constant '1' value labeled by different build stats fields. Applies to GitLab Runner < 1.11.0,0,gitlab_runner,ci version info
 gitlab_runner.ci_ssh_docker_machines_provider_machine_creation_duration_seconds_bucket,gauge,,request,second,A histogram of SSH Docker machine creation time. Applies to GitLab Runner < 1.11.0,0,gitlab_runner,ssh docker machine creation time
 gitlab_runner.ci_ssh_docker_machines_provider_machine_creation_duration_seconds_sum,gauge,,request,second,The sum of SSH Docker machine creation time. Applies to GitLab Runner < 1.11.0,0,gitlab_runner,sum ssh docker machine creation time
