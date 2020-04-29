@@ -26,7 +26,7 @@ def dd_environment():
             CheckDockerLogs('hazelcast_management_center', ['Started communication with member']),
             CheckDockerLogs('hazelcast2', [r'Hazelcast JMX agent enabled']),
             CheckDockerLogs('hazelcast2', [r'is STARTED']),
-            WaitFor(trigger_some_tcp_data, attempts=1),
+            WaitFor(trigger_some_tcp_data),
         ],
         attempts=5,
         attempts_wait=5,
