@@ -35,6 +35,12 @@
     },
     "monitors": {},
     "dashboards": {},
+    "saved_views": {
+      "operations_by_type_overview": "assets/saved_views/operations_by_type_overview.json",
+      "queries": "assets/saved_views/queries.json",
+      "queries_by_type_overview": "assets/saved_views/queries_by_type_overview.json",
+      "slow_queries": "assets/saved_views/slow_queries.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

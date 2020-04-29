@@ -37,6 +37,12 @@
   "assets": {
     "monitors": {},
     "dashboards": {},
+    "saved_views": {
+      "operations": "assets/saved_views/operations.json",
+      "slow_operations": "assets/saved_views/slow_operations.json",
+      "postgres_pattern": "assets/saved_views/postgres_pattern.json",
+      "sessions_by_host": "assets/saved_views/sessions_by_host.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }
