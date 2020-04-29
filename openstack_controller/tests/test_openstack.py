@@ -194,142 +194,105 @@ def test_collect_server_metrics_pre_2_48(server_diagnostics, os_aggregates, aggr
     check.collect_server_diagnostic_metrics({})
 
     aggregator.assert_metric(
-        'openstack.nova.server.vda_read_req',
-        value=112.0,
-        tags=['nova_managed_server', 'availability_zone:NA'],
-        hostname='',
+        'openstack.nova.server.vda_read_req', value=112.0, tags=['nova_managed_server', 'availability_zone:NA'],
     )
     aggregator.assert_metric(
-        'openstack.nova.server.vda_read',
-        value=262144.0,
-        tags=['nova_managed_server', 'availability_zone:NA'],
-        hostname='',
+        'openstack.nova.server.vda_read', value=262144.0, tags=['nova_managed_server', 'availability_zone:NA'],
     )
     aggregator.assert_metric(
-        'openstack.nova.server.memory',
-        value=524288.0,
-        tags=['nova_managed_server', 'availability_zone:NA'],
-        hostname='',
+        'openstack.nova.server.memory', value=524288.0, tags=['nova_managed_server', 'availability_zone:NA'],
     )
     aggregator.assert_metric(
-        'openstack.nova.server.cpu0_time',
-        value=17300000000.0,
-        tags=['nova_managed_server', 'availability_zone:NA'],
-        hostname='',
+        'openstack.nova.server.cpu0_time', value=17300000000.0, tags=['nova_managed_server', 'availability_zone:NA'],
     )
     aggregator.assert_metric(
-        'openstack.nova.server.vda_errors',
-        value=-1.0,
-        tags=['nova_managed_server', 'availability_zone:NA'],
-        hostname='',
+        'openstack.nova.server.vda_errors', value=-1.0, tags=['nova_managed_server', 'availability_zone:NA'],
     )
     aggregator.assert_metric(
-        'openstack.nova.server.vda_write_req',
-        value=488.0,
-        tags=['nova_managed_server', 'availability_zone:NA'],
-        hostname='',
+        'openstack.nova.server.vda_write_req', value=488.0, tags=['nova_managed_server', 'availability_zone:NA'],
     )
     aggregator.assert_metric(
-        'openstack.nova.server.vda_write',
-        value=5778432.0,
-        tags=['nova_managed_server', 'availability_zone:NA'],
-        hostname='',
+        'openstack.nova.server.vda_write', value=5778432.0, tags=['nova_managed_server', 'availability_zone:NA'],
     )
     aggregator.assert_metric(
         'openstack.nova.server.tx_drop',
         value=0.0,
         tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet1'],
-        hostname='',
     )
     aggregator.assert_metric(
         'openstack.nova.server.tx',
         value=140208.0,
         tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet1'],
-        hostname='',
     )
     aggregator.assert_metric(
         'openstack.nova.server.rx_drop',
         value=0.0,
         tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet1'],
-        hostname='',
     )
     aggregator.assert_metric(
         'openstack.nova.server.rx',
         value=2070139.0,
         tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet1'],
-        hostname='',
     )
     aggregator.assert_metric(
         'openstack.nova.server.tx_packets',
         value=662.0,
         tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet1'],
-        hostname='',
     )
     aggregator.assert_metric(
         'openstack.nova.server.tx_errors',
         value=0.0,
         tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet1'],
-        hostname='',
     )
     aggregator.assert_metric(
         'openstack.nova.server.rx_packets',
         value=26701.0,
         tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet1'],
-        hostname='',
     )
     aggregator.assert_metric(
         'openstack.nova.server.rx_errors',
         value=0.0,
         tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet1'],
-        hostname='',
     )
     aggregator.assert_metric(
         'openstack.nova.server.tx_drop',
         value=0.0,
         tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet2'],
-        hostname='',
     )
     aggregator.assert_metric(
         'openstack.nova.server.tx',
         value=140208.0,
         tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet2'],
-        hostname='',
     )
     aggregator.assert_metric(
         'openstack.nova.server.rx_drop',
         value=0.0,
         tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet2'],
-        hostname='',
     )
     aggregator.assert_metric(
         'openstack.nova.server.rx',
         value=2070139.0,
         tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet2'],
-        hostname='',
     )
     aggregator.assert_metric(
         'openstack.nova.server.tx_packets',
         value=662.0,
         tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet2'],
-        hostname='',
     )
     aggregator.assert_metric(
         'openstack.nova.server.tx_errors',
         value=0.0,
         tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet2'],
-        hostname='',
     )
     aggregator.assert_metric(
         'openstack.nova.server.rx_packets',
         value=26701.0,
         tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet2'],
-        hostname='',
     )
     aggregator.assert_metric(
         'openstack.nova.server.rx_errors',
         value=0.0,
         tags=['nova_managed_server', 'availability_zone:NA', 'interface:vnet2'],
-        hostname='',
     )
 
     aggregator.assert_all_metrics_covered()

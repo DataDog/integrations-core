@@ -268,11 +268,11 @@ class OpenStackControllerCheck(AgentCheck):
         hyp_state = hyp.get('state', None)
 
         if not hyp_state:
-            self.service_check(self.HYPERVISOR_SC, AgentCheck.UNKNOWN, hostname=hyp_hostname, tags=service_check_tags)
+            self.service_check(self.HYPERVISOR_SC, AgentCheck.UNKNOWN, tags=service_check_tags)
         elif hyp_state != self.HYPERVISOR_STATE_UP:
-            self.service_check(self.HYPERVISOR_SC, AgentCheck.CRITICAL, hostname=hyp_hostname, tags=service_check_tags)
+            self.service_check(self.HYPERVISOR_SC, AgentCheck.CRITICAL, tags=service_check_tags)
         else:
-            self.service_check(self.HYPERVISOR_SC, AgentCheck.OK, hostname=hyp_hostname, tags=service_check_tags)
+            self.service_check(self.HYPERVISOR_SC, AgentCheck.OK, tags=service_check_tags)
 
         if not collect_hypervisor_metrics:
             return
@@ -430,6 +430,8 @@ class OpenStackControllerCheck(AgentCheck):
                 tags.append("project_name:{}".format(project_name))
             if hypervisor_hostname:
                 tags.append("hypervisor:{}".format(hypervisor_hostname))
+            if server_id:
+                tags.append("server_id:{}".format(server_id))
             if server_name:
                 tags.append("server_name:{}".format(server_name))
 
@@ -444,14 +446,10 @@ class OpenStackControllerCheck(AgentCheck):
                         "openstack.nova.server.{}{}".format(metric_pre[1].replace("_", ""), metric_pre[2]),
                         server_stats[m],
                         tags=tags + host_tags + [interface],
-                        hostname=server_id,
                     )
                 elif _is_valid_metric(m):
                     self.gauge(
-                        "openstack.nova.server.{}".format(m.replace("-", "_")),
-                        server_stats[m],
-                        tags=tags + host_tags,
-                        hostname=server_id,
+                        "openstack.nova.server.{}".format(m.replace("-", "_")), server_stats[m], tags=tags + host_tags,
                     )
 
     def collect_project_limit(self, project, tags=None):
@@ -526,16 +524,16 @@ class OpenStackControllerCheck(AgentCheck):
             tags.append("project_name:{}".format(project_name))
         if hypervisor_hostname:
             tags.append("hypervisor:{}".format(hypervisor_hostname))
+        if server_id:
+            tags.append("server_id:{}".format(server_id))
         if server_name:
             tags.append("server_name:{}".format(server_name))
 
-        self.gauge("openstack.nova.server.flavor.disk", flavor.get('disk'), tags=tags + host_tags, hostname=server_id)
-        self.gauge("openstack.nova.server.flavor.vcpus", flavor.get('vcpus'), tags=tags + host_tags, hostname=server_id)
-        self.gauge("openstack.nova.server.flavor.ram", flavor.get('ram'), tags=tags + host_tags, hostname=server_id)
-        self.gauge(
-            "openstack.nova.server.flavor.ephemeral", flavor.get('ephemeral'), tags=tags + host_tags, hostname=server_id
-        )
-        self.gauge("openstack.nova.server.flavor.swap", flavor.get('swap'), tags=tags + host_tags, hostname=server_id)
+        self.gauge("openstack.nova.server.flavor.disk", flavor.get('disk'), tags=tags + host_tags)
+        self.gauge("openstack.nova.server.flavor.vcpus", flavor.get('vcpus'), tags=tags + host_tags)
+        self.gauge("openstack.nova.server.flavor.ram", flavor.get('ram'), tags=tags + host_tags)
+        self.gauge("openstack.nova.server.flavor.ephemeral", flavor.get('ephemeral'), tags=tags + host_tags)
+        self.gauge("openstack.nova.server.flavor.swap", flavor.get('swap'), tags=tags + host_tags)
 
     def _get_host_aggregate_tag(self, hyp_hostname, use_shortname=False):
         tags = []

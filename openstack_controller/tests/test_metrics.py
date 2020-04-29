@@ -203,9 +203,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'interface:tapb488fc1e-3e',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
 
             aggregator.assert_metric(
@@ -217,9 +217,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
                     'availability_zone:nova',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'interface:tapc929a75b-94',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -230,9 +230,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
                     'availability_zone:nova',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'interface:tapf3e5d7a2-94',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -243,45 +243,39 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
                     'availability_zone:nova',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'interface:tapf3e5d7a2-94',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_image_meta',
                 value=128.0,
                 tags=['tenant_id:***************************4bfc1', 'project_name:service'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_image_meta',
                 value=128.0,
                 tags=['tenant_id:***************************3fb11', 'project_name:admin'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_image_meta',
                 value=128.0,
                 tags=['tenant_id:***************************d91a1', 'project_name:testProj2'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_image_meta',
                 value=128.0,
                 tags=['tenant_id:***************************73dbe', 'project_name:testProj1'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_image_meta',
                 value=128.0,
                 tags=['tenant_id:***************************147d1', 'project_name:12345'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_image_meta',
                 value=128.0,
                 tags=['tenant_id:***************************44736', 'project_name:abcde'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -292,9 +286,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
                     'availability_zone:nova',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'interface:tap8880f875-12',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
@@ -305,45 +299,39 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
                     'availability_zone:nova',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'interface:tap9bff9e73-2f',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_personality',
                 value=5.0,
                 tags=['tenant_id:***************************4bfc1', 'project_name:service'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_personality',
                 value=10.0,
                 tags=['tenant_id:***************************3fb11', 'project_name:admin'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_personality',
                 value=5.0,
                 tags=['tenant_id:***************************d91a1', 'project_name:testProj2'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_personality',
                 value=5.0,
                 tags=['tenant_id:***************************73dbe', 'project_name:testProj1'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_personality',
                 value=5.0,
                 tags=['tenant_id:***************************147d1', 'project_name:12345'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_personality',
                 value=5.0,
                 tags=['tenant_id:***************************44736', 'project_name:abcde'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb',
@@ -355,7 +343,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb',
@@ -367,13 +354,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb',
                 value=7982.0,
                 tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb',
@@ -386,7 +371,6 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb',
@@ -398,13 +382,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb',
                 value=7982.0,
                 tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb',
@@ -416,7 +398,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb',
@@ -428,13 +409,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb',
                 value=7982.0,
                 tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb',
@@ -446,7 +425,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -457,9 +435,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
                     'availability_zone:nova',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'interface:tapad123605-18',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -470,9 +448,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
                     'availability_zone:nova',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'interface:tapab9b23ee-c1',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
@@ -483,9 +461,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
                     'availability_zone:nova',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'interface:tap702092ed-a5',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -496,9 +474,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
                     'availability_zone:nova',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'interface:tapc929a75b-94',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -509,9 +487,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
                     'availability_zone:nova',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'interface:tapf3e5d7a2-94',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -522,9 +500,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
                     'availability_zone:nova',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'interface:tapad123605-18',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
@@ -535,9 +513,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
                     'availability_zone:nova',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'interface:tap9ac4ed56-d2',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -548,9 +526,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
                     'availability_zone:nova',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'interface:tap56f02c54-da',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -561,81 +539,69 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
                     'availability_zone:nova',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'interface:tape690927f-80',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_security_groups_used',
                 value=0.0,
                 tags=['tenant_id:***************************4bfc1', 'project_name:service'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_security_groups_used',
                 value=1.0,
                 tags=['tenant_id:***************************3fb11', 'project_name:admin'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_security_groups_used',
                 value=0.0,
                 tags=['tenant_id:***************************d91a1', 'project_name:testProj2'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_security_groups_used',
                 value=1.0,
                 tags=['tenant_id:***************************73dbe', 'project_name:testProj1'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_security_groups_used',
                 value=0.0,
                 tags=['tenant_id:***************************147d1', 'project_name:12345'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_security_groups_used',
                 value=0.0,
                 tags=['tenant_id:***************************44736', 'project_name:abcde'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_cores',
                 value=20.0,
                 tags=['tenant_id:***************************4bfc1', 'project_name:service'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_cores',
                 value=40.0,
                 tags=['tenant_id:***************************3fb11', 'project_name:admin'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_cores',
                 value=40.0,
                 tags=['tenant_id:***************************d91a1', 'project_name:testProj2'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_cores',
                 value=40.0,
                 tags=['tenant_id:***************************73dbe', 'project_name:testProj1'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_cores',
                 value=40.0,
                 tags=['tenant_id:***************************147d1', 'project_name:12345'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_cores',
                 value=40.0,
                 tags=['tenant_id:***************************44736', 'project_name:abcde'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -646,9 +612,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
                     'availability_zone:nova',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'interface:tapcb21dae0-46',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -659,9 +625,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
                     'availability_zone:nova',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'interface:tap9ac4ed56-d2',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -672,45 +638,39 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
                     'availability_zone:nova',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'interface:tap8880f875-12',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_floating_ips_used',
                 value=0.0,
                 tags=['tenant_id:***************************4bfc1', 'project_name:service'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_floating_ips_used',
                 value=0.0,
                 tags=['tenant_id:***************************3fb11', 'project_name:admin'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_floating_ips_used',
                 value=0.0,
                 tags=['tenant_id:***************************d91a1', 'project_name:testProj2'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_floating_ips_used',
                 value=0.0,
                 tags=['tenant_id:***************************73dbe', 'project_name:testProj1'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_floating_ips_used',
                 value=0.0,
                 tags=['tenant_id:***************************147d1', 'project_name:12345'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_floating_ips_used',
                 value=0.0,
                 tags=['tenant_id:***************************44736', 'project_name:abcde'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -721,9 +681,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
                     'availability_zone:nova',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'interface:tap702092ed-a5',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -734,9 +694,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
                     'availability_zone:nova',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'interface:tap9ac4ed56-d2',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -747,9 +707,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
                     'availability_zone:nova',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'interface:tapab9b23ee-c1',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -760,9 +720,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
                     'availability_zone:nova',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'interface:tapc929a75b-94',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -773,9 +733,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
                     'availability_zone:nova',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'interface:tap66a9ffb5-8f',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -786,9 +746,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
                     'availability_zone:nova',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'interface:tap9ac4ed56-d2',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -799,9 +759,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
                     'availability_zone:nova',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'interface:tap3fd8281c-97',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.current_workload',
@@ -813,7 +773,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.current_workload',
@@ -825,13 +784,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.current_workload',
                 value=0.0,
                 tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.current_workload',
@@ -844,7 +801,6 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.current_workload',
@@ -856,13 +812,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.current_workload',
                 value=0.0,
                 tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.current_workload',
@@ -874,7 +828,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.current_workload',
@@ -886,13 +839,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.current_workload',
                 value=0.0,
                 tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.current_workload',
@@ -904,43 +855,36 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_floating_ips',
                 value=10.0,
                 tags=['tenant_id:***************************4bfc1', 'project_name:service'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_floating_ips',
                 value=10.0,
                 tags=['tenant_id:***************************3fb11', 'project_name:admin'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_floating_ips',
                 value=10.0,
                 tags=['tenant_id:***************************d91a1', 'project_name:testProj2'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_floating_ips',
                 value=10.0,
                 tags=['tenant_id:***************************73dbe', 'project_name:testProj1'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_floating_ips',
                 value=10.0,
                 tags=['tenant_id:***************************147d1', 'project_name:12345'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_floating_ips',
                 value=10.0,
                 tags=['tenant_id:***************************44736', 'project_name:abcde'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -951,45 +895,39 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
                     'availability_zone:nova',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'interface:tap702092ed-a5',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_ram_used',
                 value=0.0,
                 tags=['tenant_id:***************************4bfc1', 'project_name:service'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_ram_used',
                 value=17408.0,
                 tags=['tenant_id:***************************3fb11', 'project_name:admin'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_ram_used',
                 value=0.0,
                 tags=['tenant_id:***************************d91a1', 'project_name:testProj2'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_ram_used',
                 value=1024.0,
                 tags=['tenant_id:***************************73dbe', 'project_name:testProj1'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_ram_used',
                 value=0.0,
                 tags=['tenant_id:***************************147d1', 'project_name:12345'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_ram_used',
                 value=0.0,
                 tags=['tenant_id:***************************44736', 'project_name:abcde'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -1000,9 +938,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
                     'availability_zone:nova',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'interface:tap66a9ffb5-8f',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -1013,9 +951,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
                     'availability_zone:nova',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'interface:tape690927f-80',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -1026,9 +964,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
                     'availability_zone:nova',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'interface:tap3fd8281c-97',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
@@ -1039,9 +977,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
                     'availability_zone:nova',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'interface:tapf86369c0-84',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
@@ -1052,9 +990,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
                     'availability_zone:nova',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'interface:tapab9b23ee-c1',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -1065,9 +1003,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
                     'availability_zone:nova',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'interface:tapcb21dae0-46',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -1078,9 +1016,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
                     'availability_zone:nova',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'interface:tapf86369c0-84',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -1091,9 +1029,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
                     'availability_zone:nova',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'interface:tape690927f-80',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -1104,9 +1042,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
                     'availability_zone:nova',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'interface:tapcb21dae0-46',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
@@ -1117,9 +1055,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
                     'availability_zone:nova',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'interface:tap69a50430-3b',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -1130,9 +1068,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
                     'availability_zone:nova',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'interface:tap73364860-8e',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_ram_mb',
@@ -1144,7 +1082,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_ram_mb',
@@ -1156,13 +1093,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_ram_mb',
                 value=5934.0,
                 tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_ram_mb',
@@ -1175,7 +1110,6 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_ram_mb',
@@ -1187,13 +1121,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_ram_mb',
                 value=5934.0,
                 tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_ram_mb',
@@ -1205,7 +1137,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_ram_mb',
@@ -1217,13 +1148,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_ram_mb',
                 value=5934.0,
                 tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_ram_mb',
@@ -1235,7 +1164,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -1246,9 +1174,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
                     'availability_zone:nova',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'interface:tap3fd8281c-97',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -1259,9 +1187,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
                     'availability_zone:nova',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'interface:tapab9b23ee-c1',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -1272,9 +1200,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'interface:tapb488fc1e-3e',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -1285,9 +1213,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
                     'availability_zone:nova',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'interface:tap9bff9e73-2f',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -1298,9 +1226,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'interface:tapb488fc1e-3e',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1310,9 +1238,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'availability_zone:nova',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1322,9 +1250,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'availability_zone:nova',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1334,9 +1262,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'availability_zone:nova',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1346,9 +1274,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'availability_zone:nova',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1358,9 +1286,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'availability_zone:nova',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1370,9 +1298,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'availability_zone:nova',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1382,9 +1310,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'availability_zone:nova',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1394,9 +1322,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'availability_zone:nova',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1406,9 +1334,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'availability_zone:nova',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1418,9 +1346,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'availability_zone:nova',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1430,9 +1358,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'availability_zone:nova',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1442,9 +1370,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'availability_zone:nova',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1454,9 +1382,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'availability_zone:nova',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1466,9 +1394,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'availability_zone:nova',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1478,9 +1406,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'availability_zone:nova',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1490,9 +1418,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'availability_zone:nova',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1502,9 +1430,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'availability_zone:nova',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.cpu0_time',
@@ -1514,9 +1442,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'availability_zone:nova',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -1527,9 +1455,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
                     'availability_zone:nova',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'interface:tapab9b23ee-c1',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
@@ -1540,9 +1468,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
                     'availability_zone:nova',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'interface:tapf3e5d7a2-94',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -1553,9 +1481,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
                     'availability_zone:nova',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'interface:tap56f02c54-da',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -1566,45 +1494,39 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
                     'availability_zone:nova',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'interface:tapf3e5d7a2-94',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_personality_size',
                 value=10240.0,
                 tags=['tenant_id:***************************4bfc1', 'project_name:service'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_personality_size',
                 value=10240.0,
                 tags=['tenant_id:***************************3fb11', 'project_name:admin'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_personality_size',
                 value=10240.0,
                 tags=['tenant_id:***************************d91a1', 'project_name:testProj2'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_personality_size',
                 value=10240.0,
                 tags=['tenant_id:***************************73dbe', 'project_name:testProj1'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_personality_size',
                 value=10240.0,
                 tags=['tenant_id:***************************147d1', 'project_name:12345'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_personality_size',
                 value=10240.0,
                 tags=['tenant_id:***************************44736', 'project_name:abcde'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -1615,9 +1537,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
                     'availability_zone:nova',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'interface:tap66a9ffb5-8f',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -1628,9 +1550,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
                     'availability_zone:nova',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'interface:tap73364860-8e',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -1641,9 +1563,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
                     'availability_zone:nova',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'interface:tap73364860-8e',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -1654,9 +1576,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
                     'availability_zone:nova',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'interface:tapad123605-18',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -1667,9 +1589,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
                     'availability_zone:nova',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'interface:tap39a71720-01',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -1680,9 +1602,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
                     'availability_zone:nova',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'interface:tapad123605-18',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -1693,9 +1615,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
                     'availability_zone:nova',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'interface:tap9bff9e73-2f',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -1706,45 +1628,39 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
                     'availability_zone:nova',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'interface:tapf3e5d7a2-94',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_server_meta',
                 value=128.0,
                 tags=['tenant_id:***************************4bfc1', 'project_name:service'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_server_meta',
                 value=128.0,
                 tags=['tenant_id:***************************3fb11', 'project_name:admin'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_server_meta',
                 value=128.0,
                 tags=['tenant_id:***************************d91a1', 'project_name:testProj2'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_server_meta',
                 value=128.0,
                 tags=['tenant_id:***************************73dbe', 'project_name:testProj1'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_server_meta',
                 value=128.0,
                 tags=['tenant_id:***************************147d1', 'project_name:12345'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_server_meta',
                 value=128.0,
                 tags=['tenant_id:***************************44736', 'project_name:abcde'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -1755,9 +1671,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
                     'availability_zone:nova',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'interface:tapcb21dae0-46',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus_used',
@@ -1769,7 +1685,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus_used',
@@ -1781,13 +1696,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus_used',
                 value=0.0,
                 tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus_used',
@@ -1800,7 +1713,6 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus_used',
@@ -1812,13 +1724,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus_used',
                 value=0.0,
                 tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus_used',
@@ -1830,7 +1740,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus_used',
@@ -1842,13 +1751,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus_used',
                 value=0.0,
                 tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus_used',
@@ -1860,7 +1767,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
@@ -1871,9 +1777,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
                     'availability_zone:nova',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'interface:tap66a9ffb5-8f',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
@@ -1884,81 +1790,69 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
                     'availability_zone:nova',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'interface:tap56f02c54-da',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_keypairs',
                 value=100.0,
                 tags=['tenant_id:***************************4bfc1', 'project_name:service'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_keypairs',
                 value=100.0,
                 tags=['tenant_id:***************************3fb11', 'project_name:admin'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_keypairs',
                 value=100.0,
                 tags=['tenant_id:***************************d91a1', 'project_name:testProj2'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_keypairs',
                 value=100.0,
                 tags=['tenant_id:***************************73dbe', 'project_name:testProj1'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_keypairs',
                 value=100.0,
                 tags=['tenant_id:***************************147d1', 'project_name:12345'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_keypairs',
                 value=100.0,
                 tags=['tenant_id:***************************44736', 'project_name:abcde'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_security_groups',
                 value=10.0,
                 tags=['tenant_id:***************************4bfc1', 'project_name:service'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_security_groups',
                 value=10.0,
                 tags=['tenant_id:***************************3fb11', 'project_name:admin'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_security_groups',
                 value=10.0,
                 tags=['tenant_id:***************************d91a1', 'project_name:testProj2'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_security_groups',
                 value=10.0,
                 tags=['tenant_id:***************************73dbe', 'project_name:testProj1'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_security_groups',
                 value=10.0,
                 tags=['tenant_id:***************************147d1', 'project_name:12345'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_security_groups',
                 value=10.0,
                 tags=['tenant_id:***************************44736', 'project_name:abcde'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.running_vms',
@@ -1970,7 +1864,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.running_vms',
@@ -1982,13 +1875,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.running_vms',
                 value=0.0,
                 tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.running_vms',
@@ -2001,7 +1892,6 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.running_vms',
@@ -2013,13 +1903,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.running_vms',
                 value=0.0,
                 tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.running_vms',
@@ -2031,7 +1919,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.running_vms',
@@ -2043,13 +1930,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.running_vms',
                 value=0.0,
                 tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.running_vms',
@@ -2061,7 +1946,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
@@ -2072,9 +1956,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
                     'availability_zone:nova',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'interface:tapcb21dae0-46',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus',
@@ -2086,7 +1970,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus',
@@ -2098,13 +1981,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus',
                 value=8.0,
                 tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus',
@@ -2117,7 +1998,6 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus',
@@ -2129,13 +2009,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus',
                 value=8.0,
                 tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus',
@@ -2147,7 +2025,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus',
@@ -2159,13 +2036,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus',
                 value=8.0,
                 tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.vcpus',
@@ -2177,7 +2052,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -2188,9 +2062,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
                     'availability_zone:nova',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'interface:tap69a50430-3b',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -2201,9 +2075,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
                     'availability_zone:nova',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'interface:tap66a9ffb5-8f',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
@@ -2214,45 +2088,39 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
                     'availability_zone:nova',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'interface:tap3fd8281c-97',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_instances_used',
                 value=0.0,
                 tags=['tenant_id:***************************4bfc1', 'project_name:service'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_instances_used',
                 value=17.0,
                 tags=['tenant_id:***************************3fb11', 'project_name:admin'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_instances_used',
                 value=0.0,
                 tags=['tenant_id:***************************d91a1', 'project_name:testProj2'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_instances_used',
                 value=1.0,
                 tags=['tenant_id:***************************73dbe', 'project_name:testProj1'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_instances_used',
                 value=0.0,
                 tags=['tenant_id:***************************147d1', 'project_name:12345'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_instances_used',
                 value=0.0,
                 tags=['tenant_id:***************************44736', 'project_name:abcde'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -2263,9 +2131,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
                     'availability_zone:nova',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'interface:tap3fd8281c-97',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -2276,9 +2144,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
                     'availability_zone:nova',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'interface:tape690927f-80',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -2289,9 +2157,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
                     'availability_zone:nova',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'interface:tap66a9ffb5-8f',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -2302,9 +2170,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
                     'availability_zone:nova',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'interface:tap69a50430-3b',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -2315,9 +2183,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
                     'availability_zone:nova',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'interface:tap56f02c54-da',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
@@ -2328,9 +2196,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
                     'availability_zone:nova',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'interface:tape690927f-80',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_disk_gb',
@@ -2342,7 +2210,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_disk_gb',
@@ -2354,13 +2221,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_disk_gb',
                 value=46.0,
                 tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_disk_gb',
@@ -2373,7 +2238,6 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_disk_gb',
@@ -2385,13 +2249,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_disk_gb',
                 value=46.0,
                 tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_disk_gb',
@@ -2403,7 +2265,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_disk_gb',
@@ -2415,13 +2276,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_disk_gb',
                 value=46.0,
                 tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.free_disk_gb',
@@ -2433,7 +2292,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb_used',
@@ -2445,7 +2303,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb_used',
@@ -2457,13 +2314,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb_used',
                 value=2.0,
                 tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb_used',
@@ -2476,7 +2331,6 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb_used',
@@ -2488,13 +2342,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb_used',
                 value=2.0,
                 tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb_used',
@@ -2506,7 +2358,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb_used',
@@ -2518,13 +2369,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb_used',
                 value=2.0,
                 tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb_used',
@@ -2536,7 +2385,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2546,9 +2394,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'availability_zone:nova',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2558,9 +2406,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'availability_zone:nova',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2570,9 +2418,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'availability_zone:nova',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2582,9 +2430,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'availability_zone:nova',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2594,9 +2442,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'availability_zone:nova',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2606,9 +2454,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'availability_zone:nova',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2618,9 +2466,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'availability_zone:nova',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2630,9 +2478,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'availability_zone:nova',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2642,9 +2490,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'availability_zone:nova',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2654,9 +2502,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'availability_zone:nova',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2666,9 +2514,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'availability_zone:nova',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2678,9 +2526,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'availability_zone:nova',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2690,9 +2538,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'availability_zone:nova',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2702,9 +2550,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'availability_zone:nova',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2714,9 +2562,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'availability_zone:nova',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2726,9 +2574,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'availability_zone:nova',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2738,9 +2586,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'availability_zone:nova',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory',
@@ -2750,9 +2598,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'availability_zone:nova',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -2763,9 +2611,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
                     'availability_zone:nova',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'interface:tapad123605-18',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -2776,9 +2624,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
                     'availability_zone:nova',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'interface:tap8880f875-12',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -2789,9 +2637,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
                     'availability_zone:nova',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'interface:tapcb21dae0-46',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -2802,9 +2650,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
                     'availability_zone:nova',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'interface:tap39a71720-01',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -2815,9 +2663,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
                     'availability_zone:nova',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'interface:tapc929a75b-94',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -2828,9 +2676,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
                     'availability_zone:nova',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'interface:tap9ac4ed56-d2',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -2841,9 +2689,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
                     'availability_zone:nova',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'interface:tap8880f875-12',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -2854,9 +2702,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'interface:tapb488fc1e-3e',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -2867,9 +2715,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
                     'availability_zone:nova',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'interface:tapf86369c0-84',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -2880,9 +2728,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'interface:tapb488fc1e-3e',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
@@ -2893,9 +2741,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
                     'availability_zone:nova',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'interface:tapad123605-18',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -2906,9 +2754,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
                     'availability_zone:nova',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'interface:tap69a50430-3b',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
@@ -2919,9 +2767,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
                     'availability_zone:nova',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'interface:tap8880f875-12',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -2932,9 +2780,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
                     'availability_zone:nova',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'interface:tap9bff9e73-2f',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -2945,9 +2793,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
                     'availability_zone:nova',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'interface:tapcb21dae0-46',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -2958,9 +2806,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
                     'availability_zone:nova',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'interface:tap69a50430-3b',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -2971,9 +2819,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
                     'availability_zone:nova',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'interface:tapf86369c0-84',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -2984,45 +2832,39 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
                     'availability_zone:nova',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'interface:tapab9b23ee-c1',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_cores_used',
                 value=0.0,
                 tags=['tenant_id:***************************4bfc1', 'project_name:service'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_cores_used',
                 value=34.0,
                 tags=['tenant_id:***************************3fb11', 'project_name:admin'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_cores_used',
                 value=0.0,
                 tags=['tenant_id:***************************d91a1', 'project_name:testProj2'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_cores_used',
                 value=2.0,
                 tags=['tenant_id:***************************73dbe', 'project_name:testProj1'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_cores_used',
                 value=0.0,
                 tags=['tenant_id:***************************147d1', 'project_name:12345'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.total_cores_used',
                 value=0.0,
                 tags=['tenant_id:***************************44736', 'project_name:abcde'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -3033,9 +2875,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
                     'availability_zone:nova',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'interface:tap9ac4ed56-d2',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -3046,9 +2888,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
                     'availability_zone:nova',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'interface:tapab9b23ee-c1',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -3059,9 +2901,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
                     'availability_zone:nova',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'interface:tap39a71720-01',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3071,9 +2913,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'availability_zone:nova',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3083,9 +2925,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'availability_zone:nova',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3095,9 +2937,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'availability_zone:nova',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3107,9 +2949,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'availability_zone:nova',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3119,9 +2961,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'availability_zone:nova',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3131,9 +2973,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'availability_zone:nova',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3143,9 +2985,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'availability_zone:nova',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3155,9 +2997,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'availability_zone:nova',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3167,9 +3009,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'availability_zone:nova',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3179,9 +3021,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'availability_zone:nova',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3191,9 +3033,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'availability_zone:nova',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3203,9 +3045,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'availability_zone:nova',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3215,9 +3057,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'availability_zone:nova',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3227,9 +3069,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'availability_zone:nova',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3239,9 +3081,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'availability_zone:nova',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3251,9 +3093,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'availability_zone:nova',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3263,9 +3105,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'availability_zone:nova',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write',
@@ -3275,9 +3117,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'availability_zone:nova',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -3288,9 +3130,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
                     'availability_zone:nova',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'interface:tapad123605-18',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -3301,9 +3143,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
                     'availability_zone:nova',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'interface:tapab9b23ee-c1',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -3314,9 +3156,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
                     'availability_zone:nova',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'interface:tap702092ed-a5',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -3327,9 +3169,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
                     'availability_zone:nova',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'interface:tap3fd8281c-97',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -3340,9 +3182,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
                     'availability_zone:nova',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'interface:tap69a50430-3b',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3352,9 +3194,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'availability_zone:nova',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3364,9 +3206,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'availability_zone:nova',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3376,9 +3218,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'availability_zone:nova',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3388,9 +3230,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'availability_zone:nova',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3400,9 +3242,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'availability_zone:nova',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3412,9 +3254,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'availability_zone:nova',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3424,9 +3266,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'availability_zone:nova',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3436,9 +3278,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'availability_zone:nova',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3448,9 +3290,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'availability_zone:nova',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3460,9 +3302,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'availability_zone:nova',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3472,9 +3314,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'availability_zone:nova',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3484,9 +3326,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'availability_zone:nova',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3496,9 +3338,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'availability_zone:nova',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3508,9 +3350,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'availability_zone:nova',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3520,9 +3362,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'availability_zone:nova',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3532,9 +3374,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'availability_zone:nova',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3544,9 +3386,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'availability_zone:nova',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read_req',
@@ -3556,9 +3398,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'availability_zone:nova',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3568,9 +3410,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'availability_zone:nova',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3580,9 +3422,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'availability_zone:nova',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3592,9 +3434,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'availability_zone:nova',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3604,9 +3446,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'availability_zone:nova',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3616,9 +3458,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'availability_zone:nova',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3628,9 +3470,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'availability_zone:nova',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3640,9 +3482,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'availability_zone:nova',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3652,9 +3494,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'availability_zone:nova',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3664,9 +3506,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'availability_zone:nova',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3676,9 +3518,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'availability_zone:nova',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3688,9 +3530,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'availability_zone:nova',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3700,9 +3542,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'availability_zone:nova',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3712,9 +3554,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'availability_zone:nova',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3724,9 +3566,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'availability_zone:nova',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3736,9 +3578,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'availability_zone:nova',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3748,9 +3590,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'availability_zone:nova',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3760,9 +3602,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'availability_zone:nova',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_read',
@@ -3772,9 +3614,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'availability_zone:nova',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -3785,9 +3627,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
                     'availability_zone:nova',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'interface:tapf86369c0-84',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3797,9 +3639,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'availability_zone:nova',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3809,9 +3651,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'availability_zone:nova',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3821,9 +3663,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'availability_zone:nova',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3833,9 +3675,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'availability_zone:nova',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3845,9 +3687,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'availability_zone:nova',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3857,9 +3699,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'availability_zone:nova',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3869,9 +3711,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'availability_zone:nova',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3881,9 +3723,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'availability_zone:nova',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3893,9 +3735,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'availability_zone:nova',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3905,9 +3747,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'availability_zone:nova',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3917,9 +3759,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'availability_zone:nova',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3929,9 +3771,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'availability_zone:nova',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3941,9 +3783,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'availability_zone:nova',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3953,9 +3795,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'availability_zone:nova',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3965,9 +3807,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'availability_zone:nova',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3977,9 +3819,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'availability_zone:nova',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -3989,9 +3831,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'availability_zone:nova',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_actual',
@@ -4001,9 +3843,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'availability_zone:nova',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -4014,9 +3856,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
                     'availability_zone:nova',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'interface:tap3fd8281c-97',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -4027,9 +3869,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
                     'availability_zone:nova',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'interface:tap9bff9e73-2f',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -4040,9 +3882,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
                     'availability_zone:nova',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'interface:tap73364860-8e',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -4053,9 +3895,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
                     'availability_zone:nova',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'interface:tap39a71720-01',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -4066,9 +3908,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
                     'availability_zone:nova',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'interface:tap702092ed-a5',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4078,9 +3920,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'availability_zone:nova',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4090,9 +3932,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'availability_zone:nova',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4102,9 +3944,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'availability_zone:nova',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4114,9 +3956,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'availability_zone:nova',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4126,9 +3968,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'availability_zone:nova',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4138,9 +3980,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'availability_zone:nova',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4150,9 +3992,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'availability_zone:nova',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4162,9 +4004,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'availability_zone:nova',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4174,9 +4016,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'availability_zone:nova',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4186,9 +4028,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'availability_zone:nova',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4198,9 +4040,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'availability_zone:nova',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4210,9 +4052,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'availability_zone:nova',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4222,9 +4064,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'availability_zone:nova',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4234,9 +4076,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'availability_zone:nova',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4246,9 +4088,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'availability_zone:nova',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4258,9 +4100,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'availability_zone:nova',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_errors',
@@ -4270,9 +4112,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'availability_zone:nova',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
 
             aggregator.assert_metric(
@@ -4283,9 +4125,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'availability_zone:nova',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -4296,9 +4138,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
                     'availability_zone:nova',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'interface:tap702092ed-a5',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb',
@@ -4310,7 +4152,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb',
@@ -4322,13 +4163,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb',
                 value=48.0,
                 tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb',
@@ -4341,7 +4180,6 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb',
@@ -4353,13 +4191,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb',
                 value=48.0,
                 tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb',
@@ -4371,7 +4207,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb',
@@ -4383,13 +4218,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb',
                 value=48.0,
                 tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.local_gb',
@@ -4401,7 +4234,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
@@ -4412,9 +4244,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
                     'availability_zone:nova',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'interface:tap39a71720-01',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -4425,9 +4257,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
                     'availability_zone:nova',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'interface:tapf3e5d7a2-94',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -4438,9 +4270,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'interface:tapb488fc1e-3e',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -4451,9 +4283,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'interface:tapb488fc1e-3e',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
@@ -4464,9 +4296,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
                     'availability_zone:nova',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'interface:tap73364860-8e',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -4477,9 +4309,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
                     'availability_zone:nova',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'interface:tap56f02c54-da',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -4490,9 +4322,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
                     'availability_zone:nova',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'interface:tapc929a75b-94',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -4503,9 +4335,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
                     'availability_zone:nova',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'interface:tap56f02c54-da',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -4516,45 +4348,39 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
                     'availability_zone:nova',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'interface:tap66a9ffb5-8f',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_instances',
                 value=10.0,
                 tags=['tenant_id:***************************4bfc1', 'project_name:service'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_instances',
                 value=20.0,
                 tags=['tenant_id:***************************3fb11', 'project_name:admin'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_instances',
                 value=20.0,
                 tags=['tenant_id:***************************d91a1', 'project_name:testProj2'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_instances',
                 value=20.0,
                 tags=['tenant_id:***************************73dbe', 'project_name:testProj1'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_instances',
                 value=20.0,
                 tags=['tenant_id:***************************147d1', 'project_name:12345'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_instances',
                 value=20.0,
                 tags=['tenant_id:***************************44736', 'project_name:abcde'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -4565,9 +4391,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
                     'availability_zone:nova',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'interface:tap702092ed-a5',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -4578,9 +4404,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
                     'availability_zone:nova',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'interface:tap9bff9e73-2f',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.disk_available_least',
@@ -4592,7 +4418,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.disk_available_least',
@@ -4604,13 +4429,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.disk_available_least',
                 value=38.0,
                 tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.disk_available_least',
@@ -4623,7 +4446,6 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.disk_available_least',
@@ -4635,13 +4457,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.disk_available_least',
                 value=37.0,
                 tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.disk_available_least',
@@ -4653,7 +4473,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.disk_available_least',
@@ -4665,13 +4484,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.disk_available_least',
                 value=3.0,
                 tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.disk_available_least',
@@ -4683,7 +4500,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -4694,45 +4510,39 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
                     'availability_zone:nova',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'interface:tapf3e5d7a2-94',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_ram_size',
                 value=51200.0,
                 tags=['tenant_id:***************************4bfc1', 'project_name:service'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_ram_size',
                 value=51200.0,
                 tags=['tenant_id:***************************3fb11', 'project_name:admin'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_ram_size',
                 value=51200.0,
                 tags=['tenant_id:***************************d91a1', 'project_name:testProj2'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_ram_size',
                 value=51200.0,
                 tags=['tenant_id:***************************73dbe', 'project_name:testProj1'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_ram_size',
                 value=51200.0,
                 tags=['tenant_id:***************************147d1', 'project_name:12345'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_total_ram_size',
                 value=51200.0,
                 tags=['tenant_id:***************************44736', 'project_name:abcde'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4742,9 +4552,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'availability_zone:nova',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4754,9 +4564,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'availability_zone:nova',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4766,9 +4576,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'availability_zone:nova',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4778,9 +4588,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'availability_zone:nova',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4790,9 +4600,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'availability_zone:nova',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4802,9 +4612,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'availability_zone:nova',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4814,9 +4624,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'availability_zone:nova',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4826,9 +4636,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'availability_zone:nova',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4838,9 +4648,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'availability_zone:nova',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4850,9 +4660,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'availability_zone:nova',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4862,9 +4672,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'availability_zone:nova',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4874,9 +4684,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'availability_zone:nova',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4886,9 +4696,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'availability_zone:nova',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4898,9 +4708,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'availability_zone:nova',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4910,9 +4720,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'availability_zone:nova',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4922,9 +4732,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'availability_zone:nova',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4934,9 +4744,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'availability_zone:nova',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.vda_write_req',
@@ -4946,9 +4756,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'availability_zone:nova',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -4959,9 +4769,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
                     'availability_zone:nova',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'interface:tape690927f-80',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -4971,9 +4781,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'availability_zone:nova',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -4983,9 +4793,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'availability_zone:nova',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -4995,9 +4805,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'availability_zone:nova',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -5007,9 +4817,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'availability_zone:nova',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -5019,9 +4829,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'availability_zone:nova',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -5031,9 +4841,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'availability_zone:nova',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -5043,9 +4853,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'availability_zone:nova',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -5055,9 +4865,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'availability_zone:nova',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -5067,9 +4877,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'availability_zone:nova',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -5079,9 +4889,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'availability_zone:nova',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -5091,9 +4901,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'availability_zone:nova',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -5103,9 +4913,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'availability_zone:nova',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -5115,9 +4925,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'availability_zone:nova',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -5127,9 +4937,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'availability_zone:nova',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -5139,9 +4949,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'availability_zone:nova',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -5151,9 +4961,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'availability_zone:nova',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -5163,9 +4973,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'availability_zone:nova',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.memory_rss',
@@ -5175,9 +4985,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'availability_zone:nova',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -5188,9 +4998,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
                     'availability_zone:nova',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'interface:tape690927f-80',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -5201,9 +5011,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
                     'availability_zone:nova',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'interface:tap8880f875-12',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -5214,9 +5024,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
                     'availability_zone:nova',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'interface:tap39a71720-01',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -5227,9 +5037,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
                     'availability_zone:nova',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'interface:tapad123605-18',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -5240,9 +5050,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
                     'availability_zone:nova',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'interface:tap9bff9e73-2f',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -5253,9 +5063,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
                     'availability_zone:nova',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'interface:tapc929a75b-94',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb_used',
@@ -5267,7 +5077,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb_used',
@@ -5279,13 +5088,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb_used',
                 value=2048.0,
                 tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb_used',
@@ -5298,7 +5105,6 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb_used',
@@ -5310,13 +5116,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb_used',
                 value=2048.0,
                 tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb_used',
@@ -5328,7 +5132,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb_used',
@@ -5340,13 +5143,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb_used',
                 value=2048.0,
                 tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.memory_mb_used',
@@ -5358,7 +5159,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -5369,9 +5169,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
                     'availability_zone:nova',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'interface:tap56f02c54-da',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -5382,9 +5182,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
                     'availability_zone:nova',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'interface:tape690927f-80',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -5395,9 +5195,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
                     'availability_zone:nova',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'interface:tapc929a75b-94',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -5408,9 +5208,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
                     'availability_zone:nova',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'interface:tapf86369c0-84',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -5421,9 +5221,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
                     'availability_zone:nova',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'interface:tap9ac4ed56-d2',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -5434,45 +5234,39 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
                     'availability_zone:nova',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'interface:tapf86369c0-84',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_security_group_rules',
                 value=20.0,
                 tags=['tenant_id:***************************4bfc1', 'project_name:service'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_security_group_rules',
                 value=20.0,
                 tags=['tenant_id:***************************3fb11', 'project_name:admin'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_security_group_rules',
                 value=20.0,
                 tags=['tenant_id:***************************d91a1', 'project_name:testProj2'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_security_group_rules',
                 value=20.0,
                 tags=['tenant_id:***************************73dbe', 'project_name:testProj1'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_security_group_rules',
                 value=20.0,
                 tags=['tenant_id:***************************147d1', 'project_name:12345'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.limits.max_security_group_rules',
                 value=20.0,
                 tags=['tenant_id:***************************44736', 'project_name:abcde'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -5483,9 +5277,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
                     'availability_zone:nova',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'interface:tap39a71720-01',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -5496,9 +5290,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
                     'availability_zone:nova',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'interface:tap66a9ffb5-8f',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -5509,9 +5303,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
                     'availability_zone:nova',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'interface:tap9ac4ed56-d2',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_drop',
@@ -5522,9 +5316,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
                     'availability_zone:nova',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'interface:tapf86369c0-84',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -5535,9 +5329,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
                     'availability_zone:nova',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'interface:tap9bff9e73-2f',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -5548,9 +5342,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
                     'availability_zone:nova',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'interface:tap39a71720-01',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -5561,9 +5355,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
                     'availability_zone:nova',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'interface:tapc929a75b-94',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -5574,9 +5368,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
                     'availability_zone:nova',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'interface:tapcb21dae0-46',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -5587,9 +5381,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
                     'availability_zone:nova',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'interface:tap73364860-8e',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -5600,9 +5394,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
                     'availability_zone:nova',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'interface:tap8880f875-12',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -5613,9 +5407,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
                     'availability_zone:nova',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'interface:tap73364860-8e',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -5626,9 +5420,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
                     'availability_zone:nova',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'interface:tap8880f875-12',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -5639,9 +5433,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
                     'availability_zone:nova',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'interface:tap73364860-8e',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx',
@@ -5652,9 +5446,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
                     'availability_zone:nova',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'interface:tap3fd8281c-97',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx',
@@ -5665,9 +5459,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
                     'availability_zone:nova',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'interface:tap69a50430-3b',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_errors',
@@ -5678,9 +5472,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
                     'availability_zone:nova',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'interface:tap702092ed-a5',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_drop',
@@ -5691,9 +5485,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
                     'availability_zone:nova',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'interface:tap69a50430-3b',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.rx_packets',
@@ -5704,9 +5498,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
                     'availability_zone:nova',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'interface:tap56f02c54-da',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.tx_packets',
@@ -5717,9 +5511,9 @@ def test_scenario(make_request, aggregator):
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
                     'availability_zone:nova',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'interface:tapb488fc1e-3e',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5729,9 +5523,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'availability_zone:nova',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5741,9 +5535,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'availability_zone:nova',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5753,9 +5547,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'availability_zone:nova',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5765,9 +5559,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'availability_zone:nova',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5777,9 +5571,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'availability_zone:nova',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5789,9 +5583,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'availability_zone:nova',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5801,9 +5595,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'availability_zone:nova',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5813,9 +5607,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'availability_zone:nova',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5825,9 +5619,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'availability_zone:nova',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5837,9 +5631,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'availability_zone:nova',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5849,9 +5643,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'availability_zone:nova',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5861,9 +5655,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'availability_zone:nova',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5873,9 +5667,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'availability_zone:nova',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5885,9 +5679,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'availability_zone:nova',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5897,9 +5691,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'availability_zone:nova',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5909,9 +5703,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'availability_zone:nova',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5921,9 +5715,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'availability_zone:nova',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.disk',
@@ -5933,9 +5727,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'availability_zone:nova',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
 
             aggregator.assert_metric(
@@ -5946,9 +5740,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'availability_zone:nova',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -5958,9 +5752,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'availability_zone:nova',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -5970,9 +5764,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'availability_zone:nova',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -5982,9 +5776,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'availability_zone:nova',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -5994,9 +5788,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'availability_zone:nova',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -6006,9 +5800,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'availability_zone:nova',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -6018,9 +5812,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'availability_zone:nova',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -6030,9 +5824,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'availability_zone:nova',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -6042,9 +5836,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'availability_zone:nova',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -6054,9 +5848,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'availability_zone:nova',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -6066,9 +5860,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'availability_zone:nova',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -6078,9 +5872,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'availability_zone:nova',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -6090,9 +5884,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'availability_zone:nova',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -6102,9 +5896,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'availability_zone:nova',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -6114,9 +5908,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'availability_zone:nova',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -6126,9 +5920,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'availability_zone:nova',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -6138,9 +5932,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'availability_zone:nova',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ram',
@@ -6150,9 +5944,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'availability_zone:nova',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
 
             aggregator.assert_metric(
@@ -6163,9 +5957,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'availability_zone:nova',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6175,9 +5969,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'availability_zone:nova',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6187,9 +5981,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'availability_zone:nova',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6199,9 +5993,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'availability_zone:nova',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6211,9 +6005,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'availability_zone:nova',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6223,9 +6017,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'availability_zone:nova',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6235,9 +6029,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'availability_zone:nova',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6247,9 +6041,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'availability_zone:nova',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6259,9 +6053,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'availability_zone:nova',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6271,9 +6065,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'availability_zone:nova',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6283,9 +6077,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'availability_zone:nova',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6295,9 +6089,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'availability_zone:nova',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6307,9 +6101,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'availability_zone:nova',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6319,9 +6113,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'availability_zone:nova',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6331,9 +6125,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'availability_zone:nova',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6343,9 +6137,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'availability_zone:nova',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6355,9 +6149,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'availability_zone:nova',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.vcpus',
@@ -6367,9 +6161,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'availability_zone:nova',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
 
             aggregator.assert_metric(
@@ -6380,9 +6174,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'availability_zone:nova',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6392,9 +6186,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'availability_zone:nova',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6404,9 +6198,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'availability_zone:nova',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6416,9 +6210,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'availability_zone:nova',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6428,9 +6222,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'availability_zone:nova',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6440,9 +6234,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'availability_zone:nova',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6452,9 +6246,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'availability_zone:nova',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6464,9 +6258,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'availability_zone:nova',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6476,9 +6270,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'availability_zone:nova',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6488,9 +6282,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'availability_zone:nova',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6500,9 +6294,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'availability_zone:nova',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6512,9 +6306,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'availability_zone:nova',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6524,9 +6318,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'availability_zone:nova',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6536,9 +6330,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'availability_zone:nova',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6548,9 +6342,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'availability_zone:nova',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6560,9 +6354,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'availability_zone:nova',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6572,9 +6366,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'availability_zone:nova',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.ephemeral',
@@ -6584,9 +6378,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'availability_zone:nova',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
 
             aggregator.assert_metric(
@@ -6597,9 +6391,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-1',
+                    'server_id:7eaa751c-1e37-4963-a836-0a28bc283a9a',
                     'availability_zone:nova',
                 ],
-                hostname=u'7eaa751c-1e37-4963-a836-0a28bc283a9a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6609,9 +6403,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-2',
+                    'server_id:52561f29-e479-43d7-85de-944d29ef178d',
                     'availability_zone:nova',
                 ],
-                hostname=u'52561f29-e479-43d7-85de-944d29ef178d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6621,9 +6415,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:ReadyServerOne',
+                    'server_id:412c79b2-25f2-44d6-8e3b-be4baee11a7f',
                     'availability_zone:nova',
                 ],
-                hostname=u'412c79b2-25f2-44d6-8e3b-be4baee11a7f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6633,9 +6427,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-6',
+                    'server_id:acb4197c-f54e-488e-a40a-1b7f59cc9117',
                     'availability_zone:nova',
                 ],
-                hostname=u'acb4197c-f54e-488e-a40a-1b7f59cc9117',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6645,9 +6439,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-4',
+                    'server_id:7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
                     'availability_zone:nova',
                 ],
-                hostname=u'7e622c28-4b12-4a58-8ac2-4a2e854f84eb',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6657,9 +6451,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute8.openstack.local',
                     'server_name:finalDestination-7',
+                    'server_id:1cc21586-8d43-40ea-bdc9-6f54a79957b4',
                     'availability_zone:nova',
                 ],
-                hostname=u'1cc21586-8d43-40ea-bdc9-6f54a79957b4',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6669,9 +6463,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:jenga',
+                    'server_id:f2dd3f90-e738-4135-84d4-1a2d30d04929',
                     'availability_zone:nova',
                 ],
-                hostname=u'f2dd3f90-e738-4135-84d4-1a2d30d04929',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6681,9 +6475,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:moarserver-13',
+                    'server_id:4ceb4c69-a332-4b9d-907b-e99635aae644',
                     'availability_zone:nova',
                 ],
-                hostname=u'4ceb4c69-a332-4b9d-907b-e99635aae644',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6693,9 +6487,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:finalDestination-8',
+                    'server_id:836f724f-0028-4dc0-b9bd-e0843d767ca2',
                     'availability_zone:nova',
                 ],
-                hostname=u'836f724f-0028-4dc0-b9bd-e0843d767ca2',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6705,9 +6499,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:HoneyIShrunkTheServer',
+                    'server_id:1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
                     'availability_zone:nova',
                 ],
-                hostname=u'1b7a987f-c4fb-4b6b-aad9-3b461df2019d',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6717,9 +6511,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute4.openstack.local',
                     'server_name:server_take_zero-2',
+                    'server_id:ff2f581c-5d03-4a27-a0ba-f102603fe38f',
                     'availability_zone:nova',
                 ],
-                hostname=u'ff2f581c-5d03-4a27-a0ba-f102603fe38f',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6729,9 +6523,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:finalDestination-1',
+                    'server_id:4d7cb923-788f-4b61-9061-abfc576ecc1a',
                     'availability_zone:nova',
                 ],
-                hostname=u'4d7cb923-788f-4b61-9061-abfc576ecc1a',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6741,9 +6535,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute5.openstack.local',
                     'server_name:finalDestination-5',
+                    'server_id:5357e70e-f12c-4bb7-85a2-b40d642a7e92',
                     'availability_zone:nova',
                 ],
-                hostname=u'5357e70e-f12c-4bb7-85a2-b40d642a7e92',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6753,9 +6547,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute7.openstack.local',
                     'server_name:blacklist',
+                    'server_id:7324440d-915b-4e12-8b85-ec8c9a524d6c',
                     'availability_zone:nova',
                 ],
-                hostname=u'7324440d-915b-4e12-8b85-ec8c9a524d6c',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6765,9 +6559,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute10.openstack.local',
                     'server_name:anotherServer',
+                    'server_id:30888944-fb39-4590-9073-ef977ac1f039',
                     'availability_zone:nova',
                 ],
-                hostname=u'30888944-fb39-4590-9073-ef977ac1f039',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6777,9 +6571,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'hypervisor:compute4.openstack.local',
                     'server_name:blacklistServer',
+                    'server_id:57030997-f1b5-4f79-9429-8cb285318633',
                     'availability_zone:nova',
                 ],
-                hostname=u'57030997-f1b5-4f79-9429-8cb285318633',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6789,9 +6583,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute1.openstack.local',
                     'server_name:Rocky',
+                    'server_id:2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
                     'availability_zone:nova',
                 ],
-                hostname=u'2e1ce152-b19d-4c4a-9cc7-0d150fa97a18',
             )
             aggregator.assert_metric(
                 'openstack.nova.server.flavor.swap',
@@ -6801,9 +6595,9 @@ def test_scenario(make_request, aggregator):
                     'project_name:admin',
                     'hypervisor:compute2.openstack.local',
                     'server_name:jnrgjoner',
+                    'server_id:b3c8eee3-7e22-4a7c-9745-759073673cbe',
                     'availability_zone:nova',
                 ],
-                hostname=u'b3c8eee3-7e22-4a7c-9745-759073673cbe',
             )
 
             aggregator.assert_metric(
@@ -6816,7 +6610,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.15',
@@ -6828,13 +6621,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.15',
                 value=0.14,
                 tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.15',
@@ -6847,7 +6638,6 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.15',
@@ -6859,13 +6649,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.15',
                 value=0.14,
                 tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.15',
@@ -6877,7 +6665,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.15',
@@ -6889,13 +6676,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.15',
                 value=0.14,
                 tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.15',
@@ -6907,7 +6692,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.5',
@@ -6919,7 +6703,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.5',
@@ -6931,13 +6714,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.5',
                 value=0.12,
                 tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.5',
@@ -6950,7 +6731,6 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.5',
@@ -6962,13 +6742,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.5',
                 value=0.12,
                 tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.5',
@@ -6980,7 +6758,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.5',
@@ -6992,13 +6769,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.5',
                 value=0.12,
                 tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.5',
@@ -7010,7 +6785,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.1',
@@ -7022,7 +6796,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.1',
@@ -7034,13 +6807,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.1',
                 value=0.2,
                 tags=['hypervisor:compute3.openstack.local', 'hypervisor_id:8', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.1',
@@ -7053,7 +6824,6 @@ def test_scenario(make_request, aggregator):
                     'project_name:testProj1',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.1',
@@ -7065,14 +6835,12 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
 
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.1',
                 value=0.2,
                 tags=['hypervisor:compute6.openstack.local', 'hypervisor_id:11', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.1',
@@ -7084,7 +6852,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.1',
@@ -7096,13 +6863,11 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.1',
                 value=0.2,
                 tags=['hypervisor:compute9.openstack.local', 'hypervisor_id:14', 'virt_type:QEMU', 'status:enabled'],
-                hostname='',
             )
             aggregator.assert_metric(
                 'openstack.nova.hypervisor_load.1',
@@ -7114,7 +6879,6 @@ def test_scenario(make_request, aggregator):
                     'status:enabled',
                     'project_name:admin',
                 ],
-                hostname='',
             ),
             aggregator.assert_metric('openstack.controller', value=1)
 
