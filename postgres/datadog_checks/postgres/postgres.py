@@ -491,27 +491,20 @@ class PostgreSql(AgentCheck):
                 if query_timeout:
                     connection_string += " options='-c statement_timeout=%s'" % query_timeout
                 self.db = psycopg2.connect(connection_string)
-            elif port != '':
-                self.db = psycopg2.connect(
-                    host=host,
-                    port=port,
-                    user=user,
-                    password=password,
-                    database=dbname,
-                    sslmode=ssl,
-                    application_name="datadog-agent",
-                    options='-c statement_timeout=%s' % query_timeout if query_timeout else None,
-                )
             else:
-                self.db = psycopg2.connect(
-                    host=host,
-                    user=user,
-                    password=password,
-                    database=dbname,
-                    sslmode=ssl,
-                    application_name="datadog-agent",
-                    options='-c statement_timeout=%s' % query_timeout if query_timeout else None,
-                )
+                args = {
+                    'host': host,
+                    'user': user,
+                    'password': password,
+                    'database': dbname,
+                    'sslmode': ssl,
+                    'application_name': "datadog-agent",
+                }
+                if port:
+                    args['port'] = port
+                if query_timeout:
+                    args['options'] = '-c statement_timeout=%s' % query_timeout
+                self.db = psycopg2.connect(**args)
 
     def _get_custom_queries(self, tags, custom_queries):
         """
