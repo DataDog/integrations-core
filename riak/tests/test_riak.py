@@ -30,9 +30,12 @@ def test_check(aggregator, check, instance):
 
 
 @pytest.mark.usefixtures('dd_environment')
-def test_bad_config(aggregator, check):
-    with pytest.raises(socket.error):
-        check.check({"url": "http://localhost:5985"})
+def test_bad_config(aggregator, instance):
+    instance.update({"url": "http://localhost:5985"})
+    check = Riak('riak', {}, [instance])
 
-    sc_tags = ['url:http://localhost:5985']
+    with pytest.raises(socket.error):
+        check.check(instance)
+
+    sc_tags = ['my_tag', 'url:http://localhost:5985']
     aggregator.assert_service_check(common.SERVICE_CHECK_NAME, status=Riak.CRITICAL, tags=sc_tags)

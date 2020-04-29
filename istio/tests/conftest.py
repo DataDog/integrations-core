@@ -9,17 +9,20 @@ import requests
 from requests.exceptions import HTTPError
 
 from datadog_checks.base.utils.common import ensure_unicode
+from datadog_checks.dev import get_here
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.terraform import terraform_run
-from datadog_checks.dev.utils import get_here
 
 try:
     from contextlib import ExitStack
 except ImportError:
     from contextlib2 import ExitStack
 
-DEPLOYMENTS = [
+
+HERE = get_here()
+
+DEPLOYMENTS_LEGACY = [
     ('istio-citadel', 15014),
     ('istio-galley', 15014),
     ('istio-pilot', 15014),
@@ -31,27 +34,35 @@ DEPLOYMENTS = [
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with terraform_run(os.path.join(get_here(), 'terraform')) as outputs:
+    version = os.environ.get("ISTIO_VERSION")
+
+    with terraform_run(os.path.join(HERE, 'terraform', version)) as outputs:
         kubeconfig = outputs['kubeconfig']['value']
         with ExitStack() as stack:
-            ip_ports = [
-                stack.enter_context(port_forward(kubeconfig, 'istio-system', deployment, port))
-                for (deployment, port) in DEPLOYMENTS
-            ]
-            instance = {
-                'citadel_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
-                'galley_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
-                'pilot_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[2]),
-                'mixer_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[3]),
-                'istio_mesh_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[4]),
-            }
-            page = 'http://{}:{}/productpage'.format(*ip_ports[5])
-            # Check a bit to make sure it's available
-            CheckEndpoints([page], wait=5)()
-            for _ in range(5):
-                # Generate some traffic
-                requests.get(page)
-            yield instance
+            if version == '1.5.1':
+                istiod_host, istiod_port = stack.enter_context(port_forward(kubeconfig, 'istio-system', 'istiod', 8080))
+                instance = {'istiod_endpoint': 'http://{}:{}/metrics'.format(istiod_host, istiod_port)}
+
+                yield instance
+            else:
+                ip_ports = [
+                    stack.enter_context(port_forward(kubeconfig, 'istio-system', deployment, port))
+                    for (deployment, port) in DEPLOYMENTS_LEGACY
+                ]
+                instance = {
+                    'citadel_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
+                    'galley_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
+                    'pilot_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[2]),
+                    'mixer_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[3]),
+                    'istio_mesh_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[4]),
+                }
+                page = 'http://{}:{}/productpage'.format(*ip_ports[5])
+                # Check a bit to make sure it's available
+                CheckEndpoints([page], wait=5)()
+                for _ in range(5):
+                    # Generate some traffic
+                    requests.get(page)
+                yield instance
 
 
 class MockResponse:
@@ -79,9 +90,31 @@ class MockResponse:
 
 
 @pytest.fixture
+def istio_proxy_mesh_fixture():
+    mesh_file_path = os.path.join(HERE, 'fixtures', '1.5', 'istio-proxy.txt')
+    responses = []
+    with open(mesh_file_path, 'r') as f:
+        responses.append(f.read())
+
+    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+        yield
+
+
+@pytest.fixture
+def istiod_mixture_fixture():
+    mesh_file_path = os.path.join(HERE, 'fixtures', '1.5', 'istiod.txt')
+    responses = []
+    with open(mesh_file_path, 'r') as f:
+        responses.append(f.read())
+
+    with mock.patch('requests.get', return_value=MockResponse(responses, 'text/plain'), __name__="get"):
+        yield
+
+
+@pytest.fixture
 def mesh_mixture_fixture():
-    mesh_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'istio', 'mesh.txt')
-    mixer_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'istio', 'mixer.txt')
+    mesh_file_path = os.path.join(HERE, 'fixtures', '0.5', 'mesh.txt')
+    mixer_file_path = os.path.join(HERE, 'fixtures', '0.5', 'mixer.txt')
     responses = []
     with open(mesh_file_path, 'r') as f:
         responses.append(f.read())
@@ -97,7 +130,7 @@ def new_mesh_mixture_fixture():
     files = ['mesh.txt', 'mixer.txt', 'pilot.txt', 'galley.txt', 'citadel.txt']
     responses = []
     for filename in files:
-        file_path = os.path.join(os.path.dirname(__file__), 'fixtures', '1.1', filename)
+        file_path = os.path.join(HERE, 'fixtures', '1.1', filename)
         with open(file_path, 'r') as f:
             responses.append(f.read())
 
@@ -110,7 +143,7 @@ def new_pilot_fixture():
     files = ['pilot.txt']
     responses = []
     for filename in files:
-        file_path = os.path.join(os.path.dirname(__file__), 'fixtures', '1.1', filename)
+        file_path = os.path.join(HERE, 'fixtures', '1.1', filename)
         with open(file_path, 'r') as f:
             responses.append(f.read())
 
@@ -123,7 +156,7 @@ def new_galley_fixture():
     files = ['galley.txt']
     responses = []
     for filename in files:
-        file_path = os.path.join(os.path.dirname(__file__), 'fixtures', '1.1', filename)
+        file_path = os.path.join(HERE, 'fixtures', '1.1', filename)
         with open(file_path, 'r') as f:
             responses.append(f.read())
 

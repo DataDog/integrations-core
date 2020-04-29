@@ -2,20 +2,18 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
-import re
 from collections import defaultdict
-from typing import Any, Callable, DefaultDict, Dict, Iterator, List, Optional, Pattern, Set, Tuple, Union
+from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
 from .models import OID
+from .parsing import ParsedMetric, ParsedMetricTag, ParsedSymbolMetric, parse_metric_tags, parse_metrics
 from .pysnmp_types import (
     CommunityData,
     ContextData,
     DirMibSource,
     MibViewController,
-    ObjectIdentity,
-    ObjectType,
     OctetString,
     SnmpEngine,
     UdpTransportTarget,
@@ -26,82 +24,7 @@ from .pysnmp_types import (
     usmHMACMD5AuthProtocol,
 )
 from .resolver import OIDResolver
-
-
-class ParsedMetric(object):
-
-    __slots__ = ('name', 'tags', 'forced_type', 'enforce_scalar')
-
-    def __init__(
-        self,
-        name,  # type: str
-        tags=None,  # type: List[str]
-        forced_type=None,  # type: str
-        enforce_scalar=True,  # type: bool
-    ):
-        # type: (...) -> None
-        self.name = name
-        self.tags = tags or []
-        self.forced_type = forced_type
-        self.enforce_scalar = enforce_scalar
-
-
-class ParsedTableMetric(object):
-
-    __slots__ = ('name', 'index_tags', 'column_tags', 'forced_type')
-
-    def __init__(
-        self,
-        name,  # type: str
-        index_tags,  # type: List[Tuple[str, int]]
-        column_tags,  # type: List[Tuple[str, str]]
-        forced_type=None,  # type: str
-    ):
-        # type: (...) -> None
-        self.name = name
-        self.index_tags = index_tags
-        self.column_tags = column_tags
-        self.forced_type = forced_type
-
-
-class ParsedMetricTag(object):
-
-    __slots__ = ('name', 'symbol')
-
-    def __init__(self, name, symbol):
-        # type: (str, str) -> None
-        self.name = name
-        self.symbol = symbol
-
-    def matched_tags(self, value):
-        # type: (Any) -> Iterator[str]
-        yield '{}:{}'.format(self.name, value)
-
-
-class ParsedMatchMetricTags(object):
-
-    __slots__ = ('names', 'symbol', 'match')
-
-    def __init__(self, names, symbol, match):
-        # type: (dict, str, Pattern) -> None
-        self.names = names
-        self.symbol = symbol
-        self.match = match
-
-    def matched_tags(self, value):
-        # type: (Any) -> Iterator[str]
-        matched = self.match.match(str(value))
-        if matched is not None:
-            for name, match in self.names.items():
-                yield '{}:{}'.format(name, matched.expand(match))
-
-
-def _no_op(*args, **kwargs):
-    # type: (*Any, **Any) -> None
-    """
-    A 'do-nothing' replacement for the `warning()` AgentCheck function, suitable for when those
-    functions are not available (e.g. in unit tests).
-    """
+from .types import OIDMatch
 
 
 class InstanceConfig:
@@ -116,7 +39,6 @@ class InstanceConfig:
     def __init__(
         self,
         instance,  # type: dict
-        warning=_no_op,  # type: Callable[..., None]
         global_metrics=None,  # type: List[dict]
         mibs_path=None,  # type: str
         profiles=None,  # type: Dict[str, dict]
@@ -126,6 +48,11 @@ class InstanceConfig:
         global_metrics = [] if global_metrics is None else global_metrics
         profiles = {} if profiles is None else profiles
         profiles_by_oid = {} if profiles_by_oid is None else profiles_by_oid
+
+        # Clean empty or null values. This will help templating.
+        for key, value in list(instance.items()):
+            if value in (None, ""):
+                instance.pop(key)
 
         self.instance = instance
         self.tags = instance.get('tags', [])
@@ -188,7 +115,7 @@ class InstanceConfig:
 
         self._auth_data = self.get_auth_data(instance)
 
-        self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics, warning)
+        self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
             self.all_oids.extend(tag_oids)
@@ -196,7 +123,7 @@ class InstanceConfig:
         if profile:
             if profile not in profiles:
                 raise ConfigurationError("Unknown profile '{}'".format(profile))
-            self.refresh_with_profile(profiles[profile], warning)
+            self.refresh_with_profile(profiles[profile])
             self.add_profile_tag(profile)
 
         self._context_data = ContextData(*self.get_context_data(instance))
@@ -209,13 +136,13 @@ class InstanceConfig:
             )
 
     def resolve_oid(self, oid):
-        # type: (ObjectType) -> Tuple[str, Tuple[str, ...]]
+        # type: (OID) -> OIDMatch
         return self._resolver.resolve_oid(oid)
 
-    def refresh_with_profile(self, profile, warning):
-        # type: (Dict[str, Any], Callable[..., None]) -> None
+    def refresh_with_profile(self, profile):
+        # type: (Dict[str, Any]) -> None
         metrics = profile['definition'].get('metrics', [])
-        all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics, warning)
+        all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics)
 
         metric_tags = profile['definition'].get('metric_tags', [])
         tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
@@ -342,198 +269,19 @@ class InstanceConfig:
 
             yield host
 
-    def parse_metrics(
-        self,
-        metrics,  # type: List[Dict[str, Any]]
-        warning,  # type: Callable[..., None]
-    ):
-        # type: (...) -> Tuple[List[OID], List[OID], List[Union[ParsedMetric, ParsedTableMetric]]]
-        """Parse configuration and returns data to be used for SNMP queries.
-
-        `oids` is a dictionnary of SNMP tables to symbols to query.
-        """
-        table_oids = {}  # type: Dict[Tuple[str, str], Tuple[OID, List[OID]]]
-        parsed_metrics = []  # type: List[Union[ParsedMetric, ParsedTableMetric]]
-
-        def extract_symbol(mib, symbol):
-            # type: (str, Union[str, dict]) -> Tuple[OID, str]
-            if isinstance(symbol, dict):
-                symbol_oid = symbol['OID']
-                symbol_name = symbol['name']
-                oid = OID(symbol_oid)
-                self._resolver.register(oid.as_tuple(), symbol_name)
-            else:
-                oid = OID(ObjectIdentity(mib, symbol))
-                symbol_name = symbol
-
-            return oid, symbol_name
-
-        def get_table_symbols(mib, table):
-            # type: (str, str) -> Tuple[List[OID], str]
-            table_oid, table = extract_symbol(mib, table)
-            key = (mib, table)
-
-            if key in table_oids:
-                symbols = table_oids[key][1]
-            else:
-                symbols = []
-                table_oids[key] = (table_oid, symbols)
-
-            return symbols, table
-
-        # Check the metrics completely defined
-        for metric in metrics:
-            forced_type = metric.get('forced_type')
-            metric_tags = metric.get('metric_tags', [])
-
-            if 'MIB' in metric:
-                if not ('table' in metric or 'symbol' in metric):
-                    raise ConfigurationError('When specifying a MIB, you must specify either table or symbol')
-
-                if 'symbol' in metric:
-                    to_query = metric['symbol']
-
-                    try:
-                        _, parsed_metric_name = get_table_symbols(metric['MIB'], to_query)
-                    except Exception as e:
-                        warning("Can't generate MIB object for variable : %s\nException: %s", metric, e)
-                    else:
-                        parsed_metric = ParsedMetric(parsed_metric_name, tags=metric_tags, forced_type=forced_type)
-                        parsed_metrics.append(parsed_metric)
-
-                    continue
-
-                elif 'symbols' not in metric:
-                    raise ConfigurationError('When specifying a table, you must specify a list of symbols')
-
-                symbols, _ = get_table_symbols(metric['MIB'], metric['table'])
-                index_tags = []
-                column_tags = []
-
-                for metric_tag in metric_tags:
-                    if not ('tag' in metric_tag and ('index' in metric_tag or 'column' in metric_tag)):
-                        raise ConfigurationError(
-                            'When specifying metric tags, you must specify a tag, and an index or column'
-                        )
-
-                    tag_key = metric_tag['tag']
-
-                    if 'column' in metric_tag:
-                        # In case it's a column, we need to query it as well
-                        mib = metric_tag.get('MIB', metric['MIB'])
-                        oid, column = extract_symbol(mib, metric_tag['column'])
-                        column_tags.append((tag_key, column))
-
-                        if 'table' in metric_tag:
-                            tag_symbols, _ = get_table_symbols(mib, metric_tag['table'])
-                            tag_symbols.append(oid)
-                        elif mib != metric['MIB']:
-                            raise ConfigurationError('When tagging from a different MIB, the table must be specified')
-                        else:
-                            symbols.append(oid)
-
-                    elif 'index' in metric_tag:
-                        index_tags.append((tag_key, metric_tag['index']))
-
-                        if 'mapping' in metric_tag:
-                            # Need to do manual resolution
-
-                            for symbol in metric['symbols']:
-                                self._resolver.register_index(
-                                    symbol['name'], metric_tag['index'], metric_tag['mapping']
-                                )
-
-                            for tag in metric['metric_tags']:
-                                if 'column' in tag:
-                                    self._resolver.register_index(
-                                        tag['column']['name'], metric_tag['index'], metric_tag['mapping']
-                                    )
-
-                for symbol in metric['symbols']:
-                    oid, parsed_metric_name = extract_symbol(metric['MIB'], symbol)
-                    symbols.append(oid)
-                    parsed_table_metric = ParsedTableMetric(parsed_metric_name, index_tags, column_tags, forced_type)
-                    parsed_metrics.append(parsed_table_metric)
-
-            elif 'OID' in metric:
-                oid = OID(metric['OID'])
-
-                table_oids[metric['OID']] = (oid, [])
-                self._resolver.register(oid.as_tuple(), metric['name'])
-
-                parsed_metric = ParsedMetric(
-                    metric['name'], tags=metric_tags, forced_type=forced_type, enforce_scalar=False
-                )
-                parsed_metrics.append(parsed_metric)
-
-            else:
-                raise ConfigurationError('Unsupported metric in config file: {}'.format(metric))
-
-        all_oids = []  # type: List[OID]
-        bulk_oids = []  # type: List[OID]
-
-        # Use bulk for SNMP version > 1 and there are enough symbols
-        bulk_limit = self.bulk_threshold if self._auth_data.mpModel else 0
-
-        for table_oid, symbols in table_oids.values():
-            if not symbols:
-                # No table to browse, just one symbol
-                all_oids.append(table_oid)
-            elif bulk_limit and len(symbols) > bulk_limit:
-                bulk_oids.append(table_oid)
-            else:
-                all_oids.extend(symbols)
-
-        return all_oids, bulk_oids, parsed_metrics
+    def parse_metrics(self, metrics):
+        # type: (list) -> Tuple[List[OID], List[OID], List[ParsedMetric]]
+        """Parse configuration and returns data to be used for SNMP queries."""
+        # Use bulk for SNMP version > 1 only.
+        bulk_threshold = self.bulk_threshold if self._auth_data.mpModel else 0
+        result = parse_metrics(metrics, resolver=self._resolver, bulk_threshold=bulk_threshold)
+        return result['oids'], result['bulk_oids'], result['parsed_metrics']
 
     def parse_metric_tags(self, metric_tags):
-        # type: (List[Dict[str, Any]]) -> Tuple[List[OID], List[Any]]
+        # type: (list) -> Tuple[List[OID], List[ParsedMetricTag]]
         """Parse configuration for global metric_tags."""
-        oids = []  # type: List[OID]
-        parsed_metric_tags = []
-
-        for tag in metric_tags:
-            if 'symbol' not in tag:
-                raise ConfigurationError('A metric tag needs to specify a symbol: {}'.format(tag))
-            symbol = tag['symbol']
-
-            if not ('OID' in tag or 'MIB' in tag):
-                raise ConfigurationError('A metric tag needs to specify an OID or a MIB: {}'.format(tag))
-
-            if 'tag' not in tag:
-                if not ('tags' in tag and 'match' in tag):
-                    raise ConfigurationError(
-                        'A metric tag needs to specify either a tag, '
-                        'or a mapping of tags and a regular expression: {}'.format(tag)
-                    )
-                tags = tag['tags']
-                if not isinstance(tags, dict):
-                    raise ConfigurationError(
-                        'Specified tags needs to be a mapping of tag name to regular '
-                        'expression matching: {}'.format(tag)
-                    )
-                match = tag['match']
-                try:
-                    compiled_match = re.compile(match)
-                except re.error as e:
-                    raise ConfigurationError('Failed compile regular expression {}: {}'.format(match, e))
-                else:
-                    parsed = ParsedMatchMetricTags(tags, symbol, compiled_match)
-            else:
-                tag_name = tag['tag']
-                parsed = ParsedMetricTag(tag_name, symbol)  # type: ignore
-
-            if 'MIB' in tag:
-                mib = tag['MIB']
-                oid = OID(ObjectIdentity(mib, symbol))
-            else:
-                oid = OID(tag['OID'])
-                self._resolver.register(oid.as_tuple(), symbol)
-
-            oids.append(oid)
-            parsed_metric_tags.append(parsed)
-
-        return oids, parsed_metric_tags
+        result = parse_metric_tags(metric_tags, resolver=self._resolver)
+        return result['oids'], result['parsed_metric_tags']
 
     def add_uptime_metric(self):
         # type: () -> None
@@ -542,8 +290,8 @@ class InstanceConfig:
         # Reference sysUpTimeInstance directly, see http://oidref.com/1.3.6.1.2.1.1.3.0
         uptime_oid = OID('1.3.6.1.2.1.1.3.0')
         self.all_oids.append(uptime_oid)
-        self._resolver.register(uptime_oid.as_tuple(), 'sysUpTimeInstance')
+        self._resolver.register(uptime_oid, 'sysUpTimeInstance')
 
-        parsed_metric = ParsedMetric('sysUpTimeInstance', forced_type='gauge')
+        parsed_metric = ParsedSymbolMetric('sysUpTimeInstance', forced_type='gauge')
         self.parsed_metrics.append(parsed_metric)
         self._uptime_metric_added = True

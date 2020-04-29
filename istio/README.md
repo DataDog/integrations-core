@@ -22,19 +22,31 @@ Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [
 
 #### Metric Collection
 
-Add this configuration block to your `istio.d/conf.yaml` file to start gathering your Istio Metrics:
+Add one of the configuration blocks below to your `istio.d/conf.yaml` file to start gathering your Istio Metrics for your supported version:
 
-```yaml
-init_config:
+1. To monitor the `istiod` deployment in Istio `v1.5+`, use the following configuration:
 
-instances:
-  - istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
-    mixer_endpoint: http://istio-telemetry.istio-system:15014/metrics
-    galley_endpoint: http://istio-galley.istio-system:15014/metrics
-    pilot_endpoint: http://istio-pilot.istio-system:15014/metrics
-    citadel_endpoint: http://istio-citadel.istio-system:15014/metrics
-    send_histograms_buckets: true
-```
+    _Available in Istio integration version v3.1.0, which will be included in Agent 7.20. See the [Integration Management documentation][15] for instructions to upgrade the integration manually_
+    
+    ```yaml
+    init_config:
+    
+    instances:
+      - istiod_endpoint: http://istiod.istio-system:8080/metrics
+    ```
+    
+2. To monitor Istio versions `v1.4` or earlier, use the following configuration:
+    ```yaml
+    init_config:
+
+    instances:
+      - istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
+        mixer_endpoint: http://istio-telemetry.istio-system:15014/metrics
+        galley_endpoint: http://istio-galley.istio-system:15014/metrics
+        pilot_endpoint: http://istio-pilot.istio-system:15014/metrics
+        citadel_endpoint: http://istio-citadel.istio-system:15014/metrics
+        send_histograms_buckets: true
+    ```
 
 Each of the endpoints is optional, but at least one must be configured. See the [Istio documentation][5] to learn more about the Prometheus adapter.
 
@@ -100,7 +112,17 @@ The Istio check does not include any events.
 
 ### Service Checks
 
-The Istio check does not include any service checks.
+For Istio versions `1.5` or higher:
+
+`istio.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+
+For all other versions of Istio:
+
+`istio.pilot.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+
+`istio.galley.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
+
+`istio.citadel.prometheus.health`: Returns `CRITICAL` if the Agent cannot reach the metrics endpoints, `OK` otherwise.
 
 ## Troubleshooting
 
@@ -127,3 +149,4 @@ Additional helpful documentation, links, and articles:
 [12]: https://docs.datadoghq.com/integrations/envoy/#log-collection
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [14]: https://www.datadoghq.com/blog/istio-metrics/
+[15]: https://docs.datadoghq.com/agent/guide/integration-management/#install

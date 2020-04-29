@@ -64,12 +64,12 @@ def test_error_query(instance):
         (
             queries.SystemMetrics.query_data['columns'][1]['items'],
             {'Revision', 'VersionInteger'},
-            'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/dbms/src/Common/CurrentMetrics.cpp',
+            'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/src/Common/CurrentMetrics.cpp',
         ),
         (
             queries.SystemEvents.query_data['columns'][1]['items'],
             set(),
-            'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/dbms/src/Common/ProfileEvents.cpp',
+            'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/src/Common/ProfileEvents.cpp',
         ),
     ],
     ids=['SystemMetrics', 'SystemEvents'],

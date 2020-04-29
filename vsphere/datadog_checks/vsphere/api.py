@@ -63,6 +63,25 @@ class APIResponseError(Exception):
     pass
 
 
+class VersionInfo(object):
+    def __init__(self, about_info):
+        # type: (vim.AboutInfo) -> None
+        # Semver formatted version string
+        self.version_str = "{}+{}".format(about_info.version, about_info.build)
+
+        # Text based information i.e 'VMware vCenter Server 6.7.0 build-14792544'
+        self.fullName = about_info.fullName
+
+        # 'VirtualCenter' when connected to vCenter, 'HostAgent' when connected to an ESX host directly
+        self.api_type = about_info.apiType
+
+    def is_vcenter(self):
+        # type: () -> bool
+        """The vSphere integration only supports connecting to a vCenter instance. It can't be used to monitor Esxi
+        hosts directly."""
+        return self.api_type == 'VirtualCenter'
+
+
 class VSphereAPI(object):
     """Abstraction class over the vSphere SOAP api using the pyvmomi library"""
 
@@ -106,20 +125,37 @@ class VSphereAPI(object):
                 host=self.config.hostname, user=self.config.username, pwd=self.config.password, sslContext=context
             )
             # Next line tries a simple API call to check the health of the connection.
-            conn.CurrentTime()
+            version_info = VersionInfo(conn.content.about)
         except Exception as e:
             err_msg = "Connection to {} failed: {}".format(self.config.hostname, e)
             raise APIConnectionError(err_msg)
+
+        if not version_info.is_vcenter():
+            # Connection was successful but to something that is not a VirtualCenter instance. The check won't
+            # run correctly.
+            # TODO: Raise an exception and stop execution here
+            self.log.error(
+                "%s is not a valid VirtualCenter (vCenter) instance, the vSphere API reports '%s'. "
+                "Do not try to connect to ESXi hosts directly.",
+                self.config.hostname,
+                version_info.api_type,
+            )
 
         if self._conn:
             connect.Disconnect(self._conn)
 
         self._conn = conn
+        self.log.debug("Connected to %s", version_info.fullName)
 
     @smart_retry
     def check_health(self):
         # type: () -> None
         self._conn.CurrentTime()
+
+    @smart_retry
+    def get_version(self):
+        # type: () -> VersionInfo
+        return VersionInfo(self._conn.content.about)
 
     @smart_retry
     def get_perf_counter_by_level(self, collection_level):

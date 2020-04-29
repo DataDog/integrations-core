@@ -34,19 +34,29 @@ def get_current_branch():
         return run_command(command, capture='out').stdout.strip()
 
 
-def files_changed():
+def files_changed(include_uncommitted=True):
     """
     Return the list of file changed in the current branch compared to `master`
     """
     with chdir(get_root()):
-        result = run_command('git diff --name-status master...', capture='out')
-    status_lines = result.stdout.splitlines()
+        # Use `--name-status` to include moved files
+        name_status_result = run_command('git diff --name-status master...', capture='out')
+
+    name_status_lines = name_status_result.stdout.splitlines()
 
     changed_files = []
-    for l in status_lines:
+    for l in name_status_lines:
         files = l.split('\t')[1:]  # skip first element representing the type of change
         changed_files.extend(files)
-    return sorted([f for f in changed_files if f])
+
+    if include_uncommitted:
+        with chdir(get_root()):
+            # Use `--name-only` to include uncommitted files
+            name_only_result = run_command('git diff --name-only master', capture='out')
+        name_only_lines = name_only_result.stdout.splitlines()
+        changed_files.extend(name_only_lines)
+
+    return sorted([f for f in set(changed_files) if f])
 
 
 def get_commits_since(check_name, target_tag=None):
@@ -75,9 +85,15 @@ def git_show_file(path, ref):
         return run_command(command, capture=True).stdout
 
 
-def git_commit(targets, message, force=False, sign=False):
+def git_commit(targets, message, force=False, sign=False, update=False):
     """
     Commit the changes for the given targets.
+
+    `targets` - be files or directiries
+    `message` - the commit message
+    `force` - (optional) force the commit
+    `sign` - sign with `-S` option
+    `update` - only commit updated files already tracked by git, via `-u`
     """
     root = get_root()
     target_paths = []
@@ -85,7 +101,10 @@ def git_commit(targets, message, force=False, sign=False):
         target_paths.append(os.path.join(root, t))
 
     with chdir(root):
-        result = run_command(f"git add{' -f' if force else ''} {' '.join(target_paths)}")
+        if update:
+            result = run_command(f"git add{' -f' if force else ''} -u {' '.join(target_paths)}")
+        else:
+            result = run_command(f"git add{' -f' if force else ''} {' '.join(target_paths)}")
         if result.code != 0:
             return result
 

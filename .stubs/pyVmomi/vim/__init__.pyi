@@ -34,6 +34,7 @@ class ServiceInstanceContent:
     viewManager: ViewManager
     perfManager: PerformanceManager
     eventManager: EventManager
+    about: AboutInfo
 
 class ServiceInstance:
     """
@@ -83,6 +84,14 @@ class PerformanceManager:
         value: Any
         entity: ManagedEntity
     def QueryPerf(self, querySpec: List[PerformanceManager.QuerySpec]) -> List[PerformanceManager.EntityMetricBase]: ...
+
+
+class AboutInfo:
+    apiType: str
+    apiVersion: str
+    version: str
+    build: str
+    fullName: str
 
 class VirtualMachine(ManagedEntity): ...
 class HostSystem(ManagedEntity): ...
