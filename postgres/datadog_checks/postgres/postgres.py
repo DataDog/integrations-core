@@ -76,8 +76,6 @@ class PostgreSql(AgentCheck):
         self.instance_metrics = None
         self.bgw_metrics = None
         self.archiver_metrics = None
-        self.db_bgw_metrics = []
-        self.db_archiver_metrics = []
         self.replication_metrics = None
         self.activity_metrics = None
 
@@ -145,22 +143,7 @@ class PostgreSql(AgentCheck):
         Uses a dictionary to save the result for each instance
         """
         # Extended 9.2+ metrics if needed
-        metrics = self.bgw_metrics
-
-        if metrics is None:
-            # Hack to make sure that if we have multiple instances that connect to
-            # the same host, port, we don't collect metrics twice
-            # as it will result in https://github.com/DataDog/dd-agent/issues/1211
-            sub_key = self.config.key[:2]
-            if sub_key in self.db_bgw_metrics:
-                self.bgw_metrics = None
-                self.log.debug(
-                    "Not collecting bgw metrics for key: %s as they are already collected by another instance",
-                    self.config.key,
-                )
-                return None
-
-            self.db_bgw_metrics.append(sub_key)
+        if self.bgw_metrics is None:
             self.bgw_metrics = dict(COMMON_BGW_METRICS)
 
             if self.version >= V9_1:
@@ -168,14 +151,12 @@ class PostgreSql(AgentCheck):
             if self.version >= V9_2:
                 self.bgw_metrics.update(NEWER_92_BGW_METRICS)
 
-            metrics = self.bgw_metrics
-
-        if not metrics:
+        if not self.bgw_metrics:
             return None
 
         return {
             'descriptors': [],
-            'metrics': metrics,
+            'metrics': self.bgw_metrics,
             'query': "select {metrics_columns} FROM pg_stat_bgwriter",
             'relation': False,
         }
@@ -194,30 +175,15 @@ class PostgreSql(AgentCheck):
         """
         # While there's only one set for now, prepare for future additions to
         # the table, mirroring _get_bgw_metrics()
-        metrics = self.archiver_metrics
-
-        if metrics is None and self.version >= V9_4:
-            # Collect from only one instance. See _get_bgw_metrics() for details on why.
-            sub_key = self.config.key[:2]
-            if sub_key in self.db_archiver_metrics:
-                self.archiver_metrics = None
-                self.log.debug(
-                    "Not collecting archiver metrics for key: %s as they are already collected by another instance",
-                    self.config.key,
-                )
-                return None
-
-            self.db_archiver_metrics.append(sub_key)
-
+        if self.archiver_metrics is None and self.version >= V9_4:
             self.archiver_metrics = dict(COMMON_ARCHIVER_METRICS)
-            metrics = self.archiver_metrics
 
-        if not metrics:
+        if not self.archiver_metrics:
             return None
 
         return {
             'descriptors': [],
-            'metrics': metrics,
+            'metrics': self.archiver_metrics,
             'query': "select {metrics_columns} FROM pg_stat_archiver",
             'relation': False,
         }
@@ -475,7 +441,6 @@ class PostgreSql(AgentCheck):
             else:
                 args = {
                     'host': self.config.host,
-                    'port': self.config.port,
                     'user': self.config.user,
                     'password': self.config.password,
                     'database': self.config.dbname,
@@ -630,7 +595,6 @@ class PostgreSql(AgentCheck):
 
     def check(self, _):
         tags = copy.copy(self.config.tags)
-        (host, port, dbname) = self.config.key
         # Collect metrics
         try:
             # Check version
@@ -645,14 +609,18 @@ class PostgreSql(AgentCheck):
             self._clean_state()
             self.db = None
             message = u'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
-                host, port, dbname, str(e)
+                self.config.host, self.config.port, self.config.dbname, str(e)
             )
             self.service_check(
                 self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.config.service_check_tags, message=message
             )
             raise e
         else:
-            message = u'Established connection to postgres://%s:%s/%s' % (host, port, dbname)
+            message = u'Established connection to postgres://%s:%s/%s' % (
+                self.config.host,
+                self.config.port,
+                self.config.dbname,
+            )
             self.service_check(
                 self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.config.service_check_tags, message=message
             )

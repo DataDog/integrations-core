@@ -20,7 +20,6 @@ class PostgresConfig:
         if self.relations and not self.dbname:
             raise ConfigurationError('"dbname" parameter must be set when using the "relations" parameter.')
 
-        self.key = (self.host, self.port, self.dbname)
         self.tags = self._build_tags(instance.get('tags', []))
 
         ssl = instance.get('ssl', False)
