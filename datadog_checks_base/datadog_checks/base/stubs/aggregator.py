@@ -5,7 +5,6 @@ from __future__ import division
 
 from collections import OrderedDict, defaultdict
 
-import pytest_check as check
 from six import iteritems
 
 from ..utils.common import ensure_unicode, to_native_string
@@ -153,9 +152,9 @@ class AggregatorStub(object):
 
         msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(metric_name, count, at_least)
         if count is not None:
-            check.equal(len(candidates), count, msg=msg)
+            assert len(candidates) == count, msg
         else:
-            check.greater_equal(len(candidates), at_least, msg=msg)
+            assert len(candidates) >= at_least, msg
 
     # Potential kwargs: aggregation_key, alert_type, event_type,
     # msg_title, source_type_name
@@ -174,9 +173,9 @@ class AggregatorStub(object):
 
         msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(msg_text, count, at_least)
         if count is not None:
-            check.equal(len(candidates), count, msg=msg)
+            assert len(candidates) == count, msg
         else:
-            check.greater_equal(len(candidates), at_least, msg=msg)
+            assert len(candidates) >= at_least, msg
 
     def assert_histogram_bucket(
         self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, count=None, at_least=1
@@ -289,8 +288,7 @@ class AggregatorStub(object):
         new_msg = msg
         if not condition:  # It's costly to build the message with similar metrics, so it's built only on failure.
             new_msg = "{}\n{}".format(msg, build_similar_elements_msg(expected_stub, submitted_elements))
-
-        check.is_true(condition, msg=new_msg)
+        assert condition, new_msg
 
     def assert_all_metrics_covered(self):
         # use `condition` to avoid building the `msg` if not needed
@@ -301,7 +299,7 @@ class AggregatorStub(object):
             msg = 'Some metrics are missing:'
             msg += '\nAsserted Metrics:{}{}'.format(prefix, prefix.join(sorted(self._asserted)))
             msg += '\nMissing Metrics:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
-        check.is_true(condition, msg=msg)
+        assert condition, msg
 
     def assert_metrics_using_metadata(self, metadata_metrics, check_metric_type=True, exclude=None):
         """
@@ -340,8 +338,7 @@ class AggregatorStub(object):
                             )
                         )
 
-        msg = "Metadata assertion errors using metadata.csv:" + "\n\t- ".join([''] + sorted(errors))
-        check.equal(0, len(errors), msg=msg)
+        assert not errors, "Metadata assertion errors using metadata.csv:" + "\n\t- ".join([''] + sorted(errors))
 
     def assert_no_duplicate_all(self):
         """
@@ -405,8 +402,7 @@ class AggregatorStub(object):
             for metric in contexts:
                 err_msg_lines.append('    ' + str(metric))
 
-        msg = "\n".join(err_msg_lines)
-        check.equal(0, len(dup_contexts), msg=msg)
+        assert len(dup_contexts) == 0, "\n".join(err_msg_lines)
 
     def reset(self):
         """
@@ -418,7 +414,7 @@ class AggregatorStub(object):
         self._events = []
 
     def all_metrics_asserted(self):
-        check.greater_equal(self.metrics_asserted_pct, 100.0)
+        assert self.metrics_asserted_pct >= 100.0
 
     def not_asserted(self):
         present_metrics = {ensure_unicode(m) for m in self._metrics}
@@ -436,9 +432,9 @@ class AggregatorStub(object):
 
         msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(metric_name, count, at_least)
         if count is not None:
-            check.equal(len(candidates), count, msg=msg)
+            assert len(candidates) == count, msg
         else:
-            check.greater_equal(len(candidates), at_least, msg=msg)
+            assert len(candidates) >= at_least, msg
 
     @property
     def metrics_asserted_pct(self):
