@@ -51,9 +51,6 @@ class PostgreSql(AgentCheck):
     """Collects per-database, and optionally per-relation metrics, custom metrics"""
 
     SOURCE_TYPE_NAME = 'postgresql'
-    RATE = AgentCheck.rate
-    GAUGE = AgentCheck.gauge
-    MONOTONIC = AgentCheck.monotonic_count
     SERVICE_CHECK_NAME = 'postgres.can_connect'
     METADATA_TRANSFORMERS = {'version': transform_version}
 
@@ -62,7 +59,6 @@ class PostgreSql(AgentCheck):
         self._clean_state()
         self.db = None
         self._version = None
-        self._custom_metrics = None
         # Deprecate custom_metrics in favor of custom_queries
         if 'custom_metrics' in self.instance:
             self.warning(
@@ -412,8 +408,8 @@ class PostgreSql(AgentCheck):
             activity_metrics = self._get_activity_metrics()
             self._query_scope(cursor, activity_metrics, instance_tags, False, relations_config)
 
-        for scope in list(metric_scope) + self.custom_metrics:
-            self._query_scope(cursor, scope, instance_tags, scope in self.custom_metrics, relations_config)
+        for scope in list(metric_scope) + self.config.custom_metrics:
+            self._query_scope(cursor, scope, instance_tags, scope in self.config.custom_metrics, relations_config)
 
         cursor.close()
 
@@ -548,50 +544,6 @@ class PostgreSql(AgentCheck):
                         for info in metric_info:
                             metric, value, method = info
                             getattr(self, method)(metric, value, tags=set(query_tags))
-
-    @property
-    def custom_metrics(self):
-        # Pre-processed cached custom_metrics
-        if self._custom_metrics is not None:
-            self.log.debug("Custom metrics: %s", self._custom_metrics)
-            return self._custom_metrics
-
-        # Otherwise pre-process custom metrics and verify definition
-        required_parameters = ("descriptors", "metrics", "query", "relation")
-
-        custom_metrics = self.instance.get('custom_metrics', [])
-        for m in custom_metrics:
-            for param in required_parameters:
-                if param not in m:
-                    raise ConfigurationError('Missing {} parameter in custom metric'.format(param))
-
-            self.log.debug("Metric: %s", m)
-
-            # Old formatting to new formatting. The first params is always the columns names from which to
-            # read metrics. The `relation` param instructs the check to replace the next '%s' with the list of
-            # relations names.
-            if m['relation']:
-                m['query'] = m['query'] % ('{metrics_columns}', '{relations_names}')
-            else:
-                m['query'] = m['query'] % '{metrics_columns}'
-
-            try:
-                for ref, (_, mtype) in iteritems(m['metrics']):
-                    cap_mtype = mtype.upper()
-                    if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
-                        raise ConfigurationError(
-                            'Collector method {} is not known. '
-                            'Known methods are RATE, GAUGE, MONOTONIC'.format(cap_mtype)
-                        )
-
-                    m['metrics'][ref][1] = getattr(PostgreSql, cap_mtype)
-                    self.log.debug("Method: %s", mtype)
-            except Exception as e:
-                raise Exception('Error processing custom metric `{}`: {}'.format(m, e))
-
-        self._custom_metrics = custom_metrics
-        self.log.debug("Custom metrics: %s", custom_metrics)
-        return custom_metrics
 
     def check(self, _):
         tags = copy.copy(self.config.tags)

@@ -1,14 +1,19 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from datadog_checks.base import ConfigurationError, is_affirmative
+from datadog_checks.base import ConfigurationError, is_affirmative, AgentCheck
 
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+from six import iteritems
+
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
 
-
 class PostgresConfig:
+    RATE = AgentCheck.rate
+    GAUGE = AgentCheck.gauge
+    MONOTONIC = AgentCheck.monotonic_count
+
     def __init__(self, instance):
         self.host = instance.get('host', '')
         self.port = instance.get('port', '')
@@ -47,6 +52,7 @@ class PostgresConfig:
 
         self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', False))
         self.service_check_tags = self._get_service_check_tags()
+        self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
 
     def _build_tags(self, custom_tags):
         # Clean up tags in case there was a None entry in the instance
@@ -72,3 +78,35 @@ class PostgresConfig:
         service_check_tags.extend(self.tags)
         service_check_tags = list(set(service_check_tags))
         return service_check_tags
+
+    @staticmethod
+    def _get_custom_metrics(custom_metrics):
+        # Otherwise pre-process custom metrics and verify definition
+        required_parameters = ("descriptors", "metrics", "query", "relation")
+
+        for m in custom_metrics:
+            for param in required_parameters:
+                if param not in m:
+                    raise ConfigurationError('Missing {} parameter in custom metric'.format(param))
+
+            # Old formatting to new formatting. The first params is always the columns names from which to
+            # read metrics. The `relation` param instructs the check to replace the next '%s' with the list of
+            # relations names.
+            if m['relation']:
+                m['query'] = m['query'] % ('{metrics_columns}', '{relations_names}')
+            else:
+                m['query'] = m['query'] % '{metrics_columns}'
+
+            try:
+                for ref, (_, mtype) in iteritems(m['metrics']):
+                    cap_mtype = mtype.upper()
+                    if cap_mtype not in ('RATE', 'GAUGE', 'MONOTONIC'):
+                        raise ConfigurationError(
+                            'Collector method {} is not known. '
+                            'Known methods are RATE, GAUGE, MONOTONIC'.format(cap_mtype)
+                        )
+
+                    m['metrics'][ref][1] = getattr(PostgresConfig, cap_mtype)
+            except Exception as e:
+                raise Exception('Error processing custom metric `{}`: {}'.format(m, e))
+        return custom_metrics
