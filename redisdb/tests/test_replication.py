@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
 
+import pytest
 import redis
 
 from datadog_checks.redisdb import Redis
@@ -15,11 +16,13 @@ REPLICA_METRICS = [
     'redis.replication.master_repl_offset',
 ]
 
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
+
 
 def test_redis_replication_link_metric(aggregator, replica_instance, dd_environment):
     metric_name = 'redis.replication.master_link_down_since_seconds'
 
-    redis_check = Redis('redisdb', {}, {})
+    redis_check = Redis('redisdb', {}, [replica_instance])
     redis_check.check(replica_instance)
     aggregator.assert_metric(metric_name, value=0)
 
@@ -34,7 +37,7 @@ def test_redis_replication_link_metric(aggregator, replica_instance, dd_environm
 
 def test_redis_replication_service_check(aggregator, replica_instance, dd_environment):
     service_check_name = 'redis.replication.master_link_status'
-    redis_check = Redis('redisdb', {}, {})
+    redis_check = Redis('redisdb', {}, [replica_instance])
     redis_check.check(replica_instance)
     assert len(aggregator.service_checks(service_check_name)) == 1
 
@@ -58,7 +61,7 @@ def test_redis_repl(aggregator, dd_environment, master_instance):
     master_db.set('replicated:test', 'true')
     assert replica_db.get('replicated:test') == b'true'
 
-    redis_check = Redis('redisdb', {}, {})
+    redis_check = Redis('redisdb', {}, [master_instance])
     redis_check.check(master_instance)
 
     for name in REPLICA_METRICS:

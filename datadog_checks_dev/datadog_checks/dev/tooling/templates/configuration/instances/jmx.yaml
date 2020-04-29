@@ -91,4 +91,19 @@
     example: false
     type: boolean
 
+- name: rmi_connection_timeout
+  description: The connection timeout, in seconds, when connecting to a remote JVM.
+  value:
+    example: 30
+    type: number
+
+- name: rmi_client_timeout
+  description: |
+    The timeout to consider a remote connection, already successfully established, as lost.
+    If a connected remote JVM does not reply after `rmi_client_timeout` seconds jmxfetch
+    will give up on that connection and retry.
+  value:
+    example: 30
+    type: number
+
 - template: instances/default

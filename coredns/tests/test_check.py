@@ -17,7 +17,7 @@ class TestCoreDNS:
         Testing CoreDNS check.
         """
 
-        check = CoreDNSCheck(CHECK_NAME, {}, {}, [instance])
+        check = CoreDNSCheck(CHECK_NAME, {}, [instance])
         check.check(instance)
 
         # check that we then get the count metrics also
@@ -34,7 +34,7 @@ class TestCoreDNS:
         Testing metrics emitted from docker container.
         """
 
-        check = CoreDNSCheck(CHECK_NAME, {}, {}, [dockerinstance])
+        check = CoreDNSCheck(CHECK_NAME, {}, [dockerinstance])
         check.check(dockerinstance)
 
         for metric in METRICS:

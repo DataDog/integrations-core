@@ -102,10 +102,10 @@ class FileDescriptor(object):
 
 
 class BTRFS(AgentCheck):
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances=instances)
-        if instances is not None and len(instances) > 1:
-            raise Exception("BTRFS check only supports one configured instance.")
+    def __init__(self, name, init_config, instances):
+        super(BTRFS, self).__init__(name, init_config, instances=instances)
+        self.excluded_devices = self.instance.get('excluded_devices', [])
+        self.custom_tags = self.instance.get('tags', [])
 
     def get_usage(self, mountpoint):
         results = []
@@ -165,13 +165,11 @@ class BTRFS(AgentCheck):
                 return None
         return unallocated_bytes
 
-    def check(self, instance):
+    def check(self, _):
         btrfs_devices = {}
-        excluded_devices = instance.get('excluded_devices', [])
-        custom_tags = instance.get('tags', [])
 
         for p in psutil.disk_partitions():
-            if p.fstype == 'btrfs' and p.device not in btrfs_devices and p.device not in excluded_devices:
+            if p.fstype == 'btrfs' and p.device not in btrfs_devices and p.device not in self.excluded_devices:
                 btrfs_devices[p.device] = p.mountpoint
 
         if len(btrfs_devices) == 0:
@@ -185,7 +183,7 @@ class BTRFS(AgentCheck):
                     'replication_type:{}'.format(replication_type),
                     "device:{}".format(device),
                 ]
-                tags.extend(custom_tags)
+                tags.extend(self.custom_tags)
 
                 free = total_bytes - used_bytes
                 usage = used_bytes / total_bytes
@@ -197,7 +195,7 @@ class BTRFS(AgentCheck):
 
             unallocated_bytes = self.get_unallocated_space(mountpoint)
             if unallocated_bytes is not None:
-                tags = ["device:{}".format(device)] + custom_tags
+                tags = ["device:{}".format(device)] + self.custom_tags
                 self.gauge("system.disk.btrfs.unallocated", unallocated_bytes, tags=tags)
             else:
                 self.log.debug(

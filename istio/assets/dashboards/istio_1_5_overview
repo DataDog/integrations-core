@@ -1,0 +1,921 @@
+{
+    "author_info": {
+        "author_name": "Datadog"
+    },
+    "board_title": "Istio Overview (v1.5+)",
+    "created": "2020-03-30T17:55:10.381398+00:00",
+    "created_by": {
+        "access_role": "adm",
+        "disabled": false,
+        "email": "support@datadoghq.com",
+        "handle": "support@datadoghq.com",
+        "is_admin": true,
+        "name": "Datadog",
+        "role": null,
+        "title": null,
+        "verified": true
+    },
+    "description": "### Istio\n\nNote: This dashboard outlines new metrics from Istio `v1.5+.\n\n- [What is Istio](https://istio.io/docs/concepts/what-is-istio/)?\n- [Istiod](https://istio.io/docs/ops/deployment/architecture/)\n- [Envoy](https://istio.io/docs/concepts/what-is-istio/#envoy), a high performance proxy.\n    - XDS = Envoy management APIs that can be implemented by backend servers. \n        - These APIs support:\n            - Cluster discovery service (CDS)\n            - Route discovery service (RDS)\n            - Endpoint discovery service (EDS)\n            - Listener discovery service (LDS)",
+    "id": 1035172,
+    "modified": "2020-04-24T20:27:51.817384+00:00",
+    "new_id": "3y6-epj-nrz",
+    "read_only": false,
+    "template_variables": [],
+    "widgets": [
+        {
+            "bgcolor": "gray",
+            "font_size": "18",
+            "height": 5,
+            "html": "Istiod resource usage",
+            "id": 0,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 80,
+            "x": 109,
+            "y": 0
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "18",
+            "height": 5,
+            "html": "Mesh throughput",
+            "id": 1,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 40,
+            "x": 14,
+            "y": 0
+        },
+        {
+            "height": 12,
+            "id": 2,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "top(avg:istio.mesh.request.count{cluster-name:istio-annotated-workaround} by {host}, 10, 'mean', 'desc')",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "center",
+            "title_size": 16,
+            "title_text": "Request count",
+            "type": "timeseries",
+            "width": 26,
+            "x": 1,
+            "y": 21
+        },
+        {
+            "height": 12,
+            "id": 3,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "top(top(avg:istio.mesh.request.duration.milliseconds.sum{*} by {host}, 10, 'mean', 'desc')/top(avg:istio.mesh.request.duration.milliseconds.count{*} by {host}, 10, 'mean', 'desc'),10,'mean','desc')"
+                    }
+                ],
+                "viz": "toplist"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "center",
+            "title_size": 16,
+            "title_text": "Average request latency by host",
+            "type": "toplist",
+            "width": 53,
+            "x": 1,
+            "y": 6
+        },
+        {
+            "height": 12,
+            "id": 4,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "top(avg:istio.mesh.response.size.sum{*}, 10, 'mean', 'desc')/top(avg:istio.mesh.response.size.count{*}, 10, 'mean', 'desc')",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries"
+            },
+            "title": true,
+            "title_align": "center",
+            "title_size": 16,
+            "title_text": "Average response size",
+            "type": "timeseries",
+            "width": 26,
+            "x": 28,
+            "y": 36
+        },
+        {
+            "height": 12,
+            "id": 5,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "top(avg:istio.go.threads{*} by {host}, 10, 'mean', 'desc')",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "thin"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "center",
+            "title_size": 16,
+            "title_text": "Number of OS threads created",
+            "type": "timeseries",
+            "width": 26,
+            "x": 163,
+            "y": 51
+        },
+        {
+            "height": 12,
+            "id": 6,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "top((top(avg:istio.go.memstats.alloc_bytes{*} by {host}, 10, 'mean', 'desc')/top(avg:istio.go.memstats.alloc_bytes_total{*} by {host}.as_count(), 10, 'mean', 'desc'))*100,10,'mean','desc')"
+                    }
+                ],
+                "viz": "toplist"
+            },
+            "title": true,
+            "title_align": "center",
+            "title_size": 16,
+            "title_text": "Percentage of available memory allocated",
+            "type": "toplist",
+            "width": 53,
+            "x": 109,
+            "y": 6
+        },
+        {
+            "height": 12,
+            "id": 7,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "(top(avg:istio.go.memstats.heap_inuse_bytes{*} by {host}, 10, 'mean', 'desc')/top(avg:istio.go.memstats.heap_alloc_bytes{*} by {host}, 10, 'mean', 'desc'))*100",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "thin"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "center",
+            "title_size": 16,
+            "title_text": "Heap in use (percent)",
+            "type": "timeseries",
+            "width": 26,
+            "x": 163,
+            "y": 6
+        },
+        {
+            "height": 12,
+            "id": 8,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "top(avg:istio.go.memstats.gc_cpu_fraction{*}, 10, 'mean', 'desc')",
+                        "style": {
+                            "palette": "cool",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "center",
+            "title_size": 16,
+            "title_text": "CPU required for GC",
+            "type": "timeseries",
+            "width": 26,
+            "x": 136,
+            "y": 36
+        },
+        {
+            "height": 12,
+            "id": 9,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "top(avg:istio.go.gc_duration_seconds.sum{*}, 10, 'mean', 'desc')/top(avg:istio.go.gc_duration_seconds.count{*}, 10, 'mean', 'desc')",
+                        "style": {
+                            "palette": "cool",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "center",
+            "title_size": 16,
+            "title_text": "Average GC duration",
+            "type": "timeseries",
+            "width": 26,
+            "x": 109,
+            "y": 36
+        },
+        {
+            "height": 5,
+            "id": 10,
+            "sizing": "fit",
+            "type": "image",
+            "url": "https://s3.amazonaws.com/dd-integrations/istio/configuration/tile/logo.png",
+            "width": 12,
+            "x": 1,
+            "y": 0
+        },
+        {
+            "height": 12,
+            "id": 11,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "top(avg:istio.grpc.server.msg_sent_total{*} by {host}.as_count(), 10, 'mean', 'desc'), top(avg:istio.grpc.server.msg_received_total{*} by {host}.as_count(), 10, 'mean', 'desc')",
+                        "style": {
+                            "palette": "cool",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "center",
+            "title_size": 16,
+            "title_text": "GRPC messages sent/received by host",
+            "type": "timeseries",
+            "width": 26,
+            "x": 136,
+            "y": 21
+        },
+        {
+            "height": 12,
+            "id": 12,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "top(avg:istio.go.gc_duration_seconds.sum{*} by {host}, 10, 'mean', 'desc')"
+                    }
+                ],
+                "viz": "toplist"
+            },
+            "title": true,
+            "title_align": "center",
+            "title_size": 16,
+            "title_text": "Hosts with the highest GC time",
+            "type": "toplist",
+            "width": 53,
+            "x": 109,
+            "y": 51
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "18",
+            "height": 5,
+            "html": "Pilot Traffic Management",
+            "id": 14,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 53,
+            "x": 55,
+            "y": 0
+        },
+        {
+            "height": 12,
+            "id": 15,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "sum:istio.pilot.xds{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries"
+            },
+            "title": true,
+            "title_align": "center",
+            "title_size": 16,
+            "title_text": "XDS connected endpoints",
+            "type": "timeseries",
+            "width": 26,
+            "x": 55,
+            "y": 6
+        },
+        {
+            "height": 12,
+            "id": 16,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "sum:istio.pilot.xds.pushes{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries"
+            },
+            "title": true,
+            "title_align": "center",
+            "title_size": 16,
+            "title_text": "LDS/EDS/RDS/CDS Build,Send Errors",
+            "type": "timeseries",
+            "width": 26,
+            "x": 82,
+            "y": 6
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "18",
+            "height": 5,
+            "html": "Galley  Configuration Validation",
+            "id": 17,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 53,
+            "x": 55,
+            "y": 51
+        },
+        {
+            "height": 12,
+            "id": 18,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "sum:istio.galley.endpoint_no_pod{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries"
+            },
+            "title": true,
+            "title_align": "center",
+            "title_size": 16,
+            "title_text": "Endpoints without a pod",
+            "type": "timeseries",
+            "width": 26,
+            "x": 55,
+            "y": 57
+        },
+        {
+            "height": 12,
+            "id": 19,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "sum:istio.process.max_fds{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "center",
+            "title_size": 16,
+            "title_text": "Max # of File Descriptors",
+            "type": "timeseries",
+            "width": 26,
+            "x": 163,
+            "y": 36
+        },
+        {
+            "height": 12,
+            "id": 20,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "sum:istio.process.virtual_memory_bytes{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "center",
+            "title_size": 16,
+            "title_text": "Virtual Memory Size",
+            "type": "timeseries",
+            "width": 26,
+            "x": 163,
+            "y": 21
+        },
+        {
+            "height": 12,
+            "id": 22,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:istio.pilot.xds.eds_all_locality_endpoints{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Network endpoints for each cluster (all localities)",
+            "type": "timeseries",
+            "width": 26,
+            "x": 55,
+            "y": 21
+        },
+        {
+            "height": 12,
+            "id": 23,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:istio.sidecar_injection.requests_total{*}.as_count()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Total Sidecar Injection Requests",
+            "type": "timeseries",
+            "width": 26,
+            "x": 1,
+            "y": 57
+        },
+        {
+            "height": 12,
+            "id": 25,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:istio.galley.validation.failed{*}.as_count()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Total failed Galley Validation",
+            "type": "timeseries",
+            "width": 26,
+            "x": 82,
+            "y": 57
+        },
+        {
+            "height": 12,
+            "id": 26,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:istio.sidecar_injection.requests_total{*}.as_count(), avg:istio.sidecar_injection.success_total{*}.as_count(), avg:istio.sidecar_injection.requests_total{*}.as_count()-avg:istio.sidecar_injection.success_total{*}.as_count()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Total Failed Sidecar Injection Requests",
+            "type": "timeseries",
+            "width": 26,
+            "x": 28,
+            "y": 57
+        },
+        {
+            "height": 12,
+            "id": 27,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "top(avg:istio.mesh.request.size.sum{*}, 10, 'mean', 'desc')/top(avg:istio.mesh.request.size.count{*}, 10, 'mean', 'desc')",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Average request size",
+            "type": "timeseries",
+            "width": 26,
+            "x": 1,
+            "y": 36
+        },
+        {
+            "height": 12,
+            "id": 28,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:istio.grpc.server.handling_seconds.sum{*}, avg:istio.grpc.server.handling_seconds.count{*}, avg:istio.grpc.server.handling_seconds.sum{*}/avg:istio.grpc.server.handling_seconds.count{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "thin"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Average response latency of gRPC",
+            "type": "timeseries",
+            "width": 26,
+            "x": 109,
+            "y": 21
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "18",
+            "height": 5,
+            "html": "Sidecar Injection",
+            "id": 29,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 53,
+            "x": 1,
+            "y": 51
+        },
+        {
+            "height": 12,
+            "id": 31,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:istio.pilot.proxy_queue_time.sum{*}, avg:istio.pilot.proxy_queue_time.count{*}, avg:istio.pilot.proxy_queue_time.sum{*}/avg:istio.pilot.proxy_queue_time.count{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Average proxy queue duration",
+            "type": "timeseries",
+            "width": 26,
+            "x": 82,
+            "y": 21
+        },
+        {
+            "height": 12,
+            "id": 32,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "top(avg:istio.mesh.request.duration.milliseconds.sum{*} by {host}, 10, 'mean', 'desc')/top(avg:istio.mesh.request.duration.milliseconds.count{*} by {host}, 10, 'mean', 'desc')",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "thin"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Average request latency by host",
+            "type": "timeseries",
+            "width": 26,
+            "x": 28,
+            "y": 21
+        },
+        {
+            "height": 12,
+            "id": 33,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:istio.pilot.services{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Total pilot services",
+            "type": "timeseries",
+            "width": 26,
+            "x": 55,
+            "y": 36
+        },
+        {
+            "height": 12,
+            "id": 35,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:istio.pilot.rds_expired_nonce{*}.as_count()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Total expired RDS messages",
+            "type": "timeseries",
+            "width": 26,
+            "x": 82,
+            "y": 36
+        }
+    ]
+}

@@ -209,8 +209,8 @@ class Riak(AgentCheck):
 
     vnodeq_keys = ["riak_kv_vnodeq", "riak_pipe_vnodeq"]
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances=None):
+        super(Riak, self).__init__(name, init_config, instances)
         for k in ["mean", "median", "95", "99", "100"]:
             for m in self.stat_keys:
                 self.keys.append(m + "_" + k)
@@ -224,25 +224,26 @@ class Riak(AgentCheck):
                 self.keys.append(m + "_" + k)
 
         self.prev_coord_redirs_total = -1
+        self.url = self.instance['url']
+        default_timeout = float(self.init_config.get('default_timeout', 5))
+        self.timeout = float(self.instance.get('timeout', default_timeout))
+        self.cacert = self.instance.get('cacert', None)
+        self.disable_cert_verify = self.instance.get('disable_cert_verify', False)
+        self.tags = self.instance.get('tags', [])
+        self.service_check_tags = self.tags + ['url:%s' % self.url]
 
-    def check(self, instance):
-        url = instance['url']
-        default_timeout = self.init_config.get('default_timeout', 5)
-        timeout = float(instance.get('timeout', default_timeout))
-        cacert = instance.get('cacert', None)
-        disable_cert_verify = instance.get('disable_cert_verify', False)
-        tags = instance.get('tags', [])
-        service_check_tags = tags + ['url:%s' % url]
-
+    def check(self, _):
         try:
-            h = Http(timeout=timeout, ca_certs=cacert, disable_ssl_certificate_validation=disable_cert_verify)
-            resp, content = h.request(url, "GET")
+            h = Http(
+                timeout=self.timeout, ca_certs=self.cacert, disable_ssl_certificate_validation=self.disable_cert_verify
+            )
+            resp, content = h.request(self.url, "GET")
         except (socket.timeout, socket.error, HttpLib2Error) as e:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
                 message="Unable to fetch Riak stats: %s" % str(e),
-                tags=service_check_tags,
+                tags=self.service_check_tags,
             )
             raise
 
@@ -250,16 +251,16 @@ class Riak(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
-                tags=service_check_tags,
+                tags=self.service_check_tags,
                 message="Unexpected status of %s when fetching Riak stats, response: %s" % (resp.status, content),
             )
 
         stats = json.loads(content)
-        self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
+        self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.service_check_tags)
 
         for k in self.keys:
             if k in stats:
-                self.safe_submit_metric("riak." + k, stats[k], tags=tags)
+                self.safe_submit_metric("riak." + k, stats[k], tags=self.tags)
 
         coord_redirs_total = stats["coord_redirs_total"]
         if self.prev_coord_redirs_total > -1:

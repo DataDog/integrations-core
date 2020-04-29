@@ -11,7 +11,7 @@ import threading
 import time
 from collections import defaultdict
 from concurrent import futures
-from typing import Any, DefaultDict, Dict, List, Optional, Tuple, Union
+from typing import Any, DefaultDict, Dict, List, Optional, Tuple
 
 from six import iteritems
 
@@ -20,10 +20,11 @@ from datadog_checks.base.errors import CheckException
 
 from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, write_persistent_cache
-from .config import InstanceConfig, ParsedMatchMetricTags, ParsedMetric, ParsedMetricTag, ParsedTableMetric
+from .config import InstanceConfig
 from .exceptions import PySnmpError
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
 from .models import OID
+from .parsing import ParsedMetric, ParsedMetricTag, ParsedTableMetric
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
 from .utils import (
     OIDPrinter,
@@ -100,18 +101,23 @@ class SnmpCheck(AgentCheck):
         """
         Get the mapping from sysObjectID to profile.
         """
-        profiles_by_oid = {}
+        profiles_by_oid = {}  # type: Dict[str, str]
         for name, profile in self.profiles.items():
             sys_object_oid = profile['definition'].get('sysobjectid')
             if sys_object_oid is not None:
-                profiles_by_oid[sys_object_oid] = name
+                profile_match = profiles_by_oid.get(sys_object_oid)
+                if profile_match:
+                    raise ConfigurationError(
+                        "Profile {} has the same sysObjectID ({}) as {}".format(name, sys_object_oid, profile_match)
+                    )
+                else:
+                    profiles_by_oid[sys_object_oid] = name
         return profiles_by_oid
 
     def _build_config(self, instance):
         # type: (dict) -> InstanceConfig
         return InstanceConfig(
             instance,
-            warning=self.warning,
             global_metrics=self.init_config.get('global_metrics', []),
             mibs_path=self.mibs_path,
             profiles=self.profiles,
@@ -160,7 +166,7 @@ class SnmpCheck(AgentCheck):
                         self.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
                         continue
                 else:
-                    host_config.refresh_with_profile(self.profiles[profile], self.warning)
+                    host_config.refresh_with_profile(self.profiles[profile])
                     host_config.add_profile_tag(profile)
 
                 config.discovered_instances[host] = host_config
@@ -208,8 +214,8 @@ class SnmpCheck(AgentCheck):
                 self.warning(message)
 
         for result_oid, value in all_binds:
-            metric, indexes = config.resolve_oid(result_oid)
-            results[metric][indexes] = value
+            match = config.resolve_oid(OID(result_oid))
+            results[match.name][match.indexes] = value
         self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
         # Freeze the result
         results.default_factory = None  # type: ignore
@@ -374,7 +380,7 @@ class SnmpCheck(AgentCheck):
             if not (config.all_oids or config.bulk_oids):
                 sys_object_oid = self.fetch_sysobject_oid(config)
                 profile = self._profile_for_sysobject_oid(sys_object_oid)
-                config.refresh_with_profile(self.profiles[profile], self.warning)
+                config.refresh_with_profile(self.profiles[profile])
                 config.add_profile_tag(profile)
 
             if config.all_oids or config.bulk_oids:
@@ -402,7 +408,7 @@ class SnmpCheck(AgentCheck):
         return error
 
     def extract_metric_tags(self, metric_tags, results):
-        # type: (List[Union[ParsedMetricTag, ParsedMatchMetricTags]], Dict[str, dict]) -> List[str]
+        # type: (List[ParsedMetricTag], Dict[str, dict]) -> List[str]
         extracted_tags = []  # type: List[str]
         for tag in metric_tags:
             if tag.symbol not in results:
@@ -422,7 +428,7 @@ class SnmpCheck(AgentCheck):
 
     def report_metrics(
         self,
-        metrics,  # type: List[Union[ParsedMetric, ParsedTableMetric]]
+        metrics,  # type: List[ParsedMetric]
         results,  # type: Dict[str, Dict[Tuple[str, ...], Any]]
         tags,  # type: List[str]
     ):
