@@ -26,6 +26,7 @@ services:
       - "5701:5701"
       - "1098:1098"
     volumes:
+      - ./hazelcast.xml:/tmp/hazelcast.xml
       - ./log4j2.properties:/tmp/log4j2.properties
       - ${DD_LOG_1}:/var/log/hazelcast.log
     networks:
@@ -36,6 +37,7 @@ services:
     container_name: hazelcast2
     environment:
       JAVA_OPTS: >-
+        -Dhazelcast.config=/tmp/hazelcast.xml
         -Dhazelcast.jmx=true
         -Dhazelcast.metrics.enabled=true
         -Dhazelcast.metrics.jmx.enabled=true
@@ -48,6 +50,8 @@ services:
     ports:
       - "5702:5701"
       - "1099:1099"
+    volumes:
+      - ./hazelcast.xml:/tmp/hazelcast.xml
     networks:
       - dd_hazelcast
 

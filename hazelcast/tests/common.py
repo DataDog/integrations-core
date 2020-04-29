@@ -7,6 +7,7 @@ HERE = get_here()
 HOST = get_docker_hostname()
 
 MEMBER_PORT = 1099
+MEMBER_REST_PORT = 5702
 MC_PORT = 9999
 MC_HEALTH_CHECK_ENDPOINT = 'http://{}:8081/health'.format(HOST)
 
