@@ -50,6 +50,7 @@ metrics:
           name: ifName
         table: ifXTable
         tag: interface
+
   - MIB: CISCO-ENVMON-MIB
     table:
       OID: 1.3.6.1.4.1.9.9.13.1.3
@@ -62,3 +63,52 @@ metrics:
         column:
           OID: 1.3.6.1.4.1.9.9.13.1.3.1.2
           name: ciscoEnvMonTemperatureStatusDescr
+
+  #  stackport specific info - every physical stackport has an entry in ifTable
+  - MIB: CISCO-STACKWISE-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.500.1.2.2
+      name: cswStackPortInfoTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.500.1.2.2.1.1
+        name: cswStackPortOperStatus
+    metric_tags:
+      - MIB: IF-MIB
+        column:
+          OID: 1.3.6.1.2.1.31.1.1.1.1
+          name: ifName
+        table: ifXTable
+        tag: interface
+
+  # every switch with entPhysicalClass chassis will have an entry in switchinfo
+  - MIB: CISCO-STACKWISE-MIBs
+    table:
+      OID: 1.3.6.1.4.1.9.9.500.1.2.1
+      name: cswSwitchInfoTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.500.1.2.1.1.6
+        name: cswSwitchState
+    metric_tags:
+      - tag: mac_addr
+        column:
+          OID: 1.3.6.1.4.1.9.9.500.1.2.1.1.7
+          name: cswSwitchMacAddress
+      - MIB: ENTITY-MIB
+        column:
+          OID: 1.3.6.1.2.1.47.1.1.1.1.7
+          name: entPhysicalName
+        table: entPhysicalTable
+        tag: entity_name
+
+  - MIB: CISCO-ENVMON-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.13.1.5
+      name: ciscoEnvMonSupplyStatusTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.13.1.5.1.3
+        name: ciscoEnvMonSupplyState
+    metric_tags:
+      column:
+        OID: 	1.3.6.1.4.1.9.9.13.1.5.1.2
+        name: ciscoEnvMonSupplyStatusDescr
+      tag: power_supply_descr
