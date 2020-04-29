@@ -33,7 +33,8 @@
     },
     "monitors": {},
     "dashboards": {
-      "Istio base dashboard": "assets/dashboards/istio_overview.json"
+      "Istio base dashboard": "assets/dashboards/istio_overview.json",
+      "Istio Overview 1.5": "assets/dashboards/istio_1_5_overview"
     },
     "service_checks": "assets/service_checks.json"
   }

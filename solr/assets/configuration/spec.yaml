@@ -1,0 +1,15 @@
+name: Solr
+files:
+- name: solr.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/jmx
+  - template: instances
+    options:
+    - template: instances/jmx
+      overrides:
+        host.description: Solr JMX host to connect to.
+        port.value.example: 9999
+        port.description: Solr JMX port to connect to.
+        name.value.example: solr_instance

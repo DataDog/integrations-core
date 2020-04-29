@@ -389,7 +389,7 @@ class PostgreSql(AgentCheck):
             if not scope['relation'] and not scope.get('use_global_db_tag', False):
                 tags = [t for t in instance_tags if not t.startswith("db:")]
             else:
-                tags = [t for t in instance_tags]
+                tags = copy.copy(instance_tags)
 
             # Add tags from descriptors.
             tags += [("%s:%s" % (k, v)) for (k, v) in iteritems(desc_map)]
@@ -397,7 +397,7 @@ class PostgreSql(AgentCheck):
             # Submit metrics to the Agent.
             for column, value in zip(cols, column_values):
                 name, submit_metric = scope['metrics'][column]
-                submit_metric(self, name, value, tags=tags)
+                submit_metric(self, name, value, tags=set(tags))
 
             num_results += 1
 
@@ -415,7 +415,7 @@ class PostgreSql(AgentCheck):
         bgw_instance_metrics = self._get_bgw_metrics()
         archiver_instance_metrics = self._get_archiver_metrics()
 
-        metric_scope = [CONNECTION_METRICS, LOCK_METRICS]
+        metric_scope = [CONNECTION_METRICS]
 
         if self.config.collect_function_metrics:
             metric_scope.append(FUNCTION_METRICS)
@@ -425,7 +425,7 @@ class PostgreSql(AgentCheck):
         # Do we need relation-specific metrics?
         relations_config = {}
         if self.config.relations:
-            metric_scope += [REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
+            metric_scope += [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
             relations_config = self._build_relations_config(self.config.relations)
 
         replication_metrics = self._get_replication_metrics()
@@ -464,9 +464,14 @@ class PostgreSql(AgentCheck):
         else:
             if self.config.host == 'localhost' and self.config.password == '':
                 # Use ident method
-                self.db = psycopg2.connect(
-                    "user=%s dbname=%s, application_name=%s" % (self.config.user, self.config.dbname, "datadog-agent")
+                connection_string = "user=%s dbname=%s, application_name=%s" % (
+                    self.config.user,
+                    self.config.dbname,
+                    "datadog-agent",
                 )
+                if self.config.query_timeout:
+                    connection_string += " options='-c statement_timeout=%s'" % self.config.query_timeout
+                self.db = psycopg2.connect(connection_string)
             else:
                 args = {
                     'host': self.config.host,
@@ -479,6 +484,8 @@ class PostgreSql(AgentCheck):
                 }
                 if self.config.port:
                     args['port'] = self.config.port
+                if self.config.query_timeout:
+                    args['options'] = '-c statement_timeout=%s' % self.config.query_timeout
                 self.db = psycopg2.connect(**args)
 
     def _collect_custom_queries(self, tags):
@@ -575,7 +582,7 @@ class PostgreSql(AgentCheck):
                     else:
                         for info in metric_info:
                             metric, value, method = info
-                            getattr(self, method)(metric, value, tags=query_tags)
+                            getattr(self, method)(metric, value, tags=set(query_tags))
 
     @property
     def custom_metrics(self):

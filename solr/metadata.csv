@@ -15,12 +15,22 @@ solr.query_result_cache.evictions,gauge,10,eviction,second,The total number of c
 solr.query_result_cache.hits,gauge,10,hit,second,The number of cache hits per second.,1,solr,query result cache hits
 solr.query_result_cache.inserts,gauge,10,set,second,The total number of cache inserts per second.,0,solr,query result cache sets
 solr.query_result_cache.lookups,gauge,10,get,second,The total number of cache lookups per second.,0,solr,query result cache gets
-solr.search_handler.avg_requests_per_sec,gauge,10,request,second,The average number of requests per second.,1,solr,search reqs per sec
+solr.search_handler.request_times.50percentile,gauge,10,request,second,Request processing time in milliseconds (50percentile).,-1,solr,search reqs proces time 50p
+solr.search_handler.request_times.75percentile,gauge,10,request,second,Request processing time in milliseconds (75percentile).,-1,solr,search reqs proces time 75p
+solr.search_handler.request_times.95percentile,gauge,10,request,second,Request processing time in milliseconds (95percentile).,-1,solr,search reqs proces time 95p
+solr.search_handler.request_times.98percentile,gauge,10,request,second,Request processing time in milliseconds (98percentile).,-1,solr,search reqs proces time 98p
+solr.search_handler.request_times.99percentile,gauge,10,request,second,Request processing time in milliseconds (99percentile).,-1,solr,search reqs proces time 99p
+solr.search_handler.request_times.999percentile,gauge,10,request,second,Request processing time in milliseconds (999percentile).,-1,solr,search reqs proces time 999p
+solr.search_handler.request_times.one_minute_rate,gauge,10,request,second,Requests per second received over the past minutes.,1,solr,search reqs proces time
+solr.search_handler.request_times.mean_rate,gauge,10,request,second,Average number of requests received per second since the Solr core was first created.,1,solr,search reqs mean rate
+solr.search_handler.request_times.mean,gauge,10,millisecond,request,The average time per request.,-1,solr,search time mean
+solr.search_handler.avg_requests_per_sec,gauge,10,request,second,Average number of requests received per second since the Solr core was first created.,1,solr,search reqs per sec
 solr.search_handler.avg_time_per_req,gauge,10,millisecond,request,The average time per request.,-1,solr,search time per req
 solr.search_handler.errors,gauge,10,error,second,Number of errors per second encountered by the handler.,-1,solr,search errors
 solr.search_handler.requests,gauge,10,request,second,Number of requests per second processed by the handler.,0,solr,search requests
 solr.search_handler.time,gauge,10,,,The sum of all request processing times (in milliseconds) per second.,0,solr,search time
 solr.search_handler.timeouts,gauge,10,timeout,second,Number of responses per second received with partial results.,-1,solr,search timeouts
-solr.searcher.maxdoc,gauge,10,document,,One greater than the largest possible document number.,0,solr,max doc id
+solr.searcher.maxdoc,gauge,10,document,,One greater than the largest possible document number (Solr version <= 6).,0,solr,max doc id solr6
+solr.searcher.maxdocs,gauge,10,document,,One greater than the largest possible document number (Solr version >= 7).,0,solr,max doc id
 solr.searcher.numdocs,gauge,10,document,,The total number of indexed documents.,0,solr,num docs
 solr.searcher.warmup,gauge,10,millisecond,,The time spent warming up.,-1,solr,warmup time

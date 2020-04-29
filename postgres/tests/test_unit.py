@@ -5,6 +5,7 @@ import mock
 import psycopg2
 import pytest
 from mock import MagicMock
+from pytest import fail
 from semver import VersionInfo
 from six import iteritems
 
@@ -15,36 +16,37 @@ from .common import SCHEMA_NAME
 pytestmark = pytest.mark.unit
 
 
-def test_get_instance_metrics_lt_92(check):
+def test_get_instance_metrics_lt_92(integration_check, pg_instance):
     """
     check output when 9.2+
     """
-    check.config.collect_default_db = False
-    check.config.database_size_metrics = False
-
+    pg_instance['collect_database_size_metrics'] = False
+    check = integration_check(pg_instance)
     check._version = VersionInfo(9, 1, 0)
+
     res = check._get_instance_metrics()
     assert res['metrics'] == util.COMMON_METRICS
 
 
-def test_get_instance_metrics_92(check):
+def test_get_instance_metrics_92(integration_check, pg_instance):
     """
     check output when <9.2
     """
-    check.config.collect_default_db = False
-    check.config.database_size_metrics = False
-
+    pg_instance['collect_database_size_metrics'] = False
+    check = integration_check(pg_instance)
     check._version = VersionInfo(9, 2, 0)
+
     res = check._get_instance_metrics()
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
 
 
-def test_get_instance_metrics_state(check):
+def test_get_instance_metrics_state(integration_check, pg_instance):
     """
     Ensure data is consistent when the function is called more than once
     """
-    check.config.collect_default_db = False
-    check.config.database_size_metrics = False
+    pg_instance['collect_database_size_metrics'] = False
+    check = integration_check(pg_instance)
+    check._version = VersionInfo(9, 2, 0)
 
     res = check._get_instance_metrics()
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
@@ -53,12 +55,14 @@ def test_get_instance_metrics_state(check):
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
 
 
-def test_get_instance_metrics_database_size_metrics(check):
+def test_get_instance_metrics_database_size_metrics(integration_check, pg_instance):
     """
     Test the function behaves correctly when `database_size_metrics` is passed
     """
-    check.config.collect_default_db = True
-    check.config.database_size_metrics = False
+    pg_instance['collect_default_database'] = True
+    pg_instance['collect_database_size_metrics'] = False
+    check = integration_check(pg_instance)
+    check._version = VersionInfo(9, 2, 0)
 
     expected = util.COMMON_METRICS
     expected.update(util.NEWER_92_METRICS)
@@ -71,9 +75,6 @@ def test_get_instance_with_default(check):
     """
     Test the contents of the query string with different `collect_default_db` values
     """
-    check.config.collect_default_db = False
-    check.config.database_size_metrics = False
-
     res = check._get_instance_metrics()
     assert "  AND psd.datname not ilike 'postgres'" in res['query']
 
@@ -231,3 +232,17 @@ def test_relation_filter_regex():
     relations_config = {'persons': {'relation_regex': 'b.*', 'schemas': [util.ALL_SCHEMAS]}}
     query_filter = util.build_relations_filter(relations_config, SCHEMA_NAME)
     assert query_filter == "( relname ~ 'b.*' )"
+
+
+def test_query_timeout_connection_string(aggregator, integration_check, pg_instance):
+    pg_instance['password'] = ''
+    pg_instance['query_timeout'] = 1000
+
+    check = integration_check(pg_instance)
+    try:
+        check._connect()
+    except psycopg2.ProgrammingError as e:
+        fail(str(e))
+    except psycopg2.OperationalError:
+        # could not connect to server because there is no server running
+        pass

@@ -44,7 +44,7 @@ def parse_metrics(metrics, resolver, bulk_threshold=0):
             oids.append(oid)
 
         for name, oid in result.oids_to_resolve.items():
-            resolver.register(oid.as_tuple(), name)
+            resolver.register(oid, name)
 
         for index_mapping in result.index_mappings:
             resolver.register_index(tag=index_mapping.tag, index=index_mapping.index, mapping=index_mapping.mapping)

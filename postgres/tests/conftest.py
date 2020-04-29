@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import copy
 import os
 
 import psycopg2
@@ -13,6 +14,7 @@ from datadog_checks.postgres import PostgreSql
 from .common import DB_NAME, HOST, PASSWORD, PORT, USER
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+INSTANCE = {'host': HOST, 'port': PORT, 'username': USER, 'password': PASSWORD, 'dbname': DB_NAME, 'tags': ['foo:bar']}
 
 
 def connect_to_pg():
@@ -46,9 +48,9 @@ def integration_check():
 
 @pytest.fixture
 def pg_instance():
-    return {'host': HOST, 'port': PORT, 'username': USER, 'password': PASSWORD, 'dbname': DB_NAME, 'tags': ['foo:bar']}
+    return copy.deepcopy(INSTANCE)
 
 
 @pytest.fixture(scope='session')
 def e2e_instance():
-    return {'host': HOST, 'port': PORT, 'username': USER, 'password': PASSWORD, 'dbname': DB_NAME, 'tags': ['foo:bar']}
+    return copy.deepcopy(INSTANCE)

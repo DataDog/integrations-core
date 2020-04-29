@@ -29,6 +29,11 @@
   "assets": {
     "monitors": {},
     "dashboards": {},
+    "saved_views": {
+      "operations": "assets/saved_views/operations.json",
+      "operations_overview": "assets/saved_views/operations_overview.json",
+      "slow_operations": "assets/saved_views/slow_operations.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

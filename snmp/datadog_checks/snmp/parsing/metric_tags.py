@@ -34,7 +34,7 @@ def parse_metric_tags(metric_tags, resolver):
         result = _parse_metric_tag(metric_tag)
 
         for name, oid in result.oids_to_resolve.items():
-            resolver.register(oid.as_tuple(), name)
+            resolver.register(oid, name)
 
         oids.append(result.oid)
         parsed_metric_tags.append(result.parsed_metric_tag)

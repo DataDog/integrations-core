@@ -15,6 +15,7 @@ class PostgresConfig:
         if self.port != '':
             self.port = int(self.port)
         self.dbname = instance.get('dbname', 'postgres')
+        self.query_timeout = instance.get('query_timeout')
         self.relations = instance.get('relations', [])
         if self.relations and not self.dbname:
             raise ConfigurationError('"dbname" parameter must be set when using the "relations" parameter.')

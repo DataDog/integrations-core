@@ -118,10 +118,11 @@ SELECT mode,
   JOIN pg_database pd ON (l.database = pd.oid)
   JOIN pg_class pc ON (l.relation = pc.oid)
   LEFT JOIN pg_namespace pn ON (pn.oid = pc.relnamespace)
- WHERE l.mode IS NOT NULL
+ WHERE {relations}
+   AND l.mode IS NOT NULL
    AND pc.relname NOT LIKE 'pg_%%'
  GROUP BY pd.datname, pc.relname, pn.nspname, locktype, mode""",
-    'relation': False,
+    'relation': True,
 }
 
 REL_METRICS = {

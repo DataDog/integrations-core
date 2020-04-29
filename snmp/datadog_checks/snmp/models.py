@@ -56,11 +56,6 @@ class OID(object):
 
     def resolve(self, mib_view_controller):
         # type: (MibViewController) -> None
-        if self._parts is not None:
-            # Client code should only call this if they're certain the
-            # underlying OID isn't resolved yet.
-            raise RuntimeError('Already resolved as {}'.format(self._parts))
-
         self._object_identity.resolveWithMib(mib_view_controller)
         self._parts = parse_as_oid_tuple(self._object_identity)
 
@@ -81,10 +76,10 @@ class OID(object):
         except SmiError as exc:
             raise UnresolvedOID(exc)
 
-        _, name, indexes = result
+        mib, symbol, indexes = result
         prefix = tuple(index.prettyPrint() for index in indexes)
 
-        return MIBSymbol(name, prefix)
+        return MIBSymbol(mib, symbol, prefix)
 
     def __str__(self):
         # type: () -> str

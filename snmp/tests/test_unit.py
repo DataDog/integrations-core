@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import copy
 import os
 import time
 from concurrent import futures
@@ -175,6 +176,16 @@ def test_ignore_ip_addresses():
         SnmpCheck('snmp', {}, [instance])
 
 
+def test_empty_values():
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance['user'] = ''
+    instance['enforce_mib_constraints'] = ''
+    instance['timeout'] = ''
+    instance['retries'] = ''
+    check = SnmpCheck('snmp', {}, [instance])
+    assert check._config.enforce_constraints
+
+
 def test_profile_error():
     instance = common.generate_instance_config([])
     instance['profile'] = 'profile1'
@@ -192,6 +203,22 @@ def test_profile_error():
         init_config = {'profiles': {'profile1': {'definition_file': profile_file}}}
         with pytest.raises(ConfigurationError):
             SnmpCheck('snmp', init_config, [instance])
+
+
+def test_duplicate_sysobjectid_error():
+    profile1 = {'sysobjectid': '1.3.6.1.4.1.30932.*'}
+    profile2 = copy.copy(profile1)
+
+    instance = common.generate_instance_config([])
+    init_config = {'profiles': {'profile1': {'definition': profile1}, 'profile2': {'definition': profile2}}}
+
+    with pytest.raises(ConfigurationError) as e:
+        SnmpCheck('snmp', init_config, [instance])
+    assert "has the same sysObjectID" in str(e.value)
+
+    # no errors are raised
+    init_config['profiles']['profile2']['definition']['sysobjectid'] = '1.3.6.2.4.1.30932.*'
+    SnmpCheck('snmp', init_config, [instance])
 
 
 def test_no_address():

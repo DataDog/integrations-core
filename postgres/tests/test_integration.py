@@ -11,7 +11,7 @@ from semver import VersionInfo
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.util import PartialFormatter, fmt
 
-from .common import DB_NAME, HOST, PORT, POSTGRES_VERSION, check_bgw_metrics, check_common_metrics
+from .common import DB_NAME, HOST, PASSWORD, PORT, POSTGRES_VERSION, USER, check_bgw_metrics, check_common_metrics
 from .utils import requires_over_10
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
@@ -137,23 +137,17 @@ def test_connections_metrics(aggregator, integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_locks_metrics(aggregator, integration_check, pg_instance):
+def test_locks_metrics_no_relations(aggregator, integration_check, pg_instance):
+    """
+    Since 4.0.0, to prevent tag explosion, lock metrics are not collected anymore unless relations are specified
+    """
     check = integration_check(pg_instance)
     with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
         with conn.cursor() as cur:
             cur.execute('LOCK persons')
             check.check(pg_instance)
 
-    expected_tags = pg_instance['tags'] + [
-        'server:{}'.format(HOST),
-        'port:{}'.format(PORT),
-        'db:datadog_test',
-        'lock_mode:AccessExclusiveLock',
-        'lock_type:relation',
-        'table:persons',
-        'schema:public',
-    ]
-    aggregator.assert_metric('postgresql.locks', count=1, tags=expected_tags)
+    aggregator.assert_metric('postgresql.locks', count=0)
 
 
 @pytest.mark.integration
@@ -222,6 +216,17 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
         with pytest.raises(socket.error):
             check.check(pg_instance)
     assert_state_clean(check)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_query_timeout(aggregator, integration_check, pg_instance):
+    pg_instance['query_timeout'] = 1000
+    check = integration_check(pg_instance)
+    check._connect()
+    cursor = check.db.cursor()
+    with pytest.raises(psycopg2.errors.QueryCanceled):
+        cursor.execute("select pg_sleep(2000)")
 
 
 def assert_state_clean(check):
