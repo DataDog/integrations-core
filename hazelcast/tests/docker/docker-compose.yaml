@@ -2,12 +2,11 @@ version: "3"
 
 services:
   hazelcast1:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#      args:
-#        HAZELCAST_VERSION: ${HAZELCAST_VERSION}
-    image: hazelcast/hazelcast:${HAZELCAST_VERSION}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        HAZELCAST_VERSION: ${HAZELCAST_VERSION}
     container_name: hazelcast1
     environment:
       CLASSPATH: /tmp/log4j2/*
@@ -21,14 +20,14 @@ services:
         -Dcom.sun.management.jmxremote.authenticate=false
         -Dcom.sun.management.jmxremote.rmi.port=1098
         -Djava.rmi.server.hostname=localhost
-#        -Dhazelcast.logging.type=log4j2
-#        -Dlog4j.configurationFile=/tmp/log4j2.properties
+        -Dhazelcast.logging.type=log4j2
+        -Dlog4j.configurationFile=/tmp/log4j2.properties
     ports:
       - "5701:5701"
       - "1098:1098"
-#    volumes:
-#      - ./log4j2.properties:/tmp/log4j2.properties
-#      - ${DD_LOG_1}:/var/log/hazelcast.log
+    volumes:
+      - ./log4j2.properties:/tmp/log4j2.properties
+      - ${DD_LOG_1}:/var/log/hazelcast.log
     networks:
       - dd_hazelcast
 
