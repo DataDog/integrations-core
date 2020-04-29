@@ -25,6 +25,7 @@ def dd_environment():
             CheckDockerLogs('hazelcast_management_center', [r'Members \[']),
             CheckDockerLogs('hazelcast2', [r'Members \{size:']),
         ],
+        sleep=10,
     ):
         config = load_jmx_config()
         config['instances'] = [common.INSTANCE_MEMBER_JMX, common.INSTANCE_MC_JMX, common.INSTANCE_MC_PYTHON]
