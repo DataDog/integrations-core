@@ -31,7 +31,7 @@ def dd_environment():
                     r'Members \{size:2',
                 ],
                 matches='all',
-                attempts=120,
+                attempts=200,
             )
         ],
     ):
