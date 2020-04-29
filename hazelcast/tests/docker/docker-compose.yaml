@@ -8,7 +8,6 @@ services:
       args:
         HAZELCAST_VERSION: ${HAZELCAST_VERSION}
     container_name: hazelcast1
-    restart: always
     environment:
       CLASSPATH: /tmp/log4j2/*
       JAVA_OPTS: >-
@@ -26,16 +25,15 @@ services:
     ports:
       - "5701:5701"
       - "1098:1098"
-#    volumes:
-#      - ./log4j2.properties:/tmp/log4j2.properties
-#      - ${DD_LOG_1}:/var/log/hazelcast.log
+    volumes:
+      - ./log4j2.properties:/tmp/log4j2.properties
+      - ${DD_LOG_1}:/var/log/hazelcast.log
     networks:
       - dd_hazelcast
 
   hazelcast2:
     image: hazelcast/hazelcast:${HAZELCAST_VERSION}
     container_name: hazelcast2
-    restart: always
     environment:
       JAVA_OPTS: >-
         -Dhazelcast.jmx=true
@@ -58,7 +56,7 @@ services:
     container_name: hazelcast_management_center
     environment:
       MC_CONTEXT_PATH: /
-      MC_INIT_CMD: "./mc-conf.sh cluster add -H=/data -ma hazelcast1:5701 -cn dev"
+      MC_INIT_CMD: "./mc-conf.sh cluster add -H=/data -ma hazelcast1:5701,hazelcast2:5702 -cn dev"
       JAVA_OPTS: >-
         -Dhazelcast.metrics.enabled=true
         -Dhazelcast.metrics.jmx.enabled=true
