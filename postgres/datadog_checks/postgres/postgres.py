@@ -73,17 +73,16 @@ class PostgreSql(AgentCheck):
                 "DEPRECATION NOTICE: Please use the new custom_queries option "
                 "rather than the now deprecated custom_metrics"
             )
-        host = self.instance.get('host', '')
-        port = self.instance.get('port', '')
-        if port != '':
-            port = int(port)
-        dbname = self.instance.get('dbname', 'postgres')
+        self.host = self.instance.get('host', '')
+        self.port = self.instance.get('port', '')
+        if self.port != '':
+            self.port = int(self.port)
+        self.dbname = self.instance.get('dbname', 'postgres')
         self.relations = self.instance.get('relations', [])
-        if self.relations and not dbname:
+        if self.relations and not self.dbname:
             raise ConfigurationError('"dbname" parameter must be set when using the "relations" parameter.')
 
-        self.key = (host, port, dbname)
-        self.tags = self._build_tags(self.instance.get('tags', []), host, port, dbname)
+        self.tags = self._build_tags(self.instance.get('tags', []), self.host, self.port, self.dbname)
 
     def _build_tags(self, custom_tags, host, port, dbname):
         # Clean up tags in case there was a None entry in the instance
@@ -109,8 +108,6 @@ class PostgreSql(AgentCheck):
         self.instance_metrics = None
         self.bgw_metrics = None
         self.archiver_metrics = None
-        self.db_bgw_metrics = []
-        self.db_archiver_metrics = []
         self.replication_metrics = None
         self.activity_metrics = None
 
@@ -182,18 +179,6 @@ class PostgreSql(AgentCheck):
         metrics = self.bgw_metrics
 
         if metrics is None:
-            # Hack to make sure that if we have multiple instances that connect to
-            # the same host, port, we don't collect metrics twice
-            # as it will result in https://github.com/DataDog/dd-agent/issues/1211
-            sub_key = self.key[:2]
-            if sub_key in self.db_bgw_metrics:
-                self.bgw_metrics = None
-                self.log.debug(
-                    "Not collecting bgw metrics for key: %s as they are already collected by another instance", self.key
-                )
-                return None
-
-            self.db_bgw_metrics.append(sub_key)
             self.bgw_metrics = dict(COMMON_BGW_METRICS)
 
             if self.version >= V9_1:
@@ -230,18 +215,6 @@ class PostgreSql(AgentCheck):
         metrics = self.archiver_metrics
 
         if metrics is None and self.version >= V9_4:
-            # Collect from only one instance. See _get_bgw_metrics() for details on why.
-            sub_key = self.key[:2]
-            if sub_key in self.db_archiver_metrics:
-                self.archiver_metrics = None
-                self.log.debug(
-                    "Not collecting archiver metrics for key: %s as they are already collected by another instance",
-                    self.key,
-                )
-                return None
-
-            self.db_archiver_metrics.append(sub_key)
-
             self.archiver_metrics = dict(COMMON_ARCHIVER_METRICS)
             metrics = self.archiver_metrics
 
@@ -696,8 +669,7 @@ class PostgreSql(AgentCheck):
         custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
         custom_queries = instance.get('custom_queries', [])
 
-        (host, port, dbname) = self.key
-        if not host:
+        if not self.host:
             raise ConfigurationError('Please specify a Postgres host to connect to.')
         elif not user:
             raise ConfigurationError('Please specify a user to connect to Postgres as.')
@@ -707,11 +679,11 @@ class PostgreSql(AgentCheck):
         tag_replication_role = is_affirmative(self.instance.get('tag_replication_role', False))
         tags = self.tags
 
-        service_check_tags = self._get_service_check_tags(host, tags)
+        service_check_tags = self._get_service_check_tags(self.host, tags)
         # Collect metrics
         try:
             # Check version
-            self._connect(host, port, user, password, dbname, ssl, query_timeout)
+            self._connect(self.host, self.port, user, password, self.dbname, ssl, query_timeout)
             if tag_replication_role:
                 tags.extend(["replication_role:{}".format(self._get_replication_role())])
             self.log.debug("Running check against version %s", str(self.version))
@@ -733,12 +705,12 @@ class PostgreSql(AgentCheck):
             self._clean_state()
             self.db = None
             message = u'Error establishing connection to postgres://{}:{}/{}, error is {}'.format(
-                host, port, dbname, str(e)
+                self.host, self.port, self.dbname, str(e)
             )
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=message)
             raise e
         else:
-            message = u'Established connection to postgres://%s:%s/%s' % (host, port, dbname)
+            message = u'Established connection to postgres://%s:%s/%s' % (self.host, self.port, self.dbname)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags, message=message)
             try:
                 # commit to close the current query transaction

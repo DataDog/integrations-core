@@ -232,8 +232,6 @@ def assert_state_clean(check):
     assert check.instance_metrics is None
     assert check.bgw_metrics is None
     assert check.archiver_metrics is None
-    assert check.db_bgw_metrics == []
-    assert check.db_archiver_metrics == []
     assert check.replication_metrics is None
     assert check.activity_metrics is None
 
@@ -243,6 +241,4 @@ def assert_state_set(check):
     assert check.bgw_metrics
     if POSTGRES_VERSION != '9.3':
         assert check.archiver_metrics
-        assert check.db_archiver_metrics != []
-    assert check.db_bgw_metrics != []
     assert check.replication_metrics
