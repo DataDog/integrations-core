@@ -2,16 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import pytest
 from copy import deepcopy
 
-from datadog_checks.dev.utils import load_jmx_config
+import pytest
+
 from datadog_checks.dev import docker_run, get_here
+from datadog_checks.dev.utils import load_jmx_config
 
 
 @pytest.fixture(scope='session')
 def dd_environment(instance):
-    with docker_run(os.path.join(get_here(), 'docker', 'docker-compose.yaml')):
+    with docker_run(os.path.join(get_here(), 'docker', 'docker-compose.yaml'), log_patterns=['SERVER STARTED']):
         yield instance, {'use_jmx': True}
 
 

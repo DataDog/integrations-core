@@ -3,9 +3,15 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from .common import METRICS
 
-# We don't test JMXFetch based integrations in this repo
-# This is required to allow E2E to spin up the environment
-@pytest.mark.usefixtures('dd_environment')
-def test():
-    pass
+
+@pytest.mark.e2e
+def test(dd_agent_check):
+    instance = {}
+    aggregator = dd_agent_check(instance, rate=True)
+
+    for metric in METRICS:
+        aggregator.assert_metric(metric)
+
+    aggregator.assert_all_metrics_covered()
