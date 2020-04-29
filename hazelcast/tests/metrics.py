@@ -27,7 +27,6 @@ METRICS = (
     'hazelcast.member.bytes_received',
     'hazelcast.member.bytes_send',
     'hazelcast.member.bytes_transceived',
-    'hazelcast.member.bytes_written',
     'hazelcast.member.call_timeout_count',
     'hazelcast.member.client_count',
     'hazelcast.member.closed_count',
@@ -223,4 +222,7 @@ METRICS = (
     'jvm.thread_count',
 )
 
-FLAKY_METRICS = ('hazelcast.member.bytes_read',)
+FLAKY_METRICS = (
+    'hazelcast.member.bytes_read',
+    'hazelcast.member.bytes_written',
+)
