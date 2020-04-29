@@ -426,11 +426,7 @@ class PostgreSql(AgentCheck):
         else:
             if self.config.host == 'localhost' and self.config.password == '':
                 # Use ident method
-                connection_string = "user=%s dbname=%s, application_name=%s" % (
-                    self.config.user,
-                    self.config.dbname,
-                    "datadog-agent",
-                )
+                connection_string = "user=%s dbname=%s, application_name=%s" % (self.config.user, self.config.dbname, "datadog-agent")
                 if self.config.query_timeout:
                     connection_string += " options='-c statement_timeout=%s'" % self.config.query_timeout
                 self.db = psycopg2.connect(connection_string)
@@ -449,7 +445,7 @@ class PostgreSql(AgentCheck):
                     args['options'] = '-c statement_timeout=%s' % self.config.query_timeout
                 self.db = psycopg2.connect(**args)
 
-    def _collect_custom_queries(self, tags):
+    def _get_custom_queries(self, tags):
         """
         Given a list of custom_queries, execute each query and parse the result for metrics
         """
