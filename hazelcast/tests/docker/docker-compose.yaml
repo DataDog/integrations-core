@@ -26,9 +26,9 @@ services:
     ports:
       - "5701:5701"
       - "1098:1098"
-    volumes:
-      - ./log4j2.properties:/tmp/log4j2.properties
-      - ${DD_LOG_1}:/var/log/hazelcast.log
+#    volumes:
+#      - ./log4j2.properties:/tmp/log4j2.properties
+#      - ${DD_LOG_1}:/var/log/hazelcast.log
     networks:
       - dd_hazelcast
 
