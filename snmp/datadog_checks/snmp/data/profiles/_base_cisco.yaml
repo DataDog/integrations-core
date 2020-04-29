@@ -32,6 +32,8 @@ metrics:
         name: cpmCPUMemoryUsed
       - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.13
         name: cpmCPUMemoryFree
+      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.7
+        name: cpmCPUTotalEntry
     metric_tags:
       - index: 1
         tag: cpu
@@ -81,7 +83,7 @@ metrics:
         tag: interface
 
   # every switch with entPhysicalClass chassis will have an entry in switchinfo
-  - MIB: CISCO-STACKWISE-MIBs
+  - MIB: CISCO-STACKWISE-MIB
     table:
       OID: 1.3.6.1.4.1.9.9.500.1.2.1
       name: cswSwitchInfoTable
@@ -112,3 +114,14 @@ metrics:
         OID: 	1.3.6.1.4.1.9.9.13.1.5.1.2
         name: ciscoEnvMonSupplyStatusDescr
       tag: power_supply_descr
+
+  - MIB: CISCO-FRU-CONTROL-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.117.1.4.1
+      name: cefcFanTrayStatusTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.117.1.4.1.1.1
+        name: cefcFanTrayOperStatus
+    metric_tags:
+      - index: 1
+        tag: fru
