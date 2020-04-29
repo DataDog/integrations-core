@@ -3,9 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from typing import Any, Dict, List
 
-from datadog_checks.base.checks.win.wmi import WinWMICheck
+from datadog_checks.base.checks.win.wmi import WinWMICheck, WMISampler
 from datadog_checks.base.checks.win.wmi.types import TagQuery, WMIFilter, WMIMetric, WMIProperties
-from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.timeout import TimeoutException
 
 
