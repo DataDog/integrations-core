@@ -24,8 +24,8 @@ gitlab.transaction.cache_count_total,count,,,,The counter for total Rails cache 
 gitlab.transaction.cache_duration_total,count,,second,,The counter for total time (seconds) spent in Rails cache calls (aggregate),0,gitlab,transaction cache duration
 gitlab.transaction.cache_read_hit_count_total,count,,hit,,The counter for cache hits for Rails cache calls,0,gitlab,transaction cache hits
 gitlab.transaction.cache_read_miss_count_total,count,,miss,,The counter for cache misses for Rails cache calls,0,gitlab,transaction cache misses
-gitlab.transaction.duration_seconds.count,count,,second,,The count of Duration for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction duration count
-gitlab.transaction.duration_seconds.sum,gauge,,second,,The sum of Duration for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction duration sum
+gitlab.transaction.duration_seconds.count,count,,second,,The count of duration for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction duration count
+gitlab.transaction.duration_seconds.sum,gauge,,second,,The sum of duration for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction duration sum
 gitlab.transaction.event_build_found_total,count,,,,The counter for build found for API /jobs/request,0,gitlab,build found count
 gitlab.transaction.event_build_invalid_total,count,,,,The counter for build invalid due to concurrency conflict for API /jobs/request,-1,gitlab,build invalid count
 gitlab.transaction.event_build_not_found_cached_total,count,,,,The counter for cached response of build not found for API /jobs/request	,-1,gitlab,build not found cached
@@ -63,7 +63,7 @@ gitlab.rack.http_requests_total.count,count,,request,,The rack request count,0,g
 gitlab.rack.http_requests_total.sum,gauge,,request,,The sum of rack requests,0,gitlab,rack request sum
 gitlab.rack.http_request_duration_seconds.sum,gauge,,second,,The sum of HTTP response time from rack middleware,0,gitlab,http request dur sum
 gitlab.rack.http_request_duration_seconds.count,count,,second,,The count of HTTP response time from rack middleware,0,gitlab,http request dur count
-gitlab.rack.uncaught_errors_total,count,,connection,,The rack connections handling uncaught errors count,-1,gitlab,rack uncaught errors
+gitlab.rack.uncaught_errors_total,count,,connection,,The count of rack connections handling uncaught errors,-1,gitlab,rack uncaught errors
 gitlab.pipelines_created_total,count,,,,The counter of pipelines created,0,gitlab,pipelines created total
 gitlab.user_session_logins_total,count,,,,The counter of how many users have logged in,0,gitlab,user logins
 gitlab.upload_file_does_not_exist,count,,,,The number of times an upload record could not find its file,0,gitlab,no upload file
@@ -76,7 +76,7 @@ gitlab.sidekiq.jobs_completion_seconds.count,count,,second,,The count of seconds
 gitlab.sidekiq.jobs_db_second.count,count,,second,,The count of seconds of DB time to run Sidekiq job,0,gitlab,sidekiq db count
 gitlab.sidekiq.jobs_db_second.sum,gauge,,second,,The sum of seconds of DB time to run Sidekiq job,0,gitlab,sidekiq db sum
 gitlab.sidekiq.jobs_gitaly_seconds.count,count,,second,,The count of seconds of Gitaly time to run Sidekiq job,0,gitlab,sidekiq gitaly count
-gitlab.sidekiq.jobs_gitaly_seconds.sum,gauge,,second,,The sum of Seconds of Gitaly time to run Sidekiq job,0,gitlab,sidekiq gitaly sum
+gitlab.sidekiq.jobs_gitaly_seconds.sum,gauge,,second,,The sum of seconds of Gitaly time to run Sidekiq job,0,gitlab,sidekiq gitaly sum
 gitlab.sidekiq.jobs_completion_seconds.sum,gauge,,second,,The sum of seconds to complete Sidekiq job,0,gitlab,sidekiq completion sum
 gitlab.sidekiq.jobs_queue_duration_seconds.count,count,,second,,The count of duration in seconds that a Sidekiq job was queued before being executed,0,gitlab,sidekiq queue count
 gitlab.sidekiq.jobs_queue_duration_seconds.sum,gauge,,second,,The sum of duration in seconds that a Sidekiq job was queued before being executed,0,gitlab,sidekiq queue sum
@@ -85,7 +85,7 @@ gitlab.sidekiq.jobs_retried_total,count,,job,,The number of retried sidekiq jobs
 gitlab.sidekiq.running_jobs,gauge,,job,,The number of running sidekiq jobs,0,gitlab,sidekiq jobs running
 gitlab.sidekiq.concurrency,gauge,,job,,The maximum number of Sidekiq jobs,0,gitlab,sidekiq jobs max
 gitlab.ruby.gc_duration_seconds.count,count,,second,,The count of time spent by Ruby in GC,0,gitlab,ruby gc dur cnt
-gitlab.ruby.gc_duration_seconds.sum,gauge,,second,,The sum oftime spent by Ruby in GC,0,gitlab,ruby gc dur sum
+gitlab.ruby.gc_duration_seconds.sum,gauge,,second,,The sum of time spent by Ruby in GC,0,gitlab,ruby gc dur sum
 gitlab.ruby.file_descriptors,gauge,,,,The number of file descriptors per process,0,gitlab,ruby file descriptors
 gitlab.ruby.memory_bytes,gauge,,byte,,The memory usage,0,gitlab,ruby memory process
 gitlab.ruby.sampler_duration_seconds_total,count,,second,,The time spent collecting stats,0,gitlab,ruby sampler dur
