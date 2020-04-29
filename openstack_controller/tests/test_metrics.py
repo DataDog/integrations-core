@@ -194,6 +194,18 @@ def test_scenario(make_request, aggregator):
             return_value=auth_projects_response,
         ):
             check.check(common.MOCK_CONFIG['instances'][0])
+
+            # Service checks.
+
+            aggregator.assert_service_check(
+                'openstack.nova.hypervisor.up',
+                OpenStackControllerCheck.OK,
+                tags=['hypervisor:compute1.openstack.local', 'hypervisor_id:1', 'virt_type:QEMU', 'status:enabled'],
+                hostname='',
+            )
+
+            # Metrics.
+
             aggregator.assert_metric(
                 'openstack.nova.server.tx_errors',
                 value=0.0,

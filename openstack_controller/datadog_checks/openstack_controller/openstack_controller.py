@@ -255,6 +255,8 @@ class OpenStackControllerCheck(AgentCheck):
             'status:{}'.format(hyp['status']),
         ]
 
+        service_check_tags = tags + custom_tags
+
         # add hypervisor project names as tags
         project_names = hyp_project_names.get(hyp_hostname, set())
         for project_name in project_names:
@@ -263,16 +265,15 @@ class OpenStackControllerCheck(AgentCheck):
         host_tags = self._get_host_aggregate_tag(hyp_hostname, use_shortname=use_shortname)
         tags.extend(host_tags)
         tags.extend(custom_tags)
-        service_check_tags = list(custom_tags)
 
         hyp_state = hyp.get('state', None)
 
         if not hyp_state:
-            self.service_check(self.HYPERVISOR_SC, AgentCheck.UNKNOWN, hostname=hyp_hostname, tags=service_check_tags)
+            self.service_check(self.HYPERVISOR_SC, AgentCheck.UNKNOWN, tags=service_check_tags)
         elif hyp_state != self.HYPERVISOR_STATE_UP:
-            self.service_check(self.HYPERVISOR_SC, AgentCheck.CRITICAL, hostname=hyp_hostname, tags=service_check_tags)
+            self.service_check(self.HYPERVISOR_SC, AgentCheck.CRITICAL, tags=service_check_tags)
         else:
-            self.service_check(self.HYPERVISOR_SC, AgentCheck.OK, hostname=hyp_hostname, tags=service_check_tags)
+            self.service_check(self.HYPERVISOR_SC, AgentCheck.OK, tags=service_check_tags)
 
         if not collect_hypervisor_metrics:
             return
