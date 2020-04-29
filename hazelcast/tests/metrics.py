@@ -49,11 +49,9 @@ METRICS = (
     'hazelcast.member.available_processors',
     'hazelcast.member.backup_timeout_millis',
     'hazelcast.member.backup_timeouts',
-    'hazelcast.member.bytes_read',
     'hazelcast.member.bytes_received',
     'hazelcast.member.bytes_send',
     'hazelcast.member.bytes_transceived',
-    'hazelcast.member.bytes_written',
     'hazelcast.member.call_timeout_count',
     'hazelcast.member.client_count',
     'hazelcast.member.closed_count',
@@ -76,7 +74,6 @@ METRICS = (
     'hazelcast.member.completed_tasks',
     'hazelcast.member.completed_total_count',
     'hazelcast.member.connection_listener_count',
-    'hazelcast.member.connection_type',
     'hazelcast.member.count',
     'hazelcast.member.created_count',
     'hazelcast.member.daemon_thread_count',
@@ -108,7 +105,6 @@ METRICS = (
     'hazelcast.member.heartbeat_packets_received',
     'hazelcast.member.heartbeat_packets_sent',
     'hazelcast.member.idle_time_millis',
-    'hazelcast.member.idle_time_ms',
     'hazelcast.member.imbalance_detected_count',
     'hazelcast.member.in_progress_count',
     'hazelcast.member.invocation_scan_period_millis',
@@ -247,4 +243,11 @@ METRICS = (
     'jvm.non_heap_memory_max',
     'jvm.os.open_file_descriptors',
     'jvm.thread_count',
+)
+
+FLAKY_METRICS = (
+    'hazelcast.member.bytes_read',
+    'hazelcast.member.bytes_written',
+    'hazelcast.member.connection_type',
+    'hazelcast.member.idle_time_ms',
 )
