@@ -1,0 +1,17 @@
+{ 
+  "name": "IIS 5xx errors",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:iis @http.status_code:[500 TO 599]",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": ["source", "host", "service", "status", "@http.status_code", "@http.method", "@http.url_details.path", "@http.useragent_details.browser.family", "@http.useragent_details.device.family", "@http.useragent_details.os.family", "@network.client.ip"],
+  "options": {
+    "columns": ["status", "@http.method", "@http.url_details.path", "@http.status_code"],
+    "show_date_column": true,
+    "show_message_column": true,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}
