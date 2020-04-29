@@ -1000,5 +1000,23 @@ def test_apc_ups(aggregator):
     run_profile_check('apc_ups')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:apc_ups']
-    tags = [] + common_tags
-    aggregator.assert_metric('snmp.upsAdvBatteryNumOfBadBattPacks', metric_type=aggregator.GAUGE, tags=tags, count=1)
+    tags = common_tags
+    metrics = [
+        'upsAdvBatteryNumOfBadBattPacks',
+        'upsAdvBatteryReplaceIndicator',
+        'upsAdvBatteryRunTimeRemaining',
+        'upsAdvBatteryTemperature',
+        'upsAdvBatteryCapacity',
+        'upsHighPrecInputFrequency',
+        'upsHighPrecInputLineVoltage',
+        'upsHighPrecOutputCurrent',
+        'upsAdvInputLineFailCause',
+        'upsAdvOutputLoad',
+        'upsBasicBatteryTimeOnBattery',
+        'upsAdvTestDiagnosticsResults',
+    ]
+
+    for metric in metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_all_metrics_covered()
