@@ -7,6 +7,7 @@ from typing import Iterator
 
 from six import string_types
 from six.moves.urllib.parse import urlparse
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
@@ -104,6 +105,8 @@ def docker_run(
     conditions=None,
     env_vars=None,
     wrappers=None,
+    attempts=None,
+    attempts_wait=1,
 ):
     """This utility provides a convenient way to safely set up and tear down Docker environments.
 
@@ -136,6 +139,10 @@ def docker_run(
     :param env_vars: A dictionary to update ``os.environ`` with during execution.
     :type env_vars: ``dict``
     :param wrappers: A list of context managers to use during execution.
+    :param attempts: Number attempts to run `up`
+    :type attempts: int
+    :param attempts_wait: Time wait between attempts
+    :type attempts_wait: int
     """
     if compose_file and up:
         raise TypeError('You must select either a compose file or a custom setup callable, not both.')
@@ -154,6 +161,15 @@ def docker_run(
     else:
         set_up = up
         tear_down = down
+
+    if attempts is not None:
+        saved_set_up = set_up
+
+        @retry(wait=wait_fixed(attempts_wait), stop=stop_after_attempt(attempts))
+        def set_up_with_retry():
+            return saved_set_up()
+
+        set_up = set_up_with_retry
 
     docker_conditions = []
 
