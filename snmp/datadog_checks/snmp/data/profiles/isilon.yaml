@@ -108,11 +108,11 @@ metrics:
           name: quotaID
 metric_tags:
   - tag: cluster_name
-    MIB: ISILON-MIB
+    OID: 1.3.6.1.4.1.12124.1.1.1
     symbol: clusterName
   - tag: node_name
-    MIB: ISILON-MIB
+    OID: 1.3.6.1.4.1.12124.2.1.1
     symbol: nodeName
   - tag: node_type
-    MIB: ISILON-MIB
+    OID: 1.3.6.1.4.1.12124.2.1.3
     symbol: nodeType
