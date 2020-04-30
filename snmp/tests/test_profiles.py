@@ -805,6 +805,9 @@ def test_proliant(aggregator):
         for metric in IF_RATES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
 
+
+    aggregator.assert_metric('snmp.cpqHeResMem2ModuleCondition', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1)
+
     aggregator.assert_all_metrics_covered()
 
 
