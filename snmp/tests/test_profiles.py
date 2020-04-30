@@ -1109,6 +1109,6 @@ def test_apc_ups(aggregator):
     aggregator.assert_metric(
         'snmp.upsOutletGroupStatusGroupState',
         metric_type=aggregator.GAUGE,
-        tags=['outlet_group_name:test_outlet'] + profile_tags,
+        tags=['outlet_group_name:test_outlet'] + tags,
     )
     aggregator.assert_all_metrics_covered()
