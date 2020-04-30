@@ -5,10 +5,10 @@ import copy
 from contextlib import closing
 
 import psycopg2
-from datadog_checks.postgres.metric_utils import PostgresMetrics
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.postgres.metric_utils import PostgresMetrics
 
 from .config import PostgresConfig
 from .util import (

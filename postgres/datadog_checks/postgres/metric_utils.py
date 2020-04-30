@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
-from .version_utils import V9_2, V9_1, V9_4, V10, V9_6
-
 from .util import (
     ACTIVITY_DD_METRICS,
     ACTIVITY_METRICS_8_3,
@@ -24,15 +22,20 @@ from .util import (
     REPLICATION_METRICS_9_2,
     REPLICATION_METRICS_10,
 )
+from .version_utils import V8_3, V9_1, V9_2, V9_4, V9_6, V10
 
 
 class PostgresMetrics:
+    """ Mantains a cache of metrics to collect """
+
     def __init__(self, config):
         self.config = config
         self.instance_metrics = None
         self.bgw_metrics = None
         self.archiver_metrics = None
         self.replication_metrics = None
+        self.activity_metrics = None
+        self._count_metrics = None
 
     def clean_state(self):
         self.instance_metrics = None
@@ -71,11 +74,11 @@ class PostgresMetrics:
             'descriptors': [('psd.datname', 'db')],
             'metrics': metrics,
             'query': "SELECT psd.datname, {metrics_columns} "
-                     "FROM pg_stat_database psd "
-                     "JOIN pg_database pd ON psd.datname = pd.datname "
-                     "WHERE psd.datname not ilike 'template%%' "
-                     "  AND psd.datname not ilike 'rdsadmin' "
-                     "  AND psd.datname not ilike 'azure_maintenance' ",
+            "FROM pg_stat_database psd "
+            "JOIN pg_database pd ON psd.datname = pd.datname "
+            "WHERE psd.datname not ilike 'template%%' "
+            "  AND psd.datname not ilike 'rdsadmin' "
+            "  AND psd.datname not ilike 'azure_maintenance' ",
             'relation': False,
         }
 
@@ -109,10 +112,13 @@ class PostgresMetrics:
         }
 
     def get_count_metrics(self):
+        if self._count_metrics is not None:
+            return self._count_metrics
         metrics = dict(COUNT_METRICS)
         metrics['query'] = COUNT_METRICS['query'].format(
             metrics_columns="{metrics_columns}", table_count_limit=self.config.table_count_limit
         )
+        self._count_metrics = metrics
         return metrics
 
     def get_archiver_metrics(self, version):

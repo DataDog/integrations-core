@@ -23,7 +23,7 @@ def test_get_instance_metrics_lt_92(integration_check, pg_instance):
     pg_instance['collect_database_size_metrics'] = False
     check = integration_check(pg_instance)
 
-    res = check.metric_utils.get_instance_metrics( VersionInfo(9, 1, 0))
+    res = check.metric_utils.get_instance_metrics(VersionInfo(9, 1, 0))
     assert res['metrics'] == util.COMMON_METRICS
 
 
