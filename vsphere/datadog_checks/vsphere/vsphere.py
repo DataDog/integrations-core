@@ -26,6 +26,8 @@ from .common import SOURCE_TYPE
 from .event import VSphereEvent
 from .metrics import ALLOWED_METRICS_FOR_MOR
 
+from datadog import initialize,statsd
+
 try:
     # Agent >= 6.0: the check pushes tags invoking `set_external_tags`
     from datadog_agent import set_external_tags
@@ -68,7 +70,12 @@ MORLIST = 'morlist'
 METRICS_METADATA = 'metrics_metadata'
 LAST = 'last'
 INTERVAL = 'interval'
+ERR_CODE = 'code'
+ERR_MSG = 'msg'
 
+#statsd config default values
+STATSD_SERVER_HOST = '127.0.0.1'
+STATSD_SERVER_PORT = 9000
 
 def atomic_method(method):
     """ Decorator to catch the exceptions that happen in detached thread atomic tasks
@@ -124,6 +131,9 @@ class VSphereCheck(AgentCheck):
         # uuid cache
         self.cache_uuids = {}
 
+        # error config
+        self.error_configs = {}
+
         # Caching resources, timeouts
         self.cache_times = {}
         for instance in self.instances:
@@ -146,6 +156,10 @@ class VSphereCheck(AgentCheck):
             self.cache_uuids[i_key] = {}
             for vimtype in HISTORICAL_RESOURCES:
                 self.cache_uuids[i_key][vimtype] = {}
+            self.error_configs[i_key] = {
+                    ERR_CODE : None,
+                    ERR_MSG : None
+            }
 
         # managed entity raw view
         self.registry = {}
@@ -157,6 +171,11 @@ class VSphereCheck(AgentCheck):
         self.metrics_metadata = {}
         self.metric_ids = {}
         self.latest_event_query = {}
+
+        #init the statsd client
+        statsd_host = init_config.get('statsd_server_host',STATSD_SERVER_HOST)
+        statsd_port = init_config.get('statsd_server_port',STATSD_SERVER_PORT)
+        initialize(statsd_host = statsd_host, statsd_port = statsd_port)
 
     def stop(self):
         self.stop_pool()
@@ -191,6 +210,23 @@ class VSphereCheck(AgentCheck):
                 self.log.critical("Restarting Pool. One check is stuck.")
                 self.restart_pool()
                 break
+
+    def raiseAlert(self,instance,error_code,error_msg):
+        if error_code == 'InvalidLogin':
+            title = 'NTNX_NC_VC_user_authentication_alert'
+        elif error_code == 'RuntimeFault':
+                title = 'NTNX_NC_VC_server_not_reachable'
+        else:
+            title = None
+
+        if title:
+            text = error_msg
+            alert_type = 'error'
+            tags = []
+            tags.append('vcenter_host:%s' % instance.get('host'))
+            tags.append('vcenter_user:%s' % instance.get('username'))
+            self.log.debug(u"Alert info. title:%s , text:%s , type:%s , tags:%s",title,text,alert_type,tags)
+            statsd.event(title = title, text = text, alert_type = alert_type, tags = tags)
 
     def _query_event(self, instance):
         i_key = self._instance_key(instance)
@@ -239,6 +275,7 @@ class VSphereCheck(AgentCheck):
 
     def _get_server_instance(self, instance):
         i_key = self._instance_key(instance)
+        error_config = self.error_configs.get(i_key)
 
         service_check_tags = [
             'vcenter_server:{0}'.format(instance.get('name')),
@@ -273,24 +310,49 @@ class VSphereCheck(AgentCheck):
                     pwd=instance.get('password'),
                     sslContext=context if not ssl_verify or ssl_capath else None
                 )
+
+            except vim.fault.InvalidLogin , e:
+                err_msg = u"Invalid login credentials to %s , %s" % (instance.get('host'), str(e.msg))
+                error_config.update({ERR_CODE : 'InvalidLogin'})
+                error_config.update({ERR_MSG : err_msg})
+                self.log.error(err_msg)
+
+            except AttributeError , e:
+                err_msg = u"Invalid configuration parameters : %s" % str(e)
+                error_config.update({ERR_CODE : 'AttributeError'})
+                error_config.update({ERR_MSG : err_msg})
+                self.log.error(err_msg)
+
             except Exception as e:
                 err_msg = "Connection to %s failed: %s" % (instance.get('host'), e)
+                error_config.update({ERR_CODE : 'RuntimeFault'})
+                error_config.update({ERR_MSG : err_msg})
+                self.log.error(err_msg)
                 self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                    tags=service_check_tags, message=err_msg)
-                raise Exception(err_msg)
 
-            self.server_instances[i_key] = server_instance
+            else:
+                # Test if the connection is working
+                try:
+                    server_instance.RetrieveContent()
+                    self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
+                                       tags=service_check_tags)
+                except Exception as e:
+                    err_msg = "Connection to %s died unexpectedly: %s" % (instance.get('host'), e)
+                    error_config.update({ERR_CODE : 'RuntimeFault'})
+                    error_config.update({ERR_MSG : err_msg})
+                    self.log.error(err_msg)
+                    self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
+                                       tags=service_check_tags, message=err_msg)
+                else:
+                    self.server_instances[i_key] = server_instance
 
-        # Test if the connection is working
-        try:
-            self.server_instances[i_key].RetrieveContent()
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK,
-                               tags=service_check_tags)
-        except Exception as e:
-            err_msg = "Connection to %s died unexpectedly: %s" % (instance.get('host'), e)
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
-                               tags=service_check_tags, message=err_msg)
-            raise Exception(err_msg)
+            #extract the error config to raise alarms for vcenter errors if any
+            error_msg = error_config.get(ERR_MSG)
+            error_code = error_config.get(ERR_CODE)
+            if error_msg and error_code:
+                self.raiseAlert(instance, error_code, error_msg)
+                raise Exception(error_msg)
 
         return self.server_instances[i_key]
 
@@ -349,34 +411,63 @@ class VSphereCheck(AgentCheck):
         filter_spec = vmodl.query.PropertyCollector.FilterSpec()
         filter_spec.objectSet = [obj_spec]
         filter_spec.propSet = [property_spec]
+        filter_spec.reportMissingObjectsInResults = True
 
-        retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
-
-        # Collect the objects and their properties
-        res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
-        objects = res.objects
-        # Results can be paginated
-        while res.token is not None:
-            res = collector.ContinueRetrievePropertiesEx(res.token)
-            objects.extend(res.objects)
+        retr_opts = self.createPropertyOptions()
 
         cluster_mors = {}
-        for obj in objects:
-            if obj.missingSet:
-                for prop in obj.missingSet:
-                    self.log.warning(
-                        u"Unable to retrieve property %s for object %s: %s",
-                                            prop.path,str(obj.obj),str(prop.fault))
+        i_key = self._instance_key(instance)
+        error_config = self.error_configs[i_key]
+        # Collect the objects and their properties
+        try:
+            res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
+            objects = res.objects
+            # Results can be paginated
+            while res.token is not None:
+                res = collector.ContinueRetrievePropertiesEx(res.token)
+                objects.extend(res.objects)
 
-            if obj.propSet:
-                properties = {}
-                for prop in obj.propSet:
-                    properties.update({prop.name : prop.val})
+        except vmodl.query.InvalidProperty, e:
+            err_msg = u"InvalidProperty fault while retrieving cluster properties : %s , %s" % (e.name, str(e.faultMessage))
+            error_config.update(code = 'InvalidProperty')
+            error_config.update(msg = err_msg)
+            self.log.warning(err_msg)
 
-                cluster_name = properties.get("name")
-                self.log.debug(u"Discovered cluster : %s",cluster_name)
-                if cluster_name:
-                    cluster_mors[cluster_name] = obj.obj
+        except vmodl.fault.InvalidArgument:
+            err_msg = u"InvalidArgument fault while retrieving cluster properties : %s , %s" % (str(e.invalidProperty), str(e.faultMessage))
+            error_config.update(code = 'InvalidArgument')
+            error_config.update(msg = err_msg)
+            self.log.warning(err_msg)
+
+        except vmodl.fault.InvalidType:
+            err_msg = u"InvalidType fault while retrieving cluster properties : %s , %s" % (str(e.argument),str(e.faultMessage))
+            error_config.update(code = 'InvalidType')
+            error_config.update(msg = err_msg)
+            self.log.warning(err_msg)
+
+        except vmodl.RuntimeFault, e:
+            err_msg = u"Runtime fault while retrieving cluster properties : %s , %s" % (str(e.faultCause),str(e.faultMessage))
+            error_config.update(code = 'RuntimeFault')
+            error_config.update(msg = err_msg)
+            self.log.warning(err_msg)
+
+        else:
+            for obj in objects:
+                if obj.missingSet:
+                    for prop in obj.missingSet:
+                        self.log.warning(
+                            u"Unable to retrieve property %s for object %s: %s",
+                                                prop.path,str(obj.obj),str(prop.fault))
+
+                if obj.propSet:
+                    properties = {}
+                    for prop in obj.propSet:
+                        properties.update({prop.name : prop.val})
+
+                    cluster_name = properties.get("name")
+                    self.log.debug(u"Discovered cluster : %s",cluster_name)
+                    if cluster_name:
+                        cluster_mors[cluster_name] = obj.obj
 
         return cluster_mors
 
@@ -400,6 +491,8 @@ class VSphereCheck(AgentCheck):
             self.log.warning(u"unable to add uuid for empty cluster name")
 
     def getClustersToMonitor(self,instance):
+        i_key = self._instance_key(instance)
+        error_config = self.error_configs[i_key]
         monitor_clusters = []
         i_key = self._instance_key(instance)
         if i_key not in self.monitor_cluster_mors:
@@ -407,22 +500,44 @@ class VSphereCheck(AgentCheck):
             if vcenter_clusters:
                 self.log.info(u"Vcenter Cluster list : %s",vcenter_clusters)
                 cluster_mors = self.getClusters(instance)
-                self.log.info(u"Completed enumeration of clusters for vcenter instance %s" % i_key)
-                for vcenter_cluster in vcenter_clusters:
-                    cluster_mor = cluster_mors.get(vcenter_cluster)
-                    if cluster_mor:
-                        monitor_clusters.append(cluster_mor)
-                        self.addClusterUuid(instance,vcenter_cluster)
-                    else:
-                        self.log.warning("Invalid cluster name %s",vcenter_cluster)
+                if cluster_mors:
+                    self.log.info(u"Completed enumeration of clusters for vcenter instance %s" % i_key)
+                    for vcenter_cluster in vcenter_clusters:
+                        cluster_mor = cluster_mors.get(vcenter_cluster)
+                        if cluster_mor:
+                            monitor_clusters.append(cluster_mor)
+                            self.addClusterUuid(instance,vcenter_cluster)
+                        else:
+                            self.log.warning("Invalid cluster name %s",vcenter_cluster)
+
+                    if not monitor_clusters:
+                        error_msg = u"Invalid cluster list in vcenter configuration"
+                        self.log.error(error_msg)
+                        error_config.update({ERR_MSG : error_msg})
+                        error_config.update({ERR_CODE : None})
+                else:
+                    self.log.error(u"Discovery of clusters failed.")
+                    error_msg = error_config.get(ERR_MSG)
+                    error_msg = u"Discovery of clusters failed due to %s" % error_msg
+                    error_config.update({ERR_MSG : error_msg})
             else:
-                self.log.warning(u"Empty cluster list in vcenter configuration.")
+                error_msg = u"Empty cluster list in vcenter configuration"
+                self.log.error(error_msg)
+                error_config.update({ERR_MSG : error_msg})
+                error_config.update({ERR_CODE : None})
             #update the cluster monitor list
             self.monitor_cluster_mors[i_key] = monitor_clusters
         else:
             monitor_clusters = self.monitor_cluster_mors[i_key]
 
         return monitor_clusters
+
+    def createPropertyOptions(self):
+            retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
+            # To limit the number of objects retrieved per call.
+            # If batch_collector_size is 0, collect maximum number of objects.
+            retr_opts.maxObjects = self.batch_collector_size or None
+            return retr_opts
 
     def _discover_mor(self, instance, tags, regexes=None, include_only_marked=False):
         """
@@ -527,47 +642,67 @@ class VSphereCheck(AgentCheck):
 
             return property_specs
 
-        def createPropertyOptions():
-            retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
-            # To limit the number of objects retrieved per call.
-            # If batch_collector_size is 0, collect maximum number of objects.
-            retr_opts.maxObjects = self.batch_collector_size or None
-            return retr_opts
-
-        def collectProperties(server_instance,filter_spec,retr_opts):
+        def collectProperties(server_instance,error_config,filter_spec,retr_opts):
             mor_properties = {}
             # Collect the objects and their properties
-            collector = server_instance.content.propertyCollector
-            res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
-            objects = res.objects
-            # Results can be paginated
-            while res.token is not None:
-                res = collector.ContinueRetrievePropertiesEx(res.token)
-                objects.extend(res.objects)
+            try:
+                collector = server_instance.content.propertyCollector
+                res = collector.RetrievePropertiesEx([filter_spec], retr_opts)
+                objects = res.objects
+                # Results can be paginated
+                while res.token is not None:
+                    res = collector.ContinueRetrievePropertiesEx(res.token)
+                    objects.extend(res.objects)
 
-            for obj in objects:
-                if obj.missingSet:
-                    for prop in obj.missingSet:
-                        self.log.warning(u"Unable to retrieve property %s for object %s: %s",
-                                                        prop.path,str(obj.obj),str(prop.fault))
+            except vmodl.query.InvalidProperty, e:
+                err_msg = u"InvalidProperty fault while collecting properties : %s , %s" % (e.name, str(e.faultMessage))
+                error_config.update({ERR_CODE : 'InvalidProperty'})
+                error_config.update({ERR_MSG : err_msg})
+                self.log.warning(err_msg)
 
-                mor_properties[obj.obj] = {prop.name: prop.val for prop in obj.propSet} if obj.propSet else {}
+            except vmodl.fault.InvalidArgument:
+                err_msg = u"InvalidArgument fault while collecting properties : %s , %s" % (str(e.invalidProperty), str(e.faultMessage))
+                error_config.update({ERR_CODE : 'InvalidArgument'})
+                error_config.update({ERR_MSG : err_msg})
+                self.log.warning(err_msg)
+
+            except vmodl.fault.InvalidType:
+                err_msg = u"InvalidType fault while collecting properties : %s , %s" % (str(e.argument),str(e.faultMessage))
+                error_config.update({ERR_CODE : 'InvalidType'})
+                error_config.update({ERR_MSG : err_msg})
+                self.log.warning(err_msg)
+
+            except vmodl.RuntimeFault, e:
+                err_msg = u"Runtime fault while collecting properties : %s , %s" % (str(e.faultCause),str(e.faultMessage))
+                error_config.update({ERR_CODE : 'RuntimeFault'})
+                error_config.update({ERR_MSG : err_msg})
+                self.log.warning(err_msg)
+
+            else:
+                for obj in objects:
+                    if obj.missingSet:
+                        for prop in obj.missingSet:
+                            self.log.warning(u"Unable to retrieve property %s for object %s: %s",
+                                                            prop.path,str(obj.obj),str(prop.fault))
+
+                    mor_properties[obj.obj] = {prop.name: prop.val for prop in obj.propSet} if obj.propSet else {}
 
             return mor_properties
 
-        def _collect_metric_mors_and_attributes(server_instance,clusters):
+        def _collect_metric_mors_and_attributes(server_instance,error_config,clusters):
             obj_specs = createObjectSpecs(clusters)
             property_specs = createPropertySpecs(ALL_RESOURCES_WITH_METRICS)
             #Add the list of object and property specifications to the property filter specification
             filter_spec = vmodl.query.PropertyCollector.FilterSpec()
             filter_spec.objectSet = obj_specs
             filter_spec.propSet = property_specs
+            filter_spec.reportMissingObjectsInResults = True
 
-            retr_opts = createPropertyOptions()
-            mor_attrs = collectProperties(server_instance,filter_spec,retr_opts)
+            retr_opts = self.createPropertyOptions()
+            mor_attrs = collectProperties(server_instance,error_config,filter_spec,retr_opts)
             return mor_attrs
 
-        def _collect_non_metric_mors_and_attributes(server_instance):
+        def _collect_non_metric_mors_and_attributes(server_instance,error_config):
             #collect the non metric types for parents info
             content = server_instance.content
             view_ref = content.viewManager.CreateContainerView(content.rootFolder, ALL_RESOURCES_WITH_NO_METRICS, True)
@@ -591,9 +726,10 @@ class VSphereCheck(AgentCheck):
             filter_spec = vmodl.query.PropertyCollector.FilterSpec()
             filter_spec.objectSet = [obj_spec]
             filter_spec.propSet = property_specs
+            filter_spec.reportMissingObjectsInResults = True
 
-            retr_opts = createPropertyOptions()
-            mor_attrs = collectProperties(server_instance,filter_spec,retr_opts)
+            retr_opts = self.createPropertyOptions()
+            mor_attrs = collectProperties(server_instance,error_config,filter_spec,retr_opts)
             return mor_attrs
 
         def getDatastoreUuid(mor,properties,datastore_cache):
@@ -634,98 +770,126 @@ class VSphereCheck(AgentCheck):
 
             return cluster_uuid
 
-        def _get_all_objs(server_instance, regexes=None, include_only_marked=False, tags=[], clusters = [], uuid_cache = {}):
+        def _get_all_objs(instance, regexes=None, include_only_marked=False, tags=[], clusters = [], uuid_cache = {}):
             """
             Get all the vsphere objects of all types
             """
+            server_instance = self._get_server_instance(instance)
+            i_key = self._instance_key(instance)
+            error_config = self.error_configs[i_key]
+
             obj_list = defaultdict(list)
             all_mors = {}
             # Collect metric mors and their required attributes
             self.log.debug(u"No. of clusters %d",len(clusters))
-            metric_mors = _collect_metric_mors_and_attributes(server_instance,clusters)
+            metric_mors = _collect_metric_mors_and_attributes(server_instance,error_config,clusters)
             self.log.debug(u"count of metric mors %d",len(metric_mors))
 
-            all_mors.update(metric_mors)
-            # Collect non metric mors and their required attributes
-            non_metric_mors = _collect_non_metric_mors_and_attributes(server_instance)
-            self.log.debug(u"count of non metric mors %d",len(non_metric_mors))
-            all_mors.update(non_metric_mors)
+            if not metric_mors:
+                #extract the error config to check why collection failed
+                #raise alarms for vcenter errors if any
+                error_msg = error_config.get(ERR_MSG)
+                error_code = error_config.get(ERR_CODE)
+                if error_code and error_msg:
+                    self.raiseAlert(instance, error_code, error_msg)
+                self.log.error(u"Discovery of metric mors failed : %s",error_msg)
+            else:
+                all_mors.update(metric_mors)
+                # Collect non metric mors and their required attributes
+                non_metric_mors = _collect_non_metric_mors_and_attributes(server_instance,error_config)
+                self.log.debug(u"count of non metric mors %d",len(non_metric_mors))
 
-            # Add rootFolder since it is not explored by the propertyCollector
-            root_mor = server_instance.content.rootFolder
-            all_mors[root_mor] = {"name": root_mor.name, "parent": None}
-            self.log.debug(u"Total count of mors %d",len(all_mors))
+                if non_metric_mors:
+                    all_mors.update(non_metric_mors)
+                else:
+                    #extract the error config to check why monitor exited
+                    #raise alarms for vcenter errors if any
+                    error_msg = error_config.get(ERR_MSG)
+                    error_code = error_config.get(ERR_CODE)
+                    if error_code and error_msg:
+                        self.raiseAlert(instance, error_code, error_msg)
+                    self.log.error(u"Discovery of non-metric mors failed: %s",error_msg)
 
-            for mor, properties in all_mors.items():
-                instance_tags = []
-                mor_type = type(mor)
-                if  mor_type in ALL_RESOURCES_WITH_METRICS and not self._is_excluded(mor, properties, regexes, include_only_marked):
-                    hostname = properties.get("name", "unknown")
-                    if properties.get("parent"):
-                        instance_tags.extend(_get_parent_tags(mor, all_mors))
+                # Add rootFolder since it is not explored by the propertyCollector
+                root_mor = server_instance.content.rootFolder
+                all_mors[root_mor] = {"name": root_mor.name, "parent": None}
+                self.log.debug(u"Total count of mors %d",len(all_mors))
 
-                    vsphere_type = None
-                    entity_type = None
-                    entity_id = None
+                for mor, properties in all_mors.items():
+                    instance_tags = []
+                    mor_type = type(mor)
+                    if  mor_type in ALL_RESOURCES_WITH_METRICS and not self._is_excluded(mor, properties, regexes, include_only_marked):
+                        hostname = properties.get("name", "unknown")
+                        if properties.get("parent"):
+                            instance_tags.extend(_get_parent_tags(mor, all_mors))
 
-                    if isinstance(mor, vim.VirtualMachine):
-                        power_state = properties.get("runtime.powerState")
-                        if power_state == vim.VirtualMachinePowerState.poweredOn:
-                            host_mor = properties.get("runtime.host")
-                            host_props = all_mors.get(host_mor, {})
-                            host = "unknown"
-                            if host_mor and host_props:
-                                host = host_props.get("name", "unknown")
-                                if self._is_excluded(host_mor, host_props, regexes, include_only_marked):
-                                    self.log.debug(u"Skipping VM because host %s is excluded by rule %s.", host, regexes.get('host_include'))
-                                    continue
-                            instance_tags.append('vsphere_host:{}'.format(host))
-                            vsphere_type = u'vsphere_type:vm'
-                            entity_id = properties.get("config.instanceUuid","")
-                            entity_type = "vm"
+                        vsphere_type = None
+                        entity_type = None
+                        entity_id = None
 
-                    elif isinstance(mor, vim.HostSystem):
-                        vsphere_type = u'vsphere_type:host'
-                        entity_type = "node"
-                        entity_id = properties.get("summary.hardware.uuid","")
+                        if isinstance(mor, vim.VirtualMachine):
+                            power_state = properties.get("runtime.powerState")
+                            if power_state == vim.VirtualMachinePowerState.poweredOn:
+                                host_mor = properties.get("runtime.host")
+                                host_props = all_mors.get(host_mor, {})
+                                host = "unknown"
+                                if host_mor and host_props:
+                                    host = host_props.get("name", "unknown")
+                                    if self._is_excluded(host_mor, host_props, regexes, include_only_marked):
+                                        self.log.debug(u"Skipping VM because host %s is excluded by rule %s.", host, regexes.get('host_include'))
+                                        continue
+                                instance_tags.append('vsphere_host:{}'.format(host))
+                                vsphere_type = u'vsphere_type:vm'
+                                entity_id = properties.get("config.instanceUuid","")
+                                entity_type = "vm"
 
-                    elif isinstance(mor, vim.Datastore):
-                        vsphere_type = u'vsphere_type:datastore'
-                        instance_tags.append(u'vsphere_datastore:{}'.format(properties.get("name", "unknown")))
-                        hostname = None
-                        entity_type = "container"
-                        datastore_cache = uuid_cache.get(vim.Datastore,{})
-                        entity_id = getDatastoreUuid(mor,properties,datastore_cache)
+                        elif isinstance(mor, vim.HostSystem):
+                            vsphere_type = u'vsphere_type:host'
+                            entity_type = "node"
+                            entity_id = properties.get("summary.hardware.uuid","")
 
-                    elif isinstance(mor, vim.ClusterComputeResource):
-                        vsphere_type = u'vsphere_type:cluster'
-                        instance_tags.append(u'vsphere_cluster:{}'.format(properties.get("name", "unknown")))
-                        hostname = None
-                        entity_type = "cluster"
-                        cluster_cache = uuid_cache.get(vim.ClusterComputeResource,{})
-                        entity_id = getClusterUuid(properties,cluster_cache)
+                        elif isinstance(mor, vim.Datastore):
+                            vsphere_type = u'vsphere_type:datastore'
+                            instance_tags.append(u'vsphere_datastore:{}'.format(properties.get("name", "unknown")))
+                            hostname = None
+                            entity_type = "container"
+                            datastore_cache = uuid_cache.get(vim.Datastore,{})
+                            entity_id = getDatastoreUuid(mor,properties,datastore_cache)
 
-                    if entity_type and entity_id:
-                        if vsphere_type:
-                            instance_tags.append(vsphere_type)
-                        obj_dict = dict(mor=mor, hostname=hostname, entity_type=entity_type, entity_id=entity_id, tags=tags+instance_tags)
-                        obj_list[mor_type].append(obj_dict)
+                        elif isinstance(mor, vim.ClusterComputeResource):
+                            vsphere_type = u'vsphere_type:cluster'
+                            instance_tags.append(u'vsphere_cluster:{}'.format(properties.get("name", "unknown")))
+                            hostname = None
+                            entity_type = "cluster"
+                            cluster_cache = uuid_cache.get(vim.ClusterComputeResource,{})
+                            entity_id = getClusterUuid(properties,cluster_cache)
+
+                        if entity_type and entity_id:
+                            if vsphere_type:
+                                instance_tags.append(vsphere_type)
+                            obj_dict = dict(mor=mor, hostname=hostname, entity_type=entity_type, entity_id=entity_id, tags=tags+instance_tags)
+                            obj_list[mor_type].append(obj_dict)
 
             return obj_list
 
         def build_resource_registry(instance, tags, regexes=None, include_only_marked=False):
             i_key = self._instance_key(instance)
-            server_instance = self._get_server_instance(instance)
+            error_config = self.error_configs[i_key]
             if i_key not in self.morlist_raw:
                 self.morlist_raw[i_key] = {}
 
             clusters = self.getClustersToMonitor(instance)
             if clusters:
                 uuid_cache = self.cache_uuids[i_key]
-                all_objs = _get_all_objs(server_instance,regexes,include_only_marked,tags,clusters,uuid_cache)
+                all_objs = _get_all_objs(instance,regexes,include_only_marked,tags,clusters,uuid_cache)
                 self.morlist_raw[i_key] = all_objs
             else:
-                self.log.warning(u"Nothing to monitor , empty cluster list for vcenter instance %s",i_key)
+                #extract the error config to check why monitor exited
+                #raise alarms for vcenter errors if any
+                error_msg = error_config.get(ERR_MSG)
+                error_code = error_config.get(ERR_CODE)
+                if error_code and error_msg:
+                    self.raiseAlert(instance, error_code, error_msg)
 
         # enumerate and build inventory of resources...
         build_resource_registry(instance, tags, regexes, include_only_marked)
@@ -894,6 +1058,7 @@ class VSphereCheck(AgentCheck):
 
         i_key = self._instance_key(instance)
         server_instance = self._get_server_instance(instance)
+        error_config = {ERR_CODE : None,ERR_MSG : None}
         perfManager = server_instance.content.perfManager
         custom_tags = instance.get('tags', [])
         try:
@@ -918,7 +1083,8 @@ class VSphereCheck(AgentCheck):
                         try:
                             metric_name = self.metrics_metadata[i_key][mor_type][counter_id]['name']
                         except KeyError:
-                            metric_name = None
+                            self.log.debug(u"Skipping this metric value %d, because of missing metric name",counter_id)
+                            continue
 
                         if not perf_metric.value:
                             self.log.debug(u"Skipping `%s` metric because the value is empty", metric_name)
@@ -961,9 +1127,28 @@ class VSphereCheck(AgentCheck):
                             hostname=mor['hostname'],
                             tags=tags
                         )
-        except Exception:
-            self.log.warning(u"Could not query perf metrics.")
-            pass
+        except vmodl.fault.InvalidArgument , e:
+            err_msg = u"InvalidArgument fault while querying perf metrics : %s , %s" % (str(e.invalidProperty), str(e.faultMessage))
+            error_config.update({ERR_CODE : 'InvalidArgument'})
+            error_config.update({ERR_MSG : err_msg})
+            self.log.warning(err_msg)
+        except vim.fault.RestrictedByAdministrator , e:
+            err_msg = u"RestrictedByAdministrator fault while querying perf metrics : %s , %s" % (str(e.details), str(e.faultMessage))
+            error_config.update({ERR_CODE : 'RestrictedByAdministrator'})
+            error_config.update({ERR_MSG : err_msg})
+            self.log.warning(err_msg)
+        except vmodl.RuntimeFault , e:
+            err_msg = u"Runtime fault while querying perf metrics : %s , %s" % (str(e.faultCause),str(e.faultMessage))
+            error_config.update({ERR_CODE : 'RuntimeFault'})
+            error_config.update({ERR_MSG : err_msg})
+            self.log.warning(err_msg)
+
+        #extract the error config to check why monitor exited
+        #raise alarms for vcenter errors if any
+        error_msg = error_config.get(ERR_MSG)
+        error_code = error_config.get(ERR_CODE)
+        if error_msg and error_code:
+            self.raiseAlert(instance, error_code, error_msg)
 
         # ## <TEST-INSTRUMENTATION>
         self.histogram('datadog.agent.vsphere.metric_colection.time', t.total(), tags=custom_tags)
