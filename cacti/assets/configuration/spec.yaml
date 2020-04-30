@@ -18,12 +18,12 @@ files:
               type: integer
           - name: mysql_user
             required: true
-            description: User to use to connect to MySQL in order to gather metrics
+            description: User to use to connect to MySQL in order to gather metrics.
             value:
               type: string
           - name: mysql_password
             required: true
-            description: Password to use to connect to MySQL in order to gather metrics
+            description: Password to use to connect to MySQL in order to gather metrics.
             value:
               type: string
           - name: rrd_path
