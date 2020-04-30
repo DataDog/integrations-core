@@ -269,9 +269,13 @@ def test_cisco_3850(aggregator):
                 metric_type=aggregator.GAUGE,
                 tags=['fan_descr:Switch {} - FAN {}, Normal'.format(switch, fan)] + common_tags,
             )
-    
+
     # TODO: Needs to add iftable tags
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
+
+    for switch, mac_addr in [(1, '0x046c9d42b080'), (2, '0xdccec1430680')]:
+        tags = ['entity_name:Switch {}'.format(switch), 'mac_addr:{}'.format(mac_addr)] + common_tags
+        aggregator.assert_metric('snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=tags)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance')
     aggregator.assert_all_metrics_covered()
@@ -402,8 +406,12 @@ def test_cisco_nexus(aggregator):
             tags=['fan_descr:fan_{}'.format(fan)] + common_tags,
         )
 
-    # TODO: Needs to add iftable tags
+    # TODO: Needs to add ifName cross-table tag
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
+    # TODO: Needs Entity cross-table tag
+    aggregator.assert_metric(
+        'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:0xffffffffffff'] + common_tags
+    )
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
@@ -868,6 +876,10 @@ def test_cisco_asa_5525(aggregator):
 
     # TODO: Needs to add iftable tags
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
+    # TODO: Needs Entity cross-table tag
+    aggregator.assert_metric(
+        'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:0xffffffffffff'] + common_tags
+    )
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
