@@ -234,3 +234,4 @@ snmp.upsAdvInputLineFailCause,gauge,,,,[APC UPS] Error status of last failed tra
 snmp.upsAdvOutputLoad,gauge,,percent,,[APC UPS] The current UPS load expressed in percent of rated capacity.,0,snmp,
 snmp.upsBasicBatteryTimeOnBattery,gauge,,time,,[APC UPS] The elapsed time since the UPS has switched to battery power.,0,snmp,
 snmp.upsAdvTestDiagnosticsResults,gauge,,,,[APC UPS] The results of the last UPS diagnostics test performed.,0,snmp,
+snmp.ciscoEnvMonTemperatureStatusValue,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The current value of the testpoint being instrumented.,0,snmp,
