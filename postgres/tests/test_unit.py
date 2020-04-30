@@ -22,9 +22,8 @@ def test_get_instance_metrics_lt_92(integration_check, pg_instance):
     """
     pg_instance['collect_database_size_metrics'] = False
     check = integration_check(pg_instance)
-    check._version = VersionInfo(9, 1, 0)
 
-    res = check._get_instance_metrics()
+    res = check.metric_utils.get_instance_metrics( VersionInfo(9, 1, 0))
     assert res['metrics'] == util.COMMON_METRICS
 
 
@@ -34,9 +33,8 @@ def test_get_instance_metrics_92(integration_check, pg_instance):
     """
     pg_instance['collect_database_size_metrics'] = False
     check = integration_check(pg_instance)
-    check._version = VersionInfo(9, 2, 0)
 
-    res = check._get_instance_metrics()
+    res = check.metric_utils.get_instance_metrics(VersionInfo(9, 2, 0))
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
 
 
@@ -48,10 +46,10 @@ def test_get_instance_metrics_state(integration_check, pg_instance):
     check = integration_check(pg_instance)
     check._version = VersionInfo(9, 2, 0)
 
-    res = check._get_instance_metrics()
+    res = check.metric_utils.get_instance_metrics(check._version)
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
     check._version = 'foo'  # metrics were cached so this shouldn't be called
-    res = check._get_instance_metrics()
+    res = check.metric_utils.get_instance_metrics(check._version)
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
 
 
@@ -62,12 +60,11 @@ def test_get_instance_metrics_database_size_metrics(integration_check, pg_instan
     pg_instance['collect_default_database'] = True
     pg_instance['collect_database_size_metrics'] = False
     check = integration_check(pg_instance)
-    check._version = VersionInfo(9, 2, 0)
 
     expected = util.COMMON_METRICS
     expected.update(util.NEWER_92_METRICS)
     expected.update(util.DATABASE_SIZE_METRICS)
-    res = check._get_instance_metrics()
+    res = check.metric_utils.get_instance_metrics(VersionInfo(9, 2, 0))
     assert res['metrics'] == expected
 
 
@@ -75,11 +72,12 @@ def test_get_instance_with_default(check):
     """
     Test the contents of the query string with different `collect_default_db` values
     """
-    res = check._get_instance_metrics()
+    version = VersionInfo(9, 2, 0)
+    res = check.metric_utils.get_instance_metrics(version)
     assert "  AND psd.datname not ilike 'postgres'" in res['query']
 
     check.config.collect_default_db = True
-    res = check._get_instance_metrics()
+    res = check.metric_utils.get_instance_metrics(version)
     assert "  AND psd.datname not ilike 'postgres'" not in res['query']
 
 

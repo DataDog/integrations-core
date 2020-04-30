@@ -230,16 +230,16 @@ def test_query_timeout(aggregator, integration_check, pg_instance):
 
 
 def assert_state_clean(check):
-    assert check.instance_metrics is None
-    assert check.bgw_metrics is None
-    assert check.archiver_metrics is None
-    assert check.replication_metrics is None
-    assert check.activity_metrics is None
+    assert check.metric_utils.instance_metrics is None
+    assert check.metric_utils.bgw_metrics is None
+    assert check.metric_utils.archiver_metrics is None
+    assert check.metric_utils.replication_metrics is None
+    assert check.metric_utils.activity_metrics is None
 
 
 def assert_state_set(check):
-    assert check.instance_metrics
-    assert check.bgw_metrics
+    assert check.metric_utils.instance_metrics
+    assert check.metric_utils.bgw_metrics
     if POSTGRES_VERSION != '9.3':
-        assert check.archiver_metrics
-    assert check.replication_metrics
+        assert check.metric_utils.archiver_metrics
+    assert check.metric_utils.replication_metrics
