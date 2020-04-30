@@ -24,6 +24,12 @@ INSTANCE_MEMBERS = [
     {'host': HOST, 'port': MEMBER_PORT, 'is_jmx': True},
     {'host': HOST, 'port': 1098, 'is_jmx': True},
     {'host': HOST, 'port': 1100, 'is_jmx': True},
+    {'host': HOST, 'port': MEMBER_PORT, 'is_jmx': True},
+    {'host': HOST, 'port': 1098, 'is_jmx': True},
+    {'host': HOST, 'port': 1100, 'is_jmx': True},
+    {'host': HOST, 'port': MEMBER_PORT, 'is_jmx': True},
+    {'host': HOST, 'port': 1098, 'is_jmx': True},
+    {'host': HOST, 'port': 1100, 'is_jmx': True},
 ]
 INSTANCE_MC_JMX = {'host': HOST, 'port': MC_PORT, 'is_jmx': True}
 INSTANCE_MC_PYTHON = {'mc_health_check_endpoint': MC_HEALTH_CHECK_ENDPOINT}
