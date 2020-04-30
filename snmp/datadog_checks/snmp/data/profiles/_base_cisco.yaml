@@ -166,18 +166,18 @@ metrics:
           name: cfwConnectionStatType
         tag: connection_type
 
-  # - MIB: CISCO-FIREWALL-MIB
-  #   table:
-  #     OID: 1.3.6.1.4.1.9.9.147.1.2.1.1
-  #     name: cfwHardwareStatusTable
-  #   symbols:
-  #     - OID: 1.3.6.1.4.1.9.9.147.1.2.1.1.1.3
-  #       name: cfwHardwareStatusValue
-  #   metric_tags:
-  #     column:
-  #       OID: 1.3.6.1.4.1.9.9.147.1.2.1.1.1.
-  #       name: cfwHardwareType
-  #     tag: hardware_type
+  - MIB: CISCO-FIREWALL-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.147.1.2.1.1
+      name: cfwHardwareStatusTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.147.1.2.1.1.1.3
+        name: cfwHardwareStatusValue
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.9.9.147.1.2.1.1.1.1
+          name: cfwHardwareType
+        tag: hardware_type
 
   # - MIB: CISCO-VIRTUAL-SWITCH-MIB
   #   table:
