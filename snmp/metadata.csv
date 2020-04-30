@@ -232,3 +232,4 @@ snmp.cefcFanTrayOperStatus,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525]
 snmp.ciscoMemoryPoolUsed,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] Indicates the number of bytes from the memory pool that are currently in use by applications on the managed device.,0,snmp,
 snmp.ciscoMemoryPoolFree,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] Indicates the number of bytes from the memory pool that are currently unused on the managed device.,0,snmp,
 snmp.ciscoMemoryPoolLargestFree,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] Indicates the largest number of contiguous bytes from the memory pool that are currently unused on the managed device.,0,snmp,
+snmp.cfwConnectionStatCount,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] This is an integer that contains the value of the resource statistic.,0,snmp,

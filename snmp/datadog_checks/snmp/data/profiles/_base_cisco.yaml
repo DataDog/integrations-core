@@ -153,18 +153,18 @@ metrics:
           name: ciscoMemoryPoolName
         tag: mem_pool_name
 
-  # - MIB: CISCO-FIREWALL-MIB
-  #   table:
-  #     OID: 1.3.6.1.4.1.9.9.147.1.2.2.2
-  #     name: cfwConnectionStatTable
-  #   symbols:
-  #     - OID: 1.3.6.1.4.1.9.9.147.1.2.2.2.1.4
-  #       name: cfwConnectionStatCount
-  #   metric_tags:
-  #     column:
-  #       OID: 1.3.6.1.4.1.9.9.147.1.2.2.2.1.2
-  #       name: cfwConnectionStatType
-  #     tag: connection_type
+  - MIB: CISCO-FIREWALL-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.147.1.2.2.2
+      name: cfwConnectionStatTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.147.1.2.2.2.1.4
+        name: cfwConnectionStatCount
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.9.9.147.1.2.2.2.1.2
+          name: cfwConnectionStatType
+        tag: connection_type
 
   # - MIB: CISCO-FIREWALL-MIB
   #   table:

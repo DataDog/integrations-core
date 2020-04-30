@@ -290,6 +290,8 @@ def test_cisco_3850(aggregator):
             tags = ['mem_pool_name:{}'.format(pool)] + common_tags
             aggregator.assert_metric('snmp.{}'.format(metrics), metric_type=aggregator.GAUGE, tags=tags)
 
+    # aggregator.assert_metric('snmp.cfwConnectionStatCount', metric_type=aggregator.GAUGE, tags=common_tags)
+
     aggregator.assert_metric('snmp.sysUpTimeInstance')
     aggregator.assert_all_metrics_covered()
 
@@ -436,6 +438,10 @@ def test_cisco_nexus(aggregator):
     for metrics in MEMORY_METRICS:
         tags = ['mem_pool_name:test_pool'] + common_tags
         aggregator.assert_metric('snmp.{}'.format(metrics), metric_type=aggregator.GAUGE, tags=tags)
+
+    for conn in [1, 2, 5]:
+        conn_tags = ['connection_type:{}'.format(conn)] + common_tags
+    aggregator.assert_metric('snmp.cfwConnectionStatCount', metric_type=aggregator.GAUGE, tags=conn_tags)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
@@ -915,6 +921,11 @@ def test_cisco_asa_5525(aggregator):
     for metrics in MEMORY_METRICS:
         tags = ['mem_pool_name:test_pool'] + common_tags
         aggregator.assert_metric('snmp.{}'.format(metrics), metric_type=aggregator.GAUGE, tags=tags)
+
+    for conn in [1, 2, 5]:
+        conn_tags = ['connection_type:{}'.format(conn)] + common_tags
+    aggregator.assert_metric('snmp.cfwConnectionStatCount', metric_type=aggregator.GAUGE, tags=conn_tags)
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
