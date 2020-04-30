@@ -1,5 +1,13 @@
 # CHANGELOG - datadog_checks_base
 
+## 11.6.0 / 2020-04-29
+
+* [Added] Validate metrics using metadata.csv. See [#6027](https://github.com/DataDog/integrations-core/pull/6027).
+* [Added] [WinWMICheck] Support latest Agent signature. See [#6324](https://github.com/DataDog/integrations-core/pull/6324).
+* [Fixed] WMI base typing and instance free API. See [#6329](https://github.com/DataDog/integrations-core/pull/6329).
+* [Fixed] Break reference cycle with log formatter. See [#6470](https://github.com/DataDog/integrations-core/pull/6470).
+* [Fixed] Mark `instance` as non-`Optional`. See [#6350](https://github.com/DataDog/integrations-core/pull/6350).
+
 ## 11.5.0 / 2020-04-07
 
 * [Added] Update PyYAML to 5.3.1. See [#6276](https://github.com/DataDog/integrations-core/pull/6276).
