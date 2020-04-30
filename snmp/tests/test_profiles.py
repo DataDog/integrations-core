@@ -733,11 +733,25 @@ def test_palo_alto(aggregator):
         'panGPGWUtilizationActiveTunnels',
     ]
 
+    entity = [
+        'panEntityTotalPowerAvail',
+        'panEntityTotalPowerUsed',
+    ]
+
+    entry = [
+        'panEntryFRUModulePowerUsed',
+        'panEntryFRUModuleNumPorts'
+    ]
+
     for metric in session:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     for metric in global_protect:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
-
+    for metric in entity:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    for metric in entry:
+        # Needs cross table entPhysicalIsFRU tag
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_all_metrics_covered()
 
 
