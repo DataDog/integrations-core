@@ -141,6 +141,18 @@ DISK_GAUGES = [
     'physicalDiskFreeSpaceInMB',
 ]
 
+PROBE_GAUGES = ['amperageProbeReading', 'amperageProbeStatus']
+
+VOLTAGE_GAUGES = ['voltageProbeStatus', 'voltageProbeReading']
+
+DRS_GAUGES = [
+    'drsCMCCurrStatus',
+    'drsGlobalCurrStatus',
+    'drsPowerCurrStatus',
+    'drsRedCurrStatus',
+    'drsGlobalSystemStatus',
+]
+
 # Base profile metrics for Cisco devices
 # _base_cisco.yaml
 FRU_METRICS = [
