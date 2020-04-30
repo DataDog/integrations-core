@@ -130,6 +130,8 @@ init_config:
   #     definition_file: checkpoint-firewall.yaml
   #   isilon:
   #     definition_file: isilon.yaml
+  #   apc-ups:
+  #     definition_file: apc-ups.yaml
 
 instances:
   -
