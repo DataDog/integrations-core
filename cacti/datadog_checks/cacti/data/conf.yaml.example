@@ -17,12 +17,12 @@ instances:
     # mysql_port: 3306
 
     ## @param mysql_user - string - required
-    ## User to use to connect to MySQL in order to gather metrics
+    ## User to use to connect to MySQL in order to gather metrics.
     #
     mysql_user: <MYSQL_USER>
 
     ## @param mysql_password - string - required
-    ## Password to use to connect to MySQL in order to gather metrics
+    ## Password to use to connect to MySQL in order to gather metrics.
     #
     mysql_password: <MYSQL_PASSWORD>
 
