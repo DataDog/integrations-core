@@ -228,3 +228,4 @@ snmp.ciscoEnvMonSupplyState,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525
 snmp.ciscoEnvMonFanState,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The current state of the fan being instrumented.,0,snmp,
 snmp.cswStackPortOperStatus,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The state of the stackport.,0,snmp,
 snmp.cswSwitchState,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The current state of a switch.,0,snmp,
+snmp.cefcFanTrayOperStatus,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The operational state of the fan or fan tray.,0,snmp,

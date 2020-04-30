@@ -125,16 +125,16 @@ metrics:
         table: entPhysicalTable
         tag: entity_name
 
-  # - MIB: CISCO-FRU-CONTROL-MIB
-  #   table:
-  #     OID: 1.3.6.1.4.1.9.9.117.1.4.1
-  #     name: cefcFanTrayStatusTable
-  #   symbols:
-  #     - OID: 1.3.6.1.4.1.9.9.117.1.4.1.1.1
-  #       name: cefcFanTrayOperStatus
-  #   metric_tags:
-  #     - index: 1
-  #       tag: fru
+  - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.117.1.4.1
+      name: cefcFanTrayStatusTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.117.1.4.1.1.1
+        name: cefcFanTrayOperStatus
+    metric_tags:
+      - index: 1
+        tag: fru
 
   # - MIB: CISCO-MEMORY-POOL-MIB
   #   table:
