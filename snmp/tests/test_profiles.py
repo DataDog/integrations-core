@@ -999,7 +999,12 @@ def test_chatsworth(aggregator):
 def test_isilon(aggregator):
     run_profile_check('isilon')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:isilon']
+    common_tags = common.CHECK_TAGS + [
+        'snmp_profile:isilon',
+        'cluster_name:testcluster1',
+        'node_name:node1',
+        'node_type:1',
+    ]
 
     cluster_rates = [
         'clusterIfsInBytes',

@@ -38,12 +38,6 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.12124.1.2.1.3
       name: clusterIfsOutBytes
-    # Figure out tagging nontable tags
-    # metric_tags:
-    #   - tag: cluster_name
-    #     column:
-    #       OID: 1.3.6.1.4.1.12124.1.1.1
-    #       name: clusterName
 
   # file system
   - MIB: ISILON-MIB
@@ -68,17 +62,6 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.12124.2.2.1.3
       name: nodeIfsOutBytes
-    # These prob won't work
-    #   metric_tags:
-    #     - tag: node_name
-    #       column:
-    #         OID: 1.3.6.1.4.1.12124.2.1.1
-    #         name: nodeName
-    #     - tag: node_type
-    #       column:
-    #         OID: 1.3.6.1.4.1.12124.2.1.3
-    #         name: nodeType
-
   # protocol
   - MIB: ISILON-MIB
     table:
@@ -122,3 +105,13 @@ metrics:
         column:
           OID: 1.3.6.1.4.1.12124.1.12.1.1.3
           name: quotaID
+metric_tags:
+  - tag: cluster_name
+    MIB: ISILON-MIB
+    symbol: clusterName
+  - tag: node_name
+    MIB: ISILON-MIB
+    symbol: nodeName
+  - tag: node_type
+    MIB: ISILON-MIB
+    symbol: nodeType
