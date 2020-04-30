@@ -59,7 +59,7 @@ def test_invalid_metrics(aggregator, check):
 
 
 def test_check(mock_disk_sampler, aggregator, check):
-    c = check(copy.deepcopy(common.INSTANCE))
+    c = check(common.WMI_CONFIG)
     c.check(common.WMI_CONFIG)
 
     for _, mname, _ in common.WMI_CONFIG['metrics']:
