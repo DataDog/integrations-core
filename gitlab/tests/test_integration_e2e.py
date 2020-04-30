@@ -108,4 +108,6 @@ def test_e2e_legacy(dd_agent_check):
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(CONFIG, rate=True)
     assert_check(aggregator, METRICS_TO_TEST)
+    # Excluding gitlab.rack.http_requests_total because it is a distribution metric
+    # (its sum and count metrics are in the metadata)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=["gitlab.rack.http_requests_total"])
