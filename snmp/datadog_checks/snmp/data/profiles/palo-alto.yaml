@@ -102,30 +102,17 @@ metrics:
         table: entPhysicalTable
         tag: fru
   
-
-  # - MIB: PAN-ENTITY-EXT-MIB
-  #   table:
-  #     OID: 1.3.6.1.4.1.25461.1.1.7.1.3.1
-  #     name: panEntityFanTrayTable
-  #   symbols:
-  #     - OID: 11.3.6.1.4.1.25461.1.1.7.1.3.1.1.1
-  #       name: panEntryFanTrayPowerUsed
-  #   metric_tags:
-  #     - MIB: ENTITY-MIB
-  #       column:
-  #         OID: 1.3.6.1.2.1.47.1.2.1.1.2
-  #         name: entLogicalDescr
-  #       table: entLogicalTable
-  #       tag: ent_descr
-
-
-
-  ## Unsupported metric types
-  # - MIB: PAN-COMMON-MIB
-  #   symbol:
-  #     OID: 1.3.6.1.4.1.25461.2.1.2.1.11
-  #     name: panSysHAState
-  # - MIB: PAN-COMMON-MIB
-  #   symbol:
-  #     OID: 1.3.6.1.4.1.25461.2.1.2.1.12
-  #     name: panSysHAPeerState
+  - MIB: PAN-ENTITY-EXT-MIB
+    table:
+      OID: 1.3.6.1.4.1.25461.1.1.7.1.3.1
+      name: panEntityFanTrayTable
+    symbols:
+      - OID: 1.3.6.1.4.1.25461.1.1.7.1.3.1.1.1
+        name: panEntryFanTrayPowerUsed
+    metric_tags:
+      - MIB: ENTITY-MIB
+        column:
+          OID: 1.3.6.1.2.1.47.1.2.1.1.2
+          name: entLogicalDescr
+        table: entLogicalTable
+        tag: ent_descr
