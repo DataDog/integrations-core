@@ -9,8 +9,9 @@ kubernetes.containers.state.waiting,gauge,,,,The number of currently waiting con
 kubernetes.cpu.load.10s.avg,gauge,,,,Container cpu load average over the last 10 seconds,0,kubernetes,k8s.cpu.load.10s
 kubernetes.cpu.system.total,rate,,core,,The number of cores used for system time,0,kubernetes,k8s.cpu.system
 kubernetes.cpu.user.total,rate,,core,,The number of cores used for user time,0,kubernetes,k8s.cpu.user
-kubernetes.cpu.cfs.throttled.period,rate,,,,Number of throttled period intervals,-1,kubernetes,k8s.cpu.throttled.periods
-kubernetes.cpu.cfs.throttled.second,rate,,,,Total time duration the container has been throttled,-1,kubernetes,k8s.cpu.throttled.sec
+kubernetes.cpu.cfs.periods,rate,,,,Number of elapsed enforcement period intervals,-1,kubernetes,k8s.cpu.periods
+kubernetes.cpu.cfs.throttled.periods,rate,,,,Number of throttled period intervals,-1,kubernetes,k8s.cpu.throttled.periods
+kubernetes.cpu.cfs.throttled.seconds,rate,,,,Total time duration the container has been throttled,-1,kubernetes,k8s.cpu.throttled.sec
 kubernetes.cpu.capacity,gauge,,core,,The number of cores in this machine (available until kubernetes v1.18),0,kubernetes,k8s.cpu.capacity
 kubernetes.cpu.usage.total,gauge,,nanocore,,The number of cores used,-1,kubernetes,k8s.cpu
 kubernetes.cpu.limits,gauge,,core,,The limit of cpu cores set,0,kubernetes,k8s.cpu.limits

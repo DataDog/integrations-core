@@ -30,12 +30,15 @@ def tags_for_pod(pod_id, cardinality):
     return tagger.tag('kubernetes_pod_uid://%s' % pod_id, cardinality) or []
 
 
-def tags_for_docker(cid, cardinality):
+def tags_for_docker(cid, cardinality, with_prefix=False):
     """
-    Queries the tagger for a given container id
+    Queries the tagger for a given container id.
+    If with_prefix=true, method won't add `container_id://` to `cid`
     :return: string array, empty if container not found
     """
-    return tagger.tag('container_id://%s' % cid, cardinality) or []
+    if not with_prefix:
+        cid = 'container_id://%s' % cid
+    return tagger.tag(cid, cardinality) or []
 
 
 def get_pod_by_uid(uid, podlist):
