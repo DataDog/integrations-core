@@ -81,13 +81,13 @@ def mock_to_time():
 
 @pytest.fixture
 def check():
-    check = Win32EventLogWMI('win32_event_log', {}, [INSTANCE])
-    return check
+    return lambda instance: Win32EventLogWMI('win32_event_log', {}, [instance])
 
 
 def test_check(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggregator):
-    check.check(INSTANCE)
-    check.check(INSTANCE)
+    c = check(INSTANCE)
+    c.check(INSTANCE)
+    c.check(INSTANCE)
 
     aggregator.assert_event(
         'SomeMessage',
@@ -121,9 +121,10 @@ def test_check_with_event_format(mock_from_time, mock_to_time, check, mock_get_w
             'Type',
         ],
     }
+    c = check(instance)
+    c.check(instance)
+    c.check(instance)
 
-    check.check(instance)
-    check.check(instance)
     message = """%%%
 ```
 Logfile: Application
@@ -150,7 +151,7 @@ Type: Error
     )
 
 
-def test_no_filters(check):
+def test_no_filters():
     instance = {}
 
     with pytest.raises(ConfigurationError):
