@@ -160,3 +160,8 @@ CIE_METRICS = [
     "cieIfInputQueueDrops",
     "cieIfOutputQueueDrops",
 ]
+MEMORY_METRICS = [
+    'ciscoMemoryPoolUsed',
+    'ciscoMemoryPoolFree',
+    'ciscoMemoryPoolLargestFree',
+]

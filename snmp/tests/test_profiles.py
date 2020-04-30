@@ -20,6 +20,7 @@ from .metrics import (
     IP_COUNTS,
     IP_IF_COUNTS,
     IPX_COUNTS,
+    MEMORY_METRICS,
     SYSTEM_STATUS_GAUGES,
     TCP_COUNTS,
     TCP_GAUGES,
@@ -284,6 +285,11 @@ def test_cisco_3850(aggregator):
             'snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=['fru:{}'.format(fru)] + common_tags
         )
 
+    for metrics in MEMORY_METRICS:
+        for pool in ['Processor', 'IOS Process stack']:
+            tags = ['mem_pool_name:{}'.format(pool)] + common_tags
+            aggregator.assert_metric('snmp.{}'.format(metrics), metric_type=aggregator.GAUGE, tags=tags)
+
     aggregator.assert_metric('snmp.sysUpTimeInstance')
     aggregator.assert_all_metrics_covered()
 
@@ -426,6 +432,10 @@ def test_cisco_nexus(aggregator):
         aggregator.assert_metric(
             'snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=['fru:{}'.format(fru)] + common_tags
         )
+
+    for metrics in MEMORY_METRICS:
+        tags = ['mem_pool_name:test_pool'] + common_tags
+        aggregator.assert_metric('snmp.{}'.format(metrics), metric_type=aggregator.GAUGE, tags=tags)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
@@ -894,7 +904,7 @@ def test_cisco_asa_5525(aggregator):
     aggregator.assert_metric(
         'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:0xffffffffffff'] + common_tags
     )
-    
+
     frus = [2, 7, 8, 21, 26, 27, 30, 31]
     for fru in frus:
         tags = ['fru:{}'.format(fru)] + common_tags
@@ -902,6 +912,9 @@ def test_cisco_asa_5525(aggregator):
             'snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=['fru:{}'.format(fru)] + common_tags
         )
 
+    for metrics in MEMORY_METRICS:
+        tags = ['mem_pool_name:test_pool'] + common_tags
+        aggregator.assert_metric('snmp.{}'.format(metrics), metric_type=aggregator.GAUGE, tags=tags)
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
