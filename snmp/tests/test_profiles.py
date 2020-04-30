@@ -994,3 +994,65 @@ def test_chatsworth(aggregator):
         )
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_isilon(aggregator):
+    run_profile_check('isilon')
+
+    common_tags = common.CHECK_TAGS + ['snmp_profile:isilon']
+
+    cluster_rates = [
+        'clusterIfsInBytes',
+        'clusterIfsOutBytes',
+    ]
+
+    node_rates = [
+        'nodeIfsOutBytes',
+        'nodeIfsInBits',
+    ]
+
+    protocol_metrics = [
+        'protocolOpsPerSecond',
+        'latencyMin',
+        'latencyMax',
+        'latencyAverage',
+    ]
+
+    quota_metrics = ['quotaHardThreshold', 'quotaSoftThreshold', 'quotaUsage', 'quotaAdvisoryThreshold']
+
+    quota_ids_types = [
+        (422978632, 1),
+        (153533730, 5),
+        (3299369987, 4),
+        (2149993012, 3),
+        (1424325378, 1),
+        (4245321451, 0),
+        (2328145711, 1),
+        (1198032230, 4),
+        (1232918362, 1),
+        (1383990869, 1),
+    ]
+    for metric in quota_metrics:
+        for qid, qtype in quota_ids_types:
+            tags = ['quota_id:{}'.format(qid), 'quota_type:{}'.format(qtype)] + common_tags
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+
+    for metric in protocol_metrics:
+        for num in range(1, 3):
+            tags = ['protocol_name:testprotocol{}'.format(num)] + common_tags
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_metric('snmp.clusterHealth', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    for metric in cluster_rates:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=common_tags, count=1)
+
+    aggregator.assert_metric('snmp.nodeHealth', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    for metric in node_rates:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=common_tags, count=1)
+
+    for fan in [4, 6, 10, 11, 14, 21, 22, 23, 25, 30]:
+        tags = ['fan_name:testfan', 'fan_number:{}'.format(fan)] + common_tags
+        aggregator.assert_metric('snmp.fanSpeed', metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_metric('snmp.ifsUsedBytes', metric_type=aggregator.RATE, tags=common_tags, count=1)
+    aggregator.assert_metric('snmp.ifsTotalBytes', metric_type=aggregator.RATE, tags=common_tags, count=1)
