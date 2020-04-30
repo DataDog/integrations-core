@@ -224,3 +224,4 @@ snmp.aristaEgressQueuePktsDropped,gauge,,,,[Arista] The number of packets discar
 snmp.aristaIngressQueuePktsDropped,gauge,,,,[Arista] The number of dropped packets due to congestion at the ingress port in an interface.,0,snmp,
 snmp.entPhySensorOperStatus,gauge,,,,[Arista] The operational status of the sensor.,0,snmp,
 snmp.ciscoEnvMonTemperatureStatusValue,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The current value of the testpoint being instrumented.,0,snmp,
+snmp.ciscoEnvMonSupplyState,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The current state of the power supply being instrumented.,0,snmp,

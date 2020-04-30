@@ -66,21 +66,33 @@ metrics:
           OID: 1.3.6.1.4.1.9.9.13.1.3.1.2
           name: ciscoEnvMonTemperatureStatusDescr
 
-  #  stackport specific info - every physical stackport has an entry in ifTable
-  - MIB: CISCO-STACKWISE-MIB
+  - MIB: CISCO-ENVMON-MIB
     table:
-      OID: 1.3.6.1.4.1.9.9.500.1.2.2
-      name: cswStackPortInfoTable
+      OID: 1.3.6.1.4.1.9.9.13.1.5
+      name: ciscoEnvMonSupplyStatusTable
     symbols:
-      - OID: 1.3.6.1.4.1.9.9.500.1.2.2.1.1
-        name: cswStackPortOperStatus
+      - OID: 1.3.6.1.4.1.9.9.13.1.5.1.3
+        name: ciscoEnvMonSupplyState
     metric_tags:
-      - MIB: IF-MIB
-        column:
-          OID: 1.3.6.1.2.1.31.1.1.1.1
-          name: ifName
-        table: ifXTable
-        tag: interface
+      - column:
+          OID: 1.3.6.1.4.1.9.9.13.1.5.1.2
+          name: ciscoEnvMonSupplyStatusDescr
+        tag: power_supply_descr
+
+  # - MIB: CISCO-ENVMON-MIB
+  #   table:
+  #     OID: 1.3.6.1.4.1.9.9.13.1.4
+  #     name: ciscoEnvMonFanStatusTable
+  #   symbols:
+  #     - OID: 1.3.6.1.4.1.9.9.13.1.4.1.3
+  #       name: ciscoEnvMonFanState
+  #   metric_tags:
+  #     column:
+  #       OID: 1.3.6.1.4.1.9.9.13.1.4.1.2
+  #       name: ciscoEnvMonFanStatusDescr
+  #     tag: fan_descr
+
+
   # #  stackport specific info - every physical stackport has an entry in ifTable
   # - MIB: CISCO-STACKWISE-MIB
   #   table:
@@ -116,32 +128,6 @@ metrics:
   #         name: entPhysicalName
   #       table: entPhysicalTable
   #       tag: entity_name
-
-  # - MIB: CISCO-ENVMON-MIB
-  #   table:
-  #     OID: 1.3.6.1.4.1.9.9.13.1.5
-  #     name: ciscoEnvMonSupplyStatusTable
-  #   symbols:
-  #     - OID: 1.3.6.1.4.1.9.9.13.1.5.1.3
-  #       name: ciscoEnvMonSupplyState
-  #   metric_tags:
-  #     column:
-  #       OID: 	1.3.6.1.4.1.9.9.13.1.5.1.2
-  #       name: ciscoEnvMonSupplyStatusDescr
-  #     tag: power_supply_descr
-
-  # - MIB: CISCO-ENVMON-MIB
-  #   table:
-  #     OID: 1.3.6.1.4.1.9.9.13.1.4
-  #     name: ciscoEnvMonFanStatusTable
-  #   symbols:
-  #     - OID: 1.3.6.1.4.1.9.9.13.1.4.1.3
-  #       name: ciscoEnvMonFanState
-  #   metric_tags:
-  #     column:
-  #       OID: 1.3.6.1.4.1.9.9.13.1.4.1.2
-  #       name: ciscoEnvMonFanStatusDescr
-  #     tag: fan_descr
 
   # - MIB: CISCO-FRU-CONTROL-MIB
   #   table:
