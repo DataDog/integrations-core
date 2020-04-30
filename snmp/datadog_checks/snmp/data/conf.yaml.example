@@ -165,10 +165,10 @@ instances:
     #
     # snmp_version: 2
 
-    ## @param timeout - integer - optional - default: 1
+    ## @param timeout - integer - optional - default: 5
     ## Amount of second before timing out.
     #
-    # timeout: 1
+    # timeout: 5
 
     ## @param retries - integer - optional - default: 5
     ## Amount of retries before failure.
