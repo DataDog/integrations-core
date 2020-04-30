@@ -1003,9 +1003,9 @@ def test_apc_ups(aggregator):
         'model:APC Smart-UPS 600',
         'firmware_version:2.0.3-test',
         'serial_num:test_serial',
-        'ups_name:testIdentName'
+        'ups_name:testIdentName',
     ]
-    
+
     tags = common.CHECK_TAGS + profile_tags
     metrics = [
         'upsAdvBatteryNumOfBadBattPacks',
