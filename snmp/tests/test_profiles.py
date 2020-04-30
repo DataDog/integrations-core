@@ -518,6 +518,12 @@ def test_dell_poweredge(aggregator):
 
     memory_device_gauges = ['memoryDeviceStatus', 'memoryDeviceFailureModes']
 
+    idrac_gauges = (
+        ['batteryState', 'controllerRollUpStatus', 'pCIDeviceStatus', 'systemSlotStatus', 'systemBIOSStatus']
+        + VOLTAGE_GAUGES
+        + PROBE_GAUGES
+    )
+
     common_tags = common.CHECK_TAGS + ['snmp_profile:dell-poweredge']
 
     chassis_indexes = [29, 31]
@@ -585,6 +591,9 @@ def test_dell_poweredge(aggregator):
         tags = ['disk_name:{}'.format(disk)] + common_tags
         for gauge in DISK_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    for gauge in idrac_gauges:
+        aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE)
 
     aggregator.assert_all_metrics_covered()
 
