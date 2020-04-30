@@ -1009,3 +1009,35 @@ def test_chatsworth(aggregator):
         )
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_apc_ups(aggregator):
+    run_profile_check('apc_ups')
+    profile_tags = [
+        'snmp_profile:apc_ups',
+        'model:APC Smart-UPS 600',
+        'firmware_version:2.0.3-test',
+        'serial_num:test_serial',
+        'ups_name:testIdentName',
+    ]
+
+    tags = common.CHECK_TAGS + profile_tags
+    metrics = [
+        'upsAdvBatteryNumOfBadBattPacks',
+        'upsAdvBatteryReplaceIndicator',
+        'upsAdvBatteryRunTimeRemaining',
+        'upsAdvBatteryTemperature',
+        'upsAdvBatteryCapacity',
+        'upsHighPrecInputFrequency',
+        'upsHighPrecInputLineVoltage',
+        'upsHighPrecOutputCurrent',
+        'upsAdvInputLineFailCause',
+        'upsAdvOutputLoad',
+        'upsBasicBatteryTimeOnBattery',
+        'upsAdvTestDiagnosticsResults',
+    ]
+
+    for metric in metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_all_metrics_covered()
