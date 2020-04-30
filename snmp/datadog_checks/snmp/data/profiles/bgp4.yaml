@@ -8,24 +8,44 @@ metrics:
   - MIB: BGP4-MIB
     table: bgpPeerTable
     symbols:
-      - bgpPeerInUpdates
-      - bgpPeerOutUpdates
-      - bgpPeerInTotalMessages
-      - bgpPeerOutTotalMessages
-      - bgpPeerFsmEstablishedTransitions
-      - bgpPeerFsmEstablishedTime
-      - bgpPeerConnectRetryInterval
-      - bgpPeerHoldTime
-      - bgpPeerKeepAlive
-      - bgpPeerHoldTimeConfigured
-      - bgpPeerKeepAliveConfigured
-      - bgpPeerMinASOriginationInterval
-      - bgpPeerMinRouteAdvertisementInterval
-      - bgpPeerInUpdateElapsedTime
-      - bgpPeerAdminStatus
-      - bgpPeerNegotiatedVersion
-      - bgpPeerRemoteAs
-      - bgpPeerState
+      - OID: 1.3.6.1.2.1.15.3.1.10
+        name: bgpPeerInUpdates
+      - OID: 1.3.6.1.2.1.15.3.1.11
+        name: bgpPeerOutUpdates
+      - OID: 1.3.6.1.2.1.15.3.1.11
+        name: bgpPeerInTotalMessages
+      - OID: 1.3.6.1.2.1.15.3.1.13
+        name: bgpPeerOutTotalMessages
+      - OID: 1.3.6.1.2.1.15.3.1.15
+        name: bgpPeerFsmEstablishedTransitions
+      - OID: 1.3.6.1.2.1.15.3.1.16
+        name: bgpPeerFsmEstablishedTime
+      - OID: 1.3.6.1.2.1.15.3.1.17
+        name: bgpPeerConnectRetryInterval
+      - OID: 1.3.6.1.2.1.15.3.1.18
+        name: bgpPeerHoldTime
+      - OID: 1.3.6.1.2.1.15.3.1.19
+        name: bgpPeerKeepAlive
+      - OID: 1.3.6.1.2.1.15.3.1.20
+        name: bgpPeerHoldTimeConfigured
+      - OID: bgpPeerHoldTimeConfigured
+        name: bgpPeerKeepAliveConfigured
+      - OID: 1.3.6.1.2.1.15.3.1.22
+        name: bgpPeerMinASOriginationInterval
+      - OID: 1.3.6.1.2.1.15.3.1.23
+        name: bgpPeerMinRouteAdvertisementInterval
+      - OID: 1.3.6.1.2.1.15.3.1.24
+        name: bgpPeerInUpdateElapsedTime
+      - OID: 1.3.6.1.2.1.15.3.1.3
+        name: bgpPeerAdminStatus
+      - OID: 1.3.6.1.2.1.15.3.1.4
+        name: bgpPeerNegotiatedVersion
+      - OID: 1.3.6.1.2.1.15.3.1.9
+        name: bgpPeerRemoteAs
+      - OID: 1.3.6.1.2.1.15.3.1.2
+        name: bgpPeerState
     metric_tags:
       - tag: neighbor
-        column: bgpPeerRemoteAddr
+        column:
+          OID: bgpPeerRemoteAddr
+          name: bgpPeerRemoteAddr
