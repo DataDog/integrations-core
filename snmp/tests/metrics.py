@@ -152,6 +152,7 @@ CPU_METRICS = [
     "cpmCPUTotalMonIntervalValue",
     "cpmCPUMemoryUsed",
     "cpmCPUMemoryFree",
+    "cpmCPUTotalEntry",
 ]
 CIE_METRICS = [
     "cieIfLastInTime",

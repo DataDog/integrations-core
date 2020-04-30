@@ -20,6 +20,7 @@ snmp.cieIfResetCount,count,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The n
 snmp.cpmCPUMemoryFree,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The overall CPU wide system memory currently free.,0,snmp,
 snmp.cpmCPUMemoryUsed,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The overall CPU wide system memory currently in use.,0,snmp,
 snmp.cpmCPUTotalMonIntervalValue,gauge,,percent,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The overall CPU busy percentage in the last cpmCPUMonInterval period.,0,snmp,
+snmp.cpmCPUTotalEntry,gauge,,entry,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] A table of overall CPU statistics.,0,snmp,
 snmp.devClientCount,gauge,,,,[Cisco Meraki] The number of clients currently associated with the device.,0,snmp,
 snmp.devInterfaceRecvBytes,gauge,,byte,,[Cisco Meraki] The number of bytes received on this interface.,0,snmp,
 snmp.devInterfaceRecvPkts,gauge,,packet,,[Cisco Meraki] The number of packets received on this interface.,0,snmp,

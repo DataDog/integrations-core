@@ -194,7 +194,7 @@ def test_f5_router(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_3850(aggregator):
+def test_cisco_3850(aggregator):
     run_profile_check('3850')
     # We're not covering all interfaces
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 48)]
