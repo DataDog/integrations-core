@@ -1013,7 +1013,7 @@ def test_isilon(aggregator):
 
     node_rates = [
         'nodeIfsOutBytes',
-        'nodeIfsInBits',
+        'nodeIfsInBytes',
     ]
 
     protocol_metrics = [
