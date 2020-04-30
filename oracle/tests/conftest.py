@@ -25,8 +25,11 @@ INSTANT_CLIENT_URL = (
 )
 
 E2E_METADATA_ORACLE_CLIENT = {
-    'docker_volumes': ['{}/scripts/start_commands_oracle.sh:/tmp/start_commands.sh'.format(HERE)],
-    'start_commands': ['bash /tmp/start_commands.sh'],
+    'docker_volumes': ['{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE)],
+    'start_commands': [
+        'bash /tmp/install_instant_client.sh',
+        'apt-get install libaio1',  # `apt-get update` already ran in install_instant_client.sh
+    ],
     'env_vars': {'LD_LIBRARY_PATH': '/opt/oracle/instantclient_19_3'},
 }
 
@@ -34,8 +37,8 @@ E2E_METADATA_JDBC_CLIENT = {
     # Since we don't include Oracle instantclient to `LD_LIBRARY_PATH` env var,
     # the integration will fallback to JDBC client
     'use_jmx': True,  # Using jmx to have a ready to use java runtime
-    'docker_volumes': ['{}/scripts/start_commands_jdbc.sh:/tmp/start_commands.sh'.format(HERE)],
-    'start_commands': ['bash /tmp/start_commands.sh'],
+    'docker_volumes': ['{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE)],
+    'start_commands': ['bash /tmp/install_instant_client.sh'],
 }
 
 
