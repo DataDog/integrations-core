@@ -28,7 +28,7 @@ gitlab.transaction.duration_seconds.count,count,,second,,The count of duration f
 gitlab.transaction.duration_seconds.sum,gauge,,second,,The sum of duration for all transactions (gitlab_transaction_* metrics),0,gitlab,transaction duration sum
 gitlab.transaction.event_build_found_total,count,,,,The counter for build found for API /jobs/request,0,gitlab,build found count
 gitlab.transaction.event_build_invalid_total,count,,,,The counter for build invalid due to concurrency conflict for API /jobs/request,-1,gitlab,build invalid count
-gitlab.transaction.event_build_not_found_cached_total,count,,,,The counter for cached response of build not found for API /jobs/request	,-1,gitlab,build not found cached
+gitlab.transaction.event_build_not_found_cached_total,count,,,,The counter for cached response of build not found for API /jobs/request,-1,gitlab,build not found cached
 gitlab.transaction.event_build_not_found_total,count,,,,The counter for build not found for API /jobs/request,-1,gitlab,build not found total
 gitlab.transaction.event_change_default_branch_total,count,,,,The counter when default branch is changed for any repository,0,gitlab,change default branch
 gitlab.transaction.event_create_repository_total,count,,,,The counter when any repository is created,0,gitlab,create repository total
