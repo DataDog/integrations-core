@@ -922,7 +922,9 @@ def test_cisco_asa_5525(aggregator):
 
     for switch in [4684, 4850, 8851, 9997, 15228, 16580, 24389, 30813, 36264]:
         aggregator.assert_metric(
-            'snmp.cvsChassisUpTime', metric_type=aggregator.GAUGE, tags=['chassis_switch_id:{}'.format(switch)] + common_tags
+            'snmp.cvsChassisUpTime',
+            metric_type=aggregator.GAUGE,
+            tags=['chassis_switch_id:{}'.format(switch)] + common_tags,
         )
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
