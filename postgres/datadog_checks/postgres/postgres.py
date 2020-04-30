@@ -449,7 +449,7 @@ class PostgreSql(AgentCheck):
                     args['options'] = '-c statement_timeout=%s' % self.config.query_timeout
                 self.db = psycopg2.connect(**args)
 
-    def _get_custom_queries(self, tags):
+    def _collect_custom_queries(self, tags):
         """
         Given a list of custom_queries, execute each query and parse the result for metrics
         """
