@@ -226,3 +226,4 @@ snmp.entPhySensorOperStatus,gauge,,,,[Arista] The operational status of the sens
 snmp.ciscoEnvMonTemperatureStatusValue,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The current value of the testpoint being instrumented.,0,snmp,
 snmp.ciscoEnvMonSupplyState,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The current state of the power supply being instrumented.,0,snmp,
 snmp.ciscoEnvMonFanState,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The current state of the fan being instrumented.,0,snmp,
+snmp.cswStackPortOperStatus,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The state of the stackport.,0,snmp,
