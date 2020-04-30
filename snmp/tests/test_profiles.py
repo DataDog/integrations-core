@@ -290,10 +290,6 @@ def test_cisco_3850(aggregator):
             tags = ['mem_pool_name:{}'.format(pool)] + common_tags
             aggregator.assert_metric('snmp.{}'.format(metrics), metric_type=aggregator.GAUGE, tags=tags)
 
-    # TODO: Needs snmprec in azure
-    # aggregator.assert_metric('snmp.cfwConnectionStatCount', metric_type=aggregator.RATE, tags=common_tags)
-    # aggregator.assert_metric('snmp.cfwHardwareStatusValue', metric_type=aggregator.GAUGE, tags=common_tags)
-
     aggregator.assert_metric('snmp.sysUpTimeInstance')
     aggregator.assert_all_metrics_covered()
 
@@ -436,18 +432,6 @@ def test_cisco_nexus(aggregator):
         aggregator.assert_metric(
             'snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=['fru:{}'.format(fru)] + common_tags
         )
-
-    for metrics in MEMORY_METRICS:
-        tags = ['mem_pool_name:test_pool'] + common_tags
-        aggregator.assert_metric('snmp.{}'.format(metrics), metric_type=aggregator.GAUGE, tags=tags)
-
-    aggregator.assert_metric(
-        'snmp.cfwConnectionStatCount', metric_type=aggregator.RATE, tags=['connection_type:1'] + common_tags
-    )
-
-    aggregator.assert_metric(
-        'snmp.cfwHardwareStatusValue', metric_type=aggregator.GAUGE, tags=['hardware_type:3'] + common_tags
-    )
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
@@ -936,6 +920,10 @@ def test_cisco_asa_5525(aggregator):
         'snmp.cfwHardwareStatusValue', metric_type=aggregator.GAUGE, tags=['hardware_type:3'] + common_tags
     )
 
+    for switch in [4684, 4850, 8851, 9997, 15228, 16580, 24389, 30813, 36264]:
+        aggregator.assert_metric(
+            'snmp.cvsChassisUpTime', metric_type=aggregator.GAUGE, tags=['chassis_switch_id:{}'.format(switch)] + common_tags
+        )
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
