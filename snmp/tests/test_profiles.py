@@ -259,6 +259,13 @@ def test_cisco_3850(aggregator):
             env_tags = ['power_supply_descr:Switch {} - Power Supply {}, {}'.format(switch, supply, status)]
             aggregator.assert_metric('snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=env_tags + common_tags)
 
+    for fan in range(1, 4):
+        for switch in range(1, 3):
+            aggregator.assert_metric(
+                'snmp.ciscoEnvMonFanState',
+                metric_type=aggregator.GAUGE,
+                tags=['fan_descr:Switch {} - FAN {}, Normal'.format(switch, fan)] + common_tags)
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
@@ -380,6 +387,13 @@ def test_cisco_nexus(aggregator):
         metric_type=aggregator.GAUGE,
         tags=['power_supply_descr:test_power_supply'] + common_tags,
     )
+
+    for fan in range(1, 9):
+        aggregator.assert_metric(
+            'snmp.ciscoEnvMonFanState',
+            metric_type=aggregator.GAUGE,
+            tags=['fan_descr:fan_{}'.format(fan)] + common_tags)
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
@@ -825,13 +839,20 @@ def test_cisco_asa_5525(aggregator):
     aggregator.assert_metric(
         'snmp.ciscoEnvMonTemperatureStatusValue',
         metric_type=aggregator.GAUGE,
-        tags=['temp_descr:quaintly oxen Jaded but their'] + common_tags,
+        tags=['temp_descr:test_temp'] + common_tags,
     )
 
     aggregator.assert_metric(
         'snmp.ciscoEnvMonSupplyState',
         metric_type=aggregator.GAUGE,
         tags=['power_supply_descr:test_power_supply'] + common_tags,)
+    
+    for fan in range(1, 9):
+        aggregator.assert_metric(
+            'snmp.ciscoEnvMonFanState',
+            metric_type=aggregator.GAUGE,
+            tags=['fan_descr:fan_{}'.format(fan)] + common_tags)
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
