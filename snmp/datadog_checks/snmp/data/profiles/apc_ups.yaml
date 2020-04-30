@@ -54,17 +54,16 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.318.1.1.1.7.2.3
       name: upsAdvTestDiagnosticsResults
-    ## Need to investigate getting these universal tags working
-    # metric_tags:
-    #   - MIB: POWERNET-MIB
-    #     symbol: upsBasicIdentName
-    #     tag: ups_name
-    #   - tag: model
-    #     MIB: POWERNET-MIB
-    #     symbol: upsBasicIdentModel
-    #   - tag: serial_num
-    #     MIB: POWERNET-MIB
-    #     name: upsAdvIdentSerialNumber
-    #   - tag: firmware_version
-    #     MIB: POWERNET-MIB
-    #     name: upsAdvIdentFirmwareRevision
+metric_tags:
+  - tag: model
+    MIB: PowerNet-MIB
+    symbol: upsBasicIdentModel
+  - tag: serial_num
+    MIB: PowerNet-MIB
+    symbol: upsAdvIdentSerialNumber
+  - tag: firmware_version
+    MIB: PowerNet-MIB
+    symbol: upsAdvIdentFirmwareRevision
+  - MIB: PowerNet-MIB
+    symbol: upsBasicIdentName
+    tag: ups_name
