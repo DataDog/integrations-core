@@ -388,7 +388,7 @@ snmp.bgpPeerHoldTimeConfigured,gauge,,second,,The time interval in seconds for t
 snmp.bgpPeerKeepAliveConfigured,gauge,,second,,The time interval in seconds for the KeepAlive timer configured for this BGP speaker with this peer.,0,snmp,
 snmp.bgpPeerMinASOriginationInterval,gauge,,second,,The time interval in seconds for the MinASOriginationInterval timer.,0,snmp,
 snmp.bgpPeerInUpdates,rate,,message,,The number of BGP UPDATE messages received on this connection.,0,snmp,
-snmp.bgpPeerOutUpdates,rate,,messsge,,The number of BGP UPDATE messages transmitted on this connection.,0,snmp,
+snmp.bgpPeerOutUpdates,rate,,message,,The number of BGP UPDATE messages transmitted on this connection.,0,snmp,
 snmp.bgpPeerInTotalMessages,rate,,message,,The total number of messages received from the remote peer on this connection.,0,snmp,
 snmp.bgpPeerOutTotalMessages,rate,,message,,The total number of messages transmitted o the remote peer on this connection.,0,snmp,
 snmp.bgpPeerFsmEstablishedTransitions,rate,,,,The total number of times the BGP FSM transitioned into the established state.,0,snmp,
