@@ -290,7 +290,7 @@ LTM_POOL_MEMBER_RATES = [
     'ltmPoolMemberStatServerBytesOut',
 
 # Base profile metrics from BPG profile
-# _base_bgp4.yaml
+# _generic-router-bgp4.yaml
 PEER_GAUGES = [
     'bgpPeerAdminStatus',
     'bgpPeerNegotiatedVersion',
