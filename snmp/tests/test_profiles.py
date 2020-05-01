@@ -1107,13 +1107,35 @@ def test_cisco_asa_5525(aggregator):
 def test_cisco_csr(aggregator):
     run_profile_check('cisco-csr1000v')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-csr1000v', 'snmp_host:kept']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-csr1000v']
     
-    peer_metrics = [
-        'bgpPeerInUpdates',
+    PEER_GAUGES = [
+        'bgpPeerAdminStatus',
+        'bgpPeerNegotiatedVersion',
+        'bgpPeerRemoteAs',
+        'bgpPeerState',
+        'bgpPeerFsmEstablishedTime',
+        'bgpPeerConnectRetryInterval',
+        'bgpPeerHoldTime',
+        'bgpPeerKeepAlive',
+        'bgpPeerHoldTimeConfigured',
+        'bgpPeerKeepAliveConfigured',
+        'bgpPeerMinASOriginationInterval',
     ]
-    for metric in peer_metrics:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
+    PEER_RATES = [
+        'bgpPeerInUpdates',
+        'bgpPeerOutUpdates',
+        'bgpPeerInTotalMessages',
+        'bgpPeerOutTotalMessages',
+        'bgpPeerFsmEstablishedTransitions',
+    ]
+    
+    tags = ['neighbor:244.12.239.177'] + common_tags
+    for metric in PEER_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+    for metric in PEER_RATES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags)
 
 
 def test_checkpoint_firewall(aggregator):
