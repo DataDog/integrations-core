@@ -1,0 +1,67 @@
+name: Ceph
+files:
+  - name: ceph.yaml
+    options:
+      - template: init_config
+      - template: instances
+        options:
+          - name: ceph_cmd
+            description: Ceph command to use.
+            value:
+              example: /usr/bin/ceph
+              type: string
+          - name: ceph_cluster
+            description: Cluster ceph to query.
+            value:
+              example: ceph
+              type: string
+          - name: use_sudo
+            description: |
+              If your environment requires sudo, please add the following line:
+
+              dd-agent ALL=(ALL) NOPASSWD:/usr/bin/ceph
+
+              to your sudoers file, and uncomment the option below:
+            value:
+              type: boolean
+              example: false
+          - name: collect_service_check_for
+            description: |
+              If you wish to customize the health checks sent as a service check, uncomment and edit the list below.
+              It collects by default the health check listed below.
+              The list of health checks is available here: http://docs.ceph.com/docs/master/rados/operations/health-checks/
+              The health checks are only available if you're running ceph luminous or later
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - OSD_DOWN
+                - OSD_ORPHAN
+                - OSD_FULL
+                - OSD_NEARFULL
+                - POOL_FULL
+                - POOL_NEAR_FULL
+                - PG_AVAILABILITY
+                - PG_DEGRADED
+                - PG_DEGRADED_FULL
+                - PG_DAMAGED
+                - PG_NOT_SCRUBBED
+                - PG_NOT_DEEP_SCRUBBED
+                - CACHE_POOL_NEAR_FULL
+                - TOO_FEW_PGS
+                - TOO_MANY_PGS
+                - OBJECT_UNFOUND
+                - REQUEST_SLOW
+                - REQUEST_STUCK
+          - template: instances/tags
+      - template: logs
+        example:
+         - type: file
+           path: /var/log/ceph/*.log
+           source: ceph
+           service: <APPLICATION_NAME>
+           log_processing_rules:
+             - type: multi_line
+               name: log_start_with_date
+               pattern: \d{4}-\d{2}-\d{2}

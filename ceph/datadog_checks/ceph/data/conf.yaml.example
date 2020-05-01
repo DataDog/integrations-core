@@ -1,5 +1,9 @@
-init_config:
+## All options defined here are available to all instances.
+#
+# init_config: {}
 
+## Every instance is scheduled independent of the others.
+#
 instances:
 
   -
@@ -20,9 +24,9 @@ instances:
     ##
     ## to your sudoers file, and uncomment the option below:
     #
-    # use_sudo: true
+    # use_sudo: false
 
-    ## @param collect_service_check_for - list of string - optional
+    ## @param collect_service_check_for - list of strings - optional
     ## If you wish to customize the health checks sent as a service check, uncomment and edit the list below.
     ## It collects by default the health check listed below.
     ## The list of health checks is available here: http://docs.ceph.com/docs/master/rados/operations/health-checks/
@@ -48,22 +52,25 @@ instances:
     #   - REQUEST_SLOW
     #   - REQUEST_STUCK
 
-    ## @param tags - list of key:value element - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
-    #   - name:mars_cluster
+    #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-## Log Section (Available for Agent >=6.0)
+## Log Section
 ##
-## type - mandatory - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
-## service - mandatory - Name of the service that generated the log
-## source  - mandatory - Attribute that defines which Integration sent the logs
-## tags: - optional - Add tags to the collected logs
+## type - required - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - required - Set port if type is tcp or udp.
+##                                         Set path if type is file.
+##                                         Set channel_path if type is windows_event.
+## source  - required - Attribute that defines which Integration sent the logs
+## service - required - The name of the service that generates the log.
+##                      Overrides any `service` defined in the `init_config` section.
+## tags - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
@@ -73,6 +80,6 @@ instances:
 #     source: ceph
 #     service: <APPLICATION_NAME>
 #     log_processing_rules:
-#       - type: multi_line
-#         name: log_start_with_date
-#         pattern: \d{4}-\d{2}-\d{2}
+#     - type: multi_line
+#       name: log_start_with_date
+#       pattern: \d{4}-\d{2}-\d{2}
