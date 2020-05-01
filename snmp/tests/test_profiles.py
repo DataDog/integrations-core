@@ -260,9 +260,7 @@ def test_cisco_3850(aggregator):
         )
 
     aggregator.assert_metric(
-        'snmp.ciscoEnvMonFanState',
-        metric_type=aggregator.GAUGE,
-        tags=common_tags,
+        'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags,
     )
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
@@ -401,15 +399,11 @@ def test_cisco_nexus(aggregator):
         )
 
     aggregator.assert_metric(
-        'snmp.ciscoEnvMonSupplyState',
-        metric_type=aggregator.GAUGE,
-        tags=['power_source:1'] + common_tags,
+        'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags,
     )
 
     aggregator.assert_metric(
-        'snmp.ciscoEnvMonFanState',
-        metric_type=aggregator.GAUGE,
-        tags=common_tags,
+        'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags,
     )
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
@@ -874,15 +868,11 @@ def test_cisco_asa_5525(aggregator):
         )
 
     aggregator.assert_metric(
-        'snmp.ciscoEnvMonSupplyState',
-        metric_type=aggregator.GAUGE,
-        tags=['power_source:1'] + common_tags,
+        'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags,
     )
 
     aggregator.assert_metric(
-        'snmp.ciscoEnvMonFanState',
-        metric_type=aggregator.GAUGE,
-        tags=common_tags,
+        'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags,
     )
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
