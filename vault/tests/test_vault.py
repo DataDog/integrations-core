@@ -11,7 +11,7 @@ from datadog_checks.vault import Vault
 from datadog_checks.vault.errors import ApiUnreachable
 from datadog_checks.vault.vault import Leader
 
-from .common import INSTANCES, MockResponse
+from .common import INSTANCES, MockResponse, auth_required, noauth_required
 from .utils import run_check
 
 pytestmark = pytest.mark.usefixtures('dd_environment')
@@ -413,6 +413,7 @@ class TestVault:
 
         aggregator.assert_metric('vault.is_leader', count=0)
 
+    @auth_required
     def test_token_renewal(self, caplog, aggregator, instance, global_tags):
         instance = instance()
         instance['token_renewal_wait'] = 1
@@ -452,7 +453,8 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.WARNING, count=0)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=0)
 
-    def test_no_token(self, aggregator, instance, global_tags):
+    @auth_required
+    def test_auth_needed_but_no_token(self, aggregator, instance, global_tags):
         instance = instance()
         instance['no_token'] = True
         c = Vault(Vault.CHECK_NAME, {}, [instance])
@@ -463,3 +465,12 @@ class TestVault:
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=0)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.WARNING, count=0)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=1, tags=global_tags)
+
+    @noauth_required
+    def test_noauth_needed(self, aggregator, no_token_instance, global_tags):
+        c = Vault(Vault.CHECK_NAME, {}, [no_token_instance])
+        run_check(c, extract_message=True)
+
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1, tags=global_tags)
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.WARNING, count=0)
+        aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, count=0)
