@@ -1,5 +1,4 @@
 extends:
-  - cisco-nexus.yaml
   - _generic-router-ip.yaml
   - bgp4.yaml
 

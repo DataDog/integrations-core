@@ -1104,6 +1104,18 @@ def test_cisco_asa_5525(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+def test_cisco_csr(aggregator):
+    run_profile_check('cisco-csr1000v')
+
+    common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-csr1000v', 'snmp_host:kept']
+    
+    peer_metrics = [
+        'bgpPeerInUpdates',
+    ]
+    for metric in peer_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
+
+
 def test_checkpoint_firewall(aggregator):
     run_profile_check('checkpoint-firewall')
 
