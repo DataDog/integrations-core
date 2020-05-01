@@ -259,13 +259,11 @@ def test_cisco_3850(aggregator):
             'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=env_tags + common_tags
         )
 
-    for fan in range(1, 4):
-        for switch in range(1, 3):
-            aggregator.assert_metric(
-                'snmp.ciscoEnvMonFanState',
-                metric_type=aggregator.GAUGE,
-                tags=common_tags,
-            )
+    aggregator.assert_metric(
+        'snmp.ciscoEnvMonFanState',
+        metric_type=aggregator.GAUGE,
+        tags=common_tags,
+    )
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
 
@@ -408,12 +406,11 @@ def test_cisco_nexus(aggregator):
         tags=['power_source:1'] + common_tags,
     )
 
-    for fan in range(1, 9):
-        aggregator.assert_metric(
-            'snmp.ciscoEnvMonFanState',
-            metric_type=aggregator.GAUGE,
-            tags=common_tags,
-        )
+    aggregator.assert_metric(
+        'snmp.ciscoEnvMonFanState',
+        metric_type=aggregator.GAUGE,
+        tags=common_tags,
+    )
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
     aggregator.assert_metric(
@@ -882,12 +879,11 @@ def test_cisco_asa_5525(aggregator):
         tags=['power_source:1'] + common_tags,
     )
 
-    for fan in range(1, 9):
-        aggregator.assert_metric(
-            'snmp.ciscoEnvMonFanState',
-            metric_type=aggregator.GAUGE,
-            tags=common_tags,
-        )
+    aggregator.assert_metric(
+        'snmp.ciscoEnvMonFanState',
+        metric_type=aggregator.GAUGE,
+        tags=common_tags,
+    )
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
     aggregator.assert_metric(
