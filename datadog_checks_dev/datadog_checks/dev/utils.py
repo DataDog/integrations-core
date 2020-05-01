@@ -27,6 +27,8 @@ ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
 
+def get_tox_env():
+    return os.environ['TOX_ENV_NAME']
 
 def get_ci_env_vars():
     return ('AGENT_OS', 'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI')
