@@ -288,4 +288,26 @@ LTM_POOL_MEMBER_RATES = [
     'ltmPoolMemberStatServerBytesIn',
     'ltmPoolMemberStatServerPktsOut',
     'ltmPoolMemberStatServerBytesOut',
+
+# Base profile metrics from BPG profile
+# _base_bgp4.yaml
+PEER_GAUGES = [
+    'bgpPeerAdminStatus',
+    'bgpPeerNegotiatedVersion',
+    'bgpPeerRemoteAs',
+    'bgpPeerState',
+    'bgpPeerFsmEstablishedTime',
+    'bgpPeerConnectRetryInterval',
+    'bgpPeerHoldTime',
+    'bgpPeerKeepAlive',
+    'bgpPeerHoldTimeConfigured',
+    'bgpPeerKeepAliveConfigured',
+    'bgpPeerMinASOriginationInterval',
+]
+PEER_RATES = [
+    'bgpPeerInUpdates',
+    'bgpPeerOutUpdates',
+    'bgpPeerInTotalMessages',
+    'bgpPeerOutTotalMessages',
+    'bgpPeerFsmEstablishedTransitions',
 ]

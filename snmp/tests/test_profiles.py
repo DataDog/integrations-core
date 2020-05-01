@@ -36,6 +36,8 @@ from .metrics import (
     LTM_VIRTUAL_SERVER_RATES,
     MEMORY_METRICS,
     PROBE_GAUGES,
+    PEER_GAUGES,
+    PEER_RATES,
     SYSTEM_STATUS_GAUGES,
     TCP_COUNTS,
     TCP_GAUGES,
@@ -1108,28 +1110,7 @@ def test_cisco_csr(aggregator):
     run_profile_check('cisco-csr1000v')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-csr1000v']
-    
-    PEER_GAUGES = [
-        'bgpPeerAdminStatus',
-        'bgpPeerNegotiatedVersion',
-        'bgpPeerRemoteAs',
-        'bgpPeerState',
-        'bgpPeerFsmEstablishedTime',
-        'bgpPeerConnectRetryInterval',
-        'bgpPeerHoldTime',
-        'bgpPeerKeepAlive',
-        'bgpPeerHoldTimeConfigured',
-        'bgpPeerKeepAliveConfigured',
-        'bgpPeerMinASOriginationInterval',
-    ]
-    PEER_RATES = [
-        'bgpPeerInUpdates',
-        'bgpPeerOutUpdates',
-        'bgpPeerInTotalMessages',
-        'bgpPeerOutTotalMessages',
-        'bgpPeerFsmEstablishedTransitions',
-    ]
-    
+
     tags = ['neighbor:244.12.239.177'] + common_tags
     for metric in PEER_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
