@@ -63,4 +63,35 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.25461.2.1.2.5.1.3
       name: panGPGWUtilizationActiveTunnels
-
+  - MIB: PAN-ENTITY-EXT-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.1.1.7.1.1.2
+      name: panEntityTotalPowerUsed
+  - MIB: PAN-ENTITY-EXT-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.25461.1.1.7.1.1.1
+      name: panEntityTotalPowerAvail
+  - MIB: PAN-ENTITY-EXT-MIB
+    table:
+      OID: 1.3.6.1.4.1.25461.1.1.7.1.2.1
+      name: panEntityFRUModuleTable
+    symbols:
+      - OID: 1.3.6.1.4.1.25461.1.1.7.1.2.1.1.1
+        name: panEntryFRUModulePowerUsed
+      - OID: 1.3.6.1.4.1.25461.1.1.7.1.2.1.1.2
+        name: panEntryFRUModuleNumPorts
+  
+  - MIB: PAN-ENTITY-EXT-MIB
+    table:
+      OID: 1.3.6.1.4.1.25461.1.1.7.1.3.1
+      name: panEntityFanTrayTable
+    symbols:
+      - OID: 1.3.6.1.4.1.25461.1.1.7.1.3.1.1.1
+        name: panEntryFanTrayPowerUsed
+    metric_tags:
+      - MIB: ENTITY-MIB
+        column:
+          OID: 1.3.6.1.2.1.47.1.1.1.1.2
+          name: entPhysicalDescr
+        table: entPhysicalTable
+        tag: ent_descr
