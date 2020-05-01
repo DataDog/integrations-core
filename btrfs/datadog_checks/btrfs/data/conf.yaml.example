@@ -1,19 +1,23 @@
-init_config:
+## All options defined here are available to all instances.
+#
+# init_config: {}
 
+## Every instance is scheduled independent of the others.
+#
 instances:
 
   -
-    ## @param excluded_devices - list of string - optional
-    ## List of devices to exclude
+    ## @param excluded_devices - list of strings - optional
+    ## List of devices to exclude.
     #
     # excluded_devices:
     #   - <DEVICE_1>
     #   - <DEVICE_2>
 
-    ## @param tags - list of key:value element - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
     #   - <KEY_1>:<VALUE_1>
