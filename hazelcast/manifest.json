@@ -24,7 +24,7 @@
     "log collection"
   ],
   "type": "check",
-  "is_public": true,
+  "is_public": false,
   "integration_id": "hazelcast",
   "assets": {
     "configuration": {
