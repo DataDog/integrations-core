@@ -894,9 +894,7 @@ def test_cisco_asa_5525(aggregator):
             tags=['fan_descr:fan_{}'.format(fan)] + common_tags,
         )
 
-    # TODO: Needs to add iftable tags
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
-    # TODO: Needs Entity cross-table tag
     aggregator.assert_metric(
         'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:0xffffffffffff'] + common_tags
     )
