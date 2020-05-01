@@ -73,9 +73,9 @@ metrics:
         name: ciscoEnvMonSupplyState
     metric_tags:
       - column:
-          OID: 1.3.6.1.4.1.9.9.13.1.5.1.2
-          name: ciscoEnvMonSupplyStatusDescr
-        tag: power_supply_descr
+          OID: 1.3.6.1.4.1.9.9.13.1.5.1.4
+          name: ciscoEnvMonSupplySource
+        tag: power_source
   - MIB: CISCO-ENVMON-MIB
     table:
       OID: 1.3.6.1.4.1.9.9.13.1.4

@@ -256,12 +256,11 @@ def test_cisco_3850(aggregator):
                 'snmp.ciscoEnvMonTemperatureStatusValue', metric_type=aggregator.GAUGE, tags=env_tag + common_tags
             )
 
-    for switch in range(1, 3):
-        for supply, status in [('A', 'Normal'), ('B', 'NotExist')]:
-            env_tags = ['power_supply_descr:Switch {} - Power Supply {}, {}'.format(switch, supply, status)]
-            aggregator.assert_metric(
-                'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=env_tags + common_tags
-            )
+    for source in range(1, 3):
+        env_tags = ['power_source:{}'.format(source)]
+        aggregator.assert_metric(
+            'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=env_tags + common_tags
+        )
 
     for fan in range(1, 4):
         for switch in range(1, 3):
@@ -271,7 +270,6 @@ def test_cisco_3850(aggregator):
                 tags=['fan_descr:Switch {} - FAN {}, Normal'.format(switch, fan)] + common_tags,
             )
 
-    # TODO: Needs to add iftable tags
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
 
     for switch, mac_addr in [(1, '0x046c9d42b080'), (2, '0xdccec1430680')]:
@@ -409,7 +407,7 @@ def test_cisco_nexus(aggregator):
     aggregator.assert_metric(
         'snmp.ciscoEnvMonSupplyState',
         metric_type=aggregator.GAUGE,
-        tags=['power_supply_descr:test_power_supply'] + common_tags,
+        tags=['power_source:1'] + common_tags,
     )
 
     for fan in range(1, 9):
@@ -419,9 +417,7 @@ def test_cisco_nexus(aggregator):
             tags=['fan_descr:fan_{}'.format(fan)] + common_tags,
         )
 
-    # TODO: Needs to add ifName cross-table tag
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
-    # TODO: Needs Entity cross-table tag
     aggregator.assert_metric(
         'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:0xffffffffffff'] + common_tags
     )
@@ -884,7 +880,7 @@ def test_cisco_asa_5525(aggregator):
     aggregator.assert_metric(
         'snmp.ciscoEnvMonSupplyState',
         metric_type=aggregator.GAUGE,
-        tags=['power_supply_descr:test_power_supply'] + common_tags,
+        tags=['power_source:1'] + common_tags,
     )
 
     for fan in range(1, 9):
