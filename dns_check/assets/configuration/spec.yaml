@@ -60,4 +60,4 @@ files:
             value:
               type: string
               example: A
-          - template: instances/tags
+          - template: instances/default
