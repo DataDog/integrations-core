@@ -1106,5 +1106,9 @@ def test_apc_ups(aggregator):
 
     for metric in metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
-
+    aggregator.assert_metric(
+        'snmp.upsOutletGroupStatusGroupState',
+        metric_type=aggregator.GAUGE,
+        tags=['outlet_group_name:test_outlet'] + tags,
+    )
     aggregator.assert_all_metrics_covered()

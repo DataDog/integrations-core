@@ -253,3 +253,4 @@ snmp.upsAdvOutputLoad,gauge,,percent,,[APC UPS] The current UPS load expressed i
 snmp.upsBasicBatteryTimeOnBattery,gauge,,time,,[APC UPS] The elapsed time since the UPS has switched to battery power.,0,snmp,
 snmp.upsAdvTestDiagnosticsResults,gauge,,,,[APC UPS] The results of the last UPS diagnostics test performed.,0,snmp,
 snmp.ciscoEnvMonTemperatureStatusValue,gauge,,,,[Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] The current value of the testpoint being instrumented.,0,snmp,
+snmp.upsOutletGroupStatusGroupState,gauge,,,,[APC UPS] The current state of the outlet group.,0,snmp,
