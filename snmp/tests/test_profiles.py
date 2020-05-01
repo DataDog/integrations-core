@@ -361,7 +361,7 @@ def test_idrac(aggregator):
     for index, device, mac in tag_mappings:
         tags = [
             'chassis_index:{}'.format(index),
-            'device_fqdn:{}'.format(device),
+            'device_fqdd:{}'.format(device),
             'mac_addr:{}'.format(mac),
         ] + common_tags
         aggregator.assert_metric(
@@ -396,7 +396,6 @@ def test_idrac(aggregator):
         )
 
     for gauge in DRS_GAUGES:
-        # tags = ['chassis_index:{}'.format('')] + common_tags
         aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
     aggregator.assert_all_metrics_covered()

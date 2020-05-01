@@ -116,7 +116,6 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.15.1.21
           name: batteryDisplayName
         tag: battery_name
-
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1
@@ -129,7 +128,6 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.5.1.20.130.1.1.2
           name: controllerName
         tag: controller_name
-
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.4.1100.80
@@ -181,7 +179,7 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.674.10892.5.4.1100.90.1.30
           name: networkDeviceFQDD
-        tag: device_fqdn
+        tag: device_fqdd
   - MIB: IDRAC-MIB-SMIv2
     table:
       OID: 1.3.6.1.4.1.674.10892.5.4.300.50
@@ -246,55 +244,23 @@ metrics:
           OID: 1.3.6.1.4.1.674.10892.5.4.1100.50.1.1
           name: memoryDevicechassisIndex
         tag: chassis_index
-
   - MIB: DELL-RAC-MIB
     symbol:
       OID: 1.3.6.1.4.1.674.10892.2.3.1.9
       name: drsCMCCurrStatus
- #   metric_tags:
- #     - MIB: DELL-RAC-MIB
- #       column:
- #         OID: 1.3.6.1.4.1.674.10892.2.4.1.1.1
- #         name: drsChassisIndex
- #       table: drsCMCPowerTableEntry
- #       tag: chassis_index
-
   - MIB: DELL-RAC-MIB
     symbol:
       OID: 1.3.6.1.4.1.674.10892.2.3.1.1
       name: drsGlobalCurrStatus
-#    metric_tags:
-#      - column:
-#          OID: 1.3.6.1.4.1.674.10892.2.4.1.1.1
-#          name: drsChassisIndex
-#        tag: chassis_index
-
   - MIB: DELL-RAC-MIB
     symbol:
       OID: 1.3.6.1.4.1.674.10892.2.3.1.5
       name: drsPowerCurrStatus
-#    metric_tags:
-#      - column:
-#          OID: 1.3.6.1.4.1.674.10892.2.4.1.1.1
-#          name: drsChassisIndex
-#        tag: chassis_index
-
   - MIB: DELL-RAC-MIB
     symbol:
       OID: 1.3.6.1.4.1.674.10892.2.3.1.4
       name: drsRedCurrStatus
-#    metric_tags:
-#      - column:
-#          OID: 1.3.6.1.4.1.674.10892.2.4.1.1.1
-#          name: drsChassisIndex
-#        tag: chassis_index
-
   - MIB: DELL-RAC-MIB
     symbol:
       OID: 1.3.6.1.4.1.674.10892.2.2.1
       name: drsGlobalSystemStatus
-#    metric_tags:
-#      - column:
-#          OID: 1.3.6.1.4.1.674.10892.2.4.1.1.1
-#          name: drsChassisIndex
-#        tag: chassis_index
