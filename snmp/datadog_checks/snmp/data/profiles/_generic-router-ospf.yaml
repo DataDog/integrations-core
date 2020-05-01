@@ -15,11 +15,10 @@ metrics:
           OID: 1.3.6.1.2.1.14.10.1.3
           name: ospfNbrRtrId
         tag: neighbor_id
-      - colimn:
+      - column:
           OID: 1.3.6.1.2.1.14.10.1.1
           name: ospfNbrIpAddr
         tag: neighbor_ip
-
   - MIB: OSPF-MIB
     table:
       OID: 1.3.6.1.2.1.14.11
@@ -40,7 +39,6 @@ metrics:
           OID: 1.3.6.1.2.1.14.11.1.2
           name: ospfVirtNbrRtrId
         tag: neighbor_id
-
   - MIB: OSPF-MIB
     table:
       OID: 1.3.6.1.2.1.14.7
@@ -60,8 +58,9 @@ metrics:
       - column:
           OID: 1.3.6.1.2.1.14.10.1.3
           name: ospfNbrRtrId
+        table: ospfNbrTable
+        MIB: OSPF-MIB
         tag: neighbor_id
-
   - MIB: OSPF-MIB
     table:
       OID: 1.3.6.1.2.1.14.9
@@ -77,4 +76,6 @@ metrics:
       - column:
           OID: 1.3.6.1.2.1.14.11.1.2
           name: ospfVirtNbrRtrId
+        table: ospfVirtNbrTable
+        MIB: OSPF-MIB
         tag: neighbor_id
