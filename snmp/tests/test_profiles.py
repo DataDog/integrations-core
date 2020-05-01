@@ -805,8 +805,35 @@ def test_proliant(aggregator):
         for metric in IF_RATES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
 
+    mem_boards = ['11', '12']
+    for board in mem_boards:
+        tags = ['mem_board_index:{}'.format(board)] + common_tags
+        aggregator.assert_metric('snmp.cpqHeResMem2ModuleCondition', metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    aggregator.assert_metric('snmp.cpqHeResMem2ModuleCondition', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1)
+    adapter_gauges = ['cpqNicIfPhysAdapterStatus', 'cpqNicIfPhysAdapterState']
+
+    for gauge in adapter_gauges:
+        tags = ['adapter_name:adapter', 'adapter_mac_addr:mac'] + common_tags
+        aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    power_metrics = [
+        'cpqHeFltTolPowerSupplyStatus',
+        'cpqHeFltTolPowerSupplyCapacityUsed',
+        'cpqHeFltTolPowerSupplyCapacityMaximum',
+    ]
+    for gauge in power_metrics:
+        tags = ['chassis_num:30'] + common_tags
+        aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    controller_index = ['controller_index:3'] + common_tags
+    aggregator.assert_metric(
+        'snmp.{}'.format("cpqDaCntlrCondition"), metric_type=aggregator.GAUGE, tags=controller_index, count=1
+    )
+
+    thermal_metrics = ['cpqHeThermalCondition', 'cpqHeSysUtilLifeTime', 'cpqHeFltTolPwrSupplyStatus']
+
+    for metric in thermal_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
 
