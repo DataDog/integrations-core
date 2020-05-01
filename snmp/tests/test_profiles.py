@@ -300,6 +300,13 @@ def test_cisco_3850(aggregator):
         tags = ['ospf_ip_addr:192.29.116.25'] + common_tags  # 'neighbor_ip:74.210.82.1',
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
+    for temp in range(3):
+        for switch in range(1, 3):
+            env_tag = ['temp_descr:Switch {} - Temp Sensor {}, GREEN '.format(switch, temp)]
+            aggregator.assert_metric(
+                'snmp.ciscoEnvMonTemperatureStatusValue', metric_type=aggregator.GAUGE, tags=env_tag + common_tags
+            )
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
