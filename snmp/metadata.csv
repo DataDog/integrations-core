@@ -392,3 +392,4 @@ snmp.bgpPeerOutUpdates,rate,,message,,[Cisco CSR1000v] The number of BGP UPDATE 
 snmp.bgpPeerInTotalMessages,rate,,message,,[Cisco CSR1000v] The total number of messages received from the remote peer on this connection.,0,snmp,
 snmp.bgpPeerOutTotalMessages,rate,,message,,[Cisco CSR1000v] The total number of messages transmitted o the remote peer on this connection.,0,snmp,
 snmp.bgpPeerFsmEstablishedTransitions,rate,,,,[Cisco CSR1000v] The total number of times the BGP FSM transitioned into the established state.,0,snmp,
+
