@@ -67,24 +67,10 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.25461.1.1.7.1.1.2
       name: panEntityTotalPowerUsed
-    # metric_tags:
-    #   - MIB: ENTITY-MIB
-    #     column:
-    #       OID: 1.3.6.1.2.1.47.1.2.1.1.2
-    #       name: entLogicalDescr
-    #     table: entLogicalTable
-    #     tag: ent_descr
   - MIB: PAN-ENTITY-EXT-MIB
     symbol:
       OID: 1.3.6.1.4.1.25461.1.1.7.1.1.1
       name: panEntityTotalPowerAvail
-    # metric_tags:
-    #   - MIB: ENTITY-MIB
-    #     column:
-    #       OID: 1.3.6.1.2.1.47.1.2.1.1.2
-    #       name: entLogicalDescr
-    #     table: entLogicalTable
-    #     tag: ent_descr
   - MIB: PAN-ENTITY-EXT-MIB
     table:
       OID: 1.3.6.1.4.1.25461.1.1.7.1.2.1
@@ -99,7 +85,7 @@ metrics:
         column:
           OID: 1.3.6.1.2.1.47.1.1.1.1.16
           name: entPhysicalIsFRU
-        table: entPhysicalTable
+        table: entPhysicalDescr
         tag: fru
   
   - MIB: PAN-ENTITY-EXT-MIB
@@ -113,6 +99,6 @@ metrics:
       - MIB: ENTITY-MIB
         column:
           OID: 1.3.6.1.2.1.47.1.2.1.1.2
-          name: entLogicalDescr
-        table: entLogicalTable
+          name: entPhysicalDescr
+        table: entPhysicalTable
         tag: ent_descr
