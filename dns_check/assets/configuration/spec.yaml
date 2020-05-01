@@ -9,6 +9,7 @@ files:
             value:
               example: 5
               type: integer
+          - template: init_config/default
       - template: instances
         options:
           - name: name
