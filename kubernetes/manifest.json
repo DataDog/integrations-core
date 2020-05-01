@@ -24,7 +24,9 @@
   "integration_id": "kubernetes",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Kubernetes - Pods": "assets/dashboards/kubernetes_pods.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }
