@@ -54,7 +54,7 @@ files:
                 - OBJECT_UNFOUND
                 - REQUEST_SLOW
                 - REQUEST_STUCK
-          - template: instances/tags
+          - template: instances/default
       - template: logs
         example:
          - type: file
