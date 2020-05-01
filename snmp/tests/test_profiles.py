@@ -249,12 +249,9 @@ def test_cisco_3850(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
-    for temp in range(3):
-        for switch in range(1, 3):
-            env_tag = ['temp_descr:Switch {} - Temp Sensor {}, GREEN '.format(switch, temp)]
-            aggregator.assert_metric(
-                'snmp.ciscoEnvMonTemperatureStatusValue', metric_type=aggregator.GAUGE, tags=env_tag + common_tags
-            )
+    aggregator.assert_metric(
+        'snmp.ciscoEnvMonTemperatureStatusValue', metric_type=aggregator.GAUGE, tags=['temp_state:1'] + common_tags
+    )
 
     for source in range(1, 3):
         env_tags = ['power_source:{}'.format(source)]
@@ -267,7 +264,7 @@ def test_cisco_3850(aggregator):
             aggregator.assert_metric(
                 'snmp.ciscoEnvMonFanState',
                 metric_type=aggregator.GAUGE,
-                tags=['fan_descr:Switch {} - FAN {}, Normal'.format(switch, fan)] + common_tags,
+                tags=common_tags,
             )
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
@@ -398,11 +395,12 @@ def test_cisco_nexus(aggregator):
         for metric in CPU_METRICS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    aggregator.assert_metric(
-        'snmp.ciscoEnvMonTemperatureStatusValue',
-        metric_type=aggregator.GAUGE,
-        tags=['temp_descr:test_temp'] + common_tags,
-    )
+    for state in [3, 4, 6]:
+        aggregator.assert_metric(
+            'snmp.ciscoEnvMonTemperatureStatusValue',
+            metric_type=aggregator.GAUGE,
+            tags=['temp_state:{}'.format(state)] + common_tags,
+        )
 
     aggregator.assert_metric(
         'snmp.ciscoEnvMonSupplyState',
@@ -414,7 +412,7 @@ def test_cisco_nexus(aggregator):
         aggregator.assert_metric(
             'snmp.ciscoEnvMonFanState',
             metric_type=aggregator.GAUGE,
-            tags=['fan_descr:fan_{}'.format(fan)] + common_tags,
+            tags=common_tags,
         )
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
@@ -871,11 +869,12 @@ def test_cisco_asa_5525(aggregator):
     aggregator.assert_metric('snmp.cipSecGlobalHcInOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.cipSecGlobalHcOutOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
 
-    aggregator.assert_metric(
-        'snmp.ciscoEnvMonTemperatureStatusValue',
-        metric_type=aggregator.GAUGE,
-        tags=['temp_descr:test_temp'] + common_tags,
-    )
+    for state in [3, 4, 6]:
+        aggregator.assert_metric(
+            'snmp.ciscoEnvMonTemperatureStatusValue',
+            metric_type=aggregator.GAUGE,
+            tags=['temp_state:{}'.format(state)] + common_tags,
+        )
 
     aggregator.assert_metric(
         'snmp.ciscoEnvMonSupplyState',
@@ -887,7 +886,7 @@ def test_cisco_asa_5525(aggregator):
         aggregator.assert_metric(
             'snmp.ciscoEnvMonFanState',
             metric_type=aggregator.GAUGE,
-            tags=['fan_descr:fan_{}'.format(fan)] + common_tags,
+            tags=common_tags,
         )
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
