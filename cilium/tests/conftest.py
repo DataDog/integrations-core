@@ -6,9 +6,10 @@ from subprocess import check_call
 
 import mock
 import pytest
-
+from subprocess import check_call
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev import TempDir
 from datadog_checks.dev.kube_port_forward import port_forward
 
 try:
@@ -51,19 +52,20 @@ def setup_cilium():
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with kind_run(os.path.join(HERE, 'kind'), conditions=[setup_cilium]) as kubeconfig:
-        with ExitStack() as stack:
-            ip_ports = [
-                stack.enter_context(port_forward(kubeconfig, 'cilium', 'cilium-operator', port)) for port in PORTS
-            ]
-        instances = {
-            'instances': [
-                {'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0])},
-                {'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1])},
-            ]
-        }
+    with TempDir() as tmp:
+        with kind_run(tmp, conditions=[setup_cilium]) as kubeconfig:
+            with ExitStack() as stack:
+                ip_ports = [
+                    stack.enter_context(port_forward(kubeconfig, 'cilium', 'cilium-operator', port)) for port in PORTS
+                ]
+            instances = {
+                'instances': [
+                    {'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0])},
+                    {'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1])},
+                ]
+            }
 
-        yield instances
+            yield instances
 
 
 @pytest.fixture(scope="session")

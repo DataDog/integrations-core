@@ -8,7 +8,7 @@ import pytest
 from six import PY3
 
 from .env import environment_run
-from .structures import LazyFunction
+from .structures import LazyFunction, TempDir
 from .subprocess import run_command
 from .utils import find_check_root, get_check_name, get_here, get_tox_env, path_join
 
@@ -63,7 +63,7 @@ class KindUp(LazyFunction):
 
     def __init__(self, directory):
         self.directory = directory
-        self.check_root = find_check_root(path=self.directory)
+        self.check_root = find_check_root(depth=3)
         self.check_name = get_check_name(self.directory)
         self.cluster_name = '{}-{}-cluster'.format(self.check_name, get_tox_env())
 
@@ -73,8 +73,10 @@ class KindUp(LazyFunction):
         env['KUBECONFIG'] = kube_path
         # Create cluster
         run_command(['kind', 'create', 'cluster', '--name', self.cluster_name], check=True, env=env)
+        # os.move(kube_path -> tempdir)
         # Connect to cluster
         run_command(['kind', 'export', 'kubeconfig', '--name', self.cluster_name], check=True, env=env)
+
         return kube_path
 
 

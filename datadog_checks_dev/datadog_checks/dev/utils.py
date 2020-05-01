@@ -27,8 +27,10 @@ ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
 
+
 def get_tox_env():
     return os.environ['TOX_ENV_NAME']
+
 
 def get_ci_env_vars():
     return ('AGENT_OS', 'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI')
@@ -226,7 +228,7 @@ def load_jmx_config():
     return example_config
 
 
-def find_check_root(depth=0, path=None):
+def find_check_root(depth=0):
     # Account for this call
     depth += 1
 
@@ -234,10 +236,7 @@ def find_check_root(depth=0, path=None):
     for _ in range(depth):
         frame = frame.f_back
 
-    root = path
-    if root is None:
-        root = get_parent_dir(frame.f_code.co_filename)
-
+    root = get_parent_dir(frame.f_code.co_filename)
     while True:
         if file_exists(path_join(root, 'setup.py')):
             break
