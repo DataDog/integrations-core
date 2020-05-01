@@ -9,11 +9,11 @@ Get metrics from kubernetes service in real time to:
 - Visualize and monitor kubernetes states
 - Be notified about kubernetes failovers and events.
 
-## Agent6 migration instructions
+## Setup
 
-Agent6 uses a new set of integrations, see [the update instructions][2] and the [new dedicated kubernetes documentation page][3] for more information.
+See [the update instructions][2] and the [new kubernetes documentation page][3] for more information on how to setup the Datadog Agent with Kubernetes integration.
 
-## Setup Agent version 5
+Note: Please use the following instructions if you are using an older version of Datadog Agent (version 5) -
 
 ### Installation
 
