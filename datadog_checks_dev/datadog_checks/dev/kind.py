@@ -56,9 +56,9 @@ def kind_run(directory, sleep=None, endpoints=None, conditions=None, env_vars=No
 
 class KindUp(LazyFunction):
     """Create the kind cluster and use its context, calling
-    `kind create cluster --name <integration>-testing`
+    `kind create cluster --name <integration>-cluster`
 
-    It also returns the kubeconfig as a `string`.
+    It also returns the kubeconfig path as a `str`.
     """
 
     def __init__(self, directory):
