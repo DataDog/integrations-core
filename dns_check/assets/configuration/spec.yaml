@@ -1,0 +1,63 @@
+name: DNS
+files:
+  - name: dns_check.yaml
+    options:
+      - template: init_config
+        options:
+          - name: default_timeout
+            description: Timeout to use as a default for all your instances.
+            value:
+              example: 5
+              type: integer
+      - template: instances
+        options:
+          - name: name
+            required: true
+            description: |
+               Name of your DNS check instance.
+               To create multiple DNS checks, create multiple instances with unique names.
+            value:
+              type: string
+              example: <INSTANCE_NAME>
+          - name: hostname
+            required: true
+            description: Hostname to resolve.
+            value:
+              type: string
+          - name: nameserver
+            description: IP address of the name server to query.
+            value:
+              type: string
+          - name: nameserver_port
+            description: Port for the name server.
+            value:
+              type: integer
+              example: 53
+          - name: resolves_as
+            description: |
+              A comma separated list of IP addresses that the hostname is expected to resolve as.
+              Useful to ensure that the name hasn't been hijacked and points to the expected servers.
+            value:
+              type: string
+              example: <IP_ADDRESSES>
+          - name: timeout
+            description: Timeout to honor for this instance of the check.
+            value:
+              type: integer
+              example: 5
+          - name: record_type
+            description: |
+              The record type to be queried to the name server.
+
+              If you use NXDOMAIN as the `record_type`, an NXDOMAIN result is expected from the query,
+              and the check instance reports response time data.
+
+              In many DNS systems, NXDOMAIN results are uncached. Further a query for a unqualified domain
+              name that one expects to return an NXDOMAIN result can result in many dns queries, depending
+              on the resolver's configured search domain.
+
+              For these reasons, these queries are good candidates to monitor the worst-case performance of a DNS lookup.
+            value:
+              type: string
+              example: A
+          - template: instances/tags

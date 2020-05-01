@@ -1,10 +1,14 @@
+## All options defined here are available to all instances.
+#
 init_config:
 
-  ## @param default_timeout - string - optional - default: 5
-  ## Timeout to use as a default for all your instances.
-  #
-  # default_timeout: 5
+    ## @param default_timeout - integer - optional - default: 5
+    ## Timeout to use as a default for all your instances.
+    #
+    # default_timeout: 5
 
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param name - string - required
@@ -23,7 +27,7 @@ instances:
     #
     # nameserver: <NAMESERVER>
 
-    ## @param nameserver_port - string - optional - default: 53
+    ## @param nameserver_port - integer - optional - default: 53
     ## Port for the name server.
     #
     # nameserver_port: 53
@@ -34,26 +38,29 @@ instances:
     #
     # resolves_as: <IP_ADDRESSES>
 
-    ## @param timeout - string - optional - default: default_timeout
-    ## Timeout to honor for this instance of the check
+    ## @param timeout - integer - optional - default: 5
+    ## Timeout to honor for this instance of the check.
     #
     # timeout: 5
 
     ## @param record_type - string - optional - default: A
-    ## The record type to be queried to the name server
+    ## The record type to be queried to the name server.
+    ##
     ## If you use NXDOMAIN as the `record_type`, an NXDOMAIN result is expected from the query,
     ## and the check instance reports response time data.
+    ##
     ## In many DNS systems, NXDOMAIN results are uncached. Further a query for a unqualified domain
     ## name that one expects to return an NXDOMAIN result can result in many dns queries, depending
     ## on the resolver's configured search domain.
+    ##
     ## For these reasons, these queries are good candidates to monitor the worst-case performance of a DNS lookup.
     #
     # record_type: A
 
-    ## @param tags - list of key:value element - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
     #   - <KEY_1>:<VALUE_1>
