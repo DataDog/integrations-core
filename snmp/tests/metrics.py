@@ -38,7 +38,7 @@ IF_RATES = [
     'ifHCInOctets.rate',
     'ifHCOutOctets.rate',
 ]
-IF_GAUGES = ['ifAdminStatus', 'ifOperStatus']
+IF_GAUGES = ['ifAdminStatus', 'ifOperStatus', 'ifSpeed']
 
 # Generic IP metrics for routers
 # _generic-router-ip.yaml
