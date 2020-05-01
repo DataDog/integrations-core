@@ -8,7 +8,7 @@ import pytest
 from six import PY3
 
 from .env import environment_run
-from .structures import LazyFunction, TempDir
+from .structures import LazyFunction
 from .subprocess import run_command
 from .utils import find_check_root, get_check_name, get_here, get_tox_env, path_join
 
