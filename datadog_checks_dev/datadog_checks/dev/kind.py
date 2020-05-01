@@ -75,7 +75,6 @@ class KindUp(LazyFunction):
         run_command(['kind', 'create', 'cluster', '--name', self.cluster_name], check=True, env=env)
         # Connect to cluster
         run_command(['kind', 'export', 'kubeconfig', '--name', self.cluster_name], check=True, env=env)
-        run_command(['python', path_join(self.directory, 'script.py')])
         return kube_path
 
 

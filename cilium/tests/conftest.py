@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from subprocess import check_call
 
 import mock
 import pytest
@@ -15,6 +16,7 @@ try:
 except ImportError:
     from contextlib2 import ExitStack
 
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
 AGENT_PORT = 9090
@@ -25,9 +27,31 @@ OPERATOR_URL = "http://{}:{}/metrics".format(HOST, OPERATOR_PORT)
 PORTS = [AGENT_PORT, OPERATOR_PORT]
 
 
+def setup_cilium():
+    config = os.path.join(HERE, 'kind', 'cilium.yaml')
+    check_call(
+        [
+            "kubectl",
+            "create",
+            "clusterrolebinding",
+            "cluster-admin-binding",
+            "--clusterrole",
+            "cluster-admin",
+            "--user",
+            "ddtest@google.email",
+        ]
+    )
+    check_call(["kubectl", "create", "ns", "cilium"])
+    check_call(["kubectl", "create", "-f", config])
+    check_call(
+        ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "cilium", "--timeout=300s"]
+    )
+    check_call(["kubectl", "wait", "pods", "-n", "cilium", "--all", "--for=condition=Ready", "--timeout=300s"])
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
-    with kind_run(os.path.join(HERE, 'kind')) as kubeconfig:
+    with kind_run(os.path.join(HERE, 'kind'), conditions=[setup_cilium]) as kubeconfig:
         with ExitStack() as stack:
             ip_ports = [
                 stack.enter_context(port_forward(kubeconfig, 'cilium', 'cilium-operator', port)) for port in PORTS
