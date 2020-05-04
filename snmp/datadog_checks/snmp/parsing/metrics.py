@@ -56,6 +56,10 @@ def parse_metrics(metrics, resolver, bulk_threshold=0):
             if should_query_in_bulk:
                 bulk_oids.append(batch.table_oid)
             else:
+                # NOTE: we should issue GETNEXT commands for these OIDs, because GET commands on table column OIDs
+                # never succeed.
+                # This is because data for a given entry in the table is available at the column OIDs **suffixed
+                # with the table entry index**, i.e. `<COLUMN_OID>.<ENTRY_INDEX>`. (There's nothing at `<COLUMN_OID>`.)
                 next_oids.extend(batch.oids)
 
         parsed_metrics.extend(result.parsed_metrics)
