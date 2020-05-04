@@ -291,7 +291,7 @@ def test_cisco_3850(aggregator):
 
     lls_metrics = ['ospfIfRetransInterval', 'ospfIfState']
     for metric in lls_metrics:
-        tags = ['ospf_ip_addr:192.29.116.25'] + common_tags  # 'neighbor_ip:74.210.82.1',
+        tags = ['ospf_ip_addr:192.29.116.25'] + common_tags
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     for temp_index in [1006, 1007, 1008, 2006, 2007, 2008]:
@@ -1184,18 +1184,21 @@ def test_aruba(aggregator):
         ('ospfVirtNbrLsRetransQLen', aggregator.GAUGE),
     ]
     for metric, metric_type in virtual_neighbor_metrics:
-        tags = ['neighbor_ip:74.210.82.1', 'neighbor_id:203.164.233.193'] + common_tags
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=metric_type, tags=tags, count=1)
+        for ip, nbr in [('74.210.82.1', '194.154.66.112'), ('122.226.86.1', '184.201.101.140')]:
+            tags = ['neighbor_ip:{}'.format(ip), 'neighbor_id:{}'.format(nbr)] + common_tags
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=metric_type, tags=tags, count=1)
 
     lls_metrics = ['ospfIfRetransInterval', 'ospfIfState', 'ospfIfLsaCount']
     for metric in lls_metrics:
-        tags = ['ospf_ip_addr:103.229.209.198'] + common_tags  # 'neighbor_ip:74.210.82.1',
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        for ip, nbr in [('58.115.169.188', '192.29.66.79'), ('18.2.8.29', '118.246.193.247')]:
+            tags = ['ospf_ip_addr:{}'.format(ip), 'neighbor_id:{}'.format(nbr)] + common_tags
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     virtual_lls_metrics = ['ospfVirtIfRetransInterval', 'ospfVirtIfState', 'ospfVirtIfLsaCount']
     for metric in virtual_lls_metrics:
-        tags = common_tags  # 'neighbor_ip:74.210.82.1',
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=10)
+        for nbr in ['194.154.66.112', '184.201.101.140']:
+            tags = ['neighbor_id:{}'.format(nbr)] + common_tags
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
 
