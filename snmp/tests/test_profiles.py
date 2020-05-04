@@ -35,6 +35,8 @@ from .metrics import (
     LTM_VIRTUAL_SERVER_GAUGES,
     LTM_VIRTUAL_SERVER_RATES,
     MEMORY_METRICS,
+    PEER_GAUGES,
+    PEER_RATES,
     PROBE_GAUGES,
     SYSTEM_STATUS_GAUGES,
     TCP_COUNTS,
@@ -1118,6 +1120,19 @@ def test_cisco_asa_5525(aggregator):
         )
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
+
+
+def test_cisco_csr(aggregator):
+    run_profile_check('cisco-csr1000v')
+
+    common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-csr1000v']
+
+    tags = ['neighbor:244.12.239.177'] + common_tags
+    for metric in PEER_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
+
+    for metric in PEER_RATES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags)
 
 
 def test_checkpoint_firewall(aggregator):
