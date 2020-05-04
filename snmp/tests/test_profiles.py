@@ -12,6 +12,7 @@ from .metrics import (
     CIE_METRICS,
     CPU_METRICS,
     DISK_GAUGES,
+    DRS_GAUGES,
     FRU_METRICS,
     IF_COUNTS,
     IF_GAUGES,
@@ -21,10 +22,12 @@ from .metrics import (
     IP_IF_COUNTS,
     IPX_COUNTS,
     MEMORY_METRICS,
+    PROBE_GAUGES,
     SYSTEM_STATUS_GAUGES,
     TCP_COUNTS,
     TCP_GAUGES,
     UDP_COUNTS,
+    VOLTAGE_GAUGES,
 )
 
 pytestmark = pytest.mark.usefixtures("dd_environment")
@@ -308,6 +311,7 @@ def test_idrac(aggregator):
 
     interfaces = ['eth0', 'en1']
     common_tags = common.CHECK_TAGS + ['snmp_profile:idrac']
+
     for interface in interfaces:
         tags = ['adapter:{}'.format(interface)] + common_tags
         for count in ADAPTER_IF_COUNTS:
@@ -328,6 +332,71 @@ def test_idrac(aggregator):
         tags = ['disk_name:{}'.format(disk)] + common_tags
         for gauge in DISK_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    batteries = ['battery1', 'battery2']
+    for battery_name in batteries:
+        tags = ['battery_name:{}'.format(battery_name)] + common_tags
+        aggregator.assert_metric('snmp.{}'.format("batteryState"), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    controllers = ['controller1', 'controller2']
+    for controller in controllers:
+        tags = ['controller_name:{}'.format(controller)] + common_tags
+        aggregator.assert_metric(
+            'snmp.{}'.format("controllerRollUpStatus"), metric_type=aggregator.GAUGE, tags=tags, count=1
+        )
+
+    devices = ['device1', 'device2']
+    indexes = ['10', '20']
+    for device, index in zip(devices, indexes):
+        tags = ['device_descr_name:{}'.format(device), 'chassis_index:{}'.format(index)] + common_tags
+        aggregator.assert_metric('snmp.{}'.format("pCIDeviceStatus"), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    slots = ['slot1', 'slot2']
+    indexes = ['19', '21']
+    for slot, index in zip(slots, indexes):
+        tags = ['slot_name:{}'.format(slot), 'chassis_index:{}'.format(index)] + common_tags
+        aggregator.assert_metric('snmp.{}'.format("systemSlotStatus"), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    tag_mappings = [('29', 'device2', '0x9e00e0291401'), ('3', 'device1', '0x9e00e0291401')]
+    for index, device, mac in tag_mappings:
+        tags = [
+            'chassis_index:{}'.format(index),
+            'device_fqdd:{}'.format(device),
+            'mac_addr:{}'.format(mac),
+        ] + common_tags
+        aggregator.assert_metric(
+            'snmp.{}'.format("networkDeviceStatus"), metric_type=aggregator.GAUGE, tags=tags, count=1
+        )
+
+    indexes = ['3', '31']
+    for index in indexes:
+        tags = ['chassis_index:{}'.format(index)] + common_tags
+        aggregator.assert_metric('snmp.{}'.format("systemBIOSStatus"), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    indexes = ['9', '18']
+    probe_types = ['26', '26']
+    for index, probe_type in zip(indexes, probe_types):
+        tags = ['chassis_index:{}'.format(index), 'probe_type:{}'.format(probe_type)] + common_tags
+        for gauge in PROBE_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    indexes = ['12', '22']
+    probe_types = ['6', '3']
+    for index, probe_type in zip(indexes, probe_types):
+        tags = ['chassis_index:{}'.format(index), 'probe_type:{}'.format(probe_type)] + common_tags
+        for gauge in VOLTAGE_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    indexes = ['29', '22']
+    device_types = ['26', '4']
+    for index, device_type in zip(indexes, device_types):
+        tags = ['chassis_index:{}'.format(index), 'device_type:{}'.format(device_type)] + common_tags
+        aggregator.assert_metric(
+            'snmp.{}'.format("memoryDeviceStatus"), metric_type=aggregator.GAUGE, tags=tags, count=1
+        )
+
+    for gauge in DRS_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
 
@@ -448,6 +517,12 @@ def test_dell_poweredge(aggregator):
 
     memory_device_gauges = ['memoryDeviceStatus', 'memoryDeviceFailureModes']
 
+    idrac_gauges = (
+        ['batteryState', 'controllerRollUpStatus', 'pCIDeviceStatus', 'systemSlotStatus', 'systemBIOSStatus']
+        + VOLTAGE_GAUGES
+        + PROBE_GAUGES
+    )
+
     common_tags = common.CHECK_TAGS + ['snmp_profile:dell-poweredge']
 
     chassis_indexes = [29, 31]
@@ -515,6 +590,9 @@ def test_dell_poweredge(aggregator):
         tags = ['disk_name:{}'.format(disk)] + common_tags
         for gauge in DISK_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    for gauge in idrac_gauges:
+        aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE)
 
     aggregator.assert_all_metrics_covered()
 
