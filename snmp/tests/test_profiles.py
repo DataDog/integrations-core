@@ -997,11 +997,11 @@ def test_cisco_asa_5525(aggregator):
     aggregator.assert_metric('snmp.cipSecGlobalHcInOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.cipSecGlobalHcOutOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
 
-    for state in [3, 4, 6]:
+    for (index, state) in [(3, 3), (6, 6), (8, 6), (11, 6), (13, 3), (14, 6), (20, 6), (21, 4), (31, 5)]:
         aggregator.assert_metric(
             'snmp.ciscoEnvMonTemperatureStatusValue',
             metric_type=aggregator.GAUGE,
-            tags=['temp_state:{}'.format(state)] + common_tags,
+            tags=['temp_state:{}'.format(state), 'temp_index:{}'.format(index)] + common_tags,
         )
 
     aggregator.assert_metric(
