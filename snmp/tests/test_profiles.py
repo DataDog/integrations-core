@@ -252,8 +252,6 @@ def test_cisco_3850(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     aggregator.assert_metric(
         'snmp.ciscoEnvMonTemperatureStatusValue', metric_type=aggregator.GAUGE, tags=['temp_state:1'] + common_tags
     )
