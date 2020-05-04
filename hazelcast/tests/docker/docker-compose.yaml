@@ -83,7 +83,7 @@ services:
     container_name: hazelcast_management_center
     environment:
       MC_CONTEXT_PATH: /
-      MC_INIT_CMD: "./mc-conf.sh cluster add -H=/data -ma hazelcast1:5701,hazelcast2:5701 -cn dev"
+      MC_INIT_CMD: "./mc-conf.sh cluster add -H=/data -ma hazelcast1:5701,hazelcast2:5701,hazelcast3:5701 -cn dev"
       JAVA_OPTS: >-
         -Dhazelcast.metrics.enabled=true
         -Dhazelcast.metrics.jmx.enabled=true
