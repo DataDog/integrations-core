@@ -261,28 +261,25 @@ class TestVault:
     def test_event_leader_change(self, aggregator, cluster):
         instance = INSTANCES['main']
         c = Vault(Vault.CHECK_NAME, {}, [instance])
+        next_leader = None
         if cluster:
             c._previous_leader = Leader('', 'foo')
+            next_leader = Leader('', 'bar')
         else:
             c._previous_leader = Leader('foo', '')
+            next_leader = Leader('bar', '')
 
         # Keep a reference for use during mock
         requests_get = requests.get
 
         def mock_requests_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                if cluster:
-                    leader_addr = ''
-                    leader_cluster_addr = 'bar'
-                else:
-                    leader_addr = 'bar'
-                    leader_cluster_addr = ''
                 return MockResponse(
                     {
                         'ha_enabled': False,
                         'is_self': True,
-                        'leader_address': leader_addr,
-                        'leader_cluster_address': leader_cluster_addr,
+                        'leader_address': next_leader.leader_addr,
+                        'leader_cluster_address': next_leader.leader_cluster_addr,
                     }
                 )
             return requests_get(url, *args, **kwargs)
@@ -303,6 +300,7 @@ class TestVault:
         assert event['source_type_name'] == Vault.CHECK_NAME
         assert event['host'] == c.hostname
         assert 'is_leader:true' in event['tags']
+        assert c._previous_leader == next_leader
 
     def test_leader_change_not_self(self, aggregator):
         """The agent should only submit a leader change event when the monitored vault is the leader."""
