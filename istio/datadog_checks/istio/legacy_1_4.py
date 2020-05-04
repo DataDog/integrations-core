@@ -7,7 +7,14 @@ from copy import deepcopy
 from datadog_checks.base import OpenMetricsBaseCheck
 from datadog_checks.base.errors import CheckException
 
-from .constants import CITADEL_NAMESPACE, GALLEY_NAMESPACE, MESH_NAMESPACE, MIXER_NAMESPACE, PILOT_NAMESPACE
+from .constants import (
+    BLACKLIST_LABELS,
+    CITADEL_NAMESPACE,
+    GALLEY_NAMESPACE,
+    MESH_NAMESPACE,
+    MIXER_NAMESPACE,
+    PILOT_NAMESPACE,
+)
 from .metrics import CITADEL_METRICS, GALLEY_METRICS, GENERIC_METRICS, MESH_METRICS, MIXER_METRICS, PILOT_METRICS
 
 
@@ -86,6 +93,10 @@ class LegacyIstioCheck_1_4(OpenMetricsBaseCheck):
         """
         result = []
         for instance in instances:
+            exclude_labels = instance.get('exclude_labels', [])
+            exclude_labels.extend(BLACKLIST_LABELS)
+            instance.update({'exclude_labels': exclude_labels})
+
             if 'istio_mesh_endpoint' in instance:
                 result.append(self._create_istio_mesh_instance(instance))
             if 'mixer_endpoint' in instance:

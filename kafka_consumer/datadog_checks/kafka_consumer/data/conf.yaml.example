@@ -104,17 +104,17 @@ instances:
 
     ## @param sasl_mechanism - string - optional
     ## String picking sasl mechanism when security_protocol is SASL_PLAINTEXT or SASL_SSL.
-    ## Valid values are: PLAIN, GSSAPI, OAUTHBEARER.
+    ## Valid values are: PLAIN, GSSAPI, OAUTHBEARER, SCRAM-SHA-256, SCRAM-SHA-512.
     #
     # sasl_mechanism: PLAIN
 
     ## @param sasl_plain_username - string - optional
-    ## Username for sasl PLAIN authentication.
+    ## Username for sasl PLAIN or SCRAM authentication.
     #
     # sasl_plain_username: <USERNAME>
 
     ## @param sasl_plain_password - string - optional
-    ## Password for sasl PLAIN authentication.
+    ## Password for sasl PLAIN or SCRAM authentication.
     #
     # sasl_plain_password: <PASSWORD>
 

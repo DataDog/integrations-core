@@ -22,7 +22,7 @@ except ImportError:
 def test_check_invalid_password(aggregator, init_config, instance_docker):
     instance_docker['password'] = 'FOO'
 
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_docker])
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
 
     with pytest.raises(SQLConnectionError) as excinfo:
         sqlserver_check.check(instance_docker)
@@ -37,7 +37,7 @@ def test_check_invalid_password(aggregator, init_config, instance_docker):
 @not_windows_ci
 @pytest.mark.usefixtures("dd_environment")
 def test_check_docker(aggregator, init_config, instance_docker):
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_docker])
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
     sqlserver_check.check(instance_docker)
     expected_tags = instance_docker.get('tags', []) + ['host:{}'.format(instance_docker.get('host')), 'db:master']
     _assert_metrics(aggregator, expected_tags)
@@ -50,7 +50,7 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
     sp_tags = "foo:bar,baz:qux"
 
     instance_docker['stored_procedure'] = proc
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_docker])
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker])
 
     # Make DB connection
     conn_str = 'DRIVER={};Server={};Database=master;UID={};PWD={};'.format(
@@ -114,7 +114,7 @@ def test_check_stored_procedure(aggregator, init_config, instance_docker):
 @pytest.mark.usefixtures("dd_environment")
 def test_object_name(aggregator, init_config_object_name, instance_docker):
 
-    sqlserver_check = SQLServer(CHECK_NAME, init_config_object_name, {}, [instance_docker])
+    sqlserver_check = SQLServer(CHECK_NAME, init_config_object_name, [instance_docker])
     sqlserver_check.check(instance_docker)
 
     aggregator.assert_metric('sqlserver.cache.hit_ratio', tags=['optional:tag1', 'optional_tag:tag1'], count=1)
@@ -123,7 +123,7 @@ def test_object_name(aggregator, init_config_object_name, instance_docker):
 
 @windows_ci
 def test_check_local(aggregator, init_config, instance_sql2017):
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance_sql2017])
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_sql2017])
     sqlserver_check.check(instance_sql2017)
     expected_tags = instance_sql2017.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
     _assert_metrics(aggregator, expected_tags)
@@ -135,7 +135,7 @@ def test_check_adoprovider(aggregator, init_config, instance_sql2017, adoprovide
     instance = deepcopy(instance_sql2017)
     instance['adoprovider'] = adoprovider
 
-    sqlserver_check = SQLServer(CHECK_NAME, init_config, {}, [instance])
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance])
     sqlserver_check.check(instance)
     expected_tags = instance.get('tags', []) + ['host:{}'.format(LOCAL_SERVER), 'db:master']
     _assert_metrics(aggregator, expected_tags)

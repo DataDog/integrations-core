@@ -16,7 +16,7 @@ services:
     entrypoint: ["/bin/sh"]
     command: ["-c", "vault server -config=/vault/config -dev-root-token-id= -dev-listen-address=0.0.0.0:8200 > /var/log/vault.log 2>&1"]
     volumes:
-      - ./vault_server_config.json:/vault/config/config.json
+      - ${SERVER_CONFIG_FILE}:/vault/config/config.json
       - ./vault_agent_config.hcl:/home/agent_config.hcl
       - ./metrics_policy.hcl:/home/metrics_policy.hcl
       - ./pub.pem:/home/pub.pem
@@ -41,7 +41,7 @@ services:
       - vault-leader
     command: server
     volumes:
-      - ./vault_server_config.json:/vault/config/config.json
+      - ${SERVER_CONFIG_FILE}:/vault/config/config.json
 
   consul:
     image: 'consul'

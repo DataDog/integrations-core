@@ -1,0 +1,9 @@
+{ 
+  "name": "RabbitMQ patterns",
+  "type": "logs",
+  "page": "patterns",
+  "query": "source:rabbitmq",
+  "timerange": {
+    "interval_ms": 3600000
+  }
+}

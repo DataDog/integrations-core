@@ -5,7 +5,7 @@ from __future__ import division
 
 import re
 import time
-from collections import defaultdict
+from collections import Counter, defaultdict
 from copy import deepcopy
 
 import redis
@@ -19,6 +19,8 @@ MAX_SLOW_ENTRIES_KEY = "slowlog-max-len"
 
 REPL_KEY = 'master_link_status'
 LINK_DOWN_KEY = 'master_link_down_since_seconds'
+
+DEFAULT_CLIENT_NAME = "unknown"
 
 
 class Redis(AgentCheck):
@@ -245,6 +247,12 @@ class Redis(AgentCheck):
             metric_name = self.CONFIG_GAUGE_KEYS.get(config_key)
             if metric_name is not None:
                 self.gauge(metric_name, value, tags=tags)
+
+        # Save client connections statistics
+        clients = conn.client_list()
+        clients_by_name = Counter(client["name"] or DEFAULT_CLIENT_NAME for client in clients)
+        for name, count in clients_by_name.items():
+            self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
 
         # Save the number of commands.
         self.rate('redis.net.commands', info['total_commands_processed'], tags=tags)

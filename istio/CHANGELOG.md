@@ -1,5 +1,13 @@
 # CHANGELOG - istio
 
+## 3.1.0 / 2020-04-23
+
+* [Added] Add autodiscovery config and default tag exclusion. See [#6375](https://github.com/DataDog/integrations-core/pull/6375).
+* [Added] Support istiod metrics. See [#6426](https://github.com/DataDog/integrations-core/pull/6426).
+* [Added] Refactor to support different versions of istio. See [#6360](https://github.com/DataDog/integrations-core/pull/6360).
+* [Added] Add configuration template spec. See [#6320](https://github.com/DataDog/integrations-core/pull/6320).
+* [Added] Refactor check and support new Agent signature. See [#6341](https://github.com/DataDog/integrations-core/pull/6341).
+
 ## 3.0.0 / 2020-04-04
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).

@@ -7,6 +7,7 @@ import mock
 import pytest
 
 from datadog_checks.aerospike import AerospikeCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import LAZY_METRICS, NAMESPACE_METRICS, SET_METRICS, STATS_METRICS
 
@@ -52,6 +53,8 @@ def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance)
 
     _test_check(aggregator)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def _test_check(aggregator):
