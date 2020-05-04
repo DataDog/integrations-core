@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 2.3.2 / 2020-05-04
+
+* [Fixed] Fixed infinite stream of Vault leader detection events. See [#6552](https://github.com/DataDog/integrations-core/pull/6552). Thanks [fabienrenaud](https://github.com/fabienrenaud).
+
 ## 2.3.1 / 2020-04-07
 
 * [Fixed] Add `kerberos_cache` to HTTP config options. See [#6279](https://github.com/DataDog/integrations-core/pull/6279).
