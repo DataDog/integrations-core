@@ -3,11 +3,11 @@
 ## 3.0.0 / 2020-05-04
 
 * [Added] Add base BGP4 and Cisco-CSR1000v profiles. See [#6315](https://github.com/DataDog/integrations-core/pull/6315).
-* [Added] Collect OSPF routing metrics . See [#6554](https://github.com/DataDog/integrations-core/pull/6554).
+* [Added] Collect OSPF routing metrics. See [#6554](https://github.com/DataDog/integrations-core/pull/6554).
 * [Added] Add F5 Big IP local traffic management (LTM) metrics. See [#5963](https://github.com/DataDog/integrations-core/pull/5963).
-* [Added] Add more HP metrics . See [#6542](https://github.com/DataDog/integrations-core/pull/6542).
-* [Added] Add more idrac/dell metrics . See [#6540](https://github.com/DataDog/integrations-core/pull/6540).
-* [Added] Add additional Cisco metrics . See [#6539](https://github.com/DataDog/integrations-core/pull/6539).
+* [Added] Add more HP metrics. See [#6542](https://github.com/DataDog/integrations-core/pull/6542).
+* [Added] Add more idrac/dell metrics. See [#6540](https://github.com/DataDog/integrations-core/pull/6540).
+* [Added] Add additional Cisco metrics. See [#6539](https://github.com/DataDog/integrations-core/pull/6539).
 * [Added] Add more metrics to Palo Alto profile. See [#6541](https://github.com/DataDog/integrations-core/pull/6541).
 * [Added] Add upsOutletGroupStatusGroupState metric to APC UPS profile. See [#6555](https://github.com/DataDog/integrations-core/pull/6555).
 * [Added] Add ifspeed metric to interface profile. See [#6499](https://github.com/DataDog/integrations-core/pull/6499).
