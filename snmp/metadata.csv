@@ -306,7 +306,6 @@ snmp.panSessionSslProxyUtilization,gauge,,session,,[Palo Alto] SSL proxy Session
 snmp.panGPGWUtilizationPct,gauge,,percent,,[Palo Alto] GlobalProtect Gateway utilization percentage.,0,snmp,
 snmp.panGPGWUtilizationMaxTunnels,gauge,,,,[Palo Alto] Maximum tunnels allowed.,0,snmp,
 snmp.panGPGWUtilizationActiveTunnels,gauge,,,,[Palo Alto] Number of active tunnels.,0,snmp,
-snmp.upsOutletGroupStatusGroupState,gauge,,,,[APC UPS] The current state of the outlet group.,0,snmp,
 snmp.ltmVirtualServNumber,gauge,,,,[F5 BIG-IP] The number of virtual servers.,0,snmp,
 snmp.ltmVirtualServEnabled,gauge,,,,[F5 BIG-IP] Whether a given virtual server is enabled.,0,snmp,
 snmp.ltmVirtualServConnLimit,gauge,,,,[F5 BIG-IP] The maximum number of connections on a virtual server.,0,snmp,

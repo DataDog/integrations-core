@@ -288,6 +288,8 @@ LTM_POOL_MEMBER_RATES = [
     'ltmPoolMemberStatServerBytesIn',
     'ltmPoolMemberStatServerPktsOut',
     'ltmPoolMemberStatServerBytesOut',
+]
+
 
 # Base profile metrics from BPG profile
 # _generic-router-bgp4.yaml
