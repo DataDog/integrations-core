@@ -152,10 +152,16 @@ CPU_METRICS = [
     "cpmCPUTotalMonIntervalValue",
     "cpmCPUMemoryUsed",
     "cpmCPUMemoryFree",
+    "cpmCPUTotal1minRev",
 ]
 CIE_METRICS = [
     "cieIfLastInTime",
     "cieIfLastOutTime",
     "cieIfInputQueueDrops",
     "cieIfOutputQueueDrops",
+]
+MEMORY_METRICS = [
+    'ciscoMemoryPoolUsed',
+    'ciscoMemoryPoolFree',
+    'ciscoMemoryPoolLargestFree',
 ]

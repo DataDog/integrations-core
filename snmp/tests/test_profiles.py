@@ -20,6 +20,7 @@ from .metrics import (
     IP_COUNTS,
     IP_IF_COUNTS,
     IPX_COUNTS,
+    MEMORY_METRICS,
     SYSTEM_STATUS_GAUGES,
     TCP_COUNTS,
     TCP_GAUGES,
@@ -194,7 +195,7 @@ def test_f5_router(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_3850(aggregator):
+def test_cisco_3850(aggregator):
     run_profile_check('3850')
     # We're not covering all interfaces
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 48)]
@@ -216,6 +217,7 @@ def test_3850(aggregator):
             )
         for metric in IF_RATES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+
     for metric in TCP_COUNTS:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
@@ -246,13 +248,40 @@ def test_3850(aggregator):
         for metric in CIE_METRICS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
-    for temp in range(3):
-        for switch in range(1, 3):
-            env_tag = ['temp_descr:Switch {} - Temp Sensor {}, GREEN '.format(switch, temp)]
-            aggregator.assert_metric(
-                'snmp.ciscoEnvMonTemperatureStatusValue', metric_type=aggregator.GAUGE, tags=env_tag + common_tags
-            )
-    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+
+    aggregator.assert_metric(
+        'snmp.ciscoEnvMonTemperatureStatusValue', metric_type=aggregator.GAUGE, tags=['temp_state:1'] + common_tags
+    )
+
+    for source in range(1, 3):
+        env_tags = ['power_source:{}'.format(source)]
+        aggregator.assert_metric(
+            'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=env_tags + common_tags
+        )
+
+    aggregator.assert_metric(
+        'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags,
+    )
+
+    aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
+
+    for switch, mac_addr in [(1, '0x046c9d42b080'), (2, '0xdccec1430680')]:
+        tags = ['entity_name:Switch {}'.format(switch), 'mac_addr:{}'.format(mac_addr)] + common_tags
+        aggregator.assert_metric('snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=tags)
+
+    frus = [1011, 1012, 1013, 2011, 2012, 2013]
+    for fru in frus:
+        tags = ['fru:{}'.format(fru)] + common_tags
+        aggregator.assert_metric(
+            'snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=['fru:{}'.format(fru)] + common_tags
+        )
+
+    for metrics in MEMORY_METRICS:
+        for pool in ['Processor', 'IOS Process stack']:
+            tags = ['mem_pool_name:{}'.format(pool)] + common_tags
+            aggregator.assert_metric('snmp.{}'.format(metrics), metric_type=aggregator.GAUGE, tags=tags)
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance')
     aggregator.assert_all_metrics_covered()
 
 
@@ -362,11 +391,33 @@ def test_cisco_nexus(aggregator):
         for metric in CPU_METRICS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
+    for state in [3, 4, 6]:
+        aggregator.assert_metric(
+            'snmp.ciscoEnvMonTemperatureStatusValue',
+            metric_type=aggregator.GAUGE,
+            tags=['temp_state:{}'.format(state)] + common_tags,
+        )
+
     aggregator.assert_metric(
-        'snmp.ciscoEnvMonTemperatureStatusValue',
-        metric_type=aggregator.GAUGE,
-        tags=['temp_descr:quaintly oxen Jaded but their'] + common_tags,
+        'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags,
     )
+
+    aggregator.assert_metric(
+        'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags,
+    )
+
+    aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(
+        'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:0xffffffffffff'] + common_tags
+    )
+
+    frus = [2, 7, 8, 21, 26, 27, 30, 31]
+    for fru in frus:
+        tags = ['fru:{}'.format(fru)] + common_tags
+        aggregator.assert_metric(
+            'snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=['fru:{}'.format(fru)] + common_tags
+        )
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
@@ -822,11 +873,51 @@ def test_cisco_asa_5525(aggregator):
     aggregator.assert_metric('snmp.cipSecGlobalHcInOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.cipSecGlobalHcOutOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
 
+    for state in [3, 4, 6]:
+        aggregator.assert_metric(
+            'snmp.ciscoEnvMonTemperatureStatusValue',
+            metric_type=aggregator.GAUGE,
+            tags=['temp_state:{}'.format(state)] + common_tags,
+        )
+
     aggregator.assert_metric(
-        'snmp.ciscoEnvMonTemperatureStatusValue',
-        metric_type=aggregator.GAUGE,
-        tags=['temp_descr:quaintly oxen Jaded but their'] + common_tags,
+        'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags,
     )
+
+    aggregator.assert_metric(
+        'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags,
+    )
+
+    aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(
+        'snmp.cswSwitchState', metric_type=aggregator.GAUGE, tags=['mac_addr:0xffffffffffff'] + common_tags
+    )
+
+    frus = [2, 7, 8, 21, 26, 27, 30, 31]
+    for fru in frus:
+        tags = ['fru:{}'.format(fru)] + common_tags
+        aggregator.assert_metric(
+            'snmp.cefcFanTrayOperStatus', metric_type=aggregator.GAUGE, tags=['fru:{}'.format(fru)] + common_tags
+        )
+
+    for metrics in MEMORY_METRICS:
+        tags = ['mem_pool_name:test_pool'] + common_tags
+        aggregator.assert_metric('snmp.{}'.format(metrics), metric_type=aggregator.GAUGE, tags=tags)
+
+    for conn in [1, 2, 5]:
+        conn_tags = ['connection_type:{}'.format(conn)] + common_tags
+        aggregator.assert_metric('snmp.cfwConnectionStatCount', metric_type=aggregator.RATE, tags=conn_tags)
+
+    aggregator.assert_metric(
+        'snmp.cfwHardwareStatusValue', metric_type=aggregator.GAUGE, tags=['hardware_type:3'] + common_tags
+    )
+
+    for switch in [4684, 4850, 8851, 9997, 15228, 16580, 24389, 30813, 36264]:
+        aggregator.assert_metric(
+            'snmp.cvsChassisUpTime',
+            metric_type=aggregator.GAUGE,
+            tags=['chassis_switch_id:{}'.format(switch)] + common_tags,
+        )
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
