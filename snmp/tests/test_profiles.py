@@ -252,10 +252,6 @@ def test_cisco_3850(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
-    aggregator.assert_metric(
-        'snmp.ciscoEnvMonTemperatureStatusValue', metric_type=aggregator.GAUGE, tags=['temp_state:1'] + common_tags
-    )
-
     for source in range(1, 3):
         env_tags = ['power_source:{}'.format(source)]
         aggregator.assert_metric(
@@ -298,12 +294,11 @@ def test_cisco_3850(aggregator):
         tags = ['ospf_ip_addr:192.29.116.25'] + common_tags  # 'neighbor_ip:74.210.82.1',
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    for temp in range(3):
-        for switch in range(1, 3):
-            env_tag = ['temp_descr:Switch {} - Temp Sensor {}, GREEN '.format(switch, temp)]
-            aggregator.assert_metric(
-                'snmp.ciscoEnvMonTemperatureStatusValue', metric_type=aggregator.GAUGE, tags=env_tag + common_tags
-            )
+    for temp_index in [1006, 1007, 1008, 2006, 2007, 2008]:
+        env_tag = ['temp_index:{}'.format(temp_index), 'temp_state:1']
+        aggregator.assert_metric(
+            'snmp.ciscoEnvMonTemperatureStatusValue', metric_type=aggregator.GAUGE, tags=env_tag + common_tags
+        )
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
@@ -481,11 +476,11 @@ def test_cisco_nexus(aggregator):
         for metric in CPU_METRICS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    for state in [3, 4, 6]:
+    for (index, state) in [(3, 3), (6, 6), (8, 6), (11, 6), (13, 3), (14, 6), (20, 6), (21, 4), (31, 5)]:
         aggregator.assert_metric(
             'snmp.ciscoEnvMonTemperatureStatusValue',
             metric_type=aggregator.GAUGE,
-            tags=['temp_state:{}'.format(state)] + common_tags,
+            tags=['temp_state:{}'.format(state), 'temp_index:{}'.format(index)] + common_tags,
         )
 
     aggregator.assert_metric(

@@ -65,6 +65,8 @@ metrics:
         column:
           OID: 1.3.6.1.4.1.9.9.13.1.3.1.6
           name: ciscoEnvMonTemperatureState
+      - tag: temp_index
+        index: 1
   - MIB: CISCO-ENVMON-MIB
     table:
       OID: 1.3.6.1.4.1.9.9.13.1.5
