@@ -11,7 +11,7 @@ files:
       required: true
       description: |
         The hostname to connect to.
-        NOTE: Even if the server name is `localhost`, the agent connects to PostgreSQL using TCP/IP, unless you also
+        NOTE: Even if the server name is `localhost`, the Agent connects to PostgreSQL using TCP/IP unless you also
         provide a value for the sock key.
         If `use_psycopg2` is enabled, use the directory containing the UNIX socket (ex: `/run/postgresql/`)
         otherwise, use the full path to the socket file (ex: `/run/postgresql/.s.PGSQL.5433`).
@@ -25,7 +25,7 @@ files:
         example: 5432
     - name: username
       required: true
-      description: The datadog Username created to connect to PostgreSQL.
+      description: The Datadog username created to connect to PostgreSQL.
       value:
           type: string
           example: datadog
@@ -35,8 +35,8 @@ files:
         type: string
     - name: dbname
       description: |
-        The Name of the PostgresSQL database to monitor.
-        Note: If omitted, the default system postgres database is queried.
+        The name of the PostgresSQL database to monitor.
+        Note: If omitted, the default system Postgres database is queried.
       value:
         type: string
         default: postgres
