@@ -115,7 +115,7 @@ Need help? Contact [Datadog support][10].
 - [Instrument Memcached performance metrics with DogStatsD][12]
 - [Monitoring ElastiCache performance metrics with Redis or Memcached][13]
 
-[1]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/mcache/datadog_checks/mcache/data/conf.yaml.example
@@ -124,7 +124,7 @@ Need help? Contact [Datadog support][10].
 [7]: https://docs.datadoghq.com/tracing/setup/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/mcache/metadata.csv
-[10]: https://docs.datadoghq.com/help
+[10]: https://docs.datadoghq.com/help/
 [11]: https://www.datadoghq.com/blog/speed-up-web-applications-memcached
 [12]: https://www.datadoghq.com/blog/instrument-memcached-performance-metrics-dogstatsd
 [13]: https://www.datadoghq.com/blog/monitoring-elasticache-performance-metrics-with-redis-or-memcached

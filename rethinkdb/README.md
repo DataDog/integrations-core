@@ -96,8 +96,8 @@ RethinkDB does not include any events.
 Need help? Contact [Datadog support][12].
 
 [1]: https://rethinkdb.com/
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
-[3]: https://docs.datadoghq.com/agent
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[3]: https://docs.datadoghq.com/agent/
 [4]: https://rethinkdb.com/docs/permissions-and-accounts/
 [5]: https://rethinkdb.com/docs/security/#the-admin-account
 [6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
@@ -106,4 +106,4 @@ Need help? Contact [Datadog support][12].
 [9]: https://docs.datadoghq.com/agent/kubernetes/log/
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/rethinkdb/metadata.csv
-[12]: https://docs.datadoghq.com/help
+[12]: https://docs.datadoghq.com/help/

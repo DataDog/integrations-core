@@ -42,10 +42,10 @@ The ClickHouse check does not include any events.
 Need help? Contact [Datadog support][8].
 
 [1]: https://clickhouse.yandex
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://docs.datadoghq.com/agent/
 [4]: https://github.com/DataDog/integrations-core/blob/master/clickhouse/datadog_checks/clickhouse/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/clickhouse/metadata.csv
-[8]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/help/

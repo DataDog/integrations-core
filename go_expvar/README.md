@@ -78,10 +78,10 @@ Need help? Contact [Datadog support][11].
 [6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [7]: https://github.com/DataDog/integrations-core/blob/master/go_expvar/datadog_checks/go_expvar/data/conf.yaml.example
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[9]: https://docs.datadoghq.com/developers/metrics/custom_metrics
-[10]: https://docs.datadoghq.com/account_management/billing/custom_metrics
-[11]: https://docs.datadoghq.com/help
-[12]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[9]: https://docs.datadoghq.com/developers/metrics/custom_metrics/
+[10]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
+[11]: https://docs.datadoghq.com/help/
+[12]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [14]: https://github.com/DataDog/integrations-core/blob/master/go_expvar/metadata.csv
 [15]: https://www.datadoghq.com/blog/instrument-go-apps-expvar-datadog

@@ -88,4 +88,4 @@ Need help? Contact [Datadog support][5].
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://github.com/DataDog/integrations-core/blob/master/cri/metadata.csv
-[5]: https://docs.datadoghq.com/help
+[5]: https://docs.datadoghq.com/help/

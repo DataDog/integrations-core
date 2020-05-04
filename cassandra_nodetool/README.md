@@ -68,7 +68,7 @@ Need help? Contact [Datadog support][119].
 [116]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [117]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [118]: https://github.com/DataDog/integrations-core/blob/master/cassandra_nodetool/metadata.csv
-[119]: https://docs.datadoghq.com/help
+[119]: https://docs.datadoghq.com/help/
 [1110]: https://www.datadoghq.com/blog/how-to-monitor-cassandra-performance-metrics
 [1111]: https://www.datadoghq.com/blog/how-to-collect-cassandra-metrics
 [1112]: https://www.datadoghq.com/blog/monitoring-cassandra-with-datadog

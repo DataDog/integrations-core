@@ -138,6 +138,6 @@ Need help? Contact [Datadog support][8].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv
-[8]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/help/
 [9]: https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor
-[10]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[10]: https://docs.datadoghq.com/agent/kubernetes/integrations/

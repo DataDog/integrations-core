@@ -101,13 +101,13 @@ Need help? Contact [Datadog support][4].
 
 
 [1]: https://ignite.apache.org/
-[2]: https://docs.datadoghq.com/agent
+[2]: https://docs.datadoghq.com/agent/
 [3]: https://apacheignite.readme.io/docs/logging#section-log4j
 [4]: https://github.com/DataDog/integrations-core/blob/master/ignite/datadog_checks/ignite/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/integrations/java
-[6]: https://docs.datadoghq.com/help
+[5]: https://docs.datadoghq.com/integrations/java/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[8]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[8]: https://docs.datadoghq.com/agent/autodiscovery/integrations/
 [9]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
 [10]: https://docs.datadoghq.com/agent/docker/log/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
