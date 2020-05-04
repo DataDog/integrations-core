@@ -1,12 +1,5 @@
 init_config:
 
-    ## @param os_host - string - optional
-    ## The hostname of this machine registered with Nova.
-    ## Defaults to the Hostname detected by the Agent -
-    ## https://docs.datadoghq.com/agent/faq/how-datadog-agent-determines-the-hostname/
-    #
-    # os_host: <HOSTNAME>
-
     ## @param proxy - object - optional
     ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.

@@ -43,6 +43,9 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
             # Default to `unknown` for checks that log during
             # `__init__` and therefore have no `check_id` yet
             self.extra['_check_id'] = self.check_id or 'unknown'
+            if self.check_id:
+                # Break the reference cycle, once we resolved check_id we don't need the check anymore
+                self.check = None
 
         kwargs.setdefault('extra', self.extra)
         return msg, kwargs

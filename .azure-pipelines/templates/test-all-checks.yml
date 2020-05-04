@@ -1,6 +1,5 @@
 parameters:
   pip_cache_config: null
-
 jobs:
 - template: ./test-all.yml
   parameters:
@@ -103,8 +102,11 @@ jobs:
       displayName: Disk (Windows)
       os: windows
     - checkName: dns_check
-      displayName: DNS
+      displayName: DNS (Linux)
       os: linux
+    - checkName: dns_check
+      displayName: DNS (Windows)
+      os: windows
     - checkName: dotnetclr
       displayName: .NET CLR
       os: windows
@@ -155,6 +157,9 @@ jobs:
       os: linux
     - checkName: harbor
       displayName: Harbor
+      os: linux
+    - checkName: hazelcast
+      displayName: Hazelcast
       os: linux
     - checkName: hdfs_datanode
       displayName: HDFS Datanode

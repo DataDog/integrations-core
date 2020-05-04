@@ -39,6 +39,7 @@ class CadvisorPrometheusScraperMixin(object):
             'container_cpu_load_average_10s': self.container_cpu_load_average_10s,
             'container_cpu_system_seconds_total': self.container_cpu_system_seconds_total,
             'container_cpu_user_seconds_total': self.container_cpu_user_seconds_total,
+            'container_cpu_cfs_periods_total': self.container_cpu_cfs_periods_total,
             'container_cpu_cfs_throttled_periods_total': self.container_cpu_cfs_throttled_periods_total,
             'container_cpu_cfs_throttled_seconds_total': self.container_cpu_cfs_throttled_seconds_total,
             'container_fs_reads_bytes_total': self.container_fs_reads_bytes_total,
@@ -74,7 +75,6 @@ class CadvisorPrometheusScraperMixin(object):
                 # so the key is different than the kubelet scraper.
                 'prometheus_url': instance.get('cadvisor_metrics_endpoint', 'dummy_url/cadvisor'),
                 'ignore_metrics': [
-                    'container_cpu_cfs_periods_total',
                     'container_fs_inodes_free',
                     'container_fs_inodes_total',
                     'container_fs_io_current',
@@ -466,6 +466,10 @@ class CadvisorPrometheusScraperMixin(object):
 
     def container_cpu_user_seconds_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.cpu.user.total'
+        self._process_container_metric('rate', metric_name, metric, scraper_config)
+
+    def container_cpu_cfs_periods_total(self, metric, scraper_config):
+        metric_name = scraper_config['namespace'] + '.cpu.cfs.periods'
         self._process_container_metric('rate', metric_name, metric, scraper_config)
 
     def container_cpu_cfs_throttled_periods_total(self, metric, scraper_config):

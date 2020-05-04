@@ -1,40 +1,40 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-flink.jobmanager.Status.JVM.CPU.load,gauge,,percent,,The recent CPU usage of the JVM,0,flink,jobmanager cpu load
-flink.jobmanager.Status.JVM.CPU.time,gauge,,second,,The CPU time used by the JVM,0,flink,jobmanager cpu time
-flink.taskmanager.Status.JVM.CPU.load,gauge,,percent,,The recent CPU usage of the JVM,0,flink,taskmanager cpu load
-flink.taskmanager.Status.JVM.CPU.time,gauge,,second,,The CPU time used by the JVM,0,flink,taskmanager cpu time
-flink.jobmanager.Status.JVM.Memory.Heap.Used,gauge,,byte,,The amount of heap memory currently used,0,flink,jobmanager heap used
-flink.jobmanager.Status.JVM.Memory.Heap.Committed,gauge,,byte,,The amount of heap memory guaranteed to be available to the JVM,0,flink,jobmanager heap committed
-flink.jobmanager.Status.JVM.Memory.Heap.Max,gauge,,byte,,The maximum amount of heap memory that can be used for memory management,0,flink,jobmanager heap max
-flink.jobmanager.Status.JVM.Memory.NonHeap.Used,gauge,,byte,,The amount of non-heap memory currently used,0,flink,jobmanager nonheap used
-flink.jobmanager.Status.JVM.Memory.NonHeap.Committed,gauge,,byte,,The amount of non-heap memory guaranteed to be available to the JVM,0,flink,jobmanager nonheap committed
-flink.jobmanager.Status.JVM.Memory.NonHeap.Max,gauge,,byte,,The maximum amount of non-heap memory that can be used for memory management,0,flink,jobmanager nonheap max
-flink.jobmanager.Status.JVM.Memory.Direct.Count,count,,buffer,,The number of buffers in the direct buffer pool,0,flink,jobmanager direct buffers
-flink.jobmanager.Status.JVM.Memory.Direct.MemoryUsed,gauge,,byte,,The amount of memory used by the JVM for the direct buffer pool,0,flink,jobmanager direct used
-flink.jobmanager.Status.JVM.Memory.Direct.TotalCapacity,count,,byte,,The total capacity of all buffers in the direct buffer pool,0,flink,jobmanager direct capacity
-flink.jobmanager.Status.JVM.Memory.Mapped.Count,gauge,,buffer,,The number of buffers in the mapped buffer pool,0,flink,jobmanager mapped count
-flink.jobmanager.Status.JVM.Memory.Mapped.MemoryUsed,gauge,,byte,,The amount of memory used by the JVM for the mapped buffer pool,0,flink,jobmanager mapped used
-flink.jobmanager.Status.JVM.Memory.Mapped.TotalCapacity,count,,byte,,The number of buffers in the mapped buffer pool,0,flink,jobmanager mapped capacity
-flink.taskmanager.Status.JVM.Memory.Heap.Used,gauge,,byte,,The amount of heap memory currently used,0,flink,taskmanager heap used
-flink.taskmanager.Status.JVM.Memory.Heap.Committed,gauge,,byte,,The amount of heap memory guaranteed to be available to the JVM,0,flink,taskmanager heap committed
-flink.taskmanager.Status.JVM.Memory.Heap.Max,gauge,,byte,,The maximum amount of heap memory that can be used for memory management,0,flink,taskmanager heap max
-flink.taskmanager.Status.JVM.Memory.NonHeap.Used,gauge,,byte,,The amount of non-heap memory currently used,0,flink,taskmanager nonheap used
-flink.taskmanager.Status.JVM.Memory.NonHeap.Committed,gauge,,byte,,The amount of non-heap memory guaranteed to be available to the JVM,0,flink,taskmanager nonheap committed
-flink.taskmanager.Status.JVM.Memory.NonHeap.Max,gauge,,byte,,The maximum amount of non-heap memory that can be used for memory management,0,flink,taskmanager nonheap max
-flink.taskmanager.Status.JVM.Memory.Direct.Count,gauge,,buffer,,The number of buffers in the direct buffer pool,0,flink,taskmanager direct buffers
-flink.taskmanager.Status.JVM.Memory.Direct.MemoryUsed,gauge,,byte,,The amount of memory used by the JVM for the direct buffer pool,0,flink,taskmanager direct used
-flink.taskmanager.Status.JVM.Memory.Direct.TotalCapacity,count,,byte,,The total capacity of all buffers in the direct buffer pool,0,flink,taskmanager direct capacity
-flink.taskmanager.Status.JVM.Memory.Mapped.Count,gauge,,,,The number of buffers in the mapped buffer pool,0,flink,taskmanager mapped count
-flink.taskmanager.Status.JVM.Memory.Mapped.MemoryUsed,gauge,,byte,,The amount of memory used by the JVM for the mapped buffer pool,0,flink,taskmanager mapped used
-flink.taskmanager.Status.JVM.Memory.Mapped.TotalCapacity,count,,byte,,The number of buffers in the mapped buffer pool,0,flink,taskmanager mapped capacity
-flink.jobmanager.Status.JVM.Threads.Count,count,,thread,,The total number of live threads,0,flink,jobmanager live threads
-flink.taskmanager.Status.JVM.Threads.Count,count,,thread,,The total number of live threads,0,flink,taskmanager live threads
-flink.jobmanager.Status.JVM.ClassLoader.ClassesLoaded,count,,,,The total number of classes loaded since the start of the JVM,0,flink,jobmanager classes loaded
-flink.jobmanager.Status.JVM.ClassLoader.ClassesUnloaded,count,,,,The total number of classes unloaded since the start of the JVM,0,flink,jobmanager classes unloaded
-flink.taskmanager.Status.JVM.ClassLoader.ClassesLoaded,count,,,,The total number of classes loaded since the start of the JVM,0,flink,taskmanager classes loaded
-flink.taskmanager.Status.JVM.ClassLoader.ClassesUnloaded,count,,,,The total number of classes unloaded since the start of the JVM,0,flink,taskmanager classes unloaded
-flink.taskmanager.Status.Shuffle.Netty.AvailableMemorySegments,gauge,,,,The number of unused memory segments,0,flink,taskmanager shuffle available memory
-flink.taskmanager.Status.Shuffle.Netty.TotalMemorySegments,gauge,,,,The number of allocated memory segments,0,flink,taskmanager ahuffle allocated memory
+flink.jobmanager.Status.JVM.CPU.load,gauge,,percent,,The recent CPU usage of the JVM in the jobmanager,0,flink,jobmanager cpu load
+flink.jobmanager.Status.JVM.CPU.time,gauge,,second,,The CPU time used by the JVM in the jobmanager,0,flink,jobmanager cpu time
+flink.taskmanager.Status.JVM.CPU.load,gauge,,percent,,The recent CPU usage of the JVM in the taskmanager,0,flink,taskmanager cpu load
+flink.taskmanager.Status.JVM.CPU.time,gauge,,second,,The CPU time used by the JVM in the taskmanager,0,flink,taskmanager cpu time
+flink.jobmanager.Status.JVM.Memory.Heap.Used,gauge,,byte,,The amount of heap memory currently used in the jobmanager,0,flink,jobmanager heap used
+flink.jobmanager.Status.JVM.Memory.Heap.Committed,gauge,,byte,,The amount of heap memory guaranteed to be available to the JVM in the jobmanager,0,flink,jobmanager heap committed
+flink.jobmanager.Status.JVM.Memory.Heap.Max,gauge,,byte,,The maximum amount of heap memory that can be used for memory management in the jobmanager,0,flink,jobmanager heap max
+flink.jobmanager.Status.JVM.Memory.NonHeap.Used,gauge,,byte,,The amount of non-heap memory currently used in the jobmanager,0,flink,jobmanager nonheap used
+flink.jobmanager.Status.JVM.Memory.NonHeap.Committed,gauge,,byte,,The amount of non-heap memory guaranteed to be available to the JVM in the jobmanager,0,flink,jobmanager nonheap committed
+flink.jobmanager.Status.JVM.Memory.NonHeap.Max,gauge,,byte,,The maximum amount of non-heap memory that can be used for memory management in the jobmanager,0,flink,jobmanager nonheap max
+flink.jobmanager.Status.JVM.Memory.Direct.Count,count,,buffer,,The number of buffers in the direct buffer pool in the jobmanager,0,flink,jobmanager direct buffers
+flink.jobmanager.Status.JVM.Memory.Direct.MemoryUsed,gauge,,byte,,The amount of memory used by the JVM for the direct buffer pool in the jobmanager,0,flink,jobmanager direct used
+flink.jobmanager.Status.JVM.Memory.Direct.TotalCapacity,count,,byte,,The total capacity of all buffers in the direct buffer pool in the jobmanager,0,flink,jobmanager direct capacity
+flink.jobmanager.Status.JVM.Memory.Mapped.Count,gauge,,buffer,,The number of buffers in the mapped buffer pool in the jobmanager,0,flink,jobmanager mapped count
+flink.jobmanager.Status.JVM.Memory.Mapped.MemoryUsed,gauge,,byte,,The amount of memory used by the JVM for the mapped buffer pool in the jobmanager,0,flink,jobmanager mapped used
+flink.jobmanager.Status.JVM.Memory.Mapped.TotalCapacity,count,,byte,,The total capacity of all buffers in the mapped buffer pool in the jobmanager,0,flink,jobmanager mapped capacity
+flink.taskmanager.Status.JVM.Memory.Heap.Used,gauge,,byte,,The amount of heap memory currently used in the taskmanager,0,flink,taskmanager heap used
+flink.taskmanager.Status.JVM.Memory.Heap.Committed,gauge,,byte,,The amount of heap memory guaranteed to be available to the JVM in the taskmanager,0,flink,taskmanager heap committed
+flink.taskmanager.Status.JVM.Memory.Heap.Max,gauge,,byte,,The maximum amount of heap memory that can be used for memory management in the taskmanager,0,flink,taskmanager heap max
+flink.taskmanager.Status.JVM.Memory.NonHeap.Used,gauge,,byte,,The amount of non-heap memory currently used in the taskmanager,0,flink,taskmanager nonheap used
+flink.taskmanager.Status.JVM.Memory.NonHeap.Committed,gauge,,byte,,The amount of non-heap memory guaranteed to be available to the JVM in the taskmanager,0,flink,taskmanager nonheap committed
+flink.taskmanager.Status.JVM.Memory.NonHeap.Max,gauge,,byte,,The maximum amount of non-heap memory that can be used for memory management in the taskmanager,0,flink,taskmanager nonheap max
+flink.taskmanager.Status.JVM.Memory.Direct.Count,gauge,,buffer,,The number of buffers in the direct buffer pool in the taskmanager,0,flink,taskmanager direct buffers
+flink.taskmanager.Status.JVM.Memory.Direct.MemoryUsed,gauge,,byte,,The amount of memory used by the JVM for the direct buffer pool in the taskmanager,0,flink,taskmanager direct used
+flink.taskmanager.Status.JVM.Memory.Direct.TotalCapacity,count,,byte,,The total capacity of all buffers in the direct buffer pool in the taskmanager,0,flink,taskmanager direct capacity
+flink.taskmanager.Status.JVM.Memory.Mapped.Count,gauge,,,,The number of buffers in the mapped buffer pool in the taskmanager,0,flink,taskmanager mapped count
+flink.taskmanager.Status.JVM.Memory.Mapped.MemoryUsed,gauge,,byte,,The amount of memory used by the JVM for the mapped buffer pool in the taskmanager,0,flink,taskmanager mapped used
+flink.taskmanager.Status.JVM.Memory.Mapped.TotalCapacity,count,,byte,,The total capacity of all buffers in the mapped buffer pool in the taskmanager,0,flink,taskmanager mapped capacity
+flink.jobmanager.Status.JVM.Threads.Count,count,,thread,,The total number of live threads in the jobmanager,0,flink,jobmanager live threads
+flink.taskmanager.Status.JVM.Threads.Count,count,,thread,,The total number of live threads in the taskmanager,0,flink,taskmanager live threads
+flink.jobmanager.Status.JVM.ClassLoader.ClassesLoaded,count,,,,The total number of classes loaded since the start of the JVM in the jobmanager,0,flink,jobmanager classes loaded
+flink.jobmanager.Status.JVM.ClassLoader.ClassesUnloaded,count,,,,The total number of classes unloaded since the start of the JVM in the jobmanager,0,flink,jobmanager classes unloaded
+flink.taskmanager.Status.JVM.ClassLoader.ClassesLoaded,count,,,,The total number of classes loaded since the start of the JVM in the taskmanager,0,flink,taskmanager classes loaded
+flink.taskmanager.Status.JVM.ClassLoader.ClassesUnloaded,count,,,,The total number of classes unloaded since the start of the JVM in the taskmanager,0,flink,taskmanager classes unloaded
+flink.taskmanager.Status.Shuffle.Netty.AvailableMemorySegments,gauge,,,,The number of unused memory segments in the taskmanager,0,flink,taskmanager shuffle available memory
+flink.taskmanager.Status.Shuffle.Netty.TotalMemorySegments,gauge,,,,The number of allocated memory segments in the taskmanager,0,flink,taskmanager ahuffle allocated memory
 flink.task.Shuffle.Netty.Input.Buffers.inputQueueLength,gauge,,buffer,,The number of queued input buffers,0,flink,task input buffers queued
 flink.task.Shuffle.Netty.Input.Buffers.inPoolUsage,gauge,,,,An estimate of the input buffers usage,0,flink,task input buffers used
 flink.task.Shuffle.Netty.Output.Buffers.outputQueueLength,gauge,,buffer,,The number of queued output buffers,0,flink,task output buffers queued

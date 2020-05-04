@@ -223,7 +223,7 @@ class AggregatorStub(object):
             if expected_tags and expected_tags != sorted(metric.tags):
                 continue
 
-            if hostname and hostname != metric.hostname:
+            if hostname is not None and hostname != metric.hostname:
                 continue
 
             if metric_type is not None and metric_type != metric.type:
@@ -338,7 +338,7 @@ class AggregatorStub(object):
                             )
                         )
 
-        assert not errors, "Metadata assertion errors using metadata.csv:\n" + "\n\t- ".join(sorted(errors))
+        assert not errors, "Metadata assertion errors using metadata.csv:" + "\n\t- ".join([''] + sorted(errors))
 
     def assert_no_duplicate_all(self):
         """

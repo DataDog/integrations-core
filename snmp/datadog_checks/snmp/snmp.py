@@ -11,7 +11,7 @@ import threading
 import time
 from collections import defaultdict
 from concurrent import futures
-from typing import Any, DefaultDict, Dict, List, Optional, Tuple, Union
+from typing import Any, DefaultDict, Dict, List, Optional, Tuple
 
 from six import iteritems
 
@@ -20,10 +20,11 @@ from datadog_checks.base.errors import CheckException
 
 from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, write_persistent_cache
-from .config import InstanceConfig, ParsedMatchMetricTags, ParsedMetric, ParsedMetricTag, ParsedTableMetric
+from .config import InstanceConfig
 from .exceptions import PySnmpError
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
 from .models import OID
+from .parsing import ParsedMetric, ParsedMetricTag, ParsedTableMetric
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
 from .utils import (
     OIDPrinter,
@@ -100,11 +101,17 @@ class SnmpCheck(AgentCheck):
         """
         Get the mapping from sysObjectID to profile.
         """
-        profiles_by_oid = {}
+        profiles_by_oid = {}  # type: Dict[str, str]
         for name, profile in self.profiles.items():
             sys_object_oid = profile['definition'].get('sysobjectid')
             if sys_object_oid is not None:
-                profiles_by_oid[sys_object_oid] = name
+                profile_match = profiles_by_oid.get(sys_object_oid)
+                if profile_match:
+                    raise ConfigurationError(
+                        "Profile {} has the same sysObjectID ({}) as {}".format(name, sys_object_oid, profile_match)
+                    )
+                else:
+                    profiles_by_oid[sys_object_oid] = name
         return profiles_by_oid
 
     def _build_config(self, instance):
@@ -173,8 +180,14 @@ class SnmpCheck(AgentCheck):
             if interval - time_elapsed > 0:
                 time.sleep(interval - time_elapsed)
 
-    def fetch_results(self, config, all_oids, next_oids, bulk_oids):
-        # type: (InstanceConfig, List[OID], List[OID]) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], Optional[str]]
+    def fetch_results(
+        self,
+        config,  # type: InstanceConfig
+        all_oids,  # type: List[OID]
+        next_oids,  # type: List[OID]
+        bulk_oids,  # type: List[OID]
+    ):
+        # type: (...) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], Optional[str]]
         """
         Perform a snmpwalk on the domain specified by the oids, on the device
         configured in instance.
@@ -186,7 +199,7 @@ class SnmpCheck(AgentCheck):
         results = defaultdict(dict)  # type: DefaultDict[str, Dict[Tuple[str, ...], Any]]
         enforce_constraints = config.enforce_constraints
 
-        all_binds, error = self.fetch_oids(config, all_oids, next_oids,  enforce_constraints=enforce_constraints)
+        all_binds, error = self.fetch_oids(config, all_oids, next_oids, enforce_constraints=enforce_constraints)
 
         for oid in bulk_oids:
             try:
@@ -207,15 +220,15 @@ class SnmpCheck(AgentCheck):
                 self.warning(message)
 
         for result_oid, value in all_binds:
-            metric, indexes = config.resolve_oid(result_oid)
-            results[metric][indexes] = value
+            match = config.resolve_oid(OID(result_oid))
+            results[match.name][match.indexes] = value
         self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
         # Freeze the result
         results.default_factory = None  # type: ignore
         return results, error
 
     def fetch_oids(self, config, all_oids, next_oids, enforce_constraints):
-        # type: (InstanceConfig, List[OID], bool) -> Tuple[List[Any], Optional[str]]
+        # type: (InstanceConfig, List[OID], List[OID], bool) -> Tuple[List[Any], Optional[str]]
         # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
         # It returns the wrong value when the OID passed is referring to a specific leaf.
         # For example:
@@ -262,9 +275,7 @@ class SnmpCheck(AgentCheck):
             try:
                 oids_batch = next_oids[first_oid : first_oid + self.oid_batch_size]
 
-                self.log.debug(
-                    'Running SNMP command getNext on OIDS: %s', OIDPrinter(oids_batch, with_values=False)
-                )
+                self.log.debug('Running SNMP command getNext on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
                 binds = list(
                     snmp_getnext(
                         config,
@@ -417,7 +428,7 @@ class SnmpCheck(AgentCheck):
         return error
 
     def extract_metric_tags(self, metric_tags, results):
-        # type: (List[Union[ParsedMetricTag, ParsedMatchMetricTags]], Dict[str, dict]) -> List[str]
+        # type: (List[ParsedMetricTag], Dict[str, dict]) -> List[str]
         extracted_tags = []  # type: List[str]
         for tag in metric_tags:
             if tag.symbol not in results:
@@ -437,7 +448,7 @@ class SnmpCheck(AgentCheck):
 
     def report_metrics(
         self,
-        metrics,  # type: List[Union[ParsedMetric, ParsedTableMetric]]
+        metrics,  # type: List[ParsedMetric]
         results,  # type: Dict[str, Dict[Tuple[str, ...], Any]]
         tags,  # type: List[str]
     ):

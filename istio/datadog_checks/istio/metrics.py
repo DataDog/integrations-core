@@ -95,6 +95,11 @@ MESH_METRICS = {
     'istio_request_duration': 'request.duration',
     'istio_request_size': 'request.size',
     'istio_response_size': 'response.size',
+    # TCP metrics
+    'istio_tcp_connections_closed_total': 'tcp.connections_closed.total',
+    'istio_tcp_connections_opened_total': 'tcp.connections_opened.total',
+    'istio_tcp_received_bytes_total': 'tcp.received_bytes.total',
+    'istio_tcp_sent_bytes_total': 'tcp.send_bytes.total',
 }
 
 

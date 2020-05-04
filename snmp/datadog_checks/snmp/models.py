@@ -8,6 +8,7 @@ Define our own models and interfaces for dealing with SNMP data.
 from typing import Optional, Sequence, Tuple, Union
 
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
+from .pysnmp_inspect import object_identity_from_object_type
 from .pysnmp_types import MibViewController, ObjectIdentity, ObjectName, ObjectType
 from .types import MIBSymbol
 from .utils import format_as_oid_string, parse_as_oid_tuple
@@ -41,10 +42,7 @@ class OID(object):
         # Resolve the `ObjectIdentity` which we can use to resolve the MIB name of the OID (for metric naming).
         # PySNMP objects may contain MIB information already, so check for them in priority.
         if isinstance(value, ObjectType):
-            # No other choice than to use private API here.
-            object_identity = value._ObjectType__args[0]
-            if not isinstance(object_identity, ObjectIdentity):  # pragma: no cover
-                raise RuntimeError('Expected {!r} to be an `ObjectIdentity` instance'.format(object_identity))
+            object_identity = object_identity_from_object_type(value)
         elif isinstance(value, ObjectIdentity):
             object_identity = value
         else:
@@ -58,11 +56,6 @@ class OID(object):
 
     def resolve(self, mib_view_controller):
         # type: (MibViewController) -> None
-        if self._parts is not None:
-            # Client code should only call this if they're certain the
-            # underlying OID isn't resolved yet.
-            raise RuntimeError('Already resolved as {}'.format(self._parts))
-
         self._object_identity.resolveWithMib(mib_view_controller)
         self._parts = parse_as_oid_tuple(self._object_identity)
 
@@ -83,10 +76,10 @@ class OID(object):
         except SmiError as exc:
             raise UnresolvedOID(exc)
 
-        _, name, indexes = result
+        mib, symbol, indexes = result
         prefix = tuple(index.prettyPrint() for index in indexes)
 
-        return MIBSymbol(name, prefix)
+        return MIBSymbol(mib, symbol, prefix)
 
     def __str__(self):
         # type: () -> str

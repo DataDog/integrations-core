@@ -1,0 +1,9 @@
+{ 
+  "name": "Postgres patterns",
+  "type": "logs",
+  "page": "patterns",
+  "query": "source:postgresql",
+  "timerange": {
+    "interval_ms": 3600000
+  }
+}

@@ -5,11 +5,6 @@ from six import iteritems
 
 from datadog_checks.base import PDHBaseCheck
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 DEFAULT_COUNTERS = [
     ["Web Service", None, "Service Uptime", "iis.uptime", "gauge"],
     # Network
@@ -40,99 +35,119 @@ DEFAULT_COUNTERS = [
     ["Web Service", None, "ISAPI Extension Requests/sec", "iis.requests.isapi", "gauge"],
 ]
 
-TOTAL_SITE = "_Total"
+TOTAL_INSTANCE = '_Total'
 
 
 class IIS(PDHBaseCheck):
-    SERVICE_CHECK = "iis.site_up"
+    SITE = 'site'
 
     def __init__(self, name, init_config, instances):
-        super(IIS, self).__init__(name, init_config, instances=instances, counter_list=DEFAULT_COUNTERS)
-        self.sites = self.instance.get('sites') or []
+        super(IIS, self).__init__(name, init_config, instances, counter_list=DEFAULT_COUNTERS)
+        self._sites = self.instance.get('sites', [])
 
-    def get_iishost(self):
-        inst_host = self.instance.get("host")
-        if inst_host in [".", "localhost", "127.0.0.1", None]:
-            # Use agent's hostname if connecting to local machine.
-            iis_host = datadog_agent.get_hostname()
-        else:
-            iis_host = inst_host
-        return "iis_host:{}".format(self.normalize_tag(iis_host))
+        self._expected_data = ((self.SITE, self._sites),)
+        self._remaining_data = {namespace: set() for namespace, _ in self._expected_data}
 
     def check(self, _):
         if self.refresh_counters:
             for counter, values in list(iteritems(self._missing_counters)):
                 self._make_counters(self.instance_hash, ([counter], values))
 
-        expected_sites = set(self.sites)
-        # _Total should always be in the list of expected sites; we always
-        # report _Total
-        expected_sites.add(TOTAL_SITE)
-        self.log.debug("Expected sites is %s", expected_sites)
+        self.reset_remaining_data()
 
         for inst_name, dd_name, metric_func, counter in self._metrics[self.instance_hash]:
             try:
-                site_values = counter.get_all_values()
+                counter_values = counter.get_all_values()
             except Exception as e:
                 self.log.error("Failed to get_all_values %s %s: %s", inst_name, dd_name, e)
                 continue
+
             try:
-                for site_name, value in iteritems(site_values):
-                    is_single_instance = counter.is_single_instance()
-                    if (
-                        not is_single_instance
-                        and self.sites
-                        and site_name != TOTAL_SITE
-                        and site_name not in self.sites
-                    ):
-                        continue
-
-                    tags = self._get_site_tags(site_name, is_single_instance)
-                    try:
-                        metric_func(dd_name, value, tags)
-                    except Exception as e:
-                        self.log.error("Error in metric_func: %s %s %s", dd_name, value, e)
-
-                    if dd_name == "iis.uptime":
-                        self._report_uptime(value, tags)
-                        if site_name in expected_sites:
-                            self.log.debug("Removing %r from expected sites", site_name)
-                            expected_sites.remove(site_name)
-                        else:
-                            self.log.warning("Site %r not in expected_sites", site_name)
+                if counter._class_name == 'Web Service':
+                    self.collect_sites(dd_name, metric_func, counter, counter_values)
 
             except Exception as e:
                 # don't give up on all of the metrics because one failed
                 self.log.error("IIS Failed to get metric data for %s %s: %s", inst_name, dd_name, e)
 
-        self._report_unavailable_sites(expected_sites)
+        self._report_unavailable_values()
 
-    def _report_uptime(self, site_uptime, tags):
-        uptime = int(site_uptime)
+    def collect_sites(self, dd_name, metric_func, counter, counter_values):
+        remaining_sites = self._remaining_data[self.SITE]
+
+        for site_name, value in iteritems(counter_values):
+            is_single_instance = counter.is_single_instance()
+            if (
+                not is_single_instance
+                and site_name != TOTAL_INSTANCE
+                and site_name not in self._sites
+                # Collect all if not selected
+                and self._sites
+            ):
+                continue
+
+            tags = self._get_tags(self.SITE, site_name, is_single_instance)
+            try:
+                metric_func(dd_name, value, tags)
+            except Exception as e:
+                self.log.error('Error in metric_func: %s %s %s', dd_name, value, e)
+
+            if dd_name == 'iis.uptime':
+                self._report_uptime(self.SITE, value, tags)
+                if site_name in remaining_sites:
+                    self.log.debug('Removing %r from expected sites', site_name)
+                    remaining_sites.remove(site_name)
+                else:
+                    self.log.warning('Site %r not in expected sites', site_name)
+
+    def _report_uptime(self, namespace, uptime, tags):
+        uptime = int(uptime)
         status = self.CRITICAL if uptime == 0 else self.OK
-        self.service_check(self.SERVICE_CHECK, status, tags)
+        self.service_check(self.get_service_check_uptime(namespace), status, tags)
 
-    def _report_unavailable_sites(self, remaining_sites):
-        for site in remaining_sites:
-            tags = []
-            if self.instance_hash in self._tags:
-                tags = list(self._tags[self.instance_hash])
-            tags.append(self.get_iishost())
-            normalized_site = self.normalize_tag(site)
-            tags.append("site:{}".format(normalized_site))
-            self.log.warning("Check didn't get any data for expected site: %r", site)
-            self.service_check(self.SERVICE_CHECK, self.CRITICAL, tags)
+    def _report_unavailable_values(self):
+        for namespace, remaining_values in self._remaining_data.items():
+            service_check_uptime = self.get_service_check_uptime(namespace)
 
-    def _get_site_tags(self, site_name, is_single_instance):
+            for value in remaining_values:
+                tags = self._get_tags(namespace, value, False)
+                self.log.warning('Did not get any data for expected %s: %s', namespace, value)
+                self.service_check(service_check_uptime, self.CRITICAL, tags)
+
+    def _get_tags(self, name, value, is_single_instance):
         tags = []
         if self.instance_hash in self._tags:
             tags = list(self._tags[self.instance_hash])
         tags.append(self.get_iishost())
 
-        try:
-            if not is_single_instance:
-                tags.append("site:{}".format(self.normalize_tag(site_name)))
-        except Exception as e:
-            self.log.error("Caught exception %r setting tags", e)
+        if not is_single_instance:
+            try:
+                tags.append('{}:{}'.format(name, self.normalize_tag(value)))
+            except Exception as e:
+                self.log.error('Error setting %s tags: %s', name, e)
 
         return tags
+
+    def get_iishost(self):
+        inst_host = self.instance.get('host')
+        if inst_host in ['.', 'localhost', '127.0.0.1', None]:
+            # Use agent's hostname if connecting to local machine.
+            iis_host = self.hostname
+        else:
+            iis_host = inst_host
+        return 'iis_host:{}'.format(self.normalize_tag(iis_host))
+
+    @classmethod
+    def get_service_check_uptime(cls, namespace):
+        return 'iis.{}_up'.format(namespace)
+
+    def reset_remaining_data(self):
+        for namespace, expected_values in self._expected_data:
+            remaining_values = self._remaining_data[namespace]
+            remaining_values.clear()
+            remaining_values.update(expected_values)
+
+            # Ensure that we always report _Total
+            remaining_values.add(TOTAL_INSTANCE)
+
+            self.log.debug('Expecting %ss: %s', namespace, remaining_values)
