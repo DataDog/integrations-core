@@ -223,7 +223,7 @@ class AggregatorStub(object):
             if expected_tags and expected_tags != sorted(metric.tags):
                 continue
 
-            if hostname and hostname != metric.hostname:
+            if hostname is not None and hostname != metric.hostname:
                 continue
 
             if metric_type is not None and metric_type != metric.type:
