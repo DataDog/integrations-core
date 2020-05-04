@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 2.4.0 / 2020-05-04
+
+* [Added] Add Raft storage backend metrics. See [#6492](https://github.com/DataDog/integrations-core/pull/6492). Thanks [fabienrenaud](https://github.com/fabienrenaud).
+
 ## 2.3.2 / 2020-05-04
 
 * [Fixed] Fixed infinite stream of Vault leader detection events. See [#6552](https://github.com/DataDog/integrations-core/pull/6552). Thanks [fabienrenaud](https://github.com/fabienrenaud).
