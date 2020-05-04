@@ -79,6 +79,10 @@ def shared_logs(example_log_configs, mount_whitelist=None):
             example_log_config['path'] = agent_mount_path
             docker_volumes.append('{}:{}'.format(shared_log_file, agent_mount_path))
 
+            # If service is the default, use the source
+            if example_log_config.get('service', '<SERVICE>') == '<SERVICE>':
+                example_log_config['service'] = log_source
+
             # Make it available to reference for Docker volumes
             env_vars[log_name.upper()] = shared_log_file
 

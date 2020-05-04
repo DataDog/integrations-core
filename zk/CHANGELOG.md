@@ -1,5 +1,9 @@
 # CHANGELOG - zk
 
+## 2.5.0 / 2020-05-04
+
+* [Added] Add new metrics for ZK version 3.6. See [#6421](https://github.com/DataDog/integrations-core/pull/6421).
+
 ## 2.4.2 / 2020-04-13
 
 * [Fixed] Handle non-integers when parsing latency values. See [#6323](https://github.com/DataDog/integrations-core/pull/6323).

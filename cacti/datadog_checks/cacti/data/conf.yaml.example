@@ -1,24 +1,28 @@
-init_config:
+## All options defined here are available to all instances.
+#
+# init_config: {}
 
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param mysql_host - string - required
-    ## url of your MySQL database
+    ## URL of your MySQL database
     #
   - mysql_host: localhost
 
     ## @param mysql_port - integer - optional - default: 3306
-    ## port of your MySQL database
+    ## Port of your MySQL database
     #
     # mysql_port: 3306
 
     ## @param mysql_user - string - required
-    ## User to use to connect to MySQL in order to gather metrics
+    ## User to use to connect to MySQL in order to gather metrics.
     #
     mysql_user: <MYSQL_USER>
 
     ## @param mysql_password - string - required
-    ## Password to use to connect to MySQL in order to gather metrics
+    ## Password to use to connect to MySQL in order to gather metrics.
     #
     mysql_password: <MYSQL_PASSWORD>
 
@@ -32,7 +36,7 @@ instances:
     #
     rrd_path: <CACTI_RRA_PATH>
 
-    ## @param field_names - list of string - optional
+    ## @param field_names - list of strings - optional
     ## The `field_names` specifies which field_names should be used
     ## to determine if a device is a real device. You can let it commented
     ## out as the default values should satisfy your needs.
@@ -62,10 +66,10 @@ instances:
     #
     # rrd_whitelist: <RRD_WHITELIST_FILE_PATH>
 
-    ## @param tags - list of key:value element - optional
-    ## List of tags to attach to every metric, event, and service check emitted by this integration.
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
     #   - <KEY_1>:<VALUE_1>
