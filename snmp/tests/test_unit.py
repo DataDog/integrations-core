@@ -316,6 +316,7 @@ def test_cache_corrupted(write_mock, read_mock):
 @mock.patch("datadog_checks.snmp.snmp.write_persistent_cache")
 def test_cache_building(write_mock, read_mock):
     instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance['timeout'] = 1
     instance.pop('ip_address')
 
     read_mock.return_value = '[]'

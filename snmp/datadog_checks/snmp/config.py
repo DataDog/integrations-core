@@ -31,7 +31,7 @@ class InstanceConfig:
     """Parse and hold configuration about a single instance."""
 
     DEFAULT_RETRIES = 5
-    DEFAULT_TIMEOUT = 1
+    DEFAULT_TIMEOUT = 5
     DEFAULT_ALLOWED_FAILURES = 3
     DEFAULT_BULK_THRESHOLD = 0
     DEFAULT_WORKERS = 5
