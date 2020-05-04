@@ -19,7 +19,6 @@ from .common import (
 )
 
 FILES = [
-    "https://ddintegrations.blob.core.windows.net/snmp/f5.snmprec",
     "https://ddintegrations.blob.core.windows.net/snmp/3850.snmprec",
 ]
 

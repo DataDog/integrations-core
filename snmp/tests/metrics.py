@@ -177,3 +177,115 @@ MEMORY_METRICS = [
     'ciscoMemoryPoolFree',
     'ciscoMemoryPoolLargestFree',
 ]
+
+# F5-BIG-IP profile metrics.
+# f5-big-ip.yaml
+
+LTM_GAUGES = [
+    'ltmVirtualServNumber',
+    'ltmNodeAddrNumber',
+    'ltmPoolNumber',
+    'ltmPoolMemberNumber',
+]
+
+LTM_VIRTUAL_SERVER_GAUGES = [
+    'ltmVirtualServEnabled',
+    'ltmVirtualServConnLimit',
+    'ltmVirtualServStatClientCurConns',
+    'ltmVirtualServStatVsUsageRatio5s',
+    'ltmVirtualServStatVsUsageRatio1m',
+    'ltmVirtualServStatVsUsageRatio5m',
+    'ltmVirtualServStatCurrentConnsPerSec',
+    'ltmVirtualServStatDurationRateExceeded',
+]
+
+LTM_VIRTUAL_SERVER_COUNTS = [
+    'ltmVirtualServStatNoNodesErrors',
+    'ltmVirtualServStatClientTotConns',
+    'ltmVirtualServStatClientEvictedConns',
+    'ltmVirtualServStatClientSlowKilled',
+    'ltmVirtualServStatTotRequests',
+]
+
+LTM_VIRTUAL_SERVER_RATES = [
+    'ltmVirtualServStatClientPktsIn',
+    'ltmVirtualServStatClientBytesIn',
+    'ltmVirtualServStatClientPktsOut',
+    'ltmVirtualServStatClientBytesOut',
+]
+
+LTM_NODES_GAUGES = [
+    'ltmNodeAddrSessionStatus',
+    'ltmNodeAddrConnLimit',
+    'ltmNodeAddrRatio',
+    'ltmNodeAddrDynamicRatio',
+    'ltmNodeAddrMonitorState',
+    'ltmNodeAddrMonitorStatus',
+    'ltmNodeAddrStatServerCurConns',
+    'ltmNodeAddrStatCurSessions',
+    'ltmNodeAddrStatCurrentConnsPerSec',
+    'ltmNodeAddrStatDurationRateExceeded',
+]
+
+LTM_NODES_COUNTS = [
+    'ltmNodeAddrStatServerTotConns',
+    'ltmNodeAddrStatTotRequests',
+]
+
+LTM_NODES_RATES = [
+    'ltmNodeAddrStatServerPktsIn',
+    'ltmNodeAddrStatServerBytesIn',
+    'ltmNodeAddrStatServerPktsOut',
+    'ltmNodeAddrStatServerBytesOut',
+]
+
+LTM_POOL_GAUGES = [
+    'ltmPoolDynamicRatioSum',
+    'ltmPoolMemberCnt',
+    'ltmPoolActiveMemberCnt',
+    'ltmPoolStatServerCurConns',
+    'ltmPoolStatConnqDepth',
+    'ltmPoolStatConnqAgeHead',
+    'ltmPoolStatCurSessions',
+]
+
+LTM_POOL_COUNTS = [
+    'ltmPoolStatServerTotConns',
+    'ltmPoolStatConnqServiced',
+    'ltmPoolStatTotRequests',
+]
+
+LTM_POOL_RATES = [
+    'ltmPoolStatServerPktsIn',
+    'ltmPoolStatServerBytesIn',
+    'ltmPoolStatServerPktsOut',
+    'ltmPoolStatServerBytesOut',
+]
+
+LTM_POOL_MEMBER_GAUGES = [
+    'ltmPoolMemberMonitorState',
+    'ltmPoolMemberMonitorStatus',
+    'ltmPoolMemberSessionStatus',
+    'ltmPoolMemberConnLimit',
+    'ltmPoolMemberRatio',
+    'ltmPoolMemberDynamicRatio',
+    'ltmPoolMemberStatServerCurConns',
+    'ltmPoolMemberStatConnqDepth',
+    'ltmPoolMemberStatConnqAgeHead',
+    'ltmPoolMemberStatCurSessions',
+    'ltmPoolMemberStatCurrentConnsPerSec',
+    'ltmPoolMemberStatDurationRateExceeded',
+]
+
+LTM_POOL_MEMBER_COUNTS = [
+    'ltmPoolMemberStatServerTotConns',
+    'ltmPoolMemberStatTotRequests',
+    'ltmPoolMemberStatConnqServiced',
+]
+
+LTM_POOL_MEMBER_RATES = [
+    'ltmPoolMemberStatServerPktsIn',
+    'ltmPoolMemberStatServerBytesIn',
+    'ltmPoolMemberStatServerPktsOut',
+    'ltmPoolMemberStatServerBytesOut',
+]

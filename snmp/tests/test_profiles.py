@@ -21,6 +21,19 @@ from .metrics import (
     IP_COUNTS,
     IP_IF_COUNTS,
     IPX_COUNTS,
+    LTM_GAUGES,
+    LTM_NODES_COUNTS,
+    LTM_NODES_GAUGES,
+    LTM_NODES_RATES,
+    LTM_POOL_COUNTS,
+    LTM_POOL_GAUGES,
+    LTM_POOL_MEMBER_COUNTS,
+    LTM_POOL_MEMBER_GAUGES,
+    LTM_POOL_MEMBER_RATES,
+    LTM_POOL_RATES,
+    LTM_VIRTUAL_SERVER_COUNTS,
+    LTM_VIRTUAL_SERVER_GAUGES,
+    LTM_VIRTUAL_SERVER_RATES,
     MEMORY_METRICS,
     PROBE_GAUGES,
     SYSTEM_STATUS_GAUGES,
@@ -89,6 +102,7 @@ def test_f5(aggregator):
         'sysMultiHostCpuSoftirq',
         'sysMultiHostCpuIowait',
     ]
+
     if_counts = IF_COUNTS + IFX_COUNTS
     interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
     tags = ['snmp_profile:f5-big-ip', 'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal']
@@ -119,6 +133,66 @@ def test_f5(aggregator):
                 tags=['interface:{}'.format(interface)] + tags,
                 count=1,
             )
+
+    for metric in LTM_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    servers = ['server1', 'server2', 'server3']
+    for server in servers:
+        server_tags = tags + ['server:{}'.format(server)]
+        for metric in LTM_VIRTUAL_SERVER_GAUGES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=server_tags, count=1,
+            )
+        for metric in LTM_VIRTUAL_SERVER_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=server_tags, count=1,
+            )
+        for metric in LTM_VIRTUAL_SERVER_RATES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=server_tags, count=1,
+            )
+
+    nodes = ['node1', 'node2', 'node3']
+    for node in nodes:
+        node_tags = tags + ['node:{}'.format(node)]
+        for metric in LTM_NODES_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=node_tags, count=1)
+        for metric in LTM_NODES_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=node_tags, count=1
+            )
+        for metric in LTM_NODES_RATES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=node_tags, count=1)
+
+    pools = ['pool1', 'pool2']
+    for pool in pools:
+        pool_tags = tags + ['pool:{}'.format(pool)]
+        for metric in LTM_POOL_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=pool_tags, count=1)
+        for metric in LTM_POOL_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=pool_tags, count=1
+            )
+        for metric in LTM_POOL_RATES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=pool_tags, count=1)
+
+    pool_members = [('pool1', 'node1'), ('pool1', 'node2'), ('pool2', 'node3')]
+    for pool, node in pool_members:
+        pool_member_tags = tags + ['pool:{}'.format(pool), 'node:{}'.format(node)]
+        for metric in LTM_POOL_MEMBER_GAUGES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=pool_member_tags, count=1
+            )
+        for metric in LTM_POOL_MEMBER_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=pool_member_tags, count=1
+            )
+        for metric in LTM_POOL_MEMBER_RATES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=pool_member_tags, count=1
+            )
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
