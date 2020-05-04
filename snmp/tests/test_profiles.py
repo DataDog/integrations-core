@@ -326,10 +326,6 @@ def test_cisco_3850(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
         aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
-    aggregator.assert_metric(
-        'snmp.ciscoEnvMonTemperatureStatusValue', metric_type=aggregator.GAUGE, tags=['temp_state:1'] + common_tags
-    )
-
     for source in range(1, 3):
         env_tags = ['power_source:{}'.format(source)]
         aggregator.assert_metric(
@@ -358,7 +354,27 @@ def test_cisco_3850(aggregator):
             tags = ['mem_pool_name:{}'.format(pool)] + common_tags
             aggregator.assert_metric('snmp.{}'.format(metrics), metric_type=aggregator.GAUGE, tags=tags)
 
-    aggregator.assert_metric('snmp.sysUpTimeInstance')
+    neighbor_metrics = [
+        ('ospfNbrEvents', aggregator.RATE),
+        ('ospfNbrState', aggregator.GAUGE),
+        ('ospfNbrLsRetransQLen', aggregator.GAUGE),
+    ]
+    for metric, metric_type in neighbor_metrics:
+        tags = ['neighbor_ip:192.29.116.26', 'neighbor_id:192.29.66.79'] + common_tags
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=metric_type, tags=tags, count=1)
+
+    lls_metrics = ['ospfIfRetransInterval', 'ospfIfState']
+    for metric in lls_metrics:
+        tags = ['ospf_ip_addr:192.29.116.25'] + common_tags
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    for temp_index in [1006, 1007, 1008, 2006, 2007, 2008]:
+        env_tag = ['temp_index:{}'.format(temp_index), 'temp_state:1']
+        aggregator.assert_metric(
+            'snmp.ciscoEnvMonTemperatureStatusValue', metric_type=aggregator.GAUGE, tags=env_tag + common_tags
+        )
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
 
@@ -534,11 +550,11 @@ def test_cisco_nexus(aggregator):
         for metric in CPU_METRICS:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    for state in [3, 4, 6]:
+    for (index, state) in [(3, 3), (6, 6), (8, 6), (11, 6), (13, 3), (14, 6), (20, 6), (21, 4), (31, 5)]:
         aggregator.assert_metric(
             'snmp.ciscoEnvMonTemperatureStatusValue',
             metric_type=aggregator.GAUGE,
-            tags=['temp_state:{}'.format(state)] + common_tags,
+            tags=['temp_state:{}'.format(state), 'temp_index:{}'.format(index)] + common_tags,
         )
 
     aggregator.assert_metric(
@@ -1055,11 +1071,11 @@ def test_cisco_asa_5525(aggregator):
     aggregator.assert_metric('snmp.cipSecGlobalHcInOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.cipSecGlobalHcOutOctets', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags)
 
-    for state in [3, 4, 6]:
+    for (index, state) in [(3, 3), (6, 6), (8, 6), (11, 6), (13, 3), (14, 6), (20, 6), (21, 4), (31, 5)]:
         aggregator.assert_metric(
             'snmp.ciscoEnvMonTemperatureStatusValue',
             metric_type=aggregator.GAUGE,
-            tags=['temp_state:{}'.format(state)] + common_tags,
+            tags=['temp_state:{}'.format(state), 'temp_index:{}'.format(index)] + common_tags,
         )
 
     aggregator.assert_metric(
@@ -1225,6 +1241,38 @@ def test_aruba(aggregator):
     aggregator.assert_metric(
         'snmp.wlsxSysExtPacketLossPercent', metric_type=aggregator.GAUGE, tags=common_tags, count=1
     )
+
+    # OSPF metrics
+    neighbor_metrics = [
+        ('ospfNbrEvents', aggregator.RATE),
+        ('ospfNbrState', aggregator.GAUGE),
+        ('ospfNbrLsRetransQLen', aggregator.GAUGE),
+    ]
+    for metric, metric_type in neighbor_metrics:
+        tags = ['neighbor_ip:192.29.116.26', 'neighbor_id:192.29.66.79'] + common_tags
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=metric_type, tags=tags, count=1)
+
+    virtual_neighbor_metrics = [
+        ('ospfVirtNbrState', aggregator.GAUGE),
+        ('ospfVirtNbrEvents', aggregator.RATE),
+        ('ospfVirtNbrLsRetransQLen', aggregator.GAUGE),
+    ]
+    for metric, metric_type in virtual_neighbor_metrics:
+        for ip, nbr in [('74.210.82.1', '194.154.66.112'), ('122.226.86.1', '184.201.101.140')]:
+            tags = ['neighbor_ip:{}'.format(ip), 'neighbor_id:{}'.format(nbr)] + common_tags
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=metric_type, tags=tags, count=1)
+
+    lls_metrics = ['ospfIfRetransInterval', 'ospfIfState', 'ospfIfLsaCount']
+    for metric in lls_metrics:
+        for ip, nbr in [('58.115.169.188', '192.29.66.79'), ('18.2.8.29', '118.246.193.247')]:
+            tags = ['ospf_ip_addr:{}'.format(ip), 'neighbor_id:{}'.format(nbr)] + common_tags
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    virtual_lls_metrics = ['ospfVirtIfRetransInterval', 'ospfVirtIfState', 'ospfVirtIfLsaCount']
+    for metric in virtual_lls_metrics:
+        for nbr in ['194.154.66.112', '184.201.101.140']:
+            tags = ['neighbor_id:{}'.format(nbr)] + common_tags
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
 
