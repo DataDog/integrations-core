@@ -103,6 +103,7 @@ class CoreDNSCheck(OpenMetricsBaseCheck):
                 'prometheus_url': endpoint,
                 'namespace': 'coredns',
                 'metrics': metrics,
+                # Submits Prometheus histogram counter metrics as monotonic_count
                 'send_monotonic_with_gauge': True,
             }
         )

@@ -951,12 +951,12 @@ class OpenMetricsScraperMixin(object):
         )
 
     def _submit_distribution_count(self, monotonic, send_monotonic_with_gauge, metric_name, value, tags=None, hostname=None):
+        if send_monotonic_with_gauge:
+            self.monotonic_count(metric_name + ".total", value, tags=tags, hostname=hostname)
         if monotonic:
             self.monotonic_count(metric_name, value, tags=tags, hostname=hostname)
         else:
             self.gauge(metric_name, value, tags=tags, hostname=hostname)
-            if send_monotonic_with_gauge:
-                self.monotonic_count(metric_name + ".total", value, tags=tags, hostname=hostname)
 
     def _metric_tags(self, metric_name, val, sample, scraper_config, hostname=None):
         custom_tags = scraper_config['custom_tags']

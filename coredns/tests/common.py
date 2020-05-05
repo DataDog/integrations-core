@@ -8,13 +8,12 @@ COUNT_METRICS = [
     NAMESPACE + '.cache_hits_count',
     NAMESPACE + '.response_code_count',
     NAMESPACE + '.proxy_request_count',
-    NAMESPACE + '.response_size.bytes.count',
-    NAMESPACE + '.request_size.bytes.count',
     NAMESPACE + '.forward_request_count',
     NAMESPACE + '.forward_response_rcode_count',
     NAMESPACE + '.forward_request_duration.seconds.count.total',
     NAMESPACE + '.proxy_request_duration.seconds.count.total',
     NAMESPACE + '.request_duration.seconds.count.total',
+    NAMESPACE + '.response_size.bytes.count.total',
 ]
 
 METRICS = [
@@ -41,4 +40,5 @@ METRICS = [
     NAMESPACE + '.proxy_request_duration.seconds.count.total',
     NAMESPACE + '.forward_request_duration.seconds.count.total',
     NAMESPACE + '.request_duration.seconds.count.total',
+    NAMESPACE + '.response_size.bytes.count.total',
 ]
