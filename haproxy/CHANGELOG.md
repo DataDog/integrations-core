@@ -1,5 +1,9 @@
 # CHANGELOG - haproxy
 
+## 2.8.1 / 2020-05-05
+
+* [Fixed] Handle empty response from show table. See [#6579](https://github.com/DataDog/integrations-core/pull/6579).
+
 ## 2.8.0 / 2020-04-04
 
 * [Added] Gather stick-table metrics. See [#6158](https://github.com/DataDog/integrations-core/pull/6158).
