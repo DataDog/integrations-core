@@ -17,9 +17,9 @@ from datadog_checks.base import ConfigurationError
 from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck
 from datadog_checks.snmp.config import InstanceConfig
+from datadog_checks.snmp.discovery import discover_instances
 from datadog_checks.snmp.parsing import ParsedSymbolMetric, ParsedTableMetric
 from datadog_checks.snmp.resolver import OIDTrie
-from datadog_checks.snmp.snmp import discover_instances
 from datadog_checks.snmp.utils import _load_default_profiles, oid_pattern_specificity, recursively_expand_base_profiles
 
 from . import common
@@ -315,7 +315,7 @@ def test_cache_corrupted(write_mock, read_mock):
 
 
 @mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")
-@mock.patch("datadog_checks.snmp.snmp.write_persistent_cache")
+@mock.patch("datadog_checks.snmp.discovery.write_persistent_cache")
 def test_cache_building(write_mock, read_mock):
     instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
     instance['timeout'] = 1

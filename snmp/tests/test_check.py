@@ -679,7 +679,7 @@ def test_discovery(aggregator):
             aggregator.reset()
     finally:
         check._running = False
-        del check
+        del check  # This is what the Agent would do when unscheduling the check.
 
     for metric in common.SUPPORTED_METRIC_TYPES:
         metric_name = "snmp." + metric['name']
