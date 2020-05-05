@@ -15,7 +15,7 @@ from ...git import get_commits_since
 from ...github import from_contributor, get_changelog_types, get_pr, parse_pr_numbers
 from ...release import get_release_tag_string
 from ...utils import complete_testable_checks, get_valid_checks, get_version_string
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, validate_check_arg, echo_success
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, validate_check_arg
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
 

@@ -150,9 +150,7 @@ def get_latest_tag(pattern=None, tag_prefix='v'):
     """
     if not pattern:
         pattern = rf'^({tag_prefix})?\d+\.\d+\.\d+.*'
-    all_tags = sorted(
-        (parse_version_info(t.replace(tag_prefix, '', 1)), t) for t in git_tag_list(pattern)
-    )
+    all_tags = sorted((parse_version_info(t.replace(tag_prefix, '', 1)), t) for t in git_tag_list(pattern))
     # reverse so we have descendant order
     return list(reversed(all_tags))[0][1]
 
