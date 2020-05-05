@@ -320,7 +320,19 @@ Optionally, deploy cluster check runners in addition to setting up the Datadog C
 
 ## Process Collection
 
-[Process Collection][21] is not currently available.
+For Agent 6.19+/7.19+, [Process Collection][21] is available. Enable `shareProcessNamespace` on your pod spec to collect all processes running on your Fargate pod. For example:
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: <NAME>
+spec:
+  shareProcessNamespace: true
+...
+```
+
+**Note**: CPU and memory metrics are not available.
 
 ## Data Collected
 
