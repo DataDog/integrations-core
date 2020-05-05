@@ -70,8 +70,8 @@ def test_parse_metrics(lcd_mock):
 
     # MIB with table and symbols
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"]}]
-    _, oids, _, parsed_metrics = config.parse_metrics(metrics)
-    assert len(oids) == 2
+    _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(next_oids) == 2
     assert len(parsed_metrics) == 2
     foo, bar = parsed_metrics
     assert isinstance(foo, ParsedTableMetric)
@@ -91,8 +91,8 @@ def test_parse_metrics(lcd_mock):
 
     # Table with manual OID
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": [{"OID": "1.2.3", "name": "foo"}]}]
-    _, oids, _, parsed_metrics = config.parse_metrics(metrics)
-    assert len(oids) == 1
+    _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(next_oids) == 1
     assert len(parsed_metrics) == 1
     foo = parsed_metrics[0]
     assert isinstance(foo, ParsedTableMetric)
@@ -107,8 +107,8 @@ def test_parse_metrics(lcd_mock):
             "metric_tags": [{"tag": "test", "index": "1"}],
         },
     ]
-    _, oids, _, parsed_metrics = config.parse_metrics(metrics)
-    assert len(oids) == 2
+    _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(next_oids) == 2
     assert len(parsed_metrics) == 2
     foo, bar = parsed_metrics
     assert isinstance(foo, ParsedTableMetric)
@@ -127,8 +127,8 @@ def test_parse_metrics(lcd_mock):
             "metric_tags": [{"tag": "test", "column": "baz"}],
         }
     ]
-    _, oids, _, parsed_metrics = config.parse_metrics(metrics)
-    assert len(oids) == 3
+    _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(next_oids) == 3
     assert len(parsed_metrics) == 2
     foo, bar = parsed_metrics
     assert isinstance(foo, ParsedTableMetric)
@@ -147,8 +147,8 @@ def test_parse_metrics(lcd_mock):
             "metric_tags": [{"tag": "test", "column": {"name": "baz", "OID": "1.5.6"}}],
         }
     ]
-    _, oids, _, parsed_metrics = config.parse_metrics(metrics)
-    assert len(oids) == 3
+    _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(next_oids) == 3
     assert len(parsed_metrics) == 2
     foo, bar = parsed_metrics
     assert isinstance(foo, ParsedTableMetric)
