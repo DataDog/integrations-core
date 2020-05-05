@@ -318,6 +318,10 @@ Optionally, deploy cluster check runners in addition to setting up the Datadog C
 
 **Note**: You can also collect events if you run the Datadog Cluster Agent in a pod in Fargate.
 
+## Process Collection
+
+[Process Collection][21] is not currently available.
+
 ## Data Collected
 
 ### Metrics
@@ -356,3 +360,4 @@ Need help? Contact [Datadog support][20].
 [18]: http://docs.datadoghq.com/agent/cluster_agent/setup
 [19]: http://docs.datadoghq.com/agent/cluster_agent/event_collection
 [20]: https://docs.datadoghq.com/help/
+[21]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#process-collection
