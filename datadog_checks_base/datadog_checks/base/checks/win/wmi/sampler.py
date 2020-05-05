@@ -24,10 +24,12 @@ Original discussion thread: https://github.com/DataDog/dd-agent/issues/1952
 Credits to @TheCloudlessSky (https://github.com/TheCloudlessSky)
 """
 from copy import deepcopy
+from datetime import time
 from threading import Event, Thread
 
 import pythoncom
 import pywintypes
+from ...utils.timeout import TimeoutException
 from six import iteritems, string_types, with_metaclass
 from six.moves import zip
 from win32com.client import Dispatch
@@ -171,6 +173,7 @@ class WMISampler(object):
         self.stop()
 
     def _query_sample_loop(self):
+        time_started = time.time()
         try:
             # Initialize COM for the current (dedicated) thread
             # WARNING: any python COM object (locator, connection, etc) created in a thread
@@ -182,6 +185,8 @@ class WMISampler(object):
             raise
 
         while True:
+            if time.time() > time_started + self._timeout_duration:
+                raise TimeoutException()
             self._runSampleEvent.wait()
             if self._stopping:
                 self.logger.debug("_query_sample_loop stopping")
