@@ -179,8 +179,8 @@ Need help? Contact [Datadog support][7].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/logs/processing/pipelines/#integration-pipelines
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://docs.datadoghq.com/help
-[8]: https://docs.datadoghq.com/integrations/faq/how-to-add-event-log-files-to-the-win32-ntlogevent-wmi-class
+[7]: https://docs.datadoghq.com/help/
+[8]: https://docs.datadoghq.com/integrations/faq/how-to-add-event-log-files-to-the-win32-ntlogevent-wmi-class/
 [9]: https://www.datadoghq.com/blog/monitoring-windows-server-2012
 [10]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics
 [11]: https://www.datadoghq.com/blog/windows-server-monitoring

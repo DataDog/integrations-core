@@ -97,8 +97,8 @@ Need help? Contact [Datadog support][5].
 [1]: https://developers.redhat.com/products/eap/overview
 [2]: http://wildfly.org
 [3]: https://app.datadoghq.com/account/settings#agent
-[4]: https://docs.datadoghq.com/integrations/java
-[5]: https://docs.datadoghq.com/help
+[4]: https://docs.datadoghq.com/integrations/java/
+[5]: https://docs.datadoghq.com/help/
 [6]: https://github.com/DataDog/integrations-core/blob/master/jboss_wildfly/datadog_checks/jboss_wildfly/data/conf.yaml.example
 [7]: https://docs.jboss.org/author/display/WFLY9/JMX%20subsystem%20configuration.html
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent

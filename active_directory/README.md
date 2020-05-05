@@ -74,4 +74,4 @@ Need help? Contact [Datadog support][8].
 [5]: https://www.rubydoc.info/gems/activedirectory/0.9.3
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/active_directory/metadata.csv
-[8]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/help/

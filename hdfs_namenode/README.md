@@ -122,14 +122,14 @@ Need help? Contact [Datadog support][119].
 - [How to monitor Hadoop with Datadog][1113]
 
 [111]: https://raw.githubusercontent.com/DataDog/integrations-core/master/hdfs_datanode/images/hadoop_dashboard.png
-[112]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[112]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [113]: https://app.datadoghq.com/account/settings#agent
 [114]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [115]: https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/datadog_checks/hdfs_namenode/data/conf.yaml.example
 [116]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [117]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [118]: https://github.com/DataDog/integrations-core/blob/master/hdfs_namenode/metadata.csv
-[119]: https://docs.datadoghq.com/help
+[119]: https://docs.datadoghq.com/help/
 [1110]: https://www.datadoghq.com/blog/hadoop-architecture-overview
 [1111]: https://www.datadoghq.com/blog/monitor-hadoop-metrics
 [1112]: https://www.datadoghq.com/blog/collecting-hadoop-metrics

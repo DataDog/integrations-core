@@ -136,13 +136,13 @@ Need help? Contact [Datadog support][13].
 [2]: https://msdn.microsoft.com/en-us/library/system.diagnostics.performancecounter(v=vs.110.aspx)
 [3]: https://wmie.codeplex.com
 [4]: https://msdn.microsoft.com/en-us/powershell/scripting/getting-started/cookbooks/getting-wmi-objects--get-wmiobject-
-[5]: https://docs.datadoghq.com/integrations/faq/how-to-retrieve-wmi-metrics
+[5]: https://docs.datadoghq.com/integrations/faq/how-to-retrieve-wmi-metrics/
 [6]: https://msdn.microsoft.com/en-us/library/windows/desktop/aa394084.aspx
 [7]: https://technet.microsoft.com/en-us/library/Hh921475.aspx
 [8]: https://msdn.microsoft.com/en-us/library/aa393067.aspx
-[9]: https://docs.datadoghq.com/developers/metrics/custom_metrics
-[10]: https://docs.datadoghq.com/account_management/billing/custom_metrics
+[9]: https://docs.datadoghq.com/developers/metrics/custom_metrics/
+[10]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/wmi_check/metadata.csv
-[13]: https://docs.datadoghq.com/help
+[13]: https://docs.datadoghq.com/help/
 [14]: https://docs.datadoghq.com/integrations/pdh_check/

@@ -24,4 +24,4 @@ tox
 Need help? Contact [Datadog support][2].
 
 [1]: https://tox.readthedocs.io/en/latest/install.html
-[2]: https://docs.datadoghq.com/help
+[2]: https://docs.datadoghq.com/help/
