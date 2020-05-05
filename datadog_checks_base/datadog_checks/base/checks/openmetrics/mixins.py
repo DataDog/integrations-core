@@ -203,10 +203,6 @@ class OpenMetricsScraperMixin(object):
             instance.get('send_monotonic_with_gauge', default_instance.get('send_monotonic_with_gauge', False))
         )
 
-        # Submit Prometheus counter metrics as monotonic_count along with gauge
-        if not config['send_monotonic_counter']:
-            config['send_monotonic_with_gauge'] = True
-
         config['send_distribution_counts_as_monotonic'] = is_affirmative(
             instance.get(
                 'send_distribution_counts_as_monotonic',
@@ -784,18 +780,18 @@ class OpenMetricsScraperMixin(object):
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
                 self._submit_distribution_count(
                     scraper_config['send_distribution_sums_as_monotonic'],
+                    scraper_config['send_monotonic_with_gauge'],
                     "{}.{}.sum".format(scraper_config['namespace'], metric_name),
                     val,
                     tags=tags,
                     hostname=custom_hostname,
-                    send_monotonic_with_gauge=scraper_config['send_monotonic_with_gauge'],
                 )
             elif sample[self.SAMPLE_NAME].endswith("_count"):
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
                 self._submit_distribution_count(
                     scraper_config['send_distribution_counts_as_monotonic'],
-                    "{}.{}.count".format(scraper_config['namespace'], metric_name),
                     scraper_config['send_monotonic_with_gauge'],
+                    "{}.{}.count".format(scraper_config['namespace'], metric_name),
                     val,
                     tags=tags,
                     hostname=custom_hostname,
