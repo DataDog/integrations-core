@@ -15,7 +15,7 @@ from ...git import get_commits_since
 from ...github import from_contributor, get_changelog_types, get_pr, parse_pr_numbers
 from ...release import get_release_tag_string
 from ...utils import complete_testable_checks, get_valid_checks, get_version_string
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, validate_check_arg
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, validate_check_arg, echo_success
 
 ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, author_url, from_contributor')
 
@@ -65,6 +65,7 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_
 
     user_config = ctx.obj
     entries = defaultdict(list)
+    generated_changelogs = 0
     for pr_num in pr_numbers:
         try:
             payload = get_pr(pr_num, user_config)
@@ -85,6 +86,8 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_
                 # No changelog entry for this PR
                 echo_info(f'Skipping PR #{pr_num} from changelog due to label')
             continue
+
+        generated_changelogs += 1
 
         author = payload.get('user', {}).get('login')
         author_url = payload.get('user', {}).get('html_url')
@@ -138,3 +141,4 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_
     else:
         # overwrite the old changelog
         write_file(changelog_path, changelog_buffer.getvalue())
+        echo_success(f"Successfully generated {generated_changelogs} change{'s' if generated_changelogs > 1 else ''}")
