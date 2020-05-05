@@ -199,6 +199,14 @@ class OpenMetricsScraperMixin(object):
             instance.get('send_monotonic_counter', default_instance.get('send_monotonic_counter', True))
         )
 
+        config['send_monotonic_with_gauge'] = is_affirmative(
+            instance.get('send_monotonic_with_gauge', default_instance.get('send_monotonic_with_gauge', False))
+        )
+
+        # Submit Prometheus counter metrics as monotonic_count along with gauge
+        if not config['send_monotonic_counter']:
+            config['send_monotonic_with_gauge' = True
+
         config['send_distribution_counts_as_monotonic'] = is_affirmative(
             instance.get(
                 'send_distribution_counts_as_monotonic',

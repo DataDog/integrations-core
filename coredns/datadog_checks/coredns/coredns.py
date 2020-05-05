@@ -104,6 +104,7 @@ class CoreDNSCheck(OpenMetricsBaseCheck):
                 'namespace': 'coredns',
                 'metrics': metrics,
                 'send_distribution_counts_as_monotonic': True,
+                'send_monotonic_with_gauge': True,
             }
         )
 
