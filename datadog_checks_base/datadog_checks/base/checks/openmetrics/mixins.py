@@ -742,7 +742,9 @@ class OpenMetricsScraperMixin(object):
                     # Metric is a "counter" but legacy behavior has "send_as_monotonic" defaulted to false
                     # Submit metric as monotonic_count with appended name
                     if metric.type == "counter" and scraper_config['send_monotonic_with_gauge']:
-                        self.monotonic_count(metric_name_with_namespace + '.total', val, tags=tags, hostname=custom_hostname)
+                        self.monotonic_count(
+                            metric_name_with_namespace + '.total', val, tags=tags, hostname=custom_hostname
+                        )
         elif metric.type == "histogram":
             self._submit_gauges_from_histogram(metric_name, metric, scraper_config)
         elif metric.type == "summary":
@@ -950,7 +952,9 @@ class OpenMetricsScraperMixin(object):
             tags,
         )
 
-    def _submit_distribution_count(self, monotonic, send_monotonic_with_gauge, metric_name, value, tags=None, hostname=None):
+    def _submit_distribution_count(
+        self, monotonic, send_monotonic_with_gauge, metric_name, value, tags=None, hostname=None
+    ):
         if send_monotonic_with_gauge:
             self.monotonic_count(metric_name + ".total", value, tags=tags, hostname=hostname)
         if monotonic:
