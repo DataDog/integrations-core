@@ -10,17 +10,6 @@ from . import common
 log = logging.getLogger(__file__)
 
 
-def test_basic_check(mock_proc_sampler, aggregator, check):
-    instance = copy.deepcopy(common.INSTANCE)
-    instance['tags'] = ["optional:tag1"]
-    check.check(instance)
-
-    for metric in common.INSTANCE_METRICS:
-        aggregator.assert_metric(metric, tags=['optional:tag1'], count=1)
-
-    aggregator.assert_all_metrics_covered()
-
-
 def test_tags(mock_proc_sampler, aggregator, check):
     instance = copy.deepcopy(common.INSTANCE)
     instance['tags'] = ["optional:tag1"]
