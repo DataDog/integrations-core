@@ -376,10 +376,6 @@ class MongoDb(AgentCheck):
 
         clean_server_name = server.replace(password, '*' * 5) if password else server
 
-        if username and self.ssl_params:
-            username_pattern = '{}[@:]'.format(re.escape(username))
-            clean_server_name = re.sub(username_pattern, '', clean_server_name)
-
         return server, username, password, database, nodelist, clean_server_name, auth_source
 
     @classmethod
