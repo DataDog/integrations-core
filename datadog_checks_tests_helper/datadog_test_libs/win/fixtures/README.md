@@ -7,18 +7,24 @@ You take `typeperf -qx` and redirect to a file, that gets you a huge file in the
 
 ```
 \Storage QoS Filter - Volume(D:)\Avg. Normalized I/O Cost
-\Storage QoS Filter - Volume(D:)\Avg. I/O Cost
+\ASP.NET\Requests Disconnected
 \Network Virtualization(Provider Routing Domain)\Unicast Replicated Packets out
 \Network Virtualization(Provider Routing Domain)\Inbound Packets dropped
 ```
 
-Then you use a giant regex to format it so that `!` is the separator, to make it easier to parse.
+then you use a giant regex to format it so that `!` is the separator, to make it easier to parse like:
+
+```
+Storage QoS Filter - Volume ! D: ! Avg. Normalized I/O Cost
+ASP.NET ! ! Requests Disconnected
+Network Virtualization ! Provider Routing Domain ! Unicast Replicated Packets out
+Network Virtualization ! Provider Routing Domain ! Inbound Packets dropped
+```
 
 This is the lasting remnant of the old script:
 
 ```python
 import re
-import string
 from collections import defaultdict
 
 teststrings = [
@@ -34,7 +40,7 @@ def parse_counter(counter):
     instance = None
     cname = None
     # remove the leading slash, don't need it
-    c = string.lstrip(counter, '\\')
+    c = counter.lstrip('\\')
 
     firstslash = c.find('\\')
 
@@ -69,7 +75,8 @@ for s in teststrings:
     a,b,c = [ x if not x else x.lstrip('\\') for x in res ]
     #if b:
     #    b = b.lstrip("(").rstrip(")")
-    allcounters[a][0].append(c) if c not in allcounters[a][0]
+    if c not in allcounters[a]:
+        allcounters[a].append(c)
 
-print allcounters
+print(allcounters)
 ```
