@@ -89,9 +89,6 @@ class MongoDb(AgentCheck):
 
         self.collection_metrics_names = (key.split('.')[1] for key in metrics.COLLECTION_METRICS)
 
-        if 'server' not in self.instance:
-            raise ConfigurationError("Missing 'server' in mongo config")
-
         # x.509 authentication
         ssl_params = {
             'ssl': self.instance.get('ssl', None),
@@ -102,15 +99,27 @@ class MongoDb(AgentCheck):
         }
         self.ssl_params = {key: value for key, value in iteritems(ssl_params) if value is not None}
 
-        self.server = self.instance['server']
-        (
-            self.username,
-            self.password,
-            self.db_name,
-            self.nodelist,
-            self.clean_server_name,
-            self.auth_source,
-        ) = self._parse_uri(self.server, sanitize_username=bool(self.ssl_params))
+        if 'server' in self.instance:
+            self.warning('Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.')
+            self.server = self.instance['server']
+            (
+                self.username,
+                self.password,
+                self.db_name,
+                self.nodelist,
+                self.clean_server_name,
+                self.auth_source,
+            ) = self._parse_uri(self.server, sanitize_username=bool(self.ssl_params))
+        else:
+            (
+                self.server,
+                self.username,
+                self.password,
+                self.db_name,
+                self.nodelist,
+                self.clean_server_name,
+                self.auth_source,
+            ) = self._parse_config()
 
         self.additional_metrics = self.instance.get('additional_metrics', [])
 
@@ -318,6 +327,60 @@ class MongoDb(AgentCheck):
             raise Exception(message)
 
         return authenticated
+
+    def _parse_config(self):
+        """
+        See https://docs.mongodb.com/manual/reference/connection-string/
+        """
+        hosts = self.instance.get('hosts', [])
+        if not hosts:
+            raise ConfigurationError('No `hosts` specified')
+
+        connection_scheme = self.instance.get('connection_scheme', 'mongodb')
+        username = self.instance.get('username')
+        password = self.instance.get('password')
+        database = self.instance.get('database')
+        options = self.instance.get('options', {})
+
+        # Construct the connection string
+        server = '{}://'.format(connection_scheme)
+
+        if username and password:
+            server += '{}:{}@'.format(username, password)
+
+        server += ','.join(hosts)
+
+        if database:
+            server += '/{}'.format(database)
+
+        if options:
+            if not database:
+                server += '/'
+
+            server += '?{}'.format('&'.join('{}={}'.format(key, value) for key, value in options.items()))
+
+        # Satisfy requirements of _parse_uri
+        auth_source = None
+        for key, value in options.items():
+            if key.lower() == 'authsource':
+                auth_source = value
+                break
+
+        nodelist = []
+        for host in hosts:
+            if ':' in host:
+                hostname, port = host.rsplit(':', 1)
+                nodelist.append((hostname, int(port)))
+            else:
+                nodelist.append((host, 27017))
+
+        clean_server_name = server.replace(password, '*' * 5) if password else server
+
+        if username and self.ssl_params:
+            username_pattern = '{}[@:]'.format(re.escape(username))
+            clean_server_name = re.sub(username_pattern, '', clean_server_name)
+
+        return server, username, password, database, nodelist, clean_server_name, auth_source
 
     @classmethod
     def _parse_uri(cls, server, sanitize_username=False):
