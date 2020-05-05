@@ -10,13 +10,14 @@ files:
     - name: hosts
       required: true
       description: |
-        The host (and optional port number) where the mongod instance (or mongos instance for
+        The host (and optional port number) where the mongod instance (or mongos instances for
         a sharded cluster) is running. You can specify a hostname, IP address, or UNIX domain
         socket. Specify as many hosts as appropriate for your deployment topology:
 
           - For a standalone, specify the hostname of the standalone mongod instance.
-          - For a replica set, specify the hostname(s) of the mongod instance(s) as listed in
-            the replica set configuration.
+          - For a replica set, specify the hostname of a mongod instance as listed in
+            the replica set configuration. You need one check instance per mongod instance
+            in order to collect replication metrics and events.
           - For a sharded cluster, specify the hostname(s) of the mongos instance(s).
 
         If the port number is not specified, the default port 27017 is used.
@@ -39,7 +40,8 @@ files:
         type: string
     - name: database
       description: |
-        The authentication database to use if a `username` and `password` is set but the `authSource` is not
+        The database to collect metrics from.
+        This is also the authentication database to use if a `username` and `password` is set but the `authSource` is not
         specified in `options`. If `database` is not set and the `authSource` is not specified in `options`,
         the check will attempt to authenticate `username` to the admin database.
       value:
@@ -48,6 +50,8 @@ files:
       description: |
         For a complete list of available connection options, see:
         https://docs.mongodb.com/manual/reference/connection-string/#connections-connection-options
+        NOTE: For monitoring replica set, do not use the replSet parameter as the agent expects to always
+        connect to the same host. Instead configure one check instance for each node.
       value:
         type: object
         properties: []
@@ -60,7 +64,7 @@ files:
     - name: replica_check
       description: |
         Whether or not to read from available replicas.
-        Disable this if any replicas are inaccessible to the agent.
+        Disable this if any replicas are inaccessible to the agent. This option is not supported for sharded clusters.
       value:
         type: boolean
         example: true
