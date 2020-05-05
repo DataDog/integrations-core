@@ -10,11 +10,11 @@ COUNT_METRICS = [
     NAMESPACE + '.proxy_request_count',
     NAMESPACE + '.response_size.bytes.count',
     NAMESPACE + '.request_size.bytes.count',
-    NAMESPACE + '.proxy_request_duration.seconds.count',
-    NAMESPACE + '.request_duration.seconds.count',
     NAMESPACE + '.forward_request_count',
-    NAMESPACE + '.forward_request_duration.seconds.count',
     NAMESPACE + '.forward_response_rcode_count',
+    NAMESPACE + '.forward_request_duration.seconds.count.total',
+    NAMESPACE + '.proxy_request_duration.seconds.count.total',
+    NAMESPACE + '.request_duration.seconds.count.total',
 ]
 
 METRICS = [
@@ -37,4 +37,8 @@ METRICS = [
     NAMESPACE + '.forward_request_duration.seconds.count',
     NAMESPACE + '.forward_response_rcode_count',
     NAMESPACE + '.forward_sockets_open',
+    # The following are histogram counts that are now submitted as monotonic_count
+    NAMESPACE + '.proxy_request_duration.seconds.count.total',
+    NAMESPACE + '.forward_request_duration.seconds.count.total',
+    NAMESPACE + '.request_duration.seconds.count.total',
 ]
