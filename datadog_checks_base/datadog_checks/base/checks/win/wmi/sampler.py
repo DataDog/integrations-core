@@ -403,7 +403,7 @@ class WMISampler(object):
             while f:
                 prop, value = f.popitem()
 
-                if isinstance(value, (tuple, list)) and len(value) == 2:
+                if isinstance(value, (tuple, list)) and len(value) == 2 and isinstance(value[0], string_types):
                     oper = value[0]
                     value = value[1]
                 elif isinstance(value, string_types) and '%' in value:
