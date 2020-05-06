@@ -318,6 +318,22 @@ Optionally, deploy cluster check runners in addition to setting up the Datadog C
 
 **Note**: You can also collect events if you run the Datadog Cluster Agent in a pod in Fargate.
 
+## Process Collection
+
+For Agent 6.19+/7.19+, [Process Collection][21] is available. Enable `shareProcessNamespace` on your pod spec to collect all processes running on your Fargate pod. For example:
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: <NAME>
+spec:
+  shareProcessNamespace: true
+...
+```
+
+**Note**: CPU and memory metrics are not available.
+
 ## Data Collected
 
 ### Metrics
@@ -356,3 +372,4 @@ Need help? Contact [Datadog support][20].
 [18]: http://docs.datadoghq.com/agent/cluster_agent/setup
 [19]: http://docs.datadoghq.com/agent/cluster_agent/event_collection
 [20]: https://docs.datadoghq.com/help/
+[21]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#process-collection
