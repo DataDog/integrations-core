@@ -24,7 +24,8 @@ from .metrics_types import (
 from .parsed_metrics import ParsedMetric, ParsedSymbolMetric, ParsedTableMetric
 
 ParseMetricsResult = TypedDict(
-    'ParseMetricsResult', {'oids': List[OID], 'bulk_oids': List[OID], 'parsed_metrics': List[ParsedMetric]},
+    'ParseMetricsResult',
+    {'oids': List[OID], 'next_oids': List[OID], 'bulk_oids': List[OID], 'parsed_metrics': List[ParsedMetric]},
 )
 
 
@@ -34,6 +35,7 @@ def parse_metrics(metrics, resolver, bulk_threshold=0):
     Parse the `metrics` section of a config file, and return OIDs to fetch and metrics to submit.
     """
     oids = []
+    next_oids = []
     bulk_oids = []
     parsed_metrics = []  # type: List[ParsedMetric]
 
@@ -54,11 +56,15 @@ def parse_metrics(metrics, resolver, bulk_threshold=0):
             if should_query_in_bulk:
                 bulk_oids.append(batch.table_oid)
             else:
-                oids.extend(batch.oids)
+                # NOTE: we should issue GETNEXT commands for these OIDs, because GET commands on table column OIDs
+                # never succeed.
+                # This is because data for a given entry in the table is available at the column OIDs **suffixed
+                # with the table entry index**, i.e. `<COLUMN_OID>.<ENTRY_INDEX>`. (There's nothing at `<COLUMN_OID>`.)
+                next_oids.extend(batch.oids)
 
         parsed_metrics.extend(result.parsed_metrics)
 
-    return {'oids': oids, 'bulk_oids': bulk_oids, 'parsed_metrics': parsed_metrics}
+    return {'oids': oids, 'next_oids': next_oids, 'bulk_oids': bulk_oids, 'parsed_metrics': parsed_metrics}
 
 
 # Helpers below.
@@ -241,17 +247,15 @@ def _parse_table_metric(metric):
     # Parse metric tags first, as we need the list of index tags and column tags.
     # Column metric tags may specify other OIDs to fetch, so make sure to keep track of them.
 
-    other_oids_to_fetch = []
     index_tags = []
     column_tags = []
     index_mappings = []
     table_batches = {}  # type: TableBatches
 
     for metric_tag in metric.get('metric_tags', []):
-        parsed_table_metric_tag = _parse_table_metric_tag(mib, metric_tag)
+        parsed_table_metric_tag = _parse_table_metric_tag(mib, parsed_table, metric_tag)
 
         if isinstance(parsed_table_metric_tag, ParsedColumnMetricTag):
-            other_oids_to_fetch.extend(parsed_table_metric_tag.oids_to_fetch)
             oids_to_resolve.update(parsed_table_metric_tag.oids_to_resolve)
             column_tags.extend(parsed_table_metric_tag.column_tags)
             table_batches = merge_table_batches(table_batches, parsed_table_metric_tag.table_batches)
@@ -293,7 +297,7 @@ def _parse_table_metric(metric):
     )
 
     return MetricParseResult(
-        oids_to_fetch=other_oids_to_fetch,
+        oids_to_fetch=[],
         oids_to_resolve=oids_to_resolve,
         table_batches=table_batches,
         index_mappings=index_mappings,
@@ -325,12 +329,7 @@ ColumnTag = NamedTuple('ColumnTag', [('name', str), ('column', str)])
 
 ParsedColumnMetricTag = NamedTuple(
     'ParsedColumnMetricTag',
-    [
-        ('oids_to_fetch', List[OID]),
-        ('oids_to_resolve', Dict[str, OID]),
-        ('table_batches', TableBatches),
-        ('column_tags', List[ColumnTag]),
-    ],
+    [('oids_to_resolve', Dict[str, OID]), ('table_batches', TableBatches), ('column_tags', List[ColumnTag])],
 )
 
 ParsedIndexMetricTag = NamedTuple(
@@ -340,8 +339,8 @@ ParsedIndexMetricTag = NamedTuple(
 ParsedTableMetricTag = Union[ParsedColumnMetricTag, ParsedIndexMetricTag]
 
 
-def _parse_table_metric_tag(mib, metric_tag):
-    # type: (str, TableMetricTag) -> ParsedTableMetricTag
+def _parse_table_metric_tag(mib, parsed_table, metric_tag):
+    # type: (str, ParsedSymbol, TableMetricTag) -> ParsedTableMetricTag
     """
     Parsed an item of the `metric_tags` section of a table metric.
 
@@ -407,12 +406,12 @@ def _parse_table_metric_tag(mib, metric_tag):
         metric_tag_mib = metric_tag.get('MIB', mib)
 
         if 'table' in metric_tag:
-            return _parse_other_table_column_metric_tag(metric_tag, mib=metric_tag_mib, table=metric_tag['table'])
+            return _parse_other_table_column_metric_tag(metric_tag_mib, metric_tag['table'], metric_tag)
 
         if mib != metric_tag_mib:
             raise ConfigurationError('When tagging from a different MIB, the table must be specified')
 
-        return _parse_column_metric_tag(metric_tag, mib=mib)
+        return _parse_column_metric_tag(mib, parsed_table, metric_tag)
 
     if 'index' in metric_tag:
         metric_tag = cast(IndexTableMetricTag, metric_tag)
@@ -421,34 +420,30 @@ def _parse_table_metric_tag(mib, metric_tag):
     raise ConfigurationError('When specifying metric tags, you must specify either and index or a column')
 
 
-def _parse_column_metric_tag(metric_tag, mib):
-    # type: (ColumnTableMetricTag, str) -> ParsedColumnMetricTag
+def _parse_column_metric_tag(mib, parsed_table, metric_tag):
+    # type: (str, ParsedSymbol, ColumnTableMetricTag) -> ParsedColumnMetricTag
     parsed_column = _parse_symbol(mib, metric_tag['column'])
 
+    batches = {TableBatchKey(mib, table=parsed_table.name): TableBatch(parsed_table.oid, oids=[parsed_column.oid])}
+
     return ParsedColumnMetricTag(
-        oids_to_fetch=[parsed_column.oid],
         oids_to_resolve=parsed_column.oids_to_resolve,
         column_tags=[ColumnTag(name=metric_tag['tag'], column=parsed_column.name)],
-        table_batches={},
+        table_batches=batches,
     )
 
 
-def _parse_other_table_column_metric_tag(metric_tag, mib, table):
-    # type: (ColumnTableMetricTag, str, str) -> ParsedTableMetricTag
-    parsed_metric_tag = _parse_column_metric_tag(metric_tag, mib=mib)
+def _parse_other_table_column_metric_tag(mib, table, metric_tag):
+    # type: (str, str, ColumnTableMetricTag) -> ParsedTableMetricTag
     parsed_table = _parse_symbol(mib, table)
+    parsed_metric_tag = _parse_column_metric_tag(mib, parsed_table, metric_tag)
 
     oids_to_resolve = parsed_metric_tag.oids_to_resolve
     oids_to_resolve.update(parsed_table.oids_to_resolve)
 
-    batches = {
-        TableBatchKey(mib, table=parsed_table.name): TableBatch(parsed_table.oid, oids=parsed_metric_tag.oids_to_fetch)
-    }
-
     return ParsedColumnMetricTag(
-        oids_to_fetch=parsed_metric_tag.oids_to_fetch,
         oids_to_resolve=oids_to_resolve,
-        table_batches=batches,
+        table_batches=parsed_metric_tag.table_batches,
         column_tags=parsed_metric_tag.column_tags,
     )
 

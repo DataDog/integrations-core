@@ -134,7 +134,7 @@ class InstanceConfig:
 
         self._auth_data = self.get_auth_data(instance)
 
-        self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
+        self.all_oids, self.next_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
             self.all_oids.extend(tag_oids)
@@ -161,7 +161,7 @@ class InstanceConfig:
     def refresh_with_profile(self, profile):
         # type: (Dict[str, Any]) -> None
         metrics = profile['definition'].get('metrics', [])
-        all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics)
+        all_oids, next_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics)
 
         metric_tags = profile['definition'].get('metric_tags', [])
         tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
@@ -173,6 +173,7 @@ class InstanceConfig:
 
         self.metrics.extend(metrics)
         self.all_oids.extend(all_oids)
+        self.next_oids.extend(next_oids)
         self.bulk_oids.extend(bulk_oids)
         self.parsed_metrics.extend(parsed_metrics)
         self.parsed_metric_tags.extend(parsed_metric_tags)
@@ -295,12 +296,12 @@ class InstanceConfig:
             yield host
 
     def parse_metrics(self, metrics):
-        # type: (list) -> Tuple[List[OID], List[OID], List[ParsedMetric]]
+        # type: (list) -> Tuple[List[OID], List[OID], List[OID], List[ParsedMetric]]
         """Parse configuration and returns data to be used for SNMP queries."""
         # Use bulk for SNMP version > 1 only.
         bulk_threshold = self.bulk_threshold if self._auth_data.mpModel else 0
         result = parse_metrics(metrics, resolver=self._resolver, bulk_threshold=bulk_threshold)
-        return result['oids'], result['bulk_oids'], result['parsed_metrics']
+        return result['oids'], result['next_oids'], result['bulk_oids'], result['parsed_metrics']
 
     def parse_metric_tags(self, metric_tags):
         # type: (list) -> Tuple[List[OID], List[ParsedMetricTag]]
