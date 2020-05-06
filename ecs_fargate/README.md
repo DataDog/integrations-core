@@ -2,6 +2,8 @@
 
 ## Overview
 
+**Note**: This page describes the ECS Fargate integration. For EKS Fargate, see the documentation for Datadog's [EKS Fargate integration][35].
+
 Get metrics from all your containers running in ECS Fargate:
 
 - CPU/Memory usage & limit metrics
@@ -330,3 +332,4 @@ Need help? Contact [Datadog support][19].
 [32]: https://docs.datadoghq.com/tracing/setup/
 [33]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/metadata.csv
 [34]: https://www.datadoghq.com/blog/monitor-aws-fargate
+[35]: http://docs.datadoghq.com/integrations/eks_fargate

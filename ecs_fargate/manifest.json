@@ -5,7 +5,7 @@
     "orchestration"
   ],
   "creates_events": false,
-  "display_name": "Amazon Fargate",
+  "display_name": "Amazon ECS on AWS Fargate",
   "guid": "7484e55c-99ec-45ad-92f8-28e798796411",
   "is_public": true,
   "maintainer": "help@datadoghq.com",
@@ -16,11 +16,6 @@
   "public_title": "Datadog-Amazon Fargate Integration",
   "short_description": "Track metrics for containers running with ECS Fargate",
   "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
   "type": "check",
   "integration_id": "aws-fargate",
   "assets": {
