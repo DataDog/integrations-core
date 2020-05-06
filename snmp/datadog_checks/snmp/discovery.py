@@ -5,16 +5,20 @@
 import copy
 import json
 import time
-from typing import Any
+import weakref
+from typing import TYPE_CHECKING
 
 from datadog_checks.base import ConfigurationError
 
 from .compat import write_persistent_cache
 from .config import InstanceConfig
 
+if TYPE_CHECKING:
+    from .snmp import SnmpCheck
+
 
 def discover_instances(config, interval, check_ref):
-    # type: (InstanceConfig, float, Any) -> None
+    # type: (InstanceConfig, float, weakref.ref[SnmpCheck]) -> None
     """Function looping over a subnet to discover devices, meant to run in a thread.
 
     This is extracted from the check class to not keep a strong reference to
