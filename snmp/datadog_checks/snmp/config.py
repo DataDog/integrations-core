@@ -36,6 +36,25 @@ class InstanceConfig:
     DEFAULT_BULK_THRESHOLD = 0
     DEFAULT_WORKERS = 5
 
+    AUTH_PROTOCOL_MAPPING = {
+        'md5': 'usmHMACMD5AuthProtocol',
+        'sha': 'usmHMACSHAAuthProtocol',
+        'sha224': 'usmHMAC128SHA224AuthProtocol',
+        'sha256': 'usmHMAC192SHA256AuthProtocol',
+        'sha384': 'usmHMAC256SHA384AuthProtocol',
+        'sha512': 'usmHMAC384SHA512AuthProtocol',
+    }
+
+    PRIV_PROTOCOL_MAPPING = {
+        'des': 'usmDESPrivProtocol',
+        '3des': 'usm3DESEDEPrivProtocol',
+        'aes': 'usmAesCfb128Protocol',
+        'aes192': 'usmAesBlumenthalCfb192Protocol',
+        'aes256': 'usmAesBlumenthalCfb256Protocol',
+        'aes192c': 'usmAesCfb192Protocol',
+        'aes256c': 'usmAesCfb256Protocol',
+    }
+
     def __init__(
         self,
         instance,  # type: dict
@@ -191,8 +210,8 @@ class InstanceConfig:
         port = int(instance.get('port', 161))  # Default SNMP port
         return UdpTransportTarget((ip_address, port), timeout=timeout, retries=retries)
 
-    @staticmethod
-    def get_auth_data(instance):
+    @classmethod
+    def get_auth_data(cls, instance):
         # type: (Dict[str, Any]) -> Any
         """
         Generate a Security Parameters object based on the instance's
@@ -223,10 +242,16 @@ class InstanceConfig:
                 priv_protocol = usmDESPrivProtocol
 
             if 'authProtocol' in instance:
-                auth_protocol = getattr(hlapi, instance['authProtocol'])
+                protocol_name = instance['authProtocol']
+                if protocol_name.lower() in cls.AUTH_PROTOCOL_MAPPING:
+                    protocol_name = cls.AUTH_PROTOCOL_MAPPING[protocol_name.lower()]
+                auth_protocol = getattr(hlapi, protocol_name)
 
             if 'privProtocol' in instance:
-                priv_protocol = getattr(hlapi, instance['privProtocol'])
+                protocol_name = instance['privProtocol']
+                if protocol_name.lower() in cls.PRIV_PROTOCOL_MAPPING:
+                    protocol_name = cls.PRIV_PROTOCOL_MAPPING[protocol_name.lower()]
+                priv_protocol = getattr(hlapi, protocol_name)
 
             return UsmUserData(user, auth_key, priv_key, auth_protocol, priv_protocol)
 
