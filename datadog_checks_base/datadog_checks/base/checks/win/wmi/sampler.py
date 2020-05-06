@@ -411,7 +411,7 @@ class WMISampler(object):
                 else:
                     oper = '='
 
-                if isinstance(value, list):
+                if isinstance(value, (tuple, list)):
                     if not len(value):
                         continue
 
@@ -476,7 +476,7 @@ class WMISampler(object):
             )
             self.logger.debug(u"Querying WMI: %s", wql)
         except Exception as e:
-            self.logger.error(e)
+            self.logger.error(str(e))
             return []
 
         try:

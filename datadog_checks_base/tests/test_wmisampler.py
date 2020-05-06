@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import collections
 
 import pytest
 from tests.utils import requires_windows
@@ -51,15 +52,17 @@ def test_format_filter_tuple():
 @requires_windows
 @pytest.mark.unit
 def test_format_filter_win32_log():
-    query = {
-        'TimeGenerated': ('>=', '202056101355.000000+'),
-        'Type': [('=', 'Warning')],
-        'SourceName': [('=', 'MSSQLSERVER')],
-    }
+    query = collections.OrderedDict(
+        {
+            'TimeGenerated': ('>=', '202056101355.000000+'),
+            'Type': [('=', 'Warning'), ('=', 'Error')],
+            'SourceName': [('=', 'MSSQLSERVER')],
+        }
+    )
 
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=[query])
     formatted_filters = sampler.formatted_filters
     assert (
         formatted_filters == " WHERE ( ( SourceName = 'MSSQLSERVER' ) "
-        "AND ( Type = 'Warning' ) AND TimeGenerated >= '202056101355.000000+' )"
+        "AND ( Type = 'Warning' OR Type = 'Error' ) AND TimeGenerated >= '202056101355.000000+' )"
     )
