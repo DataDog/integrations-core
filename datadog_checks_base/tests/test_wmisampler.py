@@ -55,3 +55,21 @@ def test_format_filter_tuple():
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
     formatted_filters = sampler.formatted_filters
     assert formatted_filters == " WHERE ( a < '3' )"
+
+
+@requires_windows
+@pytest.mark.unit
+def test_format_filter_win32_log():
+    query = {
+        'TimeGenerated': ('>=', '202056101355.000000+'),
+        'User': ('=', 'frank'),
+        'Type': [('=', 'Warning')],
+        'SourceName': [('=', 'MSSQLSERVER')],
+    }
+
+    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=[query])
+    formatted_filters = sampler.formatted_filters
+    assert (
+        formatted_filters == " WHERE ((SourceName = 'MSSQLSERVER' "
+        "AND (Type = 'Error' OR Type = 'Warning' AND TimeGenerated = '202056101355.000000+')"
+    )
