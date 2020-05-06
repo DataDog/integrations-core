@@ -9,7 +9,7 @@ mkdir /opt/oracle
 
 # Retry:
 # - Retry `apt-get`: we might not be able to fetch deps from debian
-# - Retry of curl donwload needed due to:
+# - Retry curl: donwload might fail due to:
 #   curl: (56) OpenSSL SSL_read: SSL_ERROR_SYSCALL, errno 110
 for i in 2 4 8 16 32; do
   apt-get update
@@ -18,4 +18,5 @@ for i in 2 4 8 16 32; do
   sleep $i
 done
 
+# Unzip will fail if the oracle client download failed
 unzip /opt/oracle/instantclient.zip -d /opt/oracle
