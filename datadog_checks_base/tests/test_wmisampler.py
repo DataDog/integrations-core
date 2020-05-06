@@ -22,29 +22,11 @@ def test_format_filter_value():
 
 @requires_windows
 @pytest.mark.unit
-def test_format_filter_list():
-    filters = [{'a': ['>', 1, 'i_get_ignored']}]
-    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
-    formatted_filters = sampler.formatted_filters
-    assert formatted_filters == " WHERE ( a > '1' )"
-
-
-@requires_windows
-@pytest.mark.unit
 def test_format_filter_like():
     filters = [{'a': '%foo'}]
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
     formatted_filters = sampler.formatted_filters
     assert formatted_filters == " WHERE ( a LIKE '%foo' )"
-
-
-@requires_windows
-@pytest.mark.unit
-def test_format_filter_list_expected():
-    filters = [{'a': ['<', 3]}]
-    sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=filters)
-    formatted_filters = sampler.formatted_filters
-    assert formatted_filters == " WHERE ( a < '3' )"
 
 
 @requires_windows
@@ -62,7 +44,6 @@ def test_format_filter_tuple():
 def test_format_filter_win32_log():
     query = {
         'TimeGenerated': ('>=', '202056101355.000000+'),
-        'User': ('=', 'frank'),
         'Type': [('=', 'Warning')],
         'SourceName': [('=', 'MSSQLSERVER')],
     }
@@ -70,6 +51,6 @@ def test_format_filter_win32_log():
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=[query])
     formatted_filters = sampler.formatted_filters
     assert (
-        formatted_filters == " WHERE ((SourceName = 'MSSQLSERVER' "
-        "AND (Type = 'Error' OR Type = 'Warning' AND TimeGenerated = '202056101355.000000+')"
+        formatted_filters == " WHERE ( ( SourceName = 'MSSQLSERVER' ) "
+        "AND ( Type = 'Warning' ) AND TimeGenerated >= '202056101355.000000+' )"
     )
