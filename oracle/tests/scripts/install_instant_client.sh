@@ -8,7 +8,7 @@ INSTANT_CLIENT_URL="https://ddintegrations.blob.core.windows.net/oracle/instantc
 mkdir /opt/oracle
 
 # Retry:
-# - Retry `apt-get`: we might not be able to fetch deps from debian
+# - Retry `apt-get`: we might be flaky when fetching packages
 # - Retry curl: donwload might fail due to:
 #   curl: (56) OpenSSL SSL_read: SSL_ERROR_SYSCALL, errno 110
 for i in 2 4 8 16 32; do
