@@ -7,6 +7,7 @@ import pytest
 from datadog_checks.snmp import SnmpCheck
 
 from . import common
+from .utils import get_all_profiles
 from .metrics import (
     ADAPTER_IF_COUNTS,
     CIE_METRICS,
@@ -46,6 +47,23 @@ from .metrics import (
 )
 
 pytestmark = pytest.mark.usefixtures("dd_environment")
+
+
+def test_load_profiles(aggregator):
+    print(get_all_profiles())
+    for profile in get_all_profiles():
+        print(profile)
+        #run_profile_check(profile)
+        instance = common.generate_instance_config([])
+
+        instance['community_string'] = "dummy"
+        instance['enforce_mib_constraints'] = False
+        try:
+            check = SnmpCheck('snmp', {}, [instance])
+        except ImportError:
+            pytest.fail("Configuration file for profile `{}` is not valid yaml.".format(profile))
+        check.check(instance)
+        aggregator.assert_service_check("snmp.can_check", 0, tags=common.CHECK_TAGS, at_least=1)
 
 
 def run_profile_check(recording_name):

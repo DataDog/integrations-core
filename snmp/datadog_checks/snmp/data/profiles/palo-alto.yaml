@@ -17,9 +17,9 @@ metrics:
   #
 
   - MIB: PAN-COMMON-MIB
-    symbol:
+    symol:
       OID: 1.3.6.1.4.1.25461.2.1.2.3.1
-      name: panSessionUtilization
+      nae: panSessionUtilization
   - MIB: PAN-COMMON-MIB
     symbol:
       OID: 1.3.6.1.4.1.25461.2.1.2.3.2
@@ -81,7 +81,7 @@ metrics:
         name: panEntryFRUModulePowerUsed
       - OID: 1.3.6.1.4.1.25461.1.1.7.1.2.1.1.2
         name: panEntryFRUModuleNumPorts
-  
+
   - MIB: PAN-ENTITY-EXT-MIB
     table:
       OID: 1.3.6.1.4.1.25461.1.1.7.1.3.1
@@ -91,8 +91,8 @@ metrics:
         name: panEntryFanTrayPowerUsed
     metric_tags:
       - MIB: ENTITY-MIB
-        column:
+        colmn:
           OID: 1.3.6.1.2.1.47.1.1.1.1.2
           name: entPhysicalDescr
-        table: entPhysicalTable
-        tag: ent_descr
+        tble: entPhysicalTable
+        tg: ent_descr
