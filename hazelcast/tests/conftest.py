@@ -4,9 +4,10 @@
 import os
 
 import pytest
+import requests
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 from datadog_checks.dev.utils import load_jmx_config
 from datadog_checks.hazelcast import HazelcastCheck
 
@@ -21,23 +22,27 @@ def dd_environment():
         build=True,
         mount_logs=True,
         conditions=[
-            CheckDockerLogs(
-                compose_file,
-                [
-                    # Management Center
-                    'Hazelcast Management Center successfully started',
-                    r'Members \[2',
-                    # Members connected to each other
-                    r'Members \{size:2',
-                ],
-                matches='all',
-                attempts=120,
-            )
+            CheckDockerLogs('hazelcast_management_center', ['Hazelcast Management Center successfully started']),
+            CheckDockerLogs('hazelcast_management_center', ['Started communication with member']),
+            CheckDockerLogs('hazelcast2', [r'Hazelcast JMX agent enabled']),
+            CheckDockerLogs('hazelcast2', [r'is STARTED']),
+            WaitFor(trigger_some_tcp_data),
         ],
+        attempts=5,
+        attempts_wait=5,
     ):
         config = load_jmx_config()
-        config['instances'] = [common.INSTANCE_MEMBER_JMX, common.INSTANCE_MC_JMX, common.INSTANCE_MC_PYTHON]
+        config['instances'] = common.INSTANCE_MEMBERS + [common.INSTANCE_MC_JMX, common.INSTANCE_MC_PYTHON]
         yield config, {'use_jmx': True}
+
+
+def trigger_some_tcp_data():
+    base_url = 'http://{}:{}'.format(common.HOST, common.MEMBER_REST_PORT)
+    for i in range(100):
+        url = "{}/hazelcast/rest/maps/mapName/foo{}".format(base_url, i)
+        requests.post(url, data='bar')
+        resp = requests.get(url)
+        assert resp.content.decode('utf-8') == 'bar'
 
 
 @pytest.fixture(scope='session')

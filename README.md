@@ -82,7 +82,7 @@ fingerprints known to correspond to developers who, at the time of writing (Dec
 [1]: https://dev.azure.com/datadoghq/integrations-core/_apis/build/status/Master%20All?branchName=master
 [2]: https://dev.azure.com/datadoghq/integrations-core/_build/latest?definitionId=29&branchName=master
 [5]: https://github.com/DataDog/integrations-extras
-[6]: https://docs.datadoghq.com/developers/integrations
+[6]: https://docs.datadoghq.com/developers/integrations/
 [7]: https://github.com/DataDog/datadog-agent
 [8]: https://docs.datadoghq.com/agent/
 [9]: https://docs.pytest.org/en/latest/

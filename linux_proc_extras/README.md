@@ -46,8 +46,8 @@ Need help? Contact [Datadog support][7].
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/linux_proc_extras/datadog_checks/linux_proc_extras/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/developers/metrics/custom_metrics
-[5]: https://docs.datadoghq.com/account_management/billing/custom_metrics
+[4]: https://docs.datadoghq.com/developers/metrics/custom_metrics/
+[5]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://docs.datadoghq.com/help
+[7]: https://docs.datadoghq.com/help/
 [8]: https://github.com/DataDog/integrations-core/blob/master/linux_proc_extras/metadata.csv

@@ -20,17 +20,3 @@ files:
   - template: instances
     options:
     - template: instances/default
-- name: metrics.yaml
-  example_name: metrics.yaml
-  options:
-  - name: jmx_metrics
-    description: |
-      Default metrics collected by this check. You should not have to modify this.
-      See Cassandra's metrics.yaml as an example:
-      https://github.com/DataDog/integrations-core/blob/master/cassandra/datadog_checks/cassandra/data/metrics.yaml
-    value:
-      example: []
-      type: array
-      items:
-        type: object
-        properties: []

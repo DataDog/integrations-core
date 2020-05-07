@@ -159,7 +159,7 @@ ubuntu   18463 18457  0 20:26 pts/0    00:00:00 gunicorn: worker [my_app]
 [5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [6]: https://github.com/DataDog/integrations-core/blob/master/gunicorn/datadog_checks/gunicorn/data/conf.yaml.example
 [7]: https://docs.gunicorn.org/en/stable/settings.html#statsd-host
-[8]: https://docs.datadoghq.com/guides/dogstatsd
+[8]: https://docs.datadoghq.com/guides/dogstatsd/
 [9]: https://docs.gunicorn.org/en/stable/settings.html#accesslog
 [10]: https://docs.gunicorn.org/en/stable/settings.html#errorlog
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

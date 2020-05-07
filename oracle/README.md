@@ -234,5 +234,5 @@ Need help? Contact [Datadog support][12].
 [9]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/oracle/metadata.csv
-[12]: https://docs.datadoghq.com/help
+[12]: https://docs.datadoghq.com/help/
 [13]: https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads

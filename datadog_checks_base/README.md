@@ -64,4 +64,4 @@ Need help? Contact [Datadog support][8].
 [5]: https://datadog-checks-base.readthedocs.io/en/latest/?badge=latest
 [6]: https://github.com/DataDog/integrations-core
 [7]: https://tox.readthedocs.io/en/latest/install.html
-[8]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/help/

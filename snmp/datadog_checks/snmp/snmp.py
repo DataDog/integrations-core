@@ -162,7 +162,7 @@ class SnmpCheck(AgentCheck):
                 try:
                     profile = self._profile_for_sysobject_oid(sys_object_oid)
                 except ConfigurationError:
-                    if not (host_config.all_oids or host_config.bulk_oids):
+                    if not (host_config.all_oids or config.next_oids or host_config.bulk_oids):
                         self.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
                         continue
                 else:
@@ -180,8 +180,14 @@ class SnmpCheck(AgentCheck):
             if interval - time_elapsed > 0:
                 time.sleep(interval - time_elapsed)
 
-    def fetch_results(self, config, all_oids, bulk_oids):
-        # type: (InstanceConfig, List[OID], List[OID]) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], Optional[str]]
+    def fetch_results(
+        self,
+        config,  # type: InstanceConfig
+        all_oids,  # type: List[OID]
+        next_oids,  # type: List[OID]
+        bulk_oids,  # type: List[OID]
+    ):
+        # type: (...) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], Optional[str]]
         """
         Perform a snmpwalk on the domain specified by the oids, on the device
         configured in instance.
@@ -193,7 +199,7 @@ class SnmpCheck(AgentCheck):
         results = defaultdict(dict)  # type: DefaultDict[str, Dict[Tuple[str, ...], Any]]
         enforce_constraints = config.enforce_constraints
 
-        all_binds, error = self.fetch_oids(config, all_oids, enforce_constraints=enforce_constraints)
+        all_binds, error = self.fetch_oids(config, all_oids, next_oids, enforce_constraints=enforce_constraints)
 
         for oid in bulk_oids:
             try:
@@ -221,8 +227,8 @@ class SnmpCheck(AgentCheck):
         results.default_factory = None  # type: ignore
         return results, error
 
-    def fetch_oids(self, config, oids, enforce_constraints):
-        # type: (InstanceConfig, List[OID], bool) -> Tuple[List[Any], Optional[str]]
+    def fetch_oids(self, config, all_oids, next_oids, enforce_constraints):
+        # type: (InstanceConfig, List[OID], List[OID], bool) -> Tuple[List[Any], Optional[str]]
         # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
         # It returns the wrong value when the OID passed is referring to a specific leaf.
         # For example:
@@ -232,9 +238,10 @@ class SnmpCheck(AgentCheck):
         error = None
         first_oid = 0
         all_binds = []
-        while first_oid < len(oids):
+        next_oids = [o.as_object_type() for o in next_oids]
+        while first_oid < len(all_oids):
             try:
-                oids_batch = [oid.as_object_type() for oid in oids[first_oid : first_oid + self.oid_batch_size]]
+                oids_batch = [oid.as_object_type() for oid in all_oids[first_oid : first_oid + self.oid_batch_size]]
                 self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
 
                 var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
@@ -252,20 +259,33 @@ class SnmpCheck(AgentCheck):
 
                 if missing_results:
                     # If we didn't catch the metric using snmpget, try snmpnext
-                    # Don't walk through the entire MIB, stop at end of table
-                    self.log.debug(
-                        'Running SNMP command getNext on OIDS: %s', OIDPrinter(missing_results, with_values=False)
+                    next_oids.extend(missing_results)
+
+            except PySnmpError as e:
+                message = 'Failed to collect some metrics: {}'.format(e)
+                if not error:
+                    error = message
+                self.warning(message)
+
+            # if we fail move onto next batch
+            first_oid += self.oid_batch_size
+
+        first_oid = 0
+        while first_oid < len(next_oids):
+            try:
+                oids_batch = next_oids[first_oid : first_oid + self.oid_batch_size]
+
+                self.log.debug('Running SNMP command getNext on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
+                binds = list(
+                    snmp_getnext(
+                        config,
+                        oids_batch,
+                        lookup_mib=enforce_constraints,
+                        ignore_nonincreasing_oid=self.ignore_nonincreasing_oid,
                     )
-                    binds = list(
-                        snmp_getnext(
-                            config,
-                            missing_results,
-                            lookup_mib=enforce_constraints,
-                            ignore_nonincreasing_oid=self.ignore_nonincreasing_oid,
-                        )
-                    )
-                    self.log.debug('Returned vars: %s', OIDPrinter(binds, with_values=True))
-                    all_binds.extend(binds)
+                )
+                self.log.debug('Returned vars: %s', OIDPrinter(binds, with_values=True))
+                all_binds.extend(binds)
 
             except PySnmpError as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
@@ -377,16 +397,16 @@ class SnmpCheck(AgentCheck):
         error = results = None
         tags = config.tags
         try:
-            if not (config.all_oids or config.bulk_oids):
+            if not (config.all_oids or config.next_oids or config.bulk_oids):
                 sys_object_oid = self.fetch_sysobject_oid(config)
                 profile = self._profile_for_sysobject_oid(sys_object_oid)
                 config.refresh_with_profile(self.profiles[profile])
                 config.add_profile_tag(profile)
 
-            if config.all_oids or config.bulk_oids:
+            if config.all_oids or config.next_oids or config.bulk_oids:
                 self.log.debug('Querying device %s', config.ip_address)
                 config.add_uptime_metric()
-                results, error = self.fetch_results(config, config.all_oids, config.bulk_oids)
+                results, error = self.fetch_results(config, config.all_oids, config.next_oids, config.bulk_oids)
                 tags = self.extract_metric_tags(config.parsed_metric_tags, results)
                 tags.extend(config.tags)
                 self.report_metrics(config.parsed_metrics, results, tags)

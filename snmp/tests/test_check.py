@@ -274,9 +274,9 @@ def test_table_v3_MD5_AES(aggregator):
         common.TABULAR_OBJECTS,
         name=name,
         user='datadog{}{}'.format(auth.upper(), priv.upper()),
-        auth=common.AUTH_PROTOCOLS[auth],
+        auth=auth,
         auth_key=common.AUTH_KEY,
-        priv=common.PRIV_PROTOCOLS[priv],
+        priv=priv,
         priv_key=common.PRIV_KEY,
     )
     check = common.create_check(instance)
@@ -312,9 +312,9 @@ def test_table_v3_SHA_DES(aggregator):
         common.TABULAR_OBJECTS,
         name=name,
         user='datadog{}{}'.format(auth.upper(), priv.upper()),
-        auth=common.AUTH_PROTOCOLS[auth],
+        auth=auth,
         auth_key=common.AUTH_KEY,
-        priv=common.PRIV_PROTOCOLS[priv],
+        priv=priv,
         priv_key=common.PRIV_KEY,
     )
     check = common.create_check(instance)
@@ -414,7 +414,7 @@ def test_invalid_metric(aggregator):
     check.check(instance)
 
     # Test service check
-    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.WARNING, tags=common.CHECK_TAGS, at_least=1)
 
 
 def test_forcedtype_metric(aggregator):

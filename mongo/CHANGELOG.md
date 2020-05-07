@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 1.15.0 / 2020-05-05
+
+* [Deprecated] Refactor connection configuration. See [#6574](https://github.com/DataDog/integrations-core/pull/6574).
+
 ## 1.14.0 / 2020-04-04
 
 * [Added] Add config specs. See [#6145](https://github.com/DataDog/integrations-core/pull/6145).
