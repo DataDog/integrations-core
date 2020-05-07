@@ -9,7 +9,7 @@ import pytest
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import HOST, INSTANCES, response
+from .common import ENVOY_VERSION, HOST, INSTANCES, response
 
 CHECK_NAME = 'envoy'
 
@@ -120,3 +120,24 @@ def test_config(test_case, extra_config, expected_http_kwargs):
         )
         http_wargs.update(expected_http_kwargs)
         r.get.assert_called_with('http://{}:8001/stats'.format(HOST), **http_wargs)
+
+
+def test_metadata(datadog_agent):
+    instance = INSTANCES['main']
+    check = Envoy(CHECK_NAME, {}, [instance])
+
+    with mock.patch('requests.get', return_value=response('multiple_services')):
+        check.check_id = 'test:123'
+        check._collect_metadata(instance['stats_url'])
+
+    major, minor, patch = ENVOY_VERSION.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': ENVOY_VERSION,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
