@@ -14,15 +14,11 @@ The CoreDNS check is included in the [Datadog Agent][1] package, so you don't ne
 
 ### Configuration
 
-#### Host
-
-Follow the instructions below to configure this check for an Agent running on a host. For containerized environments, see the [Containerized](#containerized) section.
-
-Edit the `coredns.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][2], to point to your server and port and set the masters to monitor. See the [sample coredns.d/conf.yaml][3] for all available configuration options.
-
 #### Containerized
 
 For containerized environments, see the [Autodiscovery Integration Templates][7] for guidance on applying the parameters below.
+
+#### Metric Collection
 
 | Parameter            | Value                                                                            |
 | -------------------- | -------------------------------------------------------------------------------- |
@@ -34,6 +30,14 @@ For containerized environments, see the [Autodiscovery Integration Templates][7]
 
 - The `dns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the dd-agent that is polling the information using the service discovery.
 - The service discovery annotations need to be done on the pod. In case of a deployment, add the annotations to the metadata of the template's specifications. Do not add it at the outer specification level.
+
+##### Log collection
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
+
+| Parameter      | Value                                     |
+|----------------|-------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "coredns", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
 

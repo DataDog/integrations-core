@@ -13,6 +13,8 @@ No additional installation is needed on your server.
 
 ### Configuration
 
+See the [Autodiscovery Integration Templates][9] for guidance on applying the parameters below.
+
 #### Metric collection
 
 1. Edit the `kube_scheduler.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your kube_scheduler performance data. See the [sample kube_scheduler.d/conf.yaml][2] for all available configuration options.
@@ -21,24 +23,11 @@ No additional installation is needed on your server.
 
 #### Log collection
 
-_Available for Agent versions >6.0_
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
 
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][4]:
-
-   ```yaml
-     # (...)
-     env:
-       # (...)
-       - name: DD_LOGS_ENABLED
-           value: "true"
-       - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
-           value: "true"
-     # (...)
-   ```
-
-2. Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][5].
-
-3. [Restart the Agent][3].
+| Parameter      | Value                                     |
+|----------------|-------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "kube_scheduler", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
 
@@ -71,3 +60,5 @@ Need help? Contact [Datadog support][8].
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/kube_scheduler/metadata.csv
 [8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[10]: https://docs.datadoghq.com/agent/kubernetes/log/

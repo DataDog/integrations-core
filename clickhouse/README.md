@@ -14,9 +14,52 @@ The ClickHouse check is included in the [Datadog Agent][3] package. No additiona
 
 ### Configuration
 
+#### Host
 1. To start collecting your ClickHouse performance data, edit the `clickhouse.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample clickhouse.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
+
+##### Log Collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add the log files you are interested in to your `clickhouse.d/conf.yaml` file to start collecting your ClickHouse logs:
+
+   ```yaml
+     logs:
+       - type: file
+         path: /var/log/clickhouse-server/clickhouse-server.log
+         source: clickhouse
+         service: "<SERVICE_NAME>"
+   ```
+
+    Change the `path` and `service` parameter values and configure them for your environment. See the [sample clickhouse.d/conf.yaml][4] for all available configuration options.
+
+3. [Restart the Agent][6].
+
+#### Containerized
+
+For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying the parameters below.
+
+#### Metric Collection
+
+| Parameter            | Value                                                      |
+|----------------------|------------------------------------------------------------|
+| `<INTEGRATION_NAME>` | `clickhouse`                                                   |
+| `<INIT_CONFIG>`      | blank or `{}`                                              |
+| `<INSTANCE_CONFIG>`  | `{"server": "%%host%%", "port": "%%port%%", "username": "<USER>", "password": "<PASSWORD>"}`       |
+
+##### Log collection
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][9].
+
+| Parameter      | Value                                     |
+|----------------|-------------------------------------------|
+| `<LOG_CONFIG>` | `{"source": "clickhouse", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
 

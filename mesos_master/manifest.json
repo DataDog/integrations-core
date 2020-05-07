@@ -5,8 +5,7 @@
   "categories": [
     "configuration & deployment",
     "containers",
-    "orchestration",
-    "log collection"
+    "orchestration"
   ],
   "creates_events": false,
   "display_name": "Mesos Master",
