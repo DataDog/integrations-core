@@ -550,7 +550,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "avg:openstack.nova.server.hdd_read_req{$project} by {host}",
+                        "q": "avg:openstack.nova.server.vda_read_req{$project} by {host}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",

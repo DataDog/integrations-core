@@ -148,4 +148,4 @@ Need help? Contact [Datadog support][8].
 [5]: https://github.com/DataDog/integrations-core/blob/master/cacti/metadata.csv
 [6]: https://github.com/pbanaszkiewicz/python-rrdtool
 [7]: https://github.com/commx/python-rrdtool/issues/25
-[8]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/help/

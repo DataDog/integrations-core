@@ -19,9 +19,8 @@ from .stop import stop
     '--agent',
     '-a',
     help=(
-        'The agent build to use e.g. a Docker image like `datadog/agent:6.5.2`. For '
-        'Docker environments you can use an integer corresponding to fields in the '
-        'config (agent5, agent6, etc.)'
+        'The agent build to use e.g. a Docker image like `datadog/agent:latest`. You can '
+        'also use the name of an agent defined in the `agents` configuration section.'
     ),
 )
 @click.option(

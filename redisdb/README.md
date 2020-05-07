@@ -158,7 +158,7 @@ Additional helpful documentation, links, and articles:
 
 - [How to monitor Redis performance metrics][12]
 
-[1]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/redisdb/datadog_checks/redisdb/data/conf.yaml.example
@@ -167,8 +167,8 @@ Additional helpful documentation, links, and articles:
 [7]: https://docs.datadoghq.com/tracing/setup/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv
-[10]: https://docs.datadoghq.com/integrations/faq/redis-integration-error-unknown-command-config
-[11]: https://docs.datadoghq.com/developers/integrations
+[10]: https://docs.datadoghq.com/integrations/faq/redis-integration-error-unknown-command-config/
+[11]: https://docs.datadoghq.com/developers/integrations/
 [12]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics
 [13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [14]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java

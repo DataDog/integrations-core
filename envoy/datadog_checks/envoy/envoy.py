@@ -5,6 +5,7 @@ import re
 from collections import defaultdict
 
 import requests
+from six.moves.urllib.parse import urljoin
 
 from datadog_checks.base import AgentCheck
 
@@ -51,6 +52,8 @@ class Envoy(AgentCheck):
 
         if self.caching_metrics is None:
             self.caching_metrics = instance.get('cache_metrics', True)
+
+        self._collect_metadata(stats_url)
 
         try:
             response = self.http.get(stats_url)
@@ -138,3 +141,33 @@ class Envoy(AgentCheck):
             return not blacklisted
         else:
             return True
+
+    @AgentCheck.metadata_entrypoint
+    def _collect_metadata(self, stats_url):
+        # From http://domain/thing/stats to http://domain/thing/server_info
+        server_info_url = urljoin(stats_url, 'server_info')
+
+        try:
+            response = self.http.get(server_info_url)
+            if response.status_code != 200:
+                msg = 'Envoy endpoint `{}` responded with HTTP status code {}'.format(
+                    server_info_url, response.status_code
+                )
+                self.log.info(msg)
+                return
+            # {
+            #   "version": "222aaacccfff888/1.14.1/Clean/RELEASE/BoringSSL",
+            #   "state": "LIVE",
+            #   ...
+            # }
+            raw_version = response.json()["version"].split('/')[1]
+        except requests.exceptions.Timeout:
+            msg = 'Envoy endpoint `{}` timed out after {} seconds'.format(server_info_url, self.http.options['timeout'])
+            self.log.info(msg)
+            return
+        except (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
+            msg = 'Error accessing Envoy endpoint `{}`'.format(server_info_url)
+            self.log.info(msg)
+            return
+
+        self.set_metadata('version', raw_version)

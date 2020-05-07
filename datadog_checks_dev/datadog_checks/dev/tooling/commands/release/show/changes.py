@@ -12,15 +12,17 @@ from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_su
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Show all the pending PRs for a given check.')
 @click.argument('check', autocompletion=complete_valid_checks, callback=validate_check_arg)
+@click.option('--tag-pattern', default=None)
+@click.option('--tag-prefix', default=None)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.pass_context
-def changes(ctx, check, dry_run):
+def changes(ctx, check, tag_pattern, tag_prefix, dry_run):
     """Show all the pending PRs for a given check."""
     if not dry_run and check and check not in get_valid_checks():
         abort(f'Check `{check}` is not an Agent-based Integration')
 
     # get the name of the current release tag
-    cur_version = get_version_string(check)
+    cur_version = get_version_string(check, pattern=tag_pattern, tag_prefix=tag_prefix)
     target_tag = get_release_tag_string(check, cur_version)
 
     # get the diff from HEAD

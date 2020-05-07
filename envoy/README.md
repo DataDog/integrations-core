@@ -215,8 +215,8 @@ Need help? Contact [Datadog support][15].
 [8]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/data/conf.yaml.example
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [10]: https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
-[11]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[11]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [12]: https://docs.datadoghq.com/agent/kubernetes/log/
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [14]: https://github.com/DataDog/integrations-core/blob/master/envoy/metadata.csv
-[15]: https://docs.datadoghq.com/help
+[15]: https://docs.datadoghq.com/help/

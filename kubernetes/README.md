@@ -175,7 +175,7 @@ To get a better idea of how (or why) to integrate your Kubernetes service, check
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kubernetes/images/kubernetes_dashboard.png
 [2]: https://github.com/DataDog/datadog-agent/blob/master/docs/agent/changes.md#kubernetes-support
-[3]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes
+[3]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/
 [4]: https://app.datadoghq.com/account/settings#agent
 [5]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/datadog_checks/kubernetes/data/conf.yaml.example
 [6]: https://kubernetes.io/docs/api-reference/v1.7/#configmap-v1-core

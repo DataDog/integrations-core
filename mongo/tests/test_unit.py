@@ -6,9 +6,10 @@ import copy
 import mock
 import pytest
 from six import iteritems
-from tests.common import DEFAULT_INSTANCE
 
 from datadog_checks.mongo import MongoDb, metrics
+
+from . import common
 
 RATE = MongoDb.rate
 GAUGE = MongoDb.gauge
@@ -39,7 +40,7 @@ def test_build_metric_list(check, test_case, additional_metrics, expected_length
     Build the metric list according to the user configuration.
     Print a warning when an option has no match.
     """
-    instance = copy.deepcopy(DEFAULT_INSTANCE)
+    instance = copy.deepcopy(common.INSTANCE_BASIC)
     instance['additional_metrics'] = additional_metrics
     check = check(instance)
     check.log = mock.Mock()
@@ -142,3 +143,11 @@ def test_server_uri_sanitization(check, instance):
     for server, expected_clean_name in server_names:
         _, _, _, _, clean_name, _ = _parse_uri(server, sanitize_username=True)
         assert expected_clean_name == clean_name
+
+
+def test_legacy_config_deprecation(check):
+    check = check(common.INSTANCE_BASIC_LEGACY_CONFIG)
+
+    assert check.get_warnings() == [
+        'Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.'
+    ]

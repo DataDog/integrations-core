@@ -26,6 +26,7 @@ services:
       - "5701:5701"
       - "1098:1098"
     volumes:
+      - ./hazelcast.xml:/tmp/hazelcast.xml
       - ./log4j2.properties:/tmp/log4j2.properties
       - ${DD_LOG_1}:/var/log/hazelcast.log
     networks:
@@ -36,6 +37,7 @@ services:
     container_name: hazelcast2
     environment:
       JAVA_OPTS: >-
+        -Dhazelcast.config=/tmp/hazelcast.xml
         -Dhazelcast.jmx=true
         -Dhazelcast.metrics.enabled=true
         -Dhazelcast.metrics.jmx.enabled=true
@@ -48,6 +50,31 @@ services:
     ports:
       - "5702:5701"
       - "1099:1099"
+    volumes:
+      - ./hazelcast.xml:/tmp/hazelcast.xml
+    networks:
+      - dd_hazelcast
+
+  hazelcast3:
+    image: hazelcast/hazelcast:${HAZELCAST_VERSION}
+    container_name: hazelcast3
+    environment:
+      JAVA_OPTS: >-
+        -Dhazelcast.config=/tmp/hazelcast.xml
+        -Dhazelcast.jmx=true
+        -Dhazelcast.metrics.enabled=true
+        -Dhazelcast.metrics.jmx.enabled=true
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.port=1100
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.rmi.port=1100
+        -Djava.rmi.server.hostname=localhost
+    ports:
+      - "5703:5701"
+      - "1100:1100"
+    volumes:
+      - ./hazelcast.xml:/tmp/hazelcast.xml
     networks:
       - dd_hazelcast
 
@@ -56,7 +83,7 @@ services:
     container_name: hazelcast_management_center
     environment:
       MC_CONTEXT_PATH: /
-      MC_INIT_CMD: "./mc-conf.sh cluster add -H=/data -ma hazelcast1:5701 -cn dev"
+      MC_INIT_CMD: "./mc-conf.sh cluster add -H=/data -ma hazelcast1:5701,hazelcast2:5701,hazelcast3:5701 -cn dev"
       JAVA_OPTS: >-
         -Dhazelcast.metrics.enabled=true
         -Dhazelcast.metrics.jmx.enabled=true

@@ -109,14 +109,14 @@ The OpenShift check does not include any Service Checks.
 Need help? Contact [Datadog support][11].
 
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/kubernetes_apiserver.d/conf.yaml.example
-[2]: https://docs.datadoghq.com/agent/kubernetes
+[2]: https://docs.datadoghq.com/agent/kubernetes/
 [3]: https://docs.openshift.org/latest/admin_guide/manage_scc.html
-[4]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup
+[4]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/
 [5]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#configure-rbac-permissions
 [6]: https://github.com/DataDog/datadog-agent/blob/master/Dockerfiles/manifests/agent-kubelet-only.yaml
 [7]: https://developers.redhat.com/blog/2014/11/06/introducing-a-super-privileged-container-concept
 [8]: https://github.com/DataDog/datadog-agent/blob/master/Dockerfiles/manifests/openshift/scc.yaml
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/openshift/metadata.csv
-[11]: https://docs.datadoghq.com/help
+[11]: https://docs.datadoghq.com/help/
 [12]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/#log-collection

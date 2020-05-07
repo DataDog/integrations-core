@@ -46,6 +46,13 @@ METRIC_VAL_CHECKS_OLD = {
 pytestmark = pytest.mark.usefixtures('dd_environment')
 
 
+@pytest.mark.parametrize(
+    'instance_authdb',
+    [
+        pytest.param(common.INSTANCE_AUTHDB, id='standard'),
+        pytest.param(common.INSTANCE_AUTHDB_LEGACY_CONFIG, id='legacy'),
+    ],
+)
 def test_mongo(aggregator, check, instance_authdb):
     check = check(instance_authdb)
     check.check(instance_authdb)
@@ -59,6 +66,10 @@ def test_mongo(aggregator, check, instance_authdb):
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
 
 
+@pytest.mark.parametrize(
+    'instance_user',
+    [pytest.param(common.INSTANCE_USER, id='standard'), pytest.param(common.INSTANCE_USER_LEGACY_CONFIG, id='legacy')],
+)
 def test_mongo2(aggregator, check, instance_user):
     check = check(instance_user)
     check.check(instance_user)
