@@ -20,7 +20,7 @@ def make_query():
 
 @pytest.mark.e2e
 def test(dd_agent_check):
-    make_query()
+    #make_query()
 
     instance = {}
     aggregator = dd_agent_check(instance, rate=True)
