@@ -92,7 +92,7 @@ INIT_CONFIG_OBJECT_NAME = {
 FULL_CONFIG = {"init_config": INIT_CONFIG, "instances": [INSTANCE_DOCKER]}
 
 E2E_METADATA = {
-    'start_commands': ['apt-get update', 'apt-get install -y tdsodbc unixodbc-dev'],
+    'start_commands': ['apt-get update', 'apt-get install -y unixodbc-dev'],
     'docker_volumes': [
         '{}:/opt/datadog-agent/embedded/etc/odbcinst.ini'.format(os.path.join(HERE, 'odbc', 'odbcinst.ini'))
     ],
