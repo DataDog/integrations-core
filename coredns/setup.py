@@ -8,6 +8,15 @@ from os import path
 from setuptools import setup
 
 HERE = path.abspath(path.dirname(__file__))
+def get_dependencies():
+    dep_file = path.join(HERE, 'requirements.in')
+    if not path.isfile(dep_file):
+        return []
+
+    with open(dep_file, encoding='utf-8') as f:
+        return f.readlines()
+
+
 CHECKS_BASE_REQ = 'datadog-checks-base>=4.1.0'
 
 # Get version info
@@ -42,6 +51,7 @@ setup(
     ],
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
+    extras_require={'deps': get_dependencies()},
     # The package we're going to ship
     packages=['datadog_checks.coredns'],
     include_package_data=True,
