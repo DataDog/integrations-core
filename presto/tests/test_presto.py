@@ -15,6 +15,7 @@ def make_query():
     conn = prestodb.dbapi.connect(host='localhost', port=8080, user='test', catalog='test', schema='test',)
     cur = conn.cursor()
     cur.execute('SELECT * FROM system.runtime.nodes')
+    cur.fetchall()
 
 
 @pytest.mark.e2e
