@@ -469,6 +469,28 @@ CLUSTER_PENDING_TASKS = {
     'elasticsearch.pending_tasks_time_in_queue': ('gauge', 'pending_tasks_time_in_queue'),
 }
 
+NODE_SYSTEM_METRICS = {
+    'system.mem.free': ('gauge', 'os.mem.free_in_bytes'),
+    'system.mem.usable': ('gauge', 'os.mem.free_in_bytes'),
+    'system.mem.used': ('gauge', 'os.mem.used_in_bytes'),
+    'system.swap.free': ('gauge', 'os.swap.free_in_bytes'),
+    'system.swap.used': ('gauge', 'os.swap.used_in_bytes'),
+    'system.net.bytes_rcvd': ('gauge', 'transport.rx_size_in_bytes'),
+    'system.net.bytes_sent': ('gauge', 'transport.tx_size_in_bytes'),
+}
+
+NODE_SYSTEM_METRICS_POST_1 = {
+    'system.mem.total': ('gauge', 'os.mem.total_in_bytes'),
+    'system.swap.total': ('gauge', 'os.swap.total_in_bytes'),
+}
+
+NODE_SYSTEM_METRICS_POST_5 = {
+    'system.cpu.idle': ('gauge', 'os.cpu.percent', lambda v: (100 - v)),
+    'system.load.1': ('gauge', 'os.cpu.load_average.1m'),
+    'system.load.5': ('gauge', 'os.cpu.load_average.5m'),
+    'system.load.15': ('gauge', 'os.cpu.load_average.15m'),
+}
+
 
 def stats_for_version(version):
     """
@@ -571,3 +593,17 @@ def index_stats_for_version(version):
         index_stats.update(INDEX_STATS_METRICS)
 
     return index_stats
+
+
+def node_system_stats_for_version(version):
+    """
+    Get the proper set of os metrics for the specified ES version
+    """
+    node_system_stats = dict(NODE_SYSTEM_METRICS)
+
+    if version >= [1, 0, 0]:
+        node_system_stats.update(NODE_SYSTEM_METRICS_POST_1)
+    if version >= [5, 0, 0]:
+        node_system_stats.update(NODE_SYSTEM_METRICS_POST_5)
+
+    return node_system_stats
