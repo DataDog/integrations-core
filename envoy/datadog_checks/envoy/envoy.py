@@ -149,6 +149,12 @@ class Envoy(AgentCheck):
 
         try:
             response = self.http.get(server_info_url)
+            if response.status_code != 200:
+                msg = 'Envoy endpoint `{}` responded with HTTP status code {}'.format(
+                    server_info_url, response.status_code
+                )
+                self.log.info(msg)
+                return
             # {
             #   "version": "222aaacccfff888/1.14.1/Clean/RELEASE/BoringSSL",
             #   "state": "LIVE",
@@ -156,18 +162,11 @@ class Envoy(AgentCheck):
             # }
             raw_version = response.json()["version"].split('/')[1]
         except requests.exceptions.Timeout:
-            msg = 'Envoy endpoint `{}` timed out after {} seconds'.format(
-                server_info_url, timeout=self.http.options['timeout']
-            )
+            msg = 'Envoy endpoint `{}` timed out after {} seconds'.format(server_info_url, self.http.options['timeout'])
             self.log.info(msg)
             return
         except (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
             msg = 'Error accessing Envoy endpoint `{}`'.format(server_info_url)
-            self.log.info(msg)
-            return
-
-        if response.status_code != 200:
-            msg = 'Envoy endpoint `{}` responded with HTTP status code {}'.format(server_info_url, response.status_code)
             self.log.info(msg)
             return
 
