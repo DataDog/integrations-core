@@ -53,11 +53,11 @@ def test_format_filter_tuple():
 @pytest.mark.unit
 def test_format_filter_win32_log():
     query = collections.OrderedDict(
-        {
-            'TimeGenerated': ('>=', '202056101355.000000+'),
-            'Type': [('=', 'Warning'), ('=', 'Error')],
-            'SourceName': [('=', 'MSSQLSERVER')],
-        }
+        (
+            ('TimeGenerated', ('>=', '202056101355.000000+')),
+            ('Type', [('=', 'Warning'), ('=', 'Error')]),
+            ('SourceName', [('=', 'MSSQLSERVER')]),
+        )
     )
 
     sampler = WMISampler(logger=None, class_name='MyClass', property_names='my.prop', filters=[query])
