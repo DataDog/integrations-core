@@ -20,6 +20,7 @@ ABOUT = {}
 with open(path.join(HERE, "datadog_checks", "varnish", "__about__.py")) as f:
     exec(f.read(), ABOUT)
 
+
 def get_dependencies():
     dep_file = path.join(HERE, 'requirements.in')
     if not path.isfile(dep_file):

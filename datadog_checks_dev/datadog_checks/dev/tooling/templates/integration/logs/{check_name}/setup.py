@@ -55,7 +55,7 @@ setup(
     packages=['datadog_checks.{check_name}'],
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
-    extras_require={'deps': get_dependencies()},
+    extras_require={{'deps': get_dependencies()}},
     # Extra files to ship with the wheel package
     include_package_data=True,
 )
