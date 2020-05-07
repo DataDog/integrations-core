@@ -5,6 +5,19 @@
 CHECK_NAME = "presto"
 
 METRICS = [
+    "presto.execution.cpu_input_byte_rate.one_minute.avg",
+    "presto.execution.cpu_input_byte_rate.all_time.avg",
+    "presto.execution.execution_time.all_time.avg",
+    "presto.execution.execution_time.all_time.max",
+    "presto.execution.execution_time.all_time.min",
+    "presto.execution.execution_time.all_time.p75",
+    "presto.execution.execution_time.all_time.p95",
+    "presto.execution.execution_time.one_minute.avg",
+    "presto.execution.execution_time.one_minute.max",
+    "presto.execution.execution_time.one_minute.min",
+    "presto.execution.execution_time.one_minute.p75",
+    "presto.execution.execution_time.one_minute.p95",
+    "presto.execution.wall_input_bytes_rate.one_minute.avg",
     "presto.execution.abandoned_queries.one_minute.count",
     "presto.execution.abandoned_queries.one_minute.rate",
     "presto.execution.abandoned_queries.total_count",
