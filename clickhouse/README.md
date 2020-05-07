@@ -15,6 +15,9 @@ The ClickHouse check is included in the [Datadog Agent][3] package. No additiona
 ### Configuration
 
 #### Host
+
+#### Metric Collection
+
 1. To start collecting your ClickHouse performance data, edit the `clickhouse.d/conf.yaml` file in the `conf.d/` folder at the root of your Agent's configuration directory. See the [sample clickhouse.d/conf.yaml][4] for all available configuration options.
 
 2. [Restart the Agent][5].
