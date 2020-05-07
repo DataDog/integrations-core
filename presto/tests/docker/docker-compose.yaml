@@ -13,6 +13,15 @@ services:
     ports:
       - "8080:8080"
       - "9997:9999"
+    environment:
+      JAVA_OPTS: >-
+          -Dcom.sun.management.jmxremote=true
+          -Dcom.sun.management.jmxremote.port=9997
+          -Dcom.sun.management.jmxremote.rmi.port=9997
+          -Dcom.sun.management.jmxremote.local.only=false
+          -Dcom.sun.management.jmxremote.authenticate=false
+          -Dcom.sun.management.jmxremote.ssl=false
+          -Djava.rmi.server.hostname=localhost
 
   worker1:
     build:
@@ -25,6 +34,15 @@ services:
     ports:
       - "8081:8080"
       - "9998:9999"
+    environment:
+      JAVA_OPTS: >-
+          -Dcom.sun.management.jmxremote=true
+          -Dcom.sun.management.jmxremote.port=9998
+          -Dcom.sun.management.jmxremote.rmi.port=9998
+          -Dcom.sun.management.jmxremote.local.only=false
+          -Dcom.sun.management.jmxremote.authenticate=false
+          -Dcom.sun.management.jmxremote.ssl=false
+          -Djava.rmi.server.hostname=localhost
 
   worker2:
     build:
@@ -37,3 +55,12 @@ services:
     ports:
       - "8082:8080"
       - "9999:9999"
+    environment:
+      JAVA_OPTS: >-
+          -Dcom.sun.management.jmxremote=true
+          -Dcom.sun.management.jmxremote.port=9999
+          -Dcom.sun.management.jmxremote.rmi.port=9999
+          -Dcom.sun.management.jmxremote.local.only=false
+          -Dcom.sun.management.jmxremote.authenticate=false
+          -Dcom.sun.management.jmxremote.ssl=false
+          -Djava.rmi.server.hostname=localhost
