@@ -42,7 +42,7 @@ The ClickHouse check is included in the [Datadog Agent][3] package. No additiona
 
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample clickhouse.d/conf.yaml][4] for all available configuration options.
 
-3. [Restart the Agent][6].
+3. [Restart the Agent][5].
 
 #### Containerized
 
