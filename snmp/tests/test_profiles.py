@@ -51,11 +51,12 @@ pytestmark = pytest.mark.usefixtures("dd_environment")
 
 
 def test_load_profiles(aggregator, caplog):
+    caplog.set_level(logging.WARNING)
+
     instance = common.generate_instance_config([])
     instance['enforce_mib_constraints'] = False
-    check = SnmpCheck('snmp', {}, [instance])
 
-    caplog.set_level(logging.WARNING)
+    check = SnmpCheck('snmp', {}, [instance])
     check.check(instance)
 
     for record in caplog.records:
