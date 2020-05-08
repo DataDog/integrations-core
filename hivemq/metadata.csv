@@ -1,7 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 hivemq.cache.payload_persistence.average_load_penalty,gauge,,,,Cache statistic capturing the average load penalty of the payload persistence cache,0,hivemq,
 hivemq.cache.payload_persistence.eviction_count,gauge,,,,Cache statistic capturing the eviction count of the payload persistence cache,0,hivemq,
-hivemq.cache.payload_persistence.hit_count,gauge,,,,Cache statistic capturing the hit count of the payload persistence cache,0,hivemq,
+hivemq.cache.payload_persistence.hit_count,gauge,,hit,,Cache statistic capturing the hit count of the payload persistence cache,0,hivemq,
 hivemq.cache.payload_persistence.hit_rate,gauge,,,,Cache statistic capturing the hit rate of the payload persistence cache,0,hivemq,
 hivemq.cache.payload_persistence.load_count,gauge,,,,Cache statistic capturing the load count of the payload persistence cache,0,hivemq,
 hivemq.cache.payload_persistence.load_exception_count,gauge,,,,Cache statistic capturing the load exception count of the payload persistence cache,0,hivemq,

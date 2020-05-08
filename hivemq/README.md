@@ -20,7 +20,7 @@ Follow the instructions below to configure this check for an Agent running on a 
 ##### Metric collection
 
 1. Edit the `hivemq.d/conf.yaml` file, in the `conf.d/` folder at the root of your
-   Agent's configuration directory to start collecting your hivemq performance data.
+   Agent's configuration directory to start collecting your HiveMQ performance data.
    See the [sample hivemq.d/conf.yaml][3] for all available configuration options.
 
    This check has a limit of 350 metrics per instance. The number of returned metrics is indicated in the info page.
