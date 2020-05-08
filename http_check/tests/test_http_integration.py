@@ -125,8 +125,10 @@ def test_check_tsl_ca_cert(aggregator):
         'skip_proxy': 'false',
     }
 
-    with mock.patch('datadog_checks.http_check.http_check.get_ca_certs_path',
-                    new=lambda: os.path.join(HERE, 'fixtures', 'emptycert.pem')):
+    with mock.patch(
+        'datadog_checks.http_check.http_check.get_ca_certs_path',
+        new=lambda: os.path.join(HERE, 'fixtures', 'emptycert.pem'),
+    ):
         check = HTTPCheck('http_check', {}, [instance])
 
     check.check(instance)

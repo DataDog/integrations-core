@@ -5,7 +5,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import mock
-import pytest
 
 from datadog_checks.http_check import HTTPCheck
 
@@ -33,4 +32,3 @@ def test_instances_do_not_share_data():
 
     assert http_check_1.HTTP_CONFIG_REMAPPER['ca_certs']['default'] == 'foo'
     assert http_check_2.HTTP_CONFIG_REMAPPER['ca_certs']['default'] == 'bar'
-
