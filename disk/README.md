@@ -40,7 +40,7 @@ Need help? Contact [Datadog support][6].
 
 [1]: https://app.datadoghq.com/account/settings#agent
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[3]: https://github.com/DataDog/integrations-core/blob/master/disk/datadog_checks/disk/data/conf.yaml.default
+[3]: https://github.com/DataDog/integrations-core/blob/master/disk/datadog_checks/disk/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/disk/metadata.csv
 [6]: https://docs.datadoghq.com/help/
