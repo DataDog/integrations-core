@@ -82,3 +82,4 @@ def test_instance_ca_cert():
     # No default ca_cert
     params_no_default = from_instance({'url': 'https://example2.com', 'name': 'UpService'})
     assert params_no_default.instance_ca_certs is None
+

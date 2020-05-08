@@ -113,6 +113,28 @@ def test_check_ssl(aggregator, http_check):
 
 
 @pytest.mark.usefixtures("dd_environment", "mock_dns")
+def test_check_tsl_ca_cert(aggregator):
+    instance = {
+        'name': 'good_cert',
+        'url': 'https://valid.mock:443',
+        'timeout': 1,
+        'tls_ca_cert': os.path.join(HERE, 'fixtures', 'cacert.pem'),
+        'check_certificate_expiration': 'false',
+        'collect_response_time': 'false',
+        'disable_ssl_validation': 'false',
+        'skip_proxy': 'false',
+    }
+
+    with mock.patch('datadog_checks.http_check.http_check.get_ca_certs_path',
+                    new=lambda: os.path.join(HERE, 'fixtures', 'emptycert.pem')):
+        check = HTTPCheck('http_check', {}, [instance])
+
+    check.check(instance)
+    good_cert_tags = ['url:https://valid.mock:443', 'instance:good_cert']
+    aggregator.assert_service_check(HTTPCheck.SC_STATUS, status=HTTPCheck.OK, tags=good_cert_tags, count=1)
+
+
+@pytest.mark.usefixtures("dd_environment", "mock_dns")
 def test_check_ssl_expire_error(aggregator, http_check):
     with mock.patch('ssl.SSLSocket.getpeercert', side_effect=Exception()):
         # Run the check for the one instance configured with days left
@@ -235,6 +257,7 @@ def test_unexisting_ca_cert_should_throw_error(aggregator):
         'disable_ssl_validation': 'false',
         'skip_proxy': 'false',
     }
+
     check = HTTPCheck('http_check', {'ca_certs': 'foo'}, [instance])
 
     check.check(instance)
