@@ -1,5 +1,11 @@
 # CHANGELOG - datadog_checks_base
 
+## 11.4.0 / 2020-05-08
+
+* [Added] Use a faster JSON library. See [#6143](https://github.com/DataDog/integrations-core/pull/6143).
+* [Added] Add secrets sanitization helpers. See [#6107](https://github.com/DataDog/integrations-core/pull/6107).
+* [Added] Upgrade `contextlib2` to 0.6.0. See [#6131](https://github.com/DataDog/integrations-core/pull/6131).
+
 ## 11.3.0 / 2020-05-08
 
 * [Added] Add secrets sanitization helpers. See [#6107](https://github.com/DataDog/integrations-core/pull/6107).
