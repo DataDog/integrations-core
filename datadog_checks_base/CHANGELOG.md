@@ -1,5 +1,11 @@
 # CHANGELOG - datadog_checks_base
 
+## 11.7.0 / 2020-05-08
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Fixed] Add wmi integration test and fix filter sampler. See [#6576](https://github.com/DataDog/integrations-core/pull/6576).
+* [Fixed] Allow to verify that no special hostname was submitted with a metric. See [#6529](https://github.com/DataDog/integrations-core/pull/6529).
+
 ## 11.6.0 / 2020-04-29
 
 * [Added] Validate metrics using metadata.csv. See [#6027](https://github.com/DataDog/integrations-core/pull/6027).
