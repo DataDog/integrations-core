@@ -2,7 +2,8 @@
 
 ## Overview
 
-This check monitors [HiveMQ][1].
+[HiveMQ][1] is a MQTT based messaging platform designed for the fast, efficient and reliable movement
+of data to and from connected IoT devices. It is a MQTT 3.1, 3.1.1, and 5.0 compliant broker.
 
 ## Setup
 
