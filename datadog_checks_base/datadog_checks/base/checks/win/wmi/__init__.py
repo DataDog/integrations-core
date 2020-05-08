@@ -182,19 +182,27 @@ class WinWMICheck(AgentCheck):
             for wmi_property, wmi_value in iteritems(wmi_obj):
                 # skips any property not in arguments since SWbemServices.ExecQuery will return key prop properties
                 # https://msdn.microsoft.com/en-us/library/aa393866(v=vs.85).aspx
-                if wmi_property.lower() not in (s.lower() for s in wmi_sampler.property_names):
+                found = False
+                for s in wmi_sampler.property_names:
+                    if wmi_property.lower() in s.lower():
+                        # wmi_property: "foo" should be found in property_names ["foo,bar", "name"]
+                        found = True
+                        continue
+                if not found or ',' in wmi_property:
+                    # skip wmi_property "foo,bar"; there will be a separate wmi_property for each "foo" and "bar"
                     continue
                 # Tag with `tag_by` parameter
-                if wmi_property == tag_by:
-                    tag_value = str(wmi_value).lower()
-                    if tag_queries and tag_value.find("#") > 0:
-                        tag_value = tag_value[: tag_value.find("#")]
+                for t in [t.strip() for t in tag_by.split(',')]:
+                    if wmi_property == t:
+                        tag_value = str(wmi_value).lower()
+                        if tag_queries and tag_value.find("#") > 0:
+                            tag_value = tag_value[: tag_value.find("#")]
 
-                    tags.append("{name}:{value}".format(name=tag_by, value=tag_value))
-                    continue
+                        tags.append("{name}:{value}".format(name=t, value=tag_value))
+                        continue
 
-                # No metric extraction on 'Name' property
-                if wmi_property == 'name':
+                # No metric extraction on 'Name' and properties in tag_by
+                if wmi_property == 'name' or wmi_property.lower() in tag_by.lower():
                     continue
 
                 try:
