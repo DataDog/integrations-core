@@ -416,7 +416,6 @@ def _parse_table_metric_tag(mib, parsed_table, metric_tag):
     if 'index' in metric_tag:
         metric_tag = cast(IndexTableMetricTag, metric_tag)
         return parse_index_metric_tag(metric_tag)
-
     raise ConfigurationError('When specifying metric tags, you must specify either and index or a column')
 
 

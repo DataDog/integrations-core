@@ -5,6 +5,7 @@
 import pytest
 
 from datadog_checks.snmp import SnmpCheck
+import logging
 
 from . import common
 from .utils import get_all_profiles
@@ -49,21 +50,19 @@ from .metrics import (
 pytestmark = pytest.mark.usefixtures("dd_environment")
 
 
-def test_load_profiles(aggregator):
-    print(get_all_profiles())
-    for profile in get_all_profiles():
-        print(profile)
-        #run_profile_check(profile)
-        instance = common.generate_instance_config([])
+def test_load_profiles(aggregator, caplog):
+    instance = common.generate_instance_config([])
+    instance['enforce_mib_constraints'] = False
+    check = SnmpCheck('snmp', {}, [instance])
 
-        instance['community_string'] = "dummy"
-        instance['enforce_mib_constraints'] = False
-        try:
-            check = SnmpCheck('snmp', {}, [instance])
-        except ImportError:
-            pytest.fail("Configuration file for profile `{}` is not valid yaml.".format(profile))
-        check.check(instance)
-        aggregator.assert_service_check("snmp.can_check", 0, tags=common.CHECK_TAGS, at_least=1)
+    caplog.set_level(logging.WARNING)
+    check.check(instance)
+
+    for record in caplog.records:
+        print(record.message)
+        pytest.fail(record.message)
+    else:
+        pytest.fail()
 
 
 def run_profile_check(recording_name):
