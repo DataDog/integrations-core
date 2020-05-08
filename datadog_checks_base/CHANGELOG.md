@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 11.5.1 / 2020-05-08
+
+* [Fixed] Add wmi integration test and fix filter sampler. See [#6576](https://github.com/DataDog/integrations-core/pull/6576).
+
 ## 11.5.0 / 2020-04-07
 
 * [Added] Update PyYAML to 5.3.1. See [#6276](https://github.com/DataDog/integrations-core/pull/6276).
