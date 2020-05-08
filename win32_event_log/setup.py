@@ -24,7 +24,7 @@ def get_requirements(fpath):
         return f.readlines()
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base>=11.6.0'
+CHECKS_BASE_REQ = 'datadog_checks_base>=11.7.0'
 
 setup(
     name='datadog-win32_event_log',
