@@ -59,10 +59,7 @@ def test_load_profiles(aggregator, caplog):
     check.check(instance)
 
     for record in caplog.records:
-        print(record.message)
         pytest.fail(record.message)
-    else:
-        pytest.fail()
 
 
 def run_profile_check(recording_name):
