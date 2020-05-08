@@ -133,7 +133,7 @@ class HTTPCheck(AgentCheck):
                 (self.SC_STATUS, AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length))
             )
 
-        except socket.error as e:
+        except (socket.error, IOError) as e:  # Py2 throws IOError on invalid cert path while py3 throws a socket.error
             length = int((time.time() - start) * 1000)
             self.log.info("%s is DOWN, error: %s. Connection failed after %s ms", addr, repr(e), length)
             service_checks.append(
