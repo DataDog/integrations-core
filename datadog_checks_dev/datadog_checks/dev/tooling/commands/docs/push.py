@@ -5,7 +5,7 @@ import os
 
 import click
 
-from ....utils import chdir, create_file, copy_path, dir_exists, path_join, temp_dir
+from ....utils import chdir, create_file, copy_path, dir_exists, path_join, remove_path, temp_dir
 from ...constants import get_root
 from ...git import get_git_email, get_git_user, get_latest_commit_hash
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning, run_or_abort
@@ -50,6 +50,9 @@ def push(ctx, branch, yes):
         # https://github.com/mkdocs/mkdocs/pull/2060
         echo_waiting('Writing .nojekyll at the root...')
         create_file(path_join(temp_repo_dir, '.nojekyll'))
+
+        # TODO: Remove when this ships https://github.com/mkdocs/mkdocs/pull/2100
+        remove_path(path_join(temp_repo_dir, 'sitemap.xml.gz'))
 
         with chdir(temp_repo_dir):
             echo_waiting('Configuring the temporary Git repository...')
