@@ -35,6 +35,46 @@ FOREST_STATUS_METRICS = [
     'marklogic.forests.total-forests',
 ]
 
+FOREST_STATUS_EXTRA_METRICS = [
+    'marklogic.forests.backup-read-load',
+    'marklogic.forests.backup-read-rate',
+    'marklogic.forests.backup-write-load',
+    'marklogic.forests.backup-write-rate',
+    'marklogic.forests.database-replication-receive-load',
+    'marklogic.forests.database-replication-receive-rate',
+    'marklogic.forests.database-replication-send-load',
+    'marklogic.forests.database-replication-send-rate',
+    'marklogic.forests.deadlock-rate',
+    'marklogic.forests.deadlock-wait-load',
+    'marklogic.forests.journal-write-load',
+    'marklogic.forests.journal-write-rate',
+    'marklogic.forests.large-read-load',
+    'marklogic.forests.large-read-rate',
+    'marklogic.forests.large-write-load',
+    'marklogic.forests.large-write-rate',
+    'marklogic.forests.merge-read-load',
+    'marklogic.forests.merge-read-rate',
+    'marklogic.forests.merge-write-load',
+    'marklogic.forests.merge-write-rate',
+    'marklogic.forests.min-capacity',
+    'marklogic.forests.query-read-load',
+    'marklogic.forests.query-read-rate',
+    'marklogic.forests.read-lock-hold-load',
+    'marklogic.forests.read-lock-rate',
+    'marklogic.forests.read-lock-wait-load',
+    'marklogic.forests.restore-read-load',
+    'marklogic.forests.restore-read-rate',
+    'marklogic.forests.restore-write-load',
+    'marklogic.forests.restore-write-rate',
+    'marklogic.forests.save-write-load',
+    'marklogic.forests.save-write-rate',
+    'marklogic.forests.total-load',
+    'marklogic.forests.total-rate',
+    'marklogic.forests.write-lock-hold-load',
+    'marklogic.forests.write-lock-rate',
+    'marklogic.forests.write-lock-wait-load',
+]
+
 
 HOST_STATUS_METRICS = [
     # Part 1
@@ -138,6 +178,7 @@ TRANSACTION_STATUS_METRICS = [
 
 
 STATUS_METRICS = (FOREST_STATUS_METRICS
+                  + FOREST_STATUS_EXTRA_METRICS
                   + HOST_STATUS_METRICS
                   + REQUESTS_STATUS_METRICS
                   + SERVER_STATUS_METRICS

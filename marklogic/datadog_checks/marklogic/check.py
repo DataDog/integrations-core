@@ -8,6 +8,7 @@ from pprint import pprint
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.marklogic.api import MarkLogicApi
+from .constants import RESOURCE_TYPES
 
 
 class MarklogicCheck(AgentCheck):
@@ -31,9 +32,14 @@ class MarklogicCheck(AgentCheck):
         self.process_base_status(self.api.get_status())
 
         # Collect Extra Metrics
-        # pprint(self.api.get_status('hosts'))
-        # pprint(self.api.get_status('forests'))
-        # pprint(self.api.get_status('servers'))
+        # Only necessary for forest.
+        # For other resources, all metrics are already collected via `process_base_status`
+        for resource_type in ['forest']:
+            res_meta = RESOURCE_TYPES[resource_type]
+            data = self.api.get_status(res_meta['plural'])
+            pprint(data)
+            metrics = data['{}-status-list'.format(resource_type)]['status-list-summary']
+            self.process_status_metrics(res_meta['plural'], metrics, tags=[])
 
     def process_base_status(self, data):
         relations = data['local-cluster-status']['status-relations']
@@ -46,8 +52,7 @@ class MarklogicCheck(AgentCheck):
             #       - forests-status-summary
             #       - hosts-status-summary
             #       - servers-status-summary
-            tags = ['resource:{}'.format(resource_type)]
-            self.process_status_metrics(resource_type, metrics, tags=tags)
+            self.process_status_metrics(resource_type, metrics, tags=[])
 
     def process_status_metrics(self, metric_prefix, metrics, tags):
         pprint(tags)

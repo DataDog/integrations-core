@@ -11,18 +11,18 @@ from datadog_checks.marklogic.api import MarkLogicApi
 
 RESOURCE_TYPES = {
     'cluster': {
-        'api_resource': None,
+        'plural': None,
     },
     'forest': {
-        'api_resource': 'forests',
+        'plural': 'forests',
     },
     'database': {
-        'api_resource': 'databases',
+        'plural': 'databases',
     },
     'host': {
-        'api_resource': 'hosts',
+        'plural': 'hosts',
     },
     'server': {
-        'api_resource': 'servers',
+        'plural': 'servers',
     },
 }
