@@ -8,7 +8,8 @@ import pytest
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.marklogic import MarklogicCheck
 
-from .common import STATUS_METRICS, INSTANCE
+from .common import INSTANCE
+from .metrics import STATUS_METRICS
 
 
 @pytest.mark.integration
