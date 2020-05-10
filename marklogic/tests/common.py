@@ -13,9 +13,17 @@ API_URL = "http://{}:{}".format(HOST, PORT)
 USERNAME = 'admin'
 PASSWORD = 'admin'
 
+INSTANCE = {
+    'url': API_URL,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'auth_type': 'digest',
+}
+
+
 CHECK_CONFIG = {
     'init_config': {},
-    'instances': [{'url': ''}],
+    'instances': [INSTANCE],
 }
 
 

@@ -12,15 +12,8 @@ from .common import CHECK_CONFIG, HERE, API_URL, USERNAME, PASSWORD
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    with docker_run(compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'),):
+    with docker_run(
+            compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'),
+            log_patterns=[r'Detected quorum \(2 online, 0 suspect, 0 offline\)'],
+    ):
         yield CHECK_CONFIG
-
-
-@pytest.fixture
-def instance():
-    return {
-        'url': API_URL,
-        'username': USERNAME,
-        'password': PASSWORD,
-        'auth_type': 'digest',
-    }

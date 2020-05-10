@@ -8,16 +8,16 @@ import pytest
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.marklogic import MarklogicCheck
 
-from .common import METRICS
+from .common import METRICS, INSTANCE
 
 
 @pytest.mark.integration
 # @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, instance):
+def test_check(aggregator):
     # type: (AggregatorStub, Dict[str, Any]) -> None
-    check = MarklogicCheck('marklogic', {}, [instance])
+    check = MarklogicCheck('marklogic', {}, [INSTANCE])
 
-    check.check(instance)
+    check.check(INSTANCE)
 
     for metric in METRICS:
         aggregator.assert_metric(metric)
@@ -31,8 +31,11 @@ def test_check(aggregator, instance):
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, instance):
-    aggregator = dd_agent_check(instance, rate=True)
+def test_e2e(dd_agent_check):
+    aggregator = dd_agent_check(INSTANCE, rate=True)
+
+    for metric in METRICS:
+        aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
 

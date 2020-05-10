@@ -7,7 +7,7 @@ files:
     - template: init_config/default
   - template: instances
     options:
-    - name: api_url
+    - name: url
       required: true
       description: URL of MarkLogic REST API.
       value:
