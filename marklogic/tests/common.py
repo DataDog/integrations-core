@@ -26,14 +26,18 @@ CHECK_CONFIG = {
     'instances': [INSTANCE],
 }
 
-
-METRICS = [
+FOREST_STATUS_METRICS = [
     'marklogic.forests.backup-count',
     'marklogic.forests.max-stands-per-forest',
     'marklogic.forests.merge-count',
     'marklogic.forests.restore-count',
     'marklogic.forests.state-not-open',
     'marklogic.forests.total-forests',
+]
+
+
+HOST_STATUS_METRICS = [
+    # Part 1
     'marklogic.hosts.memory-process-huge-pages-size',
     'marklogic.hosts.memory-process-rss',
     'marklogic.hosts.memory-size',
@@ -43,26 +47,7 @@ METRICS = [
     'marklogic.hosts.total-cpu-stat-user',
     'marklogic.hosts.total-hosts',
     'marklogic.hosts.total-hosts-offline',
-    'marklogic.requests.max-seconds',
-    'marklogic.requests.mean-seconds',
-    'marklogic.requests.median-seconds',
-    'marklogic.requests.min-seconds',
-    'marklogic.requests.ninetieth-percentile-seconds',
-    'marklogic.requests.query-count',
-    'marklogic.requests.standard-dev-seconds',
-    'marklogic.requests.total-requests',
-    'marklogic.requests.update-count',
-    'marklogic.servers.expanded-tree-cache-hit-rate',
-    'marklogic.servers.expanded-tree-cache-miss-rate',
-    'marklogic.servers.request-count',
-    'marklogic.servers.request-rate',
-    'marklogic.transactions.max-seconds',
-    'marklogic.transactions.mean-seconds',
-    'marklogic.transactions.median-seconds',
-    'marklogic.transactions.min-seconds',
-    'marklogic.transactions.ninetieth-percentile-seconds',
-    'marklogic.transactions.standard-dev-seconds',
-    'marklogic.transactions.total-transactions',
+    # Part 2
     'marklogic.hosts.backup-read-load',
     'marklogic.hosts.backup-read-rate',
     'marklogic.hosts.backup-write-load',
@@ -119,3 +104,41 @@ METRICS = [
     'marklogic.hosts.xdqp-server-send-load',
     'marklogic.hosts.xdqp-server-send-rate',
 ]
+
+
+REQUESTS_STATUS_METRICS = [
+    'marklogic.requests.max-seconds',
+    'marklogic.requests.mean-seconds',
+    'marklogic.requests.median-seconds',
+    'marklogic.requests.min-seconds',
+    'marklogic.requests.ninetieth-percentile-seconds',
+    'marklogic.requests.query-count',
+    'marklogic.requests.standard-dev-seconds',
+    'marklogic.requests.total-requests',
+    'marklogic.requests.update-count',
+]
+
+
+SERVER_STATUS_METRICS = [
+    'marklogic.servers.expanded-tree-cache-hit-rate',
+    'marklogic.servers.expanded-tree-cache-miss-rate',
+    'marklogic.servers.request-count',
+    'marklogic.servers.request-rate',
+]
+
+TRANSACTION_STATUS_METRICS = [
+    'marklogic.transactions.max-seconds',
+    'marklogic.transactions.mean-seconds',
+    'marklogic.transactions.median-seconds',
+    'marklogic.transactions.min-seconds',
+    'marklogic.transactions.ninetieth-percentile-seconds',
+    'marklogic.transactions.standard-dev-seconds',
+    'marklogic.transactions.total-transactions',
+]
+
+
+STATUS_METRICS = (FOREST_STATUS_METRICS
+                  + HOST_STATUS_METRICS
+                  + REQUESTS_STATUS_METRICS
+                  + SERVER_STATUS_METRICS
+                  + TRANSACTION_STATUS_METRICS)

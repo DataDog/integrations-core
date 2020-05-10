@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.marklogic import MarklogicCheck
 
-from .common import METRICS, INSTANCE
+from .common import STATUS_METRICS, INSTANCE
 
 
 @pytest.mark.integration
@@ -19,7 +19,7 @@ def test_check(aggregator):
 
     check.check(INSTANCE)
 
-    for metric in METRICS:
+    for metric in STATUS_METRICS:
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
@@ -34,7 +34,7 @@ def test_check(aggregator):
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(INSTANCE, rate=True)
 
-    for metric in METRICS:
+    for metric in STATUS_METRICS:
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
