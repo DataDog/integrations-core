@@ -27,7 +27,10 @@ class MarklogicCheck(AgentCheck):
     def check(self, _):
         # type: (Any) -> None
         pprint(self.api.get_status())
+        # Collect OOTB Metrics
         self.process_base_status(self.api.get_status())
+
+        # Collect Extra Metrics
         # pprint(self.api.get_status('hosts'))
         # pprint(self.api.get_status('forests'))
         # pprint(self.api.get_status('servers'))
@@ -39,6 +42,10 @@ class MarklogicCheck(AgentCheck):
                 continue
             resource_type = resource_data['typeref']
             metrics = resource_data['{}-status-summary'.format(resource_type)]
+            # TODO: Ignore already collected metrics
+            #       - forests-status-summary
+            #       - hosts-status-summary
+            #       - servers-status-summary
             tags = ['resource:{}'.format(resource_type)]
             self.process_status_metrics(resource_type, metrics, tags=tags)
 
