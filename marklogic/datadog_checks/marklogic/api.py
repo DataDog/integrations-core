@@ -26,3 +26,27 @@ class MarkLogicApi(object):
         resp = self._http.get(url, params=params)
         resp.raise_for_status()
         return resp.json()
+
+    def get_resources(self):
+        data = self._get_raw_resources()
+        resources = {}
+        for group in data['cluster-query']['relations']['relation-group']:
+            resource_type = group['typeref']
+            resources[resource_type] = []
+            for rel in group['relation']:
+                resources[resource_type].append({
+                    'id': rel['idref'],
+                    'name': rel['nameref'],
+                })
+        return resources
+
+    def _get_raw_resources(self):
+        # http://localhost:8002/manage/v2?view=query&format=json
+        params = {
+            'view': 'query',
+            'format': 'json',
+        }
+        url = self._base_url
+        resp = self._http.get(url, params=params)
+        resp.raise_for_status()
+        return resp.json()

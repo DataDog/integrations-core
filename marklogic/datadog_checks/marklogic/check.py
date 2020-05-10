@@ -25,6 +25,9 @@ class MarklogicCheck(AgentCheck):
 
         self._tags = tuple(self.instance.get('tags', []))
 
+        # TODO: Need cache with regular refresh
+        self.resources = self.api.get_resources()
+
     def check(self, _):
         # type: (Any) -> None
         self.process_base_status()
