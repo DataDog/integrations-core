@@ -1,0 +1,323 @@
+forest-status:
+  id: '1820166264592188154'
+  meta:
+    current-time: '2020-05-03T17:31:09.912719Z'
+    elapsed-time:
+      units: sec
+      value: 0.010828
+    uri: /manage/v2/forests/Documents?view=status
+  name: Documents
+  related-views:
+    related-view:
+    - view-name: default
+      view-type: item
+      view-uri: /manage/v2/forests/Documents
+  relations:
+    relation-group:
+    - relation:
+      - idref: '15647249281729042749'
+        nameref: Documents
+        uriref: /manage/v2/databases/Documents?view=status
+      typeref: databases
+    - relation:
+      - idref: '5321375585086763744'
+        nameref: 5eab7977c8c6
+        uriref: /manage/v2/hosts/5eab7977c8c6?view=status
+      typeref: hosts
+  status-properties:
+    availability:
+      units: enum
+      value: online
+    backup-read-bytes:
+      units: bytes
+      value: 0
+    backup-read-load:
+      units: ''
+      value: 0
+    backup-read-rate:
+      units: MB/sec
+      value: 0
+    backup-read-time:
+      units: time
+      value: PT0S
+    backup-write-bytes:
+      units: bytes
+      value: 0
+    backup-write-load:
+      units: ''
+      value: 0
+    backup-write-rate:
+      units: MB/sec
+      value: 0
+    backup-write-time:
+      units: time
+      value: PT0S
+    current-foreign-master-cluster:
+      units: quantity
+      value: '4034351331391987771'
+    current-foreign-master-database: '15647249281729042749'
+    current-foreign-master-forest: '1820166264592188154'
+    current-foreign-master-fsn:
+      units: quantity
+      value: 0
+    current-foreign-master-precise-time:
+      units: datetime
+      value: '2020-05-03T16:19:09.524876Z'
+    current-master-forest: '1820166264592188154'
+    current-master-fsn:
+      units: quantity
+      value: 0
+    current-master-precise-time:
+      units: datetime
+      value: '2020-05-03T16:19:09.524876Z'
+    data-dir: /var/opt/MarkLogic
+    database-replication-receive-bytes:
+      units: bytes
+      value: 0
+    database-replication-receive-load:
+      units: ''
+      value: 0
+    database-replication-receive-rate:
+      units: MB/sec
+      value: 0
+    database-replication-receive-time:
+      units: time
+      value: PT0S
+    database-replication-send-bytes:
+      units: bytes
+      value: 0
+    database-replication-send-load:
+      units: ''
+      value: 0
+    database-replication-send-rate:
+      units: MB/sec
+      value: 0
+    database-replication-send-time:
+      units: time
+      value: PT0S
+    deadlock-count:
+      units: secs/sec
+      value: 0
+    deadlock-rate:
+      units: locks/sec
+      value: 0
+    deadlock-wait-load:
+      units: ''
+      value: 0
+    deadlock-wait-time:
+      units: seconds
+      value: PT0S
+    device-space:
+      units: quantity
+      value: 1023
+    enabled:
+      units: bool
+      value: true
+    encryption:
+      units: bool
+      value: false
+    forest-reserve:
+      units: MB
+      value: 0
+    journal-write-bytes:
+      units: bytes
+      value: 0
+    journal-write-load:
+      units: ''
+      value: 0
+    journal-write-rate:
+      units: MB/sec
+      value: 0
+    journal-write-time:
+      units: time
+      value: PT0S
+    journals-size:
+      units: MB
+      value: 0
+    large-binary-cache-hit-rate:
+      units: fraction
+      value: 0
+    large-binary-cache-hits:
+      units: quantity
+      value: 0
+    large-binary-cache-miss-rate:
+      units: fraction
+      value: 0
+    large-binary-cache-misses:
+      units: quantity
+      value: 0
+    large-data-size:
+      units: MB
+      value: 0
+    large-read-bytes:
+      units: bytes
+      value: 0
+    large-read-load:
+      units: ''
+      value: 0
+    large-read-rate:
+      units: MB/sec
+      value: 0
+    large-read-time:
+      units: time
+      value: PT0S
+    large-write-bytes:
+      units: bytes
+      value: 0
+    large-write-load:
+      units: ''
+      value: 0
+    large-write-rate:
+      units: MB/sec
+      value: 0
+    large-write-time:
+      units: time
+      value: PT0S
+    last-state-change:
+      units: datetime
+      value: '2020-05-03T16:19:28.360853Z'
+    master-forest: '1820166264592188154'
+    max-query-timestamp:
+      units: quantity
+      value: '15885270003196980'
+    merge-read-bytes:
+      units: bytes
+      value: 0
+    merge-read-load:
+      units: ''
+      value: 0
+    merge-read-rate:
+      units: MB/sec
+      value: 0
+    merge-read-time:
+      units: time
+      value: PT0S
+    merge-write-bytes:
+      units: bytes
+      value: 0
+    merge-write-load:
+      units: ''
+      value: 0
+    merge-write-rate:
+      units: MB/sec
+      value: 0
+    merge-write-time:
+      units: time
+      value: PT0S
+    nonblocking-timestamp:
+      units: quantity
+      value: '15885270601760280'
+    orphaned-binaries:
+      units: quantity
+      value: 0
+    query-read-bytes:
+      units: bytes
+      value: 0
+    query-read-load:
+      units: ''
+      value: 0
+    query-read-rate:
+      units: MB/sec
+      value: 0
+    query-read-time:
+      units: time
+      value: PT0S
+    read-lock-count:
+      units: locks
+      value: 0
+    read-lock-hold-load:
+      units: ''
+      value: 0
+    read-lock-hold-time:
+      units: seconds
+      value: PT0S
+    read-lock-rate:
+      units: locks/sec
+      value: 0
+    read-lock-wait-load:
+      units: ''
+      value: 0
+    read-lock-wait-time:
+      units: seconds
+      value: PT0S
+    rebalancer-enable:
+      units: bool
+      value: true
+    rebalancing:
+      units: bool
+      value: false
+    reindexing:
+      units: bool
+      value: false
+    restore-read-bytes:
+      units: bytes
+      value: 0
+    restore-read-load:
+      units: ''
+      value: 0
+    restore-read-rate:
+      units: MB/sec
+      value: 0
+    restore-read-time:
+      units: time
+      value: PT0S
+    restore-write-bytes:
+      units: bytes
+      value: 0
+    restore-write-load:
+      units: ''
+      value: 0
+    restore-write-rate:
+      units: MB/sec
+      value: 0
+    restore-write-time:
+      units: time
+      value: PT0S
+    retired:
+      units: bool
+      value: false
+    save-write-bytes:
+      units: bytes
+      value: 0
+    save-write-load:
+      units: ''
+      value: 0
+    save-write-rate:
+      units: MB/sec
+      value: 0
+    save-write-time:
+      units: time
+      value: PT0S
+    shared-disk-failover-active:
+      units: bool
+      value: false
+    state:
+      units: enum
+      value: open
+    transaction-journal-limit:
+      units: bytes
+      value: 33554432
+    transaction-journal-size:
+      units: bytes
+      value: 0
+    updates-allowed:
+      units: enum
+      value: all
+    write-lock-count:
+      units: locks
+      value: 0
+    write-lock-hold-load:
+      units: ''
+      value: 0
+    write-lock-hold-time:
+      units: seconds
+      value: PT0S
+    write-lock-rate:
+      units: locks/sec
+      value: 0
+    write-lock-wait-load:
+      units: ''
+      value: 0
+    write-lock-wait-time:
+      units: seconds
+      value: PT0S

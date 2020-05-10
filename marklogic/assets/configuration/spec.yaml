@@ -1,0 +1,113 @@
+name: MarkLogic
+files:
+- name: marklogic.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: api_url
+      required: true
+      description: URL of MarkLogic REST API.
+      value:
+        example: http://localhost:8002/
+        type: string
+    - name: resource_filters
+      description: |
+        Each filter in the list is composed of three parameters.
+        'resource' is one of cluster/forest/database/host/server on which to apply the filter
+        'type' is either whitelist (default) or blacklist. If a resource is both whitelisted and blacklisted it will be
+               considered blacklisted.
+        'name' is the resource name to match
+        'id' is the resource id to match
+        'group' is the resource group to match
+        'metric_groups' is a list of type of metric_groups to collect.
+                        Possible values are: `requests`, `status` and `storage`.
+                        If not set, all groups of metrics are collected.
+      value:
+        type: array
+        items:
+          type: object
+        example:
+        - resource: forest
+          name: Documents
+        - resource: database
+          type: blacklist
+          name: Documents
+          group: Default
+          metric_groups:
+            - requests
+            - status
+
+    - template: instances/default
+
+    ## VSPHERE EXAMPLE
+    ## @param resource_filters - list of objects - optional - default: no filter
+    ## Each filter in the list is composed of three parameters.
+    ## 'resource' is one of vm/host/datastore/datacenter/cluster on which to apply the filter
+    ## 'patterns' is a list of matching regex, if any of those matches, the resource will be monitored.
+    ## 'type' is either whitelist (default) or blacklist. If a resource is both whitelisted and blacklisted it will be
+    ##        considered blacklisted.
+    ## 'property' is the kind of property on which to apply the filter and must be one of those values:
+    ##    - name (default) to filter on the resource name (defined by vCenter)
+    ##    - inventory_path to filter on the full inventory path
+    ##      (ex: \/<Datacenter_name>\/vm\/<FOLDER_NAME>\/.* for all vms in the folder <FOLDER_NAME>)
+    ##    - tag to filter only the resources with a given tag. Datadog has stricter rules (i.e no space), but the filter
+    ##          is applied on the value coming from vCenter directly.
+    ##    - hostname to filter on the ESXi Host name (only valid for if 'resource' equals 'vm')
+    ##    - guest_hostname to filter on the VM hostname (only valid for if 'resource' equals 'vm' and
+    ##      if VMware tools are installed)
+    ## Note1: 'datastore', 'datacenter' and 'cluster' filters are ignored when collecting realtime metrics as those
+    ##         resources do not have realtime metrics
+    ## Note2: 'vm' and 'host' filters are ignored when collecting historical metrics as those resources do not have
+    ##         historical metrics
+    #
+    # resource_filters:
+    #   - resource: vm
+    #     property: name
+    #     patterns:
+    #       - <VM_REGEX_1>
+    #       - <VM_REGEX_2>
+    #   - resource: vm
+    #     property: hostname
+    #     patterns:
+    #       - <HOSTNAME_REGEX>
+    #   - resource: vm
+    #     property: tag
+    #     type: blacklist
+    #     patterns:
+    #       - '^env:staging$'
+    #   - resource: vm
+    #     property: tag
+    #     type: whitelist
+    #     patterns:
+    #       - '^env:.*$'
+    #   - resource: vm
+    #     property: guest_hostname
+    #     patterns:
+    #       - <GUEST_HOSTNAME_REGEX>
+    #   - resource: host
+    #     property: inventory_path
+    #     patterns:
+    #       - <INVENTORY_PATH_REGEX>
+
+## Metrics to collect flags by object types
+#- hosts
+#- forests
+#- servers
+#- databases
+#- groups
+
+## Summary
+#- cluster
+#- hosts
+#- servers
+#- forests
+
+## Filters/Specific object
+#- hosts
+#- forests
+#- servers
+#- databases
+#- groups

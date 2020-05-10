@@ -1,0 +1,200 @@
+host-status-list:
+  meta:
+    current-time: '2020-05-02T00:08:20.116591Z'
+    elapsed-time:
+      units: sec
+      value: 0.011294
+    uri: /manage/v2/hosts?view=status
+  related-views:
+    related-view:
+    - view-name: default
+      view-type: list
+      view-uri: /manage/v2/hosts
+  status-list-items:
+    status-list-item:
+    - idref: '9614261020922107465'
+      nameref: 26f962ec5443
+      uriref: /manage/v2/hosts/26f962ec5443?view=status
+  status-list-summary:
+    load-properties:
+      load-detail:
+        backup-read-load:
+          units: sec/sec
+          value: 0
+        backup-write-load:
+          units: sec/sec
+          value: 0
+        deadlock-wait-load:
+          units: sec/sec
+          value: 0
+        external-binary-read-load:
+          units: sec/sec
+          value: 0
+        foreign-xdqp-client-receive-load:
+          units: sec/sec
+          value: 0
+        foreign-xdqp-client-send-load:
+          units: sec/sec
+          value: 0
+        foreign-xdqp-server-receive-load:
+          units: sec/sec
+          value: 0
+        foreign-xdqp-server-send-load:
+          units: sec/sec
+          value: 0
+        journal-write-load:
+          units: sec/sec
+          value: 0
+        large-read-load:
+          units: sec/sec
+          value: 0
+        large-write-load:
+          units: sec/sec
+          value: 0
+        merge-read-load:
+          units: sec/sec
+          value: 0
+        merge-write-load:
+          units: sec/sec
+          value: 0
+        query-read-load:
+          units: sec/sec
+          value: 0
+        read-lock-hold-load:
+          units: sec/sec
+          value: 0
+        read-lock-wait-load:
+          units: sec/sec
+          value: 0
+        restore-read-load:
+          units: sec/sec
+          value: 0
+        restore-write-load:
+          units: sec/sec
+          value: 0
+        save-write-load:
+          units: sec/sec
+          value: 0
+        write-lock-hold-load:
+          units: sec/sec
+          value: 0.0023878060746938
+        write-lock-wait-load:
+          units: sec/sec
+          value: 0
+        xdqp-client-receive-load:
+          units: sec/sec
+          value: 0
+        xdqp-client-send-load:
+          units: sec/sec
+          value: 0
+        xdqp-server-receive-load:
+          units: sec/sec
+          value: 0
+        xdqp-server-send-load:
+          units: sec/sec
+          value: 0
+      total-load:
+        units: MB/sec
+        value: 0.0023878060746938
+    memory-process-huge-pages-size: 0
+    memory-process-rss: 446
+    memory-size: 6144
+    memory-system-free: 5527
+    memory-system-total: 5947
+    rate-properties:
+      rate-detail:
+        backup-read-rate:
+          units: MB/sec
+          value: 0
+        backup-write-rate:
+          units: MB/sec
+          value: 0
+        deadlock-rate:
+          units: locks/sec
+          value: 0
+        external-binary-read-rate:
+          units: MB/sec
+          value: 0
+        foreign-xdqp-client-receive-rate:
+          units: MB/sec
+          value: 0
+        foreign-xdqp-client-send-rate:
+          units: MB/sec
+          value: 0
+        foreign-xdqp-server-receive-rate:
+          units: MB/sec
+          value: 0
+        foreign-xdqp-server-send-rate:
+          units: MB/sec
+          value: 0
+        journal-write-rate:
+          units: MB/sec
+          value: 0.00239793607033789
+        large-read-rate:
+          units: MB/sec
+          value: 0
+        large-write-rate:
+          units: MB/sec
+          value: 0
+        memory-process-swap-rate:
+          units: MB/sec
+          value: 0
+        memory-system-pagein-rate:
+          units: MB/sec
+          value: 0
+        memory-system-pageout-rate:
+          units: MB/sec
+          value: 8.67247009277344
+        memory-system-swapin-rate:
+          units: MB/sec
+          value: 0
+        memory-system-swapout-rate:
+          units: MB/sec
+          value: 0
+        merge-read-rate:
+          units: MB/sec
+          value: 0
+        merge-write-rate:
+          units: MB/sec
+          value: 0
+        query-read-rate:
+          units: MB/sec
+          value: 0
+        read-lock-rate:
+          units: locks/sec
+          value: 0
+        restore-read-rate:
+          units: MB/sec
+          value: 0
+        restore-write-rate:
+          units: MB/sec
+          value: 0
+        save-write-rate:
+          units: MB/sec
+          value: 0
+        write-lock-rate:
+          units: locks/sec
+          value: 0.078973300755024
+        xdqp-client-receive-rate:
+          units: MB/sec
+          value: 0
+        xdqp-client-send-rate:
+          units: MB/sec
+          value: 0
+        xdqp-server-receive-rate:
+          units: MB/sec
+          value: 0
+        xdqp-server-send-rate:
+          units: MB/sec
+          value: 0
+      total-rate:
+        units: MB/sec
+        value: 8.67486763000488
+    total-cpu-stat-system: 0.73309600353241
+    total-cpu-stat-user: 0.933287978172302
+    total-hosts:
+      units: quantity
+      value: 1
+    total-hosts-offline:
+      units: quantity
+      value: 0

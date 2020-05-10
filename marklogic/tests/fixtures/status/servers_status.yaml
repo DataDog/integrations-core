@@ -1,0 +1,70 @@
+server-status-list:
+  meta:
+    current-time: '2020-05-02T00:09:06.340024Z'
+    elapsed-time:
+      units: sec
+      value: 0.015201
+    uri: /manage/v2/servers?view=status
+  related-views:
+    related-view:
+    - view-name: default
+      view-type: list
+      view-uri: /manage/v2/servers
+  relations:
+    relation-group:
+    - relation:
+      - idref: '12028649737908102850'
+        nameref: Default
+        uriref: /manage/v2/groups/Default?view=status
+      relation-count:
+        units: quantity
+        value: 1
+      typeref: groups
+  status-list-items:
+    status-list-item:
+    - content-db: Security
+      groupnameref: Default
+      idref: '11245084237637722255'
+      kindref: http
+      nameref: Admin
+      relation-id:
+      - '12028649737908102850'
+      uriref: /manage/v2/servers/Admin?view=status&group-id=Default
+    - content-db: Documents
+      groupnameref: Default
+      idref: '16241905451599374366'
+      kindref: http
+      modules-db: Modules
+      nameref: App-Services
+      relation-id:
+      - '12028649737908102850'
+      uriref: /manage/v2/servers/App-Services?view=status&group-id=Default
+    - content-db: App-Services
+      groupnameref: Default
+      idref: '7042213653223029123'
+      kindref: http
+      nameref: HealthCheck
+      relation-id:
+      - '12028649737908102850'
+      uriref: /manage/v2/servers/HealthCheck?view=status&group-id=Default
+    - content-db: App-Services
+      groupnameref: Default
+      idref: '3308729765622030084'
+      kindref: http
+      nameref: Manage
+      relation-id:
+      - '12028649737908102850'
+      uriref: /manage/v2/servers/Manage?view=status&group-id=Default
+  status-list-summary:
+    expanded-tree-cache-hit-rate:
+      units: hits/sec
+      value: 0
+    expanded-tree-cache-miss-rate:
+      units: misses/sec
+      value: 0
+    request-count:
+      units: quantity
+      value: 1
+    request-rate:
+      units: quantity/sec
+      value: 1.05999994277954

@@ -1,0 +1,817 @@
+host-status:
+  effective-version: 9001200
+  host-mode: normal
+  host-mode-description: ''
+  id: '5321375585086763744'
+  meta:
+    current-time: '2020-05-03T17:36:55.284996Z'
+    elapsed-time:
+      units: sec
+      value: 0.009656
+    uri: /manage/v2/hosts/5eab7977c8c6?view=status
+  name: 5eab7977c8c6
+  related-views:
+    related-view:
+    - view-name: default
+      view-type: item
+      view-uri: /manage/v2/hosts/5eab7977c8c6
+  relations:
+    relation-group:
+    - relation:
+      - idref: '3786488726808586550'
+        nameref: App-Services
+        uriref: /manage/v2/forests/App-Services
+      - idref: '1820166264592188154'
+        nameref: Documents
+        uriref: /manage/v2/forests/Documents
+      - idref: '8053065595008873436'
+        nameref: Extensions
+        uriref: /manage/v2/forests/Extensions
+      - idref: '2785138124640517860'
+        nameref: Fab
+        uriref: /manage/v2/forests/Fab
+      - idref: '13048550940918331133'
+        nameref: Last-Login
+        uriref: /manage/v2/forests/Last-Login
+      - idref: '1692877627578728950'
+        nameref: Meters
+        uriref: /manage/v2/forests/Meters
+      - idref: '3766431777045645973'
+        nameref: Modules
+        uriref: /manage/v2/forests/Modules
+      - idref: '2670818919489020721'
+        nameref: Schemas
+        uriref: /manage/v2/forests/Schemas
+      - idref: '18190287290391606510'
+        nameref: Security
+        uriref: /manage/v2/forests/Security
+      - idref: '5249063930325655346'
+        nameref: Triggers
+        uriref: /manage/v2/forests/Triggers
+      typeref: forests
+      uriref: /manage/v2/forests?view=status&host-id=5eab7977c8c6
+    - relation:
+      - idref: '15903386134521536956'
+        nameref: Default
+        uriref: /manage/v2/groups/Default?view=status
+      typeref: groups
+  status-properties:
+    cache-properties:
+      cache-detail:
+        compressed-tree-cache-partition:
+        - partition-free: 99.3000030517578
+          partition-overhead: 0
+          partition-size: 384
+          partition-table: 0.200000002980232
+          partition-used: 0.600000023841858
+        expanded-tree-cache-partition:
+        - partition-busy: 0
+          partition-free: 96.6999969482422
+          partition-overhead: 0
+          partition-size: 768
+          partition-table: 0.600000023841858
+          partition-used: 3.29999995231628
+        triple-cache-partition:
+        - partition-busy: 0
+          partition-free: 100
+          partition-size: 384
+          partition-used: 0
+        triple-value-cache-partition:
+        - partition-busy: 0
+          partition-free: 100
+          partition-size: 768
+          partition-used: 0
+          value-bytes-average: 0
+          value-bytes-total: 0
+          value-count: 0
+    load-properties:
+      load-detail:
+        backup-read-load:
+          units: sec/sec
+          value: 0
+        backup-write-load:
+          units: sec/sec
+          value: 0
+        deadlock-wait-load:
+          units: sec/sec
+          value: 0
+        external-binary-read-load:
+          units: sec/sec
+          value: 0
+        foreign-xdqp-client-receive-load:
+          units: sec/sec
+          value: 0
+        foreign-xdqp-client-send-load:
+          units: sec/sec
+          value: 0
+        foreign-xdqp-server-receive-load:
+          units: sec/sec
+          value: 0
+        foreign-xdqp-server-send-load:
+          units: sec/sec
+          value: 0
+        journal-write-load:
+          units: sec/sec
+          value: 0
+        large-read-load:
+          units: sec/sec
+          value: 0
+        large-write-load:
+          units: sec/sec
+          value: 0
+        merge-read-load:
+          units: sec/sec
+          value: 0
+        merge-write-load:
+          units: sec/sec
+          value: 0
+        query-read-load:
+          units: sec/sec
+          value: 0
+        read-lock-hold-load:
+          units: sec/sec
+          value: 0
+        read-lock-wait-load:
+          units: sec/sec
+          value: 0
+        restore-read-load:
+          units: sec/sec
+          value: 0
+        restore-write-load:
+          units: sec/sec
+          value: 0
+        save-write-load:
+          units: sec/sec
+          value: 0
+        write-lock-hold-load:
+          units: sec/sec
+          value: 0.00159299303777516
+        write-lock-wait-load:
+          units: sec/sec
+          value: 0
+        xdqp-client-receive-load:
+          units: sec/sec
+          value: 0
+        xdqp-client-send-load:
+          units: sec/sec
+          value: 0
+        xdqp-server-receive-load:
+          units: sec/sec
+          value: 0
+        xdqp-server-send-load:
+          units: sec/sec
+          value: 0
+      total-load:
+        units: sec/sec
+        value: 0.00159299303777516
+    online:
+      units: bool
+      value: true
+    rate-properties:
+      rate-detail:
+        backup-read-rate:
+          units: MB/sec
+          value: 0
+        backup-write-rate:
+          units: MB/sec
+          value: 0
+        deadlock-rate:
+          units: MB/sec
+          value: 0
+        external-binary-read-rate:
+          units: MB/sec
+          value: 0
+        foreign-xdqp-client-receive-rate:
+          units: MB/sec
+          value: 0
+        foreign-xdqp-client-send-rate:
+          units: MB/sec
+          value: 0
+        foreign-xdqp-server-receive-rate:
+          units: MB/sec
+          value: 0
+        foreign-xdqp-server-send-rate:
+          units: MB/sec
+          value: 0
+        journal-write-rate:
+          units: MB/sec
+          value: 0
+        large-read-rate:
+          units: MB/sec
+          value: 0
+        large-write-rate:
+          units: MB/sec
+          value: 0
+        memory-system-pagein-rate:
+          units: MB/sec
+          value: 0
+        memory-system-pageout-rate:
+          units: MB/sec
+          value: 7.32316017150879
+        memory-system-swapin-rate:
+          units: MB/sec
+          value: 0
+        memory-system-swapout-rate:
+          units: MB/sec
+          value: 0
+        merge-read-rate:
+          units: MB/sec
+          value: 0
+        merge-write-rate:
+          units: MB/sec
+          value: 0
+        query-read-rate:
+          units: MB/sec
+          value: 0
+        read-lock-rate:
+          units: MB/sec
+          value: 0
+        restore-read-rate:
+          units: MB/sec
+          value: 0
+        restore-write-rate:
+          units: MB/sec
+          value: 0
+        save-write-rate:
+          units: MB/sec
+          value: 0
+        write-lock-rate:
+          units: MB/sec
+          value: 0.0235892497003078
+        xdqp-client-receive-rate:
+          units: MB/sec
+          value: 0
+        xdqp-client-send-rate:
+          units: MB/sec
+          value: 0
+        xdqp-server-receive-rate:
+          units: MB/sec
+          value: 0
+        xdqp-server-send-rate:
+          units: MB/sec
+          value: 0
+      total-rate:
+        units: MB/sec
+        value: 7.32316017150879
+    secure:
+      units: bool
+      value: false
+    status-detail:
+      architecture: x86_64
+      background-io-limit:
+        units: quantity
+        value: 0
+      backup-read-bytes:
+        units: bytes
+        value: 0
+      backup-read-load:
+        units: ''
+        value: 0
+      backup-read-rate:
+        units: MB/sec
+        value: 0
+      backup-read-time:
+        units: time
+        value: PT0S
+      backup-write-bytes:
+        units: bytes
+        value: 0
+      backup-write-load:
+        units: ''
+        value: 0
+      backup-write-rate:
+        units: MB/sec
+        value: 0
+      backup-write-time:
+        units: time
+        value: PT0S
+      bind-port: 7999
+      connect-port: 7999
+      core-threads:
+        units: quantity
+        value: 6
+      cores:
+        units: quantity
+        value: 6
+      cpus:
+        units: quantity
+        value: 1
+      data-dir-space:
+        units: MB
+        value: 1021
+      deadlock-count:
+        units: locks
+        value: 0
+      deadlock-rate:
+        units: locks/sec
+        value: 0
+      deadlock-wait-load:
+        units: ''
+        value: 0
+      deadlock-wait-time:
+        units: seconds
+        value: PT0S
+      edition:
+        units: enum
+        value: Essential Enterprise
+      effective-version:
+        units: quantity
+        value: 9001200
+      environment:
+        units: enum
+        value: developer
+      external-binary-read-bytes:
+        units: bytes
+        value: 0
+      external-binary-read-load:
+        units: ''
+        value: 0
+      external-binary-read-rate:
+        units: MB/sec
+        value: 0
+      external-binary-read-time:
+        units: time
+        value: PT0S
+      external-kms-request-rate:
+        units: requests/sec
+        value: 0
+      external-kms-request-time:
+        units: milliseconds
+        value: 0
+      foreign-bind-port: 7998
+      foreign-connect-port: 7998
+      foreign-xdqp-client-receive-bytes:
+        units: bytes
+        value: 0
+      foreign-xdqp-client-receive-load:
+        units: ''
+        value: 0
+      foreign-xdqp-client-receive-rate:
+        units: MB/sec
+        value: 0
+      foreign-xdqp-client-receive-time:
+        units: time
+        value: PT0S
+      foreign-xdqp-client-send-bytes:
+        units: bytes
+        value: 0
+      foreign-xdqp-client-send-load:
+        units: ''
+        value: 0
+      foreign-xdqp-client-send-rate:
+        units: MB/sec
+        value: 0
+      foreign-xdqp-client-send-time:
+        units: time
+        value: PT0S
+      foreign-xdqp-server-receive-bytes:
+        units: bytes
+        value: 0
+      foreign-xdqp-server-receive-load:
+        units: ''
+        value: 0
+      foreign-xdqp-server-receive-rate:
+        units: MB/sec
+        value: 0
+      foreign-xdqp-server-receive-time:
+        units: time
+        value: PT0S
+      foreign-xdqp-server-send-bytes:
+        units: bytes
+        value: 0
+      foreign-xdqp-server-send-load:
+        units: ''
+        value: 0
+      foreign-xdqp-server-send-rate:
+        units: MB/sec
+        value: 0
+      foreign-xdqp-server-send-time:
+        units: time
+        value: PT0S
+      host-large-data-size:
+        units: MB
+        value: 0
+      host-mode:
+        units: enum
+        value: normal
+      host-size:
+        units: MB
+        value: 3
+      http-server-receive-bytes:
+        units: bytes
+        value: 479501
+      http-server-receive-load:
+        units: ''
+        value: 0
+      http-server-receive-rate:
+        units: MB/sec
+        value: 0
+      http-server-receive-time:
+        units: sec
+        value: PT0.020705S
+      http-server-send-bytes:
+        units: bytes
+        value: 0
+      http-server-send-load:
+        units: ''
+        value: 0
+      http-server-send-rate:
+        units: MB/sec
+        value: 0
+      http-server-send-time:
+        units: sec
+        value: PT0S
+      journal-write-bytes:
+        units: bytes
+        value: 14928184
+      journal-write-load:
+        units: ''
+        value: 0
+      journal-write-rate:
+        units: MB/sec
+        value: 0
+      journal-write-time:
+        units: time
+        value: PT0.451215S
+      keystore-status: normal
+      large-read-bytes:
+        units: bytes
+        value: 0
+      large-read-load:
+        units: ''
+        value: 0
+      large-read-rate:
+        units: MB/sec
+        value: 0
+      large-read-time:
+        units: time
+        value: PT0S
+      large-write-bytes:
+        units: bytes
+        value: 0
+      large-write-load:
+        units: ''
+        value: 0
+      large-write-rate:
+        units: MB/sec
+        value: 0
+      large-write-time:
+        units: time
+        value: PT0S
+      last-startup:
+        units: datetime
+        value: '2020-05-03T16:19:27.229264Z'
+      ldap-request-rate:
+        units: requests/sec
+        value: 0
+      ldap-request-time:
+        units: milliseconds
+        value: 0
+      license-key-cores:
+        units: quantity
+        value: 0
+      license-key-cpus:
+        units: quantity
+        value: 0
+      license-key-option:
+      - units: enum
+        value: English
+      license-key-size:
+        units: MB
+        value: 0
+      log-device-space:
+        units: MB
+        value: 1021
+      memory-cache-size:
+        units: quantity
+        value: 1920
+      memory-file-size:
+        units: quantity
+        value: 1
+      memory-forest-size:
+        units: quantity
+        value: 844
+      memory-join-size:
+        units: quantity
+        value: 0
+      memory-process-anon:
+        units: fraction
+        value: 402
+      memory-process-huge-pages-size:
+        units: fraction
+        value: 0
+      memory-process-rss:
+        units: fraction
+        value: 471
+      memory-process-rss-hwm:
+        units: fraction
+        value: 657
+      memory-process-size:
+        units: fraction
+        value: 686
+      memory-process-swap-size:
+        units: fraction
+        value: 0
+      memory-registry-size:
+        units: quantity
+        value: 1
+      memory-size:
+        units: quantity
+        value: 6144
+      memory-system-free:
+        units: fraction
+        value: 5515
+      memory-system-pagein-rate:
+        units: fraction
+        value: 0
+      memory-system-pageout-rate:
+        units: fraction
+        value: 7.32316017150879
+      memory-system-swapin-rate:
+        units: fraction
+        value: 0
+      memory-system-swapout-rate:
+        units: fraction
+        value: 0
+      memory-system-total:
+        units: fraction
+        value: 5947
+      memory-unclosed-size:
+        units: quantity
+        value: 0
+      merge-read-bytes:
+        units: bytes
+        value: 2638080
+      merge-read-load:
+        units: ''
+        value: 0
+      merge-read-rate:
+        units: MB/sec
+        value: 0
+      merge-read-time:
+        units: time
+        value: PT0.003376S
+      merge-write-bytes:
+        units: bytes
+        value: 2974197
+      merge-write-load:
+        units: ''
+        value: 0
+      merge-write-rate:
+        units: MB/sec
+        value: 0
+      merge-write-time:
+        units: time
+        value: PT0.069047S
+      metering-enabled:
+        units: bool
+        value: true
+      meters-database:
+        units: quantity
+        value: '49570668165749287'
+      odbc-server-receive-bytes:
+        units: bytes
+        value: 0
+      odbc-server-receive-load:
+        units: ''
+        value: 0
+      odbc-server-receive-rate:
+        units: MB/sec
+        value: 0
+      odbc-server-receive-time:
+        units: sec
+        value: PT0S
+      odbc-server-send-bytes:
+        units: bytes
+        value: 0
+      odbc-server-send-load:
+        units: ''
+        value: 0
+      odbc-server-send-rate:
+        units: MB/sec
+        value: 0
+      odbc-server-send-time:
+        units: sec
+        value: PT0S
+      os-version: Linux 4.19.76-linuxkit (CentOS Linux release 7.7.1908 (Core)) on
+        Docker
+      performance-metering-enabled:
+        units: bool
+        value: true
+      performance-metering-period:
+        units: second
+        value: 60
+      performance-metering-retain-daily:
+        units: day
+        value: 90
+      performance-metering-retain-hourly:
+        units: day
+        value: 30
+      performance-metering-retain-raw:
+        units: day
+        value: 7
+      platform: linux
+      query-read-bytes:
+        units: bytes
+        value: 3172764
+      query-read-load:
+        units: ''
+        value: 0
+      query-read-rate:
+        units: MB/sec
+        value: 0
+      query-read-time:
+        units: time
+        value: PT0.017223S
+      read-lock-count:
+        units: locks
+        value: 27
+      read-lock-hold-load:
+        units: ''
+        value: 0
+      read-lock-hold-time:
+        units: seconds
+        value: PT0.1190281S
+      read-lock-rate:
+        units: locks/sec
+        value: 0
+      read-lock-wait-load:
+        units: ''
+        value: 0
+      read-lock-wait-time:
+        units: seconds
+        value: PT0.000543S
+      restore-read-bytes:
+        units: bytes
+        value: 0
+      restore-read-load:
+        units: ''
+        value: 0
+      restore-read-rate:
+        units: MB/sec
+        value: 0
+      restore-read-time:
+        units: time
+        value: PT0S
+      restore-write-bytes:
+        units: bytes
+        value: 0
+      restore-write-load:
+        units: ''
+        value: 0
+      restore-write-rate:
+        units: MB/sec
+        value: 0
+      restore-write-time:
+        units: time
+        value: PT0S
+      save-write-bytes:
+        units: bytes
+        value: 1056701
+      save-write-load:
+        units: ''
+        value: 0
+      save-write-rate:
+        units: MB/sec
+        value: 0
+      save-write-time:
+        units: time
+        value: PT0.01577S
+      software-version:
+        units: quantity
+        value: 9001200
+      ssl-fips-enabled:
+        units: bool
+        value: true
+      total-cpu-stat-guest: 0
+      total-cpu-stat-guest-nice: 0
+      total-cpu-stat-idle: 98.9593963623047
+      total-cpu-stat-iowait: 0
+      total-cpu-stat-irq: 0
+      total-cpu-stat-nice: 0.00281253992579877
+      total-cpu-stat-softirq: 0
+      total-cpu-stat-steal: 0
+      total-cpu-stat-system: 0.711574018001556
+      total-cpu-stat-user: 0.326254993677139
+      version: 9.0-12
+      webDAV-server-receive-bytes:
+        units: bytes
+        value: 0
+      webDAV-server-receive-load:
+        units: ''
+        value: 0
+      webDAV-server-receive-rate:
+        units: MB/sec
+        value: 0
+      webDAV-server-receive-time:
+        units: sec
+        value: PT0S
+      webDAV-server-send-bytes:
+        units: bytes
+        value: 0
+      webDAV-server-send-load:
+        units: ''
+        value: 0
+      webDAV-server-send-rate:
+        units: MB/sec
+        value: 0
+      webDAV-server-send-time:
+        units: sec
+        value: PT0S
+      write-lock-count:
+        units: locks
+        value: 439
+      write-lock-hold-load:
+        units: ''
+        value: 0.00159299303777516
+      write-lock-hold-time:
+        units: seconds
+        value: PT18.0393284S
+      write-lock-rate:
+        units: locks/sec
+        value: 0.0235892497003078
+      write-lock-wait-load:
+        units: ''
+        value: 0
+      write-lock-wait-time:
+        units: seconds
+        value: PT0.007778S
+      xdbc-server-receive-bytes:
+        units: bytes
+        value: 0
+      xdbc-server-receive-load:
+        units: ''
+        value: 0
+      xdbc-server-receive-rate:
+        units: MB/sec
+        value: 0
+      xdbc-server-receive-time:
+        units: sec
+        value: PT0S
+      xdbc-server-send-bytes:
+        units: bytes
+        value: 0
+      xdbc-server-send-load:
+        units: ''
+        value: 0
+      xdbc-server-send-rate:
+        units: MB/sec
+        value: 0
+      xdbc-server-send-time:
+        units: sec
+        value: PT0S
+      xdqp-client-receive-bytes:
+        units: bytes
+        value: 0
+      xdqp-client-receive-load:
+        units: ''
+        value: 0
+      xdqp-client-receive-rate:
+        units: MB/sec
+        value: 0
+      xdqp-client-receive-time:
+        units: time
+        value: PT0S
+      xdqp-client-send-bytes:
+        units: bytes
+        value: 0
+      xdqp-client-send-load:
+        units: ''
+        value: 0
+      xdqp-client-send-rate:
+        units: MB/sec
+        value: 0
+      xdqp-client-send-time:
+        units: time
+        value: PT0S
+      xdqp-server-receive-bytes:
+        units: bytes
+        value: 0
+      xdqp-server-receive-load:
+        units: ''
+        value: 0
+      xdqp-server-receive-rate:
+        units: MB/sec
+        value: 0
+      xdqp-server-receive-time:
+        units: time
+        value: PT0S
+      xdqp-server-request-rate:
+        units: requests/sec
+        value: 0
+      xdqp-server-request-time:
+        units: milliseconds
+        value: 0
+      xdqp-server-send-bytes:
+        units: bytes
+        value: 0
+      xdqp-server-send-load:
+        units: ''
+        value: 0
+      xdqp-server-send-rate:
+        units: MB/sec
+        value: 0
+      xdqp-server-send-time:
+        units: time
+        value: PT0S
+  version: 9.0-12

@@ -1,0 +1,55 @@
+#version: '3'
+#services:
+#  marklogic:
+#    container_name: marklogic
+#    image: store/marklogicdb/marklogic-server:9.0-12-dev-centos
+#    ports:
+#      - 8000:8000
+#      - 8001:8001
+#      - 8002:8002
+#    environment:
+#      - MARKLOGIC_INIT=true
+#      - MARKLOGIC_ADMIN_USERNAME=admin
+#      - MARKLOGIC_ADMIN_PASSWORD=admin
+
+version: '3.6'
+
+services:
+    bootstrap:
+      image: store/marklogicdb/marklogic-server:9.0-12-dev-centos
+      container_name: bootstrap
+      domainname: .
+      environment:
+        - MARKLOGIC_INIT=true
+        - MARKLOGIC_ADMIN_USERNAME=admin
+        - MARKLOGIC_ADMIN_PASSWORD=admin
+      ports:
+        - 8000:8000
+        - 8001:8001
+        - 8002:8002
+    dnode:
+      image: store/marklogicdb/marklogic-server:9.0-12-dev-centos
+      domainname: .
+      environment:
+        - MARKLOGIC_INIT=true
+        - MARKLOGIC_ADMIN_USERNAME=admin
+        - MARKLOGIC_ADMIN_PASSWORD=admin
+        - MARKLOGIC_JOIN_CLUSTER=true
+      ports:
+        - 18000:8000
+        - 18001:8001
+        - 18002:8002
+      depends_on:
+      - bootstrap
+
+#
+#
+#§ docker run -d -it -p 8000:8000 -p 8001:8001 -p 8002:8002 \
+#     -e MARKLOGIC_INIT=true \
+#     -e MARKLOGIC_ADMIN_USERNAME=admin \
+#     -e MARKLOGIC_ADMIN_PASSWORD=password \
+#     store/marklogicdb/marklogic-server:9.0-12-dev-centos
+
+
+# curl --anyauth --user 'admin:passw0rd' 'http://localhost:8002/manage/v2/servers?view=status&format=json' | jq
+# curl --anyauth --user 'admin:passw0rd' 'http://localhost:8002/manage/v2/forests?view=metrics&format=json' | jq

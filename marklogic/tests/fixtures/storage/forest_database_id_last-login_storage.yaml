@@ -1,0 +1,65 @@
+forest-storage-list:
+  id: '3674269176556456706'
+  meta:
+    current-time: '2020-05-02T00:23:42.182484Z'
+    elapsed-time:
+      units: sec
+      value: 0.010053
+    uri: /manage/v2/forests?view=storage&database-id=Last-Login
+  name: Last-Login
+  related-views:
+    related-view:
+    - view-name: default
+      view-type: list
+      view-uri: /manage/v2/forests?database-id=Last-Login
+  relations:
+    relation-group:
+    - relation:
+      - idref: '4645248220841139930'
+        nameref: Last-Login
+        uriref: /manage/v2/databases/Last-Login?view=status
+      relation-count:
+        units: quantity
+        value: 1
+      typeref: databases
+    - relation:
+      - idref: '9614261020922107465'
+        nameref: 26f962ec5443
+        uriref: /manage/v2/hosts/26f962ec5443?view=status
+      relation-count:
+        units: quantity
+        value: 1
+      typeref: hosts
+  storage-list-items:
+    storage-host:
+    - locations:
+        location:
+        - capacity:
+            units: '%'
+            value: '100'
+          device-space:
+            units: MB
+            value: 1134
+          forest-reserve:
+            units: MB
+            value: 0
+          forest-size:
+            units: MB
+            value: 0
+          large-data-size:
+            units: MB
+            value: 0
+          location-forests:
+            location-forest:
+            - disk-size:
+                units: MB
+                value: 0
+              idref: '3674269176556456706'
+              nameref: Last-Login
+              relation-id: '4645248220841139930'
+              uriref: /manage/v2/forests/Last-Login?view=status
+          path: /var/opt/MarkLogic
+          remaining-space:
+            units: MB
+            value: 1134
+      relation-id: '9614261020922107465'

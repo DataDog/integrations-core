@@ -1,0 +1,202 @@
+request-default-list:
+  list-items:
+    list-count:
+      units: quantity
+      value: 2
+    list-item:
+    - idref: '14209295713740633640'
+      item-properties:
+        canceled:
+          units: bool
+          value: false
+        client-address: 172.19.0.1
+        debugging-allowed:
+          units: bool
+          value: true
+        debugging-status: detached
+        expanded-tree-cache-hits:
+          units: quantity
+          value: 0
+        expanded-tree-cache-misses:
+          units: quantity
+          value: 0
+        lock-count: '0'
+        max-time-limit:
+          units: quantity
+          value: 3600
+        profiling-allowed:
+          units: bool
+          value: true
+        profiling-enabled:
+          units: bool
+          value: false
+        read-size: '0'
+        request-kind:
+          units: enum
+          value: invoke
+        request-rewritten-text: manage/resource-rewriter.xqy?view=status&format=json&request-id=host-item&version=v2&var1=v2&var2=26f962ec5443&var3=&var4=
+        request-state:
+          units: enum
+          value: running
+        request-text: /manage/v2/hosts/26f962ec5443
+        retry-count:
+          units: quantity
+          value: 0
+        root: Apps/
+        seconds-elapsed:
+          units: sec
+          value: 0.031198
+        start-time:
+          units: datetime
+          value: '2020-05-02T00:15:35.2859Z'
+        time-limit:
+          units: quantity
+          value: 600
+        trigger-depth:
+          units: quantity
+          value: 0
+        update:
+          units: bool
+          value: true
+        user: '7071164303237443533'
+      relation-id:
+      - '9614261020922107465'
+      - '3308729765622030084'
+      - '10261592349936198357'
+      - '16955238094048613943'
+      uriref: /manage/v2/requests/14209295713740633640?host-id=9614261020922107465
+    - idref: '3360822391268270342'
+      item-properties:
+        canceled:
+          units: bool
+          value: false
+        client-address: 172.19.0.1
+        debugging-allowed:
+          units: bool
+          value: true
+        debugging-status: detached
+        expanded-tree-cache-hits:
+          units: quantity
+          value: 0
+        expanded-tree-cache-misses:
+          units: quantity
+          value: 0
+        lock-count: '0'
+        max-time-limit:
+          units: quantity
+          value: 3600
+        profiling-allowed:
+          units: bool
+          value: true
+        profiling-enabled:
+          units: bool
+          value: false
+        read-size: '0'
+        request-kind:
+          units: enum
+          value: invoke
+        request-rewritten-text: manage/resource-rewriter.xqy?format=json&host-id=26f962ec5443&request-id=request-list&version=v2&var1=v2&var2=&var3=&var4=
+        request-state:
+          units: enum
+          value: running
+        request-text: /manage/v2/requests
+        retry-count:
+          units: quantity
+          value: 0
+        root: Apps/
+        seconds-elapsed:
+          units: sec
+          value: 0.016784
+        start-time:
+          units: datetime
+          value: '2020-05-02T00:15:35.300314Z'
+        time-limit:
+          units: quantity
+          value: 600
+        trigger-depth:
+          units: quantity
+          value: 0
+        update:
+          units: bool
+          value: true
+        user: '7071164303237443533'
+      relation-id:
+      - '9614261020922107465'
+      - '3308729765622030084'
+      - '10261592349936198357'
+      - '13197506436142206512'
+      uriref: /manage/v2/requests/3360822391268270342?host-id=9614261020922107465
+  list-summary:
+    max-seconds:
+      units: sec
+      value: 0.031198
+    mean-seconds:
+      units: sec
+      value: 0.023991
+    median-seconds:
+      units: sec
+      value: 0.023991
+    min-seconds:
+      units: sec
+      value: 0.016784
+    ninetieth-percentile-seconds:
+      units: sec
+      value: 0.031198
+    query-count:
+      units: quantity
+      value: 0
+    standard-dev-seconds:
+      units: sec
+      value: 0.0102
+    total-requests:
+      units: quantity
+      value: 2
+    update-count:
+      units: quantity
+      value: 2
+  meta:
+    current-time: '2020-05-02T00:15:35.301986Z'
+    elapsed-time:
+      units: sec
+      value: 0.016183
+    uri: /manage/v2/requests?host-id=26f962ec5443
+  related-views:
+    related-view:
+    - view-name: default
+      view-type: root
+      view-uri: /manage/v2
+  relations:
+    relation-group:
+    - relation:
+      - idref: '9614261020922107465'
+        nameref: 26f962ec5443
+        uriref: /manage/v2/hosts/26f962ec5443
+      relation-count:
+        units: quantity
+        value: 1
+      typeref: hosts
+    - relation:
+      - idref: '3308729765622030084'
+        nameref: Manage
+        uriref: /manage/v2/servers/Manage?group-id=Default
+      relation-count:
+        units: quantity
+        value: 1
+      typeref: servers
+    - relation:
+      - idref: '10261592349936198357'
+        nameref: App-Services
+        uriref: /manage/v2/databases/App-Services
+      relation-count:
+        units: quantity
+        value: 1
+      typeref: databases
+    - relation:
+      - idref: '16955238094048613943'
+        uriref: /manage/v2/transactions/16955238094048613943?host-id=26f962ec5443
+      - idref: '13197506436142206512'
+        uriref: /manage/v2/transactions/13197506436142206512?host-id=26f962ec5443
+      relation-count:
+        units: quantity
+        value: 2
+      typeref: transactions

@@ -1,0 +1,33 @@
+{
+  "display_name": "MarkLogic",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "marklogic",
+  "metric_prefix": "marklogic.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "TODO",
+  "guid": "0c200415-731f-4b67-9b2c-d6bd1225eee1",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-MarkLogic Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "marklogic",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json"
+  }
+}

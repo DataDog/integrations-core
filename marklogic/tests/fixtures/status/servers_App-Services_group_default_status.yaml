@@ -1,0 +1,233 @@
+server-status:
+  id: '713167273001961108'
+  meta:
+    current-time: '2020-05-03T17:40:25.809673Z'
+    elapsed-time:
+      units: sec
+      value: 0.012741
+    uri: /manage/v2/servers/App-Services?view=status&group-id=Default
+  name: App-Services
+  related-views:
+    related-view:
+    - view-name: default
+      view-type: item
+      view-uri: /manage/v2/servers/App-Services?group-id=Default
+  relations:
+    relation-group:
+    - relation:
+      - idref: '15903386134521536956'
+        nameref: Default
+        uriref: /manage/v2/groups/Default?view=status
+      relation-count:
+        units: quantity
+        value: 1
+      typeref: groups
+    - relation:
+      - idref: '5321375585086763744'
+        nameref: 5eab7977c8c6
+        uriref: /manage/v2/hosts/5eab7977c8c6?view=status
+      relation-count:
+        units: quantity
+        value: 1
+      typeref: hosts
+    - relation:
+      - idref: '15647249281729042749'
+        nameref: Documents
+        uriref: /manage/v2/databases/Documents?view=status
+      relation-count:
+        units: quantity
+        value: 1
+      typeref: databases
+    - typeref: requests
+      uriref: /manage/v2/requests?group-id=Default&server-id=App-Services
+  server-kind: http
+  status-properties:
+    authentication:
+      units: enum
+      value: digest
+    backlog:
+      units: quantity
+      value: 512
+    concurrent-request-limit:
+      units: quantity
+      value: 0
+    content-database-enabled:
+      units: bool
+      value: true
+    default-time-limit:
+      units: quantity
+      value: 600
+    default-user: '10306463041007996463'
+    default-xquery-version:
+      units: enum
+      value: 1.0-ml
+    display-last-login:
+      units: bool
+      value: false
+    enabled:
+      units: bool
+      value: true
+    error-handler: /MarkLogic/rest-api/8000-error-handler.xqy
+    host-detail:
+    - db-lib-module-cache-hits:
+        units: quantity
+        value: 0
+      db-lib-module-cache-misses:
+        units: quantity
+        value: 0
+      db-main-module-seq-cache-hits:
+        units: quantity
+        value: 0
+      db-main-module-seq-cache-misses:
+        units: quantity
+        value: 0
+      db-program-cache-hits:
+        units: quantity
+        value: 0
+      db-program-cache-misses:
+        units: quantity
+        value: 0
+      db-schema-cache-hits:
+        units: quantity
+        value: 0
+      db-schema-cache-misses:
+        units: quantity
+        value: 0
+      default-inference-size:
+        units: quantity
+        value: 100
+      distribute-timestamps:
+        units: enum
+        value: fast
+      env-program-cache-hits:
+        units: quantity
+        value: 0
+      env-program-cache-misses:
+        units: quantity
+        value: 0
+      env-schema-cache-hits:
+        units: quantity
+        value: 82520
+      env-schema-cache-misses:
+        units: quantity
+        value: 0
+      expanded-tree-cache-hit-rate:
+        units: hits/sec
+        value: 0
+      expanded-tree-cache-hits:
+        units: quantity
+        value: 21
+      expanded-tree-cache-miss-rate:
+        units: misses/sec
+        value: 0
+      expanded-tree-cache-misses:
+        units: quantity
+        value: 4
+      fs-lib-module-cache-hits:
+        units: quantity
+        value: 136
+      fs-lib-module-cache-misses:
+        units: quantity
+        value: 47
+      fs-main-module-seq-cache-hits:
+        units: quantity
+        value: 0
+      fs-main-module-seq-cache-misses:
+        units: quantity
+        value: 7
+      fs-program-cache-hits:
+        units: quantity
+        value: 6
+      fs-program-cache-misses:
+        units: quantity
+        value: 7
+      fs-schema-cache-hits:
+        units: quantity
+        value: 0
+      fs-schema-cache-misses:
+        units: quantity
+        value: 0
+      max-inference-size:
+        units: quantity
+        value: 500
+      relation-id: '5321375585086763744'
+      request-rate:
+        units: quantity/sec
+        value: 0
+      request-time:
+        units: fraction
+        value: 0
+      requests-count:
+        units: quantity
+        value: 0
+      server-receive-bytes:
+        units: bytes
+        value: 183752
+      server-receive-load:
+        units: ''
+        value: 0
+      server-receive-rate:
+        units: MB/sec
+        value: 0
+      server-receive-time:
+        units: sec
+        value: PT0.00945S
+      server-send-bytes:
+        units: bytes
+        value: 10873925
+      server-send-load:
+        units: ''
+        value: 0
+      server-send-rate:
+        units: MB/sec
+        value: 0
+      server-send-time:
+        units: sec
+        value: PT0.079245S
+    keep-alive-timeout:
+      units: quantity
+      value: 5
+    max-threads:
+      units: quantity
+      value: 32
+    max-time-limit:
+      units: quantity
+      value: 3600
+    modules-database-enabled:
+      units: bool
+      value: true
+    multi-version-concurrency-control:
+      units: enum
+      value: contemporaneous
+    output-encoding: UTF-8
+    output-sgml-character-entities:
+      units: enum
+      value: none
+    port: 8000
+    privilege: 0
+    request-timeout:
+      units: quantity
+      value: 30
+    root: /
+    session-timeout:
+      units: quantity
+      value: 3600
+    static-expires:
+      units: quantity
+      value: 3600
+    threads:
+      units: quantity
+      value: 1
+    total-expanded-tree-cache-hit-rate:
+      units: hits/sec
+      value: 0
+    total-expanded-tree-cache-miss-rate:
+      units: misses/sec
+      value: 0
+    total-request-rate:
+      units: quantity/sec
+      value: 0
+    total-requests:
+      units: quantity
+      value: 0
+    url-rewriter: /MarkLogic/rest-api/8000-rewriter.xml

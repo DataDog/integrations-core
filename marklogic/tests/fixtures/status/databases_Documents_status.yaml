@@ -1,0 +1,268 @@
+database-status:
+  id: '15647249281729042749'
+  meta:
+    current-time: '2020-05-03T17:33:06.427025Z'
+    elapsed-time:
+      units: sec
+      value: 0.011826
+    uri: /manage/v2/databases/Documents?view=status
+  name: Documents
+  related-views:
+    related-view:
+    - view-name: default
+      view-type: item
+      view-uri: /manage/v2/databases/Documents
+  relations:
+    relation-group:
+    - relation:
+      - idref: '11206881856309399802'
+        nameref: Schemas
+        roleref: schema
+        uriref: /manage/v2/databases/Schemas
+      - idref: '8187108862100602225'
+        nameref: Security
+        roleref: security
+        uriref: /manage/v2/databases/Security
+      - idref: '2422790033700993850'
+        nameref: Triggers
+        roleref: triggers
+        uriref: /manage/v2/databases/Triggers
+      relation-count:
+        units: quantity
+        value: 3
+      typeref: databases
+    - relation:
+      - idref: '1820166264592188154'
+        nameref: Documents
+        uriref: /manage/v2/forests/Documents
+      relation-count:
+        units: quantity
+        value: 1
+      typeref: forests
+    - relation:
+      - idref: '713167273001961108'
+        nameref: App-Services
+        uriref: /manage/v2/servers/App-Services?group-id=Default
+      relation-count:
+        units: quantity
+        value: 1
+      typeref: servers
+  status-properties:
+    average-forest-size:
+      units: MB
+      value: 0
+    backup-count:
+      units: quantity
+      value: 0
+    cache-properties:
+      compressed-tree-cache-hit-rate:
+        units: hits/sec
+        value: 0
+      compressed-tree-cache-miss-rate:
+        units: misses/sec
+        value: 0
+      large-binary-cache-hit-rate:
+        units: hits/sec
+        value: 0
+      large-binary-cache-miss-rate:
+        units: misses/sec
+        value: 0
+      list-cache-hit-rate:
+        units: hits/sec
+        value: 0
+      list-cache-miss-rate:
+        units: misses/sec
+        value: 0
+      triple-cache-hit-rate:
+        units: hits/sec
+        value: 0
+      triple-cache-miss-rate:
+        units: misses/sec
+        value: 0
+      triple-value-cache-hit-rate:
+        units: hits/sec
+        value: 0
+      triple-value-cache-miss-rate:
+        units: misses/sec
+        value: 0
+    cpf-enabled:
+      units: bool
+      value: false
+    data-size:
+      units: MB
+      value: 0
+    database-replication-status:
+      database-replication-configured:
+        units: bool
+        value: false
+    device-space:
+      units: MB
+      value: '1023'
+    enabled:
+      units: bool
+      value: true
+    fast-data-size:
+      units: MB
+      value: 0
+    flexible-replication-enabled:
+      units: bool
+      value: false
+    forests-count:
+      units: quantity
+      value: 1
+    in-memory-size:
+      units: MB
+      value: 0
+    indexing-state:
+      units: bool
+      value: 'false'
+    large-data-size:
+      units: MB
+      value: 0
+    largest-forest-size:
+      units: MB
+      value: 0
+    least-remaining-space-forest:
+      units: MB
+      value: 1023
+    load-properties:
+      load-detail:
+        backup-read-load:
+          units: sec/sec
+          value: 0
+        backup-write-load:
+          units: sec/sec
+          value: 0
+        database-replication-receive-load:
+          units: sec/sec
+          value: 0
+        database-replication-send-load:
+          units: sec/sec
+          value: 0
+        deadlock-wait-load:
+          units: sec/sec
+          value: 0
+        journal-write-load:
+          units: sec/sec
+          value: 0
+        large-read-load:
+          units: sec/sec
+          value: 0
+        large-write-load:
+          units: sec/sec
+          value: 0
+        merge-read-load:
+          units: sec/sec
+          value: 0
+        merge-write-load:
+          units: sec/sec
+          value: 0
+        query-read-load:
+          units: sec/sec
+          value: 0
+        read-lock-hold-load:
+          units: sec/sec
+          value: 0
+        read-lock-wait-load:
+          units: sec/sec
+          value: 0
+        restore-read-load:
+          units: sec/sec
+          value: 0
+        restore-write-load:
+          units: sec/sec
+          value: 0
+        save-write-load:
+          units: sec/sec
+          value: 0
+        write-lock-hold-load:
+          units: sec/sec
+          value: 0
+        write-lock-wait-load:
+          units: sec/sec
+          value: 0
+      total-load:
+        units: sec/sec
+        value: 0
+    local-disk-failover:
+      local-disk-failover-active:
+        units: bool
+        value: false
+    merge-count:
+      units: quantity
+      value: 0
+    min-capacity:
+      units: '%'
+      value: 100
+    rate-properties:
+      rate-detail:
+        backup-read-rate:
+          units: MB/sec
+          value: 0
+        backup-write-rate:
+          units: MB/sec
+          value: 0
+        database-replication-receive-rate:
+          units: MB/sec
+          value: 0
+        database-replication-send-rate:
+          units: MB/sec
+          value: 0
+        deadlock-rate:
+          units: MB/sec
+          value: 0
+        journal-write-rate:
+          units: MB/sec
+          value: 0
+        large-read-rate:
+          units: MB/sec
+          value: 0
+        large-write-rate:
+          units: MB/sec
+          value: 0
+        merge-read-rate:
+          units: MB/sec
+          value: 0
+        merge-write-rate:
+          units: MB/sec
+          value: 0
+        query-read-rate:
+          units: MB/sec
+          value: 0
+        read-lock-rate:
+          units: MB/sec
+          value: 0
+        restore-read-rate:
+          units: MB/sec
+          value: 0
+        restore-write-rate:
+          units: MB/sec
+          value: 0
+        save-write-rate:
+          units: MB/sec
+          value: 0
+        write-lock-rate:
+          units: MB/sec
+          value: 0
+      total-rate:
+        units: MB/sec
+        value: 0
+    rebalancing-state:
+      units: bool
+      value: 'false'
+    reindex-count:
+      units: quantity
+      value: 0
+    restore-count:
+      units: quantity
+      value: 0
+    shared-disk-failover:
+      shared-disk-failover-active:
+        units: bool
+        value: false
+    state:
+      units: enum
+      value: available
+    total-merge-size:
+      units: MB
+      value: 0

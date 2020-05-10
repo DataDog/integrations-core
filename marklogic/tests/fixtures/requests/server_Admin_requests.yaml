@@ -1,0 +1,26 @@
+request-default-list:
+  list-items:
+    list-count:
+      units: quantity
+      value: 0
+  list-summary:
+    query-count:
+      units: quantity
+      value: 0
+    total-requests:
+      units: quantity
+      value: 0
+    update-count:
+      units: quantity
+      value: 0
+  meta:
+    current-time: '2020-05-02T00:12:53.020593Z'
+    elapsed-time:
+      units: sec
+      value: 0.009835
+    uri: /manage/v2/requests?server-id=Admin&group-id=Default
+  related-views:
+    related-view:
+    - view-name: default
+      view-type: root
+      view-uri: /manage/v2
