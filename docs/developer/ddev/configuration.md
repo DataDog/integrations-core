@@ -89,7 +89,7 @@ If not:
 
 ## Trello
 
-To participate as an [Agent release manager](../process/agent_release.md), you need to set `trello.key`/`trello.token` in your config file.
+To participate as an [Agent release manager](../process/agent-release.md), you need to set `trello.key`/`trello.token` in your config file.
 
 Run `ddev config show` to see if your Trello key and token is set.
 

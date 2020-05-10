@@ -34,8 +34,10 @@ nav:
   - E2E: e2e.md
   - Base Package:
     - About: base/about.md
+    - Basics: base/basics.md
     - HTTP: base/http.md
     - Databases: base/databases.md
+    - Prometheus: base/prometheus.md
     - Metadata: base/metadata.md
     - API: base/api.md
   - Dev Package:
@@ -47,18 +49,27 @@ nav:
   - Guidelines:
     - Pull requests: guidelines/pr.md
     - Style: guidelines/style.md
+    - Dashboards: guidelines/dashboards.md
     - Conventions: guidelines/conventions.md
   - Meta:
     - CI: meta/ci.md
     - CD: meta/cd.md
     - Docs: meta/docs.md
-    - Config specs: meta/config_specs.md
+    - Config specs: meta/config-specs.md
     - Status: meta/status.md
+  - Tutorials:
+    - JMX: tutorials/jmx.md
+    - SNMP: tutorials/snmp.md
+    - Memory profiling: tutorials/memory-profiling.md
+  - Architecture:
+    - SNMP: architecture/snmp.md
+    - vSphere: architecture/vsphere.md
   - Process:
-    - Integration release: process/integration_release.md
-    - Agent release: process/agent_release.md
+    - Integration release: process/integration-release.md
+    - Agent release: process/agent-release.md
   - FAQ:
     - FAQ: faq/faq.md
+    - Acknowledgements: faq/acknowledgements.md
 
 plugins:
   # Built-in

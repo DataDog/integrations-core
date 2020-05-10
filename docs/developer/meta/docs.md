@@ -55,7 +55,8 @@ than defined on a per-page basis, for many reasons:
 We use some [scripts][docs-scripts] to dynamically modify pages before being processed by other extensions and MkDocs itself, to achieve the following:
 
 - add [references](#references) to the bottom of every page
-- render the [status](status.md) of various
+- render the [status](status.md) of various aspects of integrations
+- enumerate all the [dependencies](../faq/acknowledgements.md#dependencies) that are shipped with the [Datadog Agent][]
 
 ## Build
 
@@ -72,5 +73,12 @@ By default, live reloading is enabled so any modification will be reflected in n
 ## Deploy
 
 Our [CI](ci.md#docs) deploys the documentation to [GitHub Pages][github-pages-docs] if any changes occur on commits to the `master` branch.
+
+!!! danger
+    **Never make documentation non-deterministic as it will trigger deploys for every single commit.**
+
+    For example, say you want to display the valid values of a CLI option and the enumeration is represented as a `set`.
+    Formatting the sequence directly will produce inconsistent results because sets do not guarantee order like
+    dictionaries do, so you must sort it first.
 
 *[CERN]: European Organization for Nuclear Research

@@ -5,7 +5,7 @@ import os
 
 import click
 
-from ....utils import chdir, create_file, copy_path, dir_exists, path_join, remove_path, temp_dir
+from ....utils import chdir, copy_path, create_file, dir_exists, path_join, remove_path, temp_dir
 from ...constants import get_root
 from ...git import get_git_email, get_git_user, get_latest_commit_hash
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning, run_or_abort
@@ -13,12 +13,12 @@ from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_wai
 PRODUCTION_BRANCH = 'gh-pages'
 
 
-@click.command(context_settings=CONTEXT_SETTINGS, short_help='Push built documentation')
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Deploy built documentation')
 @click.argument('branch', required=False)
 @click.option('--yes', '-y', is_flag=True)
 @click.pass_context
-def push(ctx, branch, yes):
-    """Push built documentation."""
+def deploy(ctx, branch, yes):
+    """Deploy built documentation."""
     # We allow specifying a branch in case you want to quickly showcase changes to others
     if not branch:
         branch = PRODUCTION_BRANCH

@@ -78,6 +78,7 @@
 [isort-github]: https://github.com/timothycrosley/isort
 [keepachangelog-types]: https://keepachangelog.com/en/1.1.0/#how
 [integration-log-collection]: https://docs.datadoghq.com/logs/log_collection/
+[microsoft-generosity]: https://github.com/DataDog/integrations-core/pull/4461#issuecomment-526217824
 [mkdocs-home]: https://www.mkdocs.org
 [mkdocs-plugins]: https://github.com/mkdocs/mkdocs/wiki/MkDocs-Plugins
 [metric-type-gauge]: https://docs.datadoghq.com/developers/metrics/types/?tab=gauge#metric-types
@@ -96,8 +97,9 @@
 [pytest-markers]: http://doc.pytest.org/en/latest/example/markers.html
 [pytest-mock-github]: https://github.com/pytest-dev/pytest-mock
 [pytest-usage]: https://docs.pytest.org/en/latest/usage.html
-[python-downloads-windows]: https://www.python.org/downloads/windows
 [python-cprofile]: https://docs.python.org/3/library/profile.html#module-cProfile
+[python-downloads-windows]: https://www.python.org/downloads/windows
+[python-home]: https://www.python.org
 [python-markdown-extensions]: https://github.com/Python-Markdown/markdown/wiki/Third-Party-Extensions
 [python-pdb]: https://docs.python.org/3/library/pdb.html
 [requests-github]: https://github.com/psf/requests

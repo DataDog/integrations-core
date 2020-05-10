@@ -1,16 +1,13 @@
 import os
 
-from datadog_checks.dev.tooling.constants import set_root
+from datadog_checks.dev.tooling.constants import get_root
 from datadog_checks.dev.tooling.utils import get_default_config_spec, get_valid_checks, get_valid_integrations
-
-ROOT = os.getcwd()
-set_root(ROOT)
 
 MARKER = '<docs-insert-status>'
 
 
 def patch(lines):
-    """This renders the state of various aspects of integrations."""
+    """This renders the status of various aspects of integrations."""
     if not lines or not (lines[0] == '# Status' and MARKER in lines):
         return
 
@@ -71,7 +68,7 @@ def render_dashboard_progress():
     ]
 
     for integration in valid_integrations:
-        dashboards_path = os.path.join(ROOT, integration, 'assets', 'dashboards')
+        dashboards_path = os.path.join(get_root(), integration, 'assets', 'dashboards')
         if os.path.isdir(dashboards_path) and len(os.listdir(dashboards_path)) > 0:
             integrations_with_dashboard += 1
             status = 'X'

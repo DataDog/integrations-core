@@ -15,7 +15,7 @@ from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_wait
 @click.command(context_settings=CONTEXT_SETTINGS, short_help="Remove a project's build artifacts")
 @click.argument('check', autocompletion=complete_testable_checks, required=False)
 @click.option(
-    '--compiled-only', '-c', is_flag=True, help=f"Remove compiled files only ({', '.join(sorted(DELETE_EVERYWHERE))}).",
+    '--compiled-only', '-c', is_flag=True, help=f"Remove compiled files only ({', '.join(sorted(DELETE_EVERYWHERE))})."
 )
 @click.option(
     '--all',
@@ -33,8 +33,8 @@ from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_wait
     '-f',
     is_flag=True,
     help=(
-        'If set and the command is run from the root directory, '
-        'allow removing build and test artifacts ({}).'.format(', '.join(sorted(DELETE_IN_ROOT)))
+        f'If set and the command is run from the root directory, '
+        f'allow removing build and test artifacts ({", ".join(sorted(DELETE_IN_ROOT))}).'
     ),
 )
 @click.option('--verbose', '-v', is_flag=True, help='Shows removed paths.')

@@ -121,7 +121,7 @@ time spent in the given function (and excluding time made in calls to sub-functi
 We provide an easy way to utilize [log collection][integration-log-collection] with E2E [Docker environments](#docker).
 
 1. Pass `mount_logs=True` to [docker_run](#datadog_checks.dev.docker.docker_run). This will use the logs example in
-   the integration's [config spec](../meta/config_specs.md). For example, the following defines 2 example log files:
+   the integration's [config spec](../meta/config-specs.md). For example, the following defines 2 example log files:
 
     ```yaml
     - template: logs

@@ -57,7 +57,7 @@ The labeler is [configured][github-actions-labeler-config] to add the following:
 | Label | Condition |
 | --- | --- |
 | <mark style="background-color: #bfdadc; color: #000000">integration/&lt;NAME&gt;</mark> | any directory at the root that actually contains an integration |
-| <mark style="background-color: #7e1df4; color: #ffffff">documentation</mark> | any Markdown, [config specs](config_specs.md), `manifest.json`, or anything in `/docs/` |
+| <mark style="background-color: #7e1df4; color: #ffffff">documentation</mark> | any Markdown, [config specs](config-specs.md), `manifest.json`, or anything in `/docs/` |
 | <mark style="background-color: #6ad86c; color: #000000">dev/testing</mark> | [Codecov][codecov-home] or [Azure Pipelines][azp-home] config |
 | <mark style="background-color: #6ad86c; color: #000000">dev/tooling</mark> | [GitLab][gitlab-home] (see [CD](cd.md)), [GitHub Actions][github-actions-home], or [Stale bot](#stale-bot) config, or the `ddev` [CLI](../ddev/about.md#cli) |
 | <mark style="background-color: #83fcf8; color: #000000">dependencies</mark> | any change in shipped dependencies |

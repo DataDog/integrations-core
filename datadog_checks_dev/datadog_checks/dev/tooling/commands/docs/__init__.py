@@ -5,10 +5,10 @@ import click
 
 from ..console import CONTEXT_SETTINGS
 from .build import build
-from .push import push
+from .deploy import deploy
 from .serve import serve
 
-ALL_COMMANDS = (build, push, serve)
+ALL_COMMANDS = (build, deploy, serve)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage documentation')
