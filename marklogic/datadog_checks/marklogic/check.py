@@ -27,13 +27,15 @@ class MarklogicCheck(AgentCheck):
 
     def check(self, _):
         # type: (Any) -> None
-        pprint(self.api.get_status())
-        # Collect OOTB Metrics
-        self.process_base_status(self.api.get_status())
+        self.process_base_status()
+        self.process_extra_status()
 
-        # Collect Extra Metrics
-        # Only necessary for forest.
-        # For other resources, all metrics are already collected via `process_base_status`
+    def process_extra_status(self):
+        """
+        Collect Extra Metrics.
+        Only necessary for forest.
+        For other resources, all metrics are already collected via `process_base_status`
+        """
         for resource_type in ['forest']:
             res_meta = RESOURCE_TYPES[resource_type]
             data = self.api.get_status(res_meta['plural'])
@@ -41,7 +43,11 @@ class MarklogicCheck(AgentCheck):
             metrics = data['{}-status-list'.format(resource_type)]['status-list-summary']
             self.process_status_metrics(res_meta['plural'], metrics, tags=[])
 
-    def process_base_status(self, data):
+    def process_base_status(self):
+        """
+        Collect Status Metrics
+        """
+        data = self.api.get_status()
         relations = data['local-cluster-status']['status-relations']
         for key, resource_data in iteritems(relations):
             if not key.endswith('-status'):
