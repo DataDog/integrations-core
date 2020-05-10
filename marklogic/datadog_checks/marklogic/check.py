@@ -31,9 +31,9 @@ class MarklogicCheck(AgentCheck):
     def check(self, _):
         # type: (Any) -> None
         self.process_base_status()
-        self.process_extra_status()
+        self.process_resource_status()
 
-    def process_extra_status(self):
+    def process_resource_status(self):
         """
         Collect Extra Metrics.
         Only necessary for forest.
