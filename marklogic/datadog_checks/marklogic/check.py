@@ -33,14 +33,14 @@ class MarklogicCheck(AgentCheck):
         # TODO: Handle errors:
         #       - Continue if one of the processor fail
         #       - Add service check (can connect, status service check)
-        self.collect_base_status_metrics()
-        self.collect_resource_status()
+        self.collect_summary_status_metrics()
+        self.collect_summary_resource_status_metrics()
 
         # No need to query base requests metrics, they are already collect in by process_base_status
         # self.process_requests_metrics_by_resource()
-        self.collect_base_storage_metrics()
+        self.collect_summary_storage_metrics()
 
-    def collect_resource_status(self):
+    def collect_summary_resource_status_metrics(self):
         """
         Collect Extra Metrics.
         Only necessary for forest.
@@ -52,7 +52,7 @@ class MarklogicCheck(AgentCheck):
             metrics = data['{}-status-list'.format(resource_type)]['status-list-summary']
             self._collect_status_metrics(res_meta['plural'], metrics)
 
-    def collect_base_status_metrics(self):
+    def collect_summary_status_metrics(self):
         """
         Collect Status Metrics
         """
@@ -92,7 +92,7 @@ class MarklogicCheck(AgentCheck):
         for metric_name, value_data in iteritems(metrics_data):
             self.submit_metric("requests.{}".format(metric_name), value_data)
 
-    def collect_base_storage_metrics(self):
+    def collect_summary_storage_metrics(self):
         """
         Collect Base Storage Metrics
         """
