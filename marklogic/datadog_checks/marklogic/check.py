@@ -10,7 +10,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.marklogic.api import MarkLogicApi
 from datadog_checks.marklogic.parsers.status import parse_summary_status_resource_metrics, \
     parse_summary_status_base_metrics
-from datadog_checks.marklogic.parsers.storage import parse_summary_storage_metrics
+from datadog_checks.marklogic.parsers.storage import parse_summary_storage_base_metrics
 from .constants import RESOURCE_TYPES
 
 
@@ -83,7 +83,7 @@ class MarklogicCheck(AgentCheck):
         Collect Base Storage Metrics
         """
         data = self.api.get_forest_storage_data()
-        metrics = parse_summary_storage_metrics(data, self._tags)
+        metrics = parse_summary_storage_base_metrics(data, self._tags)
         self.submit_metrics(metrics)
 
     def submit_metrics(self, metrics):

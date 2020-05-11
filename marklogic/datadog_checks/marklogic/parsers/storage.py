@@ -6,7 +6,7 @@ from six import iteritems
 from .common import is_metric, build_metric_to_submit
 
 
-def parse_summary_storage_metrics(data, tags):
+def parse_summary_storage_base_metrics(data, tags):
     """
     Collect Base Storage Metrics
     """
