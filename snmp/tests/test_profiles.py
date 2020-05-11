@@ -2,12 +2,13 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import logging
+
 import pytest
 
 from datadog_checks.snmp import SnmpCheck
-import logging
-from . import common
 
+from . import common
 from .metrics import (
     ADAPTER_IF_COUNTS,
     CIE_METRICS,

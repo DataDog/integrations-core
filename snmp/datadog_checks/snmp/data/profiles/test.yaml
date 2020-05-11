@@ -1,0 +1,64 @@
+# Profile for HP iLO4 devices.
+
+# This corresponds to the 'cpqSm2ProdRILO4' OID listed in CPQSM2-MIB.
+# Source: CPQSM2-MIB, can downloaded here: https://support.hpe.com/hpsc/swd/public/detail?swItemId=MTX_53293d026fb147958b223069b6
+
+extends:
+  - _base.yaml
+
+sysobjectid: 1.3.6.1.4.1.232.9.4.10
+
+metrics:
+  # iLO controller metrics.
+
+  - # Power state.
+    # NOTE: unknown(1), poweredOff(2), poweredOn(3), insufficientPowerOrPowerOnDenied(4)
+    MIB: CPQSM2-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.232.9.2.2.32
+      name: cpqSm2CntlrServerPowerState
+
+  - # Status of battery.
+    # NOTE: other(1), batteryOk(2), batteryFailed(3), batteryDisconnected(4)
+    MIB: CPQSM2-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.232.9.2.2.5
+      name: cpqSm2CntlrBatteryStatus
+
+  - # Charge level of battery.
+    MIB: CPQSM2-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.232.9.2.2.6
+      name: cpqSm2CntlrBatteryPercentCharged
+
+  - # A bitmap of self-test errors.
+    # NOTE: 0 indicates that no errors have occurred.
+    MIB: CPQSM2-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.232.9.2.2.9
+      name: cpqSm2CntlrSelfTestErrors
+
+  - # Whether a remote session is active.
+    # NOTE: other(1), active(2), inactive(3)
+    MIB: CPQSM2-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.232.9.2.2.16
+      name: cpqSm2CntlrRemoteSessionStatus
+
+  - # Status of the remote interface.
+    # NOTE: other(1), ok(2), notResponding(3)
+    MIB: CPQSM2-MIB
+    symol:
+      OID: 1.3.6.1.4.1.232.9.2.2.17
+      name: cpqSm2CntlrInterfaceStatus
+
+  # Event log.
+
+  - # Number of entries in the event log.
+    MIB: CPQSM2-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.232.9.2.3.1
+      name: cpqSm2EventTotalEntries
+
+  # System utilization.
+
