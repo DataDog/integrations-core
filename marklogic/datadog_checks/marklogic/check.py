@@ -44,7 +44,7 @@ class MarklogicCheck(AgentCheck):
             data = self.api.get_status(res_meta['plural'])
             pprint(data)
             metrics = data['{}-status-list'.format(resource_type)]['status-list-summary']
-            self.process_status_metrics(res_meta['plural'], metrics, tags=[])
+            self._process_status_metrics(res_meta['plural'], metrics, tags=[])
 
     def process_base_status(self):
         """
@@ -61,9 +61,9 @@ class MarklogicCheck(AgentCheck):
             #       - forests-status-summary
             #       - hosts-status-summary
             #       - servers-status-summary
-            self.process_status_metrics(resource_type, metrics, tags=[])
+            self._process_status_metrics(resource_type, metrics, tags=[])
 
-    def process_status_metrics(self, metric_prefix, metrics, tags):
+    def _process_status_metrics(self, metric_prefix, metrics, tags):
         pprint(tags)
         pprint(metrics)
         for key, data in iteritems(metrics):
@@ -71,10 +71,10 @@ class MarklogicCheck(AgentCheck):
                 prop_type = key[:key.index('-properties')]
                 total_key = 'total-'+prop_type
                 self.submit_metric(metric_prefix, total_key, data[total_key], tags)
-                self.process_status_metrics(metric_prefix, data[prop_type+'-detail'], tags)
+                self._process_status_metrics(metric_prefix, data[prop_type + '-detail'], tags)
             elif key == 'load-properties':
                 self.submit_metric(metric_prefix, 'total-load', data['total-load'], tags)
-                self.process_status_metrics(metric_prefix, data['load-detail'], tags)
+                self._process_status_metrics(metric_prefix, data['load-detail'], tags)
             elif self.is_metric(data):
                 self.submit_metric(metric_prefix, key, data, tags)
 
