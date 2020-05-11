@@ -16,6 +16,18 @@ init_config:
   #
   # ignore_nonincreasing_oid: false
 
+  ## @param oid_batch_size - integer - optional - default: 10
+  ## Number of OIDs handled by each batch. Performance can be improved by increasing this number, though
+  ## it will also use more resource.
+  #
+  # oid_batch_size: 10
+
+  ## @param shared_mib_builder - boolean - optional - default: false
+  ## Set to true to share MIB builders between instance. It will reduce memory
+  ## usage, but doesn't work in some edge cases.
+  #
+  # shared_mib_builder: false
+
   ## @param global_metrics - list of elements - optional
   ## Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
   ## global_metrics are applied to all instances where use_global_metrics is set to true at the instance level.

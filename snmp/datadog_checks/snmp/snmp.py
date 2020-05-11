@@ -63,6 +63,8 @@ class SnmpCheck(AgentCheck):
         # Load Custom MIB directory
         self.mibs_path = self.init_config.get('mibs_folder')
 
+        self.shared_mib_builder = is_affirmative(self.init_config.get('shared_mib_builder', False))
+
         self.ignore_nonincreasing_oid = is_affirmative(self.init_config.get('ignore_nonincreasing_oid', False))
 
         self.profiles = self._load_profiles()
@@ -124,6 +126,7 @@ class SnmpCheck(AgentCheck):
             mibs_path=self.mibs_path,
             profiles=self.profiles,
             profiles_by_oid=self.profiles_by_oid,
+            shared_mib_builder=self.shared_mib_builder,
         )
 
     def _get_instance_name(self, instance):
