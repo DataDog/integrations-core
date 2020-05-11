@@ -861,9 +861,12 @@ class KubernetesState(OpenMetricsBaseCheck):
         object_counter = Counter()
 
         for sample in metric.samples:
-            tags = [
-                self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config) for l in config['allowed_labels']
-            ] + scraper_config['custom_tags']
+            tags = []
+            for l in config['allowed_labels']:
+                tag = self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config)
+                if tag is not None:
+                    tags.append(tag)
+            tags += scraper_config['custom_tags']
             object_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
         for tags, count in iteritems(object_counter):
