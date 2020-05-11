@@ -19,7 +19,7 @@ files:
         'resource' is one of cluster/forest/database/host/server on which to apply the filter
         'type' is either whitelist (default) or blacklist. If a resource is both whitelisted and blacklisted it will be
                considered blacklisted.
-        'name' is the resource name to match
+        'name' is a pattern to match the resource name
         'id' is the resource id to match
         'group' is the resource group to match
         'metric_groups' is a list of type of metric_groups to collect.
