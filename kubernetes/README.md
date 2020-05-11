@@ -4,30 +4,29 @@
 
 ## Overview
 
-Get metrics from kubernetes service in real time to:
+Get metrics from the Kubernetes service in real time to:
 
-- Visualize and monitor kubernetes states
-- Be notified about kubernetes failovers and events.
+- Visualize and monitor Kubernetes states
+- Be notified about Kubernetes failovers and events.
 
 ## Setup
-
-See [new kubernetes documentation page][2] for more information on how to setup the Datadog Agent with Kubernetes integration.
-
-Note: Please use the following instructions if you are using an older version of Datadog Agent (version 5) -
 
 ### Installation
 
 The Kubernetes check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Kubernetes servers.
 
+For more information on installing the Datadog Agent on your Kubernetes clusters, see the [Kubernetes documentation page][2] for more information.
+
+To collect Kubernetes State metrics, please refer to the [kubernetes_states integration][].
+
+
 ### Configuration
 
 Edit the `kubernetes.yaml` file to point to your server and port, set the masters to monitor. See the [sample kubernetes.yaml][4] for all available configuration options.
 
-To enable Kubernetes State Metrics, please refer to [kubernetes_states integration][].
+### Gathering Kubernetes events
 
-### Gathering kubernetes events
-
-As the 5.17.0 release, Datadog Agent now supports built in leader election option for the Kubernetes event collector. Agents coordinate by performing a leader election among members of the Datadog DaemonSet through kubernetes to ensure only one leader agent instance is gathering events at a given time.
+As the 5.17.0 release, Datadog Agent now supports built in leader election option for the Kubernetes event collector. Agents coordinate by performing a leader election among members of the Datadog DaemonSet through Kubernetes to ensure only one leader agent instance is gathering events at a given time.
 If the leader agent instance fails, a re-election occurs and another cluster agent will take over collection.
 
 **This functionality is disabled by default**.
