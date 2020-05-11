@@ -8,7 +8,10 @@ from pprint import pprint
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.marklogic.api import MarkLogicApi
-from .constants import RESOURCE_TYPES
+from datadog_checks.marklogic.collector_status import collect_summary_status_resource_metrics, \
+    collect_summary_status_base_metrics
+from datadog_checks.marklogic.collector_storage import collect_summary_storage_metrics
+from .constants import RESOURCE_TYPES, GAUGE_UNITS
 
 
 class MarklogicCheck(AgentCheck):
@@ -33,14 +36,20 @@ class MarklogicCheck(AgentCheck):
         # TODO: Handle errors:
         #       - Continue if one of the processor fail
         #       - Add service check (can connect, status service check)
-        self.collect_summary_status_metrics()
-        self.collect_summary_resource_status_metrics()
-
         # No need to query base requests metrics, they are already collect in by process_base_status
         # self.process_requests_metrics_by_resource()
-        self.collect_summary_storage_metrics()
 
-    def collect_summary_resource_status_metrics(self):
+        collectors = [
+            self.submit_summary_status_base_metrics,
+            self.submit_summary_status_resource_metrics,
+            self.submit_summary_storage_metrics,
+        ]
+
+        for collector in collectors:
+            # TODO: try/catch
+            collector()
+
+    def submit_summary_status_resource_metrics(self):
         """
         Collect Extra Metrics.
         Only necessary for forest.
@@ -49,41 +58,16 @@ class MarklogicCheck(AgentCheck):
         for resource_type in ['forest']:
             res_meta = RESOURCE_TYPES[resource_type]
             data = self.api.get_status_data(res_meta['plural'])
-            metrics = data['{}-status-list'.format(resource_type)]['status-list-summary']
-            self._collect_status_metrics(res_meta['plural'], metrics)
+            self.submit_metrics(collect_summary_status_resource_metrics(resource_type, data, self._tags))
 
-    def collect_summary_status_metrics(self):
+    def submit_summary_status_base_metrics(self):
         """
         Collect Status Metrics
         """
         data = self.api.get_status_data()
-        relations = data['local-cluster-status']['status-relations']
-        for key, resource_data in iteritems(relations):
-            if not key.endswith('-status'):
-                continue
-            resource_type = resource_data['typeref']
-            metrics = resource_data['{}-status-summary'.format(resource_type)]
-            # TODO: Ignore already collected metrics
-            #       - forests-status-summary
-            #       - hosts-status-summary
-            #       - servers-status-summary
-            self._collect_status_metrics(resource_type, metrics)
+        self.submit_metrics(collect_summary_status_base_metrics(data, self._tags))
 
-    def _collect_status_metrics(self, metric_prefix, metrics):
-        tags = self._tags
-        for key, data in iteritems(metrics):
-            if key in ['rate-properties', 'load-properties']:
-                prop_type = key[:key.index('-properties')]
-                total_key = 'total-'+prop_type
-                self.submit_metric("{}.{}".format(metric_prefix, total_key), data[total_key], tags)
-                self._collect_status_metrics(metric_prefix, data[prop_type + '-detail'])
-            elif key == 'load-properties':
-                self.submit_metric("{}.total-load".format(metric_prefix), data['total-load'], tags)
-                self._collect_status_metrics(metric_prefix, data['load-detail'])
-            elif self.is_metric(data):
-                self.submit_metric("{}.{}".format(metric_prefix, key), data, tags)
-
-    def collect_requests_metrics_by_resource(self):
+    def submit_summary_requests_metrics_by_resource(self):
         """
         Collect Base Query Metrics
         """
@@ -92,71 +76,17 @@ class MarklogicCheck(AgentCheck):
         for metric_name, value_data in iteritems(metrics_data):
             self.submit_metric("requests.{}".format(metric_name), value_data)
 
-    def collect_summary_storage_metrics(self):
+    def submit_summary_storage_metrics(self):
         """
         Collect Base Storage Metrics
         """
-
         data = self.api.get_forest_storage_data()
-        hosts_meta = {}
-        relations = data['forest-storage-list']['relations']['relation-group']
-        for rel in relations:
-            if rel['typeref'] == 'hosts':
-                for host in rel['relation']:
-                    hosts_meta[host['idref']] = host['nameref']
+        self.submit_metrics(collect_summary_storage_metrics(data, self._tags))
 
-        all_hosts_data = data['forest-storage-list']['storage-list-items']['storage-host']
+    def submit_metrics(self, metrics):
+        for metric_type, metric_name, value_data, tags in metrics:
+            getattr(self, metric_type)(metric_name, value_data, tags=tags)
 
-        for host_data in all_hosts_data:
-            host_tags = self._tags[:]
-            host_id = host_data['relation-id']
-            host_tags.append('host_id:{}'.format(host_id))
-            host_tags.append('host_name:{}'.format(hosts_meta[host_id]))
-            for location_data in host_data['locations']['location']:
-                location_tags = host_tags + ['storage_path:{}'.format(location_data['path'])]
-                for host_key, host_value in iteritems(location_data):
-                    if host_key == 'location-forests':
-                        location_value = host_value['location-forest']
-                        for forest_data in location_value:
-                            forest_tags = location_tags + [
-                                "forest_id:{}".format(forest_data['idref']),
-                                "forest_name:{}".format(forest_data['nameref']),
-                            ]
-                            for forest_key, forest_value in iteritems(forest_data):
-                                if forest_key == 'disk-size':
-                                    self.submit_metric("forests.storage.forest.{}".format(forest_key), forest_value,
-                                                       tags=forest_tags)
-                    elif self.is_metric(host_value):
-                        self.submit_metric("forests.storage.host.{}".format(host_key), host_value, tags=location_tags)
-
-    @staticmethod
-    def is_metric(data):
-        return (isinstance(data, (int, float))) or ('units' in data and 'value' in data)
-
-    def submit_metric(self, metric_name, value_data, tags=None):
-        if isinstance(value_data, (int, float)):
-            self.gauge(metric_name, value_data, tags=tags)
-        elif 'units' in value_data and 'value' in value_data:
-            units = value_data['units']
-            value = value_data['value']
-            if units in GAUGE_UNITS:
-                self.gauge(metric_name, value, tags=tags)
-        else:
-            self.log.warning("Invalid metric: metric_suffix={}, metric_data={}".format(metric_name, value_data))
-
-
-GAUGE_UNITS = [
-    '%',
-    'hits/sec',
-    'locks/sec',
-    'MB',
-    'MB/sec',
-    'misses/sec',
-    'quantity',
-    'quantity/sec',
-    'sec',
-    'sec/sec',
-]
 
 """
 Design

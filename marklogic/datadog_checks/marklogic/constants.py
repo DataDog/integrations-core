@@ -19,3 +19,16 @@ RESOURCE_TYPES = {
         'plural': 'servers',
     },
 }
+
+GAUGE_UNITS = [
+    '%',
+    'hits/sec',
+    'locks/sec',
+    'MB',
+    'MB/sec',
+    'misses/sec',
+    'quantity',
+    'quantity/sec',
+    'sec',
+    'sec/sec',
+]
