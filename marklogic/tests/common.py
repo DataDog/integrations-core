@@ -18,6 +18,7 @@ INSTANCE = {
     'username': USERNAME,
     'password': PASSWORD,
     'auth_type': 'digest',
+    'tags': ['foo:bar'],
 }
 
 

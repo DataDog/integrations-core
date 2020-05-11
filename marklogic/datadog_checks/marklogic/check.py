@@ -100,26 +100,26 @@ class MarklogicCheck(AgentCheck):
         data = self.api.get_forest_storage_data()
         locations_data = data['forest-storage-list']['storage-list-items']['storage-host']
 
-        for location_data in locations_data:
-            tags = self._tags[:]
-            tags.append('host_id:{}'.format(location_data['relation-id']))
+        for host_data in locations_data:
+            host_tags = self._tags[:]
+            host_tags.append('host_id:{}'.format(host_data['relation-id']))
             # tags.append('host_name:{}'.format(sub_locations['relation-id']))  # TODO: get host name too
-            for sub_location_data in location_data['locations']['location']:
-                tags += ['storage_path:{}'.format(sub_location_data['path'])]
-                for host_key, host_value in iteritems(sub_location_data):
+            for location_data in host_data['locations']['location']:
+                location_tags = host_tags + ['storage_path:{}'.format(location_data['path'])]
+                for host_key, host_value in iteritems(location_data):
                     if host_key == 'location-forests':
                         location_value = host_value['location-forest']
                         for forest_data in location_value:
-                            tags += [
+                            forest_tags = location_tags + [
                                 "forest_id:{}".format(forest_data['idref']),
                                 "forest_name:{}".format(forest_data['nameref']),
                             ]
                             for forest_key, forest_value in iteritems(forest_data):
                                 if forest_key == 'disk-size':
                                     self.submit_metric("forests.storage.forest.{}".format(forest_key), forest_value,
-                                                       tags=tags)
+                                                       tags=forest_tags)
                     elif self.is_metric(host_value):
-                        self.submit_metric("forests.storage.host.{}".format(host_key), host_value, tags=tags)
+                        self.submit_metric("forests.storage.host.{}".format(host_key), host_value, tags=location_tags)
 
     @staticmethod
     def is_metric(data):

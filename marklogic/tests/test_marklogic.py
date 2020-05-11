@@ -9,7 +9,7 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.marklogic import MarklogicCheck
 
 from .common import INSTANCE
-from .metrics import STATUS_METRICS
+from .metrics import GLOBAL_METRICS, STORAGE_HOST_METRICS, STORAGE_FOREST_METRICS
 
 
 @pytest.mark.integration
@@ -20,22 +20,31 @@ def test_check(aggregator):
 
     check.check(INSTANCE)
 
-    for metric in STATUS_METRICS:
-        aggregator.assert_metric(metric)
+    tags = ['foo:bar']
+
+    for metric in GLOBAL_METRICS:
+        aggregator.assert_metric(metric, tags=tags)
+
+    for metric in STORAGE_HOST_METRICS:
+        for tag in tags:
+            aggregator.assert_metric_has_tag(metric, tag)
+        for prefix in ['host_id', 'storage_path']:
+            aggregator.assert_metric_has_tag_prefix(metric, prefix)
+
+    for metric in STORAGE_FOREST_METRICS:
+        for tag in tags:
+            aggregator.assert_metric_has_tag(metric, tag)
+        for prefix in ['host_id', 'storage_path', 'forest_id', 'forest_name']:
+            aggregator.assert_metric_has_tag_prefix(metric, prefix)
 
     aggregator.assert_all_metrics_covered()
-    # for metrics in aggregator._metrics.values():
-    #     for m in metrics:
-    #         print(m)
-    #
-    # 1/0
 
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(INSTANCE, rate=True)
 
-    for metric in STATUS_METRICS:
+    for metric in GLOBAL_METRICS:
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()

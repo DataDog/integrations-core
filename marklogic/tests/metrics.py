@@ -2,16 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-FOREST_STATUS_METRICS = [
+FOREST_STATUS_SUMMARY_METRICS = [
+    # from /manage/v2
     'marklogic.forests.backup-count',
     'marklogic.forests.max-stands-per-forest',
     'marklogic.forests.merge-count',
     'marklogic.forests.restore-count',
     'marklogic.forests.state-not-open',
     'marklogic.forests.total-forests',
-]
 
-FOREST_STATUS_EXTRA_METRICS = [
+    # from /manage/v2/forests
     'marklogic.forests.backup-read-load',
     'marklogic.forests.backup-read-rate',
     'marklogic.forests.backup-write-load',
@@ -123,6 +123,7 @@ HOST_STATUS_METRICS = [
 
 
 REQUESTS_STATUS_METRICS = [
+    # from /manage/v2
     'marklogic.requests.max-seconds',
     'marklogic.requests.mean-seconds',
     'marklogic.requests.median-seconds',
@@ -136,6 +137,7 @@ REQUESTS_STATUS_METRICS = [
 
 
 SERVER_STATUS_METRICS = [
+    # from /manage/v2
     'marklogic.servers.expanded-tree-cache-hit-rate',
     'marklogic.servers.expanded-tree-cache-miss-rate',
     'marklogic.servers.request-count',
@@ -143,6 +145,7 @@ SERVER_STATUS_METRICS = [
 ]
 
 TRANSACTION_STATUS_METRICS = [
+    # from /manage/v2
     'marklogic.transactions.max-seconds',
     'marklogic.transactions.mean-seconds',
     'marklogic.transactions.median-seconds',
@@ -153,8 +156,7 @@ TRANSACTION_STATUS_METRICS = [
 ]
 
 
-STORAGE_SUMMARY_METRICS = [
-    'marklogic.forests.storage.forest.disk-size',
+STORAGE_HOST_METRICS = [
     'marklogic.forests.storage.host.capacity',
     'marklogic.forests.storage.host.device-space',
     'marklogic.forests.storage.host.forest-reserve',
@@ -164,10 +166,13 @@ STORAGE_SUMMARY_METRICS = [
 ]
 
 
-STATUS_METRICS = (FOREST_STATUS_METRICS
-                  + FOREST_STATUS_EXTRA_METRICS
+STORAGE_FOREST_METRICS = [
+    'marklogic.forests.storage.forest.disk-size',
+]
+
+
+GLOBAL_METRICS = (FOREST_STATUS_SUMMARY_METRICS
                   + HOST_STATUS_METRICS
                   + REQUESTS_STATUS_METRICS
                   + SERVER_STATUS_METRICS
-                  + STORAGE_SUMMARY_METRICS
                   + TRANSACTION_STATUS_METRICS)
