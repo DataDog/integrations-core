@@ -31,6 +31,12 @@ class MarklogicCheck(AgentCheck):
         # TODO: Need cache with regular refresh
         self.resources = self.api.get_resources()
 
+        self.collectors = [
+            self.collect_summary_status_base_metrics,
+            self.collect_summary_status_resource_metrics,
+            self.collect_summary_storage_metrics,
+        ]
+
     def check(self, _):
         # type: (Any) -> None
         # TODO: Handle errors:
@@ -39,17 +45,11 @@ class MarklogicCheck(AgentCheck):
         # No need to query base requests metrics, they are already collect in by process_base_status
         # self.process_requests_metrics_by_resource()
 
-        collectors = [
-            self.submit_summary_status_base_metrics,
-            self.submit_summary_status_resource_metrics,
-            self.submit_summary_storage_metrics,
-        ]
-
-        for collector in collectors:
+        for collector in self.collectors:
             # TODO: try/catch
             collector()
 
-    def submit_summary_status_resource_metrics(self):
+    def collect_summary_status_resource_metrics(self):
         """
         Collect Extra Metrics.
         Only necessary for forest.
@@ -61,7 +61,7 @@ class MarklogicCheck(AgentCheck):
             metrics = parse_summary_status_resource_metrics(resource_type, data, self._tags)
             self.submit_metrics(metrics)
 
-    def submit_summary_status_base_metrics(self):
+    def collect_summary_status_base_metrics(self):
         """
         Collect Status Metrics
         """
@@ -78,7 +78,7 @@ class MarklogicCheck(AgentCheck):
         for metric_name, value_data in iteritems(metrics_data):
             self.submit_metric("requests.{}".format(metric_name), value_data)
 
-    def submit_summary_storage_metrics(self):
+    def collect_summary_storage_metrics(self):
         """
         Collect Base Storage Metrics
         """
