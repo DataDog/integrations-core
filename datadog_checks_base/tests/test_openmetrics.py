@@ -389,80 +389,41 @@ def test_submit_counter(aggregator, mocked_prometheus_check, mocked_prometheus_s
     aggregator.assert_all_metrics_covered()
 
 
-def test_submit_summary(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    _sum = SummaryMetricFamily('my_summary', 'Random summary')
-    _sum.add_metric([], 5.0, 120512.0)
-    _sum.add_sample("my_summary", {"quantile": "0.5"}, 24547.0)
-    _sum.add_sample("my_summary", {"quantile": "0.9"}, 25763.0)
-    _sum.add_sample("my_summary", {"quantile": "0.99"}, 25763.0)
-    check = mocked_prometheus_check
-    check.submit_openmetric('custom.summary', _sum, mocked_prometheus_scraper_config)
-    aggregator.assert_metric('prometheus.custom.summary.count', 5.0, tags=[], count=1, metric_type=aggregator.GAUGE)
-    aggregator.assert_metric('prometheus.custom.summary.sum', 120512.0, tags=[], count=1, metric_type=aggregator.GAUGE)
-    aggregator.assert_metric('prometheus.custom.summary.quantile', 24547.0, tags=['quantile:0.5'], count=1)
-    aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.9'], count=1)
-    aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.99'], count=1)
-    aggregator.assert_all_metrics_covered()
-
-
-def test_submit_summary_with_count_monotonic_count(
-    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
+@pytest.mark.parametrize(
+    ('config, count_metric_monotonic, sum_metric_monotonic'),
+    (
+        ({}, False, False),
+        ({'send_distribution_counts_as_monotonic': True}, True, False),
+        ({'send_distribution_sums_as_monotonic': True}, False, True),
+        ({'send_distribution_counts_as_monotonic': True, 'send_distribution_sums_as_monotonic': True}, True, True),
+    ),
+    ids=('default', 'count only as monotonic_count', 'sum only as monotonic_count', 'count and sum as monotonic_count'),
+)
+def test_submit_summary(
+    aggregator,
+    mocked_prometheus_check,
+    mocked_prometheus_scraper_config,
+    config,
+    count_metric_monotonic,
+    sum_metric_monotonic,
 ):
+    # Determine expected metric types for `.count` and `.sum` metrics
+    count_type = aggregator.GAUGE
+    sum_type = aggregator.GAUGE
+    if count_metric_monotonic:
+        count_type = aggregator.MONOTONIC_COUNT
+    if sum_metric_monotonic:
+        sum_type = aggregator.MONOTONIC_COUNT
+
     _sum = SummaryMetricFamily('my_summary', 'Random summary')
     _sum.add_metric([], 5.0, 120512.0)
     _sum.add_sample("my_summary", {"quantile": "0.5"}, 24547.0)
     _sum.add_sample("my_summary", {"quantile": "0.9"}, 25763.0)
     _sum.add_sample("my_summary", {"quantile": "0.99"}, 25763.0)
     check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['send_distribution_counts_as_monotonic'] = True
     check.submit_openmetric('custom.summary', _sum, mocked_prometheus_scraper_config)
-    aggregator.assert_metric(
-        'prometheus.custom.summary.count', 5.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT
-    )
-    aggregator.assert_metric('prometheus.custom.summary.sum', 120512.0, tags=[], count=1, metric_type=aggregator.GAUGE)
-    aggregator.assert_metric('prometheus.custom.summary.quantile', 24547.0, tags=['quantile:0.5'], count=1)
-    aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.9'], count=1)
-    aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.99'], count=1)
-    aggregator.assert_all_metrics_covered()
-
-
-def test_submit_summary_with_sum_monotonic_count(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    _sum = SummaryMetricFamily('my_summary', 'Random summary')
-    _sum.add_metric([], 5.0, 120512.0)
-    _sum.add_sample("my_summary", {"quantile": "0.5"}, 24547.0)
-    _sum.add_sample("my_summary", {"quantile": "0.9"}, 25763.0)
-    _sum.add_sample("my_summary", {"quantile": "0.99"}, 25763.0)
-    check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['send_distribution_sums_as_monotonic'] = True
-    check.submit_openmetric('custom.summary', _sum, mocked_prometheus_scraper_config)
-    aggregator.assert_metric('prometheus.custom.summary.count', 5.0, tags=[], count=1, metric_type=aggregator.GAUGE)
-    aggregator.assert_metric(
-        'prometheus.custom.summary.sum', 120512.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT
-    )
-    aggregator.assert_metric('prometheus.custom.summary.quantile', 24547.0, tags=['quantile:0.5'], count=1)
-    aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.9'], count=1)
-    aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.99'], count=1)
-    aggregator.assert_all_metrics_covered()
-
-
-def test_submit_summary_with_count_sum_monotonic_count(
-    aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config
-):
-    _sum = SummaryMetricFamily('my_summary', 'Random summary')
-    _sum.add_metric([], 5.0, 120512.0)
-    _sum.add_sample("my_summary", {"quantile": "0.5"}, 24547.0)
-    _sum.add_sample("my_summary", {"quantile": "0.9"}, 25763.0)
-    _sum.add_sample("my_summary", {"quantile": "0.99"}, 25763.0)
-    check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['send_distribution_counts_as_monotonic'] = True
-    mocked_prometheus_scraper_config['send_distribution_sums_as_monotonic'] = True
-    check.submit_openmetric('custom.summary', _sum, mocked_prometheus_scraper_config)
-    aggregator.assert_metric(
-        'prometheus.custom.summary.count', 5.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT
-    )
-    aggregator.assert_metric(
-        'prometheus.custom.summary.sum', 120512.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT
-    )
+    aggregator.assert_metric('prometheus.custom.summary.count', 5.0, tags=[], count=1, metric_type=count_type)
+    aggregator.assert_metric('prometheus.custom.summary.sum', 120512.0, tags=[], count=1, metric_type=sum_type)
     aggregator.assert_metric('prometheus.custom.summary.quantile', 24547.0, tags=['quantile:0.5'], count=1)
     aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.9'], count=1)
     aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.99'], count=1)
