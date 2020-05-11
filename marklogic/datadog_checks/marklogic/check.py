@@ -98,9 +98,9 @@ class MarklogicCheck(AgentCheck):
         """
 
         data = self.api.get_forest_storage_data()
-        locations_data = data['forest-storage-list']['storage-list-items']['storage-host']
+        all_hosts_data = data['forest-storage-list']['storage-list-items']['storage-host']
 
-        for host_data in locations_data:
+        for host_data in all_hosts_data:
             host_tags = self._tags[:]
             host_tags.append('host_id:{}'.format(host_data['relation-id']))
             # tags.append('host_name:{}'.format(sub_locations['relation-id']))  # TODO: get host name too
