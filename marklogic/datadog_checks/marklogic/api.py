@@ -13,8 +13,17 @@ class MarkLogicApi(object):
         self._http = http
         self._base_url = api_url + '/manage/v2'
 
-    def get_status(self, resource=None, name=None, group=None):
-        # http://localhost:8002/manage/v2/hosts?view=status&format=json
+    def get_status_data(self, resource=None, name=None, group=None):
+        """
+        Example url:
+            - http://localhost:8002/manage/v2/hosts?view=status
+            - http://localhost:8002/manage/v2/hosts?view=status&format=json (cluster level)
+            - http://localhost:8002/manage/v2/forests/Security?view=status&format=json
+            - http://localhost:8002/manage/v2/databases/Extensions?view=status&format=json
+            - http://localhost:8002/manage/v2/hosts/2871b05b4bdc?view=status&format=json
+            - http://localhost:8002/manage/v2/transactions?format=json (already in http://localhost:8002/manage/v2/hosts?view=status)
+            - http://localhost:8002/manage/v2/servers?view=status&format=json (already in http://localhost:8002/manage/v2/hosts?view=status)
+        """
         params = {
             'view': 'status',
             'format': 'json',
@@ -23,6 +32,43 @@ class MarkLogicApi(object):
 
         if resource:
             url = "{}/{}".format(url, resource)
+        resp = self._http.get(url, params=params)
+        resp.raise_for_status()
+        return resp.json()
+
+    def get_requests_data(self, resource=None, name=None, group=None):
+        """
+        Example url:
+            - http://localhost:8002/manage/v2/requests?format=json (cluster level)
+            - http://localhost:8002/manage/v2/requests?format=json&server-id=Admin&group-id=Default
+            - http://localhost:8002/manage/v2/requests?format=json&group-id=Default
+            - http://localhost:8002/manage/v2/requests?format=json&host-id=2871b05b4bdc
+        """
+        params = {
+            'format': 'json',
+        }
+        url = "{}/requests".format(self._base_url)
+        if resource:
+            params['{}-id'.format(resource)] = name
+        resp = self._http.get(url, params=params)
+        resp.raise_for_status()
+        return resp.json()
+
+    def get_forest_storage_data(self, name=None, group=None):
+        """
+        Example url:
+            - http://localhost:8002/manage/v2/forests?format=json&view=storage
+            - http://localhost:8002/manage/v2/forests?format=json&view=storage&database-id=Last-Login
+            - http://localhost:8002/manage/v2/forests?format=json&view=storage&forest-id=Last-Login
+            - http://localhost:8002/manage/v2/forests?format=json&view=storage&database-id=Security
+        """
+        params = {
+            'format': 'json',
+            'view': 'storage',
+        }
+        url = "{}/forests".format(self._base_url)
+        if name:
+            url = "{}/{}".format(url, name)
         resp = self._http.get(url, params=params)
         resp.raise_for_status()
         return resp.json()

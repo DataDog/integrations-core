@@ -153,9 +153,21 @@ TRANSACTION_STATUS_METRICS = [
 ]
 
 
+STORAGE_SUMMARY_METRICS = [
+    'marklogic.forests.storage.forest.disk-size',
+    'marklogic.forests.storage.host.capacity',
+    'marklogic.forests.storage.host.device-space',
+    'marklogic.forests.storage.host.forest-reserve',
+    'marklogic.forests.storage.host.forest-size',
+    'marklogic.forests.storage.host.large-data-size',
+    'marklogic.forests.storage.host.remaining-space',
+]
+
+
 STATUS_METRICS = (FOREST_STATUS_METRICS
                   + FOREST_STATUS_EXTRA_METRICS
                   + HOST_STATUS_METRICS
                   + REQUESTS_STATUS_METRICS
                   + SERVER_STATUS_METRICS
+                  + STORAGE_SUMMARY_METRICS
                   + TRANSACTION_STATUS_METRICS)

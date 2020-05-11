@@ -23,17 +23,24 @@ class MarklogicCheck(AgentCheck):
 
         self.api = MarkLogicApi(self.http, url)
 
-        self._tags = tuple(self.instance.get('tags', []))
+        self._tags = self.instance.get('tags', [])
 
         # TODO: Need cache with regular refresh
         self.resources = self.api.get_resources()
 
     def check(self, _):
         # type: (Any) -> None
-        self.process_base_status()
-        self.process_resource_status()
+        # TODO: Handle errors:
+        #       - Continue if one of the processor fail
+        #       - Add service check (can connect, status service check)
+        self.collect_base_status_metrics()
+        self.collect_resource_status()
 
-    def process_resource_status(self):
+        # No need to query base requests metrics, they are already collect in by process_base_status
+        # self.process_requests_metrics_by_resource()
+        self.collect_base_storage_metrics()
+
+    def collect_resource_status(self):
         """
         Collect Extra Metrics.
         Only necessary for forest.
@@ -41,16 +48,15 @@ class MarklogicCheck(AgentCheck):
         """
         for resource_type in ['forest']:
             res_meta = RESOURCE_TYPES[resource_type]
-            data = self.api.get_status(res_meta['plural'])
-            pprint(data)
+            data = self.api.get_status_data(res_meta['plural'])
             metrics = data['{}-status-list'.format(resource_type)]['status-list-summary']
-            self._process_status_metrics(res_meta['plural'], metrics, tags=[])
+            self._collect_status_metrics(res_meta['plural'], metrics)
 
-    def process_base_status(self):
+    def collect_base_status_metrics(self):
         """
         Collect Status Metrics
         """
-        data = self.api.get_status()
+        data = self.api.get_status_data()
         relations = data['local-cluster-status']['status-relations']
         for key, resource_data in iteritems(relations):
             if not key.endswith('-status'):
@@ -61,29 +67,65 @@ class MarklogicCheck(AgentCheck):
             #       - forests-status-summary
             #       - hosts-status-summary
             #       - servers-status-summary
-            self._process_status_metrics(resource_type, metrics, tags=[])
+            self._collect_status_metrics(resource_type, metrics)
 
-    def _process_status_metrics(self, metric_prefix, metrics, tags):
-        pprint(tags)
-        pprint(metrics)
+    def _collect_status_metrics(self, metric_prefix, metrics):
+        tags = self._tags
         for key, data in iteritems(metrics):
             if key in ['rate-properties', 'load-properties']:
                 prop_type = key[:key.index('-properties')]
                 total_key = 'total-'+prop_type
-                self.submit_metric(metric_prefix, total_key, data[total_key], tags)
-                self._process_status_metrics(metric_prefix, data[prop_type + '-detail'], tags)
+                self.submit_metric("{}.{}".format(metric_prefix, total_key), data[total_key], tags)
+                self._collect_status_metrics(metric_prefix, data[prop_type + '-detail'])
             elif key == 'load-properties':
-                self.submit_metric(metric_prefix, 'total-load', data['total-load'], tags)
-                self._process_status_metrics(metric_prefix, data['load-detail'], tags)
+                self.submit_metric("{}.total-load".format(metric_prefix), data['total-load'], tags)
+                self._collect_status_metrics(metric_prefix, data['load-detail'])
             elif self.is_metric(data):
-                self.submit_metric(metric_prefix, key, data, tags)
+                self.submit_metric("{}.{}".format(metric_prefix, key), data, tags)
+
+    def collect_requests_metrics_by_resource(self):
+        """
+        Collect Base Query Metrics
+        """
+        data = self.api.get_requests_data()
+        metrics_data = data['request-default-list']['list-summary']
+        for metric_name, value_data in iteritems(metrics_data):
+            self.submit_metric("requests.{}".format(metric_name), value_data)
+
+    def collect_base_storage_metrics(self):
+        """
+        Collect Base Storage Metrics
+        """
+
+        data = self.api.get_forest_storage_data()
+        locations_data = data['forest-storage-list']['storage-list-items']['storage-host']
+
+        for location_data in locations_data:
+            tags = self._tags[:]
+            tags.append('host_id:{}'.format(location_data['relation-id']))
+            # tags.append('host_name:{}'.format(sub_locations['relation-id']))  # TODO: get host name too
+            for sub_location_data in location_data['locations']['location']:
+                tags += ['storage_path:{}'.format(sub_location_data['path'])]
+                for host_key, host_value in iteritems(sub_location_data):
+                    if host_key == 'location-forests':
+                        location_value = host_value['location-forest']
+                        for forest_data in location_value:
+                            tags += [
+                                "forest_id:{}".format(forest_data['idref']),
+                                "forest_name:{}".format(forest_data['nameref']),
+                            ]
+                            for forest_key, forest_value in iteritems(forest_data):
+                                if forest_key == 'disk-size':
+                                    self.submit_metric("forests.storage.forest.{}".format(forest_key), forest_value,
+                                                       tags=tags)
+                    elif self.is_metric(host_value):
+                        self.submit_metric("forests.storage.host.{}".format(host_key), host_value, tags=tags)
 
     @staticmethod
     def is_metric(data):
         return (isinstance(data, (int, float))) or ('units' in data and 'value' in data)
 
-    def submit_metric(self, suffix, prefix, value_data, tags=None):
-        metric_name = "{}.{}".format(suffix, prefix)
+    def submit_metric(self, metric_name, value_data, tags=None):
         if isinstance(value_data, (int, float)):
             self.gauge(metric_name, value_data, tags=tags)
         elif 'units' in value_data and 'value' in value_data:
@@ -92,13 +134,14 @@ class MarklogicCheck(AgentCheck):
             if units in GAUGE_UNITS:
                 self.gauge(metric_name, value, tags=tags)
         else:
-            self.log.warning("Invalid metric: metric_suffix={}, metric_data={}".format(prefix, value_data))
+            self.log.warning("Invalid metric: metric_suffix={}, metric_data={}".format(metric_name, value_data))
 
 
 GAUGE_UNITS = [
     '%',
     'hits/sec',
     'locks/sec',
+    'MB',
     'MB/sec',
     'misses/sec',
     'quantity',
