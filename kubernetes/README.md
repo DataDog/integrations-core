@@ -23,6 +23,8 @@ The Kubernetes check is included in the [Datadog Agent][3] package, so you don't
 
 Edit the `kubernetes.yaml` file to point to your server and port, set the masters to monitor. See the [sample kubernetes.yaml][4] for all available configuration options.
 
+To enable Kubernetes State Metrics, please refer to [kubernetes_states integration][].
+
 ### Gathering kubernetes events
 
 As the 5.17.0 release, Datadog Agent now supports built in leader election option for the Kubernetes event collector. Agents coordinate by performing a leader election among members of the Datadog DaemonSet through kubernetes to ensure only one leader agent instance is gathering events at a given time.
@@ -185,3 +187,4 @@ To get a better idea of how (or why) to integrate your Kubernetes service, check
 [10]: https://blog.kubernetes.io/2017/03/advanced-scheduling-in-kubernetes.html
 [11]: https://github.com/DataDog/dd-agent/pull/3051
 [12]: https://www.datadoghq.com/blog/monitoring-kubernetes-era
+[13]: https://docs.datadoghq.com/integrations/kubernetes/#kubernetes-state-metrics
