@@ -3,11 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from six import iteritems
 
-from .collector_common import is_metric, build_metric_to_submit
-from .constants import RESOURCE_TYPES
+from .common import is_metric, build_metric_to_submit
 
 
-def collect_summary_storage_metrics(data, tags):
+def parse_summary_storage_metrics(data, tags):
     """
     Collect Base Storage Metrics
     """

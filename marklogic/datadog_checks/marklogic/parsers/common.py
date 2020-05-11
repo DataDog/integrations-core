@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from six import iteritems
 
-from .constants import RESOURCE_TYPES, GAUGE_UNITS
+from ..constants import GAUGE_UNITS
 
 
 class CollectorException(RuntimeError):

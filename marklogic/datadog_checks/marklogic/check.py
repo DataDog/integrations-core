@@ -8,10 +8,10 @@ from pprint import pprint
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.marklogic.api import MarkLogicApi
-from datadog_checks.marklogic.collector_status import collect_summary_status_resource_metrics, \
-    collect_summary_status_base_metrics
-from datadog_checks.marklogic.collector_storage import collect_summary_storage_metrics
-from .constants import RESOURCE_TYPES, GAUGE_UNITS
+from datadog_checks.marklogic.parsers.status import parse_summary_status_resource_metrics, \
+    parse_summary_status_base_metrics
+from datadog_checks.marklogic.parsers.storage import parse_summary_storage_metrics
+from .constants import RESOURCE_TYPES
 
 
 class MarklogicCheck(AgentCheck):
@@ -58,14 +58,16 @@ class MarklogicCheck(AgentCheck):
         for resource_type in ['forest']:
             res_meta = RESOURCE_TYPES[resource_type]
             data = self.api.get_status_data(res_meta['plural'])
-            self.submit_metrics(collect_summary_status_resource_metrics(resource_type, data, self._tags))
+            metrics = parse_summary_status_resource_metrics(resource_type, data, self._tags)
+            self.submit_metrics(metrics)
 
     def submit_summary_status_base_metrics(self):
         """
         Collect Status Metrics
         """
         data = self.api.get_status_data()
-        self.submit_metrics(collect_summary_status_base_metrics(data, self._tags))
+        metrics = parse_summary_status_base_metrics(data, self._tags)
+        self.submit_metrics(metrics)
 
     def submit_summary_requests_metrics_by_resource(self):
         """
@@ -81,7 +83,8 @@ class MarklogicCheck(AgentCheck):
         Collect Base Storage Metrics
         """
         data = self.api.get_forest_storage_data()
-        self.submit_metrics(collect_summary_storage_metrics(data, self._tags))
+        metrics = parse_summary_storage_metrics(data, self._tags)
+        self.submit_metrics(metrics)
 
     def submit_metrics(self, metrics):
         for metric_type, metric_name, value_data, tags in metrics:
