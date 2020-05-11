@@ -6,9 +6,8 @@ import pytest
 
 from datadog_checks.snmp import SnmpCheck
 import logging
-
 from . import common
-from .utils import get_all_profiles
+
 from .metrics import (
     ADAPTER_IF_COUNTS,
     CIE_METRICS,
@@ -51,16 +50,15 @@ pytestmark = pytest.mark.usefixtures("dd_environment")
 
 
 def test_load_profiles(aggregator, caplog):
-    caplog.set_level(logging.WARNING)
 
     instance = common.generate_instance_config([])
-    instance['enforce_mib_constraints'] = False
-
     check = SnmpCheck('snmp', {}, [instance])
-    check.check(instance)
+    for name, profile in check.profiles.items():
+        check._config.refresh_with_profile(profile)
 
-    for record in caplog.records:
-        pytest.fail(record.message)
+    for _, level, message in caplog.record_tuples:
+        if level == logging.WARNING:
+            pytest.fail("Profiles are not configured correctly: {}", message)
 
 
 def run_profile_check(recording_name):
