@@ -75,6 +75,8 @@ class MarkLogicApi(object):
 
     def get_resources(self):
         data = self._get_raw_resources()
+        from pprint import pprint
+        pprint(data)
         resources = {}
         for group in data['cluster-query']['relations']['relation-group']:
             resource_type = group['typeref']

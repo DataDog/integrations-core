@@ -3,14 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict
 
-from six import iteritems
 from pprint import pprint
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.marklogic.api import MarkLogicApi
-from datadog_checks.marklogic.parsers.status import parse_summary_status_resource_metrics, \
+from .config import Config
+from .api import MarkLogicApi
+from .parsers.status import parse_summary_status_resource_metrics, \
     parse_summary_status_base_metrics
-from datadog_checks.marklogic.parsers.storage import parse_summary_storage_base_metrics
+from .parsers.storage import parse_summary_storage_base_metrics
 from .constants import RESOURCE_TYPES
 
 
@@ -26,16 +26,16 @@ class MarklogicCheck(AgentCheck):
 
         self.api = MarkLogicApi(self.http, url)
 
-        self._tags = self.instance.get('tags', [])
-
-        # TODO: Need cache with regular refresh
-        self.resources = self.api.get_resources()
+        self.config = Config(self.instance)
 
         self.collectors = [
             self.collect_summary_status_base_metrics,
             self.collect_summary_status_resource_metrics,
             self.collect_summary_storage_base_metrics,
+            self.collect_per_resource_status_metrics,
         ]
+
+        self.resources_to_monitor = None  # Refreshed at each check
 
     def check(self, _):
         # type: (Any) -> None
@@ -44,6 +44,8 @@ class MarklogicCheck(AgentCheck):
         #       - Add service check (can connect, status service check)
         # No need to query base requests metrics, they are already collect in by process_base_status
         # self.process_requests_metrics_by_resource()
+
+        self.resources_to_monitor = self.get_resources_to_monitor()
 
         for collector in self.collectors:
             # TODO: try/catch
@@ -59,7 +61,7 @@ class MarklogicCheck(AgentCheck):
         for resource_type in ['forest']:
             res_meta = RESOURCE_TYPES[resource_type]
             data = self.api.get_status_data(res_meta['plural'])
-            metrics = parse_summary_status_resource_metrics(resource_type, data, self._tags)
+            metrics = parse_summary_status_resource_metrics(resource_type, data, self.config.tags)
             self.submit_metrics(metrics)
 
     def collect_summary_status_base_metrics(self):
@@ -73,25 +75,28 @@ class MarklogicCheck(AgentCheck):
           - Summary Transaction Metrics
         """
         data = self.api.get_status_data()
-        metrics = parse_summary_status_base_metrics(data, self._tags)
+        metrics = parse_summary_status_base_metrics(data, self.config.tags)
         self.submit_metrics(metrics)
-
-    def submit_summary_requests_metrics_by_resource(self):
-        """
-        Collect Base Query Metrics
-        """
-        data = self.api.get_requests_data()
-        metrics_data = data['request-default-list']['list-summary']
-        for metric_name, value_data in iteritems(metrics_data):
-            self.submit_metric("requests.{}".format(metric_name), value_data)
 
     def collect_summary_storage_base_metrics(self):
         """
         Collect Base Storage Metrics
         """
         data = self.api.get_forest_storage_data()
-        metrics = parse_summary_storage_base_metrics(data, self._tags)
+        metrics = parse_summary_storage_base_metrics(data, self.config.tags)
         self.submit_metrics(metrics)
+
+    def collect_per_resource_status_metrics(self):
+        """
+        Collect Per Resource Status Metrics.
+        """
+        pprint(self.resources_to_monitor)
+
+    def get_resources_to_monitor(self):
+        resources = self.api.get_resources()
+        pprint(self.config.resource_filters)
+        pprint(resources)
+        return []
 
     def submit_metrics(self, metrics):
         for metric_type, metric_name, value_data, tags in metrics:
