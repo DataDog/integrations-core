@@ -6,7 +6,7 @@ from six import iteritems
 from ..constants import GAUGE_UNITS
 
 
-class CollectorException(RuntimeError):
+class MarkLogicParserException(RuntimeError):
     pass
 
 
@@ -19,7 +19,7 @@ def build_metric_to_submit(metric_name, value_data, tags=None):
         if units in GAUGE_UNITS:
             return 'gauge', metric_name, value, tags
     else:
-        raise CollectorException("Invalid metric: metric_suffix={}, metric_data={}, tags={}".format(metric_name, value_data, tags))
+        raise MarkLogicParserException("Invalid metric: metric_suffix={}, metric_data={}, tags={}".format(metric_name, value_data, tags))
 
 
 def is_metric(data):
