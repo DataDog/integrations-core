@@ -17,7 +17,7 @@ The Kubernetes check is included in the [Datadog Agent][3] package, so you don't
 
 For more information on installing the Datadog Agent on your Kubernetes clusters, see the [Kubernetes documentation page][2] for more information.
 
-To collect Kubernetes State metrics, please refer to the [kubernetes_states integration][].
+To collect Kubernetes State metrics, please refer to the [kubernetes_states integration][13].
 
 
 ### Configuration
