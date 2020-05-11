@@ -34,7 +34,7 @@ class MarklogicCheck(AgentCheck):
         self.collectors = [
             self.collect_summary_status_base_metrics,
             self.collect_summary_status_resource_metrics,
-            self.collect_summary_storage_metrics,
+            self.collect_summary_storage_base_metrics,
         ]
 
     def check(self, _):
@@ -51,9 +51,10 @@ class MarklogicCheck(AgentCheck):
 
     def collect_summary_status_resource_metrics(self):
         """
-        Collect Extra Metrics.
-        Only necessary for forest.
-        For other resources, all metrics are already collected via `process_base_status`
+        Collect Summary Status Resource Metrics.
+
+        Only necessary for forest resource metrics. Other resources metrics are already collected via
+        `collect_summary_status_base_metrics`.
         """
         for resource_type in ['forest']:
             res_meta = RESOURCE_TYPES[resource_type]
@@ -63,7 +64,13 @@ class MarklogicCheck(AgentCheck):
 
     def collect_summary_status_base_metrics(self):
         """
-        Collect Status Metrics
+        Collect Summary Status Base Metrics.
+
+        Includes:
+          - Summary Request Metrics (Same metrics as `/requests`)
+          - Summary Host Metrics (Same metrics as `/hosts`)
+          - Summary Server Metrics (Same metrics as `/servers`)
+          - Summary Transaction Metrics
         """
         data = self.api.get_status_data()
         metrics = parse_summary_status_base_metrics(data, self._tags)
@@ -78,7 +85,7 @@ class MarklogicCheck(AgentCheck):
         for metric_name, value_data in iteritems(metrics_data):
             self.submit_metric("requests.{}".format(metric_name), value_data)
 
-    def collect_summary_storage_metrics(self):
+    def collect_summary_storage_base_metrics(self):
         """
         Collect Base Storage Metrics
         """
