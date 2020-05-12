@@ -1269,7 +1269,107 @@ def test_aruba(aggregator):
 def test_chatsworth(aggregator):
     run_profile_check('chatsworth')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:chatsworth_pdu']
+    legacy_global_tags = [
+        'legacy_pdu_hwaddress:but kept quaintly',
+        'legacy_pdu_model:kept driving',
+        'legacy_pdu_name:their Jaded kept oxen driving Jaded forward acted',
+        'legacy_pdu_version:their',
+    ]
+    common_tags = common.CHECK_TAGS + legacy_global_tags + ['snmp_profile:chatsworth_pdu']
+
+    legacy_pdu_tags = common_tags
+    legacy_pdu_gauge_metrics = [
+        'snmp.pduRole',
+        'snmp.outOfService',
+        'snmp.temperatureProbe1',
+        'snmp.temperatureProbe2',
+        'snmp.humidityProbe1',
+        'snmp.humidityProbe2',
+        'snmp.line1curr',
+        'snmp.line2curr',
+        'snmp.line3curr',
+        'snmp.currentxy1',
+        'snmp.currentxy2',
+        'snmp.currentyz1',
+        'snmp.currentyz2',
+        'snmp.currentzx1',
+        'snmp.currentzx2',
+        'snmp.powerFactxy1',
+        'snmp.powerFactxy2',
+        'snmp.powerFactyz1',
+        'snmp.powerFactyz2',
+        'snmp.powerFactzx1',
+        'snmp.powerFactzx2',
+        'snmp.powerxy1',
+        'snmp.voltagexy1',
+        'snmp.voltagexy2',
+        'snmp.voltageyz1',
+        'snmp.voltageyz2',
+        'snmp.voltagezx1',
+        'snmp.voltagezx2',
+        'snmp.outlet1Current',
+        'snmp.outlet2Current',
+        'snmp.outlet3Current',
+        'snmp.outlet4Current',
+        'snmp.outlet5Current',
+        'snmp.outlet6Current',
+        'snmp.outlet7Current',
+        'snmp.outlet8Current',
+        'snmp.outlet9Current',
+        'snmp.outlet10Current',
+        'snmp.outlet11Current',
+        'snmp.outlet12Current',
+        'snmp.outlet13Current',
+        'snmp.outlet14Current',
+        'snmp.outlet15Current',
+        'snmp.outlet16Current',
+        'snmp.outlet17Current',
+        'snmp.outlet18Current',
+        'snmp.outlet19Current',
+        'snmp.outlet20Current',
+        'snmp.outlet21Current',
+        'snmp.outlet22Current',
+        'snmp.outlet23Current',
+        'snmp.outlet24Current',
+    ]
+    for metric in legacy_pdu_gauge_metrics:
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=legacy_pdu_tags, count=1)
+
+    legacy_pdu_rate_metrics = [
+        'snmp.energyxy1s',
+        'snmp.energyxy2s',
+        'snmp.energyyz1s',
+        'snmp.energyyz2s',
+        'snmp.energyzx1s',
+        'snmp.energyzx2s',
+        'snmp.receptacleEnergyoutlet1s',
+        'snmp.receptacleEnergyoutlet2s',
+        'snmp.receptacleEnergyoutlet3s',
+        'snmp.receptacleEnergyoutlet4s',
+        'snmp.receptacleEnergyoutlet5s',
+        'snmp.receptacleEnergyoutlet6s',
+        'snmp.receptacleEnergyoutlet7s',
+        'snmp.receptacleEnergyoutlet8s',
+        'snmp.receptacleEnergyoutlet9s',
+        'snmp.receptacleEnergyoutlet10s',
+        'snmp.receptacleEnergyoutlet11s',
+        'snmp.receptacleEnergyoutlet12s',
+        'snmp.receptacleEnergyoutlet13s',
+        'snmp.receptacleEnergyoutlet14s',
+        'snmp.receptacleEnergyoutlet15s',
+        'snmp.receptacleEnergyoutlet16s',
+        'snmp.receptacleEnergyoutlet17s',
+        'snmp.receptacleEnergyoutlet18s',
+        'snmp.receptacleEnergyoutlet19s',
+        'snmp.receptacleEnergyoutlet20s',
+        'snmp.receptacleEnergyoutlet21s',
+        'snmp.receptacleEnergyoutlet22s',
+        'snmp.receptacleEnergyoutlet23s',
+        'snmp.receptacleEnergyoutlet24s',
+    ]
+    for metric in legacy_pdu_rate_metrics:
+        aggregator.assert_metric(metric, metric_type=aggregator.RATE, tags=legacy_pdu_tags, count=1)
+
     pdu_tags = common_tags + [
         'pdu_cabinetid:cab1',
         'pdu_ipaddress:42.2.210.224',
