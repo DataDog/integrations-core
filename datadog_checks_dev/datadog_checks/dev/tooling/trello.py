@@ -48,6 +48,12 @@ class TrelloClient:
             'Processes': '5e7910789f92a918152b700d',
             'Trace': '5c050640ecb34f0915ec589a',
         }
+        self.progress_columns = {
+            '55d1fe4cd3192ab85fa0f7ea': 'In Progress',  # INPROGRESS
+            '58f0c271cbf2d534bd626916': 'Issues Found',  # HAVE BUGS
+            '5d5a8a50ca7a0189ae8ac5ac': 'Awaiting Build',  # WAITING
+            '5dfb4eef503607473af708ab': 'Done'
+        }
 
     def create_card(self, team, name, body, member=None):
         rate_limited = False
@@ -85,16 +91,7 @@ class TrelloClient:
 
     def count_by_columns(self):
         """
-        Output:
-
-            'Containers': Total (In Progress / Issues Found / Awaiting Build / Done)
-            'Core': Total (In Progress / Issues Found / Awaiting Build / Done)
-            'Integrations': Total (In Progress / Issues Found / Awaiting Build / Done)
-            'Logs':
-            'Platform':
-            'Networks':
-            'Processes':
-            'Trace':
+        Gather statistics for each category in the Trello board.
 
         """
         columns = requests.get(self.LISTS_ENDPOINT, params=self.auth)
@@ -116,21 +113,12 @@ class TrelloClient:
                 if label['name'] in self.label_map:
                     team = label['name']
                     counts[team]['Total'] += 1
-                    if card['idList'] in map_team_list:
+                    id_list = card['idList']
+                    if id_list in map_team_list:
                         # Team's Inbox
+                        # NOTE: This is "In Progress" but not technically started, yet
                         counts[team]['In Progress'] += 1
-                    elif card['idList'] == '55d1fe4cd3192ab85fa0f7ea':
-                        # INPROGRESS
-                        counts[team]['In Progress'] += 1
-                    elif card['idList'] == '58f0c271cbf2d534bd626916':
-                        # HAVE BUGS
-                        counts[team]['Issues Found'] += 1
-                    elif card['idList'] == '5d5a8a50ca7a0189ae8ac5ac':
-                        # WAITING
-                        counts[team]['Awaiting Build'] += 1
-                    elif card['idList'] == '5dfb4eef503607473af708ab':
-                        # Done
-                        counts[team]['Done'] += 1
+                    elif id_list == self.progress_columns:
+                        counts[team][id_list] += 1
 
-        for k, v in counts.items():
-            print(k, v)
+        return counts

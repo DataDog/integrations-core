@@ -224,10 +224,6 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
     user_config = ctx.obj
     trello = TrelloClient(user_config)
 
-    if counts:
-        trello.count_by_columns()
-        return
-
     for i, (commit_hash, commit_subject) in enumerate(commits, 1):
         commit_id = parse_pr_number(commit_subject)
         if commit_id is not None:

@@ -8,11 +8,12 @@ from .build import build
 from .changelog import changelog
 from .make import make
 from .show import show
+from .status import status
 from .tag import tag
 from .testable import testable
 from .upload import upload
 
-ALL_COMMANDS = [build, changelog, make, show, tag, testable, upload]
+ALL_COMMANDS = [build, changelog, make, show, status, tag, testable, upload]
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage the release of checks')
