@@ -1270,10 +1270,10 @@ def test_chatsworth(aggregator):
     run_profile_check('chatsworth')
 
     legacy_global_tags = [
-        'legacy_pdu_hwaddress:but kept quaintly',
-        'legacy_pdu_model:kept driving',
-        'legacy_pdu_name:their Jaded kept oxen driving Jaded forward acted',
-        'legacy_pdu_version:their',
+        'legacy_pdu_macaddress:00:0E:D3:AA:CC:EE',
+        'legacy_pdu_model:P10-1234-ABC',
+        'legacy_pdu_name:legacy-name1',
+        'legacy_pdu_version:1.2.3',
     ]
     common_tags = common.CHECK_TAGS + legacy_global_tags + ['snmp_profile:chatsworth_pdu']
 
