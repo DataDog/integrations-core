@@ -59,5 +59,6 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yaml'),
         conditions=[WaitFor(sqlserver, wait=3, attempts=10)],
+        mount_logs=True,
     ):
         yield FULL_CONFIG, E2E_METADATA

@@ -1,0 +1,28 @@
+name: SqlServer
+files:
+- name: sqlserver.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: host
+      required: true
+      value:
+        type: string
+  - template: logs
+    example:
+    - type: file
+      path: /var/opt/mssql/log/errorlog
+      source: sqlserver
+      service: <SERVICE_NAME>
+      logs:
+      - type: file
+        path: /var/opt/mssql/log/errorlog
+        source: sqlserver
+        service: <SERVICE_NAME>
+        log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_date
+          pattern: \d{4}\-\d{2}\-\d{2}
