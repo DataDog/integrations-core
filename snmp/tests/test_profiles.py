@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import logging
-
 import pytest
 
 from datadog_checks.base import ConfigurationError
