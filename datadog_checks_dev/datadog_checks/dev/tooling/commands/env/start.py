@@ -292,7 +292,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     if profile_memory and on_ci:
         environment.metadata['sampling_start_time'] = time.time()
 
-        echo_waiting('Updating metadata... '.format(env), nl=False)
+        echo_waiting('Updating metadata {}... '.format(env), nl=False)
         environment.write_config()
         echo_success('success!')
 
