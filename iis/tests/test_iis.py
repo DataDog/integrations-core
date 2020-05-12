@@ -103,6 +103,7 @@ def test_check(aggregator):
     for app_pool in instance['app_pools']:
         app_pools.append(re.sub(r'[,+*\-/()\[\]{}\s]', '_', app_pool))
 
+    # Exclude `Failing site` and `Failing app pool`
     namespace_data_ok = ((SITE_METRICS, IIS.SITE, sites[:-1]), (APP_POOL_METRICS, IIS.APP_POOL, app_pools[:-1]))
     for metrics, namespace, values in namespace_data_ok:
         for metric in metrics:
@@ -112,6 +113,7 @@ def test_check(aggregator):
                 )
 
     for _, namespace, values in namespace_data_ok:
+        # Exclude `Total`
         for value in values[1:]:
             aggregator.assert_service_check(
                 'iis.{}_up'.format(namespace),
@@ -120,6 +122,7 @@ def test_check(aggregator):
                 count=1,
             )
 
+    # Only `Failing site` and `Failing app pool`
     namespace_data_failed = ((SITE_METRICS, IIS.SITE, sites[-1:]), (APP_POOL_METRICS, IIS.APP_POOL, app_pools[-1:]))
     for _, namespace, values in namespace_data_failed:
         for value in values:
