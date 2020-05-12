@@ -33,7 +33,6 @@ class Envoy(AgentCheck):
 
     def check(self, instance):
         custom_tags = instance.get('tags', [])
-        timeout = self.http.options['timeout']
 
         try:
             stats_url = instance['stats_url']
@@ -59,6 +58,7 @@ class Envoy(AgentCheck):
         try:
             response = self.http.get(stats_url)
         except requests.exceptions.Timeout:
+            timeout = self.http.options['timeout']
             msg = 'Envoy endpoint `{}` timed out after {} seconds'.format(stats_url, timeout)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=msg, tags=custom_tags)
             self.log.exception(msg)
