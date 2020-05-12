@@ -390,14 +390,14 @@ def test_submit_counter(aggregator, mocked_prometheus_check, mocked_prometheus_s
 
 
 @pytest.mark.parametrize(
-    ('config, count_metric_monotonic, sum_metric_monotonic'),
+    'config, count_metric_monotonic, sum_metric_monotonic',
     (
         ({}, False, False),
         ({'send_distribution_counts_as_monotonic': True}, True, False),
         ({'send_distribution_sums_as_monotonic': True}, False, True),
         ({'send_distribution_counts_as_monotonic': True, 'send_distribution_sums_as_monotonic': True}, True, True),
     ),
-    ids=('default', 'count only as monotonic_count', 'sum only as monotonic_count', 'count and sum as monotonic_count'),
+    ids=('default', 'count as monotonic_count', 'sum as monotonic_count', 'count and sum as monotonic_count'),
 )
 def test_submit_summary(
     aggregator,
@@ -415,6 +415,8 @@ def test_submit_summary(
     if sum_metric_monotonic:
         sum_type = aggregator.MONOTONIC_COUNT
 
+    mocked_prometheus_scraper_config.update(config)
+
     _sum = SummaryMetricFamily('my_summary', 'Random summary')
     _sum.add_metric([], 5.0, 120512.0)
     _sum.add_sample("my_summary", {"quantile": "0.5"}, 24547.0)
@@ -431,7 +433,7 @@ def test_submit_summary(
 
 
 @pytest.mark.parametrize(
-    ('config, count_metric_monotonic, sum_metric_monotonic'),
+    'config, count_metric_monotonic, sum_metric_monotonic',
     (
         ({}, False, False),
         ({'send_distribution_counts_as_monotonic': True}, True, False),
