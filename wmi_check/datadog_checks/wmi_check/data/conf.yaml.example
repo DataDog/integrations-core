@@ -85,12 +85,12 @@ instances:
     #
     # provider: 64
 
-    ## @param tag_by - string - optional - default: Name
+    ## @param tag_by - string - optional
     ## The `tag_by` parameter lets you tag each metric with a property from the WMI class you're using.
     ## This is only useful when you will have multiple values for your WMI query.
     ## Comma-separated list of property names
     #
-    # tag_by: "Name,Label"
+    # tag_by: Name,Label
 
     ## @param tag_queries - list of lists - optional
     ## The `tag_queries`  parameter lets you specify a list of queries, to tag metrics with a target class property.
