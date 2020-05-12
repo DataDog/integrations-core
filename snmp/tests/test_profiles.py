@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
 import pytest
 
 from datadog_checks.base import ConfigurationError
@@ -49,15 +48,23 @@ from .metrics import (
 pytestmark = pytest.mark.usefixtures("dd_environment")
 
 
-def test_load_profiles(aggregator, caplog):
+def _verify_profile(check, profile, name):
+    __tracebackhide__ = True
+    message = None
+    try:
+        check._config.refresh_with_profile(profile)
+    except ConfigurationError as e:
+        message = "Profile `{}` is not configured correctly: {}".format(name, e)
+    return message
 
+
+def test_load_profiles(aggregator):
     instance = common.generate_instance_config([])
     check = SnmpCheck('snmp', {}, [instance])
     for name, profile in check.profiles.items():
-        try:
-            check._config.refresh_with_profile(profile)
-        except ConfigurationError as e:
-            pytest.fail("Profile `{}` is not configured correctly: {}".format(name, e))
+        profile_error = _verify_profile(check, profile, name)
+        if profile_error:
+            pytest.fail(profile_error)
 
 
 def run_profile_check(recording_name):
