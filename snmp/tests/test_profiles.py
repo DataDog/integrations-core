@@ -88,12 +88,22 @@ def test_cisco_voice(aggregator):
     for ccm in ccms:
         aggregator.assert_metric('snmp.{}'.format(ccm), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    calls = ["cvCallVolPeerIncomingCalls", "cvCallVolPeerOutgoingCalls", "cvCallVolMediaIncomingCalls", "cvCallVolMediaOutgoingCalls"]
+    calls = [
+        "cvCallVolPeerIncomingCalls",
+        "cvCallVolPeerOutgoingCalls",
+        "cvCallVolMediaIncomingCalls",
+        "cvCallVolMediaOutgoingCalls",
+    ]
 
     for call in calls:
         aggregator.assert_metric('snmp.{}'.format(call), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    dial_controls = ["dialCtlPeerStatsAcceptCalls", "dialCtlPeerStatsFailCalls", "dialCtlPeerStatsRefuseCalls", "dialCtlPeerStatsSuccessCalls"]
+    dial_controls = [
+        "dialCtlPeerStatsAcceptCalls",
+        "dialCtlPeerStatsFailCalls",
+        "dialCtlPeerStatsRefuseCalls",
+        "dialCtlPeerStatsSuccessCalls",
+    ]
 
     for ctl in dial_controls:
         aggregator.assert_metric('snmp.{}'.format(ctl), metric_type=aggregator.GAUGE, tags=tags, count=1)
