@@ -73,7 +73,6 @@ class KindUp(LazyFunction):
         env['KUBECONFIG'] = kube_path
         # Create cluster
         run_command(['kind', 'create', 'cluster', '--name', self.cluster_name], check=True, env=env)
-        # os.move(kube_path -> tempdir)
         # Connect to cluster
         run_command(['kind', 'export', 'kubeconfig', '--name', self.cluster_name], check=True, env=env)
 
