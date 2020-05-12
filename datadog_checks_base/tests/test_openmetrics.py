@@ -380,12 +380,45 @@ def test_submit_gauge_with_exclude_labels(aggregator, mocked_prometheus_check, m
     )
 
 
-def test_submit_counter(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+@pytest.mark.parametrize(
+    'config, counter_metric_monotonic, counter_with_gauge',
+    (
+        ({'send_monotonic_counter': True}, True, False),
+        ({'send_monotonic_counter': False}, False, False),
+        ({'send_monotonic_counter': False, 'send_monotonic_with_gauge': True}, False, True),
+        ({'send_monotonic_counter': True, 'send_monotonic_with_gauge': True}, True, False),
+    ),
+    ids=(
+        'default',
+        'override default send_monotonic_counter',
+        'send monotonic_counter with gauge',
+        'ignore send_monotonic_with_gauge flag',
+    ),
+)
+def test_submit_counter(
+    aggregator,
+    mocked_prometheus_check,
+    mocked_prometheus_scraper_config,
+    config,
+    counter_metric_monotonic,
+    counter_with_gauge,
+):
+    # Determine expected metric types for counter metrics
+    counter_type = aggregator.GAUGE
+    if counter_metric_monotonic:
+        counter_type = aggregator.MONOTONIC_COUNT
+
+    metric_name = 'prometheus.custom.counter'
     _counter = CounterMetricFamily('my_counter', 'Random counter')
     _counter.add_metric([], 42)
+    mocked_prometheus_scraper_config.update(config)
     check = mocked_prometheus_check
     check.submit_openmetric('custom.counter', _counter, mocked_prometheus_scraper_config)
-    aggregator.assert_metric('prometheus.custom.counter', 42, tags=[], count=1)
+    aggregator.assert_metric(metric_name, 42, tags=[], count=1, metric_type=counter_type)
+
+    if counter_with_gauge:
+        aggregator.assert_metric(metric_name + '.total', 42, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT)
+
     aggregator.assert_all_metrics_covered()
 
 
@@ -482,6 +515,7 @@ def test_submit_summary(
 def assert_histogram_counts(aggregator, count_type, suffix=False):
     # Refactor commonly used metric assertion for the `test_submit_histogram` tests
     metric_name = 'prometheus.custom.histogram.count'
+    # Append `.total` to monotonic_count metrics submitted with gauge
     if suffix:
         metric_name += '.total'
 
