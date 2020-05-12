@@ -6,6 +6,7 @@ import logging
 
 import pytest
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.snmp import SnmpCheck
 
 from . import common
@@ -55,11 +56,10 @@ def test_load_profiles(aggregator, caplog):
     instance = common.generate_instance_config([])
     check = SnmpCheck('snmp', {}, [instance])
     for name, profile in check.profiles.items():
-        check._config.refresh_with_profile(profile)
-
-    for _, level, message in caplog.record_tuples:
-        if level == logging.WARNING:
-            pytest.fail("Profiles are not configured correctly: {}", message)
+        try:
+            check._config.refresh_with_profile(profile)
+        except ConfigurationError as e:
+            pytest.fail("Profile `{}` is not configured correctly: {}".format(name, e))
 
 
 def run_profile_check(recording_name):
