@@ -390,15 +390,21 @@ def test_submit_counter(aggregator, mocked_prometheus_check, mocked_prometheus_s
 
 
 @pytest.mark.parametrize(
-    'config, count_metric_monotonic, sum_metric_monotonic',
+    'config, count_metric_monotonic, sum_metric_monotonic, count_monotonic_gauge, sum_monotonic_gauge',
     (
-        ({}, False, False),
-        ({'send_distribution_counts_as_monotonic': True}, True, False),
-        ({'send_distribution_sums_as_monotonic': True}, False, True),
-        ({'send_distribution_counts_as_monotonic': True, 'send_distribution_sums_as_monotonic': True}, True, True),
-        ({'send_monotonic_with_gauge': True}, False, False),
-        ({'send_monotonic_with_gauge': True, 'send_distribution_counts_as_monotonic': True}, True, False),
-        ({'send_monotonic_with_gauge': True, 'send_distribution_sums_as_monotonic': True}, False, True),
+        ({}, False, False, False, False),
+        ({'send_distribution_counts_as_monotonic': True}, True, False, False, False),
+        ({'send_distribution_sums_as_monotonic': True}, False, True, False, False),
+        (
+            {'send_distribution_counts_as_monotonic': True, 'send_distribution_sums_as_monotonic': True},
+            True,
+            True,
+            False,
+            False,
+        ),
+        ({'send_monotonic_with_gauge': True}, False, False, True, True),
+        ({'send_monotonic_with_gauge': True, 'send_distribution_counts_as_monotonic': True}, True, False, False, True),
+        ({'send_monotonic_with_gauge': True, 'send_distribution_sums_as_monotonic': True}, False, True, True, False),
         (
             {
                 'send_monotonic_with_gauge': True,
@@ -407,6 +413,8 @@ def test_submit_counter(aggregator, mocked_prometheus_check, mocked_prometheus_s
             },
             True,
             True,
+            False,
+            False,
         ),
     ),
     ids=(
@@ -427,6 +435,8 @@ def test_submit_summary(
     config,
     count_metric_monotonic,
     sum_metric_monotonic,
+    count_monotonic_gauge,
+    sum_monotonic_gauge,
 ):
 
     # Determine expected metric types for `.count` and `.sum` metrics
@@ -456,20 +466,15 @@ def test_submit_summary(
     aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.99'], count=1)
 
     # If `send_monotonic_with_gauge` is true, assert a monotonic_count with suffixed `.total` is submitted
-    if mocked_prometheus_scraper_config['send_monotonic_with_gauge']:
-        if not mocked_prometheus_scraper_config['send_distribution_counts_as_monotonic']:
-            aggregator.assert_metric(
-                'prometheus.custom.summary.count.total', 5.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT
-            )
+    if count_monotonic_gauge:
+        aggregator.assert_metric(
+            'prometheus.custom.summary.count.total', 5.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT
+        )
 
-        if not mocked_prometheus_scraper_config['send_distribution_sums_as_monotonic']:
-            aggregator.assert_metric(
-                'prometheus.custom.summary.sum.total',
-                120512.0,
-                tags=[],
-                count=1,
-                metric_type=aggregator.MONOTONIC_COUNT,
-            )
+    if sum_monotonic_gauge:
+        aggregator.assert_metric(
+            'prometheus.custom.summary.sum.total', 120512.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT,
+        )
 
     aggregator.assert_all_metrics_covered()
 
