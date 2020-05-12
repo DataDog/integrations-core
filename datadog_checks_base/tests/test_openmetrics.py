@@ -479,15 +479,64 @@ def test_submit_summary(
     aggregator.assert_all_metrics_covered()
 
 
+def assert_histogram_counts(aggregator, count_type, suffix=False):
+    # Refactor commonly used metric assertion for the `test_submit_histogram` tests
+    metric_name = 'prometheus.custom.histogram.count'
+    if suffix:
+        metric_name += '.total'
+
+    aggregator.assert_metric(
+        metric_name, 4, tags=['upper_bound:none'], count=1, metric_type=count_type,
+    )
+    aggregator.assert_metric(
+        metric_name, 1, tags=['upper_bound:1.0'], count=1, metric_type=count_type,
+    )
+    aggregator.assert_metric(
+        metric_name, 2, tags=['upper_bound:31104000.0'], count=1, metric_type=count_type,
+    )
+    aggregator.assert_metric(
+        metric_name, 3, tags=['upper_bound:432400000.0'], count=1, metric_type=count_type,
+    )
+
+
 @pytest.mark.parametrize(
-    'config, count_metric_monotonic, sum_metric_monotonic',
+    'config, count_metric_monotonic, sum_metric_monotonic, count_monotonic_gauge, sum_monotonic_gauge',
     (
-        ({}, False, False),
-        ({'send_distribution_counts_as_monotonic': True}, True, False),
-        ({'send_distribution_sums_as_monotonic': True}, False, True),
-        ({'send_distribution_counts_as_monotonic': True, 'send_distribution_sums_as_monotonic': True}, True, True),
+        ({}, False, False, False, False),
+        ({'send_distribution_counts_as_monotonic': True}, True, False, False, False),
+        ({'send_distribution_sums_as_monotonic': True}, False, True, False, False),
+        (
+            {'send_distribution_counts_as_monotonic': True, 'send_distribution_sums_as_monotonic': True},
+            True,
+            True,
+            False,
+            False,
+        ),
+        ({'send_monotonic_with_gauge': True}, False, False, True, True),
+        ({'send_monotonic_with_gauge': True, 'send_distribution_counts_as_monotonic': True}, True, False, False, True),
+        ({'send_monotonic_with_gauge': True, 'send_distribution_sums_as_monotonic': True}, False, True, True, False),
+        (
+            {
+                'send_monotonic_with_gauge': True,
+                'send_distribution_sums_as_monotonic': True,
+                'send_distribution_counts_as_monotonic': True,
+            },
+            True,
+            True,
+            False,
+            False,
+        ),
     ),
-    ids=('default', 'count as monotonic_count', 'sum as monotonic_count', 'count and sum as monotonic_count'),
+    ids=(
+        'default',
+        'count only as monotonic_count',
+        'sum only as monotonic_count',
+        'count and sum as monotonic_count',
+        'count and sum with monotonic and gauge',
+        'count only with monotonic_count and gauge',
+        'sum only with monotonic_count and gauge',
+        'ignore send_montonic_with_gauge flag',
+    ),
 )
 def test_submit_histograms(
     aggregator,
@@ -496,6 +545,8 @@ def test_submit_histograms(
     config,
     count_metric_monotonic,
     sum_metric_monotonic,
+    count_monotonic_gauge,
+    sum_monotonic_gauge,
 ):
     # Determine expected metric types for `.count` and `.sum` metrics
     count_type = aggregator.GAUGE
@@ -514,19 +565,16 @@ def test_submit_histograms(
 
     check.submit_openmetric('custom.histogram', _histo, mocked_prometheus_scraper_config)
     aggregator.assert_metric('prometheus.custom.histogram.sum', 1337, tags=[], count=1, metric_type=sum_type)
+    assert_histogram_counts(aggregator, count_type)
 
-    aggregator.assert_metric(
-        'prometheus.custom.histogram.count', 4, tags=['upper_bound:none'], count=1, metric_type=count_type,
-    )
-    aggregator.assert_metric(
-        'prometheus.custom.histogram.count', 1, tags=['upper_bound:1.0'], count=1, metric_type=count_type,
-    )
-    aggregator.assert_metric(
-        'prometheus.custom.histogram.count', 2, tags=['upper_bound:31104000.0'], count=1, metric_type=count_type,
-    )
-    aggregator.assert_metric(
-        'prometheus.custom.histogram.count', 3, tags=['upper_bound:432400000.0'], count=1, metric_type=count_type,
-    )
+    # If `send_monotonic_with_gauge` is true, assert a monotonic_count with suffixed `.total` is submitted
+    if count_monotonic_gauge:
+        assert_histogram_counts(aggregator, aggregator.MONOTONIC_COUNT, True)
+
+    if sum_monotonic_gauge:
+        aggregator.assert_metric(
+            'prometheus.custom.histogram.sum.total', 1337, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT
+        )
 
     aggregator.assert_all_metrics_covered()
 
