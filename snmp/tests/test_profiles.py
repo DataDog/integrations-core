@@ -60,6 +60,50 @@ def run_profile_check(recording_name):
     check.check(instance)
 
 
+def test_cisco_voice(aggregator):
+    run_profile_check('cisco_customer_voice')
+    resources = ["hrSWRunPerfMem", "hrSWRunPerfCPU", "hrSWRunStatus"]
+
+    tags = ['snmp_profile:cisco_customer_voice', 'snmp_host:test']
+    tags += common.CHECK_TAGS
+
+    for resource in resources:
+        aggregator.assert_metric('snmp.{}'.format(resource), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    cvps = [
+        "ccvpSipIntAvgLatency1",
+        "ccvpSipIntAvgLatency2",
+        "ccvpSipIntConnectsRcv",
+        "ccvpSipIntNewCalls",
+        "ccvpSipRtActiveCalls",
+        "ccvpSipRtTotalCallLegs",
+        "ccvpLicAggMaxPortsInUse",
+        "ccvpLicRtPortsInUse",
+    ]
+    for cvp in cvps:
+        aggregator.assert_metric('snmp.{}'.format(cvp), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    ccms = ["ccmRegisteredGateways", "ccmRejectedPhones", "ccmRegisteredPhones", "ccmUnregisteredPhones"]
+
+    for ccm in ccms:
+        aggregator.assert_metric('snmp.{}'.format(ccm), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    calls = ["cvCallVolPeerIncomingCalls", "cvCallVolPeerOutgoingCalls", "cvCallVolMediaIncomingCalls", "cvCallVolMediaOutgoingCalls"]
+
+    for call in calls:
+        aggregator.assert_metric('snmp.{}'.format(call), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    dial_controls = ["dialCtlPeerStatsAcceptCalls", "dialCtlPeerStatsFailCalls", "dialCtlPeerStatsRefuseCalls", "dialCtlPeerStatsSuccessCalls"]
+
+    for ctl in dial_controls:
+        aggregator.assert_metric('snmp.{}'.format(ctl), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_metric('snmp.{}'.format("cccaPimStatus"), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    aggregator.assert_metric('snmp.{}'.format("sysUpTimeInstance"), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_all_metrics_covered()
+
+
 def test_f5(aggregator):
     run_profile_check('f5')
 
