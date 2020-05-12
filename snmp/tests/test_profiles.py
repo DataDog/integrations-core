@@ -1284,44 +1284,22 @@ def test_chatsworth(aggregator):
     legacy_pdu_gauge_metrics = [
         'snmp.pduRole',
         'snmp.outOfService',
-        'snmp.temperatureProbe1',
-        'snmp.temperatureProbe2',
-        'snmp.humidityProbe1',
-        'snmp.humidityProbe2',
-        'snmp.line1curr',
-        'snmp.line2curr',
-        'snmp.line3curr',
-        'snmp.currentxy1',
-        'snmp.currentxy2',
-        'snmp.currentyz1',
-        'snmp.currentyz2',
-        'snmp.currentzx1',
-        'snmp.currentzx2',
-        'snmp.powerFactxy1',
-        'snmp.powerFactxy2',
-        'snmp.powerFactyz1',
-        'snmp.powerFactyz2',
-        'snmp.powerFactzx1',
-        'snmp.powerFactzx2',
-        'snmp.powerxy1',
-        'snmp.voltagexy1',
-        'snmp.voltagexy2',
-        'snmp.voltageyz1',
-        'snmp.voltageyz2',
-        'snmp.voltagezx1',
-        'snmp.voltagezx2',
     ]
-    legacy_pdu_monotonic_count_metrics = [
-        'snmp.energyxy1s',
-        'snmp.energyxy2s',
-        'snmp.energyyz1s',
-        'snmp.energyyz2s',
-        'snmp.energyzx1s',
-        'snmp.energyzx2s',
-    ]
-    for i in range(1, 25):
-        legacy_pdu_monotonic_count_metrics.append('snmp.receptacleEnergyoutlet{}s'.format(i))
-        legacy_pdu_gauge_metrics.append('snmp.outlet{}Current'.format(i))
+    legacy_pdu_monotonic_count_metrics = []
+    for line in range(1, 4):
+        legacy_pdu_gauge_metrics.append('snmp.line{}curr'.format(line))
+    for branch in range(1, 3):
+        legacy_pdu_gauge_metrics.append('snmp.temperatureProbe{}'.format(branch))
+        legacy_pdu_gauge_metrics.append('snmp.humidityProbe{}'.format(branch))
+        for xyz in ['xy', 'yz', 'zx']:
+            legacy_pdu_monotonic_count_metrics.append('snmp.energy{}{}s'.format(xyz, branch))
+            legacy_pdu_gauge_metrics.append('snmp.voltage{}{}'.format(xyz, branch))
+            legacy_pdu_gauge_metrics.append('snmp.power{}{}'.format(xyz, branch))
+            legacy_pdu_gauge_metrics.append('snmp.powerFact{}{}'.format(xyz, branch))
+            legacy_pdu_gauge_metrics.append('snmp.current{}{}'.format(xyz, branch))
+    for branch in range(1, 25):
+        legacy_pdu_monotonic_count_metrics.append('snmp.receptacleEnergyoutlet{}s'.format(branch))
+        legacy_pdu_gauge_metrics.append('snmp.outlet{}Current'.format(branch))
 
     for metric in legacy_pdu_gauge_metrics:
         aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=legacy_pdu_tags, count=1)
