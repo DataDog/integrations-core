@@ -4,6 +4,7 @@
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.snmp import SnmpCheck
 
 from . import common
@@ -1369,6 +1370,7 @@ def test_chatsworth(aggregator):
         )
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_isilon(aggregator):
