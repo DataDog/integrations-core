@@ -9,7 +9,7 @@ from ipaddress import ip_address, ip_network
 import requests
 from requests import auth as requests_auth
 from requests_toolbelt.adapters import host_header_ssl
-from six import iteritems, string_types
+from six import PY2, iteritems, string_types
 from six.moves.urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
 
@@ -501,4 +501,5 @@ class StandardFields(object):
     pass
 
 
-StandardFields.__doc__ = '\n'.join('- `{}`'.format(field) for field in STANDARD_FIELDS)
+if not PY2:
+    StandardFields.__doc__ = '\n'.join('- `{}`'.format(field) for field in STANDARD_FIELDS)
