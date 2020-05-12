@@ -1269,6 +1269,8 @@ def test_aruba(aggregator):
 def test_chatsworth(aggregator):
     run_profile_check('chatsworth')
 
+    # Since the test `chatsworth.snmprec` contain both legacy and new objects, global legacy tags will be present
+    # for all metrics. In practice, new devices won't have legacy objects and global tags should NOT be present.
     legacy_global_tags = [
         'legacy_pdu_macaddress:00:0E:D3:AA:CC:EE',
         'legacy_pdu_model:P10-1234-ABC',
@@ -1277,6 +1279,7 @@ def test_chatsworth(aggregator):
     ]
     common_tags = common.CHECK_TAGS + legacy_global_tags + ['snmp_profile:chatsworth_pdu']
 
+    # Legacy metrics
     legacy_pdu_tags = common_tags
     legacy_pdu_gauge_metrics = [
         'snmp.pduRole',
@@ -1308,7 +1311,7 @@ def test_chatsworth(aggregator):
         'snmp.voltagezx1',
         'snmp.voltagezx2',
     ]
-    legacy_pdu_rate_metrics = [
+    legacy_pdu_monotonic_count_metrics = [
         'snmp.energyxy1s',
         'snmp.energyxy2s',
         'snmp.energyyz1s',
@@ -1317,14 +1320,15 @@ def test_chatsworth(aggregator):
         'snmp.energyzx2s',
     ]
     for i in range(1, 25):
-        legacy_pdu_rate_metrics.append('snmp.receptacleEnergyoutlet{}s'.format(i))
+        legacy_pdu_monotonic_count_metrics.append('snmp.receptacleEnergyoutlet{}s'.format(i))
         legacy_pdu_gauge_metrics.append('snmp.outlet{}Current'.format(i))
 
     for metric in legacy_pdu_gauge_metrics:
         aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=legacy_pdu_tags, count=1)
-    for metric in legacy_pdu_rate_metrics:
-        aggregator.assert_metric(metric, metric_type=aggregator.RATE, tags=legacy_pdu_tags, count=1)
+    for metric in legacy_pdu_monotonic_count_metrics:
+        aggregator.assert_metric(metric, metric_type=aggregator.MONOTONIC_COUNT, tags=legacy_pdu_tags, count=1)
 
+    # New metrics
     pdu_tags = common_tags + [
         'pdu_cabinetid:cab1',
         'pdu_ipaddress:42.2.210.224',

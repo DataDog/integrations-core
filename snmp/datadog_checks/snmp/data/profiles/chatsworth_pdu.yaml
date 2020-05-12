@@ -142,21 +142,28 @@ metrics:
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.11.1
     name: energyxy1s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.11.2
     name: energyyz1s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.11.3
     name: energyzx1s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.11.4
     name: energyxy2s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.11.5
     name: energyyz2s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.11.6
     name: energyzx2s
+    forced_type: monotonic_count
+
 
   ### [Legacy] Outlets
   - MIB: CPI-UNITY-MIB
@@ -235,75 +242,99 @@ metrics:
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.1
     name: receptacleEnergyoutlet1s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.2
     name: receptacleEnergyoutlet2s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.3
     name: receptacleEnergyoutlet3s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.4
     name: receptacleEnergyoutlet4s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.5
     name: receptacleEnergyoutlet5s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.6
     name: receptacleEnergyoutlet6s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.7
     name: receptacleEnergyoutlet7s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.8
     name: receptacleEnergyoutlet8s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.9
     name: receptacleEnergyoutlet9s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.10
     name: receptacleEnergyoutlet10s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.11
     name: receptacleEnergyoutlet11s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.12
     name: receptacleEnergyoutlet12s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.13
     name: receptacleEnergyoutlet13s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.14
     name: receptacleEnergyoutlet14s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.15
     name: receptacleEnergyoutlet15s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.16
     name: receptacleEnergyoutlet16s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.17
     name: receptacleEnergyoutlet17s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.18
     name: receptacleEnergyoutlet18s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.19
     name: receptacleEnergyoutlet19s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.20
     name: receptacleEnergyoutlet20s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.21
     name: receptacleEnergyoutlet21s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.22
     name: receptacleEnergyoutlet22s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.23
     name: receptacleEnergyoutlet23s
+    forced_type: monotonic_count
   - MIB: CPI-UNITY-MIB
     OID: 1.3.6.1.4.1.30932.1.1.3.12.24
     name: receptacleEnergyoutlet24s
+    forced_type: monotonic_count
 
   ### PDU
 
