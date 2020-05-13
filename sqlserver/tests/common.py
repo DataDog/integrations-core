@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-
 from datadog_checks.dev import get_docker_hostname, get_here
 from datadog_checks.dev.utils import ON_MACOS, ON_WINDOWS
 from datadog_checks.sqlserver import SQLServer
@@ -94,8 +92,6 @@ INIT_CONFIG_OBJECT_NAME = {
 FULL_E2E_CONFIG = {"init_config": INIT_CONFIG, "instances": [INSTANCE_E2E]}
 
 E2E_METADATA = {
+    # TODO: REMOVE start_commands when this is merged: https://github.com/DataDog/datadog-agent/pull/5478
     'start_commands': ['apt-get update', 'apt-get install -y tdsodbc unixodbc-dev'],
-    'docker_volumes': [
-        '{}:/opt/datadog-agent/embedded/etc/odbcinst.ini'.format(os.path.join(HERE, 'odbc', 'odbcinst.ini'))
-    ],
 }
