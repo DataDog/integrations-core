@@ -169,8 +169,6 @@ class PgBouncer(AgentCheck):
             pgbouncer_version = self.get_version()
             if pgbouncer_version:
                 self.set_metadata('version', pgbouncer_version)
-            else:
-                self.log.debug("Couldn't detect version")
 
     def get_version(self):
         db = self._get_connection()
@@ -184,3 +182,4 @@ class PgBouncer(AgentCheck):
             res = re.findall(regex, data)
             if res:
                 return res[0]
+            self.log.debug("Couldn't detect version from %s", data)

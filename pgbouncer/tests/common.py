@@ -3,6 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import os
 
+from packaging import version
+
 from datadog_checks.base.utils.common import get_docker_hostname
 
 HOST = get_docker_hostname()
@@ -17,4 +19,4 @@ INSTANCE_URL = {'database_url': 'postgresql://datadog:datadog@localhost:16432/da
 
 
 def get_version_from_env():
-    return os.environ.get('PGBOUNCER_VERSION').replace('_', '.').split('.')
+    return version.parse(os.environ.get('PGBOUNCER_VERSION'))

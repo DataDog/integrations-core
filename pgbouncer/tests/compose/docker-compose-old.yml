@@ -11,7 +11,7 @@ services:
       - "5432:5432"
 
   pgbouncer:
-    image: "datadog/docker-library:pgbouncer_${PGBOUNCER_VERSION}"
+    image: "datadog/docker-library:${PGBOUNCER_IMAGE_TAG}"
     environment:
       PG_ENV_POSTGRESQL_USER: postgres
       PG_ENV_POSTGRESQL_PASS: datadog

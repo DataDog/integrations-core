@@ -11,7 +11,7 @@ services:
       - "5432:5432"
 
   pgbouncer:
-    image: "pgbouncer/pgbouncer:${PGBOUNCER_VERSION}"
+    image: "pgbouncer/pgbouncer:${PGBOUNCER_IMAGE_TAG}"
     environment:
       DATABASES_USER: postgres
       DATABASES_PASSWORD: datadog

@@ -7,6 +7,7 @@ from copy import deepcopy
 
 import psycopg2
 import pytest
+from packaging import version
 
 from datadog_checks.dev import WaitFor, docker_run
 
@@ -30,8 +31,8 @@ def dd_environment():
     Start postgres and install pgbouncer. If there's any problem executing docker-compose, let the exception bubble up.
     """
     compose_file = 'docker-compose.yml'
-    version = common.get_version_from_env()
-    if int(version[1]) < 10:
+    env_version = common.get_version_from_env()
+    if env_version < version.parse('1.10'):
         compose_file = 'docker-compose-old.yml'
 
     with docker_run(

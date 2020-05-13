@@ -4,6 +4,7 @@
 
 import psycopg2
 import pytest
+from packaging import version
 
 from datadog_checks.pgbouncer import PgBouncer
 
@@ -31,20 +32,16 @@ def test_check(instance, aggregator, datadog_agent):
     check.check_id = 'test:123'
     check.check(instance)
 
-    version = common.get_version_from_env()
-    assert_metric_coverage(version, aggregator)
-    patches = {'8': '1', '9': '2'}
-    patch = patches.get(version[1])
+    env_version = common.get_version_from_env()
+    assert_metric_coverage(env_version, aggregator)
 
     version_metadata = {
-        'version.raw': '.'.join(version),
+        'version.raw': str(env_version),
         'version.scheme': 'semver',
-        'version.major': version[0],
-        'version.minor': version[1],
+        'version.major': str(env_version.major),
+        'version.minor': str(env_version.minor),
+        'version.patch': str(env_version.micro),
     }
-    if patch:
-        version_metadata['version.patch'] = patch
-        version_metadata['version.raw'] += '.' + patch
     datadog_agent.assert_metadata('test:123', version_metadata)
 
 
@@ -56,7 +53,7 @@ def test_check_e2e(dd_agent_check, instance):
     assert_metric_coverage(version, aggregator)
 
 
-def assert_metric_coverage(version, aggregator):
+def assert_metric_coverage(env_version, aggregator):
     aggregator.assert_metric('pgbouncer.pools.cl_active')
     aggregator.assert_metric('pgbouncer.pools.cl_waiting')
     aggregator.assert_metric('pgbouncer.pools.sv_active')
@@ -68,8 +65,7 @@ def assert_metric_coverage(version, aggregator):
     aggregator.assert_metric('pgbouncer.stats.avg_recv')
     aggregator.assert_metric('pgbouncer.stats.avg_sent')
 
-    pgbouncer_pre18 = int(version[1]) < 8
-    if pgbouncer_pre18:
+    if env_version < version.parse('1.8.0'):
         aggregator.assert_metric('pgbouncer.stats.avg_req')
         aggregator.assert_metric('pgbouncer.stats.avg_query')
         aggregator.assert_metric('pgbouncer.stats.requests_per_second')
