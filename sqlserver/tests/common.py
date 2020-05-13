@@ -37,7 +37,7 @@ EXPECTED_METRICS = [m[0] for m in SQLServer.METRICS] + CUSTOM_METRICS
 INSTANCE_DOCKER = {
     'host': '{},1433'.format(HOST),
     'connector': 'odbc',
-    'driver': 'FreeTDS' if e2e_testing() else get_local_driver(),
+    'driver': 'FreeTDS',
     'username': 'sa',
     'password': 'Password123',
     'tags': ['optional:tag1'],
