@@ -64,49 +64,114 @@ Entries in the `metrics` field define which metrics will be collected by the pro
 
 #### Symbol metrics
 
-In profiles, OIDs can be specified as entries containing the `symbol` field:
+An SNMP symbol is an object with a scalar type (i.e. `Counter32`, `Integer32`, `OctetString`, etc).
+
+In a MIB file, a symbol can be recognized as an `OBJECT-TYPE` node with a scalar `SYNTAX`, placed under an `OBJECT IDENTIFIER` node (which is often the root OID of the MIB):
+
+```asn
+EXAMPLE-MIB DEFINITIONS ::= BEGIN
+-- ...
+example OBJECT IDENTIFIER ::= { mib-2 7 }
+
+exampleSymbol OBJECT-TYPE
+    SYNTAX Counter32
+    -- ...
+    ::= { example 1 }
+```
+
+In profiles, symbol metrics can be specified as entries that specify the `MIB` and `symbol` fields:
 
 ```yaml
 metrics:
-  - MIB: TCP-MIB
+  # Example for the above dummy MIB and symbol:
+  - MIB: EXAMPLE-MIB
     symbol:
-      OID: 1.3.6.1.2.1.6.5
-      name: tcpActiveOpens
+      OID: 1.3.5.1.2.1.7.1
+      name: exampleSymbol
+  # More realistic examples:
+  - MIB: ISILON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.12124.1.1.2
+      name: clusterHealth
+  - MIB: ISILON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.12124.1.2.1.1
+      name: clusterIfsInBytes
+  - MIB: ISILON-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.12124.1.2.1.3
+      name: clusterIfsOutBytes
 ```
+
+!!! warning
+    Symbol metrics from the same `MIB` must still be listed as separate `metrics` entries, as shown above.
+
+    For example, this is _not_ valid syntax:
+
+    ```yaml
+    metrics:
+      - MIB: ISILON-MIB
+        symbol:
+          - OID: 1.3.6.1.4.1.12124.1.2.1.1
+            name: clusterIfsInBytes
+          - OID: 1.3.6.1.4.1.12124.1.2.1.3
+            name: clusterIfsOutBytes
+    ```
 
 #### Table metrics
 
-An SNMP table is an object that is composed of multiple entries.
+An SNMP table is an object that is composed of multiple entries ("rows"), where each entry contains values a set of symbols ("columns").
 
-In a MIB file, tables be recognized by the following syntax:
+In a MIB file, tables be recognized by the presence of `SEQUENCE OF`:
 
 ```asn
 exampleTable OBJECT-TYPE
     SYNTAX   SEQUENCE OF exampleEntry
     -- ...
+    ::= { example 10 }
 
 exampleEntry OBJECT-TYPE
    -- ...
    ::= { exampleTable 1 }
+
+exampleColumn1 OBJECT-TYPE
+   -- ...
+   ::= { exampleEntry 1 }
+
+exampleColumn2 OBJECT-TYPE
+   -- ...
+   ::= { exampleEntry 2 }
+
+-- ...
 ```
 
-In profiles, tables can be specified as entries containing the `table` and `symbols` fields:
+In profiles, tables can be specified as entries containing the `MIB`, `table` and `symbols` fields:
 
 ```yaml
 metrics:
-  - MIB: CISCO-PROCESS-MIB
+  # Example for the dummy table above:
+  - MIB: EXAMPLE-MIB
     table:
       # Identification of the table which metrics come from.
-      # For example, this device has multiple CPU units; each row
-      # in this table contains information about a single CPU unit.
-      OID: 1.3.6.1.4.1.9.9.109.1.1.1
-      name: cpmCPUTotalTable
+      OID: 1.3.6.1.4.1.10
+      name: exampleTable
     symbols:
       # List of symbols ('columns') to retrieve.
       # Same format as for a single OID.
       # Each row in the table will emit these metrics.
-      # For example, if we have N CPU units, then the
-      # integration will emit N `snmp.cpmCPUMemoryUsed` metrics.
+      - OID: 1.3.6.1.4.1.10.1.1
+        name: exampleColumn1
+      - OID: 1.3.6.1.4.1.10.1.2
+        name: exampleColumn2
+      # ...
+
+  # More realistic example:
+  - MIB: CISCO-PROCESS-MIB
+    table:
+      # Each row in this table contains information about a CPU unit of the device.
+      OID: 1.3.6.1.4.1.9.9.109.1.1.1
+      name: cpmCPUTotalTable
+    symbols:
       - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.12
         name: cpmCPUMemoryUsed
       # ...
@@ -178,11 +243,101 @@ metrics:
         tag: interface
 ```
 
+#### Metric type inference
+
+By default, the [Datadog metric type](https://docs.datadoghq.com/developers/metrics/types/?tab=count) of a symbol will be inferred from the SNMP type (i.e. the MIB `SYNTAX`):
+
+| SNMP type             | Inferred metric type |
+| --------------------- | -------------------- |
+| `Counter32`           | `rate`               |
+| `Counter64`           | `rate`               |
+| `Gauge32`             | `gauge`              |
+| `Integer`             | `gauge`              |
+| `Integer32`           | `gauge`              |
+| `CounterBasedGauge64` | `gauge`              |
+| `Opaque`              | `gauge`              |
+
+SNMP types not listed in this table are submitted as `gauge` by default.
+
+#### Forced metric types
+
+Sometimes the inferred type may not be what you want. Typically, OIDs that represent "total number of X" are defined as `Counter32` in MIBs, but you probably want to submit them `monotonic_count` instead of a `rate`.
+
+For such cases, you can define a `forced_type`. Possible values and their effect are listed below.
+
+| Forced type                | Description                                                                                         |
+| -------------------------- | --------------------------------------------------------------------------------------------------- |
+| `gauge`                    | Submit as a gauge.                                                                                  |
+| `rate`                     | Submit as a rate.                                                                                   |
+| `percent`                  | Multiply by 100 and submit as a rate.                                                               |
+| `monotonic_count`          | Submit as a monotonic count.                                                                        |
+| `monotonic_count_and_rate` | Submit 2 copies of the metric: one as a monotonic count, and one as a rate (suffixed with `.rate`). |
+
+This works on both symbol and table metrics:
+
+```yaml
+metrics:
+  # On a symbol:
+  - MIB: TCP-MIB
+    forced_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.2.1.6.5
+      name: tcpActiveOpens
+  # On a table:
+  - MIB: IP-MIB
+    table:
+      OID: 1.3.6.1.2.1.4.31.1
+      name: ipSystemStatsTable
+    forced_type: monotonic_count
+    symbols:
+    - OID: 1.3.6.1.2.1.4.31.1.1.4
+      name: ipSystemStatsHCInReceives
+    - OID: 1.3.6.1.2.1.4.31.1.1.6
+      name: ipSystemStatsHCInOctets
+```
+
+!!! note
+    When used on a table metrics entry, `forced_type` is applied to _all_ symbols in the entry.
+
+    So, if a table contains symbols of varying types, you should use multiple `metrics` entries: one for symbols with inferred metric types, and one for each `forced_type`.
+
+    For example:
+
+    ```yaml
+    metrics:
+      - MIB: F5-BIGIP-LOCAL-MIB
+        table:
+          OID: 1.3.6.1.4.1.3375.2.2.5.2.3
+          name: ltmPoolStatTable
+        # No `forced_type` specified => metric types will be inferred.
+        symbols:
+          - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.2
+            name: ltmPoolStatServerPktsIn
+          - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.4
+            name: ltmPoolStatServerPktsOut
+          # ...
+
+      - MIB: F5-BIGIP-LOCAL-MIB
+        table:
+          OID: 1.3.6.1.4.1.3375.2.2.5.2.3
+          name: ltmPoolStatTable
+        forced_type: monotonic_count
+        # All these symbols will be submitted as monotonic counts.
+        symbols:
+          - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.7
+            name: ltmPoolStatServerTotConns
+          - OID: 1.3.6.1.4.1.3375.2.2.5.2.3.1.23
+            name: ltmPoolStatConnqServiced
+          # ...
+    ```
+
 ### `metric_tags`
 
 _(Optional)_
 
-This field is used to apply tags to all metrics collected by the profile. It has the same meaning than the instance-level config option (see [`conf.yaml.example`](https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example)). Several collection methods are supported.
+This field is used to apply tags to all metrics collected by the profile. It has the same meaning than the instance-level config option (see [`conf.yaml.example`](https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example)).
+
+Several collection methods are supported, as illustrated below:
 
 ```yaml
 metric_tags:
@@ -199,6 +354,6 @@ metric_tags:
     symbol: sysName
     match: (.*)-(.*)
     tags:
-        host: \2
         device_type: \1
+        host: \2
 ```
