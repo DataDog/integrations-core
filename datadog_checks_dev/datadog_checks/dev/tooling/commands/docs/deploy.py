@@ -5,7 +5,7 @@ import os
 
 import click
 
-from ....utils import chdir, copy_path, create_file, dir_exists, path_join, remove_path, temp_dir
+from ....utils import chdir, copy_path, create_file, dir_exists, path_join, temp_dir
 from ...constants import get_root
 from ...git import get_git_email, get_git_user, get_latest_commit_hash
 from ..console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_waiting, echo_warning, run_or_abort

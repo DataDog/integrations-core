@@ -55,6 +55,7 @@ class MetadataManager(object):
 
     There are a few default transformers, which can be overridden by custom transformers.
     """
+
     __slots__ = ('check_id', 'check_name', 'logger', 'metadata_transformers')
 
     def __init__(self, check_name, check_id, logger=None, metadata_transformers=None):
