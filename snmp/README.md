@@ -129,7 +129,9 @@ Profiles can be used interchangeably, such that devices that share MIB dependenc
 * [Cisco c3850][9]
 * [Cisco Nexus][10]
 * [Cisco Meraki][11]
-* [Cisco Voice][26]
+* [Cisco UC Virtual Machine][26]
+* [Cisco ICM][27]
+* [Cisco ISR 4431][28]
 * [Dell iDRAC][12]
 * [Dell Poweredge][13]
 * [F5 Big IP][14]
@@ -197,4 +199,7 @@ Additional helpful documentation, links, and articles:
 [23]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
 [24]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/isilon.yaml
 [25]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/apc-ups.yaml
-[26]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/_base_cisco_voice.yaml
+[26]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco_uc_virtual_machine.yaml
+[27]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco_icm.yaml
+[28]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco_isr_4431.yaml
+
