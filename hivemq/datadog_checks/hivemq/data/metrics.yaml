@@ -185,7 +185,7 @@ jmx_metrics:
           metric_type: gauge
         Count:
           alias: hivemq.$1.count
-          metric_type: gauge
+          metric_type: monotonic_count
         Max:
           alias: hivemq.$1.max
           metric_type: gauge
