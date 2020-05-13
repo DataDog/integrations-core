@@ -11,10 +11,20 @@ metrics:
         OID: 1.3.6.1.2.1.25.5.1.1.2
       - name: hrSWRunPerfCPU
         OID: 1.3.6.1.2.1.25.5.1.1.1
+    metric_tags:
+      - column:
+          name: hrSWRunStatus
+          OID: 1.3.6.1.2.1.25.4.2.1.7
+        table: hrSWRunTable
+        tag: status
 
   - MIB: HOST-RESOURCES-MIB
-    name: hrSWRunStatus
-    OID: 1.3.6.1.2.1.25.4.2.1.7
+    table:
+      name: hrSWRunTable
+      OID: 1.3.6.1.2.1.25.4.2
+    symbols:
+      - name: hrSWRunStatus
+        OID: 1.3.6.1.2.1.25.4.2.1.7
 
   - MIB: CISCO-CVP-MIB
     table:

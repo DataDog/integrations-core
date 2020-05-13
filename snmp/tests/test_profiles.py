@@ -62,31 +62,37 @@ def run_profile_check(recording_name):
 
 def test_cisco_voice(aggregator):
     run_profile_check('cisco_icm')
-    resources = ["hrSWRunPerfMem", "hrSWRunPerfCPU", "hrSWRunStatus"]
 
-    tags = ['snmp_profile:cisco_icm', 'snmp_host:test']
-    tags += common.CHECK_TAGS
+    tags = ['snmp_profile:cisco_icm', 'snmp_host:test'] + common.CHECK_TAGS
+
+    resources = ["hrSWRunPerfMem", "hrSWRunPerfCPU", "hrSWRunStatus"]
 
     for resource in resources:
         aggregator.assert_metric('snmp.{}'.format(resource), metric_type=aggregator.GAUGE, tags=tags)
 
-    cvps = [
+    cvp_gauges = [
         "ccvpSipIntAvgLatency1",
         "ccvpSipIntAvgLatency2",
         "ccvpSipIntConnectsRcv",
         "ccvpSipIntNewCalls",
         "ccvpSipRtActiveCalls",
         "ccvpSipRtTotalCallLegs",
-        "ccvpLicAggMaxPortsInUse",
         "ccvpLicRtPortsInUse",
     ]
-    for cvp in cvps:
+
+    cvp_counts = [
+        "ccvpLicAggMaxPortsInUse",
+    ]
+    for cvp in cvp_gauges:
         aggregator.assert_metric('snmp.{}'.format(cvp), metric_type=aggregator.GAUGE, tags=tags)
+
+    for cvp in cvp_counts:
+        aggregator.assert_metric('snmp.{}'.format(cvp), metric_type=aggregator.RATE, tags=tags)
 
     ccms = ["ccmRegisteredGateways", "ccmRejectedPhones", "ccmRegisteredPhones", "ccmUnregisteredPhones"]
 
     for ccm in ccms:
-        aggregator.assert_metric('snmp.{}'.format(ccm), metric_type=aggregator.GAUGE, tags=tags)
+        aggregator.assert_metric('snmp.{}'.format(ccm), metric_type=aggregator.RATE, tags=tags)
 
     calls = [
         "cvCallVolPeerIncomingCalls",
