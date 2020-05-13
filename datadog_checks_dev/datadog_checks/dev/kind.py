@@ -8,9 +8,9 @@ import pytest
 from six import PY3
 
 from .env import environment_run
-from .structures import LazyFunction
+from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import find_check_root, get_check_name, get_here, get_tox_env, path_join
+from .utils import create_file, file_exists, get_check_name, get_tox_env, path_join
 
 if PY3:
     from shutil import which
@@ -38,20 +38,29 @@ def kind_run(directory, sleep=None, endpoints=None, conditions=None, env_vars=No
     if not which('kind'):
         pytest.skip('Kind not available')
 
-    get_here()
-    set_up = KindUp(directory)
-    tear_down = KindDown(directory)
+    check_name = get_check_name(directory)
+    cluster_name = '{}-{}-cluster'.format(check_name, get_tox_env())
 
-    with environment_run(
-        up=set_up,
-        down=tear_down,
-        sleep=sleep,
-        endpoints=endpoints,
-        conditions=conditions,
-        env_vars=env_vars,
-        wrappers=wrappers,
-    ) as result:
-        yield result
+    with TempDir(cluster_name) as temp_dir:
+        kubeconfig_path = path_join(temp_dir, 'config')
+
+        if not file_exists(kubeconfig_path):
+            create_file(kubeconfig_path)
+
+        with EnvVars({'KUBECONFIG': kubeconfig_path}):
+            set_up = KindUp(cluster_name)
+            tear_down = KindDown(cluster_name)
+
+            with environment_run(
+                up=set_up,
+                down=tear_down,
+                sleep=sleep,
+                endpoints=endpoints,
+                conditions=conditions,
+                env_vars=env_vars,
+                wrappers=wrappers,
+            ):
+                yield kubeconfig_path
 
 
 class KindUp(LazyFunction):
@@ -61,31 +70,21 @@ class KindUp(LazyFunction):
     It also returns the kubeconfig path as a `str`.
     """
 
-    def __init__(self, directory):
-        self.directory = directory
-        self.check_root = find_check_root(depth=3)
-        self.check_name = get_check_name(self.directory)
-        self.cluster_name = '{}-{}-cluster'.format(self.check_name, get_tox_env())
+    def __init__(self, cluster_name):
+        self.cluster_name = cluster_name
 
     def __call__(self):
-        kube_path = path_join(self.check_root, '.kube', 'config')
-        env = os.environ.copy()
-        env['KUBECONFIG'] = kube_path
         # Create cluster
-        run_command(['kind', 'create', 'cluster', '--name', self.cluster_name], check=True, env=env)
+        run_command(['kind', 'create', 'cluster', '--name', self.cluster_name], check=True)
         # Connect to cluster
-        run_command(['kind', 'export', 'kubeconfig', '--name', self.cluster_name], check=True, env=env)
-
-        return kube_path
+        run_command(['kind', 'export', 'kubeconfig', '--name', self.cluster_name], check=True)
 
 
 class KindDown(LazyFunction):
     """Delete the kind cluster, calling `delete cluster`."""
 
-    def __init__(self, directory):
-        self.directory = directory
-        self.check_name = get_check_name(self.directory)
-        self.cluster_name = '{}-{}-cluster'.format(self.check_name, get_tox_env())
+    def __init__(self, cluster_name):
+        self.cluster_name = cluster_name
 
     def __call__(self):
         return run_command(['kind', 'delete', 'cluster', '--name', self.cluster_name], check=True)
