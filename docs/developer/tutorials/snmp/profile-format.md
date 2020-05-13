@@ -243,6 +243,13 @@ metrics:
         tag: interface
 ```
 
+!!! note
+    General guidelines on [Datadog tagging](https://docs.datadoghq.com/tagging/) also apply to table metric tags.
+
+    In particular, be mindful of the kind of value contained in the columns used a tag sources. E.g. avoid using a `DisplayString` (an arbitrarily long human-readable text description) or unbounded sources (timestamps, IDs...) as tag values.
+
+    Good candidates for tag values include short strings, enums, or integer indexes.
+
 #### Metric type inference
 
 By default, the [Datadog metric type](https://docs.datadoghq.com/developers/metrics/types/?tab=count) of a symbol will be inferred from the SNMP type (i.e. the MIB `SYNTAX`):
