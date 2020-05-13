@@ -51,9 +51,6 @@ def deploy(ctx, branch, yes):
         echo_waiting('Writing .nojekyll at the root...')
         create_file(path_join(temp_repo_dir, '.nojekyll'))
 
-        # TODO: Remove when this ships https://github.com/mkdocs/mkdocs/pull/2100
-        remove_path(path_join(temp_repo_dir, 'sitemap.xml.gz'))
-
         with chdir(temp_repo_dir):
             echo_waiting('Configuring the temporary Git repository...')
             run_or_abort('git init', capture=True)
