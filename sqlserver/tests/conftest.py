@@ -12,11 +12,12 @@ from datadog_checks.dev import WaitFor, docker_run
 from .common import (
     DOCKER_SERVER,
     E2E_METADATA,
-    FULL_CONFIG,
+    FULL_E2E_CONFIG,
     HERE,
     INIT_CONFIG,
     INIT_CONFIG_OBJECT_NAME,
     INSTANCE_DOCKER,
+    INSTANCE_E2E,
     INSTANCE_SQL2017,
     get_local_driver,
 )
@@ -47,6 +48,11 @@ def instance_docker():
     return deepcopy(INSTANCE_DOCKER)
 
 
+@pytest.fixture
+def instance_e2e():
+    return deepcopy(INSTANCE_E2E)
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
     if pyodbc is None:
@@ -61,4 +67,4 @@ def dd_environment():
         conditions=[WaitFor(sqlserver, wait=3, attempts=10)],
         mount_logs=True,
     ):
-        yield FULL_CONFIG, E2E_METADATA
+        yield FULL_E2E_CONFIG, E2E_METADATA
