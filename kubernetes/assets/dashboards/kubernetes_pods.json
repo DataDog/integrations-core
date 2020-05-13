@@ -15,9 +15,9 @@
         "title": null,
         "verified": true
     },
-    "description": "Our Kubernetes dashboards give you broad visibility into the scale, status, and resource usage of your cluster and its containers. Further reading for Kubernetes monitoring:\n\n- [Autoscale Kubernetes workloads with any Datadog metric](https://www.datadoghq.com/blog/autoscale-kubernetes-datadog/)\n\n- [How to monitor Kubernetes + Docker with Datadog](https://www.datadoghq.com/blog/monitor-kubernetes-docker/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\n- [Monitoring Kubernetes performance metrics](https://www.datadoghq.com/blog/monitoring-kubernetes-performance-metrics/)\n\n- [Collecting metrics with built-in Kubernetes monitoring tools](https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics/)\n\n- [Monitoring Kubernetes with Datadog](https://www.datadoghq.com/blog/monitoring-kubernetes-with-datadog/)\n\n- [Datadog's Kubernetes integration docs](https://docs.datadoghq.com/integrations/kubernetes/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "description": "Our Kubernetes dashboard gives you broad visibility into the scale, status, and resource usage of your cluster and its containers. Further reading for Kubernetes monitoring:\n\n- [Autoscale Kubernetes workloads with any Datadog metric](https://www.datadoghq.com/blog/autoscale-kubernetes-datadog/)\n\n- [How to monitor Kubernetes + Docker with Datadog](https://www.datadoghq.com/blog/monitor-kubernetes-docker/)\n\n- [Monitoring in the Kubernetes era](https://www.datadoghq.com/blog/monitoring-kubernetes-era/)\n\n- [Monitoring Kubernetes performance metrics](https://www.datadoghq.com/blog/monitoring-kubernetes-performance-metrics/)\n\n- [Collecting metrics with built-in Kubernetes monitoring tools](https://www.datadoghq.com/blog/how-to-collect-and-graph-kubernetes-metrics/)\n\n- [Monitoring Kubernetes with Datadog](https://www.datadoghq.com/blog/monitoring-kubernetes-with-datadog/)\n\n- [Datadog's Kubernetes integration docs](https://docs.datadoghq.com/integrations/kubernetes/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "id": 1081578,
-    "modified": "2020-05-01T18:01:10.685241+00:00",
+    "modified": "2020-05-13T15:17:48.421139+00:00",
     "new_id": "ztq-ghw-wpg",
     "read_only": false,
     "template_variables": [
@@ -40,46 +40,30 @@
             "default": "*",
             "name": "deployment",
             "prefix": "kube_deployment"
+        },
+        {
+            "default": "*",
+            "name": "statefulset",
+            "prefix": "kube_stateful_set"
+        },
+        {
+            "default": "*",
+            "name": "daemonset",
+            "prefix": "kube_daemon_set"
+        },
+        {
+            "default": "*",
+            "name": "job",
+            "prefix": "kube_job"
         }
     ],
     "widgets": [
-        {
-            "height": 9,
-            "id": 1,
-            "tile_def": {
-                "autoscale": true,
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "custom_fg_color": "#6a53a1",
-                                "palette": "custom_text",
-                                "value": "0"
-                            }
-                        ],
-                        "q": "sum:kubernetes.pods.running{$scope,$cluster,$namespace,$deployment}"
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Running",
-            "type": "query_value",
-            "width": 17,
-            "x": 0,
-            "y": 12
-        },
         {
             "bgcolor": "gray",
             "font_size": "18",
             "height": 5,
             "html": "Overview",
-            "id": 2,
+            "id": 1,
             "text_align": "center",
             "tick": false,
             "tick_edge": "bottom",
@@ -87,45 +71,15 @@
             "type": "note",
             "width": 115,
             "x": 0,
-            "y": 0
-        },
-        {
-            "bgcolor": "white",
-            "font_size": "18",
-            "height": 5,
-            "html": "Pods",
-            "id": 7,
-            "text_align": "center",
-            "tick": false,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 57,
-            "x": -1,
-            "y": 6
-        },
-        {
-            "bgcolor": "white",
-            "font_size": "18",
-            "height": 5,
-            "html": "Containers",
-            "id": 8,
-            "text_align": "center",
-            "tick": false,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 57,
-            "x": 58,
-            "y": 6
+            "y": -8
         },
         {
             "height": 22,
-            "id": 9,
+            "id": 4,
             "tile_def": {
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes.memory.usage{$scope,$namespace,$deployment,!pod_name:no_pod,$cluster} by {pod_name}, 10, 'mean', 'desc')"
+                        "q": "top(sum:kubernetes.memory.usage{$scope,$namespace,$deployment,!pod_name:no_pod,$cluster,$statefulset,$daemonset,$job} by {pod_name}, 10, 'mean', 'desc')"
                     }
                 ],
                 "viz": "toplist"
@@ -140,15 +94,15 @@
             "type": "toplist",
             "width": 28,
             "x": 29,
-            "y": 55
+            "y": 52
         },
         {
             "height": 22,
-            "id": 10,
+            "id": 5,
             "tile_def": {
                 "requests": [
                     {
-                        "q": "top(sum:kubernetes.cpu.usage.total{$scope,$namespace,$deployment,!pod_name:no_pod,$cluster} by {pod_name}, 10, 'mean', 'desc')"
+                        "q": "top(sum:kubernetes.cpu.usage.total{$scope,$namespace,$deployment,!pod_name:no_pod,$cluster,$statefulset,$daemonset,$job} by {pod_name}, 10, 'mean', 'desc')"
                     }
                 ],
                 "viz": "toplist"
@@ -163,11 +117,11 @@
             "type": "toplist",
             "width": 28,
             "x": 0,
-            "y": 55
+            "y": 52
         },
         {
             "height": 22,
-            "id": 11,
+            "id": 6,
             "legend": true,
             "tile_def": {
                 "requests": [
@@ -186,7 +140,7 @@
                                 "alias": "Succeeded pods"
                             }
                         },
-                        "q": "sum:kubernetes_state.pod.status_phase{$cluster,$namespace,$deployment,pod_phase:failed,$scope}, sum:kubernetes_state.pod.status_phase{$cluster,$namespace,$deployment,pod_phase:pending,$scope}, sum:kubernetes_state.pod.status_phase{$cluster,$namespace,$deployment,pod_phase:running,$scope}, sum:kubernetes_state.pod.status_phase{$cluster,$namespace,$deployment,pod_phase:succeeded,$scope}",
+                        "q": "sum:kubernetes_state.pod.status_phase{$cluster,$namespace,$deployment,pod_phase:failed,$scope,$statefulset,$daemonset,$job}, sum:kubernetes_state.pod.status_phase{$cluster,$namespace,$deployment,pod_phase:pending,$scope,$statefulset,$daemonset,$job}, sum:kubernetes_state.pod.status_phase{$cluster,$namespace,$deployment,pod_phase:running,$scope,$statefulset,$daemonset,$job}, sum:kubernetes_state.pod.status_phase{$cluster,$namespace,$deployment,pod_phase:succeeded,$scope,$statefulset,$daemonset,$job}",
                         "style": {
                             "palette": "cool",
                             "type": "solid",
@@ -211,14 +165,14 @@
             "type": "timeseries",
             "width": 57,
             "x": 58,
-            "y": 55
+            "y": 52
         },
         {
             "bgcolor": "gray",
             "font_size": "18",
             "height": 5,
             "html": "Containers",
-            "id": 14,
+            "id": 7,
             "text_align": "center",
             "tick": false,
             "tick_edge": "bottom",
@@ -226,17 +180,17 @@
             "type": "note",
             "width": 115,
             "x": 0,
-            "y": 114
+            "y": 94
         },
         {
             "height": 22,
-            "id": 15,
+            "id": 8,
             "legend": true,
             "legend_size": "0",
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.container.ready{$cluster,$namespace,$deployment,$scope}, sum:kubernetes_state.container.running{$cluster,$namespace,$deployment,$scope}, sum:kubernetes_state.container.terminated{$cluster,$namespace,$deployment,$scope}, sum:kubernetes_state.container.waiting{$cluster,$namespace,$deployment,$scope}",
+                        "q": "sum:kubernetes_state.container.ready{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job}, sum:kubernetes_state.container.running{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job}, sum:kubernetes_state.container.terminated{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job}, sum:kubernetes_state.container.waiting{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -261,17 +215,17 @@
             "type": "timeseries",
             "width": 57,
             "x": 0,
-            "y": 120
+            "y": 100
         },
         {
             "height": 22,
-            "id": 16,
+            "id": 9,
             "legend": false,
             "legend_size": "4",
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.container.restarts{$scope,$cluster,$namespace,$deployment} by {pod_name}",
+                        "q": "sum:kubernetes_state.container.restarts{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job} by {pod_name}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -296,17 +250,17 @@
             "type": "timeseries",
             "width": 57,
             "x": 58,
-            "y": 120
+            "y": 100
         },
         {
             "height": 22,
-            "id": 17,
+            "id": 10,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.container.waiting{$cluster,$namespace,$deployment,reason:crashloopbackoff,$scope} by {pod_name}",
+                        "q": "sum:kubernetes_state.container.waiting{$cluster,$namespace,$deployment,reason:crashloopbackoff,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -331,17 +285,17 @@
             "type": "timeseries",
             "width": 57,
             "x": 0,
-            "y": 145
+            "y": 125
         },
         {
             "height": 22,
-            "id": 18,
+            "id": 11,
             "legend": true,
             "legend_size": "0",
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.container.terminated{$cluster,$namespace,$deployment,reason:OOMKilled} by {pod_name}",
+                        "q": "sum:kubernetes_state.container.terminated{$cluster,$namespace,$deployment,reason:OOMKilled,$statefulset,$daemonset,$job} by {pod_name}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -366,17 +320,17 @@
             "type": "timeseries",
             "width": 57,
             "x": 58,
-            "y": 145
+            "y": 125
         },
         {
             "height": 22,
-            "id": 19,
+            "id": 12,
             "legend": true,
             "legend_size": "0",
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:kubernetes.cpu.usage.total{$cluster,$namespace,$deployment,$scope} by {kube_container_name,container_id}",
+                        "q": "sum:kubernetes.cpu.usage.total{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {kube_container_name,container_id}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -401,17 +355,17 @@
             "type": "timeseries",
             "width": 57,
             "x": 0,
-            "y": 170
+            "y": 150
         },
         {
             "height": 22,
-            "id": 20,
+            "id": 13,
             "legend": true,
             "legend_size": "0",
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:kubernetes.memory.usage{$cluster,$namespace,$deployment,$scope} by {kube_container_name,container_id}",
+                        "q": "sum:kubernetes.memory.usage{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {kube_container_name,container_id}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -436,14 +390,14 @@
             "type": "timeseries",
             "width": 57,
             "x": 58,
-            "y": 170
+            "y": 150
         },
         {
             "bgcolor": "gray",
             "font_size": "18",
             "height": 5,
             "html": "Pods",
-            "id": 21,
+            "id": 14,
             "text_align": "center",
             "tick": false,
             "tick_edge": "bottom",
@@ -451,17 +405,17 @@
             "type": "note",
             "width": 115,
             "x": -1,
-            "y": 24
+            "y": 21
         },
         {
             "height": 22,
-            "id": 22,
+            "id": 15,
             "legend": true,
             "legend_size": "0",
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:kubernetes.network.rx_bytes{$cluster,$namespace,$deployment,$scope} by {pod_name}, sum:kubernetes.network.tx_bytes{$cluster,$namespace,$deployment,$scope} by {pod_name}",
+                        "q": "sum:kubernetes.network.rx_bytes{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name}, sum:kubernetes.network.tx_bytes{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -486,17 +440,17 @@
             "type": "timeseries",
             "width": 57,
             "x": 0,
-            "y": 195
+            "y": 175
         },
         {
             "height": 22,
-            "id": 23,
+            "id": 16,
             "legend": true,
             "legend_size": "0",
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:kubernetes.network.rx_errors{$cluster,$namespace,$deployment,$scope} by {pod_name}, sum:kubernetes.network.tx_errors{$cluster,$namespace,$deployment,$scope} by {pod_name}",
+                        "q": "sum:kubernetes.network.rx_errors{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name}, sum:kubernetes.network.tx_errors{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -521,11 +475,11 @@
             "type": "timeseries",
             "width": 57,
             "x": 58,
-            "y": 195
+            "y": 175
         },
         {
             "height": 14,
-            "id": 24,
+            "id": 17,
             "tile_def": {
                 "requests": [
                     {
@@ -546,7 +500,7 @@
                                 "value": "3000"
                             }
                         ],
-                        "q": "top(sum:kubernetes.pods.running{$scope,$namespace,$deployment,$cluster} by {kubernetes_cluster,kube_namespace}, 100, 'max', 'desc')"
+                        "q": "top(sum:kubernetes.pods.running{$scope,$namespace,$deployment,$cluster,$statefulset,$daemonset,$job} by {kubernetes_cluster,kube_namespace}, 100, 'max', 'desc')"
                     }
                 ],
                 "viz": "toplist"
@@ -558,11 +512,11 @@
             "type": "toplist",
             "width": 28,
             "x": 0,
-            "y": 80
+            "y": 77
         },
         {
             "height": 14,
-            "id": 25,
+            "id": 18,
             "tile_def": {
                 "requests": [
                     {
@@ -583,7 +537,7 @@
                                 "value": "24"
                             }
                         ],
-                        "q": "top(sum:kubernetes_state.pod.ready{$scope,$cluster,$namespace,$deployment,condition:true} by {kubernetes_cluster,host,nodepool}, 10, 'last', 'desc')"
+                        "q": "top(sum:kubernetes_state.pod.ready{$scope,$cluster,$namespace,$deployment,condition:true,$statefulset,$daemonset,$job} by {kubernetes_cluster,host,nodepool}, 10, 'last', 'desc')"
                     }
                 ],
                 "viz": "toplist"
@@ -595,11 +549,11 @@
             "type": "toplist",
             "width": 28,
             "x": 29,
-            "y": 80
+            "y": 77
         },
         {
-            "height": 14,
-            "id": 26,
+            "height": 12,
+            "id": 19,
             "tile_def": {
                 "requests": [
                     {
@@ -615,23 +569,24 @@
                                 "value": "0"
                             }
                         ],
-                        "q": "top(sum:kubernetes_state.pod.status_phase{$scope,$cluster,$namespace,$deployment,!phase:running,!phase:succeeded} by {phase,kube_namespace}, 100, 'last', 'desc')"
+                        "q": "top(sum:kubernetes_state.pod.status_phase{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,!phase:running,!phase:succeeded} by {phase,kube_namespace}, 100, 'last', 'desc')"
                     }
                 ],
                 "viz": "toplist"
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": 16,
             "title_text": "Pods in Bad Phase by Namespaces",
             "type": "toplist",
-            "width": 57,
-            "x": 58,
-            "y": 97
+            "width": 28,
+            "x": 87,
+            "y": 6
         },
         {
             "height": 14,
-            "id": 27,
+            "id": 20,
             "tile_def": {
                 "requests": [
                     {
@@ -647,7 +602,7 @@
                                 "value": "0"
                             }
                         ],
-                        "q": "top(exclude_null(sum:kubernetes_state.pod.ready{condition:false,$scope,$cluster,$namespace,$deployment} by {kube_namespace}), 25, 'last', 'desc')"
+                        "q": "top(exclude_null(sum:kubernetes_state.pod.ready{condition:false,$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job} by {kube_namespace}), 25, 'last', 'desc')"
                     }
                 ],
                 "viz": "toplist"
@@ -659,16 +614,149 @@
             "type": "toplist",
             "width": 57,
             "x": 58,
-            "y": 80
+            "y": 77
         },
         {
-            "height": 14,
-            "id": 28,
-            "legend": false,
+            "height": 12,
+            "id": 22,
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:kubernetes.pods.running{$scope,$namespace,$cluster,$deployment} by {kube_namespace,kube_deployment}",
+                        "change_type": "absolute",
+                        "compare_to": "week_before",
+                        "increase_good": true,
+                        "order_by": "change",
+                        "order_dir": "desc",
+                        "q": "sum:kubernetes.pods.running{$scope,$namespace,$cluster,$deployment,$statefulset,$daemonset,$job} by {kube_namespace,kube_deployment}"
+                    }
+                ],
+                "viz": "change"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Pods Running (changed weekly)",
+            "type": "change",
+            "width": 28,
+            "x": 58,
+            "y": 6
+        },
+        {
+            "height": 12,
+            "id": 23,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "sum:kubernetes.pods.running{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Pods Running",
+            "type": "timeseries",
+            "width": 28,
+            "x": 0,
+            "y": 6
+        },
+        {
+            "height": 22,
+            "id": 26,
+            "legend": true,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:kubernetes.cpu.usage.total{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "CPU Usage by Pod",
+            "type": "timeseries",
+            "width": 57,
+            "x": 0,
+            "y": 27
+        },
+        {
+            "height": 22,
+            "id": 27,
+            "legend": true,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:kubernetes.memory.usage{$cluster,$namespace,$deployment,$scope,$statefulset,$daemonset,$job} by {pod_name}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Memory Usage by Pod",
+            "type": "timeseries",
+            "width": 57,
+            "x": 58,
+            "y": 27
+        },
+        {
+            "height": 12,
+            "id": 29,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "sum:kubernetes.pods.running{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job} by {cluster_name,kube_namespace}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -686,226 +774,15 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": 16,
-            "title_text": "Pods Running by Deployment",
+            "title_text": "Pods running by Namespace",
             "type": "timeseries",
             "width": 28,
             "x": 29,
-            "y": 97
-        },
-        {
-            "height": 14,
-            "id": 31,
-            "tile_def": {
-                "requests": [
-                    {
-                        "change_type": "absolute",
-                        "compare_to": "week_before",
-                        "increase_good": true,
-                        "order_by": "change",
-                        "order_dir": "desc",
-                        "q": "sum:kubernetes.pods.running{$scope,$namespace,$cluster,$deployment} by {kube_namespace,kube_deployment}"
-                    }
-                ],
-                "viz": "change"
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Pods Running (Changed Weekly)",
-            "type": "change",
-            "width": 28,
-            "x": 0,
-            "y": 97
-        },
-        {
-            "height": 9,
-            "id": 32,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "sum:kubernetes.pods.running{$scope,$cluster,$namespace,$deployment}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Running over time",
-            "type": "timeseries",
-            "width": 39,
-            "x": 18,
-            "y": 12
-        },
-        {
-            "height": 9,
-            "id": 33,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "metadata": {
-                            "count_not_null(sum:containerd.cpu.user{$scope,$cluster,$namespace,$deployment} by {container_id})": {
-                                "alias": "Containerd"
-                            },
-                            "count_not_null(sum:cri.cpu.usage{$scope,$cluster,$namespace,$deployment} by {container_id})": {
-                                "alias": "Cri-o"
-                            },
-                            "count_not_null(sum:docker.cpu.user{$scope,$cluster,$namespace,$deployment} by {container_id})": {
-                                "alias": "Docker"
-                            },
-                            "count_not_null(sum:docker.cpu.user{$scope,$cluster,$namespace,$deployment} by {container_id})+count_not_null(sum:containerd.cpu.user{$scope,$cluster,$namespace,$deployment} by {container_id})+count_not_null(sum:cri.cpu.usage{$scope,$cluster,$namespace,$deployment} by {container_id})": {
-                                "alias": "Total"
-                            }
-                        },
-                        "q": "count_not_null(sum:docker.cpu.user{$scope,$cluster,$namespace,$deployment} by {container_id}), count_not_null(sum:containerd.cpu.user{$scope,$cluster,$namespace,$deployment} by {container_id}), count_not_null(sum:cri.cpu.usage{$scope,$cluster,$namespace,$deployment} by {container_id}), count_not_null(sum:docker.cpu.user{$scope,$cluster,$namespace,$deployment} by {container_id})+count_not_null(sum:containerd.cpu.user{$scope,$cluster,$namespace,$deployment} by {container_id})+count_not_null(sum:cri.cpu.usage{$scope,$cluster,$namespace,$deployment} by {container_id})",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Running over time",
-            "type": "timeseries",
-            "width": 39,
-            "x": 76,
-            "y": 12
-        },
-        {
-            "height": 9,
-            "id": 34,
-            "tile_def": {
-                "autoscale": true,
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "conditional_formats": [
-                            {
-                                "comparator": ">",
-                                "custom_fg_color": "#598f46",
-                                "palette": "custom_text",
-                                "value": "0"
-                            }
-                        ],
-                        "q": "count_not_null(sum:docker.cpu.user{$scope,$cluster,$namespace,$deployment} by {container_id})+count_not_null(sum:containerd.cpu.user{$scope,$cluster,$namespace,$deployment} by {container_id})+count_not_null(sum:cri.cpu.usage{$scope,$cluster,$namespace,$deployment} by {container_id})"
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Running",
-            "type": "query_value",
-            "width": 17,
-            "x": 58,
-            "y": 12
-        },
-        {
-            "height": 22,
-            "id": 37,
-            "legend": true,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:kubernetes.cpu.usage.total{$cluster,$namespace,$deployment,$scope} by {pod_name}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "CPU Usage by Pod",
-            "type": "timeseries",
-            "width": 57,
-            "x": 0,
-            "y": 30
-        },
-        {
-            "height": 22,
-            "id": 38,
-            "legend": true,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:kubernetes.memory.usage{$cluster,$namespace,$deployment,$scope} by {pod_name}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Memory Usage by Pod",
-            "type": "timeseries",
-            "width": 57,
-            "x": 58,
-            "y": 30
+            "y": 6
         }
     ]
 }
