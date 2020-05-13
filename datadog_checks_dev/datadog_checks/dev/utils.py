@@ -250,21 +250,11 @@ def find_check_root(depth=0):
     return root
 
 
-def get_check_name(root):
-    """
-    Get check name from path
-    """
-    while True:
-        if os.path.isfile(os.path.join(root, 'setup.py')):
-            check = os.path.basename(root)
-            break
+def get_current_check_name(depth=0):
+    # Account for this call
+    depth += 1
 
-        new_root = os.path.dirname(root)
-        if new_root == root:
-            raise OSError('No Datadog Agent check found')
-
-        root = new_root
-    return check
+    return os.path.basename(find_check_root(depth))
 
 
 @contextmanager

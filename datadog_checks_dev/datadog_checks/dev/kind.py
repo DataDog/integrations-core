@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
 from contextlib import contextmanager
 
 import pytest
@@ -10,7 +9,7 @@ from six import PY3
 from .env import environment_run
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import create_file, file_exists, get_check_name, get_tox_env, path_join
+from .utils import create_file, file_exists, get_current_check_name, get_tox_env, path_join
 
 if PY3:
     from shutil import which
@@ -19,11 +18,10 @@ else:
 
 
 @contextmanager
-def kind_run(directory, sleep=None, endpoints=None, conditions=None, env_vars=None, wrappers=None):
-    """This utility provides a convenient way to safely set up and tear down Kind environments.
+def kind_run(sleep=None, endpoints=None, conditions=None, env_vars=None, wrappers=None):
+    """
+    This utility provides a convenient way to safely set up and tear down Kind environments.
 
-    :param directory: A path containing Kind files.
-    :type directory: ``str``
     :param sleep: Number of seconds to wait before yielding.
     :type sleep: ``float``
     :param endpoints: Endpoints to verify access for before yielding. Shorthand for adding
@@ -38,8 +36,9 @@ def kind_run(directory, sleep=None, endpoints=None, conditions=None, env_vars=No
     if not which('kind'):
         pytest.skip('Kind not available')
 
-    check_name = get_check_name(directory)
-    cluster_name = '{}-{}-cluster'.format(check_name, get_tox_env())
+    # An extra level deep because of the context manager
+    check_name = get_current_check_name(depth=2)
+    cluster_name = 'cluster-{}-{}'.format(check_name, get_tox_env())
 
     with TempDir(cluster_name) as temp_dir:
         kubeconfig_path = path_join(temp_dir, 'config')
@@ -66,8 +65,6 @@ def kind_run(directory, sleep=None, endpoints=None, conditions=None, env_vars=No
 class KindUp(LazyFunction):
     """Create the kind cluster and use its context, calling
     `kind create cluster --name <integration>-cluster`
-
-    It also returns the kubeconfig path as a `str`.
     """
 
     def __init__(self, cluster_name):
