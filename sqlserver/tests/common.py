@@ -5,7 +5,6 @@
 import os
 
 from datadog_checks.dev import get_docker_hostname, get_here
-from datadog_checks.dev._env import e2e_testing
 from datadog_checks.dev.utils import ON_MACOS, ON_WINDOWS
 from datadog_checks.sqlserver import SQLServer
 
