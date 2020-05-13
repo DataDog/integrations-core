@@ -68,7 +68,7 @@ def test_cisco_voice(aggregator):
     tags += common.CHECK_TAGS
 
     for resource in resources:
-        aggregator.assert_metric('snmp.{}'.format(resource), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(resource), metric_type=aggregator.GAUGE, tags=tags)
 
     cvps = [
         "ccvpSipIntAvgLatency1",
@@ -81,12 +81,12 @@ def test_cisco_voice(aggregator):
         "ccvpLicRtPortsInUse",
     ]
     for cvp in cvps:
-        aggregator.assert_metric('snmp.{}'.format(cvp), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(cvp), metric_type=aggregator.GAUGE, tags=tags)
 
     ccms = ["ccmRegisteredGateways", "ccmRejectedPhones", "ccmRegisteredPhones", "ccmUnregisteredPhones"]
 
     for ccm in ccms:
-        aggregator.assert_metric('snmp.{}'.format(ccm), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(ccm), metric_type=aggregator.GAUGE, tags=tags)
 
     calls = [
         "cvCallVolPeerIncomingCalls",
@@ -96,7 +96,7 @@ def test_cisco_voice(aggregator):
     ]
 
     for call in calls:
-        aggregator.assert_metric('snmp.{}'.format(call), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(call), metric_type=aggregator.GAUGE, tags=tags)
 
     dial_controls = [
         "dialCtlPeerStatsAcceptCalls",
@@ -106,9 +106,10 @@ def test_cisco_voice(aggregator):
     ]
 
     for ctl in dial_controls:
-        aggregator.assert_metric('snmp.{}'.format(ctl), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(ctl), metric_type=aggregator.GAUGE, tags=tags)
 
-    aggregator.assert_metric('snmp.{}'.format("cccaPimStatus"), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    pim_tags = tags + ['pim_host:test', 'pim_name:name', 'pim_num:2']
+    aggregator.assert_metric('snmp.{}'.format("cccaPimStatus"), metric_type=aggregator.GAUGE, tags=pim_tags)
     aggregator.assert_metric('snmp.{}'.format("sysUpTimeInstance"), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
