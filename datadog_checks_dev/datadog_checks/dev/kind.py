@@ -84,4 +84,4 @@ class KindDown(LazyFunction):
         self.cluster_name = cluster_name
 
     def __call__(self):
-        return run_command(['kind', 'delete', 'cluster', '--name', self.cluster_name], check=True)
+        run_command(['kind', 'delete', 'cluster', '--name', self.cluster_name], check=True)
