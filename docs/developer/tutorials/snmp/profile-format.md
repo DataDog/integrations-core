@@ -1,4 +1,4 @@
-# Profile format reference
+# Profile Format Reference
 
 ## Overview
 

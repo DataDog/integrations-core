@@ -1,4 +1,4 @@
-# Build an SNMP profile
+# Build an SNMP Profile
 
 SNMP profiles are our way of providing out-of-the-box monitoring for certain makes and models of network devices.
 
@@ -30,7 +30,7 @@ Generally, you'll want to search the web and find out about the following:
 
     > E.g. we can see that HP provides a MIB package for iLO devices [here](https://support.hpe.com/hpsc/swd/public/detail?swItemId=MTX_53293d026fb147958b223069b6).
 
-### Metrics selections
+### Metrics selection
 
 Now that we have gathered some basic information about the device and its SNMP interfaces, we should decide which metrics we want to collect. (Devices often expose thousands of metrics through SNMP. We certainly don't want to collect them all.)
 
@@ -42,7 +42,7 @@ Some guidelines to help you in this process:
 - Explore base profiles to see which ones could be applicable to the device.
 - Explore manufacturer-specific MIB files looking for metrics such as:
     - General health: status gauges...
-    - Network traffic: bytes in/ou, errors in/out, ...
+    - Network traffic: bytes in/out, errors in/out, ...
     - CPU and memory usage.
     - Temperature: temperature sensors, thermal condition, ...
     - Power supply.
@@ -100,8 +100,8 @@ We don't have simulation data yet, so the test should fail. Let's make sure it d
 ```console
 $ ddev -k test_hp_ilo4 snmp:py38
 [...]
-======================================== FAILURES ========================================
-_____________________________________ test_hp_ilo42 ______________________________________
+======================================= FAILURES ========================================
+_____________________________________ test_hp_ilo4 ______________________________________
 tests/test_profiles.py:1464: in test_hp_ilo4
     aggregator.assert_metric('snmp.cpqHeSysUtilLifeTime', metric_type=aggregator.GAUGE, tags=common.CHECK_TAGS, count=1)
 ../datadog_checks_base/datadog_checks/base/stubs/aggregator.py:253: in assert_metric
@@ -116,10 +116,10 @@ Good. Now, onto adding simulation data.
 
 ### Add simulation data
 
-Add a `.snmprec` file named after the `community_string`:
+Add a `.snmprec` file named after the `community_string`, which is the value we gave to `run_profile_check()`:
 
 ```
-$ touch snmp/tests/compose/data/<community_string>.snmprec
+$ touch snmp/tests/compose/data/hp_ilo4.snmprec
 ```
 
 Then add a line there for the OID listed in the profile:

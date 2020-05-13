@@ -2,7 +2,7 @@
 
 ## Simulate SNMP devices
 
-SNMP is a protocol for gathering metrics from network devices (e.g. routers, switches, etc.), but we don't have access to actual devices (_yet_).
+SNMP is a protocol for gathering metrics from network devices, but automated testing of the integration would not be practical nor reliable if we used actual devices.
 
 Our approach is to use a simulated SNMP device that responds to SNMP queries using [simulation data](./sim-format.md).
 
@@ -127,7 +127,7 @@ First, install snmpsim:
 pip install snmpsim
 ```
 
-Then run the tool, specifying the MIB, and start and stop OIDs (which can correspond to .e.g the first and last columns in the table respectively).
+Then run the tool, specifying the MIB with the start and stop OIDs (which can correspond to .e.g the first and last columns in the table respectively).
 
 For example:
 

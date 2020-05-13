@@ -31,7 +31,7 @@ The main differences between v1/v2c and v3 are the authentication mechanism and 
 
 **Identifiers for queryable quantities**
 
-An **OID**, also known as an **Object Identifier**, is an identifier for a quantity ("object") that can be retrieved from an SNMP device. Such quantities may include uptime, temperature, network traffic, etc. (quantities available will vary across devices).
+An **OID**, also known as an **Object Identifier**, is an identifier for a quantity ("object") that can be retrieved from an SNMP device. Such quantities may include uptime, temperature, network traffic, etc (quantities available will vary across devices).
 
 To make them processable by machines, OIDs are represented as dot-separated sequences of numbers, e.g. `1.3.6.1.2.1.1.1`.
 

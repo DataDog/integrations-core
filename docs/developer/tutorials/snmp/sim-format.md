@@ -1,4 +1,4 @@
-# Simulation data file format
+# Simulation Data Format Reference
 
 ## Conventions
 

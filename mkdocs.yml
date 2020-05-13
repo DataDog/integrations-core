@@ -60,11 +60,11 @@ nav:
   - Tutorials:
     - JMX: tutorials/jmx.md
     - SNMP:
-      - Introduction to SNMP: tutorials/snmp/introduction.md
-      - Build an SNMP profile: tutorials/snmp/profiles.md
-      - SNMP How-To: tutorials/snmp/how-to.md
-      - Profile format reference: tutorials/snmp/profile-format.md
-      - Simulation data format reference: tutorials/snmp/sim-format.md
+      - tutorials/snmp/introduction.md
+      - tutorials/snmp/profiles.md
+      - tutorials/snmp/how-to.md
+      - tutorials/snmp/profile-format.md
+      - tutorials/snmp/sim-format.md
     - Memory profiling: tutorials/memory-profiling.md
   - Architecture:
     - SNMP: architecture/snmp.md
