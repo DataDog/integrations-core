@@ -4,6 +4,18 @@
 
 import requests
 
+TRELLO_DOCSTRING = """
+
+    \b
+    To use Trello:
+    1. Go to `https://trello.com/app-key` and copy your API key.
+    2. Run `ddev config set trello.key` and paste your API key.
+    3. Go to `https://trello.com/1/authorize?key=key&name=name&scope=read,write&expiration=never&response_type=token`,
+       where `key` is your API key and `name` is the name to give your token, e.g. ReleaseTestingYourName.
+       Authorize access and copy your token.
+    4. Run `ddev config set trello.token` and paste your token.
+"""
+
 
 class TrelloClient:
     API_URL = 'https://api.trello.com'

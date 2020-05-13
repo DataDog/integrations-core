@@ -11,7 +11,7 @@ from ....subprocess import SubprocessError, run_command
 from ....utils import basepath, chdir, get_next
 from ...constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
 from ...github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
-from ...trello import TrelloClient
+from ...trello import TRELLO_DOCSTRING, TrelloClient
 from ...utils import format_commit_id
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
@@ -131,16 +131,8 @@ def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
     return member
 
 
-@click.command(
-    context_settings=CONTEXT_SETTINGS, short_help='Create a Trello card for each change that needs to be tested'
-)
-@click.argument('base_ref')
-@click.argument('target_ref')
-@click.option('--milestone', help='The PR milestone to filter by')
-@click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
-@click.option('--counts', '-c', is_flag=True, help='Only show the counts on the board')
-@click.pass_context
-def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str, dry_run: bool, counts: bool) -> None:
+SHORT_HELP = 'Create a Trello card for each change that needs to be tested'
+LONG_HELP = (
     """
     Create a Trello card for changes since a previous release (referenced by `BASE_REF`)
     that need to be tested for the next release (referenced by `TARGET_REF`).
@@ -180,14 +172,21 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
     `github.user`/`github.token` in your config file or use the
     `DD_GITHUB_USER`/`DD_GITHUB_TOKEN` environment variables.
 
-    \b
-    To use Trello:
-    1. Go to `https://trello.com/app-key` and copy your API key.
-    2. Run `ddev config set trello.key` and paste your API key.
-    3. Go to `https://trello.com/1/authorize?key=key&name=name&scope=read,write&expiration=never&response_type=token`,
-       where `key` is your API key and `name` is the name to give your token, e.g. ReleaseTestingYourName.
-       Authorize access and copy your token.
-    4. Run `ddev config set trello.token` and paste your token.
+"""
+    + TRELLO_DOCSTRING
+)
+
+
+@click.command(context_settings=CONTEXT_SETTINGS, short_help=SHORT_HELP, help=LONG_HELP)
+@click.argument('base_ref')
+@click.argument('target_ref')
+@click.option('--milestone', help='The PR milestone to filter by')
+@click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
+@click.pass_context
+def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str, dry_run: bool) -> None:
+    """
+    Create a Trello card for changes since a previous release (referenced by `BASE_REF`)
+    that need to be tested for the next release (referenced by `TARGET_REF`).
     """
     root = get_root()
     repo = basepath(root)
