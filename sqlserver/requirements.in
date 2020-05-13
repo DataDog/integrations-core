@@ -1,5 +1,5 @@
 adodbapi==2.6.0.7; sys_platform == 'win32'
-pyodbc==4.0.26; sys_platform != 'darwin'
+pyodbc==4.0.26
 pyro4==4.73; sys_platform == 'win32'
 pywin32==227; sys_platform == 'win32'
 selectors34==1.2.0; sys_platform == 'win32' and python_version < '3.4'
