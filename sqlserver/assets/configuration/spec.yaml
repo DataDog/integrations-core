@@ -1,23 +1,114 @@
-name: SqlServer
+name: SQL Server
 files:
 - name: sqlserver.yaml
   options:
   - template: init_config
     options:
-    - template: init_config/default
+    - name: custom_metrics
+      description: |
+        Collect custom metrics and send them to Datadog based on
+        your SQL server counters.
+        
+        See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
+      value:
+        type: array
+        items:
+          type: object
+        example:
+          - name: sqlserver.clr.execution
+            counter_name: CLR Execution
   - template: instances
+    description: |
+      Every instance is scheduled independent of the others.
+
+      Note: All '%' characters must be escaped as '%%'.
     options:
     - name: host
+      description: Host and port of your SQL server.
       required: true
       value:
         type: string
-  - template: logs
-    example:
-    - type: file
-      path: /var/opt/mssql/log/errorlog
-      source: sqlserver
-      service: <SERVICE_NAME>
-      logs:
+        example: <HOST>,<PORT>
+    - name: username
+      description: Username for the Datadog-SQL server check user
+      value:
+        type: string
+    - name: password
+      description: Password for the Datadog-SQL server check user
+      value:
+        type: string
+    - name: database
+      description: Database name to query
+      value:
+        type: string
+        example: master
+    - name: adoprovider
+      description: |
+        Choose the ADO provider.  Note that the (default) provider
+        SQLOLEDB is being deprecated.  To use the newer MSOLEDBSQL
+        provider, set the adoprovider to "MSOLEDBSQL" below. You will also need
+        to download the new provider from
+        https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
+      value:
+        type: string
+        example: SQLOLEDB
+    - name: connector
+      description: |
+        Change the connection method from adodbapi (the default) to
+        odbc (valid connector names are 'odbc' and 'adodbapi')
+        Note: 'adodbapi` is only available on Windows
+      value:
+        type: string
+        example: adodbapi
+    - name: driver
+      description: If using odbc, use the named driver.
+      value:
+        type: string
+        example: SQL Server
+    - name: dsn
+      description: If using odbc, configure a connection using a DSN.
+      value:
+        type: string
+    - name: connection_string
+      description: |
+        Specify a custom connection string to be used
+        Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=True"
+        "Trusted_Connection=yes" to use Windows Authentication
+      value:
+        type: string
+        example: "<CONNECTION_STRING>"
+    - name: command_timeout
+      description: Timeout in seconds for the connection and each command run
+      value:
+        type: integer
+        example: 30
+    - name: stored_procedure
+      description: |
+        Get metrics from custom proc in MyDB but only if the database is writable
+        (i.e. it's the master in an availability group) Note: Custom proc must be defined in its own instance
+        See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
+      value:
+        type: string
+        example: <PROCEDURE_NAME>
+    - name: proc_only_if
+      description: Run this SQL before each call to `stored_procedure`. Only if it returns 1 then call the proc.
+      value:
+        type: string
+        example: <SQL_QUERY>
+    - name: proc_only_if_database
+      description: The database to run the `proc_only_if` SQL in.
+      value:
+        type: string
+        example: master
+    - name: ignore_missing_database
+      description: If the DB specified doesn't exist on the server then don't do the check
+      value:
+        type: boolean
+        example: false
+    - template: instances/tags
+
+    - template: logs
+      example:
       - type: file
         path: /var/opt/mssql/log/errorlog
         source: sqlserver

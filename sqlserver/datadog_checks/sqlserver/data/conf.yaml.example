@@ -1,18 +1,22 @@
+## All options defined here are available to all instances.
+#
 init_config:
 
-  ## @param custom_metrics - object - optional
-  ## Collect custom metrics and send them to Datadog based on
-  ## your SQL server counters.
-  ##
-  ## See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
-  #
-  # custom_metrics:
-  #   - name: sqlserver.clr.execution
-  #     counter_name: CLR Execution
+    ## @param custom_metrics - list of mappings - optional
+    ## Collect custom metrics and send them to Datadog based on
+    ## your SQL server counters.
+    ##
+    ## See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
+    #
+    # custom_metrics:
+    #   - name: sqlserver.clr.execution
+    #     counter_name: CLR Execution
 
+## Every instance is scheduled independent of the others.
+##
+## Note: All '%' characters must be escaped as '%%'.
+#
 instances:
-
-    ## Note: All '%' characters must be escaped as '%%'.
 
     ## @param host - string - required
     ## Host and port of your SQL server.
@@ -22,7 +26,7 @@ instances:
     ## @param username - string - optional
     ## Username for the Datadog-SQL server check user
     #
-    # username: datadog
+    # username: <USERNAME>
 
     ## @param password - string - optional
     ## Password for the Datadog-SQL server check user
@@ -32,7 +36,7 @@ instances:
     ## @param database - string - optional - default: master
     ## Database name to query
     #
-    #  database: master
+    # database: master
 
     ## @param adoprovider - string - optional - default: SQLOLEDB
     ## Choose the ADO provider.  Note that the (default) provider
@@ -58,14 +62,14 @@ instances:
     ## @param dsn - string - optional
     ## If using odbc, configure a connection using a DSN.
     #
-    # dsn: <DSN_NAME>
+    # dsn: <DSN>
 
     ## @param connection_string - string - optional
     ## Specify a custom connection string to be used
     ## Ex: "ApplicationIntent=ReadWrite" or "MultiSubnetFailover=True"
     ## "Trusted_Connection=yes" to use Windows Authentication
     #
-    # connection_string: "<CONNECTION_STRING>"
+    # connection_string: <CONNECTION_STRING>
 
     ## @param command_timeout - integer - optional - default: 30
     ## Timeout in seconds for the connection and each command run
@@ -94,10 +98,10 @@ instances:
     #
     # ignore_missing_database: false
 
-    ## @param tags - list of key:value elements - optional
-    ## List of tags to attach to every metric, event and service check emitted by this integration.
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
     #   - <KEY_1>:<VALUE_1>

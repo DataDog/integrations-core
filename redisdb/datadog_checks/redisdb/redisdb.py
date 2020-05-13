@@ -426,7 +426,7 @@ class Redis(AgentCheck):
             try:
                 max_slow_entries = int(conn.config_get(MAX_SLOW_ENTRIES_KEY)[MAX_SLOW_ENTRIES_KEY])
                 if max_slow_entries > DEFAULT_MAX_SLOW_ENTRIES:
-                    self.warning(
+                    self.log.debug(
                         "Redis {0} is higher than {1}. Defaulting to {1}. "  # noqa: G001
                         "If you need a higher value, please set {0} in your check config".format(
                             MAX_SLOW_ENTRIES_KEY, DEFAULT_MAX_SLOW_ENTRIES
