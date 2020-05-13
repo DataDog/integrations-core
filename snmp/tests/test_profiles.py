@@ -61,10 +61,10 @@ def run_profile_check(recording_name):
 
 
 def test_cisco_voice(aggregator):
-    run_profile_check('cisco_customer_voice')
+    run_profile_check('cisco_icm')
     resources = ["hrSWRunPerfMem", "hrSWRunPerfCPU", "hrSWRunStatus"]
 
-    tags = ['snmp_profile:cisco_customer_voice', 'snmp_host:test']
+    tags = ['snmp_profile:cisco_icm', 'snmp_host:test']
     tags += common.CHECK_TAGS
 
     for resource in resources:
