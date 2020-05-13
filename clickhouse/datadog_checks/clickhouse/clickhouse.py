@@ -89,8 +89,7 @@ class ClickhouseCheck(AgentCheck):
                 sync_request_timeout=self._connect_timeout,
                 compression=self._compression,
                 secure=self._tls_verify,
-                # Don't pollute the Agent logs
-                settings={'calculate_text_stack_trace': False},
+                settings={},
                 # Make every client unique for server logs
                 client_name='datadog-{}'.format(self.check_id),
             )
