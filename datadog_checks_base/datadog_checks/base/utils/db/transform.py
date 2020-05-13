@@ -496,7 +496,8 @@ class ColumnTransformers(object):
 
 class ExtraTransformers(object):
     """
-    Every column transformer (except `tag`) is supported at this level, the only difference being one must set a `source` to retrieve the desired value.
+    Every column transformer (except `tag`) is supported at this level, the only
+    difference being one must set a `source` to retrieve the desired value.
 
     So for example here:
 
