@@ -177,8 +177,8 @@ Additional helpful documentation, links, and articles:
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv
-[10]: https://docs.datadoghq.com/help
+[10]: https://docs.datadoghq.com/help/
 [11]: https://www.datadoghq.com/blog/activemq-architecture-and-metrics
 [12]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance
-[13]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[13]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [14]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup

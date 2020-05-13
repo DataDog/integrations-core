@@ -120,4 +120,4 @@ Need more help? Contact [Datadog support][11].
 [8]: https://www.rubydoc.info/gems/fluent-plugin-datadog
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/mapr/metadata.csv
-[11]: https://docs.datadoghq.com/help
+[11]: https://docs.datadoghq.com/help/

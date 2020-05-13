@@ -8,7 +8,6 @@ from os import path
 from setuptools import setup
 
 HERE = path.abspath(path.dirname(__file__))
-CHECKS_BASE_REQ = 'datadog-checks-base>=4.1.0'
 
 # Get version info
 ABOUT = {}
@@ -18,6 +17,19 @@ with open(path.join(HERE, "datadog_checks", "coredns", "__about__.py")) as f:
 # Get the long description from the README file
 with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
+
+
+def get_dependencies():
+    dep_file = path.join(HERE, 'requirements.in')
+    if not path.isfile(dep_file):
+        return []
+
+    with open(dep_file, encoding='utf-8') as f:
+        return f.readlines()
+
+
+CHECKS_BASE_REQ = 'datadog-checks-base>=4.1.0'
+
 
 setup(
     name='datadog-coredns',
@@ -42,6 +54,7 @@ setup(
     ],
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
+    extras_require={'deps': get_dependencies()},
     # The package we're going to ship
     packages=['datadog_checks.coredns'],
     include_package_data=True,

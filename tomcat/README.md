@@ -246,7 +246,7 @@ Additional helpful documentation, links, and articles:
 [5]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [6]: https://github.com/DataDog/integrations-core/blob/master/tomcat/datadog_checks/tomcat/data/conf.yaml.example
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[8]: https://docs.datadoghq.com/integrations/java
+[8]: https://docs.datadoghq.com/integrations/java/
 [9]: https://tomcat.apache.org/tomcat-7.0-doc/logging.html
 [10]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

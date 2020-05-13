@@ -149,8 +149,8 @@ Need help? Contact [Datadog support][9].
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/marathon/datadog_checks/marathon/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[5]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[5]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [6]: https://docs.datadoghq.com/agent/kubernetes/log/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/marathon/metadata.csv
-[9]: https://docs.datadoghq.com/help
+[9]: https://docs.datadoghq.com/help/

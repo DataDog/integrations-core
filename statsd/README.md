@@ -80,7 +80,7 @@ To get a better idea of how (or why) to visualize StatsD metrics with Counts Gra
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/statsd/metadata.csv
-[7]: https://docs.datadoghq.com/help
+[7]: https://docs.datadoghq.com/help/
 [8]: https://www.datadoghq.com/blog/statsd
 [9]: https://www.datadoghq.com/blog/visualize-statsd-metrics-counts-graphing
-[10]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[10]: https://docs.datadoghq.com/agent/kubernetes/integrations/

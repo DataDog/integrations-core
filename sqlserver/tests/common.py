@@ -5,7 +5,6 @@
 import os
 
 from datadog_checks.dev import get_docker_hostname, get_here
-from datadog_checks.dev._env import e2e_testing
 from datadog_checks.dev.utils import ON_MACOS, ON_WINDOWS
 from datadog_checks.sqlserver import SQLServer
 
@@ -37,11 +36,14 @@ EXPECTED_METRICS = [m[0] for m in SQLServer.METRICS] + CUSTOM_METRICS
 INSTANCE_DOCKER = {
     'host': '{},1433'.format(HOST),
     'connector': 'odbc',
-    'driver': 'FreeTDS' if e2e_testing() else get_local_driver(),
+    'driver': get_local_driver(),
     'username': 'sa',
     'password': 'Password123',
     'tags': ['optional:tag1'],
 }
+
+INSTANCE_E2E = INSTANCE_DOCKER.copy()
+INSTANCE_E2E['driver'] = 'FreeTDS'
 
 INSTANCE_SQL2017 = {
     'host': LOCAL_SERVER,
@@ -89,7 +91,7 @@ INIT_CONFIG_OBJECT_NAME = {
     ]
 }
 
-FULL_CONFIG = {"init_config": INIT_CONFIG, "instances": [INSTANCE_DOCKER]}
+FULL_E2E_CONFIG = {"init_config": INIT_CONFIG, "instances": [INSTANCE_E2E]}
 
 E2E_METADATA = {
     'start_commands': ['apt-get update', 'apt-get install -y tdsodbc unixodbc-dev'],
