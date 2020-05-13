@@ -107,25 +107,25 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
-## Log Section
-##
-## type - required - Type of log input source (tcp / udp / file / windows_event)
-## port / path / channel_path - required - Set port if type is tcp or udp.
-##                                         Set path if type is file.
-##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs
-## service - required - The name of the service that generates the log.
-##                      Overrides any `service` defined in the `init_config` section.
-## tags - optional - Add tags to the collected logs
-##
-## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
-#
-# logs:
-#   - type: file
-#     path: /var/opt/mssql/log/errorlog
-#     source: sqlserver
-#     service: <SERVICE_NAME>
-#     log_processing_rules:
-#     - type: multi_line
-#       name: new_log_start_with_date
-#       pattern: \d{4}\-\d{2}\-\d{2}
+    ## Log Section
+    ##
+    ## type - required - Type of log input source (tcp / udp / file / windows_event)
+    ## port / path / channel_path - required - Set port if type is tcp or udp.
+    ##                                         Set path if type is file.
+    ##                                         Set channel_path if type is windows_event.
+    ## source  - required - Attribute that defines which Integration sent the logs
+    ## service - required - The name of the service that generates the log.
+    ##                      Overrides any `service` defined in the `init_config` section.
+    ## tags - optional - Add tags to the collected logs
+    ##
+    ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+    #
+    # logs:
+    #   - type: file
+    #     path: /var/opt/mssql/log/errorlog
+    #     source: sqlserver
+    #     service: <SERVICE_NAME>
+    #     log_processing_rules:
+    #     - type: multi_line
+    #       name: new_log_start_with_date
+    #       pattern: \d{4}\-\d{2}\-\d{2}
