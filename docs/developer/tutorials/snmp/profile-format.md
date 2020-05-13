@@ -181,25 +181,6 @@ metrics:
 
 It is possible to add tags to metrics retrieved from a table in three ways:
 
-- Using an index:
-
-```yaml
-metrics:
-  - MIB: CISCO-PROCESS-MIB
-    table:
-      OID: 1.3.6.1.4.1.9.9.109.1.1.1
-      name: cpmCPUTotalTable
-    symbols:
-      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.12
-        name: cpmCPUMemoryUsed
-    metric_tags:
-      # Add a 'cpu:<row_index>' tag to each metric of each row,
-      # whose value is the index of the row in the table.
-      # This allows querying metrics for a given CPU unit, e.g. 'cpu:1'.
-      - tag: cpu
-        index: 1
-```
-
 - Using a column within the same table:
 
 ```yaml
@@ -241,6 +222,38 @@ metrics:
           name: ifName
         table: ifXTable
         tag: interface
+```
+
+- Using an "index", i.e. one of the values in the `INDEX` field of the table MIB definition:
+
+```yaml
+metrics:
+  - MIB: CISCO-PROCESS-MIB
+    table:
+      OID: 1.3.6.1.4.1.9.9.109.1.1.1
+      name: cpmCPUTotalTable
+    symbols:
+      - OID: 1.3.6.1.4.1.9.9.109.1.1.1.1.12
+        name: cpmCPUMemoryUsed
+    metric_tags:
+      # This tagging method is more complex, so let's walk through an example...
+      #
+      # In CISCO-PROCESS-MIB, we can see that entries in the `cpmCPUTotalTable` are indexed by `cpmCPUTotalIndex`,
+      # which corresponds to some sort of CPU position for each row in the table:
+      #
+      #   cpmCPUTotalEntry OBJECT-TYPE
+      #      -- ...
+      #      INDEX    { cpmCPUTotalIndex }  # <-- See?
+      #
+      # We want to tag metrics in this table by this CPU position.
+      #
+      # To do this, we look up the position of this OID in `INDEX`. Here we see it's in 1st position.
+      # So we can reference it here using `index: 1`.
+      # (If there were two OIDs in `INDEX`, and we wanted to use the one in 2nd position, then we would have used `index: 2`.)
+      #
+      # NOTE: currently only indexes that refer to a column in the same table are supported.
+      - tag: cpu
+        index: 1
 ```
 
 !!! note
