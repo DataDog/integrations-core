@@ -11,13 +11,13 @@ services:
       - "5432:5432"
 
   pgbouncer:
-    image: "pgbouncer/pgbouncer:${PGBOUNCER_VERSION}"
+    image: "datadog/docker-library:pgbouncer_${PGBOUNCER_VERSION}"
     environment:
-      DATABASES_USER: postgres
-      DATABASES_PASSWORD: datadog
-      DATABASES_HOST: postgres
-      DATABASES_PORT: 5432
-      PGBOUNCER_LISTEN_PORT: 6432
+      PG_ENV_POSTGRESQL_USER: postgres
+      PG_ENV_POSTGRESQL_PASS: datadog
+      PG_PORT_5432_TCP_ADDR: postgres
+      PG_PORT_5432_TCP_PORT: 5432
+      PG_ENV_POSTGRESQL_ADMIN_USERS: postgres
     ports:
       - "6432:6432"
     depends_on:

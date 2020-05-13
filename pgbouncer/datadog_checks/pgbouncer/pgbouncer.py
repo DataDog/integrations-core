@@ -167,15 +167,20 @@ class PgBouncer(AgentCheck):
     def _set_metadata(self):
         if self.is_metadata_collection_enabled():
             pgbouncer_version = self.get_version()
-            self.set_metadata('version', pgbouncer_version)
+            if pgbouncer_version:
+                self.set_metadata('version', pgbouncer_version)
+            else:
+                self.log.debug("Couldn't detect version")
 
     def get_version(self):
         db = self._get_connection()
-        regex = r'\d\.\d\.\d'
+        regex = r'\d+\.\d+\.\d+'
         with db.cursor(cursor_factory=pgextras.DictCursor) as cursor:
             cursor.execute('SHOW VERSION;')
             if db.notices:
-                res = re.findall(regex, db.notices[0])
-                if res:
-                    return res[0]
-            return None
+                data = db.notices[0]
+            else:
+                data = cursor.fetchone()[0]
+            res = re.findall(regex, data)
+            if res:
+                return res[0]

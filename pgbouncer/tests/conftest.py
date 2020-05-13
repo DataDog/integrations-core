@@ -27,12 +27,15 @@ def container_up(service_name, port):
 @pytest.fixture(scope="session")
 def dd_environment():
     """
-    Start postgres and install pgbouncer. If there's any problem executing
-    docker-compose, let the exception bubble up.
+    Start postgres and install pgbouncer. If there's any problem executing docker-compose, let the exception bubble up.
     """
+    compose_file = 'docker-compose.yml'
+    version = common.get_version_from_env()
+    if int(version[1]) < 10:
+        compose_file = 'docker-compose-old.yml'
 
     with docker_run(
-        compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'),
+        compose_file=os.path.join(HERE, 'compose', compose_file),
         env_vars={'TEST_RESOURCES_PATH': os.path.join(HERE, 'resources')},
         conditions=[
             WaitFor(container_up, args=("Postgres", 5432)),

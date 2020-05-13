@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import os
 
 import psycopg2
 import pytest
@@ -32,29 +31,28 @@ def test_check(instance, aggregator, datadog_agent):
     check.check_id = 'test:123'
     check.check(instance)
 
-    version = _get_version_from_env()
+    version = common.get_version_from_env()
     assert_metric_coverage(version, aggregator)
-    patch = '1' if version[1] == '8' else '2'
+    patches = {'8': '1', '9': '2'}
+    patch = patches.get(version[1])
 
     version_metadata = {
-        'version.raw': '.'.join(version) + '.' + patch,
+        'version.raw': '.'.join(version),
         'version.scheme': 'semver',
         'version.major': version[0],
         'version.minor': version[1],
-        'version.patch': patch,
     }
+    if patch:
+        version_metadata['version.patch'] = patch
+        version_metadata['version.raw'] += '.' + patch
     datadog_agent.assert_metadata('test:123', version_metadata)
-
-
-def _get_version_from_env():
-    return os.environ.get('PGBOUNCER_VERSION').split('_')
 
 
 @pytest.mark.e2e
 def test_check_e2e(dd_agent_check, instance):
     # run the check
     aggregator = dd_agent_check(instance, rate=True)
-    version = _get_version_from_env()
+    version = common.get_version_from_env()
     assert_metric_coverage(version, aggregator)
 
 
