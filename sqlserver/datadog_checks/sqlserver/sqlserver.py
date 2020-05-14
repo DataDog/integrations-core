@@ -8,7 +8,6 @@ http://blogs.msdn.com/b/psssql/archive/2013/09/23/interpreting-the-counter-value
 '''
 from __future__ import division
 
-import os
 from collections import defaultdict
 from contextlib import contextmanager
 
@@ -16,7 +15,8 @@ from six import raise_from
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
-from datadog_checks.base.utils.platform import Platform
+
+from .utils import set_default_driver_conf
 
 try:
     import adodbapi
@@ -32,13 +32,7 @@ except ImportError:
 if adodbapi is None and pyodbc is None:
     raise ImportError('adodbapi or pyodbc must be installed to use this check.')
 
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
-
-if Platform.is_containerized():
-    # Use default `./driver_config/odbcinst.ini` when Agent is running in docker.
-    # `freetds` is shipped with the Docker Agent.
-    os.environ.setdefault('ODBCSYSINI', DRIVER_CONFIG_DIR)
+set_default_driver_conf()
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'sql server'
 ALL_INSTANCES = 'ALL'
