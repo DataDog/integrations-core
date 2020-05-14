@@ -90,8 +90,3 @@ INIT_CONFIG_OBJECT_NAME = {
 }
 
 FULL_E2E_CONFIG = {"init_config": INIT_CONFIG, "instances": [INSTANCE_E2E]}
-
-E2E_METADATA = {
-    # TODO: REMOVE start_commands when this is merged: https://github.com/DataDog/datadog-agent/pull/5478
-    'start_commands': ['apt-get update', 'apt-get install -y tdsodbc unixodbc-dev'],
-}
