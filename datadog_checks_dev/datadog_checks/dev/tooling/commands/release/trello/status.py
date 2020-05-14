@@ -6,19 +6,21 @@ import json
 
 import click
 
-from ...trello import TRELLO_DOCSTRING, TrelloClient
-from ..console import CONTEXT_SETTINGS
-
-SHORT_HELP = 'Gather statistics from the Trello release board'
-LONG_HELP = SHORT_HELP + TRELLO_DOCSTRING
+from ....trello import TrelloClient
+from ...console import CONTEXT_SETTINGS
 
 
-@click.command(context_settings=CONTEXT_SETTINGS, short_help=SHORT_HELP, help=LONG_HELP)
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Gather statistics from the Trello release board')
 @click.option('--json', '-j', 'as_json', is_flag=True, help='Return as raw JSON instead')
 @click.pass_context
 def status(ctx: click.Context, as_json: bool) -> None:
     """Print tabular status of Agent Release based on Trello columns.
+
+    See trello subcommand for details on how to setup access:
+
+    `ddev release trello -h`.
     """
+
     user_config = ctx.obj
     trello = TrelloClient(user_config)
 

@@ -7,13 +7,13 @@ from typing import List, Optional, Sequence, Set, Tuple
 
 import click
 
-from ....subprocess import SubprocessError, run_command
-from ....utils import basepath, chdir, get_next
-from ...constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
-from ...github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
-from ...trello import TRELLO_DOCSTRING, TrelloClient
-from ...utils import format_commit_id
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
+from .....subprocess import SubprocessError, run_command
+from .....utils import basepath, chdir, get_next
+from ....constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
+from ....github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
+from ....trello import TrelloClient
+from ....utils import format_commit_id
+from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
 
 
 def create_trello_card(
@@ -131,8 +131,15 @@ def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
     return member
 
 
-SHORT_HELP = 'Create a Trello card for each change that needs to be tested'
-LONG_HELP = (
+@click.command(
+    context_settings=CONTEXT_SETTINGS, short_help='Create a Trello card for each change that needs to be tested'
+)
+@click.argument('base_ref')
+@click.argument('target_ref')
+@click.option('--milestone', help='The PR milestone to filter by')
+@click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
+@click.pass_context
+def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str, dry_run: bool) -> None:
     """
     Create a Trello card for changes since a previous release (referenced by `BASE_REF`)
     that need to be tested for the next release (referenced by `TARGET_REF`).
@@ -172,22 +179,12 @@ LONG_HELP = (
     `github.user`/`github.token` in your config file or use the
     `DD_GITHUB_USER`/`DD_GITHUB_TOKEN` environment variables.
 
+
+    See trello subcommand for details on how to setup access:
+
+    `ddev release trello -h`.
+
 """
-    + TRELLO_DOCSTRING
-)
-
-
-@click.command(context_settings=CONTEXT_SETTINGS, short_help=SHORT_HELP, help=LONG_HELP)
-@click.argument('base_ref')
-@click.argument('target_ref')
-@click.option('--milestone', help='The PR milestone to filter by')
-@click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
-@click.pass_context
-def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str, dry_run: bool) -> None:
-    """
-    Create a Trello card for changes since a previous release (referenced by `BASE_REF`)
-    that need to be tested for the next release (referenced by `TARGET_REF`).
-    """
     root = get_root()
     repo = basepath(root)
     if repo not in ('integrations-core', 'datadog-agent'):
