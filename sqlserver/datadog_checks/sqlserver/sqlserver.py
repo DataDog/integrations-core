@@ -36,8 +36,8 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
 
 if Platform.is_containerized():
-    # Use default `./driver_config/odbcinst.ini` when Agent is run in docker.
-    # `tdsodbc` is shipped with the Docker Agent
+    # Use default `./driver_config/odbcinst.ini` when Agent is running in docker.
+    # `freetds` is shipped with the Docker Agent.
     os.environ.setdefault('ODBCSYSINI', DRIVER_CONFIG_DIR)
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'sql server'
