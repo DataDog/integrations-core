@@ -142,3 +142,24 @@ def get_mocked_server():
     server_mock = MagicMock()
     server_mock.configure_mock(**{'RetrieveContent.return_value': content_mock, 'content': content_mock})
     return server_mock
+
+
+def mock_alarm_event(from_status='green', to_status='red', message='Some error', key=0):
+    now = datetime.utcnow()
+    vm = MockedMOR(spec='VirtualMachine')
+    dc = MockedMOR(spec="Datacenter")
+    dc_arg = vim.event.DatacenterEventArgument(datacenter=dc, name='dc1')
+    alarm = MockedMOR(spec="Alarm")
+    alarm_arg = vim.event.AlarmEventArgument(alarm=alarm, name='alarm1')
+    entity = vim.event.ManagedEntityEventArgument(entity=vm, name='vm1')
+    event = vim.event.AlarmStatusChangedEvent(
+        entity=entity,
+        fullFormattedMessage=message,
+        createdTime=now,
+        to=to_status,
+        datacenter=dc_arg,
+        alarm=alarm_arg,
+        key=key,
+    )
+    setattr(event, 'from', from_status)  # noqa: B009
+    return event
