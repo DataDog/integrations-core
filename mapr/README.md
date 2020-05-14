@@ -65,7 +65,7 @@ Then update the `/opt/mapr/fluentd/fluentd-<VERSION>/etc/fluentd/fluentd.conf` w
     @type datadog
     @id dd_agent
     include_tag_key true
-    dd_source mapr
+    dd_source mapr  # Sets "source: mapr" on every log to allow automatic parsing on Datadog.
     dd_tags "<KEY>:<VALUE>"
     service <YOUR_SERVICE_NAME>
     api_key <YOUR_API_KEY>

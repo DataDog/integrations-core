@@ -79,22 +79,12 @@ Istio contains two types of logs. Envoy access logs that are collected with the 
 
 _Available for Agent versions >6.0_
 
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][4]:
+See the [Autodiscovery Integration Templates][1] for guidance on applying the parameters below.
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][16].
 
-   ```yaml
-       (...)
-       env:
-         # (...)
-         - name: DD_LOGS_ENABLED
-             value: "true"
-         - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
-             value: "true"
-     # (...)
-   ```
-
-2. Make sure that the Docker socket is mounted to the Datadog Agent as done in [this manifest][5] or mount the `/var/log/pods` directory if you are not using docker.
-
-3. [Restart the Agent][13].
+| Parameter      | Value                                                |
+| -------------- | ---------------------------------------------------- |
+| `<LOG_CONFIG>` | `{"source": "istio", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
 
@@ -150,3 +140,4 @@ Additional helpful documentation, links, and articles:
 [13]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [14]: https://www.datadoghq.com/blog/istio-metrics/
 [15]: https://docs.datadoghq.com/agent/guide/integration-management/#install
+[16]: https://docs.datadoghq.com/agent/kubernetes/log/

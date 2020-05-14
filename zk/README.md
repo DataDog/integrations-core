@@ -96,7 +96,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 | Parameter      | Value                                           |
 | -------------- | ----------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "zk", "service": "<SERVICE_NAME>"}` |
+| `<LOG_CONFIG>` | `{"source": "zookeeper", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
 

@@ -79,7 +79,7 @@ By default Haproxy sends logs over UDP to port 514. The Agent can listen for the
    logs:
      - type: udp
        port: 514
-       service: haproxy
+       service: <SERVICE_NAME>
        source: haproxy
    ```
 
