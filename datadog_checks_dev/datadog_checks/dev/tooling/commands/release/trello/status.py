@@ -13,8 +13,9 @@ from ...console import CONTEXT_SETTINGS, echo_info, echo_success
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Gather statistics from the Trello release board')
 @click.option('--json', '-j', 'as_json', is_flag=True, help='Return as raw JSON instead')
+@click.option('--clipboard', '-c', is_flag=True, help='Copy output to clipboard')
 @click.pass_context
-def status(ctx: click.Context, as_json: bool) -> None:
+def status(ctx: click.Context, as_json: bool, clipboard: bool) -> None:
     """Print tabular status of Agent Release based on Trello columns.
 
     See trello subcommand for details on how to setup access:
@@ -52,12 +53,13 @@ def status(ctx: click.Context, as_json: bool) -> None:
 
     out = '\n'.join(output)
 
-    try:
-        pyperclip.copy(out)
-    except Exception:
-        msg = '\nTrello Status Report:\n'
-    else:
-        msg = '\nTrello Status Report (copied to your clipboard):\n'
+    msg = '\nTrello Status Report:\n'
+    if clipboard:
+        try:
+            pyperclip.copy(out)
+            msg = '\nTrello Status Report (copied to your clipboard):\n'
+        except Exception:
+            pass
 
     echo_success(msg)
     echo_info(out)
