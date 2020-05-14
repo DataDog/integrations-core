@@ -108,6 +108,14 @@ class VSphereConfig(object):
                 "integer between 1 and 4."
             )
 
+        if not self.should_collect_tags:
+            for resource_filter in self.resource_filters:
+                if resource_filter.property_name == 'tag':
+                    raise ConfigurationError(
+                        'Your configuration is incorrectly attempting to filter resources '
+                        'by the `tag` property but `collect_tags` is disabled.'
+                    )
+
     def _parse_resource_filters(self, all_resource_filters):
         # type: (List[ResourceFilterConfig]) -> List[ResourceFilter]
 
