@@ -274,7 +274,7 @@ class WinWMICheck(AgentCheck):
 
         If no matching WMISampler is running yet, start one and cache it.
         """
-        if self._wmi_sampler is None:
+        if not self._wmi_sampler:
             property_list = list(properties) + [tag_by] if tag_by else list(properties)
             self._wmi_sampler = WMISampler(self.log, wmi_class, property_list, **kwargs)
             self._wmi_sampler.start()
