@@ -1,5 +1,15 @@
 # CHANGELOG - snmp
 
+## 3.1.0 / 2020-05-14
+
+* [Added] Add `chatsworth` legacy metrics. See [#6624](https://github.com/DataDog/integrations-core/pull/6624).
+* [Added] Add ifHighSpeed. See [#6602](https://github.com/DataDog/integrations-core/pull/6602).
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Improve autodiscovery support. See [#6526](https://github.com/DataDog/integrations-core/pull/6526).
+* [Fixed] Exit discovery thread when check is gc-ed. See [#6484](https://github.com/DataDog/integrations-core/pull/6484).
+* [Fixed] Don't use ifDescr for metric tagging. See [#6601](https://github.com/DataDog/integrations-core/pull/6601).
+* [Fixed] Optimize away useless GET calls. See [#6456](https://github.com/DataDog/integrations-core/pull/6456).
+
 ## 3.0.0 / 2020-05-04
 
 * [Added] Add base BGP4 and Cisco-CSR1000v profiles. See [#6315](https://github.com/DataDog/integrations-core/pull/6315).
