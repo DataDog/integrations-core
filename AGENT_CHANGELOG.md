@@ -1,3 +1,9 @@
+## Datadog Agent version [7.19.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7192)
+
+* datadog_checks_base [11.5.1](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* HAProxy [2.8.1](https://github.com/DataDog/integrations-core/blob/master/haproxy/CHANGELOG.md)
+* Vault [2.3.2](https://github.com/DataDog/integrations-core/blob/master/vault/CHANGELOG.md)
+
 ## Datadog Agent version [7.19.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7190)
 
 * Active Directory [1.7.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)

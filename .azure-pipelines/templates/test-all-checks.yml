@@ -170,6 +170,9 @@ jobs:
     - checkName: hive
       displayName: Hive
       os: linux
+    - checkName: hivemq
+      displayName: HiveMQ
+      os: linux
     - checkName: http_check
       displayName: HTTP
       os: linux

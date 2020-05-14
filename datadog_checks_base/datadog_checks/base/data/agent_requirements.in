@@ -44,7 +44,7 @@ pyhdb==0.3.4
 pymongo==3.8.0
 pymqi==1.10.1; sys_platform != 'win32' and sys_platform != 'darwin'
 pymysql==0.9.3
-pyodbc==4.0.26; sys_platform != 'darwin'
+pyodbc==4.0.26
 pyro4==4.73; sys_platform == 'win32'
 pysmi==0.3.4
 pysnmp==4.4.9
