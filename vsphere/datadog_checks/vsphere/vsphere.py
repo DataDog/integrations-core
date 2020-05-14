@@ -499,7 +499,11 @@ class VSphereCheck(AgentCheck):
             event_config = {'collect_vcenter_alarms': True}
             for event in new_events:
                 if event.key in self.latest_processed_events:
-                    self.log.debug("Skip already processed event (key=%s).", event.key)
+                    self.log.debug(
+                        "Skip already processed event (current event key: %s, latest processed events: %s).",
+                        event.key,
+                        self.latest_processed_events,
+                    )
                     continue
                 self.log.debug("Process event (key=%s)", event.key)
                 latest_processed_events.append(event.key)
