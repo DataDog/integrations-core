@@ -75,7 +75,7 @@ class VSphereCheck(AgentCheck):
         instance = cast(InstanceConfig, self.instance)
         self.config = VSphereConfig(instance, self.log)
 
-        self.latest_event_query = dt.datetime.now()
+        self.latest_event_query = dt.datetime.utcnow()
         self.infrastructure_cache = InfrastructureCache(interval_sec=self.config.refresh_infrastructure_cache_interval)
         self.metrics_metadata_cache = MetricsMetadataCache(
             interval_sec=self.config.refresh_metrics_metadata_cache_interval
@@ -482,6 +482,7 @@ class VSphereCheck(AgentCheck):
     def collect_events(self):
         # type: () -> None
         self.log.debug("Starting events collection.")
+        new_event_query_time = dt.datetime.utcnow()
         try:
             t0 = Timer()
             new_events = self.api.get_new_events(start_time=self.latest_event_query)
@@ -505,7 +506,7 @@ class VSphereCheck(AgentCheck):
             # Ignore them for next pass
             self.log.warning("Unable to fetch Events %s", e)
 
-        self.latest_event_query = self.api.get_latest_event_timestamp() + dt.timedelta(seconds=1)
+        self.latest_event_query = new_event_query_time
 
     def check(self, _):
         # type: (Any) -> None
