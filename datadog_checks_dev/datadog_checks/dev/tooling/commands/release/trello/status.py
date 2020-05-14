@@ -5,9 +5,10 @@
 import json
 
 import click
+import pyperclip
 
 from ....trello import TrelloClient
-from ...console import CONTEXT_SETTINGS
+from ...console import CONTEXT_SETTINGS, echo_info, echo_success
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Gather statistics from the Trello release board')
@@ -35,14 +36,28 @@ def status(ctx: click.Context, as_json: bool) -> None:
 
     totals = dict(zip(headers, [0] * len(headers)))
 
-    print(row_format.format('Team', *headers))
-    print(row_format.format('--', *['--' for _ in headers]))
+    output = []
+    output.append(row_format.format('Team', *headers))
+    output.append(row_format.format('--', *['--' for _ in headers]))
+
     for team, data in counts.items():
         for header in headers:
             totals[header] += data[header]
         row = row_format.format(team, *[data[header] for header in headers])
-        print(row)
+        output.append(row)
 
-    print(row_format.format('--', *['--' for _ in headers]))
+    output.append(row_format.format('--', *['--' for _ in headers]))
     row = row_format.format('TOTALS', *[totals[header] for header in headers])
-    print(row)
+    output.append(row)
+
+    out = '\n'.join(output)
+
+    try:
+        pyperclip.copy(out)
+    except Exception:
+        msg = '\nTrello Status Report:\n'
+    else:
+        msg = '\nTrello Status Report (copied to your clipboard):\n'
+
+    echo_success(msg)
+    echo_info(out)
