@@ -54,23 +54,49 @@ Make sure that your SQL Server instance supports SQL Server authentication by en
 
 3. [Restart the Agent][7] to start sending SQL Server metrics to Datadog.
 
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+    ```
+
+2. Add this configuration block to your `sqlserver.d/conf.yaml` file to start collecting your SQL Server logs:
+
+    ```yaml
+    logs:
+      - type: file
+        path: "<LOG_FILE_PATH>"
+        source: sqlserver
+        service: "<SERVICE_NAME>"
+    ```
+
+    Change the `path` and `service` parameter values based on your environment. See the [sample sqlserver.d/conf.yaml][8] for all available configuration options.
+
+3. [Restart the Agent][7].
+
+See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
+
 #### Linux
 
 Extra configuration steps are required to get the SQL Server integration running on a Linux host:
 
-1. Install an ODBC SQL Server Driver, for example the [Microsoft ODBC Driver][8].
+1. Install an ODBC SQL Server Driver, for example the [Microsoft ODBC Driver][10].
 2. Copy the `odbc.ini` and `odbcinst.ini` files into the `/opt/datadog-agent/embedded/etc` folder.
 3. Configure the `conf.yaml` file to use the `odbc` connector and specify the proper driver as specified in the `odbcinst.ini file`.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][9] and look for `sqlserver` under the Checks section.
+[Run the Agent's `status` subcommand][11] and look for `sqlserver` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][10] for a list of metrics provided by this check.
+See [metadata.csv][12] for a list of metrics provided by this check.
 
 Most of these metrics come from your SQL Server's `sys.dm_os_performance_counters` table.
 
@@ -86,11 +112,11 @@ Returns CRITICAL if the Agent cannot connect to SQL Server to collect metrics, o
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][11].
+Need help? Contact [Datadog support][13].
 
 ## Development
 
-See the [main documentation][12] for more details about how to test and develop Agent based integrations.
+See the [main documentation][14] for more details about how to test and develop Agent based integrations.
 
 ### Testing Guidelines
 
@@ -100,7 +126,7 @@ To run the tests on Windows, an instance of MSSQL is expected to run on the host
 
 #### Linux
 
-On Linux, a Docker container running a MSSQL instance is automatically started before running the tests. We use unixODBC and [FreeTDS][13] to talk to the database so, depending on the Linux distribution, you need to install additional dependencies on your local dev environment before running the tests. For example these are the installation steps for Ubuntu 14.04:
+On Linux, a Docker container running a MSSQL instance is automatically started before running the tests. We use unixODBC and [FreeTDS][15] to talk to the database so, depending on the Linux distribution, you need to install additional dependencies on your local dev environment before running the tests. For example these are the installation steps for Ubuntu 14.04:
 
 ```shell
 sudo apt-get install unixodbc unixodbc-dev tdsodbc
@@ -108,7 +134,7 @@ sudo apt-get install unixodbc unixodbc-dev tdsodbc
 
 #### OSX
 
-Same as Linux, MSSQL runs in a Docker container and we talk to the database through unixODBC and [FreeTDS][13]. You can use [homebrew][14] to install the required packages:
+Same as Linux, MSSQL runs in a Docker container and we talk to the database through unixODBC and [FreeTDS][15]. You can use [homebrew][16] to install the required packages:
 
 ```shell
 brew install unixodbc
@@ -117,11 +143,11 @@ brew install freetds --with-unixodbc
 
 ## Further Reading
 
-- [Monitor your Azure SQL Databases with Datadog][15]
-- [Key metrics for SQL Server monitoring][16]
-- [SQL Server monitoring tools][17]
-- [Monitor SQL Server performance with Datadog][18]
-- [Custom SQL Server metrics for detailed monitoring][19]
+- [Monitor your Azure SQL Databases with Datadog][17]
+- [Key metrics for SQL Server monitoring][18]
+- [SQL Server monitoring tools][19]
+- [Monitor SQL Server performance with Datadog][20]
+- [Custom SQL Server metrics for detailed monitoring][21]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard.png
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
@@ -130,15 +156,20 @@ brew install freetds --with-unixodbc
 [5]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/datadog_checks/sqlserver/data/conf.yaml.example
 [6]: https://docs.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-2017
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[8]: https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server?view=sql-server-2017
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[10]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/metadata.csv
-[11]: https://docs.datadoghq.com/help/
-[12]: https://docs.datadoghq.com/developers/integrations/
-[13]: http://www.freetds.org
-[14]: https://brew.sh
-[15]: https://www.datadoghq.com/blog/monitor-azure-sql-databases-datadog
-[16]: https://www.datadoghq.com/blog/sql-server-monitoring
-[17]: https://www.datadoghq.com/blog/sql-server-monitoring-tools
-[18]: https://www.datadoghq.com/blog/sql-server-performance
-[19]: https://www.datadoghq.com/blog/sql-server-metrics
+
+[8]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/datadog_checks/sqlserver/data/conf.yaml.example
+[9]: https://docs.datadoghq.com/agent/kubernetes/log/
+
+[10]: https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server?view=sql-server-2017
+
+[11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[12]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/metadata.csv
+[13]: https://docs.datadoghq.com/help/
+[14]: https://docs.datadoghq.com/developers/integrations/
+[15]: http://www.freetds.org
+[16]: https://brew.sh
+[17]: https://www.datadoghq.com/blog/monitor-azure-sql-databases-datadog
+[18]: https://www.datadoghq.com/blog/sql-server-monitoring
+[19]: https://www.datadoghq.com/blog/sql-server-monitoring-tools
+[20]: https://www.datadoghq.com/blog/sql-server-performance
+[21]: https://www.datadoghq.com/blog/sql-server-metrics
