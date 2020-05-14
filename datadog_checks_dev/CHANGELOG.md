@@ -19,7 +19,7 @@
 * [Added] Add validation for per_unit_name and line numbers for all errors. See [#6394](https://github.com/DataDog/integrations-core/pull/6394).
 * [Added] Validate metrics using metadata.csv. See [#6027](https://github.com/DataDog/integrations-core/pull/6027).
 * [Added] Add verbose mode to validate config. See [#6302](https://github.com/DataDog/integrations-core/pull/6302).
-* [Added] Validate metadata doesn't contain |. See [#6333](https://github.com/DataDog/integrations-core/pull/6333).
+* [Added] Validate metadata doesn't contain `|`. See [#6333](https://github.com/DataDog/integrations-core/pull/6333).
 * [Fixed] Fix style to account for new flake8 rules. See [#6620](https://github.com/DataDog/integrations-core/pull/6620).
 * [Fixed] Fix typo in README template for new community integrations. See [#6585](https://github.com/DataDog/integrations-core/pull/6585).
 * [Fixed] Remove metrics file from JMX template's config spec. See [#6559](https://github.com/DataDog/integrations-core/pull/6559).
