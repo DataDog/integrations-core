@@ -18,7 +18,7 @@ Lines must be formatted as follows:
 For the list of supported types, see the [`snmpsim` simulation data file format](http://snmplabs.com/snmpsim/managing-simulation-data.html#file-format) documentation.
 
 !!! warning
-    Due to a limitation in of `snmpsim`, contents of `.snmprec` files must be **sorted in lexicographic order**.
+    Due to a limitation of `snmpsim`, contents of `.snmprec` files must be **sorted in lexicographic order**.
 
     Use `$ sort -V /path/to/profile.snmprec` to sort lines from the terminal.
 

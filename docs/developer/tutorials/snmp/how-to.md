@@ -25,16 +25,15 @@ init_config:
       definition_file: cisco-nexus.yaml
 
 instances:
-- community_string: cisco_nexus  # (1)
-  ip_address: <IP_ADDRESS_OF_SNMP_CONTAINER>  # (2)
+- community_string: cisco_nexus  # (1.)
+  ip_address: <IP_ADDRESS_OF_SNMP_CONTAINER>  # (2.)
   profile: cisco_nexus
   name: localhost
   port: 1161
 ```
 
-(1) The `community_string` must match the corresponding device `.snmprec` file name.
-
-(2) To find the IP address of the SNMP container, run:
+1. The `community_string` must match the corresponding device `.snmprec` file name.
+2. To find the IP address of the SNMP container, run:
 
 ```bash
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' dd-snmp
@@ -59,7 +58,9 @@ The most commonly used commands are:
 - `snmpwalk`: to query an entire OID sub-tree at once.
 - `snmptable`: to query rows in an SNMP table.
 
-### Example: GET query
+### Examples
+
+#### GET query
 
 To query a specific OID from a device, we can use the `snmpget` command.
 
@@ -87,7 +88,7 @@ Let's break this command down:
     $ snmpget -v 2c -c public -IR 127.0.0.1:1161 iso.3.6.1.2.1.1.1.0
     ```
 
-### Example: table query
+#### Table query
 
 For tables, use the `snmptable` command, which will output the rows in the table in a tabular format. Its arguments and options are similar to `snmpget`.
 

@@ -34,7 +34,7 @@ Generally, you'll want to search the web and find out about the following:
 
 Now that we have gathered some basic information about the device and its SNMP interfaces, we should decide which metrics we want to collect. (Devices often expose thousands of metrics through SNMP. We certainly don't want to collect them all.)
 
-Devices typically expose thousands of OIDs that can span dozens of MIB, so this can feel daunting at first.
+Devices typically expose thousands of OIDs that can span dozens of MIB, so this can feel daunting at first. Remember, [never give up!](https://www.youtube.com/watch?v=KxGRhd_iWuE)
 
 Some guidelines to help you in this process:
 
