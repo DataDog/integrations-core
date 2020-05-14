@@ -18,7 +18,7 @@ try:
 except ImportError:
     pyodbc = None
 
-from config import _is_affirmative
+#from config import _is_affirmative
 
 # project
 from checks import AgentCheck
@@ -474,7 +474,11 @@ class SQLServer(AgentCheck):
             metrics_to_collect = self.instances_metrics[instance_key]
 
             with self.get_managed_cursor(instance, self.DEFAULT_DB_KEY) as cursor:
-
+                # Get sqlserver hostname for each instance as tag.
+                cursor.execute("SELECT @@SERVERNAME")
+                rows = cursor.fetchall()
+                if rows is not None:
+                  custom_tags.append("instance_host_name:{0}".format(str(rows[0][0]).strip()))
                 simple_rows = SqlSimpleMetric.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlSimpleMetric"], self.log)
                 fraction_results = SqlFractionMetric.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlFractionMetric"], self.log)
                 waitstat_rows, waitstat_cols = SqlOsWaitStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlOsWaitStat"], self.log)
@@ -670,7 +674,6 @@ class SqlComplexMetric(SqlServerMetric):
     @classmethod
     def fetch_all_values(cls, cursor, query, logger):
         # This method detch all the metric based on the complex metric passed.
-        logger.debug("query : %s", query)
         cursor.execute(query)
         rows = cursor.fetchall()
         columns = [i[0] for i in cursor.description]
@@ -678,23 +681,22 @@ class SqlComplexMetric(SqlServerMetric):
 
     def fetch_metric(self, cursor, rows, columns, tags):
         # This method deals with publishing metric in data dog.
-        tagby_index = -1
-
         if self.cfg_instance != None :
             attribute_name_list = self.cfg_instance.get("attribute",[])
         attribute_index_list = []
+        tag_by_indexs = []
         for index in range(len(columns)):
-            if (self.tag_by is not None) and (columns[index] in [self.tag_by]):
-                tagby_index = index
+            if (self.tag_by is not None) and (columns[index] in self.tag_by):
+                tag_by_indexs.append(index)
             if columns[index] in attribute_name_list:
                 attribute_index_list.append(index)
 
         for row in rows:
             metric_tags = list(tags)
-            if tagby_index != -1:
+            for tagby_index in tag_by_indexs:
                 metric_tags.append('{}:{}'.format(columns[tagby_index],str(row[tagby_index]).strip()))
             for index in range(len(row)):
-                if (index == tagby_index) and (tagby_index not in attribute_index_list):
+                if (index in tag_by_indexs) and (index not in attribute_index_list):
                     continue
                 report_value = row[index]
                 metric_name = ""
@@ -957,3 +959,4 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
             metric_name = '%s.%s' % (self.datadog_name, self.column)
             self.report_function(metric_name, column_val,
                                  tags=metric_tags)
+
