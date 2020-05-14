@@ -7,12 +7,6 @@ from .legacy import Win32EventLogWMI
 
 
 class Win32EventLogCheck(AgentCheck):
-    def __init__(self, name, init_config, instances):
-        super(Win32EventLogCheck, self).__init__(name, init_config, instances)
-
-    def check(self, _):
-        raise NotImplementedError()
-
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
@@ -20,3 +14,9 @@ class Win32EventLogCheck(AgentCheck):
             return super(Win32EventLogCheck, cls).__new__(cls)
         else:
             return Win32EventLogWMI(name, init_config, instances)
+
+    def __init__(self, name, init_config, instances):
+        super(Win32EventLogCheck, self).__init__(name, init_config, instances)
+
+    def check(self, _):
+        raise NotImplementedError()
