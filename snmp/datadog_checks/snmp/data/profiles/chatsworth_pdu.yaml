@@ -4,9 +4,6 @@ extends:
 sysobjectid: 1.3.6.1.4.1.30932.*
 
 # [legacy] Global tags
-# Global tags are only for legacy metrics.
-# They apply to all metrics, but if we use this profile on a new devices the legacy OIDs should
-# not be present and no global tag will be added.
 metric_tags:
   - tag: legacy_pdu_name
     OID: 1.3.6.1.4.1.30932.1.1.2.40

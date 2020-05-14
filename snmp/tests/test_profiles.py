@@ -1270,8 +1270,7 @@ def test_aruba(aggregator):
 def test_chatsworth(aggregator):
     run_profile_check('chatsworth')
 
-    # Since the test `chatsworth.snmprec` contain both legacy and new objects, global legacy tags will be present
-    # for all metrics. In practice, new devices won't have legacy objects and global tags should NOT be present.
+    # Legacy global tags are applied to all metrics
     legacy_global_tags = [
         'legacy_pdu_macaddress:00:0E:D3:AA:CC:EE',
         'legacy_pdu_model:P10-1234-ABC',
