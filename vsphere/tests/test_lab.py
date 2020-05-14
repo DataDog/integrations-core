@@ -42,6 +42,7 @@ def test_lab(aggregator):
         'collect_metric_instance_values': True,
         'ssl_verify': False,
         'collect_tags': True,
+        'collect_events': True,
     }
     check = VSphereCheck('vsphere', {}, [instance])
     check.initiate_api_connection()
