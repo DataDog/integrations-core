@@ -7,7 +7,7 @@ class Event:
 
 class EventFilterSpec:
     class ByTime:
-        def [__init__(self, beginTime: datetime): ...
+        def __init__(self, beginTime: datetime): ...
     time: EventFilterSpec.ByTime
 
 class EventManager:
