@@ -15,5 +15,6 @@ except ImportError:
 @pytest.mark.unit
 def test_get_running_sampler_does_not_leak():
     check = WinWMICheck('wmi_base_check', {}, [{}])
-    sampler = check.get_running_wmi_sampler(properties=[], filters=[])
-    assert check.get_running_wmi_sampler(properties=[], filters=[]) is sampler
+    with check.get_running_wmi_sampler(properties=[], filters=[]) as sampler:
+        assert sampler is not None
+        assert check.get_running_wmi_sampler(properties=[], filters=[]) is sampler
