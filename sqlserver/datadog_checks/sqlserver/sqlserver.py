@@ -63,7 +63,7 @@ DM_OS_VIRTUAL_FILE_STATS = "sys.dm_io_virtual_file_stats"
 
 # Note : This is not actually table, This is a place holder for all other table.
 # goverened by the query.
-DM_CUSTOME_METRIC = "custom_metric_table"
+DM_CUSTOM_METRIC = "custom_metric_table"
 
 class SQLConnectionError(Exception):
     """
@@ -232,7 +232,7 @@ class SQLServer(AgentCheck):
                         continue
                     else:
                         sql_type = PERF_COUNTER_LARGE_RAWCOUNT
-                        db_table = DM_CUSTOME_METRIC
+                        db_table = DM_CUSTOM_METRIC
                         base_name = None
 
                 metrics_to_collect.append(self.typed_metric(instance,
@@ -313,7 +313,7 @@ class SQLServer(AgentCheck):
                 DM_OS_WAIT_STATS_TABLE: (self.gauge, SqlOsWaitStat),
                 DM_OS_MEMORY_CLERKS_TABLE: (self.gauge, SqlOsMemoryClerksStat),
                 DM_OS_VIRTUAL_FILE_STATS: (self.gauge, SqlIoVirtualFileStat),
-                DM_CUSTOME_METRIC: (self.gauge, SqlComplexMetric)
+                DM_CUSTOM_METRIC: (self.gauge, SqlComplexMetric)
             }
             metric_type, cls = table_type_mapping[table]
 
@@ -661,8 +661,6 @@ class SqlServerMetric(object):
         self.report_function = report_function
         self.instance = cfg_instance.get('instance_name', '')
         self.tag_by = cfg_instance.get('tag_by', None)
-        self.query = cfg_instance.get('sql_query', None)
-        self.attributes = cfg_instance.get('attribute',[])
         self.column = column
         self.instances = None
         self.past_values = {}
@@ -672,6 +670,13 @@ class SqlServerMetric(object):
         raise NotImplementedError
 
 class SqlComplexMetric(SqlServerMetric):
+
+    def __init__(self, connector,  cfg_instance, base_name,
+                 report_function, column, logger):
+        SqlServerMetric.__init__(self, connector,  cfg_instance, base_name,
+                 report_function, column, logger)
+        self.query = cfg_instance.get('sql_query', None)
+        self.attributes = cfg_instance.get('attribute',[])
 
     def fetch_all_values(self, cursor, logger):
         # This method fetch all the metric based on the complex metric passed.
