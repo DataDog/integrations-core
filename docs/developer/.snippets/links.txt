@@ -18,7 +18,6 @@
 [config-spec-template-instances-http]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/http.yaml
 [config-spec-templates]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration
 [Datadog Agent]: https://docs.datadoghq.com/agent/
-[database-troll]: https://lmgtfy.com/?q=What+is+a+database%3F&iie=1
 [datadog-agent]: https://github.com/DataDog/datadog-agent
 [datadog-agent-flare]: https://docs.datadoghq.com/agent/troubleshooting/send_a_flare/
 [datadog-agent-logs]: https://docs.datadoghq.com/agent/logs/?tab=tailfiles

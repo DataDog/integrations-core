@@ -2,7 +2,11 @@
 
 -----
 
-What _is_ a database, you may wonder. Well, the answer to that question is [fascinating][database-troll]!
+<div align="center">
+    <video preload="auto" autoplay loop muted>
+        <source src="https://media.giphy.com/media/dIBLtolI6axTGIGopo/giphy.mp4" type="video/mp4"></source>
+    </video>
+</div>
 
 No matter the database you wish to monitor, the base package provides a standard way to define and collect data from arbitrary queries.
 
