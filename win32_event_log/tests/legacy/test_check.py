@@ -7,7 +7,7 @@ import pytest
 from mock import patch
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.win32_event_log import Win32EventLogWMI
+from datadog_checks.win32_event_log import Win32EventLogCheck
 
 from .common import INSTANCE
 
@@ -51,7 +51,7 @@ class FakeWmiSampler:
 @pytest.fixture
 def mock_get_wmi_sampler():
     with patch(
-        "datadog_checks.win32_event_log.Win32EventLogWMI._get_running_wmi_sampler", return_value=FakeWmiSampler()
+        "datadog_checks.win32_event_log.legacy.Win32EventLogWMI._get_running_wmi_sampler", return_value=FakeWmiSampler()
     ):
         yield
 
@@ -80,7 +80,7 @@ def mock_to_time():
 
 @pytest.fixture
 def check():
-    check = Win32EventLogWMI('win32_event_log', {}, {}, [INSTANCE])
+    check = Win32EventLogCheck('win32_event_log', {}, [INSTANCE])
     return check
 
 
