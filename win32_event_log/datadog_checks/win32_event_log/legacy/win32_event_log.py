@@ -11,7 +11,7 @@ from datadog_checks.base.checks.win.wmi import WinWMICheck, from_time, to_time
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.base.utils.timeout import TimeoutException
 
-from .constants import EVENT_TYPE, INTEGER_PROPERTIES, SOURCE_TYPE_NAME
+from ..constants import EVENT_TYPE, INTEGER_PROPERTIES, SOURCE_TYPE_NAME
 
 
 class Win32EventLogWMI(WinWMICheck):
