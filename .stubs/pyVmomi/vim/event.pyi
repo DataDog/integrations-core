@@ -3,10 +3,11 @@ from typing import List
 
 class Event:
     createdTime: datetime
+    key: int
 
 class EventFilterSpec:
     class ByTime:
-        def __init__(self, beginTime: datetime): ...
+        def [__init__(self, beginTime: datetime): ...
     time: EventFilterSpec.ByTime
 
 class EventManager:
