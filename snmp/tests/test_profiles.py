@@ -4,6 +4,7 @@
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.snmp import SnmpCheck
 
 from . import common
@@ -1269,7 +1270,43 @@ def test_aruba(aggregator):
 def test_chatsworth(aggregator):
     run_profile_check('chatsworth')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:chatsworth_pdu']
+    # Legacy global tags are applied to all metrics
+    legacy_global_tags = [
+        'legacy_pdu_macaddress:00:0E:D3:AA:CC:EE',
+        'legacy_pdu_model:P10-1234-ABC',
+        'legacy_pdu_name:legacy-name1',
+        'legacy_pdu_version:1.2.3',
+    ]
+    common_tags = common.CHECK_TAGS + legacy_global_tags + ['snmp_profile:chatsworth_pdu']
+
+    # Legacy metrics
+    legacy_pdu_tags = common_tags
+    legacy_pdu_gauge_metrics = [
+        'snmp.pduRole',
+        'snmp.outOfService',
+    ]
+    legacy_pdu_monotonic_count_metrics = []
+    for line in range(1, 4):
+        legacy_pdu_gauge_metrics.append('snmp.line{}curr'.format(line))
+    for branch in range(1, 3):
+        legacy_pdu_gauge_metrics.append('snmp.temperatureProbe{}'.format(branch))
+        legacy_pdu_gauge_metrics.append('snmp.humidityProbe{}'.format(branch))
+        for xyz in ['xy', 'yz', 'zx']:
+            legacy_pdu_monotonic_count_metrics.append('snmp.energy{}{}s'.format(xyz, branch))
+            legacy_pdu_gauge_metrics.append('snmp.voltage{}{}'.format(xyz, branch))
+            legacy_pdu_gauge_metrics.append('snmp.power{}{}'.format(xyz, branch))
+            legacy_pdu_gauge_metrics.append('snmp.powerFact{}{}'.format(xyz, branch))
+            legacy_pdu_gauge_metrics.append('snmp.current{}{}'.format(xyz, branch))
+    for branch in range(1, 25):
+        legacy_pdu_monotonic_count_metrics.append('snmp.receptacleEnergyoutlet{}s'.format(branch))
+        legacy_pdu_gauge_metrics.append('snmp.outlet{}Current'.format(branch))
+
+    for metric in legacy_pdu_gauge_metrics:
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=legacy_pdu_tags, count=1)
+    for metric in legacy_pdu_monotonic_count_metrics:
+        aggregator.assert_metric(metric, metric_type=aggregator.MONOTONIC_COUNT, tags=legacy_pdu_tags, count=1)
+
+    # New metrics
     pdu_tags = common_tags + [
         'pdu_cabinetid:cab1',
         'pdu_ipaddress:42.2.210.224',
@@ -1332,6 +1369,7 @@ def test_chatsworth(aggregator):
         )
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_isilon(aggregator):
