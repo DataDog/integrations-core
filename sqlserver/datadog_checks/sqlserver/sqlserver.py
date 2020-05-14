@@ -673,8 +673,7 @@ class SqlServerMetric(object):
 
 class SqlComplexMetric(SqlServerMetric):
 
-    @classmethod
-    def fetch_all_values(cls, cursor, logger):
+    def fetch_all_values(self, cursor, logger):
         # This method fetch all the metric based on the complex metric passed.
         cursor.execute(self.query)
         rows = cursor.fetchall()
