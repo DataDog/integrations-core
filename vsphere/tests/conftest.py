@@ -5,7 +5,9 @@ import os
 
 import pytest
 from mock import MagicMock, Mock, patch
-from tests.mocked_api import MockedAPI, mock_http_rest_api
+
+from .common import LAB_INSTANCE
+from .mocked_api import MockedAPI, mock_http_rest_api
 
 try:
     from contextlib import ExitStack
@@ -13,17 +15,9 @@ except ImportError:
     from contextlib2 import ExitStack
 
 
-@pytest.fixture()
-def realtime_instance():
-    return {
-        'collection_level': 4,
-        'empty_default_hostname': True,
-        'use_legacy_check_version': False,
-        'host': os.environ.get('VSPHERE_URL', 'FAKE'),
-        'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
-        'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
-        'ssl_verify': False,
-    }
+@pytest.fixture(scope='session')
+def dd_environment():
+    yield LAB_INSTANCE
 
 
 @pytest.fixture()

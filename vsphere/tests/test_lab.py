@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.base import is_affirmative
 from datadog_checks.vsphere import VSphereCheck
 
-from .common import HERE
+from .common import HERE, LAB_INSTANCE
 
 
 def test_lab(aggregator):
@@ -30,23 +30,9 @@ def test_lab(aggregator):
             "Skipped! Set TEST_VSPHERE_RUN_LAB to run this test. "
             "TEST_VSPHERE_USER and TEST_VSPHERE_PASS must also be set."
         )
-    username = os.environ['TEST_VSPHERE_USER']
-    password = os.environ['TEST_VSPHERE_PASS']
-    instance = {
-        'host': 'aws.vcenter.localdomain',
-        'username': username,
-        'password': password,
-        'collection_level': 4,
-        'collection_type': 'both',
-        'use_legacy_check_version': False,
-        'collect_metric_instance_values': True,
-        'ssl_verify': False,
-        'collect_tags': True,
-        'collect_events': True,
-    }
-    check = VSphereCheck('vsphere', {}, [instance])
+    check = VSphereCheck('vsphere', {}, [LAB_INSTANCE])
     check.initiate_api_connection()
-    check.check(instance)
+    check.check(LAB_INSTANCE)
 
     # Basic assert
     aggregator.assert_metric('vsphere.cpu.coreUtilization.avg')
