@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
-import re
 from typing import Any, Dict, Mapping, Sequence, Tuple, Union
 
 import yaml
@@ -288,7 +287,7 @@ class OIDPrinter(object):
             displayed = values[0]
         else:
             displayed = '{{{}}}'.format(', '.join(values))
-        return "'{}': {}".format(key, re.sub('\x00', '', displayed))
+        return "'{}': {}".format(key, displayed.replace('\x00', ''))
 
     def __str__(self):
         # type: () -> str
