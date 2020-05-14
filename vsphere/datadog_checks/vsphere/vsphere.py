@@ -76,7 +76,7 @@ class VSphereCheck(AgentCheck):
         self.config = VSphereConfig(instance, self.log)
 
         self.latest_event_query_time = dt.datetime.utcnow()
-        self.latest_event_key = None
+        self.latest_processed_events = []
         self.infrastructure_cache = InfrastructureCache(interval_sec=self.config.refresh_infrastructure_cache_interval)
         self.metrics_metadata_cache = MetricsMetadataCache(
             interval_sec=self.config.refresh_metrics_metadata_cache_interval
@@ -484,6 +484,7 @@ class VSphereCheck(AgentCheck):
         # type: () -> None
         self.log.debug("Starting events collection.")
         latest_event = None
+        latest_processed_events = []
         try:
             t0 = Timer()
             new_events = self.api.get_new_events(start_time=self.latest_event_query_time)
@@ -497,10 +498,11 @@ class VSphereCheck(AgentCheck):
             self.log.debug("Got %s new events from the vCenter event manager", len(new_events))
             event_config = {'collect_vcenter_alarms': True}
             for event in new_events:
-                if event.key == self.latest_event_key:
+                if event.key in self.latest_processed_events:
                     self.log.debug("Skip already processed event (key=%s).", event.key)
                     continue
                 self.log.debug("Process event (key=%s)", event.key)
+                latest_processed_events.append(event.key)
                 normalized_event = VSphereEvent(event, event_config, self.config.base_tags)
                 # Can return None if the event if filtered out
                 event_payload = normalized_event.get_datadog_payload()
@@ -515,7 +517,7 @@ class VSphereCheck(AgentCheck):
 
         if latest_event is not None:
             self.latest_event_query_time = latest_event.createdTime
-            self.latest_event_key = latest_event.key
+            self.latest_processed_events = latest_processed_events
 
     def check(self, _):
         # type: (Any) -> None
