@@ -75,7 +75,8 @@ class VSphereCheck(AgentCheck):
         instance = cast(InstanceConfig, self.instance)
         self.config = VSphereConfig(instance, self.log)
 
-        self.latest_event_query = dt.datetime.now()
+        self.latest_event_query_time = dt.datetime.utcnow()
+        self.latest_event_key = None
         self.infrastructure_cache = InfrastructureCache(interval_sec=self.config.refresh_infrastructure_cache_interval)
         self.metrics_metadata_cache = MetricsMetadataCache(
             interval_sec=self.config.refresh_metrics_metadata_cache_interval
@@ -485,7 +486,7 @@ class VSphereCheck(AgentCheck):
         latest_event = None
         try:
             t0 = Timer()
-            new_events = self.api.get_new_events(start_time=self.latest_event_query)
+            new_events = self.api.get_new_events(start_time=self.latest_event_query_time)
             self.gauge(
                 'datadog.vsphere.collect_events.time',
                 t0.total(),
@@ -496,6 +497,9 @@ class VSphereCheck(AgentCheck):
             self.log.debug("Got %s new events from the vCenter event manager", len(new_events))
             event_config = {'collect_vcenter_alarms': True}
             for event in new_events:
+                if event.key == self.latest_event_key:
+                    self.log.debug("Skip already processed event (key=%s).", event.key)
+                    continue
                 self.log.debug("Process event (key=%s)", event.key)
                 normalized_event = VSphereEvent(event, event_config, self.config.base_tags)
                 # Can return None if the event if filtered out
@@ -510,7 +514,8 @@ class VSphereCheck(AgentCheck):
             self.log.warning("Unable to fetch Events %s", e)
 
         if latest_event is not None:
-            self.latest_event_query = latest_event.createdTime + dt.timedelta(seconds=1)
+            self.latest_event_query_time = latest_event.createdTime
+            self.latest_event_key = latest_event.key
 
     def check(self, _):
         # type: (Any) -> None
