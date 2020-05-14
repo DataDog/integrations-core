@@ -20,6 +20,7 @@ PRODUCTION_BRANCH = 'gh-pages'
 def deploy(ctx, branch, yes):
     """Deploy built documentation."""
     # We allow specifying a branch in case you want to quickly showcase changes to others
+    # In that case, you should ship them the zip archive linked to at the end of the script.
     if not branch:
         branch = PRODUCTION_BRANCH
 
@@ -72,9 +73,12 @@ def deploy(ctx, branch, yes):
             result = run_or_abort(
                 f'git commit -m "build docs at {latest_commit_hash}"', capture=True, ignore_exit_code=True
             )
-            if result.code and 'nothing to commit' in result.stdout:
-                echo_warning('No documentation changes, skipping deployment.')
-                abort(code=0)
+            if result.code:
+                if 'nothing to commit' in result.stdout:
+                    echo_warning('No documentation changes, skipping deployment.')
+                    abort(code=0)
+                else:
+                    abort(result.stdout + result.stderr, code=result.code)
 
             if branch == PRODUCTION_BRANCH and not yes and not click.confirm('Do you want to continue?'):
                 abort('Will not deploy')

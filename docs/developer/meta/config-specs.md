@@ -101,7 +101,7 @@ Values also support 1 field of our own:
 ## Templates
 
 Every [option](#options) may reference [pre-defined templates][config-spec-templates] using a key called `template`.
-The template format looks like `path/to/template_file` where `path/to` must point an extant directory relative
+The template format looks like `path/to/template_file` where `path/to` must point an existing directory relative
 to a template directory and `template_file` must have the file extension `.yaml` or `.yml`.
 
 You can use custom templates that will take precedence over the pre-defined templates by using the `template_paths`
