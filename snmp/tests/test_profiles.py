@@ -48,24 +48,14 @@ from .metrics import (
 pytestmark = pytest.mark.usefixtures("dd_environment")
 
 
-def _verify_profile(check, profile, name):
-    __tracebackhide__ = True
-    message = None
-    try:
-        check._config.refresh_with_profile(profile)
-    except ConfigurationError as e:
-        message = "Profile `{}` is not configured correctly: {}".format(name, e)
-    return message
-
-
 def test_load_profiles(aggregator):
     instance = common.generate_instance_config([])
     check = SnmpCheck('snmp', {}, [instance])
     for name, profile in check.profiles.items():
-        profile_error = _verify_profile(check, profile, name)
-        if profile_error:
-            pytest.fail(profile_error)
-
+        try:
+            check._config.refresh_with_profile(profile)
+        except ConfigurationError as e:
+            pytest.fail("Profile `{}` is not configured correctly: {}".format(name, e))
 
 def run_profile_check(recording_name):
     """
