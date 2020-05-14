@@ -25,6 +25,10 @@ to run, test and build a Check. More advanced documentation can be found [here][
 For more information on integrations, please reference our [documentation][11] and
 [knowledge base][12]. You can also visit our [help page][13] to connect with us.
 
+## GPG public keys
+
+An up-to-date list of all developers authorized to sign releases can be found [here][23].
+
 [1]: https://dev.azure.com/datadoghq/integrations-core/_apis/build/status/Master%20All?branchName=master
 [2]: https://dev.azure.com/datadoghq/integrations-core/_build/latest?definitionId=29&branchName=master
 [5]: https://github.com/DataDog/integrations-extras
@@ -44,3 +48,4 @@ For more information on integrations, please reference our [documentation][11] a
 [20]: https://datadoghq.dev/integrations-core/
 [21]: https://img.shields.io/badge/code%20style-black-000000.svg
 [22]: https://github.com/ambv/black
+[23]: https://datadoghq.dev/integrations-core/process/integration-release/#releasers
