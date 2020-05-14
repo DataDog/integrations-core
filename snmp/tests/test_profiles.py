@@ -57,6 +57,7 @@ def test_load_profiles(aggregator):
         except ConfigurationError as e:
             pytest.fail("Profile `{}` is not configured correctly: {}".format(name, e))
 
+
 def run_profile_check(recording_name):
     """
     Run a single check with the provided `recording_name` used as
