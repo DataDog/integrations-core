@@ -131,9 +131,9 @@ def docker_run(
     - **down** (_callable_) - A custom tear down callable. This is required when using a custom setup.
     - **on_error** (_callable_) - A callable called in case of an unhandled exception
     - **sleep** (_float_) - Number of seconds to wait before yielding. This occurs after all conditions are successful.
-    - **endpoints** (_List[str])_) - Endpoints to verify access for before yielding. Shorthand for adding
+    - **endpoints** (_List[str]_) - Endpoints to verify access for before yielding. Shorthand for adding
       `CheckEndpoints(endpoints)` to the `conditions` argument.
-    - **log_patterns** (_List[str|re.Pattern])_) - Regular expression patterns to find in Docker logs before yielding.
+    - **log_patterns** (_List[str|re.Pattern]_) - Regular expression patterns to find in Docker logs before yielding.
       This is only available when `compose_file` is provided. Shorthand for adding
       `CheckDockerLogs(compose_file, log_patterns)` to the `conditions` argument.
     - **mount_logs** (_bool_) - Whether or not to mount log files in Agent containers based on example logs

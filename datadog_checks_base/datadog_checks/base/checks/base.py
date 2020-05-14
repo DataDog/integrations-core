@@ -449,7 +449,7 @@ class AgentCheck(object):
 
         - **name** (_str_) - the name of the metric
         - **value** (_float_) - the value for the metric
-        - **tags** (_List[str])_) - a list of tags to associate with this metric
+        - **tags** (_List[str]_) - a list of tags to associate with this metric
         - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
         - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
@@ -465,7 +465,7 @@ class AgentCheck(object):
 
         - **name** (_str_) - the name of the metric
         - **value** (_float_) - the value for the metric
-        - **tags** (_List[str])_) - a list of tags to associate with this metric
+        - **tags** (_List[str]_) - a list of tags to associate with this metric
         - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
         - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
@@ -481,7 +481,7 @@ class AgentCheck(object):
 
         - **name** (_str_) - the name of the metric
         - **value** (_float_) - the value for the metric
-        - **tags** (_List[str])_) - a list of tags to associate with this metric
+        - **tags** (_List[str]_) - a list of tags to associate with this metric
         - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
         - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
@@ -497,7 +497,7 @@ class AgentCheck(object):
 
         - **name** (_str_) - the name of the metric
         - **value** (_float_) - the value for the metric
-        - **tags** (_List[str])_) - a list of tags to associate with this metric
+        - **tags** (_List[str]_) - a list of tags to associate with this metric
         - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
         - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
@@ -513,7 +513,7 @@ class AgentCheck(object):
 
         - **name** (_str_) - the name of the metric
         - **value** (_float_) - the value for the metric
-        - **tags** (_List[str])_) - a list of tags to associate with this metric
+        - **tags** (_List[str]_) - a list of tags to associate with this metric
         - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
         - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
@@ -529,7 +529,7 @@ class AgentCheck(object):
 
         - **name** (_str_) - the name of the metric
         - **value** (_float_) - the value for the metric
-        - **tags** (_List[str])_) - a list of tags to associate with this metric
+        - **tags** (_List[str]_) - a list of tags to associate with this metric
         - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
         - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
@@ -545,7 +545,7 @@ class AgentCheck(object):
 
         - **name** (_str_) - the name of the metric
         - **value** (_float_) - the value for the metric
-        - **tags** (_List[str])_) - a list of tags to associate with this metric
+        - **tags** (_List[str]_) - a list of tags to associate with this metric
         - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
         - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
@@ -562,7 +562,7 @@ class AgentCheck(object):
 
         - **name** (_str_) - the name of the metric
         - **value** (_float_) - the value for the metric
-        - **tags** (_List[str])_) - a list of tags to associate with this metric
+        - **tags** (_List[str]_) - a list of tags to associate with this metric
         - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
         - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
@@ -579,7 +579,7 @@ class AgentCheck(object):
 
         - **name** (_str_) - the name of the service check
         - **status** (_int_) - a constant describing the service status.
-        - **tags** (_List[str])_) - a list of tags to associate with this service check
+        - **tags** (_List[str]_) - a list of tags to associate with this service check
         - **message** (_str_) - additional information or a description of why this status occurred.
         - **raw** (_bool_) - whether to ignore any defined namespace prefix
         """

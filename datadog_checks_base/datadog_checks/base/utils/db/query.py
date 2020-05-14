@@ -10,7 +10,7 @@ from .utils import create_extra_transformer
 
 class Query(object):
     """
-    This class accepts a single `dict` argument which is the necessary data to run the query. The representation
+    This class accepts a single `dict` argument which is necessary to run the query. The representation
     is based on our `custom_queries` format originally designed and implemented in !1528.
 
     It is now part of all our database integrations and

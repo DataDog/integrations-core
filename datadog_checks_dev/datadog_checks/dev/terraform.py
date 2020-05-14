@@ -43,7 +43,7 @@ def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_va
 
     - **directory** (_str_) - A path containing Terraform files
     - **sleep** (_float_) - Number of seconds to wait before yielding. This occurs after all conditions are successful.
-    - **endpoints** (_List[str])_) - Endpoints to verify access for before yielding. Shorthand for adding
+    - **endpoints** (_List[str]_) - Endpoints to verify access for before yielding. Shorthand for adding
       `CheckEndpoints(endpoints)` to the `conditions` argument.
     - **conditions** (_callable_) - A list of callable objects that will be executed before yielding to
       check for errors
