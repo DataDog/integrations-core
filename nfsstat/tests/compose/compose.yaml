@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  nfs-server:
+    image: gists/nfs-server
+    container_name: nfs-server
+    cap_add:
+      - SYS_ADMIN
+      - SETPCAP
+    volumes:
+      - ./nfs-share:/nfs-share
+
+  nfs-client:
+    image: ubuntu:18.04
+    privileged: true
+    container_name: nfs-client
+    depends_on: 
+      - nfs-server
+    environment:
+      - NFS_SERVER=nfs-server
+    command: sh -c "./setup.sh && tail -f /dev/null"
+    volumes:
+      - ./client/setup.sh:/setup.sh
