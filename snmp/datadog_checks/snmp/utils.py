@@ -5,6 +5,7 @@ import os
 from typing import Any, Dict, Mapping, Sequence, Tuple, Union
 
 import yaml
+import re
 
 from .compat import get_config
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
@@ -287,7 +288,7 @@ class OIDPrinter(object):
             displayed = values[0]
         else:
             displayed = '{{{}}}'.format(', '.join(values))
-        return "'{}': {}".format(key, displayed)
+        return "'{}': {}".format(key, re.sub('\x00', '', displayed))
 
     def __str__(self):
         # type: () -> str
