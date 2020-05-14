@@ -30,9 +30,10 @@ EXCLUDE_FILTERS = {
     'VmPoweredOnEvent': [],
     'VmPoweredOffEvent': [],
     'VmReconfiguredEvent': [],
-    'VmResumedEvent': [],
     'VmSuspendedEvent': [],
 }
+
+ALLOWED_EVENTS = [getattr(vim.event, event_type) for event_type in EXCLUDE_FILTERS.keys()]
 
 
 class VSphereEvent(object):

@@ -482,6 +482,7 @@ class VSphereCheck(AgentCheck):
     def collect_events(self):
         # type: () -> None
         self.log.debug("Starting events collection.")
+        latest_event_time = None
         try:
             t0 = Timer()
             new_events = self.api.get_new_events(start_time=self.latest_event_query)
@@ -495,17 +496,22 @@ class VSphereCheck(AgentCheck):
             self.log.debug("Got %s new events from the vCenter event manager", len(new_events))
             event_config = {'collect_vcenter_alarms': True}
             for event in new_events:
+                self.log.debug("Processing event number %s: %s", event.key, type(event))
                 normalized_event = VSphereEvent(event, event_config, self.config.base_tags)
                 # Can return None if the event if filtered out
                 event_payload = normalized_event.get_datadog_payload()
                 if event_payload is not None:
+                    self.log.debug("Submit event number %s: %s", event.key, type(event))
                     self.event(event_payload)
+                if latest_event_time is None or event.createdTime > latest_event_time:
+                    latest_event_time = event.createdTime
         except Exception as e:
             # Don't get stuck on a failure to fetch an event
             # Ignore them for next pass
             self.log.warning("Unable to fetch Events %s", e)
 
-        self.latest_event_query = self.api.get_latest_event_timestamp() + dt.timedelta(seconds=1)
+        if latest_event_time is not None:
+            self.latest_event_query = latest_event_time + dt.timedelta(seconds=1)
 
     def check(self, _):
         # type: (Any) -> None

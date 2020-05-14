@@ -79,7 +79,6 @@ This check watches vCenter's Event Manager for events and emits them to Datadog.
 
 - AlarmStatusChangedEvent:Gray
 - VmBeingHotMigratedEvent
-- VmResumedEvent
 - VmReconfiguredEvent
 - VmPoweredOnEvent
 - VmMigratedEvent

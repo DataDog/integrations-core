@@ -7,6 +7,8 @@ import ssl
 from typing import Any, Callable, List, TypeVar, cast
 
 from pyVim import connect
+
+from datadog_checks.vsphere.legacy.event import ALLOWED_EVENTS
 from pyVmomi import vim, vmodl
 
 from datadog_checks.base.log import CheckLoggingAdapter
@@ -257,13 +259,8 @@ class VSphereAPI(object):
         query_filter = vim.event.EventFilterSpec()
         time_filter = vim.event.EventFilterSpec.ByTime(beginTime=start_time)
         query_filter.time = time_filter
+        query_filter.type = ALLOWED_EVENTS
         return event_manager.QueryEvents(query_filter)
-
-    @smart_retry
-    def get_latest_event_timestamp(self):
-        # type: () -> dt.datetime
-        event_manager = self._conn.content.eventManager
-        return event_manager.latestEvent.createdTime
 
     @smart_retry
     def get_max_query_metrics(self):
