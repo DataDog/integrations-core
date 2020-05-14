@@ -23,8 +23,11 @@ UDP_COUNTS = ['udpHCInDatagrams', 'udpNoPorts', 'udpInErrors', 'udpHCOutDatagram
 
 # Generic network interfaces metrics for routers.
 # _generic-router-if.yaml
-IF_COUNTS = ['ifInErrors', 'ifInDiscards', 'ifOutErrors', 'ifOutDiscards']
-IFX_COUNTS = [
+IF_COUNTS = [
+    'ifInErrors',
+    'ifInDiscards',
+    'ifOutErrors',
+    'ifOutDiscards',
     'ifHCInOctets',
     'ifHCInUcastPkts',
     'ifHCInMulticastPkts',
@@ -38,7 +41,7 @@ IF_RATES = [
     'ifHCInOctets.rate',
     'ifHCOutOctets.rate',
 ]
-IF_GAUGES = ['ifAdminStatus', 'ifOperStatus', 'ifSpeed']
+IF_GAUGES = ['ifAdminStatus', 'ifOperStatus', 'ifSpeed', 'ifHighSpeed']
 
 # Generic IP metrics for routers
 # _generic-router-ip.yaml

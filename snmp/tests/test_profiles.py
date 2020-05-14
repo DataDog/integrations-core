@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.snmp import SnmpCheck
 
 from . import common
@@ -17,7 +18,6 @@ from .metrics import (
     IF_COUNTS,
     IF_GAUGES,
     IF_RATES,
-    IFX_COUNTS,
     IP_COUNTS,
     IP_IF_COUNTS,
     IPX_COUNTS,
@@ -114,7 +114,6 @@ def test_f5(aggregator):
         'sysMultiHostCpuIowait',
     ]
 
-    if_counts = IF_COUNTS + IFX_COUNTS
     interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
     tags = ['snmp_profile:f5-big-ip', 'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal']
     tags += common.CHECK_TAGS
@@ -128,7 +127,7 @@ def test_f5(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:1'] + tags, count=1)
     for interface in interfaces:
         interface_tags = ['interface:{}'.format(interface)] + tags
-        for metric in if_counts:
+        for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=interface_tags, count=1,
             )
@@ -213,7 +212,7 @@ def test_router(aggregator):
     common_tags = common.CHECK_TAGS + ['snmp_profile:generic-router']
     for interface in ['eth0', 'eth1']:
         tags = ['interface:{}'.format(interface)] + common_tags
-        for metric in IF_COUNTS + IFX_COUNTS:
+        for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
@@ -258,13 +257,12 @@ def test_f5_router(aggregator):
     check = SnmpCheck('snmp', init_config, [instance])
     check.check(instance)
 
-    if_counts = IF_COUNTS + IFX_COUNTS
     interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
     common_tags = ['snmp_profile:router', 'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal']
     common_tags.extend(common.CHECK_TAGS)
     for interface in interfaces:
         tags = ['interface:{}'.format(interface)] + common_tags
-        for metric in if_counts:
+        for metric in IF_COUNTS:
             aggregator.assert_metric(
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
@@ -286,7 +284,7 @@ def test_f5_router(aggregator):
 def test_cisco_3850(aggregator):
     run_profile_check('3850')
     # We're not covering all interfaces
-    interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 48)]
+    interfaces = ["Gi1/0/{}".format(i) for i in range(1, 48)]
     common_tags = common.CHECK_TAGS + ['snmp_host:Cat-3850-4th-Floor.companyname.local', 'snmp_profile:cisco-3850']
     for interface in interfaces:
         tags = ['interface:{}'.format(interface)] + common_tags
@@ -296,13 +294,6 @@ def test_cisco_3850(aggregator):
             )
         for metric in IF_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
-    interfaces = ["Gi1/0/{}".format(i) for i in range(1, 48)]
-    for interface in interfaces:
-        tags = ['interface:{}'.format(interface)] + common_tags
-        for metric in IFX_COUNTS:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
-            )
         for metric in IF_RATES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
 
@@ -523,13 +514,6 @@ def test_cisco_nexus(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
         for metric in IF_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
-
-    for interface in interfaces:
-        tags = ['interface:{}'.format(interface)] + common_tags
-        for metric in IFX_COUNTS:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
-            )
 
     for metric in TCP_COUNTS:
         aggregator.assert_metric(
@@ -899,10 +883,6 @@ def test_proliant(aggregator):
         for metric in IF_GAUGES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
-        for metric in IFX_COUNTS:
-            aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
-            )
         for metric in IF_RATES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
 
@@ -1032,7 +1012,7 @@ def test_cisco_asa_5525(aggregator):
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
         )
 
-    if_tags = ['interface:0x42010aa40033'] + common_tags
+    if_tags = ['interface:eth0'] + common_tags
     for metric in IF_COUNTS:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
@@ -1041,13 +1021,8 @@ def test_cisco_asa_5525(aggregator):
     for metric in IF_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
-    hc_tags = ['interface:Jaded oxen acted acted'] + common_tags
-    for metric in IFX_COUNTS:
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=hc_tags, count=1
-        )
     for metric in IF_RATES:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=hc_tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
 
     aggregator.assert_metric('snmp.cieIfResetCount', metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1)
 
@@ -1304,7 +1279,43 @@ def test_aruba(aggregator):
 def test_chatsworth(aggregator):
     run_profile_check('chatsworth')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:chatsworth_pdu']
+    # Legacy global tags are applied to all metrics
+    legacy_global_tags = [
+        'legacy_pdu_macaddress:00:0E:D3:AA:CC:EE',
+        'legacy_pdu_model:P10-1234-ABC',
+        'legacy_pdu_name:legacy-name1',
+        'legacy_pdu_version:1.2.3',
+    ]
+    common_tags = common.CHECK_TAGS + legacy_global_tags + ['snmp_profile:chatsworth_pdu']
+
+    # Legacy metrics
+    legacy_pdu_tags = common_tags
+    legacy_pdu_gauge_metrics = [
+        'snmp.pduRole',
+        'snmp.outOfService',
+    ]
+    legacy_pdu_monotonic_count_metrics = []
+    for line in range(1, 4):
+        legacy_pdu_gauge_metrics.append('snmp.line{}curr'.format(line))
+    for branch in range(1, 3):
+        legacy_pdu_gauge_metrics.append('snmp.temperatureProbe{}'.format(branch))
+        legacy_pdu_gauge_metrics.append('snmp.humidityProbe{}'.format(branch))
+        for xyz in ['xy', 'yz', 'zx']:
+            legacy_pdu_monotonic_count_metrics.append('snmp.energy{}{}s'.format(xyz, branch))
+            legacy_pdu_gauge_metrics.append('snmp.voltage{}{}'.format(xyz, branch))
+            legacy_pdu_gauge_metrics.append('snmp.power{}{}'.format(xyz, branch))
+            legacy_pdu_gauge_metrics.append('snmp.powerFact{}{}'.format(xyz, branch))
+            legacy_pdu_gauge_metrics.append('snmp.current{}{}'.format(xyz, branch))
+    for branch in range(1, 25):
+        legacy_pdu_monotonic_count_metrics.append('snmp.receptacleEnergyoutlet{}s'.format(branch))
+        legacy_pdu_gauge_metrics.append('snmp.outlet{}Current'.format(branch))
+
+    for metric in legacy_pdu_gauge_metrics:
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=legacy_pdu_tags, count=1)
+    for metric in legacy_pdu_monotonic_count_metrics:
+        aggregator.assert_metric(metric, metric_type=aggregator.MONOTONIC_COUNT, tags=legacy_pdu_tags, count=1)
+
+    # New metrics
     pdu_tags = common_tags + [
         'pdu_cabinetid:cab1',
         'pdu_ipaddress:42.2.210.224',
@@ -1367,6 +1378,7 @@ def test_chatsworth(aggregator):
         )
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_isilon(aggregator):

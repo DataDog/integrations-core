@@ -17,8 +17,9 @@ metrics:
     name: ifOutDiscards
   metric_tags:
   - column:
-      OID: 1.3.6.1.2.1.2.2.1.2
-      name: ifDescr
+      OID: 1.3.6.1.2.1.31.1.1.1.1
+      name: ifName
+      table: ifXTable
     tag: interface
 - MIB: IF-MIB
   table:
@@ -33,8 +34,9 @@ metrics:
     name: ifSpeed
   metric_tags:
   - column:
-      OID: 1.3.6.1.2.1.2.2.1.2
-      name: ifDescr
+      OID: 1.3.6.1.2.1.31.1.1.1.1
+      name: ifName
+      table: ifXTable
     tag: interface
 - MIB: IF-MIB
   table:
@@ -69,6 +71,18 @@ metrics:
     name: ifHCInOctets
   - OID: 1.3.6.1.2.1.31.1.1.1.10
     name: ifHCOutOctets
+  metric_tags:
+  - column:
+      OID: 1.3.6.1.2.1.31.1.1.1.1
+      name: ifName
+    tag: interface
+- MIB: IF-MIB
+  table:
+    OID: 1.3.6.1.2.1.31.1.1
+    name: ifXTable
+  symbols:
+  - OID: 1.3.6.1.2.1.31.1.1.1.15
+    name: ifHighSpeed
   metric_tags:
   - column:
       OID: 1.3.6.1.2.1.31.1.1.1.1
