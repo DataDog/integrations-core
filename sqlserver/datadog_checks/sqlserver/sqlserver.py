@@ -18,7 +18,7 @@ try:
 except ImportError:
     pyodbc = None
 
-#from config import _is_affirmative
+from config import _is_affirmative
 
 # project
 from checks import AgentCheck
