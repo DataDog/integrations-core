@@ -498,7 +498,7 @@ class SQLServer(AgentCheck):
                         elif type(metric) is SqlOsMemoryClerksStat:
                             metric.fetch_metric(cursor, clerk_rows, clerk_cols, custom_tags)
                         elif type(metric) is SqlComplexMetric:
-                            rows, cols = metric.fetch_all_values(cursor, metric.cfg_instance["sql_query"] , self.log)
+                            rows, cols = metric.fetch_all_values(cursor, self.log)
                             metric.fetch_metric(cursor, rows, cols, custom_tags)
 
                     except Exception as e:
@@ -661,6 +661,8 @@ class SqlServerMetric(object):
         self.report_function = report_function
         self.instance = cfg_instance.get('instance_name', '')
         self.tag_by = cfg_instance.get('tag_by', None)
+        self.query = cfg_instance.get('sql_query', None)
+        self.attributes = cfg_instance.get('attribute',[])
         self.column = column
         self.instances = None
         self.past_values = {}
@@ -672,23 +674,21 @@ class SqlServerMetric(object):
 class SqlComplexMetric(SqlServerMetric):
 
     @classmethod
-    def fetch_all_values(cls, cursor, query, logger):
+    def fetch_all_values(cls, cursor, logger):
         # This method fetch all the metric based on the complex metric passed.
-        cursor.execute(query)
+        cursor.execute(self.query)
         rows = cursor.fetchall()
         columns = [i[0] for i in cursor.description]
         return rows, columns
 
     def fetch_metric(self, cursor, rows, columns, tags):
         # This method deals with publishing metric in data dog.
-        if self.cfg_instance != None :
-            attribute_name_list = self.cfg_instance.get("attribute",[])
         attribute_index_list = []
         tag_by_indexs = []
         for index in range(len(columns)):
             if (self.tag_by is not None) and (columns[index] in self.tag_by):
                 tag_by_indexs.append(index)
-            if columns[index] in attribute_name_list:
+            if columns[index] in self.attributes:
                 attribute_index_list.append(index)
 
         for row in rows:
