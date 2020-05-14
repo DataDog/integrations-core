@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
+import re
 from typing import Any, Dict, Mapping, Sequence, Tuple, Union
 
 import yaml
-import re
 
 from .compat import get_config
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
