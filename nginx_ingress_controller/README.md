@@ -58,7 +58,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 | Parameter      | Value                                                              |
 | -------------- | ------------------------------------------------------------------ |
-| `<LOG_CONFIG>` | `[{"service": "controller", "source":"nginx-ingress-controller"}]` |
+| `<LOG_CONFIG>` | `[{"service": "controller", "source": "nginx-ingress-controller"}]` |
 
 ### Validation
 
