@@ -32,6 +32,7 @@ def test_realtime_metrics(aggregator, dd_run_check, realtime_instance):
                 metric['name'], metric.get('value'), hostname=metric.get('hostname'), tags=metric.get('tags')
             )
 
+    aggregator.assert_metric('datadog.vsphere.collect_events.time')
     aggregator.assert_all_metrics_covered()
 
 

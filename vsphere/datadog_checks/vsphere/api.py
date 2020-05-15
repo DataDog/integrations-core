@@ -286,6 +286,10 @@ class VSphereAPI(object):
                 continue
             if len(collected_events) == 0:
                 break
+            event = collected_events[0]
+            self.log.debug(
+                "Collect event number:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
+            )
             events.extend(collected_events)
         return events
 
