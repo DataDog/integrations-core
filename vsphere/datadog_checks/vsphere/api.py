@@ -267,11 +267,14 @@ class VSphereAPI(object):
         return events
 
     def _get_new_events_one_by_one(self, query_filter):
-        # Collecting events one by one and skip those with parsing error.
-        # The parsing error is triggered by unknown types like `ContentLibrary`.
-        # More info:
-        # - https://github.com/vmware/pyvmomi/issues/190
-        # - https://github.com/vmware/pyvmomi/issues/872
+        """
+        Collecting events one by one and skip those with parsing error.
+
+        The parsing error is triggered by unknown types like `ContentLibrary`.
+        More info:
+            - https://github.com/vmware/pyvmomi/issues/190
+            - https://github.com/vmware/pyvmomi/issues/872
+        """
         event_manager = self._conn.content.eventManager
         events = []
         event_collector = event_manager.CreateCollectorForEvents(query_filter)
