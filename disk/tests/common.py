@@ -19,6 +19,19 @@ else:
     DEFAULT_MOUNT_POINT = '/'
 
 EXPECTED_METRICS = [
+    "system.disk.free",
+    "system.disk.in_use",
+    "system.disk.total",
+    "system.disk.used",
+    "system.fs.inodes.free",
+    "system.fs.inodes.in_use",
+    "system.fs.inodes.total",
+    "system.fs.inodes.used",
+]
+
+EXPECTED_DEVICE = ["overlay", "shm", "tmpfs"]
+
+EXPECTED_MAPING = [
     {"metric": "system.disk.free", "device": "overlay"},
     {"metric": "system.disk.free", "device": "shm"},
     {"metric": "system.disk.free", "device": "tmpfs"},

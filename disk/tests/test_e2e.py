@@ -11,4 +11,5 @@ from . import common
 def test_check(dd_agent_check):
     aggregator = dd_agent_check()
     for metric in common.EXPECTED_METRICS:
-        aggregator.assert_metric(metric['metric'], metric_type=aggregator.GAUGE, device=metric['device'])
+        for device in common.EXPECTED_DEVICE:
+            aggregator.assert_metric(metric['metric'], metric_type=aggregator.GAUGE, device=metric['device'])
