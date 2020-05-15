@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import pytest
 import datetime as dt
 
+import pytest
 from pyVmomi import vim
 
 from datadog_checks.vsphere import VSphereCheck
@@ -64,4 +64,3 @@ def test_events_collection(aggregator, dd_run_check, realtime_instance, datadog_
         )
     assert len(aggregator.events) == 3
     assert check.latest_event_query == time3 + dt.timedelta(seconds=1)
-

@@ -6,15 +6,13 @@ import functools
 import ssl
 from typing import Any, Callable, List, TypeVar, cast
 
-import pyVmomi
 from pyVim import connect
-
-from datadog_checks.vsphere.legacy.event import ALLOWED_EVENTS
-from pyVmomi import vim, vmodl
+from pyVmomi import SoapAdapter, vim, vmodl
 
 from datadog_checks.base.log import CheckLoggingAdapter
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES, MAX_QUERY_METRICS_OPTION, UNLIMITED_HIST_METRICS_PER_QUERY
+from datadog_checks.vsphere.legacy.event import ALLOWED_EVENTS
 from datadog_checks.vsphere.types import InfrastructureData
 
 CallableT = TypeVar('CallableT', bound=Callable)
@@ -264,7 +262,7 @@ class VSphereAPI(object):
         events = []
         try:
             events = event_manager.QueryEvents(query_filter)
-        except pyVmomi.SoapAdapter.ParserError as e:
+        except SoapAdapter.ParserError as e:
             self.log.debug("Error parsing all events (%s). Fetch events one by one.", e)
 
             # Collecting events one by one and skip those with parsing error.
@@ -276,7 +274,7 @@ class VSphereAPI(object):
             while True:
                 try:
                     collected_events = event_collector.ReadNextEvents(1)  # Read with page_size=1
-                except pyVmomi.SoapAdapter.ParserError as e:
+                except SoapAdapter.ParserError as e:
                     self.log.debug("Cannot parse event, skipped: %s", e)
                     continue
                 if len(collected_events) == 0:
