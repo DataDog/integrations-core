@@ -1495,9 +1495,11 @@ def test_isilon(aggregator):
     for fan in [4, 6, 10, 11, 14, 21, 22, 23, 25, 30]:
         tags = ['fan_name:testfan', 'fan_number:{}'.format(fan)] + common_tags
         aggregator.assert_metric('snmp.fanSpeed', metric_type=aggregator.GAUGE, tags=tags, count=1)
-    for status in ['HEALTHY', 'DEAD', 'SMARTFAIL']:
-        tags = common_tags + ['disk_status:{}'.format(status)]
+
+    for status, bay in [('SMARTFAIL', 1), ('HEALTHY', 2), ('DEAD', 3)]:
+        tags = common_tags + ['disk_status:{}'.format(status), 'disk_bay:{}'.format((bay))]
         aggregator.assert_metric('snmp.diskSizeBytes', metric_type=aggregator.RATE, tags=tags)
+
     aggregator.assert_metric('snmp.ifsUsedBytes', metric_type=aggregator.RATE, tags=common_tags, count=1)
     aggregator.assert_metric('snmp.ifsTotalBytes', metric_type=aggregator.RATE, tags=common_tags, count=1)
 
