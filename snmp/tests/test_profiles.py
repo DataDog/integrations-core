@@ -48,14 +48,18 @@ from .metrics import (
 pytestmark = pytest.mark.usefixtures("dd_environment")
 
 
-def test_load_profiles(aggregator):
-    instance = common.generate_instance_config([])
-    check = SnmpCheck('snmp', {}, [instance])
+def _test_profile_syntax(check):
     for name, profile in check.profiles.items():
         try:
             check._config.refresh_with_profile(profile)
         except ConfigurationError as e:
             pytest.fail("Profile `{}` is not configured correctly: {}".format(name, e))
+
+
+def test_load_profiles(aggregator):
+    instance = common.generate_instance_config([])
+    check = SnmpCheck('snmp', {}, [instance])
+    _test_profile_syntax(check)
 
 
 def run_profile_check(recording_name):
@@ -68,6 +72,7 @@ def run_profile_check(recording_name):
     instance['community_string'] = recording_name
     instance['enforce_mib_constraints'] = False
     check = SnmpCheck('snmp', {}, [instance])
+    _test_profile_syntax(check)
     check.check(instance)
 
 
