@@ -8,7 +8,7 @@ import click
 
 from ....utils import chdir
 from ...constants import get_root
-from ..console import CONTEXT_SETTINGS, abort
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_waiting, echo_warning
 from .utils import insert_verbosity_flag
 
 
@@ -22,10 +22,36 @@ def serve(no_open, verbose):
     command = ['tox', '-e', 'docs', '--', 'serve', '--livereload', '--dev-addr', address]
     insert_verbosity_flag(command, verbose)
 
-    if not no_open:
-        webbrowser.open_new_tab(f'http://{address}')
+    address = f'http://{address}'
+    build_completion_indicator = f'Serving on {address}'
+    build_complete = False
+
+    # TODO: Investigate why messages are logged twice, then submit upstream fix (to tornado or livereload)
+    info_prefixes = ('[I ', 'INFO ')
+    warning_prefixes = ('[W ', 'WARNING ')
+    error_prefixes = ('[E ', 'ERROR ')
 
     with chdir(get_root()):
-        process = subprocess.run(command)
+        with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as process:
+
+            # To avoid blocking never use a pipe's file descriptor iterator. See https://bugs.python.org/issue3907
+            for line in iter(process.stdout.readline, b''):
+                line = line.decode('utf-8')
+
+                if 'Building documentation...' in line:
+                    echo_waiting(line, nl=False)
+                elif line.startswith(info_prefixes):
+                    echo_info(line, nl=False)
+                elif line.startswith(warning_prefixes):
+                    echo_warning(line, nl=False)
+                elif line.startswith(error_prefixes):
+                    echo_failure(line, nl=False)
+                else:
+                    click.echo(line, nl=False)
+
+                if not build_complete and line.rstrip().endswith(build_completion_indicator):
+                    build_complete = True
+                    if not no_open:
+                        webbrowser.open_new_tab(address)
 
     abort(code=process.returncode)
