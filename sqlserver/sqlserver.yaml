@@ -81,24 +81,3 @@ init_config:
        tag_by:
           - node_name
 instances:
-#      - host: 10.51.171.7,1433
-#        username: sql_lpu
-#        password: Nutanix@123
-#        connector: odbc
-#        driver: ODBC Driver 17 for SQL Server
-#        tags:
-#          - instance_id:100ee4bb-79ae-3930-a213-e4001df3d1da
-#      - host: 10.51.171.186,1433
-#        username: sa
-#        password: Nutanix.123
-#        connector: odbc
-#        driver: ODBC Driver 17 for SQL Server
-#        tags:
-#          - instance_id:100ee4bb-79ae-3930-a213-e4001df3d1da_2
-      - host: 10.51.171.183,1433
-        username: sa
-        password: Nutanix.123
-        connector: odbc
-        driver: ODBC Driver 17 for SQL Server
-        tags:
-          - instance_id:100ee4bb-79ae-3930-a213-e4001df3d1da_1
