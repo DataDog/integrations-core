@@ -5,10 +5,10 @@ import pytest
 
 from datadog_checks.dev import docker_run
 
-from . import common
+from .common import COMPOSE_FILE, CONFIG, E2E_METADATA
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with docker_run(common.COMPOSE_FILE, log_patterns=['mount.nfs: trying text-based options']):
-        yield common.CONFIG
+    with docker_run(COMPOSE_FILE, log_patterns=['mount.nfs: trying text-based options']):
+        yield CONFIG, E2E_METADATA
