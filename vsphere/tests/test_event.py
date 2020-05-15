@@ -26,7 +26,7 @@ def test_allowed_event_list():
         vim.event.VmReconfiguredEvent,
         vim.event.VmSuspendedEvent,
     ]
-    assert expected_events == ALLOWED_EVENTS
+    assert sorted(str(e) for e in expected_events) == sorted(str(e) for e in ALLOWED_EVENTS)
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
