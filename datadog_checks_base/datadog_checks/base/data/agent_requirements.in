@@ -22,7 +22,7 @@ kubernetes==8.0.1
 ldap3==2.5
 lxml==4.2.6
 meld3==1.0.2
-ntplib==0.3.3
+ntplib==0.3.4
 paramiko==2.1.5
 pg8000==1.10.1
 ply==3.10
