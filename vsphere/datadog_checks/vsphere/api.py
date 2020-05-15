@@ -279,6 +279,9 @@ class VSphereAPI(object):
         More info:
             - https://github.com/vmware/pyvmomi/issues/190
             - https://github.com/vmware/pyvmomi/issues/872
+
+        The event collection fallback is a workaround and can be removed when the upstream issues
+        mentioned above are solved.
         """
         event_manager = self._conn.content.eventManager
         events = []
