@@ -267,6 +267,7 @@ class VSphereAPI(object):
         return events
 
     def _get_new_events_one_by_one(self, query_filter):
+        # type: (vim.event.EventFilterSpec) -> List[vim.event.Event]
         """
         Collecting events one by one and skip those with parsing error.
 
