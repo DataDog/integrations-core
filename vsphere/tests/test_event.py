@@ -5,6 +5,7 @@
 import datetime as dt
 
 import pytest
+from mock import MagicMock, patch
 from pyVmomi import vim
 
 from datadog_checks.vsphere import VSphereCheck
@@ -29,7 +30,7 @@ def test_allowed_event_list():
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
-def test_events_collection(aggregator, dd_run_check, realtime_instance, datadog_agent):
+def test_events_collection(aggregator, realtime_instance):
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     check.initiate_api_connection()
     time_initial = check.latest_event_query
@@ -64,3 +65,29 @@ def test_events_collection(aggregator, dd_run_check, realtime_instance, datadog_
         )
     assert len(aggregator.events) == 3
     assert check.latest_event_query == time3 + dt.timedelta(seconds=1)
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_events_collection_safeguard(realtime_instance):
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    check.initiate_api_connection()
+    time_initial = check.latest_event_query
+
+    # base case, latest_event_query set to last event datetime + 1 sec
+    event1 = mock_alarm_event(from_status='green', key=10, created_time=time_initial)
+    check.api.mock_events = [event1]
+    check.check(None)
+
+    assert check.latest_event_query == time_initial + dt.timedelta(seconds=1)
+
+    # error case, latest_event_query set to collection datetime
+    with patch('datadog_checks.vsphere.vsphere.dt') as mock_dt:
+        collection_datetime = dt.datetime(2010, 10, 8)
+        mock_dt.datetime.utcnow.return_value = collection_datetime
+        check.log = MagicMock()
+
+        check.api.get_new_events = MagicMock(side_effect=RuntimeError('my error'))
+        check.check(None)
+
+        assert check.latest_event_query == collection_datetime
+        check.log.warning.assert_called_with("Unable to fetch Events %s", "my error")
