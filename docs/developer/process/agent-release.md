@@ -46,12 +46,12 @@ We test all changes to integrations that were introduced since the last release.
 ### Create items
 
 Create an item for every change in [our board](https://trello.com/b/ICjijxr4/agent-release-sprint) using
-the `ddev release testable` command.
+the Trello subcommand called [testable](../ddev/cli.md#testable).
 
 For example:
 
 ```
-ddev release testable 7.17.1 7.18.0-rc.1
+ddev release trello testable 7.17.1 7.18.0-rc.1
 ```
 
 would select all commits that were merged between the Git references.
