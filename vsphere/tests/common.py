@@ -19,4 +19,5 @@ LAB_INSTANCE = {
     'ssl_verify': False,
     'collect_tags': True,
     'collect_events': True,
+    'use_collect_events_fallback': True,
 }

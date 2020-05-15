@@ -262,9 +262,10 @@ class VSphereAPI(object):
         try:
             events = event_manager.QueryEvents(query_filter)
         except SoapAdapter.ParserError as e:
-            self.log.debug("Error parsing all events (%s). Fetch events one by one.", e)
+            self.log.debug("Error parsing all events: %s", e)
 
             if self.config.use_collect_events_fallback:
+                self.log.debug("Start fetch events one by one...")
                 events = self._get_new_events_one_by_one(query_filter)
             else:
                 raise

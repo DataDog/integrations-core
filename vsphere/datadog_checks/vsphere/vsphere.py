@@ -481,7 +481,7 @@ class VSphereCheck(AgentCheck):
 
     def collect_events(self):
         # type: () -> None
-        self.log.debug("Starting events collection.")
+        self.log.debug("Starting events collection (query start time: %s).", self.latest_event_query)
         latest_event_time = None
         collect_start_time = dt.datetime.utcnow()
         try:
