@@ -44,7 +44,7 @@ def test_events_collection(aggregator, dd_run_check, realtime_instance, datadog_
     # No events
     check.check(None)
     assert len(aggregator.events) == 0
-    assert check.latest_event_query == time_initial  # check time not changed if there is no event
+    assert check.latest_event_query > time_initial  # check time not changed if there is no event
 
     # 1 events
     aggregator.reset()

@@ -483,6 +483,7 @@ class VSphereCheck(AgentCheck):
         # type: () -> None
         self.log.debug("Starting events collection.")
         latest_event_time = None
+        collect_start_time = dt.datetime.utcnow()
         try:
             t0 = Timer()
             new_events = self.api.get_new_events(start_time=self.latest_event_query)
@@ -516,6 +517,10 @@ class VSphereCheck(AgentCheck):
 
         if latest_event_time is not None:
             self.latest_event_query = latest_event_time + dt.timedelta(seconds=1)
+        else:
+            # Let's set `self.latest_event_query` to `collect_start_time` as safeguard in case no events are reported
+            # OR something bad happened (which might happen again indefinitely).
+            self.latest_event_query = collect_start_time
 
     def check(self, _):
         # type: (Any) -> None
