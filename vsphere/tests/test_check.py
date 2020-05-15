@@ -1,12 +1,14 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import datetime as dt
 import json
 import os
 
 import mock
 import pytest
 from mock import MagicMock
+from tests.legacy.utils import mock_alarm_event
 
 from datadog_checks.base import to_string
 from datadog_checks.vsphere import VSphereCheck
@@ -48,6 +50,24 @@ def test_historical_metrics(aggregator, dd_run_check, historical_instance):
         for metric in data:
             aggregator.assert_metric(metric['name'], metric.get('value'), tags=metric.get('tags'))
 
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_events_only(aggregator, events_only_instance):
+    check = VSphereCheck('vsphere', {}, [events_only_instance])
+    check.initiate_api_connection()
+
+    time1 = dt.datetime.now()
+    event1 = mock_alarm_event(from_status='green', key=10, created_time=time1)
+
+    check.api.mock_events = [event1]
+    check.check(None)
+    aggregator.assert_event("vCenter monitor status changed on this alarm, it was green and it's now red.", count=1)
+
+    aggregator.assert_metric('datadog.vsphere.collect_events.time')
+
+    # assert all metrics will check that we are not collecting historical and realtime metrics
     aggregator.assert_all_metrics_covered()
 
 

@@ -538,6 +538,13 @@ class VSphereCheck(AgentCheck):
         else:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.config.base_tags, hostname=None)
 
+        # Collect and submit events
+        if self.config.should_collect_events:
+            self.collect_events()
+
+        if self.config.is_events_only():
+            return
+
         # Update the value of `max_query_metrics` if needed
         if self.config.is_historical():
             try:
@@ -572,10 +579,6 @@ class VSphereCheck(AgentCheck):
                 self.refresh_infrastructure_cache()
             # Submit host tags as soon as we have fresh data
             self.submit_external_host_tags()
-
-        # Collect and submit events
-        if self.config.should_collect_events:
-            self.collect_events()
 
         # Submit the number of VMs that are monitored
         for resource_type in self.config.collected_resource_types:
