@@ -27,7 +27,14 @@ SOURCE_PATTERN = r'(?<!"|\')({})(?!"|\')'
 
 def get_tag(transformers, column_name, **modifiers):
     """
-    modifiers: boolean
+    Convert a column to a tag that will be used in every subsequent submission.
+
+    For example, if you named the column `env` and the column returned the value `prod1`, all submissions
+    from that row will be tagged by `env:prod1`.
+
+    This also accepts an optional modifier called `boolean` that when set to `true` will transform the result
+    to the string `true` or `false`. So for example if you named the column `alive` and the result was the
+    number `0` the tag will be `alive:false`.
     """
     template = '{}:{{}}'.format(column_name)
     boolean = is_affirmative(modifiers.pop('boolean', None))
@@ -42,6 +49,9 @@ def get_tag(transformers, column_name, **modifiers):
 
 
 def get_monotonic_gauge(transformers, column_name, **modifiers):
+    """
+    Send the result as both a `gauge` suffixed by `.total` and a `monotonic_count` suffixed by `.count`.
+    """
     gauge = transformers['gauge'](transformers, '{}.total'.format(column_name), **modifiers)
     monotonic_count = transformers['monotonic_count'](transformers, '{}.count'.format(column_name), **modifiers)
 
@@ -54,7 +64,22 @@ def get_monotonic_gauge(transformers, column_name, **modifiers):
 
 def get_temporal_percent(transformers, column_name, **modifiers):
     """
-    modifiers: scale
+    Send the result as percentage of time since the last check run as a `rate`.
+
+    For example, say the result is a forever increasing counter representing the total time spent pausing for
+    garbage collection since start up. That number by itself is quite useless, but as a percentage of time spent
+    pausing since the previous collection interval it becomes a useful metric.
+
+    There is one required parameter called `scale` that indicates what unit of time the result should be considered.
+    Valid values are:
+
+    - `second`
+    - `millisecond`
+    - `microsecond`
+    - `nanosecond`
+
+    You may also define the unit as an integer number of parts compared to seconds e.g. `millisecond` is
+    equivalent to `1000`.
     """
     scale = modifiers.pop('scale', None)
     if scale is None:
@@ -81,7 +106,76 @@ def get_temporal_percent(transformers, column_name, **modifiers):
 
 def get_match(transformers, column_name, **modifiers):
     """
-    modifiers: items
+    This is used for querying unstructured data.
+
+    For example, say you want to collect the fields named `foo` and `bar`. Typically, they would be stored like:
+
+    | foo | bar |
+    | --- | --- |
+    | 4   | 2   |
+
+    and would be queried like:
+
+    ```sql
+    SELECT foo, bar FROM ...
+    ```
+
+    Often, you will instead find data stored in the following format:
+
+    | metric | value |
+    | ------ | ----- |
+    | foo    | 4     |
+    | bar    | 2     |
+
+    and would be queried like:
+
+    ```sql
+    SELECT metric, value FROM ...
+    ```
+
+    In this case, the `metric` column stores the name with which to match on and its `value` is
+    stored in a separate column.
+
+    The required `items` modifier is a mapping of matched names to column data values. Consider the values
+    to be exactly the same as the entries in the `columns` top level field. You must also define a `source`
+    modifier either for this transformer itself or in the values of `items` (which will take precedence).
+    The source will be treated as the value of the match.
+
+    Say this is your configuration:
+
+    ```yaml
+    query: SELECT source1, source2, metric FROM TABLE
+    columns:
+      - name: value1
+        type: source
+      - name: value2
+        type: source
+      - name: metric_name
+        type: match
+        source: value1
+        items:
+          foo:
+            name: test.foo
+            type: gauge
+            source: value2
+          bar:
+            name: test.bar
+            type: monotonic_gauge
+    ```
+
+    and the result set is:
+
+    | source1 | source2 | metric |
+    | ------- | ------- | ------ |
+    | 1       | 2       | foo    |
+    | 3       | 4       | baz    |
+    | 5       | 6       | bar    |
+
+    Here's what would be submitted:
+
+    - `foo` - `test.foo` as a `gauge` with a value of `2`
+    - `bar` - `test.bar.total` as a `gauge` and `test.bar.count` as a `monotonic_count`, both with a value of `5`
+    - `baz` - nothing since it was not defined as a match item
     """
     # Do work in a separate function to avoid having to `del` a bunch of variables
     compiled_items = _compile_match_items(transformers, modifiers)
@@ -96,7 +190,16 @@ def get_match(transformers, column_name, **modifiers):
 
 def get_service_check(transformers, column_name, **modifiers):
     """
-    modifiers: status_map
+    Submit a service check.
+
+    The required modifier `status_map` is a mapping of values to statuses. Valid statuses include:
+
+    - `OK`
+    - `WARNING`
+    - `CRITICAL`
+    - `UNKNOWN`
+
+    Any encountered values that are not defined will be sent as `UNKNOWN`.
     """
     # Do work in a separate function to avoid having to `del` a bunch of variables
     status_map = _compile_service_check_statuses(modifiers)
@@ -111,7 +214,19 @@ def get_service_check(transformers, column_name, **modifiers):
 
 def get_time_elapsed(transformers, column_name, **modifiers):
     """
-    modifiers: format
+    Send the number of seconds elapsed from a time in the past as a `gauge`.
+
+    For example, if the result is an instance of
+    [datetime.datetime](https://docs.python.org/3/library/datetime.html#datetime.datetime) representing 5 seconds ago,
+    then this would submit with a value of `5`.
+
+    The optional modifier `format` indicates what format the result is in. By default it is `native`, assuming the
+    underlying library provides timestamps as `datetime` objects. If it does not and passes them through directly as
+    strings, you must provide the expected timestamp format using the
+    [supported codes](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes).
+
+    !!! note
+        The code `%z` (lower case) is not supported on Windows.
     """
     time_format = modifiers.pop('format', 'native')
     if not isinstance(time_format, str):
@@ -136,7 +251,56 @@ def get_time_elapsed(transformers, column_name, **modifiers):
 
 def get_expression(transformers, name, **modifiers):
     """
-    modifiers: expression, verbose, submit_type
+    This allows the evaluation of a limited subset of Python syntax and built-in functions.
+
+    ```yaml
+    columns:
+      - name: disk.total
+        type: gauge
+      - name: disk.used
+        type: gauge
+    extras:
+      - name: disk.free
+        expression: disk.total - disk.used
+        submit_type: gauge
+    ```
+
+    For brevity, if the `expression` attribute exists and `type` does not then it is assumed the type is
+    `expression`. The `submit_type` can be any transformer and any extra options are passed down to it.
+
+    The result of every expression is stored, so in lieu of a `submit_type` the above example could also be written as:
+
+    ```yaml
+    columns:
+      - name: disk.total
+        type: gauge
+      - name: disk.used
+        type: gauge
+    extras:
+      - name: free
+        expression: disk.total - disk.used
+      - name: disk.free
+        type: gauge
+        source: free
+    ```
+
+    The order matters though, so for example the following will fail:
+
+    ```yaml
+    columns:
+      - name: disk.total
+        type: gauge
+      - name: disk.used
+        type: gauge
+    extras:
+      - name: disk.free
+        type: gauge
+        source: free
+      - name: free
+        expression: disk.total - disk.used
+    ```
+
+    since the source `free` does not yet exist.
     """
     available_sources = modifiers.pop('sources')
 
@@ -191,7 +355,28 @@ def get_expression(transformers, name, **modifiers):
 
 def get_percent(transformers, name, **modifiers):
     """
-    modifiers: part, total
+    Send a percentage based on 2 sources as a `gauge`.
+
+    The required modifiers are `part` and `total`.
+
+    For example, if you have this configuration:
+
+    ```yaml
+    columns:
+      - name: disk.total
+        type: gauge
+      - name: disk.used
+        type: gauge
+    extras:
+      - name: disk.utilized
+        type: percent
+        part: disk.used
+        total: disk.total
+    ```
+
+    then the extra metric `disk.utilized` would be sent as a `gauge` calculated as `disk.used / disk.total * 100`.
+
+    If the source of `total` is `0`, then the submitted value will always be sent as `0` too.
     """
     available_sources = modifiers.pop('sources')
 
@@ -302,3 +487,42 @@ def _compile_match_items(transformers, modifiers):
         )
 
     return compiled_items
+
+
+# For documentation generation
+class ColumnTransformers(object):
+    pass
+
+
+class ExtraTransformers(object):
+    """
+    Every column transformer (except `tag`) is supported at this level, the only
+    difference being one must set a `source` to retrieve the desired value.
+
+    So for example here:
+
+    ```yaml
+    columns:
+      - name: foo.bar
+        type: rate
+    extras:
+      - name: foo.current
+        type: gauge
+        source: foo.bar
+    ```
+
+    the metric `foo.current` will be sent as a gauge will the value of `foo.bar`.
+    """
+
+
+# Need a custom object to allow for modification of docstrings
+class __TransformerDocumentionHelper(object):
+    pass
+
+
+for name, transformer in sorted(COLUMN_TRANSFORMERS.items()):
+    setattr(ColumnTransformers, name, transformer)
+
+
+for name, transformer in sorted(EXTRA_TRANSFORMERS.items()):
+    setattr(ExtraTransformers, name, transformer)

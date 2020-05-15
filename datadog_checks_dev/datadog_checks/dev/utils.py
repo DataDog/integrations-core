@@ -166,9 +166,9 @@ def download_file(url, fname):
 
 def copy_path(path, d):
     if dir_exists(path):
-        shutil.copytree(path, os.path.join(d, basepath(path)))
+        return shutil.copytree(path, os.path.join(d, basepath(path)))
     else:
-        shutil.copy(path, d)
+        return shutil.copy(path, d)
 
 
 def copy_dir_contents(path, d):
