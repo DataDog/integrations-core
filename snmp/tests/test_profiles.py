@@ -61,6 +61,67 @@ def run_profile_check(recording_name):
     check.check(instance)
 
 
+def test_cisco_voice(aggregator):
+    run_profile_check('cisco_icm')
+
+    tags = ['snmp_profile:cisco_icm', 'snmp_host:test'] + common.CHECK_TAGS
+
+    resources = ["hrSWRunPerfMem", "hrSWRunPerfCPU", "hrSWRunStatus"]
+
+    for resource in resources:
+        aggregator.assert_metric('snmp.{}'.format(resource), metric_type=aggregator.GAUGE, tags=tags)
+
+    cvp_gauges = [
+        "ccvpSipIntAvgLatency1",
+        "ccvpSipIntAvgLatency2",
+        "ccvpSipIntConnectsRcv",
+        "ccvpSipIntNewCalls",
+        "ccvpSipRtActiveCalls",
+        "ccvpSipRtTotalCallLegs",
+        "ccvpLicRtPortsInUse",
+    ]
+
+    cvp_counts = [
+        "ccvpLicAggMaxPortsInUse",
+    ]
+    for cvp in cvp_gauges:
+        aggregator.assert_metric('snmp.{}'.format(cvp), metric_type=aggregator.GAUGE, tags=tags)
+
+    for cvp in cvp_counts:
+        aggregator.assert_metric('snmp.{}'.format(cvp), metric_type=aggregator.RATE, tags=tags)
+
+    ccms = ["ccmRegisteredGateways", "ccmRejectedPhones", "ccmRegisteredPhones", "ccmUnregisteredPhones"]
+
+    for ccm in ccms:
+        aggregator.assert_metric('snmp.{}'.format(ccm), metric_type=aggregator.RATE, tags=tags)
+
+    calls = [
+        "cvCallVolPeerIncomingCalls",
+        "cvCallVolPeerOutgoingCalls",
+        "cvCallVolMediaIncomingCalls",
+        "cvCallVolMediaOutgoingCalls",
+    ]
+
+    for call in calls:
+        aggregator.assert_metric('snmp.{}'.format(call), metric_type=aggregator.GAUGE, tags=tags)
+
+    dial_controls = [
+        "dialCtlPeerStatsAcceptCalls",
+        "dialCtlPeerStatsFailCalls",
+        "dialCtlPeerStatsRefuseCalls",
+        "dialCtlPeerStatsSuccessCalls",
+    ]
+
+    for ctl in dial_controls:
+        aggregator.assert_metric('snmp.{}'.format(ctl), metric_type=aggregator.MONOTONIC_COUNT, tags=tags)
+
+    pim_tags = tags + ['pim_host:test', 'pim_name:name', 'pim_num:2']
+    aggregator.assert_metric('snmp.{}'.format("cccaPimStatus"), metric_type=aggregator.GAUGE, tags=pim_tags)
+    aggregator.assert_metric('snmp.{}'.format("sysUpTimeInstance"), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_all_metrics_covered()
+
+
 def test_f5(aggregator):
     run_profile_check('f5')
 

@@ -1,10 +1,6 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
-'''
-Monitor the Windows Event Log
-'''
 import calendar
 from datetime import datetime, timedelta
 
@@ -15,12 +11,7 @@ from datadog_checks.base.checks.win.wmi import WinWMICheck, from_time, to_time
 from datadog_checks.base.utils.containers import hash_mutable
 from datadog_checks.base.utils.timeout import TimeoutException
 
-SOURCE_TYPE_NAME = 'event viewer'
-EVENT_TYPE = 'win32_log_event'
-
-# Integer properties to normalize.
-# Source: https://docs.microsoft.com/en-us/previous-versions/windows/desktop/eventlogprov/win32-ntlogevent
-INTEGER_PROPERTIES = ['EventCode', 'EventIdentifier', 'EventType', 'RecordNumber']
+from ..constants import EVENT_TYPE, INTEGER_PROPERTIES, SOURCE_TYPE_NAME
 
 
 class Win32EventLogWMI(WinWMICheck):
@@ -30,8 +21,8 @@ class Win32EventLogWMI(WinWMICheck):
     NAMESPACE = "root\\CIMV2"
     EVENT_CLASS = "Win32_NTLogEvent"
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        WinWMICheck.__init__(self, name, init_config, agentConfig, instances=instances)
+    def __init__(self, name, init_config, instances):
+        super(Win32EventLogWMI, self).__init__(name, init_config, instances)
         # Settings
         self._tag_event_id = is_affirmative(init_config.get('tag_event_id', False))
         self._verbose = init_config.get('verbose', True)
