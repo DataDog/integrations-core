@@ -71,6 +71,10 @@ metrics:
     symbols:
       - OID: 1.3.6.1.4.1.12124.2.52.1.9
         name: diskSizeBytes
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.12124.2.52.1.5
+          name: diskStatus
 
 
   # protocol
