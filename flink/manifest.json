@@ -18,7 +18,8 @@
   "categories": [
     "processing",
     "data streams",
-    "dataflow"
+    "dataflow",
+    "log collection"
   ],
   "type": "check",
   "is_public": true,

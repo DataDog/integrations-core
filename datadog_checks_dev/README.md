@@ -12,7 +12,7 @@ integration repository.
 
 ## Prerequisites
 
-* Python 3.7+ needs to be available on your system. Python 2.7 is optional.
+* Python 3.8+ needs to be available on your system. Python 2.7 is optional.
 * Docker to run the full test suite.
 
 Using a virtual environment is recommended.

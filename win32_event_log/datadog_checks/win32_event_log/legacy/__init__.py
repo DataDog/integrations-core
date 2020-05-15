@@ -1,4 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-__version__ = '1.0.0'
+from .win32_event_log import Win32EventLogWMI
+
+__all__ = ['Win32EventLogWMI']
