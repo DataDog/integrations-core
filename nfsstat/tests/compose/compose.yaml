@@ -4,9 +4,9 @@ services:
   nfs-server:
     image: gists/nfs-server
     container_name: nfs-server
-    cap_add:
-      - SYS_ADMIN
-      - SETPCAP
+    privileged: true
+    ports:
+      - 2049:2049
     volumes:
       - ./nfs-share:/nfs-share
 

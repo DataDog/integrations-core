@@ -24,6 +24,6 @@ def dd_environment():
 
 def wait_for_nfsiostat():
     output = check_output(CONFIG["init_config"]["nfsiostat_path"].split())
+    print(output)
 
-    print()
-    return output != 'No NFS mount points were found'
+    return "nfs-server:/ mounted on /test1:" in output
