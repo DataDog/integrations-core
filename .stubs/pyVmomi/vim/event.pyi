@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import List
+from typing import List, Type
+
 
 class Event:
     createdTime: datetime
@@ -10,7 +11,7 @@ class EventFilterSpec:
     class ByTime:
         def __init__(self, beginTime: datetime): ...
     time: EventFilterSpec.ByTime
-    type: List[Event]
+    type: List[Type[Event]]
 
 class EventManager:
     latestEvent: Event
