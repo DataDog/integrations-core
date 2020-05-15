@@ -75,7 +75,7 @@ class VSphereCheck(AgentCheck):
         instance = cast(InstanceConfig, self.instance)
         self.config = VSphereConfig(instance, self.log)
 
-        self.latest_event_query = dt.datetime.now()
+        self.latest_event_query = dt.datetime.utcnow()
         self.infrastructure_cache = InfrastructureCache(interval_sec=self.config.refresh_infrastructure_cache_interval)
         self.metrics_metadata_cache = MetricsMetadataCache(
             interval_sec=self.config.refresh_metrics_metadata_cache_interval
@@ -508,7 +508,8 @@ class VSphereCheck(AgentCheck):
         except Exception as e:
             # Don't get stuck on a failure to fetch an event
             # Ignore them for next pass
-            self.log.warning("Unable to fetch Events %s", e)
+            self.log.debug("Unable to fetch Events. Error with stacktrace: %s", e, exc_info=True)
+            self.log.warning("Unable to fetch Events: %s", e)
 
         if latest_event_time is not None:
             self.latest_event_query = latest_event_time + dt.timedelta(seconds=1)
