@@ -146,21 +146,21 @@ def get_match(transformers, column_name, **modifiers):
     ```yaml
     query: SELECT source1, source2, metric FROM TABLE
     columns:
-        - name: value1
-          type: source
-        - name: value2
-          type: source
-        - name: metric_name
-          type: match
-          source: value1
-          items:
-            foo:
-              name: test.foo
-              type: gauge
-              source: value2
-            bar:
-              name: test.bar
-              type: monotonic_gauge
+      - name: value1
+        type: source
+      - name: value2
+        type: source
+      - name: metric_name
+        type: match
+        source: value1
+        items:
+          foo:
+            name: test.foo
+            type: gauge
+            source: value2
+          bar:
+            name: test.bar
+            type: monotonic_gauge
     ```
 
     and the result set is:
