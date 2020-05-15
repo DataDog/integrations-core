@@ -3,6 +3,8 @@ from typing import List
 
 class Event:
     createdTime: datetime
+    key: int
+    fullFormattedMessage: str
 
 class EventFilterSpec:
     class ByTime:
