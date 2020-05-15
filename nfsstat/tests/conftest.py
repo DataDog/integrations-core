@@ -10,5 +10,5 @@ from .common import COMPOSE_FILE, CONFIG, E2E_METADATA
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with docker_run(COMPOSE_FILE, log_patterns=['mount.nfs: trying text-based options']):
+    with docker_run(COMPOSE_FILE, log_patterns=['NFS Client ready.']):
         yield CONFIG, E2E_METADATA
