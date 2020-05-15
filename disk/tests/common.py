@@ -30,30 +30,3 @@ EXPECTED_METRICS = [
 ]
 
 EXPECTED_DEVICE = ["overlay", "shm", "tmpfs"]
-
-EXPECTED_MAPING = [
-    {"metric": "system.disk.free", "device": "overlay"},
-    {"metric": "system.disk.free", "device": "shm"},
-    {"metric": "system.disk.free", "device": "tmpfs"},
-    {"metric": "system.disk.in_use", "device": "overlay"},
-    {"metric": "system.disk.in_use", "device": "shm"},
-    {"metric": "system.disk.in_use", "device": "tmpfs"},
-    {"metric": "system.disk.total", "device": "overlay"},
-    {"metric": "system.disk.total", "device": "shm"},
-    {"metric": "system.disk.total", "device": "tmpfs"},
-    {"metric": "system.disk.used", "device": "overlay"},
-    {"metric": "system.disk.used", "device": "shm"},
-    {"metric": "system.disk.used", "device": "tmpfs"},
-    {"metric": "system.fs.inodes.free", "device": "overlay"},
-    {"metric": "system.fs.inodes.free", "device": "shm"},
-    {"metric": "system.fs.inodes.free", "device": "tmpfs"},
-    {"metric": "system.fs.inodes.in_use", "device": "overlay"},
-    {"metric": "system.fs.inodes.in_use", "device": "shm"},
-    {"metric": "system.fs.inodes.in_use", "device": "tmpfs"},
-    {"metric": "system.fs.inodes.total", "device": "overlay"},
-    {"metric": "system.fs.inodes.total", "device": "shm"},
-    {"metric": "system.fs.inodes.total", "device": "tmpfs"},
-    {"metric": "system.fs.inodes.used", "device": "overlay"},
-    {"metric": "system.fs.inodes.used", "device": "shm"},
-    {"metric": "system.fs.inodes.used", "device": "tmpfs"},
-]
