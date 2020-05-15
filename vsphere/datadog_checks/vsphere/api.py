@@ -259,27 +259,31 @@ class VSphereAPI(object):
         time_filter = vim.event.EventFilterSpec.ByTime(beginTime=start_time)
         query_filter.time = time_filter
         query_filter.type = ALLOWED_EVENTS
-        events = []
         try:
             events = event_manager.QueryEvents(query_filter)
         except SoapAdapter.ParserError as e:
             self.log.debug("Error parsing all events (%s). Fetch events one by one.", e)
+            events = self._get_new_events_one_by_one(event_manager)
+        return events
 
-            # Collecting events one by one and skip those with parsing error.
-            # The parsing error is triggered by unknown types like `ContentLibrary`.
-            # More info:
-            # - https://github.com/vmware/pyvmomi/issues/190
-            # - https://github.com/vmware/pyvmomi/issues/872
-            event_collector = event_manager.CreateCollectorForEvents(query_filter)
-            while True:
-                try:
-                    collected_events = event_collector.ReadNextEvents(1)  # Read with page_size=1
-                except SoapAdapter.ParserError as e:
-                    self.log.debug("Cannot parse event, skipped: %s", e)
-                    continue
-                if len(collected_events) == 0:
-                    break
-                events.extend(collected_events)
+    def _get_new_events_one_by_one(self, query_filter):
+        # Collecting events one by one and skip those with parsing error.
+        # The parsing error is triggered by unknown types like `ContentLibrary`.
+        # More info:
+        # - https://github.com/vmware/pyvmomi/issues/190
+        # - https://github.com/vmware/pyvmomi/issues/872
+        event_manager = self._conn.content.eventManager
+        events = []
+        event_collector = event_manager.CreateCollectorForEvents(query_filter)
+        while True:
+            try:
+                collected_events = event_collector.ReadNextEvents(1)  # Read with page_size=1
+            except SoapAdapter.ParserError as e:
+                self.log.debug("Cannot parse event, skipped: %s", e)
+                continue
+            if len(collected_events) == 0:
+                break
+            events.extend(collected_events)
         return events
 
     @smart_retry
