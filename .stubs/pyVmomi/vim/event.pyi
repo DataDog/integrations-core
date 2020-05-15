@@ -4,6 +4,8 @@ from typing import List, Type
 
 class Event:
     createdTime: datetime
+    key: int
+    fullFormattedMessage: str
 
 class EventFilterSpec:
     class ByTime:
