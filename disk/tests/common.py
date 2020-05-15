@@ -29,4 +29,4 @@ EXPECTED_METRICS = [
     "system.fs.inodes.used",
 ]
 
-EXPECTED_DEVICES = ["overlay", "shm", "tmpfs"]
+EXPECTED_DEVICES = ["overlay", "shm", "tmpfs", "/dev/sdb1"]
