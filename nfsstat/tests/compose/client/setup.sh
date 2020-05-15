@@ -10,5 +10,3 @@ mkdir /test1
 mount -v -t nfs -o port=2049 $NFS_SERVER:/ /test1
 
 echo "NFS Client ready."
-
-/usr/sbin/nfsiostat
