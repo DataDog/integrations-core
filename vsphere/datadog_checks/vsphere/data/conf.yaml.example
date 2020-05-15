@@ -69,10 +69,17 @@ instances:
     ## Whether or not to pull events data from vCenter.
     ## If you have multiple configuration instances collecting data from the same vCenter server (i.e if you collect
     ## realtime and historical metrics), you usually want to collect events only once.
-    ## By default this parameter will be 'true' if `collection_type: realtime` and 'false' if
-    ## `collection_type: historical`
+    ## By default this parameter will be 'true' if `collection_type: realtime` or `events_only`
+    ## and 'false' if `collection_type: historical`
     #
     # collect_events: <COLLECT_EVENTS>
+
+    ## @param use_collect_events_fallback - boolean - optional - default: false
+    ## Some events might contain invalid types types.
+    ## Instead of having the whole event batch fail. Using the fallback will process event one by one
+    ## and skip event with parsing issues.
+    #
+    # use_collect_events_fallback: false
 
     ## @param ssl_verify - boolean - optional - default: true
     ## Set to false to disable SSL verification, when connecting to vCenter

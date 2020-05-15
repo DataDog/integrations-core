@@ -50,7 +50,8 @@ class VSphereConfig(object):
         self.metrics_per_query = instance.get("metrics_per_query", DEFAULT_METRICS_PER_QUERY)
         self.batch_collector_size = instance.get('batch_property_collector_size', DEFAULT_BATCH_COLLECTOR_SIZE)
         self.batch_tags_collector_size = instance.get('batch_tags_collector_size', DEFAULT_TAGS_COLLECTOR_SIZE)
-        self.should_collect_events = instance.get("collect_events", self.collection_type == 'realtime')
+        self.should_collect_events = instance.get("collect_events", self.collection_type in ['realtime', 'events_only'])
+        self.use_collect_events_fallback = instance.get("use_collect_events_fallback", False)
         self.should_collect_tags = is_affirmative(instance.get("collect_tags", False))
         self.tags_prefix = instance.get("tags_prefix", DEFAULT_VSPHERE_TAG_PREFIX)
         self.excluded_host_tags = instance.get("excluded_host_tags", [])
@@ -67,6 +68,8 @@ class VSphereConfig(object):
             self.collected_resource_types = REALTIME_RESOURCES + HISTORICAL_RESOURCES
         elif self.collection_type == 'historical':
             self.collected_resource_types = HISTORICAL_RESOURCES
+        elif self.collection_type == 'events_only':
+            self.collected_resource_types = []
         else:
             self.collected_resource_types = REALTIME_RESOURCES
 
@@ -84,6 +87,10 @@ class VSphereConfig(object):
         # type: () -> bool
         return self.collection_type in ('historical', 'both')
 
+    def is_events_only(self):
+        # type: () -> bool
+        return self.collection_type == 'events_only'
+
     def validate_config(self):
         # type: () -> None
         if not self.ssl_verify and self.ssl_capath:
@@ -94,11 +101,11 @@ class VSphereConfig(object):
                 "disabling ssl verification."
             )
 
-        if self.collection_type not in ('realtime', 'historical', 'both'):
+        if self.collection_type not in ('realtime', 'historical', 'both', 'events_only'):
             raise ConfigurationError(
                 "Your configuration is incorrectly attempting to "
                 "set the `collection_type` to {}. It should be either "
-                "'realtime', 'historical' or 'both'.".format(self.collection_type)
+                "'realtime', 'historical', 'both' or 'events_only'".format(self.collection_type)
             )
 
         if self.collection_level not in (1, 2, 3, 4):
