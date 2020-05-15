@@ -266,11 +266,15 @@ class VSphereAPI(object):
         except pyVmomi.SoapAdapter.ParserError as e:
             self.log.debug("Error parsing all events (%s). Fetch events one by one.", e)
 
+            # Collecting events one by one and skip those with parsing error.
+            # The parsing error is triggered by unknown types like `ContentLibrary`.
+            # More info:
+            # - https://github.com/vmware/pyvmomi/issues/190
+            # - https://github.com/vmware/pyvmomi/issues/872
             event_collector = event_manager.CreateCollectorForEvents(query_filter)
             while True:
                 try:
-                    page_size = 1
-                    collected_events = event_collector.ReadNextEvents(page_size)
+                    collected_events = event_collector.ReadNextEvents(1)  # Read with page_size=1
                 except pyVmomi.SoapAdapter.ParserError as e:
                     self.log.debug("Cannot parse event, skipped: %s", e)
                     continue
