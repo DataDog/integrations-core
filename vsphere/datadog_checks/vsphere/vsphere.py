@@ -513,7 +513,7 @@ class VSphereCheck(AgentCheck):
         except Exception as e:
             # Don't get stuck on a failure to fetch an event
             # Ignore them for next pass
-            self.log.warning("Unable to fetch Events %s", str(e))
+            self.log.warning("Unable to fetch Events %s", e)
 
         if latest_event_time is not None:
             self.latest_event_query = latest_event_time + dt.timedelta(seconds=1)
