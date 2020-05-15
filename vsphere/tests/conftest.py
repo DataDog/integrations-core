@@ -5,19 +5,12 @@ import os
 
 import pytest
 from mock import MagicMock, Mock, patch
-
-from .common import LAB_INSTANCE
-from .mocked_api import MockedAPI, mock_http_rest_api
+from tests.mocked_api import MockedAPI, mock_http_rest_api
 
 try:
     from contextlib import ExitStack
 except ImportError:
     from contextlib2 import ExitStack
-
-
-@pytest.fixture(scope='session')
-def dd_environment():
-    yield LAB_INSTANCE
 
 
 @pytest.fixture()
