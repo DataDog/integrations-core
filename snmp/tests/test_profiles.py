@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-
 import pytest
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.snmp import SnmpCheck
 
@@ -46,6 +46,16 @@ from .metrics import (
 )
 
 pytestmark = pytest.mark.usefixtures("dd_environment")
+
+
+def test_load_profiles():
+    instance = common.generate_instance_config([])
+    check = SnmpCheck('snmp', {}, [instance])
+    for name, profile in check.profiles.items():
+        try:
+            check._config.refresh_with_profile(profile)
+        except ConfigurationError as e:
+            pytest.fail("Profile `{}` is not configured correctly: {}".format(name, e))
 
 
 def run_profile_check(recording_name):
