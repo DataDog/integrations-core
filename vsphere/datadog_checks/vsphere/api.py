@@ -8,6 +8,8 @@ from typing import Any, Callable, List, TypeVar, cast
 
 import pyVmomi
 from pyVim import connect
+
+from datadog_checks.vsphere.legacy.event import ALLOWED_EVENTS
 from pyVmomi import vim, vmodl
 
 from datadog_checks.base.log import CheckLoggingAdapter
