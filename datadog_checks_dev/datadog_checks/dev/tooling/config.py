@@ -41,8 +41,7 @@ DEFAULT_CONFIG = {
         'agent': os.path.join('~', 'dd', 'datadog-agent'),
     },
     'agents': {
-        '6': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
-        '5': {'docker': 'datadog/dev-dd-agent:master', 'local': 'latest'},
+        'master': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
     },
     'orgs': {
         'default': {
