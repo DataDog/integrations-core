@@ -125,6 +125,16 @@ def mock_get():
         yield text_data
 
 
+def test_config_instance(mocked_prometheus_check):
+    """Ensure scraper config persists instance options"""
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['new_option'] = 'test123'
+
+    config = check.create_scraper_configuration(instance)
+    config['new_option'] = 'test123'
+
+
 def test_process(text_data, mocked_prometheus_check, mocked_prometheus_scraper_config, ref_gauge):
     check = mocked_prometheus_check
     check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
