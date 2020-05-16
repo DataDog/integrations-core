@@ -59,7 +59,6 @@ class OpenMetricsScraperMixin(object):
         if instance is None:
             instance = {}
 
-        # Create an empty configuration
         # Supports new configuration options
         config = copy.deepcopy(instance)
 
