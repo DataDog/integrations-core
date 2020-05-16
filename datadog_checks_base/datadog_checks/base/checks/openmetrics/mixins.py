@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import copy
 from fnmatch import translate
 from math import isinf, isnan
 from os.path import isfile
@@ -59,7 +60,8 @@ class OpenMetricsScraperMixin(object):
             instance = {}
 
         # Create an empty configuration
-        config = {}
+        # Supports new configuration options
+        config = copy.deepcopy(instance)
 
         # Set the endpoint
         endpoint = instance.get('prometheus_url')
