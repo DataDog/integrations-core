@@ -476,7 +476,7 @@ class OpenMetricsScraperMixin(object):
 
     def process(self, scraper_config, metric_transformers=None):
         """
-        Polls the data from Prometheus and pushes them as gauges.
+        Polls the data from Prometheus and submits them as Datadog metrics.
         `endpoint` is the metrics endpoint to use to poll metrics from Prometheus
 
         Note that if the instance has a `tags` attribute, it will be pushed
