@@ -54,6 +54,14 @@ class OpenMetricsScraperMixin(object):
         super(OpenMetricsScraperMixin, self).__init__(*args, **kwargs)
 
     def create_scraper_configuration(self, instance=None):
+        """
+        Creates a scraper configuration.
+
+        If instance does not specify a value for a configuration option, the value will default to the `init_config`.
+        Otherwise, the `default_instance` value will be used.
+
+        A default mixin configuration will be returned if there is no instance.
+        """
 
         # We can choose to create a default mixin configuration for an empty instance
         if instance is None:
@@ -602,7 +610,7 @@ class OpenMetricsScraperMixin(object):
             - call check method with the same name as the metric
             - log info if none of the above worked
 
-        `metric_transformers` is a dict of <metric name>:<function to run when the metric name is encountered>
+        `metric_transformers` is a dict of `<metric name>:<function to run when the metric name is encountered>`
         """
         # If targeted metric, store labels
         self._store_labels(metric, scraper_config)

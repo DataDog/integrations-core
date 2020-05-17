@@ -1,9 +1,33 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from six import PY2
 from ...errors import CheckException
 from .. import AgentCheck
 from .mixins import OpenMetricsScraperMixin
+
+
+STANDARD_FIELDS = [
+    'prometheus_url',
+    'namespace',
+    'metrics',
+    'prometheus_metrics_prefix',
+    'health_service_check',
+    'label_to_hostname',
+    'label_joins',
+    'labels_mapper',
+    'type_overrides',
+    'send_histograms_buckets',
+    'send_distribution_buckets',
+    'send_monotonic_counter',
+    'send_monotonic_with_gauge',
+    'send_distribution_counts_as_monotonic',
+    'send_distribution_sums_as_monotonic',
+    'exclude_labels',
+    'bearer_token_auth',
+    'bearer_token_path',
+    'ignore_metrics',
+]
 
 
 class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
@@ -123,3 +147,13 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         Used to filter metrics at the begining of the processing, by default no metric is filtered
         """
         return False
+
+
+# For documentation generation
+# TODO: use an enum and remove STANDARD_FIELDS when mkdocstrings supports it
+class StandardFields(object):
+    pass
+
+
+if not PY2:
+    StandardFields.__doc__ = '\n'.join('- `{}`'.format(field) for field in STANDARD_FIELDS)
