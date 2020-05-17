@@ -5,8 +5,7 @@
 [Prometheus](https://prometheus.io) is an open-source monitoring system for timeseries metric data. Many Datadog 
 integrations collect metrics based on Prometheus exported data sets.
 
-As of [Agent `6.5.0`](https://www.datadoghq.com/blog/monitor-prometheus-metrics/), Prometheus-based integrations use 
-the OpenMetric exposition format to monitor metrics.
+Prometheus-based integrations use the OpenMetrics exposition format to collect metrics.
 
 ## Openmetrics Base Check
 
