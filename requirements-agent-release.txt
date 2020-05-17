@@ -95,7 +95,7 @@ datadog-oracle==2.1.0
 datadog-pdh-check==1.10.0; sys_platform == 'win32'
 datadog-pgbouncer==1.10.0; sys_platform != 'win32'
 datadog-php-fpm==1.9.0
-datadog-postfix==1.6.2; sys_platform != 'win32'
+datadog-postfix==1.7.0; sys_platform != 'win32'
 datadog-postgres==3.5.4
 datadog-powerdns-recursor==1.5.1
 datadog-presto==2.0.2
