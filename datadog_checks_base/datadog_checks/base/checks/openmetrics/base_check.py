@@ -32,7 +32,7 @@ STANDARD_FIELDS = [
 
 class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
     """
-    OpenMetricsBaseCheck is a class that helps instantiating the PrometheusCheck only
+    OpenMetricsBaseCheck is a class that helps scrape endpoints that emit Prometheus metrics only
     with YAML configurations.
 
     As each check has its own states it maintains a map
