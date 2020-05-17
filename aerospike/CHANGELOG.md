@@ -1,5 +1,9 @@
 # CHANGELOG - Aerospike
 
+## 1.8.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 1.7.1 / 2020-04-15
 
 * [Fixed] Fix namespace valid chars matching regex. See [#6352](https://github.com/DataDog/integrations-core/pull/6352).
