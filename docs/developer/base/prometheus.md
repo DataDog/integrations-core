@@ -7,9 +7,7 @@ integrations collect metrics based on Prometheus exported data sets.
 
 Prometheus-based integrations use the OpenMetrics exposition format to collect metrics.
 
-## Openmetrics Base Check
-
-### Interface
+## Interface
 
 All functionality is exposed by the `OpenMetricsBaseCheck` and `OpenMetricsScraperMixin` classes.
 
