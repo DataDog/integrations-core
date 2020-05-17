@@ -1,5 +1,9 @@
 # CHANGELOG - TLS
 
+## 1.5.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 1.4.1 / 2020-02-12
 
 * [Fixed] Don't rely on file extension for local cert loading. See [#5694](https://github.com/DataDog/integrations-core/pull/5694).
