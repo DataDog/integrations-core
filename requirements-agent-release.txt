@@ -91,7 +91,7 @@ datadog-openldap==1.5.0
 datadog-openmetrics==1.7.0
 datadog-openstack-controller==1.9.0
 datadog-openstack==1.10.0
-datadog-oracle==2.0.1
+datadog-oracle==2.1.0
 datadog-pdh-check==1.9.1; sys_platform == 'win32'
 datadog-pgbouncer==1.9.0; sys_platform != 'win32'
 datadog-php-fpm==1.8.1
