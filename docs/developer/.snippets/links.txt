@@ -18,7 +18,6 @@
 [config-spec-template-instances-http]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/http.yaml
 [config-spec-template-init-config-openmetrics]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/init_config/openmetrics.yaml
 [config-spec-template-instances-openmetrics]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration/instances/openmetrics.yaml
-
 [config-spec-templates]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/configuration
 [Datadog Agent]: https://docs.datadoghq.com/agent/
 [datadog-agent]: https://github.com/DataDog/datadog-agent

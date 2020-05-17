@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from six import PY2
+
 from ...errors import CheckException
 from .. import AgentCheck
 from .mixins import OpenMetricsScraperMixin
-
 
 STANDARD_FIELDS = [
     'prometheus_url',
