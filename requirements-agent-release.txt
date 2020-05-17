@@ -109,7 +109,7 @@ datadog-riak==1.8.0
 datadog-riakcs==2.3.0
 datadog-sap-hana==1.2.0
 datadog-scylla==1.1.0
-datadog-sidekiq==1.0.0
+datadog-sidekiq==1.1.0
 datadog-snmp==3.1.0
 datadog-solr==1.3.0
 datadog-spark==1.11.4
