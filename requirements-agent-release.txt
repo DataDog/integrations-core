@@ -113,7 +113,7 @@ datadog-sidekiq==1.1.0
 datadog-snmp==3.2.0
 datadog-solr==1.4.0
 datadog-spark==1.12.0
-datadog-sqlserver==1.16.3; sys_platform != 'darwin'
+datadog-sqlserver==1.17.0; sys_platform != 'darwin'
 datadog-squid==1.5.1
 datadog-ssh-check==1.10.1
 datadog-statsd==1.3.1
