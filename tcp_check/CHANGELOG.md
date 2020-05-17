@@ -1,5 +1,9 @@
 # CHANGELOG - tcp_check
 
+## 2.4.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 2.3.4 / 2020-03-11
 
 * [Fixed] Reattempt to resolve IP on failure. See [#6012](https://github.com/DataDog/integrations-core/pull/6012).
