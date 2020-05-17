@@ -68,7 +68,7 @@ datadog-kube-dns==2.4.0
 datadog-kube-metrics-server==1.2.0
 datadog-kube-proxy==3.4.0
 datadog-kube-scheduler==1.4.0
-datadog-kubelet==4.0.0
+datadog-kubelet==4.1.0
 datadog-kubernetes-state==5.3.0
 datadog-kyototycoon==1.9.1
 datadog-lighttpd==1.8.1
