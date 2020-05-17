@@ -28,7 +28,7 @@ All functionality is exposed by the `OpenMetricsBaseCheck` and `OpenMetricsScrap
         - process_metric
         - create_scraper_configuration
 
-### Options
+## Options
 
 Some options can be set globally in `init_config` (with `instances` taking precedence).
 For complete documentation of every option, see the associated configuration templates for the
