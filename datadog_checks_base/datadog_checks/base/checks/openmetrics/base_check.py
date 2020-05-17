@@ -9,9 +9,9 @@ from .mixins import OpenMetricsScraperMixin
 class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
     """
     OpenMetricsBaseCheck is a class that helps instantiating PrometheusCheck only
-    with YAML configurations. As each check has it own states it maintains a map
+    with YAML configurations. As each check has its own states it maintains a map
     of all checks so that the one corresponding to the instance is executed.
-    Minimal example configuration::
+    Minimal example configuration:
 
         instances:
         - prometheus_url: http://example.com/endpoint
@@ -19,12 +19,6 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             metrics:
             - bar
             - foo
-
-
-    Agent 5 signature:
-
-        OpenMetricsBaseCheck(name, init_config, agentConfig, instances=None, default_instances=None,
-                             default_namespace=None)
 
     Agent 6 signature:
 
