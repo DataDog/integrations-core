@@ -1,5 +1,9 @@
 # CHANGELOG - etcd
 
+## 2.3.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 2.2.1 / 2020-02-22
 
 * [Fixed] Update auto_conf yaml to default to preview. See [#5661](https://github.com/DataDog/integrations-core/pull/5661).
