@@ -20,7 +20,7 @@ datadog-clickhouse==1.3.0
 datadog-cockroachdb==1.3.0
 datadog-confluent-platform==1.1.0
 datadog-consul==1.14.0
-datadog-coredns==1.3.1; sys_platform == 'linux2'
+datadog-coredns==1.4.0; sys_platform == 'linux2'
 datadog-couch==3.8.1
 datadog-couchbase==1.12.2
 datadog-crio==1.3.2
