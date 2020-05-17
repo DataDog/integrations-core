@@ -8,7 +8,7 @@ from .mixins import OpenMetricsScraperMixin
 
 class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
     """
-    OpenMetricsBaseCheck is a class that helps instantiating PrometheusCheck only
+    OpenMetricsBaseCheck is a class that helps instantiating the PrometheusCheck only
     with YAML configurations. As each check has its own states it maintains a map
     of all checks so that the one corresponding to the instance is executed.
     Minimal example configuration:
@@ -85,6 +85,10 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         self.process(scraper_config)
 
     def get_scraper_config(self, instance):
+        """
+        Validates the instance configuration and creates a scraper configuration for a new instance.
+        If the endpoint already has a corresponding configuration, return the cached configuration.
+        """
         endpoint = instance.get('prometheus_url')
 
         if endpoint is None:
