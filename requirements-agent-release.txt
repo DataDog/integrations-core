@@ -10,7 +10,7 @@ datadog-aspdotnet==1.5.0; sys_platform == 'win32'
 datadog-btrfs==1.10.0; sys_platform != 'win32'
 datadog-cacti==1.7.0; sys_platform == 'linux2'
 datadog-cassandra-nodetool==1.5.2
-datadog-cassandra==1.5.0
+datadog-cassandra==1.6.0
 datadog-ceph==2.0.0; sys_platform != 'win32'
 datadog-checks-base==11.7.0
 datadog-checks-downloader==2.4.0
