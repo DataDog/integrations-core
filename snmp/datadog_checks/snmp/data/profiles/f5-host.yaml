@@ -1,0 +1,20 @@
+# Generic Profile for f5 Host
+extends:
+  - _base.yaml
+  - _generic-router-if.yaml
+  - _generic-host-resources.yaml
+  - _generic-sensor-stats.yaml
+  - f5-big-ip.yaml
+
+sysobjectid: 1.3.6.1.4.1.3375.2.1.*
+
+metrics:
+  # Sync status of the cluster
+  - MIB: F5-BIGIP-SYSTEM-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.14.3.1
+      name: sysCmFailoverStatusId
+    metric_tags:
+      - tag: sysCmFailoverStatusStatus
+        column: sysCmFailoverStatusStatus
+        OID: 1.3.6.1.4.1.3375.2.1.14.3.2

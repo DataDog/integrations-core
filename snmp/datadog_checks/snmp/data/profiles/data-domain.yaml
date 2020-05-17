@@ -1,0 +1,167 @@
+# Default profile for Dell EMC Data Domain device
+
+extends:
+  - _generic_router_if.yaml
+
+sysobjectid: 1.3.6.1.4.1.19746.*
+
+metrics:
+    # Filesystem stats
+  - MIB: DATA-DOMAIN-MIB
+    table:
+      OID: 1.3.6.1.4.1.19746.1.3.2.1
+      name: fileSystemSpaceTable
+    symbols:
+      - OID: 1.3.6.1.4.1.19746.1.3.2.1.1.7
+        name: fileSystemPercentUsed
+      - OID: 1.3.6.1.4.1.19746.1.3.2.1.1.1
+        name: fileSystemResourceIndex
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.19746.1.3.2.1.1.3
+          name: fileSystemResourceName
+          table: fileSystemSpaceTable
+        tag: fileSystemResourceName
+      - column:
+          OID: 1.3.6.1.4.1.19746.1.3.2.1.1.4
+          name: fileSystemSpaceSize
+          table: fileSystemSpaceTable
+        tag: fileSystemSpaceSize
+      - column:
+          OID: 1.3.6.1.4.1.19746.1.3.2.1.1.5
+          name: fileSystemSpaceUsed
+          table: fileSystemSpaceTable
+        tag: fileSystemSpaceUsed
+      - column:
+          OID: 1.3.6.1.4.1.19746.1.3.2.1.1.6
+          name: fileSystemSpaceAvail
+          table: fileSystemSpaceTable
+        tag: fileSystemSpaceAvail
+      - column:
+          OID: 1.3.6.1.4.1.19746.1.3.2.1.1.9
+          name: fileSystemResourceTier
+          table: fileSystemSpaceTable
+        tag: fileSystemResourceTier
+
+  # Fan stats
+  # fanStatus: notfound(0), ok(1), fail(2)
+  # fanLevel: unknown(0), low(1), medium(2), high(3)
+  - MIB: DATA-DOMAIN-MIB
+    table:
+      OID: 1.3.6.1.4.1.19746.1.1.3.1.1
+      name: fanPropertiesTable
+    symbols:
+      - OID: 1.3.6.1.4.1.19746.1.1.3.1.1.1.5
+        name: fanLevel
+      - OID: 1.3.6.1.4.1.19746.1.1.3.1.1.1.6
+        name: fanStatus
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.19746.1.1.3.1.1.1.4
+          name: fanDescription
+          table: fanPropertiesTable
+        tag: fanDescription
+
+    # Power module stats
+    # powerModuleStatus: absent(0), ok(1), failed(2), faulty(3), acnone(4), unknown(99)
+  - MIB: DATA-DOMAIN-MIB
+    table:
+      OID: 1.3.6.1.4.1.19746.1.1.1.1.1
+      name: powerModuleTable
+    symbols:
+      - OID: 1.3.6.1.4.1.19746.1.1.1.1.1.1.4
+        name: powerModuleStatus
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.19746.1.1.1.1.1.1.3
+          name: powerModuleDescription
+          table: powerModuleTable
+        tag: powerModuleDescription
+
+    # Temperature sensor stats
+    # tempSensorStatus: failed(0), ok(1), notfound(2), overheatWarning(3), overheatCritical(4)
+  - MIB: DATA-DOMAIN-MIB
+    table:
+      OID: 1.3.6.1.4.1.19746.1.1.2.1.1
+      name: temperatureSensorTable
+    symbols:
+      - OID: 1.3.6.1.4.1.19746.1.1.2.1.1.1.5
+        name: tempSensorCurrentValue
+      - OID: 1.3.6.1.4.1.19746.1.1.2.1.1.1.6
+        name: tempSensorStatus
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.19746.1.1.2.1.1.1.4
+          name: tempSensorDescription
+          table: temperatureSensorTable
+        tag: tempSensorDescription
+
+    # Disk stats
+    # diskPerfState: ok(1), unknown(2), absent(3), failed(4), spare(5), available(6)
+  - MIB: DATA-DOMAIN-MIB
+    table:
+      OID: 1.3.6.1.4.1.19746.1.6.2.1
+      name: diskPerformanceTable
+    symbols:
+      - OID: 1.3.6.1.4.1.19746.1.6.2.1.1.6
+        name: diskBusy
+      - OID: 1.3.6.1.4.1.19746.1.6.2.1.1.7
+        name: diskPerfState
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.19746.1.6.1.1.1.4
+          name: diskModel
+          table: diskPropertiesTable
+        tag: diskModel
+      - column:
+          OID: 1.3.6.1.4.1.19746.1.6.1.1.1.5
+          name: diskFirmwareVersion
+          table: diskPropertiesTable
+        tag: diskFirmwareVersion
+      - column:
+          OID: 1.3.6.1.4.1.19746.1.6.1.1.1.6
+          name: diskSerialNumber
+          table: diskPropertiesTable
+        tag: diskSerialNumber
+      - column:
+          OID: 1.3.6.1.4.1.19746.1.6.1.1.1.7
+          name: diskCapacity
+          table: diskPropertiesTable
+        tag: diskCapacity
+
+    # Battery stats
+    # nvramBatteryStatus: ok(0), disabled(1), discharged(2), softdisabled(3)
+  - MIB: DATA-DOMAIN-MIB
+    table:
+      OID: 1.3.6.1.4.1.19746.1.2.3.1
+      name: nvramBatteryTable
+    symbols:
+      - OID: 1.3.6.1.4.1.19746.1.2.3.1.1.3
+        name: nvramBatteryStatus
+      - OID: 1.3.6.1.4.1.19746.1.2.3.1.1.4
+        name: nvramBatteryCharge
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.19746.1.2.3.1.1.1
+          name: nvramBatteriesIndex
+          table: nvramBatteryTable
+        tag: nvramBatteryCardIndex
+      - column:
+          OID: 1.3.6.1.4.1.19746.1.2.3.1.1.2
+          name: nvramBatteryIndex
+          table: nvramBatteryTable
+        tag: nvramBatteryIndex
+
+  - MIB: HOST-RESOURCES-MIB
+    table:
+      OID: 1.3.6.1.2.1.25.3.3
+      name: hrProcessorTable
+    symbols:
+      - OID: 1.3.6.1.2.1.25.3.3.1.2
+        name: hrProcessorLoad
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.2.1.25.3.2.1.3
+          name: hrDeviceDescr
+          table: hrDeviceTable
+        tag: hrDevice

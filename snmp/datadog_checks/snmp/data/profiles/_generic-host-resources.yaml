@@ -20,25 +20,45 @@ metrics:
   # Storage Devices
   #
   - MIB: HOST-RESOURCES-MIB
-    table: hrStorageTable
+    table:
+      OID: 1.3.6.1.2.1.25.2.3
+      name: hrStorageTable
     symbols:
-      - hrStorageAllocationUnits
-      - hrStorageSize
-      - hrStorageUsed
-      - hrStorageAllocationFailures
+      - OID: 1.3.6.1.2.1.25.2.3.1.4
+        name: hrStorageAllocationUnits
+      - OID: 1.3.6.1.2.1.25.2.3.1.5
+        name: hrStorageSize
+      - OID: 1.3.6.1.2.1.25.2.3.1.6
+        name: hrStorageUsed
+      - OID: 1.3.6.1.2.1.25.2.3.1.7
+        name: hrStorageAllocationFailures
     metric_tags:
-      - tag: storagedesc
-        column: hrStorageDescr
-      - tag: storagetype
-        column: hrStorageType
+    - column:
+        OID: 1.3.6.1.2.1.25.2.3.1.3
+        name: hrStorageDescr
+        table: hrStorageTable
+      tag: hrStorageDescr
+    - column:
+        OID: 1.3.6.1.2.1.25.2.3.1.2
+        name: hrStorageType
+        table: hrStorageTable
+      tag: hrStorageType
 
   #
   # Processor Load
   #
   - MIB: HOST-RESOURCES-MIB
-    table: hrProcessorTable
+    table:
+      OID: 1.3.6.1.2.1.25.3.3
+      name: hrProcessorTable
     symbols:
-      - hrProcessorLoad
+      - OID: 1.3.6.1.2.1.25.3.3.1.2
+        name: hrProcessorLoad
     metric_tags:
       - tag: processorid
         column: hrProcessorFrwID
+      - column:
+          OID: 1.3.6.1.2.1.25.3.2.1.3
+          name: hrDeviceDescr
+          table: hrDeviceTable
+        tag: hrDevice

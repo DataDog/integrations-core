@@ -1,0 +1,38 @@
+# Generic network interfaces metrics for routers that respond to 32 bit metric
+
+#TCP stats
+extends:
+  - _generic-router-if.yaml
+
+metrics:
+- MIB: IF-MIB
+  table:
+    OID: 1.3.6.1.2.1.2.2
+    name: ifTable
+  forced_type: monotonic_count
+  symbols:
+  - OID: 1.3.6.1.2.1.2.2.1.16
+    name: ifOutOctets
+  - OID: 1.3.6.1.2.1.2.2.1.10
+    name: ifInOctets
+  metric_tags:
+  - column:
+      OID: 1.3.6.1.2.1.31.1.1.1.1
+      name: ifName
+      table: ifXTable
+    tag: interface
+  - column:
+      OID: 1.3.6.1.2.1.2.2.1.2
+      name: ifDescr
+      table: ifTable
+    tag: ifDescr
+  - column:
+      OID: 1.3.6.1.2.1.2.2.1.6
+      name: ifPhysAddress
+      table: ifTable
+    tag: ifPhysAddress
+  - column:
+      OID: 1.3.6.1.2.1.31.1.1.1.18
+      name: ifAlias
+      table: ifXTable
+    tag: ifAlias

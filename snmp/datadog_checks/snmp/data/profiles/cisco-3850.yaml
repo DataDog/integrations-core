@@ -20,6 +20,17 @@ metrics:
         tag: sensor_type
       - index: 1
         tag: sensor_id
+      - tag: entPhySensorUnitsDisplay
+        OID: 1.3.6.1.2.1.99.1.1.1.6
+        column: entPhySensorUnitsDisplay
+        table: entPhySensorTable
+        MIB: ENTITY-SENSOR-MIB
+      - tag: entPhysicalDescr
+        OID: 1.3.6.1.2.1.47.1.1.1.1.2
+        column: entPhysicalDescr
+        table: entPhysicalTable
+        MIB: ENTITY-MIB
+
   - MIB: CISCO-IF-EXTENSION-MIB
     table:
       OID: 1.3.6.1.4.1.9.9.276.1.1.1

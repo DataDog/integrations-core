@@ -1,0 +1,21 @@
+# Generic Profile for f5 Guest devices
+extends:
+  - _base.yaml
+  - _generic-router-if.yaml
+  - _generic-host-resources.yaml
+  - _generic-sensor-stats.yaml
+  - f5-host.yaml
+
+sysobjectid: 1.3.6.1.4.1.3375.2.1.13.*
+
+metrics:
+  # Sync status of the cluster
+  - MIB: F5-BIGIP-SYSTEM-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.3375.2.1.14.1.1 
+      name: sysCmSyncStatusId 
+    metric_tags:
+      - MIB: F5-BIGIP-SYSTEM-MIB
+        column:
+          OID: 1.3.6.1.4.1.3375.2.1.14.1.2
+          name: sysCmSyncStatusStatus

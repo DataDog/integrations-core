@@ -1,0 +1,5 @@
+# Generic Profile for Infoblox devices
+extends:
+  - _base.yaml
+  - _generic-router-if.yaml
+  - _generic-host-resources.yaml

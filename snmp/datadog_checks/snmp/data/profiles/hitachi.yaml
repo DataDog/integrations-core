@@ -1,0 +1,59 @@
+# Profile for Hitachi devices
+
+sysobjectid: 1.3.6.1.4.1.116.*
+
+metrics:
+  - MIB: HDS9900MIB
+    table:
+      OID: 1.3.6.1.4.1.116.5.11.4.1.1.6
+      name: raidExMibDKCHWTable
+    symbols:
+      - OID: 1.3.6.1.4.1.116.5.11.4.1.1.6.1.2
+        name: Hitachi DKC Processor
+      - OID: 1.3.6.1.4.1.116.5.11.4.1.1.6.1.3
+        name: Hitachi DKC Internal Bus
+      - OID: 1.3.6.1.4.1.116.5.11.4.1.1.6.1.4
+        name: Hitachi DKC Cache
+      - OID: 1.3.6.1.4.1.116.5.11.4.1.1.6.1.5
+        name: Hitachi DKC Shared Memory
+      - OID: 1.3.6.1.4.1.116.5.11.4.1.1.6.1.6
+        name: Hitachi DKC Power Supply
+      - OID: 1.3.6.1.4.1.116.5.11.4.1.1.6.1.7
+        name: Hitachi DKC Battery
+      - OID: 1.3.6.1.4.1.116.5.11.4.1.1.6.1.8
+        name: Hitachi DKC Fan
+      - OID: 1.3.6.1.4.1.116.5.11.4.1.1.6.1.9
+        name: Hitachi DKC Environment
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.116.5.11.4.1.1.6.1.1
+          name: dkcRaidListIndexSerialNumber
+          table: raidExMibDKCHWTable
+        tag: DKC serial number
+
+  - MIB: HDS9900MIB
+    table:
+      OID: 1.3.6.1.4.1.116.5.11.4.1.1.7
+      name: raidExMibDKUHWTable
+    symbols:
+      - OID: 1.3.6.1.4.1.116.5.11.4.1.1.7.1.2
+        name: Hitachi DKU Power Supply
+      - OID: 1.3.6.1.4.1.116.5.11.4.1.1.7.1.3
+        name: Hitachi DKU Fan
+      - OID: 1.3.6.1.4.1.116.5.11.4.1.1.7.1.4
+        name: Hitachi DKU Environment
+      - OID: 1.3.6.1.4.1.116.5.11.4.1.1.7.1.5
+        name: Hitachi DKU Drive
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.116.5.11.4.1.1.7.1.1
+          name: dkuRaidListIndexSerialNumber
+          table: raidExMibDKUHWTable
+        tag: DKU serial number
+
+# The status of each component is a single digit which shows the following:
+# 1: Normal.
+# 2: Acute failure detected.
+# 3: Serious failure detected.
+# 4: Moderate failure detected.
+# 5: Service failure detected.

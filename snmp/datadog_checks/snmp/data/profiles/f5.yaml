@@ -1,0 +1,77 @@
+# Generic Profile for F5 devices, Host and Guest F5 does not Hardware stats
+extends:
+  - _base.yaml
+  - _generic-router-if.yaml
+  - _generic-host-resources.yaml
+  - f5-guest.yaml
+
+sysobjectid: 1.3.6.1.4.1.3375.2.1.3.4.*
+
+metrics:
+    # Device Hardware stats
+
+    # Fan stats
+    # sysChassisFanStatus: bad(0), good(1), notpresent(2)
+  - MIB: F5-BIGIP-SYSTEM-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.1.3.2.1.2
+      name: sysChassisFanTable
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.1.3.2.1.2.1.3
+        name: sysChassisFanSpeed
+      - OID: 1.3.6.1.4.1.3375.2.1.3.2.1.2.1.2
+        name: sysChassisFanStatus
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.3375.2.1.3.2.1.2.1.1
+          name: sysChassisFanIndex
+          table: sysChassisFanTable
+        tag: sysChassisFanIndex
+
+    # Chassis Temperature stats
+  - MIB: F5-BIGIP-SYSTEM-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.1.3.2.3.2
+      name: sysChassisTempTable
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.1.3.2.3.2.1.2
+        name: sysChassisTempTemperature
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.3375.2.1.3.2.3.2.1.1
+          name: sysChassisTempIndex
+          table: sysChassisTempTemperature
+        tag: sysChassisTempIndex
+
+    # CPU Sensor stats
+  - MIB: F5-BIGIP-SYSTEM-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.1.3.6.2
+      name: sysCpuSensorTable
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.1.3.6.2.1.2
+        name: sysCpuSensorTemperature
+      - OID: 1.3.6.1.4.1.3375.2.1.3.6.2.1.3
+        name: sysCpuSensorFanSpeed
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.3375.2.1.3.6.2.1.4
+          name: sysCpuSensorName
+          table: sysCpuSensorTable
+        tag: sysCpuSensorName
+
+    # Chassus PSU Stats
+    # sysChassisPowerSupplyStatus: bad(0), good(1), notpresent(2)
+  - MIB: F5-BIGIP-SYSTEM-MIB
+    table:
+      OID: 1.3.6.1.4.1.3375.2.1.3.2.2.2
+      name: sysChassisPowerSupplyTable
+    symbols:
+      - OID: 1.3.6.1.4.1.3375.2.1.3.2.2.2.1.2
+        name: sysChassisPowerSupplyStatus
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.3375.2.1.3.2.2.2.1.1
+          name: sysChassisPowerSupplyIndex
+          table: sysChassisPowerSupplyTable
+        tag: sysChassisPowerSupplyIndex
