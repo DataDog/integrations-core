@@ -121,7 +121,7 @@ datadog-supervisord==1.6.0
 datadog-system-core==1.7.0
 datadog-system-swap==1.8.0
 datadog-tcp-check==2.4.0
-datadog-teamcity==1.7.1
+datadog-teamcity==1.8.0
 datadog-tenable==1.1.0
 datadog-tls==1.4.1
 datadog-tokumx==2.2.1
