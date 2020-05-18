@@ -3,7 +3,7 @@
 ## 1.10.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
-* [Added] Add btrfs config spec. See [#6561](https://github.com/DataDog/integrations-core/pull/6561).
+* [Added] Add config spec. See [#6561](https://github.com/DataDog/integrations-core/pull/6561).
 * [Fixed] Use agent 6 signature. See [#6441](https://github.com/DataDog/integrations-core/pull/6441).
 
 ## 1.9.0 / 2020-04-04
