@@ -2,6 +2,7 @@
 
 ## 1.17.0 / 2020-05-17
 
+* [Added] Install `pyodbc` for MacOS and fix local test setup. See [#6633](https://github.com/DataDog/integrations-core/pull/6633).
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
 * [Fixed] Use agent 6 signature. See [#6447](https://github.com/DataDog/integrations-core/pull/6447).
 
