@@ -113,7 +113,7 @@ class TrelloClient:
                         # Team's Inbox
                         # NOTE: This is "In Progress" but not technically started, yet
                         counts[team]['In Progress'] += 1
-                    elif id_list == self.progress_columns:
-                        counts[team][id_list] += 1
+                    elif id_list in self.progress_columns:
+                        counts[team][self.progress_columns[id_list]] += 1
 
         return counts
