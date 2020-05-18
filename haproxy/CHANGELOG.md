@@ -1,5 +1,9 @@
 # CHANGELOG - haproxy
 
+## 2.9.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 2.8.1 / 2020-05-05
 
 * [Fixed] Handle empty response from show table. See [#6579](https://github.com/DataDog/integrations-core/pull/6579).

@@ -1,5 +1,9 @@
 # CHANGELOG - Vault
 
+## 2.5.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 2.4.0 / 2020-05-04
 
 * [Added] Add Raft storage backend metrics. See [#6492](https://github.com/DataDog/integrations-core/pull/6492). Thanks [fabienrenaud](https://github.com/fabienrenaud).

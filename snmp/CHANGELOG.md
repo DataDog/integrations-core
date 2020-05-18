@@ -1,5 +1,11 @@
 # CHANGELOG - snmp
 
+## 3.2.0 / 2020-05-17
+
+* [Added] Add diskStatus tag to Isilon profile. See [#6660](https://github.com/DataDog/integrations-core/pull/6660).
+* [Added] Add BPG metrics to more profiles. See [#6655](https://github.com/DataDog/integrations-core/pull/6655).
+* [Added] Add voice metrics and profiles. See [#6629](https://github.com/DataDog/integrations-core/pull/6629).
+
 ## 3.1.0 / 2020-05-14
 
 * [Added] Add `chatsworth` legacy metrics. See [#6624](https://github.com/DataDog/integrations-core/pull/6624).
