@@ -16,6 +16,7 @@
   "support": "core",
   "supported_os": [
     "linux",
+    "mac_os",
     "windows"
   ],
   "type": "check",
