@@ -3,7 +3,7 @@
 ## 1.6.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
-* [Added] Add dns_check config spec. See [#6560](https://github.com/DataDog/integrations-core/pull/6560).
+* [Added] Add config spec. See [#6560](https://github.com/DataDog/integrations-core/pull/6560).
 
 ## 1.5.2 / 2020-04-24
 
