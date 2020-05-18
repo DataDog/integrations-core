@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.7.1 / 2020-05-18
+
+* [Fixed] Sync JMX template example config. See [#6676](https://github.com/DataDog/integrations-core/pull/6676).
+
 ## 3.7.0 / 2020-05-17
 
 * [Added] Add send_monotonic_with_gauge config option and refactor test. See [#6618](https://github.com/DataDog/integrations-core/pull/6618).
