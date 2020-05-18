@@ -132,7 +132,7 @@ class CheckCommandOutput(LazyFunction):
 
             time.sleep(self.wait)
         else:
-            patterns = '\t- '.join([''] + self.patterns)
+            patterns = '\t- '.join([''] + [str(p) for p in self.patterns])
             raise RetryError(
                 u'Command: {}\nTarget patterns:\n{}\nExit code: {}\nCaptured Output: {}'.format(self.command, patterns, exit_code, log_output)
             )
