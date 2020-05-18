@@ -1,5 +1,9 @@
 # CHANGELOG - active_directory
 
+## 1.8.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 1.7.0 / 2020-04-04
 
 * [Added] Active Directory to not use agentConfig. See [#5938](https://github.com/DataDog/integrations-core/pull/5938).

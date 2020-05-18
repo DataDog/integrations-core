@@ -18,16 +18,19 @@
   "categories": [
     "processing",
     "messaging",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "confluent-platform",
   "assets": {
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "Confluent Platform Overview": "assets/dashboards/overview.json"
+    },
     "monitors": {},
     "saved_views": {},
     "service_checks": "assets/service_checks.json"

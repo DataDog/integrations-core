@@ -1,0 +1,667 @@
+# Apache Ignite
+# Default metrics collected by this check. You should not have to modify this.
+
+jmx_metrics:
+  - include:
+      bean_regex:
+        - org\.apache:clsLdr=(.*),group="Thread Pools",name=(.*)
+      exclude_tags:
+        - name
+        - clsLdr
+        - group
+      tags:
+        executor: $2
+      attribute:
+        ActiveCount:
+          alias: ignite.threads.active
+          metric_type: gauge
+        PoolSize:
+          alias: ignite.threads.pool_size
+          metric_type: gauge
+        LargestPoolSize:
+          alias: ignite.threads.largest_size
+          metric_type: gauge
+        TaskCount:
+          alias: ignite.threads.tasks
+          metric_type: monotonic_count
+        CompletedTaskCount:
+          alias: ignite.threads.completed_tasks
+          metric_type: monotonic_count
+        QueueSize:
+          alias: ignite.threads.queue_size
+          metric_type: gauge
+        CorePoolSize:
+          alias: ignite.threads.core_pool_size
+          metric_type: gauge
+        MaximumPoolSize:
+          alias: ignite.threads.maximum_pool_size
+          metric_type: gauge
+  - include:
+      bean_regex:
+        - org\.apache:clsLdr=(.*),group=DataRegionMetrics,name=(.*)
+      exclude_tags:
+        - name
+        - clsLdr
+        - group
+      tags:
+        region: $2
+      attribute:
+        AllocationRate:
+          alias: ignite.allocation_rate
+          metric_type: gauge
+        InitialSize:
+          alias: ignite.initial_memory_size
+          metric_type: gauge
+        MaxSize:
+          alias: ignite.max_memory_size
+          metric_type: gauge
+        OffHeapSize:
+          alias: ignite.offheap_size
+          metric_type: gauge
+        TotalAllocatedPages:
+          alias: ignite.total_allocated_pages
+          metric_type: monotonic_count
+        EvictionRate:
+          alias: ignite.eviction_rate
+          metric_type: gauge
+        LargeEntriesPagesPercentage:
+          alias: ignite.large_entries_pages_percentage
+          metric_type: gauge
+        PagesFillFactor:
+          alias: ignite.pages_fill_factor
+          metric_type: gauge
+        DirtyPages:
+          alias: ignite.dirty_pages
+          metric_type: gauge
+        PagesReplaceRate:
+          alias: ignite.pages_replace_rate
+          metric_type: gauge
+        PhysicalMemoryPages:
+          alias: ignite.physical_memory_pages
+          metric_type: gauge
+        PagesReplaceAge:
+          alias: ignite.pages_replace_age
+          metric_type: gauge
+        PagesRead:
+          alias: ignite.pages_read
+          metric_type: monotonic_count
+        PagesWritten:
+          alias: ignite.pages_written
+          metric_type: monotonic_count
+        PagesReplaced:
+          alias: ignite.pages_replaced
+          metric_type: monotonic_count
+        OffheapUsedSize:
+          alias: ignite.offheap_used_size
+          metric_type: gauge
+        TotalAllocatedSize:
+          alias: ignite.total_allocated_size
+          metric_type: monotonic_count
+        UsedCheckpointBufferPages:
+          alias: ignite.used_checkpoint_buffer_pages
+          metric_type: gauge
+        UsedCheckpointBufferSize:
+          alias: ignite.used_checkpoint_buffer_size
+          metric_type: gauge
+        CheckpointBufferSize:
+          alias: ignite.check_point_buffer_size
+          metric_type: gauge
+  - include:
+      bean_regex:
+        - org\.apache:clsLdr=(.*),group=Kernal,name=ClusterMetricsMXBeanImpl
+      exclude_tags:
+        - name
+        - clsLdr
+        - group
+      attribute:
+        TotalStartedThreadCount:
+          alias: ignite.total_started_threads
+          metric_type: monotonic_count
+        HeapMemoryInitialized:
+          alias: ignite.heap_memory_initialized
+          metric_type: gauge
+        HeapMemoryMaximum:
+          alias: ignite.heap_memory_maximum
+          metric_type: gauge
+        ReceivedBytesCount:
+          alias: ignite.received_bytes
+          metric_type: monotonic_count
+        OutboundMessagesQueueSize:
+          alias: ignite.oubound_messages_queue_size
+          metric_type: gauge
+        SentMessagesCount:
+          alias: ignite.sent_messages
+          metric_type: monotonic_count
+        SentBytesCount:
+          alias: ignite.sent_bytes
+          metric_type: monotonic_count
+        ReceivedMessagesCount:
+          alias: ignite.received_messages
+          metric_type: monotonic_count
+        TotalCpus:
+          alias: ignite.total_cpus
+          metric_type: gauge
+        NonHeapMemoryInitialized:
+          alias: ignite.non_heap_memory_initialized
+          metric_type: gauge
+        NonHeapMemoryUsed:
+          alias: ignite.non_heap_memory_used
+          metric_type: gauge
+        NonHeapMemoryCommitted:
+          alias: ignite.non_heap_memory_committed
+          metric_type: gauge
+        NonHeapMemoryMaximum:
+          alias: ignite.non_heap_memory_maximum
+          metric_type: gauge
+        CurrentGcCpuLoad:
+          alias: ignite.current_gc_load
+          metric_type: gauge
+        HeapMemoryUsed:
+          alias: ignite.heap_memory_used
+          metric_type: gauge
+        HeapMemoryCommitted:
+          alias: ignite.heap_memory_committed
+          metric_type: gauge
+        CurrentCpuLoad:
+          alias: ignite.current_cpu_load
+          metric_type: gauge
+        AverageCpuLoad:
+          alias: ignite.average_cpu_load
+          metric_type: gauge
+        TotalNodes:
+          alias: ignite.total_nodes
+          metric_type: gauge
+        MaximumActiveJobs:
+          alias: ignite.jobs.active.maximum
+          metric_type: gauge
+        CurrentActiveJobs:
+          alias: ignite.jobs.active.current
+          metric_type: gauge
+        AverageActiveJobs:
+          alias: ignite.jobs.active.average
+          metric_type: gauge
+        MaximumWaitingJobs:
+          alias: ignite.jobs.waiting.maximum
+          metric_type: gauge
+        CurrentWaitingJobs:
+          alias: ignite.jobs.waiting.current
+          metric_type: gauge
+        AverageWaitingJobs:
+          alias: ignite.jobs.waiting.average
+          metric_type: gauge
+        MaximumRejectedJobs:
+          alias: ignite.jobs.rejected.maximum
+          metric_type: gauge
+        CurrentRejectedJobs:
+          alias: ignite.jobs.rejected.current
+          metric_type: gauge
+        AverageRejectedJobs:
+          alias: ignite.jobs.rejected.average
+          metric_type: gauge
+        TotalRejectedJobs:
+          alias: ignite.jobs.rejected.total
+          metric_type: monotonic_count
+        MaximumCancelledJobs:
+          alias: ignite.jobs.cancelled.maximum
+          metric_type: gauge
+        CurrentCancelledJobs:
+          alias: ignite.jobs.cancelled.current
+          metric_type: gauge
+        AverageCancelledJobs:
+          alias: ignite.jobs.cancelled.average
+          metric_type: gauge
+        TotalCancelledJobs:
+          alias: ignite.jobs.cancelled.total
+          metric_type: monotonic_count
+        TotalExecutedJobs:
+          alias: ignite.jobs.executed.total
+          metric_type: monotonic_count
+        TotalJobsExecutionTime:
+          alias: ignite.jobs.execution_time.total
+          metric_type: monotonic_count
+        MaximumJobWaitTime:
+          alias: ignite.jobs.wait_time.maximum
+          metric_type: gauge
+        CurrentJobWaitTime:
+          alias: ignite.jobs.wait_time.current
+          metric_type: gauge
+        AverageJobWaitTime:
+          alias: ignite.jobs.wait_time.average
+          metric_type: gauge
+        MaximumJobExecuteTime:
+          alias: ignite.jobs.execute_time.maximum
+          metric_type: gauge
+        CurrentJobExecuteTime:
+          alias: ignite.jobs.execute_time.current
+          metric_type: gauge
+        AverageJobExecuteTime:
+          alias: ignite.jobs.execute_time.average
+          metric_type: gauge
+        TotalExecutedTasks:
+          alias: ignite.total_executed_tasks
+          metric_type: monotonic_count
+        TotalBusyTime:
+          alias: ignite.total_busy_time
+          metric_type: gauge
+        TotalIdleTime:
+          alias: ignite.total_idle_time
+          metric_type: gauge
+        CurrentIdleTime:
+          alias: ignite.current_idle_time
+          metric_type: gauge
+        BusyTimePercentage:
+          alias: ignite.busy_time_percentage
+          metric_type: gauge
+        IdleTimePercentage:
+          alias: ignite.idle_time_percentage
+          metric_type: gauge
+        HeapMemoryTotal:
+          alias: ignite.heap_memory_total
+          metric_type: gauge
+        NonHeapMemoryTotal:
+          alias: ignite.non_heap_memory_total
+          metric_type: gauge
+        CurrentThreadCount:
+          alias: ignite.current_thread_count
+          metric_type: gauge
+        MaximumThreadCount:
+          alias: ignite.maximum_thread_count
+          metric_type: gauge
+        CurrentDaemonThreadCount:
+          alias: ignite.current_daemon_thread_count
+          metric_type: gauge
+        TotalBaselineNodes:
+          alias: ignite.total_baseline_nodes
+          metric_type: gauge
+        ActiveBaselineNodes:
+          alias: ignite.active_baseline_nodes
+          metric_type: gauge
+        TotalServerNodes:
+          alias: ignite.total_server_nodes
+          metric_type: gauge
+        TotalClientNodes:
+          alias: ignite.total_client_nodes
+          metric_type: gauge
+  - include:
+      bean_regex:
+        - org\.apache:clsLdr=(.*),group=SPIs,name=AlwaysFailoverSpi
+      exclude_tags:
+        - name
+        - clsLdr
+        - group
+      attribute:
+        MaximumFailoverAttempts:
+          alias: ignite.jobs.maximum_failover
+          metric_type: gauge
+        TotalFailoverJobsCount:
+          alias: ignite.jobs.total_failover
+          metric_type: monotonic_count
+  - include:
+      bean_regex:
+        - org\.apache:clsLdr=(.*),group=SPIs,name=TcpDiscoverySpi
+      exclude_tags:
+        - name
+        - clsLdr
+        - group
+      attribute:
+        MessageWorkerQueueSize:
+          alias: ignite.discovery.message_worker_queue_size
+          metric_type: gauge
+        NodesJoined:
+          alias: ignite.discovery.nodes_joined
+          metric_type: monotonic_count
+        NodesLeft:
+          alias: ignite.discovery.nodes_left
+          metric_type: monotonic_count
+        NodesFailed:
+          alias: ignite.discovery.nodes_failed
+          metric_type: monotonic_count
+        PendingMessagesRegistered:
+          alias: ignite.discovery.pending_messages_registered
+          metric_type: gauge
+        PendingMessagesDiscarded:
+          alias: ignite.discovery.pending_messages_discarded
+          metric_type: gauge
+        AvgMessageProcessingTime:
+          alias: ignite.discovery.average_message_processing_time
+          metric_type: gauge
+        MaxMessageProcessingTime:
+          alias: ignite.discovery.max_message_processing_time
+          metric_type: gauge
+        TotalReceivedMessages:
+          alias: ignite.discovery.total_received_messages
+          metric_type: monotonic_count
+        TotalProcessedMessages:
+          alias: ignite.discovery.total_processed_messages
+          metric_type: monotonic_count
+  - include:
+      bean_regex:
+        - org\.apache:clsLdr=(.*),group=TransactionMetrics,name=TransactionMetricsMxBeanImpl
+      exclude_tags:
+        - name
+        - clsLdr
+        - group
+      attribute:
+        TransactionsCommittedNumber:
+          alias: ignite.transaction.committed
+          metric_type: monotonic_count
+        TransactionsRolledBackNumber:
+          alias: ignite.transaction.rolledback
+          metric_type: monotonic_count
+        TransactionsHoldingLockNumber:
+          alias: ignite.transaction.holding_lock
+          metric_type: gauge
+        LockedKeysNumber:
+          alias: ignite.transaction.locked_keys
+          metric_type: gauge
+        OwnerTransactionsNumber:
+          alias: ignite.transaction.owner
+          metric_type: gauge
+  - include:
+      bean_regex:
+        - org\.apache:clsLdr=(.*),group="Persistent Store",name=DataStorageMetrics
+      exclude_tags:
+        - name
+        - clsLdr
+        - group
+      attribute:
+        WalArchiveSegments:
+          alias: ignite.wal.archive_segments
+          metric_type: gauge
+        WalLoggingRate:
+          alias: ignite.wal.logging_rate
+          metric_type: gauge
+        WalWritingRate:
+          alias: ignite.wal.writing_rate
+          metric_type: gauge
+        WalBuffPollSpinsRate:
+          alias: ignite.wal.buffer_poll_spin
+          metric_type: gauge
+        WalFsyncTimeAverage:
+          alias: ignite.wal.fsync_average
+          metric_type: gauge
+        LastCheckpointLockWaitDuration:
+          alias: ignite.checkpoint.last_lock_wait_duration
+          metric_type: gauge
+        LastCheckpointMarkDuration:
+          alias: ignite.checkpoint.last_mark_duration
+          metric_type: gauge
+        LastCheckpointPagesWriteDuration:
+          alias: ignite.checkpoint.last_pages_write_duration
+          metric_type: gauge
+        LastCheckpointFsyncDuration:
+          alias: ignite.checkpoint.last_fsync_duration
+          metric_type: gauge
+        LastCheckpointTotalPagesNumber:
+          alias: ignite.checkpoint.last_total_pages
+          metric_type: gauge
+        LastCheckpointDataPagesNumber:
+          alias: ignite.checkpoint.last_data_pages
+          metric_type: gauge
+        LastCheckpointCopiedOnWritePagesNumber:
+          alias: ignite.checkpoint.last_copied_on_write_pages
+          metric_type: gauge
+        LastCheckpointDuration:
+          alias: ignite.checkpoint.last_duration
+          metric_type: gauge
+        WalTotalSize:
+          alias: ignite.wal.total_size
+          metric_type: gauge
+        WalLastRollOverTime:
+          alias: ignite.wal.last_rollover
+          metric_type: gauge
+        CheckpointTotalTime:
+          alias: ignite.checkpoint.total_time
+          metric_type: gauge
+  - include:
+      bean_regex:
+        - org\.apache:clsLdr=(.*),group="Cache groups",name=(.*)
+      exclude_tags:
+        - name
+        - clsLdr
+        - group
+      tags:
+        cache: $2
+      attribute:
+        ClusterMovingPartitionsCount:
+          alias: ignite.cache.cluster_moving_partitions
+          metric_type: gauge
+        MinimumNumberOfPartitionCopies:
+          alias: ignite.cache.minimum_partition_copies
+          metric_type: gauge
+        MaximumNumberOfPartitionCopies:
+          alias: ignite.cache.maximum_partition_copies
+          metric_type: gauge
+        LocalNodeOwningPartitionsCount:
+          alias: ignite.cache.local_owning_partitions
+          metric_type: gauge
+        LocalNodeMovingPartitionsCount:
+          alias: ignite.cache.local_moving_partitions
+          metric_type: gauge
+        LocalNodeRentingPartitionsCount:
+          alias: ignite.cache.local_renting_partitions
+          metric_type: gauge
+        LocalNodeRentingEntriesCount:
+          alias: ignite.cache.local_renting_entries
+          metric_type: gauge
+        ClusterOwningPartitionsCount:
+          alias: ignite.cache.cluster_owning_partitions
+          metric_type: gauge
+        Backups:
+          alias: ignite.cache.backups
+          metric_type: gauge
+        Partitions:
+          alias: ignite.cache.partitions
+          metric_type: gauge
+  - include:
+      bean_regex:
+        - org\.apache:clsLdr=(.*),group=default,name="org.apache.ignite.internal.processors.cache.CacheClusterMetricsMXBeanImpl"
+      exclude_tags:
+        - name
+        - clsLdr
+        - group
+      attribute:
+        CacheSize:
+          alias: ignite.cache.size
+          metric_type: gauge
+        CacheGets:
+          alias: ignite.cache.gets
+          metric_type: monotonic_count
+        CacheRemovals:
+          alias: ignite.cache.removals
+          metric_type: monotonic_count
+        CachePuts:
+          alias: ignite.cache.puts
+          metric_type: monotonic_count
+        CacheHits:
+          alias: ignite.cache.hits
+          metric_type: monotonic_count
+        CacheMisses:
+          alias: ignite.cache.misses
+          metric_type: monotonic_count
+        OffHeapAllocatedSize:
+          alias: ignite.cache.offheap_allocated_size
+          metric_type: gauge
+        CacheHitPercentage:
+          alias: ignite.cache.hit_percentage
+          metric_type: gauge
+        CacheMissPercentage:
+          alias: ignite.cache.miss_percentage
+          metric_type: gauge
+        CacheEvictions:
+          alias: ignite.cache.evictions
+          metric_type: monotonic_count
+        AverageGetTime:
+          alias: ignite.cache.average_get_time
+          metric_type: gauge
+        AveragePutTime:
+          alias: ignite.cache.average_put_time
+          metric_type: gauge
+        AverageRemoveTime:
+          alias: ignite.cache.average_remove_time
+          metric_type: gauge
+        AverageTxCommitTime:
+          alias: ignite.cache.average_commit_time
+          metric_type: gauge
+        AverageTxRollbackTime:
+          alias: ignite.cache.average_rollback_time
+          metric_type: gauge
+        CacheTxCommits:
+          alias: ignite.cache.commits
+          metric_type: monotonic_count
+        CacheTxRollbacks:
+          alias: ignite.cache.rollbacks
+          metric_type: monotonic_count
+        OffHeapGets:
+          alias: ignite.cache.offheap_gets
+          metric_type: monotonic_count
+        OffHeapPuts:
+          alias: ignite.cache.offheap_puts
+          metric_type: monotonic_count
+        OffHeapRemovals:
+          alias: ignite.cache.offheap_removals
+          metric_type: monotonic_count
+        OffHeapEvictions:
+          alias: ignite.cache.offheap_evictions
+          metric_type: monotonic_count
+        OffHeapHits:
+          alias: ignite.cache.offheap_hits
+          metric_type: monotonic_count
+        OffHeapHitPercentage:
+          alias: ignite.cache.offheap_hit_percentage
+          metric_type: gauge
+        OffHeapMisses:
+          alias: ignite.cache.offheap_misses
+          metric_type: monotonic_count
+        OffHeapMissPercentage:
+          alias: ignite.cache.offheap_miss_percentage
+          metric_type: gauge
+        HeapEntriesCount:
+          alias: ignite.cache.heap_entries
+          metric_type: gauge
+        OffHeapEntriesCount:
+          alias: ignite.cache.offheap_entries
+          metric_type: gauge
+        OffHeapPrimaryEntriesCount:
+          alias: ignite.cache.offheap_primary_entries
+          metric_type: gauge
+        OffHeapBackupEntriesCount:
+          alias: ignite.cache.offheap_backup_entries
+          metric_type: gauge
+        DhtEvictQueueCurrentSize:
+          alias: ignite.cache.evict_queue_size
+          metric_type: gauge
+        TxThreadMapSize:
+          alias: ignite.cache.thread_map_size
+          metric_type: gauge
+        TxXidMapSize:
+          alias: ignite.cache.xid_map_size
+          metric_type: gauge
+        TxCommitQueueSize:
+          alias: ignite.cache.commit_queue_size
+          metric_type: gauge
+        TxPrepareQueueSize:
+          alias: ignite.cache.prepare_queue_size
+          metric_type: gauge
+        TxStartVersionCountsSize:
+          alias: ignite.cache.start_version_counts_size
+          metric_type: gauge
+        TxCommittedVersionsSize:
+          alias: ignite.cache.committed_versions_size
+          metric_type: gauge
+        TxRolledbackVersionsSize:
+          alias: ignite.cache.rolledback_versions_size
+          metric_type: gauge
+        TxDhtThreadMapSize:
+          alias: ignite.cache.dht_thread_map_size
+          metric_type: gauge
+        TxDhtXidMapSize:
+          alias: ignite.cache.dht_xid_map_size
+          metric_type: gauge
+        TxDhtCommitQueueSize:
+          alias: ignite.cache.dht_commit_queue_size
+          metric_type: gauge
+        TxDhtPrepareQueueSize:
+          alias: ignite.cache.dht_prepare_queue_size
+          metric_type: gauge
+        TxDhtStartVersionCountsSize:
+          alias: ignite.cache.dht_start_version_counts_size
+          metric_type: gauge
+        TxDhtCommittedVersionsSize:
+          alias: ignite.cache.dht_committed_versions_size
+          metric_type: gauge
+        TxDhtRolledbackVersionsSize:
+          alias: ignite.cache.dht_rolledback_versions_size
+          metric_type: gauge
+        WriteBehindStoreBatchSize:
+          alias: ignite.cache.write_behind_store_batch_size
+          metric_type: gauge
+        WriteBehindTotalCriticalOverflowCount:
+          alias: ignite.cache.write_behind_overflow_total
+          metric_type: monotonic_count
+        WriteBehindCriticalOverflowCount:
+          alias: ignite.cache.write_behind_overflow
+          metric_type: gauge
+        WriteBehindErrorRetryCount:
+          alias: ignite.cache.write_behind_retries
+          metric_type: gauge
+        WriteBehindBufferSize:
+          alias: ignite.cache.write_behind_buffer_size
+          metric_type: gauge
+        EntryProcessorPuts:
+          alias: ignite.cache.entry_processor.puts
+          metric_type: monotonic_count
+        EntryProcessorRemovals:
+          alias: ignite.cache.entry_processor.removals
+          metric_type: monotonic_count
+        EntryProcessorReadOnlyInvocations:
+          alias: ignite.cache.entry_processor.read_only_invocations
+          metric_type: monotonic_count
+        EntryProcessorInvocations:
+          alias: ignite.cache.entry_processor.invocations
+          metric_type: monotonic_count
+        EntryProcessorHits:
+          alias: ignite.cache.entry_processor.hits
+          metric_type: monotonic_count
+        EntryProcessorHitPercentage:
+          alias: ignite.cache.entry_processor.hit_percentage
+          metric_type: gauge
+        EntryProcessorMisses:
+          alias: ignite.cache.entry_processor.misses
+          metric_type: monotonic_count
+        EntryProcessorMissPercentage:
+          alias: ignite.cache.entry_processor.miss_percentage
+          metric_type: gauge
+        EntryProcessorAverageInvocationTime:
+          alias: ignite.cache.entry_processor.average_invocation_time
+          metric_type: gauge
+        EntryProcessorMinInvocationTime:
+          alias: ignite.cache.entry_processor.minimum_invocation_time
+          metric_type: gauge
+        EntryProcessorMaxInvocationTime:
+          alias: ignite.cache.entry_processor.maximum_invocation_time
+          metric_type: gauge
+        TotalPartitionsCount:
+          alias: ignite.cache.total_partitions
+          metric_type: gauge
+        RebalancingPartitionsCount:
+          alias: ignite.cache.rebalancing_partitions
+          metric_type: gauge
+        RebalancedKeys:
+          alias: ignite.cache.rebalanced_keys
+          metric_type: gauge
+        EstimatedRebalancingKeys:
+          alias: ignite.cache.estimated_rebalancing_keys
+          metric_type: gauge
+        KeysToRebalanceLeft:
+          alias: ignite.cache.keys_to_rebalance
+          metric_type: gauge
+        RebalancingKeysRate:
+          alias: ignite.cache.rebalancing_keys_rate
+          metric_type: gauge
+        RebalancingBytesRate:
+          alias: ignite.cache.rebalancing_bytes_rate
+          metric_type: gauge
+        RebalanceClearingPartitionsLeft:
+          alias: ignite.cache.rebalance_clearing_partitions
+          metric_type: gauge

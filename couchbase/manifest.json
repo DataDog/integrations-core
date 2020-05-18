@@ -1,7 +1,6 @@
 {
   "categories": [
     "data store",
-    "log collection",
     "autodiscovery"
   ],
   "creates_events": false,

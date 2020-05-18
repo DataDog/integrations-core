@@ -34,19 +34,29 @@ def get_current_branch():
         return run_command(command, capture='out').stdout.strip()
 
 
-def files_changed():
+def files_changed(include_uncommitted=True):
     """
     Return the list of file changed in the current branch compared to `master`
     """
     with chdir(get_root()):
-        result = run_command('git diff --name-status master...', capture='out')
-    status_lines = result.stdout.splitlines()
+        # Use `--name-status` to include moved files
+        name_status_result = run_command('git diff --name-status master...', capture='out')
+
+    name_status_lines = name_status_result.stdout.splitlines()
 
     changed_files = []
-    for l in status_lines:
+    for l in name_status_lines:
         files = l.split('\t')[1:]  # skip first element representing the type of change
         changed_files.extend(files)
-    return sorted([f for f in changed_files if f])
+
+    if include_uncommitted:
+        with chdir(get_root()):
+            # Use `--name-only` to include uncommitted files
+            name_only_result = run_command('git diff --name-only master', capture='out')
+        name_only_lines = name_only_result.stdout.splitlines()
+        changed_files.extend(name_only_lines)
+
+    return sorted([f for f in set(changed_files) if f])
 
 
 def get_commits_since(check_name, target_tag=None):
@@ -75,9 +85,15 @@ def git_show_file(path, ref):
         return run_command(command, capture=True).stdout
 
 
-def git_commit(targets, message, force=False, sign=False):
+def git_commit(targets, message, force=False, sign=False, update=False):
     """
     Commit the changes for the given targets.
+
+    `targets` - be files or directiries
+    `message` - the commit message
+    `force` - (optional) force the commit
+    `sign` - sign with `-S` option
+    `update` - only commit updated files already tracked by git, via `-u`
     """
     root = get_root()
     target_paths = []
@@ -85,7 +101,10 @@ def git_commit(targets, message, force=False, sign=False):
         target_paths.append(os.path.join(root, t))
 
     with chdir(root):
-        result = run_command(f"git add{' -f' if force else ''} {' '.join(target_paths)}")
+        if update:
+            result = run_command(f"git add{' -f' if force else ''} -u {' '.join(target_paths)}")
+        else:
+            result = run_command(f"git add{' -f' if force else ''} {' '.join(target_paths)}")
         if result.code != 0:
             return result
 
@@ -129,11 +148,18 @@ def get_latest_tag(pattern=None, tag_prefix='v'):
     Filters on pattern first, otherwise based off all tags
     Removes prefixed `v` if applicable
     """
-    all_tags = sorted(
-        (parse_version_info(t.replace(tag_prefix, '', 1)), t) for t in git_tag_list(rf'^({tag_prefix})?\d+\.\d+\.\d+$')
-    )
+    if not pattern:
+        pattern = rf'^({tag_prefix})?\d+\.\d+\.\d+.*'
+    all_tags = sorted((parse_version_info(t.replace(tag_prefix, '', 1)), t) for t in git_tag_list(pattern))
     # reverse so we have descendant order
     return list(reversed(all_tags))[0][1]
+
+
+def get_latest_commit_hash(root=None):
+    with chdir(root or get_root()):
+        result = run_command('git rev-parse HEAD', capture=True, check=True)
+
+    return result.stdout.strip()
 
 
 def tracked_by_git(filename):
@@ -153,3 +179,13 @@ def ignored_by_git(filename):
     with chdir(get_root()):
         result = run_command(f'git check-ignore -q {filename}', capture=True)
         return result.code == 0
+
+
+def get_git_user():
+    result = run_command('git config --get user.name', capture=True, check=True)
+    return result.stdout.strip()
+
+
+def get_git_email():
+    result = run_command('git config --get user.email', capture=True, check=True)
+    return result.stdout.strip()

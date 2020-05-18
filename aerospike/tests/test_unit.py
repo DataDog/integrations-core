@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 
 import mock
@@ -9,22 +12,6 @@ from . import common
 
 pytestmark = pytest.mark.unit
 
-METRICS = [
-    'aerospike.datacenter.dc_timelag',
-    'aerospike.datacenter.dc_rec_ship_attempts',
-    'aerospike.datacenter.dc_delete_ship_attempts',
-    'aerospike.datacenter.dc_remote_ship_ok',
-    'aerospike.datacenter.dc_err_ship_client',
-    'aerospike.datacenter.dc_err_ship_server',
-    'aerospike.datacenter.dc_esmt_bytes_shipped',
-    'aerospike.datacenter.dc_esmt_ship_avg_comp_pct',
-    'aerospike.datacenter.dc_latency_avg_ship',
-    'aerospike.datacenter.dc_remote_ship_avg_sleep',
-    'aerospike.datacenter.dc_open_conn',
-    'aerospike.datacenter.dc_recs_inflight',
-    'aerospike.datacenter.dc_size',
-]
-
 
 def test_datacenter_metrics(aggregator):
     check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
@@ -34,7 +21,7 @@ def test_datacenter_metrics(aggregator):
         if command == 'dcs':
             return ['test']
         elif command.startswith("dc/"):
-            return common.DATACENTER_METRICS
+            return common.MOCK_DATACENTER_METRICS
 
         return original_get_info(command, separator)
 
@@ -46,16 +33,16 @@ def test_datacenter_metrics(aggregator):
     check.collect_latency = mock.MagicMock()
     check.collect_version = mock.MagicMock()
     check.check(common.INSTANCE)
-    for metric in METRICS:
+    for metric in common.DATACENTER_METRICS:
         aggregator.assert_metric(metric)
 
 
-def connection_uses_tls():
+def test_connection_uses_tls():
     instance = copy.deepcopy(common.INSTANCE)
     tls_config = {'cafile': 'my-ca-file', 'certfile': 'my-certfile', 'keyfile': 'my-keyfile'}
     instance['tls_config'] = copy.deepcopy(tls_config)
 
-    check = AerospikeCheck('aerospike', {}, [common.INSTANCE])
+    check = AerospikeCheck('aerospike', {}, [instance])
     tls_config['enable'] = True
 
     assert check._tls_config == tls_config
@@ -84,19 +71,8 @@ def test_collect_latency_parser(aggregator):
     )
     check.collect_latency(None)
 
-    metrics = [
-        'aerospike.namespace.latency.read_ops_sec',
-        'aerospike.namespace.latency.read_over_1ms',
-        'aerospike.namespace.latency.read_over_8ms',
-        'aerospike.namespace.latency.read_over_64ms',
-        'aerospike.namespace.latency.write_ops_sec',
-        'aerospike.namespace.latency.write_over_1ms',
-        'aerospike.namespace.latency.write_over_8ms',
-        'aerospike.namespace.latency.write_over_64ms',
-    ]
-
     for ns in ['ns-1', 'ns-2_foo']:
-        for metric in metrics:
+        for metric in common.LAZY_METRICS:
             aggregator.assert_metric(metric, tags=['namespace:{}'.format(ns), 'tag:value'])
 
     aggregator.assert_all_metrics_covered()

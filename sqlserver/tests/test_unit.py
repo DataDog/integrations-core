@@ -17,6 +17,6 @@ def test_get_cursor(instance_sql2017):
     Ensure we don't leak connection info in case of a KeyError when the
     connection pool is empty or the params for `get_cursor` are invalid.
     """
-    check = SQLServer(CHECK_NAME, {}, {}, [])
+    check = SQLServer(CHECK_NAME, {}, [])
     with pytest.raises(SQLConnectionError):
         check.get_cursor(instance_sql2017, 'foo')

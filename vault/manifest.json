@@ -2,9 +2,7 @@
   "categories": [
     "security",
     "configuration & deployment",
-    "aws",
-    "google cloud",
-    "azure",
+    "log collection",
     "autodiscovery"
   ],
   "creates_events": true,
@@ -33,6 +31,11 @@
     "monitors": {},
     "dashboards": {
       "Vault - Overview": "assets/dashboards/vault_overview.json"
+    },
+    "saved_views": {
+      "error_warning_status": "assets/saved_views/error_warning_status.json",
+      "service_name_overview": "assets/saved_views/service_name_overview.json",
+      "vault_patern": "assets/saved_views/vault_patern.json"
     },
     "service_checks": "assets/service_checks.json"
   }

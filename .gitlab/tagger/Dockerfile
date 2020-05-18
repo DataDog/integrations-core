@@ -1,4 +1,4 @@
-FROM ubuntu:19.04
+FROM ubuntu:18.04
 
 # Update sources and install required packages
 RUN apt-get update \
@@ -28,6 +28,9 @@ RUN mkdir -p ~/.ssh \
 
 # Environment
 ENV DDEV_ROOT ~/datadog_checks_dev
+# Locales are required to be set to use click
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
 
 # Assumes the build context is `integrations-core/datadog_checks_dev`
 COPY . ${DDEV_ROOT}

@@ -64,3 +64,4 @@ ibm_mq.queue_manager.dist_lists,gauge,,resource,,This indicates whether distribu
 ibm_mq.queue_manager.max_msg_list,gauge,,byte,,the length of the longest message the queue manager can handle,0,ibm_mq,max message length
 ibm_mq.queue.max_channels,gauge,,connection,,the max number of channels that can be connected,0,ibm_mq,max channels
 ibm_mq.queue.oldest_message_age,gauge,,second,,the age of the oldest message on the queue in seconds,0,ibm_mq,oldest message
+ibm_mq.queue.uncommitted_msgs,gauge,,message,,the number of uncommitted messages on the queue.,0,ibm_mq,uncommitted msgs

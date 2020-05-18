@@ -130,11 +130,11 @@ Additional helpful documentation, links, and articles:
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/apache/datadog_checks/apache/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [7]: https://docs.datadoghq.com/agent/kubernetes/log/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/apache/metadata.csv
-[10]: https://docs.datadoghq.com/integrations/faq/apache-ssl-certificate-issues
+[10]: https://docs.datadoghq.com/integrations/faq/apache-ssl-certificate-issues/
 [11]: https://www.datadoghq.com/blog/deploying-datadog-with-cloudformation
 [12]: https://www.datadoghq.com/blog/monitoring-apache-web-server-performance
 [13]: https://www.datadoghq.com/blog/collect-apache-performance-metrics

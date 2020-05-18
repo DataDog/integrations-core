@@ -7,15 +7,26 @@ files:
         - template: init_config/openmetrics
     - template: instances
       options:
+        - name: istiod_endpoint
+          description: |
+            Collect mixer, galley, pilot, and citadel metrics available from the istiod deployment.
+            Only available for Istio >= v1.5.
+          value:
+            default: null
+            example: http://istiod.istio-system:8080/metrics
+            type: string
         - name: istio_mesh_endpoint
           description: |
             To enable Istio metrics you must specify the url exposing the API.
             Note for RHEL and SUSE users: due to compatibility issues, the check does not make use of
             the CPP extension to process Protocol buffer messages coming from the api. Depending
             on the metrics volume, the check may run very slowly.
+
+            When collecting mesh metrics in Istio < v1.5, use
+            istio_mesh_endpoint: http://istio-telemetry.istio-system:42422/metrics
           value:
             default: null
-            example: http://istio-telemetry.istio-system:42422/metrics
+            example: http://istio-proxy.istio-system:15090/stats/prometheus
             type: string
         - name: mixer_endpoint
           description: |

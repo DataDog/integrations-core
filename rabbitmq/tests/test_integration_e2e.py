@@ -9,6 +9,7 @@ from contextlib import closing
 import pika
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 
 from . import common, metrics
@@ -20,6 +21,7 @@ log = logging.getLogger(__file__)
 def test_rabbitm_e2e(dd_agent_check):
     aggregator = dd_agent_check(common.CONFIG)
     assert_metric_covered(aggregator)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration

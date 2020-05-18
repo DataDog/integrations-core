@@ -7,18 +7,9 @@ import mock
 import pytest
 
 from datadog_checks.aerospike import AerospikeCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 
-LAZY_METRICS = [
-    'aerospike.namespace.latency.write_over_64ms',
-    'aerospike.namespace.latency.write_over_8ms',
-    'aerospike.namespace.latency.write_over_1ms',
-    'aerospike.namespace.latency.write_ops_sec',
-    'aerospike.namespace.latency.read_over_64ms',
-    'aerospike.namespace.latency.read_over_8ms',
-    'aerospike.namespace.latency.read_over_1ms',
-    'aerospike.namespace.latency.read_ops_sec',
-    'aerospike.namespace.tps.read',
-]
+from .common import LAZY_METRICS, NAMESPACE_METRICS, SET_METRICS, STATS_METRICS
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -63,27 +54,23 @@ def test_e2e(dd_agent_check, instance):
 
     _test_check(aggregator)
 
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
 
 def _test_check(aggregator):
-    aggregator.assert_metric('aerospike.cluster_size')
-    aggregator.assert_metric('aerospike.namespace.objects')
-    aggregator.assert_metric('aerospike.namespace.hwm_breached')
-    aggregator.assert_metric('aerospike.namespace.client_write_error', 0)
-    aggregator.assert_metric('aerospike.namespace.client_write_success', 1)
-    aggregator.assert_metric('aerospike.namespace.truncate_lut', 0)
-    aggregator.assert_metric('aerospike.namespace.tombstones', 0)
-    aggregator.assert_metric('aerospike.set.tombstones', 0)
-    aggregator.assert_metric('aerospike.set.truncate_lut', 0)
-    aggregator.assert_metric('aerospike.set.memory_data_bytes', 289)
-    aggregator.assert_metric('aerospike.set.objects', 1, tags=['namespace:test', 'set:characters', 'tag:value'])
-    aggregator.assert_metric(
-        'aerospike.set.stop_writes_count', 0, tags=['namespace:test', 'set:characters', 'tag:value']
-    )
+
+    for metric in NAMESPACE_METRICS:
+        aggregator.assert_metric("aerospike.namespace.{}".format(metric))
+
+    for metric in STATS_METRICS:
+        aggregator.assert_metric("aerospike.{}".format(metric))
+
+    for metric in SET_METRICS:
+        aggregator.assert_metric("aerospike.set.{}".format(metric))
 
     for metric in LAZY_METRICS:
         aggregator.assert_metric(metric)
 
-    aggregator.assert_metric('aerospike.namespace.tps.write', at_least=0)
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_service_check('aerospike.can_connect', AerospikeCheck.OK)

@@ -5,6 +5,7 @@
 Utilities functions abstracting common operations, specially designed to be used
 by Integrations within tests.
 """
+import csv
 import inspect
 import os
 import platform
@@ -25,6 +26,10 @@ __platform = platform.system()
 ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
+
+
+def get_tox_env():
+    return os.environ['TOX_ENV_NAME']
 
 
 def get_ci_env_vars():
@@ -161,9 +166,9 @@ def download_file(url, fname):
 
 def copy_path(path, d):
     if dir_exists(path):
-        shutil.copytree(path, os.path.join(d, basepath(path)))
+        return shutil.copytree(path, os.path.join(d, basepath(path)))
     else:
-        shutil.copy(path, d)
+        return shutil.copy(path, d)
 
 
 def copy_dir_contents(path, d):
@@ -245,6 +250,13 @@ def find_check_root(depth=0):
     return root
 
 
+def get_current_check_name(depth=0):
+    # Account for this call
+    depth += 1
+
+    return os.path.basename(find_check_root(depth))
+
+
 @contextmanager
 def temp_dir():
     # TODO: On Python 3.5+ just use `with TemporaryDirectory() as d:`.
@@ -315,3 +327,14 @@ def get_ip():
         # doesn't even have to be reachable
         s.connect(('10.255.255.255', 1))
         return s.getsockname()[0]
+
+
+def get_metadata_metrics():
+    # Only called in tests of a check, so just go back one frame
+    root = find_check_root(depth=1)
+    metadata_path = os.path.join(root, 'metadata.csv')
+    metrics = {}
+    with open(metadata_path) as f:
+        for row in csv.DictReader(f):
+            metrics[row['metric_name']] = row
+    return metrics

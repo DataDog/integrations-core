@@ -1,5 +1,13 @@
 # CHANGELOG - solr
 
+## 1.4.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.3.0 / 2020-04-28
+
+* [Added] Update metrics and use config spec. See [#6496](https://github.com/DataDog/integrations-core/pull/6496).
+
 ## 1.2.0 / 2018-10-12
 
 * [Added] [jmx] add rmi registry ssl config option. See [#2371][1].

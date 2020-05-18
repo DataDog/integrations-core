@@ -326,6 +326,22 @@ Optionally, deploy cluster check runners in addition to setting up the Datadog C
 
 **Note**: You can also collect events if you run the Datadog Cluster Agent in a pod in Fargate.
 
+## Process Collection
+
+For Agent 6.19+/7.19+, [Process Collection][24] is available. Enable `shareProcessNamespace` on your pod spec to collect all processes running on your Fargate pod. For example:
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: <NAME>
+spec:
+  shareProcessNamespace: true
+...
+```
+
+**Note**: CPU and memory metrics are not available.
+
 ## Data Collected
 
 ### Metrics
@@ -357,9 +373,9 @@ Need help? Contact [Datadog support][20].
 [11]: https://app.datadoghq.com/account/settings#integrations/amazon-ec2
 [12]: http://docs.datadoghq.com/integrations/kubernetes
 [13]: https://app.datadoghq.com/account/settings#api
-[14]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[14]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [15]: https://docs.datadoghq.com/integrations/#cat-autodiscovery
-[16]: https://docs.datadoghq.com/developers/dogstatsd
+[16]: https://docs.datadoghq.com/developers/dogstatsd/
 [17]: http://docs.datadoghq.com/tracing/setup
 [18]: http://docs.datadoghq.com/agent/cluster_agent/setup
 [19]: http://docs.datadoghq.com/agent/cluster_agent/event_collection
@@ -367,3 +383,5 @@ Need help? Contact [Datadog support][20].
 [21]: https://app.datadoghq.com/containers
 [22]: https://app.datadoghq.com/process
 [23]: https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/
+[24]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#process-collection
+

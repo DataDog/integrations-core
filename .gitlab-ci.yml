@@ -32,12 +32,12 @@ release-manual:
     - /.*-\d+\.\d+\.\d+(-(rc|pre|alpha|beta)\.\d+)?$/
   script:
     # Get tagger info
-    - tagger=$(git show "$CI_COMMIT_TAG" | head -2 | tail -1)
+    - tagger=$(git for-each-ref refs/tags/$CI_COMMIT_TAG  --format='%(taggername) %(taggeremail)')
     # The automatic release builder will trigger this job as a side-effect of
     # tagging releases. To prevent multiple redundant builds we don't trigger
     # the pipeline unless the tag was applied manually.
     - |
-      if [[ "$tagger" =~ "Tagger: $TAGGER_NAME <$TAGGER_EMAIL>" ]]; then
+      if [[ "$tagger" =~ "$TAGGER_NAME <$TAGGER_EMAIL>" ]]; then
           echo "Skipping, packages have already been built"
       else
           ./.gitlab/tagger/build-packages.sh

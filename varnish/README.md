@@ -132,7 +132,7 @@ Additional helpful documentation, links, and articles:
 - [Monitor Varnish using Datadog][15]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/varnish/images/varnish.png
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/varnish/datadog_checks/varnish/data/conf.yaml.example
@@ -141,7 +141,7 @@ Additional helpful documentation, links, and articles:
 [8]: https://github.com/jonnenauha/prometheus_varnish_exporter
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/varnish/metadata.csv
-[12]: https://docs.datadoghq.com/help
+[12]: https://docs.datadoghq.com/help/
 [13]: https://www.datadoghq.com/blog/top-varnish-performance-metrics
 [14]: https://www.datadoghq.com/blog/how-to-collect-varnish-metrics
 [15]: https://www.datadoghq.com/blog/monitor-varnish-using-datadog

@@ -9,3 +9,6 @@ PILOT_NAMESPACE = 'istio.pilot'
 GALLEY_NAMESPACE = 'istio.galley'
 CITADEL_NAMESPACE = 'istio.citadel'
 ISTIOD_NAMESPACE = 'istio.istiod'
+
+# Known labels that cause context explosion
+BLACKLIST_LABELS = ["connectionID", "destination_service", "source_workload"]

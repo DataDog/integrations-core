@@ -9,44 +9,24 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 if ON_WINDOWS:
     DEFAULT_DEVICE_NAME = 'c:'
+    DEFAULT_DEVICE_BASE_NAME = 'c:'
     DEFAULT_FILE_SYSTEM = 'ntfs'
     DEFAULT_MOUNT_POINT = 'c:'
 else:
     DEFAULT_DEVICE_NAME = '/dev/sda1'
+    DEFAULT_DEVICE_BASE_NAME = 'sda1'
     DEFAULT_FILE_SYSTEM = 'ext4'
     DEFAULT_MOUNT_POINT = '/'
 
 EXPECTED_METRICS = [
-    {"metric": "system.disk.free", "device": "/dev/sda1"},
-    {"metric": "system.disk.free", "device": "overlay"},
-    {"metric": "system.disk.free", "device": "shm"},
-    {"metric": "system.disk.free", "device": "tmpfs"},
-    {"metric": "system.disk.in_use", "device": "/dev/sda1"},
-    {"metric": "system.disk.in_use", "device": "overlay"},
-    {"metric": "system.disk.in_use", "device": "shm"},
-    {"metric": "system.disk.in_use", "device": "tmpfs"},
-    {"metric": "system.disk.total", "device": "/dev/sda1"},
-    {"metric": "system.disk.total", "device": "overlay"},
-    {"metric": "system.disk.total", "device": "shm"},
-    {"metric": "system.disk.total", "device": "tmpfs"},
-    {"metric": "system.disk.used", "device": "/dev/sda1"},
-    {"metric": "system.disk.used", "device": "overlay"},
-    {"metric": "system.disk.used", "device": "shm"},
-    {"metric": "system.disk.used", "device": "tmpfs"},
-    {"metric": "system.fs.inodes.free", "device": "/dev/sda1"},
-    {"metric": "system.fs.inodes.free", "device": "overlay"},
-    {"metric": "system.fs.inodes.free", "device": "shm"},
-    {"metric": "system.fs.inodes.free", "device": "tmpfs"},
-    {"metric": "system.fs.inodes.in_use", "device": "/dev/sda1"},
-    {"metric": "system.fs.inodes.in_use", "device": "overlay"},
-    {"metric": "system.fs.inodes.in_use", "device": "shm"},
-    {"metric": "system.fs.inodes.in_use", "device": "tmpfs"},
-    {"metric": "system.fs.inodes.total", "device": "/dev/sda1"},
-    {"metric": "system.fs.inodes.total", "device": "overlay"},
-    {"metric": "system.fs.inodes.total", "device": "shm"},
-    {"metric": "system.fs.inodes.total", "device": "tmpfs"},
-    {"metric": "system.fs.inodes.used", "device": "/dev/sda1"},
-    {"metric": "system.fs.inodes.used", "device": "overlay"},
-    {"metric": "system.fs.inodes.used", "device": "shm"},
-    {"metric": "system.fs.inodes.used", "device": "tmpfs"},
+    "system.disk.free",
+    "system.disk.in_use",
+    "system.disk.total",
+    "system.disk.used",
+    "system.fs.inodes.free",
+    "system.fs.inodes.in_use",
+    "system.fs.inodes.total",
+    "system.fs.inodes.used",
 ]
+
+EXPECTED_DEVICES = ["overlay", "shm", "tmpfs", "/dev/sdb1"]

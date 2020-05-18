@@ -6,9 +6,11 @@ Type declarations, for type checking purposes only.
 """
 from typing import Literal, NamedTuple, Tuple, TypedDict
 
-ForceableMetricType = Literal['gauge', 'percent']
 MetricDefinition = TypedDict(
-    'MetricDefinition', {'type': Literal['gauge', 'rate', 'counter', 'monotonic_count'], 'value': float}
+    'MetricDefinition',
+    {'type': Literal['gauge', 'rate', 'counter', 'monotonic_count', 'monotonic_count_and_rate'], 'value': float},
 )
 
-MIBSymbol = NamedTuple('MIBSymbol', [('name', str), ('prefix', Tuple[str, ...])])
+MIBSymbol = NamedTuple('MIBSymbol', [('mib', str), ('symbol', str), ('prefix', Tuple[str, ...])])
+
+OIDMatch = NamedTuple('OIDMatch', [('name', str), ('indexes', Tuple[str, ...])])

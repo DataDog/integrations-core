@@ -32,6 +32,7 @@ def test_realtime_metrics(aggregator, dd_run_check, realtime_instance):
                 metric['name'], metric.get('value'), hostname=metric.get('hostname'), tags=metric.get('tags')
             )
 
+    aggregator.assert_metric('datadog.vsphere.collect_events.time', metric_type=aggregator.GAUGE, count=1)
     aggregator.assert_all_metrics_covered()
 
 
@@ -306,3 +307,20 @@ def test_tags_filters_with_prefix_when_tags_are_not_yet_collected(aggregator, dd
     aggregator.assert_metric('vsphere.cpu.usage.avg', count=1)
     # Assert that the resource that was collected is the one with the correct tag
     aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-4')
+
+
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
+def test_version_metadata(aggregator, dd_run_check, realtime_instance, datadog_agent):
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    check.check_id = 'test:123'
+    dd_run_check(check)
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': '6',
+        'version.minor': '7',
+        'version.patch': '0',
+        'version.build': '123456789',
+        'version.raw': '6.7.0+123456789',
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)

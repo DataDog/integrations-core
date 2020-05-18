@@ -1,5 +1,49 @@
 # CHANGELOG - snmp
 
+## 3.2.0 / 2020-05-17
+
+* [Added] Add diskStatus tag to Isilon profile. See [#6660](https://github.com/DataDog/integrations-core/pull/6660).
+* [Added] Add BPG metrics to more profiles. See [#6655](https://github.com/DataDog/integrations-core/pull/6655).
+* [Added] Add voice metrics and profiles. See [#6629](https://github.com/DataDog/integrations-core/pull/6629).
+
+## 3.1.0 / 2020-05-14
+
+* [Added] Add `chatsworth` legacy metrics. See [#6624](https://github.com/DataDog/integrations-core/pull/6624).
+* [Added] Add ifHighSpeed. See [#6602](https://github.com/DataDog/integrations-core/pull/6602).
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Improve autodiscovery support. See [#6526](https://github.com/DataDog/integrations-core/pull/6526).
+* [Fixed] Exit discovery thread when check is gc-ed. See [#6484](https://github.com/DataDog/integrations-core/pull/6484).
+* [Fixed] Don't use ifDescr for metric tagging. See [#6601](https://github.com/DataDog/integrations-core/pull/6601).
+* [Fixed] Optimize away useless GET calls. See [#6456](https://github.com/DataDog/integrations-core/pull/6456).
+
+## 3.0.0 / 2020-05-04
+
+* [Added] Add base BGP4 and Cisco-CSR1000v profiles. See [#6315](https://github.com/DataDog/integrations-core/pull/6315).
+* [Added] Collect OSPF routing metrics. See [#6554](https://github.com/DataDog/integrations-core/pull/6554).
+* [Added] Add F5 Big IP local traffic management (LTM) metrics. See [#5963](https://github.com/DataDog/integrations-core/pull/5963).
+* [Added] Add more HP metrics. See [#6542](https://github.com/DataDog/integrations-core/pull/6542).
+* [Added] Add more idrac/dell metrics. See [#6540](https://github.com/DataDog/integrations-core/pull/6540).
+* [Added] Add additional Cisco metrics. See [#6539](https://github.com/DataDog/integrations-core/pull/6539).
+* [Added] Add more metrics to Palo Alto profile. See [#6541](https://github.com/DataDog/integrations-core/pull/6541).
+* [Added] Add upsOutletGroupStatusGroupState metric to APC UPS profile. See [#6555](https://github.com/DataDog/integrations-core/pull/6555).
+* [Added] Add ifspeed metric to interface profile. See [#6499](https://github.com/DataDog/integrations-core/pull/6499).
+* [Added] Add Isilon profile. See [#6518](https://github.com/DataDog/integrations-core/pull/6518).
+* [Added] Add APC UPS profile. See [#6505](https://github.com/DataDog/integrations-core/pull/6505).
+* [Added] Add env metric to cisco base profile. See [#6517](https://github.com/DataDog/integrations-core/pull/6517).
+* [Added] Submit throughput as a rate. See [#6384](https://github.com/DataDog/integrations-core/pull/6384).
+* [Added] Add more Cisco ASA metrics. See [#6335](https://github.com/DataDog/integrations-core/pull/6335).
+* [Added] Add MIB resolution to `OID` model. See [#6242](https://github.com/DataDog/integrations-core/pull/6242).
+* [Fixed] Change default timeout to 5. See [#6546](https://github.com/DataDog/integrations-core/pull/6546).
+* [Fixed] Remove empty values in config. See [#6455](https://github.com/DataDog/integrations-core/pull/6455).
+* [Fixed] Use `OID` model in `OIDResolver`. See [#6469](https://github.com/DataDog/integrations-core/pull/6469).
+* [Fixed] Isolate parsing logic into a dedicated sub-package. See [#6398](https://github.com/DataDog/integrations-core/pull/6398).
+* [Fixed] Isolate PySNMP inspection hacks. See [#6461](https://github.com/DataDog/integrations-core/pull/6461).
+* [Fixed] Drop outdated `warning` parameter in `parse_metrics`. See [#6412](https://github.com/DataDog/integrations-core/pull/6412).
+* [Fixed] Fix debug output. See [#6400](https://github.com/DataDog/integrations-core/pull/6400).
+* [Fixed] Check types on all modules. See [#6392](https://github.com/DataDog/integrations-core/pull/6392).
+* [Fixed] Fix misleading `metric_tags` naming on `ParsedMetric`. See [#6387](https://github.com/DataDog/integrations-core/pull/6387).
+* [Changed] Throw error if two profiles have the same sysObjectID. See [#6501](https://github.com/DataDog/integrations-core/pull/6501).
+
 ## 2.6.1 / 2020-04-04
 
 * [Fixed] Small profiles cleanups. See [#6233](https://github.com/DataDog/integrations-core/pull/6233).

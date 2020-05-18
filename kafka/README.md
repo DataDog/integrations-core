@@ -143,7 +143,7 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 - [Monitoring Kafka with Datadog][19]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka/images/kafka_dashboard.png
-[2]: https://docs.datadoghq.com/integrations/java
+[2]: https://docs.datadoghq.com/integrations/java/
 [3]: https://docs.datadoghq.com/integrations/kafka/#agent-check-kafka-consumer
 [4]: https://app.datadoghq.com/account/settings#agent
 [5]: https://github.com/DataDog/jmxfetch
@@ -155,9 +155,9 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 [11]: https://docs.datadoghq.com/agent/kubernetes/log/
 [12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [13]: https://github.com/DataDog/integrations-core/blob/master/kafka/metadata.csv
-[14]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka
-[15]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub
-[16]: https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application
+[14]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
+[15]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub/
+[16]: https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application/
 [17]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
 [18]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [19]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog

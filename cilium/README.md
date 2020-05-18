@@ -113,13 +113,13 @@ Cilium does not include any events.
 Need help? Contact [Datadog support][8].
 
 [1]: https://cilium.io
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
-[3]: https://docs.datadoghq.com/agent
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[3]: https://docs.datadoghq.com/agent/
 [4]: https://github.com/DataDog/integrations-core/blob/master/cilium/datadog_checks/cilium/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/cilium/metadata.csv
-[8]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/help/
 [9]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#create-manifest
-[10]: https://docs.datadoghq.com/agent/kubernetes/log
-[11]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[10]: https://docs.datadoghq.com/agent/kubernetes/log/
+[11]: https://docs.datadoghq.com/agent/kubernetes/integrations/

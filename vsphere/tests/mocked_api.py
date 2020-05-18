@@ -12,6 +12,8 @@ from requests import Response
 from six import iteritems
 from tests.common import HERE
 
+from datadog_checks.vsphere.api import VersionInfo
+
 
 class MockedCounter(object):
     def __init__(self, counter):
@@ -26,9 +28,19 @@ class MockedAPI(object):
         self.config = config
         self.infrastructure_data = {}
         self.metrics_data = []
+        self.mock_events = []
 
     def check_health(self):
         return True
+
+    def get_version(self):
+        about = MagicMock(
+            version='6.7.0',
+            build='123456789',
+            fullName='VMware vCenter Server 6.7.0 build-14792544',
+            apiType='VirtualCenter',
+        )
+        return VersionInfo(about)
 
     def recursive_parse_topology(self, subtree, parent=None):
         current_mor = MagicMock(spec=getattr(vim, subtree['spec']), _moId=subtree['mo_id'])
@@ -96,6 +108,9 @@ class MockedAPI(object):
 
     def get_latest_event_timestamp(self):
         return datetime.now()
+
+    def get_new_events(self, start_time):
+        return self.mock_events
 
 
 class MockResponse(Response):

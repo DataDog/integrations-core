@@ -16,12 +16,16 @@
   ],
   "public_title": "Datadog-Airflow Integration",
   "categories": [
-    "processing"
+    "processing",
+    "log collection"
   ],
   "type": "check",
   "is_public": true,
   "integration_id": "airflow",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {
       "Airflow Overview": "assets/dashboards/overview.json"
     },

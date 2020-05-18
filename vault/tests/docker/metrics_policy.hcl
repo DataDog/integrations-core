@@ -2,18 +2,7 @@ path "sys/metrics*" {
   capabilities = ["read", "list"]
 }
 
-path "sys/audit" {
-  capabilities = ["read", "sudo"]
-}
-
+// Might be needed later for license monitoring
 path "sys/license" {
-  capabilities = ["read", "list"]
-}
-
-path "sys/mounts" {
-  capabilities = ["read", "list"]
-}
-
-path "sys/host-info" {
   capabilities = ["read", "list"]
 }

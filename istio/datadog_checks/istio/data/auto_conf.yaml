@@ -1,0 +1,20 @@
+ad_identifiers:
+  - proxyv2
+
+## All options defined here are available to all instances.
+#
+init_config:
+
+## Every instance is scheduled independent of the others.
+#
+instances:
+
+    ## @param send_histograms_buckets - boolean - required
+    ## Set send_histograms_buckets to true to send the histograms bucket from Istio.
+    #
+  - send_histograms_buckets: true
+
+    ## @param istio_mesh_endpoint - string - optional
+    ## To enable Istio metrics you must specify the url exposing the API.
+    #
+    istio_mesh_endpoint: http://%%host%%:15090/stats/prometheus

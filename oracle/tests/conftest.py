@@ -12,6 +12,7 @@ from .common import (
     CLIENT_LIB,
     COMPOSE_FILE,
     CONTAINER_NAME,
+    HERE,
     HOST,
     ORACLE_DATABASE_VERSION,
     PASSWORD,
@@ -19,17 +20,11 @@ from .common import (
     USER,
 )
 
-INSTANT_CLIENT_URL = (
-    "https://ddintegrations.blob.core.windows.net/oracle/instantclient-basiclite-linux.x64-19.3.0.0.0dbru.zip"
-)
-
 E2E_METADATA_ORACLE_CLIENT = {
+    'docker_volumes': ['{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE)],
     'start_commands': [
-        'mkdir /opt/oracle',
-        'apt-get update',
-        'apt-get install libaio1 unzip',
-        'curl -o /opt/oracle/instantclient.zip {}'.format(INSTANT_CLIENT_URL),
-        'unzip /opt/oracle/instantclient.zip -d /opt/oracle',
+        'bash /tmp/install_instant_client.sh',
+        'apt-get install libaio1',  # `apt-get update` already ran in install_instant_client.sh
     ],
     'env_vars': {'LD_LIBRARY_PATH': '/opt/oracle/instantclient_19_3'},
 }
@@ -38,14 +33,8 @@ E2E_METADATA_JDBC_CLIENT = {
     # Since we don't include Oracle instantclient to `LD_LIBRARY_PATH` env var,
     # the integration will fallback to JDBC client
     'use_jmx': True,  # Using jmx to have a ready to use java runtime
-    'start_commands': [
-        'mkdir /opt/oracle',
-        'apt-get update',
-        'apt-get install unzip',
-        # JDBC client needs Oracle driver `ojdbc8.jar` from Instant Client
-        'curl -o /opt/oracle/instantclient.zip {}'.format(INSTANT_CLIENT_URL),
-        'unzip /opt/oracle/instantclient.zip -d /opt/oracle',
-    ],
+    'docker_volumes': ['{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE)],
+    'start_commands': ['bash /tmp/install_instant_client.sh'],
 }
 
 
@@ -87,6 +76,8 @@ def dd_environment():
             WaitFor(create_user),
         ],
         env_vars={'ORACLE_DATABASE_VERSION': ORACLE_DATABASE_VERSION},
+        attempts=20,
+        attempts_wait=5,
     ):
         yield instance, e2e_metadata
 

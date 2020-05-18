@@ -96,7 +96,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 | Parameter      | Value                                           |
 | -------------- | ----------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "zk", "service": "<SERVICE_NAME>"}` |
+| `<LOG_CONFIG>` | `{"source": "zookeeper", "service": "<SERVICE_NAME>"}` |
 
 ### Validation
 
@@ -149,7 +149,7 @@ The Agent submits this service check if `expected_mode` is configured in `zk.yam
 Need help? Contact [Datadog support][11].
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/zk/images/zk_dashboard.png
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/zk/datadog_checks/zk/data/conf.yaml.example
@@ -158,5 +158,5 @@ Need help? Contact [Datadog support][11].
 [8]: https://zookeeper.apache.org/doc/r3.5.4-beta/zookeeperAdmin.html#sc_4lw
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/zk/metadata.csv
-[11]: https://docs.datadoghq.com/help
+[11]: https://docs.datadoghq.com/help/
 [12]: https://docs.datadoghq.com/agent/kubernetes/log/

@@ -124,6 +124,12 @@ class VSphereConfig(object):
             if 'property' not in resource_filter:
                 resource_filter['property'] = 'name'
 
+            if resource_filter['property'] == 'tag' and not self.should_collect_tags:
+                raise ConfigurationError(
+                    'Your configuration is incorrectly attempting to filter resources '
+                    'by the `tag` property but `collect_tags` is disabled.'
+                )
+
             # Check required fields and their types
             for (field, field_type) in iteritems(
                 {'resource': string_types, 'property': string_types, 'type': string_types, 'patterns': list}

@@ -7,13 +7,16 @@ import pytest
 from datadog_test_libs.win.pdh_mocks import pdh_mocks_fixture  # noqa: F401
 
 from datadog_checks.iis import IIS
-from datadog_checks.iis.iis import DEFAULT_COUNTERS
 
 from .common import (
+    APP_POOL_METRICS,
     CHECK_NAME,
+    DEFAULT_APP_POOLS,
+    DEFAULT_SITES,
     INSTANCE,
     INVALID_HOST_INSTANCE,
     MINIMAL_INSTANCE,
+    SITE_METRICS,
     WIN_SERVICES_CONFIG,
     WIN_SERVICES_MINIMAL_CONFIG,
 )
@@ -23,39 +26,49 @@ from .common import (
 def test_basic_check(aggregator):
     instance = MINIMAL_INSTANCE
     c = IIS(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    c.check(None)
     iis_host = c.get_iishost()
 
-    site_tags = ['Default_Web_Site', 'Exchange_Back_End', 'Total']
-    for metric_def in DEFAULT_COUNTERS:
-        metric = metric_def[3]
-        for site_tag in site_tags:
-            aggregator.assert_metric(metric, tags=["site:{0}".format(site_tag), iis_host], count=1)
+    namespace_data = ((SITE_METRICS, IIS.SITE, DEFAULT_SITES), (APP_POOL_METRICS, IIS.APP_POOL, DEFAULT_APP_POOLS))
+    for metrics, namespace, values in namespace_data:
+        for metric in metrics:
+            for value in values:
+                aggregator.assert_metric(metric, tags=['{}:{}'.format(namespace, value), iis_host], count=1)
 
-    for site_tag in site_tags:
-        aggregator.assert_service_check('iis.site_up', IIS.OK, tags=["site:{0}".format(site_tag), iis_host], count=1)
+    for _, namespace, values in namespace_data:
+        for value in values:
+            aggregator.assert_service_check(
+                'iis.{}_up'.format(namespace), IIS.OK, tags=['{}:{}'.format(namespace, value), iis_host], count=1
+            )
 
     aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')
-def test_check_on_specific_websites(aggregator):
+def test_check_on_specific_websites_and_app_pools(aggregator):
     instance = INSTANCE
     c = IIS(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    c.check(None)
     iis_host = c.get_iishost()
 
-    site_tags = ['Default_Web_Site', 'Exchange_Back_End', 'Total']
-    for metric_def in DEFAULT_COUNTERS:
-        metric = metric_def[3]
-        for site_tag in site_tags:
-            aggregator.assert_metric(metric, tags=["site:{0}".format(site_tag), iis_host], count=1)
+    namespace_data = (
+        (SITE_METRICS, IIS.SITE, ['Default_Web_Site', 'Exchange_Back_End', 'Total']),
+        (APP_POOL_METRICS, IIS.APP_POOL, ['DefaultAppPool', 'MSExchangeServicesAppPool', 'Total']),
+    )
+    for metrics, namespace, values in namespace_data:
+        for metric in metrics:
+            for value in values:
+                aggregator.assert_metric(metric, tags=['{}:{}'.format(namespace, value), iis_host], count=1)
 
-    for site_tag in site_tags:
-        aggregator.assert_service_check('iis.site_up', IIS.OK, tags=["site:{0}".format(site_tag), iis_host], count=1)
+    for _, namespace, values in namespace_data:
+        for value in values:
+            aggregator.assert_service_check(
+                'iis.{}_up'.format(namespace), IIS.OK, tags=['{}:{}'.format(namespace, value), iis_host], count=1
+            )
 
+    aggregator.assert_service_check('iis.site_up', IIS.CRITICAL, tags=['site:Non_Existing_Website', iis_host], count=1)
     aggregator.assert_service_check(
-        'iis.site_up', IIS.CRITICAL, tags=["site:{0}".format('Non_Existing_Website'), iis_host], count=1
+        'iis.app_pool_up', IIS.CRITICAL, tags=['app_pool:Non_Existing_App_Pool', iis_host], count=1
     )
 
     aggregator.assert_all_metrics_covered()
@@ -65,10 +78,11 @@ def test_check_on_specific_websites(aggregator):
 def test_service_check_with_invalid_host(aggregator):
     instance = INVALID_HOST_INSTANCE
     c = IIS(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    c.check(None)
     iis_host = c.get_iishost()
 
-    aggregator.assert_service_check('iis.site_up', IIS.CRITICAL, tags=["site:{0}".format('Total'), iis_host])
+    aggregator.assert_service_check('iis.site_up', IIS.CRITICAL, tags=['site:Total', iis_host])
+    aggregator.assert_service_check('iis.app_pool_up', IIS.CRITICAL, tags=['app_pool:Total', iis_host])
 
 
 @pytest.mark.usefixtures('pdh_mocks_fixture')
@@ -78,33 +92,46 @@ def test_check(aggregator):
     """
     instance = WIN_SERVICES_CONFIG
     c = IIS(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    c.check(None)
     iis_host = c.get_iishost()
 
-    # Test metrics
-    # ... normalize site-names
-    default_site_name = re.sub(r"[,\+\*\-/()\[\]{}\s]", "_", WIN_SERVICES_CONFIG['sites'][0])
-    ok_site_name = re.sub(r"[,\+\*\-/()\[\]{}\s]", "_", WIN_SERVICES_CONFIG['sites'][1])
-    fail_site_name = re.sub(r"[,\+\*\-/()\[\]{}\s]", "_", WIN_SERVICES_CONFIG['sites'][2])
+    # Test tag name normalization
+    sites = ['Total']
+    for site in instance['sites']:
+        sites.append(re.sub(r'[,+*\-/()\[\]{}\s]', '_', site))
+    app_pools = ['Total']
+    for app_pool in instance['app_pools']:
+        app_pools.append(re.sub(r'[,+*\-/()\[\]{}\s]', '_', app_pool))
 
-    for site_name in [default_site_name, ok_site_name, 'Total']:
-        for metric_def in DEFAULT_COUNTERS:
-            mname = metric_def[3]
-            aggregator.assert_metric(mname, tags=["mytag1", "mytag2", "site:{0}".format(site_name), iis_host], count=1)
+    # Exclude `Failing site` and `Failing app pool`
+    namespace_data_ok = ((SITE_METRICS, IIS.SITE, sites[:-1]), (APP_POOL_METRICS, IIS.APP_POOL, app_pools[:-1]))
+    for metrics, namespace, values in namespace_data_ok:
+        for metric in metrics:
+            for value in values:
+                aggregator.assert_metric(
+                    metric, tags=['mytag1', 'mytag2', '{}:{}'.format(namespace, value), iis_host], count=1
+                )
 
-        aggregator.assert_service_check(
-            'iis.site_up', status=IIS.OK, tags=["mytag1", "mytag2", "site:{0}".format(site_name), iis_host], count=1
-        )
+    for _, namespace, values in namespace_data_ok:
+        # Exclude `Total`
+        for value in values[1:]:
+            aggregator.assert_service_check(
+                'iis.{}_up'.format(namespace),
+                IIS.OK,
+                tags=['mytag1', 'mytag2', '{}:{}'.format(namespace, value), iis_host],
+                count=1,
+            )
 
-    aggregator.assert_service_check(
-        'iis.site_up',
-        status=IIS.CRITICAL,
-        tags=["mytag1", "mytag2", "site:{0}".format(fail_site_name), iis_host],
-        count=1,
-    )
-
-    # Check completed with no warnings
-    # self.assertFalse(logger.warning.called)
+    # Only `Failing site` and `Failing app pool`
+    namespace_data_failed = ((SITE_METRICS, IIS.SITE, sites[-1:]), (APP_POOL_METRICS, IIS.APP_POOL, app_pools[-1:]))
+    for _, namespace, values in namespace_data_failed:
+        for value in values:
+            aggregator.assert_service_check(
+                'iis.{}_up'.format(namespace),
+                IIS.CRITICAL,
+                tags=['mytag1', 'mytag2', '{}:{}'.format(namespace, value), iis_host],
+                count=1,
+            )
 
     aggregator.assert_all_metrics_covered()
 
@@ -117,18 +144,24 @@ def test_check_without_sites_specified(aggregator):
     # Run check
     instance = WIN_SERVICES_MINIMAL_CONFIG
     c = IIS(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    c.check(None)
     iis_host = c.get_iishost()
 
-    site_tags = ['Default_Web_Site', 'Exchange_Back_End', 'Total']
-    for metric_def in DEFAULT_COUNTERS:
-        mname = metric_def[3]
+    namespace_data = ((SITE_METRICS, IIS.SITE, DEFAULT_SITES), (APP_POOL_METRICS, IIS.APP_POOL, DEFAULT_APP_POOLS))
+    for metrics, namespace, values in namespace_data:
+        for metric in metrics:
+            for value in values:
+                aggregator.assert_metric(
+                    metric, tags=['mytag1', 'mytag2', '{}:{}'.format(namespace, value), iis_host], count=1
+                )
 
-        for site_tag in site_tags:
-            aggregator.assert_metric(mname, tags=["mytag1", "mytag2", "site:{0}".format(site_tag), iis_host], count=1)
+    for _, namespace, values in namespace_data:
+        for value in values:
+            aggregator.assert_service_check(
+                'iis.{}_up'.format(namespace),
+                IIS.OK,
+                tags=['mytag1', 'mytag2', '{}:{}'.format(namespace, value), iis_host],
+                count=1,
+            )
 
-    for site_tag in site_tags:
-        aggregator.assert_service_check(
-            'iis.site_up', status=IIS.OK, tags=["mytag1", "mytag2", "site:{0}".format(site_tag), iis_host], count=1
-        )
     aggregator.assert_all_metrics_covered()

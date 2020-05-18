@@ -9,18 +9,18 @@ rabbitmq.node.partitions,gauge,,,,Number of network partitions this node is seei
 rabbitmq.node.running,gauge,,,,Is the node running or not,0,rabbitmq,running
 rabbitmq.node.mem_alarm,gauge,,,,Does the host has memory alarm,0,rabbitmq,mem_alarm
 rabbitmq.node.disk_alarm,gauge,,,,Does the node have disk alarm,0,rabbitmq,disk_alarm
-rabbitmq.exchange.messages.ack.count,gauge,,message,,Number of messages delivered to clients and acknowledged,0,rabbitmq,xchng msgs ack
-rabbitmq.exchange.messages.ack.rate,gauge,,message,,Rate of messages delivered to clients and acknowledged per second ,0,rabbitmq,xchng msgs ack rate
-rabbitmq.exchange.messages.confirm.count,gauge,,message,,Count of messages confirmed,0,rabbitmq,xchng msgs cnfrm
-rabbitmq.exchange.messages.confirm.rate,gauge,,message,,Rate of messages confirmed per second,0,rabbitmq,xchng msgs cnfrm rate
-rabbitmq.exchange.messages.deliver_get.count,gauge,,message,,"Sum of messages delivered in acknowledgement mode to consumers, in no-acknowledgement mode to consumers, in acknowledgement mode in response to basic.get, and in no-acknowledgement mode in response to basic.get",0,rabbitmq,xchng msgs dlv get
-rabbitmq.exchange.messages.deliver_get.rate,gauge,,message,,"Rate per second of the sum of messages delivered in acknowledgement mode to consumers, in no-acknowledgement mode to consumers, in acknowledgement mode in response to basic.get, and in no-acknowledgement mode in response to basic.get",0,rabbitmq,xchng msgs dlv get rate
-rabbitmq.exchange.messages.redeliver.count,gauge,,message,,Count of subset of messages in deliver_get which had the redelivered flag set,0,rabbitmq,xchng msgs redlv
-rabbitmq.exchange.messages.redeliver.rate,gauge,,message,,Rate of subset of messages in deliver_get which had the redelivered flag set per second ,0,rabbitmq,xchng msgs redlv rate
-rabbitmq.exchange.messages.return_unroutable.count,gauge,,message,,Count of messages returned to publisher as unroutable,0,rabbitmq,xchng msgs unroutable
-rabbitmq.exchange.messages.return_unroutable.rate,gauge,,message,,Rate of messages returned to publisher as unroutable per second,0,rabbitmq,xchng msgs unroutable rate
-rabbitmq.exchange.messages.publish.count,gauge,,message,,Count of messages published,0,rabbitmq,xchng msgs pub
-rabbitmq.exchange.messages.publish.rate,gauge,,message,,Rate of messages published per second,0,rabbitmq,xchng msgs pub rate
+rabbitmq.exchange.messages.ack.count,gauge,,message,,Number of messages in exchanges delivered to clients and acknowledged,0,rabbitmq,xchng msgs ack
+rabbitmq.exchange.messages.ack.rate,gauge,,message,,Rate of messages in exchanges delivered to clients and acknowledged per second,0,rabbitmq,xchng msgs ack rate
+rabbitmq.exchange.messages.confirm.count,gauge,,message,,Count of messages in exchanges confirmed,0,rabbitmq,xchng msgs cnfrm
+rabbitmq.exchange.messages.confirm.rate,gauge,,message,,Rate of messages in exchanges confirmed per second,0,rabbitmq,xchng msgs cnfrm rate
+rabbitmq.exchange.messages.deliver_get.count,gauge,,message,,"Sum of messages in exchanges delivered in acknowledgement mode to consumers, in no-acknowledgement mode to consumers, in acknowledgement mode in response to basic.get, and in no-acknowledgement mode in response to basic.get",0,rabbitmq,xchng msgs dlv get
+rabbitmq.exchange.messages.deliver_get.rate,gauge,,message,,"Rate per second of the sum of exchange messages delivered in acknowledgement mode to consumers, in no-acknowledgement mode to consumers, in acknowledgement mode in response to basic.get, and in no-acknowledgement mode in response to basic.get",0,rabbitmq,xchng msgs dlv get rate
+rabbitmq.exchange.messages.redeliver.count,gauge,,message,,Count of subset of messages in exchanges in deliver_get which had the redelivered flag set,0,rabbitmq,xchng msgs redlv
+rabbitmq.exchange.messages.redeliver.rate,gauge,,message,,Rate of subset of messages in exchanges in deliver_get which had the redelivered flag set per second ,0,rabbitmq,xchng msgs redlv rate
+rabbitmq.exchange.messages.return_unroutable.count,gauge,,message,,Count of messages in exchanges returned to publisher as unroutable,0,rabbitmq,xchng msgs unroutable
+rabbitmq.exchange.messages.return_unroutable.rate,gauge,,message,,Rate of messages in exchanges returned to publisher as unroutable per second,0,rabbitmq,xchng msgs unroutable rate
+rabbitmq.exchange.messages.publish.count,gauge,,message,,Count of messages in exchanges published,0,rabbitmq,xchng msgs pub
+rabbitmq.exchange.messages.publish.rate,gauge,,message,,Rate of messages in exchanges published per second,0,rabbitmq,xchng msgs pub rate
 rabbitmq.exchange.messages.publish_in.count,gauge,,message,,Count of messages published from channels into this exchange,0,rabbitmq,xchng msgs pub in
 rabbitmq.exchange.messages.publish_in.rate,gauge,,message,,Rate of messages published from channels into this exchange per sec,0,rabbitmq,xchng msgs pub in rate
 rabbitmq.exchange.messages.publish_out.count,gauge,,message,,Count of messages published from this exchange into queues,0,rabbitmq,xchng msgs pub out
@@ -36,15 +36,15 @@ rabbitmq.queue.messages_ready,gauge,,message,,Number of messages ready to be del
 rabbitmq.queue.messages_ready.rate,gauge,,message,second,Number per second of messages ready to be delivered to clients,0,rabbitmq,msgs rdy rate
 rabbitmq.queue.messages_unacknowledged,gauge,,message,,Number of messages delivered to clients but not yet acknowledged,0,rabbitmq,msgs unack
 rabbitmq.queue.messages_unacknowledged.rate,gauge,,message,second,Number per second of messages delivered to clients but not yet acknowledged,0,rabbitmq,msgs unack rate
-rabbitmq.queue.messages.ack.count,gauge,,message,,Number of messages delivered to clients and acknowledged,0,rabbitmq,msgs ack
+rabbitmq.queue.messages.ack.count,gauge,,message,,Number of messages in queues delivered to clients and acknowledged,0,rabbitmq,msgs ack
 rabbitmq.queue.messages.ack.rate,gauge,,message,second,Number per second of messages delivered to clients and acknowledged,0,rabbitmq,msgs ack rate
 rabbitmq.queue.messages.deliver.count,gauge,,message,,Count of messages delivered in acknowledgement mode to consumers,0,rabbitmq,msgs delv
-rabbitmq.queue.messages.deliver.rate,gauge,,message,second,Count of messages delivered in acknowledgement mode to consumers,0,rabbitmq,msgs delv rate
-rabbitmq.queue.messages.deliver_get.count,gauge,,message,,"Sum of messages delivered in acknowledgement mode to consumers, in no-acknowledgement mode to consumers, in acknowledgement mode in response to basic.get, and in no-acknowledgement mode in response to basic.get.",0,rabbitmq,msgs delv get
-rabbitmq.queue.messages.deliver_get.rate,gauge,,message,second,"Rate per second of the sum of messages delivered in acknowledgement mode to consumers, in no-acknowledgement mode to consumers, in acknowledgement mode in response to basic.get, and in no-acknowledgement mode in response to basic.get.",0,rabbitmq,msgs delv get rate
-rabbitmq.queue.messages.publish.count,gauge,,message,,Count of messages published,0,rabbitmq,msgs pub
+rabbitmq.queue.messages.deliver.rate,gauge,,message,second,Rate of messages delivered in acknowledgement mode to consumers,0,rabbitmq,msgs delv rate
+rabbitmq.queue.messages.deliver_get.count,gauge,,message,,"Sum of messages in queues delivered in acknowledgement mode to consumers, in no-acknowledgement mode to consumers, in acknowledgement mode in response to basic.get, and in no-acknowledgement mode in response to basic.get.",0,rabbitmq,msgs delv get
+rabbitmq.queue.messages.deliver_get.rate,gauge,,message,second,"Rate per second of the sum of messages in queues delivered in acknowledgement mode to consumers, in no-acknowledgement mode to consumers, in acknowledgement mode in response to basic.get, and in no-acknowledgement mode in response to basic.get.",0,rabbitmq,msgs delv get rate
+rabbitmq.queue.messages.publish.count,gauge,,message,,Count of messages in queues published,0,rabbitmq,msgs pub
 rabbitmq.queue.messages.publish.rate,gauge,,message,second,Rate per second of messages published,0,rabbitmq,msgs pub rate
-rabbitmq.queue.messages.redeliver.count,gauge,,message,,Count of subset of messages in deliver_get which had the redelivered flag set,0,rabbitmq,msgs redelv
+rabbitmq.queue.messages.redeliver.count,gauge,,message,,Count of subset of messages in queues in deliver_get which had the redelivered flag set,0,rabbitmq,msgs redelv
 rabbitmq.queue.messages.redeliver.rate,gauge,,message,second,Rate per second of subset of messages in deliver_get which had the redelivered flag set,0,rabbitmq,msgs redelv rate
 rabbitmq.connections,gauge,,connection,,"Number of current connections to a given rabbitmq vhost, tagged 'rabbitmq_vhost:<vhost_name>'",0,rabbitmq,connections
 rabbitmq.connections.state,gauge,,connection,,Number of connections in the specified connection state,0,rabbitmq,connection_state
