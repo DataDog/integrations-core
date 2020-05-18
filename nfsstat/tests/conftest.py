@@ -7,8 +7,6 @@ from datadog_checks.dev import docker_run
 
 from .common import COMPOSE_FILE, CONFIG, E2E_METADATA
 
-NFS_CLIENT_CONTAINER_NAME = 'nfs-client'
-
 
 @pytest.fixture(scope='session')
 def dd_environment():

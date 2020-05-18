@@ -8,11 +8,13 @@ from datadog_checks.dev import get_here
 
 COMPOSE_FILE = os.path.join(get_here(), 'compose', 'compose.yaml')
 
+# Calling the binary on nfs-client container from the agent container
 CONFIG = {
     "init_config": {"nfsiostat_path": "docker exec nfs-client /usr/sbin/nfsiostat"},
     "instances": [{"tags": ["tag1:value1"]}],
 }
 
+# Needed to call docker exec from the agent container
 E2E_METADATA = {
     'start_commands': [
         'apt-get update',
