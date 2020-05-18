@@ -61,6 +61,10 @@ DM_OS_WAIT_STATS_TABLE = "sys.dm_os_wait_stats"
 DM_OS_MEMORY_CLERKS_TABLE = "sys.dm_os_memory_clerks"
 DM_OS_VIRTUAL_FILE_STATS = "sys.dm_io_virtual_file_stats"
 
+# Note : This is not actually table, This is a place holder for all other table.
+# goverened by the query.
+DM_CUSTOM_METRIC = "custom_metric_table"
+
 class SQLConnectionError(Exception):
     """
     Exception raised for SQL instance connection issues
@@ -223,8 +227,13 @@ class SQLServer(AgentCheck):
                     if user_type is None:
                         sql_type, base_name = self.get_sql_type(instance, row['counter_name'])
                 except Exception:
-                    self.log.warning("Can't load the metric %s, ignoring", row['name'], exc_info=True)
-                    continue
+                    if row.get('sql_query') is None:
+                        self.log.warning("Can't load the metric %s, ignoring", row['name'], exc_info=True)
+                        continue
+                    else:
+                        sql_type = PERF_COUNTER_LARGE_RAWCOUNT
+                        db_table = DM_CUSTOM_METRIC
+                        base_name = None
 
                 metrics_to_collect.append(self.typed_metric(instance,
                                                             row,
@@ -303,7 +312,8 @@ class SQLServer(AgentCheck):
             table_type_mapping = {
                 DM_OS_WAIT_STATS_TABLE: (self.gauge, SqlOsWaitStat),
                 DM_OS_MEMORY_CLERKS_TABLE: (self.gauge, SqlOsMemoryClerksStat),
-                DM_OS_VIRTUAL_FILE_STATS: (self.gauge, SqlIoVirtualFileStat)
+                DM_OS_VIRTUAL_FILE_STATS: (self.gauge, SqlIoVirtualFileStat),
+                DM_CUSTOM_METRIC: (self.gauge, SqlComplexMetric)
             }
             metric_type, cls = table_type_mapping[table]
 
@@ -464,7 +474,11 @@ class SQLServer(AgentCheck):
             metrics_to_collect = self.instances_metrics[instance_key]
 
             with self.get_managed_cursor(instance, self.DEFAULT_DB_KEY) as cursor:
-
+                # Get sqlserver hostname for each instance as tag.
+                cursor.execute("SELECT @@SERVERNAME")
+                rows = cursor.fetchall()
+                if rows is not None:
+                  custom_tags.append("instance_host_name:{0}".format(str(rows[0][0]).strip()))
                 simple_rows = SqlSimpleMetric.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlSimpleMetric"], self.log)
                 fraction_results = SqlFractionMetric.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlFractionMetric"], self.log)
                 waitstat_rows, waitstat_cols = SqlOsWaitStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlOsWaitStat"], self.log)
@@ -483,6 +497,9 @@ class SQLServer(AgentCheck):
                             metric.fetch_metric(cursor, vfs_rows, vfs_cols, custom_tags)
                         elif type(metric) is SqlOsMemoryClerksStat:
                             metric.fetch_metric(cursor, clerk_rows, clerk_cols, custom_tags)
+                        elif type(metric) is SqlComplexMetric:
+                            rows, cols = metric.fetch_all_values(cursor, self.log)
+                            metric.fetch_metric(cursor, rows, cols, custom_tags)
 
                     except Exception as e:
                         self.log.warning("Could not fetch metric %s: %s" % (metric.datadog_name, e))
@@ -652,6 +669,46 @@ class SqlServerMetric(object):
     def fetch_metrics(self, cursor, tags):
         raise NotImplementedError
 
+class SqlComplexMetric(SqlServerMetric):
+
+    def __init__(self, connector,  cfg_instance, base_name,
+                 report_function, column, logger):
+        SqlServerMetric.__init__(self, connector,  cfg_instance, base_name,
+                 report_function, column, logger)
+        self.query = cfg_instance.get('sql_query', None)
+        self.attributes = cfg_instance.get('attribute',[])
+
+    def fetch_all_values(self, cursor, logger):
+        # This method fetch all the metric based on the complex metric passed.
+        cursor.execute(self.query)
+        rows = cursor.fetchall()
+        columns = [i[0] for i in cursor.description]
+        return rows, columns
+
+    def fetch_metric(self, cursor, rows, columns, tags):
+        # This method deals with publishing metric in data dog.
+        attribute_index_list = []
+        tag_by_indexs = []
+        for index in range(len(columns)):
+            if (self.tag_by is not None) and (columns[index] in self.tag_by):
+                tag_by_indexs.append(index)
+            if columns[index] in self.attributes:
+                attribute_index_list.append(index)
+
+        for row in rows:
+            metric_tags = list(tags)
+            for tagby_index in tag_by_indexs:
+                metric_tags.append('{}:{}'.format(columns[tagby_index],str(row[tagby_index]).strip()))
+            for index in range(len(row)):
+                if (index in tag_by_indexs) and (index not in attribute_index_list):
+                    continue
+                report_value = row[index]
+                metric_name = ""
+                if index in attribute_index_list:
+                    metric_name = '{}.{}.{}'.format(self.datadog_name, "attribute", columns[index])
+                else :
+                    metric_name = '{}.{}.{}'.format(self.datadog_name, "metric", columns[index])
+                self.report_function(metric_name, report_value, tags=metric_tags)
 
 class SqlSimpleMetric(SqlServerMetric):
 
@@ -906,3 +963,4 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
             metric_name = '%s.%s' % (self.datadog_name, self.column)
             self.report_function(metric_name, column_val,
                                  tags=metric_tags)
+
