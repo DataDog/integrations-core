@@ -4,6 +4,6 @@ from datadog_checks.base import AgentCheck
 
 
 class {check_class}(AgentCheck):
-    def check(self, instance):
-        # type: (Dict[str, Any]) -> None
+    def check(self, _):
+        # type: (Any) -> None
         pass
