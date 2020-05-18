@@ -5,6 +5,7 @@ init_config:
   ##
   ## See https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/
   #
+  min_collection_interval: 240
   custom_metrics:
      - name: sqlserver.server.metric.used_memory
        counter_name: Used memory (KB)
