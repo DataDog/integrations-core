@@ -259,7 +259,7 @@ class OIDPrinter(object):
         key = oid[0]
         if not isinstance(key, ObjectName):
             key = key.getOid()
-        return "'{}': {}".format(key.prettyPrint(), value)
+        return "'{}': {}".format(key.prettyPrint(), value.replace('\x00', ''))
 
     def oid_dict(self, key, value):
         # type: (str, Dict[Any, Any]) -> str
