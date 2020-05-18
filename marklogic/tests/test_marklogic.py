@@ -13,7 +13,7 @@ from .metrics import GLOBAL_METRICS, STORAGE_HOST_METRICS, STORAGE_FOREST_METRIC
 
 
 @pytest.mark.integration
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_check(aggregator):
     # type: (AggregatorStub, Dict[str, Any]) -> None
     check = MarklogicCheck('marklogic', {}, [INSTANCE])

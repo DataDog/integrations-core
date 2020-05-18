@@ -16,7 +16,7 @@ version: '3.6'
 
 services:
     bootstrap:
-      image: store/marklogicdb/marklogic-server:9.0-12-dev-centos
+      image: store/marklogicdb/marklogic-server:${MARKLOGIC_IMAGE}
       container_name: bootstrap
       domainname: .
       environment:
@@ -28,7 +28,7 @@ services:
         - 8001:8001
         - 8002:8002
     dnode:
-      image: store/marklogicdb/marklogic-server:9.0-12-dev-centos
+      image: store/marklogicdb/marklogic-server:${MARKLOGIC_IMAGE}
       domainname: .
       environment:
         - MARKLOGIC_INIT=true
