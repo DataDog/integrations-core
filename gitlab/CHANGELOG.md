@@ -3,7 +3,7 @@
 ## 4.0.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
-* [Added] Add gitlab config spec. See [#6151](https://github.com/DataDog/integrations-core/pull/6151).
+* [Added] Add config spec. See [#6151](https://github.com/DataDog/integrations-core/pull/6151).
 * [Changed] Remove duplicates in metadata and assert metrics with metadata. See [#6516](https://github.com/DataDog/integrations-core/pull/6516).
 
 ## 3.0.0 / 2020-04-04
