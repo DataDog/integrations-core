@@ -252,7 +252,7 @@ spec:
 
 ### Live Containers
 
-Datadog Agent 6.19+ supports live containers in the EKS Fargate integration. Live containers appear in the [Containers][21] page.
+Datadog Agent v6.19+ supports live containers in the EKS Fargate integration. Live containers appear on the [Containers][21] page.
 
 ### Live Processes
 
