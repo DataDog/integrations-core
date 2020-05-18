@@ -3,7 +3,7 @@
 ## 5.2.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
-* [Added] Add vSphere version metadata. See [#6364](https://github.com/DataDog/integrations-core/pull/6364).
+* [Added] Add version metadata. See [#6364](https://github.com/DataDog/integrations-core/pull/6364).
 * [Fixed] Properly error when filtering resources by the `tag` property but `collect_tags` is disabled. See [#6638](https://github.com/DataDog/integrations-core/pull/6638).
 
 ## 5.1.2 / 2020-04-14
