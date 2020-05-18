@@ -1,4 +1,4 @@
-{license_header}from typing import Any, Dict
+{license_header}from typing import Any
 
 from datadog_checks.base import AgentCheck
 
