@@ -256,7 +256,7 @@ Datadog Agent v6.19+ supports live containers in the EKS Fargate integration. Li
 
 ### Live Processes
 
-Datadog Agent 6.19+ supports live processes in the EKS Fargate integration. Live processes appear in the [Processes][22] page. To enable live processes, [enable `shareProcessNamespace` in the pod spec][23].
+Datadog Agent v6.19+ supports live processes in the EKS Fargate integration. Live processes appear on the [Processes][22] page. To enable live processes, [enable shareProcessNamespace in the pod spec][23].
 
 ## Traces Collection
 
