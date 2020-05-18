@@ -248,6 +248,9 @@ jobs:
     - checkName: marathon
       displayName: Marathon
       os: linux
+    - checkName: marklogic
+      displayName: MarkLogic
+      os: linux
     - checkName: mcache
       displayName: Memcached
       os: linux
