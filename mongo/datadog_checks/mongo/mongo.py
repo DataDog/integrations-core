@@ -33,11 +33,11 @@ def build_url(scheme, host, path='/', username=None, password=None, query_params
     else:
         netloc = host
 
-    params = ""
+    path_params = ""
     query = urlencode(query_params or {})
     fragment = ""
 
-    return urlunparse([scheme, netloc, path, params, query, fragment])
+    return urlunparse([scheme, netloc, path, path_params, query, fragment])
 
 
 class MongoDb(AgentCheck):
