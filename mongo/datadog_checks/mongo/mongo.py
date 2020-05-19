@@ -10,7 +10,7 @@ from distutils.version import LooseVersion
 
 import pymongo
 from six import PY3, iteritems, itervalues
-from six.moves.urllib.parse import unquote_plus, urlsplit
+from six.moves.urllib.parse import unquote_plus, urlsplit, urlunparse, urlencode, quote_plus
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import round_value
@@ -23,6 +23,21 @@ if PY3:
 DEFAULT_TIMEOUT = 30
 ALLOWED_CUSTOM_METRICS_TYPES = ['gauge', 'rate', 'count', 'monotonic_count']
 ALLOWED_CUSTOM_QUERIES_COMMANDS = ['aggregate', 'count', 'find']
+
+
+def build_url(scheme, host, path='/', username=None, password=None, query_params=None):
+    # type: (str, str, str, str, str, dict) -> str
+    """Build an URL from individual parts. Makes sure that parts are properly URL-encoded."""
+    if username and password:
+        netloc = '{}:{}@{}'.format(quote_plus(username), quote_plus(password), host)
+    else:
+        netloc = host
+
+    params = ""
+    query = urlencode(query_params or {})
+    fragment = ""
+
+    return urlunparse([scheme, netloc, path, params, query, fragment])
 
 
 class MongoDb(AgentCheck):
@@ -102,24 +117,27 @@ class MongoDb(AgentCheck):
         if 'server' in self.instance:
             self.warning('Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.')
             self.server = self.instance['server']
-            (
-                self.username,
-                self.password,
-                self.db_name,
-                self.nodelist,
-                self.clean_server_name,
-                self.auth_source,
-            ) = self._parse_uri(self.server, sanitize_username=bool(self.ssl_params))
         else:
-            (
-                self.server,
-                self.username,
-                self.password,
-                self.db_name,
-                self.nodelist,
-                self.clean_server_name,
-                self.auth_source,
-            ) = self._parse_config()
+            hosts = self.instance.get('hosts', [])
+            if not hosts:
+                raise ConfigurationError('No `hosts` specified')
+            self.server = self._build_connection_string(
+                hosts,
+                scheme=self.instance.get('connection_scheme', 'mongodb'),
+                username=self.instance.get('username'),
+                password=self.instance.get('password'),
+                database=self.instance.get('database'),
+                options=self.instance.get('options'),
+            )
+
+        (
+            self.username,
+            self.password,
+            self.db_name,
+            self.nodelist,
+            self.clean_server_name,
+            self.auth_source,
+        ) = self._parse_uri(self.server, sanitize_username=bool(self.ssl_params))
 
         self.additional_metrics = self.instance.get('additional_metrics', [])
 
@@ -328,55 +346,28 @@ class MongoDb(AgentCheck):
 
         return authenticated
 
-    def _parse_config(self):
+    def _build_connection_string(self, hosts, scheme, username=None, password=None, database=None, options=None):
+        # type: (list, str, str, str, str, dict) -> str
         """
+        Build a server connection string.
+
         See https://docs.mongodb.com/manual/reference/connection-string/
         """
-        hosts = self.instance.get('hosts', [])
-        if not hosts:
-            raise ConfigurationError('No `hosts` specified')
 
-        connection_scheme = self.instance.get('connection_scheme', 'mongodb')
-        username = self.instance.get('username')
-        password = self.instance.get('password')
-        database = self.instance.get('database')
-        options = self.instance.get('options', {})
+        def add_default_port(host):
+            # type: (str) -> str
+            if ':' not in host:
+                return '{}:27017'.format(host)
+            return host
 
-        # Construct the connection string
-        server = '{}://'.format(connection_scheme)
-
-        if username and password:
-            server += '{}:{}@'.format(username, password)
-
-        server += ','.join(hosts)
-
-        if database:
-            server += '/{}'.format(database)
-
-        if options:
-            if not database:
-                server += '/'
-
-            server += '?{}'.format('&'.join('{}={}'.format(key, value) for key, value in options.items()))
-
-        # Satisfy requirements of _parse_uri
-        auth_source = None
-        for key, value in options.items():
-            if key.lower() == 'authsource':
-                auth_source = value
-                break
-
-        nodelist = []
-        for host in hosts:
-            if ':' in host:
-                hostname, port = host.rsplit(':', 1)
-                nodelist.append((hostname, int(port)))
-            else:
-                nodelist.append((host, 27017))
-
-        clean_server_name = server.replace(password, '*' * 5) if password else server
-
-        return server, username, password, database, nodelist, clean_server_name, auth_source
+        return build_url(
+            scheme,
+            host=','.join(add_default_port(host) for host in hosts),
+            path='/{}'.format(database) if database else '/',
+            username=username,
+            password=password,
+            query_params=options,
+        )
 
     @classmethod
     def _parse_uri(cls, server, sanitize_username=False):
