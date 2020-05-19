@@ -1,5 +1,9 @@
 # CHANGELOG - mongo
 
+## 1.16.1 / 2020-05-19
+
+* [Fixed] Fix encoding and parsing issues when processing connection configuration. See [#6686](https://github.com/DataDog/integrations-core/pull/6686).
+
 ## 1.16.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
