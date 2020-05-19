@@ -103,7 +103,7 @@ def translate_profile(ctx, profile_path):
     print(yaml.dump({'metrics': output}))
 
 
-@snmp.command(context_settings=CONTEXT_SETTINGS, short_help='Translate MIB name to OIDs in SNMP profiles')
+@snmp.command(context_settings=CONTEXT_SETTINGS, short_help='Generate metadata.csv from profile')
 @click.argument('profile_path')
 @click.pass_context
 def metadata_from_profile(ctx, profile_path):
