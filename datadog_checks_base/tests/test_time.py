@@ -27,7 +27,10 @@ class TestNormalization:
         nyc = tz.gettz('America/New_York')
         now = datetime.now(nyc)
 
-        assert normalize_datetime(now).tzinfo is nyc
+        normalized = normalize_datetime(now)
+
+        assert normalized is now
+        assert normalized.tzinfo is nyc
 
 
 class TestCurrentDatetime:
