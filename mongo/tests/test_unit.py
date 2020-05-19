@@ -153,14 +153,14 @@ def test_parse_server_config(check):
     instance = {
         'hosts': ['localhost', 'localhost:27018'],
         'username': 'john\\doe',  # Backslash
-        'password': 'pass word',  # Space
+        'password': 'p@ss word',  # Special character and space
         'database': 'test',
         'options': {'replicaSet': 'bar!baz'},  # Special character
     }
     check = check(instance)
-    assert check.server == 'mongodb://john%5Cdoe:pass+word@localhost:27017,localhost:27018/test?replicaSet=bar%21baz'
+    assert check.server == 'mongodb://john%5Cdoe:p%40ss+word@localhost:27017,localhost:27018/test?replicaSet=bar%21baz'
     assert check.username == 'john\\doe'
-    assert check.password == 'pass word'
+    assert check.password == 'p@ss word'
     assert check.db_name == 'test'
     assert check.nodelist == [('localhost', 27017), ('localhost', 27018)]
     assert check.clean_server_name == (
