@@ -1,5 +1,9 @@
 # CHANGELOG - Envoy
 
+## 1.15.1 / 2020-05-19
+
+* [Fixed] Safer metadata error handling. See [#6685](https://github.com/DataDog/integrations-core/pull/6685).
+
 ## 1.15.0 / 2020-05-17
 
 * [Added] Collect version metadata. See [#6595](https://github.com/DataDog/integrations-core/pull/6595).
