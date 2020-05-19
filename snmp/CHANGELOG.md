@@ -1,5 +1,9 @@
 # CHANGELOG - snmp
 
+## 3.2.1 / 2020-05-19
+
+* [Fixed] Add missing auto_conf. See [#6687](https://github.com/DataDog/integrations-core/pull/6687).
+
 ## 3.2.0 / 2020-05-17
 
 * [Added] Add diskStatus tag to Isilon profile. See [#6660](https://github.com/DataDog/integrations-core/pull/6660).
