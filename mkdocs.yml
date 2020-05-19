@@ -70,6 +70,7 @@ nav:
   - Architecture:
     - SNMP: architecture/snmp.md
     - vSphere: architecture/vsphere.md
+    - Windows Event Log: architecture/win32_event_log.md
   - Process:
     - Integration release: process/integration-release.md
     - Agent release:
