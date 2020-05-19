@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from six.moves.urllib.parse import urlunparse, urlencode, quote_plus
+from six.moves.urllib.parse import quote_plus, urlencode, urlunparse
 
 
 def build_url(scheme, host, path='/', username=None, password=None, query_params=None):
