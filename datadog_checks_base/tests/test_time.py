@@ -12,10 +12,6 @@ from datadog_checks.base.utils.time import EPOCH, UTC, get_current_datetime, get
 pytestmark = pytest.mark.time
 
 
-def test_timestamp_type():
-    assert isinstance(get_timestamp(), float)
-
-
 class TestNormalization:
     def test_replace(self):
         now = datetime.now()
@@ -34,20 +30,37 @@ class TestNormalization:
 
 
 class TestCurrentDatetime:
-    def test_default_utc(self):
-        dt = get_current_datetime()
-        now = datetime.now(UTC)
+    # What follows is a workaround for:
+    # TypeError: can't set attributes of built-in/extension type 'datetime.datetime'
 
-        assert now.tzinfo is UTC
-        assert get_timestamp(now) - get_timestamp(dt) < 0.01
+    def test_default_utc(self, mocker):
+        datetime_obj = mocker.patch('datadog_checks.base.utils.time.datetime')
+        datetime_obj.now = mocker.MagicMock()
+        get_current_datetime()
+        datetime_obj.now.assert_called_once_with(UTC)
 
-    def test_tz(self):
+    def test_tz(self, mocker):
+        datetime_obj = mocker.patch('datadog_checks.base.utils.time.datetime')
+        datetime_obj.now = mocker.MagicMock()
         nyc = tz.gettz('America/New_York')
-        dt = get_current_datetime(nyc)
-        now = datetime.now(nyc)
+        get_current_datetime(nyc)
+        datetime_obj.now.assert_called_once_with(nyc)
 
-        assert now.tzinfo is nyc
-        assert get_timestamp(now) - get_timestamp(dt) < 0.01
+
+class TestTimestamp:
+    def test_type(self):
+        assert isinstance(get_timestamp(), float)
+
+    def test_default(self, mocker):
+        time_time = mocker.patch('datadog_checks.base.utils.time.epoch_offset')
+        get_timestamp()
+        time_time.assert_called_once()
+
+    def test_time_delta(self):
+        now = datetime.now()
+        expected = (now.replace(tzinfo=UTC) - EPOCH).total_seconds()
+
+        assert get_timestamp(now) == expected
 
 
 @pytest.mark.skipif(PY2, reason='Using Python 3 features')
