@@ -10,12 +10,13 @@ from distutils.version import LooseVersion
 
 import pymongo
 from six import PY3, iteritems, itervalues
-from six.moves.urllib.parse import unquote_plus, urlsplit, urlunparse, urlencode, quote_plus
+from six.moves.urllib.parse import unquote_plus, urlsplit
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import round_value
 
 from . import metrics
+from .utils import build_url
 
 if PY3:
     long = int
@@ -23,21 +24,6 @@ if PY3:
 DEFAULT_TIMEOUT = 30
 ALLOWED_CUSTOM_METRICS_TYPES = ['gauge', 'rate', 'count', 'monotonic_count']
 ALLOWED_CUSTOM_QUERIES_COMMANDS = ['aggregate', 'count', 'find']
-
-
-def build_url(scheme, host, path='/', username=None, password=None, query_params=None):
-    # type: (str, str, str, str, str, dict) -> str
-    """Build an URL from individual parts. Makes sure that parts are properly URL-encoded."""
-    if username and password:
-        netloc = '{}:{}@{}'.format(quote_plus(username), quote_plus(password), host)
-    else:
-        netloc = host
-
-    path_params = ""
-    query = urlencode(query_params or {})
-    fragment = ""
-
-    return urlunparse([scheme, netloc, path, path_params, query, fragment])
 
 
 class MongoDb(AgentCheck):
