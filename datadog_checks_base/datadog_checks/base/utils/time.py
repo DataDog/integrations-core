@@ -17,20 +17,6 @@ def get_timestamp(dt=None):
     If `dt` is not specified or `None`, the current time in UTC is assumed.
     """
     if dt is None:
-        # NOTE: Although the epoch is platform dependent, it appears to be the same
-        # for all platforms we've tested, therefore we use `time.time` for speed.
-        #
-        # Here is the test:
-        #
-        #     $ python -c "import time;print(tuple(time.gmtime(0)[:9]))"
-        #     (1970, 1, 1, 0, 0, 0, 3, 1, 0)
-        #
-        # If you can reproduce, add to the following list of tested platforms:
-        #
-        # - Windows
-        # - macOS
-        # - Ubuntu
-        # - Alpine
         return epoch_offset()
 
     # TODO: when we drop support for Python 2 switch to:
