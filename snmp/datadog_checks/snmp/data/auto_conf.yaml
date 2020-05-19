@@ -1,0 +1,17 @@
+ad_identifiers:
+  - snmp
+init_config:
+instances:
+  - ip_address: "%%host%%"
+    port: "%%port%%"
+    extra_version: "%%extra_version%%"
+    timeout: "%%extra_timeout%%"
+    retries: "%%extra_retries%%"
+    community_string: "%%extra_community%%"
+    user: "%%extra_user%%"
+    authKey: "%%extra_auth_key%%"
+    authProtocol: "%%extra_auth_protocol%%"
+    privKey: "%%extra_priv_key%%"
+    privProtocol: "%%extra_priv_protocol%%"
+    context_engine_id: "%%extra_context_engine_id%%"
+    context_name: "%%extra_context_name%%"
