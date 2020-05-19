@@ -130,6 +130,7 @@ def test_cisco_voice(aggregator):
     aggregator.assert_metric('snmp.{}'.format("sysUpTimeInstance"), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_f5(aggregator):
@@ -267,6 +268,7 @@ def test_f5(aggregator):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_router(aggregator):
@@ -306,6 +308,7 @@ def test_router(aggregator):
                 )
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_f5_router(aggregator):
@@ -341,6 +344,7 @@ def test_f5_router(aggregator):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_cisco_3850(aggregator):
@@ -440,6 +444,7 @@ def test_cisco_3850(aggregator):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_meraki_cloud_controller(aggregator):
@@ -458,6 +463,7 @@ def test_meraki_cloud_controller(aggregator):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_idrac(aggregator):
@@ -553,6 +559,7 @@ def test_idrac(aggregator):
         aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_cisco_nexus(aggregator):
@@ -636,6 +643,7 @@ def test_cisco_nexus(aggregator):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_dell_poweredge(aggregator):
@@ -742,6 +750,7 @@ def test_dell_poweredge(aggregator):
         aggregator.assert_metric('snmp.{}'.format(gauge), metric_type=aggregator.GAUGE)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_hp_ilo4(aggregator):
@@ -849,6 +858,7 @@ def test_hp_ilo4(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_proliant(aggregator):
@@ -979,6 +989,7 @@ def test_proliant(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_generic_host_resources(aggregator):
@@ -1011,6 +1022,7 @@ def test_generic_host_resources(aggregator):
     aggregator.assert_metric('snmp.hrProcessorLoad', count=2)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_palo_alto(aggregator):
@@ -1054,6 +1066,7 @@ def test_palo_alto(aggregator):
     # Needs cross table entLogicalDescr tag
     aggregator.assert_metric('snmp.panEntryFanTrayPowerUsed', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_cisco_asa_5525(aggregator):
@@ -1166,6 +1179,7 @@ def test_cisco_asa_5525(aggregator):
         )
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_cisco_csr(aggregator):
@@ -1239,6 +1253,7 @@ def test_checkpoint_firewall(aggregator):
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_arista(aggregator):
@@ -1277,6 +1292,7 @@ def test_arista(aggregator):
         aggregator.assert_metric('snmp.entPhySensorOperStatus', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_aruba(aggregator):
@@ -1336,6 +1352,7 @@ def test_aruba(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 def test_chatsworth(aggregator):
@@ -1548,3 +1565,4 @@ def test_apc_ups(aggregator):
         tags=['outlet_group_name:test_outlet'] + tags,
     )
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)

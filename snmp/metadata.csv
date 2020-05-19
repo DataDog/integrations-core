@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+snmp.sysUpTimeInstance,count,,,,[Generic] System uptime in hundredths of seconds..,0,snmp,
 snmp.adapterCollisions,count,,,,[Dell iDRAC] Total number of single collisions.,0,snmp,
 snmp.adapterRxBytes,count,,byte,,[Dell iDRAC] Total number of bytes received.,0,snmp,
 snmp.adapterRxDropped,count,,packet,,[Dell iDRAC] Total number of receive packets dropped due to overrun.,0,snmp,
