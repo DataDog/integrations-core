@@ -56,8 +56,3 @@ class TestConstants:
         from datetime import timezone
 
         assert EPOCH == datetime(1970, 1, 1, tzinfo=timezone.utc)
-
-    def test_utc(self):
-        from datetime import timezone
-
-        assert UTC.utcoffset(None) == timezone.utc.utcoffset(None)
