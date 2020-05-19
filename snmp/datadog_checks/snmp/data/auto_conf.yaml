@@ -4,7 +4,7 @@ init_config:
 instances:
   - ip_address: "%%host%%"
     port: "%%port%%"
-    extra_version: "%%extra_version%%"
+    snmp_version: "%%extra_version%%"
     timeout: "%%extra_timeout%%"
     retries: "%%extra_retries%%"
     community_string: "%%extra_community%%"
