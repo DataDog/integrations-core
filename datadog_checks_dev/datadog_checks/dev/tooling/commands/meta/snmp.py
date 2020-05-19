@@ -1,11 +1,14 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import sys
+from io import StringIO
 import os
 
 import click
 import yaml
 from pysnmp.smi import builder
+from pysnmp.smi.error import SmiError
 
 from ..console import CONTEXT_SETTINGS
 
@@ -138,36 +141,52 @@ def metadata_from_profile(ctx, profile_path):
         data = yaml.safe_load(f.read())
 
     def _bulid_metric_row(symbol_name, forced_type=None):
-        node = mib_view_controller.mibBuilder.importSymbols(mib, symbol_name)[0]
+        try:
+            node = mib_view_controller.mibBuilder.importSymbols(mib, symbol_name)[0]
+        except (TypeError, SmiError) as e:
+            sys.stderr.write("[ERROR] Fail to process symbol: {:30}. Error: {}\n".format(symbol_name, e))
+            node = None
+
         if forced_type:
             metric_type = forced_type
-        else:
+        elif node:
             metric_type = get_type(node.syntax)
+        else:
+            metric_type = 'UNKNOWN'
         row = {
             'metric_name': "snmp.{}".format(symbol_name),
             'metric_type': metric_type,
-            'description': node.getDescription(),
+            'interval': None,
+            'unit_name': None,
+            'per_unit_name': None,
+            'description': node.getDescription() if node else 'UNKNOWN',
+            'orientation': None,
+            'integration': 'snmp',
+            'short_name': None,
         }
         return row
 
-    output = []
+    metrics = []
     for metric in data['metrics']:
-        print("processing: ", metric)
         mib = metric['MIB']
-        try:
-            mib_view_controller.mibBuilder.loadModule(mib)
-        except MibNotFoundError:
-            fetch_mib(mib)
+        # try:
+        #     mib_view_controller.mibBuilder.loadModule(mib)
+        # except MibNotFoundError:
+        #     fetch_mib(mib)
         if 'table' in metric:
             for symbol in metric['symbols']:
-                output.append(_bulid_metric_row(symbol, metric.get('forced_type')))
+                metrics.append(_bulid_metric_row(symbol['name'], metric.get('forced_type')))
         elif 'symbol' in metric:
-            output.append(_bulid_metric_row(metric['symbol'], metric.get('forced_type')))
+            metrics.append(_bulid_metric_row(metric['symbol'], metric.get('forced_type')))
         elif 'name' in metric:
-            output.append(_bulid_metric_row(metric['name'], metric.get('forced_type')))
-    print(yaml.dump({'metrics': output}))
+            metrics.append(_bulid_metric_row(metric['name'], metric.get('forced_type')))
+    import csv
 
-# metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
+    output = StringIO()
+    w = csv.DictWriter(output, metrics[0].keys())
+    w.writeheader()
+    w.writerows(metrics)
+    print(output.getvalue())
 
 
 SNMP_COUNTER_CLASSES = {
@@ -193,4 +212,4 @@ def get_type(obj):
         return 'count'
     elif name in SNMP_GAUGE_CLASSES:
         return 'gauge'
-    return 'unknown'
+    return 'UNKNOWN'
