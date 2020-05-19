@@ -127,13 +127,22 @@ def test_metadata(datadog_agent):
     instance = INSTANCES['main']
     check = Envoy(CHECK_NAME, {}, [instance])
     check.check_id = 'test:123'
+    check.log = mock.MagicMock()
 
     with mock.patch('requests.get', side_effect=requests.exceptions.Timeout()):
         check._collect_metadata(instance['stats_url'])
         datadog_agent.assert_metadata_count(0)
-    with mock.patch('requests.get', side_effect=requests.exceptions.RequestException):
+        check.log.warning.assert_called_with(
+            'Envoy endpoint `%s` timed out after %s seconds', 'http://localhost:8001/server_info', (10.0, 10.0)
+        )
+    with mock.patch('requests.get', side_effect=requests.exceptions.RequestException('Req Exception')):
         check._collect_metadata(instance['stats_url'])
         datadog_agent.assert_metadata_count(0)
+        check.log.warning.assert_called_with(
+            'Error collecting Envoy version with url=`%s`. Error: %s',
+            'http://localhost:8001/server_info',
+            'Req Exception',
+        )
 
     with mock.patch('requests.get', return_value=response('multiple_services')):
         check._collect_metadata(instance['stats_url'])
