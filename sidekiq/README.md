@@ -57,24 +57,24 @@ No additional installation is needed on your server.
        mappings:
          - match: "sidekiq.sidekiq.*"
            name: "sidekiq.*"
-         - match: "sidekiq\.jobs\.(.*)\.perform"
+         - match: 'sidekiq\.jobs\.(.*)\.perform'
            name: "sidekiq.jobs.perform"
-           match_type: regex
+           match_type: "regex"
            tags:
              worker: "$1"
-         - match: "sidekiq\.jobs\.(.*)\.count"
+         - match: 'sidekiq\.jobs\.(.*)\.count'
            name: "sidekiq.jobs.count.total"
-           match_type: regex
+           match_type: "regex"
            tags:
              worker: "$1"
-         - match: "sidekiq\.jobs\.(.*)\.success"
+         - match: 'sidekiq\.jobs\.(.*)\.success'
            name: "sidekiq.jobs.success.total"
-           match_type: regex
+           match_type: "regex"
            tags:
              worker: "$1"
-        - match: "sidekiq\.jobs\.(.*)\.failure"
+        - match: 'sidekiq\.jobs\.(.*)\.failure'
            name: "sidekiq.jobs.failure.total"
-           match_type: regex
+           match_type: "regex"
            tags:
              worker: "$1"
     ```
