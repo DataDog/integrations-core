@@ -13,7 +13,11 @@ ships a snapshot of [integrations-core][].
 
 ## Setup
 
-Configure your [GitHub](../ddev/configuration.md#github) and [Trello](../ddev/configuration.md#trello) auth.
+Configure your the following and add to your [configuration](../ddev/configuration.md):
+
+- [GitHub](../ddev/configuration.md#github) credentials
+- [Trello](../ddev/configuration.md#trello) credentials
+- Add the `trello_users_$team` table to [automatically assign test cards](#create-items) to team members.
 
 ## Freeze
 
@@ -25,6 +29,8 @@ all integrations with pending changes then branch off.
 1. Make a pull request to release [any new integrations](integration-release.md#new-integrations), then merge it and pull `master`
 1. Make a pull request to release [all changed integrations](integration-release.md#bulk-releases), then merge it and pull `master`
 
+!!! important
+    Update [PyPI](integration-release.md#PyPI) if you released `datadog_checks_base` or `datadog_checks_dev`.
 ### Branch
 
 1. Create a branch based on `master` named after the highest version of the Agent being released in the form `<MAJOR>.<MINOR>.x`
