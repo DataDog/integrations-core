@@ -30,7 +30,8 @@ all integrations with pending changes then branch off.
 1. Make a pull request to release [all changed integrations](integration-release.md#bulk-releases), then merge it and pull `master`
 
 !!! important
-    Update [PyPI](integration-release.md#PyPI) if you released `datadog_checks_base` or `datadog_checks_dev`.
+    [Update PyPI](integration-release.md#pypi) if you released `datadog_checks_base` or `datadog_checks_dev`.
+
 
 ### Branch
 
