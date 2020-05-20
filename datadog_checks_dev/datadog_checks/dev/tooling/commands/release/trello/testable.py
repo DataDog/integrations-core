@@ -27,7 +27,7 @@ def create_trello_card(
     pr_author: str,
     config: dict,
 ) -> None:
-    labels = ', '.join([f'`{l}`' for l in pr_labels])
+    labels = ', '.join([f'`{label}`' for label in pr_labels])
     body = f'Pull request: {pr_url}\nLabels: {labels}\n\n{pr_body}'
 
     for team in teams:
