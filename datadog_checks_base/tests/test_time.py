@@ -7,7 +7,7 @@ import pytest
 from dateutil import tz
 from six import PY2
 
-from datadog_checks.base.utils.time import EPOCH, UTC, get_current_datetime, get_timestamp, normalize_datetime
+from datadog_checks.base.utils.time import EPOCH, UTC, ensure_aware_datetime, get_current_datetime, get_timestamp
 
 pytestmark = pytest.mark.time
 
@@ -17,33 +17,37 @@ class TestNormalization:
         now = datetime.now()
         assert now.tzinfo is None
 
-        assert normalize_datetime(now).tzinfo is UTC
+        assert ensure_aware_datetime(now).tzinfo is UTC
 
     def test_utc(self):
         nyc = tz.gettz('America/New_York')
         now = datetime.now(nyc)
 
-        normalized = normalize_datetime(now)
+        normalized = ensure_aware_datetime(now)
 
         assert normalized is now
         assert normalized.tzinfo is nyc
 
 
 class TestCurrentDatetime:
-    # What follows is a workaround for:
+    # What follows is a workaround for being unable to patch directly:
     # TypeError: can't set attributes of built-in/extension type 'datetime.datetime'
 
     def test_default_utc(self, mocker):
         datetime_obj = mocker.patch('datadog_checks.base.utils.time.datetime')
         datetime_obj.now = mocker.MagicMock()
-        get_current_datetime()
+        dt = datetime(2020, 2, 2, tzinfo=UTC)
+        datetime_obj.now.return_value = dt
+        assert get_current_datetime() is dt
         datetime_obj.now.assert_called_once_with(UTC)
 
     def test_tz(self, mocker):
         datetime_obj = mocker.patch('datadog_checks.base.utils.time.datetime')
         datetime_obj.now = mocker.MagicMock()
         nyc = tz.gettz('America/New_York')
-        get_current_datetime(nyc)
+        dt = datetime(2020, 2, 2, tzinfo=nyc)
+        datetime_obj.now.return_value = dt
+        assert get_current_datetime(nyc) is dt
         datetime_obj.now.assert_called_once_with(nyc)
 
 

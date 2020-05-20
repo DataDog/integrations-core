@@ -21,8 +21,8 @@ def get_timestamp(dt=None):
         return epoch_offset()
 
     # TODO: when we drop support for Python 2 switch to:
-    # return normalize_datetime(dt).timestamp()
-    return (normalize_datetime(dt) - EPOCH).total_seconds()
+    # return ensure_aware_datetime(dt).timestamp()
+    return (ensure_aware_datetime(dt) - EPOCH).total_seconds()
 
 
 def get_current_datetime(tz=UTC):
@@ -32,7 +32,7 @@ def get_current_datetime(tz=UTC):
     return datetime.now(tz)
 
 
-def normalize_datetime(dt, default_tz=UTC):
+def ensure_aware_datetime(dt, default_tz=UTC):
     """
     Ensures that the returned datetime object is not naive.
     """
@@ -42,4 +42,4 @@ def normalize_datetime(dt, default_tz=UTC):
     return dt
 
 
-__all__ = ['EPOCH', 'UTC', 'get_current_datetime', 'get_timestamp', 'normalize_datetime']
+__all__ = ['EPOCH', 'UTC', 'ensure_aware_datetime', 'get_current_datetime', 'get_timestamp']
