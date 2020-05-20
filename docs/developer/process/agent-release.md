@@ -31,6 +31,7 @@ all integrations with pending changes then branch off.
 
 !!! important
     Update [PyPI](integration-release.md#PyPI) if you released `datadog_checks_base` or `datadog_checks_dev`.
+
 ### Branch
 
 1. Create a branch based on `master` named after the highest version of the Agent being released in the form `<MAJOR>.<MINOR>.x`
