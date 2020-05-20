@@ -66,7 +66,7 @@ No additional installation is needed on your server.
            name: "sidekiq.jobs.worker.$2"
            match_type: "regex"
            tags:
-             worker: "$1
+             worker: "$1"
     ```
 
 4. [Restart the Agent][8].
