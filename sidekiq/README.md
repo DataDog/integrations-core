@@ -72,7 +72,7 @@ No additional installation is needed on your server.
            match_type: "regex"
            tags:
              worker: "$1"
-        - match: 'sidekiq\.jobs\.(.*)\.failure'
+         - match: 'sidekiq\.jobs\.(.*)\.failure'
            name: "sidekiq.jobs.failure.total"
            match_type: "regex"
            tags:
