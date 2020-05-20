@@ -21,12 +21,14 @@ def create_trello_card(
     teams: List[str],
     pr_title: str,
     pr_url: str,
+    pr_labels: List[str],
     pr_body: str,
     dry_run: bool,
     pr_author: str,
     config: dict,
 ) -> None:
-    body = f'Pull request: {pr_url}\n\n{pr_body}'
+    labels = ', '.join([f'`{l}`' for l in pr_labels])
+    body = f'Pull request: {pr_url}\nLabels: {labels}\n\n{pr_body}'
 
     for team in teams:
         member = pick_card_member(config, pr_author, team)
@@ -296,7 +298,7 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
 
         teams = [trello.label_team_map[label] for label in pr_labels if label in trello.label_team_map]
         if teams:
-            create_trello_card(trello, teams, pr_title, pr_url, pr_body, dry_run, pr_author, user_config)
+            create_trello_card(trello, teams, pr_title, pr_url, pr_labels, pr_body, dry_run, pr_author, user_config)
             continue
 
         finished = False
@@ -355,6 +357,8 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
                 echo_warning(f'Exited at {format_commit_id(commit_id)}')
                 return
             else:
-                create_trello_card(trello, [value], pr_title, pr_url, pr_body, dry_run, pr_author, user_config)
+                create_trello_card(
+                    trello, [value], pr_title, pr_url, pr_labels, pr_body, dry_run, pr_author, user_config
+                )
 
             finished = True
