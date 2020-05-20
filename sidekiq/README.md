@@ -62,21 +62,11 @@ No additional installation is needed on your server.
            match_type: "regex"
            tags:
              worker: "$1"
-         - match: 'sidekiq\.jobs\.(.*)\.count'
-           name: "sidekiq.jobs.count.total"
+        - match: 'sidekiq\.jobs\.(.*)\.(count|success|failure)'
+           name: "sidekiq.jobs.worker.$2"
            match_type: "regex"
            tags:
-             worker: "$1"
-         - match: 'sidekiq\.jobs\.(.*)\.success'
-           name: "sidekiq.jobs.success.total"
-           match_type: "regex"
-           tags:
-             worker: "$1"
-         - match: 'sidekiq\.jobs\.(.*)\.failure'
-           name: "sidekiq.jobs.failure.total"
-           match_type: "regex"
-           tags:
-             worker: "$1"
+             worker: "$1
     ```
 
 4. [Restart the Agent][8].
