@@ -13,7 +13,7 @@ ships a snapshot of [integrations-core][].
 
 ## Setup
 
-Configure and add the following to your [configuration](../ddev/configuration.md):
+Ensure that you have configured the following:
 
 - [GitHub](../ddev/configuration.md#github) credentials
 - [Trello](../ddev/configuration.md#trello) credentials
