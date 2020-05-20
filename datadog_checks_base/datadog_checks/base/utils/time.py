@@ -6,64 +6,33 @@ from __future__ import absolute_import
 from datetime import datetime
 from time import time as epoch_offset
 
-import pytz
-from six import PY2
+from dateutil.tz import UTC
 
-UTC = pytz.utc
-EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
+EPOCH = datetime.fromtimestamp(0, UTC)
 
 
-if PY2:
-
-    def get_timestamp(dt=None):
-        """
-        Returns the number of seconds since the Unix epoch.
-        If `dt` is not specified or `None`, the current time in UTC is assumed.
-        """
-        if dt is None:
-            return epoch_offset()
-
-        return (dt - EPOCH).total_seconds()
-
-
-else:
-
-    def get_timestamp(dt=None):
-        """
-        Returns the number of seconds since the Unix epoch.
-        If `dt` is not specified or `None`, the current time in UTC is assumed.
-        """
-        if dt is None:
-            # NOTE: Although the epoch is platform dependent, it appears to be the same
-            # for all platforms we've tested, therefore we use `time.time` for speed.
-            #
-            # Here is the test:
-            #
-            #     $ python -c "import time;print(tuple(time.gmtime(0)[:9]))"
-            #     (1970, 1, 1, 0, 0, 0, 3, 1, 0)
-            #
-            # If you can reproduce, add to the following list of tested platforms:
-            #
-            # - Windows
-            # - macOS
-            # - Ubuntu
-            # - Alpine
-            return epoch_offset()
-
-        return normalize_datetime(dt).timestamp()
-
-
-def get_aware_datetime(dt=None, tz=UTC):
+def get_timestamp(dt=None):
     """
-    Returns an aware datetime object. If `dt` is not specified or `None`, the current time in UTC is assumed.
+    Returns the number of seconds since the Unix epoch.
+    If `dt` is not specified or `None`, the current time in UTC is assumed.
     """
     if dt is None:
-        return datetime.now(tz)
-    else:
-        return normalize_datetime(dt)
+        # The precision is different between Python 2 and 3
+        return epoch_offset()
+
+    # TODO: when we drop support for Python 2 switch to:
+    # return ensure_aware_datetime(dt).timestamp()
+    return (ensure_aware_datetime(dt) - EPOCH).total_seconds()
 
 
-def normalize_datetime(dt, default_tz=UTC):
+def get_current_datetime(tz=UTC):
+    """
+    Returns an aware datetime object representing the current time. If `tz` is not specified, UTC is assumed.
+    """
+    return datetime.now(tz)
+
+
+def ensure_aware_datetime(dt, default_tz=UTC):
     """
     Ensures that the returned datetime object is not naive.
     """
@@ -71,3 +40,6 @@ def normalize_datetime(dt, default_tz=UTC):
         dt = dt.replace(tzinfo=default_tz)
 
     return dt
+
+
+__all__ = ['EPOCH', 'UTC', 'ensure_aware_datetime', 'get_current_datetime', 'get_timestamp']
