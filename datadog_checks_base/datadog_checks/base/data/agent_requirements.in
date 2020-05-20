@@ -18,7 +18,7 @@ flup==1.0.3.dev-20110405; python_version < '3.0'
 flup-py3==1.0.3; python_version > '3.0'
 futures==3.3.0; python_version < '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
-httplib2==0.18.0
+httplib2==0.18.1
 in-toto==0.4.2
 ipaddress==1.0.22; python_version < '3.0'
 jaydebeapi==1.1.1
