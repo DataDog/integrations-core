@@ -117,4 +117,4 @@ ddev agent changelog
 ddev agent integrations
 ```
 
-Update the [`AGENT_CHANGELOG`][agent-changelog] and [`AGENT_INTEGRATIONS`][agent-integrations] files. Create a pull request and wait for approval before merging.
+Update the [`AGENT_CHANGELOG`][agent-changelog] and [`AGENT_INTEGRATIONS`][agent-integrations] files with the outputs of these commands. Create a pull request and wait for approval before merging.
