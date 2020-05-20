@@ -7,13 +7,16 @@ sidekiq.jobs.perform.95percentile,gauge,,,,95th percentile of amount of time spe
 sidekiq.jobs.count,count,,,,Count of Sidekiq jobs,0,sidekiq,jobs count
 sidekiq.jobs.success,count,,,,Count of successful Sidekiq jobs,0,sidekiq,jobs success
 sidekiq.jobs.failure,count,,,,Count of failed Sidekiq jobs,-1,sidekiq,jobs failure
-sidekiq.processed,count,,,,Number of job executions completed (success or failure),0,sidekiq,job execution processed
-sidekiq.failures,count,,,,Number of job executions which raised an error,-1,sidekiq,jobs execution failures
-sidekiq.enqueued,count,,,,Total size of all known queues,0,sidekiq,jobs enqueued
-sidekiq.retries,count,,,,Total retries size,0,sidekiq,job retries
-sidekiq.dead,count,,,,Total Dead Size,0,sidekiq,jobs dead
-sidekiq.scheduled,count,,,,Total Scheduled Size,0,sidekiq,jobs scheduled
-sidekiq.busy,count,,,,Total Busy Size,0,sidekiq,jobs busy
+sidekiq.jobs.count.total,count,,,,Total count of Sidekiq jobs,0,sidekiq,jobs count
+sidekiq.jobs.success.total,count,,,,Total count of successful Sidekiq jobs,0,sidekiq,jobs success
+sidekiq.jobs.failure.total,count,,,,Total count of failed Sidekiq jobs,-1,sidekiq,jobs failure
+sidekiq.processed,count,,,,Number of job executions completed (success or failure) (Enterprise only),0,sidekiq,job execution processed
+sidekiq.failures,count,,,,Number of job executions which raised an error (Enterprise only),-1,sidekiq,jobs execution failures
+sidekiq.enqueued,count,,,,Total size of all known queues (Enterprise only),0,sidekiq,jobs enqueued
+sidekiq.retries,count,,,,Total retries size,0,sidekiq (Enterprise only),job retries
+sidekiq.dead,count,,,,Total Dead Size (Enterprise only),0,sidekiq,jobs dead
+sidekiq.scheduled,count,,,,Total Scheduled Size (Enterprise only),0,sidekiq,jobs scheduled
+sidekiq.busy,count,,,,Total Busy Size (Enterprise only),0,sidekiq,jobs busy
 sidekiq.jobs.expired,count,,,,Count of when a job is expired,0,sidekiq,jobs expired
 sidekiq.jobs.recovered.push,count,,,,Count of when a job is recovered by reliable_push after network outage,0,sidekiq,jobs recovered push
 sidekiq.jobs.recovered.fetch,count,,,,Count of when a job is recovered by super_fetch after process crash,0,sidekiq,jobs recovered fetch
