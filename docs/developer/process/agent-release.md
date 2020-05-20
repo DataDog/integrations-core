@@ -92,14 +92,13 @@ After all fixes have been cherry-picked:
 ### Communication
 
 Update the `#agent-release-sync` channel with a daily status.
+The Agent Release Manager will post a [daily status](../ddev/cli.md#status) for the entire release cycle.
 
 ```
 #agent-integrations status:
-
-- TODO: X
-- In progress: X
-- Issues found: X
-- Awaiting build: X
+1. Status of the testing: [cards left | finished]
+2. Bugs found pending to fix: [description of bugs]
+3. Fixes done pending a new RC build: [link PRs of fixes]
 ```
 
 ## Release week
@@ -118,4 +117,4 @@ ddev agent changelog
 ddev agent integrations
 ```
 
-Create a pull request and wait for approval before merging.
+Update the [`AGENT_CHANGELOG`][agent-changelog] and [`AGENT_INTEGRATIONS`][agent-integrations] files. Create a pull request and wait for approval before merging.
