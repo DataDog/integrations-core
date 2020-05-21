@@ -21,7 +21,11 @@ files:
       value:
         type: object
         example:
-          <MC_CLUSTER_STATE>: <SERVICE_CHECK_STATUS>
+          Active: OK
+          No Migration: WARNING
+          Frozen: CRITICAL
+          Passive: CRITICAL
+          In Transition: WARNING
     - template: instances/jmx
       overrides:
         host.display_priority: 10
