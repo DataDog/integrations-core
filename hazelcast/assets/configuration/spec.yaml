@@ -17,7 +17,7 @@ files:
         type: string
     - name: mc_cluster_states
       description: |
-        Custom cluster state mapping used for configuring service check status.
+        Override cluster state to `hazelcast.mc_cluster_state` service check status mapping.
       value:
         type: object
         example:

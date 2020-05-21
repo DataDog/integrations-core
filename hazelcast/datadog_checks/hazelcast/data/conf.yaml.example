@@ -60,7 +60,7 @@ instances:
     # mc_health_check_endpoint: <MC_HEALTH_CHECK_ENDPOINT>
 
     ## @param mc_cluster_states - mapping - optional
-    ## Custom cluster state mapping used for configuring service check status.
+    ## Override cluster state to `hazelcast.mc_cluster_state` service check status mapping.
     #
     # mc_cluster_states:
     #   <MC_CLUSTER_STATE>: <SERVICE_CHECK_STATUS>
