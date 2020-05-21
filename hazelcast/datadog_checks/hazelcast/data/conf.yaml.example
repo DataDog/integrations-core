@@ -63,7 +63,11 @@ instances:
     ## Override cluster state to `hazelcast.mc_cluster_state` service check status mapping.
     #
     # mc_cluster_states:
-    #   <MC_CLUSTER_STATE>: <SERVICE_CHECK_STATUS>
+    #   Active: OK
+    #   No Migration: WARNING
+    #   Frozen: CRITICAL
+    #   Passive: CRITICAL
+    #   In Transition: WARNING
 
     ## @param user - string - optional
     ## User to use when connecting to JMX.
