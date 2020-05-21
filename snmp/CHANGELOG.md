@@ -1,5 +1,9 @@
 # CHANGELOG - snmp
 
+## 3.2.2 / 2020-05-21
+
+* [Fixed] Fix error handling in getnext. See [#6701](https://github.com/DataDog/integrations-core/pull/6701).
+
 ## 3.2.1 / 2020-05-19
 
 * [Fixed] Add missing auto_conf. See [#6687](https://github.com/DataDog/integrations-core/pull/6687).
