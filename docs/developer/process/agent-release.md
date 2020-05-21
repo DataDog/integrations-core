@@ -17,7 +17,7 @@ Ensure that you have configured the following:
 
 - [GitHub](../ddev/configuration.md#github) credentials
 - [Trello](../ddev/configuration.md#trello) credentials
-- Add the `trello_users_$team` table to [automatically assign test cards](#create-items) to team members.
+- [Trello team mappings](../ddev/configuration.md#item-assignments)
 
 ## Freeze
 
@@ -65,12 +65,7 @@ ddev release trello testable 7.17.1 7.18.0-rc.1
 would select all commits that were merged between the Git references.
 
 The command will display each change and prompt you to assign a team or skip. Purely documentation changes are automatically skipped.
-
-You must assign each item to a team member after creation and ensure no one is assigned to a change that they authored.
-
-If you would like to automate this, then add a `trello_users_$team` table in your [configuration](../ddev/configuration.md), with
-keys being GitHub usernames and values being their corresponding Trello IDs (not names). You can find current team member information
-in [this document](https://github.com/DataDog/devops/wiki/GitHub-usernames-and-Trello-IDs).
+Items are automatically assigned if `$trello_users_$team` table is [configured](../ddev/configuration.md#item-assignments).
 
 ### Release candidates
 
@@ -119,4 +114,7 @@ ddev agent changelog
 ddev agent integrations
 ```
 
-Update the [`AGENT_CHANGELOG`][agent-changelog] and [`AGENT_INTEGRATIONS`][agent-integrations] files with the outputs of these commands. Create a pull request and wait for approval before merging.
+See more options for [`ddev agent changelog`](../ddev/cli.md#changelog) and [`ddev agent integrations`](../ddev/cli.md#integrations).
+
+Update the contents of the [`AGENT_CHANGELOG`][agent-changelog] and [`AGENT_INTEGRATIONS`][agent-integrations] files. 
+Create a pull request and wait for approval before merging.
