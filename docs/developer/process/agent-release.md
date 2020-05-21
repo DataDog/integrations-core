@@ -89,7 +89,6 @@ After all fixes have been cherry-picked:
 
 ### Communication
 
-Update the `#agent-release-sync` channel with a daily status.
 The Agent Release Manager will post a [daily status](../ddev/cli.md#status) for the entire release cycle.
 
 ```
