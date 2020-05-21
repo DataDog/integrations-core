@@ -55,7 +55,7 @@ No additional installation is needed on your server.
      - name: sidekiq
        prefix: "sidekiq."
        mappings:
-         - match: "sidekiq\.sidekiq\.(.*)"
+         - match: 'sidekiq\.sidekiq\.(.*)'
            match_type: "regex"
            name: "sidekiq.$1"
          - match: 'sidekiq\.jobs\.(.*)\.perform'
