@@ -15,6 +15,13 @@ files:
         to poll for the `hazelcast.mc_cluster_state` service check.
       value:
         type: string
+    - name: mc_cluster_states
+      description: |
+        Custom cluster state mapping used for configuring service check status.
+      value:
+        type: object
+        example:
+          <MC_CLUSTER_STATE>: <SERVICE_CHECK_STATUS>
     - template: instances/jmx
       overrides:
         host.display_priority: 10

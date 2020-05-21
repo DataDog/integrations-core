@@ -59,6 +59,12 @@ instances:
     #
     # mc_health_check_endpoint: <MC_HEALTH_CHECK_ENDPOINT>
 
+    ## @param mc_cluster_states - mapping - optional
+    ## Custom cluster state mapping used for configuring service check status.
+    #
+    # mc_cluster_states:
+    #   <MC_CLUSTER_STATE>: <SERVICE_CHECK_STATUS>
+
     ## @param user - string - optional
     ## User to use when connecting to JMX.
     #
