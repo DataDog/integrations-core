@@ -65,7 +65,8 @@ ddev release trello testable 7.17.1 7.18.0-rc.1
 would select all commits that were merged between the Git references.
 
 The command will display each change and prompt you to assign a team or skip. Purely documentation changes are automatically skipped.
-Items are automatically assigned if `$trello_users_$team` table is [configured](../ddev/configuration.md#item-assignments).
+
+Cards are automatically assigned if `$trello_users_$team` table is [configured](../ddev/configuration.md#card-assignment).
 
 ### Release candidates
 
