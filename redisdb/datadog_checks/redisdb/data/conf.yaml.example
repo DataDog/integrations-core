@@ -26,8 +26,13 @@ instances:
     #
     # db: 0
 
+    ## @param username - string - optional
+    ## The username to use for the connection.
+    #
+    # username: <USERNAME>
+
     ## @param password - string - optional
-    ## Additional password to use for the connection.
+    ## The password to use for the connection.
     #
     # password: <PASSWORD>
 

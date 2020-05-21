@@ -149,6 +149,7 @@ class Redis(AgentCheck):
                     'host',
                     'port',
                     'db',
+                    'username',
                     'password',
                     'socket_timeout',
                     'connection_pool',
