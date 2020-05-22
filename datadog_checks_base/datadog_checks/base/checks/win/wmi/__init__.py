@@ -195,7 +195,8 @@ class WinWMICheck(AgentCheck):
                 else:
                     continue
                 # Tag with `tag_by` parameter
-                for t in [t.strip() for t in tag_by.split(',')]:
+                for t in tag_by.split(','):
+                    t = t.strip()
                     if wmi_property == t:
                         tag_value = str(wmi_value).lower()
                         if tag_queries and tag_value.find("#") > 0:
