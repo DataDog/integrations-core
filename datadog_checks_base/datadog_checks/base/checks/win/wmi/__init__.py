@@ -205,7 +205,7 @@ class WinWMICheck(AgentCheck):
                         continue
 
                 # No metric extraction on 'Name' and properties in tag_by
-                if wmi_property == 'name' or wmi_property.lower() in tag_by.lower():
+                if wmi_property == 'name' or normalized_wmi_property in tag_by.lower():
                     continue
 
                 try:
