@@ -27,7 +27,7 @@ def create_trello_card(
     pr_author: str,
     config: dict,
 ) -> None:
-    labels = ', '.join([f'`{label}`' for label in pr_labels])
+    labels = ', '.join(f'`{label}`' for label in sorted(pr_labels))
     body = f'''\
 Pull request: {pr_url}
 Author: `{pr_author}`
