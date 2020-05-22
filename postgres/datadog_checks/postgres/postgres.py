@@ -5,12 +5,19 @@ import copy
 from contextlib import closing
 
 import psycopg2
+import psycopg2.extras
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 
 from .config import PostgresConfig
+from .statements import PgStatementsMixin
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
+
 from .util import (
     ALL_SCHEMAS,
     CONNECTION_METRICS,
@@ -30,7 +37,7 @@ from .version_utils import V9, get_raw_version, parse_version, transform_version
 MAX_CUSTOM_RESULTS = 100
 
 
-class PostgreSql(AgentCheck):
+class PostgreSql(PgStatementsMixin, AgentCheck):
     """Collects per-database, and optionally per-relation metrics, custom metrics"""
 
     SOURCE_TYPE_NAME = 'postgresql'
@@ -38,7 +45,9 @@ class PostgreSql(AgentCheck):
     METADATA_TRANSFORMERS = {'version': transform_version}
 
     def __init__(self, name, init_config, instances):
-        super(PostgreSql, self).__init__(name, init_config, instances)
+
+        AgentCheck.__init__(self, name, init_config, instances)
+        PgStatementsMixin.__init__(self, name, init_config, instances)
         self.db = None
         self._version = None
         # Deprecate custom_metrics in favor of custom_queries
@@ -47,8 +56,10 @@ class PostgreSql(AgentCheck):
                 "DEPRECATION NOTICE: Please use the new custom_queries option "
                 "rather than the now deprecated custom_metrics"
             )
+    
         self.config = PostgresConfig(self.instance)
         self.metrics_cache = PostgresMetricsCache(self.config)
+        self.statement_cache = {}
         self._clean_state()
 
     def _clean_state(self):
@@ -110,36 +121,16 @@ class PostgreSql(AgentCheck):
         else:
             log_func = self.log.warning
 
-        results = None
-        try:
-            query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
-            # if this is a relation-specific query, we need to list all relations last
-            if is_relations:
-                schema_field = get_schema_field(descriptors)
-                relations_filter = build_relations_filter(relations_config, schema_field)
-                self.log.debug("Running query: %s with relations matching: %s", query, relations_filter)
-                cursor.execute(query.format(relations=relations_filter))
-            else:
-                self.log.debug("Running query: %s", query)
-                cursor.execute(query.replace(r'%', r'%%'))
-
-            results = cursor.fetchall()
-        except psycopg2.errors.FeatureNotSupported as e:
-            # This happens for example when trying to get replication metrics
-            # from readers in Aurora. Let's ignore it.
-            log_func(e)
-            self.db.rollback()
-        except psycopg2.errors.UndefinedFunction as e:
-            log_func(e)
-            log_func(
-                "It seems the PG version has been incorrectly identified as %s. "
-                "A reattempt to identify the right version will happen on next agent run." % self._version
-            )
-            self._clean_state()
-            self.db.rollback()
-        except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
-            log_func("Not all metrics may be available: %s" % str(e))
-            self.db.rollback()
+        query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
+        # if this is a relation-specific query, we need to list all relations last
+        if is_relations:
+            schema_field = get_schema_field(descriptors)
+            relations_filter = build_relations_filter(relations_config, schema_field)
+            self.log.debug("Running query: %s with relations matching: %s", query, relations_filter)
+            results = self._execute_query(cursor, query.format(relations=relations_filter), log_func)
+        else:
+            self.log.debug("Running query: %s", query)
+            results = self._execute_query(cursor, query.replace(r'%', r'%%'), log_func)
 
         if not results:
             return None
@@ -159,6 +150,33 @@ class PostgreSql(AgentCheck):
                 len(results),
             )
             results = results[: self.config.max_relations]
+
+        return results
+
+    def _execute_query(self, cursor, query, log_func=None):
+        if log_func is None:
+            log_func = self.warning
+
+        results = None
+        try:
+            cursor.execute(query)
+            results = cursor.fetchall()
+        except psycopg2.errors.FeatureNotSupported as e:
+            # This happens for example when trying to get replication metrics
+            # from readers in Aurora. Let's ignore it.
+            log_func(e)
+            self.db.rollback()
+        except psycopg2.errors.UndefinedFunction as e:
+            log_func(e)
+            log_func(
+                "It seems the PG version has been incorrectly identified as %s. "
+                "A reattempt to identify the right version will happen on next agent run." % self._version
+            )
+            self._clean_state()
+            self.db.rollback()
+        except (psycopg2.ProgrammingError, psycopg2.errors.QueryCanceled) as e:
+            log_func("Not all metrics may be available: %s" % str(e))
+            self.db.rollback()
 
         return results
 
@@ -228,7 +246,7 @@ class PostgreSql(AgentCheck):
         return num_results
 
     def _collect_stats(
-        self, instance_tags,
+        self, instance_tags
     ):
         """Query pg_stat_* for various metrics
         If relations is not an empty list, gather per-relation metrics
@@ -269,6 +287,9 @@ class PostgreSql(AgentCheck):
         if self.config.collect_activity_metrics:
             activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
             self._query_scope(cursor, activity_metrics, instance_tags, False, relations_config)
+
+        if self.config.collect_statement_metrics:
+            self._collect_statement_metrics(instance_tags)
 
         for scope in list(metric_scope) + self.config.custom_metrics:
             self._query_scope(cursor, scope, instance_tags, scope in self.config.custom_metrics, relations_config)

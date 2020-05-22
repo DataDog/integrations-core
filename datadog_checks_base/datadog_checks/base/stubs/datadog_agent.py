@@ -58,6 +58,9 @@ class DatadogAgentStub(object):
     def tracemalloc_enabled(self, *args, **kwargs):
         return False
 
+    def obfuscate_sql(self, *args, **kwargs):
+        return ''
+
     def write_persistent_cache(self, key, value):
         self._cache[key] = value
 

@@ -30,6 +30,7 @@ ldap3==2.5
 lxml==4.5.0
 lz4==2.2.1
 meld3==1.0.2
+mmh3==2.5.1
 openstacksdk==0.24.0
 orjson==2.6.1; python_version > '3.0'
 paramiko==2.6.0

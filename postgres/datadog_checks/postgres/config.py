@@ -44,6 +44,7 @@ class PostgresConfig:
         self.collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', False))
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
         self.collect_default_db = is_affirmative(instance.get('collect_default_database', False))
+        self.collect_statement_metrics = is_affirmative(instance.get('collect_statement_metrics', False))
         self.custom_queries = instance.get('custom_queries', [])
 
         if not self.host:
