@@ -14,7 +14,7 @@ INSTANCE = {
 
 TEST_EVENT = {
     'EventCode': 1000.0,
-    'EventIdentifier': 10.42,
+    'EventIdentifier': 10.0,
     'EventType': 20,
     'InsertionStrings': '[insertionstring]',
     'Logfile': 'Application',

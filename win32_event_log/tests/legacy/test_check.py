@@ -28,19 +28,7 @@ class FakeWmiSampler:
             yield wmi_object
 
     def sample(self):
-        self._wmi_objects = [
-            {
-                'EventCode': 1000.0,
-                'EventIdentifier': 10.0,
-                'EventType': 20,
-                'InsertionStrings': '[insertionstring]',
-                'Logfile': 'Application',
-                'Message': 'SomeMessage',
-                'SourceName': 'MSQLSERVER',
-                'TimeGenerated': '21001224113047.000000-480',
-                'User': 'FooUser',
-                'Type': 'Error',
-            }
+        self._wmi_objects = [TEST_EVENT
         ]
 
     def reset(self):
