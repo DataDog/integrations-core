@@ -10,3 +10,17 @@ INSTANCE = {
     'type': ["Error", "Warning"],
     'source_name': ["MSSQLSERVER"],
 }
+
+
+TEST_EVENT = {
+    'EventCode': 1000.0,
+    'EventIdentifier': 10.42,
+    'EventType': 20,
+    'InsertionStrings': '[insertionstring]',
+    'Logfile': 'Application',
+    'Message': 'SomeMessage',
+    'SourceName': 'MSQLSERVER',
+    'TimeGenerated': '21001224113047.000000-480',
+    'User': 'FooUser',
+    'Type': 'Error',
+}

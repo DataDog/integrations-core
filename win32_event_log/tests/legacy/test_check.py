@@ -7,9 +7,11 @@ import pytest
 from mock import patch
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.base.win.wmi.sampler import CaseInsensitiveDict
 from datadog_checks.win32_event_log import Win32EventLogCheck
+from datadog_checks.win32_event_log.legacy.win32_event_log import LogEvent
 
-from .common import INSTANCE
+from .common import INSTANCE, TEST_EVENT
 
 log = logging.getLogger(__file__)
 
@@ -99,6 +101,19 @@ def test_check(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggreg
     )
 
 
+def test_log_event():
+    TEST_EVENT['EventIdentifier'] = 12.2345
+    ev = CaseInsensitiveDict(TEST_EVENT)
+
+    log_event = LogEvent(ev, None, None, [], None, None, None, None)
+
+    # Ensure that LogEvent.event is still a CaseInsensitiveDict
+    assert isinstance(log_event.event, CaseInsensitiveDict)
+
+    # Ensure event is normalized
+    assert isinstance(log_event.event['EventIdentifier'], int)
+
+
 def test_check_with_event_format(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggregator):
     instance = {
         'host': ".",
@@ -120,7 +135,6 @@ def test_check_with_event_format(mock_from_time, mock_to_time, check, mock_get_w
             'Type',
         ],
     }
-
     check.check(instance)
     check.check(instance)
     message = """%%%
