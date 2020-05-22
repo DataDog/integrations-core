@@ -39,7 +39,7 @@ def dd_environment():
             shutil.copytree(os.path.join(COMPOSE_DIR, 'data'), data_dir)
             for data_file in FILES:
                 response = requests.get(data_file)
-                with open(os.path.join(data_dir, data_file.rsplit('/', 1)[1]), 'wb') as output:
+                with open(os.path.join(data_dir, "cisco-{}".format(data_file.rsplit('/', 1)[1])), 'wb') as output:
                     output.write(response.content)
 
         with docker_run(os.path.join(COMPOSE_DIR, 'docker-compose.yaml'), env_vars=env, log_patterns="Listening at"):

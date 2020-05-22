@@ -63,11 +63,12 @@ def run_profile_check(recording_name):
     Run a single check with the provided `recording_name` used as
     `community_string` by the docker SNMP endpoint.
     """
+    init_config = {'profiles': {recording_name: {'definition_file': "{}.yaml".format(recording_name)}}}
     instance = common.generate_instance_config([])
-
     instance['community_string'] = recording_name
     instance['enforce_mib_constraints'] = False
-    check = SnmpCheck('snmp', {}, [instance])
+    instance['profile'] = recording_name
+    check = SnmpCheck('snmp', init_config, [instance])
     check.check(instance)
 
 
@@ -133,7 +134,7 @@ def test_cisco_voice(aggregator):
 
 
 def test_f5(aggregator):
-    run_profile_check('f5')
+    run_profile_check('f5-big-ip')
 
     gauges = [
         'sysStatMemoryTotal',
@@ -270,7 +271,7 @@ def test_f5(aggregator):
 
 
 def test_router(aggregator):
-    run_profile_check('network')
+    run_profile_check('generic-router')
     common_tags = common.CHECK_TAGS + ['snmp_profile:generic-router']
     for interface in ['eth0', 'eth1']:
         tags = ['interface:{}'.format(interface)] + common_tags
@@ -312,7 +313,7 @@ def test_f5_router(aggregator):
     # Use the generic profile against the f5 device
     instance = common.generate_instance_config([])
 
-    instance['community_string'] = 'f5'
+    instance['community_string'] = 'f5-big-ip'
     instance['enforce_mib_constraints'] = False
 
     init_config = {'profiles': {'router': {'definition_file': 'generic-router.yaml'}}}
@@ -344,7 +345,7 @@ def test_f5_router(aggregator):
 
 
 def test_cisco_3850(aggregator):
-    run_profile_check('3850')
+    run_profile_check('cisco-3850')
     # We're not covering all interfaces
     interfaces = ["Gi1/0/{}".format(i) for i in range(1, 48)]
     common_tags = common.CHECK_TAGS + ['snmp_host:Cat-3850-4th-Floor.companyname.local', 'snmp_profile:cisco-3850']
@@ -556,7 +557,7 @@ def test_idrac(aggregator):
 
 
 def test_cisco_nexus(aggregator):
-    run_profile_check('cisco_nexus')
+    run_profile_check('cisco-nexus')
 
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
 
@@ -745,7 +746,7 @@ def test_dell_poweredge(aggregator):
 
 
 def test_hp_ilo4(aggregator):
-    run_profile_check('hp_ilo4')
+    run_profile_check('hp-ilo4')
 
     status_gauges = [
         'cpqHeCritLogCondition',
@@ -984,7 +985,7 @@ def test_proliant(aggregator):
 def test_generic_host_resources(aggregator):
     instance = common.generate_instance_config([])
 
-    instance['community_string'] = 'generic_host'
+    instance['community_string'] = 'generic'
     instance['enforce_mib_constraints'] = False
     instance['profile'] = 'generic'
 
@@ -1014,7 +1015,7 @@ def test_generic_host_resources(aggregator):
 
 
 def test_palo_alto(aggregator):
-    run_profile_check('pan-common')
+    run_profile_check('palo-alto')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:palo-alto']
 
@@ -1057,7 +1058,7 @@ def test_palo_alto(aggregator):
 
 
 def test_cisco_asa_5525(aggregator):
-    run_profile_check('cisco_asa_5525')
+    run_profile_check('cisco-asa-5525')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-asa-5525', 'snmp_host:kept']
 
@@ -1339,7 +1340,7 @@ def test_aruba(aggregator):
 
 
 def test_chatsworth(aggregator):
-    run_profile_check('chatsworth')
+    run_profile_check('chatsworth_pdu')
 
     # Legacy global tags are applied to all metrics
     legacy_global_tags = [
