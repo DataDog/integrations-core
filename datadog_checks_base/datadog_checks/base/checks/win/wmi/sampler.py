@@ -49,6 +49,9 @@ class CaseInsensitiveDict(dict):
         return super(CaseInsensitiveDict, self).get(key.lower())
 
     def copy(self):
+        """
+        Explicit copy to ensure keys are consistent
+        """
         copied = CaseInsensitiveDict()
         for key, value in self.items():
             copied[key] = value
