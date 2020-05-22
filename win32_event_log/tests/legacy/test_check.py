@@ -28,8 +28,7 @@ class FakeWmiSampler:
             yield wmi_object
 
     def sample(self):
-        self._wmi_objects = [TEST_EVENT
-        ]
+        self._wmi_objects = [TEST_EVENT]
 
     def reset(self):
         self._wmi_objects = []
