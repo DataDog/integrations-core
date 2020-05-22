@@ -49,7 +49,10 @@ class CaseInsensitiveDict(dict):
         return super(CaseInsensitiveDict, self).get(key.lower())
 
     def copy(self):
-        return CaseInsensitiveDict(self)
+        copied = CaseInsensitiveDict()
+        for key, value in self.items():
+            copied[key] = value
+        return copied
 
 
 class ProviderArchitectureMeta(type):
