@@ -17,3 +17,11 @@ def _assert_tags_excluded(aggregator, addl_blacklist):
                         fail += 1
     assert fail == 0
     aggregator.assert_all_metrics_covered()
+
+
+def _assert_metric(aggregator, metric):
+    if metric in COUNT_METRICS:
+        aggregator.assert_metric(metric, metric_type=aggregator.MONOTONIC_COUNT)
+    else:
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
+
