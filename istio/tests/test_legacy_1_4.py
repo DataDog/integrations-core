@@ -8,14 +8,28 @@ from . import common
 from .utils import _assert_tags_excluded, _assert_metric
 
 
-def test_legacy_mesh_mixer(aggregator, mesh_mixture_fixture):
+def test_legacy_mesh(aggregator, mesh_fixture):
     """
-    Test the full check
+    Test the mesh endpoint
     """
-    check = Istio(common.CHECK_NAME, {}, [common.MOCK_INSTANCE])
-    check.check(common.MOCK_INSTANCE)
+    check = Istio(common.CHECK_NAME, {}, [common.MOCK_MESH_INSTANCE])
+    check.check(common.MOCK_MESH_INSTANCE)
 
-    for metric in common.MESH_METRICS + common.MESH_METRICS_1_4 + common.MIXER_METRICS:
+    for metric in common.MESH_METRICS + common.MESH_METRICS_1_4:
+        _assert_metric(aggregator, metric)
+    _assert_tags_excluded(aggregator, [])
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_legacy_mixer(aggregator, mixture_fixture):
+    """
+    Test the mixer check
+    """
+    check = Istio(common.CHECK_NAME, {}, [common.MOCK_MIXTURE_INSTANCE])
+    check.check(common.MOCK_MIXTURE_INSTANCE)
+
+    for metric in common.MIXER_METRICS:
         _assert_metric(aggregator, metric)
     _assert_tags_excluded(aggregator, [])
 

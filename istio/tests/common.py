@@ -4,8 +4,11 @@
 
 CHECK_NAME = 'istio'
 
-MOCK_INSTANCE = {
+MOCK_MESH_INSTANCE = {
     'istio_mesh_endpoint': 'http://localhost:42422/metrics',
+}
+
+MOCK_MIXTURE_INSTANCE = {
     'mixer_endpoint': 'http://localhost:9093/metrics',
 }
 
@@ -39,6 +42,8 @@ COUNT_METRICS = [
     'istio.mesh.tcp.connections_opened.total.total',
     'istio.mesh.tcp.received_bytes.total.total',
     'istio.mesh.tcp.send_bytes.total.total',
+    'istio.mesh.request.duration.count.total',
+    'istio.mesh.request.duration.sum.total',
     # 'istio.mixer.adapter.dispatch_count',
     # 'istio.mixer.adapter.old_dispatch_count',
     # 'istio.mixer.config.resolve_count',
@@ -116,11 +121,20 @@ MESH_METRICS = [
     'istio.mesh.request.size.sum',
     'istio.mesh.response.size.count',
     'istio.mesh.response.size.sum',
+    # Counts submitted with `send_monotonic_with_gauge`
+    'istio.mesh.request.count.total',
+    'istio.mesh.request.size.count.total',
+    'istio.mesh.request.size.sum.total',
+    'istio.mesh.response.size.count.total',
+    'istio.mesh.response.size.sum.total',
 ]
 
 MESH_METRICS_1_4 = [
     'istio.mesh.request.duration.count',
     'istio.mesh.request.duration.sum',
+    # Counts submitted with `send_monotonic_with_gauge`
+    'istio.mesh.request.duration.count.total',
+    'istio.mesh.request.duration.sum.total',
 ]
 
 MESH_MERICS_1_5 = [
@@ -131,6 +145,13 @@ MESH_MERICS_1_5 = [
     'istio.mesh.tcp.connections_opened.total',
     'istio.mesh.tcp.received_bytes.total',
     'istio.mesh.tcp.send_bytes.total',
+    # Counts submitted with `send_monotonic_with_gauge`
+    'istio.mesh.request.duration.milliseconds.count.total',
+    'istio.mesh.request.duration.milliseconds.sum.total',
+    'istio.mesh.tcp.connections_closed.total.total',
+    'istio.mesh.tcp.connections_opened.total.total',
+    'istio.mesh.tcp.received_bytes.total.total',
+    'istio.mesh.tcp.send_bytes.total.total',
 ]
 
 

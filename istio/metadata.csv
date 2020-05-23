@@ -269,7 +269,9 @@ istio.mesh.request.size.count.total,count,,,,Count of observed request sizes as 
 istio.mesh.request.size.sum.total,count,,,,Sum of observed request sizes as monotonic count,0,istio,
 istio.mesh.response.size.count.total,count,,,,Count of observed response size as monotonic count,0,istio,
 istio.mesh.response.size.sum.total,count,,,,Sum of observed response size as monotonic count,0,istio,
-istio.mesh.tcp.connections_closed.total.total,gauge,,,,Total closed connections as monotonic count,0,istio,
-istio.mesh.tcp.connections_opened.total.total,gauge,,,,Total opened connections as monotonic count,0,istio,
-istio.mesh.tcp.received_bytes.total.total,gauge,,byte,,Size of total bytes received during request in case of a TCP connection as monotonic count,0,istio,
-istio.mesh.tcp.send_bytes.total.total,gauge,,byte,,Size of total bytes sent during response in case of a TCP connection as monotonic count,0,istio,
+istio.mesh.tcp.connections_closed.total.total,count,,,,Total closed connections as monotonic count,0,istio,
+istio.mesh.tcp.connections_opened.total.total,count,,,,Total opened connections as monotonic count,0,istio,
+istio.mesh.tcp.received_bytes.total.total,count,,byte,,Size of total bytes received during request in case of a TCP connection as monotonic count,0,istio,
+istio.mesh.tcp.send_bytes.total.total,count,,byte,,Size of total bytes sent during response in case of a TCP connection as monotonic count,0,istio,
+istio.mesh.request.duration.count.total,count,,request,,Count of request durations as monotonic count,0,istio,request durations count total
+istio.mesh.request.duration.sum.total,count,,millisecond,,Sum of request durations as monotonic count,0,istio,request durations sum total
