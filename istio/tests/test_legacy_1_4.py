@@ -37,6 +37,8 @@ def test_legacy_mixer(aggregator, mixture_fixture):
 
 
 def test_legacy_all_endpoints(aggregator, new_mesh_mixture_fixture):
+    # Enabling `send_monotonic_with_gauge` exceeds the default 2000 metric limit
+    # Overriding to collect all expected metrics
     common.NEW_MOCK_INSTANCE['max_returned_metrics'] = 3000
     check = Istio(common.CHECK_NAME, {}, [common.NEW_MOCK_INSTANCE])
     check.check(common.NEW_MOCK_INSTANCE)
