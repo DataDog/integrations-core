@@ -88,19 +88,6 @@ def test_check(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggreg
     )
 
 
-def test_log_event():
-    TEST_EVENT['EventIdentifier'] = 12.2345
-    ev = CaseInsensitiveDict(TEST_EVENT)
-
-    log_event = LogEvent(ev, None, None, [], None, None, None, None)
-
-    # Ensure that LogEvent.event is still a CaseInsensitiveDict
-    assert isinstance(log_event.event, CaseInsensitiveDict)
-
-    # Ensure event is normalized
-    assert isinstance(log_event.event['EventIdentifier'], int)
-
-
 def test_check_with_event_format(mock_from_time, mock_to_time, check, mock_get_wmi_sampler, aggregator):
     instance = {
         'host': ".",
@@ -149,6 +136,20 @@ Type: Error
         alert_type='error',
         source_type_name='event viewer',
     )
+
+
+def test_log_event():
+    test_ev = TEST_EVENT.copy()
+    test_ev['EventIdentifier'] = 12.2345
+    ev = CaseInsensitiveDict(test_ev)
+
+    log_event = LogEvent(ev, None, None, [], None, None, None, None)
+
+    # Ensure that LogEvent.event is still a CaseInsensitiveDict
+    assert isinstance(log_event.event, CaseInsensitiveDict)
+
+    # Ensure event is normalized
+    assert isinstance(log_event.event['EventIdentifier'], int)
 
 
 def test_no_filters(check):
