@@ -3,6 +3,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from datadog_checks.istio.constants import BLACKLIST_LABELS
 
+from .common import COUNT_METRICS
+
 
 def _assert_tags_excluded(aggregator, addl_blacklist):
     """
