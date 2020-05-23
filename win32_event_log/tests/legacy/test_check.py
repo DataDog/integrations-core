@@ -7,7 +7,7 @@ import pytest
 from mock import patch
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.base.win.wmi.sampler import CaseInsensitiveDict
+from datadog_checks.base.checks.win.wmi.sampler import CaseInsensitiveDict
 from datadog_checks.win32_event_log import Win32EventLogCheck
 from datadog_checks.win32_event_log.legacy.win32_event_log import LogEvent
 
