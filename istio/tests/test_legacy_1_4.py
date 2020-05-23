@@ -37,6 +37,7 @@ def test_legacy_mixer(aggregator, mixture_fixture):
 
 
 def test_legacy_all_endpoints(aggregator, new_mesh_mixture_fixture):
+    common.NEW_MOCK_INSTANCE['max_returned_metrics'] = 3000
     check = Istio(common.CHECK_NAME, {}, [common.NEW_MOCK_INSTANCE])
     check.check(common.NEW_MOCK_INSTANCE)
 
