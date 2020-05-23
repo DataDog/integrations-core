@@ -8,7 +8,7 @@ from . import common
 from .utils import _assert_tags_excluded, _assert_metric
 
 
-def test_istio(aggregator, mesh_mixture_fixture):
+def test_legacy_mesh_mixer(aggregator, mesh_mixture_fixture):
     """
     Test the full check
     """
@@ -22,7 +22,7 @@ def test_istio(aggregator, mesh_mixture_fixture):
     aggregator.assert_all_metrics_covered()
 
 
-def test_new_istio(aggregator, new_mesh_mixture_fixture):
+def test_legacy_all_endpoints(aggregator, new_mesh_mixture_fixture):
     check = Istio(common.CHECK_NAME, {}, [common.NEW_MOCK_INSTANCE])
     check.check(common.NEW_MOCK_INSTANCE)
 
@@ -41,7 +41,7 @@ def test_new_istio(aggregator, new_mesh_mixture_fixture):
     aggregator.assert_all_metrics_covered()
 
 
-def test_pilot_only_istio(aggregator, new_pilot_fixture):
+def test_legacy_pilot_only(aggregator, new_pilot_fixture):
     check = Istio(common.CHECK_NAME, {}, [common.NEW_MOCK_PILOT_ONLY_INSTANCE])
     check.check(common.NEW_MOCK_PILOT_ONLY_INSTANCE)
 
@@ -53,7 +53,7 @@ def test_pilot_only_istio(aggregator, new_pilot_fixture):
     aggregator.assert_all_metrics_covered()
 
 
-def test_galley_only_istio(aggregator, new_galley_fixture):
+def test_legacy_galley_only(aggregator, new_galley_fixture):
     check = Istio(common.CHECK_NAME, {}, [common.NEW_MOCK_GALLEY_ONLY_INSTANCE])
     check.check(common.NEW_MOCK_GALLEY_ONLY_INSTANCE)
 
