@@ -26,4 +26,3 @@ def _assert_metric(aggregator, metric):
         aggregator.assert_metric(metric, metric_type=aggregator.MONOTONIC_COUNT)
     else:
         aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
-

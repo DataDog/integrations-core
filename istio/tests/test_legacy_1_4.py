@@ -5,7 +5,7 @@ from datadog_checks.istio import Istio
 from datadog_checks.istio.constants import MESH_NAMESPACE, MIXER_NAMESPACE
 
 from . import common
-from .utils import _assert_tags_excluded, _assert_metric
+from .utils import _assert_metric, _assert_tags_excluded
 
 
 def test_legacy_mesh(aggregator, mesh_fixture):
@@ -80,9 +80,9 @@ def test_legacy_galley_only(aggregator, new_galley_fixture):
 
 
 def test_scraper_creator():
-    check = Istio(common.CHECK_NAME, {}, [common.MOCK_INSTANCE])
-    istio_mesh_config = check.config_map.get(common.MOCK_INSTANCE['istio_mesh_endpoint'])
-    mixer_scraper_dict = check.config_map.get(common.MOCK_INSTANCE['mixer_endpoint'])
+    check = Istio(common.CHECK_NAME, {}, [common.MOCK_MESH_INSTANCE, common.MOCK_MIXTURE_INSTANCE])
+    istio_mesh_config = check.config_map.get(common.MOCK_MESH_INSTANCE['istio_mesh_endpoint'])
+    mixer_scraper_dict = check.config_map.get(common.MOCK_MIXTURE_INSTANCE['mixer_endpoint'])
 
     assert istio_mesh_config['namespace'] == MESH_NAMESPACE
     assert mixer_scraper_dict['namespace'] == MIXER_NAMESPACE
