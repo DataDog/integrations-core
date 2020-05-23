@@ -122,6 +122,7 @@ def test_check_with_event_format(mock_from_time, mock_to_time, check, mock_get_w
             'Type',
         ],
     }
+
     check.check(instance)
     check.check(instance)
     message = """%%%
