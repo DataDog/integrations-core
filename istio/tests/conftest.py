@@ -50,11 +50,15 @@ def dd_environment():
                     for (deployment, port) in DEPLOYMENTS_LEGACY
                 ]
                 instance = {
-                    'citadel_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
-                    'galley_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
-                    'pilot_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[2]),
-                    'mixer_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[3]),
-                    'istio_mesh_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[4]),
+                    'instances': [
+                        {
+                            'citadel_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
+                            'galley_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
+                            'pilot_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[2]),
+                            'mixer_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[3]),
+                        },
+                        {'istio_mesh_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[4])},
+                    ]
                 }
                 page = 'http://{}:{}/productpage'.format(*ip_ports[5])
                 # Check a bit to make sure it's available
