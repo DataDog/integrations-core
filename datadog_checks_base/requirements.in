@@ -2,7 +2,7 @@ aws-requests-auth==0.4.2
 binary==1.0.0
 botocore==1.13.42
 contextlib2==0.6.0; python_version < '3.0'
-ddtrace==0.32.2
+-e git@github.com:AlexandreYang/dd-trace-py.git@cap_setuptools_scm#egg=ddtrace
 enum34==1.1.6; python_version < '3.0'
 ipaddress==1.0.22; python_version < '3.0'
 kubernetes==8.0.1
