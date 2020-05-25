@@ -50,7 +50,7 @@ Add one of the configuration blocks below to your `istio.d/conf.yaml` file to st
 
 Each of the endpoints is optional, but at least one must be configured. See the [Istio documentation][5] to learn more about the Prometheus adapter.
 
-Note: Following Prometheus labels are excluded: `connectionID`, `destination_service`, `source_workload`
+Note: `connectionID` Prometheus label is excluded.
 
 ##### Disable sidecar injection
 
