@@ -1,5 +1,9 @@
 # CHANGELOG - datadog_checks_base
 
+## 11.10.0 / 2020-05-25
+
+* [Added] Override CaseInsensitiveDict `copy()` function. See [#6715](https://github.com/DataDog/integrations-core/pull/6715).
+
 ## 11.9.0 / 2020-05-20
 
 * [Added] Upgrade httplib2 to 0.18.0. See [#6702](https://github.com/DataDog/integrations-core/pull/6702).
