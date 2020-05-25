@@ -48,8 +48,19 @@ The Openmetrics Base Check supports various configurations for submitting Promet
 We currently support Prometheus `gauge`, `counter`, `histogram`, and `summary` metric types.
 
 ### Gauge
+A gauge metric represents a single numerical value that can arbitrarily go up or down.
+
+Prometheus gauge metrics are submitted as Datadog gauge metrics
 
 ### Counter
+
+A [Prometheus counter](https://prometheus.io/docs/concepts/metric_types/#counter) is cumulative metric that represents 
+a single monotonically increasing counter whose value can only increase or be reset to zero on restart.
+
+Config Option|Value|Datadog metric submitted
+-------------|-----|------------------------
+`send_monotonic_counter`|`true` (default)| [`monotonic_count`](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/base/checks/openmetrics/mixins.py#L667-L668)
+`send_monotonic_counter`|`false`|[`gauge`](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/base/checks/openmetrics/mixins.py#L671-L672)
 
 ### Histogram
 
