@@ -68,17 +68,31 @@ ONE_PER_CONTEXT_METRIC_TYPES = [aggregator.GAUGE, aggregator.RATE, aggregator.MO
 
 
 class AgentCheck(object):
-    """The base class for any Agent based integrations.
+    """
+    The base class for any Agent based integration.
 
-    :cvar DEFAULT_METRIC_LIMIT: allows to set a limit on the number of metric name and tags combination
-        this check can send per run. This is useful for checks that have an unbounded
-        number of tag values that depend on the input payload.
-        The logic counts one set of tags per gauge/rate/monotonic_count call, and deduplicates
-        sets of tags for other metric types. The first N sets of tags in submission order will
-        be sent to the aggregator, the rest are dropped. The state is reset after each run.
-        See https://github.com/DataDog/integrations-core/pull/2093 for more informations.
-    :ivar log: is a logger instance that prints to the Agent's main log file. You can set the
-        log level in the Agent config file 'datadog.yaml'.
+    In general, you don't need to and you should not override anything from the base
+    class except the `check` method but sometimes it might be useful for a Check to
+    have its own constructor.
+
+    When overriding `__init__` you have to remember that, depending on the configuration,
+    the Agent might create several different Check instances and the method would be
+    called as many times.
+
+    Agent 6,7 signature:
+
+        AgentCheck(name, init_config, instances)    # instances contain only 1 instance
+        AgentCheck.check(instance)
+
+    Agent 8 signature:
+
+        AgentCheck(name, init_config, instance)     # one instance
+        AgentCheck.check()                          # no more instance argument for check method
+
+    !!! note
+        when loading a Custom check, the Agent will inspect the module searching
+        for a subclass of `AgentCheck`. If such a class exists but has been derived in
+        turn, it'll be ignored - **you should never derive from an existing Check**.
     """
 
     # If defined, this will be the prefix of every metric/service check and the source type of events
@@ -113,35 +127,22 @@ class AgentCheck(object):
     TAG_REPLACEMENT = re.compile(br'[,\+\*\-/()\[\]{}\s]')
     MULTIPLE_UNDERSCORE_CLEANUP = re.compile(br'__+')
     DOT_UNDERSCORE_CLEANUP = re.compile(br'_*\._*')
+
+    # allows to set a limit on the number of metric name and tags combination
+    # this check can send per run. This is useful for checks that have an unbounded
+    # number of tag values that depend on the input payload.
+    # The logic counts one set of tags per gauge/rate/monotonic_count call, and de-duplicates
+    # sets of tags for other metric types. The first N sets of tags in submission order will
+    # be sent to the aggregator, the rest are dropped. The state is reset after each run.
+    # See https://github.com/DataDog/integrations-core/pull/2093 for more information.
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
-        """In general, you don't need to and you should not override anything from the base
-        class except the :py:meth:`check` method but sometimes it might be useful for a Check to
-        have its own constructor.
-
-        When overriding `__init__` you have to remember that, depending on the configuration,
-        the Agent might create several different Check instances and the method would be
-        called as many times.
-
-        Agent 6,7 signature:
-
-            AgentCheck(name, init_config, instances)    # instances contain only 1 instance
-            AgentCheck.check(instance)
-
-        Agent 8 signature:
-
-            AgentCheck(name, init_config, instance)     # one instance
-            AgentCheck.check()                          # no more instance argument for check method
-
-        :warning: when loading a Custom check, the Agent will inspect the module searching
-            for a subclass of `AgentCheck`. If such a class exists but has been derived in
-            turn, it'll be ignored - **you should never derive from an existing Check**.
-
-        :param str name: the name of the check.
-        :param dict init_config: the 'init_config' section of the configuration.
-        :param list instances: a one-element list containing the instance options from the
+        """
+        - **name** (_str_) - the name of the check
+        - **init_config** (_dict_) - the `init_config` section of the configuration.
+        - **instance** (_List[dict]_) - a one-element list containing the instance options from the
                 configuration file (a list is used to keep backward compatibility with
                 older versions of the Agent).
         """
@@ -444,13 +445,15 @@ class AgentCheck(object):
         # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample a gauge metric.
 
-        :param str name: the name of the metric.
-        :param float value: the value for the metric.
-        :param list tags: (optional) a list of tags to associate with this metric.
-        :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
-        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
+        **Parameters:**
+
+        - **name** (_str_) - the name of the metric
+        - **value** (_float_) - the value for the metric
+        - **tags** (_List[str]_) - a list of tags to associate with this metric
+        - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
+        - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
-        :param bool raw: (optional) whether to ignore any defined namespace prefix
+        - **raw** (_bool_) - whether to ignore any defined namespace prefix
         """
         self._submit_metric(
             aggregator.GAUGE, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
@@ -460,13 +463,13 @@ class AgentCheck(object):
         # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample a raw count metric.
 
-        :param str name: the name of the metric.
-        :param float value: the value for the metric.
-        :param list tags: (optional) a list of tags to associate with this metric.
-        :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
-        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
+        - **name** (_str_) - the name of the metric
+        - **value** (_float_) - the value for the metric
+        - **tags** (_List[str]_) - a list of tags to associate with this metric
+        - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
+        - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
-        :param bool raw: (optional) whether to ignore any defined namespace prefix
+        - **raw** (_bool_) - whether to ignore any defined namespace prefix
         """
         self._submit_metric(
             aggregator.COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
@@ -476,13 +479,13 @@ class AgentCheck(object):
         # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample an increasing counter metric.
 
-        :param str name: the name of the metric.
-        :param float value: the value for the metric.
-        :param list tags: (optional) a list of tags to associate with this metric.
-        :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
-        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
+        - **name** (_str_) - the name of the metric
+        - **value** (_float_) - the value for the metric
+        - **tags** (_List[str]_) - a list of tags to associate with this metric
+        - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
+        - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
-        :param bool raw: (optional) whether to ignore any defined namespace prefix
+        - **raw** (_bool_) - whether to ignore any defined namespace prefix
         """
         self._submit_metric(
             aggregator.MONOTONIC_COUNT, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
@@ -492,13 +495,13 @@ class AgentCheck(object):
         # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample a point, with the rate calculated at the end of the check.
 
-        :param str name: the name of the metric.
-        :param float value: the value for the metric.
-        :param list tags: (optional) a list of tags to associate with this metric.
-        :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
-        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
+        - **name** (_str_) - the name of the metric
+        - **value** (_float_) - the value for the metric
+        - **tags** (_List[str]_) - a list of tags to associate with this metric
+        - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
+        - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
-        :param bool raw: (optional) whether to ignore any defined namespace prefix
+        - **raw** (_bool_) - whether to ignore any defined namespace prefix
         """
         self._submit_metric(
             aggregator.RATE, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
@@ -508,13 +511,13 @@ class AgentCheck(object):
         # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample a histogram metric.
 
-        :param str name: the name of the metric.
-        :param float value: the value for the metric.
-        :param list tags: (optional) a list of tags to associate with this metric.
-        :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
-        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
+        - **name** (_str_) - the name of the metric
+        - **value** (_float_) - the value for the metric
+        - **tags** (_List[str]_) - a list of tags to associate with this metric
+        - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
+        - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
-        :param bool raw: (optional) whether to ignore any defined namespace prefix
+        - **raw** (_bool_) - whether to ignore any defined namespace prefix
         """
         self._submit_metric(
             aggregator.HISTOGRAM, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
@@ -524,13 +527,13 @@ class AgentCheck(object):
         # type: (str, float, Sequence[str], str, str, bool) -> None
         """Sample a histogram based on rate metrics.
 
-        :param str name: the name of the metric.
-        :param float value: the value for the metric.
-        :param list tags: (optional) a list of tags to associate with this metric.
-        :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
-        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
+        - **name** (_str_) - the name of the metric
+        - **value** (_float_) - the value for the metric
+        - **tags** (_List[str]_) - a list of tags to associate with this metric
+        - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
+        - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
-        :param bool raw: (optional) whether to ignore any defined namespace prefix
+        - **raw** (_bool_) - whether to ignore any defined namespace prefix
         """
         self._submit_metric(
             aggregator.HISTORATE, name, value, tags=tags, hostname=hostname, device_name=device_name, raw=raw
@@ -540,13 +543,13 @@ class AgentCheck(object):
         # type: (str, float, Sequence[str], str, str, bool) -> None
         """Increment a counter metric.
 
-        :param str name: the name of the metric.
-        :param float value: the value for the metric.
-        :param list tags: (optional) a list of tags to associate with this metric.
-        :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
-        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
+        - **name** (_str_) - the name of the metric
+        - **value** (_float_) - the value for the metric
+        - **tags** (_List[str]_) - a list of tags to associate with this metric
+        - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
+        - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
-        :param bool raw: (optional) whether to ignore any defined namespace prefix
+        - **raw** (_bool_) - whether to ignore any defined namespace prefix
         """
         self._log_deprecation('increment')
         self._submit_metric(
@@ -557,13 +560,13 @@ class AgentCheck(object):
         # type: (str, float, Sequence[str], str, str, bool) -> None
         """Decrement a counter metric.
 
-        :param str name: the name of the metric.
-        :param float value: the value for the metric.
-        :param list tags: (optional) a list of tags to associate with this metric.
-        :param str hostname: (optional) a hostname to associate with this metric. Defaults to the current host.
-        :param str device_name: **deprecated** add a tag in the form :code:`device:<device_name>` to the :code:`tags`
+        - **name** (_str_) - the name of the metric
+        - **value** (_float_) - the value for the metric
+        - **tags** (_List[str]_) - a list of tags to associate with this metric
+        - **hostname** (_str_) - a hostname to associate with this metric. Defaults to the current host.
+        - **device_name** (_str_) - **deprecated** add a tag in the form `device:<device_name>` to the `tags`
             list instead.
-        :param bool raw: (optional) whether to ignore any defined namespace prefix
+        - **raw** (_bool_) - whether to ignore any defined namespace prefix
         """
         self._log_deprecation('increment')
         self._submit_metric(
@@ -574,12 +577,11 @@ class AgentCheck(object):
         # type: (str, ServiceCheckStatus, Sequence[str], str, str, bool) -> None
         """Send the status of a service.
 
-        :param str name: the name of the service check.
-        :param status: a constant describing the service status.
-        :type status: :py:class:`datadog_checks.base.constants.ServiceCheck`
-        :param list tags: (optional) a list of tags to associate with this check.
-        :param str message: (optional) additional information or a description of why this status occurred.
-        :param bool raw: (optional) whether to ignore any defined namespace prefix
+        - **name** (_str_) - the name of the service check
+        - **status** (_int_) - a constant describing the service status.
+        - **tags** (_List[str]_) - a list of tags to associate with this service check
+        - **message** (_str_) - additional information or a description of why this status occurred.
+        - **raw** (_bool_) - whether to ignore any defined namespace prefix
         """
         tags = self._normalize_tags_type(tags or [])
         if hostname is None:
@@ -836,23 +838,23 @@ class AgentCheck(object):
 
         An event is a dictionary with the following keys and data types:
 
-        .. code:: python
+        ```python
+        {
+            "timestamp": int,        # the epoch timestamp for the event
+            "event_type": str,       # the event name
+            "api_key": str,          # the api key for your account
+            "msg_title": str,        # the title of the event
+            "msg_text": str,         # the text body of the event
+            "aggregation_key": str,  # a key to use for aggregating events
+            "alert_type": str,       # (optional) one of ('error', 'warning', 'success', 'info'), defaults to 'info'
+            "source_type_name": str, # (optional) the source type name
+            "host": str,             # (optional) the name of the host
+            "tags": list,            # (optional) a list of tags to associate with this event
+            "priority": str,         # (optional) specifies the priority of the event ("normal" or "low")
+        }
+        ```
 
-            {
-                "timestamp": int,        # the epoch timestamp for the event
-                "event_type": str,       # the event name
-                "api_key": str,          # the api key for your account
-                "msg_title": str,        # the title of the event
-                "msg_text": str,         # the text body of the event
-                "aggregation_key": str,  # a key to use for aggregating events
-                "alert_type": str,       # (optional) one of ('error', 'warning', 'success', 'info'), defaults to 'info'
-                "source_type_name": str, # (optional) the source type name
-                "host": str,             # (optional) the name of the host
-                "tags": list,            # (optional) a list of tags to associate with this event
-                "priority": str,         # (optional) specifies the priority of the event ("normal" or "low")
-            }
-
-        :param ev event: the event to be sent.
+        - **event** (_dict_) - the event to be sent
         """
         # Enforce types of some fields, considerably facilitates handling in go bindings downstream
         for key, value in iteritems(event):

@@ -120,13 +120,13 @@ The Hive check does not include any events.
 Need help? Contact [Datadog support][6].
 
 [1]: https://cwiki.apache.org/confluence/display/Hive/Home
-[2]: https://docs.datadoghq.com/agent
+[2]: https://docs.datadoghq.com/agent/
 [3]: https://cwiki.apache.org/confluence/display/Hive/Configuration+Properties#ConfigurationProperties-Metrics
 [4]: https://github.com/DataDog/integrations-core/blob/master/hive/datadog_checks/hive/data/conf.yaml.example
-[5]: https://docs.datadoghq.com/integrations/java
-[6]: https://docs.datadoghq.com/help
+[5]: https://docs.datadoghq.com/integrations/java/
+[6]: https://docs.datadoghq.com/help/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[8]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[8]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [9]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

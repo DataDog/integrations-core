@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 2.5.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 2.4.0 / 2020-02-26
 
 * [Added] Bump securesystemslib to 0.14.2. See [#5890](https://github.com/DataDog/integrations-core/pull/5890).

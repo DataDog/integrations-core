@@ -146,14 +146,15 @@ class WMISampler(object):
 
         self._runSampleEvent = Event()
         self._sampleCompleteEvent = Event()
+        self._sampler_thread = None
 
     def start(self):
         """
         Start internal thread for sampling
         """
-        thread = Thread(target=self._query_sample_loop, name=self.class_name)
-        thread.daemon = True  # Python 2 does not support daemon as Thread constructor parameter
-        thread.start()
+        self._sampler_thread = Thread(target=self._query_sample_loop, name=self.class_name)
+        self._sampler_thread.daemon = True  # Python 2 does not support daemon as Thread constructor parameter
+        self._sampler_thread.start()
 
     def stop(self):
         """
@@ -261,7 +262,9 @@ class WMISampler(object):
         """
         self._sampling = True
         self._runSampleEvent.set()
-        self._sampleCompleteEvent.wait()
+        while not self._sampleCompleteEvent.wait(timeout=float(self._timeout_duration)):
+            if not self._sampler_thread.is_alive():
+                raise Exception("The sampler thread terminated unexpectedly")
         self._sampleCompleteEvent.clear()
         self._sampling = False
 
@@ -400,7 +403,7 @@ class WMISampler(object):
             while f:
                 prop, value = f.popitem()
 
-                if isinstance(value, (tuple, list)):
+                if isinstance(value, (tuple, list)) and len(value) == 2 and isinstance(value[0], string_types):
                     oper = value[0]
                     value = value[1]
                 elif isinstance(value, string_types) and '%' in value:
@@ -466,11 +469,15 @@ class WMISampler(object):
 
         Returns: List of WMI objects or `TimeoutException`.
         """
-        formated_property_names = ",".join(self.property_names)
-        wql = "Select {property_names} from {class_name}{filters}".format(
-            property_names=formated_property_names, class_name=self.class_name, filters=self.formatted_filters
-        )
-        self.logger.debug(u"Querying WMI: %s", wql)
+        try:
+            formated_property_names = ",".join(self.property_names)
+            wql = "Select {property_names} from {class_name}{filters}".format(
+                property_names=formated_property_names, class_name=self.class_name, filters=self.formatted_filters
+            )
+            self.logger.debug(u"Querying WMI: %s", wql)
+        except Exception as e:
+            self.logger.error(str(e))
+            return []
 
         try:
             # From: https://msdn.microsoft.com/en-us/library/aa393866(v=vs.85).aspx

@@ -9,10 +9,10 @@ from .changelog import changelog
 from .make import make
 from .show import show
 from .tag import tag
-from .testable import testable
+from .trello import trello
 from .upload import upload
 
-ALL_COMMANDS = [build, changelog, make, show, tag, testable, upload]
+ALL_COMMANDS = [build, changelog, make, show, tag, trello, upload]
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage the release of checks')

@@ -31,10 +31,29 @@ class InstanceConfig:
     """Parse and hold configuration about a single instance."""
 
     DEFAULT_RETRIES = 5
-    DEFAULT_TIMEOUT = 1
+    DEFAULT_TIMEOUT = 5
     DEFAULT_ALLOWED_FAILURES = 3
     DEFAULT_BULK_THRESHOLD = 0
     DEFAULT_WORKERS = 5
+
+    AUTH_PROTOCOL_MAPPING = {
+        'md5': 'usmHMACMD5AuthProtocol',
+        'sha': 'usmHMACSHAAuthProtocol',
+        'sha224': 'usmHMAC128SHA224AuthProtocol',
+        'sha256': 'usmHMAC192SHA256AuthProtocol',
+        'sha384': 'usmHMAC256SHA384AuthProtocol',
+        'sha512': 'usmHMAC384SHA512AuthProtocol',
+    }
+
+    PRIV_PROTOCOL_MAPPING = {
+        'des': 'usmDESPrivProtocol',
+        '3des': 'usm3DESEDEPrivProtocol',
+        'aes': 'usmAesCfb128Protocol',
+        'aes192': 'usmAesBlumenthalCfb192Protocol',
+        'aes256': 'usmAesBlumenthalCfb256Protocol',
+        'aes192c': 'usmAesCfb192Protocol',
+        'aes256c': 'usmAesCfb256Protocol',
+    }
 
     def __init__(
         self,
@@ -115,7 +134,7 @@ class InstanceConfig:
 
         self._auth_data = self.get_auth_data(instance)
 
-        self.all_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
+        self.all_oids, self.next_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
             self.all_oids.extend(tag_oids)
@@ -142,7 +161,7 @@ class InstanceConfig:
     def refresh_with_profile(self, profile):
         # type: (Dict[str, Any]) -> None
         metrics = profile['definition'].get('metrics', [])
-        all_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics)
+        all_oids, next_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics)
 
         metric_tags = profile['definition'].get('metric_tags', [])
         tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
@@ -154,6 +173,7 @@ class InstanceConfig:
 
         self.metrics.extend(metrics)
         self.all_oids.extend(all_oids)
+        self.next_oids.extend(next_oids)
         self.bulk_oids.extend(bulk_oids)
         self.parsed_metrics.extend(parsed_metrics)
         self.parsed_metric_tags.extend(parsed_metric_tags)
@@ -191,8 +211,8 @@ class InstanceConfig:
         port = int(instance.get('port', 161))  # Default SNMP port
         return UdpTransportTarget((ip_address, port), timeout=timeout, retries=retries)
 
-    @staticmethod
-    def get_auth_data(instance):
+    @classmethod
+    def get_auth_data(cls, instance):
         # type: (Dict[str, Any]) -> Any
         """
         Generate a Security Parameters object based on the instance's
@@ -223,10 +243,16 @@ class InstanceConfig:
                 priv_protocol = usmDESPrivProtocol
 
             if 'authProtocol' in instance:
-                auth_protocol = getattr(hlapi, instance['authProtocol'])
+                protocol_name = instance['authProtocol']
+                if protocol_name.lower() in cls.AUTH_PROTOCOL_MAPPING:
+                    protocol_name = cls.AUTH_PROTOCOL_MAPPING[protocol_name.lower()]
+                auth_protocol = getattr(hlapi, protocol_name)
 
             if 'privProtocol' in instance:
-                priv_protocol = getattr(hlapi, instance['privProtocol'])
+                protocol_name = instance['privProtocol']
+                if protocol_name.lower() in cls.PRIV_PROTOCOL_MAPPING:
+                    protocol_name = cls.PRIV_PROTOCOL_MAPPING[protocol_name.lower()]
+                priv_protocol = getattr(hlapi, protocol_name)
 
             return UsmUserData(user, auth_key, priv_key, auth_protocol, priv_protocol)
 
@@ -270,12 +296,12 @@ class InstanceConfig:
             yield host
 
     def parse_metrics(self, metrics):
-        # type: (list) -> Tuple[List[OID], List[OID], List[ParsedMetric]]
+        # type: (list) -> Tuple[List[OID], List[OID], List[OID], List[ParsedMetric]]
         """Parse configuration and returns data to be used for SNMP queries."""
         # Use bulk for SNMP version > 1 only.
         bulk_threshold = self.bulk_threshold if self._auth_data.mpModel else 0
         result = parse_metrics(metrics, resolver=self._resolver, bulk_threshold=bulk_threshold)
-        return result['oids'], result['bulk_oids'], result['parsed_metrics']
+        return result['oids'], result['next_oids'], result['bulk_oids'], result['parsed_metrics']
 
     def parse_metric_tags(self, metric_tags):
         # type: (list) -> Tuple[List[OID], List[ParsedMetricTag]]
