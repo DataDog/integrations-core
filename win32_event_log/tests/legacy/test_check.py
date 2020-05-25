@@ -7,9 +7,11 @@ import pytest
 from mock import patch
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.base.checks.win.wmi.sampler import CaseInsensitiveDict
 from datadog_checks.win32_event_log import Win32EventLogCheck
+from datadog_checks.win32_event_log.legacy.win32_event_log import LogEvent
 
-from .common import INSTANCE
+from .common import INSTANCE, TEST_EVENT
 
 log = logging.getLogger(__file__)
 
@@ -26,20 +28,7 @@ class FakeWmiSampler:
             yield wmi_object
 
     def sample(self):
-        self._wmi_objects = [
-            {
-                'EventCode': 1000.0,
-                'EventIdentifier': 10.0,
-                'EventType': 20,
-                'InsertionStrings': '[insertionstring]',
-                'Logfile': 'Application',
-                'Message': 'SomeMessage',
-                'SourceName': 'MSQLSERVER',
-                'TimeGenerated': '21001224113047.000000-480',
-                'User': 'FooUser',
-                'Type': 'Error',
-            }
-        ]
+        self._wmi_objects = [TEST_EVENT]
 
     def reset(self):
         self._wmi_objects = []
@@ -147,6 +136,20 @@ Type: Error
         alert_type='error',
         source_type_name='event viewer',
     )
+
+
+def test_log_event():
+    test_ev = TEST_EVENT.copy()
+    test_ev['EventIdentifier'] = 12.2345
+    ev = CaseInsensitiveDict(test_ev)
+
+    log_event = LogEvent(ev, None, None, [], None, None, None, None)
+
+    # Ensure that LogEvent.event is still a CaseInsensitiveDict
+    assert isinstance(log_event.event, CaseInsensitiveDict)
+
+    # Ensure event is normalized
+    assert isinstance(log_event.event['EventIdentifier'], int)
 
 
 def test_no_filters(check):
