@@ -75,12 +75,12 @@ Need help? Contact [Datadog support][8].
 
 - [Track performance impact of code changes with TeamCity and Datadog.][9]
 
-[1]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://confluence.jetbrains.com/display/TCD9/Enabling+Guest+Login
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/teamcity/datadog_checks/teamcity/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[8]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/help/
 [9]: https://www.datadoghq.com/blog/track-performance-impact-of-code-changes-with-teamcity-and-datadog

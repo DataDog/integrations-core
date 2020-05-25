@@ -1,5 +1,9 @@
 # CHANGELOG - apache
 
+## 1.12.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 1.11.1 / 2020-04-07
 
 * [Fixed] Add `kerberos_cache` to HTTP config options. See [#6279](https://github.com/DataDog/integrations-core/pull/6279).

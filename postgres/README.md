@@ -255,7 +255,7 @@ Additional helpful documentation, links, and articles:
 [8]: https://docs.datadoghq.com/agent/kubernetes/log/
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/postgres/metadata.csv
-[11]: https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained
+[11]: https://docs.datadoghq.com/integrations/faq/postgres-custom-metric-collection-explained/
 [12]: https://www.datadoghq.com/blog/100x-faster-postgres-performance-by-changing-1-line
 [13]: https://www.datadoghq.com/blog/postgresql-monitoring
 [14]: https://www.datadoghq.com/blog/postgresql-monitoring-tools

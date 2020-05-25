@@ -83,5 +83,5 @@ Need help? Contact [Datadog support][9].
 [6]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
 [7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[9]: https://docs.datadoghq.com/help
+[9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/nagios-monitoring

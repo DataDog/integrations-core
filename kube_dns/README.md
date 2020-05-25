@@ -68,4 +68,4 @@ Need help? Contact [Datadog support][6].
 [3]: https://github.com/DataDog/integrations-core/blob/master/kube_dns/datadog_checks/kube_dns/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/kube_dns/metadata.csv
-[6]: https://docs.datadoghq.com/help
+[6]: https://docs.datadoghq.com/help/

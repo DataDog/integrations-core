@@ -1,0 +1,22 @@
+name: HiveMQ
+files:
+- name: hivemq.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/jmx
+  - template: instances
+    options:
+    - template: instances/jmx
+      overrides:
+        port.value.example: 9010
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/hivemq.log
+      source: hivemq
+      service: <SERVICE>
+      log_processing_rules:
+      - type: multi_line
+        name: log_start_with_date
+        pattern: \d{4}-\d{2}-\d{2}

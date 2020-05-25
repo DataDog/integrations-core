@@ -80,9 +80,9 @@ Need help? Contact [Datadog support][11].
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/linkerd/datadog_checks/linkerd/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6v7#restart-the-agent
-[6]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/linkerd/metadata.csv
 [9]: https://twitter.github.io/finagle/guide/Metrics.html
 [10]: https://gist.githubusercontent.com/arbll/2f63a5375a4d6d5acface6ca8a51e2ab/raw/bc35ed4f0f4bac7e2643a6009f45f9068f4c1d12/gistfile1.txt
-[11]: https://docs.datadoghq.com/help
+[11]: https://docs.datadoghq.com/help/

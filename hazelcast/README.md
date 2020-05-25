@@ -156,8 +156,8 @@ Need help? Contact [Datadog support][5].
 [1]: https://hazelcast.org
 [2]: https://docs.datadoghq.com/agent/
 [3]: https://github.com/DataDog/integrations-core/blob/master/hazelcast/datadog_checks/hazelcast/data/conf.yaml.example
-[4]: https://docs.datadoghq.com/integrations/java
-[5]: https://docs.datadoghq.com/help
+[4]: https://docs.datadoghq.com/integrations/java/
+[5]: https://docs.datadoghq.com/help/
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [7]: https://docs.hazelcast.org/docs/latest/manual/html-single/index.html#logging-configuration
 [8]: https://logging.apache.org/log4j/2.x/manual/layouts.html#Patterns

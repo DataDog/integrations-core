@@ -33,7 +33,7 @@ def setup(checks, changed):
         else:
             echo_info(f'Checks chosen: {", ".join(checks)}')
     else:
-        echo_info(f'Checks chosen: changed')
+        echo_info('Checks chosen: changed')
 
     check_envs = list(get_tox_envs(checks, every=True, sort=True, changed_only=changed))
     echo_info(f'Configuring these envs: {check_envs}')

@@ -46,4 +46,5 @@ def test_redis_auth_wrong_pass(redis_auth):
         redis.check(instance)
         assert 0, "Check should raise an exception"
     except Exception as e:
-        assert "invalid password" in str(e).lower()
+        msg = str(e).lower()
+        assert ("invalid password" in msg) or ("wrongpass" in msg)

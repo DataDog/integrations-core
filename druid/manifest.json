@@ -17,7 +17,8 @@
   "public_title": "Datadog-Druid Integration",
   "categories": [
     "processing",
-    "data store"
+    "data store",
+    "log collection"
   ],
   "type": "check",
   "is_public": true,

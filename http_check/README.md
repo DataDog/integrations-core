@@ -108,10 +108,10 @@ Need help? Contact [Datadog support][11].
 [2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/http_check/datadog_checks/http_check/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
-[5]: https://docs.datadoghq.com/getting_started/tagging
+[5]: https://docs.datadoghq.com/getting_started/tagging/
 [6]: https://www.datadoghq.com/blog/the-power-of-tagged-metrics
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/http_check/metadata.csv
 [10]: https://app.datadoghq.com/monitors#/create
-[11]: https://docs.datadoghq.com/help
+[11]: https://docs.datadoghq.com/help/

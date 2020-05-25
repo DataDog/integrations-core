@@ -18,10 +18,12 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 
-# Parse requirements
-def get_requirements(fpath):
+def get_dependencies():
+    dep_file = path.join(HERE, 'requirements.in')
+    if not path.isfile(dep_file):
+        return []
 
-    with open(path.join(HERE, fpath), encoding='utf-8') as f:
+    with open(dep_file, encoding='utf-8') as f:
         return f.readlines()
 
 
@@ -55,6 +57,7 @@ setup(
     packages=['datadog_checks.nginx'],
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
+    extras_require={'deps': get_dependencies()},
     # Extra files to ship with the wheel package
     include_package_data=True,
 )

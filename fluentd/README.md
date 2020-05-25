@@ -153,16 +153,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INIT_CONFIG>`      | blank or `{}`                                                     |
 | `<INSTANCE_CONFIG>`  | `{"monitor_agent_url": "http://%%host%%:24220/api/plugins.json"}` |
 
-##### Log collection
-
-_Available for Agent versions >6.0_
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][18].
-
-| Parameter      | Value                                                |
-| -------------- | ---------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "fluentd", "service": "<SERVICE_NAME>"}` |
-
 ### Validation
 
 [Run the Agent's status subcommand][14] and look for `fluentd` under the Checks section.
@@ -191,7 +181,7 @@ Need help? Contact [Datadog support][16].
 - [How to monitor Fluentd with Datadog][17]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/fluentd/images/snapshot-fluentd.png
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/fluentd/datadog_checks/fluentd/data/conf.yaml.example
@@ -200,11 +190,11 @@ Need help? Contact [Datadog support][16].
 [8]: https://docs.datadoghq.com/logs/processing/#edit-reserved-attributes
 [9]: https://docs.datadoghq.com/integrations/#cat-log-collection
 [10]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
-[11]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags
+[11]: https://docs.datadoghq.com/getting_started/tagging/assigning_tags/
 [12]: https://app.datadoghq.com/infrastructure
 [13]: https://github.com/fabric8io/fluent-plugin-kubernetes_metadata_filter
 [14]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [15]: https://github.com/DataDog/integrations-core/blob/master/fluentd/metadata.csv
-[16]: https://docs.datadoghq.com/help
+[16]: https://docs.datadoghq.com/help/
 [17]: https://www.datadoghq.com/blog/monitor-fluentd-datadog
 [18]: https://docs.datadoghq.com/agent/kubernetes/log/

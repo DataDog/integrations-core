@@ -16,6 +16,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import round_value
 
 from . import metrics
+from .utils import build_url
 
 if PY3:
     long = int
@@ -89,9 +90,6 @@ class MongoDb(AgentCheck):
 
         self.collection_metrics_names = (key.split('.')[1] for key in metrics.COLLECTION_METRICS)
 
-        if 'server' not in self.instance:
-            raise ConfigurationError("Missing 'server' in mongo config")
-
         # x.509 authentication
         ssl_params = {
             'ssl': self.instance.get('ssl', None),
@@ -102,7 +100,22 @@ class MongoDb(AgentCheck):
         }
         self.ssl_params = {key: value for key, value in iteritems(ssl_params) if value is not None}
 
-        self.server = self.instance['server']
+        if 'server' in self.instance:
+            self.warning('Option `server` is deprecated and will be removed in a future release. Use `hosts` instead.')
+            self.server = self.instance['server']
+        else:
+            hosts = self.instance.get('hosts', [])
+            if not hosts:
+                raise ConfigurationError('No `hosts` specified')
+            self.server = self._build_connection_string(
+                hosts,
+                scheme=self.instance.get('connection_scheme', 'mongodb'),
+                username=self.instance.get('username'),
+                password=self.instance.get('password'),
+                database=self.instance.get('database'),
+                options=self.instance.get('options'),
+            )
+
         (
             self.username,
             self.password,
@@ -318,6 +331,29 @@ class MongoDb(AgentCheck):
             raise Exception(message)
 
         return authenticated
+
+    def _build_connection_string(self, hosts, scheme, username=None, password=None, database=None, options=None):
+        # type: (list, str, str, str, str, dict) -> str
+        """
+        Build a server connection string.
+
+        See https://docs.mongodb.com/manual/reference/connection-string/
+        """
+
+        def add_default_port(host):
+            # type: (str) -> str
+            if ':' not in host:
+                return '{}:27017'.format(host)
+            return host
+
+        return build_url(
+            scheme,
+            host=','.join(add_default_port(host) for host in hosts),
+            path='/{}'.format(database) if database else '/',
+            username=username,
+            password=password,
+            query_params=options,
+        )
 
     @classmethod
     def _parse_uri(cls, server, sanitize_username=False):
