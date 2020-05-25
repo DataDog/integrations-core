@@ -54,6 +54,7 @@ class PostgresConfig:
         self.tag_replication_role = is_affirmative(instance.get('tag_replication_role', False))
         self.service_check_tags = self._get_service_check_tags()
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
+        self.max_relations = instance.get('max_relations', 100)
 
     def _build_tags(self, custom_tags):
         # Clean up tags in case there was a None entry in the instance
