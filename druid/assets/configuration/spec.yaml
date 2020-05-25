@@ -1,0 +1,12 @@
+name: Druid
+files:
+- name: druid.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/http
+    - template: instances/default
