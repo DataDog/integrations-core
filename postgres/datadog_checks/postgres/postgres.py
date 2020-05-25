@@ -152,7 +152,8 @@ class PostgreSql(AgentCheck):
 
         if is_relations and len(results) > self.config.max_relations:
             self.warning(
-                "Query: %s returned more than %s results (%s). Truncating",
+                "Query: %s returned more than %s results (%s). "
+                "Truncating. You can edit this limit setting the max_relations config option",
                 query,
                 self.config.max_relations,
                 len(results),

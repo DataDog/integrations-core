@@ -106,6 +106,12 @@ files:
             schemas:
                - <SCHEMA_NAME1>
           - relation_regex: <TABLE_PATTERN>
+    - name: max_relations
+      description: Determines the maximum number of relations to fetch
+      value:
+        type: integer
+        default: 300
+        example: 100
     - name: collect_function_metrics
       description: |
         If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions

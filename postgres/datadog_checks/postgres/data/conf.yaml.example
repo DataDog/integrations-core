@@ -90,6 +90,11 @@ instances:
     #     - <SCHEMA_NAME1>
     #   - relation_regex: <TABLE_PATTERN>
 
+    ## @param max_relations - integer - optional - default: 300
+    ## Determines the maximum number of relations to fetch
+    #
+    # max_relations: 100
+
     ## @param collect_function_metrics - boolean - optional - default: false
     ## If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions
     #
