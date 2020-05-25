@@ -1,5 +1,10 @@
 # CHANGELOG - Nfsstat
 
+## 1.5.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Fixed] Fix nfsiostat command. See [#6650](https://github.com/DataDog/integrations-core/pull/6650).
+
 ## 1.4.2 / 2020-04-04
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).

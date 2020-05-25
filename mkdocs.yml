@@ -1,0 +1,165 @@
+site_name: Agent Integrations
+site_description: The home of Agent Integrations developer documentation
+site_author: Datadog
+site_url: https://datadoghq.dev/integrations-core/
+repo_name: datadog/integrations-core
+repo_url: https://github.com/DataDog/integrations-core
+edit_uri: blob/master/docs/developer
+copyright: 'Copyright &copy; Datadog, Inc. 2020-present'
+
+docs_dir: docs/developer
+site_dir: site
+theme:
+  name: material
+  language: en
+  features:
+    - tabs
+    # https://github.com/facelessuser/pymdown-extensions/issues/876#issuecomment-610164436
+    # - instant
+  palette:
+    primary: deep purple
+    accent: deep purple
+  font:
+    text: Roboto
+    code: Roboto Mono
+  icon:
+    repo: fontawesome/brands/github-alt
+  favicon: assets/images/favicon.ico
+  logo: assets/images/logo.svg
+
+nav:
+  - Home: index.md
+  - Setup: setup.md
+  - Testing: testing.md
+  - E2E: e2e.md
+  - Base Package:
+    - About: base/about.md
+    - Basics: base/basics.md
+    - HTTP: base/http.md
+    - Databases: base/databases.md
+    - Prometheus: base/prometheus.md
+    - Metadata: base/metadata.md
+    - API: base/api.md
+  - Dev Package:
+    - What's in the box?: ddev/about.md
+    - Test framework: ddev/test.md
+    - Plugins: ddev/plugins.md
+    - Configuration: ddev/configuration.md
+    - CLI: ddev/cli.md
+  - Guidelines:
+    - Pull requests: guidelines/pr.md
+    - Style: guidelines/style.md
+    - Dashboards: guidelines/dashboards.md
+    - Conventions: guidelines/conventions.md
+  - Meta:
+    - CI: meta/ci.md
+    - CD: meta/cd.md
+    - Docs: meta/docs.md
+    - Config specs: meta/config-specs.md
+    - Status: meta/status.md
+  - Tutorials:
+    - JMX: tutorials/jmx.md
+    - SNMP:
+      - tutorials/snmp/introduction.md
+      - tutorials/snmp/profiles.md
+      - tutorials/snmp/how-to.md
+      - tutorials/snmp/profile-format.md
+      - tutorials/snmp/sim-format.md
+    - Memory profiling: tutorials/memory-profiling.md
+  - Architecture:
+    - SNMP: architecture/snmp.md
+    - vSphere: architecture/vsphere.md
+  - Process:
+    - Integration release: process/integration-release.md
+    - Agent release: process/agent-release.md
+  - FAQ:
+    - FAQ: faq/faq.md
+    - Acknowledgements: faq/acknowledgements.md
+
+plugins:
+  # Built-in
+  - search:
+  # Extra
+  - minify:
+      minify_html: true
+  - git-revision-date-localized:
+      type: date
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_if_no_docstring: yes
+            show_root_heading: yes
+            show_source: true
+
+markdown_extensions:
+  # Built-in
+  - markdown.extensions.abbr:
+  - markdown.extensions.admonition:
+  - markdown.extensions.footnotes:
+  - markdown.extensions.tables:
+  - markdown.extensions.toc:
+      permalink: true
+      toc_depth: "2-6"
+  # Extra
+  - mkdocs-click:
+  - mkpatcher:
+      location: docs/developer/.scripts
+  - pymdownx.arithmatex:
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret:
+  - pymdownx.critic:
+  - pymdownx.details:
+  - pymdownx.emoji:
+      # https://github.com/twitter/twemoji
+      # https://raw.githubusercontent.com/facelessuser/pymdown-extensions/master/pymdownx/twemoji_db.py
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight:
+      guess_lang: false
+      linenums_style: pymdownx-inline
+      use_pygments: true
+  - pymdownx.inlinehilite:
+  - pymdownx.keys:
+  - pymdownx.magiclink:
+      repo_url_shortener: true
+      repo_url_shorthand: true
+      social_url_shortener: true
+      social_url_shorthand: true
+      provider: github
+      user: DataDog
+      repo: integrations-core
+  - pymdownx.mark:
+  - pymdownx.progressbar:
+  - pymdownx.smartsymbols:
+  - pymdownx.snippets:
+      base_path: docs/developer/.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+        - name: math
+          class: arithmatex
+          format: !!python/name:pymdownx.arithmatex.fence_mathjax_format
+  - pymdownx.tabbed:
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde:
+
+extra:
+  social:
+    - icon: fontawesome/solid/blog
+      link: https://www.datadoghq.com/blog/engineering/
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/DataDog
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/datadoghq
+    - icon: fontawesome/brands/instagram
+      link: https://www.instagram.com/datadoghq
+extra_css:
+  - assets/css/custom.css
+extra_javascript:
+  - assets/js/custom.js

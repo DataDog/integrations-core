@@ -679,7 +679,7 @@ def test_discovery(aggregator):
             aggregator.reset()
     finally:
         check._running = False
-        check._thread.join()
+        del check  # This is what the Agent would do when unscheduling the check.
 
     for metric in common.SUPPORTED_METRIC_TYPES:
         metric_name = "snmp." + metric['name']
@@ -905,3 +905,23 @@ def test_metric_tag_matching(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
 
     aggregator.all_metrics_asserted()
+
+
+def test_timeout(aggregator, caplog):
+    caplog.set_level(logging.WARNING)
+
+    instance = common.generate_instance_config([])
+    instance['community_string'] = 'public_delay'
+    instance['timeout'] = 1
+    instance['retries'] = 0
+    check = SnmpCheck('snmp', {}, [instance])
+    check.check(instance)
+
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, at_least=1)
+    aggregator.all_metrics_asserted()
+
+    for record in caplog.records:
+        if "No SNMP response received before timeout for instance" in record.message:
+            break
+    else:
+        pytest.fail()

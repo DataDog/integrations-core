@@ -4,7 +4,6 @@
   ],
   "categories": [
     "languages",
-    "log collection",
     "autodiscovery"
   ],
   "creates_events": false,

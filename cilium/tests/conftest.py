@@ -7,15 +7,15 @@ import mock
 import pytest
 
 from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.dev import run_command
+from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
-from datadog_checks.dev.terraform import terraform_run
-
-from .common import ADDL_AGENT_METRICS, AGENT_DEFAULT_METRICS, OPERATOR_AWS_METRICS, OPERATOR_METRICS
 
 try:
     from contextlib import ExitStack
 except ImportError:
     from contextlib2 import ExitStack
+
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
@@ -27,29 +27,43 @@ OPERATOR_URL = "http://{}:{}/metrics".format(HOST, OPERATOR_PORT)
 PORTS = [AGENT_PORT, OPERATOR_PORT]
 
 
+def setup_cilium():
+    config = os.path.join(HERE, 'kind', 'cilium.yaml')
+    run_command(
+        [
+            "kubectl",
+            "create",
+            "clusterrolebinding",
+            "cluster-admin-binding",
+            "--clusterrole",
+            "cluster-admin",
+            "--user",
+            "ddtest@google.email",
+        ]
+    )
+    run_command(["kubectl", "create", "ns", "cilium"])
+    run_command(["kubectl", "create", "-f", config])
+    run_command(
+        ["kubectl", "wait", "deployments", "--all", "--for=condition=Available", "-n", "cilium", "--timeout=300s"]
+    )
+    run_command(["kubectl", "wait", "pods", "-n", "cilium", "--all", "--for=condition=Ready", "--timeout=300s"])
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
-    with terraform_run(os.path.join(HERE, 'terraform')) as outputs:
-        kubeconfig = outputs['kubeconfig']['value']
+    with kind_run(conditions=[setup_cilium]) as kubeconfig:
         with ExitStack() as stack:
             ip_ports = [
                 stack.enter_context(port_forward(kubeconfig, 'cilium', 'cilium-operator', port)) for port in PORTS
             ]
+        instances = {
+            'instances': [
+                {'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0])},
+                {'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1])},
+            ]
+        }
 
-            instances = {
-                'instances': [
-                    {
-                        'agent_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[0]),
-                        'metrics': ADDL_AGENT_METRICS + AGENT_DEFAULT_METRICS,
-                    },
-                    {
-                        'operator_endpoint': 'http://{}:{}/metrics'.format(*ip_ports[1]),
-                        'metrics': OPERATOR_METRICS + OPERATOR_AWS_METRICS,
-                    },
-                ]
-            }
-
-            yield instances
+        yield instances
 
 
 @pytest.fixture(scope="session")

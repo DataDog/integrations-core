@@ -4,101 +4,36 @@
 
 ## Overview
 
-Get metrics from kubernetes service in real time to:
+Get metrics from the Kubernetes service in real time to:
 
-- Visualize and monitor kubernetes states
-- Be notified about kubernetes failovers and events.
+- Visualize and monitor Kubernetes states
+- Be notified about Kubernetes failovers and events.
 
-## Agent6 migration instructions
-
-Agent6 uses a new set of integrations, see [the update instructions][2] and the [new dedicated kubernetes documentation page][3] for more information.
-
-## Setup Agent version 5
+## Setup
 
 ### Installation
 
-The Kubernetes check is included in the [Datadog Agent][4] package, so you don't need to install anything else on your Kubernetes servers.
+The Kubernetes check is included in the [Datadog Agent][3] package, so you don't need to install anything else on your Kubernetes servers.
+
+For more information on installing the Datadog Agent on your Kubernetes clusters, see the [Kubernetes documentation page][2].
+
+To collect Kubernetes State metrics, please refer to the [kubernetes_state integration][13].
+
 
 ### Configuration
 
-Edit the `kubernetes.yaml` file to point to your server and port, set the masters to monitor. See the [sample kubernetes.yaml][5] for all available configuration options.
+Edit the `kubernetes.yaml` file to point to your server and port, set the masters to monitor. See the [sample kubernetes.yaml][4] for all available configuration options.
 
-### Gathering kubernetes events
-
-As the 5.17.0 release, Datadog Agent now supports built in leader election option for the Kubernetes event collector. Agents coordinate by performing a leader election among members of the Datadog DaemonSet through kubernetes to ensure only one leader agent instance is gathering events at a given time.
-If the leader agent instance fails, a re-election occurs and another cluster agent will take over collection.
-
-**This functionality is disabled by default**.
-
-To enable leader election you need to set the variable `leader_candidate` to true in your kubernetes.yaml file.
-
-This feature relies on [ConfigMaps][6] , so you will need to grant Datadog Agent get, list, delete and create access to the ConfigMap resource.
-
-Use these Kubernetes RBAC entities for your Datadog agent to properly configure the previous permissions by [applying this datadog service account to your pods][7].
-
-```yaml
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: datadog
-rules:
-  - nonResourceURLs:
-      - "/version" # Used to get apiserver version metadata
-      - "/healthz" # Healthcheck
-    verbs: ["get"]
-  - apiGroups: [""]
-    resources:
-      - "nodes"
-      - "namespaces" #
-      - "events" # Cluster events + kube_service cache invalidation
-      - "services" # kube_service tag
-    verbs: ["get", "list"]
-  - apiGroups: [""]
-    resources:
-      - "configmaps"
-    resourceNames: ["datadog-leader-elector"]
-    verbs: ["get", "delete", "update"]
-  - apiGroups: [""]
-    resources:
-      - "configmaps"
-    verbs: ["create"]
----
-# You need to use that account for your dd-agent DaemonSet
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: datadog
-automountServiceAccountToken: true
----
-# Your admin user needs the same permissions to be able to grant them
-# Easiest way is to bind your user to the cluster-admin role
-# See https://cloud.google.com/container-engine/docs/role-based-access-control#setting_up_role-based_access_control
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: datadog
-subjects:
-  - kind: ServiceAccount
-    name: datadog
-    namespace: default
-roleRef:
-  kind: ClusterRole
-  name: datadog
-  apiGroup: rbac.authorization.k8s.io
-```
-
-In your `kubernetes.d/conf.yaml` file you will see the [leader_lease_duration][8] parameter. It's the duration for which a leader stays elected. **It should be > 30 seconds**.
-The longer it is, the less hard your agent hits the apiserver with requests, but it also means that if the leader dies (and under certain conditions) there can be an event blackout until the lease expires and a new leader takes over.
 
 ### Validation
 
-[Run the Agent's `status` subcommand][9] and look for `kubernetes` under the Checks section.
+[Run the Agent's `status` subcommand][8] and look for `kubernetes` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][10] for a list of metrics provided by this integration.
+See [metadata.csv][9] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -139,7 +74,7 @@ The Kubernetes check does not include any service checks.
 
 ### Can I install the agent on my Kubernetes master node(s) ?
 
-Yes, since Kubernetes 1.6, the concept of [Taints and tolerations][11] was introduced. Now rather than the master being off limits, it's simply tainted. Add the required toleration to the pod to run it:
+Yes, since Kubernetes 1.6, the concept of [Taints and tolerations][10] was introduced. Now rather than the master being off limits, it's simply tainted. Add the required toleration to the pod to run it:
 
 Add the following lines to your Deployment (or Daemonset if you are running a multi-master setup):
 
@@ -161,7 +96,7 @@ The agent assumes that the kubelet API is available at the default gateway of th
       fieldPath: spec.nodeName
 ```
 
-See [this PR][12]
+See [this PR][11]
 
 ### Why is there a container in each Kubernetes pod with 0% CPU and minimal disk/ram?
 
@@ -171,18 +106,18 @@ The docker_daemon check ignores them through a default exclusion list, but they 
 
 ## Further Reading
 
-To get a better idea of how (or why) to integrate your Kubernetes service, check out our [series of blog posts][13] about it.
+To get a better idea of how (or why) to integrate your Kubernetes service, check out our [series of blog posts][12] about it.
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kubernetes/images/kubernetes_dashboard.png
-[2]: https://github.com/DataDog/datadog-agent/blob/master/docs/agent/changes.md#kubernetes-support
-[3]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/
-[4]: https://app.datadoghq.com/account/settings#agent
-[5]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/datadog_checks/kubernetes/data/conf.yaml.example
-[6]: https://kubernetes.io/docs/api-reference/v1.7/#configmap-v1-core
-[7]: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account
-[8]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/datadog_checks/kubernetes/data/conf.yaml.example#L118
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[10]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/metadata.csv
-[11]: https://blog.kubernetes.io/2017/03/advanced-scheduling-in-kubernetes.html
-[12]: https://github.com/DataDog/dd-agent/pull/3051
-[13]: https://www.datadoghq.com/blog/monitoring-kubernetes-era
+[2]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes
+[3]: https://app.datadoghq.com/account/settings#agent
+[4]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/datadog_checks/kubernetes/data/conf.yaml.example
+[5]: https://kubernetes.io/docs/api-reference/v1.7/#configmap-v1-core
+[6]: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account
+[7]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/datadog_checks/kubernetes/data/conf.yaml.example#L118
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[9]: https://github.com/DataDog/integrations-core/blob/master/kubernetes/metadata.csv
+[10]: https://blog.kubernetes.io/2017/03/advanced-scheduling-in-kubernetes.html
+[11]: https://github.com/DataDog/dd-agent/pull/3051
+[12]: https://www.datadoghq.com/blog/monitoring-kubernetes-era
+[13]: https://docs.datadoghq.com/integrations/kubernetes/#kubernetes-state-metrics

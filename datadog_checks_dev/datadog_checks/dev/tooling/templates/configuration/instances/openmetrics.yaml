@@ -98,6 +98,14 @@
   value:
     example: true
     type: boolean
+- name: send_monotonic_with_gauge
+  description: |
+    Set send_monotonic_with_gauge to true to send counters as both monotonic counters and gauges.
+    This option only works when `send_monotonic_counter` is False.
+  hidden: true
+  value:
+    example: false
+    type: boolean
 - name: send_distribution_counts_as_monotonic
   description: |
     Set send_distribution_counts_as_monotonic to true to send histograms & summary

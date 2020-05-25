@@ -17,7 +17,7 @@ class NfsStatCheck(AgentCheck):
         AgentCheck.__init__(self, name, init_config, agentConfig, instances)
         # if they set the path, use that
         if init_config.get('nfsiostat_path'):
-            self.nfs_cmd = [init_config.get('nfsiostat_path'), '1', '2']
+            self.nfs_cmd = init_config['nfsiostat_path'].split() + ['1', '2']
         else:
             # if not, check if it's installed in the opt dir, if so use that
             if os.path.exists('/opt/datadog-agent/embedded/sbin/nfsiostat'):

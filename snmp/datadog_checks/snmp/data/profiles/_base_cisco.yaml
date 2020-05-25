@@ -6,6 +6,7 @@ extends:
   - _generic-router-tcp.yaml
   - _generic-router-udp.yaml
   - _generic-router-ospf.yaml
+  - _generic-router-bgp4.yaml
 
 metrics:
   - MIB: CISCO-ENTITY-FRU-CONTROL-MIB
