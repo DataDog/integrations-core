@@ -8,5 +8,11 @@ files:
     - template: init_config/default
   - template: instances
     options:
+    - name: url
+      description: url used to connect to the Druid instance.
+      required: true
+      value:
+        type: string
+        example: <DRUID_INSTANCE_URL>
     - template: instances/http
     - template: instances/default

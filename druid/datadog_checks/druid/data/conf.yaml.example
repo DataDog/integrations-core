@@ -45,7 +45,11 @@ init_config:
 #
 instances:
 
-  -
+    ## @param url - string - required
+    ## url used to connect to the Druid instance.
+    #
+  - url: <DRUID_INSTANCE_URL>
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
