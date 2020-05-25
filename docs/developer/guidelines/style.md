@@ -46,4 +46,51 @@ A `flake8` plugin for ensuring a consistent logging format. We enable:
 
 ## [Mypy][mypy-github]
 
-A type checker allowing a mix of dynamic and static typing. This is optional for now.
+A comment-based type checker allowing a mix of dynamic and static typing. This is optional for now. In order to enable `mypy` for a specific integration, open its `tox.ini` file and add the 2 lines in the correct section:
+
+```
+[testenv]
+dd_check_types = true
+dd_mypy_args = <FLAGS> datadog_checks/ tests/
+...
+```
+
+The `dd_mypy_args` can be used to add or overwrite some flags to mypy for this specific integration. Here are some useful arguments you can add:
+
+- `--py2`: If the integration needs to be Python2.7 compatible.
+- `--disallow-untyped-defs`: Disallows defining functions without type annotations or with incomplete type annotations.
+
+Note that there is a default configuration in the `mypy.ini` file:
+
+- `follow_import = normal`: Follows all imports normally and type checks all top level code (as well as the bodies of all functions and methods with at least one type annotation in the signature).
+- `ignore_missing_import = true`: Ignore errors about imported packages that don't provide type hints.
+- `disallow_untyped_defs = false`: Allows defining functions without type annotations or with incomplete type annotations. Prevent noise from imported module.
+- `show_column_numbers = true`: Shows column numbers in error messages.
+
+### Example
+
+Extracted from `rethinkdb`:
+
+```python
+from typing import Any, Iterator # Contains the different types used
+
+import rethinkdb
+
+from .document_db.types import Metric
+
+class RethinkDBCheck(AgentCheck):
+    def __init__(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
+        super(RethinkDBCheck, self).__init__(*args, **kwargs)
+
+    def collect_metrics(self, conn):
+        # type: (rethinkdb.net.Connection) -> Iterator[Metric]
+        """
+        Collect metrics from the RethinkDB cluster we are connected to.
+        """
+        for query in self.queries:
+            for metric in query.run(logger=self.log, conn=conn, config=self.config):
+                yield metric
+```
+
+Take a look at `vsphere` or `ibm_mq` integrations for more examples.
