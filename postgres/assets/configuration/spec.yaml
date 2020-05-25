@@ -69,6 +69,7 @@ files:
       value:
         type: integer
         example: 1000
+        default: null
     - name: relations
       description: |
         The list of relations/tables must be specified here to track per-relation (table) metrics.
