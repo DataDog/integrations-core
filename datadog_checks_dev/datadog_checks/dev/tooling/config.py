@@ -41,9 +41,8 @@ DEFAULT_CONFIG = {
         'agent': os.path.join('~', 'dd', 'datadog-agent'),
     },
     'agents': {
-        'master': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
-        '7': {'docker': 'datadog/agent:7', 'local': '7'},
-        '6': {'docker': 'datadog/agent:6', 'local': '6'},
+        '6': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
+        '5': {'docker': 'datadog/dev-dd-agent:master', 'local': 'latest'},
     },
     'orgs': {
         'default': {
@@ -100,9 +99,11 @@ def update_config():
     config = copy_default_config()
     config.update(load_config())
 
-    # Support legacy config where agent6 was a string
-    if isinstance(config.get('agent6'), str):
+    # Support legacy config where agent5 and agent6 were strings
+    if isinstance(config['agent6'], str):
         config['agent6'] = {'docker': config['agent6'], 'local': 'latest'}
+    if isinstance(config['agent5'], str):
+        config['agent5'] = {'docker': config['agent5'], 'local': 'latest'}
 
     save_config(config)
     return config
