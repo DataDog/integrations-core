@@ -15,7 +15,7 @@ instances:
 
     ## @param host - string - required
     ## The hostname to connect to.
-    ## NOTE: Even if the server name is `localhost`, the agent connects to PostgreSQL using TCP/IP, unless you also
+    ## NOTE: Even if the server name is `localhost`, the Agent connects to PostgreSQL using TCP/IP unless you also
     ## provide a value for the sock key.
     ## If `use_psycopg2` is enabled, use the directory containing the UNIX socket (ex: `/run/postgresql/`)
     ## otherwise, use the full path to the socket file (ex: `/run/postgresql/.s.PGSQL.5433`).
@@ -28,7 +28,7 @@ instances:
     # port: 5432
 
     ## @param username - string - required
-    ## The datadog Username created to connect to PostgreSQL.
+    ## The Datadog username created to connect to PostgreSQL.
     #
     username: datadog
 
@@ -38,8 +38,8 @@ instances:
     # password: <PASSWORD>
 
     ## @param dbname - string - optional - default: postgres
-    ## The Name of the PostgresSQL database to monitor.
-    ## Note: If omitted, the default system postgres database is queried.
+    ## The name of the PostgresSQL database to monitor.
+    ## Note: If omitted, the default system Postgres database is queried.
     #
     # dbname: <DBNAME>
 
@@ -61,6 +61,13 @@ instances:
     ## Note: `true` is an alias for `require`, and `false` is an alias for `disable`
     #
     # ssl: 'false'
+
+    ## @param query_timeout - integer - optional - default: 1000
+    ## Abort any statement that takes more than the specified number of milliseconds, starting from the time the command
+    ## arrives at the server from the client. A value of zero (the default) turns this off.
+    ## Cancelled queries won't log any metrics
+    #
+    # query_timeout: 1000
 
     ## @param relations - list of mappings - optional
     ## The list of relations/tables must be specified here to track per-relation (table) metrics.
@@ -117,7 +124,7 @@ instances:
     ## @param table_count_limit - integer - optional - default: 200
     ## The maximum number of tables to collect metrics from
     #
-    # table_count_limit: <TABLE_COUNT_LIMIT>
+    # table_count_limit: 200
 
     ## @param custom_queries - list of mappings - optional
     ## Define custom queries to collect custom metrics from your PostgreSQL
@@ -181,6 +188,7 @@ instances:
 #   - type: file
 #     path: /path/to/postgres.log
 #     source: postgresql
+#     service: <SERVICE>
 #     log_processing_rules:
 #     - type: multi_line
 #       pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
