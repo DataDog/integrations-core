@@ -1,3 +1,4 @@
+-e git==github.com:alexandreyang/dd-trace-py.git@cap_setuptools_scm#egg=ddtrace
 adodbapi==2.6.0.7; sys_platform == 'win32'
 aerospike==3.10.0; sys_platform != 'win32'
 aws-requests-auth==0.4.2
@@ -11,7 +12,6 @@ clickhouse-driver==0.1.2
 contextlib2==0.6.0; python_version < '3.0'
 cryptography==2.8
 cx-oracle==7.2.0
-ddtrace==0.32.2
 dnspython==1.16.0
 enum34==1.1.6; python_version < '3.0'
 flup==1.0.3.dev-20110405; python_version < '3.0'
