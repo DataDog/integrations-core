@@ -51,21 +51,16 @@ A comment-based type checker allowing a mix of dynamic and static typing. This i
 ```
 [testenv]
 dd_check_types = true
-dd_mypy_args = <FLAGS> datadog_checks/ tests/
+dd_mypy_args = <FLAGS> --py2 datadog_checks/ tests/
 ...
 ```
 
-The `dd_mypy_args` can be used to add or overwrite some flags to mypy for this specific integration. Here are some useful arguments you can add:
+The `dd_mypy_args` defines the [mypy command line option][mypy-command-line] for this specific integration. `--py2` is here to make sure the integration is Python2.7 compatible. Here are some useful flags you can add:
 
-- `--py2`: If the integration needs to be Python2.7 compatible.
+- `--check-untyped-defs`: Type-checks the interior of functions without type annotations.
 - `--disallow-untyped-defs`: Disallows defining functions without type annotations or with incomplete type annotations.
 
-Note that there is a default configuration in the `mypy.ini` file:
-
-- `follow_import = normal`: Follows all imports normally and type checks all top level code (as well as the bodies of all functions and methods with at least one type annotation in the signature).
-- `ignore_missing_import = true`: Ignore errors about imported packages that don't provide type hints.
-- `disallow_untyped_defs = false`: Allows defining functions without type annotations or with incomplete type annotations. Prevent noise from imported module.
-- `show_column_numbers = true`: Shows column numbers in error messages.
+Note that there is a default configuration in the [`mypy.ini`][mypy-ini] file.
 
 ### Example
 
