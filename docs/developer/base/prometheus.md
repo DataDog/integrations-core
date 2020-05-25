@@ -15,7 +15,7 @@ All functionality is exposed by the `OpenMetricsBaseCheck` and `OpenMetricsScrap
     rendering:
       heading_level: 4
 
-::: datadog_checks.base.checks.openmetrics.OpenMetricsScraperMixin
+::: datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin
     rendering:
       heading_level: 4
     selection:
@@ -34,7 +34,7 @@ Some options can be set globally in `init_config` (with `instances` taking prece
 For complete documentation of every option, see the associated configuration templates for the
 [instances][config-spec-template-instances-openmetrics] and [init_config][config-spec-template-init-config-openmetrics] sections.
 
-Default options from the `HTTP` wrapper and `AgentCheck` are also supported.
+All [HTTP options](http.md#options) are also supported.
 
 
 ::: datadog_checks.base.checks.openmetrics.base_check.StandardFields
@@ -43,3 +43,14 @@ Default options from the `HTTP` wrapper and `AgentCheck` are also supported.
       show_root_toc_entry: false
 
 ## Prometheus to Datadog metric types
+
+The Openmetrics Base Check supports various configurations for submitting Prometheus metrics to Datadog.
+We currently support Prometheus `gauge`, `counter`, `histogram`, and `summary` metric types.
+
+### Gauge
+
+### Counter
+
+### Histogram
+
+### Summary

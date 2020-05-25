@@ -381,9 +381,6 @@ class OpenMetricsScraperMixin(object):
         """
         Parse the MetricFamily from a valid `requests.Response` object to provide a MetricFamily object.
         The text format uses iter_lines() generator.
-
-        :param response: requests.Response
-        :return: core.Metric
         """
         if response.encoding is None:
             response.encoding = 'utf-8'
@@ -606,9 +603,9 @@ class OpenMetricsScraperMixin(object):
     def process_metric(self, metric, scraper_config, metric_transformers=None):
         """
         Handle a Prometheus metric according to the following flow:
-            - search `scraper_config['metrics_mapper']` for a prometheus.metric to datadog.metric mapping
-            - call check method with the same name as the metric
-            - log info if none of the above worked
+        - search `scraper_config['metrics_mapper']` for a prometheus.metric to datadog.metric mapping
+        - call check method with the same name as the metric
+        - log info if none of the above worked
 
         `metric_transformers` is a dict of `<metric name>:<function to run when the metric name is encountered>`
         """
@@ -667,16 +664,12 @@ class OpenMetricsScraperMixin(object):
 
     def poll(self, scraper_config, headers=None):
         """
-        Returns a valid requests.Response, otherwise raise requests.HTTPError if the status code of the
-        requests.Response isn't valid - see `response.raise_for_status()`
+        Returns a valid `requests.Response`, otherwise raise requests.HTTPError if the status code of the
+        response isn't valid - see `response.raise_for_status()`
 
-        The caller needs to close the requests.Response
+        The caller needs to close the requests.Response.
 
         Custom headers can be added to the default headers.
-
-        :param endpoint: string url endpoint
-        :param headers: extra headers
-        :return: requests.Response
         """
         endpoint = scraper_config.get('prometheus_url')
 
