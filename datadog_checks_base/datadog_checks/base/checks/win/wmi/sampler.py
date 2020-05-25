@@ -52,10 +52,7 @@ class CaseInsensitiveDict(dict):
         """
         Explicit copy to ensure we return an instance of `CaseInsensitiveDict`
         """
-        copied = CaseInsensitiveDict()
-        for key, value in self.items():
-            copied[key] = value
-        return copied
+        return CaseInsensitiveDict(self)
 
 
 class ProviderArchitectureMeta(type):

@@ -18,7 +18,6 @@ except ImportError:
     pass
 
 
-
 @requires_windows
 @pytest.mark.unit
 def test_format_filter_value():
@@ -74,6 +73,7 @@ def test_format_filter_win32_log():
         "AND ( Type = 'Warning' OR Type = 'Error' ) AND TimeGenerated >= '202056101355.000000+' )"
     )
 
+
 @requires_windows
 @pytest.mark.unit
 def test_caseinsensitivedict():
@@ -98,4 +98,3 @@ def test_caseinsensitivedict():
     value2 = "Dog"
     test_copy[key2] = value2
     assert CaseInsensitiveDict({key2.lower: value2}) == test_copy
-
