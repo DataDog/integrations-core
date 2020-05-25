@@ -137,8 +137,8 @@ The `service_checks.json` file contains the following mandatory attributes:
 [1]: https://github.com/DataDog/documentation/blob/master/CONTRIBUTING.md
 [2]: https://en.wikipedia.org/wiki/YAML
 [3]: http://yaml-online-parser.appspot.com/
-[4]: https://docs.datadoghq.com/integrations
+[4]: https://docs.datadoghq.com/integrations/
 [5]: https://www.uuidgenerator.net
 [6]: https://docs.datadoghq.com/developers/metrics/metrics_type/
 [7]: https://docs.datadoghq.com/developers/metrics/metrics_units/
-[8]: https://docs.datadoghq.com/getting_started/tagging
+[8]: https://docs.datadoghq.com/getting_started/tagging/

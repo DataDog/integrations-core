@@ -1,5 +1,11 @@
 # CHANGELOG - ceph
 
+## 2.1.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Add ceph config spec. See [#6563](https://github.com/DataDog/integrations-core/pull/6563).
+* [Fixed] Capture type errors as well as key errors for osd perf metrics. See [#6381](https://github.com/DataDog/integrations-core/pull/6381).
+
 ## 2.0.0 / 2020-04-04
 
 * [Fixed] Fix response handling. See [#6152](https://github.com/DataDog/integrations-core/pull/6152).

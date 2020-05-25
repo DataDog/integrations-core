@@ -104,7 +104,7 @@ Additional helpful documentation, links, and articles:
 - [Hadoop & Spark monitoring with Datadog][12]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/spark/images/sparkgraph.png
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/spark/datadog_checks/spark/data/conf.yaml.example
@@ -112,7 +112,7 @@ Additional helpful documentation, links, and articles:
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/spark/metadata.csv
 [9]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-bootstrap.html
-[10]: https://docs.datadoghq.com/agent
+[10]: https://docs.datadoghq.com/agent/
 [11]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html
 [12]: https://www.datadoghq.com/blog/monitoring-spark
 [13]: https://spark.apache.org/

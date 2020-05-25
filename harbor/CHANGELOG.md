@@ -1,5 +1,9 @@
 # CHANGELOG - Harbor
 
+## 1.4.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 1.3.1 / 2020-02-25
 
 * [Fixed] Update base dependency for harbor. See [#5841](https://github.com/DataDog/integrations-core/pull/5841).

@@ -62,4 +62,4 @@ Need help? Contact [Datadog support][9].
 [6]: https://github.com/DataDog/integrations-extras
 [7]: https://www.python.org/dev/peps/pep-0440/#version-scheme
 [8]: https://tox.readthedocs.io/en/latest/install.html
-[9]: https://docs.datadoghq.com/help
+[9]: https://docs.datadoghq.com/help/

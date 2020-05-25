@@ -115,11 +115,11 @@ Need help? Contact [Datadog support][10].
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [7]: https://docs.datadoghq.com/agent/kubernetes/log/
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/gitlab/metadata.csv
-[10]: https://docs.datadoghq.com/help
+[10]: https://docs.datadoghq.com/help/
 [11]: https://github.com/DataDog/integrations-core/blob/master/gitlab/datadog_checks/gitlab/metrics.py
 [12]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/gitlab_metrics.html
 [13]: https://docs.gitlab.com/ee/administration/monitoring/prometheus/gitlab_metrics.html#collecting-the-metrics

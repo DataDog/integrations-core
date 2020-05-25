@@ -15,10 +15,6 @@ AGENT_DEFAULT_METRICS = [
     'cilium.controllers.failing.count',
     'cilium.controllers.runs_duration.seconds.count',
     'cilium.controllers.runs_duration.seconds.sum',
-    'cilium.datapath.conntrack_gc.duration.seconds.count',
-    'cilium.datapath.conntrack_gc.duration.seconds.sum',
-    'cilium.datapath.conntrack_gc.entries',
-    'cilium.datapath.errors.total',
     'cilium.endpoint.count',
     'cilium.endpoint.regeneration_time_stats.seconds.count',
     'cilium.endpoint.regeneration_time_stats.seconds.sum',
@@ -74,6 +70,10 @@ ADDL_AGENT_METRICS = [
     'cilium.datapath.conntrack_gc.runs.total',
     'cilium.controllers.runs.total',
     'cilium.bpf.map_ops.total',
+    'cilium.datapath.conntrack_gc.duration.seconds.count',
+    'cilium.datapath.conntrack_gc.duration.seconds.sum',
+    'cilium.datapath.conntrack_gc.entries',
+    'cilium.datapath.errors.total',
 ]
 
 OPERATOR_METRICS = [

@@ -41,6 +41,7 @@ CONFIG = {
         {
             'prometheus_endpoint': GITLAB_RUNNER_URL,
             'gitlab_url': '{}/ci'.format(GITLAB_MASTER_URL),
+            'send_monotonic_counter': True,
             'disable_ssl_validation': True,
             'tags': list(CUSTOM_TAGS),
         }

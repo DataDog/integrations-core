@@ -24,9 +24,8 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
     '--agent',
     '-a',
     help=(
-        'The agent build to use e.g. a Docker image like `datadog/agent:6.5.2`. For '
-        'Docker environments you can use an integer corresponding to fields in the '
-        'config (agent5, agent6, etc.)'
+        'The agent build to use e.g. a Docker image like `datadog/agent:latest`. You can '
+        'also use the name of an agent defined in the `agents` configuration section.'
     ),
 )
 @click.option(
@@ -131,7 +130,11 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     env_type = metadata['env_type']
 
     agent_ver = agent or os.getenv('DDEV_E2E_AGENT', '6')
-    agent_build = ctx.obj.get(f'agent{agent_ver}', agent_ver)
+    agent_build = ctx.obj.get('agents', {}).get(
+        agent_ver,
+        # TODO: remove this legacy fallback lookup eventually
+        ctx.obj.get(f'agent{agent_ver}', agent_ver),
+    )
     if isinstance(agent_build, dict):
         agent_build = agent_build.get(env_type, env_type)
 
@@ -289,7 +292,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     if profile_memory and on_ci:
         environment.metadata['sampling_start_time'] = time.time()
 
-        echo_waiting('Updating metadata... '.format(env), nl=False)
+        echo_waiting('Updating metadata... ', nl=False)
         environment.write_config()
         echo_success('success!')
 

@@ -23,12 +23,21 @@ INSTANCES = {
         'metric_blacklist': [r'envoy\.cluster\.out\.'],
     },
 }
+SERVER_INFO = {
+    "version": "222aaacccfff888/1.14.1/Clean/RELEASE/BoringSSL",
+    "state": "LIVE",
+}
+ENVOY_VERSION = os.getenv('ENVOY_VERSION')
 
 
 class MockResponse:
     def __init__(self, content, status_code):
         self.content = content
         self.status_code = status_code
+
+    def json(self):
+        # Metadata
+        return SERVER_INFO
 
 
 @lru_cache(maxsize=None)

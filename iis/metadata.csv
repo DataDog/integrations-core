@@ -21,3 +21,6 @@ iis.users.anon,gauge,,request,second,The number of requests from users over an a
 iis.users.nonanon,gauge,,request,second,The number of requests from users over a non-anonymous connection per second,0,iis,requests users non anon
 iis.requests.cgi,gauge,,request,second,The number of Common Gateway Interface requests executed per second,0,iis,requests cgi
 iis.requests.isapi,gauge,,request,second,The number of ISAPI requests executed per second,0,iis,requests isapi
+iis.app_pool.state,gauge,,,,"The current status of the application pool (1 - Uninitialized, 2 - Initialized, 3 - Running, 4 - Disabling, 5 - Disabled, 6 - Shutdown Pending, 7 - Delete Pending).",0,iis,
+iis.app_pool.uptime,gauge,,second,,"The length of time, in seconds, that the application pool has been running since it was started.",1,iis,
+iis.app_pool.recycle.count,count,,,,The number of times that the application pool has been recycled since Windows Process Activation Service (WAS) started.,0,iis,

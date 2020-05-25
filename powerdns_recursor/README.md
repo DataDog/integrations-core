@@ -122,4 +122,4 @@ Need help? Contact [Datadog support][8].
 [5]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/powerdns_recursor/metadata.csv
-[8]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/help/
