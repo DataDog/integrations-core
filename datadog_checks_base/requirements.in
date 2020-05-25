@@ -2,9 +2,6 @@ aws-requests-auth==0.4.2
 binary==1.0.0
 botocore==1.13.42
 contextlib2==0.6.0; python_version < '3.0'
-# `setuptools_scm` 4.0 breaks on Windows + 2.7: https://github.com/pypa/setuptools_scm/issues/442
-# setuptools-scm==3.5.0
-ddtrace==0.32.2
 enum34==1.1.6; python_version < '3.0'
 ipaddress==1.0.22; python_version < '3.0'
 kubernetes==8.0.1
