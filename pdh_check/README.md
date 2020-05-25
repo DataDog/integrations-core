@@ -41,5 +41,5 @@ The PDH check does not include any service checks.
 [3]: https://github.com/DataDog/integrations-core/blob/master/pdh_check/datadog_checks/pdh_check/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[6]: https://docs.datadoghq.com/developers/metrics/custom_metrics
-[7]: https://docs.datadoghq.com/account_management/billing/custom_metrics
+[6]: https://docs.datadoghq.com/developers/metrics/custom_metrics/
+[7]: https://docs.datadoghq.com/account_management/billing/custom_metrics/

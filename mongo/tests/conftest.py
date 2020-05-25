@@ -26,79 +26,79 @@ def dd_environment(instance):
 
 @pytest.fixture(scope='session')
 def instance():
-    return copy.deepcopy(common.DEFAULT_INSTANCE)
+    return copy.deepcopy(common.INSTANCE_BASIC)
 
 
 @pytest.fixture(scope='session')
 def instance_user():
-    return {'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(common.HOST, common.PORT1)}
+    return copy.deepcopy(common.INSTANCE_USER)
 
 
 @pytest.fixture(scope='session')
 def instance_authdb():
-    return {'server': 'mongodb://testUser:testPass@{}:{}/test?authSource=authDB'.format(common.HOST, common.PORT1)}
+    return copy.deepcopy(common.INSTANCE_AUTHDB)
 
 
 @pytest.fixture(scope='session')
 def instance_custom_queries():
-    return {
-        'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(common.HOST, common.PORT1),
-        'custom_queries': [
-            {
-                "metric_prefix": "dd.custom.mongo.query_a",
-                "query": {'find': "orders", 'filter': {'amount': {'$gt': 25}}, 'sort': {'amount': -1}},
-                "fields": [
-                    {"field_name": "cust_id", "name": "cluster_id", "type": "tag"},
-                    {"field_name": "status", "name": "status_tag", "type": "tag"},
-                    {"field_name": "amount", "name": "amount", "type": "count"},
-                    {"field_name": "elements", "name": "el", "type": "count"},
+    instance = copy.deepcopy(common.INSTANCE_USER)
+    instance['custom_queries'] = [
+        {
+            'metric_prefix': 'dd.custom.mongo.query_a',
+            'query': {'find': 'orders', 'filter': {'amount': {'$gt': 25}}, 'sort': {'amount': -1}},
+            'fields': [
+                {'field_name': 'cust_id', 'name': 'cluster_id', 'type': 'tag'},
+                {'field_name': 'status', 'name': 'status_tag', 'type': 'tag'},
+                {'field_name': 'amount', 'name': 'amount', 'type': 'count'},
+                {'field_name': 'elements', 'name': 'el', 'type': 'count'},
+            ],
+            'tags': ['tag1:val1', 'tag2:val2'],
+        },
+        {
+            'query': {'count': 'foo', 'query': {'1': {'$type': 16}}},
+            'metric_prefix': 'dd.custom.mongo.count',
+            'tags': ['tag1:val1', 'tag2:val2'],
+            'count_type': 'gauge',
+        },
+        {
+            'query': {
+                'aggregate': 'orders',
+                'pipeline': [
+                    {'$match': {'status': 'A'}},
+                    {'$group': {'_id': '$cust_id', 'total': {'$sum': '$amount'}}},
+                    {'$sort': {'total': -1}},
                 ],
-                "tags": ['tag1:val1', 'tag2:val2'],
+                'cursor': {},
             },
-            {
-                "query": {'count': "foo", 'query': {'1': {'$type': 16}}},
-                "metric_prefix": "dd.custom.mongo.count",
-                "tags": ['tag1:val1', 'tag2:val2'],
-                "count_type": 'gauge',
-            },
-            {
-                "query": {
-                    'aggregate': "orders",
-                    'pipeline': [
-                        {"$match": {"status": "A"}},
-                        {"$group": {"_id": "$cust_id", "total": {"$sum": "$amount"}}},
-                        {"$sort": {"total": -1}},
-                    ],
-                    'cursor': {},
-                },
-                "fields": [
-                    {"field_name": "total", "name": "total", "type": "count"},
-                    {"field_name": "_id", "name": "cluster_id", "type": "tag"},
-                ],
-                "metric_prefix": "dd.custom.mongo.aggregate",
-                "tags": ['tag1:val1', 'tag2:val2'],
-            },
-        ],
-    }
+            'fields': [
+                {'field_name': 'total', 'name': 'total', 'type': 'count'},
+                {'field_name': '_id', 'name': 'cluster_id', 'type': 'tag'},
+            ],
+            'metric_prefix': 'dd.custom.mongo.aggregate',
+            'tags': ['tag1:val1', 'tag2:val2'],
+        },
+    ]
+
+    return instance
 
 
 @pytest.fixture(scope='session')
 def instance_1valid_and_1invalid_custom_queries():
-    return {
-        'server': 'mongodb://testUser2:testPass2@{}:{}/test'.format(common.HOST, common.PORT1),
-        'custom_queries': [
-            {
-                "metric_prefix": "dd.custom.mongo.count",
-                # invalid query with missing query, skipped with error/warning logs
-            },
-            {
-                "query": {'count': "foo", 'query': {'1': {'$type': 16}}},
-                "metric_prefix": "dd.custom.mongo.count",
-                "tags": ['tag1:val1', 'tag2:val2'],
-                "count_type": 'gauge',
-            },
-        ],
-    }
+    instance = copy.deepcopy(common.INSTANCE_USER)
+    instance['custom_queries'] = [
+        {
+            'metric_prefix': 'dd.custom.mongo.count',
+            # invalid query with missing query, skipped with error/warning logs
+        },
+        {
+            'query': {'count': 'foo', 'query': {'1': {'$type': 16}}},
+            'metric_prefix': 'dd.custom.mongo.count',
+            'tags': ['tag1:val1', 'tag2:val2'],
+            'count_type': 'gauge',
+        },
+    ]
+
+    return instance
 
 
 @pytest.fixture
@@ -156,5 +156,6 @@ class InitializeDB(LazyFunction):
 
         auth_db = cli['authDB']
         auth_db.command("createUser", 'testUser', pwd='testPass', roles=[{'role': 'read', 'db': 'test'}])
+        auth_db.command("createUser", 'special test user', pwd='s3\\kr@t', roles=[{'role': 'read', 'db': 'test'}])
 
         db.command("createUser", 'testUser2', pwd='testPass2', roles=[{'role': 'read', 'db': 'test'}])

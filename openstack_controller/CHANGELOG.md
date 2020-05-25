@@ -1,5 +1,9 @@
 # CHANGELOG - Openstack_controller
 
+## 1.9.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 1.8.1 / 2020-02-25
 
 * [Fixed] Bump datadog_checks_base dependency to 11.0.0. See [#5838](https://github.com/DataDog/integrations-core/pull/5838).

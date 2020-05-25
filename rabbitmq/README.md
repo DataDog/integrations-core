@@ -174,8 +174,8 @@ Additional helpful documentation, links, and articles:
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/rabbitmq/metadata.csv
-[13]: https://docs.datadoghq.com/help
+[13]: https://docs.datadoghq.com/help/
 [14]: https://www.datadoghq.com/blog/rabbitmq-monitoring
 [15]: https://www.datadoghq.com/blog/rabbitmq-monitoring-tools
 [16]: https://www.datadoghq.com/blog/monitoring-rabbitmq-performance-with-datadog
-[17]: https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family
+[17]: https://docs.datadoghq.com/integrations/faq/tagging-rabbitmq-queues-by-tag-family/

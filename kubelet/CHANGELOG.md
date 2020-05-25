@@ -1,5 +1,11 @@
 # CHANGELOG - kubelet
 
+## 4.1.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Add parsing from `/stats/summary` for Windows. See [#6497](https://github.com/DataDog/integrations-core/pull/6497).
+* [Added] Expose number of cfs enforcement periods. See [#6093](https://github.com/DataDog/integrations-core/pull/6093). Thanks [adammw](https://github.com/adammw).
+
 ## 4.0.0 / 2020-04-04
 
 * [Fixed] Update prometheus_client. See [#6200](https://github.com/DataDog/integrations-core/pull/6200).

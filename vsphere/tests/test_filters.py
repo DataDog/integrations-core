@@ -68,6 +68,7 @@ def test_is_realtime_resource_collected_by_filters(realtime_instance):
         {'resource': 'vm', 'property': 'tag', 'patterns': [r'env:production']},
         {'resource': 'host', 'property': 'name', 'patterns': [r'10\.0\.0\.103'], 'type': 'blacklist'},
     ]
+    realtime_instance['collect_tags'] = True
 
     collected_resources = [
         'VM2-1',

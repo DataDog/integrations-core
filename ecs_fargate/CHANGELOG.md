@@ -1,5 +1,9 @@
 # CHANGELOG - ECS Fargate
 
+## 2.8.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 2.7.0 / 2020-04-04
 
 * [Added] Collect network metrics for ECS Fargate. See [#6216](https://github.com/DataDog/integrations-core/pull/6216).

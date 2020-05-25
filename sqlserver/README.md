@@ -111,8 +111,7 @@ sudo apt-get install unixodbc unixodbc-dev tdsodbc
 Same as Linux, MSSQL runs in a Docker container and we talk to the database through unixODBC and [FreeTDS][13]. You can use [homebrew][14] to install the required packages:
 
 ```shell
-brew install unixodbc
-brew install freetds --with-unixodbc
+brew install unixodbc freetds
 ```
 
 ## Further Reading
@@ -124,7 +123,7 @@ brew install freetds --with-unixodbc
 - [Custom SQL Server metrics for detailed monitoring][19]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/sqlserver/images/sqlserver_dashboard.png
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://app.datadoghq.com/account/settings#agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/datadog_checks/sqlserver/data/conf.yaml.example
@@ -133,8 +132,8 @@ brew install freetds --with-unixodbc
 [8]: https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server?view=sql-server-2017
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/metadata.csv
-[11]: https://docs.datadoghq.com/help
-[12]: https://docs.datadoghq.com/developers/integrations
+[11]: https://docs.datadoghq.com/help/
+[12]: https://docs.datadoghq.com/developers/integrations/
 [13]: http://www.freetds.org
 [14]: https://brew.sh
 [15]: https://www.datadoghq.com/blog/monitor-azure-sql-databases-datadog

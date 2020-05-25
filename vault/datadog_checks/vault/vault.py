@@ -185,6 +185,8 @@ class Vault(OpenMetricsBaseCheck):
                     }
                 )
             )
+            # Update _previous_leader for the next run
+            self._previous_leader = current_leader
 
     def check_health_v1(self, submission_queue, dynamic_tags):
         url = self._api_url + '/sys/health'
