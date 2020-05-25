@@ -25,6 +25,7 @@
 [datadog-agent-logs]: https://docs.datadoghq.com/agent/logs/?tab=tailfiles
 [datadog-agent-status-page]: https://docs.datadoghq.com/agent/guide/agent-status-page/
 [datadog-checks-base]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_base
+[datadog-distribution-metrics]: https://docs.datadoghq.com/metrics/distributions/
 [datadog-checks-dev]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev
 [datadog-checks-dev-plugin-pytest]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/plugin/pytest.py
 [datadog-checks-dev-plugin-tox]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/plugin/tox.py
