@@ -163,6 +163,8 @@ class PostgreSql(AgentCheck):
         return results
 
     def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics, relations_config):
+        if scope is None:
+            return None
         # build query
         cols = list(scope['metrics'])  # list of metrics to query, in some order
         # we must remember that order to parse results

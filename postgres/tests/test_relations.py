@@ -108,10 +108,7 @@ def test_relations_metrics_regex(aggregator, integration_check, pg_instance):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_max_relations(aggregator, integration_check, pg_instance):
-    pg_instance.update({
-        'relations': [{'relation_regex': '.*'}],
-        'max_relations': 1
-    })
+    pg_instance.update({'relations': [{'relation_regex': '.*'}], 'max_relations': 1})
     posgres_check = integration_check(pg_instance)
     posgres_check.check(pg_instance)
 
