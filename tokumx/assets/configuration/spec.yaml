@@ -1,4 +1,4 @@
-name: Tokumx
+name: TokuMX
 files:
 - name: tokumx.yaml
   options:
