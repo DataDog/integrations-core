@@ -19,7 +19,7 @@ requests-kerberos==0.12.0
 requests_ntlm==1.1.0
 requests_toolbelt==0.9.1
 # `setuptools_scm` 4.0 breaks on Windows + 2.7: https://github.com/pypa/setuptools_scm/issues/442
-setuptools_scm==3.5.0
+setuptools-scm==3.5.0
 simplejson==3.6.5
 six==1.14.0
 typing==3.7.4.1; python_version < '3.0'
