@@ -50,7 +50,7 @@ class CaseInsensitiveDict(dict):
 
     def copy(self):
         """
-        Explicit copy to ensure keys are consistent
+        Explicit copy to ensure we return an instance of `CaseInsensitiveDict`
         """
         copied = CaseInsensitiveDict()
         for key, value in self.items():
