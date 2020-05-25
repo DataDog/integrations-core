@@ -97,4 +97,9 @@ def test_caseinsensitivedict():
     key2 = "DATA"
     value2 = "Dog"
     test_copy[key2] = value2
-    assert CaseInsensitiveDict({key2.lower(): value2}) == test_copy
+    assert CaseInsensitiveDict({key1.lower(): value1, key2.lower(): value2}) == test_copy
+
+    assert test_copy.get(key1) == value1
+    assert test_copy.get(key1.lower()) == value1
+    assert test_copy.get(key2) == value2
+    assert test_copy.get(key2.lower()) == value2
