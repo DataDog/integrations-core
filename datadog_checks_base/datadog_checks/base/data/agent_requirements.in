@@ -11,7 +11,6 @@ clickhouse-driver==0.1.2
 contextlib2==0.6.0; python_version < '3.0'
 cryptography==2.8
 cx-oracle==7.2.0
-ddtrace==0.32.2
 dnspython==1.16.0
 enum34==1.1.6; python_version < '3.0'
 flup==1.0.3.dev-20110405; python_version < '3.0'
@@ -69,7 +68,6 @@ selectors34==1.2.0; sys_platform == 'win32' and python_version < '3.4'
 semver==2.9.0
 serpent==1.27; sys_platform == 'win32'
 service_identity[idna]==18.1.0
-setuptools-scm==3.5.0
 simplejson==3.6.5
 six==1.14.0
 supervisor==4.1.0
