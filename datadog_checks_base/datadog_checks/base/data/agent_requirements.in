@@ -69,7 +69,7 @@ selectors34==1.2.0; sys_platform == 'win32' and python_version < '3.4'
 semver==2.9.0
 serpent==1.27; sys_platform == 'win32'
 service_identity[idna]==18.1.0
-setuptools_scm==3.5.0
+setuptools-scm==3.5.0
 simplejson==3.6.5
 six==1.14.0
 supervisor==4.1.0
