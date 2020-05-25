@@ -2,7 +2,7 @@
 
 -----
 
-[Prometheus](https://prometheus.io) is an open-source monitoring system for timeseries metric data. Many Datadog 
+[Prometheus](https://prometheus.io) is an open source monitoring system for timeseries metric data. Many Datadog 
 integrations collect metrics based on Prometheus exported data sets.
 
 Prometheus-based integrations use the OpenMetrics exposition format to collect metrics.
