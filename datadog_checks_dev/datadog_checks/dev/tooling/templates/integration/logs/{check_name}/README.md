@@ -59,6 +59,6 @@ This integration monitors [{integration_name}][3].
 
 Need help? Contact [Datadog support][1].
 
-[1]: https://docs.datadoghq.com/help
+[1]: https://docs.datadoghq.com/help/
 [2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [3]: **LINK_TO_INTEGRATION_SITE**

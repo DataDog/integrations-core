@@ -5,6 +5,7 @@
 import copy
 import os
 import time
+import weakref
 from concurrent import futures
 from typing import Any, List
 
@@ -16,6 +17,7 @@ from datadog_checks.base import ConfigurationError
 from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck
 from datadog_checks.snmp.config import InstanceConfig
+from datadog_checks.snmp.discovery import discover_instances
 from datadog_checks.snmp.parsing import ParsedSymbolMetric, ParsedTableMetric
 from datadog_checks.snmp.resolver import OIDTrie
 from datadog_checks.snmp.utils import _load_default_profiles, oid_pattern_specificity, recursively_expand_base_profiles
@@ -42,7 +44,7 @@ def test_parse_metrics(lcd_mock):
 
     # Simple OID
     metrics = [{"OID": "1.2.3", "name": "foo"}]
-    oids, _, parsed_metrics = config.parse_metrics(metrics)
+    oids, _, _, parsed_metrics = config.parse_metrics(metrics)
     assert len(oids) == 1
     assert len(parsed_metrics) == 1
     foo = parsed_metrics[0]
@@ -56,7 +58,7 @@ def test_parse_metrics(lcd_mock):
 
     # MIB with symbol
     metrics = [{"MIB": "foo_mib", "symbol": "foo"}]
-    oids, _, parsed_metrics = config.parse_metrics(metrics)
+    oids, _, _, parsed_metrics = config.parse_metrics(metrics)
     assert len(oids) == 1
     assert len(parsed_metrics) == 1
     foo = parsed_metrics[0]
@@ -70,8 +72,8 @@ def test_parse_metrics(lcd_mock):
 
     # MIB with table and symbols
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"]}]
-    oids, _, parsed_metrics = config.parse_metrics(metrics)
-    assert len(oids) == 2
+    _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(next_oids) == 2
     assert len(parsed_metrics) == 2
     foo, bar = parsed_metrics
     assert isinstance(foo, ParsedTableMetric)
@@ -91,8 +93,8 @@ def test_parse_metrics(lcd_mock):
 
     # Table with manual OID
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": [{"OID": "1.2.3", "name": "foo"}]}]
-    oids, _, parsed_metrics = config.parse_metrics(metrics)
-    assert len(oids) == 1
+    _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(next_oids) == 1
     assert len(parsed_metrics) == 1
     foo = parsed_metrics[0]
     assert isinstance(foo, ParsedTableMetric)
@@ -107,8 +109,8 @@ def test_parse_metrics(lcd_mock):
             "metric_tags": [{"tag": "test", "index": "1"}],
         },
     ]
-    oids, _, parsed_metrics = config.parse_metrics(metrics)
-    assert len(oids) == 2
+    _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(next_oids) == 2
     assert len(parsed_metrics) == 2
     foo, bar = parsed_metrics
     assert isinstance(foo, ParsedTableMetric)
@@ -127,8 +129,8 @@ def test_parse_metrics(lcd_mock):
             "metric_tags": [{"tag": "test", "column": "baz"}],
         }
     ]
-    oids, _, parsed_metrics = config.parse_metrics(metrics)
-    assert len(oids) == 3
+    _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(next_oids) == 3
     assert len(parsed_metrics) == 2
     foo, bar = parsed_metrics
     assert isinstance(foo, ParsedTableMetric)
@@ -147,8 +149,8 @@ def test_parse_metrics(lcd_mock):
             "metric_tags": [{"tag": "test", "column": {"name": "baz", "OID": "1.5.6"}}],
         }
     ]
-    oids, _, parsed_metrics = config.parse_metrics(metrics)
-    assert len(oids) == 3
+    _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(next_oids) == 3
     assert len(parsed_metrics) == 2
     foo, bar = parsed_metrics
     assert isinstance(foo, ParsedTableMetric)
@@ -291,7 +293,7 @@ def test_cache_discovered_host(read_mock):
 
     read_mock.return_value = '["192.168.0.1"]'
     check = SnmpCheck('snmp', {}, [instance])
-    check.discover_instances = lambda: None
+    check._thread_factory = lambda **kwargs: mock.Mock()
     check.check(instance)
 
     assert '192.168.0.1' in check._config.discovered_instances
@@ -305,7 +307,7 @@ def test_cache_corrupted(write_mock, read_mock):
     instance['network_address'] = '192.168.0.0/24'
     read_mock.return_value = '["192.168.0."]'
     check = SnmpCheck('snmp', {}, [instance])
-    check.discover_instances = lambda: None
+    check._thread_factory = lambda **kwargs: mock.Mock()
     check.check(instance)
 
     assert not check._config.discovered_instances
@@ -313,9 +315,10 @@ def test_cache_corrupted(write_mock, read_mock):
 
 
 @mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")
-@mock.patch("datadog_checks.snmp.snmp.write_persistent_cache")
+@mock.patch("datadog_checks.snmp.discovery.write_persistent_cache")
 def test_cache_building(write_mock, read_mock):
     instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance['timeout'] = 1
     instance.pop('ip_address')
 
     read_mock.return_value = '[]'
@@ -458,7 +461,7 @@ def test_discovery_tags():
 
     check.fetch_sysobject_oid = mock_fetch
 
-    check.discover_instances(interval=0)
+    discover_instances(check._config, 0, weakref.ref(check))
 
     config = check._config.discovered_instances['192.168.0.2']
     assert set(config.tags) == {'snmp_device:192.168.0.2', 'test:check', 'snmp_profile:generic-router'}

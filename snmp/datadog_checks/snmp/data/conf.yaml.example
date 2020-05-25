@@ -5,7 +5,7 @@
 
 init_config:
 
-  ## @param mibs_folder - string - required
+  ## @param mibs_folder - string - optional
   ## Specify an additional folder for your custom mib files (python format).
   #
   # mibs_folder: /path/to/your/mibs/folder
@@ -128,6 +128,10 @@ init_config:
   #     definition_file: cisco-asa-5525.yaml
   #   checkpoint-firewall:
   #     definition_file: checkpoint-firewall.yaml
+  #   isilon:
+  #     definition_file: isilon.yaml
+  #   apc-ups:
+  #     definition_file: apc-ups.yaml
 
 instances:
   -
@@ -165,10 +169,10 @@ instances:
     #
     # snmp_version: 2
 
-    ## @param timeout - integer - optional - default: 1
+    ## @param timeout - integer - optional - default: 5
     ## Amount of second before timing out.
     #
-    # timeout: 1
+    # timeout: 5
 
     ## @param retries - integer - optional - default: 5
     ## Amount of retries before failure.
@@ -195,11 +199,11 @@ instances:
     #
     # enforce_mib_constraints: true
 
-    ## @param bulk_threshold - integer - optional - default: 5
+    ## @param bulk_threshold - integer - optional - default: 0
     ## The number of symbols in each table that triggers a BULK request.
     ## Only relevant for SNMP > 1.
     #
-    # bulk_threshold: 5
+    # bulk_threshold: 0
 
     ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
@@ -211,31 +215,33 @@ instances:
     #   - <KEY_2>:<VALUE_2>
 
     ## SNMP v3 specific configuration
-    ## All parameter are commented here even if they are required since
-    ## the default configuration is for SNMP v2
     ## Learn more about SNMP v3 configuration here: http://snmplabs.com/pysnmp/docs/api-reference.html#user-based
 
-    ## @param user - string - required
+    ## @param user - string - optional
     ## USERNAME to connect to your SNMP devices.
     #
     # user: <USERNAME>
 
-    ## @param authProtocol - string - required
+    ## @param authProtocol - string - optional
     ## Authentication type to use when connecting to your SNMP devices.
+    ## It can be one of: MD5, SHA, SHA224, SHA256, SHA384, SHA512.
+    ## Default to MD5 when `authKey` is specified.
     #
     # authProtocol: <AUTHENTICATION_PROTOCOL>
 
-    ## @param authKey - string - required
+    ## @param authKey - string - optional
     ## Authentication key to use with your Authentication type.
     #
     # authKey: <AUTHENTICATION_TYPE_KEY>
 
-    ## @param privProtocol - string - required
+    ## @param privProtocol - string - optional
     ## Privacy type to use when connecting to your SNMP devices.
+    ## It can be one of: DES, 3DES, AES, AES192, AES256, AES192C, AES256C.
+    ## Default to DES when `privKey` is specified.
     #
     # privProtocol: <PRIVACY_TYPE>
 
-    ## @param privKey - string - required
+    ## @param privKey - string - optional
     ## Privacy type key to use with your Privacy type.
     #
     # privKey: <PRIVACY_TYPE_KEY>

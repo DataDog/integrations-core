@@ -64,7 +64,7 @@ def dashboards():
                 failed_checks += 1
                 # Display detailed info if file is invalid
                 echo_info(f'{check_name}... ', nl=False)
-                echo_failure(' FAILED'.format(check_name))
+                echo_failure(' FAILED')
                 for display_func, message in display_queue:
                     display_func(message)
             else:

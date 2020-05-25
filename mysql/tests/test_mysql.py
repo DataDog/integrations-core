@@ -11,6 +11,7 @@ import pytest
 from pkg_resources import parse_version
 
 from datadog_checks.base.utils.platform import Platform
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql
 
 from . import common, tags, variables
@@ -54,6 +55,7 @@ def test_e2e(dd_agent_check, instance_complex):
     aggregator = dd_agent_check(instance_complex)
 
     _assert_complex_config(aggregator)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=['alice.age', 'bob.age'])
 
 
 def _assert_complex_config(aggregator):

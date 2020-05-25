@@ -177,12 +177,12 @@ Need help? Contact [Datadog support][13].
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/consul/datadog_checks/consul/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [8]: https://docs.datadoghq.com/agent/kubernetes/log/
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/consul/metadata.csv
 [11]: https://www.consul.io/docs/agent/telemetry.html
 [12]: https://www.consul.io/docs/internals/coordinates.html
-[13]: https://docs.datadoghq.com/help
+[13]: https://docs.datadoghq.com/help/
 [14]: https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog
 [15]: https://engineering.datadoghq.com/consul-at-datadog

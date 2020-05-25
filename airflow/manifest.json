@@ -16,7 +16,8 @@
   ],
   "public_title": "Datadog-Airflow Integration",
   "categories": [
-    "processing"
+    "processing",
+    "log collection"
   ],
   "type": "check",
   "is_public": true,

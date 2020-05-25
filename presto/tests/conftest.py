@@ -2,17 +2,30 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import pytest
 from copy import deepcopy
 
-from datadog_checks.dev.utils import load_jmx_config
+import prestodb
+import pytest
+
 from datadog_checks.dev import docker_run, get_here
+from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
+from datadog_checks.dev.utils import load_jmx_config
 
 
 @pytest.fixture(scope='session')
 def dd_environment(instance):
-    with docker_run(os.path.join(get_here(), 'docker', 'docker-compose.yaml')):
+
+    compose_file = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
+    with docker_run(compose_file, conditions=[WaitFor(make_query), CheckDockerLogs(compose_file, 'SERVER STARTED')]):
         yield instance, {'use_jmx': True}
+
+
+def make_query():
+    # make a query so that all metrics are emitted in the e2e test
+    conn = prestodb.dbapi.connect(host='localhost', port=8080, user='test', catalog='test', schema='test',)
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM system.runtime.nodes')
+    cur.fetchall()
 
 
 @pytest.fixture(scope='session', autouse=True)

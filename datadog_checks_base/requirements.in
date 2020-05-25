@@ -10,6 +10,7 @@ orjson==2.6.1; python_version > '3.0'
 prometheus-client==0.7.1
 protobuf==3.7.0
 pysocks==1.7.0
+python-dateutil==2.8.0
 pytz==2019.3
 pywin32==227; sys_platform == 'win32'
 pyyaml==5.3.1

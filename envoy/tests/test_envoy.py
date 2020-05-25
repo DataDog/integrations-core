@@ -5,11 +5,12 @@ from copy import deepcopy
 
 import mock
 import pytest
+import requests
 
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import HOST, INSTANCES, response
+from .common import ENVOY_VERSION, HOST, INSTANCES, response
 
 CHECK_NAME = 'envoy'
 
@@ -120,3 +121,60 @@ def test_config(test_case, extra_config, expected_http_kwargs):
         )
         http_wargs.update(expected_http_kwargs)
         r.get.assert_called_with('http://{}:8001/stats'.format(HOST), **http_wargs)
+
+
+def test_metadata(datadog_agent):
+    instance = INSTANCES['main']
+    check = Envoy(CHECK_NAME, {}, [instance])
+    check.check_id = 'test:123'
+    check.log = mock.MagicMock()
+
+    with mock.patch('requests.get', side_effect=requests.exceptions.Timeout()):
+        check._collect_metadata(instance['stats_url'])
+        datadog_agent.assert_metadata_count(0)
+        check.log.warning.assert_called_with(
+            'Envoy endpoint `%s` timed out after %s seconds', 'http://localhost:8001/server_info', (10.0, 10.0)
+        )
+    with mock.patch('requests.get', side_effect=requests.exceptions.RequestException('Req Exception')):
+        check._collect_metadata(instance['stats_url'])
+        datadog_agent.assert_metadata_count(0)
+        check.log.warning.assert_called_with(
+            'Error collecting Envoy version with url=`%s`. Error: %s',
+            'http://localhost:8001/server_info',
+            'Req Exception',
+        )
+
+    with mock.patch('requests.get', return_value=response('multiple_services')):
+        check._collect_metadata(instance['stats_url'])
+
+        major, minor, patch = ENVOY_VERSION.split('.')
+        version_metadata = {
+            'version.scheme': 'semver',
+            'version.major': major,
+            'version.minor': minor,
+            'version.patch': patch,
+            'version.raw': ENVOY_VERSION,
+        }
+
+        datadog_agent.assert_metadata('test:123', version_metadata)
+        datadog_agent.assert_metadata_count(len(version_metadata))
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_metadata_integration(aggregator, datadog_agent):
+    instance = INSTANCES['main']
+    c = Envoy(CHECK_NAME, {}, [instance])
+    c.check_id = 'test:123'
+    c.check(instance)
+
+    major, minor, patch = ENVOY_VERSION.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': ENVOY_VERSION,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
