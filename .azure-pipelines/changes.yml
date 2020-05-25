@@ -9,7 +9,7 @@ pr:
     - datadog_checks_base/datadog_checks/*
 
 variables:
-  PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
+#  PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
   DDEV_COLOR: 1
 
 jobs:
@@ -18,19 +18,19 @@ jobs:
     job_name: Changed
     display: Linux
     validate: true
-    pip_cache_config:
-      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
-      restoreKeys: |
-        pip | $(Agent.OS)
-      path: $(PIP_CACHE_DIR)
+#    pip_cache_config:
+#      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+#      restoreKeys: |
+#        pip | $(Agent.OS)
+#      path: $(PIP_CACHE_DIR)
 
 - template: './templates/test-single-windows.yml'
   parameters:
     job_name: Changed
     check: '--changed datadog_checks_base datadog_checks_dev active_directory aspdotnet disk dns_check dotnetclr exchange_server iis pdh_check sqlserver win32_event_log windows_service wmi_check'
     display: Windows
-    pip_cache_config:
-      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
-      restoreKeys: |
-        pip | $(Agent.OS)
-      path: $(PIP_CACHE_DIR)
+#    pip_cache_config:
+#      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+#      restoreKeys: |
+#        pip | $(Agent.OS)
+#      path: $(PIP_CACHE_DIR)
