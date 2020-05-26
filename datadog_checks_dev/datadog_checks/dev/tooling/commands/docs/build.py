@@ -20,10 +20,9 @@ def build(verbose, pdf):
     command = ['tox', '-e', 'docs', '--', 'build', '--clean']
     insert_verbosity_flag(command, verbose)
 
-    if pdf:
-        os.environ["ENABLE_PDF_SITE_EXPORT"] = '1'
+    env_vars = {'ENABLE_PDF_SITE_EXPORT': '1' if pdf else '0'}
 
-    with chdir(get_root()):
+    with chdir(get_root(), env_vars=env_vars):
         process = subprocess.run(command)
 
     abort(code=process.returncode)
