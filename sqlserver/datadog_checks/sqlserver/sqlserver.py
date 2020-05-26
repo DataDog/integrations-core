@@ -450,7 +450,6 @@ class SQLServer(AgentCheck):
                     alert_message = alert_message + instance.get('username')
                 self.raise_alert(instance, alert_title, alert_message)
 
-
     def raise_alert(self, instance, alert_title, alert_message):
         tags = []
         tags.append('alertMessage:%s' % alert_message)
