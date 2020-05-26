@@ -24,7 +24,7 @@ class WMICheck(WinWMICheck):
         self.tag_queries = self.instance.get('tag_queries', [])  # type: List[TagQuery]
 
         custom_tags = self.instance.get('tags', [])  # type: List[str]
-        self.constant_tags = self.instance.get('constant_tags', [])   # type: List[str]
+        self.constant_tags = self.instance.get('constant_tags', [])  # type: List[str]
         if self.constant_tags:
             self.log.warning("`constant_tags` is being deprecated, please use `tags`")
         self.constant_tags.extend(custom_tags)
