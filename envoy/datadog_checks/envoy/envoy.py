@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import re
 from collections import defaultdict
 
@@ -11,6 +12,8 @@ from datadog_checks.base import AgentCheck
 
 from .errors import UnknownMetric, UnknownTags
 from .parser import parse_histogram, parse_metric
+
+LEGACY_VERSION_RE = re.compile(r'/(\d.\d.\d)/')
 
 
 class Envoy(AgentCheck):
@@ -159,7 +162,23 @@ class Envoy(AgentCheck):
             #   "state": "LIVE",
             #   ...
             # }
-            raw_version = response.json()["version"].split('/')[1]
+            try:
+                raw_version = response.json()["version"].split('/')[1]
+            except json.decoder.JSONDecodeError as e:
+                self.log.debug('Error decoding json for with url=`%s`. Error: %s', server_info_url, str(e))
+
+            if raw_version is None:
+                # Search version in server info for Envoy version <= 1.8
+                # Example:
+                #     envoy 5d25f466c3410c0dfa735d7d4358beb76b2da507/1.8.0/Clean/RELEASE live 581130 581130 0
+                content = response.content.decode()
+                found = LEGACY_VERSION_RE.search(content)
+                if found:
+                    raw_version = found.group(1)
+                else:
+                    self.log.warning('Version not matched. content=%s', content)
+                    return
+
         except requests.exceptions.Timeout:
             self.log.warning(
                 'Envoy endpoint `%s` timed out after %s seconds', server_info_url, self.http.options['timeout']

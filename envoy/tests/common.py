@@ -1,3 +1,4 @@
+import json
 import os
 
 from datadog_checks.base.utils.common import get_docker_hostname
@@ -36,8 +37,7 @@ class MockResponse:
         self.status_code = status_code
 
     def json(self):
-        # Metadata
-        return SERVER_INFO
+        return json.loads(self.content)
 
 
 @lru_cache(maxsize=None)
