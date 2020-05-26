@@ -5,7 +5,6 @@
 import datetime as dt
 
 import pytest
-
 from pyVmomi import vim
 
 from datadog_checks.vsphere import VSphereCheck
