@@ -116,5 +116,9 @@ ddev agent integrations
 
 See more options for [`ddev agent changelog`](../ddev/cli.md#changelog) and [`ddev agent integrations`](../ddev/cli.md#integrations).
 
-Update the contents of the [`AGENT_CHANGELOG`][agent-changelog] and [`AGENT_INTEGRATIONS`][agent-integrations] files. 
+Run the following commands to update the contents: 
+
+1. `ddev agent changelog -w -f` to update the existing [`AGENT_CHANGELOG`][agent-changelog] file
+2. `ddev agent integrations -w -f` to update the existing [`AGENT_INTEGRATIONS`][agent-integrations] file. 
+
 Create a pull request and wait for approval before merging.
