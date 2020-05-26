@@ -12,7 +12,7 @@ from datadog_checks.base import AgentCheck
 from .errors import UnknownMetric, UnknownTags
 from .parser import parse_histogram, parse_metric
 
-LEGACY_VERSION_RE = re.compile(r'/(\d.\d.\d)/')
+LEGACY_VERSION_RE = re.compile(r'/(\d\.\d\.\d)/')
 
 
 class Envoy(AgentCheck):
