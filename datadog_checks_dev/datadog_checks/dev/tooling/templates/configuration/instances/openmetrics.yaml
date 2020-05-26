@@ -32,8 +32,8 @@
     default: null
 - name: health_service_check
   description: |
-    Send a service check reporting about the health of the prometheus endpoint.
-    It's named <NAMESPACE>.prometheus.health
+    Send a service check reporting about the health of the Prometheus endpoint.
+    The service check is named <NAMESPACE>.prometheus.health
   value:
     type: boolean
     example: true
@@ -44,7 +44,7 @@
     example: <LABEL>
 - name: label_joins
   description: |
-    The label join allows to target a metric and retrieve it's label via a 1:1 mapping.
+    The label join allows to target a metric and retrieve it's label with a 1:1 mapping.
   value:
     example:
       target_metric:
@@ -73,9 +73,9 @@
     type: object
 - name: type_overrides
   description: |
-    Type override allows you to override a type in the prometheus payload
-    or type an untyped metrics (they're ignored by default).
-    Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, `summary`
+    Override a type in the Prometheus payload
+    or type an untyped metric (ignored by default).
+    Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, and `summary`.
   value:
     example:
       <METRIC_NAME>: <METRIC_TYPE>
@@ -108,15 +108,15 @@
     type: boolean
 - name: send_distribution_counts_as_monotonic
   description: |
-    Set send_distribution_counts_as_monotonic to true to send histograms & summary
-    counters as monotonic counters (instead of gauges).
+    Set send_distribution_counts_as_monotonic to true to send histograms and
+    summary counters as monotonic counters (instead of gauges).
   value:
     example: false
     type: boolean
 - name: send_distribution_sums_as_monotonic
   description: |
-    Set send_distribution_sums_as_monotonic to true to send histograms & summary
-    sum as monotonic counters (instead of gauges).
+    Set send_distribution_sums_as_monotonic to true to send histograms and
+    summary sum as monotonic counters (instead of gauges).
   value:
     example: false
     type: boolean
@@ -137,7 +137,7 @@
     type: boolean
 - name: bearer_token_path
   description: |
-    The path to a kubernetes service account bearer token file, make sure the file exists and mounted correctly.
+    The path to a Kubernetes service account bearer token file. Make sure the file exists and is mounted correctly.
     Note: bearer_token_auth should be set to true to enable adding the token to HTTP headers for authentication.
   value:
     example: <TOKEN_PATH>
