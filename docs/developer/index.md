@@ -1,5 +1,6 @@
 # Agent Integrations
 
+[![CI - Docs](https://github.com/DataDog/integrations-core/workflows/docs/badge.svg)](https://github.com/DataDog/integrations-core/actions?workflow=docs)
 [![Coverage status](https://codecov.io/github/DataDog/integrations-core/coverage.svg?branch=master)](https://codecov.io/github/DataDog/integrations-core?branch=master)
 [![GitHub contributors](https://img.shields.io/github/contributors/DataDog/integrations-core)](https://github.com/DataDog/integrations-core)
 [![Downloads](https://pepy.tech/badge/datadog-checks-dev)](https://pepy.tech/project/datadog-checks-dev)
