@@ -18,22 +18,22 @@ class WMICheck(WinWMICheck):
     def __init__(self, name, init_config, instances):
         # type: (str, Dict[str, Any], List[Dict[str, Any]]) -> None
         super(WMICheck, self).__init__(name, init_config, instances)
-        self.custom_tags = self.instance.get('tags', [])  # type: List[str]
         self.filters = self.instance.get('filters', [])  # type: List[Dict[str, WMIFilter]]
         self.metrics_to_capture = self.instance.get('metrics', [])  # type: List[List[str]]
         self.tag_by = self.instance.get('tag_by', "")  # type: str
         self.tag_queries = self.instance.get('tag_queries', [])  # type: List[TagQuery]
+
+        custom_tags = self.instance.get('tags', [])  # type: List[str]
+        self.constant_tags = self.instance.get('constant_tags', [])   # type: List[str]
+        if self.constant_tags:
+            self.log.warning("`constant_tags` is being deprecated, please use `tags`")
+        self.constant_tags.extend(custom_tags)
 
     def check(self, _):
         # type: (Any) -> None
         """
         Fetch WMI metrics.
         """
-        constant_tags = self.instance.get('constant_tags', [])
-        if constant_tags:
-            self.log.warning("`constant_tags` is being deprecated, please use `tags`")
-        constant_tags.extend(self.custom_tags)
-
         # Create or retrieve an existing WMISampler
         metric_name_and_type_by_property, properties = self.get_wmi_properties()
 
@@ -42,7 +42,7 @@ class WMICheck(WinWMICheck):
         # Sample, extract & submit metrics
         try:
             wmi_sampler.sample()
-            extracted_metrics = self.extract_metrics(constant_tags, wmi_sampler)
+            extracted_metrics = self.extract_metrics(wmi_sampler)
         except TimeoutException:
             self.log.warning(
                 "WMI query timed out. class=%s - properties=%s - filters=%s - tag_queries=%s",
@@ -54,9 +54,9 @@ class WMICheck(WinWMICheck):
         else:
             self._submit_metrics(extracted_metrics, metric_name_and_type_by_property)
 
-    def extract_metrics(self, constant_tags, wmi_sampler):
+    def extract_metrics(self, wmi_sampler):
         # type: (List[str], WMISampler) -> List[WMIMetric]
-        return self._extract_metrics(wmi_sampler, self.tag_by, self.tag_queries, constant_tags)
+        return self._extract_metrics(wmi_sampler, self.tag_by, self.tag_queries, self.constant_tags)
 
     def get_wmi_properties(self):
         # type: () -> WMIProperties
