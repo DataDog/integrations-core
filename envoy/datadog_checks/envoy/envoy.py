@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 import re
 from collections import defaultdict
 
@@ -165,7 +164,7 @@ class Envoy(AgentCheck):
             # }
             try:
                 raw_version = response.json()["version"].split('/')[1]
-            except json.decoder.JSONDecodeError as e:
+            except Exception as e:
                 self.log.debug('Error decoding json for url=`%s`. Error: %s', server_info_url, str(e))
 
             if raw_version is None:
