@@ -20,7 +20,7 @@ from .metrics import CITADEL_METRICS, GALLEY_METRICS, GENERIC_METRICS, MESH_METR
 
 class LegacyIstioCheck_1_4(OpenMetricsBaseCheck):
 
-    DEFAULT_METRIC_LIMIT = 3000
+    DEFAULT_METRIC_LIMIT = 0
     SOURCE_TYPE_NAME = 'istio'
 
     def __init__(self, name, init_config, instances):
