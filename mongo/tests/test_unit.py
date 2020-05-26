@@ -7,9 +7,15 @@ import mock
 import pytest
 from six import iteritems
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.mongo import MongoDb, metrics
 
 from . import common
+
+try:
+    from contextlib import nullcontext  # type: ignore
+except ImportError:
+    from contextlib2 import nullcontext
 
 RATE = MongoDb.rate
 GAUGE = MongoDb.gauge
@@ -167,6 +173,24 @@ def test_parse_server_config(check):
         'mongodb://john doe:*****@localhost:27017,localhost:27018/test?replicaSet=bar!baz'
     )
     assert check.auth_source is None
+
+
+@pytest.mark.parametrize(
+    'options, is_error',
+    [
+        pytest.param({}, False, id='ok-none'),
+        pytest.param({'username': 'admin'}, True, id='x-password-missing'),
+        pytest.param({'password': 's3kr3t'}, True, id='x-username-missing'),
+        pytest.param({'username': 'admin', 'password': 's3kr3t'}, False, id='ok-both'),
+    ],
+)
+def test_config_credentials(check, instance, options, is_error):
+    """
+    Username and password must be specified together.
+    """
+    instance.update(options)
+    with pytest.raises(ConfigurationError) if is_error else nullcontext():
+        check(instance)
 
 
 def test_legacy_config_deprecation(check):
