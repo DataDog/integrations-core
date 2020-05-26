@@ -18,10 +18,11 @@
   "categories": [
     "processing",
     "messaging",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "confluent-platform",
   "assets": {
     "configuration": {

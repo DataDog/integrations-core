@@ -1,0 +1,560 @@
+# HELP citadel_server_root_cert_expiry_timestamp The unix timestamp, in seconds, when Citadel root cert will expire. We set it to negative in case of internal error.
+# TYPE citadel_server_root_cert_expiry_timestamp gauge
+citadel_server_root_cert_expiry_timestamp 1.900963606e+09
+# HELP endpoint_no_pod Endpoints without an associated pod.
+# TYPE endpoint_no_pod gauge
+endpoint_no_pod 0
+# HELP galley_validation_cert_key_updates Galley validation webhook certificate updates
+# TYPE galley_validation_cert_key_updates counter
+galley_validation_cert_key_updates 1
+# HELP galley_validation_config_update_error k8s webhook configuration update error
+# TYPE galley_validation_config_update_error counter
+galley_validation_config_update_error{reason="Conflict"} 1
+galley_validation_config_update_error{reason="NotFound"} 1
+# HELP galley_validation_config_updates k8s webhook configuration updates
+# TYPE galley_validation_config_updates counter
+galley_validation_config_updates 2
+# HELP galley_validation_failed Resource validation failed
+# TYPE galley_validation_failed counter
+galley_validation_failed{group="networking.istio.io",reason="invalid_resource",resource="gateways",version="v1alpha3"} 1
+# HELP go_gc_duration_seconds A summary of the GC invocation durations.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 7.837e-06
+go_gc_duration_seconds{quantile="0.25"} 1.0354e-05
+go_gc_duration_seconds{quantile="0.5"} 1.8846e-05
+go_gc_duration_seconds{quantile="0.75"} 3.7449e-05
+go_gc_duration_seconds{quantile="1"} 0.001041832
+go_gc_duration_seconds_sum 0.003274954
+go_gc_duration_seconds_count 77
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 356
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.13.8"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 2.9097592e+07
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 1.123329752e+09
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 1.622511e+06
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 1.5220685e+07
+# HELP go_memstats_gc_cpu_fraction The fraction of this program's available CPU time used by the GC since the program started.
+# TYPE go_memstats_gc_cpu_fraction gauge
+go_memstats_gc_cpu_fraction 2.6186171493157595e-05
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 2.627584e+06
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 2.9097592e+07
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 3.0769152e+07
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 3.3161216e+07
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 272774
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 2.5001984e+07
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 6.3930368e+07
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.5856099592888415e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 1.5493459e+07
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 6944
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 16384
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 461040
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 507904
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 3.6958928e+07
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 861961
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 3.178496e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 3.178496e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 7.2745208e+07
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 19
+# HELP grpc_server_handled_total Total number of RPCs completed on the server, regardless of success or failure.
+# TYPE grpc_server_handled_total counter
+grpc_server_handled_total{grpc_code="Aborted",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Aborted",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="Aborted",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Aborted",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="AlreadyExists",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="AlreadyExists",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="AlreadyExists",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="AlreadyExists",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="Canceled",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Canceled",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="Canceled",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Canceled",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="DataLoss",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="DataLoss",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="DataLoss",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="DataLoss",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="DeadlineExceeded",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="DeadlineExceeded",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="DeadlineExceeded",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="DeadlineExceeded",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="FailedPrecondition",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="FailedPrecondition",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="FailedPrecondition",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="FailedPrecondition",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="Internal",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Internal",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="Internal",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Internal",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="InvalidArgument",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="InvalidArgument",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="InvalidArgument",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="InvalidArgument",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="NotFound",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="NotFound",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="NotFound",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="NotFound",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="OK",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 5
+grpc_server_handled_total{grpc_code="OK",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="OK",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="OK",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="OutOfRange",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="OutOfRange",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="OutOfRange",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="OutOfRange",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="PermissionDenied",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="PermissionDenied",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="PermissionDenied",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="PermissionDenied",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="ResourceExhausted",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="ResourceExhausted",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="ResourceExhausted",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="ResourceExhausted",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="Unauthenticated",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Unauthenticated",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="Unauthenticated",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Unauthenticated",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="Unavailable",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Unavailable",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="Unavailable",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Unavailable",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="Unimplemented",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Unimplemented",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="Unimplemented",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Unimplemented",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="Unknown",grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Unknown",grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handled_total{grpc_code="Unknown",grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Unknown",grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+# HELP grpc_server_handling_seconds Histogram of response latency (seconds) of gRPC that had been application-level handled by the server.
+# TYPE grpc_server_handling_seconds histogram
+grpc_server_handling_seconds_bucket{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary",le="0.005"} 2
+grpc_server_handling_seconds_bucket{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary",le="0.01"} 3
+grpc_server_handling_seconds_bucket{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary",le="0.025"} 5
+grpc_server_handling_seconds_bucket{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary",le="0.05"} 5
+grpc_server_handling_seconds_bucket{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary",le="0.1"} 5
+grpc_server_handling_seconds_bucket{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary",le="0.25"} 5
+grpc_server_handling_seconds_bucket{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary",le="0.5"} 5
+grpc_server_handling_seconds_bucket{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary",le="1"} 5
+grpc_server_handling_seconds_bucket{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary",le="2.5"} 5
+grpc_server_handling_seconds_bucket{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary",le="5"} 5
+grpc_server_handling_seconds_bucket{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary",le="10"} 5
+grpc_server_handling_seconds_bucket{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary",le="+Inf"} 5
+grpc_server_handling_seconds_sum{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 0.043983009
+grpc_server_handling_seconds_count{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 5
+grpc_server_handling_seconds_bucket{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="0.005"} 0
+grpc_server_handling_seconds_bucket{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="0.01"} 0
+grpc_server_handling_seconds_bucket{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="0.025"} 0
+grpc_server_handling_seconds_bucket{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="0.05"} 0
+grpc_server_handling_seconds_bucket{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="0.1"} 0
+grpc_server_handling_seconds_bucket{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="0.25"} 0
+grpc_server_handling_seconds_bucket{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="0.5"} 0
+grpc_server_handling_seconds_bucket{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="1"} 0
+grpc_server_handling_seconds_bucket{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="2.5"} 0
+grpc_server_handling_seconds_bucket{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="5"} 0
+grpc_server_handling_seconds_bucket{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="10"} 0
+grpc_server_handling_seconds_bucket{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="+Inf"} 0
+grpc_server_handling_seconds_sum{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handling_seconds_count{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handling_seconds_bucket{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary",le="0.005"} 0
+grpc_server_handling_seconds_bucket{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary",le="0.01"} 0
+grpc_server_handling_seconds_bucket{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary",le="0.025"} 0
+grpc_server_handling_seconds_bucket{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary",le="0.05"} 0
+grpc_server_handling_seconds_bucket{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary",le="0.1"} 0
+grpc_server_handling_seconds_bucket{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary",le="0.25"} 0
+grpc_server_handling_seconds_bucket{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary",le="0.5"} 0
+grpc_server_handling_seconds_bucket{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary",le="1"} 0
+grpc_server_handling_seconds_bucket{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary",le="2.5"} 0
+grpc_server_handling_seconds_bucket{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary",le="5"} 0
+grpc_server_handling_seconds_bucket{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary",le="10"} 0
+grpc_server_handling_seconds_bucket{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary",le="+Inf"} 0
+grpc_server_handling_seconds_sum{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handling_seconds_count{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_handling_seconds_bucket{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="0.005"} 0
+grpc_server_handling_seconds_bucket{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="0.01"} 0
+grpc_server_handling_seconds_bucket{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="0.025"} 0
+grpc_server_handling_seconds_bucket{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="0.05"} 0
+grpc_server_handling_seconds_bucket{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="0.1"} 0
+grpc_server_handling_seconds_bucket{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="0.25"} 0
+grpc_server_handling_seconds_bucket{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="0.5"} 0
+grpc_server_handling_seconds_bucket{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="1"} 0
+grpc_server_handling_seconds_bucket{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="2.5"} 0
+grpc_server_handling_seconds_bucket{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="5"} 0
+grpc_server_handling_seconds_bucket{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="10"} 0
+grpc_server_handling_seconds_bucket{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream",le="+Inf"} 0
+grpc_server_handling_seconds_sum{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_handling_seconds_count{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+# HELP grpc_server_msg_received_total Total number of RPC stream messages received on the server.
+# TYPE grpc_server_msg_received_total counter
+grpc_server_msg_received_total{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 5
+grpc_server_msg_received_total{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_msg_received_total{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_msg_received_total{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+# HELP grpc_server_msg_sent_total Total number of gRPC stream messages sent by the server.
+# TYPE grpc_server_msg_sent_total counter
+grpc_server_msg_sent_total{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 5
+grpc_server_msg_sent_total{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_msg_sent_total{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_msg_sent_total{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+# HELP grpc_server_started_total Total number of RPCs started on the server.
+# TYPE grpc_server_started_total counter
+grpc_server_started_total{grpc_method="CreateCertificate",grpc_service="istio.v1.auth.IstioCertificateService",grpc_type="unary"} 5
+grpc_server_started_total{grpc_method="DeltaAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+grpc_server_started_total{grpc_method="HandleCSR",grpc_service="istio.v1.auth.IstioCAService",grpc_type="unary"} 0
+grpc_server_started_total{grpc_method="StreamAggregatedResources",grpc_service="envoy.service.discovery.v2.AggregatedDiscoveryService",grpc_type="bidi_stream"} 0
+# HELP istio_build Istio component build info
+# TYPE istio_build gauge
+istio_build{component="citadel",tag="1.5.0"} 1
+istio_build{component="pilot",tag="1.5.0"} 1
+# HELP pilot_conflict_inbound_listener Number of conflicting inbound listeners.
+# TYPE pilot_conflict_inbound_listener gauge
+pilot_conflict_inbound_listener 0
+# HELP pilot_conflict_outbound_listener_http_over_current_tcp Number of conflicting wildcard http listeners with current wildcard tcp listener.
+# TYPE pilot_conflict_outbound_listener_http_over_current_tcp gauge
+pilot_conflict_outbound_listener_http_over_current_tcp 0
+# HELP pilot_conflict_outbound_listener_http_over_https Number of conflicting HTTP listeners with well known HTTPS ports
+# TYPE pilot_conflict_outbound_listener_http_over_https gauge
+pilot_conflict_outbound_listener_http_over_https 0
+# HELP pilot_conflict_outbound_listener_tcp_over_current_http Number of conflicting wildcard tcp listeners with current wildcard http listener.
+# TYPE pilot_conflict_outbound_listener_tcp_over_current_http gauge
+pilot_conflict_outbound_listener_tcp_over_current_http 0
+# HELP pilot_conflict_outbound_listener_tcp_over_current_tcp Number of conflicting tcp listeners with current tcp listener.
+# TYPE pilot_conflict_outbound_listener_tcp_over_current_tcp gauge
+pilot_conflict_outbound_listener_tcp_over_current_tcp 0
+# HELP pilot_destrule_subsets Duplicate subsets across destination rules for same host
+# TYPE pilot_destrule_subsets gauge
+pilot_destrule_subsets 0
+# HELP pilot_duplicate_envoy_clusters Duplicate envoy clusters caused by service entries with same hostname
+# TYPE pilot_duplicate_envoy_clusters gauge
+pilot_duplicate_envoy_clusters 0
+# HELP pilot_eds_no_instances Number of clusters without instances.
+# TYPE pilot_eds_no_instances gauge
+pilot_eds_no_instances 0
+# HELP pilot_endpoint_not_ready Endpoint found in unready state.
+# TYPE pilot_endpoint_not_ready gauge
+pilot_endpoint_not_ready 0
+# HELP pilot_inbound_updates Total number of updates received by pilot.
+# TYPE pilot_inbound_updates counter
+pilot_inbound_updates{type="config"} 35
+pilot_inbound_updates{type="eds"} 25
+pilot_inbound_updates{type="svc"} 14
+# HELP pilot_info Pilot version and build information.
+# TYPE pilot_info gauge
+pilot_info{version="1.5.0-c3c353285578eb68b334fc8766746b754b6b3789-Clean"} 1
+# HELP pilot_k8s_cfg_events Events from k8s config.
+# TYPE pilot_k8s_cfg_events counter
+pilot_k8s_cfg_events{event="add",type="EnvoyFilter"} 6
+pilot_k8s_cfg_events{event="add",type="Gateway"} 1
+pilot_k8s_cfg_events{event="add",type="Sidecar"} 1
+pilot_k8s_cfg_events{event="updatesame",type="EnvoyFilter"} 636
+pilot_k8s_cfg_events{event="updatesame",type="Gateway"} 106
+pilot_k8s_cfg_events{event="updatesame",type="Sidecar"} 106
+# HELP pilot_k8s_reg_events Events from k8s registry.
+# TYPE pilot_k8s_reg_events counter
+pilot_k8s_reg_events{event="add",type="Endpoints"} 17
+pilot_k8s_reg_events{event="add",type="Nodes"} 3
+pilot_k8s_reg_events{event="add",type="Pods"} 33
+pilot_k8s_reg_events{event="add",type="Services"} 13
+pilot_k8s_reg_events{event="delete",type="Pods"} 3
+pilot_k8s_reg_events{event="update",type="Endpoints"} 8
+pilot_k8s_reg_events{event="update",type="Nodes"} 639
+pilot_k8s_reg_events{event="update",type="Pods"} 36
+pilot_k8s_reg_events{event="update",type="Services"} 1
+pilot_k8s_reg_events{event="updatesame",type="Endpoints"} 14543
+pilot_k8s_reg_events{event="updatesame",type="Nodes"} 318
+pilot_k8s_reg_events{event="updatesame",type="Pods"} 3180
+pilot_k8s_reg_events{event="updatesame",type="Services"} 1378
+# HELP pilot_no_ip Pods not found in the endpoint table, possibly invalid.
+# TYPE pilot_no_ip gauge
+pilot_no_ip 0
+# HELP pilot_proxy_convergence_time Delay in seconds between config change and a proxy receiving all required configuration.
+# TYPE pilot_proxy_convergence_time histogram
+pilot_proxy_convergence_time_bucket{le="0.1"} 6
+pilot_proxy_convergence_time_bucket{le="0.5"} 6
+pilot_proxy_convergence_time_bucket{le="1"} 6
+pilot_proxy_convergence_time_bucket{le="3"} 6
+pilot_proxy_convergence_time_bucket{le="5"} 6
+pilot_proxy_convergence_time_bucket{le="10"} 6
+pilot_proxy_convergence_time_bucket{le="20"} 6
+pilot_proxy_convergence_time_bucket{le="30"} 6
+pilot_proxy_convergence_time_bucket{le="+Inf"} 6
+pilot_proxy_convergence_time_sum 0.019777191
+pilot_proxy_convergence_time_count 6
+# HELP pilot_proxy_queue_time Time in seconds, a proxy is in the push queue before being dequeued.
+# TYPE pilot_proxy_queue_time histogram
+pilot_proxy_queue_time_bucket{le="0.1"} 6
+pilot_proxy_queue_time_bucket{le="1"} 6
+pilot_proxy_queue_time_bucket{le="3"} 6
+pilot_proxy_queue_time_bucket{le="5"} 6
+pilot_proxy_queue_time_bucket{le="10"} 6
+pilot_proxy_queue_time_bucket{le="20"} 6
+pilot_proxy_queue_time_bucket{le="30"} 6
+pilot_proxy_queue_time_bucket{le="+Inf"} 6
+pilot_proxy_queue_time_sum 0.00011372499999999999
+pilot_proxy_queue_time_count 6
+# HELP pilot_push_triggers Total number of times a push was triggered, labeled by reason for the push.
+# TYPE pilot_push_triggers counter
+pilot_push_triggers{type="endpoint"} 4
+pilot_push_triggers{type="service"} 2
+# HELP pilot_services Total services known to pilot.
+# TYPE pilot_services gauge
+pilot_services 13
+# HELP pilot_virt_services Total virtual services known to pilot.
+# TYPE pilot_virt_services gauge
+pilot_virt_services 0
+# HELP pilot_vservice_dup_domain Virtual services with dup domains.
+# TYPE pilot_vservice_dup_domain gauge
+pilot_vservice_dup_domain 0
+# HELP pilot_xds Number of endpoints connected to this pilot using XDS.
+# TYPE pilot_xds gauge
+pilot_xds 5
+# HELP pilot_xds_eds_all_locality_endpoints Network endpoints for each cluster(across all localities), as of last push. Zero endpoints is an error.
+# TYPE pilot_xds_eds_all_locality_endpoints gauge
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.15010_._.istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.15011_._.istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.15012_._.istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.15012_._.istiod.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.15014_._.istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.15020_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.15029_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.15030_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.15031_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.15032_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.15443_._.istio-egressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.15443_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.31400_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.443_._.istio-egressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.443_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.443_._.istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.443_._.istiod.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.443_._.kubernetes.default.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.443_._.metrics-server.kube-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.53_._.kube-dns.kube-system.svc.cluster.local"} 2
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.8080_._.istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.80_._.default-http-backend.kube-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.80_._.heapster.kube-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.80_._.istio-egressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.80_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.9080_._.details.default.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.9080_._.productpage.default.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.9080_._.ratings.default.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound_.9080_._.reviews.default.svc.cluster.local"} 3
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|15010||istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|15011||istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|15012||istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|15012||istiod.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|15014||istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|15020||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|15029||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|15030||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|15031||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|15032||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|15443||istio-egressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|15443||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|31400||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|443||istio-egressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|443||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|443||istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|443||istiod.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|443||kubernetes.default.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|443||metrics-server.kube-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|53||kube-dns.kube-system.svc.cluster.local"} 2
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|8080||istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|80||default-http-backend.kube-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|80||heapster.kube-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|80||istio-egressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|80||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|9080||details.default.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|9080||productpage.default.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|9080||ratings.default.svc.cluster.local"} 1
+pilot_xds_eds_all_locality_endpoints{cluster="outbound|9080||reviews.default.svc.cluster.local"} 3
+# HELP pilot_xds_eds_instances Instances for each cluster(grouped by locality), as of last push. Zero instances is an error.
+# TYPE pilot_xds_eds_instances gauge
+pilot_xds_eds_instances{cluster="outbound_.15010_._.istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.15011_._.istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.15012_._.istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.15012_._.istiod.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.15014_._.istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.15020_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.15029_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.15030_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.15031_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.15032_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.15443_._.istio-egressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.15443_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.31400_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.443_._.istio-egressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.443_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.443_._.istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.443_._.istiod.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.443_._.kubernetes.default.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.443_._.metrics-server.kube-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.53_._.kube-dns.kube-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.8080_._.istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.80_._.default-http-backend.kube-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.80_._.heapster.kube-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.80_._.istio-egressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.80_._.istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.9080_._.details.default.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.9080_._.productpage.default.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.9080_._.ratings.default.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound_.9080_._.reviews.default.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|15010||istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|15011||istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|15012||istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|15012||istiod.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|15014||istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|15020||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|15029||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|15030||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|15031||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|15032||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|15443||istio-egressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|15443||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|31400||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|443||istio-egressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|443||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|443||istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|443||istiod.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|443||kubernetes.default.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|443||metrics-server.kube-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|53||kube-dns.kube-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|8080||istio-pilot.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|80||default-http-backend.kube-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|80||heapster.kube-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|80||istio-egressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|80||istio-ingressgateway.istio-system.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|9080||details.default.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|9080||productpage.default.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|9080||ratings.default.svc.cluster.local"} 1
+pilot_xds_eds_instances{cluster="outbound|9080||reviews.default.svc.cluster.local"} 1
+# HELP pilot_xds_push_time Total time in seconds Pilot takes to push lds, rds, cds and eds.
+# TYPE pilot_xds_push_time histogram
+pilot_xds_push_time_bucket{type="cds",le="0.01"} 26
+pilot_xds_push_time_bucket{type="cds",le="0.1"} 26
+pilot_xds_push_time_bucket{type="cds",le="1"} 26
+pilot_xds_push_time_bucket{type="cds",le="3"} 26
+pilot_xds_push_time_bucket{type="cds",le="5"} 26
+pilot_xds_push_time_bucket{type="cds",le="10"} 26
+pilot_xds_push_time_bucket{type="cds",le="20"} 26
+pilot_xds_push_time_bucket{type="cds",le="30"} 26
+pilot_xds_push_time_bucket{type="cds",le="+Inf"} 26
+pilot_xds_push_time_sum{type="cds"} 0.032341275
+pilot_xds_push_time_count{type="cds"} 26
+pilot_xds_push_time_bucket{type="eds",le="0.01"} 26
+pilot_xds_push_time_bucket{type="eds",le="0.1"} 26
+pilot_xds_push_time_bucket{type="eds",le="1"} 26
+pilot_xds_push_time_bucket{type="eds",le="3"} 26
+pilot_xds_push_time_bucket{type="eds",le="5"} 26
+pilot_xds_push_time_bucket{type="eds",le="10"} 26
+pilot_xds_push_time_bucket{type="eds",le="20"} 26
+pilot_xds_push_time_bucket{type="eds",le="30"} 26
+pilot_xds_push_time_bucket{type="eds",le="+Inf"} 26
+pilot_xds_push_time_sum{type="eds"} 0.016586049
+pilot_xds_push_time_count{type="eds"} 26
+pilot_xds_push_time_bucket{type="lds",le="0.01"} 26
+pilot_xds_push_time_bucket{type="lds",le="0.1"} 26
+pilot_xds_push_time_bucket{type="lds",le="1"} 26
+pilot_xds_push_time_bucket{type="lds",le="3"} 26
+pilot_xds_push_time_bucket{type="lds",le="5"} 26
+pilot_xds_push_time_bucket{type="lds",le="10"} 26
+pilot_xds_push_time_bucket{type="lds",le="20"} 26
+pilot_xds_push_time_bucket{type="lds",le="30"} 26
+pilot_xds_push_time_bucket{type="lds",le="+Inf"} 26
+pilot_xds_push_time_sum{type="lds"} 0.021622803000000003
+pilot_xds_push_time_count{type="lds"} 26
+pilot_xds_push_time_bucket{type="rds",le="0.01"} 19
+pilot_xds_push_time_bucket{type="rds",le="0.1"} 19
+pilot_xds_push_time_bucket{type="rds",le="1"} 19
+pilot_xds_push_time_bucket{type="rds",le="3"} 19
+pilot_xds_push_time_bucket{type="rds",le="5"} 19
+pilot_xds_push_time_bucket{type="rds",le="10"} 19
+pilot_xds_push_time_bucket{type="rds",le="20"} 19
+pilot_xds_push_time_bucket{type="rds",le="30"} 19
+pilot_xds_push_time_bucket{type="rds",le="+Inf"} 19
+pilot_xds_push_time_sum{type="rds"} 0.0058618080000000005
+pilot_xds_push_time_count{type="rds"} 19
+# HELP pilot_xds_pushes Pilot build and send errors for lds, rds, cds and eds.
+# TYPE pilot_xds_pushes counter
+pilot_xds_pushes{type="cds"} 26
+pilot_xds_pushes{type="eds"} 26
+pilot_xds_pushes{type="lds"} 26
+pilot_xds_pushes{type="rds"} 19
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 22.28
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 43
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 8.828928e+07
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.58560360629e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 1.70360832e+08
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes -1
+# HELP sidecar_injection_requests_total Total number of Side car injection requests.
+# TYPE sidecar_injection_requests_total counter
+sidecar_injection_requests_total 3
+# HELP sidecar_injection_success_total Total number of successful Side car injection requests.
+# TYPE sidecar_injection_success_total counter
+sidecar_injection_success_total 3

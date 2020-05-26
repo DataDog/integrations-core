@@ -5,12 +5,13 @@ import mock
 import psycopg2
 import pytest
 from mock import MagicMock
+from pytest import fail
 from semver import VersionInfo
 from six import iteritems
 
 from datadog_checks.postgres import util
 
-from .common import SCHEMA_NAME
+from .common import DB_NAME, PORT, SCHEMA_NAME, USER
 
 pytestmark = pytest.mark.unit
 
@@ -215,3 +216,14 @@ def test_relation_filter_regex():
     relations_config = {'persons': {'relation_regex': 'b.*', 'schemas': [util.ALL_SCHEMAS]}}
     query_filter = util.build_relations_filter(relations_config, SCHEMA_NAME)
     assert query_filter == "( relname ~ 'b.*' )"
+
+
+def test_query_timeout_connection_string(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    try:
+        check._connect('localhost', PORT, USER, '', DB_NAME, ssl='disable', query_timeout=1000)
+    except psycopg2.ProgrammingError as e:
+        fail(str(e))
+    except psycopg2.OperationalError:
+        # could not connect to server because there is no server running
+        pass

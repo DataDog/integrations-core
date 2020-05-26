@@ -310,7 +310,9 @@ class HAProxy(AgentCheck):
                 (tables,) = self._run_socket_commands(parsed_url, (b"show table",))
         except (IndexError, ValueError) as e:
             self.log.error("Could not parse version number '%s': %s", raw_version, e)
-            pass
+        except CheckException:
+            # We got an empty response, which made _run_socket_commands raise an error
+            self.log.debug("No tables returned")
 
         return info, stat, tables
 

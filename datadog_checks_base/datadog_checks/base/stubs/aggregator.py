@@ -25,8 +25,12 @@ def normalize_tags(tags, sort=False):
 
 class AggregatorStub(object):
     """
-    Mainly used for unit testing checks, this stub makes possible to execute
-    a check without a running Agent.
+    This implements the methods defined by the Agent's
+    [C bindings](https://github.com/DataDog/datadog-agent/blob/master/rtloader/common/builtins/aggregator.c)
+    which in turn call the
+    [Go backend](https://github.com/DataDog/datadog-agent/blob/master/pkg/collector/python/aggregator.go).
+
+    It also provides utility methods for test assertions.
     """
 
     # Replicate the Enum we have on the Agent
@@ -223,7 +227,7 @@ class AggregatorStub(object):
             if expected_tags and expected_tags != sorted(metric.tags):
                 continue
 
-            if hostname and hostname != metric.hostname:
+            if hostname is not None and hostname != metric.hostname:
                 continue
 
             if metric_type is not None and metric_type != metric.type:
@@ -338,7 +342,7 @@ class AggregatorStub(object):
                             )
                         )
 
-        assert not errors, "Metadata assertion errors using metadata.csv:\n" + "\n\t- ".join(sorted(errors))
+        assert not errors, "Metadata assertion errors using metadata.csv:" + "\n\t- ".join([''] + sorted(errors))
 
     def assert_no_duplicate_all(self):
         """
@@ -352,10 +356,11 @@ class AggregatorStub(object):
         Assert no duplicate metrics have been submitted.
 
         Metrics are considered duplicate when all following fields match:
-            - metric name
-            - type (gauge, rate, etc)
-            - tags
-            - hostname
+
+        - metric name
+        - type (gauge, rate, etc)
+        - tags
+        - hostname
         """
         # metric types that intended to be called multiple times are ignored
         ignored_types = [self.COUNT, self.MONOTONIC_COUNT, self.COUNTER]

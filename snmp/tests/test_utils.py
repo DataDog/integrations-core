@@ -88,14 +88,14 @@ def test_oid_from_unresolved_instance(value, expected_tuple):
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    'identity, name, prefix',
+    'identity, mib, symbol, prefix',
     [
-        pytest.param(lambda: ObjectIdentity('SNMPv2-MIB', 'sysDescr'), 'sysDescr', (), id='no-prefix'),
-        pytest.param(ObjectIdentity('1.3.6.1.2.1.1.1.0'), 'sysDescr', ('0',), id='has-prefix'),
+        pytest.param(lambda: ObjectIdentity('SNMPv2-MIB', 'sysDescr'), 'SNMPv2-MIB', 'sysDescr', (), id='no-prefix'),
+        pytest.param(ObjectIdentity('1.3.6.1.2.1.1.1.0'), 'SNMPv2-MIB', 'sysDescr', ('0',), id='has-prefix'),
     ],
 )
-def test_oid_mib_symbol(identity, name, prefix):
-    # type: (ObjectIdentity, str, tuple) -> None
+def test_oid_mib_symbol(identity, mib, symbol, prefix):
+    # type: (ObjectIdentity, str, str, tuple) -> None
     if callable(identity):
         identity = identity()
 
@@ -104,6 +104,7 @@ def test_oid_mib_symbol(identity, name, prefix):
     mib_view_controller = MibViewController(SnmpEngine().getMibBuilder())
     oid.resolve(mib_view_controller)
 
-    symbol = oid.get_mib_symbol()
-    assert symbol.name == name
-    assert symbol.prefix == prefix
+    mib_symbol = oid.get_mib_symbol()
+    assert mib_symbol.mib == mib
+    assert mib_symbol.symbol == symbol
+    assert mib_symbol.prefix == prefix

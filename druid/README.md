@@ -138,4 +138,4 @@ Need help? Contact [Datadog support][12].
 [9]: https://druid.apache.org/docs/latest/operations/including-extensions.html
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/druid/metadata.csv
-[12]: https://docs.datadoghq.com/help
+[12]: https://docs.datadoghq.com/help/

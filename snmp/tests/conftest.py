@@ -19,9 +19,7 @@ from .common import (
 )
 
 FILES = [
-    "https://ddintegrations.blob.core.windows.net/snmp/f5.snmprec",
     "https://ddintegrations.blob.core.windows.net/snmp/3850.snmprec",
-    "https://ddintegrations.blob.core.windows.net/snmp/hpe-proliant.snmprec",
 ]
 
 E2E_METADATA = {

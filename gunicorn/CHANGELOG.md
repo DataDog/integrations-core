@@ -1,5 +1,9 @@
 # CHANGELOG - gunicorn
 
+## 1.11.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 1.10.0 / 2020-04-04
 
 * [Added] Upgrade psutil to 5.7.0. See [#6243](https://github.com/DataDog/integrations-core/pull/6243).

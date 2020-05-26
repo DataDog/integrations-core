@@ -41,9 +41,9 @@ See [metadata.csv][6] for a list of metrics provided by this check.
 Need help? Contact [Datadog support][7].
 
 [1]: **LINK_TO_INTEGRATION_SITE**
-[2]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/{check_name}/datadog_checks/{check_name}/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/{check_name}/metadata.csv
-[7]: https://docs.datadoghq.com/help
+[7]: https://docs.datadoghq.com/help/

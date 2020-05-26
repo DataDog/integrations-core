@@ -21,13 +21,15 @@
     "caching"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "proxysql",
   "assets": {
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "dashboards": {},
+    "dashboards": {
+      "ProxySQL Overview": "assets/dashboards/overview.json"
+    },
     "saved_views": {},
     "monitors": {},
     "service_checks": "assets/service_checks.json"

@@ -78,7 +78,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][6]
 
 | Parameter            | Value                                                                                                  |
 | -------------------- | ------------------------------------------------------------------------------------------------------ |
-| `<INTEGRATION_NAME>` | `oracle`                                                                                               |
+| `<INTEGRATION_NAME>` | `pgbouncer`                                                                                               |
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                          |
 | `<INSTANCE_CONFIG>`  | `{"database_url": "postgresql://datadog:<PASSWORD>@%%host%%:%%port%%/<DATABASE_URL>?sslmode=require"}` |
 
@@ -125,4 +125,4 @@ Need help? Contact [Datadog support][9].
 [6]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [7]: https://docs.datadoghq.com/agent/kubernetes/log/
 [8]: https://github.com/DataDog/integrations-core/blob/master/pgbouncer/metadata.csv
-[9]: https://docs.datadoghq.com/help
+[9]: https://docs.datadoghq.com/help/

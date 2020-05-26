@@ -1,5 +1,11 @@
 # CHANGELOG - sqlserver
 
+## 1.17.0 / 2020-05-17
+
+* [Added] Install `pyodbc` for MacOS and fix local test setup. See [#6633](https://github.com/DataDog/integrations-core/pull/6633).
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Fixed] Use agent 6 signature. See [#6447](https://github.com/DataDog/integrations-core/pull/6447).
+
 ## 1.16.3 / 2020-04-04
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).

@@ -132,6 +132,18 @@ instances:
     #
     # rmi_registry_ssl: false
 
+    ## @param rmi_connection_timeout - number - optional - default: 30
+    ## The connection timeout, in seconds, when connecting to a remote JVM.
+    #
+    # rmi_connection_timeout: 30
+
+    ## @param rmi_client_timeout - number - optional - default: 30
+    ## The timeout to consider a remote connection, already successfully established, as lost.
+    ## If a connected remote JVM does not reply after `rmi_client_timeout` seconds jmxfetch
+    ## will give up on that connection and retry.
+    #
+    # rmi_client_timeout: 30
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

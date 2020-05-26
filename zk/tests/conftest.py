@@ -18,22 +18,6 @@ PORT = 12181
 HERE = os.path.dirname(os.path.abspath(__file__))
 URL = "http://{}:{}".format(HOST, PORT)
 
-STAT_METRICS = [
-    'zookeeper.latency.min',
-    'zookeeper.latency.avg',
-    'zookeeper.latency.max',
-    'zookeeper.bytes_received',
-    'zookeeper.bytes_sent',
-    'zookeeper.connections',
-    'zookeeper.connections',
-    'zookeeper.outstanding_requests',
-    'zookeeper.zxid.epoch',
-    'zookeeper.zxid.count',
-    'zookeeper.nodes',
-    'zookeeper.instances',
-    'zookeeper.packets.received',
-    'zookeeper.packets.sent',
-]
 
 VALID_CONFIG = {'host': HOST, 'port': PORT, 'expected_mode': "standalone", 'tags': ["mytag"]}
 
@@ -84,8 +68,10 @@ def dd_environment(get_instance):
         sys.stderr.write("ZK boot complete.\n")
 
     compose_file = os.path.join(HERE, 'compose', 'zk.yaml')
-    if get_version() >= [3, 5, 0]:
-        compose_file = os.path.join(HERE, 'compose', 'zk35plus.yaml')
+    if [3, 5, 0] <= get_version() < [3, 6, 0]:
+        compose_file = os.path.join(HERE, 'compose', 'zk35.yaml')
+    elif get_version() >= [3, 6, 0]:
+        compose_file = os.path.join(HERE, 'compose', 'zk36plus.yaml')
 
     with docker_run(compose_file, conditions=[condition]):
         yield get_instance
