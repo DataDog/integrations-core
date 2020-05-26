@@ -92,6 +92,8 @@ plugins:
             show_if_no_docstring: yes
             show_root_heading: yes
             show_source: true
+  - pdf-export:
+      enabled_if_env: ENABLE_PDF_SITE_EXPORT
 
 markdown_extensions:
   # Built-in

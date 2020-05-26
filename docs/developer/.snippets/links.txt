@@ -46,6 +46,7 @@
 [docs-extension-pymdown]: https://facelessuser.github.io/pymdown-extensions/
 [docs-plugin-auto-doc]: https://github.com/pawamoy/mkdocstrings
 [docs-plugin-minify]: https://github.com/byrnereese/mkdocs-minify-plugin
+[docs-plugin-pdf-export]: https://github.com/zhaoterryy/mkdocs-pdf-export-plugin
 [docs-plugin-revision-date]: https://github.com/timvink/mkdocs-git-revision-date-localized-plugin
 [docs-scripts]: https://github.com/DataDog/integrations-core/tree/master/docs/developer/.scripts
 [docs-snippets-abbreviations]: https://github.com/DataDog/integrations-core/blob/master/docs/developer/.snippets/abbrs.txt
@@ -109,3 +110,4 @@
 [terraform-templates-location]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/terraform
 [toml-github]: https://github.com/toml-lang/toml
 [tox-github]: https://github.com/tox-dev/tox
+[weasyprint-dependencies]: https://weasyprint.readthedocs.io/en/latest/install.html
