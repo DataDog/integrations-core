@@ -123,7 +123,7 @@ def test_config(test_case, extra_config, expected_http_kwargs):
         r.get.assert_called_with('http://{}:8001/stats'.format(HOST), **http_wargs)
 
 
-def test_metadata(datadog_agent):
+def test_metadata_unit(datadog_agent):
     instance = INSTANCES['main']
     check = Envoy(CHECK_NAME, {}, [instance])
     check.check_id = 'test:123'
@@ -136,6 +136,7 @@ def test_metadata(datadog_agent):
             'Envoy endpoint `%s` timed out after %s seconds', 'http://localhost:8001/server_info', (10.0, 10.0)
         )
 
+    datadog_agent.reset()
     with mock.patch('requests.get', side_effect=IndexError()):
         check._collect_metadata(instance['stats_url'])
         datadog_agent.assert_metadata_count(0)
@@ -143,6 +144,7 @@ def test_metadata(datadog_agent):
             'Error collecting Envoy version with url=`%s`. Error: %s', 'http://localhost:8001/server_info', ''
         )
 
+    datadog_agent.reset()
     with mock.patch('requests.get', side_effect=requests.exceptions.RequestException('Req Exception')):
         check._collect_metadata(instance['stats_url'])
         datadog_agent.assert_metadata_count(0)
@@ -152,7 +154,8 @@ def test_metadata(datadog_agent):
             'Req Exception',
         )
 
-    with mock.patch('requests.get', return_value=response('multiple_services')):
+    datadog_agent.reset()
+    with mock.patch('requests.get', return_value=response('server_info')):
         check._collect_metadata(instance['stats_url'])
 
         major, minor, patch = ENVOY_VERSION.split('.')
@@ -166,6 +169,31 @@ def test_metadata(datadog_agent):
 
         datadog_agent.assert_metadata('test:123', version_metadata)
         datadog_agent.assert_metadata_count(len(version_metadata))
+
+    datadog_agent.reset()
+    with mock.patch('requests.get', return_value=response('server_info_before_1_9')):
+        check._collect_metadata(instance['stats_url'])
+
+        expected_version = '1.8.0'
+        major, minor, patch = expected_version.split('.')
+        version_metadata = {
+            'version.scheme': 'semver',
+            'version.major': major,
+            'version.minor': minor,
+            'version.patch': patch,
+            'version.raw': expected_version,
+        }
+
+        datadog_agent.assert_metadata('test:123', version_metadata)
+        datadog_agent.assert_metadata_count(len(version_metadata))
+
+    datadog_agent.reset()
+    with mock.patch('requests.get', return_value=response('server_info_invalid')):
+        check._collect_metadata(instance['stats_url'])
+
+        datadog_agent.assert_metadata('test:123', {})
+        datadog_agent.assert_metadata_count(0)
+        check.log.debug.assert_called_with('Version not matched.')
 
 
 @pytest.mark.usefixtures('dd_environment')
