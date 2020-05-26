@@ -8,9 +8,14 @@ See http://blogs.msdn.com/b/psssql/archive/2013/09/23/interpreting-the-counter-v
 for information on how to report the metrics available in the sys.dm_os_performance_counters table
 '''
 # stdlib
+import cPickle as pickle
 import traceback
+import time
+import tempfile
+import os
 from contextlib import contextmanager
 from collections import defaultdict
+
 # 3rd party
 import adodbapi
 try:
@@ -22,6 +27,7 @@ from config import _is_affirmative
 
 # project
 from checks import AgentCheck
+from utils.pidfile import PidFile
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'sql server'
 ALL_INSTANCES = 'ALL'
@@ -122,7 +128,13 @@ class SQLServer(AgentCheck):
 
         # We are caching some of the metrics value and timestamp to calculate
         # the rate.
-        self.cached_metrics_data = {}
+        try:
+            file = open(self.get_pickle_path())
+            self.cached_metrics_data = pickle.load(file)
+            self.log.info("loaded cached metric data {0}".format(self.cached_metrics_data))
+        except Exception as ex:
+            self.log.error("Error in loading pickle file {0}".format(ex))
+            self.cached_metrics_data = {}
 
         self.connector = init_config.get('connector', 'adodbapi')
         if not self.connector.lower() in self.valid_connectors:
@@ -464,6 +476,25 @@ class SQLServer(AgentCheck):
         else:
             self.log.debug("Skipping check")
 
+    def stop(self):
+        try:
+            path = self.get_pickle_path()
+            self.log.debug("Persisting status to %s" % path)
+            file = open(path, 'w')
+            try:
+                pickle.dump(self.cached_metrics_data, file)
+            finally:
+                file.close()
+        except Exception:
+            self.log.exception("Error persisting status")
+
+    def get_pickle_path(self):
+        if os.path.isdir(PidFile.get_dir()):
+            path = PidFile.get_dir()
+        else:
+            path = tempfile.gettempdir()
+        return os.path.join(path, 'SQLServer.pickle')
+
     def do_perf_counter_check(self, instance):
         """
         Fetch the metrics from the sys.dm_os_performance_counters table
@@ -700,7 +731,7 @@ class SqlComplexMetric(SqlServerMetric):
             if columns[index] in self.attributes:
                 attribute_index_list.append(index)
 
-
+        current_timestamp = time.time()
         for row in rows:
             metric_tags = list(tags)
             for tagby_index in tag_by_indexs:
@@ -716,16 +747,13 @@ class SqlComplexMetric(SqlServerMetric):
                     metric_name = '{}.{}.{}'.format(self.datadog_name, "metric", columns[index])
                     if self.rate_metrics and (self.rate_metrics[0] == "ALL" or
                                               columns[index] in self.rate_metrics):
-                        self.log.info("rate metrics {0}".format(self.rate_metrics))
-                        tags = tuple(sorted(set(metric_tags)))
-                        context = (metric_name, tags)
+                        sorted_tags = tuple(sorted(set(metric_tags)))
+                        context = (metric_name, sorted_tags)
                         if cached_metrics_data.get(context):
                             value, timestamp = cached_metrics_data.get(context)
-                            self.log.info("last cached value {0} -> {1}, {2}".format(context, value, timestamp))
                         else:
-                            self.log.info("missing context {0}".format(context))
+                            self.log.debug("Missing context {0} in cached metrics".format(context))
                             value, timestamp = 0, 0
-                        current_timestamp = time.time()
                         cached_metrics_data[context] = (report_value, current_timestamp)
                         report_value_in_rate = (report_value - value)/(current_timestamp  - timestamp)
                         report_value = report_value_in_rate
