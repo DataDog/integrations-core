@@ -15,31 +15,31 @@ from . import common
 
 
 @pytest.fixture(scope='session')
-def dd_environment(instance):
+def dd_environment():
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yml')
 
     with docker_run(
         compose_file, conditions=[WaitFor(setup_sharding, args=(compose_file,), attempts=5, wait=5), InitializeDB()]
     ):
-        yield instance
+        yield common.INSTANCE_BASIC
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def instance():
     return copy.deepcopy(common.INSTANCE_BASIC)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def instance_user():
     return copy.deepcopy(common.INSTANCE_USER)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def instance_authdb():
     return copy.deepcopy(common.INSTANCE_AUTHDB)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def instance_custom_queries():
     instance = copy.deepcopy(common.INSTANCE_USER)
     instance['custom_queries'] = [
@@ -82,7 +82,7 @@ def instance_custom_queries():
     return instance
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def instance_1valid_and_1invalid_custom_queries():
     instance = copy.deepcopy(common.INSTANCE_USER)
     instance['custom_queries'] = [

@@ -93,8 +93,7 @@ class LegacyIstioCheck_1_4(OpenMetricsBaseCheck):
         """
         result = []
         for instance in instances:
-            exclude_labels = instance.get('exclude_labels', [])
-            exclude_labels.extend(BLACKLIST_LABELS)
+            exclude_labels = instance.get('exclude_labels', []) + BLACKLIST_LABELS
             instance.update({'exclude_labels': exclude_labels})
 
             if 'istio_mesh_endpoint' in instance:
