@@ -19,7 +19,7 @@ div.doc-contents:not(.first) {
   padding: 0.5em 1em;
 }
 
-/* Fira code */
+/* FiraCode https://github.com/tonsky/FiraCode */
 code { font-family: 'Fira Code', monospace; }
 
 @supports (font-variation-settings: normal) {
