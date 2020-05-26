@@ -18,7 +18,7 @@ which Integrations have been updated in each Agent version.
 
 Working with integrations is easy, the main page of the [development docs][6]
 contains all the info you need to get your dev environment up and running in minutes
-to run, test and build a Check. More advanced documentation can be found [here][20].
+to run, test and build a Check. More advanced documentation can be found [here][3].
 
 ## Reporting Issues
 
@@ -31,6 +31,7 @@ An up-to-date list of all developers authorized to sign releases can be found [h
 
 [1]: https://dev.azure.com/datadoghq/integrations-core/_apis/build/status/Master%20All?branchName=master
 [2]: https://dev.azure.com/datadoghq/integrations-core/_build/latest?definitionId=29&branchName=master
+[3]: https://datadoghq.dev/integrations-core/
 [5]: https://github.com/DataDog/integrations-extras
 [6]: https://docs.datadoghq.com/developers/integrations/
 [7]: https://github.com/DataDog/datadog-agent
