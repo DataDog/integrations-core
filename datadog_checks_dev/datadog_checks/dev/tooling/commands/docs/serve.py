@@ -24,8 +24,7 @@ def serve(no_open, verbose, pdf):
     command = ['tox', '-e', 'docs', '--', 'serve', '--livereload', '--dev-addr', address]
     insert_verbosity_flag(command, verbose)
 
-    if pdf:
-        os.environ["ENABLE_PDF_SITE_EXPORT"] = '1'
+    env_vars = {'ENABLE_PDF_SITE_EXPORT': '1' if pdf else '0'}
 
     address = f'http://{address}'
     build_completion_indicator = f'Serving on {address}'

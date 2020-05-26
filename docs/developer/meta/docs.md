@@ -14,7 +14,7 @@ We use a select few [MkDocs plugins][mkdocs-plugins] to achieve the following:
 - minify HTML ([:octicons-octoface:][docs-plugin-minify])
 - display the date of the last Git modification of every page ([:octicons-octoface:][docs-plugin-revision-date])
 - automatically generate docs based on code and docstrings ([:octicons-octoface:][docs-plugin-auto-doc])
-- export the markdown pages as PDF ([:octicons-octoface:][docs-plugin-pdf-export])
+- export the site as a PDF ([:octicons-octoface:][docs-plugin-pdf-export])
 
 ## Extensions
 
@@ -71,7 +71,7 @@ ddev docs serve
 
 By default, live reloading is enabled so any modification will be reflected in near-real time.
 
-**Note:** In order to export the site as PDF, you can use the `--pdf` flag, but you will need some [external installations][weasyprint-dependencies].
+**Note:** In order to export the site as a PDF, you can use the `--pdf` flag, but you will need some [external dependencies][weasyprint-dependencies].
 
 ## Deploy
 
