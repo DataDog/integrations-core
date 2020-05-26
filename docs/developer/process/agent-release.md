@@ -98,6 +98,13 @@ The Agent Release Manager will post a [daily status](../ddev/cli.md#status) for 
 3. Fixes done pending a new RC build: [link PRs of fixes]
 ```
 
+### Logs
+
+Each release candidate is deployed in a staging environment. We observe the `WARN` or `ERROR` level logs filtered with the facets
+ `Service:datadog-agent` and `index:main` and `LogMessage` to see if any unexpected or frequent errors start occurring that was not caught
+ during QA.
+ 
+ 
 ## Release week
 
 After QA week ends the code freeze is lifted, even if there are items yet to be tested. The release manager will continue
