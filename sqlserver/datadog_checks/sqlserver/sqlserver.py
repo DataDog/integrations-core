@@ -439,8 +439,6 @@ class SQLServer(AgentCheck):
                 return value, alert_message
         return None, None
 
-
-
     def maybe_raise_alert(self, raised_exception, conn_key, instance):
         exc_type, exc_value, exc_traceback = sys.exc_info()
         exception_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
