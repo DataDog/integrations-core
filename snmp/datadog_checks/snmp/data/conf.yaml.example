@@ -18,7 +18,7 @@ init_config:
 
   ## @param oid_batch_size - integer - optional - default: 10
   ## Number of OIDs handled by each batch. Performance can be improved by increasing this number, though
-  ## it will also use more resource.
+  ## it will also use more resources.
   #
   # oid_batch_size: 10
 
