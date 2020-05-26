@@ -95,4 +95,11 @@ div.doc-contents:not(.first) {
   100% {
     background-position: 6rem 0; } }
 
+
+/* Fira code */
+code { font-family: 'Fira Code', monospace; }
+
+@supports (font-variation-settings: normal) {
+  code { font-family: 'Fira Code VF', monospace; }
+}
 /* END TODO */
