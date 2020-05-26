@@ -1,6 +1,7 @@
 {
   "categories": [
-    "data store"
+    "data store",
+    "log collection"
   ],
   "creates_events": false,
   "display_name": "SQL Server",

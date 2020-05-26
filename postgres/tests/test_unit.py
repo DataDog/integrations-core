@@ -44,12 +44,11 @@ def test_get_instance_metrics_state(integration_check, pg_instance):
     """
     pg_instance['collect_database_size_metrics'] = False
     check = integration_check(pg_instance)
-    check._version = VersionInfo(9, 2, 0)
 
-    res = check.metric_utils.get_instance_metrics(check._version)
+    res = check.metric_utils.get_instance_metrics(VersionInfo(9, 2, 0))
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
-    check._version = 'foo'  # metrics were cached so this shouldn't be called
-    res = check.metric_utils.get_instance_metrics(check._version)
+
+    res = check.metric_utils.get_instance_metrics('foo')  # metrics were cached so this shouldn't be called
     assert res['metrics'] == dict(util.COMMON_METRICS, **util.NEWER_92_METRICS)
 
 
