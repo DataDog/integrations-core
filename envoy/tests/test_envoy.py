@@ -193,7 +193,7 @@ def test_metadata_unit(datadog_agent):
 
         datadog_agent.assert_metadata('test:123', {})
         datadog_agent.assert_metadata_count(0)
-        check.log.debug.assert_called_with('Version not matched. content=%s', 'ABC\n')
+        check.log.debug.assert_called_with('Version not matched.')
 
 
 @pytest.mark.usefixtures('dd_environment')

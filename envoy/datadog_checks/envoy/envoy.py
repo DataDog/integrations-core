@@ -174,10 +174,11 @@ class Envoy(AgentCheck):
                 #     envoy 5d25f466c3410c0dfa735d7d4358beb76b2da507/1.8.0/Clean/RELEASE live 581130 581130 0
                 content = response.content.decode()
                 found = LEGACY_VERSION_RE.search(content)
+                self.log.debug('Looking for version in content: %s', content)
                 if found:
                     raw_version = found.group(1)
                 else:
-                    self.log.debug('Version not matched. content=%s', content)
+                    self.log.debug('Version not matched.')
                     return
 
         except requests.exceptions.Timeout:
