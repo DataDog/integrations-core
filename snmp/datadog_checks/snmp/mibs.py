@@ -72,7 +72,8 @@ class MIBLoader:
         """
         Create a command generator to perform SNMP queries.
 
-        If `mibs_path` is not None, load the mibs present in the custom MIBs folder. (MIBs must be in PySNMP format.)
+        `mibs_path` should point to a custom directory containing MIBs in the PySNMP format. If not given,
+        MIBs shipped with PySNMP are used.
         """
         _, instrum_controller, _ = self._get_or_create_builder_info(mibs_path)
         message_dispatcher = MsgAndPduDispatcher(instrum_controller)
