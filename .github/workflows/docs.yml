@@ -15,6 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
+        # Fetch all history for applying timestamps to every page
         fetch-depth: 0
 
     - name: Set up Python
