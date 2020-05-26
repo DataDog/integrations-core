@@ -134,7 +134,7 @@ def test_cisco_voice(aggregator):
         "cccaRouterCallsInProgress",
         "cccaRouterCallsInQueue",
     ]
-    
+
     for router in routers:
         aggregator.assert_metric('snmp.{}'.format(router), metric_type=aggregator.GAUGE, tags=tags)
 
