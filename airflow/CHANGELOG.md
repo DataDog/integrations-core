@@ -1,5 +1,10 @@
 # CHANGELOG - Airflow
 
+## 1.3.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Use config spec. See [#6305](https://github.com/DataDog/integrations-core/pull/6305).
+
 ## 1.2.0 / 2020-04-04
 
 * [Added] Add `ddev test` option to verify support of new metrics. See [#6141](https://github.com/DataDog/integrations-core/pull/6141).

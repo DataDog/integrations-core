@@ -48,6 +48,12 @@ class CaseInsensitiveDict(dict):
     def get(self, key):
         return super(CaseInsensitiveDict, self).get(key.lower())
 
+    def copy(self):
+        """
+        Explicit copy to ensure we return an instance of `CaseInsensitiveDict`
+        """
+        return CaseInsensitiveDict(self)
+
 
 class ProviderArchitectureMeta(type):
     """

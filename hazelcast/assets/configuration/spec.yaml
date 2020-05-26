@@ -15,6 +15,17 @@ files:
         to poll for the `hazelcast.mc_cluster_state` service check.
       value:
         type: string
+    - name: mc_cluster_states
+      description: |
+        Override cluster state to `hazelcast.mc_cluster_state` service check status mapping.
+      value:
+        type: object
+        example:
+          Active: OK
+          No Migration: WARNING
+          Frozen: CRITICAL
+          Passive: CRITICAL
+          In Transition: WARNING
     - template: instances/jmx
       overrides:
         host.display_priority: 10

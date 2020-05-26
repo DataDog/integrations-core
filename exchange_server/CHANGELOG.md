@@ -1,5 +1,10 @@
 # CHANGELOG - exchange_server
 
+## 1.7.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Fixed] Agent 6 signature. See [#6446](https://github.com/DataDog/integrations-core/pull/6446).
+
 ## 1.6.0 / 2019-12-02
 
 * [Added] Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).

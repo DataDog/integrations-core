@@ -1180,6 +1180,9 @@ def test_cisco_csr(aggregator):
     for metric in PEER_RATES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags)
 
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
 
 def test_checkpoint_firewall(aggregator):
     run_profile_check('checkpoint-firewall')

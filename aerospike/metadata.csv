@@ -561,7 +561,7 @@ aerospike.namespace.scan_ops_bg_error,gauge,,scan,,The number of ops background 
 aerospike.namespace.scan_proto_compression_ratio,gauge,,,,The average compressed size to uncompressed size ratio for protocol message data in basic scan or aggregation scan client responses,0,aerospike,
 aerospike.namespace.scan_proto_uncompressed_pct,gauge,,percent,,The percentage of basic scan or aggregation scan client responses with uncompressed protocol message data.,0,aerospike,
 aerospike.namespace.smd_evict_void_time,gauge,,second,,"The cluster-wide specified eviction depth, expressed as a void time in seconds since 1 January 2010 UTC.",0,aerospike,
-aerospike.namespace.truncate_lut,gauge,,,,The "most covering" truncate_lut for this namespace.,0,aerospike,
+aerospike.namespace.truncate_lut,gauge,,,,The 'most covering' truncate_lut for this namespace.,0,aerospike,
 aerospike.namespace.truncated_records,gauge,,record,,The total number of records deleted by truncation for this namespace (includes set truncations).,0,aerospike,
 aerospike.namespace.udf_sub_udf_filtered_out,gauge,,,,The number of udf sub-transactions that did not happen because the record was filtered out via a predicate expression.,0,aerospike,
 aerospike.namespace.unavailable_partitions,gauge,,,,The number of unavailable partitions for this namespace (when using strong-consistency).,0,aerospike,

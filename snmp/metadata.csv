@@ -516,4 +516,4 @@ snmp.bgpPeerOutUpdates,rate,,message,,[Arista] [Cisco c3850] [Cisco Nexus] [Cisc
 snmp.bgpPeerInTotalMessages,rate,,message,,[Arista] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Cisco CSR1000v] [F5 BIG-IP] The total number of messages received from the remote peer on this connection.,0,snmp,
 snmp.bgpPeerOutTotalMessages,rate,,message,,[Arista] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Cisco CSR1000v] [F5 BIG-IP] The total number of messages transmitted o the remote peer on this connection.,0,snmp,
 snmp.bgpPeerFsmEstablishedTransitions,rate,,,,[Arista] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Cisco CSR1000v] [F5 BIG-IP] The total number of times the BGP FSM transitioned into the established state.,0,snmp,
-
+snmp.bgpPeerFsmEstablishedTime,gauge,,second,,[Arista] [Cisco c3850] [Cisco Nexus] [Cisco ASA 5525] [Cisco CSR1000v] [F5 BIG-IP] This timer indicates how long (in seconds) this peer has been in the Established state or how long since this peer was last in the Established state.,0,snmp,

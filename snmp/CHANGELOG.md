@@ -1,5 +1,19 @@
 # CHANGELOG - snmp
 
+## 3.2.2 / 2020-05-21
+
+* [Fixed] Fix error handling in getnext. See [#6701](https://github.com/DataDog/integrations-core/pull/6701).
+
+## 3.2.1 / 2020-05-19
+
+* [Fixed] Add missing auto_conf. See [#6687](https://github.com/DataDog/integrations-core/pull/6687).
+
+## 3.2.0 / 2020-05-17
+
+* [Added] Add diskStatus tag to Isilon profile. See [#6660](https://github.com/DataDog/integrations-core/pull/6660).
+* [Added] Add BPG metrics to more profiles. See [#6655](https://github.com/DataDog/integrations-core/pull/6655).
+* [Added] Add voice metrics and profiles. See [#6629](https://github.com/DataDog/integrations-core/pull/6629).
+
 ## 3.1.0 / 2020-05-14
 
 * [Added] Add `chatsworth` legacy metrics. See [#6624](https://github.com/DataDog/integrations-core/pull/6624).

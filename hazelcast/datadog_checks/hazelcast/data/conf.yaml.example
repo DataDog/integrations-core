@@ -59,6 +59,16 @@ instances:
     #
     # mc_health_check_endpoint: <MC_HEALTH_CHECK_ENDPOINT>
 
+    ## @param mc_cluster_states - mapping - optional
+    ## Override cluster state to `hazelcast.mc_cluster_state` service check status mapping.
+    #
+    # mc_cluster_states:
+    #   Active: OK
+    #   No Migration: WARNING
+    #   Frozen: CRITICAL
+    #   Passive: CRITICAL
+    #   In Transition: WARNING
+
     ## @param user - string - optional
     ## User to use when connecting to JMX.
     #

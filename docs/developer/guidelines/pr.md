@@ -21,7 +21,7 @@ apply `changelog/no-changelog`. In all other cases, you must manually apply `cha
 
 For changelog types, we adhere to those defined by [Keep a Changelog][keepachangelog-types]:
 
-- `Added` for new features.
+- `Added` for new features or any non-trivial refactors.
 - `Changed` for changes in existing functionality.
 - `Deprecated` for soon-to-be removed features.
 - `Removed` for now removed features.

@@ -1,5 +1,23 @@
 # CHANGELOG - datadog_checks_base
 
+## 11.10.0 / 2020-05-25
+
+* [Added] Override CaseInsensitiveDict `copy()` function. See [#6715](https://github.com/DataDog/integrations-core/pull/6715).
+
+## 11.9.0 / 2020-05-20
+
+* [Added] Upgrade httplib2 to 0.18.0. See [#6702](https://github.com/DataDog/integrations-core/pull/6702).
+* [Fixed] Fix time utilities. See [#6692](https://github.com/DataDog/integrations-core/pull/6692).
+
+## 11.8.0 / 2020-05-17
+
+* [Added] Add utilities for working with time. See [#6663](https://github.com/DataDog/integrations-core/pull/6663).
+* [Added] Upgrade lxml to 4.5.0. See [#6661](https://github.com/DataDog/integrations-core/pull/6661).
+* [Added] Add send_monotonic_with_gauge config option and refactor test. See [#6618](https://github.com/DataDog/integrations-core/pull/6618).
+* [Added] Add developer docs. See [#6623](https://github.com/DataDog/integrations-core/pull/6623).
+* [Fixed] Update scraper config with instance. See [#6664](https://github.com/DataDog/integrations-core/pull/6664).
+* [Fixed] Fix thread leak in wmi checks. See [#6644](https://github.com/DataDog/integrations-core/pull/6644).
+
 ## 11.7.0 / 2020-05-08
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

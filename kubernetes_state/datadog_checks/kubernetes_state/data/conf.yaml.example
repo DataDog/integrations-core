@@ -55,3 +55,16 @@ instances:
     ## Metrics can be found under `kubernetes_state.telemetry`
     #
     # telemetry: false
+
+    ## @param join_standard_tags - boolean - optional - default: false
+    ## To enable joining standard tags from labels, you must set this parameter to true.
+    ## It will join standard tags found in these labels coming from info Kube State metrics (*_labels).
+    ##   tags.datadoghq.com/env     => env
+    ##   tags.datadoghq.com/service => service
+    ##   tags.datadoghq.com/version => version
+    ##
+    ## Resources enabled for join_standard_tags include:
+    ## Pod, Deployment, ReplicaSet, DaemonSet, StatefulSet, Job, CronJob
+    ##
+    #
+    # join_standard_tags: false

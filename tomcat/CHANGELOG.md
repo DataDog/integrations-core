@@ -1,5 +1,12 @@
 # CHANGELOG - tomcat
 
+## 1.3.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Add rmi_connection_timeout & rmi_client_timeout to config spec. See [#6459](https://github.com/DataDog/integrations-core/pull/6459).
+* [Added] Add string cache and web cache metrics. See [#6404](https://github.com/DataDog/integrations-core/pull/6404).
+* [Added] Use config spec. See [#6301](https://github.com/DataDog/integrations-core/pull/6301).
+
 ## 1.2.1 / 2020-04-04
 
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).

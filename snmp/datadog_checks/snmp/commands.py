@@ -67,7 +67,7 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
         if ignore_nonincreasing_oid and errorIndication and isinstance(errorIndication, errind.OidNotIncreasing):
             errorIndication = None
         cbCtx['error'] = errorIndication
-        cbCtx['var_bind_table'] = var_bind_table[0]
+        cbCtx['var_bind_table'] = var_bind_table[0] if var_bind_table else []
 
     ctx = {}  # type: Dict[str, Any]
 

@@ -145,6 +145,30 @@ def test_server_uri_sanitization(check, instance):
         assert expected_clean_name == clean_name
 
 
+def test_parse_server_config(check):
+    """
+    Connection parameters are properly parsed, sanitized and stored from instance configuration,
+    and special characters are dealt with.
+    """
+    instance = {
+        'hosts': ['localhost', 'localhost:27018'],
+        'username': 'john doe',  # Space
+        'password': 'p@ss\\word',  # Special characters
+        'database': 'test',
+        'options': {'replicaSet': 'bar!baz'},  # Special character
+    }
+    check = check(instance)
+    assert check.server == 'mongodb://john+doe:p%40ss%5Cword@localhost:27017,localhost:27018/test?replicaSet=bar%21baz'
+    assert check.username == 'john doe'
+    assert check.password == 'p@ss\\word'
+    assert check.db_name == 'test'
+    assert check.nodelist == [('localhost', 27017), ('localhost', 27018)]
+    assert check.clean_server_name == (
+        'mongodb://john doe:*****@localhost:27017,localhost:27018/test?replicaSet=bar!baz'
+    )
+    assert check.auth_source is None
+
+
 def test_legacy_config_deprecation(check):
     check = check(common.INSTANCE_BASIC_LEGACY_CONFIG)
 

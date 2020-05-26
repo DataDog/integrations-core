@@ -161,12 +161,12 @@ class Envoy(AgentCheck):
             # }
             raw_version = response.json()["version"].split('/')[1]
         except requests.exceptions.Timeout:
-            msg = 'Envoy endpoint `{}` timed out after {} seconds'.format(server_info_url, self.http.options['timeout'])
-            self.log.info(msg)
+            self.log.warning(
+                'Envoy endpoint `%s` timed out after %s seconds', server_info_url, self.http.options['timeout']
+            )
             return
-        except (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
-            msg = 'Error accessing Envoy endpoint `{}`'.format(server_info_url)
-            self.log.info(msg)
+        except Exception as e:
+            self.log.warning('Error collecting Envoy version with url=`%s`. Error: %s', server_info_url, str(e))
             return
 
         self.set_metadata('version', raw_version)

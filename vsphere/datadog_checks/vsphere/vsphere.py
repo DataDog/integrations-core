@@ -14,6 +14,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
+from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache
@@ -75,7 +76,7 @@ class VSphereCheck(AgentCheck):
         instance = cast(InstanceConfig, self.instance)
         self.config = VSphereConfig(instance, self.log)
 
-        self.latest_event_query = dt.datetime.utcnow()
+        self.latest_event_query = get_current_datetime()
         self.infrastructure_cache = InfrastructureCache(interval_sec=self.config.refresh_infrastructure_cache_interval)
         self.metrics_metadata_cache = MetricsMetadataCache(
             interval_sec=self.config.refresh_metrics_metadata_cache_interval
@@ -483,7 +484,7 @@ class VSphereCheck(AgentCheck):
         # type: () -> None
         self.log.debug("Starting events collection (query start time: %s).", self.latest_event_query)
         latest_event_time = None
-        collect_start_time = dt.datetime.utcnow()
+        collect_start_time = get_current_datetime()
         try:
             t0 = Timer()
             new_events = self.api.get_new_events(start_time=self.latest_event_query)
