@@ -20,6 +20,9 @@ jobs:
       with:
         python-version: '3.8'
 
+    - name: Upgrade Python packaging tools
+      run: pip install --disable-pip-version-check --upgrade pip setuptools wheel
+
     - name: Install ddev
       run: pip install -e ./datadog_checks_dev[cli]
 
@@ -60,4 +63,3 @@ jobs:
         publish_dir: ./site
         allow_empty_commit: false
         enable_jekyll: false
-        commit_message: ${{ github.event.head_commit.message }}
