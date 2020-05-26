@@ -1,3 +1,4 @@
+import json
 import os
 
 from datadog_checks.base.utils.common import get_docker_hostname
@@ -23,10 +24,6 @@ INSTANCES = {
         'metric_blacklist': [r'envoy\.cluster\.out\.'],
     },
 }
-SERVER_INFO = {
-    "version": "222aaacccfff888/1.14.1/Clean/RELEASE/BoringSSL",
-    "state": "LIVE",
-}
 ENVOY_VERSION = os.getenv('ENVOY_VERSION')
 
 
@@ -36,8 +33,7 @@ class MockResponse:
         self.status_code = status_code
 
     def json(self):
-        # Metadata
-        return SERVER_INFO
+        return json.loads(self.content)
 
 
 @lru_cache(maxsize=None)

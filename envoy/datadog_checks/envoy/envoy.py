@@ -12,6 +12,8 @@ from datadog_checks.base import AgentCheck
 from .errors import UnknownMetric, UnknownTags
 from .parser import parse_histogram, parse_metric
 
+LEGACY_VERSION_RE = re.compile(r'/(\d\.\d\.\d)/')
+
 
 class Envoy(AgentCheck):
     HTTP_CONFIG_REMAPPER = {'verify_ssl': {'name': 'tls_verify'}}
@@ -145,6 +147,7 @@ class Envoy(AgentCheck):
     def _collect_metadata(self, stats_url):
         # From http://domain/thing/stats to http://domain/thing/server_info
         server_info_url = urljoin(stats_url, 'server_info')
+        raw_version = None
 
         try:
             response = self.http.get(server_info_url)
@@ -159,7 +162,24 @@ class Envoy(AgentCheck):
             #   "state": "LIVE",
             #   ...
             # }
-            raw_version = response.json()["version"].split('/')[1]
+            try:
+                raw_version = response.json()["version"].split('/')[1]
+            except Exception as e:
+                self.log.debug('Error decoding json for url=`%s`. Error: %s', server_info_url, str(e))
+
+            if raw_version is None:
+                # Search version in server info for Envoy version <= 1.8
+                # Example:
+                #     envoy 5d25f466c3410c0dfa735d7d4358beb76b2da507/1.8.0/Clean/RELEASE live 581130 581130 0
+                content = response.content.decode()
+                found = LEGACY_VERSION_RE.search(content)
+                self.log.debug('Looking for version in content: %s', content)
+                if found:
+                    raw_version = found.group(1)
+                else:
+                    self.log.debug('Version not matched.')
+                    return
+
         except requests.exceptions.Timeout:
             self.log.warning(
                 'Envoy endpoint `%s` timed out after %s seconds', server_info_url, self.http.options['timeout']
@@ -169,4 +189,5 @@ class Envoy(AgentCheck):
             self.log.warning('Error collecting Envoy version with url=`%s`. Error: %s', server_info_url, str(e))
             return
 
-        self.set_metadata('version', raw_version)
+        if raw_version:
+            self.set_metadata('version', raw_version)
