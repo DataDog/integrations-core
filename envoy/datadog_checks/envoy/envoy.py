@@ -148,6 +148,7 @@ class Envoy(AgentCheck):
     def _collect_metadata(self, stats_url):
         # From http://domain/thing/stats to http://domain/thing/server_info
         server_info_url = urljoin(stats_url, 'server_info')
+        raw_version = None
 
         try:
             response = self.http.get(server_info_url)
