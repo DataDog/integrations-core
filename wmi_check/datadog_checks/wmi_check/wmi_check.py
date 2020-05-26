@@ -55,7 +55,7 @@ class WMICheck(WinWMICheck):
             self._submit_metrics(extracted_metrics, metric_name_and_type_by_property)
 
     def extract_metrics(self, wmi_sampler):
-        # type: (List[str], WMISampler) -> List[WMIMetric]
+        # type: (WMISampler) -> List[WMIMetric]
         return self._extract_metrics(wmi_sampler, self.tag_by, self.tag_queries, self.constant_tags)
 
     def get_wmi_properties(self):
