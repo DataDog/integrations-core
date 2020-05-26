@@ -106,3 +106,14 @@ files:
         type: boolean
         example: false
     - template: instances/tags
+
+  - template: logs
+    example:
+    - type: file
+      path: /var/opt/mssql/log/errorlog
+      source: sqlserver
+      service: <SERVICE_NAME>
+      log_processing_rules:
+      - type: multi_line
+        name: new_log_start_with_date
+        pattern: \d{4}\-\d{2}\-\d{2}
