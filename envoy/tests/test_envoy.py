@@ -135,6 +135,14 @@ def test_metadata(datadog_agent):
         check.log.warning.assert_called_with(
             'Envoy endpoint `%s` timed out after %s seconds', 'http://localhost:8001/server_info', (10.0, 10.0)
         )
+
+    with mock.patch('requests.get', side_effect=IndexError()):
+        check._collect_metadata(instance['stats_url'])
+        datadog_agent.assert_metadata_count(0)
+        check.log.warning.assert_called_with(
+            'Error collecting Envoy version with url=`%s`. Error: %s', 'http://localhost:8001/server_info', ''
+        )
+
     with mock.patch('requests.get', side_effect=requests.exceptions.RequestException('Req Exception')):
         check._collect_metadata(instance['stats_url'])
         datadog_agent.assert_metadata_count(0)
