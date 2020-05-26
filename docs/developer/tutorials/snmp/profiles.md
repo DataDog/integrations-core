@@ -98,7 +98,7 @@ def test_hp_ilo4(aggregator):
 We don't have simulation data yet, so the test should fail. Let's make sure it does:
 
 ```console
-$ ddev -k test_hp_ilo4 snmp:py38
+$ ddev test -k test_hp_ilo4 snmp:py38
 [...]
 ======================================= FAILURES ========================================
 _____________________________________ test_hp_ilo4 ______________________________________
@@ -131,7 +131,7 @@ Then add a line there for the OID listed in the profile:
 Run the test again, and make sure it passes this time:
 
 ```console
-$ ddev -k test_hp_ilo4 snmp:py38
+$ ddev test -k test_hp_ilo4 snmp:py38
 [...]
 
 tests/test_profiles.py::test_hp_ilo4 PASSED                                                                                        [100%]
