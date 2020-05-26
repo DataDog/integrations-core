@@ -166,7 +166,7 @@ class Envoy(AgentCheck):
             try:
                 raw_version = response.json()["version"].split('/')[1]
             except json.decoder.JSONDecodeError as e:
-                self.log.debug('Error decoding json for with url=`%s`. Error: %s', server_info_url, str(e))
+                self.log.debug('Error decoding json for url=`%s`. Error: %s', server_info_url, str(e))
 
             if raw_version is None:
                 # Search version in server info for Envoy version <= 1.8
