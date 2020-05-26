@@ -35,14 +35,22 @@ class MIBLoader:
     A helper for loading and caching MIB information using PySNMP.
 
     To save up memory, PySNMP MIB-related objects are cached by MIB path.
-
-    If this behavior is not desired, you should use separate loader instances.
     """
 
     def __init__(self):
         # type: () -> None
         self._builders = {}  # type: Dict[Optional[str], BuilderInfo]
         self._cache_lock = threading.Lock()
+
+    @classmethod
+    def shared_instance(cls):
+        # type: () -> MIBLoader
+        """
+        Return a globally shared loader instance. Can be used to save up memory across check instances.
+        """
+        if not hasattr(cls, "_instance"):
+            cls._instance = MIBLoader()  # type: ignore
+        return cls._instance  # type: ignore
 
     def _get_or_create_builder_info(self, mibs_path=None):
         # type: (str) -> BuilderInfo

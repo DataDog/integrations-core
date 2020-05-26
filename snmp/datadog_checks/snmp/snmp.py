@@ -119,19 +119,9 @@ class SnmpCheck(AgentCheck):
                     profiles_by_oid[sys_object_oid] = name
         return profiles_by_oid
 
-    @property
-    def _mib_loader(self):
-        # type: () -> MIBLoader
-        """
-        A lazily-loaded shared MIB loader instance.
-        """
-        if not hasattr(self, "_mib_loader_instance"):
-            self._mib_loader_instance = MIBLoader()
-        return self._mib_loader_instance
-
     def _build_config(self, instance):
         # type: (dict) -> InstanceConfig
-        loader = self._mib_loader if self.shared_mib_builder else MIBLoader()
+        loader = MIBLoader.shared_instance() if self.shared_mib_builder else MIBLoader()
 
         return InstanceConfig(
             instance,
