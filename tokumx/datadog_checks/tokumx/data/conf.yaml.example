@@ -1,5 +1,16 @@
+## All options defined here are available to all instances.
+#
 init_config:
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param server - string - required
@@ -8,16 +19,7 @@ instances:
     #
   - server: mongodb://localhost:27017
 
-    ## @param tags - list of key:value elements - optional
-    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
-    ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
-
-    ## @param ssl - boolean - optional - default: false
+    ## @param ssl - boolean - optional - default: False
     ## Optional SSL parameters, see
     ## https://github.com/mongodb/mongo-python-driver/blob/2.6.3/pymongo/mongo_client.py#L193-L212
     ## for more details
@@ -27,12 +29,12 @@ instances:
     ## @param ssl_keyfile - string - optional
     ## Path to the private key file used to identify the local connection against Mongodb.
     #
-    # ssl_keyfile: <SSL_KEY_FILE_PATH>
+    # ssl_keyfile: <SSL_KEYFILE>
 
     ## @param ssl_certfile - string - optional
     ## Path to the certificate file used to identify the local connection against Mongodb.
     #
-    # ssl_certfile: <CERT_FILE_PATH>
+    # ssl_certfile: <SSL_CERTFILE>
 
     ## @param ssl_cert_reqs - integer - optional
     ## Specifies whether a certificate is required from the other side of the connection,
@@ -42,9 +44,38 @@ instances:
     ##   * 1 for ssl.CERT_OPTIONAL (not required, but validated if provided)
     ##   * 2 for ssl.CERT_REQUIRED (required and validated)
     #
-    # ssl_cert_reqs: <SSL_CERT_REQ_VALUE>
+    # ssl_cert_reqs: <SSL_CERT_REQS>
 
     ## @param ssl_ca_certs - string - optional
     ## Path to the ca_certs file.
     #
-    # ssl_ca_certs: <CA_CERT_FILE_PATH>
+    # ssl_ca_certs: <SSL_CA_CERTS>
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false

@@ -55,7 +55,7 @@ class PostgreSql(AgentCheck):
         self._version = None
         self.metric_utils.clean_state()
 
-    def get_replication_role(self):
+    def _get_replication_role(self):
         cursor = self.db.cursor()
         cursor.execute('SELECT pg_is_in_recovery();')
         role = cursor.fetchone()[0]
