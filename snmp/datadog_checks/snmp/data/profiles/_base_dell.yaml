@@ -1,0 +1,10 @@
+extends:
+  - _base.yaml
+
+metrics:
+  - # Total time the system has been in full operation.
+    MIB: CPQHLTH-MIB
+    symbol:
+      OID: 1.3.6.1.4.1.232.6.2.8.1
+      name: cpqHeSysUtilLifeTime
+    forced_type: monotonic_count # Sent as INTEGER
