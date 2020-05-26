@@ -1,5 +1,9 @@
 # CHANGELOG - Envoy
 
+## 1.15.2 / 2020-05-26
+
+* [Fixed] Handle server info for envoy <= 1.8. See [#6740](https://github.com/DataDog/integrations-core/pull/6740).
+
 ## 1.15.1 / 2020-05-19
 
 * [Fixed] Safer metadata error handling. See [#6685](https://github.com/DataDog/integrations-core/pull/6685).
