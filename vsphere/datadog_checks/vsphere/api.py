@@ -262,12 +262,6 @@ class VSphereAPI(object):
         return event_manager.QueryEvents(query_filter)
 
     @smart_retry
-    def get_latest_event_timestamp(self):
-        # type: () -> dt.datetime
-        event_manager = self._conn.content.eventManager
-        return event_manager.latestEvent.createdTime
-
-    @smart_retry
     def get_max_query_metrics(self):
         # type: () -> float
         vcenter_settings = self._conn.content.setting.QueryOptions(MAX_QUERY_METRICS_OPTION)
