@@ -1,7 +1,7 @@
 version: '2'
 services:
   gitlab:
-    image: gitlab/gitlab-ce:12.10.6-ce.0
+    image: gitlab/gitlab-ce:${GITLAB_VERSION}
     volumes:
       - ./config/gitlab.rb:/etc/gitlab/gitlab.rb
     ports:
