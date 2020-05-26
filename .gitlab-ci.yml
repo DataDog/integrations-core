@@ -45,7 +45,7 @@ notify-slack-on-failure:
   only:
   - schedules
   variables:
-    MESSAGE: ":alert: Logs pipelines don't pass validation steps, please investigate $CI_PIPELINE_URL for errors."
+    MESSAGE: "Logs pipelines don't pass validation steps, please investigate $CI_PIPELINE_URL for errors."
   script:
     - postmessage agent-integrations "$MESSAGE" alert
   when: on_failure
