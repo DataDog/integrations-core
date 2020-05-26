@@ -27,7 +27,7 @@ instances:
     # db: 0
 
     ## @param username - string - optional
-    ## The username to use for the connection.
+    ## The username to use for the connection. Redis 6+ only.
     #
     # username: <USERNAME>
 
