@@ -16,7 +16,9 @@ init_config:
        instance_name: ALL
        tag_by: stats
      - name: sqlserver.server
-       sql_query: SELECT SUM(num_of_writes) AS write_ops, SUM(num_of_reads) AS read_ops, SUM(num_of_bytes_written) AS write_bytes, SUM(num_of_reads)+ SUM(num_of_writes) AS iops, SUM(num_of_bytes_read)+ SUM(num_of_bytes_written) AS total_bytes, SUM(num_of_bytes_read) AS read_bytes FROM sys.dm_io_virtual_file_stats(null,null) -- Datadog;
+       sql_query: SELECT SUM(num_of_writes) AS write_ops, SUM(num_of_reads) AS read_ops, SUM(num_of_reads)+ SUM(num_of_writes) AS iops FROM sys.dm_io_virtual_file_stats(null,null) -- Datadog;
+       rate_metrics:
+          - ALL
      - name: sqlserver.server
        sql_query: select count(dbid) AS number_of_connections, @@MAX_CONNECTIONS AS number_of_possible_connections, Sum(Case when dbid > 0 then 1 else 0 end) AS number_of_active_connections from sys.sysprocesses WITH (NOLOCK) -- Datadog;
      - name: sqlserver.server
@@ -36,22 +38,24 @@ init_config:
        attribute:
           - resource_name
      - name: sqlserver.database
-       sql_query: SELECT SUM(num_of_writes) AS write_ops, DB_NAME(database_id) AS database_name, SUM(num_of_reads) AS read_ops, SUM(num_of_bytes_written) AS write_bytes, SUM(num_of_reads)+ SUM(num_of_writes) AS iops, SUM(num_of_bytes_read)+ SUM(num_of_bytes_written) AS total_bytes, SUM(io_stall_read_ms) AS read_delay, SUM(io_stall_write_ms) AS write_delay, SUM(num_of_bytes_read) AS read_bytes FROM sys.dm_io_virtual_file_stats(null,null) GROUP BY database_id -- Datadog;
-       tag_by: 
+       sql_query: SELECT DB_NAME(database_id) AS database_name, SUM(num_of_reads)+ SUM(num_of_writes) AS iops FROM sys.dm_io_virtual_file_stats(null,null) GROUP BY database_id -- Datadog;
+       rate_metrics:
+          - iops
+       tag_by:
           - database_name
        attribute:
           - database_name
      - name: sqlserver.database
        sql_query: SELECT RTRIM(t1.instance_name) AS database_name, t1.log_file_used_percent AS log_file_used_percent FROM (select      instance_name,      MAX(CASE WHEN counter_name = 'Percent Log Used' then cntr_value else null end) log_file_used_percent      FROM sys.dm_os_performance_counters WITH (NOLOCK)      WHERE (counter_name in ('Percent Log Used'))      AND instance_name != '_Total' AND instance_name != 'mssqlsystemresource'      GROUP BY instance_name) t1 -- Datadog;
-       tag_by: 
+       tag_by:
           - database_name
      - name: sqlserver.database
        sql_query: WITH reserved_space(database_name, data_space_usage_kb) AS (   SELECT       DB_NAME() AS database_name, sum(CASE WHEN it.internal_type IN (202,204,211,212,213,214,215,216) THEN 0 WHEN a.type <> 1 THEN a.used_pages WHEN p.index_id < 2 THEN a.data_pages ELSE 0 END)*8.0 data_space_usage_kb   FROM sys.partitions p   INNER JOIN sys.allocation_units a ON p.partition_id = a.container_id   LEFT JOIN sys.internal_tables it ON p.object_id = it.object_id ) SELECT database_name AS database_name, max(data_space_usage_kb) / 1024 AS data_space_usage FROM reserved_space GROUP BY database_name -- Datadog;
-       tag_by: 
+       tag_by:
           - database_name
      - name: sqlserver.database
        sql_query: WITH file_space(database_name, disk_space_available_mb, total_bytes, space_available_percentage, log_size_in_mb) AS ( SELECT   db.name as database_name,         MAX(convert(INT,dovs.available_bytes/1048576.0)) disk_space_available_mb,         MAX(dovs.total_bytes) total_bytes,         MAX(convert(int,(convert(decimal, dovs.available_bytes) / convert(decimal, dovs.total_bytes)) * 100)) space_available_percentage, SUM(case when mf.type_desc ='LOG' then convert(decimal, size)*8/1024 else null end) log_size_in_mb     FROM sys.master_files mf     join sys.databases db on mf.database_id = db.database_id     CROSS APPLY sys.dm_os_volume_stats(mf.database_id, mf.FILE_ID) dovs     GROUP BY db.name ), database_size(database_name, size_in_kb) AS (     SELECT       d.name as database_name,       CAST(SUM(m.size)*8.0 AS DECIMAL(20,2)) size_in_kb     from sys.master_files m     inner join sys.databases d on (m.database_id = d.database_id)     GROUP BY d.name ) SELECT     max(fs.space_available_percentage) AS space_available_percentage, fs.database_name AS database_name, max(ds.size_in_kb) / 1024 AS size, max(fs.total_bytes) / 1048576 AS total_space, max(fs.log_size_in_mb) AS log_size, 100 - max(fs.space_available_percentage) AS space_used_percent, (max(fs.disk_space_available_mb) + (max(ds.size_in_kb) / 1024)) AS effective_free_space, max(fs.disk_space_available_mb) AS disk_space_available FROM file_space fs INNER JOIN database_size ds ON ds.database_name = fs.database_name GROUP BY fs.database_name -- Datadog;
-       tag_by: 
+       tag_by:
           - database_name
      - name: sqlserver.availabilitygroup
        sql_query: SELECT  ags.name AS agsname, synchronization_health_desc AS synchronization_health_desc_property, ags.group_id as group_id FROM sys.dm_hadr_availability_group_states  state   JOIN sys.availability_groups  ags   ON ags.group_id = state.group_id -- Datadog;
@@ -62,10 +66,10 @@ init_config:
           - group_id
      - name: sqlserver.query
        sql_query: DECLARE @offset AS BIGINT = CAST(DATEDIFF(SECOND, GETDATE(), GETUTCDATE()) as BIGINT); SELECT TOP 5 total_physical_reads AS total_physical_reads, stats.statement_start_offset AS statement_start_offset, last_execution_time AS last_execution_time, avg_execution_time AS avg_execution_time, query_text.text AS full_query_text, stats.statement_end_offset AS statement_end_offset, execution_time AS execution_time, last_execution AS last_execution, total_logical_reads AS total_logical_reads, total_logical_writes AS total_logical_writes, CONVERT(VARCHAR(25), REPLACE(REPLACE(REPLACE(SUBSTRING(query_text.text,stats.statement_start_offset/2 +1, ((CASE WHEN stats.statement_end_offset = -1 THEN LEN(CONVERT(nvarchar(MAX), query_text.text)) * 2 ELSE stats.statement_end_offset END - stats.statement_start_offset )/2) + 1),' ','<>'),'><',''),'<>',' '), 2) AS query_name, execution_count AS execution_count, CONVERT(VARCHAR(8000), stats.sql_handle, 2) AS sql_handle, unique_plans AS unique_plans, total_elapsed_time AS total_elapsed_time, CONVERT(VARCHAR(8000), SUBSTRING(query_text.text,stats.statement_start_offset/2 +1, ((CASE WHEN stats.statement_end_offset = -1 THEN LEN(CONVERT(nvarchar(MAX), query_text.text)) * 2 ELSE stats.statement_end_offset END - stats.statement_start_offset )/2) + 1), 2) AS query_text, last_elapsed_time AS last_elapsed_time     FROM (SELECT         sql_handle,         statement_start_offset,         statement_end_offset,         (CAST(DATEDIFF(SECOND,'1970-01-01', MAX(last_execution_time)) as BIGINT) + @offset)*1000 AS last_execution_time,         COUNT(plan_handle) AS unique_plans,         SUM(total_worker_time) / SUM(execution_count) AS avg_execution_time,         SUM(execution_count) AS execution_count,         SUM(total_worker_time) AS execution_time,         MAX(last_worker_time) AS last_execution,         SUM(total_physical_reads) AS total_physical_reads,         SUM(total_logical_reads) AS total_logical_reads,         SUM(total_logical_writes) AS total_logical_writes,         SUM(total_elapsed_time) AS total_elapsed_time,      SUM(last_elapsed_time) AS last_elapsed_time      FROM sys.dm_exec_query_stats query_stats         group by sql_handle, statement_start_offset, statement_end_offset) AS stats     cross apply sys.dm_exec_sql_text(stats.sql_handle) AS query_text  WHERE (last_execution_time + (last_elapsed_time / 1000)) > 1589275649  order by total_elapsed_time desc -- Datadog;
-       tag_by: 
+       tag_by:
           - sql_handle
           - statement_start_offset
-          - statement_end_offset          
+          - statement_end_offset
        attribute:
           - full_query_text
           - query_name

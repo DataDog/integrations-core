@@ -76,7 +76,7 @@ class SQLServer(AgentCheck):
 
     SERVICE_CHECK_NAME = 'sqlserver.can_connect'
     # FIXME: 6.x, set default to 5s (like every check)
-    DEFAULT_COMMAND_TIMEOUT = 30
+    DEFAULT_COMMAND_TIMEOUT = 2
     DEFAULT_DATABASE = 'master'
     DEFAULT_DRIVER = 'SQL Server'
     DEFAULT_DB_KEY = 'database'
@@ -119,6 +119,10 @@ class SQLServer(AgentCheck):
             'rate' : self.rate,
             'histogram': self.histogram
         }
+
+        # We are caching some of the metrics value and timestamp to calculate
+        # the rate.
+        self.cached_metrics_data = {}
 
         self.connector = init_config.get('connector', 'adodbapi')
         if not self.connector.lower() in self.valid_connectors:
@@ -499,7 +503,7 @@ class SQLServer(AgentCheck):
                             metric.fetch_metric(cursor, clerk_rows, clerk_cols, custom_tags)
                         elif type(metric) is SqlComplexMetric:
                             rows, cols = metric.fetch_all_values(cursor, self.log)
-                            metric.fetch_metric(cursor, rows, cols, custom_tags)
+                            metric.fetch_metric(cursor, rows, cols, custom_tags, self.cached_metrics_data)
 
                     except Exception as e:
                         self.log.warning("Could not fetch metric %s: %s" % (metric.datadog_name, e))
@@ -677,6 +681,7 @@ class SqlComplexMetric(SqlServerMetric):
                  report_function, column, logger)
         self.query = cfg_instance.get('sql_query', None)
         self.attributes = cfg_instance.get('attribute',[])
+        self.rate_metrics = cfg_instance.get("rate_metrics", None)
 
     def fetch_all_values(self, cursor, logger):
         # This method fetch all the metric based on the complex metric passed.
@@ -685,7 +690,7 @@ class SqlComplexMetric(SqlServerMetric):
         columns = [i[0] for i in cursor.description]
         return rows, columns
 
-    def fetch_metric(self, cursor, rows, columns, tags):
+    def fetch_metric(self, cursor, rows, columns, tags, cached_metrics_data):
         # This method deals with publishing metric in data dog.
         attribute_index_list = []
         tag_by_indexs = []
@@ -694,6 +699,7 @@ class SqlComplexMetric(SqlServerMetric):
                 tag_by_indexs.append(index)
             if columns[index] in self.attributes:
                 attribute_index_list.append(index)
+
 
         for row in rows:
             metric_tags = list(tags)
@@ -708,6 +714,22 @@ class SqlComplexMetric(SqlServerMetric):
                     metric_name = '{}.{}.{}'.format(self.datadog_name, "attribute", columns[index])
                 else :
                     metric_name = '{}.{}.{}'.format(self.datadog_name, "metric", columns[index])
+                    if self.rate_metrics and (self.rate_metrics[0] == "ALL" or
+                                              columns[index] in self.rate_metrics):
+                        self.log.info("rate metrics {0}".format(self.rate_metrics))
+                        tags = tuple(sorted(set(metric_tags)))
+                        context = (metric_name, tags)
+                        if cached_metrics_data.get(context):
+                            value, timestamp = cached_metrics_data.get(context)
+                            self.log.info("last cached value {0} -> {1}, {2}".format(context, value, timestamp))
+                        else:
+                            self.log.info("missing context {0}".format(context))
+                            value, timestamp = 0, 0
+                        current_timestamp = time.time()
+                        cached_metrics_data[context] = (report_value, current_timestamp)
+                        report_value_in_rate = (report_value - value)/(current_timestamp  - timestamp)
+                        report_value = report_value_in_rate
+
                 self.report_function(metric_name, report_value, tags=metric_tags)
 
 class SqlSimpleMetric(SqlServerMetric):
@@ -963,4 +985,3 @@ class SqlOsMemoryClerksStat(SqlServerMetric):
             metric_name = '%s.%s' % (self.datadog_name, self.column)
             self.report_function(metric_name, column_val,
                                  tags=metric_tags)
-
