@@ -24,10 +24,6 @@ INSTANCES = {
         'metric_blacklist': [r'envoy\.cluster\.out\.'],
     },
 }
-SERVER_INFO = {
-    "version": "222aaacccfff888/1.14.1/Clean/RELEASE/BoringSSL",
-    "state": "LIVE",
-}
 ENVOY_VERSION = os.getenv('ENVOY_VERSION')
 
 
