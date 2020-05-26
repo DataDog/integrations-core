@@ -23,7 +23,7 @@ init_config:
   # oid_batch_size: 10
 
   ## @param shared_mib_builder - boolean - optional - default: false
-  ## Set to true to share MIB builders between instance. It will reduce memory
+  ## Set to true to share MIB builders between instances. It will reduce memory
   ## usage, but doesn't work in some edge cases.
   #
   # shared_mib_builder: false
