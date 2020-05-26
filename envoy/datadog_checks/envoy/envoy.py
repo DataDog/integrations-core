@@ -177,7 +177,7 @@ class Envoy(AgentCheck):
                 if found:
                     raw_version = found.group(1)
                 else:
-                    self.log.warning('Version not matched. content=%s', content)
+                    self.log.debug('Version not matched. content=%s', content)
                     return
 
         except requests.exceptions.Timeout:
@@ -189,4 +189,5 @@ class Envoy(AgentCheck):
             self.log.warning('Error collecting Envoy version with url=`%s`. Error: %s', server_info_url, str(e))
             return
 
-        self.set_metadata('version', raw_version)
+        if raw_version:
+            self.set_metadata('version', raw_version)
