@@ -12,7 +12,7 @@ files:
       description: |
         Host to monitor. "." means the current host,
         any other value makes the Agent attempt to connect to a remote host.
-        Note: Remote access requires additional permissions
+        Note: Remote access requires additional permissions.
       value:
         example: .
         type: string
