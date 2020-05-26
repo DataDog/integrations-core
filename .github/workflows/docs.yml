@@ -1,0 +1,63 @@
+name: docs
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+
+    - name: Install ddev
+      run: pip install -e ./datadog_checks_dev[cli]
+
+    - name: Configure ddev
+      run: |
+        ddev config set repos.core .
+        ddev config set repo core
+
+    - name: Install additional dependencies for the base package
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends libkrb5-dev
+
+    - name: Build documentation
+      run: ddev docs build -v
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: documentation
+        path: site
+
+  publish:
+    runs-on: ubuntu-latest
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs:
+    - build
+
+    steps:
+    - uses: actions/download-artifact@v2
+      with:
+        name: documentation
+        path: site
+
+    - uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./site
+        allow_empty_commit: false
+        enable_jekyll: false
+        commit_message: ${{ github.event.head_commit.message }}

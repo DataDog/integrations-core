@@ -44,8 +44,8 @@ An up-to-date list of all developers authorized to sign releases can be found [h
 [16]: https://github.com/DataDog/integrations-core/blob/ea2dfbf1e8859333af4c8db50553eb72a3b466f9/requirements-agent-release.txt
 [17]: https://codecov.io/github/DataDog/integrations-core/coverage.svg?branch=master
 [18]: https://codecov.io/github/DataDog/integrations-core?branch=master
-[19]: https://readthedocs.org/projects/datadog-checks-base/badge/?version=latest
-[20]: https://datadoghq.dev/integrations-core/
+[19]: https://github.com/DataDog/integrations-core/workflows/docs/badge.svg
+[20]: https://github.com/DataDog/integrations-core/actions?workflow=docs
 [21]: https://img.shields.io/badge/code%20style-black-000000.svg
 [22]: https://github.com/ambv/black
 [23]: https://datadoghq.dev/integrations-core/process/integration-release/#releasers
