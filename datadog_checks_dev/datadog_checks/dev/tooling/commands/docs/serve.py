@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
 import subprocess
 import webbrowser
 
@@ -35,7 +34,7 @@ def serve(no_open, verbose, pdf):
     warning_prefixes = ('[W ', 'WARNING ')
     error_prefixes = ('[E ', 'ERROR ')
 
-    with chdir(get_root()):
+    with chdir(get_root(), env_vars=env_vars):
         with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as process:
 
             # To avoid blocking never use a pipe's file descriptor iterator. See https://bugs.python.org/issue3907
