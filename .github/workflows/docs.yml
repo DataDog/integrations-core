@@ -14,12 +14,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-      # with:
-      #   fetch-depth: 0
-
-    - name: debug
-      run: |
-        echo ${{ github.event.head_commit.message }}
+      with:
+        fetch-depth: 0
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -69,3 +65,4 @@ jobs:
         publish_dir: ./site
         allow_empty_commit: false
         enable_jekyll: false
+        commit_message: ${{ github.event.head_commit.message }}
