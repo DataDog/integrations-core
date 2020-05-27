@@ -24,16 +24,19 @@ Follow the instructions below to configure this check for an Agent running on a 
 
 1. Edit the `gitlab.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][3], to point to the Gitlab's metrics [endpoint][13]. See the [sample gitlab.d/conf.yaml][4] for all available configuration options.
 
-    **Note**: The metrics in [metrics.py][11] are collected by default. The `allowed_metrics` configuration option in the `init_config` collects specific legacy metrics. Some metrics may not be collected depending on your Gitlab instance version and configuration. See [Gitlab's documentation][12] for further information about its metric collection.
+2. In the Gitlab settings page, ensure that the option `Enable Prometheus Metrics` is enabled. You will need to have administrator access. For more information on how to enable metric collection, see the [Gitlab documentation][12]
 
-2. Allow access to monitoring endpoints by updating your `/etc/gitlab/gitlab.rb` to include the following line:
+3. Allow access to monitoring endpoints by updating your `/etc/gitlab/gitlab.rb` to include the following line:
 
     ```
     gitlab_rails['monitoring_whitelist'] = ['127.0.0.0/8', '192.168.0.1']
     ```
-    **Note** Save and reconfigure Gitlab to see the changes.
+    **Note** Save and restart Gitlab to see the changes.
 
-2. [Restart the Agent][5]
+4. [Restart the Agent][5]
+
+**Note**: The metrics in [gitlab/metrics.py][11] are collected by default. The `allowed_metrics` configuration option in the `init_config` collects specific legacy metrics. Some metrics may not be collected depending on your Gitlab instance version and configuration. See [Gitlab's documentation][12] for further information about its metric collection.
+
 
 ##### Log collection
 
