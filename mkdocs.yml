@@ -163,5 +163,6 @@ extra:
       link: https://www.instagram.com/datadoghq
 extra_css:
   - assets/css/custom.css
+  - https://cdn.jsdelivr.net/gh/tonsky/FiraCode@4/distr/fira_code.css
 extra_javascript:
   - assets/js/custom.js

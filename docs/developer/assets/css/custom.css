@@ -19,6 +19,13 @@ div.doc-contents:not(.first) {
   padding: 0.5em 1em;
 }
 
+/* FiraCode https://github.com/tonsky/FiraCode */
+code { font-family: 'Fira Code', monospace; }
+
+@supports (font-variation-settings: normal) {
+  code { font-family: 'Fira Code VF', monospace; }
+}
+
 /* https://facelessuser.github.io/pymdown-extensions/extensions/progressbar/ */
 
 /* TODO: replace all this when there is an updated example https://github.com/facelessuser/pymdown-extensions/issues/912 */
