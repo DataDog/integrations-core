@@ -61,30 +61,16 @@ def get_coverage_sources(check_name):
     return sorted([f'{check_name}/{package_dir}', f'{check_name}/{tests_dir}'])
 
 
-@click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate CI infrastructure configuration')
-@click.option('--fix', is_flag=True, help='Attempt to fix errors')
-@click.pass_context
-def ci(ctx, fix):
-    """Validate CI infrastructure configuration."""
-    root = get_root()
-
-    repo_choice = ctx.obj['repo_choice']
-    if repo_choice not in REPOS:
-        abort('Unknown repository `{}`'.format(repo_choice))
-
-    repo_data = REPOS[repo_choice]
-
+def validate_master_jobs(fix, repo_data, testable_checks, cached_display_names):
     jobs_definition_relative_path = repo_data['jobs_definition_relative_path']
-    jobs_definition_path = path_join(root, *jobs_definition_relative_path.split('/'))
+    jobs_definition_path = path_join(get_root(), *jobs_definition_relative_path.split('/'))
     if not file_exists(jobs_definition_path):
         abort('Unable to find the file defining all `master` jobs')
 
     jobs_definition = yaml.safe_load(read_file(jobs_definition_path))
     jobs = jobs_definition['jobs'][0]['parameters']['checks']
 
-    testable_checks = get_testable_checks()
     defined_checks = set()
-    cached_display_names = {}
     success = True
     fixed = False
 
@@ -194,8 +180,10 @@ def ci(ctx, fix):
         write_file(jobs_definition_path, output)
         echo_success('Successfully fixed {}'.format(jobs_definition_relative_path))
 
+
+def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_names):
     codecov_config_relative_path = repo_data['codecov_config_relative_path']
-    codecov_config_path = path_join(root, *codecov_config_relative_path.split('/'))
+    codecov_config_path = path_join(get_root(), *codecov_config_relative_path.split('/'))
     if not file_exists(codecov_config_path):
         abort('Unable to find the Codecov config file')
 
@@ -345,3 +333,20 @@ def ci(ctx, fix):
         output = yaml.safe_dump(codecov_config, default_flow_style=False, sort_keys=False)
         write_file(codecov_config_path, output)
         echo_success(f'Successfully fixed {codecov_config_relative_path}')
+
+
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate CI infrastructure configuration')
+@click.option('--fix', is_flag=True, help='Attempt to fix errors')
+@click.pass_context
+def ci(ctx, fix):
+    """Validate CI infrastructure configuration."""
+    repo_choice = ctx.obj['repo_choice']
+    if repo_choice not in REPOS:
+        abort('Unknown repository `{}`'.format(repo_choice))
+
+    repo_data = REPOS[repo_choice]
+    testable_checks = get_testable_checks()
+    cached_display_names = {}
+
+    validate_master_jobs(fix, repo_data, testable_checks, cached_display_names)
+    validate_coverage_flags(fix, repo_data, testable_checks, cached_display_names)
