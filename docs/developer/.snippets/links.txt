@@ -1,3 +1,5 @@
+[agent-changelog]: https://github.com/DataDog/integrations-core/blob/master/AGENT_CHANGELOG.md
+[agent-integrations]: https://github.com/DataDog/integrations-core/blob/master/AGENT_INTEGRATIONS.md
 [azp-agents]: https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted
 [azp-agents-latest-linux]: https://github.com/actions/virtual-environments/blob/master/images/linux/Ubuntu1804-README.md
 [azp-agents-latest-windows]: https://github.com/actions/virtual-environments/blob/master/images/win/Windows2019-Readme.md
