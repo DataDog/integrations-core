@@ -71,7 +71,7 @@ Histogram metrics ending in:
 
 - `_sum` represent the total sum of all observed values. Generally [sums](https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations)
  are like counters but it's also possible for a negative observation which would not behave like a typical always increasing counter.
-- `_count` represent the count of events that have been observed.
+- `_count` represent the total number of events that have been observed.
 - `_bucket` represent the cumulative counters for the observation buckets. Note that buckets are only submitted if `send_histogram_buckets` is enabled.
 
 
