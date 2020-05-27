@@ -127,7 +127,7 @@ class PostgresMetrics:
         Uses a dictionary to save the result for each instance
         """
         # While there's only one set for now, prepare for future additions to
-        # the table, mirroring _get_bgw_metrics()
+        # the table, mirroring get_bgw_metrics()
         if self.archiver_metrics is None and version >= V9_4:
             self.archiver_metrics = dict(COMMON_ARCHIVER_METRICS)
 
