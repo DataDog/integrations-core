@@ -8,10 +8,9 @@ import pytest
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
-
-# mark the whole module
 from datadog_checks.sqlserver.utils import set_default_driver_conf
 
+# mark the whole module
 pytestmark = pytest.mark.unit
 
 CHECK_NAME = 'sqlserver'
