@@ -87,7 +87,7 @@ SQLCONNECTION_FAILURE_ALERTS = {
 SQLCONNECTION_ALERT_MESSAGES = {
     NTNX__microsoft_sqlserver_user_authn : "Login failed for user: %s",
     NTNX__microsoft_sqlserver_view_server_state : "VIEW SERVER STATE permission was denied",
-    NTNX__microsoft_sqlserver_connection_setting : "Supplied user does not have the right permissions"
+    NTNX__microsoft_sqlserver_connection_setting : "Supplied user does not have the right permissions",
     NTNX__microsoft_sqlserver_sql_server_target : "The target is not an SQL server or instance/port details are incorrect"
 }
 
