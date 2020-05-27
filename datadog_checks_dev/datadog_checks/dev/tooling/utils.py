@@ -168,6 +168,13 @@ def get_tox_file(check_name):
 def get_metadata_file(check_name):
     return os.path.join(get_root(), check_name, 'metadata.csv')
 
+def get_saved_views(check_name):
+    paths = load_manifest(check_name).get('assets', {}).get('saved_views', {}) 
+    views = []
+    for path in paths.values():
+        view = os.path.join(get_root(), check_name, path)
+        views.append(view)
+    return sorted(views)
 
 def get_config_file(check_name):
     return os.path.join(get_data_directory(check_name), 'conf.yaml.example')
@@ -313,7 +320,14 @@ def load_manifest(check_name):
     if file_exists(manifest_path):
         return json.loads(read_file(manifest_path).strip())
     return {}
-
+    
+def load_saved_views(path):
+    """
+    Load the manifest file into a dictionary
+    """
+    if file_exists(path):
+        return json.loads(read_file(path).strip())
+    return {}
 
 def write_manifest(manifest, check_name):
     manifest_path = get_manifest_file(check_name)
