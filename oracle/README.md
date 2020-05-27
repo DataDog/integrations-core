@@ -16,7 +16,7 @@ To use the Oracle integration, either install the Oracle Instant Client librarie
 
 **Note**: The following runtimes are required on your system for JPype, one of the libraries used by the Agent when using JDBC Driver:
 
-- Java 8 onwards 
+- Java 8 or higher 
 - [Microsoft Visual C++ Runtime 2015][13]
 
 
