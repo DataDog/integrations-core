@@ -259,7 +259,6 @@ class VSphereAPI(object):
         time_filter = vim.event.EventFilterSpec.ByTime(beginTime=start_time)
         query_filter.time = time_filter
         query_filter.type = ALLOWED_EVENTS
-        return event_manager.QueryEvents(query_filter)
         try:
             events = event_manager.QueryEvents(query_filter)
         except SoapAdapter.ParserError as e:
