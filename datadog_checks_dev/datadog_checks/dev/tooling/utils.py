@@ -140,9 +140,6 @@ def get_version_file(check_name):
 
 
 def is_agent_check(check_name):
-    if check_name in ('datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader'):
-        return False
-
     package_root = os.path.join(get_root(), check_name, 'datadog_checks', check_name, '__init__.py')
     if not file_exists(package_root):
         return False
@@ -151,6 +148,13 @@ def is_agent_check(check_name):
 
     # Anything more than the version must be a subclass of the base class
     return contents.count('import ') > 1
+
+
+def code_coverage_enabled(check_name):
+    if check_name in ('datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader'):
+        return True
+
+    return is_agent_check(check_name)
 
 
 def get_manifest_file(check_name):

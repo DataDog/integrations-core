@@ -7,7 +7,7 @@ import yaml
 from ....utils import file_exists, path_join, read_file, write_file
 from ...constants import get_root
 from ...testing import coverage_sources
-from ...utils import get_testable_checks, is_agent_check, load_manifest
+from ...utils import code_coverage_enabled, get_testable_checks, load_manifest
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 
 REPOS = {
@@ -256,7 +256,7 @@ def ci(ctx, fix):
 
     not_agent_checks = set()
     for check in set(missing_projects):
-        if not is_agent_check(check):
+        if not code_coverage_enabled(check):
             not_agent_checks.add(check)
             missing_projects.discard(check)
 
@@ -318,7 +318,7 @@ def ci(ctx, fix):
 
     missing_flags = testable_checks - defined_checks - repo_data['ignored_missing_jobs']
     for check in set(missing_flags):
-        if check in not_agent_checks or not is_agent_check(check):
+        if check in not_agent_checks or not code_coverage_enabled(check):
             missing_flags.discard(check)
 
     if missing_flags:
