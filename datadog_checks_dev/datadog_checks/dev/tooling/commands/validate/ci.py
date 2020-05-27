@@ -217,12 +217,15 @@ def validate_coverage_flags(fix, repo_data, testable_checks, cached_display_name
             echo_failure(f'Defined project `{check_name}` has no tox.ini file')
             continue
 
+        # Project names cannot contain spaces, see:
+        # https://github.com/DataDog/integrations-core/pull/6760#issuecomment-634976885
         if check_name in cached_display_names:
-            display_name = cached_display_names[check_name]
+            display_name = cached_display_names[check_name].replace(' ', '_')
         else:
             display_name = repo_data['display_name_overrides'].get(
                 check_name, load_manifest(check_name).get('display_name', check_name)
             )
+            display_name = display_name.replace(' ', '_')
             cached_display_names[check_name] = display_name
 
         if project != display_name:

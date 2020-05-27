@@ -11,7 +11,7 @@ coverage:
       default:
         target: 75
         if_ci_failed: error
-      .NET CLR:
+      .NET_CLR:
         target: 75
         flags:
         - dotnetclr
@@ -19,14 +19,14 @@ coverage:
         target: 75
         flags:
         - aspdotnet
-      Active Directory:
-        target: 75
-        flags:
-        - active_directory
-      ActiveMQ XML:
+      ActiveMQ_XML:
         target: 75
         flags:
         - activemq_xml
+      Active_Directory:
+        target: 75
+        flags:
+        - active_directory
       Aerospike:
         target: 75
         flags:
@@ -35,11 +35,11 @@ coverage:
         target: 75
         flags:
         - airflow
-      Amazon ECS Fargate:
+      Amazon_ECS_Fargate:
         target: 75
         flags:
         - ecs_fargate
-      Amazon Kafka:
+      Amazon_Kafka:
         target: 75
         flags:
         - amazon_msk
@@ -63,7 +63,7 @@ coverage:
         target: 75
         flags:
         - cacti
-      Cassandra Nodetool:
+      Cassandra_Nodetool:
         target: 75
         flags:
         - cassandra_nodetool
@@ -75,7 +75,7 @@ coverage:
         target: 75
         flags:
         - cilium
-      Cisco ACI:
+      Cisco_ACI:
         target: 75
         flags:
         - cisco_aci
@@ -111,15 +111,15 @@ coverage:
         target: 75
         flags:
         - dns_check
-      Datadog Checks Base:
+      Datadog_Checks_Base:
         target: 75
         flags:
         - datadog_checks_base
-      Datadog Checks Dev:
+      Datadog_Checks_Dev:
         target: 75
         flags:
         - datadog_checks_dev
-      Datadog Checks Downloader:
+      Datadog_Checks_Downloader:
         target: 75
         flags:
         - datadog_checks_downloader
@@ -135,7 +135,7 @@ coverage:
         target: 75
         flags:
         - druid
-      EKS Fargate:
+      EKS_Fargate:
         target: 75
         flags:
         - eks_fargate
@@ -147,11 +147,11 @@ coverage:
         target: 75
         flags:
         - envoy
-      Exchange Server:
+      Exchange_Server:
         target: 75
         flags:
         - exchange_server
-      External DNS:
+      External_DNS:
         target: 75
         flags:
         - external_dns
@@ -163,7 +163,7 @@ coverage:
         target: 75
         flags:
         - gitlab
-      Gitlab Runner:
+      Gitlab_Runner:
         target: 75
         flags:
         - gitlab_runner
@@ -179,11 +179,11 @@ coverage:
         target: 75
         flags:
         - haproxy
-      HDFS Datanode:
+      HDFS_Datanode:
         target: 75
         flags:
         - hdfs_datanode
-      HDFS Namenode:
+      HDFS_Namenode:
         target: 75
         flags:
         - hdfs_namenode
@@ -199,15 +199,15 @@ coverage:
         target: 75
         flags:
         - hazelcast
-      IBM Db2:
+      IBM_Db2:
         target: 75
         flags:
         - ibm_db2
-      IBM MQ:
+      IBM_MQ:
         target: 75
         flags:
         - ibm_mq
-      IBM WAS:
+      IBM_WAS:
         target: 75
         flags:
         - ibm_was
@@ -219,7 +219,7 @@ coverage:
         target: 75
         flags:
         - istio
-      Kafka Consumer:
+      Kafka_Consumer:
         target: 75
         flags:
         - kafka_consumer
@@ -227,15 +227,15 @@ coverage:
         target: 75
         flags:
         - kong
-      Kube DNS:
+      Kube_DNS:
         target: 75
         flags:
         - kube_dns
-      Kube Proxy:
+      Kube_Proxy:
         target: 75
         flags:
         - kube_proxy
-      Kube metrics server:
+      Kube_metrics_server:
         target: 75
         flags:
         - kube_metrics_server
@@ -243,23 +243,23 @@ coverage:
         target: 75
         flags:
         - kubelet
-      Kubernetes API server metrics:
+      Kubernetes_API_server_metrics:
         target: 75
         flags:
         - kube_apiserver_metrics
-      Kubernetes Controller Manager:
+      Kubernetes_Controller_Manager:
         target: 75
         flags:
         - kube_controller_manager
-      Kubernetes Scheduler:
+      Kubernetes_Scheduler:
         target: 75
         flags:
         - kube_scheduler
-      Kubernetes State:
+      Kubernetes_State:
         target: 75
         flags:
         - kubernetes_state
-      Kyoto Tycoon:
+      Kyoto_Tycoon:
         target: 75
         flags:
         - kyototycoon
@@ -271,7 +271,7 @@ coverage:
         target: 75
         flags:
         - linkerd
-      Linux proc extras:
+      Linux_proc_extras:
         target: 75
         flags:
         - linux_proc_extras
@@ -291,11 +291,11 @@ coverage:
         target: 75
         flags:
         - mcache
-      Mesos Master:
+      Mesos_Master:
         target: 75
         flags:
         - mesos_master
-      Mesos Slave:
+      Mesos_Slave:
         target: 75
         flags:
         - mesos_slave
@@ -315,7 +315,7 @@ coverage:
         target: 75
         flags:
         - nginx
-      NGINX Ingress Controller:
+      NGINX_Ingress_Controller:
         target: 75
         flags:
         - nginx_ingress_controller
@@ -339,11 +339,11 @@ coverage:
         target: 75
         flags:
         - openstack
-      OpenStack Controller:
+      OpenStack_Controller:
         target: 75
         flags:
         - openstack_controller
-      Oracle Database:
+      Oracle_Database:
         target: 75
         flags:
         - oracle
@@ -367,7 +367,7 @@ coverage:
         target: 75
         flags:
         - postgres
-      PowerDNS Recursor:
+      PowerDNS_Recursor:
         target: 75
         flags:
         - powerdns_recursor
@@ -399,11 +399,11 @@ coverage:
         target: 75
         flags:
         - riak
-      Riak CS:
+      Riak_CS:
         target: 75
         flags:
         - riakcs
-      SAP HANA:
+      SAP_HANA:
         target: 75
         flags:
         - sap_hana
@@ -411,7 +411,7 @@ coverage:
         target: 75
         flags:
         - snmp
-      SQL Server:
+      SQL_Server:
         target: 75
         flags:
         - sqlserver
@@ -439,11 +439,11 @@ coverage:
         target: 75
         flags:
         - supervisord
-      System Core:
+      System_Core:
         target: 75
         flags:
         - system_core
-      System Swap:
+      System_Swap:
         target: 75
         flags:
         - system_swap
@@ -491,7 +491,7 @@ coverage:
         target: 75
         flags:
         - win32_event_log
-      Windows Service:
+      Windows_Service:
         target: 75
         flags:
         - windows_service
