@@ -103,5 +103,3 @@ Subtype|Config Option|Value|Datadog Metric Submitted
 `_count`|`send_distribution_counts_as_monotonic`|`false` (default)|[`gauge`](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/base/checks/openmetrics/mixins.py#L753-L763)
 &nbsp;|&nbsp;|`true`|`monotonic_count`
 `_quantile`|&nbsp;|&nbsp;|`gauge`
-=======
-### Summary
