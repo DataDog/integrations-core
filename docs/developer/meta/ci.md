@@ -48,6 +48,41 @@ will be executed in lexicographical order.
 
 ## Validations
 
+In addition to running tests on our CI, there are also some validation stages that check for correctness of changes to various components of integrations. 
+
+
+In short, each validation is a ``ddev`` command, which fails if the component it is validating is not correct.
+
+
+A list of the current validations can be found here: 
+https://github.com/DataDog/integrations-core/blob/master/.azure-pipelines/templates/run-validations.yml
+
+Validate CI configuration
+```python
+ddev validate ci
+```
+
+ddev validate agent-reqs
+
+Validate default configuration files
+```python
+ddev validate config
+```
+Determines if the config specs for an inter
+
+
+ddev validate dashboards
+
+ddev validate dep
+
+ddev validate manifest -i
+
+ddev validate metadata
+
+ddev validate service-checks
+
+ddev validate imports
+
 ## Labeler
 
 We use a [GitHub Action][github-actions-labeler] to automatically add labels to pull requests.
