@@ -368,12 +368,10 @@ def test_cisco_3850(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
         for metric in IF_RATES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
-    
+
     for metric in IP_COUNTS + IPX_COUNTS:
         tags = common_tags + ['ipversion:ipv6']
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
-        )
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
 
     for metric in TCP_COUNTS:
         aggregator.assert_metric(
@@ -871,9 +869,11 @@ def test_proliant(aggregator):
     run_profile_check('hpe-proliant')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:hpe-proliant']
-    
+
     for metric in TCP_COUNTS:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1)
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+        )
 
     for metric in TCP_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
@@ -882,7 +882,7 @@ def test_proliant(aggregator):
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
         )
-        
+
     cpu_gauges = [
         "cpqSeCpuSlot",
         "cpqSeCpuSpeed",
