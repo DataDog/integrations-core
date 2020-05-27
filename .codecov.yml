@@ -503,611 +503,611 @@ coverage:
 flags:
   active_directory:
     paths:
+    - active_directory/datadog_checks/active_directory
     - active_directory/tests
-    - datadog_checks/active_directory
     carryforward: true
   activemq_xml:
     paths:
+    - activemq_xml/datadog_checks/activemq_xml
     - activemq_xml/tests
-    - datadog_checks/activemq_xml
     carryforward: true
   aerospike:
     paths:
+    - aerospike/datadog_checks/aerospike
     - aerospike/tests
-    - datadog_checks/aerospike
     carryforward: true
   airflow:
     paths:
+    - airflow/datadog_checks/airflow
     - airflow/tests
-    - datadog_checks/airflow
     carryforward: true
   amazon_msk:
     paths:
+    - amazon_msk/datadog_checks/amazon_msk
     - amazon_msk/tests
-    - datadog_checks/amazon_msk
     carryforward: true
   ambari:
     paths:
+    - ambari/datadog_checks/ambari
     - ambari/tests
-    - datadog_checks/ambari
     carryforward: true
   apache:
     paths:
+    - apache/datadog_checks/apache
     - apache/tests
-    - datadog_checks/apache
     carryforward: true
   aspdotnet:
     paths:
+    - aspdotnet/datadog_checks/aspdotnet
     - aspdotnet/tests
-    - datadog_checks/aspdotnet
     carryforward: true
   btrfs:
     paths:
+    - btrfs/datadog_checks/btrfs
     - btrfs/tests
-    - datadog_checks/btrfs
     carryforward: true
   cacti:
     paths:
+    - cacti/datadog_checks/cacti
     - cacti/tests
-    - datadog_checks/cacti
     carryforward: true
   cassandra_nodetool:
     paths:
+    - cassandra_nodetool/datadog_checks/cassandra_nodetool
     - cassandra_nodetool/tests
-    - datadog_checks/cassandra_nodetool
     carryforward: true
   ceph:
     paths:
+    - ceph/datadog_checks/ceph
     - ceph/tests
-    - datadog_checks/ceph
     carryforward: true
   cilium:
     paths:
+    - cilium/datadog_checks/cilium
     - cilium/tests
-    - datadog_checks/cilium
     carryforward: true
   cisco_aci:
     paths:
+    - cisco_aci/datadog_checks/cisco_aci
     - cisco_aci/tests
-    - datadog_checks/cisco_aci
     carryforward: true
   clickhouse:
     paths:
+    - clickhouse/datadog_checks/clickhouse
     - clickhouse/tests
-    - datadog_checks/clickhouse
     carryforward: true
   cockroachdb:
     paths:
+    - cockroachdb/datadog_checks/cockroachdb
     - cockroachdb/tests
-    - datadog_checks/cockroachdb
     carryforward: true
   consul:
     paths:
+    - consul/datadog_checks/consul
     - consul/tests
-    - datadog_checks/consul
     carryforward: true
   coredns:
     paths:
+    - coredns/datadog_checks/coredns
     - coredns/tests
-    - datadog_checks/coredns
     carryforward: true
   couch:
     paths:
+    - couch/datadog_checks/couch
     - couch/tests
-    - datadog_checks/couch
     carryforward: true
   couchbase:
     paths:
+    - couchbase/datadog_checks/couchbase
     - couchbase/tests
-    - datadog_checks/couchbase
     carryforward: true
   crio:
     paths:
+    - crio/datadog_checks/crio
     - crio/tests
-    - datadog_checks/crio
     carryforward: true
   directory:
     paths:
-    - datadog_checks/directory
+    - directory/datadog_checks/directory
     - directory/tests
     carryforward: true
   disk:
     paths:
-    - datadog_checks/disk
+    - disk/datadog_checks/disk
     - disk/tests
     carryforward: true
   dns_check:
     paths:
-    - datadog_checks/dns_check
+    - dns_check/datadog_checks/dns_check
     - dns_check/tests
     carryforward: true
   dotnetclr:
     paths:
-    - datadog_checks/dotnetclr
+    - dotnetclr/datadog_checks/dotnetclr
     - dotnetclr/tests
     carryforward: true
   druid:
     paths:
-    - datadog_checks/druid
+    - druid/datadog_checks/druid
     - druid/tests
     carryforward: true
   ecs_fargate:
     paths:
-    - datadog_checks/ecs_fargate
+    - ecs_fargate/datadog_checks/ecs_fargate
     - ecs_fargate/tests
     carryforward: true
   eks_fargate:
     paths:
-    - datadog_checks/eks_fargate
+    - eks_fargate/datadog_checks/eks_fargate
     - eks_fargate/tests
     carryforward: true
   elastic:
     paths:
-    - datadog_checks/elastic
+    - elastic/datadog_checks/elastic
     - elastic/tests
     carryforward: true
   envoy:
     paths:
-    - datadog_checks/envoy
+    - envoy/datadog_checks/envoy
     - envoy/tests
     carryforward: true
   etcd:
     paths:
-    - datadog_checks/etcd
+    - etcd/datadog_checks/etcd
     - etcd/tests
     carryforward: true
   exchange_server:
     paths:
-    - datadog_checks/exchange_server
+    - exchange_server/datadog_checks/exchange_server
     - exchange_server/tests
     carryforward: true
   external_dns:
     paths:
-    - datadog_checks/external_dns
+    - external_dns/datadog_checks/external_dns
     - external_dns/tests
     carryforward: true
   fluentd:
     paths:
-    - datadog_checks/fluentd
+    - fluentd/datadog_checks/fluentd
     - fluentd/tests
     carryforward: true
   gearmand:
     paths:
-    - datadog_checks/gearmand
+    - gearmand/datadog_checks/gearmand
     - gearmand/tests
     carryforward: true
   gitlab:
     paths:
-    - datadog_checks/gitlab
+    - gitlab/datadog_checks/gitlab
     - gitlab/tests
     carryforward: true
   gitlab_runner:
     paths:
-    - datadog_checks/gitlab_runner
+    - gitlab_runner/datadog_checks/gitlab_runner
     - gitlab_runner/tests
     carryforward: true
   go_expvar:
     paths:
-    - datadog_checks/go_expvar
+    - go_expvar/datadog_checks/go_expvar
     - go_expvar/tests
     carryforward: true
   gunicorn:
     paths:
-    - datadog_checks/gunicorn
+    - gunicorn/datadog_checks/gunicorn
     - gunicorn/tests
     carryforward: true
   haproxy:
     paths:
-    - datadog_checks/haproxy
+    - haproxy/datadog_checks/haproxy
     - haproxy/tests
     carryforward: true
   harbor:
     paths:
-    - datadog_checks/harbor
+    - harbor/datadog_checks/harbor
     - harbor/tests
     carryforward: true
   hazelcast:
     paths:
-    - datadog_checks/hazelcast
+    - hazelcast/datadog_checks/hazelcast
     - hazelcast/tests
     carryforward: true
   hdfs_datanode:
     paths:
-    - datadog_checks/hdfs_datanode
+    - hdfs_datanode/datadog_checks/hdfs_datanode
     - hdfs_datanode/tests
     carryforward: true
   hdfs_namenode:
     paths:
-    - datadog_checks/hdfs_namenode
+    - hdfs_namenode/datadog_checks/hdfs_namenode
     - hdfs_namenode/tests
     carryforward: true
   http_check:
     paths:
-    - datadog_checks/http_check
+    - http_check/datadog_checks/http_check
     - http_check/tests
     carryforward: true
   ibm_db2:
     paths:
-    - datadog_checks/ibm_db2
+    - ibm_db2/datadog_checks/ibm_db2
     - ibm_db2/tests
     carryforward: true
   ibm_mq:
     paths:
-    - datadog_checks/ibm_mq
+    - ibm_mq/datadog_checks/ibm_mq
     - ibm_mq/tests
     carryforward: true
   ibm_was:
     paths:
-    - datadog_checks/ibm_was
+    - ibm_was/datadog_checks/ibm_was
     - ibm_was/tests
     carryforward: true
   iis:
     paths:
-    - datadog_checks/iis
+    - iis/datadog_checks/iis
     - iis/tests
     carryforward: true
   istio:
     paths:
-    - datadog_checks/istio
+    - istio/datadog_checks/istio
     - istio/tests
     carryforward: true
   kafka_consumer:
     paths:
-    - datadog_checks/kafka_consumer
+    - kafka_consumer/datadog_checks/kafka_consumer
     - kafka_consumer/tests
     carryforward: true
   kong:
     paths:
-    - datadog_checks/kong
+    - kong/datadog_checks/kong
     - kong/tests
     carryforward: true
   kube_apiserver_metrics:
     paths:
-    - datadog_checks/kube_apiserver_metrics
+    - kube_apiserver_metrics/datadog_checks/kube_apiserver_metrics
     - kube_apiserver_metrics/tests
     carryforward: true
   kube_controller_manager:
     paths:
-    - datadog_checks/kube_controller_manager
+    - kube_controller_manager/datadog_checks/kube_controller_manager
     - kube_controller_manager/tests
     carryforward: true
   kube_dns:
     paths:
-    - datadog_checks/kube_dns
+    - kube_dns/datadog_checks/kube_dns
     - kube_dns/tests
     carryforward: true
   kube_metrics_server:
     paths:
-    - datadog_checks/kube_metrics_server
+    - kube_metrics_server/datadog_checks/kube_metrics_server
     - kube_metrics_server/tests
     carryforward: true
   kube_proxy:
     paths:
-    - datadog_checks/kube_proxy
+    - kube_proxy/datadog_checks/kube_proxy
     - kube_proxy/tests
     carryforward: true
   kube_scheduler:
     paths:
-    - datadog_checks/kube_scheduler
+    - kube_scheduler/datadog_checks/kube_scheduler
     - kube_scheduler/tests
     carryforward: true
   kubelet:
     paths:
-    - datadog_checks/kubelet
+    - kubelet/datadog_checks/kubelet
     - kubelet/tests
     carryforward: true
   kubernetes_state:
     paths:
-    - datadog_checks/kubernetes_state
+    - kubernetes_state/datadog_checks/kubernetes_state
     - kubernetes_state/tests
     carryforward: true
   kyototycoon:
     paths:
-    - datadog_checks/kyototycoon
+    - kyototycoon/datadog_checks/kyototycoon
     - kyototycoon/tests
     carryforward: true
   lighttpd:
     paths:
-    - datadog_checks/lighttpd
+    - lighttpd/datadog_checks/lighttpd
     - lighttpd/tests
     carryforward: true
   linkerd:
     paths:
-    - datadog_checks/linkerd
+    - linkerd/datadog_checks/linkerd
     - linkerd/tests
     carryforward: true
   linux_proc_extras:
     paths:
-    - datadog_checks/linux_proc_extras
+    - linux_proc_extras/datadog_checks/linux_proc_extras
     - linux_proc_extras/tests
     carryforward: true
   mapr:
     paths:
-    - datadog_checks/mapr
+    - mapr/datadog_checks/mapr
     - mapr/tests
     carryforward: true
   mapreduce:
     paths:
-    - datadog_checks/mapreduce
+    - mapreduce/datadog_checks/mapreduce
     - mapreduce/tests
     carryforward: true
   marathon:
     paths:
-    - datadog_checks/marathon
+    - marathon/datadog_checks/marathon
     - marathon/tests
     carryforward: true
   mcache:
     paths:
-    - datadog_checks/mcache
+    - mcache/datadog_checks/mcache
     - mcache/tests
     carryforward: true
   mesos_master:
     paths:
-    - datadog_checks/mesos_master
+    - mesos_master/datadog_checks/mesos_master
     - mesos_master/tests
     carryforward: true
   mesos_slave:
     paths:
-    - datadog_checks/mesos_slave
+    - mesos_slave/datadog_checks/mesos_slave
     - mesos_slave/tests
     carryforward: true
   mongo:
     paths:
-    - datadog_checks/mongo
+    - mongo/datadog_checks/mongo
     - mongo/tests
     carryforward: true
   mysql:
     paths:
-    - datadog_checks/mysql
+    - mysql/datadog_checks/mysql
     - mysql/tests
     carryforward: true
   nagios:
     paths:
-    - datadog_checks/nagios
+    - nagios/datadog_checks/nagios
     - nagios/tests
     carryforward: true
   network:
     paths:
-    - datadog_checks/network
+    - network/datadog_checks/network
     - network/tests
     carryforward: true
   nfsstat:
     paths:
-    - datadog_checks/nfsstat
+    - nfsstat/datadog_checks/nfsstat
     - nfsstat/tests
     carryforward: true
   nginx:
     paths:
-    - datadog_checks/nginx
+    - nginx/datadog_checks/nginx
     - nginx/tests
     carryforward: true
   nginx_ingress_controller:
     paths:
-    - datadog_checks/nginx_ingress_controller
+    - nginx_ingress_controller/datadog_checks/nginx_ingress_controller
     - nginx_ingress_controller/tests
     carryforward: true
   openldap:
     paths:
-    - datadog_checks/openldap
+    - openldap/datadog_checks/openldap
     - openldap/tests
     carryforward: true
   openmetrics:
     paths:
-    - datadog_checks/openmetrics
+    - openmetrics/datadog_checks/openmetrics
     - openmetrics/tests
     carryforward: true
   openstack:
     paths:
-    - datadog_checks/openstack
+    - openstack/datadog_checks/openstack
     - openstack/tests
     carryforward: true
   openstack_controller:
     paths:
-    - datadog_checks/openstack_controller
+    - openstack_controller/datadog_checks/openstack_controller
     - openstack_controller/tests
     carryforward: true
   oracle:
     paths:
-    - datadog_checks/oracle
+    - oracle/datadog_checks/oracle
     - oracle/tests
     carryforward: true
   pdh_check:
     paths:
-    - datadog_checks/pdh_check
+    - pdh_check/datadog_checks/pdh_check
     - pdh_check/tests
     carryforward: true
   pgbouncer:
     paths:
-    - datadog_checks/pgbouncer
+    - pgbouncer/datadog_checks/pgbouncer
     - pgbouncer/tests
     carryforward: true
   php_fpm:
     paths:
-    - datadog_checks/php_fpm
+    - php_fpm/datadog_checks/php_fpm
     - php_fpm/tests
     carryforward: true
   postfix:
     paths:
-    - datadog_checks/postfix
+    - postfix/datadog_checks/postfix
     - postfix/tests
     carryforward: true
   postgres:
     paths:
-    - datadog_checks/postgres
+    - postgres/datadog_checks/postgres
     - postgres/tests
     carryforward: true
   powerdns_recursor:
     paths:
-    - datadog_checks/powerdns_recursor
+    - powerdns_recursor/datadog_checks/powerdns_recursor
     - powerdns_recursor/tests
     carryforward: true
   process:
     paths:
-    - datadog_checks/process
+    - process/datadog_checks/process
     - process/tests
     carryforward: true
   prometheus:
     paths:
-    - datadog_checks/prometheus
+    - prometheus/datadog_checks/prometheus
     - prometheus/tests
     carryforward: true
   proxysql:
     paths:
-    - datadog_checks/proxysql
+    - proxysql/datadog_checks/proxysql
     - proxysql/tests
     carryforward: true
   rabbitmq:
     paths:
-    - datadog_checks/rabbitmq
+    - rabbitmq/datadog_checks/rabbitmq
     - rabbitmq/tests
     carryforward: true
   redisdb:
     paths:
-    - datadog_checks/redisdb
+    - redisdb/datadog_checks/redisdb
     - redisdb/tests
     carryforward: true
   rethinkdb:
     paths:
-    - datadog_checks/rethinkdb
+    - rethinkdb/datadog_checks/rethinkdb
     - rethinkdb/tests
     carryforward: true
   riak:
     paths:
-    - datadog_checks/riak
+    - riak/datadog_checks/riak
     - riak/tests
     carryforward: true
   riakcs:
     paths:
-    - datadog_checks/riakcs
+    - riakcs/datadog_checks/riakcs
     - riakcs/tests
     carryforward: true
   sap_hana:
     paths:
-    - datadog_checks/sap_hana
+    - sap_hana/datadog_checks/sap_hana
     - sap_hana/tests
     carryforward: true
   scylla:
     paths:
-    - datadog_checks/scylla
+    - scylla/datadog_checks/scylla
     - scylla/tests
     carryforward: true
   snmp:
     paths:
-    - datadog_checks/snmp
+    - snmp/datadog_checks/snmp
     - snmp/tests
     carryforward: true
   spark:
     paths:
-    - datadog_checks/spark
+    - spark/datadog_checks/spark
     - spark/tests
     carryforward: true
   sqlserver:
     paths:
-    - datadog_checks/sqlserver
+    - sqlserver/datadog_checks/sqlserver
     - sqlserver/tests
     carryforward: true
   squid:
     paths:
-    - datadog_checks/squid
+    - squid/datadog_checks/squid
     - squid/tests
     carryforward: true
   ssh_check:
     paths:
-    - datadog_checks/ssh_check
+    - ssh_check/datadog_checks/ssh_check
     - ssh_check/tests
     carryforward: true
   statsd:
     paths:
-    - datadog_checks/statsd
+    - statsd/datadog_checks/statsd
     - statsd/tests
     carryforward: true
   supervisord:
     paths:
-    - datadog_checks/supervisord
+    - supervisord/datadog_checks/supervisord
     - supervisord/tests
     carryforward: true
   system_core:
     paths:
-    - datadog_checks/system_core
+    - system_core/datadog_checks/system_core
     - system_core/tests
     carryforward: true
   system_swap:
     paths:
-    - datadog_checks/system_swap
+    - system_swap/datadog_checks/system_swap
     - system_swap/tests
     carryforward: true
   tcp_check:
     paths:
-    - datadog_checks/tcp_check
+    - tcp_check/datadog_checks/tcp_check
     - tcp_check/tests
     carryforward: true
   teamcity:
     paths:
-    - datadog_checks/teamcity
+    - teamcity/datadog_checks/teamcity
     - teamcity/tests
     carryforward: true
   tls:
     paths:
-    - datadog_checks/tls
+    - tls/datadog_checks/tls
     - tls/tests
     carryforward: true
   tokumx:
     paths:
-    - datadog_checks/tokumx
+    - tokumx/datadog_checks/tokumx
     - tokumx/tests
     carryforward: true
   twemproxy:
     paths:
-    - datadog_checks/twemproxy
+    - twemproxy/datadog_checks/twemproxy
     - twemproxy/tests
     carryforward: true
   twistlock:
     paths:
-    - datadog_checks/twistlock
+    - twistlock/datadog_checks/twistlock
     - twistlock/tests
     carryforward: true
   varnish:
     paths:
-    - datadog_checks/varnish
+    - varnish/datadog_checks/varnish
     - varnish/tests
     carryforward: true
   vault:
     paths:
-    - datadog_checks/vault
+    - vault/datadog_checks/vault
     - vault/tests
     carryforward: true
   vertica:
     paths:
-    - datadog_checks/vertica
+    - vertica/datadog_checks/vertica
     - vertica/tests
     carryforward: true
   vsphere:
     paths:
-    - datadog_checks/vsphere
+    - vsphere/datadog_checks/vsphere
     - vsphere/tests
     carryforward: true
   win32_event_log:
     paths:
-    - datadog_checks/win32_event_log
+    - win32_event_log/datadog_checks/win32_event_log
     - win32_event_log/tests
     carryforward: true
   windows_service:
     paths:
-    - datadog_checks/windows_service
+    - windows_service/datadog_checks/windows_service
     - windows_service/tests
     carryforward: true
   wmi_check:
     paths:
-    - datadog_checks/wmi_check
+    - wmi_check/datadog_checks/wmi_check
     - wmi_check/tests
     carryforward: true
   yarn:
     paths:
-    - datadog_checks/yarn
+    - yarn/datadog_checks/yarn
     - yarn/tests
     carryforward: true
   zk:
     paths:
-    - datadog_checks/zk
+    - zk/datadog_checks/zk
     - zk/tests
     carryforward: true

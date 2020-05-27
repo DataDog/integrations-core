@@ -58,8 +58,7 @@ def sort_projects(projects):
 
 def get_coverage_sources(check_name):
     package_dir, tests_dir = coverage_sources(check_name)
-    tests_dir = f'{check_name}/{tests_dir}'
-    return sorted([package_dir, tests_dir])
+    return sorted([f'{check_name}/{package_dir}', f'{check_name}/{tests_dir}'])
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate CI infrastructure configuration')
