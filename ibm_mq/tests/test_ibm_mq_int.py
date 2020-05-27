@@ -122,7 +122,7 @@ def test_check_channel_count(aggregator, instance_queue_regex_tag, seed_data):
     }
 
     check = IbmMqCheck('ibm_mq', {}, [instance_queue_regex_tag])
-    check._submit_channel_count('my_channel', pymqi.CMQCFC.MQCHS_RUNNING, ["channel:my_channel"])
+    check.channel_metric_collection._submit_channel_count('my_channel', pymqi.CMQCFC.MQCHS_RUNNING, ["channel:my_channel"])
 
     for status, expected_value in iteritems(metrics_to_assert):
         aggregator.assert_metric(
@@ -147,7 +147,7 @@ def test_check_channel_count_status_unknown(aggregator, instance_queue_regex_tag
     }
 
     check = IbmMqCheck('ibm_mq', {}, [instance_queue_regex_tag])
-    check._submit_channel_count('my_channel', 123, ["channel:my_channel"])
+    check.channel_metric_collection._submit_channel_count('my_channel', 123, ["channel:my_channel"])
 
     for status, expected_value in iteritems(metrics_to_assert):
         aggregator.assert_metric(
