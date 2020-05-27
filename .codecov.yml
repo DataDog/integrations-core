@@ -1,17 +1,1140 @@
 comment:
-  layout: "files"
+  layout: files
   behavior: default
   branches: null
-
-
 coverage:
   range: 50..100
   round: down
   precision: 2
-
   status:
     project:
       default:
         target: 75
         if_ci_failed: error
-    patch: off
+      .NET CLR:
+        target: 75
+        flags:
+        - dotnetclr
+      ASP.NET:
+        target: 75
+        flags:
+        - aspdotnet
+      Active Directory:
+        target: 75
+        flags:
+        - active_directory
+      ActiveMQ XML:
+        target: 75
+        flags:
+        - activemq_xml
+      Aerospike:
+        target: 75
+        flags:
+        - aerospike
+      Airflow:
+        target: 75
+        flags:
+        - airflow
+      Amazon ECS Fargate:
+        target: 75
+        flags:
+        - ecs_fargate
+      Amazon Kafka:
+        target: 75
+        flags:
+        - amazon_msk
+      Ambari:
+        target: 75
+        flags:
+        - ambari
+      Apache:
+        target: 75
+        flags:
+        - apache
+      Btrfs:
+        target: 75
+        flags:
+        - btrfs
+      CRI-O:
+        target: 75
+        flags:
+        - crio
+      Cacti:
+        target: 75
+        flags:
+        - cacti
+      Cassandra Nodetool:
+        target: 75
+        flags:
+        - cassandra_nodetool
+      Ceph:
+        target: 75
+        flags:
+        - ceph
+      Cilium:
+        target: 75
+        flags:
+        - cilium
+      Cisco ACI:
+        target: 75
+        flags:
+        - cisco_aci
+      ClickHouse:
+        target: 75
+        flags:
+        - clickhouse
+      CockroachDB:
+        target: 75
+        flags:
+        - cockroachdb
+      Consul:
+        target: 75
+        flags:
+        - consul
+      CoreDNS:
+        target: 75
+        flags:
+        - coredns
+      CouchDB:
+        target: 75
+        flags:
+        - couch
+      Couchbase:
+        target: 75
+        flags:
+        - couchbase
+      DNS:
+        target: 75
+        flags:
+        - dns_check
+      Datadog Checks Base:
+        target: 75
+        flags:
+        - datadog_checks_base
+      Datadog Checks Dev:
+        target: 75
+        flags:
+        - datadog_checks_dev
+      Datadog Checks Downloader:
+        target: 75
+        flags:
+        - datadog_checks_downloader
+      Directory:
+        target: 75
+        flags:
+        - directory
+      Disk:
+        target: 75
+        flags:
+        - disk
+      Druid:
+        target: 75
+        flags:
+        - druid
+      EKS Fargate:
+        target: 75
+        flags:
+        - eks_fargate
+      Elasticsearch:
+        target: 75
+        flags:
+        - elastic
+      Envoy:
+        target: 75
+        flags:
+        - envoy
+      Exchange Server:
+        target: 75
+        flags:
+        - exchange_server
+      External DNS:
+        target: 75
+        flags:
+        - external_dns
+      Gearman:
+        target: 75
+        flags:
+        - gearmand
+      Gitlab:
+        target: 75
+        flags:
+        - gitlab
+      Gitlab Runner:
+        target: 75
+        flags:
+        - gitlab_runner
+      Go-Expvar:
+        target: 75
+        flags:
+        - go_expvar
+      Gunicorn:
+        target: 75
+        flags:
+        - gunicorn
+      HAProxy:
+        target: 75
+        flags:
+        - haproxy
+      HDFS Datanode:
+        target: 75
+        flags:
+        - hdfs_datanode
+      HDFS Namenode:
+        target: 75
+        flags:
+        - hdfs_namenode
+      HTTP:
+        target: 75
+        flags:
+        - http_check
+      Harbor:
+        target: 75
+        flags:
+        - harbor
+      Hazelcast:
+        target: 75
+        flags:
+        - hazelcast
+      IBM Db2:
+        target: 75
+        flags:
+        - ibm_db2
+      IBM MQ:
+        target: 75
+        flags:
+        - ibm_mq
+      IBM WAS:
+        target: 75
+        flags:
+        - ibm_was
+      IIS:
+        target: 75
+        flags:
+        - iis
+      Istio:
+        target: 75
+        flags:
+        - istio
+      Kafka Consumer:
+        target: 75
+        flags:
+        - kafka_consumer
+      Kong:
+        target: 75
+        flags:
+        - kong
+      Kube DNS:
+        target: 75
+        flags:
+        - kube_dns
+      Kube Proxy:
+        target: 75
+        flags:
+        - kube_proxy
+      Kube metrics server:
+        target: 75
+        flags:
+        - kube_metrics_server
+      Kubelet:
+        target: 75
+        flags:
+        - kubelet
+      Kubernetes API server metrics:
+        target: 75
+        flags:
+        - kube_apiserver_metrics
+      Kubernetes Controller Manager:
+        target: 75
+        flags:
+        - kube_controller_manager
+      Kubernetes Scheduler:
+        target: 75
+        flags:
+        - kube_scheduler
+      Kubernetes State:
+        target: 75
+        flags:
+        - kubernetes_state
+      Kyoto Tycoon:
+        target: 75
+        flags:
+        - kyototycoon
+      Lighttpd:
+        target: 75
+        flags:
+        - lighttpd
+      Linkerd:
+        target: 75
+        flags:
+        - linkerd
+      Linux proc extras:
+        target: 75
+        flags:
+        - linux_proc_extras
+      MapR:
+        target: 75
+        flags:
+        - mapr
+      MapReduce:
+        target: 75
+        flags:
+        - mapreduce
+      Marathon:
+        target: 75
+        flags:
+        - marathon
+      Memcached:
+        target: 75
+        flags:
+        - mcache
+      Mesos Master:
+        target: 75
+        flags:
+        - mesos_master
+      Mesos Slave:
+        target: 75
+        flags:
+        - mesos_slave
+      MongoDB:
+        target: 75
+        flags:
+        - mongo
+      MySQL:
+        target: 75
+        flags:
+        - mysql
+      NFSstat:
+        target: 75
+        flags:
+        - nfsstat
+      NGINX:
+        target: 75
+        flags:
+        - nginx
+      NGINX Ingress Controller:
+        target: 75
+        flags:
+        - nginx_ingress_controller
+      Nagios:
+        target: 75
+        flags:
+        - nagios
+      Network:
+        target: 75
+        flags:
+        - network
+      OpenLDAP:
+        target: 75
+        flags:
+        - openldap
+      OpenMetrics:
+        target: 75
+        flags:
+        - openmetrics
+      OpenStack:
+        target: 75
+        flags:
+        - openstack
+      OpenStack Controller:
+        target: 75
+        flags:
+        - openstack_controller
+      Oracle Database:
+        target: 75
+        flags:
+        - oracle
+      PDH:
+        target: 75
+        flags:
+        - pdh_check
+      PGBouncer:
+        target: 75
+        flags:
+        - pgbouncer
+      PHP-FPM:
+        target: 75
+        flags:
+        - php_fpm
+      Postfix:
+        target: 75
+        flags:
+        - postfix
+      Postgres:
+        target: 75
+        flags:
+        - postgres
+      PowerDNS Recursor:
+        target: 75
+        flags:
+        - powerdns_recursor
+      Process:
+        target: 75
+        flags:
+        - process
+      Prometheus:
+        target: 75
+        flags:
+        - prometheus
+      ProxySQL:
+        target: 75
+        flags:
+        - proxysql
+      RabbitMQ:
+        target: 75
+        flags:
+        - rabbitmq
+      Redis:
+        target: 75
+        flags:
+        - redisdb
+      RethinkDB:
+        target: 75
+        flags:
+        - rethinkdb
+      Riak:
+        target: 75
+        flags:
+        - riak
+      Riak CS:
+        target: 75
+        flags:
+        - riakcs
+      SAP HANA:
+        target: 75
+        flags:
+        - sap_hana
+      SNMP:
+        target: 75
+        flags:
+        - snmp
+      SQL Server:
+        target: 75
+        flags:
+        - sqlserver
+      SSH:
+        target: 75
+        flags:
+        - ssh_check
+      Scylla:
+        target: 75
+        flags:
+        - scylla
+      Spark:
+        target: 75
+        flags:
+        - spark
+      Squid:
+        target: 75
+        flags:
+        - squid
+      StatsD:
+        target: 75
+        flags:
+        - statsd
+      Supervisord:
+        target: 75
+        flags:
+        - supervisord
+      System Core:
+        target: 75
+        flags:
+        - system_core
+      System Swap:
+        target: 75
+        flags:
+        - system_swap
+      TCP:
+        target: 75
+        flags:
+        - tcp_check
+      TLS:
+        target: 75
+        flags:
+        - tls
+      TeamCity:
+        target: 75
+        flags:
+        - teamcity
+      TokuMX:
+        target: 75
+        flags:
+        - tokumx
+      Twemproxy:
+        target: 75
+        flags:
+        - twemproxy
+      Twistlock:
+        target: 75
+        flags:
+        - twistlock
+      Varnish:
+        target: 75
+        flags:
+        - varnish
+      Vault:
+        target: 75
+        flags:
+        - vault
+      Vertica:
+        target: 75
+        flags:
+        - vertica
+      WMI:
+        target: 75
+        flags:
+        - wmi_check
+      Win32:
+        target: 75
+        flags:
+        - win32_event_log
+      Windows Service:
+        target: 75
+        flags:
+        - windows_service
+      Yarn:
+        target: 75
+        flags:
+        - yarn
+      ZooKeeper:
+        target: 75
+        flags:
+        - zk
+      etcd:
+        target: 75
+        flags:
+        - etcd
+      fluentd:
+        target: 75
+        flags:
+        - fluentd
+      vSphere:
+        target: 75
+        flags:
+        - vsphere
+    patch: false
+flags:
+  active_directory:
+    carryforward: true
+    paths:
+    - active_directory/datadog_checks/active_directory
+    - active_directory/tests
+  activemq_xml:
+    carryforward: true
+    paths:
+    - activemq_xml/datadog_checks/activemq_xml
+    - activemq_xml/tests
+  aerospike:
+    carryforward: true
+    paths:
+    - aerospike/datadog_checks/aerospike
+    - aerospike/tests
+  airflow:
+    carryforward: true
+    paths:
+    - airflow/datadog_checks/airflow
+    - airflow/tests
+  amazon_msk:
+    carryforward: true
+    paths:
+    - amazon_msk/datadog_checks/amazon_msk
+    - amazon_msk/tests
+  ambari:
+    carryforward: true
+    paths:
+    - ambari/datadog_checks/ambari
+    - ambari/tests
+  apache:
+    carryforward: true
+    paths:
+    - apache/datadog_checks/apache
+    - apache/tests
+  aspdotnet:
+    carryforward: true
+    paths:
+    - aspdotnet/datadog_checks/aspdotnet
+    - aspdotnet/tests
+  btrfs:
+    carryforward: true
+    paths:
+    - btrfs/datadog_checks/btrfs
+    - btrfs/tests
+  cacti:
+    carryforward: true
+    paths:
+    - cacti/datadog_checks/cacti
+    - cacti/tests
+  cassandra_nodetool:
+    carryforward: true
+    paths:
+    - cassandra_nodetool/datadog_checks/cassandra_nodetool
+    - cassandra_nodetool/tests
+  ceph:
+    carryforward: true
+    paths:
+    - ceph/datadog_checks/ceph
+    - ceph/tests
+  cilium:
+    carryforward: true
+    paths:
+    - cilium/datadog_checks/cilium
+    - cilium/tests
+  cisco_aci:
+    carryforward: true
+    paths:
+    - cisco_aci/datadog_checks/cisco_aci
+    - cisco_aci/tests
+  clickhouse:
+    carryforward: true
+    paths:
+    - clickhouse/datadog_checks/clickhouse
+    - clickhouse/tests
+  cockroachdb:
+    carryforward: true
+    paths:
+    - cockroachdb/datadog_checks/cockroachdb
+    - cockroachdb/tests
+  consul:
+    carryforward: true
+    paths:
+    - consul/datadog_checks/consul
+    - consul/tests
+  coredns:
+    carryforward: true
+    paths:
+    - coredns/datadog_checks/coredns
+    - coredns/tests
+  couch:
+    carryforward: true
+    paths:
+    - couch/datadog_checks/couch
+    - couch/tests
+  couchbase:
+    carryforward: true
+    paths:
+    - couchbase/datadog_checks/couchbase
+    - couchbase/tests
+  crio:
+    carryforward: true
+    paths:
+    - crio/datadog_checks/crio
+    - crio/tests
+  datadog_checks_base:
+    carryforward: true
+    paths:
+    - datadog_checks_base/datadog_checks/base
+    - datadog_checks_base/tests
+  datadog_checks_dev:
+    carryforward: true
+    paths:
+    - datadog_checks_dev/datadog_checks/dev
+    - datadog_checks_dev/tests
+  datadog_checks_downloader:
+    carryforward: true
+    paths:
+    - datadog_checks_downloader/datadog_checks/downloader
+    - datadog_checks_downloader/tests
+  directory:
+    carryforward: true
+    paths:
+    - directory/datadog_checks/directory
+    - directory/tests
+  disk:
+    carryforward: true
+    paths:
+    - disk/datadog_checks/disk
+    - disk/tests
+  dns_check:
+    carryforward: true
+    paths:
+    - dns_check/datadog_checks/dns_check
+    - dns_check/tests
+  dotnetclr:
+    carryforward: true
+    paths:
+    - dotnetclr/datadog_checks/dotnetclr
+    - dotnetclr/tests
+  druid:
+    carryforward: true
+    paths:
+    - druid/datadog_checks/druid
+    - druid/tests
+  ecs_fargate:
+    carryforward: true
+    paths:
+    - ecs_fargate/datadog_checks/ecs_fargate
+    - ecs_fargate/tests
+  eks_fargate:
+    carryforward: true
+    paths:
+    - eks_fargate/datadog_checks/eks_fargate
+    - eks_fargate/tests
+  elastic:
+    carryforward: true
+    paths:
+    - elastic/datadog_checks/elastic
+    - elastic/tests
+  envoy:
+    carryforward: true
+    paths:
+    - envoy/datadog_checks/envoy
+    - envoy/tests
+  etcd:
+    carryforward: true
+    paths:
+    - etcd/datadog_checks/etcd
+    - etcd/tests
+  exchange_server:
+    carryforward: true
+    paths:
+    - exchange_server/datadog_checks/exchange_server
+    - exchange_server/tests
+  external_dns:
+    carryforward: true
+    paths:
+    - external_dns/datadog_checks/external_dns
+    - external_dns/tests
+  fluentd:
+    carryforward: true
+    paths:
+    - fluentd/datadog_checks/fluentd
+    - fluentd/tests
+  gearmand:
+    carryforward: true
+    paths:
+    - gearmand/datadog_checks/gearmand
+    - gearmand/tests
+  gitlab:
+    carryforward: true
+    paths:
+    - gitlab/datadog_checks/gitlab
+    - gitlab/tests
+  gitlab_runner:
+    carryforward: true
+    paths:
+    - gitlab_runner/datadog_checks/gitlab_runner
+    - gitlab_runner/tests
+  go_expvar:
+    carryforward: true
+    paths:
+    - go_expvar/datadog_checks/go_expvar
+    - go_expvar/tests
+  gunicorn:
+    carryforward: true
+    paths:
+    - gunicorn/datadog_checks/gunicorn
+    - gunicorn/tests
+  haproxy:
+    carryforward: true
+    paths:
+    - haproxy/datadog_checks/haproxy
+    - haproxy/tests
+  harbor:
+    carryforward: true
+    paths:
+    - harbor/datadog_checks/harbor
+    - harbor/tests
+  hazelcast:
+    carryforward: true
+    paths:
+    - hazelcast/datadog_checks/hazelcast
+    - hazelcast/tests
+  hdfs_datanode:
+    carryforward: true
+    paths:
+    - hdfs_datanode/datadog_checks/hdfs_datanode
+    - hdfs_datanode/tests
+  hdfs_namenode:
+    carryforward: true
+    paths:
+    - hdfs_namenode/datadog_checks/hdfs_namenode
+    - hdfs_namenode/tests
+  http_check:
+    carryforward: true
+    paths:
+    - http_check/datadog_checks/http_check
+    - http_check/tests
+  ibm_db2:
+    carryforward: true
+    paths:
+    - ibm_db2/datadog_checks/ibm_db2
+    - ibm_db2/tests
+  ibm_mq:
+    carryforward: true
+    paths:
+    - ibm_mq/datadog_checks/ibm_mq
+    - ibm_mq/tests
+  ibm_was:
+    carryforward: true
+    paths:
+    - ibm_was/datadog_checks/ibm_was
+    - ibm_was/tests
+  iis:
+    carryforward: true
+    paths:
+    - iis/datadog_checks/iis
+    - iis/tests
+  istio:
+    carryforward: true
+    paths:
+    - istio/datadog_checks/istio
+    - istio/tests
+  kafka_consumer:
+    carryforward: true
+    paths:
+    - kafka_consumer/datadog_checks/kafka_consumer
+    - kafka_consumer/tests
+  kong:
+    carryforward: true
+    paths:
+    - kong/datadog_checks/kong
+    - kong/tests
+  kube_apiserver_metrics:
+    carryforward: true
+    paths:
+    - kube_apiserver_metrics/datadog_checks/kube_apiserver_metrics
+    - kube_apiserver_metrics/tests
+  kube_controller_manager:
+    carryforward: true
+    paths:
+    - kube_controller_manager/datadog_checks/kube_controller_manager
+    - kube_controller_manager/tests
+  kube_dns:
+    carryforward: true
+    paths:
+    - kube_dns/datadog_checks/kube_dns
+    - kube_dns/tests
+  kube_metrics_server:
+    carryforward: true
+    paths:
+    - kube_metrics_server/datadog_checks/kube_metrics_server
+    - kube_metrics_server/tests
+  kube_proxy:
+    carryforward: true
+    paths:
+    - kube_proxy/datadog_checks/kube_proxy
+    - kube_proxy/tests
+  kube_scheduler:
+    carryforward: true
+    paths:
+    - kube_scheduler/datadog_checks/kube_scheduler
+    - kube_scheduler/tests
+  kubelet:
+    carryforward: true
+    paths:
+    - kubelet/datadog_checks/kubelet
+    - kubelet/tests
+  kubernetes_state:
+    carryforward: true
+    paths:
+    - kubernetes_state/datadog_checks/kubernetes_state
+    - kubernetes_state/tests
+  kyototycoon:
+    carryforward: true
+    paths:
+    - kyototycoon/datadog_checks/kyototycoon
+    - kyototycoon/tests
+  lighttpd:
+    carryforward: true
+    paths:
+    - lighttpd/datadog_checks/lighttpd
+    - lighttpd/tests
+  linkerd:
+    carryforward: true
+    paths:
+    - linkerd/datadog_checks/linkerd
+    - linkerd/tests
+  linux_proc_extras:
+    carryforward: true
+    paths:
+    - linux_proc_extras/datadog_checks/linux_proc_extras
+    - linux_proc_extras/tests
+  mapr:
+    carryforward: true
+    paths:
+    - mapr/datadog_checks/mapr
+    - mapr/tests
+  mapreduce:
+    carryforward: true
+    paths:
+    - mapreduce/datadog_checks/mapreduce
+    - mapreduce/tests
+  marathon:
+    carryforward: true
+    paths:
+    - marathon/datadog_checks/marathon
+    - marathon/tests
+  mcache:
+    carryforward: true
+    paths:
+    - mcache/datadog_checks/mcache
+    - mcache/tests
+  mesos_master:
+    carryforward: true
+    paths:
+    - mesos_master/datadog_checks/mesos_master
+    - mesos_master/tests
+  mesos_slave:
+    carryforward: true
+    paths:
+    - mesos_slave/datadog_checks/mesos_slave
+    - mesos_slave/tests
+  mongo:
+    carryforward: true
+    paths:
+    - mongo/datadog_checks/mongo
+    - mongo/tests
+  mysql:
+    carryforward: true
+    paths:
+    - mysql/datadog_checks/mysql
+    - mysql/tests
+  nagios:
+    carryforward: true
+    paths:
+    - nagios/datadog_checks/nagios
+    - nagios/tests
+  network:
+    carryforward: true
+    paths:
+    - network/datadog_checks/network
+    - network/tests
+  nfsstat:
+    carryforward: true
+    paths:
+    - nfsstat/datadog_checks/nfsstat
+    - nfsstat/tests
+  nginx:
+    carryforward: true
+    paths:
+    - nginx/datadog_checks/nginx
+    - nginx/tests
+  nginx_ingress_controller:
+    carryforward: true
+    paths:
+    - nginx_ingress_controller/datadog_checks/nginx_ingress_controller
+    - nginx_ingress_controller/tests
+  openldap:
+    carryforward: true
+    paths:
+    - openldap/datadog_checks/openldap
+    - openldap/tests
+  openmetrics:
+    carryforward: true
+    paths:
+    - openmetrics/datadog_checks/openmetrics
+    - openmetrics/tests
+  openstack:
+    carryforward: true
+    paths:
+    - openstack/datadog_checks/openstack
+    - openstack/tests
+  openstack_controller:
+    carryforward: true
+    paths:
+    - openstack_controller/datadog_checks/openstack_controller
+    - openstack_controller/tests
+  oracle:
+    carryforward: true
+    paths:
+    - oracle/datadog_checks/oracle
+    - oracle/tests
+  pdh_check:
+    carryforward: true
+    paths:
+    - pdh_check/datadog_checks/pdh_check
+    - pdh_check/tests
+  pgbouncer:
+    carryforward: true
+    paths:
+    - pgbouncer/datadog_checks/pgbouncer
+    - pgbouncer/tests
+  php_fpm:
+    carryforward: true
+    paths:
+    - php_fpm/datadog_checks/php_fpm
+    - php_fpm/tests
+  postfix:
+    carryforward: true
+    paths:
+    - postfix/datadog_checks/postfix
+    - postfix/tests
+  postgres:
+    carryforward: true
+    paths:
+    - postgres/datadog_checks/postgres
+    - postgres/tests
+  powerdns_recursor:
+    carryforward: true
+    paths:
+    - powerdns_recursor/datadog_checks/powerdns_recursor
+    - powerdns_recursor/tests
+  process:
+    carryforward: true
+    paths:
+    - process/datadog_checks/process
+    - process/tests
+  prometheus:
+    carryforward: true
+    paths:
+    - prometheus/datadog_checks/prometheus
+    - prometheus/tests
+  proxysql:
+    carryforward: true
+    paths:
+    - proxysql/datadog_checks/proxysql
+    - proxysql/tests
+  rabbitmq:
+    carryforward: true
+    paths:
+    - rabbitmq/datadog_checks/rabbitmq
+    - rabbitmq/tests
+  redisdb:
+    carryforward: true
+    paths:
+    - redisdb/datadog_checks/redisdb
+    - redisdb/tests
+  rethinkdb:
+    carryforward: true
+    paths:
+    - rethinkdb/datadog_checks/rethinkdb
+    - rethinkdb/tests
+  riak:
+    carryforward: true
+    paths:
+    - riak/datadog_checks/riak
+    - riak/tests
+  riakcs:
+    carryforward: true
+    paths:
+    - riakcs/datadog_checks/riakcs
+    - riakcs/tests
+  sap_hana:
+    carryforward: true
+    paths:
+    - sap_hana/datadog_checks/sap_hana
+    - sap_hana/tests
+  scylla:
+    carryforward: true
+    paths:
+    - scylla/datadog_checks/scylla
+    - scylla/tests
+  snmp:
+    carryforward: true
+    paths:
+    - snmp/datadog_checks/snmp
+    - snmp/tests
+  spark:
+    carryforward: true
+    paths:
+    - spark/datadog_checks/spark
+    - spark/tests
+  sqlserver:
+    carryforward: true
+    paths:
+    - sqlserver/datadog_checks/sqlserver
+    - sqlserver/tests
+  squid:
+    carryforward: true
+    paths:
+    - squid/datadog_checks/squid
+    - squid/tests
+  ssh_check:
+    carryforward: true
+    paths:
+    - ssh_check/datadog_checks/ssh_check
+    - ssh_check/tests
+  statsd:
+    carryforward: true
+    paths:
+    - statsd/datadog_checks/statsd
+    - statsd/tests
+  supervisord:
+    carryforward: true
+    paths:
+    - supervisord/datadog_checks/supervisord
+    - supervisord/tests
+  system_core:
+    carryforward: true
+    paths:
+    - system_core/datadog_checks/system_core
+    - system_core/tests
+  system_swap:
+    carryforward: true
+    paths:
+    - system_swap/datadog_checks/system_swap
+    - system_swap/tests
+  tcp_check:
+    carryforward: true
+    paths:
+    - tcp_check/datadog_checks/tcp_check
+    - tcp_check/tests
+  teamcity:
+    carryforward: true
+    paths:
+    - teamcity/datadog_checks/teamcity
+    - teamcity/tests
+  tls:
+    carryforward: true
+    paths:
+    - tls/datadog_checks/tls
+    - tls/tests
+  tokumx:
+    carryforward: true
+    paths:
+    - tokumx/datadog_checks/tokumx
+    - tokumx/tests
+  twemproxy:
+    carryforward: true
+    paths:
+    - twemproxy/datadog_checks/twemproxy
+    - twemproxy/tests
+  twistlock:
+    carryforward: true
+    paths:
+    - twistlock/datadog_checks/twistlock
+    - twistlock/tests
+  varnish:
+    carryforward: true
+    paths:
+    - varnish/datadog_checks/varnish
+    - varnish/tests
+  vault:
+    carryforward: true
+    paths:
+    - vault/datadog_checks/vault
+    - vault/tests
+  vertica:
+    carryforward: true
+    paths:
+    - vertica/datadog_checks/vertica
+    - vertica/tests
+  vsphere:
+    carryforward: true
+    paths:
+    - vsphere/datadog_checks/vsphere
+    - vsphere/tests
+  win32_event_log:
+    carryforward: true
+    paths:
+    - win32_event_log/datadog_checks/win32_event_log
+    - win32_event_log/tests
+  windows_service:
+    carryforward: true
+    paths:
+    - windows_service/datadog_checks/windows_service
+    - windows_service/tests
+  wmi_check:
+    carryforward: true
+    paths:
+    - wmi_check/datadog_checks/wmi_check
+    - wmi_check/tests
+  yarn:
+    carryforward: true
+    paths:
+    - yarn/datadog_checks/yarn
+    - yarn/tests
+  zk:
+    carryforward: true
+    paths:
+    - zk/datadog_checks/zk
+    - zk/tests
