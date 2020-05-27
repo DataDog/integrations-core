@@ -1,6 +1,7 @@
 extends:
   - _base.yaml
   - _generic-router-if.yaml
+  - _generic-router-ip.yaml
   - _generic-host-resources.yaml
   - _generic-router-ospf.yaml
   - _generic-router-bgp4.yaml
