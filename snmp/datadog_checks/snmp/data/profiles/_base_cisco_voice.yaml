@@ -126,3 +126,15 @@ metrics:
           OID: 1.3.6.1.4.1.9.9.473.1.3.6.1.5
           name: cccaPimPeripheralHostName
         tag: pim_host
+
+  - MIB: CISCO-CONTACT-CENTER-APPS-MIB
+    table:
+      name: cccaRouterTable
+      OID: 1.3.6.1.4.1.9.9.473.1.3.1
+    symbols: 
+      - name: cccaRouterAgentsLoggedOn
+        OID: 1.3.6.1.4.1.9.9.473.1.3.1.1.3
+      - name: cccaRouterCallsInProgress
+        OID: 1.3.6.1.4.1.9.9.473.1.3.1.1.4
+      - name: cccaRouterCallsInQueue
+        OID: 1.3.6.1.4.1.9.9.473.1.3.1.1.8
