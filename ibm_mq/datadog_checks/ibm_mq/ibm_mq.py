@@ -60,11 +60,11 @@ class IbmMqCheck(AgentCheck):
         super(IbmMqCheck, self).__init__(*args, **kwargs)
         self.config = IBMMQConfig(self.instance)
 
-    def check(self, instance):
         if not pymqi:
             log.error("You need to install pymqi: %s", pymqiException)
             raise errors.PymqiException("You need to install pymqi: {}".format(pymqiException))
 
+    def check(self, _):
         try:
             queue_manager = connection.get_queue_manager_connection(self.config)
             self.service_check(self.SERVICE_CHECK, AgentCheck.OK, self.config.tags)
@@ -73,32 +73,34 @@ class IbmMqCheck(AgentCheck):
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, self.config.tags)
             return
 
-        self.get_pcf_channel_metrics(queue_manager)
-        self.discover_queues(queue_manager)
-
         try:
-            self.queue_manager_stats(queue_manager, self.config.tags)
-
-            for queue_name in self.config.queues:
-                queue_tags = self.config.tags + ["queue:{}".format(queue_name)]
-
-                for regex, q_tags in self.config.queue_tag_re:
-                    if regex.match(queue_name):
-                        queue_tags.extend(q_tags)
-
-                try:
-                    self.queue_stats(queue_manager, queue_name, queue_tags)
-                    # some system queues don't have PCF metrics
-                    # so we don't collect those metrics from those queues
-                    if queue_name not in self.config.DISALLOWED_QUEUES:
-                        self.get_pcf_queue_status_metrics(queue_manager, queue_name, queue_tags)
-                        self.get_pcf_queue_reset_metrics(queue_manager, queue_name, queue_tags)
-                    self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags)
-                except Exception as e:
-                    self.warning('Cannot connect to queue %s: %s', queue_name, e)
-                    self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.CRITICAL, queue_tags)
+            self.get_pcf_channel_metrics(queue_manager)
+            self.collect_queue_metrics(queue_manager)
         finally:
             queue_manager.disconnect()
+
+    def collect_queue_metrics(self, queue_manager):
+        self.discover_queues(queue_manager)
+        self.queue_manager_stats(queue_manager, self.config.tags)
+
+        for queue_name in self.config.queues:
+            queue_tags = self.config.tags + ["queue:{}".format(queue_name)]
+
+            for regex, q_tags in self.config.queue_tag_re:
+                if regex.match(queue_name):
+                    queue_tags.extend(q_tags)
+
+            try:
+                self.queue_stats(queue_manager, queue_name, queue_tags)
+                # some system queues don't have PCF metrics
+                # so we don't collect those metrics from those queues
+                if queue_name not in self.config.DISALLOWED_QUEUES:
+                    self.get_pcf_queue_status_metrics(queue_manager, queue_name, queue_tags)
+                    self.get_pcf_queue_reset_metrics(queue_manager, queue_name, queue_tags)
+                self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.OK, queue_tags)
+            except Exception as e:
+                self.warning('Cannot connect to queue %s: %s', queue_name, e)
+                self.service_check(self.QUEUE_SERVICE_CHECK, AgentCheck.CRITICAL, queue_tags)
 
     def discover_queues(self, queue_manager):
         queues = []
