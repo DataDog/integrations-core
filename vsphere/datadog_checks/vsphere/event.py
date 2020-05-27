@@ -11,7 +11,7 @@ from pyVmomi import vim
 
 from datadog_checks.base import ensure_unicode
 
-from .common import SOURCE_TYPE
+from .constants import SOURCE_TYPE
 
 EXCLUDE_FILTERS = {
     'AlarmStatusChangedEvent': [r'Gray to Green', r'Green to Gray'],

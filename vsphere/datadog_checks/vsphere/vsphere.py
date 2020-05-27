@@ -26,7 +26,7 @@ from datadog_checks.vsphere.constants import (
     REALTIME_METRICS_INTERVAL_ID,
     REALTIME_RESOURCES,
 )
-from datadog_checks.vsphere.legacy.event import VSphereEvent
+from datadog_checks.vsphere.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
 from datadog_checks.vsphere.resource_filters import TagFilter
 from datadog_checks.vsphere.types import (

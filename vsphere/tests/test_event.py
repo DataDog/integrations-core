@@ -8,7 +8,7 @@ import pytest
 from pyVmomi import vim
 
 from datadog_checks.vsphere import VSphereCheck
-from datadog_checks.vsphere.legacy.event import ALLOWED_EVENTS
+from datadog_checks.vsphere.event import ALLOWED_EVENTS
 
 from .legacy.utils import mock_alarm_event
 
