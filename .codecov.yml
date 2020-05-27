@@ -1,5 +1,5 @@
 comment:
-  layout: flags, files
+  layout: diff, flags
   behavior: default
   branches: null
 coverage:
@@ -9,9 +9,7 @@ coverage:
   status:
     patch: false
     project:
-      default:
-        target: 75
-        if_ci_failed: error
+      default: false
       .NET CLR:
         target: 75
         flags:
