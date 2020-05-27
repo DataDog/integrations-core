@@ -22,7 +22,11 @@ metrics:
           OID: 1.3.6.1.2.1.25.4.2.1.1
           table: hrSWRunTable
         tag: run_index
-
+      - column:
+          name: hrSWRunName
+          OID: 1.3.6.1.2.1.25.4.2.1.2
+        table: hrSWRunTable
+        tag: run_name
   - MIB: CISCO-CVP-MIB
     table:
       name: ccvpSipTable
