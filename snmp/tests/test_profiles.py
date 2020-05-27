@@ -10,6 +10,7 @@ from datadog_checks.snmp import SnmpCheck
 from . import common
 from .metrics import (
     ADAPTER_IF_COUNTS,
+    CCCA_ROUTER_GAUGES,
     CIE_METRICS,
     CPU_METRICS,
     DISK_GAUGES,
@@ -129,13 +130,7 @@ def test_cisco_voice(aggregator):
     aggregator.assert_metric('snmp.{}'.format("cccaPimStatus"), metric_type=aggregator.GAUGE, tags=pim_tags)
     aggregator.assert_metric('snmp.{}'.format("sysUpTimeInstance"), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    routers = [
-        "cccaRouterAgentsLoggedOn",
-        "cccaRouterCallsInProgress",
-        "cccaRouterCallsInQueue",
-    ]
-
-    for router in routers:
+    for router in CCCA_ROUTER_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(router), metric_type=aggregator.GAUGE, tags=tags)
 
     aggregator.assert_all_metrics_covered()
