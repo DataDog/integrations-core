@@ -25,7 +25,7 @@ from .util import (
 from .version_utils import V8_3, V9_1, V9_2, V9_4, V9_6, V10
 
 
-class PostgresMetrics:
+class PostgresMetricsCache:
     """ Mantains a cache of metrics to collect """
 
     def __init__(self, config):

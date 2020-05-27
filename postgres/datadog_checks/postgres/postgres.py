@@ -8,7 +8,7 @@ import psycopg2
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.postgres.metric_utils import PostgresMetrics
+from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 
 from .config import PostgresConfig
 from .util import (
@@ -48,12 +48,12 @@ class PostgreSql(AgentCheck):
                 "rather than the now deprecated custom_metrics"
             )
         self.config = PostgresConfig(self.instance)
-        self.metric_utils = PostgresMetrics(self.config)
+        self.metrics_cache = PostgresMetricsCache(self.config)
         self._clean_state()
 
     def _clean_state(self):
         self._version = None
-        self.metric_utils.clean_state()
+        self.metrics_cache.clean_state()
 
     def _get_replication_role(self):
         cursor = self.db.cursor()
@@ -213,16 +213,16 @@ class PostgreSql(AgentCheck):
         on top of that.
         If custom_metrics is not an empty list, gather custom metrics defined in postgres.yaml
         """
-        db_instance_metrics = self.metric_utils.get_instance_metrics(self.version)
-        bgw_instance_metrics = self.metric_utils.get_bgw_metrics(self.version)
-        archiver_instance_metrics = self.metric_utils.get_archiver_metrics(self.version)
+        db_instance_metrics = self.metrics_cache.get_instance_metrics(self.version)
+        bgw_instance_metrics = self.metrics_cache.get_bgw_metrics(self.version)
+        archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
 
         metric_scope = [CONNECTION_METRICS]
 
         if self.config.collect_function_metrics:
             metric_scope.append(FUNCTION_METRICS)
         if self.config.collect_count_metrics:
-            metric_scope.append(self.metric_utils.get_count_metrics())
+            metric_scope.append(self.metrics_cache.get_count_metrics())
 
         # Do we need relation-specific metrics?
         relations_config = {}
@@ -230,7 +230,7 @@ class PostgreSql(AgentCheck):
             metric_scope += [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
             relations_config = self._build_relations_config(self.config.relations)
 
-        replication_metrics = self.metric_utils.get_replication_metrics(self.version)
+        replication_metrics = self.metrics_cache.get_replication_metrics(self.version)
         if replication_metrics is not None:
             replication_metrics_query = copy.deepcopy(REPLICATION_METRICS)
             replication_metrics_query['metrics'] = replication_metrics
@@ -245,7 +245,7 @@ class PostgreSql(AgentCheck):
         self._query_scope(cursor, archiver_instance_metrics, instance_tags, False, relations_config)
 
         if self.config.collect_activity_metrics:
-            activity_metrics = self.metric_utils.get_activity_metrics(self.version)
+            activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
             self._query_scope(cursor, activity_metrics, instance_tags, False, relations_config)
 
         for scope in list(metric_scope) + self.config.custom_metrics:
