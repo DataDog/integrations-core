@@ -17,6 +17,7 @@ theme:
     # https://github.com/facelessuser/pymdown-extensions/issues/876#issuecomment-610164436
     # - instant
   palette:
+    scheme: slate
     primary: deep purple
     accent: deep purple
   font:
