@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
-import threading
 from collections import defaultdict
 from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple
 
@@ -13,13 +12,7 @@ from .parsing import ParsedMetric, ParsedMetricTag, ParsedSymbolMetric, parse_me
 from .pysnmp_types import (
     CommunityData,
     ContextData,
-    DirMibSource,
-    MibBuilder,
-    MibInstrumController,
-    MibViewController,
-    MsgAndPduDispatcher,
     OctetString,
-    SnmpEngine,
     UdpTransportTarget,
     UsmUserData,
     hlapi,
@@ -27,6 +20,7 @@ from .pysnmp_types import (
     usmDESPrivProtocol,
     usmHMACMD5AuthProtocol,
 )
+from .mibs import MIBLoader
 from .resolver import OIDResolver
 from .types import OIDMatch
 
@@ -59,9 +53,6 @@ class InstanceConfig:
         'aes256c': 'usmAesCfb256Protocol',
     }
 
-    _mib_builders = {}  # type: Dict[Optional[str], Tuple[MibBuilder, MibInstrumController, MibViewController]]
-    _mib_lock = threading.Lock()
-
     def __init__(
         self,
         instance,  # type: dict
@@ -69,12 +60,13 @@ class InstanceConfig:
         mibs_path=None,  # type: str
         profiles=None,  # type: Dict[str, dict]
         profiles_by_oid=None,  # type: Dict[str, str]
-        shared_mib_builder=False,  # type: bool
+        loader=None,  # type: MIBLoader
     ):
         # type: (...) -> None
         global_metrics = [] if global_metrics is None else global_metrics
         profiles = {} if profiles is None else profiles
         profiles_by_oid = {} if profiles_by_oid is None else profiles_by_oid
+        loader = MIBLoader() if loader is None else loader
 
         # Clean empty or null values. This will help templating.
         for key, value in list(instance.items()):
@@ -92,7 +84,8 @@ class InstanceConfig:
             self.metrics.extend(global_metrics)
 
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
-        self._snmp_engine, mib_view_controller = self.create_snmp_engine(mibs_path, shared_mib_builder)
+        self._snmp_engine = loader.create_snmp_engine(mibs_path)
+        mib_view_controller = loader.get_mib_view_controller(mibs_path)
         self._resolver = OIDResolver(mib_view_controller, self.enforce_constraints)
 
         self.ip_address = None
@@ -190,41 +183,6 @@ class InstanceConfig:
     def add_profile_tag(self, profile_name):
         # type: (str) -> None
         self.tags.append('snmp_profile:{}'.format(profile_name))
-
-    @staticmethod
-    def _create_mib_builder(mibs_path):
-        # type: (Optional[str]) -> Tuple[MibBuilder, MibInstrumController, MibViewController]
-        mib_builder = MibBuilder()
-        if mibs_path:
-            mib_builder.addMibSources(DirMibSource(mibs_path))
-        mib_instrum = MibInstrumController(mib_builder)
-        mib_view = MibViewController(mib_builder)
-        return mib_builder, mib_instrum, mib_view
-
-    @classmethod
-    def _get_mib_builder(cls, mibs_path, shared_mib_builder):
-        # type: (Optional[str], bool) -> Tuple[MibBuilder, MibInstrumController, MibViewController]
-        if not shared_mib_builder:
-            return cls._create_mib_builder(mibs_path)
-        # Use a lock to make sure we don't concurrently create the cached objects
-        with cls._mib_lock:
-            if cls._mib_builders.get(mibs_path) is None:
-                cls._mib_builders[mibs_path] = cls._create_mib_builder(mibs_path)
-            return cls._mib_builders[mibs_path]
-
-    @classmethod
-    def create_snmp_engine(cls, mibs_path, shared_mib_builder):
-        # type: (Optional[str], bool) -> Tuple[SnmpEngine, MibViewController]
-        """
-        Create a command generator to perform all the snmp query.
-        If mibs_path is not None, load the mibs present in the custom mibs
-        folder. (Need to be in pysnmp format)
-        """
-        _, instrum_controller, mib_view_controller = cls._get_mib_builder(mibs_path, shared_mib_builder)
-        message_dispatcher = MsgAndPduDispatcher(instrum_controller)
-        snmp_engine = SnmpEngine(msgAndPduDsp=message_dispatcher)
-
-        return snmp_engine, mib_view_controller
 
     @staticmethod
     def get_transport_target(instance, timeout, retries):
