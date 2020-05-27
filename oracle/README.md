@@ -18,7 +18,6 @@ To use the Oracle integration, either install the Oracle Instant Client librarie
 - Java 8 onwards 
 - [Microsoft Visual C++ Runtime 2015][13]
 
-Please make sure to have these runtimes installed on your system.
 
 ##### JDBC Driver
 
