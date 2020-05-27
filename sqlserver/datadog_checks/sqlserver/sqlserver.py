@@ -8,7 +8,7 @@ See http://blogs.msdn.com/b/psssql/archive/2013/09/23/interpreting-the-counter-v
 for information on how to report the metrics available in the sys.dm_os_performance_counters table
 '''
 # stdlib
-import traceback
+import traceback, sys
 from contextlib import contextmanager
 from collections import defaultdict
 # 3rd party
@@ -22,6 +22,7 @@ from config import _is_affirmative
 
 # project
 from checks import AgentCheck
+from datadog import initialize,statsd
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'sql server'
 ALL_INSTANCES = 'ALL'
@@ -64,6 +65,33 @@ DM_OS_VIRTUAL_FILE_STATS = "sys.dm_io_virtual_file_stats"
 # Note : This is not actually table, This is a place holder for all other table.
 # goverened by the query.
 DM_CUSTOM_METRIC = "custom_metric_table"
+
+#statsd config default values
+STATSD_SERVER_HOST = '127.0.0.1'
+STATSD_SERVER_PORT = 9000
+
+# SQL Connection failure alert constants and dictionaries
+NTNX__microsoft_sqlserver_user_authn = "NTNX__microsoft_sqlserver_user_authn"
+NTNX__microsoft_sqlserver_view_server_state = "NTNX__microsoft_sqlserver_view_server_state"
+NTNX__microsoft_sqlserver_sql_server_target = "NTNX__microsoft_sqlserver_sql_server_target"
+NTNX__microsoft_sqlserver_connection_setting = "NTNX__microsoft_sqlserver_connection_setting"
+
+SQLCONNECTION_FAILURE_ALERTS = {
+    "Login failed for user" : NTNX__microsoft_sqlserver_user_authn,
+    "VIEW SERVER STATE permission was denied" : NTNX__microsoft_sqlserver_view_server_state,
+    "Login timeout expired" : NTNX__microsoft_sqlserver_sql_server_target,
+    "Incorrect syntax near" : NTNX__microsoft_sqlserver_connection_setting
+}
+
+# Appropriate alert messages for the alert types
+SQLCONNECTION_ALERT_MESSAGES = {
+    NTNX__microsoft_sqlserver_user_authn : "Login failed for user: %s",
+    NTNX__microsoft_sqlserver_view_server_state : "VIEW SERVER STATE permission was denied",
+    NTNX__microsoft_sqlserver_connection_setting : "Supplied user does not have the right permissions",
+    NTNX__microsoft_sqlserver_sql_server_target : "The target is not an SQL server or instance/port details are incorrect"
+}
+
+ALERT_TYPE_ERROR = 'error'
 
 class SQLConnectionError(Exception):
     """
@@ -119,6 +147,11 @@ class SQLServer(AgentCheck):
             'rate' : self.rate,
             'histogram': self.histogram
         }
+
+        #init the statsd client
+        statsd_host = init_config.get('statsd_server_host',STATSD_SERVER_HOST)
+        statsd_port = init_config.get('statsd_server_port',STATSD_SERVER_PORT)
+        initialize(statsd_host = statsd_host, statsd_port = statsd_port)
 
         self.connector = init_config.get('connector', 'adodbapi')
         if not self.connector.lower() in self.valid_connectors:
@@ -399,6 +432,32 @@ class SQLServer(AgentCheck):
             conn_str += 'Integrated Security=SSPI;'
         return conn_str
 
+    def parse_exception(self, exception_details):
+        for key, value in SQLCONNECTION_FAILURE_ALERTS.items():
+            if key in exception_details[-1]:
+                alert_message = SQLCONNECTION_ALERT_MESSAGES[value]
+                return value, alert_message
+        return None, None
+
+    def maybe_raise_alert(self, raised_exception, conn_key, instance):
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        exception_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        if len(exception_details) > 0:
+            alert_title, alert_message = self.parse_exception(exception_details)
+            if alert_title and alert_message:
+                #Enrich the message with relevant details
+                if alert_title == NTNX__microsoft_sqlserver_user_authn:
+                    alert_message = alert_message + instance.get('username')
+                self.raise_alert(instance, alert_title, alert_message)
+
+    def raise_alert(self, instance, alert_title, alert_message):
+        tags = []
+        tags.append('alertMessage:%s' % alert_message)
+        tags.append('endpoint_uuid:%s' % instance.get('endpoint_uuid'))
+        tags.append('severity:WARNING')
+        self.log.debug(u"Alert info. title:%s , text:%s , type:%s , tags:%s", alert_title, alert_message, ALERT_TYPE_ERROR, tags)
+        statsd.event(title = alert_title, text = alert_message, alert_type = ALERT_TYPE_ERROR, tags = tags)
+
 
     @contextmanager
     def get_managed_cursor(self, instance, db_key, db_name=None):
@@ -468,25 +527,26 @@ class SQLServer(AgentCheck):
         instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
 
         with self.open_managed_db_connections(instance, self.DEFAULT_DB_KEY):
-            # if the server was down at check __init__ key could be missing.
-            if instance_key not in self.instances_metrics:
-                self._make_metric_list_to_collect(instance, self.custom_metrics)
-            metrics_to_collect = self.instances_metrics[instance_key]
+            try:
+                # if the server was down at check __init__ key could be missing.
+                if instance_key not in self.instances_metrics:
+                    self._make_metric_list_to_collect(instance, self.custom_metrics)
+                metrics_to_collect = self.instances_metrics[instance_key]
 
-            with self.get_managed_cursor(instance, self.DEFAULT_DB_KEY) as cursor:
-                # Get sqlserver hostname for each instance as tag.
-                cursor.execute("SELECT @@SERVERNAME")
-                rows = cursor.fetchall()
-                if rows is not None:
-                  custom_tags.append("instance_host_name:{0}".format(str(rows[0][0]).strip()))
-                simple_rows = SqlSimpleMetric.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlSimpleMetric"], self.log)
-                fraction_results = SqlFractionMetric.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlFractionMetric"], self.log)
-                waitstat_rows, waitstat_cols = SqlOsWaitStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlOsWaitStat"], self.log)
-                vfs_rows, vfs_cols = SqlIoVirtualFileStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlIoVirtualFileStat"], self.log)
-                clerk_rows, clerk_cols = SqlOsMemoryClerksStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlOsMemoryClerksStat"], self.log)
+                with self.get_managed_cursor(instance, self.DEFAULT_DB_KEY) as cursor:
+                    # Get sqlserver hostname for each instance as tag.
+                
+                    cursor.execute("SELECT @@SERVERNAME")
+                    rows = cursor.fetchall()
+                    if rows is not None:
+                      custom_tags.append("instance_host_name:{0}".format(str(rows[0][0]).strip()))
+                    simple_rows = SqlSimpleMetric.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlSimpleMetric"], self.log)
+                    fraction_results = SqlFractionMetric.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlFractionMetric"], self.log)
+                    waitstat_rows, waitstat_cols = SqlOsWaitStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlOsWaitStat"], self.log)
+                    vfs_rows, vfs_cols = SqlIoVirtualFileStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlIoVirtualFileStat"], self.log)
+                    clerk_rows, clerk_cols = SqlOsMemoryClerksStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlOsMemoryClerksStat"], self.log)
 
-                for metric in metrics_to_collect:
-                    try:
+                    for metric in metrics_to_collect:
                         if type(metric) is SqlSimpleMetric:
                             metric.fetch_metric(cursor, simple_rows, custom_tags)
                         elif type(metric) is SqlFractionMetric or type(metric) is SqlIncrFractionMetric:
@@ -501,8 +561,9 @@ class SQLServer(AgentCheck):
                             rows, cols = metric.fetch_all_values(cursor, self.log)
                             metric.fetch_metric(cursor, rows, cols, custom_tags)
 
-                    except Exception as e:
-                        self.log.warning("Could not fetch metric %s: %s" % (metric.datadog_name, e))
+            except Exception as e:
+                self.log.warning("Could not fetch metric due to %s" % e)
+                self.maybe_raise_alert(e, instance_key, instance)
 
     def do_stored_procedure_check(self, instance, proc):
         """
@@ -598,6 +659,7 @@ class SQLServer(AgentCheck):
         """
 
         conn_key = self._conn_key(instance, db_key, db_name)
+
         timeout = int(instance.get('command_timeout',
                                    self.DEFAULT_COMMAND_TIMEOUT))
 
@@ -637,6 +699,8 @@ class SQLServer(AgentCheck):
             message = "Unable to connect to SQL Server for instance %s." % cx
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                tags=service_check_tags, message=message)
+
+            self.maybe_raise_alert(e, conn_key, instance)
 
             password = instance.get('password')
             tracebk = traceback.format_exc()
