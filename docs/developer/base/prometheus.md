@@ -50,7 +50,7 @@ We currently support Prometheus `gauge`, `counter`, `histogram`, and `summary` m
 ### Gauge
 A gauge metric represents a single numerical value that can arbitrarily go up or down.
 
-Prometheus gauge metrics are submitted as Datadog gauge metrics
+Prometheus gauge metrics are submitted as Datadog gauge metrics.
 
 ### Counter
 
