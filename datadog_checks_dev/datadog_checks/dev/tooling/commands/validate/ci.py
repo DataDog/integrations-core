@@ -305,6 +305,18 @@ def ci(ctx, fix):
                 success = False
                 echo_failure(message)
 
+        if not data.get('carryforward'):
+            message = f'Flag `{flag}` must have carryforward set to true'
+
+            if fix:
+                fixed = True
+                echo_warning(message)
+                data['carryforward'] = True
+                echo_success(f'Enabled the carryforward feature for flag `{flag}`')
+            else:
+                success = False
+                echo_failure(message)
+
     missing_flags = testable_checks - defined_checks - repo_data['ignored_missing_jobs']
     for check in set(missing_flags):
         if check in not_agent_checks or not is_agent_check(check):
@@ -319,7 +331,7 @@ def ci(ctx, fix):
             echo_warning(message)
 
             for missing_check in missing_flags:
-                flags[missing_check] = {'paths': get_coverage_sources(missing_check)}
+                flags[missing_check] = {'paths': get_coverage_sources(missing_check), 'carryforward': True}
                 echo_success(f'Added project `{missing_check}`')
         else:
             success = False
