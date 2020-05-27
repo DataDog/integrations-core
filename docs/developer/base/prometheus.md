@@ -93,7 +93,7 @@ Summary metrics ending in:
 
 - `_sum` represent the total sum of all observed values. Generally [sums](https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations)
  are like counters but it's also possible for a negative observation which would not behave like a typical always increasing counter.
-- `_count` represent the count of events that have been observed.
+- `_count` represent the total number of events that have been observed.
 -  metrics with labels like `{quantile="<φ>"}` represent the streaming quantiles of observed events.
 
 Subtype|Config Option|Value|Datadog Metric Submitted
