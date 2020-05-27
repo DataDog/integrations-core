@@ -46,4 +46,46 @@ A `flake8` plugin for ensuring a consistent logging format. We enable:
 
 ## [Mypy][mypy-github]
 
-A type checker allowing a mix of dynamic and static typing. This is optional for now.
+A comment-based type checker allowing a mix of dynamic and static typing. This is optional for now. In order to enable `mypy` for a specific integration, open its `tox.ini` file and add the 2 lines in the correct section:
+
+```
+[testenv]
+dd_check_types = true
+dd_mypy_args = <FLAGS> --py2 datadog_checks/ tests/
+...
+```
+
+The `dd_mypy_args` defines the [mypy command line option][mypy-command-line] for this specific integration. `--py2` is here to make sure the integration is Python2.7 compatible. Here are some useful flags you can add:
+
+- `--check-untyped-defs`: Type-checks the interior of functions without type annotations.
+- `--disallow-untyped-defs`: Disallows defining functions without type annotations or with incomplete type annotations.
+
+Note that there is a default configuration in the [`mypy.ini`][mypy-ini] file.
+
+### Example
+
+Extracted from `rethinkdb`:
+
+```python
+from typing import Any, Iterator # Contains the different types used
+
+import rethinkdb
+
+from .document_db.types import Metric
+
+class RethinkDBCheck(AgentCheck):
+    def __init__(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
+        super(RethinkDBCheck, self).__init__(*args, **kwargs)
+
+    def collect_metrics(self, conn):
+        # type: (rethinkdb.net.Connection) -> Iterator[Metric]
+        """
+        Collect metrics from the RethinkDB cluster we are connected to.
+        """
+        for query in self.queries:
+            for metric in query.run(logger=self.log, conn=conn, config=self.config):
+                yield metric
+```
+
+Take a look at `vsphere` or `ibm_mq` integrations for more examples.

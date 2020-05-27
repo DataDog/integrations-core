@@ -86,7 +86,9 @@
 [metric-type-gauge]: https://docs.datadoghq.com/developers/metrics/types/?tab=gauge#metric-types
 [miniconda-docs]: https://docs.conda.io/en/latest/miniconda.html
 [mock-github]: https://github.com/testing-cabal/mock
+[mypy-command-line]: https://mypy.readthedocs.io/en/stable/command_line.html
 [mypy-github]: https://github.com/python/mypy
+[mypy-ini]: https://github.com/DataDog/integrations-core/blob/master/mypy.ini
 [openapi-data-types]: https://swagger.io/docs/specification/data-models/data-types/
 [PyPI]: https://pypi.org
 [prettier-github]: https://github.com/prettier/prettier
