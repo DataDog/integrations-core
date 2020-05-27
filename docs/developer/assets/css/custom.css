@@ -19,6 +19,11 @@ div.doc-contents:not(.first) {
   padding: 0.5em 1em;
 }
 
+/* Brighter links for dark mode */
+[data-md-color-scheme=slate] {
+  --md-text-link-color: var(--md-primary-fg-color--light);
+}
+
 /* FiraCode https://github.com/tonsky/FiraCode */
 code { font-family: 'Fira Code', monospace; }
 
