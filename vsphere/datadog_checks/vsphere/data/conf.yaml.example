@@ -76,14 +76,14 @@ instances:
     # collect_events: <COLLECT_EVENTS>
 
     ## @param use_collect_events_fallback - boolean - optional - default: false
-    ## Some events might contain invalid types types.
-    ## Instead of having the whole event batch fail. Using the fallback will process event one by one
-    ## and skip event with parsing issues.
+    ## Some events might contain invalid types.
+    ## Instead of having the whole event batch fail. Using the fallback will process events one by one
+    ## and skip any event with parsing issues.
     #
     # use_collect_events_fallback: false
 
     ## @param collect_events_only - boolean - optional - default: false
-    ## Collect events only. If enabled, historical and realtime won't be collected.
+    ## Collect events only. If enabled, historical and realtime metrics won't be collected.
     #
     # collect_events_only: false
 
