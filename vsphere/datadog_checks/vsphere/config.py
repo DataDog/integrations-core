@@ -51,7 +51,7 @@ class VSphereConfig(object):
         self.batch_collector_size = instance.get('batch_property_collector_size', DEFAULT_BATCH_COLLECTOR_SIZE)
         self.batch_tags_collector_size = instance.get('batch_tags_collector_size', DEFAULT_TAGS_COLLECTOR_SIZE)
         self.collect_events_only = is_affirmative(instance.get("collect_events_only", False))
-        self.should_collect_events = instance.get("collect_events", self.collection_type in ['realtime', 'events_only'])
+        self.should_collect_events = instance.get("collect_events", self.collection_type == 'realtime')
         self.use_collect_events_fallback = instance.get("use_collect_events_fallback", False)
         self.should_collect_tags = is_affirmative(instance.get("collect_tags", False))
         self.tags_prefix = instance.get("tags_prefix", DEFAULT_VSPHERE_TAG_PREFIX)
@@ -64,6 +64,7 @@ class VSphereConfig(object):
             'refresh_metrics_metadata_cache_interval', DEFAULT_REFRESH_METRICS_METADATA_CACHE_INTERVAL
         )
 
+        # Always collect events if `collect_events_only` is true
         if self.collect_events_only:
             self.should_collect_events = True
 
