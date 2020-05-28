@@ -33,7 +33,7 @@ Add one of the configuration blocks below to your `istio.d/conf.yaml` file to st
       - istiod_endpoint: http://istiod.istio-system:8080/metrics
     ```
     
-   To monitor Istio mesh metrics, the existing config endpoint `istio_mesh_endpoint` is still available. Istio mesh metrics are now only available from `istio-proxy` containers which are supported out-of-the-box via autodiscovery, see [`istio.d/auto_conf.yaml`][17].
+   To monitor Istio mesh metrics, continue to use `istio_mesh_endpoint`. Istio mesh metrics are now only available from `istio-proxy` containers which are supported out-of-the-box via autodiscovery, see [`istio.d/auto_conf.yaml`][17].
    
    
 2. To monitor Istio versions `v1.4` or earlier, use the following configuration:
