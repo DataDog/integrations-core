@@ -543,7 +543,7 @@ class VSphereCheck(AgentCheck):
         if self.config.should_collect_events:
             self.collect_events()
 
-        if self.config.is_events_only():
+        if self.config.collect_events_only:
             return
 
         # Update the value of `max_query_metrics` if needed

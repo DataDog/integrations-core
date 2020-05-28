@@ -55,7 +55,7 @@ def events_only_instance():
         'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
         'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
         'ssl_verify': False,
-        'collection_type': 'events_only',
+        'collect_events_only': True,
     }
 
 
