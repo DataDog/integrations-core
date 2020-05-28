@@ -48,6 +48,23 @@ Follow the instructions below to configure this check for an Agent running on a 
      #
      - url: http://localhost:8500
    ```
+   
+1. (optional) Configure Consul to send DogStatsD metrics as described [here][X]
+
+1. Update the [Datadog Agent main configuration file][10] `datadog.yaml` by adding the following configs:
+
+   ```yaml
+   # dogstatsd_mapper_cache_size: 1000  # default to 1000
+   dogstatsd_mapper_profiles:
+     - name: consul
+       prefix: "consul."
+       mappings:
+         - match: 'consul\.http\.([a-zA-Z]+)\.(.*)'
+           match_type: "regex"
+           name: "consul.http.request"
+           tags:
+             http_method: "$1"
+             path: "$2"
 
 2. [Restart the Agent][6].
 
