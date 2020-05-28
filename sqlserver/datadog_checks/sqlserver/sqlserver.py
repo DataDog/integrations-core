@@ -8,6 +8,7 @@ See http://blogs.msdn.com/b/psssql/archive/2013/09/23/interpreting-the-counter-v
 for information on how to report the metrics available in the sys.dm_os_performance_counters table
 '''
 # stdlib
+import time
 import traceback
 from contextlib import contextmanager
 from collections import defaultdict
@@ -701,6 +702,7 @@ class SqlComplexMetric(SqlServerMetric):
                 attribute_index_list.append(index)
 
 
+        current_timestamp = time.time()
         for row in rows:
             metric_tags = list(tags)
             for tagby_index in tag_by_indexs:
@@ -716,15 +718,15 @@ class SqlComplexMetric(SqlServerMetric):
                     metric_name = '{}.{}.{}'.format(self.datadog_name, "metric", columns[index])
                     if self.rate_metrics and (self.rate_metrics[0] == "ALL" or
                                               columns[index] in self.rate_metrics):
-                        self.log.info("rate metrics {0}".format(self.rate_metrics))
-                        tags = tuple(sorted(set(metric_tags)))
-                        context = (metric_name, tags)
+                        sorted_tags = tuple(sorted(set(metric_tags)))
+                        context = (metric_name, sorted_tags)
                         if cached_metrics_data.get(context):
                             value, timestamp = cached_metrics_data.get(context)
-                            self.log.info("last cached value {0} -> {1}, {2}".format(context, value, timestamp))
                         else:
                             self.log.info("missing context {0}".format(context))
-                            value, timestamp = 0, 0
+                            cached_metrics_data[context] = (report_value, current_timestamp)
+                            continue
+
                         current_timestamp = time.time()
                         cached_metrics_data[context] = (report_value, current_timestamp)
                         report_value_in_rate = (report_value - value)/(current_timestamp  - timestamp)
