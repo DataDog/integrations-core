@@ -162,24 +162,9 @@ metrics:
       OID: 1.3.6.1.4.1.232.18.2.5.3
       name: cpqNicVtVirusActivity
 
-  - # Number of correctable memory errors that have occurred.
-    MIB: CPQHLTH-MIB
-    symbol:
-      OID: 1.3.6.1.4.1.232.6.2.3.3
-      name: cpqHeCorrMemTotalErrs
-    forced_type: monotonic_count # Sent as INTEGER
-
   - # Total time the system has been in full operation.
     MIB: CPQHLTH-MIB
     symbol:
       OID: 1.3.6.1.4.1.232.6.2.8.1
       name: cpqHeSysUtilLifeTime
-    forced_type: monotonic_count # Sent as INTEGER
-
-  - # Number of ASR reboots that occurred on the server since last manual reboot.
-    # NOTE: -1 if not supported.
-    MIB: CPQHLTH-MIB
-    symbol:
-      OID: 1.3.6.1.4.1.232.6.2.5.10
-      name: cpqHeAsrRebootCount    
     forced_type: monotonic_count # Sent as INTEGER
