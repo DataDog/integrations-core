@@ -27,6 +27,7 @@ InstanceConfig = TypedDict(
         'batch_tags_collector_size': int,
         'collect_events': bool,
         'use_collect_events_fallback': bool,
+        'collect_events_only': bool,
         'collect_tags': bool,
         'tags_prefix': str,
         'excluded_host_tags': List[str],

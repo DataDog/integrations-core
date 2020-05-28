@@ -69,8 +69,9 @@ instances:
     ## Whether or not to pull events data from vCenter.
     ## If you have multiple configuration instances collecting data from the same vCenter server (i.e if you collect
     ## realtime and historical metrics), you usually want to collect events only once.
-    ## By default this parameter will be 'true' if `collection_type: realtime` or `collect_events_only: true`
-    ## and 'false' if `collection_type: historical`
+    ## By default this parameter will be 'true' if `collection_type: realtime` and 'false' if
+    ## `collection_type: historical`
+    ## If `collect_events_only: true`, this option has no effect and events will be collected.
     #
     # collect_events: <COLLECT_EVENTS>
 
