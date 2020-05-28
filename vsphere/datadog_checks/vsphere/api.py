@@ -265,7 +265,7 @@ class VSphereAPI(object):
             self.log.debug("Error parsing bulk events: %s", e)
 
             if self.config.use_collect_events_fallback:
-                self.log.debug("Start fetch events one by one...")
+                self.log.debug("Start fetching events one by one...")
                 events = self._get_new_events_one_by_one(query_filter)
             else:
                 raise
