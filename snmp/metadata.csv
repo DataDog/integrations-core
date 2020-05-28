@@ -393,6 +393,7 @@ snmp.cfwHardwareStatusValue,gauge,,,,[Cisco ASA 5525] This object contains the c
 snmp.cvsChassisUpTime,gauge,,time,,[Cisco ASA 5525] The time (in hundredths of a second) since the chassis device was last re-initialized.,0,snmp,
 snmp.hrSWRunPerfMem,gauge,,,,[Cisco UC Virtual Machine] [Cisco ICM] [Cisco ISR 4431] The total amount of real system memory allocated to this process.,0,snmp,
 snmp.hrSWRunPerfCPU,gauge,,,,[Cisco UC Virtual Machine] [Cisco ICM] [Cisco ISR 4431] The number of centi-seconds of the total system's CPU resources consumed by this process.,0,snmp,
+snmp.hrSWRunStatus,gauge,,,,[Cisco UC Virtual Machine] [Cisco ICM] [Cisco ISR 4431] The status of this running piece of software.,0,snmp,
 snmp.ccvpSipIntAvgLatency1,gauge,,,,"[Cisco UC Virtual Machine] [Cisco ICM] [Cisco ISR 4431] The average period of time elapsed between the arrival of a CONNECT message from ICM and when the call is actually answered, on the first transfer request for the calls",0,snmp,
 snmp.ccvpSipIntAvgLatency2,gauge,,,,"[Cisco UC Virtual Machine] [Cisco ICM] [Cisco ISR 4431] The average period of time between the arrival of a CONNECT message from ICM and when the call is actually answered, on the second and subsequent transfer request for the call.",0,snmp,
 snmp.ccvpSipIntConnectsRcv,gauge,,,,"[Cisco UC Virtual Machine] [Cisco ICM] [Cisco ISR 4431] The number of CONNECT messages received by the SIP service in order to perform a Customer Voice Portal transfer, since system start.",0,snmp,
