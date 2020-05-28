@@ -1,9 +1,12 @@
 extends:
   - _base.yaml
   - _generic-router-if.yaml
+  - _generic-router-ip.yaml
   - _generic-host-resources.yaml
   - _generic-router-ospf.yaml
   - _generic-router-bgp4.yaml
+  - _generic-router-tcp.yaml
+  - _generic-router-udp.yaml
 
 sysobjectid: 1.3.6.1.4.1.30065.*
 
