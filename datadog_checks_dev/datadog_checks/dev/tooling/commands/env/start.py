@@ -201,7 +201,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         not bool(agent),
     )
 
-    echo_waiting(f'Updating `{agent_build}`... ', nl=False)
+    echo_waiting(f'Updating `{environment.agent_build}`... ', nl=False)
     environment.update_agent()
     echo_success('success!')
 
