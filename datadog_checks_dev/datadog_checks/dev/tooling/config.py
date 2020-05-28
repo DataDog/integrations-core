@@ -27,7 +27,7 @@ SECRET_KEYS = {
 
 DEFAULT_CONFIG = {
     'repo': 'core',
-    'agent': '6',
+    'agent': 'master',
     'org': 'default',
     'color': bool(int(os.environ['DDEV_COLOR'])) if 'DDEV_COLOR' in os.environ else None,
     'dd_api_key': os.getenv('DD_API_KEY'),
