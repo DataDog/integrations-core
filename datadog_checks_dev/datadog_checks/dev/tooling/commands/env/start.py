@@ -129,7 +129,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
 
     env_type = metadata['env_type']
 
-    agent_ver = agent or os.getenv('DDEV_E2E_AGENT', '6')
+    agent_ver = agent or os.getenv('DDEV_E2E_AGENT', ctx.obj.get('agent'))
     agent_build = ctx.obj.get('agents', {}).get(
         agent_ver,
         # TODO: remove this legacy fallback lookup eventually
