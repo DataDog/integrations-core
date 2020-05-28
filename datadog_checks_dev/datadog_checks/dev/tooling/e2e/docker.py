@@ -59,7 +59,9 @@ class DockerInterface(object):
 
         # If we use a default build, and it's missing the py suffix, adds it
         if default_agent and self.agent_build and 'py' not in self.agent_build:
-            self.agent_build = f'{self.agent_build}-py{self.python_version}'
+            # Agent 6 image no longer supports -pyX
+            if self.agent_build != 'datadog/agent:6':
+                self.agent_build = f'{self.agent_build}-py{self.python_version}'
 
         if self.agent_build and self.metadata.get('use_jmx', False):
             self.agent_build = f'{self.agent_build}-jmx'
