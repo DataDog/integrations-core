@@ -14,6 +14,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
 from datadog_checks.base.checks.libs.timer import Timer
+from datadog_checks.base.utils.time import get_current_datetime
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.api_rest import VSphereRestAPI
 from datadog_checks.vsphere.cache import InfrastructureCache, MetricsMetadataCache
@@ -25,7 +26,7 @@ from datadog_checks.vsphere.constants import (
     REALTIME_METRICS_INTERVAL_ID,
     REALTIME_RESOURCES,
 )
-from datadog_checks.vsphere.legacy.event import VSphereEvent
+from datadog_checks.vsphere.event import VSphereEvent
 from datadog_checks.vsphere.metrics import ALLOWED_METRICS_FOR_MOR, PERCENT_METRICS
 from datadog_checks.vsphere.resource_filters import TagFilter
 from datadog_checks.vsphere.types import (
@@ -75,7 +76,7 @@ class VSphereCheck(AgentCheck):
         instance = cast(InstanceConfig, self.instance)
         self.config = VSphereConfig(instance, self.log)
 
-        self.latest_event_query = dt.datetime.now()
+        self.latest_event_query = get_current_datetime()
         self.infrastructure_cache = InfrastructureCache(interval_sec=self.config.refresh_infrastructure_cache_interval)
         self.metrics_metadata_cache = MetricsMetadataCache(
             interval_sec=self.config.refresh_metrics_metadata_cache_interval
@@ -481,7 +482,9 @@ class VSphereCheck(AgentCheck):
 
     def collect_events(self):
         # type: () -> None
-        self.log.debug("Starting events collection.")
+        self.log.debug("Starting events collection (query start time: %s).", self.latest_event_query)
+        latest_event_time = None
+        collect_start_time = get_current_datetime()
         try:
             t0 = Timer()
             new_events = self.api.get_new_events(start_time=self.latest_event_query)
@@ -495,17 +498,30 @@ class VSphereCheck(AgentCheck):
             self.log.debug("Got %s new events from the vCenter event manager", len(new_events))
             event_config = {'collect_vcenter_alarms': True}
             for event in new_events:
+                self.log.debug(
+                    "Processing event with id:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
+                )
                 normalized_event = VSphereEvent(event, event_config, self.config.base_tags)
                 # Can return None if the event if filtered out
                 event_payload = normalized_event.get_datadog_payload()
                 if event_payload is not None:
+                    self.log.debug(
+                        "Submit event with id:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
+                    )
                     self.event(event_payload)
+                if latest_event_time is None or event.createdTime > latest_event_time:
+                    latest_event_time = event.createdTime
         except Exception as e:
             # Don't get stuck on a failure to fetch an event
             # Ignore them for next pass
             self.log.warning("Unable to fetch Events %s", e)
 
-        self.latest_event_query = self.api.get_latest_event_timestamp() + dt.timedelta(seconds=1)
+        if latest_event_time is not None:
+            self.latest_event_query = latest_event_time + dt.timedelta(seconds=1)
+        else:
+            # Let's set `self.latest_event_query` to `collect_start_time` as safeguard in case no events are reported
+            # OR something bad happened (which might happen again indefinitely).
+            self.latest_event_query = collect_start_time
 
     def check(self, _):
         # type: (Any) -> None

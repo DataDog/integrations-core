@@ -11,7 +11,6 @@ from datadog_checks.dev import WaitFor, docker_run
 
 from .common import (
     DOCKER_SERVER,
-    E2E_METADATA,
     FULL_E2E_CONFIG,
     HERE,
     INIT_CONFIG,
@@ -67,4 +66,4 @@ def dd_environment():
         conditions=[WaitFor(sqlserver, wait=3, attempts=10)],
         mount_logs=True,
     ):
-        yield FULL_E2E_CONFIG, E2E_METADATA
+        yield FULL_E2E_CONFIG

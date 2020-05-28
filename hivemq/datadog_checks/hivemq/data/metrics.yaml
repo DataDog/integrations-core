@@ -11,33 +11,33 @@ jmx_metrics:
           metric_type: gauge
       bean_regex:
         - "metrics:name=com\\.hivemq\\.(\
-          cache\\.payload_persistence\\.average_load_penalty|\
-          cache\\.payload_persistence\\.eviction_count|\
-          cache\\.payload_persistence\\.hit_count|\
-          cache\\.payload_persistence\\.hit_rate|\
-          cache\\.payload_persistence\\.load_count|\
-          cache\\.payload_persistence\\.load_exception_count|\
-          cache\\.payload_persistence\\.load_exception_rate|\
-          cache\\.payload_persistence\\.load_success_count|\
-          cache\\.payload_persistence\\.miss_count|\
-          cache\\.payload_persistence\\.miss_rate|\
-          cache\\.payload_persistence\\.request_count|\
-          cache\\.payload_persistence\\.total_load_time|\
-          cache\\.shared_subscription\\.average_load_penalty|\
-          cache\\.shared_subscription\\.eviction_count|\
-          cache\\.shared_subscription\\.hit_count|\
-          cache\\.shared_subscription\\.hit_rate|\
-          cache\\.shared_subscription\\.load_count|\
-          cache\\.shared_subscription\\.load_exception_count|\
-          cache\\.shared_subscription\\.load_exception_rate|\
-          cache\\.shared_subscription\\.load_success_count|\
-          cache\\.shared_subscription\\.miss_count|\
-          cache\\.shared_subscription\\.miss_rate|\
-          cache\\.shared_subscription\\.request_count|\
-          cache\\.shared_subscription\\.total_load_time|\
-          cpu_cores\\.licensed|\
-          cpu_cores\\.used|\
-          messages\\.pending\\.qos_0\\.count|\
+          cache\\.payload-persistence\\.average-load-penalty|\
+          cache\\.payload-persistence\\.eviction-count|\
+          cache\\.payload-persistence\\.hit-count|\
+          cache\\.payload-persistence\\.hit-rate|\
+          cache\\.payload-persistence\\.load-count|\
+          cache\\.payload-persistence\\.load-exception-count|\
+          cache\\.payload-persistence\\.load-exception-rate|\
+          cache\\.payload-persistence\\.load-success-count|\
+          cache\\.payload-persistence\\.miss-count|\
+          cache\\.payload-persistence\\.miss-rate|\
+          cache\\.payload-persistence\\.request-count|\
+          cache\\.payload-persistence\\.total-load-time|\
+          cache\\.shared-subscription\\.average-load-penalty|\
+          cache\\.shared-subscription\\.eviction-count|\
+          cache\\.shared-subscription\\.hit-count|\
+          cache\\.shared-subscription\\.hit-rate|\
+          cache\\.shared-subscription\\.load-count|\
+          cache\\.shared-subscription\\.load-exception-count|\
+          cache\\.shared-subscription\\.load-exception-rate|\
+          cache\\.shared-subscription\\.load-success-count|\
+          cache\\.shared-subscription\\.miss-count|\
+          cache\\.shared-subscription\\.miss-rate|\
+          cache\\.shared-subscription\\.request-count|\
+          cache\\.shared-subscription\\.total-load-time|\
+          cpu-cores\\.licensed|\
+          cpu-cores\\.used|\
+          messages\\.pending\\.qos-0\\.count|\
           messages\\.pending\\.total\\.count|\
           messages\\.queued\\.count|\
           messages\\.retained\\.current|\
@@ -48,51 +48,51 @@ jmx_metrics:
           networking\\.bytes\\.write\\.current|\
           networking\\.bytes\\.write\\.total|\
           networking\\.connections\\.current|\
-          overload_protection\\.clients\\.average_credits|\
-          overload_protection\\.clients\\.backpressure_active|\
-          overload_protection\\.clients\\.using_credits|\
-          overload_protection\\.credits\\.per_tick|\
-          overload_protection\\.level|\
-          persistence\\.executor\\.client_session\\.tasks|\
-          persistence\\.executor\\.noempty_queues|\
-          persistence\\.executor\\.outgoing_message_flow\\.tasks|\
-          persistence\\.executor\\.queued_messages\\.tasks|\
-          persistence\\.executor\\.request_event_bus\\.tasks|\
-          persistence\\.executor\\.retained_messages\\.tasks|\
+          overload-protection\\.clients\\.average-credits|\
+          overload-protection\\.clients\\.backpressure-active|\
+          overload-protection\\.clients\\.using-credits|\
+          overload-protection\\.credits\\.per-tick|\
+          overload-protection\\.level|\
+          persistence\\.executor\\.client-session\\.tasks|\
+          persistence\\.executor\\.noempty-queues|\
+          persistence\\.executor\\.outgoing-message-flow\\.tasks|\
+          persistence\\.executor\\.queued-messages\\.tasks|\
+          persistence\\.executor\\.request-event-bus\\.tasks|\
+          persistence\\.executor\\.retained-messages\\.tasks|\
           persistence\\.executor\\.running\\.threads|\
           persistence\\.executor\\.subscription\\.tasks|\
           persistence\\.executor\\.total\\.tasks|\
-          persistence\\.payload_entries\\.count|\
-          persistence\\.removable_entries\\.count|\
-          qos_0_memory\\.exceeded\\.per_client|\
-          qos_0_memory\\.max|\
-          qos_0_memory\\.used|\
+          persistence\\.payload-entries\\.count|\
+          persistence\\.removable-entries\\.count|\
+          qos-0-memory\\.exceeded\\.per-client|\
+          qos-0-memory\\.max|\
+          qos-0-memory\\.used|\
           sessions\\.overall\\.current|\
-          system\\.max_file_descriptor|\
-          system\\.open_file_descriptor|\
-          system\\.os\\.file_descriptors\\.max|\
-          system\\.os\\.file_descriptors\\.open|\
+          system\\.max-file-descriptor|\
+          system\\.open-file-descriptor|\
+          system\\.os\\.file-descriptors\\.max|\
+          system\\.os\\.file-descriptors\\.open|\
           system\\.os\\.global\\.memory\\.available|\
           system\\.os\\.global\\.memory\\.swap\\.total|\
           system\\.os\\.global\\.memory\\.swap\\.used|\
           system\\.os\\.global\\.memory\\.total|\
           system\\.os\\.global\\.uptime|\
-          system\\.os\\.process\\.disk\\.bytes_read|\
-          system\\.os\\.process\\.disk\\.bytes_written|\
-          system\\.os\\.process\\.memory\\.resident_set_size|\
+          system\\.os\\.process\\.disk\\.bytes-read|\
+          system\\.os\\.process\\.disk\\.bytes-written|\
+          system\\.os\\.process\\.memory\\.resident-set-size|\
           system\\.os\\.process\\.memory\\.virtual|\
           system\\.os\\.process\\.threads\\.count|\
-          system\\.os\\.process\\.time_spent\\.kernel|\
-          system\\.os\\.process\\.time_spent\\.user|\
-          system\\.physical_memory\\.free|\
-          system\\.physical_memory\\.total|\
-          system\\.process_cpu\\.load|\
-          system\\.process_cpu\\.time|\
-          system\\.swap_space\\.free|\
-          system\\.swap_space\\.total|\
-          system\\.system_cpu\\.load|\
-          topic_alias\\.count\\.total|\
-          topic_alias\\.memory\\.usage)"
+          system\\.os\\.process\\.time-spent\\.kernel|\
+          system\\.os\\.process\\.time-spent\\.user|\
+          system\\.physical-memory\\.free|\
+          system\\.physical-memory\\.total|\
+          system\\.process-cpu\\.load|\
+          system\\.process-cpu\\.time|\
+          system\\.swap-space\\.free|\
+          system\\.swap-space\\.total|\
+          system\\.system-cpu\\.load|\
+          topic-alias\\.count\\.total|\
+          topic-alias\\.memory\\.usage)"
 
   # Counters
   - include:
@@ -104,22 +104,22 @@ jmx_metrics:
           metric_type: monotonic_count
       bean_regex:
         - "metrics:name=com\\.hivemq\\.(\
-          cluster\\.name_request\\.retry\\.count|\
-          extension\\.managed_executor\\.running|\
-          extension\\.managed_executor\\.scheduled\\.overrun|\
-          extension\\.services\\.publish_service_publishes|\
-          extension\\.services\\.publish_service_publishes_to_client|\
-          extension\\.services\\.rate_limit_exceeded\\.count|\
-          keep_alive\\.disconnect\\.count|\
+          cluster\\.name-request\\.retry\\.count|\
+          extension\\.managed-executor\\.running|\
+          extension\\.managed-executor\\.scheduled\\.overrun|\
+          extension\\.services\\.publish-service-publishes|\
+          extension\\.services\\.publish-service-publishes-to-client|\
+          extension\\.services\\.rate-limit-exceeded\\.count|\
+          keep-alive\\.disconnect\\.count|\
           messages\\.dropped\\.count|\
-          messages\\.dropped\\.internal_error\\.count|\
-          messages\\.dropped\\.message_too_large\\.count|\
-          messages\\.dropped\\.mqtt_packet_too_large\\.count|\
-          messages\\.dropped\\.not_writable\\.count|\
-          messages\\.dropped\\.publish_inbound_intercepted\\.count|\
-          messages\\.dropped\\.qos_0_memory_exceeded\\.count|\
-          messages\\.dropped\\.queue_full\\.count|\
-          messages\\.expired_messages|\
+          messages\\.dropped\\.internal-error\\.count|\
+          messages\\.dropped\\.message-too-large\\.count|\
+          messages\\.dropped\\.mqtt-packet-too-large\\.count|\
+          messages\\.dropped\\.not-writable\\.count|\
+          messages\\.dropped\\.publish-inbound-intercepted\\.count|\
+          messages\\.dropped\\.qos-0-memory-exceeded\\.count|\
+          messages\\.dropped\\.queue-full\\.count|\
+          messages\\.expired-messages|\
           messages\\.incoming\\.auth\\.count|\
           messages\\.incoming\\.connect\\.count|\
           messages\\.incoming\\.connect\\.mqtt3\\.count|\
@@ -146,18 +146,18 @@ jmx_metrics:
           messages\\.outgoing\\.suback\\.count|\
           messages\\.outgoing\\.total\\.count|\
           messages\\.outgoing\\.unsuback\\.count|\
-          networking\\.connections_closed\\.graceful\\.count|\
-          networking\\.connections_closed\\.total\\.count|\
-          networking\\.connections_closed\\.ungraceful\\.count|\
-          payload_persistence\\.cleanup_executor\\.running|\
-          payload_persistence\\.cleanup_executor\\.scheduled\\.overrun|\
-          persistence_executor\\.running|\
-          persistence_scheduled_executor\\.running|\
-          persistence_scheduled_executor\\.scheduled\\.overrun|\
-          persistence\\.executor\\.queue_misses|\
-          publish\\.without_matching_subscribers|\
+          networking\\.connections-closed\\.graceful\\.count|\
+          networking\\.connections-closed\\.total\\.count|\
+          networking\\.connections-closed\\.ungraceful\\.count|\
+          payload-persistence\\.cleanup-executor\\.running|\
+          payload-persistence\\.cleanup-executor\\.scheduled\\.overrun|\
+          persistence-executor\\.running|\
+          persistence-scheduled-executor\\.running|\
+          persistence-scheduled-executor\\.scheduled\\.overrun|\
+          persistence\\.executor\\.queue-misses|\
+          publish\\.without-matching-subscribers|\
           sessions\\.persistent\\.active|\
-          single_writer_executor\\.running|\
+          single-writer-executor\\.running|\
           subscriptions\\.overall\\.current)"
 
   # Histograms
@@ -203,12 +203,12 @@ jmx_metrics:
           metric_type: gauge
       bean_regex:
         - "metrics:name=com\\.hivemq\\.(\
-          extension\\.managed_executor\\.scheduled\\.percent_of_period|\
+          extension\\.managed-executor\\.scheduled\\.percent-of-period|\
           messages\\.incoming\\.publish\\.bytes|\
           messages\\.incoming\\.total\\.bytes|\
           messages\\.outgoing\\.publish\\.bytes|\
           messages\\.outgoing\\.total\\.bytes|\
           messages\\.retained\\.mean|\
           networking\\.connections\\.mean|\
-          payload_persistence\\.cleanup_executor\\.scheduled\\.percent_of_period|\
-          persistence_scheduled_executor\\.scheduled\\.percent_of_period)"
+          payload-persistence\\.cleanup-executor\\.scheduled\\.percent-of-period|\
+          persistence-scheduled-executor\\.scheduled\\.percent-of-period)"

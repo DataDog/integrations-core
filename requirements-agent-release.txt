@@ -32,7 +32,7 @@ datadog-druid==1.3.0
 datadog-ecs-fargate==2.8.0
 datadog-eks-fargate==1.1.0
 datadog-elastic==1.17.0
-datadog-envoy==1.15.1
+datadog-envoy==1.15.2
 datadog-etcd==2.3.0
 datadog-exchange-server==1.7.0; sys_platform == 'win32'
 datadog-external-dns==1.1.0
@@ -49,7 +49,7 @@ datadog-hazelcast==1.1.1
 datadog-hdfs-datanode==1.13.0; sys_platform != 'win32'
 datadog-hdfs-namenode==1.12.0; sys_platform != 'win32'
 datadog-hive==1.3.0
-datadog-hivemq==1.0.0
+datadog-hivemq==1.0.1
 datadog-http-check==4.8.0
 datadog-hyperv==1.2.0; sys_platform == 'win32'
 datadog-ibm-db2==1.5.0

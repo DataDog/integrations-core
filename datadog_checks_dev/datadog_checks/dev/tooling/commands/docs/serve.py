@@ -15,12 +15,15 @@ from .utils import insert_verbosity_flag
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Serve and view documentation in a web browser')
 @click.option('--no-open', '-n', is_flag=True, help='Do not open the documentation in a web browser')
 @click.option('--verbose', '-v', count=True, help='Increase verbosity (can be used additively)')
-def serve(no_open, verbose):
+@click.option('--pdf', is_flag=True, help='Also export the site as PDF')
+def serve(no_open, verbose, pdf):
     """Serve and view documentation in a web browser."""
     address = 'localhost:8000'
 
     command = ['tox', '-e', 'docs', '--', 'serve', '--livereload', '--dev-addr', address]
     insert_verbosity_flag(command, verbose)
+
+    env_vars = {'ENABLE_PDF_SITE_EXPORT': '1' if pdf else '0'}
 
     address = f'http://{address}'
     build_completion_indicator = f'Serving on {address}'
@@ -31,7 +34,7 @@ def serve(no_open, verbose):
     warning_prefixes = ('[W ', 'WARNING ')
     error_prefixes = ('[E ', 'ERROR ')
 
-    with chdir(get_root()):
+    with chdir(get_root(), env_vars=env_vars):
         with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as process:
 
             # To avoid blocking never use a pipe's file descriptor iterator. See https://bugs.python.org/issue3907

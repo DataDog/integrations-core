@@ -134,7 +134,7 @@ class Redis(AgentCheck):
         if 'unix_socket_path' in instance:
             return instance.get('unix_socket_path'), instance.get('db')
         else:
-            return instance.get('host'), self.instance.get('port'), instance.get('db')
+            return instance.get('host'), instance.get('port'), instance.get('db')
 
     def _get_conn(self, instance=None):
         if instance is None:
@@ -149,6 +149,7 @@ class Redis(AgentCheck):
                     'host',
                     'port',
                     'db',
+                    'username',
                     'password',
                     'socket_timeout',
                     'connection_pool',

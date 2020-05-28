@@ -82,7 +82,7 @@ For instance, to see the latest event logged in the `Security` LogFile, use:
 Get-WmiObject -Class Win32_NTLogEvent -Filter "LogFile='Security'" | select -First 1
 ```
 
-The values listed in the output of the command can be set in `win32_event_log.yaml` to capture the same kind of events.
+The values listed in the output of the command can be set in `win32_event_log.d/conf.yaml` to capture the same kind of events.
 
 <div class="alert alert-info">
 The information given by the  <code> Get-EventLog</code> PowerShell command or the Windows Event ViewerGUI may slightly differ from <code>Get-WmiObject</code>.<br>
@@ -98,7 +98,7 @@ Double-check your filters' values with <code>Get-WmiObject</code> if the integra
       - source_name: Any available source name
       - user: Any valid user name
 
-    For each filter, add an instance in the configuration file at `conf.d/win32_event_log.yaml`.
+    For each filter, add an instance in the configuration file at `win32_event_log.d/conf.yaml`.
 
     Some example filters:
 

@@ -17,6 +17,7 @@ theme:
     # https://github.com/facelessuser/pymdown-extensions/issues/876#issuecomment-610164436
     # - instant
   palette:
+    scheme: slate
     primary: deep purple
     accent: deep purple
   font:
@@ -92,6 +93,8 @@ plugins:
             show_if_no_docstring: yes
             show_root_heading: yes
             show_source: true
+  - pdf-export:
+      enabled_if_env: ENABLE_PDF_SITE_EXPORT
 
 markdown_extensions:
   # Built-in
@@ -161,5 +164,6 @@ extra:
       link: https://www.instagram.com/datadoghq
 extra_css:
   - assets/css/custom.css
+  - https://cdn.jsdelivr.net/gh/tonsky/FiraCode@4/distr/fira_code.css
 extra_javascript:
   - assets/js/custom.js

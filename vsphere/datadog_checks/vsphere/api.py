@@ -12,6 +12,7 @@ from pyVmomi import vim, vmodl
 from datadog_checks.base.log import CheckLoggingAdapter
 from datadog_checks.vsphere.config import VSphereConfig
 from datadog_checks.vsphere.constants import ALL_RESOURCES, MAX_QUERY_METRICS_OPTION, UNLIMITED_HIST_METRICS_PER_QUERY
+from datadog_checks.vsphere.event import ALLOWED_EVENTS
 from datadog_checks.vsphere.types import InfrastructureData
 
 CallableT = TypeVar('CallableT', bound=Callable)
@@ -257,13 +258,8 @@ class VSphereAPI(object):
         query_filter = vim.event.EventFilterSpec()
         time_filter = vim.event.EventFilterSpec.ByTime(beginTime=start_time)
         query_filter.time = time_filter
+        query_filter.type = ALLOWED_EVENTS
         return event_manager.QueryEvents(query_filter)
-
-    @smart_retry
-    def get_latest_event_timestamp(self):
-        # type: () -> dt.datetime
-        event_manager = self._conn.content.eventManager
-        return event_manager.latestEvent.createdTime
 
     @smart_retry
     def get_max_query_metrics(self):

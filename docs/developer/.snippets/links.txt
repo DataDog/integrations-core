@@ -1,3 +1,5 @@
+[agent-changelog]: https://github.com/DataDog/integrations-core/blob/master/AGENT_CHANGELOG.md
+[agent-integrations]: https://github.com/DataDog/integrations-core/blob/master/AGENT_INTEGRATIONS.md
 [azp-agents]: https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted
 [azp-agents-latest-linux]: https://github.com/actions/virtual-environments/blob/master/images/linux/Ubuntu1804-README.md
 [azp-agents-latest-windows]: https://github.com/actions/virtual-environments/blob/master/images/win/Windows2019-Readme.md
@@ -46,6 +48,7 @@
 [docs-extension-pymdown]: https://facelessuser.github.io/pymdown-extensions/
 [docs-plugin-auto-doc]: https://github.com/pawamoy/mkdocstrings
 [docs-plugin-minify]: https://github.com/byrnereese/mkdocs-minify-plugin
+[docs-plugin-pdf-export]: https://github.com/zhaoterryy/mkdocs-pdf-export-plugin
 [docs-plugin-revision-date]: https://github.com/timvink/mkdocs-git-revision-date-localized-plugin
 [docs-scripts]: https://github.com/DataDog/integrations-core/tree/master/docs/developer/.scripts
 [docs-snippets-abbreviations]: https://github.com/DataDog/integrations-core/blob/master/docs/developer/.snippets/abbrs.txt
@@ -83,7 +86,9 @@
 [metric-type-gauge]: https://docs.datadoghq.com/developers/metrics/types/?tab=gauge#metric-types
 [miniconda-docs]: https://docs.conda.io/en/latest/miniconda.html
 [mock-github]: https://github.com/testing-cabal/mock
+[mypy-command-line]: https://mypy.readthedocs.io/en/stable/command_line.html
 [mypy-github]: https://github.com/python/mypy
+[mypy-ini]: https://github.com/DataDog/integrations-core/blob/master/mypy.ini
 [openapi-data-types]: https://swagger.io/docs/specification/data-models/data-types/
 [PyPI]: https://pypi.org
 [prettier-github]: https://github.com/prettier/prettier
@@ -109,3 +114,4 @@
 [terraform-templates-location]: https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev/datadog_checks/dev/tooling/templates/terraform
 [toml-github]: https://github.com/toml-lang/toml
 [tox-github]: https://github.com/tox-dev/tox
+[weasyprint-dependencies]: https://weasyprint.readthedocs.io/en/latest/install.html
