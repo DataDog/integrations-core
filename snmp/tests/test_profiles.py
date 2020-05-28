@@ -82,6 +82,11 @@ def test_cisco_voice(aggregator):
     for resource in resources:
         aggregator.assert_metric('snmp.{}'.format(resource), metric_type=aggregator.GAUGE, tags=tags)
 
+    run_indices = [4, 7, 8, 9, 10, 18, 24, 29, 30]
+    for index in run_indices:
+        status_tags = tags + ['run_index:{}'.format(index)]
+        aggregator.assert_metric('snmp.hrSWRunStatus', metric_type=aggregator.GAUGE, tags=status_tags)
+
     cvp_gauges = [
         "ccvpSipIntAvgLatency1",
         "ccvpSipIntAvgLatency2",
