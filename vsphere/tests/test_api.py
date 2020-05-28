@@ -1,11 +1,12 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import datetime as dt
 import ssl
 
 import pytest
 from mock import ANY, MagicMock, patch
-from pyVmomi import vim, vmodl
+from pyVmomi import SoapAdapter, vim, vmodl
 
 from datadog_checks.vsphere.api import APIConnectionError, VSphereAPI
 from datadog_checks.vsphere.config import VSphereConfig
@@ -151,3 +152,55 @@ def test_get_max_query_metrics(realtime_instance):
             max_metrics = api.get_max_query_metrics()
             assert max_metrics == expect
             query_config.assert_called_once_with("config.vpxd.stats.maxQueryMetrics")
+
+
+def test_get_new_events_success_without_fallback(realtime_instance):
+    with patch('datadog_checks.vsphere.api.connect'):
+        config = VSphereConfig(realtime_instance, MagicMock())
+        api = VSphereAPI(config, MagicMock())
+
+        returned_events = [vim.event.Event(), vim.event.Event(), vim.event.Event()]
+        api._conn.content.eventManager.QueryEvents.return_value = returned_events
+
+        events = api.get_new_events(start_time=dt.datetime.now())
+        assert events == returned_events
+
+
+def test_get_new_events_failure_without_fallback(realtime_instance):
+    with patch('datadog_checks.vsphere.api.connect'):
+        config = VSphereConfig(realtime_instance, MagicMock())
+        api = VSphereAPI(config, MagicMock())
+
+        api._conn.content.eventManager.QueryEvents.side_effect = SoapAdapter.ParserError("some parse error")
+
+        with pytest.raises(SoapAdapter.ParserError):
+            api.get_new_events(start_time=dt.datetime.now())
+
+
+def test_get_new_events_with_fallback(realtime_instance):
+    realtime_instance['use_collect_events_fallback'] = True
+
+    with patch('datadog_checks.vsphere.api.connect'):
+        config = VSphereConfig(realtime_instance, MagicMock())
+        api = VSphereAPI(config, MagicMock())
+
+        event1 = vim.event.Event(key=1)
+        event3 = vim.event.Event(key=3)
+        event_collector = MagicMock()
+        api._conn.content.eventManager.QueryEvents.side_effect = [
+            SoapAdapter.ParserError("some parse error"),
+            [event1],
+            SoapAdapter.ParserError("event parse error"),
+            [event3],
+        ]
+        api._conn.content.eventManager.CreateCollectorForEvents.return_value = event_collector
+
+        event_collector.ReadNextEvents.side_effect = [
+            [event1],
+            SoapAdapter.ParserError("event parse error"),
+            [event3],
+            [],
+        ]
+
+        events = api.get_new_events(start_time=dt.datetime.now())
+        assert events == [event1, event3]
