@@ -114,12 +114,12 @@ def update_agent_requirements(req_file, check, newline):
 
 def build_package(package_path, sdist):
     with chdir(package_path):
-        result = run_command(f'{sys.executable} setup.py bdist_wheel --universal', capture='out')
+        result = run_command([sys.executable, 'setup.py', 'bdist_wheel', '--universal'], capture='out')
         if result.code != 0:
             return result
 
         if sdist:
-            result = run_command(f'{sys.executable} setup.py sdist', capture='out')
+            result = run_command([sys.executable, 'setup.py', 'sdist'], capture='out')
             if result.code != 0:
                 return result
 
