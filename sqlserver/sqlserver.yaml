@@ -18,7 +18,9 @@ init_config:
      - name: sqlserver.server
        sql_query: SELECT SUM(num_of_writes) AS write_ops, SUM(num_of_reads) AS read_ops, SUM(num_of_reads)+ SUM(num_of_writes) AS iops FROM sys.dm_io_virtual_file_stats(null,null) -- Datadog;
        rate_metrics:
-          - ALL
+          - write_ops
+          - read_ops
+          - iops
      - name: sqlserver.server
        sql_query: select count(dbid) AS number_of_connections, @@MAX_CONNECTIONS AS number_of_possible_connections, Sum(Case when dbid > 0 then 1 else 0 end) AS number_of_active_connections from sys.sysprocesses WITH (NOLOCK) -- Datadog;
      - name: sqlserver.server

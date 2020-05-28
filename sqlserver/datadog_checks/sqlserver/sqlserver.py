@@ -716,8 +716,7 @@ class SqlComplexMetric(SqlServerMetric):
                     metric_name = '{}.{}.{}'.format(self.datadog_name, "attribute", columns[index])
                 else :
                     metric_name = '{}.{}.{}'.format(self.datadog_name, "metric", columns[index])
-                    if self.rate_metrics and (self.rate_metrics[0] == "ALL" or
-                                              columns[index] in self.rate_metrics):
+                    if self.rate_metrics and columns[index] in self.rate_metrics:
                         sorted_tags = tuple(sorted(set(metric_tags)))
                         context = (metric_name, sorted_tags)
                         if cached_metrics_data.get(context):
@@ -727,7 +726,6 @@ class SqlComplexMetric(SqlServerMetric):
                             cached_metrics_data[context] = (report_value, current_timestamp)
                             continue
 
-                        current_timestamp = time.time()
                         cached_metrics_data[context] = (report_value, current_timestamp)
                         report_value_in_rate = (report_value - value)/(current_timestamp  - timestamp)
                         report_value = report_value_in_rate
