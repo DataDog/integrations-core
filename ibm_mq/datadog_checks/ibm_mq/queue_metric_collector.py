@@ -30,12 +30,13 @@ class QueueMetricCollector:
         self.warning = warning
         self.send_metric = send_metric
         self.log = log
+        self.queues = set(self.config.queues)
 
     def collect_queue_metrics(self, queue_manager):
         self.discover_queues(queue_manager)
         self.queue_manager_stats(queue_manager, self.config.tags)
 
-        for queue_name in self.config.queues:
+        for queue_name in self.queues:
             queue_tags = self.config.tags + ["queue:{}".format(queue_name)]
 
             for regex, q_tags in self.config.queue_tag_re:
@@ -73,7 +74,7 @@ class QueueMetricCollector:
                         keep_queues.append(queue)
             queues = keep_queues
 
-        self.config.add_queues(queues)
+        self.queues.update(queues)
 
     def _discover_queues(self, queue_manager, mq_pattern_filter):
         queues = []
