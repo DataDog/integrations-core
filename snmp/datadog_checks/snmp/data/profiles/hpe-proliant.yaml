@@ -1,4 +1,5 @@
 extends:
+  - _base.yaml
   - _base_hp.yaml
   - _generic-router-if.yaml
 
@@ -172,22 +173,6 @@ metrics:
           OID: 1.3.6.1.4.1.232.18.2.3.1.1.39
           name: cpqNicIfPhysAdapterName
         tag: adapter_name
-  - MIB: CPQHLTH-MIB
-    table:
-      OID: 1.3.6.1.4.1.232.6.2.9.3
-      name: cpqHeFltTolPowerSupplyTable
-    symbols:
-      - OID: 1.3.6.1.4.1.232.6.2.9.3.1.5
-        name: cpqHeFltTolPowerSupplyStatus
-      - OID: 1.3.6.1.4.1.232.6.2.9.3.1.7
-        name: cpqHeFltTolPowerSupplyCapacityUsed
-      - OID: 1.3.6.1.4.1.232.6.2.9.3.1.8
-        name: cpqHeFltTolPowerSupplyCapacityMaximum
-    metric_tags:
-      - column:
-          OID: 1.3.6.1.4.1.232.6.2.9.3.1.1
-          name: cpqHeFltTolPowerSupplyChassis
-        tag: chassis_num
   - MIB: CPQIDA-MIB
     table:
       OID: 1.3.6.1.4.1.232.3.2.2.1
