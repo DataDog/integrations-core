@@ -20,7 +20,7 @@ else:
     SUPPORTED_QUEUE_TYPES = [pymqi.CMQC.MQQT_LOCAL, pymqi.CMQC.MQQT_MODEL]
 
 
-class QueueMetricCollector:
+class QueueMetricCollector(object):
     QUEUE_SERVICE_CHECK = 'ibm_mq.queue'
     QUEUE_MANAGER_SERVICE_CHECK = 'ibm_mq.queue_manager'
 

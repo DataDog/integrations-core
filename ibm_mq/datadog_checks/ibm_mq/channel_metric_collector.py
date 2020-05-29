@@ -32,7 +32,7 @@ else:
     }
 
 
-class ChannelMetricCollector:
+class ChannelMetricCollector(object):
     CHANNEL_SERVICE_CHECK = 'ibm_mq.channel'
     CHANNEL_STATUS_SERVICE_CHECK = 'ibm_mq.channel.status'
 
