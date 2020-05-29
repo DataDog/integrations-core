@@ -5,6 +5,7 @@ variables:
   NOTIFIER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/slack-notifier:latest
   TAGGER_EMAIL: packages@datadoghq.com
   TAGGER_NAME: ci.integrations-core
+  NOTIFICATIONS_SLACK_CHANNEL: agent-integrations
 
 # Uncomment when/if we modify script to use Jira
 #
@@ -36,19 +37,28 @@ validate-log-integrations:
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/web-ui.git --depth 1
     - ts-node /scripts/parse_ts.ts > logs_integrations.json
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/logs-backend.git --depth 1
-    - python3 /scripts/validate_log_intgs.py logs_integrations.json
+    - python3 /scripts/validate_log_intgs.py logs_integrations.json 2> errors.txt
+  artifacts:
+    paths:
+    - errors.txt
+    expire_in: 1 day
   tags: [ "runner:main", "size:large" ]
 
-notify-slack-on-failure:
+
+notify-slack:
   stage: notify
   image: $NOTIFIER_IMAGE
   only:
   - schedules
-  variables:
-    MESSAGE: "Logs pipelines don't pass validation steps, please investigate $CI_PIPELINE_URL for errors."
   script:
-    - postmessage agent-integrations "$MESSAGE" alert
-  when: on_failure
+    - |
+      if [[ -s ./errors.txt ]]; then
+          MESSAGE="Logs pipelines don't pass validation steps, please investigate $CI_PIPELINE_URL for errors.\n$(cat errors.txt)"
+          postmessage $NOTIFICATIONS_SLACK_CHANNEL $MESSAGE alert
+      else
+          MESSAGE="Logs pipelines passed validation steps, good job :+1:"
+          postmessage $NOTIFICATIONS_SLACK_CHANNEL $MESSAGE success
+      fi
   tags: [ "runner:main", "size:large" ]
 
 release-auto:

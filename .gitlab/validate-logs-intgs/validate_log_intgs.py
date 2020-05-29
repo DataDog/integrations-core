@@ -188,10 +188,8 @@ if not validation_errors_per_check:
     print("Success, no errors were found!")
     sys.exit(0)
 
-print_err("Some errors were found while validating log pipelines:")
+print_err("Logs pipelines don't pass validation steps:")
 # Filter to only agt integrations checks
 for check, errs in validation_errors_per_check.items():
     for err in errs:
-        print_err(f"{check}: {err}")
-
-sys.exit(-1)
+        print_err(f"- {check}: {err}")
