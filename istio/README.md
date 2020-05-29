@@ -25,8 +25,6 @@ Edit the `istio.d/conf.yaml` file (in the `conf.d/` folder at the root of your [
 Add one of the configuration blocks below to your `istio.d/conf.yaml` file to start gathering your Istio Metrics for your supported version:
 
 1. To monitor the `istiod` deployment in Istio `v1.5+`, use the following configuration:
-
-    _Available in Istio integration version v3.1.0, which will be included in Agent 7.20. See the [Integration Management documentation][15] for instructions to upgrade the integration manually_
     
     ```yaml
     init_config:
@@ -35,6 +33,9 @@ Add one of the configuration blocks below to your `istio.d/conf.yaml` file to st
       - istiod_endpoint: http://istiod.istio-system:8080/metrics
     ```
     
+   To monitor Istio mesh metrics, continue to use `istio_mesh_endpoint`. Istio mesh metrics are now only available from `istio-proxy` containers which are supported out-of-the-box via autodiscovery, see [`istio.d/auto_conf.yaml`][17].
+   
+   
 2. To monitor Istio versions `v1.4` or earlier, use the following configuration:
     ```yaml
     init_config:
@@ -143,3 +144,4 @@ Additional helpful documentation, links, and articles:
 [14]: https://www.datadoghq.com/blog/istio-metrics/
 [15]: https://docs.datadoghq.com/agent/guide/integration-management/#install
 [16]: https://docs.datadoghq.com/agent/kubernetes/log/
+[17]: https://github.com/DataDog/integrations-core/blob/master/istio/datadog_checks/istio/data/auto_conf.yaml
