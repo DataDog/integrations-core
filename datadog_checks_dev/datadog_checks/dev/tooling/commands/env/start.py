@@ -129,7 +129,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
 
     env_type = metadata['env_type']
 
-    # TODO: remove this legacy fallback lookup eventually
+    # TODO: remove this legacy fallback lookup in any future major version bump
     legacy_fallback = ctx.obj.get('agent', '')
     if os.path.isdir(legacy_fallback):
         legacy_fallback = ''
@@ -137,7 +137,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     agent_ver = agent or os.getenv('DDEV_E2E_AGENT', legacy_fallback)
     agent_build = ctx.obj.get('agents', {}).get(
         agent_ver,
-        # TODO: remove this legacy fallback lookup eventually
+        # TODO: remove this legacy fallback lookup in any future major version bump
         ctx.obj.get(f'agent{agent_ver}', agent_ver),
     )
     if isinstance(agent_build, dict):
