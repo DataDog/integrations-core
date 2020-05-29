@@ -129,14 +129,23 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
 
     env_type = metadata['env_type']
 
-    agent_ver = agent or os.getenv('DDEV_E2E_AGENT', '6')
+    # TODO: remove this legacy fallback lookup in any future major version bump
+    legacy_fallback = ctx.obj.get('agent', '')
+    if os.path.isdir(legacy_fallback):
+        legacy_fallback = ''
+
+    agent_ver = agent or os.getenv('DDEV_E2E_AGENT', legacy_fallback)
     agent_build = ctx.obj.get('agents', {}).get(
         agent_ver,
-        # TODO: remove this legacy fallback lookup eventually
+        # TODO: remove this legacy fallback lookup in any future major version bump
         ctx.obj.get(f'agent{agent_ver}', agent_ver),
     )
     if isinstance(agent_build, dict):
         agent_build = agent_build.get(env_type, env_type)
+
+    if agent_build == 'datadog/agent:6':
+        echo_warning('The Docker image for Agent 6 only ships with Python 2, will use that instead.')
+        python = 2
 
     interface = derive_interface(env_type)
     if interface is None:
@@ -201,7 +210,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         not bool(agent),
     )
 
-    echo_waiting(f'Updating `{agent_build}`... ', nl=False)
+    echo_waiting(f'Updating `{environment.agent_build}`... ', nl=False)
     environment.update_agent()
     echo_success('success!')
 

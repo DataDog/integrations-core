@@ -95,7 +95,9 @@ def initialize_root(config, agent=False, core=False, extras=False, here=False):
     config['repo_name'] = REPO_CHOICES[repo_choice]
 
     message = None
-    root = os.path.expanduser(config.get(repo_choice) or config.get('repos', {}).get(repo_choice, ''))
+    # TODO: remove this legacy fallback lookup in any future major version bump
+    legacy_option = None if repo_choice == 'agent' else config.get(repo_choice)
+    root = os.path.expanduser(legacy_option or config.get('repos', {}).get(repo_choice, ''))
     if here or not dir_exists(root):
         if not here:
             repo = 'datadog-agent' if repo_choice == 'agent' else f'integrations-{repo_choice}'
