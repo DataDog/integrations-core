@@ -8,41 +8,24 @@ import psycopg2
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.postgres.metrics_cache import PostgresMetricsCache
 
 from .config import PostgresConfig
 from .util import (
-    ACTIVITY_DD_METRICS,
-    ACTIVITY_METRICS_8_3,
-    ACTIVITY_METRICS_9_2,
-    ACTIVITY_METRICS_9_6,
-    ACTIVITY_METRICS_LT_8_3,
-    ACTIVITY_QUERY_10,
-    ACTIVITY_QUERY_LT_10,
     ALL_SCHEMAS,
-    COMMON_ARCHIVER_METRICS,
-    COMMON_BGW_METRICS,
-    COMMON_METRICS,
     CONNECTION_METRICS,
-    COUNT_METRICS,
-    DATABASE_SIZE_METRICS,
     FUNCTION_METRICS,
     IDX_METRICS,
     LOCK_METRICS,
-    NEWER_91_BGW_METRICS,
-    NEWER_92_BGW_METRICS,
-    NEWER_92_METRICS,
     REL_METRICS,
     REPLICATION_METRICS,
-    REPLICATION_METRICS_9_1,
-    REPLICATION_METRICS_9_2,
-    REPLICATION_METRICS_10,
     SIZE_METRICS,
     STATIO_METRICS,
     build_relations_filter,
     fmt,
     get_schema_field,
 )
-from .version_utils import V8_3, V9, V9_1, V9_2, V9_4, V9_6, V10, get_raw_version, parse_version, transform_version
+from .version_utils import V9, get_raw_version, parse_version, transform_version
 
 MAX_CUSTOM_RESULTS = 100
 
@@ -56,7 +39,6 @@ class PostgreSql(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
-        self._clean_state()
         self.db = None
         self._version = None
         # Deprecate custom_metrics in favor of custom_queries
@@ -66,14 +48,12 @@ class PostgreSql(AgentCheck):
                 "rather than the now deprecated custom_metrics"
             )
         self.config = PostgresConfig(self.instance)
+        self.metrics_cache = PostgresMetricsCache(self.config)
+        self._clean_state()
 
     def _clean_state(self):
         self._version = None
-        self.instance_metrics = None
-        self.bgw_metrics = None
-        self.archiver_metrics = None
-        self.replication_metrics = None
-        self.activity_metrics = None
+        self.metrics_cache.clean_state()
 
     def _get_replication_role(self):
         cursor = self.db.cursor()
@@ -89,146 +69,6 @@ class PostgreSql(AgentCheck):
             self._version = parse_version(raw_version)
             self.set_metadata('version', raw_version)
         return self._version
-
-    def _get_instance_metrics(self):
-        """
-        Add NEWER_92_METRICS to the default set of COMMON_METRICS when server
-        version is 9.2 or later.
-
-        Store the list of metrics in the check instance to avoid rebuilding it at
-        every collection cycle.
-
-        In case we have multiple instances pointing to the same postgres server
-        monitoring different databases, we want to collect server metrics
-        only once. See https://github.com/DataDog/dd-agent/issues/1211
-        """
-        metrics = self.instance_metrics
-        if metrics is None:
-            # select the right set of metrics to collect depending on postgres version
-            if self.version >= V9_2:
-                self.instance_metrics = dict(COMMON_METRICS, **NEWER_92_METRICS)
-            else:
-                self.instance_metrics = dict(COMMON_METRICS)
-
-            # add size metrics if needed
-            if self.config.collect_database_size_metrics:
-                self.instance_metrics.update(DATABASE_SIZE_METRICS)
-
-            metrics = self.instance_metrics
-
-        res = {
-            'descriptors': [('psd.datname', 'db')],
-            'metrics': metrics,
-            'query': "SELECT psd.datname, {metrics_columns} "
-            "FROM pg_stat_database psd "
-            "JOIN pg_database pd ON psd.datname = pd.datname "
-            "WHERE psd.datname not ilike 'template%%' "
-            "  AND psd.datname not ilike 'rdsadmin' "
-            "  AND psd.datname not ilike 'azure_maintenance' ",
-            'relation': False,
-        }
-
-        if not self.config.collect_default_db:
-            res["query"] += "  AND psd.datname not ilike 'postgres'"
-
-        return res
-
-    def _get_bgw_metrics(self):
-        """Use either COMMON_BGW_METRICS or COMMON_BGW_METRICS + NEWER_92_BGW_METRICS
-        depending on the postgres version.
-        Uses a dictionary to save the result for each instance
-        """
-        # Extended 9.2+ metrics if needed
-        if self.bgw_metrics is None:
-            self.bgw_metrics = dict(COMMON_BGW_METRICS)
-
-            if self.version >= V9_1:
-                self.bgw_metrics.update(NEWER_91_BGW_METRICS)
-            if self.version >= V9_2:
-                self.bgw_metrics.update(NEWER_92_BGW_METRICS)
-
-        if not self.bgw_metrics:
-            return None
-
-        return {
-            'descriptors': [],
-            'metrics': self.bgw_metrics,
-            'query': "select {metrics_columns} FROM pg_stat_bgwriter",
-            'relation': False,
-        }
-
-    def _get_count_metrics(self):
-        metrics = dict(COUNT_METRICS)
-        metrics['query'] = COUNT_METRICS['query'].format(
-            metrics_columns="{metrics_columns}", table_count_limit=self.config.table_count_limit
-        )
-        return metrics
-
-    def _get_archiver_metrics(self):
-        """Use COMMON_ARCHIVER_METRICS to read from pg_stat_archiver as
-        defined in 9.4 (first version to have this table).
-        Uses a dictionary to save the result for each instance
-        """
-        # While there's only one set for now, prepare for future additions to
-        # the table, mirroring _get_bgw_metrics()
-        if self.archiver_metrics is None and self.version >= V9_4:
-            self.archiver_metrics = dict(COMMON_ARCHIVER_METRICS)
-
-        if not self.archiver_metrics:
-            return None
-
-        return {
-            'descriptors': [],
-            'metrics': self.archiver_metrics,
-            'query': "select {metrics_columns} FROM pg_stat_archiver",
-            'relation': False,
-        }
-
-    def _get_replication_metrics(self):
-        """ Use either REPLICATION_METRICS_10, REPLICATION_METRICS_9_1, or
-        REPLICATION_METRICS_9_1 + REPLICATION_METRICS_9_2, depending on the
-        postgres version.
-        Uses a dictionnary to save the result for each instance
-        """
-        metrics = self.replication_metrics
-        if self.version >= V10 and metrics is None:
-            self.replication_metrics = dict(REPLICATION_METRICS_10)
-            metrics = self.replication_metrics
-        elif self.version >= V9_1 and metrics is None:
-            self.replication_metrics = dict(REPLICATION_METRICS_9_1)
-            if self.version >= V9_2:
-                self.replication_metrics.update(REPLICATION_METRICS_9_2)
-            metrics = self.replication_metrics
-        return metrics
-
-    def _get_activity_metrics(self):
-        """ Use ACTIVITY_METRICS_LT_8_3 or ACTIVITY_METRICS_8_3 or ACTIVITY_METRICS_9_2
-        depending on the postgres version in conjunction with ACTIVITY_QUERY_10 or ACTIVITY_QUERY_LT_10.
-        Uses a dictionnary to save the result for each instance
-        """
-        metrics_data = self.activity_metrics
-
-        if metrics_data is None:
-            query = ACTIVITY_QUERY_10 if self.version >= V10 else ACTIVITY_QUERY_LT_10
-            if self.version >= V9_6:
-                metrics_query = ACTIVITY_METRICS_9_6
-            elif self.version >= V9_2:
-                metrics_query = ACTIVITY_METRICS_9_2
-            elif self.version >= V8_3:
-                metrics_query = ACTIVITY_METRICS_8_3
-            else:
-                metrics_query = ACTIVITY_METRICS_LT_8_3
-
-            for i, q in enumerate(metrics_query):
-                if '{dd__user}' in q:
-                    metrics_query[i] = q.format(dd__user=self.config.user)
-
-            metrics = {k: v for k, v in zip(metrics_query, ACTIVITY_DD_METRICS)}
-            self.activity_metrics = (metrics, query)
-        else:
-            metrics, query = metrics_data
-
-        return {'descriptors': [('datname', 'db')], 'metrics': metrics, 'query': query, 'relation': False}
 
     def _build_relations_config(self, yamlconfig):
         """Builds a dictionary from relations configuration while maintaining compatibility
@@ -373,16 +213,16 @@ class PostgreSql(AgentCheck):
         on top of that.
         If custom_metrics is not an empty list, gather custom metrics defined in postgres.yaml
         """
-        db_instance_metrics = self._get_instance_metrics()
-        bgw_instance_metrics = self._get_bgw_metrics()
-        archiver_instance_metrics = self._get_archiver_metrics()
+        db_instance_metrics = self.metrics_cache.get_instance_metrics(self.version)
+        bgw_instance_metrics = self.metrics_cache.get_bgw_metrics(self.version)
+        archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
 
         metric_scope = [CONNECTION_METRICS]
 
         if self.config.collect_function_metrics:
             metric_scope.append(FUNCTION_METRICS)
         if self.config.collect_count_metrics:
-            metric_scope.append(self._get_count_metrics())
+            metric_scope.append(self.metrics_cache.get_count_metrics())
 
         # Do we need relation-specific metrics?
         relations_config = {}
@@ -390,7 +230,7 @@ class PostgreSql(AgentCheck):
             metric_scope += [LOCK_METRICS, REL_METRICS, IDX_METRICS, SIZE_METRICS, STATIO_METRICS]
             relations_config = self._build_relations_config(self.config.relations)
 
-        replication_metrics = self._get_replication_metrics()
+        replication_metrics = self.metrics_cache.get_replication_metrics(self.version)
         if replication_metrics is not None:
             replication_metrics_query = copy.deepcopy(REPLICATION_METRICS)
             replication_metrics_query['metrics'] = replication_metrics
@@ -405,7 +245,7 @@ class PostgreSql(AgentCheck):
         self._query_scope(cursor, archiver_instance_metrics, instance_tags, False, relations_config)
 
         if self.config.collect_activity_metrics:
-            activity_metrics = self._get_activity_metrics()
+            activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
             self._query_scope(cursor, activity_metrics, instance_tags, False, relations_config)
 
         for scope in list(metric_scope) + self.config.custom_metrics:

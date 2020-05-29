@@ -10,6 +10,7 @@ from datadog_checks.snmp import SnmpCheck
 from . import common
 from .metrics import (
     ADAPTER_IF_COUNTS,
+    CCCA_ROUTER_GAUGES,
     CIE_METRICS,
     CPU_METRICS,
     DISK_GAUGES,
@@ -129,6 +130,9 @@ def test_cisco_voice(aggregator):
     aggregator.assert_metric('snmp.{}'.format("cccaPimStatus"), metric_type=aggregator.GAUGE, tags=pim_tags)
     aggregator.assert_metric('snmp.{}'.format("sysUpTimeInstance"), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
+    for router in CCCA_ROUTER_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(router), metric_type=aggregator.GAUGE, tags=tags)
+
     aggregator.assert_all_metrics_covered()
 
 
@@ -204,6 +208,12 @@ def test_f5(aggregator):
                 metric_type=aggregator.GAUGE,
                 tags=['interface:{}'.format(interface)] + tags,
                 count=1,
+            )
+    for version in ['ipv4', 'ipv6']:
+        ip_tags = ['ipversion:{}'.format(version)] + tags
+        for metric in IP_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=ip_tags, count=1
             )
 
     for metric in LTM_GAUGES:
@@ -359,6 +369,10 @@ def test_cisco_3850(aggregator):
         for metric in IF_RATES:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
 
+    for metric in IP_COUNTS + IPX_COUNTS:
+        tags = common_tags + ['ipversion:ipv6']
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
+
     for metric in TCP_COUNTS:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
@@ -445,7 +459,7 @@ def test_cisco_3850(aggregator):
 def test_meraki_cloud_controller(aggregator):
     run_profile_check('meraki-cloud-controller')
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:meraki-cloud-controller']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:meraki-cloud-controller', 'snmp_host:dashboard.meraki.com']
     dev_metrics = ['devStatus', 'devClientCount']
     dev_tags = ['device:Gymnasium', 'product:MR16-HW', 'network:L_NETWORK'] + common_tags
     for metric in dev_metrics:
@@ -855,6 +869,19 @@ def test_proliant(aggregator):
     run_profile_check('hpe-proliant')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:hpe-proliant']
+
+    for metric in TCP_COUNTS:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+        )
+
+    for metric in TCP_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+
+    for metric in UDP_COUNTS:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+        )
 
     cpu_gauges = [
         "cpqSeCpuSlot",

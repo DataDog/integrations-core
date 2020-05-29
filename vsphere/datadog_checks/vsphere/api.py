@@ -7,7 +7,7 @@ import ssl
 from typing import Any, Callable, List, TypeVar, cast
 
 from pyVim import connect
-from pyVmomi import vim, vmodl
+from pyVmomi import SoapAdapter, vim, vmodl
 
 from datadog_checks.base.log import CheckLoggingAdapter
 from datadog_checks.vsphere.config import VSphereConfig
@@ -259,7 +259,48 @@ class VSphereAPI(object):
         time_filter = vim.event.EventFilterSpec.ByTime(beginTime=start_time)
         query_filter.time = time_filter
         query_filter.type = ALLOWED_EVENTS
-        return event_manager.QueryEvents(query_filter)
+        try:
+            events = event_manager.QueryEvents(query_filter)
+        except SoapAdapter.ParserError as e:
+            self.log.debug("Error parsing bulk events: %s", e)
+
+            if self.config.use_collect_events_fallback:
+                self.log.debug("Start fetching events one by one...")
+                events = self._get_new_events_one_by_one(query_filter)
+            else:
+                raise
+        return events
+
+    def _get_new_events_one_by_one(self, query_filter):
+        # type: (vim.event.EventFilterSpec) -> List[vim.event.Event]
+        """
+        Collecting events one by one and skip those with parsing error.
+
+        The parsing error is triggered by unknown types like `ContentLibrary`.
+        More info:
+            - https://github.com/vmware/pyvmomi/issues/190
+            - https://github.com/vmware/pyvmomi/issues/872
+
+        The event collection fallback is a workaround and can be removed when the upstream issues
+        mentioned above are solved.
+        """
+        event_manager = self._conn.content.eventManager
+        events = []
+        event_collector = event_manager.CreateCollectorForEvents(query_filter)
+        while True:
+            try:
+                collected_events = event_collector.ReadNextEvents(1)  # Read with page_size=1
+            except SoapAdapter.ParserError as e:
+                self.log.debug("Cannot parse event, skipped: %s", e)
+                continue
+            if len(collected_events) == 0:
+                break
+            event = collected_events[0]
+            self.log.debug(
+                "Collect event with id:%s, type:%s: msg:%s", event.key, type(event), event.fullFormattedMessage
+            )
+            events.extend(collected_events)
+        return events
 
     @smart_retry
     def get_max_query_metrics(self):
