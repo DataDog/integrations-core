@@ -135,7 +135,7 @@ validate-log-intgs-builder:
     changes:
       - .gitlab/validate-logs-intgs/**
     refs:
-      - schedules
+      - master
   script:
     - cd .gitlab/validate-logs-intgs/
     - docker build --tag $VALIDATE_LOG_INTGS .
