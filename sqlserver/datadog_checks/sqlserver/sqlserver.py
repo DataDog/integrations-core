@@ -540,7 +540,7 @@ class SQLServer(AgentCheck):
 
                 with self.get_managed_cursor(instance, self.DEFAULT_DB_KEY) as cursor:
                     # Get sqlserver hostname for each instance as tag.
-                
+
                     cursor.execute("SELECT @@SERVERNAME")
                     rows = cursor.fetchall()
                     if rows is not None:
@@ -752,6 +752,8 @@ class SqlComplexMetric(SqlServerMetric):
         # This method fetch all the metric based on the complex metric passed.
         cursor.execute(self.query)
         rows = cursor.fetchall()
+        while (cursor.nextset()):
+            rows.extend(cursor.fetchall())
         columns = [i[0] for i in cursor.description]
         return rows, columns
 
