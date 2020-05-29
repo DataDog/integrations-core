@@ -1,0 +1,840 @@
+{
+    "author_info": {
+        "author_name": "Datadog"
+    },
+    "created_by": {
+        "access_role": "adm",
+        "disabled": false,
+        "email": "support@datadoghq.com",
+        "handle": "support@datadoghq.com",
+        "is_admin": true,
+        "name": "Datadog",
+        "role": null,
+        "title": null,
+        "verified": true
+    },
+    "board_title": "Exchange Server Overview",
+    "description": "This dashboard provides a high-level view of your Exchange Server.\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "widgets": [
+        {
+            "id": 1,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:exchange.database.io_writes_avg_latency{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    },
+                    {
+                        "q": "avg:exchange.database.io_reads_avg_latency{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "I/O latency",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "show_legend": false
+            },
+            "layout": {
+                "x": 118,
+                "y": 10,
+                "width": 37,
+                "height": 15
+            }
+        },
+        {
+            "id": 2,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:exchange.processor.cpu_time{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "CPU usage",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "show_legend": false,
+                "legend_size": "auto"
+            },
+            "layout": {
+                "x": 1,
+                "y": 33,
+                "width": 37,
+                "height": 15
+            }
+        },
+        {
+            "id": 3,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:exchange.memory.available{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Memory available",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "show_legend": false
+            },
+            "layout": {
+                "x": 1,
+                "y": 49,
+                "width": 37,
+                "height": 15
+            }
+        },
+        {
+            "id": 5,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:exchange.is.store.rpc_latency{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Latency",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "show_legend": false
+            },
+            "layout": {
+                "x": 40,
+                "y": 10,
+                "width": 37,
+                "height": 15
+            }
+        },
+        {
+            "id": 6,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:exchange.is.clienttype.rpc_ops_persec{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Number of operations",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "show_legend": false
+            },
+            "layout": {
+                "x": 79,
+                "y": 26,
+                "width": 37,
+                "height": 15
+            }
+        },
+        {
+            "id": 7,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:exchange.is.store.rpc_ops_persec{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Number of operations",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "show_legend": false
+            },
+            "layout": {
+                "x": 40,
+                "y": 26,
+                "width": 37,
+                "height": 15
+            }
+        },
+        {
+            "id": 8,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:exchange.is.clienttype.rpc_latency{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Latency",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "show_legend": false
+            },
+            "layout": {
+                "x": 79,
+                "y": 10,
+                "width": 37,
+                "height": 15
+            }
+        },
+        {
+            "id": 10,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:exchange.owa.unique_users{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "title": "Unique users",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 111,
+                "y": 43,
+                "width": 17,
+                "height": 15
+            }
+        },
+        {
+            "id": 11,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:exchange.owa.requests_persec{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Number of requests processed",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "show_legend": false
+            },
+            "layout": {
+                "x": 129,
+                "y": 43,
+                "width": 37,
+                "height": 15
+            }
+        },
+        {
+            "id": 13,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:exchange.ws.requests_persec{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Number of requests processed",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "show_legend": false
+            },
+            "layout": {
+                "x": 129,
+                "y": 60,
+                "width": 37,
+                "height": 15
+            }
+        },
+        {
+            "id": 14,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:exchange.ws.current_connections_total{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "title": "Current connections",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 111,
+                "y": 60,
+                "width": 17,
+                "height": 15
+            }
+        },
+        {
+            "id": 17,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:exchange.workload_management.active_tasks{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    },
+                    {
+                        "q": "sum:exchange.workload_management.queued_tasks{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Active and queued tasks",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "show_legend": false
+            },
+            "layout": {
+                "x": 1,
+                "y": 65,
+                "width": 37,
+                "height": 15
+            }
+        },
+        {
+            "id": 18,
+            "definition": {
+                "type": "image",
+                "url": "https://static.datadoghq.com/static/images/saas_logos/bot/exchange_server@2x.png",
+                "sizing": "zoom"
+            },
+            "layout": {
+                "x": 1,
+                "y": 1,
+                "width": 37,
+                "height": 11
+            }
+        },
+        {
+            "id": 19,
+            "definition": {
+                "type": "note",
+                "content": "General",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 1,
+                "y": 14,
+                "width": 37,
+                "height": 7
+            }
+        },
+        {
+            "id": 26,
+            "definition": {
+                "type": "note",
+                "content": "Store",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 40,
+                "y": 1,
+                "width": 37,
+                "height": 7
+            }
+        },
+        {
+            "id": 27,
+            "definition": {
+                "type": "note",
+                "content": "Client",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 79,
+                "y": 1,
+                "width": 37,
+                "height": 7
+            }
+        },
+        {
+            "id": 28,
+            "definition": {
+                "type": "note",
+                "content": "Database",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 118,
+                "y": 1,
+                "width": 37,
+                "height": 7
+            }
+        },
+        {
+            "id": 29,
+            "definition": {
+                "type": "note",
+                "content": "Outlook Web Application",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "right"
+            },
+            "layout": {
+                "x": 97,
+                "y": 43,
+                "width": 12,
+                "height": 15
+            }
+        },
+        {
+            "id": 30,
+            "definition": {
+                "type": "note",
+                "content": "Web Service",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "right"
+            },
+            "layout": {
+                "x": 97,
+                "y": 60,
+                "width": 12,
+                "height": 15
+            }
+        },
+        {
+            "id": 32,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:exchange.network.tcpv6.connection_failures{*}",
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": "<=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            },
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "white_on_red"
+                            }
+                        ]
+                    }
+                ],
+                "title": "Failed connections",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "autoscale": true,
+                "precision": 0
+            },
+            "layout": {
+                "x": 1,
+                "y": 23,
+                "width": 18,
+                "height": 9
+            }
+        },
+        {
+            "id": 33,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:exchange.network.outbound_errors{*}",
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": "<=",
+                                "value": 0,
+                                "palette": "white_on_green"
+                            },
+                            {
+                                "comparator": ">",
+                                "value": 0,
+                                "palette": "white_on_yellow"
+                            },
+                            {
+                                "comparator": ">=",
+                                "value": 10,
+                                "palette": "white_on_red"
+                            }
+                        ]
+                    }
+                ],
+                "title": "Outbound packet error",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 20,
+                "y": 23,
+                "width": 18,
+                "height": 9
+            }
+        },
+        {
+            "id": 34,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:exchange.database.io_db_reads_attached_persec{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    },
+                    {
+                        "q": "sum:exchange.database.io_db_writes_attached_persec{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Number of I/O operations",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "show_legend": false
+            },
+            "layout": {
+                "x": 118,
+                "y": 26,
+                "width": 37,
+                "height": 15
+            }
+        },
+        {
+            "id": 35,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:exchange.rpc.ops_persec{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Number of operations",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "show_legend": false
+            },
+            "layout": {
+                "x": 40,
+                "y": 52,
+                "width": 37,
+                "height": 15
+            }
+        },
+        {
+            "id": 37,
+            "definition": {
+                "type": "note",
+                "content": "RPC",
+                "background_color": "gray",
+                "font_size": "18",
+                "text_align": "center",
+                "show_tick": true,
+                "tick_pos": "50%",
+                "tick_edge": "bottom"
+            },
+            "layout": {
+                "x": 40,
+                "y": 43,
+                "width": 55,
+                "height": 7
+            }
+        },
+        {
+            "id": 38,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "avg:exchange.rpc.averaged_latency{*}",
+                        "aggregator": "last",
+                        "conditional_formats": [
+                            {
+                                "comparator": ">=",
+                                "value": 10,
+                                "palette": "white_on_yellow"
+                            },
+                            {
+                                "comparator": "<",
+                                "value": 10,
+                                "palette": "white_on_green"
+                            }
+                        ]
+                    }
+                ],
+                "title": "Latency",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 78,
+                "y": 68,
+                "width": 17,
+                "height": 15
+            }
+        },
+        {
+            "id": 39,
+            "definition": {
+                "type": "timeseries",
+                "requests": [
+                    {
+                        "q": "sum:exchange.rpc.requests{*}",
+                        "display_type": "line",
+                        "style": {
+                            "palette": "dog_classic",
+                            "line_type": "solid",
+                            "line_width": "normal"
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "label": "",
+                    "scale": "linear",
+                    "min": "auto",
+                    "max": "auto",
+                    "include_zero": true
+                },
+                "title": "Number of requests processed",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "show_legend": false
+            },
+            "layout": {
+                "x": 40,
+                "y": 68,
+                "width": 37,
+                "height": 15
+            }
+        },
+        {
+            "id": 40,
+            "definition": {
+                "type": "query_value",
+                "requests": [
+                    {
+                        "q": "sum:exchange.rpc.active_user_count{*}",
+                        "aggregator": "last"
+                    }
+                ],
+                "title": "Active users",
+                "title_size": "16",
+                "title_align": "left",
+                "time": {},
+                "autoscale": true,
+                "precision": 2
+            },
+            "layout": {
+                "x": 78,
+                "y": 52,
+                "width": 17,
+                "height": 15
+            }
+        }
+    ],
+    "template_variables": [],
+    "layout_type": "free",
+    "is_read_only": false,
+    "notify_list": [],
+    "id": "yxx-ehn-dh5"
+}
