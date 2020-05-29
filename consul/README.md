@@ -49,23 +49,6 @@ Follow the instructions below to configure this check for an Agent running on a 
      - url: http://localhost:8500
    ```
    
-1. (optional) Configure Consul to send DogStatsD metrics as described [here][X]
-
-1. Update the [Datadog Agent main configuration file][10] `datadog.yaml` by adding the following configs:
-
-   ```yaml
-   # dogstatsd_mapper_cache_size: 1000  # default to 1000
-   dogstatsd_mapper_profiles:
-     - name: consul
-       prefix: "consul."
-       mappings:
-         - match: 'consul\.http\.([a-zA-Z]+)\.(.*)'
-           match_type: "regex"
-           name: "consul.http.request"
-           tags:
-             http_method: "$1"
-             path: "$2"
-
 2. [Restart the Agent][6].
 
 Reload the Consul Agent to start sending more Consul metrics to DogStatsD.
@@ -119,17 +102,52 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 #### DogStatsD
 
-Alternatively, you can configure Consul to send data to the Agent through [DogStatsD][3] instead of relying on the Agent to pull the data from Consul. To achieve this, add your `dogstatsd_addr` nested under the top-level `telemetry` key in the main Consul configuration file:
+Optionally, you can configure Consul to also send data to the Agent through [DogStatsD][3] instead of relying on the Agent to pull the data from Consul. 
 
-```conf
-{
-  ...
-  "telemetry": {
-    "dogstatsd_addr": "127.0.0.1:8125"
-  },
-  ...
-}
-```
+1. Configure Consul to send DogStatsD metrics by adding the `dogstatsd_addr` nested under the top-level `telemetry` key in the main Consul configuration file:
+
+    ```conf
+    {
+      ...
+      "telemetry": {
+        "dogstatsd_addr": "127.0.0.1:8125"
+      },
+      ...
+    }
+    ```
+
+1. Update the [Datadog Agent main configuration file][16] `datadog.yaml` by adding the following configs to ensure metrics are tagged correctly:
+
+   ```yaml
+   # dogstatsd_mapper_cache_size: 1000  # default to 1000
+   dogstatsd_mapper_profiles:
+     - name: consul
+       prefix: "consul."
+       mappings:
+         - match: 'consul\.http\.([a-zA-Z]+)\.(.*)'
+           match_type: "regex"
+           name: "consul.http.request"
+           tags:
+             http_method: "$1"
+             path: "$2"
+         - match: 'consul\.raft\.replication\.appendEntries\.logs\.([0-9a-f-]+)'
+           match_type: "regex"
+           name: "consul.raft.replication.appendEntries.logs"
+           tags:
+             consul_node_id: "$1"
+         - match: 'consul\.raft\.replication\.appendEntries\.rpc\.([0-9a-f-]+)'
+           match_type: "regex"
+           name: "consul.raft.replication.appendEntries.rpc"
+           tags:
+             consul_node_id: "$1"
+         - match: 'consul\.raft\.replication\.heartbeat\.([0-9a-f-]+)'
+           match_type: "regex"
+           name: "consul.raft.replication.heartbeat"
+           tags:
+             consul_node_id: "$1"
+   ```
+
+3. [Restart the Agent][6].
 
 ### Validation
 
@@ -203,3 +221,4 @@ Need help? Contact [Datadog support][13].
 [13]: https://docs.datadoghq.com/help/
 [14]: https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog
 [15]: https://engineering.datadoghq.com/consul-at-datadog
+[16]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
