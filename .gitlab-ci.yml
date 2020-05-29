@@ -42,6 +42,7 @@ validate-log-integrations:
     paths:
     - errors.txt
     expire_in: 1 day
+    when: always
   tags: [ "runner:main", "size:large" ]
 
 
@@ -53,12 +54,14 @@ notify-slack:
   script:
     - |
       if [[ -s ./errors.txt ]]; then
-          MESSAGE="Logs pipelines don't pass validation steps, please investigate $CI_PIPELINE_URL for errors.\n$(cat errors.txt)"
-          postmessage $NOTIFICATIONS_SLACK_CHANNEL $MESSAGE alert
+          cat errors.txt
+          MESSAGE="Logs pipelines don't pass validation steps, please investigate $CI_JOB_URL for errors."
+          postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
       else
           MESSAGE="Logs pipelines passed validation steps, good job :+1:"
-          postmessage $NOTIFICATIONS_SLACK_CHANNEL $MESSAGE success
+          postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" success
       fi
+  when: always
   tags: [ "runner:main", "size:large" ]
 
 release-auto:
