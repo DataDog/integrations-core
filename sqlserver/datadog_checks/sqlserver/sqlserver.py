@@ -12,6 +12,8 @@ import time
 import traceback, sys
 from contextlib import contextmanager
 from collections import defaultdict
+import datetime
+import time
 # 3rd party
 import adodbapi
 try:
@@ -76,6 +78,7 @@ NTNX__microsoft_sqlserver_user_authn = "NTNX__microsoft_sqlserver_user_authn"
 NTNX__microsoft_sqlserver_view_server_state = "NTNX__microsoft_sqlserver_view_server_state"
 NTNX__microsoft_sqlserver_sql_server_target = "NTNX__microsoft_sqlserver_sql_server_target"
 NTNX__microsoft_sqlserver_connection_setting = "NTNX__microsoft_sqlserver_connection_setting"
+ENDPOINT_UUID_STR = "endpoint_uuid"
 
 SQLCONNECTION_FAILURE_ALERTS = {
     "Login failed for user" : NTNX__microsoft_sqlserver_user_authn,
@@ -86,13 +89,16 @@ SQLCONNECTION_FAILURE_ALERTS = {
 
 # Appropriate alert messages for the alert types
 SQLCONNECTION_ALERT_MESSAGES = {
-    NTNX__microsoft_sqlserver_user_authn : "Login failed for user: %s",
+    NTNX__microsoft_sqlserver_user_authn : "Login failed for user ",
     NTNX__microsoft_sqlserver_view_server_state : "VIEW SERVER STATE permission was denied",
     NTNX__microsoft_sqlserver_connection_setting : "Supplied user does not have the right permissions",
     NTNX__microsoft_sqlserver_sql_server_target : "The target is not an SQL server or instance/port details are incorrect"
 }
 
 ALERT_TYPE_ERROR = 'error'
+
+# Constants for heartbeat failed collections
+NTNX_sqlserver_heartbeat_collection = "NTNX_sqlserver_heartbeat_collection"
 
 class SQLConnectionError(Exception):
     """
@@ -458,11 +464,38 @@ class SQLServer(AgentCheck):
     def raise_alert(self, instance, alert_title, alert_message):
         tags = []
         tags.append('alertMessage:%s' % alert_message)
-        tags.append('endpoint_uuid:%s' % instance.get('endpoint_uuid'))
+        tags.append('endpoint_uuid:%s' % instance.get(ENDPOINT_UUID_STR))
         tags.append('severity:WARNING')
         self.log.debug(u"Alert info. title:%s , text:%s , type:%s , tags:%s", alert_title, alert_message, ALERT_TYPE_ERROR, tags)
         statsd.event(title = alert_title, text = alert_message, alert_type = ALERT_TYPE_ERROR, tags = tags)
 
+
+    def register_heartbeat_collections(self, instance, raised_exception=None, failure=False):
+        message = None
+        if not failure:
+            message = "OK"
+        else:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            exception_details = traceback.format_exception(exc_type, exc_value, exc_traceback)
+            if len(exception_details) > 0:
+                _, message = self.parse_exception(exception_details)
+                if not message:
+                    message = exception_details[-1]
+            # Additional information in the message
+            message = message + "\t" + "username - " + instance.get('username')
+
+        tags = []
+        tags.append('endpoint_uuid:%s' % instance.get(ENDPOINT_UUID_STR))
+        tags.append('timestamp:%d' % time.time())
+        isoformat_timestamp = datetime.datetime.now().isoformat()
+        # The colon in this needs to be replaced because the separator for tags key:<value> is colon
+        # and the colon in timestamp gets misinterpretted as key:<value> by the event processor
+        # This needs to be restructured on the DPM agent end.
+        isoformat_timestamp = isoformat_timestamp.replace(":", ";")
+        tags.append('timestampISO8601:%s' % isoformat_timestamp)
+        tags.append('message:%s' % message)
+        self.log.debug(u"Alert info. text:%s , type:%s , tags:%s", message, ALERT_TYPE_ERROR, tags)
+        statsd.event(title = NTNX_sqlserver_heartbeat_collection, text = message, alert_type = ALERT_TYPE_ERROR, tags = tags)
 
     @contextmanager
     def get_managed_cursor(self, instance, db_key, db_name=None):
@@ -699,6 +732,7 @@ class SQLServer(AgentCheck):
                     self.log.info("Could not close adodbapi db connection\n{0}".format(e))
 
                 self.connections[conn_key]['conn'] = rawconn
+            self.register_heartbeat_collections(instance)
         except Exception as e:
             cx = "%s - %s" % (host, database)
             message = "Unable to connect to SQL Server for instance %s." % cx
@@ -706,6 +740,7 @@ class SQLServer(AgentCheck):
                                tags=service_check_tags, message=message)
 
             self.maybe_raise_alert(e, conn_key, instance)
+            self.register_heartbeat_collections(instance, e, True)
 
             password = instance.get('password')
             tracebk = traceback.format_exc()
