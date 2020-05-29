@@ -393,3 +393,6 @@ instances:
 #   - type: file
 #     path: /var/log/elasticsearch/<CLUSTER_NAME>_index_indexing_slowlog.log
 #     source: elasticsearch
+#   - type: file
+#     path: /var/log/elasticsearch/<CLUSTER_NAME>_index_search_slowlog.log
+#     source: elasticsearch
