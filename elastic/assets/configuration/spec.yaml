@@ -1,4 +1,4 @@
-name: Elastic
+name: Elasticsearch
 files:
 - name: elastic.yaml
   options:
@@ -25,6 +25,7 @@ files:
       value:
         type: boolean
         default: false
+        example: false
     - name: cluster_stats
       description: |
         If your cluster is hosted externally (i.e., you're not pointing to localhost)
@@ -35,11 +36,13 @@ files:
       value:
         type: boolean
         default: false
+        example: false
     - name: index_stats
       description: Set "index_stats" to true to collect metrics for individual indices.
       value:
         type: boolean
         default: false
+        example: false
     - name: pshard_stats
       description: |
         If you enable the "pshard_stats" flag, statistics over primary shards
@@ -52,11 +55,13 @@ files:
       value:
         type: boolean
         default: false
+        example: false
     - name: pshard_graceful_timeout
       description: Continue gracefully if pshard stats TO
       value:
         type: boolean
         default: false
+        example: false
     - name: pending_task_stats
       description: |
         It specifies whether to collect data exposed by the `pending_tasks` cluster endpoint.
@@ -66,14 +71,16 @@ files:
       value:
         type: boolean
         default: true
+        example: true
     - name: admin_forwarder
       description: |
         It is used to signify a URL that includes a context root
-        needed for a forwarder application to access Elasticsearch REST services
-        for example https://www.ibm.com/support/knowledgecenter/SSFTN5_8.5.6/com.ibm.wbpm.main.doc/topics/tadm_fps_esearch.html
+        needed for a forwarder application to access Elasticsearch REST services for example
+        https://www.ibm.com/support/knowledgecenter/SSFTN5_8.5.6/com.ibm.wbpm.main.doc/topics/tadm_fps_esearch.html
       value:
         type: boolean
         default: false
+        example: false
     - template: instances/default
     - template: instances/http
   - template: logs
@@ -84,3 +91,24 @@ files:
     - type: file
       path: /var/log/elasticsearch/<CLUSTER_NAME>_index_indexing_slowlog.log
       source: elasticsearch
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - elasticsearch
+      - elasticsearch-oss
+  - template: init_config
+    options: []
+  - template: instances
+    options:
+    - name: url
+      required: true
+      description: |
+        The URL where elasticsearch accepts HTTP requests. This is used to
+        fetch statistics from the nodes and information about the cluster health.
+      value:
+        example: http://%%host%%:9200
+        type: string
+
