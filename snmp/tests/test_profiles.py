@@ -138,7 +138,9 @@ def test_cisco_voice(aggregator):
     ]
 
     for ctl in dial_controls:
-        aggregator.assert_metric('snmp.{}'.format(ctl), metric_type=aggregator.MONOTONIC_COUNT, tags=["peer_index:7"] + tags)
+        aggregator.assert_metric(
+            'snmp.{}'.format(ctl), metric_type=aggregator.MONOTONIC_COUNT, tags=["peer_index:7"] + tags
+        )
 
     pim_tags = tags + ['pim_host:test', 'pim_name:name', 'pim_num:2']
     aggregator.assert_metric('snmp.{}'.format("cccaPimStatus"), metric_type=aggregator.GAUGE, tags=pim_tags)
