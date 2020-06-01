@@ -2,7 +2,7 @@
 #
 init_config:
 
-    ## @param nfsiostat_path - string - optional - default: /usr/local/sbin/nfsiostat
+    ## @param nfsiostat_path - string - optional
     ## A version of nfsiostat is shipped with the Agent binary,
     ## but if you are using a source install, specify the location of nfsiostat
     ## with the nfsiostat_path parameter.

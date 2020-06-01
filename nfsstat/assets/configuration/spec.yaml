@@ -12,6 +12,7 @@ files:
       value:
         type: string
         example: /usr/local/sbin/nfsiostat
+        default: null
     - template: init_config/default
   - template: instances
     options:
