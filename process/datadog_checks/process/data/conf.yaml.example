@@ -51,13 +51,16 @@ instances:
     ##
     ## Note: One and only one of search_string, pid or pid_file must be specified per instance.
     #
-    # search_string: []
+    # search_string:
+    #   - <SEARCH_STRING_1>
+    #   - <SEARCH_STRING_2>
 
+    ## @param pid - integer - optional
     ## A Process id to match.
     ##
     ## Note: One and only one of search_string, pid or pid_file must be specified per instance.
     #
-    # pid: {}
+    # pid: <PID>
 
     ## @param pid_file - string - optional
     ## A Pid file to match.

@@ -54,7 +54,7 @@ files:
           type: array
           items:
             type: string
-          exampe:
+          example:
             - '<SEARCH_STRING_1>'
             - '<SEARCH_STRING_2>'
       - name: pid
@@ -62,8 +62,8 @@ files:
           A Process id to match.
 
           Note: One and only one of search_string, pid or pid_file must be specified per instance.
-        type:
-          value: integer
+        value:
+          type: integer
       - name: pid_file
         description: |
           A Pid file to match.
