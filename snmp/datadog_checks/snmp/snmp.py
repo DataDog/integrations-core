@@ -380,7 +380,7 @@ class SnmpCheck(AgentCheck):
             self.warning(error)
         except Exception as e:
             if not error:
-                error = 'Failed to collect metrics for {} - {}'.format(instance['name'], e)
+                error = 'Failed to collect metrics for {} - {}'.format(instance.get('name', 'unknown'), e)
             self.warning(error)
         finally:
             # Report service checks
