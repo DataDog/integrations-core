@@ -54,6 +54,9 @@ files:
           type: array
           items:
             type: string
+          exampe:
+            - '<SEARCH_STRING_1>'
+            - '<SEARCH_STRING_2>'
       - name: pid
         description: |
           A Process id to match.
@@ -102,6 +105,7 @@ files:
                          use `.inf` for the upper bound.
         value:
           type: object
+          compact_example: true
           example:
             warning: [<BELOW_VALUE> , <TOP_VALUE>]
             critical: [<BELOW_VALUE> , <TOP_VALUE>]
