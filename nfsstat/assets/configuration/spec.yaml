@@ -1,0 +1,18 @@
+name: Nfsstat
+files:
+- name: nfsstat.yaml
+  options:
+  - template: init_config
+    options:
+    - name: nfsiostat_path
+      description: |
+        A version of nfsiostat is shipped with the Agent binary,
+        but if you are using a source install, specify the location of nfsiostat
+        with the nfsiostat_path parameter.
+      value:
+        type: string
+        example: /usr/local/sbin/nfsiostat
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/default
