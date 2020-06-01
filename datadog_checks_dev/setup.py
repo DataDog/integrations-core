@@ -69,7 +69,7 @@ setup(
     include_package_data=True,
     extras_require={
         'cli': [
-            'appdirs',
+            'appdirs>=1.4.4',
             'atomicwrites',
             'click>7',
             'colorama',
