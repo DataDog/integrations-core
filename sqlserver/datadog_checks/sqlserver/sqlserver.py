@@ -471,6 +471,16 @@ class SQLServer(AgentCheck):
 
 
     def register_heartbeat_collections(self, instance, raised_exception=None, failure=False):
+        '''
+        Function to register failed/OK collections into the heartbeat messages. This function raises an event
+        into StatsD server by sending the list of failed/OK collections. 
+        Parameters:
+            instance: Instance on which the collection failed
+            raised_exception: The exception raised when the collection failed. This is parsed to obtain
+            appropriate message
+            failure: This flag denotes if the heartbeat event is being raised for a failed collection or to
+            register an "OK" with the server.
+        '''
         message = None
         if not failure:
             message = "OK"
