@@ -7,7 +7,7 @@ from .metrics import DEFAULT_COUNTERS
 
 
 class HypervCheck(PDHBaseCheck):
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances=None):
         super(HypervCheck, self).__init__(
-            name, init_config, agentConfig, instances=instances, counter_list=DEFAULT_COUNTERS
+            name, init_config, instances=instances, counter_list=DEFAULT_COUNTERS
         )
