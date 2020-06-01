@@ -1,0 +1,130 @@
+name: Process
+files:
+- name: process.yaml
+  options:
+    - template: init_config
+      options:
+      - name: pid_cache_duration
+        description: |
+          Changes the check refresh rate of the matching pid list every X seconds except if it
+          detects a change before. You might want to set it low if you want to
+          alert on process service checks.
+        value:
+          type: integer
+          example: 120
+      - name: access_denied_cache_duration
+        description: |
+          The check maintains a list of PIDs for which it got access denied. It won't try to look at them again for the
+          duration in seconds specified by access_denied_cache_duration.
+        value:
+          type: integer
+          example: 120
+      - name: shared_process_list_cache_duration
+        description: |
+          The check maintains a list of running processes shared among all instances, that is used to generate the
+          matching pid list on each instance. It won't try to look at them again for the duration in seconds
+          specified by shared_process_list_cache_duration.
+        value:
+          type: integer
+          example: 120
+      - name: procfs_path
+        description: |
+          Used to override the default procfs path, e.g. for docker containers with the outside fs mounted at /host/proc
+          DEPRECATED: please specify `procfs_path` globally in `datadog.conf` instead
+        value:
+          type: string
+          example: /proc
+          default: null
+      - template: init_config/default
+    - template: instances
+      options:
+      - name: name
+        description: Used to uniquely identify your metrics as they are tagged with this name in Datadog.
+        required: true
+        value:
+          type: string
+      - name: search_string
+        description: |
+          If one of the elements in the list matches, it return the count of
+          all the processes that match the string exactly by default. Change this behavior with the
+          parameter `exact_match: false`.
+
+          Note: One and only one of search_string, pid or pid_file must be specified per instance.
+        value:
+          type: array
+          items:
+            type: string
+      - name: pid
+        description: |
+          A Process id to match.
+
+          Note: One and only one of search_string, pid or pid_file must be specified per instance.
+        type:
+          value: integer
+      - name: pid_file
+        description: |
+          A Pid file to match.
+          Notes:
+            * agent v6.11+ on windows runs as an unprivileged `ddagentuser`, so make sure to grant it read access to
+              the PID files you specify in this option.
+            * One and only one of search_string, pid or pid_file must be specified per instance.
+        value:
+          type: string
+      - name: exact_match
+        description: |
+          Matches your search_string on proc.name().
+          If you want to match on a substring within proc.cmdline(), set this to false
+          Regex is also supported when this flag is set to `false`.
+
+          Note: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that does not have acces to the full
+          command line of processes running under a different user. This option cannot be used in such cases.
+          https://docs.datadoghq.com/integrations/process/#configuration
+        value:
+          type: boolean
+          default: true
+          example: true
+      - name: ignore_denied_access
+        description: |
+          When getting the number of files descriptors, dd-agent user might
+          get a denied access. Set this to false to not ignore issue a warning if that happens.
+        value:
+          type: boolean
+          default: true
+          example: true
+      - name: thresholds
+        description: |
+          The threshold parameter is composed of two ranges: critical and warning
+            * warning: (optional) List of two values: If the number of processes found is below the first value or
+                       above the second one, the process check returns WARNING. To make an semi-unbounded interval,
+                       use `.inf` for the upper bound.
+            * critical: (optional) List of two values: If the number of processes found is below the first value or
+                        above the second one, the process check returns CRITICAL. To make an semi-unbounded interval,
+                         use `.inf` for the upper bound.
+        value:
+          type: object
+          example:
+            warning: [<BELOW_VALUE> , <TOP_VALUE>]
+            critical: [<BELOW_VALUE> , <TOP_VALUE>]
+      - name: collect_children
+        description: |
+          If true, the check also collects metrics from all child processes of a matched process.
+          Please be aware that the collection is recursive, and might take some time depending on the use case.
+        value:
+          type: boolean
+          default: false
+          example: false
+      - name: user
+        description: |
+          Only report processes belonging to a specific user.
+
+          Note: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that may not have access to the name
+          of the user running the processes. This option cannot be used in such cases.
+        value:
+          type: string
+      - name: try_sudo
+        description: If set to `true`, the check tries to use 'sudo' to collect the 'open_fd' metric on Unix platforms.
+        value:
+          type: boolean
+          default: false
+          example: false
+      - template: instances/default

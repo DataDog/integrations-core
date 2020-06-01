@@ -1,94 +1,108 @@
-## The `system.processes.cpu.pct` metric sent by this check is only accurate for processes that live
-## for more than 30 seconds. Do not expect its value to be accurate for shorter-lived processes.
-## One and only one of search_string, pid or pid_file must be specified per instance.
-
+## All options defined here are available to all instances.
+#
 init_config:
 
-  ## @param pid_cache_duration - integer - optional - default: 120
-  ## Changes the check refresh rate of the matching pid list every X seconds except if it
-  ## detects a change before. You might want to set it low if you want to
-  ## alert on process service checks.
-  #
-  # pid_cache_duration: 120
+    ## @param pid_cache_duration - integer - optional - default: 120
+    ## Changes the check refresh rate of the matching pid list every X seconds except if it
+    ## detects a change before. You might want to set it low if you want to
+    ## alert on process service checks.
+    #
+    # pid_cache_duration: 120
 
-  ## @param access_denied_cache_duration - integer - optional - default: 120
-  ## The check maintains a list of PIDs for which it got access denied. It won't try to look at them again for the
-  ## duration in seconds specified by access_denied_cache_duration.
-  #
-  # access_denied_cache_duration: 120
+    ## @param access_denied_cache_duration - integer - optional - default: 120
+    ## The check maintains a list of PIDs for which it got access denied. It won't try to look at them again for the
+    ## duration in seconds specified by access_denied_cache_duration.
+    #
+    # access_denied_cache_duration: 120
 
-  ## @param shared_process_list_cache_duration - integer - optional - default: 120
-  ## The check maintains a list of running processes shared among all instances, that is used to generate the
-  ## matching pid list on each instance. It won't try to look at them again for the duration in seconds
-  ## specified by shared_process_list_cache_duration.
-  #
-  # shared_process_list_cache_duration: 120
+    ## @param shared_process_list_cache_duration - integer - optional - default: 120
+    ## The check maintains a list of running processes shared among all instances, that is used to generate the
+    ## matching pid list on each instance. It won't try to look at them again for the duration in seconds
+    ## specified by shared_process_list_cache_duration.
+    #
+    # shared_process_list_cache_duration: 120
 
-  ## @param procfs_path - string - optional
-  ## Used to override the default procfs path, e.g. for docker containers with the outside fs mounted at /host/proc
-  ## DEPRECATED: please specify `procfs_path` globally in `datadog.conf` instead
-  #
-  # procfs_path: /proc
+    ## @param procfs_path - string - optional
+    ## Used to override the default procfs path, e.g. for docker containers with the outside fs mounted at /host/proc
+    ## DEPRECATED: please specify `procfs_path` globally in `datadog.conf` instead
+    #
+    # procfs_path: /proc
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
 instances:
 
     ## @param name - string - required
     ## Used to uniquely identify your metrics as they are tagged with this name in Datadog.
     #
-  - name: <PROCESS_METRIC_NAME>
+  - name: <NAME>
 
-    ## @param search_string - list of strings - required
+    ## @param search_string - list of strings - optional
     ## If one of the elements in the list matches, it return the count of
     ## all the processes that match the string exactly by default. Change this behavior with the
     ## parameter `exact_match: false`.
+    ##
+    ## Note: One and only one of search_string, pid or pid_file must be specified per instance.
     #
-    search_string:
-      - <SEARCH_STRING_1>
-      - <SEARCH_STRING_2>
+    # search_string: []
 
-    ## @param pid - string - optional
     ## A Process id to match.
+    ##
+    ## Note: One and only one of search_string, pid or pid_file must be specified per instance.
     #
-    # pid: <PROCESS_PID>
+    # pid: {}
 
     ## @param pid_file - string - optional
     ## A Pid file to match.
-    ## NOTE: agent v6.11+ on windows runs as an unprivileged `ddagentuser`, so make
-    ## sure to grant it read access to the PID files you specify in this option.
+    ## Notes:
+    ##   * agent v6.11+ on windows runs as an unprivileged `ddagentuser`, so make sure to grant it read access to
+    ##     the PID files you specify in this option.
+    ##   * One and only one of search_string, pid or pid_file must be specified per instance.
     #
     # pid_file: <PID_FILE>
 
-    ## @param exact_match - boolean - optional - default: true
+    ## @param exact_match - boolean - optional - default: True
     ## Matches your search_string on proc.name().
     ## If you want to match on a substring within proc.cmdline(), set this to false
-    ## NOTE: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that does not have
-    ## acces to the full command line of processes running under a different user. This option
-    ## cannot be used in such cases.
-    ## https://docs.datadoghq.com/integrations/process/#configuration
     ## Regex is also supported when this flag is set to `false`.
+    ##
+    ## Note: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that does not have acces to the full
+    ## command line of processes running under a different user. This option cannot be used in such cases.
+    ## https://docs.datadoghq.com/integrations/process/#configuration
     #
     # exact_match: true
 
-    ## @param ignore_denied_access - boolean - optional - default: true
+    ## @param ignore_denied_access - boolean - optional - default: True
     ## When getting the number of files descriptors, dd-agent user might
     ## get a denied access. Set this to false to not ignore issue a warning if that happens.
     #
     # ignore_denied_access: true
 
-    ## @param thresholds - object - optional
+    ## @param thresholds - mapping - optional
     ## The threshold parameter is composed of two ranges: critical and warning
     ##   * warning: (optional) List of two values: If the number of processes found is below the first value or
-    ##             above the second one, the process check returns WARNING. To make an semi-unbounded interval, 
-    ##             use `.inf` for the upper bound.
+    ##              above the second one, the process check returns WARNING. To make an semi-unbounded interval,
+    ##              use `.inf` for the upper bound.
     ##   * critical: (optional) List of two values: If the number of processes found is below the first value or
-    ##             above the second one, the process check returns CRITICAL. To make an semi-unbounded interval, 
-    ##             use `.inf` for the upper bound.
+    ##               above the second one, the process check returns CRITICAL. To make an semi-unbounded interval,
+    ##                use `.inf` for the upper bound.
     #
     # thresholds:
-    #   warning: [<BELOW_VALUE> , <TOP_VALUE>]
-    #   critical: [<BELOW_VALUE> , <TOP_VALUE>]
+    #   warning:
+    #   - <BELOW_VALUE>
+    #   - <TOP_VALUE>
+    #   critical:
+    #   - <BELOW_VALUE>
+    #   - <TOP_VALUE>
 
-    ## @param collect_children - boolean - optional - default: false
+    ## @param collect_children - boolean - optional - default: False
     ## If true, the check also collects metrics from all child processes of a matched process.
     ## Please be aware that the collection is recursive, and might take some time depending on the use case.
     #
@@ -96,21 +110,42 @@ instances:
 
     ## @param user - string - optional
     ## Only report processes belonging to a specific user.
-    ## NOTE: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that may not have
-    ## access to the name of the user running the processes. This option cannot be used in such cases.
+    ##
+    ## Note: agent v6.11+ on windows runs as an unprivileged `ddagentuser` that may not have access to the name
+    ## of the user running the processes. This option cannot be used in such cases.
     #
-    # user: <USER_NAME>
+    # user: <USER>
 
-    ## @param try_sudo - boolean - optional - default: false
+    ## @param try_sudo - boolean - optional - default: False
     ## If set to `true`, the check tries to use 'sudo' to collect the 'open_fd' metric on Unix platforms.
     #
     # try_sudo: false
 
-    ## @param tags - list of key:value elements - optional
-    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false

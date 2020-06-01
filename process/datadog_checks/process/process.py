@@ -15,6 +15,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.utils.platform import Platform
+import datadog_agent
 
 from .cache import DEFAULT_SHARED_PROCESS_LIST_CACHE_DURATION, ProcessListCache
 
@@ -59,8 +60,8 @@ class ProcessCheck(AgentCheck):
     # Shared process list
     process_list_cache = ProcessListCache()
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances=None):
+        super(ProcessCheck, self).__init__(name, init_config, instances)
 
         # ad stands for access denied
         # We cache the PIDs getting this error and don't iterate on them more often than `access_denied_cache_duration``
@@ -83,7 +84,8 @@ class ProcessCheck(AgentCheck):
         if Platform.is_linux():
             procfs_path = init_config.get('procfs_path')
             if procfs_path:
-                if 'procfs_path' in agentConfig and procfs_path != agentConfig.get('procfs_path').rstrip('/'):
+                agent_procfs_path = datadog_agent.get_config('procfs_path')
+                if agent_procfs_path and procfs_path != agent_procfs_path.rstrip('/'):
                     self._conflicting_procfs = True
                 else:
                     self._deprecated_init_procfs = True
