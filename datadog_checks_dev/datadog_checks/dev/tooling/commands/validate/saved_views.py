@@ -8,27 +8,27 @@ import click
 from ...utils import complete_valid_checks, get_saved_views, get_valid_integrations, load_saved_views
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success
 
-REQUIRED_HEADERS = {'name', 'type', 'page', 'query'}
+REQUIRED_HEADERS = {'name', 'page', 'query', 'type'}
 
-OPTIONAL_HEADERS = {'timerange', 'visible_facets', 'options'}
+OPTIONAL_HEADERS = {'options', 'timerange', 'visible_facets'}
 
 VALID_TYPES = {'logs', 'trace'}
 
-VALID_PAGES = {'analytics', 'stream', 'patterns', 'insights', 'traces'}
+VALID_PAGES = {'analytics', 'insights', 'patterns', 'stream', 'traces'}
 
-NO_OPTIONS_TYPES = {'patterns', 'insights', 'traces'}
+NO_OPTIONS_TYPES = {'insights', 'patterns', 'traces'}
 
 STREAM_OPTIONS = {
     "columns",
-    "sort",
+    "message_display",
     "show_date_column",
     "show_message_column",
-    "message_display",
     "show_timeline",
+    "sort",
     "stream",
 }
 
-ANALYTICS_OPTIONS = {"limit", "aggregations", 'group_bys', "order", "step_ms", "widget"}
+ANALYTICS_OPTIONS = {"aggregations", "group_bys", "limit", "order", "step_ms", "widget"}
 
 
 ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
