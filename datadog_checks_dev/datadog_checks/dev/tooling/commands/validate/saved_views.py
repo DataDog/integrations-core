@@ -12,11 +12,13 @@ REQUIRED_HEADERS = {'name', 'page', 'query', 'type'}
 
 OPTIONAL_HEADERS = {'options', 'timerange', 'visible_facets'}
 
+ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
+
 VALID_TYPES = {'logs', 'trace'}
 
 VALID_PAGES = {'analytics', 'insights', 'patterns', 'stream', 'traces'}
 
-NO_OPTIONS_TYPES = {'insights', 'patterns', 'traces'}
+NO_OPTIONS_PAGES = {'insights', 'patterns', 'traces'}
 
 STREAM_OPTIONS = {
     "columns",
@@ -29,9 +31,6 @@ STREAM_OPTIONS = {
 }
 
 ANALYTICS_OPTIONS = {"aggregations", "group_bys", "limit", "order", "step_ms", "widget"}
-
-
-ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate saved view files')
@@ -116,7 +115,7 @@ def saved_views(integration):
                     f"for page `analytics`: {view_options_set}"
                 )
 
-            if view_page in NO_OPTIONS_TYPES and view_options:
+            if view_page in NO_OPTIONS_PAGES and view_options:
                 errors = True
                 echo_failure(
                     f"{integration} saved view ({view.get('name')}) has an invalid options "
