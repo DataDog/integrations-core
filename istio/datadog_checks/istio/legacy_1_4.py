@@ -20,6 +20,7 @@ from .metrics import CITADEL_METRICS, GALLEY_METRICS, GENERIC_METRICS, MESH_METR
 
 class LegacyIstioCheck_1_4(OpenMetricsBaseCheck):
 
+    DEFAULT_METRIC_LIMIT = 0
     SOURCE_TYPE_NAME = 'istio'
 
     def __init__(self, name, init_config, instances):
@@ -125,6 +126,10 @@ class LegacyIstioCheck_1_4(OpenMetricsBaseCheck):
                 # Defaults that were set when istio was based on PrometheusCheck
                 'send_monotonic_counter': instance.get('send_monotonic_counter', False),
                 'health_service_check': instance.get('health_service_check', False),
+                # Override flag to submit monotonic_count for Prometheus counter metrics along with gauge.
+                # This allows backwards compatibility for the overriding of `send_monotonic_counter`
+                # in order to submit correct metric types. Monotonic counter metrics end with `.total` to its gauge
+                'send_monotonic_with_gauge': instance.get('send_monotonic_with_gauge', True),
             }
         )
 

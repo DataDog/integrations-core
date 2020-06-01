@@ -4,9 +4,11 @@
 
 CHECK_NAME = 'istio'
 
-
-MOCK_INSTANCE = {
+MOCK_MESH_INSTANCE = {
     'istio_mesh_endpoint': 'http://localhost:42422/metrics',
+}
+
+MOCK_MIXTURE_INSTANCE = {
     'mixer_endpoint': 'http://localhost:9093/metrics',
 }
 
@@ -28,17 +30,90 @@ MOCK_ISTIOD_INSTANCE = {'istiod_endpoint': 'http://localhost:8080/metrics'}
 MOCK_ISTIO_PROXY_MESH_INSTANCE = {'istio_mesh_endpoint': 'http://localhost:15090/metrics'}
 
 
+COUNT_METRICS = [
+    'istio.mesh.request.count.total',
+    'istio.mesh.request.duration.milliseconds.count.total',
+    'istio.mesh.request.duration.milliseconds.sum.total',
+    'istio.mesh.request.size.count.total',
+    'istio.mesh.request.size.sum.total',
+    'istio.mesh.response.size.count.total',
+    'istio.mesh.response.size.sum.total',
+    'istio.mesh.tcp.connections_closed.total.total',
+    'istio.mesh.tcp.connections_opened.total.total',
+    'istio.mesh.tcp.received_bytes.total.total',
+    'istio.mesh.tcp.send_bytes.total.total',
+    'istio.mesh.request.duration.count.total',
+    'istio.mesh.request.duration.sum.total',
+    'istio.pilot.mcp_sink.reconnections',
+    'istio.pilot.mcp_sink.recv_failures_total',
+    'istio.pilot.mcp_sink.request_acks_total',
+    'istio.pilot.rds_expired_nonce',
+    'istio.pilot.total_xds_internal_errors',
+    'istio.pilot.total_xds_rejects',
+    'istio.pilot.xds.push.context_errors',
+    'istio.pilot.xds.push.timeout',
+    'istio.pilot.xds.push.timeout_failures',
+    'istio.pilot.xds.pushes',
+    'istio.pilot.xds.write_timeout',
+    'istio.pilot.go.memstats.alloc_bytes_total',
+    'istio.pilot.go.memstats.frees_total',
+    'istio.pilot.go.memstats.lookups_total',
+    'istio.pilot.go.memstats.mallocs_total',
+    'istio.pilot.process.cpu_seconds_total',
+    'istio.galley.mcp_source.request_acks_total',
+    'istio.galley.process.cpu_seconds_total',
+    'istio.galley.runtime_processor.events_processed_total',
+    'istio.galley.runtime_processor.snapshots_published_total',
+    'istio.galley.runtime_strategy.on_change_total',
+    'istio.galley.runtime_strategy.timer_max_time_reached_total',
+    'istio.galley.runtime_strategy.quiesce_reached_total',
+    'istio.galley.runtime_strategy.timer_resets_total',
+    'istio.galley.source_kube.dynamic_converter_success_total',
+    'istio.galley.source_kube.event_success_total',
+    'istio.galley.validation.cert_key_updates',
+    'istio.galley.validation.config_load',
+    'istio.galley.validation.config_update',
+    'istio.galley.validation.passed',
+    'istio.galley.go.memstats.alloc_bytes_total',
+    'istio.galley.go.memstats.frees_total',
+    'istio.galley.go.memstats.lookups_total',
+    'istio.galley.go.memstats.mallocs_total',
+    'istio.citadel.go.memstats.alloc_bytes_total',
+    'istio.citadel.go.memstats.frees_total',
+    'istio.citadel.go.memstats.lookups_total',
+    'istio.citadel.go.memstats.mallocs_total',
+    'istio.citadel.process.cpu_seconds_total',
+    'istio.citadel.secret_controller.csr_err_count',
+    'istio.citadel.secret_controller.secret_deleted_cert_count',
+    'istio.citadel.secret_controller.svc_acc_created_cert_count',
+    'istio.citadel.secret_controller.svc_acc_deleted_cert_count',
+    'istio.citadel.server.authentication_failure_count',
+    'istio.citadel.server.csr_count',
+    'istio.citadel.server.csr_parsing_err_count',
+    'istio.citadel.server.id_extraction_err_count',
+    'istio.citadel.server.success_cert_issuance_count',
+]
+
 MESH_METRICS = [
     'istio.mesh.request.count',
     'istio.mesh.request.size.count',
     'istio.mesh.request.size.sum',
     'istio.mesh.response.size.count',
     'istio.mesh.response.size.sum',
+    # Counts submitted with `send_monotonic_with_gauge`
+    'istio.mesh.request.count.total',
+    'istio.mesh.request.size.count.total',
+    'istio.mesh.request.size.sum.total',
+    'istio.mesh.response.size.count.total',
+    'istio.mesh.response.size.sum.total',
 ]
 
 MESH_METRICS_1_4 = [
     'istio.mesh.request.duration.count',
     'istio.mesh.request.duration.sum',
+    # Counts submitted with `send_monotonic_with_gauge`
+    'istio.mesh.request.duration.count.total',
+    'istio.mesh.request.duration.sum.total',
 ]
 
 MESH_MERICS_1_5 = [
@@ -49,6 +124,13 @@ MESH_MERICS_1_5 = [
     'istio.mesh.tcp.connections_opened.total',
     'istio.mesh.tcp.received_bytes.total',
     'istio.mesh.tcp.send_bytes.total',
+    # Counts submitted with `send_monotonic_with_gauge`
+    'istio.mesh.request.duration.milliseconds.count.total',
+    'istio.mesh.request.duration.milliseconds.sum.total',
+    'istio.mesh.tcp.connections_closed.total.total',
+    'istio.mesh.tcp.connections_opened.total.total',
+    'istio.mesh.tcp.received_bytes.total.total',
+    'istio.mesh.tcp.send_bytes.total.total',
 ]
 
 
