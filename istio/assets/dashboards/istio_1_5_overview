@@ -60,7 +60,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "top(avg:istio.mesh.request.count{cluster-name:istio-annotated-workaround} by {host}, 10, 'mean', 'desc')",
+                        "q": "top(avg:istio.mesh.request.count{*} by {host}, 10, 'mean', 'desc')",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
