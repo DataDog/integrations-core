@@ -71,7 +71,7 @@ setup(
         'cli': [
             'appdirs',
             'atomicwrites',
-            'click',
+            'click>7',
             'colorama',
             'docker-compose>=1.25',
             'in-toto>=0.4.2',
