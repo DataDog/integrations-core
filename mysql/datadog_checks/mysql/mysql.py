@@ -399,7 +399,7 @@ class MySql(AgentCheck):
         if queries or 'max_custom_queries' in instance:
             self.warning(
                 'The options `queries` and `max_custom_queries` are deprecated and will be '
-                'removed in a future release. Use the `custom_queries` option.'
+                'removed in a future release. Use the `custom_queries` option instead.'
             )
 
         return (

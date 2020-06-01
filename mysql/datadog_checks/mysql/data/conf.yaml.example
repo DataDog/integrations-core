@@ -91,9 +91,9 @@ instances:
     ##                          considered a tag and applied to every
     ##                          metric collected by this particular query.
     ##                b. type - The submission method (gauge, monotonic_count, etc.).
-    ##                          This can also be set to `tag` to tag each metric in the row
-    ##                          with the name and value of the item in this column. You can
-    ##                          use the `count` type to perform aggregation for queries that
+    ##                          Use `tag` to tag each metric in the row
+    ##                          with the name and value of the item in this column.
+    ##                          Use the `count` type to perform aggregation for queries that
     ##                          return multiple rows with the same or no tags.
     ## 3. tags (optional) - A list of tags to apply to each metric.
     #
@@ -104,7 +104,7 @@ instances:
     #       FROM table.events
     #       GROUP BY foo
     #     columns:
-    #       # Columns without a name are ignored, use this for any column you wish to skip:
+    #       # Columns without a name are ignored. Add additional columns to skip:
     #       # - {}
     #       - name: foo
     #         type: tag
@@ -124,7 +124,7 @@ instances:
     ## Define custom queries to collect custom metrics on your MySQL
     ## See https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries to learn more.
     ##
-    ## WARNING: This option is deprecated and will be removed in a future release. Use the `custom_queries` option.
+    ## WARNING: This option is deprecated and will be removed in a future release. Use the `custom_queries` option instead.
     #
     # queries:
     #   - query: <QUERY>
