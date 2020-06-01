@@ -92,7 +92,7 @@ def initialize_root(config, agent=False, core=False, extras=False, here=False):
 
     repo_choice = 'core' if core else 'extras' if extras else 'agent' if agent else config.get('repo', 'core')
     config['repo_choice'] = repo_choice
-    config['repo_name'] = REPO_CHOICES[repo_choice]
+    config['repo_name'] = REPO_CHOICES.get(repo_choice, repo_choice)
 
     message = None
     # TODO: remove this legacy fallback lookup in any future major version bump
