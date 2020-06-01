@@ -60,7 +60,7 @@ def saved_views(integration):
                 view = load_saved_views(saved_view)
             except json.JSONDecodeError as e:
                 errors = True
-                echo_failure(f"{integration} saved view is not valid json: {e}.")
+                echo_failure(f"{integration} saved view is not valid json: {e}")
                 continue
 
             all_keys = set(view.keys())
@@ -83,7 +83,7 @@ def saved_views(integration):
 
             if view['type'] not in VALID_TYPES:
                 errors = True
-                echo_failure(f"{integration} saved view ({view.get('name')}) has an invalid type: {view['type']}")
+                echo_failure(f"{integration} saved view ({view['name']}) has an invalid type: {view['type']}")
 
             # options must be a dict
             view_options = view.get('options', {})
@@ -104,28 +104,28 @@ def saved_views(integration):
             if view_page == "stream" and not view_options_set.issubset(STREAM_OPTIONS):
                 errors = True
                 echo_failure(
-                    f"{integration} saved view ({view.get('name')}) has an invalid options "
+                    f"{integration} saved view ({view['name']}) has an invalid options "
                     f"for page `stream`: {view_options_set}"
                 )
 
-            if view_page == "analytics" and not view_options_set.issubset(ANALYTICS_OPTIONS):
+            elif view_page == "analytics" and not view_options_set.issubset(ANALYTICS_OPTIONS):
                 errors = True
                 echo_failure(
-                    f"{integration} saved view ({view.get('name')}) has an invalid options "
+                    f"{integration} saved view ({view['name']}) has an invalid options "
                     f"for page `analytics`: {view_options_set}"
                 )
 
-            if view_page in NO_OPTIONS_PAGES and view_options:
+            elif view_page in NO_OPTIONS_PAGES and view_options:
                 errors = True
                 echo_failure(
-                    f"{integration} saved view ({view.get('name')}) has an invalid options "
+                    f"{integration} saved view ({view['name']}) has an invalid options "
                     f"for page `{view_page}`: {view_options_set}"
                 )
 
             timerange = view.get('timerange')
             if timerange and "interval_ms" not in timerange:
                 errors = True
-                echo_failure(f"{integration} saved view ({view.get('name')}) has an invalid timerange: {timerange}")
+                echo_failure(f"{integration} saved view ({view['name']}) has an invalid timerange: {timerange}")
 
             elif timerange and not isinstance(timerange['interval_ms'], (int, float)):
                 errors = True

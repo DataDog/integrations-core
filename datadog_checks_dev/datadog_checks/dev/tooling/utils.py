@@ -173,7 +173,7 @@ def get_saved_views(check_name):
     paths = load_manifest(check_name).get('assets', {}).get('saved_views', {})
     views = []
     for path in paths.values():
-        view = os.path.join(get_root(), check_name, path)
+        view = os.path.join(get_root(), check_name, *path.split('/'))
         views.append(view)
     return sorted(views)
 
