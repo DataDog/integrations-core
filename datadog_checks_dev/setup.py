@@ -76,8 +76,6 @@ setup(
             'docker-compose>=1.25',
             'in-toto>=0.4.2',
             'pip-tools',
-            'pylint',
-            'Pillow',
             'pyperclip>=1.7.0',
             'semver',
             'setuptools>=38.6.0',
