@@ -396,6 +396,12 @@ class MySql(AgentCheck):
         connect_timeout = instance.get('connect_timeout', 10)
         max_custom_queries = instance.get('max_custom_queries', self.DEFAULT_MAX_CUSTOM_QUERIES)
 
+        if queries or 'max_custom_queries' in instance:
+            self.warning(
+                'The options `queries` and `max_custom_queries` are deprecated and will be '
+                'removed in a future release. Use the `custom_queries` option.'
+            )
+
         return (
             self.host,
             self.port,
