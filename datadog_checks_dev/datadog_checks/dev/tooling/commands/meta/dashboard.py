@@ -73,6 +73,11 @@ def export(ctx, url, integration):
     payload['created_by']['handle'] = 'support@datadoghq.com'
     payload['created_by']['name'] = 'Datadog'
     payload['created_by'].pop('icon', None)
+    
+    payload.pop('new_id', None)
+    payload.pop('id', None)
+    payload.pop('modified', None)
+    
     output = json.dumps(payload, indent=4, sort_keys=True)
 
     file_name = payload['board_title'].strip().lower()
