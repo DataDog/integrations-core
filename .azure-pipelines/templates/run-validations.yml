@@ -10,23 +10,23 @@ steps:
     displayName: 'Validate Agent requirements'
 
 - script: ddev validate config
-  displayName: 'Validate default configuration files'
+  displayName: 'Valida'
 
 - script: ddev validate dashboards
-  displayName: 'Validate dashboard definition files'
+  displayName: 'Valid'
 
 - ${{ if eq(parameters.repo, 'core') }}:
   - script: ddev validate dep
     displayName: 'Validate dependencies'
 
 - script: ddev validate manifest -i
-  displayName: 'Validate manifest files'
+  displayName: 'Vali'
 
 - script: ddev validate metadata
-  displayName: 'Validate metric data'
+  displayName: 'Val'
 
 - script: ddev validate saved-views
-  displayName: 'Validate saved views data'
+  displayName: 'Va'
 
 - script: ddev validate service-checks
   displayName: 'V'
