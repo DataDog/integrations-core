@@ -1,7 +1,6 @@
-# Base profile for Cisco devices
+# Metrics mixin for Cisco devices.
 
 extends:
-  - _base.yaml
   - _generic-router-if.yaml
   - _generic-router-tcp.yaml
   - _generic-router-udp.yaml
@@ -187,7 +186,7 @@ metrics:
       - OID: 1.3.6.1.4.1.9.9.388.1.2.2.1.3
         name: cvsChassisUpTime
     metric_tags:
-      - column: 
+      - column:
           OID: 1.3.6.1.4.1.9.9.388.1.2.2.1.1
           name: cvsChassisSwitchID
         tag: chassis_switch_id
