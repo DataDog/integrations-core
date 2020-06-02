@@ -41,7 +41,7 @@ PLUS_API_ENDPOINTS = {
 PLUS_API_STREAM_ENDPOINTS = {
     "stream/server_zones": ["stream", "server_zones"],
     "stream/upstreams": ["stream", "upstreams"],
-    "stream/zone_sync": ["stream", "zone_sync"],
+    "stream/zone_sync": ["stream", "zone_sync"], # API v3 and above.
 }
 
 TAGGED_KEYS = {
@@ -100,6 +100,8 @@ class Nginx(AgentCheck):
             # These are all the endpoints we have to call to get the same data as we did with the old API
             # since we can't get everything in one place anymore.
             for endpoint, nest in chain(iteritems(PLUS_API_ENDPOINTS), iteritems(PLUS_API_STREAM_ENDPOINTS)):
+                if int(plus_api_version) < 3 and endpoint == "stream/zone_sync":
+                    continue
                 response = self._get_plus_api_data(url, plus_api_version, endpoint, nest)
                 self.log.debug("Nginx Plus API version %s `response`: %s", plus_api_version, response)
                 metrics.extend(self.parse_json(response, tags))
