@@ -90,21 +90,21 @@ def test_cisco_voice(aggregator):
         "ccvpSipRtActiveCalls",
         "ccvpSipRtTotalCallLegs",
         "ccvpLicRtPortsInUse",
-    ]
-
-    cvp_counts = [
         "ccvpLicAggMaxPortsInUse",
     ]
+
     for cvp in cvp_gauges:
         aggregator.assert_metric('snmp.{}'.format(cvp), metric_type=aggregator.GAUGE, tags=tags)
 
-    for cvp in cvp_counts:
-        aggregator.assert_metric('snmp.{}'.format(cvp), metric_type=aggregator.RATE, tags=tags)
+    ccms_counts = ["ccmRejectedPhones", "ccmUnregisteredPhones"]
 
-    ccms = ["ccmRegisteredGateways", "ccmRejectedPhones", "ccmRegisteredPhones", "ccmUnregisteredPhones"]
+    ccms_gauges = ["ccmRegisteredGateways", "ccmRegisteredPhones"]
 
-    for ccm in ccms:
+    for ccm in ccms_counts:
         aggregator.assert_metric('snmp.{}'.format(ccm), metric_type=aggregator.RATE, tags=tags)
+
+    for ccm in ccms_gauges:
+        aggregator.assert_metric('snmp.{}'.format(ccm), metric_type=aggregator.GAUGE, tags=tags)
 
     calls = [
         "cvCallVolPeerIncomingCalls",
