@@ -25,9 +25,6 @@ steps:
 - script: ddev validate metadata
   displayName: 'Validate metric data'
 
-- script: ddev validate saved-views
-  displayName: 'Validate saved views data'
-
 - script: ddev validate service-checks
   displayName: 'Validate service check data'
 
