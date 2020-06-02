@@ -282,9 +282,10 @@ def test_non_existent_directory():
 
 def test_non_existent_directory_ignore_missing():
     config = {'directory': '/non-existent/directory', 'ignore_missing': True}
-    dir_check._get_stats = mock.MagicMock()
-    dir_check.check(config)
-    dir_check._get_stats.assert_called_once()
+    check = DirectoryCheck('directory', {}, {})
+    check._get_stats = mock.MagicMock()
+    check.check(config)
+    check._get_stats.assert_called_once()
 
 
 def test_no_recursive_symlink_loop(aggregator):
@@ -301,11 +302,12 @@ def test_no_recursive_symlink_loop(aggregator):
         os.symlink(tdir, os.path.join(dir3, 'symdir'))
 
         # Run Check
-        config = {'directory': tdir, 'recursive': True, 'filegauges': True, 'follow_symlinks': False}
-        dir_check.check(config)
+        instance = {'directory': tdir, 'recursive': True, 'filegauges': True, 'follow_symlinks': False}
+        check = DirectoryCheck('directory', {}, [instance])
+        check.check(instance)
 
         # Assert no warning
-        assert len(dir_check.warnings) == 0
+        assert len(check.warnings) == 0
 
         # Assert metrics
         files = [
