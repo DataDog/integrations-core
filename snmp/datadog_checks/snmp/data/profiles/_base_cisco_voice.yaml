@@ -45,6 +45,7 @@ metrics:
         OID: 1.3.6.1.4.1.9.9.590.1.6.1.1.2
 
   - MIB: CISCO-CVP-MIB
+    forced_type: gauge
     symbol:
       name: ccvpLicAggMaxPortsInUse
       OID: 1.3.6.1.4.1.9.9.590.1.2.12
@@ -54,10 +55,12 @@ metrics:
       OID: 1.3.6.1.4.1.9.9.590.1.2.2
 
   - MIB: CISCO-CCM-MIB
+    forced_type: gauge
     symbol:
       name: ccmRegisteredGateways
       OID: 1.3.6.1.4.1.9.9.156.1.5.8
   - MIB: CISCO-CCM-MIB
+    forced_type: gauge
     symbol:
       name: ccmRegisteredPhones
       OID: 1.3.6.1.4.1.9.9.156.1.5.5
