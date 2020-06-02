@@ -722,7 +722,7 @@ class OpenMetricsScraperMixin(object):
 
         Histograms generate a set of values instead of a unique metric.
         `send_histograms_buckets` is used to specify if you want to
-            send the buckets as tagged values when dealing with histograms.
+        send the buckets as tagged values when dealing with histograms.
 
         `custom_tags` is an array of `tag:value` that will be added to the
         metric when sending the gauge to Datadog.
