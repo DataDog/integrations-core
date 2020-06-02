@@ -22,13 +22,3 @@ files:
         type: string
     - template: instances/http
     - template: instances/default
-  - template: logs
-    example:
-    - type: file
-      path: /var/log/apache2/access.log
-      source: apache
-      service: apache
-    - type: file
-      path: /var/log/apache2/error.log
-      source: apache
-      service: apache
