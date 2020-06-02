@@ -3,7 +3,7 @@ parameters:
 
 steps:
 - script: ddev validate ci
-  displayName: 'Validate CI configuration'
+  displayName: 'Validat'
 
 - ${{ if eq(parameters.repo, 'core') }}:
   - script: ddev validate agent-reqs
@@ -32,4 +32,4 @@ steps:
   displayName: 'V'
 
 - script: ddev validate imports
-  displayName: 'Validate imports'
+  displayName: 's'
