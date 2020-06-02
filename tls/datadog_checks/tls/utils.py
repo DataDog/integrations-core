@@ -79,9 +79,7 @@ def sanitize_cert(cert):
     extensions = []
     for ext in cert.extensions:
         if ext.oid == ExtensionOID.SUBJECT_ALTERNATIVE_NAME:
-            uris = ext.value.get_values_for_type(
-                UniformResourceIdentifier
-            )
+            uris = ext.value.get_values_for_type(UniformResourceIdentifier)
             if any(uri.startswith("arn:") for uri in uris):
                 # Skip URI with arn type that can't be parsed for the moment
                 # More info: https://github.com/pyca/service-identity/issues/38

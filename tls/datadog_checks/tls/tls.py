@@ -13,7 +13,8 @@ from six import text_type
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-from .utils import closing, days_to_seconds, get_protocol_versions, is_ip_address, seconds_to_days, sanitize_cert
+
+from .utils import closing, days_to_seconds, get_protocol_versions, is_ip_address, sanitize_cert, seconds_to_days
 
 # Python 3 only
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)

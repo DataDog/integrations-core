@@ -168,7 +168,10 @@ def test_arn_uri_extensions_are_skipped():
     instance = {
         'local_cert_path': './certs/cert_with_arn_uri.crt',
         'server_hostname': 'ip-172-30-224-16.us-west-2.compute.internal',
-        'validate_hostname': True
+        'validate_hostname': True,
     }
     c = TLSCheck('tls', {}, [instance])
+
+    # Check should run without
+    # https://github.com/pyca/service-identity/issues/38
     c.check(instance)
