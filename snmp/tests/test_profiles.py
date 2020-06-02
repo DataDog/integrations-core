@@ -6,7 +6,12 @@ import pytest
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.snmp import SnmpCheck
-from datadog_checks.snmp.utils import _iter_default_profile_file_paths, _is_abstract_profile, get_profile_definition, _get_profile_name
+from datadog_checks.snmp.utils import (
+    _get_profile_name,
+    _is_abstract_profile,
+    _iter_default_profile_file_paths,
+    get_profile_definition,
+)
 
 from . import common
 from .metrics import (
@@ -47,7 +52,7 @@ from .metrics import (
     VOLTAGE_GAUGES,
 )
 
-# pytestmark = pytest.mark.usefixtures("dd_environment")
+pytestmark = pytest.mark.usefixtures("dd_environment")
 
 
 def test_load_profiles():

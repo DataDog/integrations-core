@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
-from typing import Any, Dict, Mapping, Sequence, Tuple, Union, Iterator
+from typing import Any, Dict, Iterator, Mapping, Sequence, Tuple, Union
 
 import yaml
 
