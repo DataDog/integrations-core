@@ -102,8 +102,8 @@ def test_process_list_cache(aggregator):
     config = {
         'instances': [{'name': 'python', 'search_string': ['python']}, {'name': 'python', 'search_string': ['python']}]
     }
-    process1 = ProcessCheck(common.CHECK_NAME, {}, {}, [config['instances'][0]])
-    process2 = ProcessCheck(common.CHECK_NAME, {}, {}, [config['instances'][1]])
+    process1 = ProcessCheck(common.CHECK_NAME, {}, [config['instances'][0]])
+    process2 = ProcessCheck(common.CHECK_NAME, {}, [config['instances'][1]])
 
     process1.check(config['instances'][0])
     process2.check(config['instances'][1])
@@ -116,7 +116,7 @@ def test_process_list_cache(aggregator):
 
 def test_ad_cache(aggregator):
     config = {'instances': [{'name': 'python', 'search_string': ['python'], 'ignore_denied_access': 'false'}]}
-    process = ProcessCheck(common.CHECK_NAME, {}, {}, config['instances'])
+    process = ProcessCheck(common.CHECK_NAME, {}, config['instances'])
 
     def deny_name(obj):
         raise psutil.AccessDenied()
@@ -360,7 +360,7 @@ def test_relocated_procfs(aggregator):
             }
         ],
     }
-    process = ProcessCheck(common.CHECK_NAME, config['init_config'], {}, config['instances'])
+    process = ProcessCheck(common.CHECK_NAME, config['init_config'], config['instances'])
 
     try:
         with patch('socket.AF_PACKET', create=True), patch('sys.platform', 'linux'), patch(
