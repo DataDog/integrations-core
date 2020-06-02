@@ -6,6 +6,7 @@ import pytest
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.snmp import SnmpCheck
+from datadog_checks.snmp.utils import _iter_default_profile_file_paths, _is_abstract_profile, get_profile_definition, _get_profile_name
 
 from . import common
 from .metrics import (
@@ -46,7 +47,7 @@ from .metrics import (
     VOLTAGE_GAUGES,
 )
 
-pytestmark = pytest.mark.usefixtures("dd_environment")
+# pytestmark = pytest.mark.usefixtures("dd_environment")
 
 
 def test_load_profiles():
@@ -57,6 +58,29 @@ def test_load_profiles():
             check._config.refresh_with_profile(profile)
         except ConfigurationError as e:
             pytest.fail("Profile `{}` is not configured correctly: {}".format(name, e))
+
+
+def test_profile_hierarchy():
+    """
+    Concrete profiles only should inherit from '_base.yaml'.
+    """
+    errors = []
+    compat_base_profiles = ['_base_cisco', '_base_cisco_voice']
+
+    for path in _iter_default_profile_file_paths():
+        name = _get_profile_name(path)
+        definition = get_profile_definition({'definition_file': path})
+        extends = definition.get('extends', [])
+
+        if _is_abstract_profile(name):
+            if '_base.yaml' in extends and name not in compat_base_profiles:
+                errors.append("'{}': mixin wrongly extends '_base.yaml'".format(name))
+        else:
+            if '_base.yaml' not in extends:
+                errors.append("'{}': concrete profile must directly extend '_base.yaml'".format(name))
+
+    if errors:
+        pytest.fail('\n'.join(sorted(errors)))
 
 
 def run_profile_check(recording_name):
