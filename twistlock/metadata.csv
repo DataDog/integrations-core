@@ -13,3 +13,17 @@ twistlock.hosts.cve.details,gauge,,occurrence,,the details of a CVE on a host,-1
 twistlock.hosts.cve.count,gauge,,occurrence,,the number of CVEs a host has,-1,twistlock,cve_count
 twistlock.hosts.compliance.count,gauge,,occurrence,,the number of compliance violations a host has,-1,twistlock,compliance_count
 twistlock.containers.compliance.count,gauge,,occurrence,,the number of compliance violations a container has,-1,twistlock,compliance_count
+prisma.registry.cve.details,gauge,,occurrence,,the details of a CVE on an image in a registry,-1,twistlock,cve_details
+prisma.registry.cve.count,gauge,,occurrence,,the number of CVEs an image has,-1,twistlock,cve_count
+prisma.registry.compliance.count,gauge,,occurrence,,the number of compliance violations an image has,-1,twistlock,compliance_count
+prisma.registry.size,gauge,,byte,,the size of an image in a registry,0,twistlock,size
+prisma.registry.layer_count,gauge,,occurrence,,the count of layers in an image in a registry,0,twistlock,layer_count
+prisma.images.cve.details,gauge,,occurrence,,the details of a CVE on an image,-1,twistlock,cve_details
+prisma.images.cve.count,gauge,,occurrence,,the number of CVEs an image has,-1,twistlock,cve_count
+prisma.images.compliance.count,gauge,,occurrence,,the number of compliance violations an image has,-1,twistlock,compliance_count
+prisma.images.size,gauge,,byte,,the size of a local image,0,twistlock,size
+prisma.images.layer_count,gauge,,occurrence,,the count of layers in a local image,0,twistlock,layer_count
+prisma.hosts.cve.details,gauge,,occurrence,,the details of a CVE on a host,-1,twistlock,cve_details
+prisma.hosts.cve.count,gauge,,occurrence,,the number of CVEs a host has,-1,twistlock,cve_count
+prisma.hosts.compliance.count,gauge,,occurrence,,the number of compliance violations a host has,-1,twistlock,compliance_count
+prisma.containers.compliance.count,gauge,,occurrence,,the number of compliance violations a container has,-1,twistlock,compliance_count

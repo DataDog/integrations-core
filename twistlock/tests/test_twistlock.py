@@ -10,7 +10,7 @@ import pytest
 
 from datadog_checks.base import ensure_bytes
 from datadog_checks.dev import get_here
-from datadog_checks.twistlock import TwistlockCheck
+from datadog_checks.twistlock import PrismaCloudCheck
 
 customtag = "custom:tag"
 
@@ -23,20 +23,20 @@ instance = {
 }
 
 METRICS = [
-    'twistlock.registry.cve.details',
-    'twistlock.registry.cve.count',
-    'twistlock.registry.compliance.count',
-    'twistlock.registry.size',
-    'twistlock.registry.layer_count',
-    'twistlock.images.cve.details',
-    'twistlock.images.cve.count',
-    'twistlock.images.compliance.count',
-    'twistlock.images.size',
-    'twistlock.images.layer_count',
-    'twistlock.hosts.cve.details',
-    'twistlock.hosts.cve.count',
-    'twistlock.hosts.compliance.count',
-    'twistlock.containers.compliance.count',
+    'registry.cve.details',
+    'registry.cve.count',
+    'registry.compliance.count',
+    'registry.size',
+    'registry.layer_count',
+    'images.cve.details',
+    'images.cve.count',
+    'images.compliance.count',
+    'images.size',
+    'images.layer_count',
+    'hosts.cve.details',
+    'hosts.cve.count',
+    'hosts.compliance.count',
+    'containers.compliance.count',
 ]
 
 HERE = get_here()
@@ -69,17 +69,21 @@ def mock_get_factory(fixture_group):
 
 
 @pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
-def test_check(aggregator, fixture_group):
+@pytest.mark.parametrize('use_prisma_prefix', [True, False])
+def test_check(aggregator, fixture_group, use_prisma_prefix):
+    instance['use_prisma_prefix'] = use_prisma_prefix
+    metrics_prefix = 'prisma' if use_prisma_prefix else 'twistlock'
 
-    check = TwistlockCheck('twistlock', {}, [instance])
+    check = PrismaCloudCheck('twistlock', {}, [instance])
 
     with mock.patch('requests.get', side_effect=mock_get_factory(fixture_group), autospec=True):
         check.check(instance)
         check.check(instance)
 
     for metric in METRICS:
-        aggregator.assert_metric(metric)
-        aggregator.assert_metric_has_tag(metric, customtag)
+        metric_name = '{}.{}'.format(metrics_prefix, metric)
+        aggregator.assert_metric(metric_name)
+        aggregator.assert_metric_has_tag(metric_name, customtag)
 
     aggregator.assert_all_metrics_covered()
 
@@ -92,7 +96,7 @@ def test_config_project(aggregator, fixture_group):
     qparams = {'project': project}
 
     instance['project'] = project
-    check = TwistlockCheck('twistlock', {}, [instance])
+    check = PrismaCloudCheck('twistlock', {}, [instance])
 
     with mock.patch('requests.get', side_effect=mock_get_factory(fixture_group), autospec=True) as r:
         check.check(instance)
@@ -109,12 +113,12 @@ def test_config_project(aggregator, fixture_group):
         )
     # Check if metrics are tagged with the project.
     for metric in METRICS:
-        aggregator.assert_metric_has_tag(metric, project_tag)
+        aggregator.assert_metric_has_tag('twistlock.' + metric, project_tag)
 
 
 def test_err_response(aggregator):
 
-    check = TwistlockCheck('twistlock', {}, [instance])
+    check = PrismaCloudCheck('twistlock', {}, [instance])
 
     with pytest.raises(Exception, match='^Error in response'):
         with mock.patch('requests.get', return_value=MockResponse('{"err": "invalid credentials"}'), autospec=True):

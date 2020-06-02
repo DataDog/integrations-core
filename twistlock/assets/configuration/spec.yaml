@@ -20,5 +20,12 @@ files:
         See https://cdn.twistlock.com/docs/api/twistlock_api.html
       value:
         type: string
+    - name: use_prisma_prefix
+      description: Wether to use `prisma` or  the legacy `twistlock` prefix for metrics
+      required: true
+      value:
+        type: boolean
+        example: true
+        default: false
     - template: instances/http
     - template: instances/default

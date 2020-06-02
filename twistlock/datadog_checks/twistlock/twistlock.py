@@ -32,14 +32,15 @@ SEVERITY_TAGS = {
 }
 
 
-class TwistlockCheck(AgentCheck):
+class PrismaCloudCheck(AgentCheck):
     NAMESPACE = 'twistlock'
 
     HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}}
 
     def __init__(self, name, init_config, instances):
-        super(TwistlockCheck, self).__init__(name, init_config, instances)
-
+        super(PrismaCloudCheck, self).__init__(name, init_config, instances)
+        if self.instance.get('use_prisma_prefix', False):
+            self.NAMESPACE = 'prisma'
         self.last_run = datetime.utcnow()
 
         self.config = None

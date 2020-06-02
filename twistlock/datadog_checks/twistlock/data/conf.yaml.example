@@ -56,6 +56,11 @@ instances:
     #
     # project: <PROJECT>
 
+    ## @param use_prisma_prefix - boolean - required
+    ## Wether to use `prisma` or  the legacy `twistlock` prefix for metrics
+    #
+    use_prisma_prefix: true
+
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
