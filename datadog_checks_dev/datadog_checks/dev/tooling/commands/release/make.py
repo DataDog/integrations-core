@@ -71,6 +71,12 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
     if initial_release:
         version = '1.0.0'
 
+    repo_choice = ctx.obj['repo_choice']
+
+    # Signing is done by a pipeline in a separate commit
+    if repo_choice != 'core' and not sign_only:
+        skip_sign = True
+
     # Keep track of the list of checks that have been updated.
     updated_checks = []
     for check in checks:
@@ -143,7 +149,7 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
         commit_targets = [check]
         updated_checks.append(check)
         # update the list of integrations to be shipped with the Agent
-        if check not in NOT_CHECKS:
+        if repo_choice == 'core' and check not in NOT_CHECKS:
             req_file = get_agent_release_requirements()
             commit_targets.append(os.path.basename(req_file))
             echo_waiting('Updating the Agent requirements file... ', nl=False)
