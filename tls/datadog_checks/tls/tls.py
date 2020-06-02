@@ -13,8 +13,7 @@ from six import text_type
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
-
-from .utils import closing, days_to_seconds, get_protocol_versions, is_ip_address, seconds_to_days
+from .utils import closing, days_to_seconds, get_protocol_versions, is_ip_address, seconds_to_days, sanitize_cert
 
 # Python 3 only
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
@@ -156,7 +155,7 @@ class TLSCheck(AgentCheck):
 
         # Load https://cryptography.io/en/latest/x509/reference/#cryptography.x509.Certificate
         try:
-            cert = load_der_x509_certificate(der_cert, default_backend())
+            cert_orig = load_der_x509_certificate(der_cert, default_backend())
         except Exception as e:
             self.service_check(
                 self.SERVICE_CHECK_VALIDATION,
@@ -165,7 +164,7 @@ class TLSCheck(AgentCheck):
                 message='Unable to parse the certificate: {}'.format(e),
             )
             return
-
+        cert = sanitize_cert(cert_orig)
         self.check_protocol_version(protocol_version)
         self.validate_certificate(cert)
         self.check_age(cert)
@@ -312,8 +311,10 @@ class TLSCheck(AgentCheck):
     def local_cert_loader(self, cert):
         backend = default_backend()
         if b'-----BEGIN CERTIFICATE-----' in cert:
-            return load_pem_x509_certificate(cert, backend)
-        return load_der_x509_certificate(cert, backend)
+            cert_orig = load_pem_x509_certificate(cert, backend)
+        else:
+            cert_orig = load_der_x509_certificate(cert, backend)
+        return sanitize_cert(cert_orig)
 
     @property
     def tls_context(self):

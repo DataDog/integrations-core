@@ -5,6 +5,7 @@ from __future__ import division
 
 from ipaddress import ip_address
 
+from cryptography.x509 import ExtensionOID, UniformResourceIdentifier
 from six import PY2, text_type
 
 # https://github.com/python/cpython/blob/ef516d11c1a0f885dba0aba8cf5366502077cdd4/Lib/ssl.py#L158-L165
@@ -72,3 +73,19 @@ else:
 
     def closing(sock):
         return sock
+
+
+def sanitize_cert(cert):
+    extensions = []
+    for ext in cert.extensions:
+        if ext.oid == ExtensionOID.SUBJECT_ALTERNATIVE_NAME:
+            uris = ext.value.get_values_for_type(
+                UniformResourceIdentifier
+            )
+            if any(uri.startswith("arn:") for uri in uris):
+                # Skip URI with arn type that can't be parsed for the moment
+                # More info: https://github.com/pyca/service-identity/issues/38
+                continue
+        extensions.append(ext)
+    cert.extensions._extensions = extensions
+    return cert

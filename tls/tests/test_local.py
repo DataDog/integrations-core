@@ -162,3 +162,13 @@ def test_cert_warning_seconds(aggregator, instance_local_cert_warning_seconds):
     aggregator.assert_metric('tls.days_left', count=1)
     aggregator.assert_metric('tls.seconds_left', count=1)
     aggregator.assert_all_metrics_covered()
+
+
+def test_arn_uri_extensions_are_skipped():
+    instance = {
+        'local_cert_path': './certs/cert_with_arn_uri.crt',
+        'server_hostname': 'ip-172-30-224-16.us-west-2.compute.internal',
+        'validate_hostname': True
+    }
+    c = TLSCheck('tls', {}, [instance])
+    c.check(instance)
