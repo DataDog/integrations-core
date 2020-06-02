@@ -9,7 +9,6 @@ import subprocess
 import time
 from collections import defaultdict
 
-import datadog_agent
 import psutil
 from six import iteritems
 
@@ -18,6 +17,12 @@ from datadog_checks.base.config import _is_affirmative
 from datadog_checks.base.utils.platform import Platform
 
 from .cache import DEFAULT_SHARED_PROCESS_LIST_CACHE_DURATION, ProcessListCache
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
 
 DEFAULT_AD_CACHE_DURATION = 120
 DEFAULT_PID_CACHE_DURATION = 120
