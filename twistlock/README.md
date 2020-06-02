@@ -2,13 +2,13 @@
 
 ## Overview
 
-[Twistlock][1] is a security scanner. It scans containers, hosts, and packages to find vulnerabilities and compliance issues.
+[Prisma Cloud Compute Edition][1] is a security scanner. It scans containers, hosts, and packages to find vulnerabilities and compliance issues.
 
 ## Setup
 
 ### Installation
 
-The Twistlock check is included in the [Datadog Agent][3] package, so you do not need to install anything else on your server.
+The Prisma Cloud Compute Edition check is included in the [Datadog Agent][3] package, so you do not need to install anything else on your server.
 
 ### Configuration
 
@@ -127,17 +127,17 @@ See [metadata.csv][9] for a list of metrics provided by this check.
 
 ### Events
 
-Twistlock sends an event when a new CVE is found.
+Prisma Cloud Compute Edition sends an event when a new CVE is found.
 
 ### Service Checks
 
-Twistlock sends service checks when a scan fails.
+Prisma Cloud Compute Edition sends service checks when a scan fails.
 
 ## Troubleshooting
 
 Need help? Contact [Datadog support][10].
 
-[1]: https://www.twistlock.com
+[1]: https://www.paloaltonetworks.com/prisma/cloud
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: https://github.com/DataDog/integrations-core/blob/master/twistlock/datadog_checks/twistlock/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
