@@ -766,9 +766,9 @@ def test_hp_ilo4(aggregator):
         'cpqSm2CntlrInterfaceStatus',
     ]
 
-    cpqhlth_counts = ['cpqHeSysUtilLifeTime', 'cpqHeAsrRebootCount', 'cpqHeCorrMemTotalErrs']
+    cpqhlth_counts = ['cpqHeAsrRebootCount', 'cpqHeCorrMemTotalErrs']
 
-    cpqhlth_gauges = ['cpqHeSysUtilEisaBusMin', 'cpqHePowerMeterCurrReading']
+    cpqhlth_gauges = ['cpqHeSysUtilEisaBusMin', 'cpqHePowerMeterCurrReading', 'cpqHeSysUtilLifeTime']
 
     cpqsm2_gauges = [
         'cpqSm2CntlrBatteryPercentCharged',
