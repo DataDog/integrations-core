@@ -28,5 +28,8 @@ steps:
 - script: ddev validate saved-views
   displayName: 'Validate saved views data'
 
+- script: ddev validate service-checks
+  displayName: 'V'
+
 - script: ddev validate imports
   displayName: 'Validate imports'
