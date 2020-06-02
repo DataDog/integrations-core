@@ -33,7 +33,7 @@ def _walk(top):
             return
 
         try:
-            is_dir = entry.is_dir()
+            is_dir = entry.is_dir(follow_symlinks=False)
         except OSError:
             is_dir = False
 
