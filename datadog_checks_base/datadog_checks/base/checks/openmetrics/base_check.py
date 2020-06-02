@@ -35,8 +35,6 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
     OpenMetricsBaseCheck is a class that helps scrape endpoints that emit Prometheus metrics only
     with YAML configurations.
 
-    As each check has its own states it maintains a map
-    of all checks so that the one corresponding to the instance is executed.
     Minimal example configuration:
 
         instances:
