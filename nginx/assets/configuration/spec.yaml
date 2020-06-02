@@ -1,0 +1,58 @@
+name: Nginx
+files:
+- name: nginx.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: nginx_status_url
+      required: true
+      description: |
+        For every instance, you need an `nginx_status_url` and can optionally
+        supply a list of tags.  This plugin requires nginx to be compiled with
+        the nginx stub status module option, and activated with the correct
+        configuration stanza.  On debian/ubuntu, this is included in the
+        `nginx-extras` package.  For more details, see:
+
+          http://docs.datadoghq.com/integrations/nginx/
+
+        For NGINX Plus API Release 13+ users using the http_api_module,
+        set nginx_status_url to the location of the `/api` endpoint.
+        E.g. `nginx_status_url: http://localhost:8080/api`
+      value:
+        example: http://localhost:81/nginx_status/
+        type: string
+    - name: use_plus_api
+      description: |
+        If you are using the commercial version of nginx, for releases R13 and above,
+        there is a new API to replace the extended status API.
+        See https://www.nginx.com/blog/nginx-plus-r13-released/
+        To use it set `use_plus_api` to true
+      value:
+        type: boolean
+        example: false
+    - name: plus_api_version
+      description: Specify the version of the Plus API to use. The check supports versions 1 & 2.
+      value:
+        type: integer
+        default: 2
+    - name: use_vts
+      description: |
+        Set this option to true if you are using the nginx vhost_traffic_status module.
+        If you are using VTS, set the nginx_status_url to something like http://localhost/nginx_stats/format/json.
+      value:
+        type: boolean
+        example: false
+    - template: instances/http
+    - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/nginx/access.log
+      source: nginx
+    - type: file
+      path: /var/log/nginx/error.log
+      source: nginx
