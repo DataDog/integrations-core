@@ -6,8 +6,8 @@ files:
     options:
     - name: nfsiostat_path
       description: |
-        A version of nfsiostat is shipped with the Agent binary,
-        but if you are using a source install, specify the location of nfsiostat
+        A version of nfsiostat is shipped with the Agent binary.
+        If you are using a source install, specify the location of nfsiostat
         with the nfsiostat_path parameter.
       value:
         type: string
