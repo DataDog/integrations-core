@@ -73,6 +73,11 @@ instances:
     #
     # ignore_missing: false
 
+    ## @param ignore_missing - boolean - optional - default: true
+    ## Following symlinks when traversing directories.
+    #
+    # follow_symlinks: true
+
     ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##

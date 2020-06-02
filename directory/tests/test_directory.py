@@ -301,7 +301,7 @@ def test_no_recursive_symlink_loop(aggregator):
         os.symlink(tdir, os.path.join(dir3, 'symdir'))
 
         # Run Check
-        config = {'directory': tdir, 'recursive': True, 'filegauges': True}
+        config = {'directory': tdir, 'recursive': True, 'filegauges': True, 'follow_symlinks': False}
         dir_check.check(config)
 
         # Assert no warning
