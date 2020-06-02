@@ -13,6 +13,8 @@ except ImportError:
 GAUGE = 'gauge'
 COUNT = 'count'
 
+METRIC_PREFIX = 'ibm_mq'
+
 
 def queue_metrics():
     return {
