@@ -6,6 +6,7 @@ import pytest
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.snmp import SnmpCheck
+from datadog_checks.snmp.utils import get_profile_definition, recursively_expand_base_profiles
 
 from . import common
 from .metrics import (
@@ -46,8 +47,6 @@ from .metrics import (
     VOLTAGE_GAUGES,
 )
 
-pytestmark = pytest.mark.usefixtures("dd_environment")
-
 
 def test_load_profiles():
     instance = common.generate_instance_config([])
@@ -72,6 +71,34 @@ def run_profile_check(recording_name):
     check.check(instance)
 
 
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'definition_file, equivalent_definition',
+    [
+        pytest.param('_base_cisco.yaml', {'extends': ['_base.yaml', '_cisco-generic.yaml']}, id='generic'),
+        pytest.param(
+            '_base_cisco_voice.yaml',
+            {'extends': ['_base.yaml', '_cisco-generic.yaml', '_cisco-voice.yaml']},
+            id='voice',
+        ),
+    ],
+)
+def test_compat_cisco_base_profiles(definition_file, equivalent_definition):
+    # type: (str, dict) -> None
+    """
+    Cisco and Cisco Voice base profiles were replaced by mixins (see Pull #6792).
+
+    But their definition files should still be present and contain equivalent metrics to ensure backward compatibility.
+    """
+    definition = get_profile_definition({'definition_file': definition_file})
+
+    recursively_expand_base_profiles(definition)
+    recursively_expand_base_profiles(equivalent_definition)
+
+    assert definition == equivalent_definition
+
+
+@pytest.mark.usefixtures("dd_environment")
 def test_cisco_voice(aggregator):
     run_profile_check('cisco_icm')
 
@@ -136,6 +163,7 @@ def test_cisco_voice(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_f5(aggregator):
     run_profile_check('f5')
 
@@ -279,6 +307,7 @@ def test_f5(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_router(aggregator):
     run_profile_check('network')
     common_tags = common.CHECK_TAGS + ['snmp_profile:generic-router']
@@ -318,6 +347,7 @@ def test_router(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_f5_router(aggregator):
     # Use the generic profile against the f5 device
     instance = common.generate_instance_config([])
@@ -353,6 +383,7 @@ def test_f5_router(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_cisco_3850(aggregator):
     run_profile_check('3850')
     # We're not covering all interfaces
@@ -456,6 +487,7 @@ def test_cisco_3850(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_meraki_cloud_controller(aggregator):
     run_profile_check('meraki-cloud-controller')
 
@@ -474,6 +506,7 @@ def test_meraki_cloud_controller(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_idrac(aggregator):
     run_profile_check('idrac')
 
@@ -569,6 +602,7 @@ def test_idrac(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_cisco_nexus(aggregator):
     run_profile_check('cisco_nexus')
 
@@ -652,6 +686,7 @@ def test_cisco_nexus(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_dell_poweredge(aggregator):
     run_profile_check('dell-poweredge')
 
@@ -758,6 +793,7 @@ def test_dell_poweredge(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_hp_ilo4(aggregator):
     run_profile_check('hp_ilo4')
 
@@ -865,6 +901,7 @@ def test_hp_ilo4(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_proliant(aggregator):
     run_profile_check('hpe-proliant')
 
@@ -1008,6 +1045,7 @@ def test_proliant(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_generic_host_resources(aggregator):
     instance = common.generate_instance_config([])
 
@@ -1040,6 +1078,7 @@ def test_generic_host_resources(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_palo_alto(aggregator):
     run_profile_check('pan-common')
 
@@ -1083,6 +1122,7 @@ def test_palo_alto(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_cisco_asa_5525(aggregator):
     run_profile_check('cisco_asa_5525')
 
@@ -1195,6 +1235,7 @@ def test_cisco_asa_5525(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_cisco_csr(aggregator):
     run_profile_check('cisco-csr1000v')
 
@@ -1211,6 +1252,7 @@ def test_cisco_csr(aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_checkpoint_firewall(aggregator):
     run_profile_check('checkpoint-firewall')
 
@@ -1271,6 +1313,7 @@ def test_checkpoint_firewall(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_arista(aggregator):
     run_profile_check('arista')
 
@@ -1309,6 +1352,7 @@ def test_arista(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_aruba(aggregator):
     run_profile_check('aruba')
 
@@ -1368,6 +1412,7 @@ def test_aruba(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_chatsworth(aggregator):
     run_profile_check('chatsworth')
 
@@ -1473,6 +1518,7 @@ def test_chatsworth(aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_isilon(aggregator):
     run_profile_check('isilon')
 
@@ -1544,6 +1590,7 @@ def test_isilon(aggregator):
     aggregator.assert_metric('snmp.ifsTotalBytes', metric_type=aggregator.RATE, tags=common_tags, count=1)
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_apc_ups(aggregator):
     run_profile_check('apc_ups')
     profile_tags = [
