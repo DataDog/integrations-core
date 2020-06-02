@@ -57,10 +57,10 @@ Prometheus gauge metrics are submitted as Datadog gauge metrics.
 A [Prometheus counter](https://prometheus.io/docs/concepts/metric_types/#counter) is cumulative metric that represents 
 a single monotonically increasing counter whose value can only increase or be reset to zero on restart.
 
-Config Option|Value|Datadog Metric Submitted
--------------|-----|------------------------
-`send_monotonic_counter`|`true` (default)| [`monotonic_count`](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/base/checks/openmetrics/mixins.py#L667-L668)
-&nbsp;|`false`|[`gauge`](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/base/checks/openmetrics/mixins.py#L671-L672)
+| Config Option | Value | Datadog Metric Submitted |
+| ------------- | ----- | ------------------------ |
+| `send_monotonic_counter` | `true` (default)| `monotonic_count` |
+| &nbsp; | `false` | `gauge` |
 
 ### Histogram
 
@@ -75,15 +75,15 @@ Histogram metrics ending in:
 - `_bucket` represent the cumulative counters for the observation buckets. Note that buckets are only submitted if `send_histogram_buckets` is enabled.
 
 
-Subtype|Config Option|Value|Datadog Metric Submitted
--------|-------------|-----|------------------------
-&nbsp;|`send_distribution_buckets`|`true`|The entire histogram can be submitted as a single [distribution metric][datadog-distribution-metrics]. If the option is enabled, none of the subtype metrics will be submitted.
-`_sum`|`send_distribution_sums_as_monotonic`|`false` (default)|[`gauge`](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/base/checks/openmetrics/mixins.py#L826-L835)
-&nbsp;| &nbsp;|`true`|`monotonic_gauge`
-`_count`|`send_distribution_counts_as_monotonic`|`false` (default)|[`gauge`](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/base/checks/openmetrics/mixins.py#L753-L763)
-&nbsp;|&nbsp;|`true`|`monotonic_count`
-`_bucket`|`non_cumulative_buckets`|`false` (default)|`gauge`
-&nbsp;|&nbsp;|`true`|`monotonic_count` under `.count` metric name if `send_distribution_counts_as_monotonic` is enabled. Otherwise, `gauge`.
+| Subtype | Config Option | Value | Datadog Metric Submitted |
+| ------- | ------------- | ----- | ------------------------ |
+| &nbsp; | `send_distribution_buckets` | `true` | The entire histogram can be submitted as a single [distribution metric][datadog-distribution-metrics]. If the option is enabled, none of the subtype metrics will be submitted.
+| `_sum` | `send_distribution_sums_as_monotonic` | `false` (default) | `gauge` |
+| &nbsp; | &nbsp; | `true` | `monotonic_gauge` |
+| `_count` | `send_distribution_counts_as_monotonic` | `false` (default) | `gauge` |
+| &nbsp; | &nbsp; | `true` | `monotonic_count` |
+| `_bucket` | `non_cumulative_buckets` | `false` (default) | `gauge` |
+| &nbsp; | &nbsp; | `true` | `monotonic_count` under `.count` metric name if `send_distribution_counts_as_monotonic` is enabled. Otherwise, `gauge`. |
 
 
 ### Summary
@@ -96,10 +96,10 @@ Summary metrics ending in:
 - `_count` represent the total number of events that have been observed.
 -  metrics with labels like `{quantile="<φ>"}` represent the streaming quantiles of observed events.
 
-Subtype|Config Option|Value|Datadog Metric Submitted
--------|-------------|-----|------------------------
-`_sum`|`send_distribution_sums_as_monotonic`|`false` (default)|[`gauge`](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/base/checks/openmetrics/mixins.py#L826-L835)
-&nbsp;| &nbsp;|`true`|`monotonic_gauge`
-`_count`|`send_distribution_counts_as_monotonic`|`false` (default)|[`gauge`](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/datadog_checks/base/checks/openmetrics/mixins.py#L753-L763)
-&nbsp;|&nbsp;|`true`|`monotonic_count`
-`_quantile`|&nbsp;|&nbsp;|`gauge`
+| Subtype | Config Option | Value | Datadog Metric Submitted |
+| ------- | ------------- | ----- | ------------------------ |
+| `_sum` | `send_distribution_sums_as_monotonic` | `false` (default) |`gauge` |
+| &nbsp; | &nbsp; | `true` | `monotonic_gauge` |
+| `_count` | `send_distribution_counts_as_monotonic` | `false` (default) | `gauge` |
+| &nbsp; | &nbsp; | `true` | `monotonic_count` |
+| `_quantile` | &nbsp; | &nbsp; | `gauge` |
