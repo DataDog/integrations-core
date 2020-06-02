@@ -179,12 +179,12 @@ nginx.upstream.peers.sent,gauge,,byte,,The total amount of data sent to this ser
 nginx.upstream.peers.sent_count,count,,byte,,The total amount of data sent to this server (shown as count).,0,nginx,upstr peers sent
 nginx.upstream.peers.unavail,gauge,,,,How many times the server became unavailable for client requests (state "unavail") due to the number of unsuccessful attempts reaching the max_fails threshold.,0,nginx,upstr peers unavail
 nginx.upstream.peers.unavail_count,count,,,,How many times the server became unavailable for client requests (state "unavail") due to the number of unsuccessful attempts reaching the max_fails threshold (shown as count).,0,nginx,upstr peers unavail
-nginx.stream.peers.weight,gauge,,,,Weight of the server.,0,nginx,upstr peers weight
-nginx.stream.zone_sync.status.nodes_online,gauge,,,nginx,The number of peers this node is connected to.
-nginx.stream.zone_sync.status.msgs_in,gauge,,,nginx,The number of messages received by this node.
-nginx.stream.zone_sync.status.msgs_out,gauge,,,nginx,The number of messages sent by this node.
-nginx.stream.zone_sync.status.bytes_in,gauge,,,nginx,The number of bytes received by this node.
-nginx.stream.zone_sync.status.bytes_out,gauge,,,nginx,The number of bytes sent by this node.
-nginx.stream.zone_sync.zones.$zone_name.records_total,gauge,,,nginx,The total number of records stored in the shared memory zone.
-nginx.stream.zone_sync.zones.$zone_name.records_pending,gauge,,,nginx,The number of records that need to be sent to the cluster.
+nginx.upstream.peers.weight,gauge,,,,Weight of the server.,0,nginx,upstr peers weight
+nginx.stream.zone_sync.status.nodes_online,gauge,,,,The number of peers this node is connected to.
+nginx.stream.zone_sync.status.msgs_in,gauge,,,,The number of messages received by this node.
+nginx.stream.zone_sync.status.msgs_out,gauge,,,,The number of messages sent by this node.
+nginx.stream.zone_sync.status.bytes_in,gauge,,,,The number of bytes received by this node.
+nginx.stream.zone_sync.status.bytes_out,gauge,,,,The number of bytes sent by this node.
+nginx.stream.zone_sync.zones.$zone_name.records_total,gauge,,,,The total number of records stored in the shared memory zone.
+nginx.stream.zone_sync.zones.$zone_name.records_pending,gauge,,,,The number of records that need to be sent to the cluster.
 nginx.version,gauge,,,,Version of nginx.,0,nginx,version
