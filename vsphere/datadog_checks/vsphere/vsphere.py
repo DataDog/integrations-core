@@ -1016,12 +1016,20 @@ class VSphereCheck(AgentCheck):
 
         counters = perfManager.perfCounter
         new_metadata = {}
-        for mor_type in ALL_RESOURCES_WITH_METRICS:
-            new_metadata[mor_type] = {}
-            for counter in counters:
-                metric_name = self.format_metric_name(counter)
+        for counter in counters:
+            metric_name = self.format_metric_name(counter)
+            for mor_type in ALL_RESOURCES_WITH_METRICS:
+                if mor_type not in new_metadata:
+                    new_metadata[mor_type] = {}
                 if metric_name in ALLOWED_METRICS_FOR_MOR[mor_type]:
-                    new_metadata[mor_type][counter.key] = dict(name = metric_name, unit=counter.unitInfo.key)
+                    instances = []
+                    instance_value = ALLOWED_METRICS_FOR_MOR[mor_type].get(metric_name)
+                    if instance_value is None:
+                        instances.append("") #aggregate
+                    else:
+                        instances = instance_value.split(",") #add * or comma separated instance values
+
+                    new_metadata[mor_type][counter.key] = dict(name = metric_name, unit=counter.unitInfo.key, instance=instances)
 
         self.log.debug(u"Collected %d counters metadata in %.3f seconds.", len(counters), t.total())
         self.log.info(u"Finished metadata collection for instance {0}".format(i_key))
@@ -1070,7 +1078,7 @@ class VSphereCheck(AgentCheck):
                     try:
                         mor = self.morlist[i_key][mor_type][mor_name]
                     except KeyError:
-                        self.log.error(u"Trying to get metrics from object %s deleted from the cache, skipping.",mor_name)
+                        self.log.warning(u"Trying to get metrics from object %s deleted from the cache, skipping.",mor_name)
                         continue
 
                     for perf_metric in entity_metrics.value:
@@ -1208,14 +1216,14 @@ class VSphereCheck(AgentCheck):
             max_batch_size = self.get_batch_size(resource_type)
             counters = self.metrics_metadata[i_key].get(resource_type,{})
             # - An asterisk (*) to specify all instances of the metric for the specified counterId
+            # - specific instance value of the metric
             # - Double-quotes ("") to specify aggregated statistics
-            if resource_type in REALTIME_RESOURCES:
-                instance_value = "*"
-            else:
-                instance_value = ""
+            # - fetch the instance from metadata to create the query accordingly
             metric_ids = []
-            for counter_key in counters.keys():
-                metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance_value))
+            for counter_key , counter_val in counters.items():
+                counter_instance = counter_val.get('instance',[])
+                for instance_value in counter_instance:
+                    metric_ids.append(vim.PerformanceManager.MetricId(counterId=counter_key, instance=instance_value))
 
             for batch in self.make_batch(mors, metric_ids, max_batch_size):
                 query_specs = []
