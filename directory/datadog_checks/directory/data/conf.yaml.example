@@ -63,7 +63,7 @@ instances:
     #
     # recursive: false
 
-    ## @param ignore_missing - boolean - optional - default: true
+    ## @param follow_symlinks - boolean - optional - default: true
     ## Follow symlinks when traversing directories.
     ## When `recursive: true` is used, setting `follow_symlinks: false` helps avoid symlink loops.
     #
