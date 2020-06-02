@@ -68,7 +68,6 @@ class SnmpCheck(AgentCheck):
         self.profiles = self._load_profiles()
         self.profiles_by_oid = self._get_profiles_mapping()
 
-        self.instance['name'] = self._get_instance_name(self.instance)
         self._config = self._build_config(self.instance)
 
     def _load_profiles(self):
@@ -380,7 +379,7 @@ class SnmpCheck(AgentCheck):
             self.warning(error)
         except Exception as e:
             if not error:
-                error = 'Failed to collect metrics for {} - {}'.format(instance['name'], e)
+                error = 'Failed to collect metrics for {} - {}'.format(self._get_instance_name(instance), e)
             self.warning(error)
         finally:
             # Report service checks
