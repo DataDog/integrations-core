@@ -71,7 +71,7 @@ instances:
     #
     # pid_file: <PID_FILE>
 
-    ## @param exact_match - boolean - optional - default: True
+    ## @param exact_match - boolean - optional - default: true
     ## Matches your search_string on proc.name().
     ## If you want to match on a substring within proc.cmdline(), set this to false
     ## Regex is also supported when this flag is set to `false`.
@@ -82,7 +82,7 @@ instances:
     #
     # exact_match: true
 
-    ## @param ignore_denied_access - boolean - optional - default: True
+    ## @param ignore_denied_access - boolean - optional - default: true
     ## When getting the number of files descriptors, dd-agent user might
     ## get a denied access. Set this to false to not ignore issue a warning if that happens.
     #
@@ -105,7 +105,7 @@ instances:
     #   - <BELOW_VALUE>
     #   - <TOP_VALUE>
 
-    ## @param collect_children - boolean - optional - default: False
+    ## @param collect_children - boolean - optional - default: false
     ## If true, the check also collects metrics from all child processes of a matched process.
     ## Please be aware that the collection is recursive, and might take some time depending on the use case.
     #
@@ -119,7 +119,7 @@ instances:
     #
     # user: <USER>
 
-    ## @param try_sudo - boolean - optional - default: False
+    ## @param try_sudo - boolean - optional - default: false
     ## If set to `true`, the check tries to use 'sudo' to collect the 'open_fd' metric on Unix platforms.
     #
     # try_sudo: false

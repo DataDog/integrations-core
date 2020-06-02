@@ -84,7 +84,6 @@ files:
           https://docs.datadoghq.com/integrations/process/#configuration
         value:
           type: boolean
-          default: true
           example: true
       - name: ignore_denied_access
         description: |
@@ -92,7 +91,6 @@ files:
           get a denied access. Set this to false to not ignore issue a warning if that happens.
         value:
           type: boolean
-          default: true
           example: true
       - name: thresholds
         description: |
@@ -115,7 +113,6 @@ files:
           Please be aware that the collection is recursive, and might take some time depending on the use case.
         value:
           type: boolean
-          default: false
           example: false
       - name: user
         description: |
@@ -129,6 +126,5 @@ files:
         description: If set to `true`, the check tries to use 'sudo' to collect the 'open_fd' metric on Unix platforms.
         value:
           type: boolean
-          default: false
           example: false
       - template: instances/default
