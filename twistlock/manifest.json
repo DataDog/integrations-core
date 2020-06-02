@@ -1,5 +1,5 @@
 {
-  "display_name": "Prisma Cloud Compute Edition",
+  "display_name": "Twistlock",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "twistlock",
