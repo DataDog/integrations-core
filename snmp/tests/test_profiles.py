@@ -62,7 +62,8 @@ def test_load_profiles():
 
 def test_profile_hierarchy():
     """
-    Concrete profiles only should inherit from '_base.yaml'.
+    * Only concrete profiles MUST inherit from '_base.yaml'.
+    * Only concrete profiles MUST define a `sysobjectid` field.
     """
     errors = []
     compat_base_profiles = ['_base_cisco', '_base_cisco_voice']
@@ -71,13 +72,18 @@ def test_profile_hierarchy():
         name = _get_profile_name(path)
         definition = get_profile_definition({'definition_file': path})
         extends = definition.get('extends', [])
+        sysobjectid = definition.get('sysobjectid')
 
         if _is_abstract_profile(name):
             if '_base.yaml' in extends and name not in compat_base_profiles:
                 errors.append("'{}': mixin wrongly extends '_base.yaml'".format(name))
+            if sysobjectid is not None:
+                errors.append("'{}': mixin wrongly defines a `sysobjectid`".format(name))
         else:
             if '_base.yaml' not in extends:
                 errors.append("'{}': concrete profile must directly extend '_base.yaml'".format(name))
+            if sysobjectid is None:
+                errors.append("'{}': concrete profile must define a `sysobjectid`".format(name))
 
     if errors:
         pytest.fail('\n'.join(sorted(errors)))
