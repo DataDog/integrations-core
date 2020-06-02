@@ -1,8 +1,11 @@
 variables:
   REMINDER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:reminder
   TAGGER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:tagger
+  VALIDATE_LOG_INTGS: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_log_intgs
+  NOTIFIER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/slack-notifier:latest
   TAGGER_EMAIL: packages@datadoghq.com
   TAGGER_NAME: ci.integrations-core
+  NOTIFICATIONS_SLACK_CHANNEL: agent-integrations
 
 # Uncomment when/if we modify script to use Jira
 #
@@ -14,10 +17,60 @@ variables:
 #     - ./.gitlab/reminder/release-reminder.sh 2>&1
 #   tags: [ "runner:main", "size:large" ]
 
+stages:
+  - build
+  - validate
+  - release
+  - notify
+
+
+validate-log-integrations:
+  stage: validate
+  image: $VALIDATE_LOG_INTGS
+  only:
+  - schedules
+  variables:
+    WEBUI_INTGS_FILE: web-ui/javascript/datadog/logs/lib/integrations/integrations.ts
+    LOGS_BACKEND_INTGS_ROOT: logs-backend/service/src/main/resources/integrations/
+    INTEGRATIONS_CORE_ROOT: .
+  script:
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/web-ui.git --depth 1
+    - ts-node /scripts/parse_ts.ts > logs_integrations.json
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/Datadog/logs-backend.git --depth 1
+    - python3 /scripts/validate_log_intgs.py logs_integrations.json 2> errors.txt
+  artifacts:
+    paths:
+    - errors.txt
+    expire_in: 1 day
+    when: always
+  tags: [ "runner:main", "size:large" ]
+
+
+notify-slack:
+  stage: notify
+  image: $NOTIFIER_IMAGE
+  only:
+  - schedules
+  script:
+    - |
+      if [[ -s ./errors.txt ]]; then
+          cat errors.txt
+          MESSAGE="Logs pipelines don't pass validation steps, please investigate $CI_JOB_URL for errors."
+          postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" alert
+      else
+          MESSAGE="Logs pipelines passed validation steps, good job :+1:"
+          postmessage "$NOTIFICATIONS_SLACK_CHANNEL" "$MESSAGE" success
+      fi
+  when: always
+  tags: [ "runner:main", "size:large" ]
+
 release-auto:
+  stage: release
   image: $TAGGER_IMAGE
   only:
     - master
+  except:
+    - schedules
   script:
     - ddev --version
     - ddev config set core .
@@ -26,10 +79,13 @@ release-auto:
   tags: [ "runner:main", "size:large" ]
 
 release-manual:
+  stage: release
   image: $TAGGER_IMAGE
   only:
     # Integration release tags e.g. any_check-X.Y.Z-rc.N
     - /.*-\d+\.\d+\.\d+(-(rc|pre|alpha|beta)\.\d+)?$/
+  except:
+  - schedules
   script:
     # Get tagger info
     - tagger=$(git for-each-ref refs/tags/$CI_COMMIT_TAG  --format='%(taggername) %(taggeremail)')
@@ -45,6 +101,7 @@ release-manual:
   tags: [ "runner:main", "size:large" ]
 
 reminder-image-builder:
+  stage: build
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
   only:
     changes:
@@ -59,6 +116,7 @@ reminder-image-builder:
   tags: [ "runner:docker", "size:large" ]
 
 tagger-image-builder:
+  stage: build
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
   only:
     changes:
@@ -71,4 +129,19 @@ tagger-image-builder:
     - docker images $TAGGER_IMAGE
     - docker push $TAGGER_IMAGE
   except: [ tags, schedules ]
+  tags: [ "runner:docker", "size:large" ]
+
+validate-log-intgs-builder:
+  stage: build
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:18.03.1
+  only:
+    changes:
+      - .gitlab/validate-logs-intgs/**
+    refs:
+      - master
+  script:
+    - cd .gitlab/validate-logs-intgs/
+    - docker build --tag $VALIDATE_LOG_INTGS .
+    - docker images $VALIDATE_LOG_INTGS
+    - docker push $VALIDATE_LOG_INTGS
   tags: [ "runner:docker", "size:large" ]
