@@ -102,7 +102,7 @@ class PostgreSql(AgentCheck):
                 self.log.warning('Unhandled relations config type: %s', element)
         return config
 
-    def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics, relations_config):
+    def _run_query_scope(self, cursor, scope, is_custom_metrics, relations_config, cols, descriptors, is_relations):
         if scope is None:
             return None
         if scope == REPLICATION_METRICS or not self.version >= V9:
@@ -110,19 +110,11 @@ class PostgreSql(AgentCheck):
         else:
             log_func = self.log.warning
 
-        # build query
-        cols = list(scope['metrics'])  # list of metrics to query, in some order
-        # we must remember that order to parse results
-
-        # A descriptor is the association of a Postgres column name (e.g. 'schemaname')
-        # to a tag name (e.g. 'schema').
-        descriptors = scope['descriptors']
-
         results = None
         try:
             query = fmt.format(scope['query'], metrics_columns=", ".join(cols))
             # if this is a relation-specific query, we need to list all relations last
-            if scope['relation'] and len(relations_config) > 0:
+            if is_relations:
                 schema_field = get_schema_field(descriptors)
                 relations_filter = build_relations_filter(relations_config, schema_field)
                 self.log.debug("Running query: %s with relations matching: %s", query, relations_filter)
@@ -157,6 +149,36 @@ class PostgreSql(AgentCheck):
                 "Query: %s returned more than %s results (%s). Truncating", query, MAX_CUSTOM_RESULTS, len(results)
             )
             results = results[:MAX_CUSTOM_RESULTS]
+
+        if is_relations and len(results) > self.config.max_relations:
+            self.warning(
+                "Query: %s returned more than %s results (%s). "
+                "Truncating. You can edit this limit by setting the `max_relations` config option",
+                query,
+                self.config.max_relations,
+                len(results),
+            )
+            results = results[: self.config.max_relations]
+
+        return results
+
+    def _query_scope(self, cursor, scope, instance_tags, is_custom_metrics, relations_config):
+        if scope is None:
+            return None
+        # build query
+        cols = list(scope['metrics'])  # list of metrics to query, in some order
+        # we must remember that order to parse results
+
+        # A descriptor is the association of a Postgres column name (e.g. 'schemaname')
+        # to a tag name (e.g. 'schema').
+        descriptors = scope['descriptors']
+        is_relations = scope['relation'] and len(relations_config) > 0
+
+        results = self._run_query_scope(
+            cursor, scope, is_custom_metrics, relations_config, cols, descriptors, is_relations
+        )
+        if not results:
+            return None
 
         # Parse and submit results.
 
