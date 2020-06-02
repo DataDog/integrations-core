@@ -14,6 +14,7 @@ STYLE_FLAG = 'dd_check_style'
 TYPES_FLAG = 'dd_check_types'
 MYPY_ARGS_OPTION = 'dd_mypy_args'
 E2E_READY_CONDITION = 'e2e ready if'
+FIX_DEFAULT_ENVDIR_FLAG = 'ensure_correct_envdir'
 
 
 @tox.hookimpl
@@ -23,11 +24,12 @@ def tox_configure(config):
     For an example, see: https://github.com/tox-dev/tox-travis
     """
     sections = config._cfg.sections
+    base_testenv = sections.get('testenv', {})
 
     # Default to false so:
     # 1. we don't affect other projects using tox
     # 2. check migrations can happen gradually
-    if str(sections.get('testenv', {}).get(STYLE_FLAG, 'false')).lower() == 'true':
+    if str(base_testenv.get(STYLE_FLAG, 'false')).lower() == 'true':
         # Disable flake8 since we already include that
         config.envlist[:] = [env for env in config.envlist if not env.endswith('flake8')]
 
@@ -37,8 +39,16 @@ def tox_configure(config):
         add_style_checker(config, sections, make_envconfig, reader)
         add_style_formatter(config, sections, make_envconfig, reader)
 
+    # Workaround for https://github.com/tox-dev/tox/issues/1593
+    #
+    # Do this only after all dynamic environments have been created
+    if str(base_testenv.get(FIX_DEFAULT_ENVDIR_FLAG, 'false')).lower() == 'true':
+        for env_name, env_config in config.envconfigs.items():
+            if env_config.envdir == config.toxinidir:
+                env_config.envdir = config.toxworkdir / env_name
+
     # Conditionally set 'e2e ready' depending on env variables
-    description = sections.get('testenv', {}).get('description')
+    description = base_testenv.get('description')
     if description and E2E_READY_CONDITION in description:
         data, var = description.split(' if ')
         if var in os.environ:
