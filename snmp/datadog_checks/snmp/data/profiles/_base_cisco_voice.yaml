@@ -13,11 +13,10 @@ metrics:
         OID: 1.3.6.1.2.1.25.5.1.1.1
     metric_tags:
       - column:
-          name: hrSWRunStatus
-          OID: 1.3.6.1.2.1.25.4.2.1.7
-        table: hrSWRunTable
-        tag: status
-
+          name: hrSWRunIndex
+          OID: 1.3.6.1.2.1.25.4.2.1.1
+          table: hrSWRunTable
+        tag: run_index
   - MIB: HOST-RESOURCES-MIB
     table:
       name: hrSWRunTable
@@ -25,7 +24,12 @@ metrics:
     symbols:
       - name: hrSWRunStatus
         OID: 1.3.6.1.2.1.25.4.2.1.7
-
+    metric_tags:
+      - column:
+          name: hrSWRunIndex
+          OID: 1.3.6.1.2.1.25.4.2.1.1
+          table: hrSWRunTable
+        tag: run_index
   - MIB: CISCO-CVP-MIB
     table:
       name: ccvpSipTable
@@ -43,6 +47,12 @@ metrics:
         OID: 1.3.6.1.4.1.9.9.590.1.6.1.1.1
       - name: ccvpSipRtTotalCallLegs
         OID: 1.3.6.1.4.1.9.9.590.1.6.1.1.2
+    metric_tags:
+      - column:
+          name: ccvpServiceIndex
+          OID: 1.3.6.1.4.1.9.9.590.1.5.1.1.1
+          table: ccvpServiceTable
+        tag: service_index
 
   - MIB: CISCO-CVP-MIB
     symbol:
@@ -79,6 +89,13 @@ metrics:
         OID: 1.3.6.1.4.1.9.9.63.1.3.8.5.1.1
       - name: cvCallVolMediaOutgoingCalls
         OID: 1.3.6.1.4.1.9.9.63.1.3.8.5.1.2
+    metric_tags:
+      - MIB: IF-MIB
+        column:
+          OID: 1.3.6.1.2.1.31.1.1.1.1
+          name: ifName
+        table: ifXTable
+        tag: interface
 
   - MIB: CISCO-VOICE-DIAL-CONTROL-MIB
     table:
@@ -89,6 +106,9 @@ metrics:
         OID: 1.3.6.1.4.1.9.9.63.1.3.8.4.1.1
       - name: cvCallVolPeerOutgoingCalls
         OID: 1.3.6.1.4.1.9.9.63.1.3.8.4.1.2
+    metric_tags:
+      - index: 1
+        tag: peer_index
 
   - MIB: DIAL-CONTROL-MIB
     forced_type: monotonic_count
@@ -104,7 +124,9 @@ metrics:
         OID: 1.3.6.1.2.1.10.21.1.2.2.1.6
       - name: dialCtlPeerStatsSuccessCalls
         OID: 1.3.6.1.2.1.10.21.1.2.2.1.3
-
+    metric_tags:
+      - index: 1
+        tag: peer_index
 
   - MIB: CISCO-CONTACT-CENTER-APPS-MIB
     table:
@@ -131,10 +153,16 @@ metrics:
     table:
       name: cccaRouterTable
       OID: 1.3.6.1.4.1.9.9.473.1.3.1
-    symbols: 
+    symbols:
       - name: cccaRouterAgentsLoggedOn
         OID: 1.3.6.1.4.1.9.9.473.1.3.1.1.3
       - name: cccaRouterCallsInProgress
         OID: 1.3.6.1.4.1.9.9.473.1.3.1.1.4
       - name: cccaRouterCallsInQueue
         OID: 1.3.6.1.4.1.9.9.473.1.3.1.1.8
+    metric_tags:
+      - column:
+          OID: 1.3.6.1.4.1.9.9.473.1.2.1.1.1
+          name: cccaInstanceNumber
+          table: cccaInstanceTable
+        tag: instance_number
