@@ -5,7 +5,7 @@ from __future__ import division
 
 import re
 import time
-from collections import defaultdict
+from collections import Counter, defaultdict
 from copy import deepcopy
 
 import redis
@@ -19,6 +19,8 @@ MAX_SLOW_ENTRIES_KEY = "slowlog-max-len"
 
 REPL_KEY = 'master_link_status'
 LINK_DOWN_KEY = 'master_link_down_since_seconds'
+
+DEFAULT_CLIENT_NAME = "unknown"
 
 
 class Redis(AgentCheck):
@@ -132,7 +134,7 @@ class Redis(AgentCheck):
         if 'unix_socket_path' in instance:
             return instance.get('unix_socket_path'), instance.get('db')
         else:
-            return instance.get('host'), self.instance.get('port'), instance.get('db')
+            return instance.get('host'), instance.get('port'), instance.get('db')
 
     def _get_conn(self, instance=None):
         if instance is None:
@@ -147,6 +149,7 @@ class Redis(AgentCheck):
                     'host',
                     'port',
                     'db',
+                    'username',
                     'password',
                     'socket_timeout',
                     'connection_pool',
@@ -245,6 +248,12 @@ class Redis(AgentCheck):
             metric_name = self.CONFIG_GAUGE_KEYS.get(config_key)
             if metric_name is not None:
                 self.gauge(metric_name, value, tags=tags)
+
+        # Save client connections statistics
+        clients = conn.client_list()
+        clients_by_name = Counter(client["name"] or DEFAULT_CLIENT_NAME for client in clients)
+        for name, count in clients_by_name.items():
+            self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
 
         # Save the number of commands.
         self.rate('redis.net.commands', info['total_commands_processed'], tags=tags)
@@ -418,7 +427,7 @@ class Redis(AgentCheck):
             try:
                 max_slow_entries = int(conn.config_get(MAX_SLOW_ENTRIES_KEY)[MAX_SLOW_ENTRIES_KEY])
                 if max_slow_entries > DEFAULT_MAX_SLOW_ENTRIES:
-                    self.warning(
+                    self.log.debug(
                         "Redis {0} is higher than {1}. Defaulting to {1}. "  # noqa: G001
                         "If you need a higher value, please set {0} in your check config".format(
                             MAX_SLOW_ENTRIES_KEY, DEFAULT_MAX_SLOW_ENTRIES

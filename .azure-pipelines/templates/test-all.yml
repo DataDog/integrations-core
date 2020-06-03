@@ -9,6 +9,9 @@ jobs:
     parameters:
       check: ${{ check.checkName }}
       display: ${{ check.displayName }}
-      validate: true
       repo: ${{ parameters.repo }}
       pip_cache_config: ${{ parameters.pip_cache_config }}
+
+      # Avoid max step limits
+      ${{ if eq(check.checkName, 'datadog_checks_base') }}:
+        validate: true

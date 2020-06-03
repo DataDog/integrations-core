@@ -7,6 +7,7 @@ from .clean import clean
 from .config import config
 from .create import create
 from .dep import dep
+from .docs import docs
 from .env import env
 from .meta import meta
 from .release import release
@@ -14,4 +15,4 @@ from .run import run
 from .test import test
 from .validate import validate
 
-ALL_COMMANDS = (agent, ci, clean, config, create, dep, env, meta, release, run, test, validate)
+ALL_COMMANDS = (agent, ci, clean, config, create, dep, docs, env, meta, release, run, test, validate)

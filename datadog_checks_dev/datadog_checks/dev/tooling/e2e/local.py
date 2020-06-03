@@ -179,9 +179,7 @@ class LocalAgentInterface(object):
     def update_check(self):
         command = get_pip_exe(self.python_version, self.platform)
         path = path_join(get_root(), self.check)
-        command.extend(('install', '-e', path))
-        if file_exists(path_join(path, REQUIREMENTS_IN)):
-            command.extend(('-r', path_join(path, REQUIREMENTS_IN)))
+        command.extend(('install', '-e', f'{path}[deps]'))
         return run_command(command, capture=True, check=True)
 
     def update_base_package(self):

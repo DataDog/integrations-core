@@ -18,7 +18,7 @@ flup==1.0.3.dev-20110405; python_version < '3.0'
 flup-py3==1.0.3; python_version > '3.0'
 futures==3.3.0; python_version < '3.0'
 gearman==2.0.2; sys_platform != 'win32' and python_version < '3.0'
-httplib2==0.10.3
+httplib2==0.18.1
 in-toto==0.4.2
 ipaddress==1.0.22; python_version < '3.0'
 jaydebeapi==1.1.1
@@ -27,7 +27,7 @@ kafka-python==2.0.0
 kazoo==2.6.1; sys_platform != 'win32'
 kubernetes==8.0.1
 ldap3==2.5
-lxml==4.4.1
+lxml==4.5.0
 lz4==2.2.1
 meld3==1.0.2
 openstacksdk==0.24.0
@@ -44,7 +44,7 @@ pyhdb==0.3.4
 pymongo==3.8.0
 pymqi==1.10.1; sys_platform != 'win32' and sys_platform != 'darwin'
 pymysql==0.9.3
-pyodbc==4.0.26; sys_platform != 'darwin'
+pyodbc==4.0.26
 pyro4==4.73; sys_platform == 'win32'
 pysmi==0.3.4
 pysnmp==4.4.9
@@ -57,7 +57,7 @@ pytz==2019.3
 pyvmomi==v6.5.0.2017.5-1
 pywin32==227; sys_platform == 'win32'
 pyyaml==5.3.1
-redis==3.3.11
+redis==3.5.2
 requests==2.22.0
 requests-kerberos==0.12.0
 requests_ntlm==1.1.0

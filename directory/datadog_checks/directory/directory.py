@@ -52,6 +52,7 @@ class DirectoryCheck(AgentCheck):
         filegauges = is_affirmative(instance.get('filegauges', False))
         countonly = is_affirmative(instance.get('countonly', False))
         ignore_missing = is_affirmative(instance.get('ignore_missing', False))
+        follow_symlinks = is_affirmative(instance.get('follow_symlinks', True))
         custom_tags = instance.get('tags', [])
 
         if not exists(abs_directory):
@@ -75,6 +76,7 @@ class DirectoryCheck(AgentCheck):
             exclude_dirs_pattern,
             dirs_patterns_full,
             recursive,
+            follow_symlinks,
             countonly,
             custom_tags,
         )
@@ -90,6 +92,7 @@ class DirectoryCheck(AgentCheck):
         exclude_dirs_pattern,
         dirs_patterns_full,
         recursive,
+        follow_symlinks,
         countonly,
         tags,
     ):
@@ -100,7 +103,7 @@ class DirectoryCheck(AgentCheck):
         max_filegauge_balance = self.MAX_FILEGAUGE_COUNT
 
         # If we do not want to recursively search sub-directories only get the root.
-        walker = walk(directory) if recursive else (next(walk(directory)),)
+        walker = walk(directory, follow_symlinks) if recursive else (next(walk(directory, follow_symlinks)),)
 
         # Avoid repeated global lookups.
         get_length = len
@@ -130,11 +133,11 @@ class DirectoryCheck(AgentCheck):
             matched_files_length = get_length(matched_files)
             directory_files += matched_files_length
 
-            for file_entry in matched_files:
-                # We're just looking to count the files.
-                if countonly:
-                    continue
+            # We're just looking to count the files.
+            if countonly:
+                continue
 
+            for file_entry in matched_files:
                 try:
                     file_stat = file_entry.stat()
 

@@ -1,5 +1,10 @@
 # CHANGELOG - pgbouncer
 
+## 1.10.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Fixed] Support more recent version in metadata. See [#6634](https://github.com/DataDog/integrations-core/pull/6634).
+
 ## 1.9.0 / 2020-04-01
 
 * [Added] Adding maxwait_us, total_wait_time, and avg_wait_time metrics. See [#6180](https://github.com/DataDog/integrations-core/pull/6180). Thanks [blaines](https://github.com/blaines).

@@ -9,24 +9,7 @@ import mock
 from datadog_checks.base import ensure_unicode
 from datadog_checks.nfsstat import NfsStatCheck
 
-metrics = [
-    'system.nfs.ops',
-    'system.nfs.rpc_bklog',
-    'system.nfs.read_per_op',
-    'system.nfs.read.ops',
-    'system.nfs.read_per_s',
-    'system.nfs.read.retrans',
-    'system.nfs.read.retrans.pct',
-    'system.nfs.read.rtt',
-    'system.nfs.read.exe',
-    'system.nfs.write_per_op',
-    'system.nfs.write.ops',
-    'system.nfs.write_per_s',
-    'system.nfs.write.retrans',
-    'system.nfs.write.retrans.pct',
-    'system.nfs.write.rtt',
-    'system.nfs.write.exe',
-]
+from .common import METRICS
 
 FIXTURE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
 
@@ -41,7 +24,7 @@ class TestNfsstat:
 
     def test_no_devices(self, aggregator):
         instance = self.INSTANCES['main']
-        c = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, {}, [instance])
+        c = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, [instance])
         with mock.patch(
             'datadog_checks.nfsstat.nfsstat.get_subprocess_output',
             return_value=('No NFS mount points were found', '', 0),
@@ -50,7 +33,7 @@ class TestNfsstat:
 
     def test_check(self, aggregator):
         instance = self.INSTANCES['main']
-        c = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, {}, [instance])
+        c = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, [instance])
 
         with open(os.path.join(FIXTURE_DIR, 'nfsiostat'), 'rb') as f:
             mock_output = ensure_unicode(f.read())
@@ -69,7 +52,7 @@ class TestNfsstat:
             ]
         )
 
-        for metric in metrics:
+        for metric in METRICS:
             aggregator.assert_metric(metric, tags=tags)
             aggregator.assert_metric(metric, tags=tags_unicode)
 

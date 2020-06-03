@@ -1,0 +1,9 @@
+{ 
+  "name": "Kafka patterns",
+  "type": "logs",
+  "page": "patterns",
+  "query": "source:kafka",
+  "timerange": {
+    "interval_ms": 3600000
+  }
+}

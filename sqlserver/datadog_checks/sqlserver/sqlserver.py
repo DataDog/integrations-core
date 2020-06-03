@@ -16,6 +16,8 @@ from six import raise_from
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import is_affirmative
 
+from .utils import set_default_driver_conf
+
 try:
     import adodbapi
 except ImportError:
@@ -29,6 +31,8 @@ except ImportError:
 
 if adodbapi is None and pyodbc is None:
     raise ImportError('adodbapi or pyodbc must be installed to use this check.')
+
+set_default_driver_conf()
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'sql server'
 ALL_INSTANCES = 'ALL'

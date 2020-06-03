@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  nfs-server:
+    image: itsthenetwork/nfs-server-alpine:12
+    container_name: nfs-server
+    # The container must be privileged on CI to start the nfs-server
+    # cap_add: sys_admin is not enough for the CI
+    privileged: true
+    environment:
+      - SHARED_DIRECTORY=/nfs-share
+    volumes:
+      - ./nfs-share:/nfs-share
+
+  nfs-client:
+    image: debian:9
+    # The container must be privileged to mount a volume
+    # cap_add: sys_admin is not enough for the CI
+    privileged: true
+    container_name: nfs-client
+    depends_on: 
+      - nfs-server
+    environment:
+      - NFS_SERVER=nfs-server
+    command: sh -c "./setup.sh && tail -f /dev/null"
+    volumes:
+      - ./client/setup.sh:/setup.sh

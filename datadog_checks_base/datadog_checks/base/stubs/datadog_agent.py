@@ -4,6 +4,15 @@
 
 
 class DatadogAgentStub(object):
+    """
+    This implements the methods defined by the Agent's
+    [C bindings](https://github.com/DataDog/datadog-agent/blob/master/rtloader/common/builtins/datadog_agent.c)
+    which in turn call the
+    [Go backend](https://github.com/DataDog/datadog-agent/blob/master/pkg/collector/python/datadog_agent.go).
+
+    It also provides utility methods for test assertions.
+    """
+
     def __init__(self):
         self._metadata = {}
         self._config = self.get_default_config()

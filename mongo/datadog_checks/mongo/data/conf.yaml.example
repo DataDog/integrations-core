@@ -13,15 +13,58 @@ init_config:
 #
 instances:
 
-    ## @param server - string - required
-    ## Specify the MongoDB URI, with database to use for reporting (defaults to "admin")
-    ## E.g. mongodb://datadog:LnCbkX4uhpuLHSUrcayEoAZA@localhost:27016/admin
+    ## @param hosts - list of strings - required
+    ## The host (and optional port number) where the mongod instance (or mongos instances for
+    ## a sharded cluster) is running. You can specify a hostname, IP address, or UNIX domain
+    ## socket. Specify as many hosts as appropriate for your deployment topology:
+    ##
+    ##   - For a standalone, specify the hostname of the standalone mongod instance.
+    ##   - For a replica set, specify the hostname of a mongod instance as listed in
+    ##     the replica set configuration. You need one check instance per mongod instance
+    ##     in order to collect replication metrics and events.
+    ##   - For a sharded cluster, specify the hostname(s) of the mongos instance(s).
+    ##
+    ## If the port number is not specified, the default port 27017 is used.
     #
-  - server: mongodb://<USER>:<PASSWORD>@<HOST>:<PORT>/<DB_NAME>
+  - hosts:
+      - <HOST_1>
+      - <HOST_2>:<PORT_2>
+
+    ## @param username - string - optional
+    ## The username to use for authentication.
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## The password to use for authentication.
+    #
+    # password: <PASSWORD>
+
+    ## @param database - string - optional
+    ## The database to collect metrics from.
+    ## This is also the authentication database to use if a `username` and `password` is set but the `authSource` is not
+    ## specified in `options`. If `database` is not set and the `authSource` is not specified in `options`,
+    ## the check will attempt to authenticate `username` to the admin database.
+    #
+    # database: <DATABASE>
+
+    ## @param options - mapping - optional
+    ## For a complete list of available connection options, see:
+    ## https://docs.mongodb.com/manual/reference/connection-string/#connections-connection-options
+    ##
+    ## NOTE: For monitoring replica set, do not use the replSet parameter as the Agent expects to always
+    ## connect to the same host. Instead configure one check instance for each node.
+    #
+    # options: {}
+
+    ## @param connection_scheme - string - optional - default: mongodb
+    ## A prefix indicating the connection string format e.g. mongodb+srv.
+    #
+    # connection_scheme: mongodb
 
     ## @param replica_check - boolean - optional - default: true
     ## Whether or not to read from available replicas.
-    ## Disable this if any replicas are inaccessible to the agent.
+    ## Disable this if any replicas are inaccessible to the Agent. This option is not supported for sharded clusters.
     #
     # replica_check: true
 
@@ -106,6 +149,19 @@ instances:
     #       type: <METRIC_TYPE>
     #     tags:
     #     - test:mongodb
+
+    ## @param server - string - optional
+    ## Specify the MongoDB URI, with database to use for reporting (defaults to "admin")
+    ## E.g. mongodb://datadog:LnCbkX4uhpuLHSUrcayEoAZA@localhost:27016/admin
+    ##
+    ##
+    ## <<< DEPRECATED >>>
+    ##
+    ## Release: 8.0.0
+    ## Migration: Use the following options instead:
+    ##            hosts, username, password, database, options, connection_scheme
+    #
+    # server: mongodb://<USER>:<PASSWORD>@<HOST>:<PORT>/<DB_NAME>
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

@@ -264,7 +264,7 @@ Need help? Contact [Datadog support][7].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/airflow/metadata.csv
-[7]: https://docs.datadoghq.com/help
+[7]: https://docs.datadoghq.com/help/
 [8]: https://docs.datadoghq.com/developers/dogstatsd/
 [9]: https://docs.datadoghq.com/agent/
 [10]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/

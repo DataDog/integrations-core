@@ -4,7 +4,6 @@
 import json
 import os
 import re
-from datetime import datetime
 
 from mock import MagicMock
 from pyVmomi import vim
@@ -28,6 +27,7 @@ class MockedAPI(object):
         self.config = config
         self.infrastructure_data = {}
         self.metrics_data = []
+        self.mock_events = []
 
     def check_health(self):
         return True
@@ -105,8 +105,8 @@ class MockedAPI(object):
     def get_max_query_metrics(self):
         return 256
 
-    def get_latest_event_timestamp(self):
-        return datetime.now()
+    def get_new_events(self, start_time):
+        return self.mock_events
 
 
 class MockResponse(Response):

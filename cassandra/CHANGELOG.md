@@ -1,5 +1,9 @@
 # CHANGELOG - cassandra
 
+## 1.6.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 1.5.0 / 2020-04-04
 
 * [Added] Add e2e testing and TotalBlockedTasks metric. See [#5957](https://github.com/DataDog/integrations-core/pull/5957).

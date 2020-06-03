@@ -4,6 +4,7 @@
 import os
 import shutil
 import tempfile
+from os import mkdir
 
 import mock
 import pytest
@@ -23,6 +24,7 @@ def setup_module(module):
     """
     Generate a directory with a file structure for tests
     """
+
     module.temp_dir = tempfile.mkdtemp()
 
     # Create folder structure
@@ -196,7 +198,7 @@ def test_file_metrics(aggregator):
                         aggregator.assert_metric(mname, tags=dir_tags + file_tag, count=1)
 
         # Common metrics
-        for mname in common.COMMON_METRICS:
+        for mname in common.DIR_METRICS:
             aggregator.assert_metric(mname, tags=dir_tags, count=1)
 
         # Raises when coverage < 100%
@@ -263,7 +265,7 @@ def test_file_metrics_many(aggregator):
                     aggregator.assert_metric(mname, tags=dir_tags + file_tag, count=50)
 
         # Common metrics
-        for mname in common.COMMON_METRICS:
+        for mname in common.DIR_METRICS:
             aggregator.assert_metric(mname, tags=dir_tags, count=1)
 
         # Raises when coverage < 100%
@@ -280,6 +282,46 @@ def test_non_existent_directory():
 
 def test_non_existent_directory_ignore_missing():
     config = {'directory': '/non-existent/directory', 'ignore_missing': True}
-    dir_check._get_stats = mock.MagicMock()
-    dir_check.check(config)
-    dir_check._get_stats.assert_called_once()
+    check = DirectoryCheck('directory', {}, {})
+    check._get_stats = mock.MagicMock()
+    check.check(config)
+    check._get_stats.assert_called_once()
+
+
+def test_no_recursive_symlink_loop(aggregator):
+    with temp_directory() as tdir:
+
+        # Setup dir and files
+        dir2 = os.path.join(tdir, 'fixture_dir2')
+        dir3 = os.path.join(tdir, 'fixture_dir2', 'fixture_dir3')
+        mkdir(dir2)
+        mkdir(dir3)
+        open(os.path.join(tdir, 'level1file'), 'w').close()
+        open(os.path.join(dir2, 'level2file'), 'w').close()
+        open(os.path.join(dir3, 'level3file'), 'w').close()
+        os.symlink(tdir, os.path.join(dir3, 'symdir'))
+
+        # Run Check
+        instance = {'directory': tdir, 'recursive': True, 'filegauges': True, 'follow_symlinks': False}
+        check = DirectoryCheck('directory', {}, [instance])
+        check.check(instance)
+
+        # Assert no warning
+        assert len(check.warnings) == 0
+
+        # Assert metrics
+        files = [
+            ['level1file'],
+            ['fixture_dir2', 'level2file'],
+            ['fixture_dir2', 'fixture_dir3', 'level3file'],
+            ['fixture_dir2', 'fixture_dir3', 'symdir'],
+        ]
+        for file in files:
+            for metric in common.FILE_METRICS:
+                tags = ['name:{}'.format(tdir), 'filename:{}'.format(os.path.join(tdir, *file))]
+                aggregator.assert_metric(metric, count=1, tags=tags)
+        for metric in common.DIR_METRICS:
+            tags = ['name:{}'.format(tdir)]
+            aggregator.assert_metric(metric, count=1, tags=tags)
+
+    aggregator.assert_all_metrics_covered()

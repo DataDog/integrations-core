@@ -19,6 +19,7 @@ from datadog_checks.base.errors import CheckException
 STATS_URL = "/;csv;norefresh"
 EVENT_TYPE = SOURCE_TYPE_NAME = 'haproxy'
 BUFSIZE = 8192
+VERSION_PATTERN = re.compile(r"(?:HAProxy|hapee-lb) version ([^,]+)")
 
 
 class Services(object):
@@ -244,6 +245,9 @@ class HAProxy(AgentCheck):
         for line in self._decode_response(r):
             if "HAProxy version" in line:
                 raw_version = line
+            if "hapee-lb version" in line:
+                # HAProxy enterprise edition
+                raw_version = line
             if "uptime = " in line:
                 raw_uptime = line
             if raw_uptime and raw_version:
@@ -252,7 +256,7 @@ class HAProxy(AgentCheck):
         if raw_version == "":
             self.log.debug("unable to find HAProxy version info")
         else:
-            version = re.search(r"HAProxy version ([^,]+)", raw_version).group(1)
+            version = VERSION_PATTERN.search(raw_version).group(1)
             self.log.debug("HAProxy version is %s", version)
             self.set_metadata('version', version)
         if raw_uptime == "":
@@ -310,7 +314,9 @@ class HAProxy(AgentCheck):
                 (tables,) = self._run_socket_commands(parsed_url, (b"show table",))
         except (IndexError, ValueError) as e:
             self.log.error("Could not parse version number '%s': %s", raw_version, e)
-            pass
+        except CheckException:
+            # We got an empty response, which made _run_socket_commands raise an error
+            self.log.debug("No tables returned")
 
         return info, stat, tables
 

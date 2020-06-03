@@ -82,7 +82,7 @@ For instance, to see the latest event logged in the `Security` LogFile, use:
 Get-WmiObject -Class Win32_NTLogEvent -Filter "LogFile='Security'" | select -First 1
 ```
 
-The values listed in the output of the command can be set in `win32_event_log.yaml` to capture the same kind of events.
+The values listed in the output of the command can be set in `win32_event_log.d/conf.yaml` to capture the same kind of events.
 
 <div class="alert alert-info">
 The information given by the  <code> Get-EventLog</code> PowerShell command or the Windows Event ViewerGUI may slightly differ from <code>Get-WmiObject</code>.<br>
@@ -98,7 +98,7 @@ Double-check your filters' values with <code>Get-WmiObject</code> if the integra
       - source_name: Any available source name
       - user: Any valid user name
 
-    For each filter, add an instance in the configuration file at `conf.d/win32_event_log.yaml`.
+    For each filter, add an instance in the configuration file at `win32_event_log.d/conf.yaml`.
 
     Some example filters:
 
@@ -179,8 +179,8 @@ Need help? Contact [Datadog support][7].
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [5]: https://docs.datadoghq.com/logs/processing/pipelines/#integration-pipelines
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://docs.datadoghq.com/help
-[8]: https://docs.datadoghq.com/integrations/faq/how-to-add-event-log-files-to-the-win32-ntlogevent-wmi-class
+[7]: https://docs.datadoghq.com/help/
+[8]: https://docs.datadoghq.com/integrations/faq/how-to-add-event-log-files-to-the-win32-ntlogevent-wmi-class/
 [9]: https://www.datadoghq.com/blog/monitoring-windows-server-2012
 [10]: https://www.datadoghq.com/blog/collect-windows-server-2012-metrics
 [11]: https://www.datadoghq.com/blog/windows-server-monitoring

@@ -27,12 +27,11 @@ SECRET_KEYS = {
 
 DEFAULT_CONFIG = {
     'repo': 'core',
+    'agent': 'master',
+    'org': 'default',
     'color': bool(int(os.environ['DDEV_COLOR'])) if 'DDEV_COLOR' in os.environ else None,
     'dd_api_key': os.getenv('DD_API_KEY'),
     'dd_app_key': os.getenv('DD_APP_KEY'),
-    'org': 'default',
-    'agent6': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
-    'agent5': {'docker': 'datadog/dev-dd-agent:master', 'local': 'latest'},
     'github': {'user': '', 'token': ''},
     'pypi': {'user': '', 'pass': ''},
     'trello': {'key': '', 'token': ''},
@@ -40,6 +39,11 @@ DEFAULT_CONFIG = {
         'core': os.path.join('~', 'dd', 'integrations-core'),
         'extras': os.path.join('~', 'dd', 'integrations-extras'),
         'agent': os.path.join('~', 'dd', 'datadog-agent'),
+    },
+    'agents': {
+        'master': {'docker': 'datadog/agent-dev:master', 'local': 'latest'},
+        '7': {'docker': 'datadog/agent:7', 'local': '7'},
+        '6': {'docker': 'datadog/agent:6', 'local': '6'},
     },
     'orgs': {
         'default': {
@@ -95,12 +99,6 @@ def restore_config():
 def update_config():
     config = copy_default_config()
     config.update(load_config())
-
-    # Support legacy config where agent5 and agent6 were strings
-    if isinstance(config['agent6'], str):
-        config['agent6'] = {'docker': config['agent6'], 'local': 'latest'}
-    if isinstance(config['agent5'], str):
-        config['agent5'] = {'docker': config['agent5'], 'local': 'latest'}
 
     save_config(config)
     return config

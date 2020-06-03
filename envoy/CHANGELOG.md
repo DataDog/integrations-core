@@ -1,5 +1,19 @@
 # CHANGELOG - Envoy
 
+## 1.15.2 / 2020-05-26
+
+* [Fixed] Handle server info for envoy <= 1.8. See [#6740](https://github.com/DataDog/integrations-core/pull/6740).
+
+## 1.15.1 / 2020-05-19
+
+* [Fixed] Safer metadata error handling. See [#6685](https://github.com/DataDog/integrations-core/pull/6685).
+
+## 1.15.0 / 2020-05-17
+
+* [Added] Collect version metadata. See [#6595](https://github.com/DataDog/integrations-core/pull/6595).
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Fixed] Fix style to account for new flake8 rules. See [#6620](https://github.com/DataDog/integrations-core/pull/6620).
+
 ## 1.14.0 / 2020-04-04
 
 * [Added] Update doc about whitelist and blacklist. See [#5875](https://github.com/DataDog/integrations-core/pull/5875).

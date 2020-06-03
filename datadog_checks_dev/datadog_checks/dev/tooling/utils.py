@@ -95,7 +95,9 @@ def initialize_root(config, agent=False, core=False, extras=False, here=False):
     config['repo_name'] = REPO_CHOICES[repo_choice]
 
     message = None
-    root = os.path.expanduser(config.get(repo_choice) or config.get('repos', {}).get(repo_choice, ''))
+    # TODO: remove this legacy fallback lookup in any future major version bump
+    legacy_option = None if repo_choice == 'agent' else config.get(repo_choice)
+    root = os.path.expanduser(legacy_option or config.get('repos', {}).get(repo_choice, ''))
     if here or not dir_exists(root):
         if not here:
             repo = 'datadog-agent' if repo_choice == 'agent' else f'integrations-{repo_choice}'
@@ -139,6 +141,24 @@ def get_version_file(check_name):
         return os.path.join(get_root(), check_name, 'datadog_checks', check_name, '__about__.py')
 
 
+def is_agent_check(check_name):
+    package_root = os.path.join(get_root(), check_name, 'datadog_checks', check_name, '__init__.py')
+    if not file_exists(package_root):
+        return False
+
+    contents = read_file(package_root)
+
+    # Anything more than the version must be a subclass of the base class
+    return contents.count('import ') > 1
+
+
+def code_coverage_enabled(check_name):
+    if check_name in ('datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader'):
+        return True
+
+    return is_agent_check(check_name)
+
+
 def get_manifest_file(check_name):
     return os.path.join(get_root(), check_name, 'manifest.json')
 
@@ -149,6 +169,15 @@ def get_tox_file(check_name):
 
 def get_metadata_file(check_name):
     return os.path.join(get_root(), check_name, 'metadata.csv')
+
+
+def get_saved_views(check_name):
+    paths = load_manifest(check_name).get('assets', {}).get('saved_views', {})
+    views = []
+    for path in paths.values():
+        view = os.path.join(get_root(), check_name, *path.split('/'))
+        views.append(view)
+    return sorted(views)
 
 
 def get_config_file(check_name):
@@ -273,7 +302,7 @@ def read_version_file(check_name):
     return read_file(get_version_file(check_name))
 
 
-def get_version_string(check_name, tag_prefix='v'):
+def get_version_string(check_name, tag_prefix='v', pattern=None):
     """
     Get the version string for the given check.
     """
@@ -284,7 +313,7 @@ def get_version_string(check_name, tag_prefix='v'):
         if version:
             return version.group(1)
     else:
-        return get_latest_tag(tag_prefix=tag_prefix)
+        return get_latest_tag(pattern=pattern, tag_prefix=tag_prefix)
 
 
 def load_manifest(check_name):
@@ -294,6 +323,15 @@ def load_manifest(check_name):
     manifest_path = get_manifest_file(check_name)
     if file_exists(manifest_path):
         return json.loads(read_file(manifest_path).strip())
+    return {}
+
+
+def load_saved_views(path):
+    """
+    Load the manifest file into a dictionary
+    """
+    if file_exists(path):
+        return json.loads(read_file(path).strip())
     return {}
 
 

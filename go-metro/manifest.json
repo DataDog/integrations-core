@@ -1,7 +1,6 @@
 {
   "categories": [
-    "languages",
-    "log collection"
+    "languages"
   ],
   "creates_events": false,
   "display_name": "Go-Metro",

@@ -194,20 +194,20 @@ class TokuMX(AgentCheck):
 
     METRICS = GAUGES + RATES
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances=None):
+        AgentCheck.__init__(self, name, init_config, instances)
         self._last_state_by_server = {}
         self.idx_rates = {}
 
     def get_library_versions(self):
         return {"pymongo": py_version}
 
-    def check_last_state(self, state, server, agentConfig):
+    def check_last_state(self, state, server):
         if self._last_state_by_server.get(server, -1) != state:
             self._last_state_by_server[server] = state
-            return self.create_event(state, server, agentConfig)
+            return self.create_event(state, server)
 
-    def create_event(self, state, server, agentConfig):
+    def create_event(self, state, server):
         """Create an event with a message describing the replication
             state of a mongo node"""
 
@@ -370,7 +370,7 @@ class TokuMX(AgentCheck):
                     server, conn, db, _ = self._get_connection(instance, read_preference=ReadPreference.SECONDARY)
 
                 data['state'] = replSet['myState']
-                self.check_last_state(data['state'], server, self.agentConfig)
+                self.check_last_state(data['state'], server)
                 status['replSet'] = data
         except Exception as e:
             if "OperationFailure" in repr(e) and (

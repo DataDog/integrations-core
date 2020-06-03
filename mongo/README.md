@@ -39,12 +39,12 @@ db.addUser("datadog", "<UNIQUEPASSWORD>", true)
 
 # On MongoDB 3.x or higher, use the createUser command.
 db.createUser({
-  "user":"datadog",
+  "user": "datadog",
   "pwd": "<UNIQUEPASSWORD>",
-  "roles" : [
-    {role: 'read', db: 'admin' },
-    {role: 'clusterMonitor', db: 'admin'},
-    {role: 'read', db: 'local' }
+  "roles": [
+    { role: "read", db: "admin" },
+    { role: "clusterMonitor", db: "admin" },
+    { role: "read", db: "local" }
   ]
 })
 ```
@@ -55,33 +55,43 @@ db.createUser({
 
    ```yaml
    init_config:
-   instances:
-     ## @param server - string - required
-     ## Specify the MongoDB URI, with database to use for reporting (defaults to "admin")
-     ## E.g. mongodb://datadog:LnCbkX4uhpuLHSUrcayEoAZA@localhost:27016/admin
-     #
-     - server: "mongodb://datadog:<UNIQUEPASSWORD>@<HOST>:<PORT>/<DB_NAME>"
 
-       ## @param replica_check - boolean - required - default: true
+   instances:
+       ## @param hosts - list of strings - required
+       ## Hosts to collect metrics from, as is appropriate for your deployment topology.
+       ## E.g. for a standalone deployment, specify the hostname and port of the mongod instance.
+       ## For replica sets or sharded clusters, see instructions in the sample conf.yaml.
+       #
+     - hosts:
+         - <HOST>:<PORT>
+
+       ## @param username - string - optional
+       ## The username to use for authentication.
+       #
+       username: datadog
+
+       ## @param password - string - optional
+       ## The password to use for authentication.
+       #
+       password: <UNIQUEPASSWORD>
+
+       ## @param database - string - optional
+       ## The database to collect metrics from.
+       #
+       database: <DATABASE>
+
+       ## @param options - mapping - optional
+       ## Connection options. For a complete list, see:
+       ## https://docs.mongodb.com/manual/reference/connection-string/#connections-connection-options
+       #
+       options:
+         authSource: admin
+
+       ## @param replica_check - boolean - optional - default: true
        ## Whether or not to read from available replicas.
-       ## Disable this if any replicas are inaccessible to the agent.
+       ## Disable this if any replicas are inaccessible to the Agent.
        #
        replica_check: true
-
-       ## @param additional_metrics - list of strings - optional
-       ## By default, the check collects a sample of metrics from MongoDB.
-       ## This  parameter instructs the check to collect additional metrics on specific topics.
-       ## Available options are:
-       ##   * `metrics.commands` - Use of database commands
-       ##   * `tcmalloc` -  TCMalloc memory allocator
-       ##   * `top` - Usage statistics for each collection
-       ##   * `collection` - Metrics of the specified collections
-       #
-       additional_metrics:
-         - metrics.commands
-         - tcmalloc
-         - top
-         - collection
    ```
 
 2. [Restart the Agent][5].
@@ -123,11 +133,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][8]
 
 ##### Metric collection
 
-| Parameter            | Value                                                                                                                                                                           |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<INTEGRATION_NAME>` | `mongo`                                                                                                                                                                         |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                                                                                                                   |
-| `<INSTANCE_CONFIG>`  | `{"server": "mongodb://datadog:<UNIQUEPASSWORD>@%%host%%:%%port%%/<DB_NAME>", "replica_check": true, "additional_metrics": "metrics.commands","tcmalloc","top","collection"]}` |
+| Parameter            | Value                                                                                                                                     |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `<INTEGRATION_NAME>` | `mongo`                                                                                                                                   |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                                                             |
+| `<INSTANCE_CONFIG>`  | `{"hosts": ["%%hosts%%:%%port%%], "username": "datadog", "password : "<UNIQUEPASSWORD>", "database": "<DATABASE>", "replica_check": true}` |
 
 ##### Trace collection
 
@@ -135,11 +145,11 @@ APM for containerized apps is supported on hosts running Agent v6+ but requires 
 
 Required environment variables on the Agent container:
 
-| Parameter            | Value                                                                      |
-| -------------------- | -------------------------------------------------------------------------- |
-| `<DD_API_KEY>` | `api_key`                                                                  |
-| `<DD_APM_ENABLED>`      | true                                                              |
-| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
+| Parameter                    | Value     |
+| ---------------------------- | --------- |
+| `<DD_API_KEY>`               | `api_key` |
+| `<DD_APM_ENABLED>`           | true      |
+| `<DD_APM_NON_LOCAL_TRAFFIC>` | true      |
 
 See [Tracing Kubernetes Applications][16] and the [Kubernetes Daemon Setup][17] for a complete list of available environment variables and configuration.
 
@@ -214,12 +224,12 @@ Read our series of blog posts about collecting metrics from MongoDB with Datadog
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/tracing/send_traces/
 [7]: https://docs.datadoghq.com/tracing/setup/
-[8]: https://docs.datadoghq.com/agent/kubernetes/integrations
+[8]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [9]: https://docs.datadoghq.com/agent/kubernetes/log/
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/mongo/metadata.csv
 [12]: https://docs.mongodb.org/manual/reference/command/dbStats
-[13]: https://docs.datadoghq.com/help
+[13]: https://docs.datadoghq.com/help/
 [14]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-wiredtiger
 [15]: https://www.datadoghq.com/blog/monitoring-mongodb-performance-metrics-mmap
 [16]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
