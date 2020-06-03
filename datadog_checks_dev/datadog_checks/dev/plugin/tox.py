@@ -14,7 +14,7 @@ STYLE_FLAG = 'dd_check_style'
 TYPES_FLAG = 'dd_check_types'
 MYPY_ARGS_OPTION = 'dd_mypy_args'
 E2E_READY_CONDITION = 'e2e ready if'
-FIX_DEFAULT_ENVDIR_FLAG = 'ensure_correct_envdir'
+FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
 
 
 @tox.hookimpl
