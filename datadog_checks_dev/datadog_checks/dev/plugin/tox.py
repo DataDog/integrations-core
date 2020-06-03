@@ -46,6 +46,8 @@ def tox_configure(config):
         for env_name, env_config in config.envconfigs.items():
             if env_config.envdir == config.toxinidir:
                 env_config.envdir = config.toxworkdir / env_name
+                env_config.envlogdir = env_config.envdir / 'log'
+                env_config.envtmpdir = env_config.envdir / 'tmp'
 
     # Conditionally set 'e2e ready' depending on env variables
     description = base_testenv.get('description')
