@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.9.0 / 2020-06-03
+
+* [Added] Speed up test suites by using a single virtual environment per Python version. See [#6789](https://github.com/DataDog/integrations-core/pull/6789).
+* [Added] Add validation for saved views. See [#6783](https://github.com/DataDog/integrations-core/pull/6783).
+
 ## 3.8.0 / 2020-06-01
 
 * [Added] Update CLI dependencies. See [#6784](https://github.com/DataDog/integrations-core/pull/6784).
