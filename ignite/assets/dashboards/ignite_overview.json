@@ -15,7 +15,7 @@
         "title": null,
         "verified": true
     },
-    "description": "## Ignite\n\nThis dashboard provides a high-level overview of your Ignite instances so you can monitor metrics related to memory statistics and workers, storage, and network.\n\n- [Official integration docs](https://docs.datadoghq.com/integrations/ignite/)\n- See [Ignite documentation](https://ignite.apache.org/) for more information\n\nClone this template to make changes and add your own graphs and widgets.\n",
+    "description": "## Ignite\n\nThis dashboard provides a high-level overview of your Ignite instances so you can monitor metrics related to memory statistics and workers, storage, and network.\n\n- [Official integration docs](https://docs.datadoghq.com/integrations/ignite/)\n- See the [Ignite documentation](https://ignite.apache.org/) for more information\n\nClone this template to make changes and add your own graphs and widgets.\n",
     "id": 1152772,
     "modified": "2020-06-02T21:03:24.771314+00:00",
     "new_id": "q6t-sid-qnd",
