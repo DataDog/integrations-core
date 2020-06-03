@@ -461,10 +461,18 @@ class SQLServer(AgentCheck):
                     alert_message = alert_message + instance.get('username')
                 self.raise_alert(instance, alert_title, alert_message)
 
+    def parse_tags(self, tags, key):
+        for tag in tags:
+            tag_values = tag.split(":")
+            if len(tag_values) == 2 and tag_values[0] == key:
+                return tag_values[1]
+        return None
+
     def raise_alert(self, instance, alert_title, alert_message):
         tags = []
+        endpoint_uuid = self.parse_tags(instance.get('tags', []), ENDPOINT_UUID_STR)
         tags.append('alertMessage:%s' % alert_message)
-        tags.append('endpoint_uuid:%s' % instance.get(ENDPOINT_UUID_STR))
+        tags.append('endpoint_uuid:%s' % endpoint_uuid)
         tags.append('severity:WARNING')
         self.log.debug(u"Alert info. title:%s , text:%s , type:%s , tags:%s", alert_title, alert_message, ALERT_TYPE_ERROR, tags)
         statsd.event(title = alert_title, text = alert_message, alert_type = ALERT_TYPE_ERROR, tags = tags)
@@ -495,7 +503,8 @@ class SQLServer(AgentCheck):
             message = message + "\t" + "username - " + instance.get('username')
 
         tags = []
-        tags.append('endpoint_uuid:%s' % instance.get(ENDPOINT_UUID_STR))
+        endpoint_uuid = self.parse_tags(instance.get('tags', []), ENDPOINT_UUID_STR)
+        tags.append('endpoint_uuid:%s' % endpoint_uuid)
         tags.append('timestamp:%d' % time.time())
         isoformat_timestamp = datetime.datetime.now().isoformat()
         # The colon in this needs to be replaced because the separator for tags key:<value> is colon
