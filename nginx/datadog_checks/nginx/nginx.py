@@ -41,7 +41,7 @@ PLUS_API_ENDPOINTS = {
 PLUS_API_STREAM_ENDPOINTS = {
     "stream/server_zones": ["stream", "server_zones"],
     "stream/upstreams": ["stream", "upstreams"],
-    "stream/zone_sync": ["stream", "zone_sync"], # API v3 and above.
+    "stream/zone_sync": ["stream", "zone_sync"],  # API v3 and above.
 }
 
 TAGGED_KEYS = {
