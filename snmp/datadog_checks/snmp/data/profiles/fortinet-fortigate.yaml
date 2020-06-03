@@ -19,11 +19,11 @@ metrics:
   - MIB: FORTINET-FORTIGATE-MIB
     table:
       OID: 1.3.6.1.4.1.12356.101.4.4.2
-      name: fgProcessorTable	
+      name: fgProcessorTable
     symbols:
       # The processor's CPU usage (percentage), which is an average calculated over the last minute.
-      - OID: 1.3.6.1.4.1.12356.101.4.4.2.1.2	
-        name: fgProcessorUsage 
+      - OID: 1.3.6.1.4.1.12356.101.4.4.2.1.2
+        name: fgProcessorUsage
       # The total number of packets received by this processor.
       - OID: 1.3.6.1.4.1.12356.101.4.4.2.1.6
         name: fgProcessorPktRxCount
@@ -74,7 +74,7 @@ metrics:
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Total hard disk capacity (MB), if disk is present.
-      - OID: 1.3.6.1.4.1.12356.101.4.1.7	
+      - OID: 1.3.6.1.4.1.12356.101.4.1.7
         name: fgSysDiskCapacity
 
   ### Virtual Domains
@@ -94,7 +94,7 @@ metrics:
       - OID: 1.3.6.1.4.1.12356.101.3.2.1.1.5
         name: fgVdEntCpuUsage
       # Memory usage of the virtual domain (percentage).
-      - OID: 	1.3.6.1.4.1.12356.101.3.2.1.1.6
+      - OID: 1.3.6.1.4.1.12356.101.3.2.1.1.6
         name: fgVdEntMemUsage
       # Number of active sessions on the virtual domain.
       - OID: 1.3.6.1.4.1.12356.101.3.2.1.1.7
@@ -153,12 +153,12 @@ metrics:
       # The average ipv6 session setup rate over the past minute.
       - OID: 1.3.6.1.4.1.12356.101.4.1.16
         name: fgSysSes6Rate1
- - MIB: FORTINET-FORTIGATE-MIB
+  - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # HTTP proxy current connections.
       - OID: 1.3.6.1.4.1.12356.101.10.100.4
         name: fgApHTTPConnections
- - MIB: FORTINET-FORTIGATE-MIB
+  - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Maximum number of connections supported by HTTP proxy.
       - OID: 1.3.6.1.4.1.12356.101.10.100.5
@@ -181,7 +181,7 @@ metrics:
   - MIB: FORTINET-FORTIGATE-MIB
     table:
       OID: 1.3.6.1.4.1.12356.101.5.1.2.1
-      name: fgFwPolStatsTable	
+      name: fgFwPolStatsTable
     symbols:
       # Number of packets matched to policy (passed or blocked, depending on policy action). Count is from the time the policy became active.
       - OID: 1.3.6.1.4.1.12356.101.5.1.2.1.1.2
@@ -196,11 +196,11 @@ metrics:
           OID: 1.3.6.1.4.1.12356.101.5.1.2.1.1.1
           name: fgFwPolID
 
-  # Firewall policy6 statistics table. 
+  # Firewall policy6 statistics table.
   - MIB: FORTINET-FORTIGATE-MIB
     table:
       OID: 1.3.6.1.4.1.12356.101.5.1.2.2
-      name: fgFwPol6StatsTable	
+      name: fgFwPol6StatsTable
     symbols:
       # Number of packets matched to policy (passed or blocked, depending on policy action). Count is from the time the policy became active.
       - OID: 1.3.6.1.4.1.12356.101.5.1.2.2.1.2
