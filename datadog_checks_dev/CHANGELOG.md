@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.9.1 / 2020-06-03
+
+* [Fixed] Fix new Check template. See [#6811](https://github.com/DataDog/integrations-core/pull/6811).
+
 ## 3.9.0 / 2020-06-03
 
 * [Added] Speed up test suites by using a single virtual environment per Python version. See [#6789](https://github.com/DataDog/integrations-core/pull/6789).
