@@ -2,7 +2,6 @@
 
 ## 1.14.0 / 2020-06-03
 
-* [Added] Speed up test suites by using a single virtual environment per Python version. See [#6789](https://github.com/DataDog/integrations-core/pull/6789).
 * [Added] Add custom queries. See [#6776](https://github.com/DataDog/integrations-core/pull/6776).
 
 ## 1.13.0 / 2020-05-17
