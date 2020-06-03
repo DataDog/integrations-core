@@ -260,3 +260,13 @@ def test_version_metadata(instance_basic, datadog_agent, version_metadata):
     mysql_check.check(instance_basic)
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata))
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_custom_queries(aggregator, instance_custom_queries, dd_run_check):
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_custom_queries])
+    dd_run_check(mysql_check)
+
+    aggregator.assert_metric('alice.age', value=25, tags=tags.METRIC_TAGS)
+    aggregator.assert_metric('bob.age', value=20, tags=tags.METRIC_TAGS)
