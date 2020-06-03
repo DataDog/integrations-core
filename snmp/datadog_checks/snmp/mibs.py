@@ -33,7 +33,10 @@ class MIBLoader:
     """
     A helper for loading and caching MIB information using PySNMP.
 
-    To save up memory, PySNMP MIB-related objects are cached by MIB path.
+    To save up memory, PySNMP MIB-related objects are cached by MIB path. This
+    is not supported perfectly by pysnmp, as `MibBuilder` in particular is
+    globally modified by each SNMP clients, and it also fails to load
+    concurrently conflicting MIBs like RFC1213 and TCP.
     """
 
     def __init__(self):

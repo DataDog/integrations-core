@@ -27,7 +27,7 @@ init_config:
   ## MIB information. Under the hood this will share internal MIB data across instances.
   ## Note that the absence of impact on MIB resolution of this strategy is not guaranteed yet.
   #
-  # shared_mib_builder: false
+  # optimize_mib_memory_usage: false
 
   ## @param global_metrics - list of elements - optional
   ## Specify global_metrics you want to monitor by using MIBS for Counter and Gauge.
