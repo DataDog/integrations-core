@@ -32,22 +32,32 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.database.io_writes_avg_latency{*}",
+                        "q": "avg:exchange.database.io_writes_avg_latency{*} by {instance,host}",
                         "style": {
                             "width": "normal",
                             "palette": "purple",
                             "type": "solid"
                         },
-                        "type": "line"
+                        "type": "line",
+                        "metadata": {
+                            "avg:exchange.database.io_writes_avg_latency{*} by {instance,host}": {
+                                "alias": "Writing latency"
+                            }
+                        }
                     },
                     {
-                        "q": "avg:exchange.database.io_reads_avg_latency{*}",
+                        "q": "avg:exchange.database.io_reads_avg_latency{*} by {instance,host}",
                         "style": {
                             "width": "normal",
                             "palette": "cool",
                             "type": "solid"
                         },
-                        "type": "line"
+                        "type": "line",
+                        "metadata": {
+                            "avg:exchange.database.io_reads_avg_latency{*} by {instance,host}": {
+                                "alias": "Reading latency"
+                            }
+                        }
                     }
                 ],
                 "yaxis": {
@@ -60,6 +70,7 @@
             },
             "width": 37,
             "legend": false,
+            "time": {},
             "y": 10,
             "x": 112,
             "type": "timeseries",
@@ -75,7 +86,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.memory.available{*}",
+                        "q": "1000000*avg:exchange.memory.available{*} by {host}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
@@ -94,7 +105,8 @@
             },
             "width": 37,
             "legend": false,
-            "y": 59,
+            "time": {},
+            "y": 77,
             "x": 1,
             "type": "timeseries",
             "id": 1
@@ -113,6 +125,7 @@
                         "aggregator": "last"
                     }
                 ],
+                "custom_unit": "ms",
                 "precision": 1
             },
             "width": 18,
@@ -132,7 +145,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.is.clienttype.rpc_ops_persec{*}",
+                        "q": "avg:exchange.is.clienttype.rpc_ops_persec{*} by {instance,host}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
@@ -151,6 +164,7 @@
             },
             "width": 37,
             "legend": false,
+            "time": {},
             "y": 26,
             "x": 73,
             "type": "timeseries",
@@ -166,13 +180,18 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.is.store.rpc_ops_persec{*}",
+                        "q": "avg:exchange.is.store.rpc_ops_persec{*} by {instance,host}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
                             "type": "solid"
                         },
-                        "type": "line"
+                        "type": "line",
+                        "metadata": {
+                            "avg:exchange.is.store.rpc_ops_persec{*} by {instance,host}": {
+                                "alias": "Operations"
+                            }
+                        }
                     }
                 ],
                 "yaxis": {
@@ -185,6 +204,7 @@
             },
             "width": 37,
             "legend": false,
+            "time": {},
             "y": 10,
             "x": 73,
             "type": "timeseries",
@@ -204,6 +224,7 @@
                         "aggregator": "last"
                     }
                 ],
+                "custom_unit": "ms",
                 "precision": 1
             },
             "width": 18,
@@ -231,7 +252,6 @@
                 "precision": 0
             },
             "width": 18,
-            "time": {},
             "y": 52,
             "x": 54,
             "type": "query_value",
@@ -247,7 +267,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.owa.requests_persec{*}",
+                        "q": "avg:exchange.owa.requests_persec{*} by {host}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
@@ -266,6 +286,7 @@
             },
             "width": 37,
             "legend": false,
+            "time": {},
             "y": 52,
             "x": 73,
             "type": "timeseries",
@@ -281,7 +302,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.ws.requests_persec{*}",
+                        "q": "avg:exchange.ws.requests_persec{*} by {host}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
@@ -300,6 +321,7 @@
             },
             "width": 37,
             "legend": false,
+            "time": {},
             "y": 68,
             "x": 73,
             "type": "timeseries",
@@ -331,7 +353,7 @@
         {
             "sizing": "zoom",
             "url": "https://static.datadoghq.com/static/images/saas_logos/bot/exchange_server@2x.png",
-            "height": 11,
+            "height": 7,
             "width": 37,
             "y": 1,
             "x": 1,
@@ -347,7 +369,7 @@
             "height": 7,
             "width": 37,
             "html": "General",
-            "y": 14,
+            "y": 10,
             "x": 1,
             "tick": true,
             "tick_pos": "50%",
@@ -447,7 +469,7 @@
             },
             "width": 18,
             "time": {},
-            "y": 23,
+            "y": 19,
             "x": 1,
             "type": "query_value",
             "id": 17
@@ -456,26 +478,14 @@
             "title_size": 16,
             "title": true,
             "title_align": "left",
-            "title_text": "Outbound packet errors",
+            "title_text": "Total outbound packet errors",
             "height": 7,
             "tile_def": {
                 "viz": "query_value",
                 "requests": [
                     {
                         "q": "sum:exchange.network.outbound_errors{*}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "palette": "white_on_green",
-                                "value": "0",
-                                "comparator": "<="
-                            },
-                            {
-                                "palette": "white_on_red",
-                                "value": "0",
-                                "comparator": ">"
-                            }
-                        ]
+                        "aggregator": "last"
                     }
                 ],
                 "autoscale": true,
@@ -483,7 +493,7 @@
             },
             "width": 18,
             "time": {},
-            "y": 23,
+            "y": 19,
             "x": 20,
             "type": "query_value",
             "id": 18
@@ -498,22 +508,32 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.database.io_db_reads_attached_persec{*}",
+                        "q": "avg:exchange.database.io_db_reads_attached_persec{*} by {instance}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
                             "type": "solid"
                         },
-                        "type": "line"
+                        "type": "line",
+                        "metadata": {
+                            "avg:exchange.database.io_db_reads_attached_persec{*} by {instance}": {
+                                "alias": "Reading rate"
+                            }
+                        }
                     },
                     {
-                        "q": "avg:exchange.database.io_db_writes_attached_persec{*}",
+                        "q": "avg:exchange.database.io_db_writes_attached_persec{*} by {instance}",
                         "style": {
                             "width": "normal",
                             "palette": "purple",
                             "type": "solid"
                         },
-                        "type": "line"
+                        "type": "line",
+                        "metadata": {
+                            "avg:exchange.database.io_db_writes_attached_persec{*} by {instance}": {
+                                "alias": "Writing rate"
+                            }
+                        }
                     }
                 ],
                 "yaxis": {
@@ -526,6 +546,7 @@
             },
             "width": 37,
             "legend": false,
+            "time": {},
             "y": 26,
             "x": 112,
             "type": "timeseries",
@@ -541,7 +562,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.processor.cpu_time{*}",
+                        "q": "avg:exchange.processor.cpu_time{*} by {host}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
@@ -560,70 +581,11 @@
             },
             "width": 37,
             "legend": false,
-            "y": 43,
+            "time": {},
+            "y": 61,
             "x": 1,
             "type": "timeseries",
             "id": 20
-        },
-        {
-            "title_size": 16,
-            "title": true,
-            "title_align": "left",
-            "title_text": "Active tasks",
-            "height": 7,
-            "tile_def": {
-                "viz": "query_value",
-                "requests": [
-                    {
-                        "q": "sum:exchange.workload_management.active_tasks{*}",
-                        "aggregator": "last"
-                    }
-                ],
-                "autoscale": true,
-                "precision": 0
-            },
-            "width": 18,
-            "time": {},
-            "y": 33,
-            "x": 1,
-            "type": "query_value",
-            "id": 21
-        },
-        {
-            "title_size": 16,
-            "title": true,
-            "title_align": "left",
-            "title_text": "Queued tasks",
-            "height": 7,
-            "tile_def": {
-                "viz": "query_value",
-                "requests": [
-                    {
-                        "q": "sum:exchange.workload_management.queued_tasks{*}",
-                        "aggregator": "last",
-                        "conditional_formats": [
-                            {
-                                "palette": "white_on_green",
-                                "value": "0",
-                                "comparator": "<="
-                            },
-                            {
-                                "palette": "white_on_yellow",
-                                "value": "0",
-                                "comparator": ">"
-                            }
-                        ]
-                    }
-                ],
-                "autoscale": true,
-                "precision": 0
-            },
-            "width": 18,
-            "time": {},
-            "y": 33,
-            "x": 20,
-            "type": "query_value",
-            "id": 22
         },
         {
             "title_size": 16,
@@ -642,7 +604,6 @@
                 "precision": 0
             },
             "width": 18,
-            "time": {},
             "y": 52,
             "x": 112,
             "type": "query_value",
@@ -658,7 +619,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.rpc.ops_persec{*}",
+                        "q": "avg:exchange.rpc.ops_persec{*} by {host}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
@@ -677,6 +638,7 @@
             },
             "width": 37,
             "legend": false,
+            "time": {},
             "y": 68,
             "x": 112,
             "type": "timeseries",
@@ -711,7 +673,8 @@
                         "aggregator": "last"
                     }
                 ],
-                "autoscale": true,
+                "autoscale": false,
+                "custom_unit": "ms",
                 "precision": 1
             },
             "width": 18,
@@ -750,6 +713,87 @@
             "tick": true,
             "tick_pos": "50%",
             "id": 28
+        },
+        {
+            "title_size": 16,
+            "title": true,
+            "title_align": "left",
+            "title_text": "Queued tasks",
+            "height": 13,
+            "tile_def": {
+                "viz": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:exchange.workload_management.queued_tasks{*} by {instance,host}",
+                        "style": {
+                            "width": "normal",
+                            "palette": "dog_classic",
+                            "type": "solid"
+                        },
+                        "type": "line",
+                        "metadata": {
+                            "avg:exchange.workload_management.queued_tasks{*} by {instance,host}": {
+                                "alias": "Queued tasks"
+                            }
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "max": "auto",
+                    "scale": "linear",
+                    "includeZero": true,
+                    "label": "",
+                    "min": "auto"
+                }
+            },
+            "width": 37,
+            "legend": false,
+            "time": {},
+            "y": 45,
+            "x": 1,
+            "type": "timeseries",
+            "id": 29
+        },
+        {
+            "title_size": 16,
+            "title": true,
+            "title_align": "left",
+            "title_text": "Active tasks",
+            "height": 13,
+            "tile_def": {
+                "viz": "timeseries",
+                "requests": [
+                    {
+                        "q": "avg:exchange.workload_management.active_tasks{*} by {instance,host}",
+                        "style": {
+                            "width": "normal",
+                            "palette": "dog_classic",
+                            "type": "solid"
+                        },
+                        "type": "line",
+                        "metadata": {
+                            "avg:exchange.workload_management.active_tasks{*} by {instance,host}": {
+                                "alias": "Active tasks"
+                            }
+                        }
+                    }
+                ],
+                "yaxis": {
+                    "max": "auto",
+                    "scale": "linear",
+                    "includeZero": true,
+                    "label": "",
+                    "min": "auto"
+                }
+            },
+            "width": 37,
+            "legend": false,
+            "time": {},
+            "y": 29,
+            "x": 1,
+            "legend_size": "0",
+            "type": "timeseries",
+            "id": 30
         }
     ]
 }
