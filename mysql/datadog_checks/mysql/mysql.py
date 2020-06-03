@@ -13,6 +13,7 @@ import pymysql
 from six import PY3, iteritems, itervalues, text_type
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.utils.db import QueryManager
 
 try:
     import psutil
@@ -289,6 +290,20 @@ class MySql(AgentCheck):
         self.qcache_stats = {}
         self.metadata = None
 
+        self._tags = list(self.instance.get('tags', []))
+
+        # Create a new connection on every check run
+        self._conn = None
+
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self._tags)
+        self.check_initializations.append(self._query_manager.compile_queries)
+
+    def execute_query_raw(self, query):
+        with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
+            cursor.execute(query)
+            for row in cursor.fetchall_unbuffered():
+                yield row
+
     def _get_metadata(self, db):
         with closing(db.cursor()) as cursor:
             cursor.execute('SELECT VERSION()')
@@ -345,6 +360,8 @@ class MySql(AgentCheck):
 
         with self._connect(host, port, mysql_sock, user, password, defaults_file, ssl, connect_timeout, tags) as db:
             try:
+                self._conn = db
+
                 # metadata collection
                 self.metadata = self._get_metadata(db)
                 self._send_metadata()
@@ -356,9 +373,14 @@ class MySql(AgentCheck):
                 # keeping track of these:
                 self._put_qcache_stats()
 
+                # Custom queries
+                self._query_manager.execute()
+
             except Exception as e:
                 self.log.exception("error!")
                 raise e
+            finally:
+                self._conn = None
 
     def _get_config(self, instance):
         self.host = instance.get('server', '')
@@ -373,6 +395,12 @@ class MySql(AgentCheck):
         ssl = instance.get('ssl', {})
         connect_timeout = instance.get('connect_timeout', 10)
         max_custom_queries = instance.get('max_custom_queries', self.DEFAULT_MAX_CUSTOM_QUERIES)
+
+        if queries or 'max_custom_queries' in instance:
+            self.warning(
+                'The options `queries` and `max_custom_queries` are deprecated and will be '
+                'removed in a future release. Use the `custom_queries` option instead.'
+            )
 
         return (
             self.host,

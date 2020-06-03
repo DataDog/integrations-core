@@ -1,4 +1,15 @@
 init_config:
+    ## @param global_custom_queries - list - optional
+    ## See `custom_queries` defined below.
+    ##
+    ## Global custom queries can be applied to all instances using the
+    ## `use_global_custom_queries` setting at the instance level.
+    #
+    # global_custom_queries:
+    #   - metric_prefix: clickhouse
+    #     query: <QUERY>
+    #     columns: <COLUMNS>
+    #     tags: <TAGS>
 
 instances:
 
@@ -59,14 +70,61 @@ instances:
     #   cert: <CERT_FILE_PATH>
     #   ca: <CA_PATH_FILE>
 
+    ## @param use_global_custom_queries - string - optional - default: true
+    ## How `global_custom_queries` should be used for this instance. There are 3 options:
+    ##
+    ## 1. true - `global_custom_queries` override `custom_queries`.
+    ## 2. false - `custom_queries` override `global_custom_queries`.
+    ## 2. extend - `global_custom_queries` are used in addition to any `custom_queries`.
+    #
+    # use_global_custom_queries: true
+
+    ## @param custom_queries - list - optional
+    ## Each query must have 2 fields:
+    ##
+    ## 1. query - The SQL to execute. It can be a simple statement or a multi-line script.
+    ## 2. columns - The list representing each column, ordered sequentially from left to right.
+    ##              The number of columns must equal the number of columns returned in the query.
+    ##              There are 2 required pieces of data:
+    ##                a. name - The suffix to append to `clickhouse.` to form
+    ##                          the full metric name. If `type` is `tag`, this column is
+    ##                          considered a tag and applied to every
+    ##                          metric collected by this particular query.
+    ##                b. type - The submission method (gauge, monotonic_count, etc.).
+    ##                          Use `tag` to tag each metric in the row
+    ##                          with the name and value of the item in this column.
+    ##                          Use the `count` type to perform aggregation for queries that
+    ##                          return multiple rows with the same or no tags.
+    ## 3. tags (optional) - A list of tags to apply to each metric.
+    #
+    # custom_queries:
+    #   - query: |  # Use the pipe if you require a multi-line script.
+    #       SELECT foo,
+    #              COUNT(*)
+    #       FROM table.events
+    #       GROUP BY foo
+    #     columns:
+    #       # Columns without a name are ignored. Add additional columns to skip:
+    #       # - {}
+    #       - name: foo
+    #         type: tag
+    #       - name: event.total
+    #         type: gauge
+    #     tags:
+    #       - test:mysql
+
     ## @param max_custom_queries - integer - optional - default: 20
     ## Set the maximum number of custom queries to execute with this integration.
+    ##
+    ## WARNING: This only applies to the deprecated `queries` option.
     #
     # max_custom_queries: 20
 
     ## @param queries - object - optional
     ## Define custom queries to collect custom metrics on your MySQL
     ## See https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries to learn more.
+    ##
+    ## WARNING: This option is deprecated and will be removed in a future release. Use the `custom_queries` option instead.
     #
     # queries:
     #   - query: <QUERY>

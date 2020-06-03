@@ -1,5 +1,9 @@
 # CHANGELOG - mysql
 
+## 1.14.0 / 2020-06-03
+
+* [Added] Add custom queries. See [#6776](https://github.com/DataDog/integrations-core/pull/6776).
+
 ## 1.13.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
