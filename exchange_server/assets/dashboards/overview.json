@@ -94,7 +94,6 @@
             },
             "width": 37,
             "legend": false,
-            "time": {},
             "y": 59,
             "x": 1,
             "type": "timeseries",
@@ -114,7 +113,7 @@
                         "aggregator": "last"
                     }
                 ],
-                "precision": 2
+                "precision": 1
             },
             "width": 18,
             "time": {},
@@ -205,7 +204,7 @@
                         "aggregator": "last"
                     }
                 ],
-                "precision": 2
+                "precision": 1
             },
             "width": 18,
             "time": {},
@@ -337,7 +336,7 @@
             "y": 1,
             "x": 1,
             "type": "image",
-            "id": 11
+            "id": 10
         },
         {
             "font_size": "18",
@@ -352,7 +351,7 @@
             "x": 1,
             "tick": true,
             "tick_pos": "50%",
-            "id": 12
+            "id": 11
         },
         {
             "font_size": "16",
@@ -367,7 +366,7 @@
             "x": 40,
             "tick": true,
             "tick_pos": "50%",
-            "id": 13
+            "id": 12
         },
         {
             "font_size": "16",
@@ -382,7 +381,7 @@
             "x": 40,
             "tick": true,
             "tick_pos": "50%",
-            "id": 14
+            "id": 13
         },
         {
             "font_size": "18",
@@ -397,7 +396,7 @@
             "x": 112,
             "tick": true,
             "tick_pos": "50%",
-            "id": 15
+            "id": 14
         },
         {
             "font_size": "16",
@@ -412,7 +411,7 @@
             "x": 40,
             "tick": true,
             "tick_pos": "50%",
-            "id": 16
+            "id": 15
         },
         {
             "font_size": "16",
@@ -427,7 +426,7 @@
             "x": 40,
             "tick": true,
             "tick_pos": "50%",
-            "id": 17
+            "id": 16
         },
         {
             "title_size": 16,
@@ -447,10 +446,11 @@
                 "precision": 0
             },
             "width": 18,
+            "time": {},
             "y": 23,
             "x": 1,
             "type": "query_value",
-            "id": 18
+            "id": 17
         },
         {
             "title_size": 16,
@@ -482,10 +482,11 @@
                 "precision": 0
             },
             "width": 18,
+            "time": {},
             "y": 23,
             "x": 20,
             "type": "query_value",
-            "id": 19
+            "id": 18
         },
         {
             "title_size": 16,
@@ -528,7 +529,7 @@
             "y": 26,
             "x": 112,
             "type": "timeseries",
-            "id": 20
+            "id": 19
         },
         {
             "title_size": 16,
@@ -562,7 +563,7 @@
             "y": 43,
             "x": 1,
             "type": "timeseries",
-            "id": 21
+            "id": 20
         },
         {
             "title_size": 16,
@@ -586,7 +587,7 @@
             "y": 33,
             "x": 1,
             "type": "query_value",
-            "id": 22
+            "id": 21
         },
         {
             "title_size": 16,
@@ -622,7 +623,7 @@
             "y": 33,
             "x": 20,
             "type": "query_value",
-            "id": 23
+            "id": 22
         },
         {
             "title_size": 16,
@@ -645,7 +646,7 @@
             "y": 52,
             "x": 112,
             "type": "query_value",
-            "id": 24
+            "id": 23
         },
         {
             "title_size": 16,
@@ -676,11 +677,10 @@
             },
             "width": 37,
             "legend": false,
-            "time": {},
             "y": 68,
             "x": 112,
             "type": "timeseries",
-            "id": 25
+            "id": 24
         },
         {
             "font_size": "18",
@@ -695,7 +695,7 @@
             "x": 40,
             "tick": true,
             "tick_pos": "50%",
-            "id": 27
+            "id": 25
         },
         {
             "title_size": 16,
@@ -712,14 +712,14 @@
                     }
                 ],
                 "autoscale": true,
-                "precision": 2
+                "precision": 1
             },
             "width": 18,
             "time": {},
             "y": 52,
             "x": 131,
             "type": "query_value",
-            "id": 28
+            "id": 26
         },
         {
             "font_size": "18",
@@ -734,7 +734,7 @@
             "x": 40,
             "tick": true,
             "tick_pos": "50%",
-            "id": 31
+            "id": 27
         },
         {
             "font_size": "18",
@@ -749,7 +749,7 @@
             "x": 112,
             "tick": true,
             "tick_pos": "50%",
-            "id": 32
+            "id": 28
         }
     ]
 }
