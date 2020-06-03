@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import threading
-from typing import Dict, Tuple, Optional
+from typing import Dict, Optional, Tuple
 
 from .pysnmp_types import (
     DirMibSource,
@@ -12,7 +12,6 @@ from .pysnmp_types import (
     MsgAndPduDispatcher,
     SnmpEngine,
 )
-
 
 BuilderInfo = Tuple[MibBuilder, MibInstrumController, MibViewController]
 

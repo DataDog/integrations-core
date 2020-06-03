@@ -7,6 +7,7 @@ from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
+from .mibs import MIBLoader
 from .models import OID
 from .parsing import ParsedMetric, ParsedMetricTag, ParsedSymbolMetric, parse_metric_tags, parse_metrics
 from .pysnmp_types import (
@@ -20,7 +21,6 @@ from .pysnmp_types import (
     usmDESPrivProtocol,
     usmHMACMD5AuthProtocol,
 )
-from .mibs import MIBLoader
 from .resolver import OIDResolver
 from .types import OIDMatch
 
