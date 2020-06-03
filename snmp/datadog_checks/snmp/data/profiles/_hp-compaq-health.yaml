@@ -1,4 +1,8 @@
 metrics:
+  # Generic device health metrics for HP devices.
+  # The latest version of these MIBs can be downloaded here:
+  # https://support.hpe.com/hpsc/swd/public/detail?swItemId=MTX_53293d026fb147958b223069b6
+
   # System utilization.
 
   - # Total time the system has been in full operation.
