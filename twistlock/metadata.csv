@@ -1,7 +1,7 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
 twistlock.registry.cve.details,gauge,,occurrence,,The details of a CVE on an image in a registry,-1,twistlock,registry cve_details
 twistlock.registry.cve.count,gauge,,occurrence,,The number of CVEs an image in a registry has,-1,twistlock,registry cve_count
-twistlock.registry.compliance.count,gauge,,occurrence,,The number of compliance violations an image in a registry has,-1,twistlock, registrycompliance_count
+twistlock.registry.compliance.count,gauge,,occurrence,,The number of compliance violations an image in a registry has,-1,twistlock, registry compliance_count
 twistlock.registry.size,gauge,,byte,,The size of an image in a registry,0,twistlock,registry size
 twistlock.registry.layer_count,gauge,,occurrence,,The count of layers in an image in a registry,0,twistlock,registry layer_count
 twistlock.images.cve.details,gauge,,occurrence,,The details of a CVE on an image,-1,twistlock,images cve_details
