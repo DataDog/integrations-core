@@ -104,10 +104,15 @@ def test_cisco_voice(aggregator):
 
     tags = ['snmp_profile:cisco_icm', 'snmp_host:test'] + common.CHECK_TAGS
 
-    resources = ["hrSWRunPerfMem", "hrSWRunPerfCPU", "hrSWRunStatus"]
+    resources = ["hrSWRunPerfMem", "hrSWRunPerfCPU"]
 
     for resource in resources:
         aggregator.assert_metric('snmp.{}'.format(resource), metric_type=aggregator.GAUGE, tags=tags)
+
+    run_indices = [4, 7, 8, 9, 10, 18, 24, 29, 30]
+    for index in run_indices:
+        status_tags = tags + ['run_index:{}'.format(index)]
+        aggregator.assert_metric('snmp.hrSWRunStatus', metric_type=aggregator.GAUGE, tags=status_tags)
 
     cvp_gauges = [
         "ccvpSipIntAvgLatency1",
@@ -136,6 +141,15 @@ def test_cisco_voice(aggregator):
     calls = [
         "cvCallVolPeerIncomingCalls",
         "cvCallVolPeerOutgoingCalls",
+    ]
+
+    peers = [4, 13, 14, 17, 18, 22, 25, 30, 31]
+    for call in calls:
+        for peer in peers:
+            peer_tags = tags + ["peer_index:{}".format(peer)]
+            aggregator.assert_metric('snmp.{}'.format(call), metric_type=aggregator.GAUGE, tags=peer_tags)
+
+    calls = [
         "cvCallVolMediaIncomingCalls",
         "cvCallVolMediaOutgoingCalls",
     ]
@@ -151,7 +165,9 @@ def test_cisco_voice(aggregator):
     ]
 
     for ctl in dial_controls:
-        aggregator.assert_metric('snmp.{}'.format(ctl), metric_type=aggregator.MONOTONIC_COUNT, tags=tags)
+        aggregator.assert_metric(
+            'snmp.{}'.format(ctl), metric_type=aggregator.MONOTONIC_COUNT, tags=["peer_index:7"] + tags
+        )
 
     pim_tags = tags + ['pim_host:test', 'pim_name:name', 'pim_num:2']
     aggregator.assert_metric('snmp.{}'.format("cccaPimStatus"), metric_type=aggregator.GAUGE, tags=pim_tags)
@@ -666,9 +682,12 @@ def test_cisco_nexus(aggregator):
         'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags,
     )
 
-    aggregator.assert_metric(
-        'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags,
-    )
+    fan_indices = [4, 6, 7, 16, 21, 22, 25, 27]
+    for index in fan_indices:
+        tags = ['fan_status_index:{}'.format(index)] + common_tags
+        aggregator.assert_metric(
+            'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags,
+        )
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
     aggregator.assert_metric(
@@ -1197,9 +1216,12 @@ def test_cisco_asa_5525(aggregator):
         'snmp.ciscoEnvMonSupplyState', metric_type=aggregator.GAUGE, tags=['power_source:1'] + common_tags,
     )
 
-    aggregator.assert_metric(
-        'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=common_tags,
-    )
+    fan_indices = [4, 6, 7, 16, 21, 22, 25, 27]
+    for index in fan_indices:
+        tags = ['fan_status_index:{}'.format(index)] + common_tags
+        aggregator.assert_metric(
+            'snmp.ciscoEnvMonFanState', metric_type=aggregator.GAUGE, tags=tags,
+        )
 
     aggregator.assert_metric('snmp.cswStackPortOperStatus', metric_type=aggregator.GAUGE)
     aggregator.assert_metric(

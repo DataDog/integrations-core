@@ -484,3 +484,21 @@ def test_cache_loading_tags(thread_mock, read_mock):
 
     config = check._config.discovered_instances['192.168.0.2']
     assert set(config.tags) == {'snmp_device:192.168.0.2', 'test:check'}
+
+
+def test_failed_to_collect_metrics():
+    config = InstanceConfig(
+        {"ip_address": "127.0.0.123", "community_string": "public", "metrics": [{"OID": "1.2.3", "name": "foo"}]}
+    )
+
+    instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
+    instance.pop('ip_address')
+    instance['network_address'] = '192.168.0.0/24'
+
+    check = SnmpCheck('snmp', {}, [instance])
+    check.fetch_results = mock.Mock(return_value=ValueError("invalid value"))
+
+    check._check_with_config(config)
+
+    assert len(check.warnings) == 1
+    assert 'Failed to collect metrics for 127.0.0.123' in check.warnings[0]

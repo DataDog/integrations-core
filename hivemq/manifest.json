@@ -21,7 +21,7 @@
     "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "hivemq",
   "assets": {
     "configuration": {
