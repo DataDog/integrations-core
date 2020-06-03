@@ -1,5 +1,9 @@
 # CHANGELOG - directory
 
+## 1.7.0 / 2020-06-03
+
+* [Added] Add `follow_symlinks` config option. See [#6800](https://github.com/DataDog/integrations-core/pull/6800).
+
 ## 1.6.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

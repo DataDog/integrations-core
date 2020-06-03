@@ -32,7 +32,9 @@ def test_channel_status_service_check_default_mapping(aggregator, instance):
     }
 
     for status in service_check_map:
-        check._submit_status_check('my_channel', status, ["channel:my_channel_{}".format(status)])
+        check.channel_metric_collector._submit_status_check(
+            'my_channel', status, ["channel:my_channel_{}".format(status)]
+        )
 
     for status, service_check_status in iteritems(service_check_map):
         aggregator.assert_service_check(
@@ -73,7 +75,9 @@ def test_channel_status_service_check_custom_mapping(aggregator, instance):
     }
 
     for status in service_check_map:
-        check._submit_status_check('my_channel', status, ["channel:my_channel_{}".format(status)])
+        check.channel_metric_collector._submit_status_check(
+            'my_channel', status, ["channel:my_channel_{}".format(status)]
+        )
 
     for status, service_check_status in iteritems(service_check_map):
         aggregator.assert_service_check(

@@ -24,7 +24,7 @@ datadog-coredns==1.4.0; sys_platform == 'linux2'
 datadog-couch==3.9.0
 datadog-couchbase==1.13.0
 datadog-crio==1.4.0
-datadog-directory==1.6.0
+datadog-directory==1.7.0
 datadog-disk==2.9.0
 datadog-dns-check==1.6.0
 datadog-dotnetclr==1.6.0; sys_platform == 'win32'
@@ -81,7 +81,7 @@ datadog-mcache==1.10.0; sys_platform != 'win32'
 datadog-mesos-master==1.8.0; sys_platform != 'win32'
 datadog-mesos-slave==2.2.0; sys_platform != 'win32'
 datadog-mongo==1.16.1
-datadog-mysql==1.13.0
+datadog-mysql==1.14.0
 datadog-nagios==1.6.0
 datadog-network==1.16.0
 datadog-nfsstat==1.5.0; sys_platform == 'linux2'
