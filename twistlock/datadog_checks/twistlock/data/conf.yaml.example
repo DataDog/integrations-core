@@ -51,7 +51,7 @@ instances:
   - url: http://localhost:8081
 
     ## @param project - string - optional
-    ## The Twistlock project if enabled
+    ## The Twistlock project if enabled.
     ## See https://cdn.twistlock.com/docs/api/twistlock_api.html
     #
     # project: <PROJECT>

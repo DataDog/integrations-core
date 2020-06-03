@@ -16,7 +16,7 @@ files:
         type: string
     - name: project
       description: |
-        The Twistlock project if enabled
+        The Twistlock project if enabled.
         See https://cdn.twistlock.com/docs/api/twistlock_api.html
       value:
         type: string
