@@ -52,6 +52,7 @@ TAGGED_KEYS = {
     'upstreamZones': 'upstream',  # VTS
     'slabs': 'slab',
     'slots': 'slot',
+    'zones': 'zone',
 }
 
 

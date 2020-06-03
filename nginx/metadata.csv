@@ -185,6 +185,6 @@ nginx.stream.zone_sync.status.msgs_in,gauge,,,,The number of messages received b
 nginx.stream.zone_sync.status.msgs_out,gauge,,,,The number of messages sent by this node.
 nginx.stream.zone_sync.status.bytes_in,gauge,,,,The number of bytes received by this node.
 nginx.stream.zone_sync.status.bytes_out,gauge,,,,The number of bytes sent by this node.
-nginx.stream.zone_sync.zones.$zone_name.records_total,gauge,,,,The total number of records stored in the shared memory zone.
-nginx.stream.zone_sync.zones.$zone_name.records_pending,gauge,,,,The number of records that need to be sent to the cluster.
+nginx.stream.zone_sync.zone.records_total,gauge,,,,The total number of records stored in the shared memory zone.
+nginx.stream.zone_sync.zone.records_pending,gauge,,,,The number of records that need to be sent to the cluster.
 nginx.version,gauge,,,,Version of nginx.,0,nginx,version
