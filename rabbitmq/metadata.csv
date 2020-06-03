@@ -29,6 +29,7 @@ rabbitmq.queue.active_consumers,gauge,,,,"Number of active consumers, consumers 
 rabbitmq.queue.bindings.count,gauge,,,,Number of bindings for a specific queue,0,rabbitmq,queue bind
 rabbitmq.queue.consumers,gauge,,,,Number of consumers,0,rabbitmq,cons
 rabbitmq.queue.consumer_utilisation,gauge,,fraction,,The ratio of time that a queue's consumers can take new messages,0,rabbitmq,cons util
+rabbitmq.queue.head_message_timestamp,gauge,,,,Timestamp of the head message of the queue,0,rabbitmq,head msg ts
 rabbitmq.queue.memory,gauge,,byte,,"Bytes of memory consumed by the Erlang process associated with the queue, including stack, heap and internal structures",0,rabbitmq,mem
 rabbitmq.queue.messages,gauge,,message,,Count of the total messages in the queue,0,rabbitmq,msgs
 rabbitmq.queue.messages.rate,gauge,,message,second,Count per second of the total messages in the queue,0,rabbitmq,msgs rate

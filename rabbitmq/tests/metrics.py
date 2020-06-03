@@ -44,6 +44,11 @@ Q_METRICS = [
     'rabbitmq.queue.messages.publish.rate',
 ]
 
+# Present from 3.6
+Q_METRICS_36 = [
+    'rabbitmq.queue.head_message_timestamp',
+]
+
 OVERVIEW_METRICS_TOTALS = [
     'rabbitmq.overview.object_totals.connections',
     'rabbitmq.overview.object_totals.channels',
