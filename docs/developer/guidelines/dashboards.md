@@ -7,7 +7,7 @@ Datadog dashboards enable you to efficiently monitor your infrastructure and int
  
 ## Integration Preset Dashboards
 
-If you would like to create a default dashboard for an integration, follow the guidelines in the [next section](./dashboards.md#best-practices).
+If you would like to create a default dashboard for an integration, follow the guidelines in the [Best Practices](./dashboards.md#best-practices) section.
 
 ### Exporting a dashboard payload
 When you've created a dashboard, you can export the dashboard payload to be included in the integration assets.
