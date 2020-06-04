@@ -63,7 +63,7 @@ Labels are used to divide the screenboard in visually comprehensive sections.
 - Horizontal labels should be kept above the graphs and its width should be the length of the entire section. 
 
 - For vertical labels, keep the label to the left of the section and its length should be the height the graphs. 
-Enable the right pointer to properly convey the direction of the section. 
+Enable a pointer to properly convey the direction of the section. 
 
 - If there is a corresponding Datadog blog post, category names should be linked to the relevant section of the article.
 
