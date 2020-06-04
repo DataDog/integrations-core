@@ -54,7 +54,7 @@ Prometheus gauge metrics are submitted as Datadog gauge metrics.
 
 ### Counter
 
-A [Prometheus counter](https://prometheus.io/docs/concepts/metric_types/#counter) is cumulative metric that represents 
+A [Prometheus counter](https://prometheus.io/docs/concepts/metric_types/#counter) is a cumulative metric that represents 
 a single monotonically increasing counter whose value can only increase or be reset to zero on restart.
 
 | Config Option | Value | Datadog Metric Submitted |
