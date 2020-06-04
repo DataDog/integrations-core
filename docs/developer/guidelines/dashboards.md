@@ -28,6 +28,15 @@ The dashboard JSON payload will be available in `/assets/dashboards/<INTEGRATION
 
 Commit the changes and create a pull request.
 
+### Verify the Preset Dashboard
+
+Once your PR is merged and synced on production, you can find your dashboard in the Dashboard List page.
+
+!!! tip
+    Make sure the integration tile is `Installed` in order to see the preset dashboard in the list.
+
+Ensure logos render correctly on the Dashboard List page and within the preset dashboard. 
+
 ## Best Practices
 
 ![Mongo dashboard](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/mongo_dashboard.png)
