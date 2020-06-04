@@ -24,7 +24,7 @@ ddev meta dash export <URL_OF_DASHBOARD> <INTEGRATION>
     If the dashboard is for a contributor-maintained integration in the `integration-extras` repo, run the command with the `--extras` or `-e` flag.
 
 The command will add the dashboard definition to the `manifest.json` file of the integration. 
-The dashboard JSON payload will be available in `/assets/dashboards/<INTEGRATION>_overview.json`.
+The dashboard JSON payload will be available in `/assets/dashboards/<DASHBOARD_TITLE>.json`.
 
 Commit the changes and create a pull request.
 
@@ -46,6 +46,9 @@ Ensure logos render correctly on the Dashboard List page and within the preset d
     !!! information
         Integration preset (or out of the box) dashboards are typically screenboards because they allow images, widgets, and labels. 
         Learn more about Datadog dashboards and see the differences between [screenboards and timeboards](https://docs.datadoghq.com/dashboards/#screenboard-vs-timeboard). 
+
+1. Dashboard titles should contain the integration name. Some examples of a good dashboard title is `Syclla` or `Cilium Overview`.
+- Avoid using `-` in the dashboard title as the dashboard URL is generated from the title.
 
 1. Research the metrics supported by the integration and consider grouping them in relevant categories. 
 Important metrics that are key to the performance and overview of the integration should be at the top.
