@@ -21,7 +21,7 @@ ddev meta dash export <URL_OF_DASHBOARD> <INTEGRATION>
 !!! tip
     If the dashboard is for a contributor-maintained integration in the `integration-extras` repo, run the command with the `--extras` or `-e` flag.
 
-The command will add the dashboard definition to `manifest.json` of the integration. 
+The command will add the dashboard definition to the `manifest.json` file of the integration. 
 The dashboard JSON payload will be available in `/assets/dashboards/<INTEGRATION>_overview.json`.
 
 Commit the changes and create a pull request.
@@ -39,47 +39,40 @@ Commit the changes and create a pull request.
 1. Research the metrics supported by the integration and consider grouping them in relevant categories. 
 Important metrics that are key to the performance and overview of the integration should be at the top.
 
-    In the Mongo dashboard example, metrics are grouped by `Throughput`, `Resource saturation`, `Resource utilization`, and `Performance & Errors`.
-
 1. Ensure good design by keeping labels and widgets aligned with consistent spacing and reasonable size. 
-   The suggested separation between widgets is:
-   
-    - 2 grid units between different categories
-    - 1 grid unit between graphs of the same category
 
 ### Logos
 
 Integration logos should be placed at the top-left of the dashboard and centered on the [image widget](https://docs.datadoghq.com/dashboards/widgets/image/).
 
-!!! tip
-    Suggested height for logos is around 12 grid units.
+The suggested height for logos is around 12 grid units.
 
 ### Labels
 
-Labels are created from the widget type [Notes & Links](https://docs.datadoghq.com/dashboards/widgets/note/).
+Labels are created from the [Notes & Links](https://docs.datadoghq.com/dashboards/widgets/note/) widget type.
 
 #### Metric Categories
 Labels are used to divide the screenboard in visually comprehensive sections. 
 
 - Category labels have gray backgrounds to contrast with the board and widgets.
-- Keep text at 18px, horizontally centered. 
+- Text is 18px and horizontally centered. 
 
-    Do not use bold or all capitalized letters because it can make the dashboard harder to read.
+    !!! important
+        Do not use bold or all capitalized letters because it can make the dashboard harder to read.
 
-- Horizontal labels should be kept above the graphs and be the length of the entire section. 
-See the `Throughput` or `Resource saturation` labels in the Mongo dashboard.
+- Horizontal labels should be kept above the graphs and its width should be the length of the entire section. 
 
-    If the label is vertical, keep the label to the left of the graphs and it's length should be the height the graphs. 
-Enable the right pointer to properly convey the direction of the section. See `Resource utilization` or `Performance & Errors` labels in the Mongo dashboard.
+- For vertical labels, keep the label to the left of the section and its length should be the height the graphs. 
+Enable the right pointer to properly convey the direction of the section. 
 
 - If there is a corresponding Datadog blog post, category names should be linked to the relevant section of the article.
 
 #### Subcategories
 With large sections of metric widgets, use subcategory labels to provide additional context. 
-Some subcategory examples are grouping reads and writes metrics.
+An example subcategory is grouping reads and writes metrics.
 
-- Subcategoy labels have blue backgrounds.
-- Text is 16px, horizontally centered.
+- Subcategory labels have blue backgrounds.
+- Text is 16px and horizontally centered.
 - Subcategory labels have the same rules as [metric category labels](./dashboards.md#metric-categories).
 
 #### Notes
@@ -97,8 +90,13 @@ Screenboards that contain metrics from other integration should use a different 
 - These labels have the same rules as [metric category labels](./dashboards.md#metric-categories).
 
 ### Widgets 
+The suggested separation between widgets is:
 
-- Widgets of the same type must be the same size and consistently aligned across the dashboard.
+- 2 grid units between different categories
+- 1 grid unit between graphs of the same category
+
+!!! important
+    Widgets of the same type must be the same size and consistently aligned across the dashboard.
 
 #### Graph titles
 
@@ -107,12 +105,12 @@ Graph titles summarize the queried metric.
 - Titles are aligned to the left.
 - Do not include timeframes (e.g "Average latency of the past day") because it's already indicated on the graph itself.
 - Do not indicate the unit in the graph title because unit types are displayed automatically from metadata. 
-Exceptions to this if the calculation in the query represents a different type of unit.
+An exception to this is if the calculation of the query represents a different type of unit.
 
 #### Metrics
 
 There are different types of metric widgets. The most commonly used are [timeseries](https://docs.datadoghq.com/dashboards/widgets/timeseries/),
- [query value](https://docs.datadoghq.com/dashboards/widgets/query_value/), and [tables](https://docs.datadoghq.com/dashboards/widgets/table/).
+ [query values](https://docs.datadoghq.com/dashboards/widgets/query_value/), and [tables](https://docs.datadoghq.com/dashboards/widgets/table/).
  
 For more information on the available widget types, see the [list of supported dashboard widgets](https://docs.datadoghq.com/dashboards/widgets/).
 
