@@ -54,6 +54,14 @@ class OpenMetricsScraperMixin(object):
         super(OpenMetricsScraperMixin, self).__init__(*args, **kwargs)
 
     def create_scraper_configuration(self, instance=None):
+        """
+        Creates a scraper configuration.
+
+        If instance does not specify a value for a configuration option, the value will default to the `init_config`.
+        Otherwise, the `default_instance` value will be used.
+
+        A default mixin configuration will be returned if there is no instance.
+        """
 
         # We can choose to create a default mixin configuration for an empty instance
         if instance is None:
@@ -329,7 +337,7 @@ class OpenMetricsScraperMixin(object):
 
     def get_http_handler(self, scraper_config):
         """
-        Get http handler for a specific scrapper config.
+        Get http handler for a specific scraper config.
         The http handler is cached using `prometheus_url` as key.
         """
         prometheus_url = scraper_config['prometheus_url']
@@ -371,10 +379,8 @@ class OpenMetricsScraperMixin(object):
 
     def parse_metric_family(self, response, scraper_config):
         """
-        Parse the MetricFamily from a valid requests.Response object to provide a MetricFamily object (see [0])
+        Parse the MetricFamily from a valid `requests.Response` object to provide a MetricFamily object.
         The text format uses iter_lines() generator.
-        :param response: requests.Response
-        :return: core.Metric
         """
         if response.encoding is None:
             response.encoding = 'utf-8'
@@ -415,7 +421,7 @@ class OpenMetricsScraperMixin(object):
 
     def scrape_metrics(self, scraper_config):
         """
-        Poll the data from prometheus and return the metrics as a generator.
+        Poll the data from Prometheus and return the metrics as a generator.
         """
         response = self.poll(scraper_config)
         if scraper_config['telemetry']:
@@ -467,10 +473,10 @@ class OpenMetricsScraperMixin(object):
 
     def process(self, scraper_config, metric_transformers=None):
         """
-        Polls the data from prometheus and pushes them as gauges
+        Polls the data from Prometheus and submits them as Datadog metrics.
         `endpoint` is the metrics endpoint to use to poll metrics from Prometheus
 
-        Note that if the instance has a 'tags' attribute, it will be pushed
+        Note that if the instance has a `tags` attribute, it will be pushed
         automatically as additional custom tags and added to the metrics
         """
         transformers = scraper_config['_default_metric_transformers'].copy()
@@ -596,12 +602,12 @@ class OpenMetricsScraperMixin(object):
 
     def process_metric(self, metric, scraper_config, metric_transformers=None):
         """
-        Handle a prometheus metric according to the following flow:
-            - search scraper_config['metrics_mapper'] for a prometheus.metric <--> datadog.metric mapping
-            - call check method with the same name as the metric
-            - log some info if none of the above worked
+        Handle a Prometheus metric according to the following flow:
+        - search `scraper_config['metrics_mapper']` for a prometheus.metric to datadog.metric mapping
+        - call check method with the same name as the metric
+        - log info if none of the above worked
 
-        `metric_transformers` is a dict of <metric name>:<function to run when the metric name is encountered>
+        `metric_transformers` is a dict of `<metric name>:<function to run when the metric name is encountered>`
         """
         # If targeted metric, store labels
         self._store_labels(metric, scraper_config)
@@ -658,16 +664,12 @@ class OpenMetricsScraperMixin(object):
 
     def poll(self, scraper_config, headers=None):
         """
+        Returns a valid `requests.Response`, otherwise raise requests.HTTPError if the status code of the
+        response isn't valid - see `response.raise_for_status()`
+
+        The caller needs to close the requests.Response.
+
         Custom headers can be added to the default headers.
-
-        Returns a valid requests.Response, raise requests.HTTPError if the status code of the requests.Response
-        isn't valid - see response.raise_for_status()
-
-        The caller needs to close the requests.Response
-
-        :param endpoint: string url endpoint
-        :param headers: extra headers
-        :return: requests.Response
         """
         endpoint = scraper_config.get('prometheus_url')
 
@@ -715,14 +717,14 @@ class OpenMetricsScraperMixin(object):
     def submit_openmetric(self, metric_name, metric, scraper_config, hostname=None):
         """
         For each sample in the metric, report it as a gauge with all labels as tags
-        except if a labels dict is passed, in which case keys are label names we'll extract
+        except if a labels `dict` is passed, in which case keys are label names we'll extract
         and corresponding values are tag names we'll use (eg: {'node': 'node'}).
 
         Histograms generate a set of values instead of a unique metric.
-        send_histograms_buckets is used to specify if yes or no you want to
-            send the buckets as tagged values when dealing with histograms.
+        `send_histograms_buckets` is used to specify if you want to
+        send the buckets as tagged values when dealing with histograms.
 
-        `custom_tags` is an array of 'tag:value' that will be added to the
+        `custom_tags` is an array of `tag:value` that will be added to the
         metric when sending the gauge to Datadog.
         """
         if metric.type in ["gauge", "counter", "rate"]:
