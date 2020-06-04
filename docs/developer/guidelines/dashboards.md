@@ -125,8 +125,8 @@ Timeseries widgets allow you to visualize the evolution of one or more metrics o
 
 | Types of metrics | Palette |
 | ---------------- | ------------- |
-| Errors/negative (e.g. Queued requests) | Warm or orange color palette |
-| Memory | Cool or blue color palette |
+| Errors/negative (e.g. Queued requests) | Warm or orange color |
+| Memory | Cool or blue color |
 | Read | Green color |
 | Write | Purple color |
 
