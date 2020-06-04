@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.10.0 / 2020-06-04
+
+* [Added] Support releasing non-core checks. See [#6805](https://github.com/DataDog/integrations-core/pull/6805).
+* [Fixed] Fix `ensure_default_envdir` tox plugin flag. See [#6817](https://github.com/DataDog/integrations-core/pull/6817).
+
 ## 3.9.1 / 2020-06-03
 
 * [Fixed] Fix new Check template. See [#6811](https://github.com/DataDog/integrations-core/pull/6811).
