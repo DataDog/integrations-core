@@ -43,7 +43,7 @@ haproxy.frontend.response.4xx,gauge,,response,,Frontend HTTP responses with 4xx 
 haproxy.frontend.response.5xx,gauge,,response,,Frontend HTTP responses with 5xx code.,-1,haproxy,frontend resp 5xx
 haproxy.frontend.response.other,gauge,,response,,Frontend HTTP responses with other code (protocol error).,0,haproxy,frontend resp other
 haproxy.frontend.session.current,gauge,,connection,,Number of active frontend sessions.,0,haproxy,frontend sess
-haproxy.frontend.session.limit,gauge,,connection,,Configured frontend session limit.,0,haproxy,frontent sess lim
+haproxy.frontend.session.limit,gauge,,connection,,Configured frontend session limit.,0,haproxy,frontend sess lim
 haproxy.frontend.session.pct,gauge,,percent,,Percentage of sessions in use (frontend.session.current/frontend.session.limit * 100).,-1,haproxy,frontend sess pct
 haproxy.frontend.session.rate,gauge,,connection,second,Number of frontend sessions created per second.,0,haproxy,frontend sess rate
 haproxy.sticktable.used,gauge,,item,,Number of elements in the table.,0,haproxy,stick-table elements
