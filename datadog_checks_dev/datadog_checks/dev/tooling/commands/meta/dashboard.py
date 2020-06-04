@@ -73,7 +73,7 @@ def export(ctx, url, integration):
     payload.pop('id', None)
     payload.pop('modified', None)
     payload.pop('read_only', None)
-    
+
     output = json.dumps(payload, indent=4, sort_keys=True)
 
     file_name = payload['board_title'].strip().lower()
