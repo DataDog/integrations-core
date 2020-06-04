@@ -4,6 +4,25 @@
 
 Datadog dashboards enable you to efficiently monitor your infrastructure and integrations
  by displaying and tracking key metrics.
+ 
+## Integration Preset Dashboards
+
+If you would like to create a default dashboard for an integration, follow the guidelines in the [next section](./dashboards.md#best-practices).
+
+### Exporting a dashboard payload
+When you've created a dashboard, you can export the dashboard payload to be included in the integration assets.
+
+Run the following command to [export the dashboard](../ddev/cli.md#export):
+
+```cli
+ddev meta dash export <URL_OF_DASHBOARD> <INTEGRATION>
+```
+
+!!! tip
+    If the dashboard is for a contributor-maintained integration in the `integration-extras` repo, run the command with the `--extras` or `-e` flag.
+
+The command will add the dashboard definition to `manifest.json` of the integration. 
+The dashboard JSON payload will be available in `/assets/dashboards/<INTEGRATION>_overview.json`.
 
 ## Best Practices
 
@@ -136,3 +155,4 @@ Add an event stream only if the service monitored by the dashboard is reporting 
 
 !!! tip
     Adding `*=scope` as a tempoate variable is useful since users can access all their own tags.
+    
