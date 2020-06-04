@@ -4,12 +4,15 @@
 
 import os
 
+from packaging import version
+
 from datadog_checks.base.utils.common import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 
-RABBITMQ_VERSION = os.environ['RABBITMQ_VERSION']
+RABBITMQ_VERSION_RAW = os.environ['RABBITMQ_VERSION']
+RABBITMQ_VERSION = version.parse(RABBITMQ_VERSION_RAW)
 
 CHECK_NAME = 'rabbitmq'
 

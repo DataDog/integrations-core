@@ -2,6 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from packaging import version
+
+from .common import RABBITMQ_VERSION
+
 COMMON_METRICS = [
     'rabbitmq.node.fd_used',
     'rabbitmq.node.disk_free',
@@ -23,12 +27,15 @@ E_METRICS = [
 ]
 
 # Only present in 3.5
-E_METRICS_35 = [
-    'rabbitmq.exchange.messages.confirm.count',
-    'rabbitmq.exchange.messages.confirm.rate',
-    'rabbitmq.exchange.messages.return_unroutable.count',
-    'rabbitmq.exchange.messages.return_unroutable.rate',
-]
+if RABBITMQ_VERSION == version.parse('3.5'):
+    E_METRICS.extend(
+        [
+            'rabbitmq.exchange.messages.confirm.count',
+            'rabbitmq.exchange.messages.confirm.rate',
+            'rabbitmq.exchange.messages.return_unroutable.count',
+            'rabbitmq.exchange.messages.return_unroutable.rate',
+        ]
+    )
 
 Q_METRICS = [
     'rabbitmq.queue.consumers',
@@ -45,9 +52,8 @@ Q_METRICS = [
 ]
 
 # Present from 3.6
-Q_METRICS_36 = [
-    'rabbitmq.queue.head_message_timestamp',
-]
+if RABBITMQ_VERSION >= version.parse('3.6'):
+    Q_METRICS.extend(['rabbitmq.queue.head_message_timestamp'])
 
 OVERVIEW_METRICS_TOTALS = [
     'rabbitmq.overview.object_totals.connections',
