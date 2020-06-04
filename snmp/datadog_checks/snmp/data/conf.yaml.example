@@ -17,15 +17,15 @@ init_config:
   # ignore_nonincreasing_oid: false
 
   ## @param oid_batch_size - integer - optional - default: 10
-  ## Number of OIDs handled by each batch. Performance can be improved by increasing this number, though
-  ## it will also use more resources.
+  ## The number of OIDs handled by each batch. Increasing this number improves performance but
+  ## uses more resources.
   #
   # oid_batch_size: 10
 
   ## @param optimize_mib_memory_usage - boolean - optional - default: false
-  ## **Experimental** - Set this flag to true to attempt optimizing memory usage related to
-  ## MIB information. Under the hood this will share internal MIB data across instances.
-  ## Note that the absence of impact on MIB resolution of this strategy is not guaranteed yet.
+  ## **Experimental** - Setting this flag to true attempts to optimize memory usage related to
+  ## MIB information. This shares internal MIB data across instances.
+  ## Note: The absence of impact on MIB resolution for this strategy is not guaranteed yet.
   #
   # optimize_mib_memory_usage: false
 
