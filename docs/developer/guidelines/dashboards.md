@@ -24,6 +24,8 @@ ddev meta dash export <URL_OF_DASHBOARD> <INTEGRATION>
 The command will add the dashboard definition to `manifest.json` of the integration. 
 The dashboard JSON payload will be available in `/assets/dashboards/<INTEGRATION>_overview.json`.
 
+Commit the changes and create a pull request.
+
 ## Best Practices
 
 ![Mongo dashboard](https://raw.githubusercontent.com/DataDog/integrations-core/master/docs/developer/assets/images/mongo_dashboard.png)
