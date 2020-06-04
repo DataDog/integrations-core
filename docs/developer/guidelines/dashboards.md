@@ -114,7 +114,7 @@ Exceptions to this if the calculation in the query represents a different type o
 There are different types of metric widgets. The most commonly used are [timeseries](https://docs.datadoghq.com/dashboards/widgets/timeseries/),
  [query value](https://docs.datadoghq.com/dashboards/widgets/query_value/), and [tables](https://docs.datadoghq.com/dashboards/widgets/table/).
  
-For more information on the available widget types, see the [dashboards widget documentation](https://docs.datadoghq.com/dashboards/widgets/).
+For more information on the available widget types, see the [list of supported dashboard widgets](https://docs.datadoghq.com/dashboards/widgets/).
 
 !!! note
     Metric widgets usually have a timeframe of 4 hours. Query value widgets have the timeframe of 1 hour.
