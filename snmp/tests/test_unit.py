@@ -251,7 +251,7 @@ def test_removing_host():
     warnings = []
     check.warning = warnings.append
     check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance)
-    msg = 'No SNMP response received before timeout for instance 1.1.1.1'
+    msg = 'Failed to collect some metrics: No SNMP response received before timeout for instance 1.1.1.1'
 
     check._start_discovery = lambda: None
     check._executor = futures.ThreadPoolExecutor(max_workers=1)

@@ -174,7 +174,7 @@ class SnmpCheck(AgentCheck):
                     self.ignore_nonincreasing_oid,
                 )
                 all_binds.extend(binds)
-            except PySnmpError as e:
+            except (PySnmpError, CheckException) as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
                 if not error:
                     error = message
@@ -222,7 +222,7 @@ class SnmpCheck(AgentCheck):
                     # If we didn't catch the metric using snmpget, try snmpnext
                     next_oids.extend(missing_results)
 
-            except PySnmpError as e:
+            except (PySnmpError, CheckException) as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
                 if not error:
                     error = message
@@ -248,7 +248,7 @@ class SnmpCheck(AgentCheck):
                 self.log.debug('Returned vars: %s', OIDPrinter(binds, with_values=True))
                 all_binds.extend(binds)
 
-            except PySnmpError as e:
+            except (PySnmpError, CheckException) as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
                 if not error:
                     error = message
