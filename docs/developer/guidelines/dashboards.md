@@ -48,7 +48,8 @@ Ensure logos render correctly on the Dashboard List page and within the preset d
         Learn more about Datadog dashboards and see the differences between [screenboards and timeboards](https://docs.datadoghq.com/dashboards/#screenboard-vs-timeboard). 
 
 1. Dashboard titles should contain the integration name. Some examples of a good dashboard title is `Syclla` or `Cilium Overview`.
-- Avoid using `-` in the dashboard title as the dashboard URL is generated from the title.
+    
+    **Note:** Avoid using `-` in the dashboard title as the dashboard URL is generated from the title.
 
 1. Research the metrics supported by the integration and consider grouping them in relevant categories. 
 Important metrics that are key to the performance and overview of the integration should be at the top.
