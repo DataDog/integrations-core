@@ -20,7 +20,18 @@
         "verified": true,
         "email": "support@datadoghq.com"
     },
-    "template_variables": [],
+    "template_variables": [
+        {
+            "default": "*",
+            "prefix": "host",
+            "name": "host"
+        },
+        {
+            "default": "*",
+            "prefix": "instance",
+            "name": "instance"
+        }
+    ],
     "widgets": [
         {
             "title_size": 16,
@@ -32,7 +43,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.database.io_writes_avg_latency{*} by {instance,host}",
+                        "q": "avg:exchange.database.io_writes_avg_latency{$host,$instance}",
                         "style": {
                             "width": "normal",
                             "palette": "purple",
@@ -40,13 +51,13 @@
                         },
                         "type": "line",
                         "metadata": {
-                            "avg:exchange.database.io_writes_avg_latency{*} by {instance,host}": {
+                            "avg:exchange.database.io_writes_avg_latency{$host,$instance}": {
                                 "alias": "Writing latency"
                             }
                         }
                     },
                     {
-                        "q": "avg:exchange.database.io_reads_avg_latency{*} by {instance,host}",
+                        "q": "avg:exchange.database.io_reads_avg_latency{$host,$instance}",
                         "style": {
                             "width": "normal",
                             "palette": "cool",
@@ -54,7 +65,7 @@
                         },
                         "type": "line",
                         "metadata": {
-                            "avg:exchange.database.io_reads_avg_latency{*} by {instance,host}": {
+                            "avg:exchange.database.io_reads_avg_latency{$host,$instance}": {
                                 "alias": "Reading latency"
                             }
                         }
@@ -86,7 +97,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "1000000*avg:exchange.memory.available{*} by {host}",
+                        "q": "avg:exchange.memory.available{$host,$instance}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
@@ -129,7 +140,6 @@
                 "precision": 1
             },
             "width": 18,
-            "time": {},
             "y": 10,
             "x": 54,
             "type": "query_value",
@@ -145,7 +155,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.is.clienttype.rpc_ops_persec{*} by {instance,host}",
+                        "q": "avg:exchange.is.clienttype.rpc_ops_persec{$host,$instance}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
@@ -180,7 +190,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.is.store.rpc_ops_persec{*} by {instance,host}",
+                        "q": "avg:exchange.is.store.rpc_ops_persec{$host,$instance}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
@@ -188,7 +198,7 @@
                         },
                         "type": "line",
                         "metadata": {
-                            "avg:exchange.is.store.rpc_ops_persec{*} by {instance,host}": {
+                            "avg:exchange.is.store.rpc_ops_persec{$host,$instance}": {
                                 "alias": "Operations"
                             }
                         }
@@ -228,7 +238,6 @@
                 "precision": 1
             },
             "width": 18,
-            "time": {},
             "y": 26,
             "x": 54,
             "type": "query_value",
@@ -267,7 +276,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.owa.requests_persec{*} by {host}",
+                        "q": "avg:exchange.owa.requests_persec{$host,$instance}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
@@ -302,7 +311,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.ws.requests_persec{*} by {host}",
+                        "q": "avg:exchange.ws.requests_persec{$host,$instance}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
@@ -468,7 +477,6 @@
                 "precision": 0
             },
             "width": 18,
-            "time": {},
             "y": 19,
             "x": 1,
             "type": "query_value",
@@ -492,7 +500,6 @@
                 "precision": 0
             },
             "width": 18,
-            "time": {},
             "y": 19,
             "x": 20,
             "type": "query_value",
@@ -508,7 +515,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.database.io_db_reads_attached_persec{*} by {instance}",
+                        "q": "avg:exchange.database.io_db_reads_attached_persec{$host,$instance}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
@@ -516,13 +523,13 @@
                         },
                         "type": "line",
                         "metadata": {
-                            "avg:exchange.database.io_db_reads_attached_persec{*} by {instance}": {
+                            "avg:exchange.database.io_db_reads_attached_persec{$host,$instance}": {
                                 "alias": "Reading rate"
                             }
                         }
                     },
                     {
-                        "q": "avg:exchange.database.io_db_writes_attached_persec{*} by {instance}",
+                        "q": "avg:exchange.database.io_db_writes_attached_persec{$host,$instance}",
                         "style": {
                             "width": "normal",
                             "palette": "purple",
@@ -530,7 +537,7 @@
                         },
                         "type": "line",
                         "metadata": {
-                            "avg:exchange.database.io_db_writes_attached_persec{*} by {instance}": {
+                            "avg:exchange.database.io_db_writes_attached_persec{$host,$instance}": {
                                 "alias": "Writing rate"
                             }
                         }
@@ -562,7 +569,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.processor.cpu_time{*} by {host}",
+                        "q": "avg:exchange.processor.cpu_time{$host,$instance}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
@@ -607,7 +614,7 @@
             "y": 52,
             "x": 112,
             "type": "query_value",
-            "id": 23
+            "id": 21
         },
         {
             "title_size": 16,
@@ -619,7 +626,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.rpc.ops_persec{*} by {host}",
+                        "q": "avg:exchange.rpc.ops_persec{$host,$instance}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
@@ -642,7 +649,7 @@
             "y": 68,
             "x": 112,
             "type": "timeseries",
-            "id": 24
+            "id": 22
         },
         {
             "font_size": "18",
@@ -657,7 +664,7 @@
             "x": 40,
             "tick": true,
             "tick_pos": "50%",
-            "id": 25
+            "id": 23
         },
         {
             "title_size": 16,
@@ -678,11 +685,10 @@
                 "precision": 1
             },
             "width": 18,
-            "time": {},
             "y": 52,
             "x": 131,
             "type": "query_value",
-            "id": 26
+            "id": 24
         },
         {
             "font_size": "18",
@@ -697,7 +703,7 @@
             "x": 40,
             "tick": true,
             "tick_pos": "50%",
-            "id": 27
+            "id": 25
         },
         {
             "font_size": "18",
@@ -712,7 +718,7 @@
             "x": 112,
             "tick": true,
             "tick_pos": "50%",
-            "id": 28
+            "id": 26
         },
         {
             "title_size": 16,
@@ -724,7 +730,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.workload_management.queued_tasks{*} by {instance,host}",
+                        "q": "avg:exchange.workload_management.queued_tasks{$host,$instance}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
@@ -732,7 +738,7 @@
                         },
                         "type": "line",
                         "metadata": {
-                            "avg:exchange.workload_management.queued_tasks{*} by {instance,host}": {
+                            "avg:exchange.workload_management.queued_tasks{$host,$instance}": {
                                 "alias": "Queued tasks"
                             }
                         }
@@ -752,7 +758,7 @@
             "y": 45,
             "x": 1,
             "type": "timeseries",
-            "id": 29
+            "id": 27
         },
         {
             "title_size": 16,
@@ -764,7 +770,7 @@
                 "viz": "timeseries",
                 "requests": [
                     {
-                        "q": "avg:exchange.workload_management.active_tasks{*} by {instance,host}",
+                        "q": "avg:exchange.workload_management.active_tasks{$host,$instance}",
                         "style": {
                             "width": "normal",
                             "palette": "dog_classic",
@@ -772,7 +778,7 @@
                         },
                         "type": "line",
                         "metadata": {
-                            "avg:exchange.workload_management.active_tasks{*} by {instance,host}": {
+                            "avg:exchange.workload_management.active_tasks{$host,$instance}": {
                                 "alias": "Active tasks"
                             }
                         }
@@ -793,7 +799,7 @@
             "x": 1,
             "legend_size": "0",
             "type": "timeseries",
-            "id": 30
+            "id": 28
         }
     ]
 }
