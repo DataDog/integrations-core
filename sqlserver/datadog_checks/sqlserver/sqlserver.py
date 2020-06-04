@@ -604,19 +604,22 @@ class SQLServer(AgentCheck):
                     clerk_rows, clerk_cols = SqlOsMemoryClerksStat.fetch_all_values(cursor, self.instances_per_type_metrics[instance_key]["SqlOsMemoryClerksStat"], self.log)
 
                     for metric in metrics_to_collect:
-                        if type(metric) is SqlSimpleMetric:
-                            metric.fetch_metric(cursor, simple_rows, custom_tags)
-                        elif type(metric) is SqlFractionMetric or type(metric) is SqlIncrFractionMetric:
-                            metric.fetch_metric(cursor, fraction_results, custom_tags)
-                        elif type(metric) is SqlOsWaitStat:
-                            metric.fetch_metric(cursor, waitstat_rows, waitstat_cols, custom_tags)
-                        elif type(metric) is SqlIoVirtualFileStat:
-                            metric.fetch_metric(cursor, vfs_rows, vfs_cols, custom_tags)
-                        elif type(metric) is SqlOsMemoryClerksStat:
-                            metric.fetch_metric(cursor, clerk_rows, clerk_cols, custom_tags)
-                        elif type(metric) is SqlComplexMetric:
-                            rows, cols = metric.fetch_all_values(cursor, self.log)
-                            metric.fetch_metric(cursor, rows, cols, custom_tags, self.cached_metrics_data)
+                        try:
+                            if type(metric) is SqlSimpleMetric:
+                                metric.fetch_metric(cursor, simple_rows, custom_tags)
+                            elif type(metric) is SqlFractionMetric or type(metric) is SqlIncrFractionMetric:
+                                metric.fetch_metric(cursor, fraction_results, custom_tags)
+                            elif type(metric) is SqlOsWaitStat:
+                                metric.fetch_metric(cursor, waitstat_rows, waitstat_cols, custom_tags)
+                            elif type(metric) is SqlIoVirtualFileStat:
+                                metric.fetch_metric(cursor, vfs_rows, vfs_cols, custom_tags)
+                            elif type(metric) is SqlOsMemoryClerksStat:
+                                metric.fetch_metric(cursor, clerk_rows, clerk_cols, custom_tags)
+                            elif type(metric) is SqlComplexMetric:
+                                rows, cols = metric.fetch_all_values(cursor, self.log)
+                                metric.fetch_metric(cursor, rows, cols, custom_tags, self.cached_metrics_data)
+                        except Exception as e:
+                            self.log.error("Could not fetch metric %s for instance %s: %s" % (metric.datadog_name, instance.get("host", ""), e))
 
             except Exception as e:
                 self.log.warning("Could not fetch metric due to %s" % e)
