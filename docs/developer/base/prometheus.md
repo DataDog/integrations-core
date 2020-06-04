@@ -79,7 +79,7 @@ Histogram metrics ending in:
 | ------- | ------------- | ----- | ------------------------ |
 | &nbsp; | `send_distribution_buckets` | `true` | The entire histogram can be submitted as a single [distribution metric][datadog-distribution-metrics]. If the option is enabled, none of the subtype metrics will be submitted.
 | `_sum` | `send_distribution_sums_as_monotonic` | `false` (default) | `gauge` |
-| &nbsp; | &nbsp; | `true` | `monotonic_gauge` |
+| &nbsp; | &nbsp; | `true` | `monotonic_count` |
 | `_count` | `send_distribution_counts_as_monotonic` | `false` (default) | `gauge` |
 | &nbsp; | &nbsp; | `true` | `monotonic_count` |
 | `_bucket` | `non_cumulative_buckets` | `false` (default) | `gauge` |
@@ -99,7 +99,7 @@ Summary metrics ending in:
 | Subtype | Config Option | Value | Datadog Metric Submitted |
 | ------- | ------------- | ----- | ------------------------ |
 | `_sum` | `send_distribution_sums_as_monotonic` | `false` (default) |`gauge` |
-| &nbsp; | &nbsp; | `true` | `monotonic_gauge` |
+| &nbsp; | &nbsp; | `true` | `monotonic_count` |
 | `_count` | `send_distribution_counts_as_monotonic` | `false` (default) | `gauge` |
 | &nbsp; | &nbsp; | `true` | `monotonic_count` |
 | `_quantile` | &nbsp; | &nbsp; | `gauge` |
