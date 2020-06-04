@@ -1,6 +1,25 @@
 {
+    "author_info": {
+        "author_name": "Datadog"
+    },
     "board_title": "Sidekiq Overview",
+    "created": "2020-04-01T14:19:50.912045+00:00",
+    "created_by": {
+        "access_role": "st",
+        "disabled": false,
+        "email": "support@datadoghq.com",
+        "handle": "support@datadoghq.com",
+        "is_admin": false,
+        "name": "Datadog",
+        "role": null,
+        "title": null,
+        "verified": true
+    },
     "description": "This dashboard provides a high-level overview of your Sidekiq deployment so you can monitor metrics related to jobs, queues, and batches.\n\nFor further reading on monitoring Sidekiq, see our [official Sidekiq integration documentation](https://docs.datadoghq.com/integrations/sidekiq/).\n\nClone this template to make changes and add your own graphs and widgets.",
+    "id": 1038262,
+    "modified": "2020-04-02T18:40:12.613606+00:00",
+    "new_id": "u7k-5bn-7ui",
+    "read_only": false,
     "template_variables": [],
     "widgets": [
         {
