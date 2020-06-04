@@ -26,6 +26,9 @@
   "type": "check",
   "integration_id": "nginx",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "NGINX Plus base overview": "assets/dashboards/plus_overview.json"
