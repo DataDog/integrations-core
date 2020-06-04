@@ -15,6 +15,18 @@ from ..console import CONTEXT_SETTINGS, abort
 
 BOARD_ID_PATTERN = r'{site}/[^/]+/([^/]+)/.+'
 SCREEN_API = 'https://api.{site}/api/v1/screen/{board_id}'
+fields_to_remove = {
+    'author_info',
+    'created_by',
+    'created',
+    'icon',
+    'id',
+    'modified',
+    'new_id',
+    'originalHeight',
+    'originalWidth',
+    'read_only',
+}
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Dashboard utilities')
@@ -66,13 +78,10 @@ def export(ctx, url, integration):
         abort(str(e).replace(api_key, '*' * len(api_key)).replace(app_key, '*' * len(app_key)))
 
     payload = response.json()
-    payload.pop('author_info', None)
-    payload.pop('created_by', None)
-    payload.pop('created', None)
-    payload.pop('new_id', None)
-    payload.pop('id', None)
-    payload.pop('modified', None)
-    payload.pop('read_only', None)
+
+    # remove unneeded fields
+    for field in fields_to_remove:
+        payload.pop(field, None)
 
     output = json.dumps(payload, indent=4, sort_keys=True)
 
