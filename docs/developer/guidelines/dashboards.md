@@ -12,6 +12,8 @@ If you would like to create a default dashboard for an integration, follow the g
 ### Exporting a dashboard payload
 When you've created a dashboard in the Datadog UI, you can export the dashboard payload to be included in its integration's assets directory.
 
+Ensure that you have set an `API_KEY` and `APP_KEY` for the org that contains the new dashboard in the ddev [configuration](https://datadoghq.dev/integrations-core/ddev/cli/#set).
+
 Run the following command to [export the dashboard](../ddev/cli.md#export):
 
 ```cli
@@ -40,6 +42,9 @@ Commit the changes and create a pull request.
 Important metrics that are key to the performance and overview of the integration should be at the top.
 
 1. Ensure good design by keeping labels and widgets aligned with consistent spacing and reasonable size. 
+
+!!! tip
+    Use [`TV Mode`](https://docs.datadoghq.com/dashboards/screenboards/#tv-mode) to ensure that the whole dashboard fit on your horizontal screen.
 
 ### Logos
 
