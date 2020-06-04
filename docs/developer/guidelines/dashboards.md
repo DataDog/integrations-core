@@ -136,8 +136,8 @@ Timeseries widgets allow you to visualize the evolution of one or more metrics o
 
 | Types of metrics | Display Type |
 | ---------------- | ------------- |
-| Volume (e.g number of connections) | `area` |
-| Counts (e.g number of errors) | `bars` |
+| Volume (e.g. Number of connections) | `area` |
+| Counts (e.g. Number of errors) | `bars` |
 | Multiple groups or default | `lines` |
 
 
@@ -150,7 +150,7 @@ Add an event stream only if the service monitored by the dashboard is reporting 
 
 ### Template Variables
 
-[Template variables](https://docs.datadoghq.com/dashboards/template_variables/) allow yu to dynamically filter one or more widgets in a dashboard.
+[Template variables](https://docs.datadoghq.com/dashboards/template_variables/) allow you to dynamically filter one or more widgets in a dashboard.
 
 - Template variables must be universal and accessible by any user or account using the monitored service.
 - Make sure all relevant graphs are listening to the relevant template variable filters.
