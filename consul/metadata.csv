@@ -1,9 +1,9 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-consul.catalog.nodes_critical,gauge,,node,,Number of nodes with service status `critical` from those registered,-1,consul,nodes crit
-consul.catalog.nodes_passing,gauge,,node,,Number of nodes with service status `passing` from those registered,1,consul,nodes pass
-consul.catalog.nodes_up,gauge,,node,,Number of nodes,0,consul,nodes up
-consul.catalog.nodes_warning,gauge,,node,,Number of nodes with service status `warning` from those registered,-1,consul,nodes warn
-consul.catalog.total_nodes,gauge,,node,,Number of nodes registered in the consul cluster,0,consul,total nodes
+consul.catalog.nodes_critical,gauge,,node,,The number of nodes with service status `critical` from those registered,-1,consul,nodes crit
+consul.catalog.nodes_passing,gauge,,node,,The number of nodes with service status `passing` from those registered,1,consul,nodes pass
+consul.catalog.nodes_up,gauge,,node,,The number of nodes,0,consul,nodes up
+consul.catalog.nodes_warning,gauge,,node,,The number of nodes with service status `warning` from those registered,-1,consul,nodes warn
+consul.catalog.total_nodes,gauge,,node,,The number of nodes registered in the consul cluster,0,consul,total nodes
 consul.catalog.services_critical,gauge,,service,,Total critical services on nodes,-1,consul,svc crit
 consul.catalog.services_passing,gauge,,service,,Total passing services on nodes,1,consul,svc pass
 consul.catalog.services_up,gauge,,service,,Total services registered on nodes,0,consul,svc up
@@ -17,34 +17,112 @@ consul.net.node.latency.p90,gauge,,millisecond,,p90 latency from this node to al
 consul.net.node.latency.p95,gauge,,millisecond,,p95 latency from this node to all others,-1,consul,p95 latency
 consul.net.node.latency.p99,gauge,,millisecond,,p99 latency from this node to all others,-1,consul,p99 latency
 consul.net.node.latency.max,gauge,,millisecond,,maximum latency from this node to all others,-1,consul,max latency
-consul.peers,gauge,,,,Number of peers in the peer set,0,consul,peer
-consul.runtime.num_goroutines,gauge,10,,,Number of running goroutines,0,consul,num goroutines
-consul.runtime.alloc_bytes,gauge,10,byte,,Current bytes allocated by the Consul process,0,consul,bytes alloc
-consul.runtime.heap_objects,gauge,10,object,,Number of objects allocated on the heap,0,consul,heap objs
-consul.runtime.sys_bytes,gauge,10,byte,,Total size of the virtual address space reserved by the Go runtime,0,consul,
-consul.runtime.malloc_count,gauge,10,object,,Cumulative count of heap objects allocated,0,consul,
-consul.runtime.free_count,gauge,10,object,,Cumulative count of heap objects freed,0,consul,
-consul.runtime.total_gc_pause_ns,gauge,10,nanosecond,,Cumulative nanoseconds in GC stop-the-world pauses since Consul started,0,consul,
-consul.runtime.total_gc_runs,gauge,10,,,Number of completed GC cycles,0,consul,
-consul.raft.state.leader,rate,10,event,,Number of completed leader elections,-1,consul,leader elecs
-consul.raft.state.candidate,rate,10,event,,Number of initiated leader elections,-1,consul,leader elecs init
-consul.raft.apply,rate,10,transaction,,Number of raft transactions occurring,0,consul,raft trans
-consul.raft.commitTime.avg,gauge,10,millisecond,,The average time it takes to commit a new entry to the raft log on the leader,-1,consul,raft cmt avg
-consul.raft.commitTime.count,rate,10,,,The number of samples of raft.commitTime,0,consul,raft cmt cnt
-consul.raft.commitTime.max,gauge,10,millisecond,,The max time it takes to commit a new entry to the raft log on the leader,-1,consul,raft cmt max
-consul.raft.commitTime.median,gauge,10,millisecond,,The median time it takes to commit a new entry to the raft log on the leader,-1,consul,raft cmt med
-consul.raft.commitTime.95percentile,gauge,10,millisecond,,The p95 time it takes to commit a new entry to the raft log on the leader,-1,consul,raft cmt p95
-consul.raft.leader.dispatchLog.avg,gauge,10,millisecond,,The average time it takes for the leader to write log entries to disk,-1,consul,dispatch log avg
-consul.raft.leader.dispatchLog.count,rate,10,,,The number of samples of raft.leader.dispatchLog,0,consul,dispatch log cnt
-consul.raft.leader.dispatchLog.max,gauge,10,millisecond,,The max time it takes for the leader to write log entries to disk,-1,consul,dispatch log max
-consul.raft.leader.dispatchLog.median,gauge,10,millisecond,,The median time it takes for the leader to write log entries to disk,-1,consul,dispatch log med
-consul.raft.leader.dispatchLog.95percentile,gauge,10,millisecond,,The p95 time it takes for the leader to write log entries to disk,-1,consul,dispatch log p95
-consul.raft.leader.lastContact.avg,gauge,10,millisecond,,Average time elapsed since the leader was last able to check its lease with followers,-1,consul,
-consul.raft.leader.lastContact.count,rate,10,,,The number of samples of raft.leader.lastContact,0,consul,
-consul.raft.leader.lastContact.max,gauge,10,millisecond,,Max time elapsed since the leader was last able to check its lease with followers,-1,consul,
-consul.raft.leader.lastContact.median,gauge,10,millisecond,,Median time elapsed since the leader was last able to check its lease with followers,-1,consul,
-consul.raft.leader.lastContact.95percentile,gauge,10,millisecond,,P95 time elapsed since the leader was last able to check its lease with followers,-1,consul,
-consul.memberlist.msg.suspect,rate,10,,,Number of times an agent suspects another as failed while probing during gossip protocol,-1,consul,
-consul.serf.member.flap,rate,10,,,Number of times an agent is marked dead and then quickly recovers,-1,consul,
-consul.serf.events,rate,10,event,,Incremented when an agent processes a serf event,0,consul,num events
-consul.serf.member.join,rate,10,event,,Incremented when an agent processes a join event,0,consul,num joins
+consul.peers,gauge,,,,The number of peers in the peer set,0,consul,peer
+consul.memberlist.degraded.probe,gauge,,,,"[DogStatsD only] This metric counts the number of times the Consul agent has performed failure detection on another agent at a slower probe rate. The agent uses its own health metric as an indicator to perform this action. (If its health score is low, means that the node is healthy, and vice versa.)",-1,consul,member degraded
+consul.memberlist.gossip.95percentile,gauge,,message,,[DogStatsD only] The p95 for the number of gossips (messages) broadcasted to a set of randomly selected nodes.,-1,consul,member gossip p95
+consul.memberlist.gossip.avg,gauge,,message,,[DogStatsD only] The avg for the number of gossips (messages) broadcasted to a set of randomly selected nodes.,-1,consul,member gossip avg
+consul.memberlist.gossip.count,rate,,,,[DogStatsD only] The number of samples of consul.memberlist.gossip,-1,consul,member gossip count
+consul.memberlist.gossip.max,gauge,,message,,[DogStatsD only] The max for the number of gossips (messages) broadcasted to a set of randomly selected nodes.,-1,consul,member gossip max
+consul.memberlist.gossip.median,gauge,,message,,[DogStatsD only] The median for the number of gossips (messages) broadcasted to a set of randomly selected nodes.,-1,consul,member gossip med
+consul.memberlist.health.score,gauge,,,,"[DogStatsD only] This metric describes a node's perception of its own health based on how well it is meeting the soft real-time requirements of the protocol. This metric ranges from 0 to 8, where 0 indicates ""totally healthy"". For more details see section IV of the Lifeguard paper: https://arxiv.org/pdf/1707.00788.pdf",0,consul,member health
+consul.memberlist.msg.alive,gauge,,,,"[DogStatsD only] This metric counts the number of alive Consul agents, that the agent has mapped out so far, based on the message information given by the network layer.",0,consul,member msg alive
+consul.memberlist.msg.dead,gauge,,message,,[DogStatsD only] This metric counts the number of times a Consul agent has marked another agent to be a dead node.,0,consul,member msg dead
+consul.memberlist.msg.suspect,rate,,,,[DogStatsD only] The number of times a Consul agent suspects another as failed while probing during gossip protocol,-1,consul,member suspect
+consul.memberlist.msg_alive,gauge,,node,,"[DogStatsD only] This metric counts the number of alive Consul agents, that the agent has mapped out so far, based on the message information given by the network layer.",0,consul,member msg_alive
+consul.memberlist.msg_dead,gauge,,node,,"[DogStatsD only] This metric gives the number of dead Consul agents, that the agent has mapped out so far, based on the message information given by the network layer.",0,consul,member msg_dead
+consul.memberlist.probenode.95percentile,gauge,,node,,[DogStatsD only] The p95 for the time taken to perform a single round of failure detection on a select Consul agent.,0,consul,member probe p95
+consul.memberlist.probenode.avg,gauge,,node,,[DogStatsD only] The avg for the time taken to perform a single round of failure detection on a select Consul agent.,0,consul,member probe avg
+consul.memberlist.probenode.count,rate,,,,[DogStatsD only] The number of samples of consul.memberlist.probenode,0,consul,member probe count
+consul.memberlist.probenode.max,gauge,,node,,[DogStatsD only] The max for the time taken to perform a single round of failure detection on a select Consul agent.,0,consul,member probe max
+consul.memberlist.probenode.median,gauge,,node,,[DogStatsD only] The median for the time taken to perform a single round of failure detection on a select Consul agent.,0,consul,member probe med
+consul.memberlist.pushpullnode.95percentile,gauge,,node,,[DogStatsD only] The p95 for the number of Consul agents that have exchanged state with this agent.,0,consul,member node p95
+consul.memberlist.pushpullnode.avg,gauge,,node,,[DogStatsD only] The avg for the number of Consul agents that have exchanged state with this agent.,0,consul,member node avg
+consul.memberlist.pushpullnode.count,rate,,,,[DogStatsD only] The number of samples of consul.memberlist.pushpullnode,0,consul,member node count
+consul.memberlist.pushpullnode.max,gauge,,node,,[DogStatsD only] The max for the number of Consul agents that have exchanged state with this agent.,0,consul,member node max
+consul.memberlist.pushpullnode.median,gauge,,node,,[DogStatsD only] The median for the number of Consul agents that have exchanged state with this agent.,0,consul,member node med
+consul.memberlist.tcp.accept,gauge,,connection,,[DogStatsD only] This metric counts the number of times a Consul agent has accepted an incoming TCP stream connection.,0,consul,member tcp accept
+consul.memberlist.tcp.connect,gauge,,connection,,[DogStatsD only] This metric counts the number of times a Consul agent has initiated a push/pull sync with an other agent.,0,consul,member tcp connect
+consul.memberlist.tcp.sent,gauge,,byte,,[DogStatsD only] This metric measures the total number of bytes sent by a Consul agent through the TCP protocol,0,consul,member tcp sent
+consul.memberlist.udp.received,gauge,,byte,,[DogStatsD only] This metric measures the total number of bytes sent/received by a Consul agent through the UDP protocol.,0,consul,member udp rec
+consul.memberlist.udp.sent,gauge,,byte,,[DogStatsD only] This metric measures the total number of bytes sent/received by a Consul agent through the UDP protocol.,0,consul,member udp sent
+consul.client.rpc,rate,,request,,"[DogStatsD only] This increments whenever a Consul agent in client mode makes an RPC request to a Consul server. This gives a measure of how much a given agent is loading the Consul servers. Currently, this is only generated by agents in client mode, not Consul servers.",0,consul,client rpc
+consul.client.rpc.failed,gauge,,request,,[DogStatsD only] Increments whenever a Consul agent in client mode makes an RPC request to a Consul server and fails,-1,consul,client rpc fail
+consul.hosts_file.age,gauge,,,,[DogStatsD only] Age of the hosts file,0,consul,hosts_file age
+consul.http..,gauge,,millisecond,,"[DogStatsD only] This tracks how long it takes to service the given HTTP request for the given verb and path. Paths do not include details like service or key names, for these an underscore will be present as a placeholder (eg. consul.http.GET.v1.kv._)",-1,consul,http api
+consul.runtime.num_goroutines,gauge,10,,,[DogStatsD only] The number of running goroutines,0,consul,num goroutines
+consul.runtime.alloc_bytes,gauge,10,byte,,[DogStatsD only] Current bytes allocated by the Consul process,0,consul,bytes alloc
+consul.runtime.heap_objects,gauge,10,object,,[DogStatsD only] The number of objects allocated on the heap,0,consul,heap objs
+consul.runtime.sys_bytes,gauge,10,byte,,[DogStatsD only] Total size of the virtual address space reserved by the Go runtime,0,consul,run sys bytes
+consul.runtime.malloc_count,gauge,10,object,,[DogStatsD only] Cumulative count of heap objects allocated,0,consul,run malloc cnt
+consul.runtime.free_count,gauge,10,object,,[DogStatsD only] Cumulative count of heap objects freed,0,consul,run free cnt
+consul.runtime.total_gc_pause_ns,gauge,10,nanosecond,,[DogStatsD only] Cumulative nanoseconds in GC stop-the-world pauses since Consul started,0,consul,run tot gc pause
+consul.runtime.total_gc_runs,gauge,10,,,[DogStatsD only] The number of completed GC cycles,0,consul,run total gc runs
+consul.runtime.gc_pause_ns.95percentile,gauge,,nanosecond,,[DogStatsD only] The p95 for the number of nanoseconds consumed by stop-the-world garbage collection (GC) pauses since Consul started.,-1,consul,run gc p95
+consul.runtime.gc_pause_ns.avg,gauge,,nanosecond,,[DogStatsD only] The avg for the number of nanoseconds consumed by stop-the-world garbage collection (GC) pauses since Consul started.,-1,consul,run gc avg
+consul.runtime.gc_pause_ns.count,rate,,,,[DogStatsD only] The number of samples of consul.runtime.gc_pause_ns,-1,consul,run gc count
+consul.runtime.gc_pause_ns.max,gauge,,nanosecond,,[DogStatsD only] The max for the number of nanoseconds consumed by stop-the-world garbage collection (GC) pauses since Consul started.,-1,consul,run gc max
+consul.runtime.gc_pause_ns.median,gauge,,nanosecond,,[DogStatsD only] The median for the number of nanoseconds consumed by stop-the-world garbage collection (GC) pauses since Consul started.,-1,consul,run gc median
+consul.raft.state.leader,rate,10,event,,[DogStatsD only] The number of completed leader elections,-1,consul,leader elecs
+consul.raft.state.candidate,rate,10,event,,[DogStatsD only] The number of initiated leader elections,-1,consul,leader elecs init
+consul.raft.apply,rate,10,transaction,,[DogStatsD only] The number of raft transactions occurring,0,consul,raft trans
+consul.raft.commitTime.avg,gauge,10,millisecond,,[DogStatsD only] The average time it takes to commit a new entry to the raft log on the leader,-1,consul,raft cmt avg
+consul.raft.commitTime.count,rate,10,,,[DogStatsD only] The number of samples of raft.commitTime,0,consul,raft cmt cnt
+consul.raft.commitTime.max,gauge,10,millisecond,,[DogStatsD only] The max time it takes to commit a new entry to the raft log on the leader,-1,consul,raft cmt max
+consul.raft.commitTime.median,gauge,10,millisecond,,[DogStatsD only] The median time it takes to commit a new entry to the raft log on the leader,-1,consul,raft cmt med
+consul.raft.commitTime.95percentile,gauge,10,millisecond,,[DogStatsD only] The p95 time it takes to commit a new entry to the raft log on the leader,-1,consul,raft cmt p95
+consul.raft.leader.dispatchLog.avg,gauge,10,millisecond,,[DogStatsD only] The average time it takes for the leader to write log entries to disk,-1,consul,dispatch log avg
+consul.raft.leader.dispatchLog.count,rate,10,,,[DogStatsD only] The number of samples of raft.leader.dispatchLog,0,consul,dispatch log cnt
+consul.raft.leader.dispatchLog.max,gauge,10,millisecond,,[DogStatsD only] The max time it takes for the leader to write log entries to disk,-1,consul,dispatch log max
+consul.raft.leader.dispatchLog.median,gauge,10,millisecond,,[DogStatsD only] The median time it takes for the leader to write log entries to disk,-1,consul,dispatch log med
+consul.raft.leader.dispatchLog.95percentile,gauge,10,millisecond,,[DogStatsD only] The p95 time it takes for the leader to write log entries to disk,-1,consul,dispatch log p95
+consul.raft.leader.lastContact.avg,gauge,10,millisecond,,[DogStatsD only] Average time elapsed since the leader was last able to check its lease with followers,-1,consul,last contact avg
+consul.raft.leader.lastContact.count,rate,10,,,[DogStatsD only] The number of samples of raft.leader.lastContact,0,consul,last contact count
+consul.raft.leader.lastContact.max,gauge,10,millisecond,,[DogStatsD only] Max time elapsed since the leader was last able to check its lease with followers,-1,consul,last contact max
+consul.raft.leader.lastContact.median,gauge,10,millisecond,,[DogStatsD only] Median time elapsed since the leader was last able to check its lease with followers,-1,consul,last contact med
+consul.raft.leader.lastContact.95percentile,gauge,10,millisecond,,[DogStatsD only] P95 time elapsed since the leader was last able to check its lease with followers,-1,consul,last contact p95
+consul.serf.events,rate,10,event,,[DogStatsD only] Incremented when a Consul agent processes a serf event,0,consul,num events
+consul.serf.coordinate.adjustment_ms.95percentile,gauge,,millisecond,,[DogStatsD only] The p95 in milliseconds for the node coordinate adjustment,-1,consul,serf coord avg
+consul.serf.coordinate.adjustment_ms.avg,gauge,,millisecond,,[DogStatsD only] The avg in milliseconds for the node coordinate adjustment,-1,consul,serf coord count
+consul.serf.coordinate.adjustment_ms.count,rate,,,,[DogStatsD only] The number of samples of consul.serf.coordinate.adjustment_ms,0,consul,serf coord max
+consul.serf.coordinate.adjustment_ms.max,gauge,,millisecond,,[DogStatsD only] The max in milliseconds for the node coordinate adjustment,-1,consul,serf coord med
+consul.serf.coordinate.adjustment_ms.median,gauge,,millisecond,,[DogStatsD only] The median in milliseconds for the node coordinate adjustment,-1,consul,serf coord p95
+consul.serf.member.flap,rate,10,,,[DogStatsD only] The number of times a Consul agent is marked dead and then quickly recovers,-1,consul,serf memb flap
+consul.serf.member.join,rate,10,event,,[DogStatsD only] Incremented when a Consul agent processes a join event,0,consul,num joins
+consul.serf.member.update,gauge,,,,[DogStatsD only] This increments when a Consul agent updates.,0,consul,serf member update
+consul.serf.member.failed,gauge,,,,"[DogStatsD only] This increments when a Consul agent is marked dead. This can be an indicator of overloaded agents, network problems, or configuration errors where agents cannot connect to each other on the required ports.",0,consul,serf member failed
+consul.serf.member.left,gauge,,,,[DogStatsD only] This increments when a Consul agent leaves the cluster.,0,consul,serf member left
+consul.serf.msgs.received.95percentile,gauge,,message,,[DogStatsD only] The p95 for the number of serf messages received,0,consul,msg recv p95
+consul.serf.msgs.received.avg,gauge,,message,,[DogStatsD only] The avg for the number of serf messages received,0,consul,msg recv avg
+consul.serf.msgs.received.count,rate,,,,[DogStatsD only] The count of serf messages received,0,consul,msg recv count
+consul.serf.msgs.received.max,gauge,,message,,[DogStatsD only] The max for the number of serf messages received,0,consul,msg recv max
+consul.serf.msgs.received.median,gauge,,message,,[DogStatsD only] The median for the number of serf messages received,0,consul,msg recv median
+consul.serf.msgs.sent.95percentile,gauge,,message,,[DogStatsD only] The p95 for the number of serf messages sent,0,consul,msg sent p95
+consul.serf.msgs.sent.avg,gauge,,message,,[DogStatsD only] The avg for the number of serf messages sent,0,consul,msg sent avg
+consul.serf.msgs.sent.count,rate,,,,[DogStatsD only] The count of serf messages sent,0,consul,msg sent count
+consul.serf.msgs.sent.max,gauge,,message,,[DogStatsD only] The max for the number of serf messages sent,0,consul,msg sent max
+consul.serf.msgs.sent.median,gauge,,message,,[DogStatsD only] The median for the number of serf messages sent,0,consul,msg sent median
+consul.serf.queue.event.95percentile,gauge,,,,[DogStatsD only] The p95 for the size of the serf event queue,-1,consul,queue event p95
+consul.serf.queue.event.avg,gauge,,,,[DogStatsD only] The avg size of the serf event queue,-1,consul,queue event avg
+consul.serf.queue.event.count,rate,,,,[DogStatsD only] The number of items in the serf event queue,0,consul,queue event count
+consul.serf.queue.event.max,gauge,,,,[DogStatsD only] The max size of the serf event queue,-1,consul,queue event max
+consul.serf.queue.event.median,gauge,,,,[DogStatsD only] The median size of the serf event queue,-1,consul,queue event median
+consul.serf.queue.intent.95percentile,gauge,,,,[DogStatsD only] The p95 for the size of the serf intent queue,-1,consul,queue intent p95
+consul.serf.queue.intent.avg,gauge,,,,[DogStatsD only] The avg size of the serf intent queue,-1,consul,queue intent avg
+consul.serf.queue.intent.count,rate,,,,[DogStatsD only] The number of items in the serf intent queue,0,consul,queue intent count
+consul.serf.queue.intent.max,gauge,,,,[DogStatsD only] The max size of the serf intent queue,-1,consul,queue intent max
+consul.serf.queue.intent.median,gauge,,,,[DogStatsD only] The median size of the serf intent queue,-1,consul,queue intent median
+consul.serf.queue.query.95percentile,gauge,,,,[DogStatsD only] The p95 for the size of the serf query queue,-1,consul,queue query p95
+consul.serf.queue.query.avg,gauge,,,,[DogStatsD only] The avg size of the serf query queue,-1,consul,queue query avg
+consul.serf.queue.query.count,rate,,,,[DogStatsD only] The number of items in the serf query queue,0,consul,queue query count
+consul.serf.queue.query.max,gauge,,,,[DogStatsD only] The max size of the serf query queue,-1,consul,queue query max
+consul.serf.queue.query.median,gauge,,,,[DogStatsD only] The median size of the serf query queue,-1,consul,queue query median
+consul.serf.snapshot.appendline.95percentile,gauge,,millisecond,,[DogStatsD only] The p95 of the time taken by the Consul agent to append an entry into the existing log.,-1,consul,snap append p95
+consul.serf.snapshot.appendline.avg,gauge,,millisecond,,[DogStatsD only] The avg of the time taken by the Consul agent to append an entry into the existing log.,-1,consul,snap append avg
+consul.serf.snapshot.appendline.count,rate,,,,[DogStatsD only] The number of samples of consul.serf.snapshot.appendline,0,consul,snap append count
+consul.serf.snapshot.appendline.max,gauge,,millisecond,,[DogStatsD only] The max of the time taken by the Consul agent to append an entry into the existing log.,-1,consul,snap append max
+consul.serf.snapshot.appendline.median,gauge,,millisecond,,[DogStatsD only] The median of the time taken by the Consul agent to append an entry into the existing log.,-1,consul,snap append median
+consul.serf.snapshot.compact.95percentile,gauge,,millisecond,,[DogStatsD only] The p95 of the time taken by the Consul agent to compact a log. This operation occurs only when the snapshot becomes large enough to justify the compaction .,-1,consul,snap compact p95
+consul.serf.snapshot.compact.avg,gauge,,millisecond,,[DogStatsD only] The avg of the time taken by the Consul agent to compact a log. This operation occurs only when the snapshot becomes large enough to justify the compaction .,-1,consul,snap compact avg
+consul.serf.snapshot.compact.count,rate,,,,[DogStatsD only] The number of samples of consul.serf.snapshot.compact,0,consul,snap compact count
+consul.serf.snapshot.compact.max,gauge,,millisecond,,[DogStatsD only] The max of the time taken by the Consul agent to compact a log. This operation occurs only when the snapshot becomes large enough to justify the compaction .,-1,consul,snap compact max
+consul.serf.snapshot.compact.median,gauge,,millisecond,,[DogStatsD only] The median of the time taken by the Consul agent to compact a log. This operation occurs only when the snapshot becomes large enough to justify the compaction .,-1,consul,snap compact median
