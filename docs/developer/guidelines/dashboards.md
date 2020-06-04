@@ -60,7 +60,7 @@ Labels are used to divide the screenboard in visually comprehensive sections.
     !!! important
         Do not use bold or all capitalized letters because it can make the dashboard harder to read.
 
-- Horizontal labels should be kept above the graphs and its width should be the length of the entire section. 
+- Horizontal labels should be kept above the graphs and their width should be the length of the entire section. 
 
 - For vertical labels, keep the label to the left of the section and its length should be the height the graphs. 
 Enable a pointer to properly convey the direction of the section. 
