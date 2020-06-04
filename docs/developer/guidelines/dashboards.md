@@ -10,7 +10,7 @@ Datadog dashboards enable you to efficiently monitor your infrastructure and int
 If you would like to create a default dashboard for an integration, follow the guidelines in the [Best Practices](./dashboards.md#best-practices) section.
 
 ### Exporting a dashboard payload
-When you've created a dashboard, you can export the dashboard payload to be included in the integration assets.
+When you've created a dashboard in the Datadog UI, you can export the dashboard payload to be included in its integration's assets directory.
 
 Run the following command to [export the dashboard](../ddev/cli.md#export):
 
