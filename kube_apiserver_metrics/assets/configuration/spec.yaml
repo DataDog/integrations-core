@@ -1,0 +1,67 @@
+name: Kubernetes API server metrics
+files:
+- name: kube-apiserver-metrics.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/openmetrics
+  - template: instances
+    options:
+    - name: scheme
+      description: |
+        Used to specify the scheme to reach the APIServer endpoints. Default to https.
+        This option is deprecated, declare the scheme in the prometheus_url
+        parameter instead.
+      value:
+        type: string
+        example: http
+    - template: instances/openmetrics
+      overrides:
+        prometheus_url.value.example: https://localhost:443/metrics
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - kube-apiserver
+  - template: init_config
+    options: []
+  - template: instances
+    options:
+    - name: prometheus_url
+      required: true
+      description: The URL where your application metrics are exposed by Prometheus.
+      value:
+        example: https://%%host%%:6443/metrics
+        type: string
+    - name: bearer_token_auth
+      description: |
+        Used if you are using RBACs and need the Agent to authenticate
+        against the APIServer to retrieve metrics. Default to true.
+      value:
+        type: boolean
+        example: true
+    - name: bearer_token_path
+      description: Used to specify the path where the service account token is located.
+      value:
+        type: string
+        default: /var/run/secrets/kubernetes.io/serviceaccount/token
+        example: /var/run/secrets/kubernetes.io/serviceaccount/token
+    - name: ssl_verify
+      description: Used to verify self signed certificates.
+      value:
+        type: boolean
+        default: false
+        example: false
+    - name: tags
+      description: |
+        List of tags to attach to every metric, event and service check emitted by this integration.
+
+        Learn more about tagging: https://docs.datadoghq.com/tagging/
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - "apiserver:%%host%%"
