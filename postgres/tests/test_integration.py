@@ -229,6 +229,19 @@ def test_query_timeout(aggregator, integration_check, pg_instance):
         cursor.execute("select pg_sleep(2000)")
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance):
+    pg_instance['tag_replication_role'] = True
+    check = integration_check(pg_instance)
+
+    expected_tags = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT), 'db:datadog_test']
+
+    for i in range(3):
+        check.check(pg_instance)
+        assert check.config.tags == expected_tags
+
+
 def assert_state_clean(check):
     assert check.metrics_cache.instance_metrics is None
     assert check.metrics_cache.bgw_metrics is None
