@@ -1440,20 +1440,17 @@ class MySql(ExecutionPlansMixin, AgentCheck):
             FROM performance_schema.events_statements_summary_by_digest
             ORDER BY `avg_timer_wait` DESC"""
 
-        COUNT_METRICS = {
+        METRICS = {
             'count': ('mysql.queries.count', self.count),
             'errors': ('mysql.queries.errors', self.count),
+            'time': ('mysql.queries.time', self.count),
             'select_scan': ('mysql.queries.select_scan', self.count),
             'select_full_join': ('mysql.queries.select_full_join', self.count),
             'no_index_used': ('mysql.queries.no_index_used', self.count),
             'no_good_index_used': ('mysql.queries.no_good_index_used', self.count),
-        }
-
-        PER_STATMENT_METRICS = {
-            'time': ('mysql.queries.time', self.gauge),
-            'lock_time': ('mysql.queries.lock_time', self.gauge),
-            'rows_affected': ('mysql.queries.rows', self.gauge),
-            'rows_sent': ('mysql.queries.rows_sent', self.gauge),
+            'lock_time': ('mysql.queries.lock_time', self.count),
+            'rows_affected': ('mysql.queries.rows', self.count),
+            'rows_sent': ('mysql.queries.rows_sent', self.count),
             'rows_examined': ('mysql.queries.rows_examined', self.count),
         }
 
@@ -1493,18 +1490,14 @@ class MySql(ExecutionPlansMixin, AgentCheck):
             if row['count'] - prev['count'] <= 0:
                 continue
 
-            for col, (name, fn) in list(COUNT_METRICS.items()) + list(PER_STATMENT_METRICS.items()):
+            for col, (name, fn) in METRICS.items():
                 tags = []
                 if row['schema'] is not None:
                     tags.append('schema:' + row['schema'])
                 tags.append('query:' + row['query'[:200]])
                 tags.append('digest:' + row['digest'])
                 tags.append('query_signature:' + compute_sql_signature(row['query']))
-                if col in PER_STATMENT_METRICS:
-                    val = (row[col] - prev[col]) / (row['count'] - prev['count'])
-                    metrics.append((name, val, fn, tags))
-                else:
-                    metrics.append((name, row[col] - prev[col], fn, tags))
+                metrics.append((name, row[col] - prev[col], fn, tags))
 
         self.statement_cache = new_cache
         return metrics
