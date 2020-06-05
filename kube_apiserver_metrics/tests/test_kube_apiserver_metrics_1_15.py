@@ -74,7 +74,7 @@ class TestKubeAPIServerMetrics:
         Testing kube_apiserver_metrics metrics collection.
         """
 
-        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [instance])
+        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [instance])
         check.check(instance)
 
         # check that we then get the count metrics also
