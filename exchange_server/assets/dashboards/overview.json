@@ -4,7 +4,7 @@
     },
     "board_title": "Exchange Server Overview",
     "read_only": false,
-    "description": "## Exchange Server\n\nThis dashboard provides a high-level overview of your Exchange Server instances so you can monitor metrics related to network, storage and workers.\n\n[Official integration docs](https://docs.datadoghq.com/integrations/exchange_server/)\n\nClone this template to make changes and add your own graphs and widgets.\n",
+    "description": "## Exchange Server\n\nThis dashboard provides a high-level overview of your Exchange Server instances so you can monitor metrics related to network, storage, and workers.\n\n[Official integration docs](https://docs.datadoghq.com/integrations/exchange_server/)\n\nClone this template to make changes and add your own graphs and widgets.\n",
     "created": "2020-05-29T11:07:43.815841+00:00",
     "id": 1143460,
     "new_id": "yxx-ehn-dh5",
