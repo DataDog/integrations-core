@@ -1,7 +1,8 @@
 import os
 
 from datadog_checks.dev.tooling.constants import get_root
-from datadog_checks.dev.tooling.utils import get_default_config_spec, get_valid_checks, get_valid_integrations
+from datadog_checks.dev.tooling.utils import get_default_config_spec, get_valid_checks, get_valid_integrations, \
+    get_config_file
 
 MARKER = '<docs-insert-status>'
 
@@ -17,6 +18,8 @@ def patch(lines):
     for renderer in (
         render_config_spec_progress,
         render_dashboard_progress,
+        render_logs_progres,
+        render_e2e_progress
     ):
         new_lines.extend(renderer())
         new_lines.append('')
@@ -80,4 +83,55 @@ def render_dashboard_progress():
     percent = integrations_with_dashboard / total_integrations * 100
     formatted_percent = f'{percent:.2f}'
     lines[5] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    return lines
+
+
+def render_logs_progres():
+    valid_checks = sorted(get_valid_checks())
+    total_checks = len(valid_checks)
+    checks_with_logs = 0
+
+    lines = ['## Logs specs', '', None, '', '??? check "Completed"']
+
+    for check in valid_checks:
+        config_file = get_config_file(check)
+        status = ' '
+        if os.path.exists(config_file):
+            with open(config_file) as f:
+                if '# logs:' in f.read():
+                    status = 'X'
+                    checks_with_logs += 1
+
+        lines.append(f'    - [{status}] {check}')
+
+    percent = checks_with_logs / total_checks * 100
+    formatted_percent = f'{percent:.2f}'
+    lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    return lines
+
+
+def render_e2e_progres():
+    valid_checks = sorted(get_valid_checks())
+    total_checks = len(valid_checks)
+    checks_with_e2e = 0
+
+    lines = ['## E2E', '', None, '', '??? check "Completed"']
+
+    for check in valid_checks:
+        config_file = get_config_file(check)
+        status = ' '
+        if not os.path.exists(config_file):
+            # tile only
+            total_checks -= 1
+        else:
+            with open(config_file) as f:
+                if '# logs:' in f.read():
+                    status = 'X'
+                    checks_with_e2e += 1
+
+        lines.append(f'    - [{status}] {check}')
+
+    percent = checks_with_e2e / total_checks * 100
+    formatted_percent = f'{percent:.2f}'
+    lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
     return lines
