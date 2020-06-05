@@ -6,15 +6,18 @@ import time
 from typing import Any, Dict
 
 from dateutil import parser
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, RequestException
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.types import Event
 
 
 class CloudFoundryApiCheck(AgentCheck):
-    SOURCE_TYPE_NAME = "CloudFoundry"
     __NAMESPACE__ = "cloud_foundry_api"
+
+    SOURCE_TYPE_NAME = "Cloud Foundry"
+    MAX_LOOKBACK_SECONDS = 600
+    TOCKEN_EXPIRATION_BUFFER = 300
 
     def __init__(self, name, init_config, instances):
         super(CloudFoundryApiCheck, self).__init__(name, init_config, instances)
@@ -34,77 +37,96 @@ class CloudFoundryApiCheck(AgentCheck):
 
     def get_oauth_token(self):
         # type: () -> str
-        if self._oauth_token is not None and self._token_expiration > int(time.time()):
+        if (
+            self._oauth_token is not None
+            and self._token_expiration - CloudFoundryApiCheck.TOCKEN_EXPIRATION_BUFFER > int(time.time())
+        ):
             return
         self.log.info("Refreshing access token")
-        res = self.http.get(
-            f"{self._uaa_url}/oauth/token",
-            auth=(self._client_id, self._client_secret),
-            params={"grant_type": "client_credentials"},
-        )
+        try:
+            res = self.http.get(
+                "{}/oauth/token".format(self._uaa_url),
+                auth=(self._client_id, self._client_secret),
+                params={"grant_type": "client_credentials"},
+            )
+        except RequestException:
+            self.log.exception("Error connecting to the UAA server")
+            raise
         try:
             res.raise_for_status()
+        except HTTPError:
+            self.log.exception("Error authenticating to the UAA server: response: %s", res.text)
+            raise
+        try:
             payload = res.json()
-            if "access_token" in payload and "expires_in" in payload:
-                self._oauth_token = payload["access_token"]
-                self._token_expiration = int(time.time()) + payload["expires_in"]
-                return
-            self.log.error("Could not find access token and expiration in payload: %s", payload)
-        except HTTPError as e:
-            self.log.error("Error authenticating to the UAA server: %s - %s", e, res.text)
+        except ValueError:
+            self.log.exception("Error decoding response from the UAA server: response: %s", res.text)
             raise
-        except ValueError as e:
-            self.log.error("Error decoding response from the UAA server: %s - %s", e, res.text)
-            raise
+
+        self._oauth_token = payload["access_token"]
+        self._token_expiration = int(time.time()) + payload["expires_in"]
 
     def get_events_v2(self):
         events = {}
         scroll = True
         params = {
-            "q": f"type IN {self._event_filter}",
+            "q": "type IN {}".format(self._event_filter),
             "results-per-page": min(self._per_page, 100),
+            "page": 1,
             "order-direction": "desc",
             "order-by": "timestamp",
         }
-        headers = {"Authorization": f"Bearer {self._oauth_token}"}
-        res = self.http.get(f"{self._api_url}/v2/events", params=params, headers=headers)
+        headers = {"Authorization": "Bearer {}".format(self._oauth_token)}
         while scroll:
             try:
-                res.raise_for_status()
-                payload = res.json()
-            except HTTPError as e:
-                self.log.error("Error querying list of events: %s - %s", e, res.text)
+                res = self.http.get("{}/v2/events".format(self._api_url), params=params, headers=headers)
+            except RequestException:
+                self.log.exception("Error connecting to the Cloud Controller API")
                 break
-            except ValueError as e:
-                self.log.error("Error decoding response from the UAA server: %s - %s", e, res.text)
+            try:
+                res.raise_for_status()
+            except HTTPError:
+                self.log.exception("Error querying list of events: response %s", res.text)
+                break
+            try:
+                payload = res.json()
+            except ValueError:
+                self.log.error("Error decoding response from the Cloud Controller API: response %s", res.text)
                 break
             # Collect events
             for v2_event in payload.get("resources", []):
                 event_ts = int(parser.isoparse(v2_event["entity"]["timestamp"]).timestamp())
                 event_guid = v2_event["metadata"]["guid"]
                 # Stop going through events if we've reached one we've already fetched or if we went back in time enough
-                if event_guid == self._last_event_guid or int(time.time()) - event_ts > 600:
+                if (
+                    event_guid == self._last_event_guid
+                    or int(time.time()) - event_ts > CloudFoundryApiCheck.MAX_LOOKBACK_SECONDS
+                ):
                     scroll = False
                     break
+                # Store the event at which we want to stop on the next check run: the most recent of the current run
                 if event_ts > self._last_event_ts:
                     self._last_event_guid = event_guid
                     self._last_event_ts = event_ts
                 tags = [
-                    f"event_type:{v2_event['entity']['type']}",
-                    f"{v2_event['entity']['actee_type']}_name:{v2_event['entity']['actee_name']}",
-                    f"{v2_event['entity']['actee_type']}_guid:{v2_event['entity']['actee']}",
-                    f"{v2_event['entity']['actor_type']}_name:{v2_event['entity']['actor_name']}",
-                    f"{v2_event['entity']['actor_type']}_guid:{v2_event['entity']['actor']}",
-                    f"space_guid:{v2_event['entity']['space_guid']}",
-                    f"org_guid:{v2_event['entity']['organization_guid']}",
+                    "event_type:{}".format(v2_event["entity"]["type"]),
+                    "{}_name:{}".format(v2_event["entity"]["actee_type"], v2_event["entity"]["actee_name"]),
+                    "{}_guid:{}".format(v2_event["entity"]["actee_type"], v2_event["entity"]["actee"]),
+                    "{}_name:{}".format(v2_event["entity"]["actor_type"], v2_event["entity"]["actor_name"]),
+                    "{}_guid:{}".format(v2_event["entity"]["actor_type"], v2_event["entity"]["actor"]),
+                    "space_guid:{}".format(v2_event["entity"]["space_guid"]),
+                    "org_guid:{}".format(v2_event["entity"]["organization_guid"]),
                 ]
                 dd_event = {
                     "source_type_name": CloudFoundryApiCheck.SOURCE_TYPE_NAME,
                     "event_type": v2_event["entity"]["type"],
                     "timestamp": event_ts,
-                    "msg_title": f"Event {v2_event['entity']['type']} happened for {v2_event['entity']['actee_type']} "
-                    f"{v2_event['entity']['actee_name']}",
-                    "msg_text": f"Triggered by {v2_event['entity']['actor_type']} {v2_event['entity']['actor_name']}",
+                    "msg_title": "Event {} happened for {} {}".format(
+                        v2_event["entity"]["type"], v2_event["entity"]["actee_type"], v2_event["entity"]["actee_name"]
+                    ),
+                    "msg_text": "Triggered by {} {}".format(
+                        v2_event["entity"]["actor_type"], v2_event["entity"]["actor_name"]
+                    ),
                     "priority": "normal",
                     "tags": tags,
                 }
@@ -115,7 +137,7 @@ class CloudFoundryApiCheck(AgentCheck):
             next_url = payload.get("next_url")
             if not next_url or not scroll:
                 break
-            res = self.http.get(f"{self._api_url}{next_url}", headers=headers)
+            params["page"] += 1
         return events
 
     def get_events(self):
@@ -130,7 +152,7 @@ class CloudFoundryApiCheck(AgentCheck):
             #     "per_page": min(self._per_page, 5000),
             #     "order_by": "-created_at",
             # }
-            # res = self.http.get(f"{self._api_url}/v3/audit_events")
+            # res = self.http.get("{}/v3/audit_events".format(self._api_url))
             pass
         else:
             self.log.error("Unknown api version `%s`, choose between `v2` and `v3`", self._api_version)
