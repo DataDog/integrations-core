@@ -24,6 +24,7 @@ from .config import InstanceConfig
 from .discovery import discover_instances
 from .exceptions import PySnmpError
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
+from .mibs import MIBLoader
 from .models import OID
 from .parsing import ParsedMetric, ParsedMetricTag, ParsedTableMetric
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
@@ -62,6 +63,8 @@ class SnmpCheck(AgentCheck):
 
         # Load Custom MIB directory
         self.mibs_path = self.init_config.get('mibs_folder')
+
+        self.optimize_mib_memory_usage = is_affirmative(self.init_config.get('optimize_mib_memory_usage', False))
 
         self.ignore_nonincreasing_oid = is_affirmative(self.init_config.get('ignore_nonincreasing_oid', False))
 
@@ -117,12 +120,15 @@ class SnmpCheck(AgentCheck):
 
     def _build_config(self, instance):
         # type: (dict) -> InstanceConfig
+        loader = MIBLoader.shared_instance() if self.optimize_mib_memory_usage else MIBLoader()
+
         return InstanceConfig(
             instance,
             global_metrics=self.init_config.get('global_metrics', []),
             mibs_path=self.mibs_path,
             profiles=self.profiles,
             profiles_by_oid=self.profiles_by_oid,
+            loader=loader,
         )
 
     def _get_instance_name(self, instance):

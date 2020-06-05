@@ -7,15 +7,13 @@ from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
+from .mibs import MIBLoader
 from .models import OID
 from .parsing import ParsedMetric, ParsedMetricTag, ParsedSymbolMetric, parse_metric_tags, parse_metrics
 from .pysnmp_types import (
     CommunityData,
     ContextData,
-    DirMibSource,
-    MibViewController,
     OctetString,
-    SnmpEngine,
     UdpTransportTarget,
     UsmUserData,
     hlapi,
@@ -62,11 +60,13 @@ class InstanceConfig:
         mibs_path=None,  # type: str
         profiles=None,  # type: Dict[str, dict]
         profiles_by_oid=None,  # type: Dict[str, str]
+        loader=None,  # type: MIBLoader
     ):
         # type: (...) -> None
         global_metrics = [] if global_metrics is None else global_metrics
         profiles = {} if profiles is None else profiles
         profiles_by_oid = {} if profiles_by_oid is None else profiles_by_oid
+        loader = MIBLoader() if loader is None else loader
 
         # Clean empty or null values. This will help templating.
         for key, value in list(instance.items()):
@@ -84,7 +84,8 @@ class InstanceConfig:
             self.metrics.extend(global_metrics)
 
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
-        self._snmp_engine, mib_view_controller = self.create_snmp_engine(mibs_path)
+        self._snmp_engine = loader.create_snmp_engine(mibs_path)
+        mib_view_controller = loader.get_mib_view_controller(mibs_path)
         self._resolver = OIDResolver(mib_view_controller, self.enforce_constraints)
 
         self.ip_address = None
@@ -182,24 +183,6 @@ class InstanceConfig:
     def add_profile_tag(self, profile_name):
         # type: (str) -> None
         self.tags.append('snmp_profile:{}'.format(profile_name))
-
-    @staticmethod
-    def create_snmp_engine(mibs_path=None):
-        # type: (str) -> Tuple[SnmpEngine, MibViewController]
-        """
-        Create a command generator to perform all the snmp query.
-        If mibs_path is not None, load the mibs present in the custom mibs
-        folder. (Need to be in pysnmp format)
-        """
-        snmp_engine = SnmpEngine()
-        mib_builder = snmp_engine.getMibBuilder()
-
-        if mibs_path is not None:
-            mib_builder.addMibSources(DirMibSource(mibs_path))
-
-        mib_view_controller = MibViewController(mib_builder)
-
-        return snmp_engine, mib_view_controller
 
     @staticmethod
     def get_transport_target(instance, timeout, retries):
