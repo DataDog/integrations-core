@@ -237,7 +237,7 @@ def test_config_tags_is_unchanged_between_checks(integration_check, pg_instance)
 
     expected_tags = pg_instance['tags'] + ['server:{}'.format(HOST), 'port:{}'.format(PORT), 'db:datadog_test']
 
-    for i in range(3):
+    for _ in range(3):
         check.check(pg_instance)
         assert check.config.tags == expected_tags
 
