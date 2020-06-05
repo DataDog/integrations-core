@@ -1,0 +1,71 @@
+name: Cloud Foundry API
+files:
+- name: cloud_foundry_api.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - template: instances/default
+    - name: api_url
+      description: URL of the Cloud Controller API.
+      required: true
+      value:
+        type: string
+    - name: uaa_url
+      description: URL of the UAA server.
+      required: true
+      value:
+        type: string
+    - name: tls_verify
+      value:
+        example: true
+        type: boolean
+      description: Instructs the check to validate the TLS certificate of services.
+    - name: client_id
+      description: |
+        `client_id` used to authenticate with UAA and obtain an oauth token
+        for communication with the Cloud Controller API.
+      required: true
+      value:
+        type: string
+    - name: client_secret
+      description: |
+        `client_secret` used to authenticate with UAA and obtain an oauth token
+        for communication with the Cloud Controller API.
+      required: true
+      value:
+        type: string
+      secret: true
+    - name: api_version
+      description: |
+        Version of the Cloud Controller API to target. Choose between `v2` and `v3`.
+        Depending on your Cloud Controller version, not all resources are available in `v3`.
+        Switch to `v2` if that is the case.
+      value:
+        type: string
+        pattern: v2|v3
+        default: v3
+        example: v3
+    - name: event_filter
+      description: |
+        A list of the types of audit events to fetch.
+        See https://docs.cloudfoundry.org/running/managing-cf/audit-events.html#types for detailed information.
+      value:
+        type: array
+        items:
+          type: string
+        default: []
+        example:
+        - audit.app.restage
+        - audit.app.update
+        - audit.app.create
+    - name: results_per_page
+      description: |
+        Maximum number of event results per request to the API. Maximum is 5000 for v3, and 100 for v2.
+      value:
+        type: integer
+        maximum: 5000
+        default: 2000
+
