@@ -47,7 +47,7 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 )
 @click.option('--org-name', '-o', help='The org to use for data submission.')
 @click.option('--profile-memory', '-pm', is_flag=True, help='Whether to collect metrics about memory usage')
-@click.option('--dogstatsd', '-d', is_flag=True, help='Enable dogstatsd port on agent')
+@click.option('--dogstatsd', is_flag=True, help='Enable dogstatsd port on agent')
 @click.pass_context
 def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile_memory, dogstatsd):
     """Start an environment."""
