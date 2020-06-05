@@ -103,7 +103,7 @@ def render_metadata_progress():
         else:
             check_file = get_check_file(check)
             if os.path.exists(check_file):
-                with open(check_file) as f:
+                with open(check_file, 'r', encoding='utf-8') as f:
                     contents = f.read()
                     if 'self.set_metadata' in contents:
                         status = 'X'
@@ -129,14 +129,14 @@ def render_logs_progress():
         status = ' '
         tile_only = not os.path.exists(config_file)
         if not tile_only:
-            with open(config_file) as f:
+            with open(config_file, 'r', encoding='utf-8') as f:
                 if '# logs:' in f.read():
                     status = 'X'
                     checks_with_logs += 1
         else:
             readme_file = get_readme_file(check)
             if os.path.exists(readme_file):
-                with open(readme_file) as f:
+                with open(readme_file, 'r', encoding='utf-8') as f:
                     if '# Log collection' in f.read():
                         status = 'X'
                         checks_with_logs += 1
@@ -165,7 +165,7 @@ def render_e2e_progress():
             # tile only
             total_checks -= 1
         else:
-            with open(config_file) as f:
+            with open(config_file, 'r', encoding='utf-8') as f:
                 if '# logs:' in f.read():
                     status = 'X'
                     checks_with_e2e += 1
