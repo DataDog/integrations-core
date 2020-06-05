@@ -38,7 +38,7 @@ instances:
     ## be "stats" (the default). For stats users (defined in Proxysql's admin-stats_credentials), this will be "main".
     ## See https://github.com/sysown/proxysql/issues/1661 for information about why this is the case
     #
-    # database_name: "stats"
+    # database_name: stats
 
     ## @param tls_verify - boolean - optional - default: false
     ## Instructs the check to use SSL when connecting to ProxySQL

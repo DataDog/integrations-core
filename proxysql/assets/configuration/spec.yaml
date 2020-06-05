@@ -34,6 +34,15 @@ files:
       value:
         type: string
         example: <PROXYSQL_ADMIN_PASSWORD>
+    - name: database_name
+      required: false
+      description: |
+        Sets the name of the database that will be queried for stats. For proxysql admin users, this will
+        be "stats" (the default). For stats users (defined in Proxysql's admin-stats_credentials), this will be "main".
+        See https://github.com/sysown/proxysql/issues/1661 for information about why this is the case
+      value:
+        type: string
+        example: stats
     - name: tls_verify
       value:
         example: false
