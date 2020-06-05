@@ -235,9 +235,14 @@ class Disk(AgentCheck):
         metrics = {}
         # we need to timeout this, too.
         try:
-            inodes = timeout(5)(os.statvfs)(mountpoint)
+            inodes = timeout(self._timeout)(os.statvfs)(mountpoint)
         except TimeoutException:
-            self.log.warning(u'Timeout while retrieving the disk usage of `%s` mountpoint. Skipping...', mountpoint)
+            self.log.warning(
+                u'Timeout after %d seconds while retrieving the disk usage of `%s` mountpoint. '
+                u'You might want to change the timeout length in the settings.',
+                self._timeout,
+                mountpoint,
+            )
             return metrics
         except Exception as e:
             self.log.warning('Unable to get disk metrics for %s: %s', mountpoint, e)
