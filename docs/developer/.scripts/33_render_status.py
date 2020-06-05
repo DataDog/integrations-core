@@ -2,7 +2,7 @@ import os
 
 from datadog_checks.dev.tooling.constants import get_root
 from datadog_checks.dev.tooling.utils import get_default_config_spec, get_valid_checks, get_valid_integrations, \
-    get_config_file, get_check_file
+    get_config_file, get_check_file, get_readme_file
 
 MARKER = '<docs-insert-status>'
 
@@ -127,11 +127,21 @@ def render_logs_progress():
     for check in valid_checks:
         config_file = get_config_file(check)
         status = ' '
-        if os.path.exists(config_file):
+        tile_only = not os.path.exists(config_file)
+        if not tile_only:
             with open(config_file) as f:
                 if '# logs:' in f.read():
                     status = 'X'
                     checks_with_logs += 1
+        else:
+            readme_file = get_readme_file(check)
+            if os.path.exists(readme_file):
+                with open(readme_file) as f:
+                    if '# Log collection' in f.read():
+                        status = 'X'
+                        checks_with_logs += 1
+            if status != 'X':
+                total_checks -= 1  # we cannot really add log collection to tile only integrations
 
         lines.append(f'    - [{status}] {check}')
 
