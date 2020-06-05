@@ -35,6 +35,7 @@ class NginxIngressControllerCheck(OpenMetricsBaseCheck):
                         # controller metrics
                         {'nginx_ingress_controller_success': 'controller.reload.success'},
                         {'nginx_ingress_controller_ingress_upstream_latency_seconds': 'controller.upstream.latency'},
+                        {'nginx_ingress_controller_response_duration_seconds': 'controller.response.duration'},
                         {'nginx_ingress_controller_requests': 'controller.requests'},
                         {'process_cpu_seconds_total': 'controller.cpu.time'},
                         {'process_resident_memory_bytes': 'controller.mem.resident'},
