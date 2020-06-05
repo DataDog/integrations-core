@@ -166,6 +166,14 @@ def test_all_metrics(aggregator, instance_all_metrics, dd_run_check):
     _assert_all_metrics(aggregator)
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_all_metrics_stats_user(aggregator, instance_stats_user, dd_run_check):
+    check = get_check(instance_stats_user)
+    dd_run_check(check)
+    _assert_all_metrics(aggregator)
+
+
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
