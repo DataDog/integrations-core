@@ -38,25 +38,20 @@ PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({
 
 
 # Count columns to be converted to metrics
-PG_STAT_STATEMENTS_COUNT_COLUMNS = {
+PG_STAT_STATEMENTS_METRIC_COLUMNS = {
     'calls': ('pg_stat_statements.calls', 'postgresql.queries.count', AgentCheck.count),
-}
-
-
-# Columns which are aggregates per-statement and must be divided by count
-PG_STAT_STATEMENTS_PER_STATEMENT_COLUMNS = {
-    'total_time': ('pg_stat_statements.total_time', 'postgresql.queries.time', AgentCheck.gauge),
-    'rows': ('pg_stat_statements.rows', 'postgresql.queries.rows', AgentCheck.gauge),
-    'shared_blks_hit': ('pg_stat_statements.shared_blks_hit', 'postgresql.queries.shared_blks_hit', AgentCheck.gauge),
-    'shared_blks_read': ('pg_stat_statements.shared_blks_read', 'postgresql.queries.shared_blks_read', AgentCheck.gauge),
-    'shared_blks_dirtied': ('pg_stat_statements.shared_blks_dirtied', 'postgresql.queries.shared_blks_dirtied', AgentCheck.gauge),
-    'shared_blks_written': ('pg_stat_statements.shared_blks_written', 'postgresql.queries.shared_blks_written', AgentCheck.gauge),
-    'local_blks_hit': ('pg_stat_statements.local_blks_hit', 'postgresql.queries.local_blks_hit', AgentCheck.gauge),
-    'local_blks_read': ('pg_stat_statements.local_blks_read', 'postgresql.queries.local_blks_read', AgentCheck.gauge),
-    'local_blks_dirtied': ('pg_stat_statements.local_blks_dirtied', 'postgresql.queries.local_blks_dirtied', AgentCheck.gauge),
-    'local_blks_written': ('pg_stat_statements.local_blks_written', 'postgresql.queries.local_blks_written', AgentCheck.gauge),
-    'temp_blks_read': ('pg_stat_statements.temp_blks_read', 'postgresql.queries.temp_blks_read', AgentCheck.gauge),
-    'temp_blks_written': ('pg_stat_statements.temp_blks_written', 'postgresql.queries.temp_blks_written', AgentCheck.gauge),
+    'total_time': ('pg_stat_statements.total_time', 'postgresql.queries.time', AgentCheck.count),
+    'rows': ('pg_stat_statements.rows', 'postgresql.queries.rows', AgentCheck.count),
+    'shared_blks_hit': ('pg_stat_statements.shared_blks_hit', 'postgresql.queries.shared_blks_hit', AgentCheck.count),
+    'shared_blks_read': ('pg_stat_statements.shared_blks_read', 'postgresql.queries.shared_blks_read', AgentCheck.count),
+    'shared_blks_dirtied': ('pg_stat_statements.shared_blks_dirtied', 'postgresql.queries.shared_blks_dirtied', AgentCheck.count),
+    'shared_blks_written': ('pg_stat_statements.shared_blks_written', 'postgresql.queries.shared_blks_written', AgentCheck.count),
+    'local_blks_hit': ('pg_stat_statements.local_blks_hit', 'postgresql.queries.local_blks_hit', AgentCheck.count),
+    'local_blks_read': ('pg_stat_statements.local_blks_read', 'postgresql.queries.local_blks_read', AgentCheck.count),
+    'local_blks_dirtied': ('pg_stat_statements.local_blks_dirtied', 'postgresql.queries.local_blks_dirtied', AgentCheck.count),
+    'local_blks_written': ('pg_stat_statements.local_blks_written', 'postgresql.queries.local_blks_written', AgentCheck.count),
+    'temp_blks_read': ('pg_stat_statements.temp_blks_read', 'postgresql.queries.temp_blks_read', AgentCheck.count),
+    'temp_blks_written': ('pg_stat_statements.temp_blks_written', 'postgresql.queries.temp_blks_written', AgentCheck.count),
 }
 
 
@@ -132,7 +127,7 @@ class PgStatementsMixin(object):
 
         cursor = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
         columns = []
-        for entry in (PG_STAT_STATEMENTS_COUNT_COLUMNS, PG_STAT_STATEMENTS_PER_STATEMENT_COLUMNS, PG_STAT_STATEMENTS_TAG_COLUMNS):
+        for entry in (PG_STAT_STATEMENTS_METRIC_COLUMNS, PG_STAT_STATEMENTS_TAG_COLUMNS):
             for alias, (column, *_) in entry.items():
                 # Only include columns which are available on the table
                 if alias in self._pg_stat_statements_columns or alias in PG_STAT_STATEMENTS_TAG_COLUMNS:
@@ -162,14 +157,11 @@ class PgStatementsMixin(object):
                 value = PG_STAT_STATEMENTS_TRANSFORM.get(tag_column, lambda x: x)(row[tag_column])
                 tags.append('{alias}:{value}'.format(alias=alias, value=value))
 
-            for alias, (_, name, fn) in list(PG_STAT_STATEMENTS_COUNT_COLUMNS.items()) + list(PG_STAT_STATEMENTS_PER_STATEMENT_COLUMNS.items()):
+            for alias, (_, name, fn) in PG_STAT_STATEMENTS_METRIC_COLUMNS.items():
                 if alias not in self._pg_stat_statements_columns:
                     continue
 
-                if alias in PG_STAT_STATEMENTS_PER_STATEMENT_COLUMNS:
-                    val = (row[alias] - prev[alias]) / (row['calls'] - prev['calls'])
-                else:
-                    val = row[alias] - prev[alias]
+                val = row[alias] - prev[alias]
 
                 fn(self, name, val, tags=tags)
 
