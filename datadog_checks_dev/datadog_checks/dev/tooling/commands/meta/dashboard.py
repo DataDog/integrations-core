@@ -26,8 +26,15 @@ def dash():
 @dash.command(context_settings=CONTEXT_SETTINGS, short_help='Export a Dashboard as JSON')
 @click.argument('url')
 @click.argument('integration', required=False)
+@click.option(
+    '--author',
+    '-a',
+    required=False,
+    default='Datadog',
+    help="The owner of this integration's dashboard. Default is 'Datadog'",
+)
 @click.pass_context
-def export(ctx, url, integration):
+def export(ctx, url, integration, author):
     if integration and integration not in get_valid_integrations():
         abort(f'Unknown integration `{integration}`')
 
@@ -68,10 +75,12 @@ def export(ctx, url, integration):
 
     payload = response.json()
     new_payload = {field: payload[field] for field in REQUIRED_FIELDS}
+    new_payload.setdefault('author_info', {})
+    new_payload['author_info']['author_name'] = author
 
     output = json.dumps(new_payload, indent=4, sort_keys=True)
 
-    file_name = payload['board_title'].strip().lower()
+    file_name = new_payload['board_title'].strip().lower()
     if integration:
         manifest = load_manifest(integration)
 
