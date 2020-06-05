@@ -159,3 +159,9 @@ files:
             value:
               example: 0
               type: number
+          - name: timeout
+            description: Timeout of the disk query in seconds
+            value:
+              example: 5
+              default: 5
+              type: integer

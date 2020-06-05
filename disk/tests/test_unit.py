@@ -30,6 +30,7 @@ def test_default_options():
     assert check._device_tag_re == []
     assert check._service_check_rw is False
     assert check._min_disk_size == 0
+    assert check._timeout == 5
 
 
 def test_bad_config():

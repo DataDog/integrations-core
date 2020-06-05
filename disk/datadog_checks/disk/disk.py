@@ -58,7 +58,7 @@ class Disk(AgentCheck):
         self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
         self._min_disk_size = instance.get('min_disk_size', 0) * 1024 * 1024
         self._blkid_cache_file = instance.get('blkid_cache_file')
-
+        self._timeout = instance.get('timeout', 5)
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
         self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
@@ -78,10 +78,13 @@ class Disk(AgentCheck):
 
             # Get disk metrics here to be able to exclude on total usage
             try:
-                disk_usage = timeout(5)(psutil.disk_usage)(part.mountpoint)
+                disk_usage = timeout(self._timeout)(psutil.disk_usage)(part.mountpoint)
             except TimeoutException:
                 self.log.warning(
-                    u'Timeout while retrieving the disk usage of `%s` mountpoint. Skipping...', part.mountpoint
+                    u'Timeout after %d seconds while retrieving the disk usage of `%s` mountpoint. '
+                    u'You might want to change the timeout length in the settings.',
+                    self._timeout,
+                    part.mountpoint,
                 )
                 continue
             except Exception as e:
