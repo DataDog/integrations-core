@@ -1,9 +1,5 @@
 # CHANGELOG - nginx-ingress-controller
 
-## 1.4.0 / 2020-06-05
-
-* [Added] Add response duration metric for default metric collection. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
-
 ## 1.3.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
