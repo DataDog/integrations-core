@@ -2,7 +2,7 @@ import os
 
 from datadog_checks.dev.tooling.constants import get_root
 from datadog_checks.dev.tooling.utils import get_default_config_spec, get_valid_checks, get_valid_integrations, \
-    get_config_file
+    get_config_file, get_check_file
 
 MARKER = '<docs-insert-status>'
 
@@ -18,7 +18,8 @@ def patch(lines):
     for renderer in (
         render_config_spec_progress,
         render_dashboard_progress,
-        render_logs_progres,
+        render_metadata_progress,
+        render_logs_progress,
         render_e2e_progress
     ):
         new_lines.extend(renderer())
@@ -86,7 +87,37 @@ def render_dashboard_progress():
     return lines
 
 
-def render_logs_progres():
+def render_metadata_progress():
+    valid_checks = sorted(get_valid_checks())
+    total_checks = len(valid_checks)
+    checks_with_metadata = 0
+
+    lines = ['## Metadata', '', None, '', '??? check "Completed"']
+
+    for check in valid_checks:
+        config_file = get_config_file(check)
+        status = ' '
+        if not os.path.exists(config_file):
+            # tile only
+            total_checks -= 1
+        else:
+            check_file = get_check_file(check)
+            if os.path.exists(check_file):
+                with open(check_file) as f:
+                    contents = f.read()
+                    if 'self.set_metadata' in contents:
+                        status = 'X'
+                        checks_with_metadata += 1
+
+        lines.append(f'    - [{status}] {check}')
+
+    percent = checks_with_metadata / total_checks * 100
+    formatted_percent = f'{percent:.2f}'
+    lines[2] = f'[={formatted_percent}% "{formatted_percent}%"]'
+    return lines
+
+
+def render_logs_progress():
     valid_checks = sorted(get_valid_checks())
     total_checks = len(valid_checks)
     checks_with_logs = 0
@@ -110,7 +141,7 @@ def render_logs_progres():
     return lines
 
 
-def render_e2e_progres():
+def render_e2e_progress():
     valid_checks = sorted(get_valid_checks())
     total_checks = len(valid_checks)
     checks_with_e2e = 0
