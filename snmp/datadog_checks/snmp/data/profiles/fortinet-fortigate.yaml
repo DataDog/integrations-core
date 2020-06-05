@@ -4,6 +4,7 @@ extends:
   - _generic-router-if.yaml
 
 sysobjectid: 1.3.6.1.4.1.12356.101.1.*
+# sysobjectid: 1.3.6.1.4.1.3375.2.1.3.*
 
 metrics:
 
@@ -20,10 +21,8 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.12356.101.4.4.2
       name: fgProcessorTable
+    forced_type: monotonic_count
     symbols:
-      # The processor's CPU usage (percentage), which is an average calculated over the last minute.
-      - OID: 1.3.6.1.4.1.12356.101.4.4.2.1.2
-        name: fgProcessorUsage
       # The total number of packets received by this processor.
       - OID: 1.3.6.1.4.1.12356.101.4.4.2.1.6
         name: fgProcessorPktRxCount
@@ -33,6 +32,20 @@ metrics:
       # The total number of packets dropped by this processor.
       - OID: 1.3.6.1.4.1.12356.101.4.4.2.1.8
         name: fgProcessorPktDroppedCount
+    metric_tags:
+      # A unique identifier within the fgProcessorTable.
+      - tag: processor_index
+        column:
+          OID: 1.3.6.1.4.1.12356.101.4.4.2.1.1
+          name: fgProcessorEntIndex
+  - MIB: FORTINET-FORTIGATE-MIB
+    table:
+      OID: 1.3.6.1.4.1.12356.101.4.4.2
+      name: fgProcessorTable
+    symbols:
+      # The processor's CPU usage (percentage), which is an average calculated over the last minute.
+      - OID: 1.3.6.1.4.1.12356.101.4.4.2.1.2
+        name: fgProcessorUsage
       # The processor's CPU system space usage, which is an average calculated over the last minute.
       - OID: 1.3.6.1.4.1.12356.101.4.4.2.1.10
         name: fgProcessorSysUsage
@@ -112,6 +125,17 @@ metrics:
           OID: 1.3.6.1.4.1.12356.101.3.2.1.1.2
           name: fgVdEntName
 
+  - MIB: FORTINET-FORTIGATE-MIB
+    symbol:
+      # The number of virtual domains in vdTable.
+      OID: 1.3.6.1.4.1.12356.101.3.1.1
+      name: fgVdNumber
+  - MIB: FORTINET-FORTIGATE-MIB
+    symbol:
+      # The maximum number of virtual domains allowed on the device as allowed by hardware and/or licensing.
+      OID: 1.3.6.1.4.1.12356.101.3.1.2
+      name: fgVdMaxVdoms
+
   ### Interfaces
   # Fortinet specific extensions to MIB-2 ifTable.
   - MIB: FORTINET-FORTIGATE-MIB
@@ -167,24 +191,13 @@ metrics:
       OID: 1.3.6.1.4.1.12356.101.10.100.5
       name: fgApHTTPMaxConnections
 
-  ### Virtual Domains
-  - MIB: FORTINET-FORTIGATE-MIB
-    symbol:
-      # The number of virtual domains in vdTable.
-      OID: 1.3.6.1.4.1.12356.101.3.1.1
-      name: fgVdNumber
-  - MIB: FORTINET-FORTIGATE-MIB
-    symbol:
-      # The maximum number of virtual domains allowed on the device as allowed by hardware and/or licensing.
-      OID: 1.3.6.1.4.1.12356.101.3.1.2
-      name: fgVdMaxVdoms
-
   ### Firewall
   # Firewall policy statistics table.
   - MIB: FORTINET-FORTIGATE-MIB
     table:
       OID: 1.3.6.1.4.1.12356.101.5.1.2.1
       name: fgFwPolStatsTable
+    forced_type: monotonic_count
     symbols:
       # Number of packets matched to policy (passed or blocked, depending on policy action). Count is from the time the policy became active.
       - OID: 1.3.6.1.4.1.12356.101.5.1.2.1.1.2
@@ -204,6 +217,7 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.12356.101.5.1.2.2
       name: fgFwPol6StatsTable
+    forced_type: monotonic_count
     symbols:
       # Number of packets matched to policy (passed or blocked, depending on policy action). Count is from the time the policy became active.
       - OID: 1.3.6.1.4.1.12356.101.5.1.2.2.1.2
