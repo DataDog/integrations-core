@@ -1,0 +1,749 @@
+{
+  "eventSource": {
+    "objectName": "SYSTEM.ADMIN.STATISTICS.QUEUE",
+    "objectType": "Queue"
+  },
+  "eventType": {
+    "name": "Statistics Queue",
+    "value": 165
+  },
+  "eventReason": {
+    "name": "None",
+    "value": 0
+  },
+  "eventCreation": {
+    "timeStamp": "2020-06-06T21:14:16Z",
+    "epoch": 1591478056
+  },
+  "eventData": {
+    "queueMgrName": "datadog",
+    "startDate": "2020-06-06",
+    "startTime": "21.13.46",
+    "endDate": "2020-06-06",
+    "endTime": "21.14.16",
+    "commandLevel": 802,
+    "objectCount": 15,
+    "queueStatisticsData": [
+      {
+        "queueName": "SYSTEM.ADMIN.COMMAND.QUEUE",
+        "creationDate": "2020-06-06",
+        "creationTime": "20.44.51",
+        "queueType": "Local",
+        "definitionType": "Predefined",
+        "queueMinDepth": 0,
+        "queueMaxDepth": 0,
+        "avgQueueTime": [
+          1317624576693539300,
+          0
+        ],
+        "puts": [
+          14,
+          0
+        ],
+        "putsFailed": 0,
+        "put1s": [
+          0,
+          0
+        ],
+        "put1sFailed": 0,
+        "putBytes": [
+          1056,
+          0
+        ],
+        "gets": [
+          14,
+          0
+        ],
+        "getBytes": [
+          1056,
+          0
+        ],
+        "getsFailed": 0,
+        "browses": [
+          0,
+          0
+        ],
+        "browseBytes": [
+          0,
+          0
+        ],
+        "browsesFailed": 0,
+        "msgsNotQueued": 14,
+        "msgsExpired": 0,
+        "msgsPurged": 0
+      },
+      {
+        "queueName": "MQAI.REPLY.5EDC004520003804",
+        "creationDate": "2020-06-06",
+        "creationTime": "21.13.52",
+        "queueType": "Local",
+        "definitionType": "Temporary Dynamic",
+        "queueMinDepth": 0,
+        "queueMaxDepth": 3,
+        "avgQueueTime": [
+          1418980313362273300,
+          0
+        ],
+        "puts": [
+          13,
+          0
+        ],
+        "putsFailed": 0,
+        "put1s": [
+          0,
+          0
+        ],
+        "put1sFailed": 0,
+        "putBytes": [
+          36432,
+          0
+        ],
+        "gets": [
+          13,
+          0
+        ],
+        "getBytes": [
+          36432,
+          0
+        ],
+        "getsFailed": 0,
+        "browses": [
+          0,
+          0
+        ],
+        "browseBytes": [
+          0,
+          0
+        ],
+        "browsesFailed": 0,
+        "msgsNotQueued": 1,
+        "msgsExpired": 0,
+        "msgsPurged": 0
+      },
+      {
+        "queueName": "MQAI.REPLY.5EDC004520003806",
+        "creationDate": "2020-06-06",
+        "creationTime": "21.13.52",
+        "queueType": "Local",
+        "definitionType": "Temporary Dynamic",
+        "queueMinDepth": 0,
+        "queueMaxDepth": 1,
+        "avgQueueTime": [
+          95,
+          0
+        ],
+        "puts": [
+          1,
+          0
+        ],
+        "putsFailed": 0,
+        "put1s": [
+          0,
+          0
+        ],
+        "put1sFailed": 0,
+        "putBytes": [
+          1172,
+          0
+        ],
+        "gets": [
+          1,
+          0
+        ],
+        "getBytes": [
+          1172,
+          0
+        ],
+        "getsFailed": 0,
+        "browses": [
+          0,
+          0
+        ],
+        "browseBytes": [
+          0,
+          0
+        ],
+        "browsesFailed": 0,
+        "msgsNotQueued": 0,
+        "msgsExpired": 0,
+        "msgsPurged": 0
+      },
+      {
+        "queueName": "MQAI.REPLY.5EDC004520003808",
+        "creationDate": "2020-06-06",
+        "creationTime": "21.13.52",
+        "queueType": "Local",
+        "definitionType": "Temporary Dynamic",
+        "queueMinDepth": 0,
+        "queueMaxDepth": 1,
+        "avgQueueTime": [
+          227,
+          0
+        ],
+        "puts": [
+          2,
+          0
+        ],
+        "putsFailed": 0,
+        "put1s": [
+          0,
+          0
+        ],
+        "put1sFailed": 0,
+        "putBytes": [
+          72,
+          0
+        ],
+        "gets": [
+          2,
+          0
+        ],
+        "getBytes": [
+          72,
+          0
+        ],
+        "getsFailed": 0,
+        "browses": [
+          0,
+          0
+        ],
+        "browseBytes": [
+          0,
+          0
+        ],
+        "browsesFailed": 0,
+        "msgsNotQueued": 0,
+        "msgsExpired": 0,
+        "msgsPurged": 0
+      },
+      {
+        "queueName": "MQAI.REPLY.5EDC00452000380A",
+        "creationDate": "2020-06-06",
+        "creationTime": "21.13.52",
+        "queueType": "Local",
+        "definitionType": "Temporary Dynamic",
+        "queueMinDepth": 0,
+        "queueMaxDepth": 1,
+        "avgQueueTime": [
+          55,
+          0
+        ],
+        "puts": [
+          1,
+          0
+        ],
+        "putsFailed": 0,
+        "put1s": [
+          0,
+          0
+        ],
+        "put1sFailed": 0,
+        "putBytes": [
+          1172,
+          0
+        ],
+        "gets": [
+          1,
+          0
+        ],
+        "getBytes": [
+          1172,
+          0
+        ],
+        "getsFailed": 0,
+        "browses": [
+          0,
+          0
+        ],
+        "browseBytes": [
+          0,
+          0
+        ],
+        "browsesFailed": 0,
+        "msgsNotQueued": 0,
+        "msgsExpired": 0,
+        "msgsPurged": 0
+      },
+      {
+        "queueName": "MQAI.REPLY.5EDC00452000380C",
+        "creationDate": "2020-06-06",
+        "creationTime": "21.13.52",
+        "queueType": "Local",
+        "definitionType": "Temporary Dynamic",
+        "queueMinDepth": 0,
+        "queueMaxDepth": 0,
+        "avgQueueTime": [
+          "-1",
+          0
+        ],
+        "puts": [
+          1,
+          0
+        ],
+        "putsFailed": 0,
+        "put1s": [
+          0,
+          0
+        ],
+        "put1sFailed": 0,
+        "putBytes": [
+          1620,
+          0
+        ],
+        "gets": [
+          1,
+          0
+        ],
+        "getBytes": [
+          1620,
+          0
+        ],
+        "getsFailed": 0,
+        "browses": [
+          0,
+          0
+        ],
+        "browseBytes": [
+          0,
+          0
+        ],
+        "browsesFailed": 0,
+        "msgsNotQueued": 1,
+        "msgsExpired": 0,
+        "msgsPurged": 0
+      },
+      {
+        "queueName": "MQAI.REPLY.5EDC00452000380E",
+        "creationDate": "2020-06-06",
+        "creationTime": "21.13.52",
+        "queueType": "Local",
+        "definitionType": "Temporary Dynamic",
+        "queueMinDepth": 0,
+        "queueMaxDepth": 0,
+        "avgQueueTime": [
+          "-1",
+          0
+        ],
+        "puts": [
+          1,
+          0
+        ],
+        "putsFailed": 0,
+        "put1s": [
+          0,
+          0
+        ],
+        "put1sFailed": 0,
+        "putBytes": [
+          356,
+          0
+        ],
+        "gets": [
+          1,
+          0
+        ],
+        "getBytes": [
+          356,
+          0
+        ],
+        "getsFailed": 0,
+        "browses": [
+          0,
+          0
+        ],
+        "browseBytes": [
+          0,
+          0
+        ],
+        "browsesFailed": 0,
+        "msgsNotQueued": 1,
+        "msgsExpired": 0,
+        "msgsPurged": 0
+      },
+      {
+        "queueName": "MQAI.REPLY.5EDC004520003810",
+        "creationDate": "2020-06-06",
+        "creationTime": "21.13.52",
+        "queueType": "Local",
+        "definitionType": "Temporary Dynamic",
+        "queueMinDepth": 0,
+        "queueMaxDepth": 0,
+        "avgQueueTime": [
+          "-1",
+          0
+        ],
+        "puts": [
+          1,
+          0
+        ],
+        "putsFailed": 0,
+        "put1s": [
+          0,
+          0
+        ],
+        "put1sFailed": 0,
+        "putBytes": [
+          168,
+          0
+        ],
+        "gets": [
+          1,
+          0
+        ],
+        "getBytes": [
+          168,
+          0
+        ],
+        "getsFailed": 0,
+        "browses": [
+          0,
+          0
+        ],
+        "browseBytes": [
+          0,
+          0
+        ],
+        "browsesFailed": 0,
+        "msgsNotQueued": 1,
+        "msgsExpired": 0,
+        "msgsPurged": 0
+      },
+      {
+        "queueName": "MQAI.REPLY.5EDC004520003728",
+        "creationDate": "2020-06-06",
+        "creationTime": "21.14.07",
+        "queueType": "Local",
+        "definitionType": "Temporary Dynamic",
+        "queueMinDepth": 0,
+        "queueMaxDepth": 8,
+        "avgQueueTime": [
+          1418980313362273300,
+          0
+        ],
+        "puts": [
+          13,
+          0
+        ],
+        "putsFailed": 0,
+        "put1s": [
+          0,
+          0
+        ],
+        "put1sFailed": 0,
+        "putBytes": [
+          36432,
+          0
+        ],
+        "gets": [
+          13,
+          0
+        ],
+        "getBytes": [
+          36432,
+          0
+        ],
+        "getsFailed": 0,
+        "browses": [
+          0,
+          0
+        ],
+        "browseBytes": [
+          0,
+          0
+        ],
+        "browsesFailed": 0,
+        "msgsNotQueued": 1,
+        "msgsExpired": 0,
+        "msgsPurged": 0
+      },
+      {
+        "queueName": "MQAI.REPLY.5EDC00452000372A",
+        "creationDate": "2020-06-06",
+        "creationTime": "21.14.07",
+        "queueType": "Local",
+        "definitionType": "Temporary Dynamic",
+        "queueMinDepth": 0,
+        "queueMaxDepth": 1,
+        "avgQueueTime": [
+          241,
+          0
+        ],
+        "puts": [
+          1,
+          0
+        ],
+        "putsFailed": 0,
+        "put1s": [
+          0,
+          0
+        ],
+        "put1sFailed": 0,
+        "putBytes": [
+          1172,
+          0
+        ],
+        "gets": [
+          1,
+          0
+        ],
+        "getBytes": [
+          1172,
+          0
+        ],
+        "getsFailed": 0,
+        "browses": [
+          0,
+          0
+        ],
+        "browseBytes": [
+          0,
+          0
+        ],
+        "browsesFailed": 0,
+        "msgsNotQueued": 0,
+        "msgsExpired": 0,
+        "msgsPurged": 0
+      },
+      {
+        "queueName": "MQAI.REPLY.5EDC00452000372C",
+        "creationDate": "2020-06-06",
+        "creationTime": "21.14.07",
+        "queueType": "Local",
+        "definitionType": "Temporary Dynamic",
+        "queueMinDepth": 0,
+        "queueMaxDepth": 2,
+        "avgQueueTime": [
+          317,
+          0
+        ],
+        "puts": [
+          2,
+          0
+        ],
+        "putsFailed": 0,
+        "put1s": [
+          0,
+          0
+        ],
+        "put1sFailed": 0,
+        "putBytes": [
+          72,
+          0
+        ],
+        "gets": [
+          2,
+          0
+        ],
+        "getBytes": [
+          72,
+          0
+        ],
+        "getsFailed": 0,
+        "browses": [
+          0,
+          0
+        ],
+        "browseBytes": [
+          0,
+          0
+        ],
+        "browsesFailed": 0,
+        "msgsNotQueued": 0,
+        "msgsExpired": 0,
+        "msgsPurged": 0
+      },
+      {
+        "queueName": "MQAI.REPLY.5EDC00452000372E",
+        "creationDate": "2020-06-06",
+        "creationTime": "21.14.07",
+        "queueType": "Local",
+        "definitionType": "Temporary Dynamic",
+        "queueMinDepth": 0,
+        "queueMaxDepth": 1,
+        "avgQueueTime": [
+          159,
+          0
+        ],
+        "puts": [
+          1,
+          0
+        ],
+        "putsFailed": 0,
+        "put1s": [
+          0,
+          0
+        ],
+        "put1sFailed": 0,
+        "putBytes": [
+          1172,
+          0
+        ],
+        "gets": [
+          1,
+          0
+        ],
+        "getBytes": [
+          1172,
+          0
+        ],
+        "getsFailed": 0,
+        "browses": [
+          0,
+          0
+        ],
+        "browseBytes": [
+          0,
+          0
+        ],
+        "browsesFailed": 0,
+        "msgsNotQueued": 0,
+        "msgsExpired": 0,
+        "msgsPurged": 0
+      },
+      {
+        "queueName": "MQAI.REPLY.5EDC004520003730",
+        "creationDate": "2020-06-06",
+        "creationTime": "21.14.07",
+        "queueType": "Local",
+        "definitionType": "Temporary Dynamic",
+        "queueMinDepth": 0,
+        "queueMaxDepth": 0,
+        "avgQueueTime": [
+          "-1",
+          0
+        ],
+        "puts": [
+          1,
+          0
+        ],
+        "putsFailed": 0,
+        "put1s": [
+          0,
+          0
+        ],
+        "put1sFailed": 0,
+        "putBytes": [
+          1620,
+          0
+        ],
+        "gets": [
+          1,
+          0
+        ],
+        "getBytes": [
+          1620,
+          0
+        ],
+        "getsFailed": 0,
+        "browses": [
+          0,
+          0
+        ],
+        "browseBytes": [
+          0,
+          0
+        ],
+        "browsesFailed": 0,
+        "msgsNotQueued": 1,
+        "msgsExpired": 0,
+        "msgsPurged": 0
+      },
+      {
+        "queueName": "MQAI.REPLY.5EDC004520003732",
+        "creationDate": "2020-06-06",
+        "creationTime": "21.14.07",
+        "queueType": "Local",
+        "definitionType": "Temporary Dynamic",
+        "queueMinDepth": 0,
+        "queueMaxDepth": 1,
+        "avgQueueTime": [
+          90,
+          0
+        ],
+        "puts": [
+          1,
+          0
+        ],
+        "putsFailed": 0,
+        "put1s": [
+          0,
+          0
+        ],
+        "put1sFailed": 0,
+        "putBytes": [
+          356,
+          0
+        ],
+        "gets": [
+          1,
+          0
+        ],
+        "getBytes": [
+          356,
+          0
+        ],
+        "getsFailed": 0,
+        "browses": [
+          0,
+          0
+        ],
+        "browseBytes": [
+          0,
+          0
+        ],
+        "browsesFailed": 0,
+        "msgsNotQueued": 0,
+        "msgsExpired": 0,
+        "msgsPurged": 0
+      },
+      {
+        "queueName": "MQAI.REPLY.5EDC004520003734",
+        "creationDate": "2020-06-06",
+        "creationTime": "21.14.07",
+        "queueType": "Local",
+        "definitionType": "Temporary Dynamic",
+        "queueMinDepth": 0,
+        "queueMaxDepth": 1,
+        "avgQueueTime": [
+          46,
+          0
+        ],
+        "puts": [
+          1,
+          0
+        ],
+        "putsFailed": 0,
+        "put1s": [
+          0,
+          0
+        ],
+        "put1sFailed": 0,
+        "putBytes": [
+          168,
+          0
+        ],
+        "gets": [
+          1,
+          0
+        ],
+        "getBytes": [
+          168,
+          0
+        ],
+        "getsFailed": 0,
+        "browses": [
+          0,
+          0
+        ],
+        "browseBytes": [
+          0,
+          0
+        ],
+        "browsesFailed": 0,
+        "msgsNotQueued": 0,
+        "msgsExpired": 0,
+        "msgsPurged": 0
+      }
+    ]
+  }
+}

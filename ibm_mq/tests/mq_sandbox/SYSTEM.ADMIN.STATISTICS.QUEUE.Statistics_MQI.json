@@ -1,0 +1,275 @@
+{
+  "eventSource": {
+    "objectName": "SYSTEM.ADMIN.STATISTICS.QUEUE",
+    "objectType": "Queue"
+  },
+  "eventType": {
+    "name": "Statistics MQI",
+    "value": 164
+  },
+  "eventReason": {
+    "name": "None",
+    "value": 0
+  },
+  "eventCreation": {
+    "timeStamp": "2020-06-06T21:14:16Z",
+    "epoch": 1591478056
+  },
+  "eventData": {
+    "queueMgrName": "datadog",
+    "startDate": "2020-06-06",
+    "startTime": "21.13.46",
+    "endDate": "2020-06-06",
+    "endTime": "21.14.16",
+    "commandLevel": 802,
+    "conns": 4,
+    "connsFailed": 0,
+    "connsMax": 25,
+    "discs": [
+      3,
+      1,
+      0
+    ],
+    "opens": [
+      0,
+      56,
+      0,
+      0,
+      0,
+      18,
+      26,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "opensFailed": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "closes": [
+      0,
+      56,
+      0,
+      0,
+      0,
+      18,
+      26,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "closesFailed": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "inqs": [
+      0,
+      18,
+      0,
+      0,
+      0,
+      33,
+      26,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "inqsFailed": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "sets": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "setsFailed": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "puts": [
+      54,
+      0
+    ],
+    "putsFailed": 0,
+    "put1s": [
+      8,
+      0
+    ],
+    "put1sFailed": 0,
+    "putBytes": [
+      115188,
+      0
+    ],
+    "gets": [
+      56,
+      0
+    ],
+    "getBytes": [
+      93244,
+      0
+    ],
+    "getsFailed": 8,
+    "browses": [
+      0,
+      0
+    ],
+    "browseBytes": [
+      0,
+      0
+    ],
+    "browsesFailed": 0,
+    "commits": 5,
+    "commitsFailed": 0,
+    "backouts": 3,
+    "msgsExpired": 0,
+    "msgsPurged": 0,
+    "subsDur": [
+      0,
+      0,
+      0
+    ],
+    "subsNdur": [
+      0,
+      0,
+      0
+    ],
+    "subsFailed": 0,
+    "unsubsDur": [
+      0,
+      0
+    ],
+    "unsubsNdur": [
+      0,
+      0
+    ],
+    "unsubsFailed": 0,
+    "subrqs": 0,
+    "subrqsFailed": 0,
+    "cbs": [
+      16,
+      14,
+      14,
+      0
+    ],
+    "cbsFailed": 0,
+    "ctls": [
+      4,
+      0,
+      0,
+      0
+    ],
+    "ctlsFailed": 0,
+    "stats": 0,
+    "statsFailed": 0,
+    "subDurHighwater": [
+      2,
+      1,
+      1,
+      0
+    ],
+    "subDurLowwater": [
+      2,
+      1,
+      1,
+      0
+    ],
+    "subNdurHighwater": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "subNdurLowwater": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "topicPuts": [
+      0,
+      0
+    ],
+    "topicPutsFailed": 0,
+    "topicPut1s": [
+      0,
+      0
+    ],
+    "topicPut1sFailed": 0,
+    "topicPutBytes": [
+      0,
+      0
+    ],
+    "publishMsgCount": [
+      0,
+      0
+    ],
+    "publishMsgBytes": [
+      0,
+      0
+    ]
+  }
+}

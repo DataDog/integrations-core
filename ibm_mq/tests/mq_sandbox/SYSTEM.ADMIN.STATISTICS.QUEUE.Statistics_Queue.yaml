@@ -1,0 +1,591 @@
+eventCreation:
+  epoch: 1591478056
+  timeStamp: '2020-06-06T21:14:16Z'
+eventData:
+  commandLevel: 802
+  endDate: '2020-06-06'
+  endTime: 21.14.16
+  objectCount: 15
+  queueMgrName: datadog
+  queueStatisticsData:
+  - avgQueueTime:
+    - 1317624576693539300
+    - 0
+    browseBytes:
+    - 0
+    - 0
+    browses:
+    - 0
+    - 0
+    browsesFailed: 0
+    creationDate: '2020-06-06'
+    creationTime: 20.44.51
+    definitionType: Predefined
+    getBytes:
+    - 1056
+    - 0
+    gets:
+    - 14
+    - 0
+    getsFailed: 0
+    msgsExpired: 0
+    msgsNotQueued: 14
+    msgsPurged: 0
+    put1s:
+    - 0
+    - 0
+    put1sFailed: 0
+    putBytes:
+    - 1056
+    - 0
+    puts:
+    - 14
+    - 0
+    putsFailed: 0
+    queueMaxDepth: 0
+    queueMinDepth: 0
+    queueName: SYSTEM.ADMIN.COMMAND.QUEUE
+    queueType: Local
+  - avgQueueTime:
+    - 1418980313362273300
+    - 0
+    browseBytes:
+    - 0
+    - 0
+    browses:
+    - 0
+    - 0
+    browsesFailed: 0
+    creationDate: '2020-06-06'
+    creationTime: 21.13.52
+    definitionType: Temporary Dynamic
+    getBytes:
+    - 36432
+    - 0
+    gets:
+    - 13
+    - 0
+    getsFailed: 0
+    msgsExpired: 0
+    msgsNotQueued: 1
+    msgsPurged: 0
+    put1s:
+    - 0
+    - 0
+    put1sFailed: 0
+    putBytes:
+    - 36432
+    - 0
+    puts:
+    - 13
+    - 0
+    putsFailed: 0
+    queueMaxDepth: 3
+    queueMinDepth: 0
+    queueName: MQAI.REPLY.5EDC004520003804
+    queueType: Local
+  - avgQueueTime:
+    - 95
+    - 0
+    browseBytes:
+    - 0
+    - 0
+    browses:
+    - 0
+    - 0
+    browsesFailed: 0
+    creationDate: '2020-06-06'
+    creationTime: 21.13.52
+    definitionType: Temporary Dynamic
+    getBytes:
+    - 1172
+    - 0
+    gets:
+    - 1
+    - 0
+    getsFailed: 0
+    msgsExpired: 0
+    msgsNotQueued: 0
+    msgsPurged: 0
+    put1s:
+    - 0
+    - 0
+    put1sFailed: 0
+    putBytes:
+    - 1172
+    - 0
+    puts:
+    - 1
+    - 0
+    putsFailed: 0
+    queueMaxDepth: 1
+    queueMinDepth: 0
+    queueName: MQAI.REPLY.5EDC004520003806
+    queueType: Local
+  - avgQueueTime:
+    - 227
+    - 0
+    browseBytes:
+    - 0
+    - 0
+    browses:
+    - 0
+    - 0
+    browsesFailed: 0
+    creationDate: '2020-06-06'
+    creationTime: 21.13.52
+    definitionType: Temporary Dynamic
+    getBytes:
+    - 72
+    - 0
+    gets:
+    - 2
+    - 0
+    getsFailed: 0
+    msgsExpired: 0
+    msgsNotQueued: 0
+    msgsPurged: 0
+    put1s:
+    - 0
+    - 0
+    put1sFailed: 0
+    putBytes:
+    - 72
+    - 0
+    puts:
+    - 2
+    - 0
+    putsFailed: 0
+    queueMaxDepth: 1
+    queueMinDepth: 0
+    queueName: MQAI.REPLY.5EDC004520003808
+    queueType: Local
+  - avgQueueTime:
+    - 55
+    - 0
+    browseBytes:
+    - 0
+    - 0
+    browses:
+    - 0
+    - 0
+    browsesFailed: 0
+    creationDate: '2020-06-06'
+    creationTime: 21.13.52
+    definitionType: Temporary Dynamic
+    getBytes:
+    - 1172
+    - 0
+    gets:
+    - 1
+    - 0
+    getsFailed: 0
+    msgsExpired: 0
+    msgsNotQueued: 0
+    msgsPurged: 0
+    put1s:
+    - 0
+    - 0
+    put1sFailed: 0
+    putBytes:
+    - 1172
+    - 0
+    puts:
+    - 1
+    - 0
+    putsFailed: 0
+    queueMaxDepth: 1
+    queueMinDepth: 0
+    queueName: MQAI.REPLY.5EDC00452000380A
+    queueType: Local
+  - avgQueueTime:
+    - '-1'
+    - 0
+    browseBytes:
+    - 0
+    - 0
+    browses:
+    - 0
+    - 0
+    browsesFailed: 0
+    creationDate: '2020-06-06'
+    creationTime: 21.13.52
+    definitionType: Temporary Dynamic
+    getBytes:
+    - 1620
+    - 0
+    gets:
+    - 1
+    - 0
+    getsFailed: 0
+    msgsExpired: 0
+    msgsNotQueued: 1
+    msgsPurged: 0
+    put1s:
+    - 0
+    - 0
+    put1sFailed: 0
+    putBytes:
+    - 1620
+    - 0
+    puts:
+    - 1
+    - 0
+    putsFailed: 0
+    queueMaxDepth: 0
+    queueMinDepth: 0
+    queueName: MQAI.REPLY.5EDC00452000380C
+    queueType: Local
+  - avgQueueTime:
+    - '-1'
+    - 0
+    browseBytes:
+    - 0
+    - 0
+    browses:
+    - 0
+    - 0
+    browsesFailed: 0
+    creationDate: '2020-06-06'
+    creationTime: 21.13.52
+    definitionType: Temporary Dynamic
+    getBytes:
+    - 356
+    - 0
+    gets:
+    - 1
+    - 0
+    getsFailed: 0
+    msgsExpired: 0
+    msgsNotQueued: 1
+    msgsPurged: 0
+    put1s:
+    - 0
+    - 0
+    put1sFailed: 0
+    putBytes:
+    - 356
+    - 0
+    puts:
+    - 1
+    - 0
+    putsFailed: 0
+    queueMaxDepth: 0
+    queueMinDepth: 0
+    queueName: MQAI.REPLY.5EDC00452000380E
+    queueType: Local
+  - avgQueueTime:
+    - '-1'
+    - 0
+    browseBytes:
+    - 0
+    - 0
+    browses:
+    - 0
+    - 0
+    browsesFailed: 0
+    creationDate: '2020-06-06'
+    creationTime: 21.13.52
+    definitionType: Temporary Dynamic
+    getBytes:
+    - 168
+    - 0
+    gets:
+    - 1
+    - 0
+    getsFailed: 0
+    msgsExpired: 0
+    msgsNotQueued: 1
+    msgsPurged: 0
+    put1s:
+    - 0
+    - 0
+    put1sFailed: 0
+    putBytes:
+    - 168
+    - 0
+    puts:
+    - 1
+    - 0
+    putsFailed: 0
+    queueMaxDepth: 0
+    queueMinDepth: 0
+    queueName: MQAI.REPLY.5EDC004520003810
+    queueType: Local
+  - avgQueueTime:
+    - 1418980313362273300
+    - 0
+    browseBytes:
+    - 0
+    - 0
+    browses:
+    - 0
+    - 0
+    browsesFailed: 0
+    creationDate: '2020-06-06'
+    creationTime: 21.14.07
+    definitionType: Temporary Dynamic
+    getBytes:
+    - 36432
+    - 0
+    gets:
+    - 13
+    - 0
+    getsFailed: 0
+    msgsExpired: 0
+    msgsNotQueued: 1
+    msgsPurged: 0
+    put1s:
+    - 0
+    - 0
+    put1sFailed: 0
+    putBytes:
+    - 36432
+    - 0
+    puts:
+    - 13
+    - 0
+    putsFailed: 0
+    queueMaxDepth: 8
+    queueMinDepth: 0
+    queueName: MQAI.REPLY.5EDC004520003728
+    queueType: Local
+  - avgQueueTime:
+    - 241
+    - 0
+    browseBytes:
+    - 0
+    - 0
+    browses:
+    - 0
+    - 0
+    browsesFailed: 0
+    creationDate: '2020-06-06'
+    creationTime: 21.14.07
+    definitionType: Temporary Dynamic
+    getBytes:
+    - 1172
+    - 0
+    gets:
+    - 1
+    - 0
+    getsFailed: 0
+    msgsExpired: 0
+    msgsNotQueued: 0
+    msgsPurged: 0
+    put1s:
+    - 0
+    - 0
+    put1sFailed: 0
+    putBytes:
+    - 1172
+    - 0
+    puts:
+    - 1
+    - 0
+    putsFailed: 0
+    queueMaxDepth: 1
+    queueMinDepth: 0
+    queueName: MQAI.REPLY.5EDC00452000372A
+    queueType: Local
+  - avgQueueTime:
+    - 317
+    - 0
+    browseBytes:
+    - 0
+    - 0
+    browses:
+    - 0
+    - 0
+    browsesFailed: 0
+    creationDate: '2020-06-06'
+    creationTime: 21.14.07
+    definitionType: Temporary Dynamic
+    getBytes:
+    - 72
+    - 0
+    gets:
+    - 2
+    - 0
+    getsFailed: 0
+    msgsExpired: 0
+    msgsNotQueued: 0
+    msgsPurged: 0
+    put1s:
+    - 0
+    - 0
+    put1sFailed: 0
+    putBytes:
+    - 72
+    - 0
+    puts:
+    - 2
+    - 0
+    putsFailed: 0
+    queueMaxDepth: 2
+    queueMinDepth: 0
+    queueName: MQAI.REPLY.5EDC00452000372C
+    queueType: Local
+  - avgQueueTime:
+    - 159
+    - 0
+    browseBytes:
+    - 0
+    - 0
+    browses:
+    - 0
+    - 0
+    browsesFailed: 0
+    creationDate: '2020-06-06'
+    creationTime: 21.14.07
+    definitionType: Temporary Dynamic
+    getBytes:
+    - 1172
+    - 0
+    gets:
+    - 1
+    - 0
+    getsFailed: 0
+    msgsExpired: 0
+    msgsNotQueued: 0
+    msgsPurged: 0
+    put1s:
+    - 0
+    - 0
+    put1sFailed: 0
+    putBytes:
+    - 1172
+    - 0
+    puts:
+    - 1
+    - 0
+    putsFailed: 0
+    queueMaxDepth: 1
+    queueMinDepth: 0
+    queueName: MQAI.REPLY.5EDC00452000372E
+    queueType: Local
+  - avgQueueTime:
+    - '-1'
+    - 0
+    browseBytes:
+    - 0
+    - 0
+    browses:
+    - 0
+    - 0
+    browsesFailed: 0
+    creationDate: '2020-06-06'
+    creationTime: 21.14.07
+    definitionType: Temporary Dynamic
+    getBytes:
+    - 1620
+    - 0
+    gets:
+    - 1
+    - 0
+    getsFailed: 0
+    msgsExpired: 0
+    msgsNotQueued: 1
+    msgsPurged: 0
+    put1s:
+    - 0
+    - 0
+    put1sFailed: 0
+    putBytes:
+    - 1620
+    - 0
+    puts:
+    - 1
+    - 0
+    putsFailed: 0
+    queueMaxDepth: 0
+    queueMinDepth: 0
+    queueName: MQAI.REPLY.5EDC004520003730
+    queueType: Local
+  - avgQueueTime:
+    - 90
+    - 0
+    browseBytes:
+    - 0
+    - 0
+    browses:
+    - 0
+    - 0
+    browsesFailed: 0
+    creationDate: '2020-06-06'
+    creationTime: 21.14.07
+    definitionType: Temporary Dynamic
+    getBytes:
+    - 356
+    - 0
+    gets:
+    - 1
+    - 0
+    getsFailed: 0
+    msgsExpired: 0
+    msgsNotQueued: 0
+    msgsPurged: 0
+    put1s:
+    - 0
+    - 0
+    put1sFailed: 0
+    putBytes:
+    - 356
+    - 0
+    puts:
+    - 1
+    - 0
+    putsFailed: 0
+    queueMaxDepth: 1
+    queueMinDepth: 0
+    queueName: MQAI.REPLY.5EDC004520003732
+    queueType: Local
+  - avgQueueTime:
+    - 46
+    - 0
+    browseBytes:
+    - 0
+    - 0
+    browses:
+    - 0
+    - 0
+    browsesFailed: 0
+    creationDate: '2020-06-06'
+    creationTime: 21.14.07
+    definitionType: Temporary Dynamic
+    getBytes:
+    - 168
+    - 0
+    gets:
+    - 1
+    - 0
+    getsFailed: 0
+    msgsExpired: 0
+    msgsNotQueued: 0
+    msgsPurged: 0
+    put1s:
+    - 0
+    - 0
+    put1sFailed: 0
+    putBytes:
+    - 168
+    - 0
+    puts:
+    - 1
+    - 0
+    putsFailed: 0
+    queueMaxDepth: 1
+    queueMinDepth: 0
+    queueName: MQAI.REPLY.5EDC004520003734
+    queueType: Local
+  startDate: '2020-06-06'
+  startTime: 21.13.46
+eventReason:
+  name: None
+  value: 0
+eventSource:
+  objectName: SYSTEM.ADMIN.STATISTICS.QUEUE
+  objectType: Queue
+eventType:
+  name: Statistics Queue
+  value: 165
