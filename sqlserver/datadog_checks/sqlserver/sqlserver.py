@@ -67,7 +67,7 @@ VALUE_AND_BASE_QUERY = '''select counter_name, cntr_type, cntr_value, instance_n
                           where counter_name in (%s)
                           order by cntr_type;'''
 
-DATABASE_EXISTS_QUERY = 'select name from sys.databases;'
+DATABASE_EXISTS_QUERY = 'select name, state from sys.databases;'
 
 # Performance tables
 DEFAULT_PERFORMANCE_TABLE = "sys.dm_os_performance_counters"
@@ -90,6 +90,7 @@ class SQLServer(AgentCheck):
     # FIXME: 6.x, set default to 5s (like every check)
     DEFAULT_COMMAND_TIMEOUT = 30
     DEFAULT_DATABASE = 'master'
+    DEFAULT_DATABASE_STATE = 6 #offline 
     DEFAULT_DRIVER = 'SQL Server'
     DEFAULT_DB_KEY = 'database'
     PROC_GUARD_DB_KEY = 'proc_only_if_database'
@@ -153,12 +154,12 @@ class SQLServer(AgentCheck):
                 self.do_check[instance_key] = True
 
                 # check to see if the database exists before we try any connections to it
-                with self.open_managed_db_connections(instance, None, db_name=self.DEFAULT_DATABASE):
-                    db_exists, context = self._check_db_exists(instance)
+                with self.open_managed_db_connections(instance, None, db_name=self.DEFAULT_DATABASE, db_state=self.DEFAULT_DATABASE_STATE):
+                    db_exists, context, db_state = self._check_db_exists(instance)
 
                 if db_exists:
                     if instance.get('stored_procedure') is None:
-                        with self.open_managed_db_connections(instance, self.DEFAULT_DB_KEY):
+                        with self.open_managed_db_connections(instance, self.DEFAULT_DB_KEY, db_state=db_state):
                             self._make_metric_list_to_collect(instance, self.custom_metrics)
                 else:
                     # How much do we care that the DB doesn't exist?
@@ -192,9 +193,12 @@ class SQLServer(AgentCheck):
 
             try:
                 self.existing_databases = {}
+                self.existing_databases_state_value = self.DEFAULT_DATABASE_STATE
                 cursor.execute(DATABASE_EXISTS_QUERY)
                 for row in cursor:
                     self.existing_databases[row.name] = True
+                    if database == row.name:
+                        self.existing_databases_state_value = row.state
 
             except Exception as e:
                 self.log.error("Failed to check if database %s exists: %s", database, e)
@@ -202,7 +206,7 @@ class SQLServer(AgentCheck):
             finally:
                 self.close_cursor(cursor)
 
-        return database in self.existing_databases, context
+        return database in self.existing_databases, context, self.existing_databases_state_value
 
     def _make_metric_list_to_collect(self, instance, custom_metrics):
         """
@@ -483,7 +487,7 @@ class SQLServer(AgentCheck):
             custom_tags = []
         instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
         instance_by_key = self.instances_per_type_metrics[instance_key]
-        with self.open_managed_db_connections(instance, self.DEFAULT_DB_KEY):
+        with self.open_managed_db_connections(instance, self.DEFAULT_DB_KEY, db_state=self.DEFAULT_DATABASE_STATE):
             # if the server was down at check __init__ key could be missing.
             if instance_key not in self.instances_metrics:
                 self._make_metric_list_to_collect(instance, self.custom_metrics)
@@ -612,13 +616,13 @@ class SQLServer(AgentCheck):
             self.log.warning("Could not close adodbapi db connection\n%s", e)
 
     @contextmanager
-    def open_managed_db_connections(self, instance, db_key, db_name=None):
-        self.open_db_connections(instance, db_key, db_name)
+    def open_managed_db_connections(self, instance, db_key, db_name=None, db_state=None):
+        self.open_db_connections(instance, db_key, db_name, db_state)
         yield
 
         self.close_db_connections(instance, db_key, db_name)
 
-    def open_db_connections(self, instance, db_key, db_name=None):
+    def open_db_connections(self, instance, db_key, db_name=None, db_state=None):
         """
         We open the db connections explicitly, so we can ensure they are open
         before we use them, and are closable, once we are finished. Open db
@@ -633,7 +637,7 @@ class SQLServer(AgentCheck):
         custom_tags = instance.get("tags", [])
         if custom_tags is None:
             custom_tags = []
-        service_check_tags = ['host:{}'.format(host), 'db:{}'.format(database)]
+        service_check_tags = ['host:{}'.format(host), 'db:{}'.format(database), 'state:{}'.format(db_state)]
         service_check_tags.extend(custom_tags)
         service_check_tags = list(set(service_check_tags))
 
