@@ -14,10 +14,11 @@ files:
         parameter instead.
       value:
         type: string
-        example: http
+        example: https
     - template: instances/openmetrics
       overrides:
         prometheus_url.value.example: https://localhost:443/metrics
+        prometheus_url.display_priority: 1
 
 - name: auto_conf.yaml
   options:
