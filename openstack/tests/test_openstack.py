@@ -26,7 +26,7 @@ instances = common.MOCK_CONFIG['instances']
 instance = common.MOCK_CONFIG['instances'][0]
 instance['tags'] = ['optional:tag1']
 init_config = common.MOCK_CONFIG['init_config']
-openstack_check = OpenStackCheck('openstack', init_config, {}, instances=[instance])
+openstack_check = OpenStackCheck('openstack', init_config, instances=[instance])
 
 
 class MockHTTPResponse(object):
