@@ -1,8 +1,13 @@
 import os
 
 from datadog_checks.dev.tooling.constants import get_root
-from datadog_checks.dev.tooling.utils import get_default_config_spec, get_valid_checks, get_valid_integrations, \
-    get_config_file, get_check_file, get_readme_file
+from datadog_checks.dev.tooling.utils import (
+    get_check_file,
+    get_config_file,
+    get_default_config_spec,
+    get_readme_file,
+    get_valid_checks,
+    get_valid_integrations,
 
 MARKER = '<docs-insert-status>'
 
@@ -92,7 +97,7 @@ def render_metadata_progress():
     total_checks = len(valid_checks)
     checks_with_metadata = 0
 
-    lines = ['## Metadata', '', None, '', '??? check "Completed"']
+    lines = ['## Metadata submission', '', None, '', '??? check "Completed"']
 
     for check in valid_checks:
         config_file = get_config_file(check)
@@ -122,7 +127,7 @@ def render_logs_progress():
     total_checks = len(valid_checks)
     checks_with_logs = 0
 
-    lines = ['## Logs specs', '', None, '', '??? check "Completed"']
+    lines = ['## Logs support', '', None, '', '??? check "Completed"']
 
     for check in valid_checks:
         config_file = get_config_file(check)
@@ -156,7 +161,7 @@ def render_e2e_progress():
     total_checks = len(valid_checks)
     checks_with_e2e = 0
 
-    lines = ['## E2E', '', None, '', '??? check "Completed"']
+    lines = ['## E2E tests', '', None, '', '??? check "Completed"']
 
     for check in valid_checks:
         config_file = get_config_file(check)
