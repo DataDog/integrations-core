@@ -481,7 +481,7 @@ class SQLServer(AgentCheck):
     def register_heartbeat_collections(self, instance, raised_exception=None, failure=False):
         '''
         Function to register failed/OK collections into the heartbeat messages. This function raises an event
-        into StatsD server by sending the list of failed/OK collections. 
+        into StatsD server by sending the list of failed/OK collections.
         Parameters:
             instance: Instance on which the collection failed
             raised_exception: The exception raised when the collection failed. This is parsed to obtain
@@ -809,9 +809,9 @@ class SqlComplexMetric(SqlServerMetric):
         # This method fetch all the metric based on the complex metric passed.
         cursor.execute(self.query)
         rows = cursor.fetchall()
+        columns = [i[0] for i in cursor.description]
         while (cursor.nextset()):
             rows.extend(cursor.fetchall())
-        columns = [i[0] for i in cursor.description]
         return rows, columns
 
     def fetch_metric(self, cursor, rows, columns, tags, cached_metrics_data):
