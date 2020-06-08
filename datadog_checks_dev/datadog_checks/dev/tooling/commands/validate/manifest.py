@@ -138,7 +138,7 @@ def manifest(ctx, fix, include_extras, repo_url):
                 file_failures += 1
                 display_queue.append((echo_failure, f' Attribute `{attr}` under `assets` is required'))
 
-            # Attributes that shouldn't change haven't
+            # Ensure attributes haven't changed
             for field in FIELDS_NOT_ALLOWED_TO_CHANGE:
                 field_changed, original_value = has_static_field_changed(decoded, check_name, field, repo_url)
                 output = f'Attribute `{field}` is not allowed to be modified.'
