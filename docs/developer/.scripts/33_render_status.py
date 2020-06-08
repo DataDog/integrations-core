@@ -161,7 +161,11 @@ def render_e2e_progress():
     lines = ['## E2E tests', '', None, '', '??? check "Completed"']
 
     for check in valid_checks:
-        status = 'X' if has_e2e(check) else ' '
+        if has_e2e(check):
+            status = 'X'
+            checks_with_e2e += 1
+        else:
+            status = ' '
         lines.append(f'    - [{status}] {check}')
 
     percent = checks_with_e2e / total_checks * 100
