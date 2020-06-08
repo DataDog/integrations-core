@@ -4,7 +4,8 @@
 
 This check monitors [TLS][1] protocol versions, certificate expiration and validity, etc.
 
-**Note**: Only TCP is supported.
+**Note 1**: Only TCP is supported.
+**Note 2**: Only leaf / end user certificates are verified (not intermediate and root certificates).
 
 ## Setup
 
