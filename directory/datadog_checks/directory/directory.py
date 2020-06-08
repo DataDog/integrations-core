@@ -42,7 +42,6 @@ class DirectoryCheck(AgentCheck):
 
         abs_directory = abspath(directory)
         name = instance.get('name', directory)
-        
         pattern = instance.get('pattern')
         exclude_dirs = instance.get('exclude_dirs', [])
         exclude_dirs_pattern = re_compile('|'.join(exclude_dirs)) if exclude_dirs else None
@@ -56,7 +55,7 @@ class DirectoryCheck(AgentCheck):
         follow_symlinks = is_affirmative(instance.get('follow_symlinks', True))
         custom_tags = instance.get('tags', [])
         max_filegauge_count = instance.get('max_filegauge_count', self.MAX_FILEGAUGE_COUNT)
-        
+
         if not exists(abs_directory):
             msg = (
                 "Either directory '{}' doesn't exist or the Agent doesn't "
