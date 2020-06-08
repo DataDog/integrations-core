@@ -1647,3 +1647,27 @@ def test_apc_ups(aggregator):
         tags=['outlet_group_name:test_outlet'] + tags,
     )
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_netapp(aggregator):
+    run_profile_check('netapp')
+
+    profile_tags = [
+        'snmp_profile:netapp',
+        'snmp_host:example-datacenter.company',
+    ]
+
+    tags = common.CHECK_TAGS + profile_tags
+
+    num_filesystems = 88
+    df_gauges = [
+        'dfHighTotalKBytes',
+    ]
+    for metric in df_gauges:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=num_filesystems
+        )
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=tags, count=1)
+    aggregator.assert_all_metrics_covered()
