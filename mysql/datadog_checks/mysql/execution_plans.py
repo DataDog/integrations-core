@@ -62,13 +62,26 @@ class ExecutionPlansMixin(object):
             self._checkpoint = result[0]
         # Select the most recent events with a bias towards events which have higher wait times
         query = """
-            SELECT thread_id, 
-                   event_id,
-                   current_schema,
-                   sql_text,
-                   IFNULL(digest_text, sql_text),
-                   timer_start,
-                   MAX(timer_wait)
+            SELECT current_schema AS current_schema,
+                   sql_text AS sql_text,
+                   IFNULL(digest_text, sql_text) AS digest_text,
+                   timer_start AS timer_start,
+                   MAX(timer_wait) / 1000 AS max_timer_wait_ns,
+                   lock_time / 1000 AS lock_time_ns,
+                   rows_affected,
+                   rows_sent,
+                   rows_examined,
+                   select_full_join,
+                   select_full_range_join,
+                   select_range,
+                   select_range_check,
+                   select_scan,
+                   sort_merge_passes,
+                   sort_range,
+                   sort_rows,
+                   sort_scan,
+                   no_index_used,
+                   no_good_index_used
               FROM performance_schema.events_statements_history_long
              WHERE sql_text IS NOT NULL
                AND event_name like %s
@@ -78,7 +91,7 @@ class ExecutionPlansMixin(object):
               LIMIT %s
             """
 
-        with closing(db.cursor()) as cursor:
+        with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
             cursor.execute(query, ('statement/%', self._checkpoint, self.query_limit))
             rows = cursor.fetchall()
 
@@ -87,11 +100,22 @@ class ExecutionPlansMixin(object):
             if not row or not all(row):
                 self.log.debug('Row was unexpectedly truncated or events_statements_history_long table is not enabled')
                 continue
-            key = (row[0], row[1])
-            schema = row[2]
-            sql_text = row[3]
-            digest_text = row[4]
-            self._checkpoint = max(row[5], self._checkpoint)
+            schema = row['current_schema']
+            sql_text = row['sql_text']
+            digest_text = row['digest_text']
+            self._checkpoint = max(row['timer_start'], self._checkpoint)
+            duration_ns = row['max_timer_wait_ns']
+
+            if not sql_text:
+                continue
+
+            # The SQL_TEXT column will store 1024 chars by default. Plans cannot be captured on truncated
+            # queries, so the `performance_schema_max_sql_text_length` variable must be raised.
+            if sql_text[-3:] == '...':
+                self.log.warning(
+                    'Unable to collect plan for query due to truncated SQL text. Consider raising the '
+                    '`performance_schema_max_sql_text_length` to capture this query.')
+                continue
 
             with closing(db.cursor()) as cursor:
                 cursor.execute('SET sql_notes = 0')
@@ -99,9 +123,30 @@ class ExecutionPlansMixin(object):
                 plan = self._run_explain(cursor, sql_text, schema)
                 if plan:
                     events.append({
-                        'query': datadog_agent.obfuscate_sql(sql_text),
-                        'plan': plan,
-                        'query_signature': compute_sql_signature(digest_text)
+                        'duration': duration_ns,
+                        'db': {
+                            'instance': schema,
+                            'statement': datadog_agent.obfuscate_sql(sql_text),
+                            'plan': plan,
+                            'query_signature': compute_sql_signature(digest_text),
+                            'mysql': {
+                                'lock_time': row['lock_time_ns'],
+                                'rows_affected': row['rows_affected'],
+                                'rows_sent': row['rows_sent'],
+                                'rows_examined': row['rows_examined'],
+                                'select_full_join': row['select_full_join'],
+                                'select_full_range_join': row['select_full_range_join'],
+                                'select_range': row['select_range'],
+                                'select_range_check': row['select_range_check'],
+                                'select_scan': row['select_scan'],
+                                'sort_merge_passes': row['sort_merge_passes'],
+                                'sort_range': row['sort_range'],
+                                'sort_rows': row['sort_rows'],
+                                'sort_scan': row['sort_scan'],
+                                'no_index_used': row['no_index_used'],
+                                'no_good_index_used': row['no_good_index_used'],
+                            }
+                        }
                     })
 
         self._submit_log_events(events)
@@ -115,13 +160,15 @@ class ExecutionPlansMixin(object):
             if schema is not None:
                 cursor.execute('USE `{}`'.format(schema))
             cursor.execute('EXPLAIN FORMAT=json {statement}'.format(statement=statement))
-        except pymysql.err.InternalError as e:
+        except (pymysql.err.InternalError, pymysql.err.ProgrammingError) as e:
             if len(e.args) != 2:
                 raise
             if e.args[0] in (1046,):
-                self.log.warning('Failed to collect EXPLAIN due to a permissions error: %s', (self.args,))
+                self.log.warning('Failed to collect EXPLAIN due to a permissions error: %s', (e.args,))
+                return None
             elif e.args[0] == 1064:
-                self.log.error('Programming error when collecting EXPLAIN: %s', (self.args,))
+                self.log.error('Programming error when collecting EXPLAIN: %s', (e.args,))
+                return None
             else:
                 raise
 
