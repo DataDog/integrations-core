@@ -41,6 +41,7 @@ class NginxIngressControllerCheck(OpenMetricsBaseCheck):
                         {'process_resident_memory_bytes': 'controller.mem.resident'},
                         {'process_virtual_memory_bytes': 'controller.mem.virtual'},
                     ],
+                    'send_histograms_buckets': True,
                 }
             },
             default_namespace="nginx_ingress",

@@ -19,3 +19,9 @@ instances:
     ## Overrides the default timeout value in second
     #
     # prometheus_timeout: 10
+
+    ## @param send_histograms_buckets - boolean - optional - default: true
+    ## Histogram buckets can be noisy and generate many tags.
+    ## Set send_histograms_buckets to true to pull them.
+    #
+    # send_histograms_buckets: true
