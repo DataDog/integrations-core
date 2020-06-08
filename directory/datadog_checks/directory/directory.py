@@ -55,7 +55,7 @@ class DirectoryCheck(AgentCheck):
         ignore_missing = is_affirmative(instance.get('ignore_missing', False))
         follow_symlinks = is_affirmative(instance.get('follow_symlinks', True))
         custom_tags = instance.get('tags', [])
-        max_filegauge_count = instance.get('max_filegauge_count', MAX_FILEGAUGE_COUNT)
+        max_filegauge_count = instance.get('max_filegauge_count', self.MAX_FILEGAUGE_COUNT)
         
         if not exists(abs_directory):
             msg = (
