@@ -340,7 +340,7 @@ def test_update_kube_state_metrics(aggregator, instance, check):
     # No storage class
     aggregator.assert_metric(
         NAMESPACE + '.persistentvolumes.by_phase',
-        tags=['phase:bound', 'optional:tag1'],
+        tags=['storageclass:unknown', 'phase:bound', 'optional:tag1'],
         value=1,
     )
     aggregator.assert_metric(

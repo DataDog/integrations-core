@@ -864,8 +864,9 @@ class KubernetesState(OpenMetricsBaseCheck):
             tags = []
             for l in config['allowed_labels']:
                 tag = self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config)
-                if tag is not None:
-                    tags.append(tag)
+                if tag is None:
+                    tag = self._format_tag(l, "unknown", scraper_config)
+                tags.append(tag)
             tags += scraper_config['custom_tags']
             object_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
