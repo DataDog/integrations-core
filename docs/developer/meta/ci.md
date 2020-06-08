@@ -48,39 +48,71 @@ will be executed in lexicographical order.
 
 ## Validations
 
-In addition to running tests on our CI, there are also some validation stages that check for correctness of changes to various components of integrations. 
+In addition to running tests on our CI, there are also some validation stages that check for correctness of changes to various components of integrations. If any of these validations fail on your branch, then CI will fail.
 
 
 In short, each validation is a ``ddev`` command, which fails if the component it is validating is not correct.
 
 
-A list of the current validations can be found here: 
+!!! tip A list of the current validations can be found here:
 https://github.com/DataDog/integrations-core/blob/master/.azure-pipelines/templates/run-validations.yml
 
-Validate CI configuration
+
+### Validate CI configuration
 ```python
 ddev validate ci
 ```
 
+### Validate Agent requirements
+```python
 ddev validate agent-reqs
+```
 
-Validate default configuration files
+### Validate default configuration files
 ```python
 ddev validate config
 ```
-Determines if the config specs for an inter
+This verifies that the config specs for all integrations are valid by enforcing our configuration spec (schema)[config-specs.md#schema] . The most common failure at this validation stage is some version of `File <INTEGRATION_SPEC> needs to be synced.` To resolve this issue, you can run `ddev validate config --sync`
 
+If you see failures regarding formatting or missing parameters, see our (config spec)[config-specs.md#schema] documentation.
 
+### Validate dashboard definition files
+```python
 ddev validate dashboards
+```
 
+This validates that dashboards are formatted correctly. This means that they need to be proper JSON and generated from Datadog's `/screen` (API)[https://docs.datadoghq.com/dashboards/guide/screenboard-api-doc/?tab=python]
+
+If you see a failure regarding use of the screen endpoint, consider using our dashboard [utility command](../ddev/cli.md#export) to generate your dashboard payload.
+
+### Validate dependencies
 ddev validate dep
 
+### Validate manifest files
 ddev validate manifest -i
+https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
 
+### ddev validate metadata
+```python
 ddev validate metadata
+```
+https://docs.datadoghq.com/developers/integrations/check_references/#metrics-metadata-file
+This checks that every `metadata.csv` file is formatted correctly
 
+### Validate saved views data
+```python
+ddev validate saved-views
+```
+
+This validates that saved views for an integration are formatted correctly and contain required fields, such as "type".
+
+
+### Validate service check data
 ddev validate service-checks
 
+https://docs.datadoghq.com/developers/integrations/check_references/#service-check-file
+
+### Validate imports
 ddev validate imports
 
 ## Labeler
