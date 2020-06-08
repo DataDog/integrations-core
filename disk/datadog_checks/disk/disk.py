@@ -78,6 +78,7 @@ class Disk(AgentCheck):
 
             # Get disk metrics here to be able to exclude on total usage
             try:
+                self.log.debug("Check %s", part.mountpoint)
                 disk_usage = timeout(self._timeout)(psutil.disk_usage)(part.mountpoint)
             except TimeoutException:
                 self.log.warning(
