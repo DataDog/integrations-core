@@ -5,11 +5,13 @@ import json
 import os
 import re
 import uuid
+from urllib.parse import urljoin
 
 import click
+import requests
 
 from ....utils import file_exists, read_file, write_file
-from ...constants import get_root
+from ...constants import get_root, RAW_GH_REPO_URLS
 from ...utils import get_metadata_file, parse_version_parts, read_metadata_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 
@@ -30,6 +32,12 @@ REQUIRED_ATTRIBUTES = {
     'supported_os',
     'type',
 }
+
+FIELDS_NOT_ALLOWED_TO_CHANGE = [
+    "integration_id",
+    "display_name",
+    "guid"
+]
 
 REQUIRED_ASSET_ATTRIBUTES = {'monitors', 'dashboards', 'service_checks'}
 
@@ -53,6 +61,8 @@ ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
 
 INTEGRATION_ID_REGEX = r'^[a-z][a-z0-9-]{0,254}(?<!-)$'
 
+MANIFESTS_FROM_MASTER = {}
+
 
 def is_metric_in_metadata_file(metric, check):
     """
@@ -65,17 +75,36 @@ def is_metric_in_metadata_file(metric, check):
     return False
 
 
+def has_static_field_changed(manifest_data, check_name, field_to_check, repo_url):
+    repo_url = urljoin(repo_url, f'{check_name}/manifest.json')
+    if not MANIFESTS_FROM_MASTER.get(check_name):
+        data = requests.get(repo_url.format(check_name))
+        MANIFESTS_FROM_MASTER[check_name] = data
+    else:
+        data = MANIFESTS_FROM_MASTER.get(check_name)
+
+    if data.status_code == 404:
+        # This integration isn't on the provided repo yet, so it's field can change
+        return False, ""
+    decoded_master = data.json()
+    if manifest_data.get(field_to_check) == decoded_master.get(field_to_check):
+        return False, ""
+    return True, decoded_master.get(field_to_check)
+
+
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `manifest.json` files')
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
 @click.option('--include-extras', '-i', is_flag=True, help='Include optional fields')
+@click.option('--repo_url', '-r', help='The raw github URL to the base of the repository to compare manifest fields '
+                                       'against')
 @click.pass_context
-def manifest(ctx, fix, include_extras):
+def manifest(ctx, fix, include_extras, repo_url):
     """Validate `manifest.json` files."""
     all_guids = {}
 
     root = get_root()
     is_extras = ctx.obj['repo_choice'] == 'extras'
-
+    repo_url = repo_url or RAW_GH_REPO_URLS.get(ctx.obj['repo_choice'])
     ok_checks = 0
     failed_checks = 0
     fixed_checks = 0
@@ -108,6 +137,22 @@ def manifest(ctx, fix, include_extras):
             for attr in sorted(REQUIRED_ASSET_ATTRIBUTES - set(decoded.get('assets', {}))):
                 file_failures += 1
                 display_queue.append((echo_failure, f' Attribute `{attr}` under `assets` is required'))
+
+            # Attributes that shouldn't change haven't
+            for field in FIELDS_NOT_ALLOWED_TO_CHANGE:
+                field_changed, original_value = has_static_field_changed(decoded, check_name, field, repo_url)
+                output = f'Attribute `{field}` is not allowed to be modified.'
+                if field_changed:
+                    file_failures += 1
+                    if fix:
+                        decoded[field] = original_value
+                        file_failures -= 1
+                        file_fixed = True
+                        display_queue.append((echo_warning, output))
+                        display_queue.append((echo_success, f'  original {field}: {original_value}'))
+                    else:
+                        output += f" Please use the existing value: {original_value}"
+                        display_queue.append((echo_failure, output))
 
             # guid
             guid = decoded.get('guid')

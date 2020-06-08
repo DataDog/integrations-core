@@ -13,6 +13,11 @@ INTEGRATION_REPOS = [
     'integrations-internal',
 ]
 
+RAW_GH_REPO_URLS = {
+    'core': 'https://raw.githubusercontent.com/DataDog/integrations-core/master/',
+    'extras': 'https://raw.githubusercontent.com/DataDog/integrations-extras/master/',
+}
+
 REPO_OPTIONS_MAP = {
     '--core': 'core',
     '-c': 'core',
