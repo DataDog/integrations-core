@@ -56,16 +56,21 @@ files:
         type: array
         items:
           type: string
-        default: []
+        default:
+        - audit.app.restage
+        - audit.app.update
+        - audit.app.create
+        - app.crash
         example:
         - audit.app.restage
         - audit.app.update
         - audit.app.create
+        - app.crash
     - name: results_per_page
       description: |
         Maximum number of event results per request to the API. Maximum is 5000 for v3, and 100 for v2.
       value:
         type: integer
         maximum: 5000
-        default: 2000
+        default: 100
 
