@@ -77,11 +77,11 @@ def is_metric_in_metadata_file(metric, check):
 
 def has_static_field_changed(manifest_data, check_name, field_to_check, repo_url):
     repo_url = urljoin(repo_url, f'{check_name}/manifest.json')
-    if not MANIFESTS_FROM_MASTER.get(check_name):
+    if MANIFESTS_FROM_MASTER.get(check_name):
+        data = MANIFESTS_FROM_MASTER.get(check_name)
+    else:
         data = requests.get(repo_url.format(check_name))
         MANIFESTS_FROM_MASTER[check_name] = data
-    else:
-        data = MANIFESTS_FROM_MASTER.get(check_name)
 
     if data.status_code == 404:
         # This integration isn't on the provided repo yet, so it's field can change
