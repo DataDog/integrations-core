@@ -56,8 +56,6 @@ ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
 
 INTEGRATION_ID_REGEX = r'^[a-z][a-z0-9-]{0,254}(?<!-)$'
 
-MANIFESTS_FROM_MASTER = {}
-
 
 def is_metric_in_metadata_file(metric, check):
     """
