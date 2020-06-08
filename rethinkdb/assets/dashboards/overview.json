@@ -2,7 +2,7 @@
     "author_info": {
         "author_name": "Datadog"
     },
-    "board_title": "RethinkDB - Overview",
+    "board_title": "RethinkDB Overview",
     "created": "2020-05-21T15:43:15.489305+00:00",
     "created_by": {
         "access_role": "st",
@@ -15,7 +15,7 @@
         "title": null,
         "verified": true
     },
-    "description": "## RethinkDB - Overview\n\nThis dashboard provides an overview of RethinkDB availability, client activity, and read/write throughput so you can monitor the health and performance of your deployments. \n\n- [Monitor RethinkDB with Datadog](datadoghq.com/blog/monitor-rethinkdb-with-datadog)\n- [RethinkDB integration documentation](https://docs.datadoghq.com/integrations/rethinkdb/)",
+    "description": "## RethinkDB Overview\n\nThis dashboard provides an overview of RethinkDB availability, client activity, and read/write throughput so you can monitor the health and performance of your deployments. \n\n- [Monitor RethinkDB with Datadog](datadoghq.com/blog/monitor-rethinkdb-with-datadog)\n- [RethinkDB integration documentation](https://docs.datadoghq.com/integrations/rethinkdb/)",
     "id": 1127697,
     "modified": "2020-06-03T21:53:28.312481+00:00",
     "new_id": "bky-fc7-h88",
