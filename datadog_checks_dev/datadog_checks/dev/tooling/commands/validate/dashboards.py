@@ -51,9 +51,11 @@ def dashboards():
             if 'layout_type' in decoded:
                 file_failed = True
                 display_queue.append(
-                    echo_failure,
-                    f'    {dashboard_file} is using the new /dash payload format which isn\'t currently supported.'
-                    ' Please use the format from the /screen or /time API endpoints instead.',
+                    (
+                        echo_failure,
+                        f'    {dashboard_file} is using the new /dash payload format which isn\'t currently supported.'
+                        ' Please use the format from the /screen or /time API endpoints instead.',
+                    ),
                 )
 
             all_keys = set(decoded.keys())
@@ -61,7 +63,7 @@ def dashboards():
                 missing_fields = REQUIRED_ATTRIBUTES.difference(all_keys)
                 file_failed = True
                 display_queue.append(
-                    echo_failure, f"    {dashboard_file} does not contain the required fields: {missing_fields}",
+                    (echo_failure, f"    {dashboard_file} does not contain the required fields: {missing_fields}"),
                 )
 
             if file_failed:
