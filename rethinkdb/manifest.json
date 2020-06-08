@@ -30,7 +30,7 @@
       "spec": "assets/configuration/spec.yaml"
     },
     "dashboards": {
-      "RethinkDB - Overview": "assets/dashboards/overview.json"
+      "RethinkDB Overview": "assets/dashboards/overview.json"
     },
     "monitors": {},
     "saved_views": {},
