@@ -1621,6 +1621,8 @@ def test_fortinet_fortigate(aggregator):
         'fgSysSes6Rate1',
         'fgApHTTPConnections',
         'fgApHTTPMaxConnections',
+        'fgVdNumber',
+        'fgVdMaxVdoms',
     ]
 
     processor_gauge_metrics = [
@@ -1632,7 +1634,7 @@ def test_fortinet_fortigate(aggregator):
         'fgProcessorPktTxCount',
         'fgProcessorPktDroppedCount',
     ]
-    processor_tags = common_tags + [ 'processor_index:12' ]
+    processor_tags = common_tags + ['processor_index:12']
 
     vd_metrics = [
         'fgVdEntOpMode',
@@ -1641,10 +1643,8 @@ def test_fortinet_fortigate(aggregator):
         'fgVdEntMemUsage',
         'fgVdEntSesCount',
         'fgVdEntSesRate',
-        'fgVdNumber',
-        'fgVdMaxVdoms',
     ]
-    vd_tags = common_tags + [ 'virtualdomain_index:4', 'virtualdomain_name:their oxen quaintly']
+    vd_tags = common_tags + ['virtualdomain_index:4', 'virtualdomain_name:their oxen quaintly']
 
     for metric in common_gauge_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
@@ -1652,7 +1652,9 @@ def test_fortinet_fortigate(aggregator):
     for metric in processor_gauge_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=processor_tags, count=1)
     for metric in processor_count_metrics:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=processor_tags, count=1)
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=processor_tags, count=1
+        )
 
     for metric in vd_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=vd_tags, count=1)
