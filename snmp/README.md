@@ -135,7 +135,7 @@ Profiles can be used interchangeably, such that devices that share MIB dependenc
 * [Dell iDRAC][12]
 * [Dell Poweredge][13]
 * [F5 Big IP][14]
-* [Fortinet FortiGate][26]
+* [Fortinet FortiGate][29]
 * [HP iLO4][15]
 * [HPE Proliant][16]
 * [Palo Alto][17]
@@ -203,4 +203,4 @@ Additional helpful documentation, links, and articles:
 [26]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco_uc_virtual_machine.yaml
 [27]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco_icm.yaml
 [28]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco_isr_4431.yaml
-[26]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/fortinet-fortigate.yaml
+[29]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/fortinet-fortigate.yaml
