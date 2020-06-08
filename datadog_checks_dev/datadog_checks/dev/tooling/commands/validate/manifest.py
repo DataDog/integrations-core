@@ -5,13 +5,12 @@ import json
 import os
 import re
 import uuid
-from urllib.parse import urljoin
 
 import click
 import requests
 
 from ....utils import file_exists, read_file, write_file
-from ...constants import get_root, RAW_GH_REPO_URLS
+from ...constants import get_root
 from ...utils import get_metadata_file, parse_version_parts, read_metadata_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 
@@ -33,11 +32,7 @@ REQUIRED_ATTRIBUTES = {
     'type',
 }
 
-FIELDS_NOT_ALLOWED_TO_CHANGE = [
-    "integration_id",
-    "display_name",
-    "guid"
-]
+FIELDS_NOT_ALLOWED_TO_CHANGE = ["integration_id", "display_name", "guid"]
 
 REQUIRED_ASSET_ATTRIBUTES = {'monitors', 'dashboards', 'service_checks'}
 
@@ -75,41 +70,47 @@ def is_metric_in_metadata_file(metric, check):
     return False
 
 
-def has_static_field_changed(manifest_data, check_name, field_to_check, repo_url):
-    repo_url = urljoin(repo_url, f'{check_name}/manifest.json')
-    if MANIFESTS_FROM_MASTER.get(check_name):
-        data = MANIFESTS_FROM_MASTER.get(check_name)
+def get_original_manifest_field(check_name, field_to_check, repo_url, manifests_from_master):
+    repo_url = f'{repo_url}/{check_name}/manifest.json'
+    if manifests_from_master.get(check_name):
+        data = manifests_from_master.get(check_name)
     else:
         data = requests.get(repo_url.format(check_name))
-        MANIFESTS_FROM_MASTER[check_name] = data
+        manifests_from_master[check_name] = data
 
     if data.status_code == 404:
         # This integration isn't on the provided repo yet, so it's field can change
-        return False, ""
+        return None
+
+    data.raise_for_status()
     decoded_master = data.json()
-    if manifest_data.get(field_to_check) == decoded_master.get(field_to_check):
-        return False, ""
-    return True, decoded_master.get(field_to_check)
+    return decoded_master.get(field_to_check)
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `manifest.json` files')
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
-@click.option('--include-extras', '-i', is_flag=True, help='Include optional fields')
-@click.option('--repo_url', '-r', help='The raw github URL to the base of the repository to compare manifest fields '
-                                       'against')
+@click.option('--include-extras', '-i', is_flag=True, help='Include optional fields, and extra validations')
+@click.option(
+    '--repo_url', '-r', help='The raw github URL to the base of the repository to compare manifest fields against'
+)
 @click.pass_context
 def manifest(ctx, fix, include_extras, repo_url):
     """Validate `manifest.json` files."""
     all_guids = {}
+    raw_gh_url = 'https://raw.githubusercontent.com/DataDog/{}/master/'
 
     root = get_root()
     is_extras = ctx.obj['repo_choice'] == 'extras'
-    repo_url = repo_url or RAW_GH_REPO_URLS.get(ctx.obj['repo_choice'])
+    formatted_repo_url = repo_url or raw_gh_url.format(os.path.basename(root))
     ok_checks = 0
     failed_checks = 0
     fixed_checks = 0
+    manifests_from_master = {}
+
     echo_info("Validating all manifest.json files...")
     for check_name in sorted(os.listdir(root)):
+        if check_name != 'new_integration':
+            continue
         manifest_file = os.path.join(root, check_name, 'manifest.json')
 
         if file_exists(manifest_file):
@@ -137,22 +138,6 @@ def manifest(ctx, fix, include_extras, repo_url):
             for attr in sorted(REQUIRED_ASSET_ATTRIBUTES - set(decoded.get('assets', {}))):
                 file_failures += 1
                 display_queue.append((echo_failure, f' Attribute `{attr}` under `assets` is required'))
-
-            # Ensure attributes haven't changed
-            for field in FIELDS_NOT_ALLOWED_TO_CHANGE:
-                field_changed, original_value = has_static_field_changed(decoded, check_name, field, repo_url)
-                output = f'Attribute `{field}` is not allowed to be modified.'
-                if field_changed:
-                    file_failures += 1
-                    if fix:
-                        decoded[field] = original_value
-                        file_failures -= 1
-                        file_fixed = True
-                        display_queue.append((echo_warning, output))
-                        display_queue.append((echo_success, f'  original {field}: {original_value}'))
-                    else:
-                        output += f" Please use the existing value: {original_value}"
-                        display_queue.append((echo_failure, output))
 
             # guid
             guid = decoded.get('guid')
@@ -343,6 +328,27 @@ def manifest(ctx, fix, include_extras, repo_url):
                     display_queue.append((echo_failure, output))
 
             if include_extras:
+                # Ensure attributes haven't changed
+                for field in FIELDS_NOT_ALLOWED_TO_CHANGE:
+                    original_value = get_original_manifest_field(
+                        check_name, field, formatted_repo_url, manifests_from_master
+                    )
+                    output = f'Attribute `{field}` is not allowed to be modified.'
+                    if original_value and original_value != decoded.get(field):
+                        file_failures += 1
+                        if fix:
+                            decoded[field] = original_value
+                            file_failures -= 1
+                            file_fixed = True
+                            display_queue.append((echo_warning, output))
+                            display_queue.append((echo_success, f'  original {field}: {original_value}'))
+                        else:
+                            output += f" Please use the existing value: {original_value}"
+                            display_queue.append((echo_failure, output))
+                    elif not original_value:
+                        output = f"  No existing field on default branch: {field}"
+                        display_queue.append((echo_warning, output))
+
                 # supported_os
                 supported_os = decoded.get('supported_os')
                 if not supported_os or not isinstance(supported_os, list):

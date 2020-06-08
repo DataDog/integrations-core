@@ -7,7 +7,7 @@
   ],
   "creates_events": false,
   "display_name": "ActiveMQ",
-  "guid": "496df16d-5ad0-438c-aa2a-b8ba8ee3ae05",
+  "guid": "496df16d-5ad0-438c-aa2a-b8ba8ee3ae06",
   "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
