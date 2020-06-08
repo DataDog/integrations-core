@@ -8,7 +8,7 @@ from datadog_checks.dev.tooling.utils import (
     get_readme_file,
     get_valid_checks,
     get_valid_integrations,
-    is_tile_only)
+    is_tile_only, has_e2e)
 MARKER = '<docs-insert-status>'
 
 
@@ -38,7 +38,7 @@ def patch(lines):
 
 
 def render_config_spec_progress():
-    valid_checks = sorted(get_valid_checks())
+    valid_checks = [x for x in sorted(get_valid_checks()) if not is_tile_only(x)]
     total_checks = len(valid_checks)
     checks_with_config_spec = 0
 
@@ -93,25 +93,22 @@ def render_dashboard_progress():
 
 
 def render_metadata_progress():
-    valid_checks = sorted(get_valid_checks())
+    valid_checks = [x for x in sorted(get_valid_checks()) if not is_tile_only(x)]
     total_checks = len(valid_checks)
     checks_with_metadata = 0
 
     lines = ['## Metadata submission', '', None, '', '??? check "Completed"']
 
     for check in valid_checks:
-        if is_tile_only(check):
-            total_checks -= 1
-        else:
-            status = ' '
-            check_file = get_check_file(check)
-            if os.path.exists(check_file):
-                with open(check_file, 'r', encoding='utf-8') as f:
-                    contents = f.read()
-                    if 'self.set_metadata' in contents:
-                        status = 'X'
-                        checks_with_metadata += 1
-            lines.append(f'    - [{status}] {check}')
+        status = ' '
+        check_file = get_check_file(check)
+        if os.path.exists(check_file):
+            with open(check_file, 'r', encoding='utf-8') as f:
+                contents = f.read()
+                if 'self.set_metadata' in contents:
+                    status = 'X'
+                    checks_with_metadata += 1
+        lines.append(f'    - [{status}] {check}')
 
     percent = checks_with_metadata / total_checks * 100
     formatted_percent = f'{percent:.2f}'
@@ -157,25 +154,15 @@ def render_logs_progress():
 
 
 def render_e2e_progress():
-    valid_checks = sorted(get_valid_checks())
+    valid_checks = [x for x in sorted(get_valid_checks()) if not is_tile_only(x)]
     total_checks = len(valid_checks)
     checks_with_e2e = 0
 
     lines = ['## E2E tests', '', None, '', '??? check "Completed"']
 
     for check in valid_checks:
-        if is_tile_only(check):
-            total_checks -= 1
-        else:
-            status = ' '
-            config_file = get_config_file(check)
-
-            with open(config_file, 'r', encoding='utf-8') as f:
-                if '# logs:' in f.read():
-                    status = 'X'
-                    checks_with_e2e += 1
-
-            lines.append(f'    - [{status}] {check}')
+        status = 'X' if has_e2e(check) else ' '
+        lines.append(f'    - [{status}] {check}')
 
     percent = checks_with_e2e / total_checks * 100
     formatted_percent = f'{percent:.2f}'

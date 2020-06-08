@@ -17,7 +17,8 @@ from ...utils import (
     get_testable_checks,
     get_valid_integrations,
     has_e2e,
-    is_tile_only)
+    is_tile_only,
+)
 from ..console import CONTEXT_SETTINGS, abort, echo_info
 
 CSV_COLUMNS = [
