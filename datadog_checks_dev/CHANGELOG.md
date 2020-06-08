@@ -1,5 +1,12 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.10.0 / 2020-06-08
+
+* [Added] Add option to open DogStatsD port on agent. See [#6777](https://github.com/DataDog/integrations-core/pull/6777).
+* [Added] Support releasing non-core checks. See [#6805](https://github.com/DataDog/integrations-core/pull/6805).
+* [Fixed] Don't error when setting an invalid repo in config. See [#6786](https://github.com/DataDog/integrations-core/pull/6786).
+* [Fixed] Fix `ensure_default_envdir` tox plugin flag. See [#6817](https://github.com/DataDog/integrations-core/pull/6817).
+
 ## 3.9.1 / 2020-06-03
 
 * [Fixed] Fix new Check template. See [#6811](https://github.com/DataDog/integrations-core/pull/6811).
