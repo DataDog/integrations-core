@@ -1690,21 +1690,21 @@ def test_netapp(aggregator):
                 'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
             )
 
-    # snapmirror_gauges = [
-    #     'snapmirrorLag',
-    # ]
-    # snapmirror_counts = [
-    #     'snapmirrorTotalFailures',
-    # ]
-    # snapmirror_metrics = snapmirror_gauges + snapmirror_counts
-    # snapmirror_tags = ['index', 'state']
-    # for metric in snapmirror_gauges:
-    #     aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
-    # for metric in snapmirror_counts:
-    #     aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
-    # for metric in snapmirror_metrics:
-    #     for tag in snapmirror_tags:
-    #         aggregator.assert_metric_has_tag_prefix('snmp.{}'.format(metric), tag)
+    snapmirrors = [('6', '1'), ('9', '5'), ('29', '1')]
+    snapmirror_gauges = [
+        'snapmirrorLag',
+    ]
+    snapmirror_counts = [
+        'snapmirrorTotalFailures',
+    ]
+    for index, state in snapmirrors:
+        tags = ['index:{}'.format(index), 'state:{}'.format(state)] + common_tags
+        for metric in snapmirror_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        for metric in snapmirror_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
 
     filesystem_gauges = [
         'dfHighTotalKBytes',
