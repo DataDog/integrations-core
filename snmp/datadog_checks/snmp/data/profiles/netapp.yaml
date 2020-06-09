@@ -47,36 +47,6 @@ metrics:
           OID: 1.3.6.1.4.1.789.1.19.11.1.5
           name: svState
 
-  # Enclosures
-
-  # - MIB: NETAPP-MIB
-  #   table:
-  #     OID: 1.3.6.1.4.1.789.1.21.1.2
-  #     name: enclTable
-  #   symbols:
-  #     # FIXME: these are DisplayString, not suitable for usage as metrics. Can we extract nums of items?
-  #     - OID: 1.3.6.1.4.1.789.1.21.1.2.1.37
-  #       name: enclVoltSensorsOverVoltWarn
-  #     - OID: 1.3.6.1.4.1.789.1.21.1.2.1.33
-  #       name: enclElectronicsFailed
-  #   metric_tags:
-  #     - tag: index
-  #       column:
-  #         OID: 1.3.6.1.4.1.789.1.21.1.2.1.1
-  #         name: enclIndex
-  #     - tag: contact_state
-  #       column:
-  #         OID: 1.3.6.1.4.1.789.1.21.1.2.1.2
-  #         name: enclContactState
-  #     - tag: channel_shelf_address
-  #       column:
-  #         OID: 1.3.6.1.4.1.789.1.21.1.2.1.3
-  #         name: enclChannelShelfAddr
-  #         # Dropped - risk of context explosion - this is a unique ID
-  #         # enclProductLogicalID - 1.3.6.1.4.1.789.1.21.1.2.1.4
-  #         # Dropped - risk of context explosion - this is a DisplayString of unique part numbers
-  #         # enclElectronicsPartNos - 1.3.6.1.4.1.789.1.21.1.2.1.63
-
   # Snap mirrors
 
   - MIB: NETAPP-MIB
