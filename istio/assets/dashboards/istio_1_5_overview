@@ -17,7 +17,7 @@
     },
     "description": "### Istio\n\nNote: This dashboard outlines new metrics from Istio `v1.5+.\n\n- [What is Istio](https://istio.io/docs/concepts/what-is-istio/)?\n- [Istiod](https://istio.io/docs/ops/deployment/architecture/)\n- [Envoy](https://istio.io/docs/concepts/what-is-istio/#envoy), a high performance proxy.\n    - XDS = Envoy management APIs that can be implemented by backend servers. \n        - These APIs support:\n            - Cluster discovery service (CDS)\n            - Route discovery service (RDS)\n            - Endpoint discovery service (EDS)\n            - Listener discovery service (LDS)",
     "id": 1170440,
-    "modified": "2020-06-09T15:27:29.709651+00:00",
+    "modified": "2020-06-09T16:55:14.604542+00:00",
     "new_id": "6pb-hvt-xq7",
     "read_only": false,
     "template_variables": [
@@ -64,6 +64,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "top(avg:istio.mesh.request.count{*} by {host}, 10, 'mean', 'desc')",
@@ -97,6 +98,7 @@
             "height": 12,
             "id": 3,
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "top(top(avg:istio.mesh.request.duration.milliseconds.sum{*} by {host}, 10, 'mean', 'desc')/top(avg:istio.mesh.request.duration.milliseconds.count{*} by {host}, 10, 'mean', 'desc'),10,'mean','desc')"
@@ -119,6 +121,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "top(avg:istio.mesh.response.size.sum{*}, 10, 'mean', 'desc')/top(avg:istio.mesh.response.size.count{*}, 10, 'mean', 'desc')",
@@ -149,7 +152,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "top(avg:istio.go.threads{*} by {host}, 10, 'mean', 'desc')",
+                        "q": "top(avg:istio.go.threads{*}, 10, 'mean', 'desc')",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -167,6 +170,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -183,7 +187,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "top(avg:istio.go.memstats.alloc_bytes{*} by {host}, 10, 'mean', 'desc')",
+                        "q": "top(avg:istio.go.memstats.alloc_bytes{*}, 10, 'mean', 'desc')",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -219,7 +223,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "(top(avg:istio.go.memstats.heap_inuse_bytes{*} by {host}, 10, 'mean', 'desc')/top(avg:istio.go.memstats.heap_alloc_bytes{*} by {host}, 10, 'mean', 'desc'))*100",
+                        "q": "(top(avg:istio.go.memstats.heap_inuse_bytes{*}, 10, 'mean', 'desc')/top(avg:istio.go.memstats.heap_alloc_bytes{*}, 10, 'mean', 'desc'))*100",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -237,6 +241,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -252,6 +257,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "top(avg:istio.go.memstats.gc_cpu_fraction{*}, 10, 'mean', 'desc')",
@@ -287,6 +293,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "top(avg:istio.go.gc_duration_seconds.sum{*}, 10, 'mean', 'desc')/top(avg:istio.go.gc_duration_seconds.count{*}, 10, 'mean', 'desc')",
@@ -334,7 +341,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "top(avg:istio.grpc.server.msg_sent_total{*} by {host}.as_count(), 10, 'mean', 'desc'), top(avg:istio.grpc.server.msg_received_total{*} by {host}.as_count(), 10, 'mean', 'desc')",
+                        "q": "top(avg:istio.grpc.server.msg_sent_total{*}.as_count(), 10, 'mean', 'desc'), top(avg:istio.grpc.server.msg_received_total{*}.as_count(), 10, 'mean', 'desc')",
                         "style": {
                             "palette": "cool",
                             "type": "solid",
@@ -352,6 +359,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -367,11 +375,12 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "top(avg:istio.go.gc_duration_seconds.sum{*} by {host}, 10, 'mean', 'desc')"
+                        "q": "top(avg:istio.go.gc_duration_seconds.sum{*}, 10, 'mean', 'desc')"
                     }
                 ],
                 "viz": "toplist"
             },
+            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -402,6 +411,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "sum:istio.pilot.xds{*}",
@@ -430,6 +440,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "sum:istio.pilot.xds.pushes{*}",
@@ -473,6 +484,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "sum:istio.galley.endpoint_no_pod{*}",
@@ -501,6 +513,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "sum:istio.process.max_fds{*}",
@@ -536,6 +549,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "sum:istio.process.virtual_memory_bytes{*}",
@@ -570,6 +584,7 @@
             "id": 20,
             "legend": false,
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "avg:istio.pilot.xds.eds_all_locality_endpoints{*}",
@@ -605,6 +620,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "avg:istio.sidecar_injection.requests_total{*}.as_count()",
@@ -640,6 +656,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "avg:istio.galley.validation.failed{*}.as_count()",
@@ -675,6 +692,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "avg:istio.sidecar_injection.requests_total{*}.as_count(), avg:istio.sidecar_injection.success_total{*}.as_count(), avg:istio.sidecar_injection.requests_total{*}.as_count()-avg:istio.sidecar_injection.success_total{*}.as_count()",
@@ -710,6 +728,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "top(avg:istio.mesh.request.size.sum{*}, 10, 'mean', 'desc')/top(avg:istio.mesh.request.size.count{*}, 10, 'mean', 'desc')",
@@ -745,6 +764,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "avg:istio.grpc.server.handling_seconds.sum{*}, avg:istio.grpc.server.handling_seconds.count{*}, avg:istio.grpc.server.handling_seconds.sum{*}/avg:istio.grpc.server.handling_seconds.count{*}",
@@ -795,6 +815,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "avg:istio.pilot.proxy_queue_time.sum{*}, avg:istio.pilot.proxy_queue_time.count{*}, avg:istio.pilot.proxy_queue_time.sum{*}/avg:istio.pilot.proxy_queue_time.count{*}",
@@ -830,6 +851,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "top(avg:istio.mesh.request.duration.milliseconds.sum{*} by {host}, 10, 'mean', 'desc')/top(avg:istio.mesh.request.duration.milliseconds.count{*} by {host}, 10, 'mean', 'desc')",
@@ -865,6 +887,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "avg:istio.pilot.services{*}",
@@ -900,6 +923,7 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
                         "q": "avg:istio.pilot.rds_expired_nonce{*}.as_count()",
