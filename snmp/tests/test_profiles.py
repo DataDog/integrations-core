@@ -1723,6 +1723,8 @@ def test_fortinet_fortigate(aggregator):
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=firewall6_tags, count=1
         )
 
+    aggregator.assert_all_metrics_covered()
+
 
 @pytest.mark.usefixtures("dd_environment")
 def test_netapp(aggregator):
