@@ -29,6 +29,15 @@ class NonDatadogPackage(CLIError):
 # Exceptions for the download module.
 
 
+class IncorrectRootLayoutType(Exception):
+    def __init__(self, found, expected):
+        self.found = found
+        self.expected = expected
+
+    def __str__(self):
+        return 'found {}, expected {}'.format(self.found, self.expected)
+
+
 class SimpleIndexError(Exception):
     def __init__(self, standard_distribution_name):
         self.standard_distribution_name = standard_distribution_name

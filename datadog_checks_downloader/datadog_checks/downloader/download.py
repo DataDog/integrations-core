@@ -23,6 +23,7 @@ from tuf.exceptions import UnknownTargetError
 from .exceptions import (
     DuplicatePackage,
     InconsistentSimpleIndex,
+    IncorrectRootLayoutType,
     MissingVersions,
     NoInTotoLinkMetadataFound,
     NoInTotoRootLayoutPublicKeysFound,
@@ -140,8 +141,9 @@ class TUFDownloader:
         fileinfo = target.get('fileinfo', {})
         custom = fileinfo.get('custom', {})
 
-        if custom.get('root-layout-type', DEFAULT_ROOT_LAYOUT_TYPE) != self.root_layout_type:
-            return target_abspaths
+        root_layout_type = custom.get('root-layout-type', DEFAULT_ROOT_LAYOUT_TYPE)
+        if root_layout_type != self.root_layout_type:
+            raise IncorrectRootLayoutType(root_layout_type, self.root_layout_type)
 
         in_toto_metadata = custom.get('in-toto', [])
 
