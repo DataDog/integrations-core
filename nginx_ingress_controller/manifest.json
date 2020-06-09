@@ -26,6 +26,9 @@
   "is_public": true,
   "integration_id": "nginx-ingress-controller",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "saved_views": {
