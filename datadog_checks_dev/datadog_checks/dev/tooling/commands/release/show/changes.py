@@ -12,11 +12,12 @@ from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_su
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Show all the pending PRs for a given check.')
 @click.argument('check', autocompletion=complete_valid_checks, callback=validate_check_arg)
+@click.option('--organization', '-r', default=None)
 @click.option('--tag-pattern', default=None)
 @click.option('--tag-prefix', default=None)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.pass_context
-def changes(ctx, check, tag_pattern, tag_prefix, dry_run):
+def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization):
     """Show all the pending PRs for a given check."""
     if not dry_run and check and check not in get_valid_checks():
         abort(f'Check `{check}` is not an Agent-based Integration')
@@ -39,7 +40,7 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run):
 
         for pr_num in pr_numbers:
             try:
-                payload = get_pr(pr_num, user_config)
+                payload = get_pr(pr_num, user_config, organization)
             except Exception as e:
                 echo_failure(f'Unable to fetch info for PR #{pr_num}: {e}')
                 continue
@@ -58,7 +59,7 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run):
     else:
         for pr_num in pr_numbers:
             try:
-                payload = get_pr(pr_num, user_config)
+                payload = get_pr(pr_num, user_config, organization)
             except Exception as e:
                 echo_failure(f'Unable to fetch info for PR #{pr_num}: {e}')
                 continue
