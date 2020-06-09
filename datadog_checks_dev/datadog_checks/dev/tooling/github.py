@@ -57,11 +57,11 @@ def get_pr(pr_num, config=None, raw=False, org=None):
     """
     Get the payload for the given PR number. Let exceptions bubble up.
     """
+    repo = basepath(get_root())
     pull = PR_ENDPOINT.format(repo, pr_num)
     if org:
         pull = API_URL + f'/repos/{org}/{repo}/pulls/{pr_num}'
 
-    repo = basepath(get_root())
     response = requests.get(pull, auth=get_auth_info(config))
 
     if raw:
