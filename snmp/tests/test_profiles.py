@@ -1671,16 +1671,24 @@ def test_netapp(aggregator):
     for metric in gauges:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     for metric in counts:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1)
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+        )
 
-    # snapvault_counts = [
-    #     'svtotalFailures',
-    # ]
-    # snapvault_tags = ['index', 'destination', 'state']
-    # for metric in snapvault_counts:
-    #     aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
-    #     for tag in snapvault_tags:
-    #         aggregator.assert_metric_has_tag_prefix('snmp.{}'.format(metric), tag)
+    snapvault_counts = [
+        'svTotalFailures',
+    ]
+    snapvaults = [('5', '/vol/dir1', '5'), ('6', '/vol/dir3', '2'), ('18', '/vol/dir9', '4')]
+    for metric in snapvault_counts:
+        for index, destination, state in snapvaults:
+            tags = [
+                'index:{}'.format(index),
+                'destination:{}'.format(destination),
+                'state:{}'.format(state),
+            ] + common_tags
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
 
     # snapmirror_gauges = [
     #     'snapmirrorLag',
