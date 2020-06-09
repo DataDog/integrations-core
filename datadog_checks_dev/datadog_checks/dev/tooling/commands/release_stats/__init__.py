@@ -4,9 +4,9 @@
 import click
 
 from ..console import CONTEXT_SETTINGS
-from .print_csv import print_csv
+from .csv_report import csv_report
 
-ALL_COMMANDS = (print_csv,)
+ALL_COMMANDS = (csv_report,)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='A collection of tasks to generate reports about releases')

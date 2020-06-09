@@ -204,17 +204,19 @@ class Release:
         version_re = re.compile(f'{release_version}-rc')
         # comparing using provided references but using parent commit of from-reference to
         # also have the from-ref commit included
+        echo_info(f'Fetching commits using compare from parent of "{from_ref}" to "{to_ref}"...')
         commits = Commit.from_github_compare(ctx, f'{from_ref}^', to_ref)
+        echo_info(f'Fetching tags matching "/{version_re}/"...')
         rc_tags = [ tag for tag in Tag.list_from_github(ctx) if version_re.match(tag.name) or tag.name == release_version ]
 
-        print('tags are ordered as:')
         for rc_tag in rc_tags:
-            print(rc_tag.name)
             # we are forced to reload tags as the github does not return the tag's commit's SHA
             # when we are using the tag list API
             if rc_tag.commit_sha is None:
+                echo_info(f'Reloading tag "{rc_tag.name}" as it does not have a commit SHA')
                 rc_tag.reload(ctx)
 
+        echo_info(f'Assigning release candidates to commits...')
         # assign commits to release candidates
         tag_index = 0
 
@@ -226,7 +228,6 @@ class Release:
 
             commit.included_in(rc_tags[tag_index])
 
-            print(f'Comparing commit {commit.sha} to tag {rc_tags[tag_index].commit_sha}')
             if commit.sha == rc_tags[tag_index].commit_sha:
                 tag_index += 1
 
@@ -246,7 +247,7 @@ class Release:
 @click.option('--release-version', '-r', help="Release version to analyze", required=True)
 @click.option('--output-folder', '-o', help="Path to output folder")
 @click.pass_context
-def print_csv(ctx, from_ref, to_ref, release_version, output_folder=None):
+def csv_report(ctx, from_ref, to_ref, release_version, output_folder=None):
     """Computes the release report and writes it to a specific directory
     """
     if output_folder is None:
