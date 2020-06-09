@@ -3,7 +3,7 @@
         "author_name": "Datadog"
     },
     "board_title": "Istio Overview (v1.5+)",
-    "created": "2020-03-30T17:55:10.381398+00:00",
+    "created": "2020-06-09T14:57:07.408502+00:00",
     "created_by": {
         "access_role": "adm",
         "disabled": false,
@@ -16,11 +16,17 @@
         "verified": true
     },
     "description": "### Istio\n\nNote: This dashboard outlines new metrics from Istio `v1.5+.\n\n- [What is Istio](https://istio.io/docs/concepts/what-is-istio/)?\n- [Istiod](https://istio.io/docs/ops/deployment/architecture/)\n- [Envoy](https://istio.io/docs/concepts/what-is-istio/#envoy), a high performance proxy.\n    - XDS = Envoy management APIs that can be implemented by backend servers. \n        - These APIs support:\n            - Cluster discovery service (CDS)\n            - Route discovery service (RDS)\n            - Endpoint discovery service (EDS)\n            - Listener discovery service (LDS)",
-    "id": 1035172,
-    "modified": "2020-04-24T20:27:51.817384+00:00",
-    "new_id": "3y6-epj-nrz",
+    "id": 1170440,
+    "modified": "2020-06-09T15:27:29.709651+00:00",
+    "new_id": "6pb-hvt-xq7",
     "read_only": false,
-    "template_variables": [],
+    "template_variables": [
+        {
+            "default": "*",
+            "name": "cluster",
+            "prefix": "cluster_name"
+        }
+    ],
     "widgets": [
         {
             "bgcolor": "gray",
@@ -98,7 +104,6 @@
                 ],
                 "viz": "toplist"
             },
-            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -162,7 +167,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -175,19 +179,34 @@
         {
             "height": 12,
             "id": 6,
+            "legend": false,
             "tile_def": {
                 "requests": [
                     {
-                        "q": "top((top(avg:istio.go.memstats.alloc_bytes{*} by {host}, 10, 'mean', 'desc')/top(avg:istio.go.memstats.alloc_bytes_total{*} by {host}.as_count(), 10, 'mean', 'desc'))*100,10,'mean','desc')"
+                        "q": "top(avg:istio.go.memstats.alloc_bytes{*} by {host}, 10, 'mean', 'desc')",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
                     }
                 ],
-                "viz": "toplist"
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
             },
+            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
-            "title_text": "Percentage of available memory allocated",
-            "type": "toplist",
+            "title_text": "Memory allocated in use",
+            "type": "timeseries",
             "width": 53,
             "x": 109,
             "y": 6
@@ -333,7 +352,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -368,7 +386,7 @@
             "font_size": "18",
             "height": 5,
             "html": "Pilot Traffic Management",
-            "id": 14,
+            "id": 13,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
@@ -380,7 +398,7 @@
         },
         {
             "height": 12,
-            "id": 15,
+            "id": 14,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -408,7 +426,7 @@
         },
         {
             "height": 12,
-            "id": 16,
+            "id": 15,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -439,7 +457,7 @@
             "font_size": "18",
             "height": 5,
             "html": "Galley  Configuration Validation",
-            "id": 17,
+            "id": 16,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
@@ -451,7 +469,7 @@
         },
         {
             "height": 12,
-            "id": 18,
+            "id": 17,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -479,7 +497,7 @@
         },
         {
             "height": 12,
-            "id": 19,
+            "id": 18,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -514,7 +532,7 @@
         },
         {
             "height": 12,
-            "id": 20,
+            "id": 19,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -549,7 +567,7 @@
         },
         {
             "height": 12,
-            "id": 22,
+            "id": 20,
             "legend": false,
             "tile_def": {
                 "requests": [
@@ -583,7 +601,7 @@
         },
         {
             "height": 12,
-            "id": 23,
+            "id": 21,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -618,7 +636,7 @@
         },
         {
             "height": 12,
-            "id": 25,
+            "id": 22,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -653,7 +671,7 @@
         },
         {
             "height": 12,
-            "id": 26,
+            "id": 23,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -688,7 +706,7 @@
         },
         {
             "height": 12,
-            "id": 27,
+            "id": 24,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -712,7 +730,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": 16,
@@ -724,7 +741,7 @@
         },
         {
             "height": 12,
-            "id": 28,
+            "id": 25,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -748,7 +765,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": 16,
@@ -763,7 +779,7 @@
             "font_size": "18",
             "height": 5,
             "html": "Sidecar Injection",
-            "id": 29,
+            "id": 26,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
@@ -775,7 +791,7 @@
         },
         {
             "height": 12,
-            "id": 31,
+            "id": 27,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -799,7 +815,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": 16,
@@ -811,7 +826,7 @@
         },
         {
             "height": 12,
-            "id": 32,
+            "id": 28,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -835,7 +850,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": 16,
@@ -847,7 +861,7 @@
         },
         {
             "height": 12,
-            "id": 33,
+            "id": 29,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -871,7 +885,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": 16,
@@ -883,7 +896,7 @@
         },
         {
             "height": 12,
-            "id": 35,
+            "id": 30,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -907,7 +920,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": 16,
