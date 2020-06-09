@@ -205,7 +205,7 @@
             "title": true,
             "title_align": "center",
             "title_size": 16,
-            "title_text": "Memory allocated in use",
+            "title_text": "Memory allocated",
             "type": "timeseries",
             "width": 53,
             "x": 109,
