@@ -1658,16 +1658,85 @@ def test_netapp(aggregator):
         'snmp_host:example-datacenter.company',
     ]
 
-    tags = common.CHECK_TAGS + profile_tags
+    common_tags = common.CHECK_TAGS + profile_tags
 
-    num_filesystems = 88
-    df_gauges = [
-        'dfHighTotalKBytes',
+    gauges = [
+        'cfInterconnectStatus',
+        'miscCacheAge',
+        'ncHttpActiveCliConns',
     ]
-    for metric in df_gauges:
-        aggregator.assert_metric(
-            'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=num_filesystems
-        )
+    counts = [
+        'extcache64Hits',
+    ]
+    for metric in gauges:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    for metric in counts:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1)
 
-    aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=tags, count=1)
+    # snapvault_counts = [
+    #     'svtotalFailures',
+    # ]
+    # snapvault_tags = ['index', 'destination', 'state']
+    # for metric in snapvault_counts:
+    #     aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
+    #     for tag in snapvault_tags:
+    #         aggregator.assert_metric_has_tag_prefix('snmp.{}'.format(metric), tag)
+
+    # snapmirror_gauges = [
+    #     'snapmirrorLag',
+    # ]
+    # snapmirror_counts = [
+    #     'snapmirrorTotalFailures',
+    # ]
+    # snapmirror_metrics = snapmirror_gauges + snapmirror_counts
+    # snapmirror_tags = ['index', 'state']
+    # for metric in snapmirror_gauges:
+    #     aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    # for metric in snapmirror_counts:
+    #     aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
+    # for metric in snapmirror_metrics:
+    #     for tag in snapmirror_tags:
+    #         aggregator.assert_metric_has_tag_prefix('snmp.{}'.format(metric), tag)
+
+    filesystem_gauges = [
+        'dfHighTotalKBytes',
+        'dfHighAvailKBytes',
+        'dfInodesUsed',
+        'dfInodesFree',
+    ]
+    filesystem_indexes = [
+        '1022',
+        '1023',
+        '1024',
+        '1025',
+        '1026',
+        '1027',
+        '1028',
+        '1029',
+        '1032',
+        '1033',
+    ]
+    filesystems = ['/vol/dir{}'.format(n) for n in range(1, len(filesystem_indexes) + 1)]
+    for metric in filesystem_gauges:
+        for index, filesystem in zip(filesystem_indexes, filesystems):
+            tags = ['index:{}'.format(index), 'filesystem:{}'.format(filesystem)] + common_tags
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    # if_rates = [
+    #     'ifHighInOctets',
+    # ]
+    # if_counts = [
+    #     'ifHighInOctets',
+    # ]
+    # if_metrics = if_rates + if_counts
+    # if_tags = ['index', 'interface']
+    # for metric in if_rates:
+    #     aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+    # for metric in if_counts:
+    #     aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
+    # for metric in if_metrics:
+    #     for tag in if_tags:
+    #         aggregator.assert_metric_has_tag_prefix('snmp.{}'.format(metric), tag, count=num_filesystems)
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     aggregator.assert_all_metrics_covered()
