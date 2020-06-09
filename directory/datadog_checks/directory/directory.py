@@ -54,6 +54,7 @@ class DirectoryCheck(AgentCheck):
         ignore_missing = is_affirmative(instance.get('ignore_missing', False))
         follow_symlinks = is_affirmative(instance.get('follow_symlinks', True))
         custom_tags = instance.get('tags', [])
+        max_filegauge_count = instance.get('max_filegauge_count', self.MAX_FILEGAUGE_COUNT)
 
         if not exists(abs_directory):
             msg = (
@@ -79,6 +80,7 @@ class DirectoryCheck(AgentCheck):
             follow_symlinks,
             countonly,
             custom_tags,
+            max_filegauge_count,
         )
 
     def _get_stats(
@@ -95,12 +97,13 @@ class DirectoryCheck(AgentCheck):
         follow_symlinks,
         countonly,
         tags,
+        max_filegauge_count,
     ):
         dirtags = ['{}:{}'.format(dirtagname, name)]
         dirtags.extend(tags)
         directory_bytes = 0
         directory_files = 0
-        max_filegauge_balance = self.MAX_FILEGAUGE_COUNT
+        max_filegauge_balance = max_filegauge_count
 
         # If we do not want to recursively search sub-directories only get the root.
         walker = walk(directory, follow_symlinks) if recursive else (next(walk(directory, follow_symlinks)),)
