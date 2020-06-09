@@ -60,7 +60,7 @@
     },
     {
       "add_timeframe": true,
-      "check": "airflow.healthy",
+      "check": "airflow.can_connect",
       "error": null,
       "group": null,
       "group_by": [],
