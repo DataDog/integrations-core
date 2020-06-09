@@ -17,6 +17,7 @@ from ...utils import (
     get_testable_checks,
     get_valid_integrations,
     has_e2e,
+    is_tile_only,
 )
 from ..console import CONTEXT_SETTINGS, abort, echo_info
 
@@ -75,13 +76,11 @@ def catalog(checks, out_file, markdown):
         has_logs = False
         is_prometheus = False
         is_http = False
-        tile_only = False
         has_metadata = False
+        tile_only = is_tile_only(check)
 
-        config_file = get_config_file(check)
-        if not os.path.exists(config_file):
-            tile_only = True
-        else:
+        if not is_tile_only:
+            config_file = get_config_file(check)
             with open(config_file) as f:
                 if '# logs:' in f.read():
                     has_logs = True

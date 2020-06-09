@@ -392,6 +392,11 @@ def has_e2e(check):
     return False
 
 
+def is_tile_only(check):
+    config_file = get_config_file(check)
+    return not os.path.exists(config_file)
+
+
 def find_legacy_signature(check):
     """
     Validate that the given check does not use the legacy agent signature (contains agentConfig)
