@@ -40,6 +40,11 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_
 
     # sanity check on the version provided
     cur_version = old_version or get_version_string(check, tag_prefix=tag_prefix)
+    if not cur_version:
+        abort(
+            'Failed to retrieve the latest version. Please ensure this has a proper set of tags following SemVer or '
+            'the provided tag_prefix/tag_pattern.'
+        )
     if parse_version_info(version.replace(tag_prefix, '', 1)) <= parse_version_info(
         cur_version.replace(tag_prefix, '', 1)
     ):
