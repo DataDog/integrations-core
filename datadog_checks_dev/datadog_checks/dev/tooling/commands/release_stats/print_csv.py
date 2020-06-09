@@ -53,30 +53,39 @@ class PullRequest:
         return PullRequest.from_github(ctx, pr_number)
 
 class Commit:
-    def __init__(self, sha, title, date, author, pull_request, parent_shas=[]):
+    def __init__(self, sha, title, date, author, pull_request, included_in_tag=None):
         self.sha = sha
         self.title = title
         self.date = date
         self.author = author
         self.pull_request = pull_request
-        self.parent_shas = parent_shas
         self.url = f'https://www.github.com/DataDog/datadog-agent/commit/{sha}'
+        self.included_in_tag = included_in_tag
+
+    def included_in(self, next_tag):
+        self.included_in_tag = next_tag
 
     def to_change(self):
         teams = []
         title = self.title
         url = self.url
+        next_tag = None
 
         if self.pull_request:
             teams = [ label.rpartition('/')[-1] for label in self.pull_request.labels if label.startswith('team') ]
             title = self.pull_request.title
             url = self.pull_request.url
 
+        if self.included_in_tag:
+            next_tag = self.included_in_tag.name
+
         return {
             'SHA': self.sha,
             'Title': title,
             'URL': url,
-            'Teams': ' & '.join(teams)
+            'Teams': ' & '.join(teams),
+            'Next tag': next_tag
+
         }
 
     @classmethod
@@ -88,13 +97,12 @@ class Commit:
             title=gh_commit['commit']['message'],
             date=datetime.datetime.strptime(gh_commit['commit']['committer']['date'], '%Y-%m-%dT%H:%M:%SZ'),
             author=f"@{gh_commit['committer']['login']} - {gh_commit['commit']['committer']['name']}",
-            pull_request=pull_request,
-            parent_shas=[ parent['sha'] for parent in gh_commit['parents'] ]
+            pull_request=pull_request
         )
 
     @classmethod
-    def from_github_branch_head(cls, ctx, branch, from_ref='master'):
-        comparison = get_compare(from_ref, branch, 'datadog-agent', config=ctx.obj)
+    def from_github_compare(cls, ctx, from_ref, to_ref):
+        comparison = get_compare(from_ref, to_ref, 'datadog-agent', config=ctx.obj)
 
         return [ Commit.from_github_commit(ctx, gh_commit) for gh_commit in comparison['commits'] ]
 
@@ -120,11 +128,13 @@ class Tag:
         self.sha = tag.sha
         self.commit_sha = tag.commit_sha
 
+        return self
+
     @classmethod
     def from_github_tag(cls, gh_tag):
         if gh_tag['object']['type'] == 'commit':
             return Tag(
-                ref=gh_tag['ref'],
+                ref=gh_tag.get('ref', gh_tag.get('tag')),
                 sha=gh_tag.get('sha', None),
                 commit_sha=gh_tag['object']['sha']
             )
@@ -136,7 +146,7 @@ class Tag:
 
     @classmethod
     def get(cls, ctx, tag_sha):
-        Tag.from_github_tag(get_tag('datadog-agent', tag_sha, config=ctx.obj))
+        return Tag.from_github_tag(get_tag('datadog-agent', tag_sha, config=ctx.obj))
 
     @classmethod
     def list_from_github(cls, ctx):
@@ -144,14 +154,14 @@ class Tag:
         return [ Tag.from_github_tag(gh_tag) for gh_tag in gh_tags ]
 
 class Release:
-    def __init__(self, release_branch, commits, rc_tags):
-        self.release_branch = release_branch
+    def __init__(self, release_version, commits, rc_tags):
+        self.release_version = release_version
         self.commits = commits
         self.rc_tags = rc_tags
 
     def to_report(self):
         return {
-            'Release Branch': self.release_branch,
+            'Release Branch': self.release_version,
             'Release candidates': len(self.rc_tags),
             'Number of Commits': len(self.commits),
             'Commits with unknown PR': len([commit for commit in self.commits if commit.pull_request is None ]),
@@ -188,36 +198,41 @@ class Release:
         return divmod(duration, 24 * 60 * 60)[0]
 
     @classmethod
-    def from_github(cls, ctx, release_branch, from_ref=None):
-        base_version = release_branch.rpartition('.')[0]
-        branch_re = re.compile(f'{base_version}\.\d+-rc') # this will only contain agent 7 RCs but it's okay
-        rc_tags = [ tag for tag in Tag.list_from_github(ctx) if branch_re.match(tag.name) ]
+    def from_github(cls, ctx, release_version, from_ref, to_ref):
+        # this will only contain agent 7 or 6 RCs but it's okay
+        # as we want versions to assign commits / count them
+        version_re = re.compile(f'{release_version}-rc')
+        # comparing using provided references but using parent commit of from-reference to
+        # also have the from-ref commit included
+        commits = Commit.from_github_compare(ctx, f'{from_ref}^', to_ref)
+        rc_tags = [ tag for tag in Tag.list_from_github(ctx) if version_re.match(tag.name) or tag.name == release_version ]
 
-        # choose base ref to compare to the release branch to get commits made after freeze
-        base_ref = None
+        print('tags are ordered as:')
+        for rc_tag in rc_tags:
+            print(rc_tag.name)
+            # we are forced to reload tags as the github does not return the tag's commit's SHA
+            # when we are using the tag list API
+            if rc_tag.commit_sha is None:
+                rc_tag.reload(ctx)
 
-        if from_ref:
-            echo_info(f"Using provided ref '{from_ref}' as base commit")
-            base_ref = from_ref
-        else:
-            # try to find rc1 tag to use as base commit
-            rc1_tag_name = f"{base_version}.0-rc.1"
-            rc1_tag = None
+        # assign commits to release candidates
+        tag_index = 0
 
-            for rc_tag in rc_tags:
-                if rc_tag.name == rc1_tag_name:
-                    rc1_tag = rc_tag
-                    break
+        for commit in commits:
+            # break if we cannot assign tags to commits anymore
+            if tag_index >= len(rc_tags):
+                echo_failure("Could not assign a tag to every commits")
+                break
 
-            if rc1_tag:
-                echo_info(f"Using parent commit of tag '{rc1_tag.name}' as base commit")
-                base_ref = f'{rc1_tag_name}^'
-            else:
-                raise ArgumentError('Did not any rc.1 tag to use as base commit')
+            commit.included_in(rc_tags[tag_index])
+
+            print(f'Comparing commit {commit.sha} to tag {rc_tags[tag_index].commit_sha}')
+            if commit.sha == rc_tags[tag_index].commit_sha:
+                tag_index += 1
 
         return Release(
-            release_branch=release_branch,
-            commits=Commit.from_github_branch_head(ctx, release_branch, from_ref=base_ref),
+            release_version=release_version,
+            commits=commits,
             rc_tags=rc_tags
         )
 
@@ -226,23 +241,22 @@ class Release:
     context_settings=CONTEXT_SETTINGS,
     short_help="Writes the CSV report about a specific release",
 )
-@click.option('--branch', '-b', help="Release branch to make stats on", required=True)
-@click.option('--base-commit', '-c', help="First 8 characters of the commit sha to use as base")
+@click.option('--from-ref', '-f', help="Reference to start stats on", required=True)
+@click.option('--to-ref', '-t', help="Reference to end stats at", required=True)
+@click.option('--release-version', '-r', help="Release version to analyze", required=True)
 @click.option('--output-folder', '-o', help="Path to output folder")
 @click.pass_context
-def print_csv(ctx, branch, base_commit=None, output_folder=None):
+def print_csv(ctx, from_ref, to_ref, release_version, output_folder=None):
     """Computes the release report and writes it to a specific directory
     """
     if output_folder is None:
         output_folder = branch
 
-    # print(get_tag('datadog-agent', '94f74d70abb0512bd0ed0fae9e50206d3b087cdb', config=ctx.obj))
-
     folder = Path(output_folder)
 
     folder.mkdir(parents=True, exist_ok=True)
 
-    release = Release.from_github(ctx, branch, from_ref=base_commit)
+    release = Release.from_github(ctx, release_version, from_ref=from_ref, to_ref=to_ref)
 
     release.write_report(folder.joinpath('release.csv'))
     release.write_changes(folder.joinpath('changes.csv'))
