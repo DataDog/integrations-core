@@ -88,7 +88,7 @@ def csv_report(ctx, from_ref, to_ref, release_version, output_folder=None):
     """Computes the release report and writes it to a specific directory
     """
     if output_folder is None:
-        output_folder = branch
+        output_folder = release_version
 
     folder = Path(output_folder)
 
