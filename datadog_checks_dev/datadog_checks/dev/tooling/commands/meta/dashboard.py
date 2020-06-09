@@ -15,6 +15,7 @@ from ..console import CONTEXT_SETTINGS, abort
 
 BOARD_ID_PATTERN = r'{site}/[^/]+/([^/]+)/.+'
 SCREEN_API = 'https://api.{site}/api/v1/screen/{board_id}'
+REQUIRED_FIELDS = ["board_title", "description", "template_variables", "widgets"]
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Dashboard utilities')
@@ -25,8 +26,15 @@ def dash():
 @dash.command(context_settings=CONTEXT_SETTINGS, short_help='Export a Dashboard as JSON')
 @click.argument('url')
 @click.argument('integration', required=False)
+@click.option(
+    '--author',
+    '-a',
+    required=False,
+    default='Datadog',
+    help="The owner of this integration's dashboard. Default is 'Datadog'",
+)
 @click.pass_context
-def export(ctx, url, integration):
+def export(ctx, url, integration, author):
     if integration and integration not in get_valid_integrations():
         abort(f'Unknown integration `{integration}`')
 
@@ -66,16 +74,13 @@ def export(ctx, url, integration):
         abort(str(e).replace(api_key, '*' * len(api_key)).replace(app_key, '*' * len(app_key)))
 
     payload = response.json()
-    payload.setdefault('author_info', {})
-    payload['author_info']['author_name'] = 'Datadog'
-    payload.setdefault('created_by', {})
-    payload['created_by']['email'] = 'support@datadoghq.com'
-    payload['created_by']['handle'] = 'support@datadoghq.com'
-    payload['created_by']['name'] = 'Datadog'
-    payload['created_by'].pop('icon', None)
-    output = json.dumps(payload, indent=4, sort_keys=True)
+    new_payload = {field: payload[field] for field in REQUIRED_FIELDS}
+    new_payload.setdefault('author_info', {})
+    new_payload['author_info']['author_name'] = author
 
-    file_name = payload['board_title'].strip().lower()
+    output = json.dumps(new_payload, indent=4, sort_keys=True)
+
+    file_name = new_payload['board_title'].strip().lower()
     if integration:
         manifest = load_manifest(integration)
 
@@ -96,7 +101,7 @@ def export(ctx, url, integration):
         location = path_join(get_root(), integration, 'assets', 'dashboards')
         ensure_dir_exists(location)
 
-        manifest['assets']['dashboards'][payload['board_title']] = f'assets/dashboards/{file_name}'
+        manifest['assets']['dashboards'][new_payload['board_title']] = f'assets/dashboards/{file_name}'
         write_manifest(manifest, integration)
     else:
         file_name = f"{file_name.replace(' ', '_')}.json"
