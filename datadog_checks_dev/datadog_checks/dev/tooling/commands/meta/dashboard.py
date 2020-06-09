@@ -101,7 +101,7 @@ def export(ctx, url, integration, author):
         location = path_join(get_root(), integration, 'assets', 'dashboards')
         ensure_dir_exists(location)
 
-        manifest['assets']['dashboards'][payload['board_title']] = f'assets/dashboards/{file_name}'
+        manifest['assets']['dashboards'][new_payload['board_title']] = f'assets/dashboards/{file_name}'
         write_manifest(manifest, integration)
     else:
         file_name = f"{file_name.replace(' ', '_')}.json"
