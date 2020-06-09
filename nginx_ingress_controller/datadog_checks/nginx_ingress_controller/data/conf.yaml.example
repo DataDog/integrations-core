@@ -45,10 +45,16 @@ init_config:
 #
 instances:
 
+  -
+    ## @param collect_nginx_histograms - boolean - optional - default: false
+    ## Enable to collect histogram metrics that are known to have high tag cardinality that can cause context explosion.
+    #
+    # collect_nginx_histograms: false
+
     ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
     #
-  - prometheus_url: http://localhost:10254/metrics
+    prometheus_url: http://localhost:10254/metrics
 
     ## @param prometheus_metrics_prefix - string - optional
     ## <PREFIX> for exposed Prometheus metrics.

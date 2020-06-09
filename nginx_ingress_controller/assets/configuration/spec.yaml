@@ -7,6 +7,13 @@ files:
         - template: init_config/openmetrics
     - template: instances
       options:
+        - name: collect_nginx_histograms
+          description: |
+            Enable to collect histogram metrics that are known to have high tag cardinality which can cause context explosion.
+            Recommended to use with distribution metrics, enable `send_distribution_buckets`.
+          value:
+            example: false
+            type: boolean
         - template: instances/openmetrics
           overrides:
             prometheus_url.value.example: http://localhost:10254/metrics

@@ -10,7 +10,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx_ingress_controller import NginxIngressControllerCheck
 
 INSTANCE = {'prometheus_url': 'http://localhost:10249/metrics'}
-INSTANCE_HISTO = {'prometheus_url': 'http://localhost:10249/metrics', 'collect_histograms': True}
+INSTANCE_HISTO = {'prometheus_url': 'http://localhost:10249/metrics', 'collect_nginx_histograms': True}
 
 CHECK_NAME = 'nginx_ingress_controller'
 NAMESPACE = 'nginx_ingress'

@@ -43,7 +43,7 @@ class NginxIngressControllerCheck(OpenMetricsBaseCheck):
         # Allow for additional metric mappings
         metrics = instance.get('metrics', []) + DEFAULT_METRICS
 
-        if instance.get('collect_histograms'):
+        if instance.get('collect_nginx_histograms', False):
             metrics += HISTOGRAM_METRICS
 
         super(NginxIngressControllerCheck, self).__init__(
