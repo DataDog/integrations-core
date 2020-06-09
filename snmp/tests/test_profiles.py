@@ -1730,21 +1730,25 @@ def test_netapp(aggregator):
             tags = ['index:{}'.format(index), 'filesystem:{}'.format(filesystem)] + common_tags
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    # if_rates = [
-    #     'ifHighInOctets',
-    # ]
-    # if_counts = [
-    #     'ifHighInOctets',
-    # ]
-    # if_metrics = if_rates + if_counts
-    # if_tags = ['index', 'interface']
-    # for metric in if_rates:
-    #     aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
-    # for metric in if_counts:
-    #     aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
-    # for metric in if_metrics:
-    #     for tag in if_tags:
-    #         aggregator.assert_metric_has_tag_prefix('snmp.{}'.format(metric), tag, count=num_filesystems)
+    if_counts = [
+        'ifHighInOctets',
+    ]
+    if_rates = [
+        'ifHighInOctets.rate',
+    ]
+    interfaces = [
+        ('6', 'netgear ifX300 v1'),
+        ('7', 'junyper proto12 12.3'),
+        ('23', 'malabar yz42 10.2020'),
+    ]
+    for index, descr in interfaces:
+        tags = ['index:{}'.format(index), 'interface:{}'.format(descr)] + common_tags
+        for metric in if_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+        for metric in if_rates:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     aggregator.assert_all_metrics_covered()
