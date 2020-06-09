@@ -138,6 +138,7 @@ Profiles can be used interchangeably, such that devices that share MIB dependenc
 * [Fortinet FortiGate][29]
 * [HP iLO4][15]
 * [HPE Proliant][16]
+* [NetApp][30]
 * [Palo Alto][17]
 * [Checkpoint Firewall][18]
 * [Isilon][24]
@@ -204,3 +205,4 @@ Additional helpful documentation, links, and articles:
 [27]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco_icm.yaml
 [28]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco_isr_4431.yaml
 [29]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/fortinet-fortigate.yaml
+[30]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/netapp.yaml
