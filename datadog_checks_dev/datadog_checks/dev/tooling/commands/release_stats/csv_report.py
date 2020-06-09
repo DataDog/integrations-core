@@ -65,29 +65,6 @@ class Commit:
     def included_in(self, next_tag):
         self.included_in_tag = next_tag
 
-    def to_change(self):
-        teams = []
-        title = self.title
-        url = self.url
-        next_tag = None
-
-        if self.pull_request:
-            teams = [ label.rpartition('/')[-1] for label in self.pull_request.labels if label.startswith('team') ]
-            title = self.pull_request.title
-            url = self.pull_request.url
-
-        if self.included_in_tag:
-            next_tag = self.included_in_tag.name
-
-        return {
-            'SHA': self.sha,
-            'Title': title,
-            'URL': url,
-            'Teams': ' & '.join(teams),
-            'Next tag': next_tag
-
-        }
-
     @classmethod
     def from_github_commit(cls, ctx, gh_commit):
         pull_request = PullRequest.from_commit(ctx, gh_commit['commit']['message'], gh_commit['sha'])
@@ -153,49 +130,12 @@ class Tag:
         gh_tags = get_tags('datadog-agent', config=ctx.obj)
         return [ Tag.from_github_tag(gh_tag) for gh_tag in gh_tags ]
 
+
 class Release:
     def __init__(self, release_version, commits, rc_tags):
         self.release_version = release_version
         self.commits = commits
         self.rc_tags = rc_tags
-
-    def to_report(self):
-        return {
-            'Release Branch': self.release_version,
-            'Release candidates': len(self.rc_tags),
-            'Number of Commits': len(self.commits),
-            'Commits with unknown PR': len([commit for commit in self.commits if commit.pull_request is None ]),
-            'Release time (days)': self._release_delay()
-        }
-
-    def write_report(self, filepath):
-        with open(filepath, 'w', newline='') as csvfile:
-            report = self.to_report()
-
-            fieldnames = report.keys()
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
-            writer.writeheader()
-            writer.writerow(report)
-
-    def write_changes(self, filepath):
-        changes = [ commit.to_change() for commit in self.commits ]
-
-        with open(filepath, 'w', newline='') as csvfile:
-            fieldnames = changes[0].keys()
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-
-            for change in changes:
-                writer.writerow(change)
-
-    def _release_delay(self):
-        rc_1 = self.commits[0]
-        last_change = self.commits[-1]
-
-        duration = (last_change.date - rc_1.date).total_seconds()
-
-        return divmod(duration, 24 * 60 * 60)[0]
 
     @classmethod
     def from_github(cls, ctx, release_version, from_ref, to_ref):
@@ -237,6 +177,71 @@ class Release:
             rc_tags=rc_tags
         )
 
+class ReportSerializer:
+    def __init__(self, release):
+        self.release = release
+
+    def write_report(self, filepath):
+        with open(filepath, 'w', newline='') as csvfile:
+            report = self._report()
+
+            fieldnames = report.keys()
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+            writer.writeheader()
+            writer.writerow(report)
+
+    def write_changes(self, filepath):
+        with open(filepath, 'w', newline='') as csvfile:
+            changes = [ self._change(commit) for commit in self.release.commits ]
+            fieldnames = changes[0].keys()
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+
+            for change in changes:
+                writer.writerow(change)
+
+    def _report(self):
+        return {
+            'Release Branch': self.release.release_version,
+            'Release candidates': len(self.release.rc_tags),
+            'Number of Commits': len(self.release.commits),
+            'Commits with unknown PR': len([commit for commit in self.release.commits if commit.pull_request is None ]),
+            'Release time (days)': self._release_delay()
+        }
+
+    def _release_delay(self):
+        rc_1 = self.release.commits[0]
+        last_change = self.release.commits[-1]
+
+        duration = (last_change.date - rc_1.date).total_seconds()
+
+        return divmod(duration, 24 * 60 * 60)[0]
+
+    def _change(self, commit):
+        teams = []
+        title = commit.title
+        url = commit.url
+        next_tag = None
+
+        pull_request = commit.pull_request
+
+        if pull_request:
+            teams = [ label.rpartition('/')[-1] for label in pull_request.labels if label.startswith('team') ]
+            title = pull_request.title
+            url = pull_request.url
+
+        if commit.included_in_tag:
+            next_tag = commit.included_in_tag.name
+
+        return {
+            'SHA': commit.sha,
+            'Title': title,
+            'URL': url,
+            'Teams': ' & '.join(teams),
+            'Next tag': next_tag
+        }
+
 
 @click.command(
     context_settings=CONTEXT_SETTINGS,
@@ -259,8 +264,10 @@ def csv_report(ctx, from_ref, to_ref, release_version, output_folder=None):
 
     release = Release.from_github(ctx, release_version, from_ref=from_ref, to_ref=to_ref)
 
-    release.write_report(folder.joinpath('release.csv'))
-    release.write_changes(folder.joinpath('changes.csv'))
+    serializer = ReportSerializer(release)
+
+    serializer.write_report(folder.joinpath('release.csv'))
+    serializer.write_changes(folder.joinpath('changes.csv'))
 
     echo_success(f'Successfully wrote reports to directory `{output_folder}`')
 
