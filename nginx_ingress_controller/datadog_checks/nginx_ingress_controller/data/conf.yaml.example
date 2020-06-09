@@ -48,7 +48,7 @@ instances:
     ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
     #
-  - prometheus_url: <PROMETHEUS_URL>
+  - prometheus_url: http://localhost:10254/metrics
 
     ## @param prometheus_metrics_prefix - string - optional
     ## <PREFIX> for exposed Prometheus metrics.

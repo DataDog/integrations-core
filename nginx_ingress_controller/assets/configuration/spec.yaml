@@ -8,3 +8,5 @@ files:
     - template: instances
       options:
         - template: instances/openmetrics
+          overrides:
+            prometheus_url.value.example: http://localhost:10254/metrics
