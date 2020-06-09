@@ -69,7 +69,7 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_
     generated_changelogs = 0
     for pr_num in pr_numbers:
         try:
-            payload = get_pr(pr_num, user_config, organization)
+            payload = get_pr(pr_num, user_config, org=organization)
         except Exception as e:
             echo_failure(f'Unable to fetch info for PR #{pr_num}: {e}')
             continue
