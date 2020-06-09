@@ -53,7 +53,7 @@ def get_changelog_types(pr_payload):
     return changelog_labels
 
 
-def get_pr(pr_num, config=None, raw=False, org=None):
+def get_pr(pr_num, config=None, raw=False, org='Datadog'):
     """
     Get the payload for the given PR number. Let exceptions bubble up.
     """
