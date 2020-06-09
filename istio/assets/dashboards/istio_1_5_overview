@@ -3,7 +3,7 @@
         "author_name": "Datadog"
     },
     "board_title": "Istio Overview (v1.5+)",
-    "created": "2020-06-09T14:57:07.408502+00:00",
+    "created": "2020-06-09T17:58:26.082012+00:00",
     "created_by": {
         "access_role": "adm",
         "disabled": false,
@@ -16,9 +16,9 @@
         "verified": true
     },
     "description": "### Istio\n\nNote: This dashboard outlines new metrics from Istio `v1.5+.\n\n- [What is Istio](https://istio.io/docs/concepts/what-is-istio/)?\n- [Istiod](https://istio.io/docs/ops/deployment/architecture/)\n- [Envoy](https://istio.io/docs/concepts/what-is-istio/#envoy), a high performance proxy.\n    - XDS = Envoy management APIs that can be implemented by backend servers. \n        - These APIs support:\n            - Cluster discovery service (CDS)\n            - Route discovery service (RDS)\n            - Endpoint discovery service (EDS)\n            - Listener discovery service (LDS)",
-    "id": 1170440,
-    "modified": "2020-06-09T16:55:14.604542+00:00",
-    "new_id": "6pb-hvt-xq7",
+    "id": 1171035,
+    "modified": "2020-06-09T17:59:33.768417+00:00",
+    "new_id": "t59-b5k-r6s",
     "read_only": false,
     "template_variables": [
         {
@@ -67,7 +67,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.mesh.request.count{*} by {host}, 10, 'mean', 'desc')",
+                        "q": "top(avg:istio.mesh.request.count{$cluster} by {host}, 10, 'mean', 'desc')",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -101,7 +101,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(top(avg:istio.mesh.request.duration.milliseconds.sum{*} by {host}, 10, 'mean', 'desc')/top(avg:istio.mesh.request.duration.milliseconds.count{*} by {host}, 10, 'mean', 'desc'),10,'mean','desc')"
+                        "q": "top(top(avg:istio.mesh.request.duration.milliseconds.sum{$cluster} by {host}, 10, 'mean', 'desc')/top(avg:istio.mesh.request.duration.milliseconds.count{$cluster} by {host}, 10, 'mean', 'desc'),10,'mean','desc')"
                     }
                 ],
                 "viz": "toplist"
@@ -124,7 +124,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.mesh.response.size.sum{*}, 10, 'mean', 'desc')/top(avg:istio.mesh.response.size.count{*}, 10, 'mean', 'desc')",
+                        "q": "top(avg:istio.mesh.response.size.sum{$cluster}, 10, 'mean', 'desc')/top(avg:istio.mesh.response.size.count{$cluster}, 10, 'mean', 'desc')",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -150,9 +150,10 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.go.threads{*}, 10, 'mean', 'desc')",
+                        "q": "top(avg:istio.go.threads{$cluster}, 10, 'mean', 'desc')",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -170,7 +171,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -185,9 +185,10 @@
             "id": 6,
             "legend": false,
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.go.memstats.alloc_bytes{*}, 10, 'mean', 'desc')",
+                        "q": "top(avg:istio.go.memstats.alloc_bytes{$cluster}, 10, 'mean', 'desc')",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -205,7 +206,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -221,9 +221,10 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
-                        "q": "(top(avg:istio.go.memstats.heap_inuse_bytes{*}, 10, 'mean', 'desc')/top(avg:istio.go.memstats.heap_alloc_bytes{*}, 10, 'mean', 'desc'))*100",
+                        "q": "(top(avg:istio.go.memstats.heap_inuse_bytes{$cluster}, 10, 'mean', 'desc')/top(avg:istio.go.memstats.heap_alloc_bytes{$cluster}, 10, 'mean', 'desc'))*100",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -241,7 +242,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -260,7 +260,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.go.memstats.gc_cpu_fraction{*}, 10, 'mean', 'desc')",
+                        "q": "top(avg:istio.go.memstats.gc_cpu_fraction{$cluster}, 10, 'mean', 'desc')",
                         "style": {
                             "palette": "cool",
                             "type": "solid",
@@ -296,7 +296,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.go.gc_duration_seconds.sum{*}, 10, 'mean', 'desc')/top(avg:istio.go.gc_duration_seconds.count{*}, 10, 'mean', 'desc')",
+                        "q": "top(avg:istio.go.gc_duration_seconds.sum{$cluster}, 10, 'mean', 'desc')/top(avg:istio.go.gc_duration_seconds.count{$cluster}, 10, 'mean', 'desc')",
                         "style": {
                             "palette": "cool",
                             "type": "solid",
@@ -339,9 +339,10 @@
             "legend": false,
             "legend_size": "0",
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.grpc.server.msg_sent_total{*}.as_count(), 10, 'mean', 'desc'), top(avg:istio.grpc.server.msg_received_total{*}.as_count(), 10, 'mean', 'desc')",
+                        "q": "top(avg:istio.grpc.server.msg_sent_total{$cluster}.as_count(), 10, 'mean', 'desc'), top(avg:istio.grpc.server.msg_received_total{$cluster}.as_count(), 10, 'mean', 'desc')",
                         "style": {
                             "palette": "cool",
                             "type": "solid",
@@ -359,7 +360,6 @@
                     "scale": "linear"
                 }
             },
-            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -373,14 +373,14 @@
             "height": 12,
             "id": 12,
             "tile_def": {
+                "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.go.gc_duration_seconds.sum{*}, 10, 'mean', 'desc')"
+                        "q": "top(avg:istio.go.gc_duration_seconds.sum{$cluster}, 10, 'mean', 'desc')"
                     }
                 ],
                 "viz": "toplist"
             },
-            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -414,7 +414,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "sum:istio.pilot.xds{*}",
+                        "q": "sum:istio.pilot.xds{$cluster}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -443,7 +443,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "sum:istio.pilot.xds.pushes{*}",
+                        "q": "sum:istio.pilot.xds.pushes{$cluster}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -487,7 +487,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "sum:istio.galley.endpoint_no_pod{*}",
+                        "q": "sum:istio.galley.endpoint_no_pod{$cluster}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -516,7 +516,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "sum:istio.process.max_fds{*}",
+                        "q": "sum:istio.process.max_fds{$cluster}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -552,7 +552,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "sum:istio.process.virtual_memory_bytes{*}",
+                        "q": "sum:istio.process.virtual_memory_bytes{$cluster}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -587,7 +587,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "avg:istio.pilot.xds.eds_all_locality_endpoints{*}",
+                        "q": "avg:istio.pilot.xds.eds_all_locality_endpoints{$cluster}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -623,7 +623,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "avg:istio.sidecar_injection.requests_total{*}.as_count()",
+                        "q": "avg:istio.sidecar_injection.requests_total{$cluster}.as_count()",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -659,7 +659,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "avg:istio.galley.validation.failed{*}.as_count()",
+                        "q": "avg:istio.galley.validation.failed{$cluster}.as_count()",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -695,7 +695,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "avg:istio.sidecar_injection.requests_total{*}.as_count(), avg:istio.sidecar_injection.success_total{*}.as_count(), avg:istio.sidecar_injection.requests_total{*}.as_count()-avg:istio.sidecar_injection.success_total{*}.as_count()",
+                        "q": "avg:istio.sidecar_injection.requests_total{$cluster}.as_count(), avg:istio.sidecar_injection.success_total{$cluster}.as_count(), avg:istio.sidecar_injection.requests_total{$cluster}.as_count()-avg:istio.sidecar_injection.success_total{$cluster}.as_count()",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -731,7 +731,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.mesh.request.size.sum{*}, 10, 'mean', 'desc')/top(avg:istio.mesh.request.size.count{*}, 10, 'mean', 'desc')",
+                        "q": "top(avg:istio.mesh.request.size.sum{$cluster}, 10, 'mean', 'desc')/top(avg:istio.mesh.request.size.count{$cluster}, 10, 'mean', 'desc')",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -767,7 +767,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "avg:istio.grpc.server.handling_seconds.sum{*}, avg:istio.grpc.server.handling_seconds.count{*}, avg:istio.grpc.server.handling_seconds.sum{*}/avg:istio.grpc.server.handling_seconds.count{*}",
+                        "q": "avg:istio.grpc.server.handling_seconds.sum{$cluster}, avg:istio.grpc.server.handling_seconds.count{$cluster}, avg:istio.grpc.server.handling_seconds.sum{$cluster}/avg:istio.grpc.server.handling_seconds.count{$cluster}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -818,7 +818,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "avg:istio.pilot.proxy_queue_time.sum{*}, avg:istio.pilot.proxy_queue_time.count{*}, avg:istio.pilot.proxy_queue_time.sum{*}/avg:istio.pilot.proxy_queue_time.count{*}",
+                        "q": "avg:istio.pilot.proxy_queue_time.sum{$cluster}, avg:istio.pilot.proxy_queue_time.count{$cluster}, avg:istio.pilot.proxy_queue_time.sum{$cluster}/avg:istio.pilot.proxy_queue_time.count{$cluster}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -854,7 +854,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.mesh.request.duration.milliseconds.sum{*} by {host}, 10, 'mean', 'desc')/top(avg:istio.mesh.request.duration.milliseconds.count{*} by {host}, 10, 'mean', 'desc')",
+                        "q": "top(avg:istio.mesh.request.duration.milliseconds.sum{$cluster} by {host}, 10, 'mean', 'desc')/top(avg:istio.mesh.request.duration.milliseconds.count{$cluster} by {host}, 10, 'mean', 'desc')",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -890,7 +890,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "avg:istio.pilot.services{*}",
+                        "q": "avg:istio.pilot.services{$cluster}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -926,7 +926,7 @@
                 "custom_links": [],
                 "requests": [
                     {
-                        "q": "avg:istio.pilot.rds_expired_nonce{*}.as_count()",
+                        "q": "avg:istio.pilot.rds_expired_nonce{$cluster}.as_count()",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
