@@ -1,5 +1,9 @@
 # CHANGELOG - istio
 
+## 3.3.0 / 2020-06-09
+
+* [Added] Enable `send_monotonic_with_gauge` to submit mesh metrics as monotonic counts. See [#5707](https://github.com/DataDog/integrations-core/pull/5707).
+
 ## 3.2.1 / 2020-05-22
 
 * [Fixed] Remove `destination_service` and `source_workload` from label blacklist. See [#6712](https://github.com/DataDog/integrations-core/pull/6712).
