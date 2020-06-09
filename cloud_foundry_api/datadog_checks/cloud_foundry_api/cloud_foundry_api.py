@@ -42,11 +42,11 @@ class CloudFoundryApiCheck(AgentCheck):
         self._token_expiration = 0
 
     def get_oauth_token(self):
-        # type: () -> str
+        # type: () -> None
         if self._oauth_token is not None and self._token_expiration - TOCKEN_EXPIRATION_BUFFER > int(time.time()):
             return
         self.log.info("Refreshing access token")
-        sc_tags = ["uaa_url:{}".format(self._uaa_url)]
+        sc_tags = ["uaa_url:{}".format(self._uaa_url)] + self._tags
         try:
             res = self.http.get(
                 "{}/oauth/token".format(self._uaa_url),
@@ -103,7 +103,7 @@ class CloudFoundryApiCheck(AgentCheck):
         page = 1
         events = {}
         scroll = True
-        sc_tags = ["api_url:{}".format(self._api_url)]
+        sc_tags = ["uaa_url:{}".format(self._uaa_url)] + self._tags
         while scroll:
             params["page"] = page
             try:
@@ -160,6 +160,7 @@ class CloudFoundryApiCheck(AgentCheck):
     def check(self, _):
         # type: (Dict[str, Any]) -> None
         events = self.get_events()
-        self.count("events.count", len(events))
+        tags = ["api_url:{}".format(self._uaa_url)] + self._tags
+        self.count("events.count", len(events), tags=tags)
         for event in events.values():
             self.event(event)

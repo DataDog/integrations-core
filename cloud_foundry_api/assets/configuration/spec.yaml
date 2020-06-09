@@ -2,12 +2,8 @@ name: Cloud Foundry API
 files:
 - name: cloud_foundry_api.yaml
   options:
-  - template: init_config
-    options:
-    - template: init_config/default
   - template: instances
     options:
-    - template: instances/default
     - name: api_url
       description: URL of the Cloud Controller API.
       required: true
@@ -18,11 +14,6 @@ files:
       required: true
       value:
         type: string
-    - name: tls_verify
-      value:
-        example: true
-        type: boolean
-      description: Instructs the check to validate the TLS certificate of services.
     - name: client_id
       description: |
         `client_id` used to authenticate with UAA and obtain an oauth token
@@ -73,4 +64,10 @@ files:
         type: integer
         maximum: 5000
         default: 100
+    - template: instances/default
+    - template: instances/http
+  - template: init_config
+    options:
+    - template: init_config/default
+    - template: init_config/http
 
