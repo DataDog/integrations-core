@@ -16,7 +16,8 @@
   ],
   "public_title": "Datadog-Cloud Foundry API Integration",
   "categories": [
-    ""
+    "cloud",
+    "orchestration"
   ],
   "type": "check",
   "is_public": false,
