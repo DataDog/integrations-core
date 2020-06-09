@@ -50,6 +50,7 @@ QUEUE_ATTRIBUTES = [
     ('active_consumers', 'active_consumers', float),
     ('consumers', 'consumers', float),
     ('consumer_utilisation', 'consumer_utilisation', float),
+    ('head_message_timestamp', 'head_message_timestamp', int),
     ('memory', 'memory', float),
     ('messages', 'messages', float),
     ('messages_details/rate', 'messages.rate', float),

@@ -2,4 +2,4 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-__version__ = "3.2.1"
+__version__ = "3.3.0"

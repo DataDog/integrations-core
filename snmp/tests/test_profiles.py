@@ -1649,6 +1649,81 @@ def test_apc_ups(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+def test_fortinet_fortigate(aggregator):
+    run_profile_check('fortinet-fortigate')
+
+    common_tags = common.CHECK_TAGS + ['snmp_profile:fortinet-fortigate']
+
+    common_gauge_metrics = [
+        'fgSysCpuUsage',
+        'fgSysMemUsage',
+        'fgSysMemCapacity',
+        'fgSysLowMemUsage',
+        'fgSysLowMemCapacity',
+        'fgSysDiskUsage',
+        'fgSysDiskCapacity',
+        'fgSysSesCount',
+        'fgSysSesRate1',
+        'fgSysSes6Count',
+        'fgSysSes6Rate1',
+        'fgApHTTPConnections',
+        'fgApHTTPMaxConnections',
+        'fgVdNumber',
+        'fgVdMaxVdoms',
+    ]
+
+    processor_gauge_metrics = [
+        'fgProcessorUsage',
+        'fgProcessorSysUsage',
+    ]
+    processor_count_metrics = [
+        'fgProcessorPktRxCount',
+        'fgProcessorPktTxCount',
+        'fgProcessorPktDroppedCount',
+    ]
+    processor_tags = common_tags + ['processor_index:12']
+
+    vd_metrics = [
+        'fgVdEntOpMode',
+        'fgVdEntHaState',
+        'fgVdEntCpuUsage',
+        'fgVdEntMemUsage',
+        'fgVdEntSesCount',
+        'fgVdEntSesRate',
+    ]
+    vd_tags = common_tags + ['virtualdomain_index:4', 'virtualdomain_name:their oxen quaintly']
+
+    for metric in common_gauge_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+
+    for metric in processor_gauge_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=processor_tags, count=1)
+    for metric in processor_count_metrics:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=processor_tags, count=1
+        )
+
+    for metric in vd_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=vd_tags, count=1)
+
+    # Interface
+    aggregator.assert_metric('snmp.fgIntfEntVdom', metric_type=aggregator.GAUGE, count=1)
+
+    # Firewall
+    firewall_tags = common_tags + ['policy_index:22']
+    for metric in ['fgFwPolPktCount', 'fgFwPolByteCount']:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=firewall_tags, count=1
+        )
+
+    # Firewall 6
+    firewall6_tags = common_tags + ['policy6_index:29']
+    for metric in ['fgFwPol6PktCount', 'fgFwPol6ByteCount']:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=firewall6_tags, count=1
+        )
+
+
 @pytest.mark.usefixtures("dd_environment")
 def test_netapp(aggregator):
     run_profile_check('netapp')
