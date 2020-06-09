@@ -48,7 +48,8 @@ REPOSITORY_DIR = 'repo'
 REPOSITORY_URL_PREFIX = 'https://dd-integrations-core-wheels-build-stable.datadoghq.com'
 # Where to find our in-toto root layout.
 IN_TOTO_METADATA_DIR = 'in-toto-metadata'
-IN_TOTO_ROOT_LAYOUT = '2.root.layout'
+ROOT_LAYOUTS = {'core': '2.root.layout', 'extras': '1.extras.root.layout'}
+DEFAULT_ROOT_LAYOUT_TYPE = 'core'
 
 
 # Global variables.
@@ -56,7 +57,9 @@ logger = logging.getLogger(__name__)
 
 
 class TUFDownloader:
-    def __init__(self, repository_url_prefix=REPOSITORY_URL_PREFIX, verbose=0):
+    def __init__(
+        self, repository_url_prefix=REPOSITORY_URL_PREFIX, root_layout_type=DEFAULT_ROOT_LAYOUT_TYPE, verbose=0
+    ):
         # 0 => 60 (effectively /dev/null)
         # 1 => 50 (CRITICAL)
         # 2 => 40 (ERROR)
@@ -70,6 +73,9 @@ class TUFDownloader:
         logging.basicConfig(format='%(levelname)-8s: %(message)s', level=level)
 
         tuf_settings.repositories_directory = REPOSITORIES_DIR
+
+        self.root_layout_type = root_layout_type
+        self.root_layout = ROOT_LAYOUTS[self.root_layout_type]
 
         # NOTE: The directory where the targets for *this* repository is
         # cached. We hard-code this keep this to a subdirectory dedicated to
@@ -124,7 +130,7 @@ class TUFDownloader:
         # expected version of the root layout. This is so that, for example, we
         # can introduce new parameters w/o breaking old downloaders that don't
         # know how to substitute them.
-        target_relpath = os.path.join(IN_TOTO_METADATA_DIR, IN_TOTO_ROOT_LAYOUT)
+        target_relpath = os.path.join(IN_TOTO_METADATA_DIR, self.root_layout)
         return self.__download_with_tuf(target_relpath)
 
     def __download_custom(self, target, extension):
@@ -133,6 +139,10 @@ class TUFDownloader:
 
         fileinfo = target.get('fileinfo', {})
         custom = fileinfo.get('custom', {})
+
+        if custom.get('root-layout-type', DEFAULT_ROOT_LAYOUT_TYPE) != self.root_layout_type:
+            return target_abspaths
+
         in_toto_metadata = custom.get('in-toto', [])
 
         for target_relpath in in_toto_metadata:
@@ -177,7 +187,7 @@ class TUFDownloader:
             return link_abspaths
 
     def __load_root_layout(self, target_relpath):
-        root_layout = Metablock.load(IN_TOTO_ROOT_LAYOUT)
+        root_layout = Metablock.load(self.root_layout)
         root_layout_pubkeys = glob.glob('*.pub')
         root_layout_pubkeys = import_public_keys_from_files_as_dict(root_layout_pubkeys)
         # Parameter substitution.
@@ -188,9 +198,9 @@ class TUFDownloader:
         logger.exception('in-toto failed to verify %s', target_relpath)
 
         if isinstance(e, LinkNotFoundError) and str(e) == RevokedDeveloper.MSG:
-            raise RevokedDeveloper(target_relpath, IN_TOTO_ROOT_LAYOUT)
+            raise RevokedDeveloper(target_relpath, self.root_layout)
         else:
-            raise
+            raise e
 
     def __in_toto_verify(self, inspection_packet, target_relpath):
         # Make a temporary directory in a parent directory we control.
