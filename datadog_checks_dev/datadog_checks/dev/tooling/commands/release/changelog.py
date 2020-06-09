@@ -25,7 +25,7 @@ ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, autho
 @click.argument('version')
 @click.argument('old_version', required=False)
 @click.option('--initial', is_flag=True)
-@click.option('--organization', '-r', default=None)
+@click.option('--organization', '-r', default='Datadog')
 @click.option('--quiet', '-q', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.option('--output-file', '-o', default='CHANGELOG.md', show_default=True)
