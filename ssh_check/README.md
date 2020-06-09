@@ -40,7 +40,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][8]
 
 | Parameter            | Value                                                        |
 | -------------------- | ------------------------------------------------------------ |
-| `<INTEGRATION_NAME>` | `ssh`                                                        |
+| `<INTEGRATION_NAME>` | `ssh_check`                                                  |
 | `<INIT_CONFIG>`      | blank or `{}`                                                |
 | `<INSTANCE_CONFIG>`  | `{"host": "%%host%%", "port":"22", "username":"<USERNAME>"}` |
 
