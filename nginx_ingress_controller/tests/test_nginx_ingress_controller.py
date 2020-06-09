@@ -51,6 +51,8 @@ def test_nginx_ingress_controller(aggregator, mock_data):
     aggregator.assert_metric(NAMESPACE + '.controller.upstream.latency.count')
     aggregator.assert_metric(NAMESPACE + '.controller.upstream.latency.sum')
     aggregator.assert_metric(NAMESPACE + '.controller.upstream.latency.quantile')
+    aggregator.assert_metric(NAMESPACE + '.controller.response.duration.count')
+    aggregator.assert_metric(NAMESPACE + '.controller.response.duration.sum')
     aggregator.assert_metric(NAMESPACE + '.controller.requests')
     aggregator.assert_metric(NAMESPACE + '.controller.cpu.time')
     aggregator.assert_metric(NAMESPACE + '.controller.mem.resident')
