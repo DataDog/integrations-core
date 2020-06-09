@@ -9,8 +9,10 @@ files:
       options:
         - name: collect_nginx_histograms
           description: |
-            Enable to collect histogram metrics that are known to have high tag cardinality which can cause context explosion.
-            Recommended to use with distribution metrics, enable `send_distribution_buckets`.
+            Enable to collect histogram metrics that are known to have high tag cardinality.
+            Recommended to use with distribution metrics tag whitelist, please enable `send_distribution_buckets`.
+            For more information about distribution metrics and tags,
+            see https://docs.datadoghq.com/metrics/distributions/#customize-tagging.
           value:
             example: false
             type: boolean
