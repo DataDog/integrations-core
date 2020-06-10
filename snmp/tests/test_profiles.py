@@ -1814,6 +1814,7 @@ def test_netapp(aggregator):
         'ifHighInOctets.rate',
     ]
     interfaces = [
+        # Interface descriptions will be normalized in the backend, but we receive the raw DisplayString values here.
         ('6', 'netgear ifX300 v1'),
         ('7', 'junyper proto12 12.3'),
         ('23', 'malabar yz42 10.2020'),
