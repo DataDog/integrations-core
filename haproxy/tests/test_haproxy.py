@@ -7,6 +7,7 @@ import os
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.haproxy import HAProxy
 
 from .common import (
@@ -129,6 +130,7 @@ def test_check(aggregator, check, instance):
     _test_service_checks(aggregator, count=0)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 @requires_socket_support
