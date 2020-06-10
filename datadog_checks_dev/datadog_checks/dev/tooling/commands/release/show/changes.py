@@ -23,6 +23,11 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run):
 
     # get the name of the current release tag
     cur_version = get_version_string(check, pattern=tag_pattern, tag_prefix=tag_prefix)
+    if not cur_version:
+        abort(
+            'Failed to retrieve the latest version. Please ensure your project or check has a proper set of tags '
+            'following SemVer and matches the provided tag_prefix and/or tag_pattern.'
+        )
     target_tag = get_release_tag_string(check, cur_version)
 
     # get the diff from HEAD
