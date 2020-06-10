@@ -114,7 +114,7 @@ The setting `[IDProcess, Win32_Process, Handle, CommandLine]` tags each process 
 
 ### Metrics
 
-All metrics collected by the PHD check are forwarded to Datadog as [custom metrics][6], which may impact your [billing][7].
+All metrics collected by the WMI check are forwarded to Datadog as [custom metrics][6], which may impact your [billing][7].
 
 ### Events
 
