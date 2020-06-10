@@ -1,7 +1,7 @@
 [
   {
     "agent_version": "7.21.0",
-    "integration": "Cloud Foundry",
+    "integration": "Cloud Foundry API",
     "check": "cloud_foundry_api.api.can_connect",
     "statuses": [
       "ok",
@@ -15,7 +15,7 @@
   },
   {
     "agent_version": "7.21.0",
-    "integration": "Cloud Foundry",
+    "integration": "Cloud Foundry API",
     "check": "cloud_foundry_api.uaa.can_authenticate",
     "statuses": [
       "ok",
