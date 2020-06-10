@@ -25,8 +25,8 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run):
     cur_version = get_version_string(check, pattern=tag_pattern, tag_prefix=tag_prefix)
     if not cur_version:
         abort(
-            'Failed to retrieve the latest version. Please ensure this has a proper set of tags following SemVer or '
-            'the provided tag_prefix/tag_pattern.'
+            'Failed to retrieve the latest version. Please ensure your repository has a proper set of tags following SemVer '
+            'and matches the provided tag_prefix and/or tag_pattern.'
         )
     target_tag = get_release_tag_string(check, cur_version)
 
