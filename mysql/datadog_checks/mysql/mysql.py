@@ -1456,7 +1456,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
             'no_index_used': ('mysql.queries.no_index_used', self.count),
             'no_good_index_used': ('mysql.queries.no_good_index_used', self.count),
             'lock_time': ('mysql.queries.lock_time', self.count),
-            'rows_affected': ('mysql.queries.rows', self.count),
+            'rows_affected': ('mysql.queries.rows_affected', self.count),
             'rows_sent': ('mysql.queries.rows_sent', self.count),
             'rows_examined': ('mysql.queries.rows_examined', self.count),
         }
