@@ -106,7 +106,7 @@ class CloudFoundryApiCheck(AgentCheck):
             for cf_event in payload.get("resources", []):
                 try:
                     dd_event, event_guid, event_ts = parse_event(cf_event, self._api_version)
-                except (ValueError, KeyError) as e:
+                except (ValueError, KeyError):
                     self.log.exception("Could not parse event %s", cf_event)
                     continue
                 # Stop going through events if we've reached one we've already fetched or if we went back in time enough
