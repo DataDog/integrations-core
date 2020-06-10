@@ -12,7 +12,7 @@ from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_su
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Show all the pending PRs for a given check.')
 @click.argument('check', autocompletion=complete_valid_checks, callback=validate_check_arg)
-@click.option('--organization', '-r', default='Datadog')
+@click.option('--organization', '-r', default='DataDog')
 @click.option('--tag-pattern', default=None)
 @click.option('--tag-prefix', default=None)
 @click.option('--dry-run', '-n', is_flag=True)
