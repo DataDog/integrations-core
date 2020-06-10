@@ -13,6 +13,9 @@ from .constants import CHANGELOG_LABEL_PREFIX, get_root
 API_URL = 'https://api.github.com'
 PR_ENDPOINT = API_URL + '/repos/{}/{}/pulls/{}'
 PR_PATTERN = re.compile(r'\(#(\d+)\)')  # match something like `(#1234)` and return `1234` in a group
+PR_MERGE_PATTERN = re.compile(
+    r'Merge pull request #(\d+)'
+)  # match something like 'Merge pull request #1234` and return `1234` in a group
 
 
 def get_auth_info(config=None):
@@ -92,9 +95,10 @@ def from_contributor(pr_payload):
 
 
 def parse_pr_number(log_line: str) -> Optional[str]:
-    """If there are multiple matches, the PR id is always the latest one"""
-    matches = re.findall(PR_PATTERN, log_line)
+    # If the PR is not squashed, then it will match PR_MERGE_PATTERN
+    matches = re.findall(PR_PATTERN, log_line) + re.findall(PR_MERGE_PATTERN, log_line)
     if matches:
+        # If there are multiple matches, the PR id is always the latest one
         return matches[-1]
     return None
 
