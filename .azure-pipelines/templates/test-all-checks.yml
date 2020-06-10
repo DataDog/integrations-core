@@ -71,6 +71,9 @@ jobs:
     - checkName: clickhouse
       displayName: ClickHouse
       os: linux
+    - checkName: cloud_foundry_api
+      displayName: Cloud Foundry API
+      os: linux
     - checkName: cockroachdb
       displayName: CockroachDB
       os: linux
