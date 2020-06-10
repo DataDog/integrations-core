@@ -64,6 +64,6 @@ files:
         type: array
         items:
           type: string
-        enable: true
+        enabled: true
         example:
           - "apiserver:%%host%%"
