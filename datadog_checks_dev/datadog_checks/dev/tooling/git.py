@@ -154,7 +154,7 @@ def get_latest_tag(pattern=None, tag_prefix='v'):
     if not all_tags:
         return
     else:
-        # reverse so we have descendant order
+        # reverse so we have descending order
         return list(reversed(all_tags))[0][1]
 
 
