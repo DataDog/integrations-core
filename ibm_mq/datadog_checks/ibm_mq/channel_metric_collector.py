@@ -5,6 +5,7 @@
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
+from datadog_checks.ibm_mq.utils import CMQCFC_LOOKUP
 
 from . import metrics
 
@@ -57,6 +58,10 @@ class ChannelMetricCollector(object):
             self.gauge(mname, channels, tags=self.config.tags_no_channel)
 
             for channel_info in response:
+                channel_dict = {}
+                for k, v in channel_info.items():
+                    channel_dict[CMQCFC_LOOKUP.get(k)] = v
+
                 channel_name = ensure_unicode(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
                 channel_tags = self.config.tags_no_channel + ["channel:{}".format(channel_name)]
 
