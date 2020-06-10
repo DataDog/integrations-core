@@ -147,6 +147,8 @@ init_config:
   #     definition_file: apc-ups.yaml
   #   fortinet-fortigate:
   #     definition_file: fortinet-fortigate.yaml
+  #   netapp:
+  #     definition_file: netapp.yaml
 
 instances:
   -
