@@ -30,7 +30,7 @@ from .exceptions import (
     NoSuchDatadogPackage,
     NoSuchDatadogPackageVersion,
     PythonVersionMismatch,
-    RevokedDeveloper,
+    RevokedDeveloperOrMachine,
 )
 from .parameters import substitute
 
@@ -75,8 +75,8 @@ class TUFDownloader:
 
         tuf_settings.repositories_directory = REPOSITORIES_DIR
 
-        self.root_layout_type = root_layout_type
-        self.root_layout = ROOT_LAYOUTS[self.root_layout_type]
+        self.__root_layout_type = root_layout_type
+        self.__root_layout = ROOT_LAYOUTS[self.__root_layout_type]
 
         # NOTE: The directory where the targets for *this* repository is
         # cached. We hard-code this keep this to a subdirectory dedicated to
@@ -131,7 +131,7 @@ class TUFDownloader:
         # expected version of the root layout. This is so that, for example, we
         # can introduce new parameters w/o breaking old downloaders that don't
         # know how to substitute them.
-        target_relpath = os.path.join(IN_TOTO_METADATA_DIR, self.root_layout)
+        target_relpath = os.path.join(IN_TOTO_METADATA_DIR, self.__root_layout)
         return self.__download_with_tuf(target_relpath)
 
     def __download_custom(self, target, extension):
@@ -142,8 +142,8 @@ class TUFDownloader:
         custom = fileinfo.get('custom', {})
 
         root_layout_type = custom.get('root-layout-type', DEFAULT_ROOT_LAYOUT_TYPE)
-        if root_layout_type != self.root_layout_type:
-            raise IncorrectRootLayoutType(root_layout_type, self.root_layout_type)
+        if root_layout_type != self.__root_layout_type:
+            raise IncorrectRootLayoutType(root_layout_type, self.__root_layout_type)
 
         in_toto_metadata = custom.get('in-toto', [])
 
@@ -189,7 +189,7 @@ class TUFDownloader:
             return link_abspaths
 
     def __load_root_layout(self, target_relpath):
-        root_layout = Metablock.load(self.root_layout)
+        root_layout = Metablock.load(self.__root_layout)
         root_layout_pubkeys = glob.glob('*.pub')
         root_layout_pubkeys = import_public_keys_from_files_as_dict(root_layout_pubkeys)
         # Parameter substitution.
@@ -199,8 +199,8 @@ class TUFDownloader:
     def __handle_in_toto_verification_exception(self, target_relpath, e):
         logger.exception('in-toto failed to verify %s', target_relpath)
 
-        if isinstance(e, LinkNotFoundError) and str(e) == RevokedDeveloper.MSG:
-            raise RevokedDeveloper(target_relpath, self.root_layout)
+        if isinstance(e, LinkNotFoundError) and str(e) == RevokedDeveloperOrMachine.MSG:
+            raise RevokedDeveloperOrMachine(target_relpath, self.__root_layout)
         else:
             raise e
 
