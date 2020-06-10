@@ -1,5 +1,21 @@
 # CHANGELOG - snmp
 
+## 3.3.0 / 2020-06-10
+
+* [Added] Add Fortinet FortiGate profile. See [#6504](https://github.com/DataDog/integrations-core/pull/6504). Thanks [lindseyferretti](https://github.com/lindseyferretti).
+* [Added] Reuse MIB builder objects per SNMP engine. See [#6716](https://github.com/DataDog/integrations-core/pull/6716).
+* [Added] Add HP health profile mixin. See [#6757](https://github.com/DataDog/integrations-core/pull/6757).
+* [Added] Add routing metrics to additional profiles. See [#6764](https://github.com/DataDog/integrations-core/pull/6764).
+* [Added] Add router metrics to cisco voice base profile. See [#6737](https://github.com/DataDog/integrations-core/pull/6737).
+* [Fixed] Fix gauge metrics wrongly submitted as rates in CISCO voice profile. See [#6794](https://github.com/DataDog/integrations-core/pull/6794).
+* [Fixed] Push received metrics on partial failure. See [#6814](https://github.com/DataDog/integrations-core/pull/6814).
+* [Fixed] Flatten Cisco profiles hierarchy. See [#6792](https://github.com/DataDog/integrations-core/pull/6792).
+* [Fixed] Add missing tags to profiles tables. See [#6765](https://github.com/DataDog/integrations-core/pull/6765).
+* [Fixed] Fix name KeyError. See [#6788](https://github.com/DataDog/integrations-core/pull/6788).
+* [Fixed] Properly handle potential embedded null characters. See [#6640](https://github.com/DataDog/integrations-core/pull/6640).
+* [Fixed] Remove iDRAC/poweredge profile inheritance. See [#6754](https://github.com/DataDog/integrations-core/pull/6754).
+* [Fixed] Make profiles compatible with previous parsing. See [#6750](https://github.com/DataDog/integrations-core/pull/6750).
+
 ## 3.2.2 / 2020-05-21
 
 * [Fixed] Fix error handling in getnext. See [#6701](https://github.com/DataDog/integrations-core/pull/6701).
