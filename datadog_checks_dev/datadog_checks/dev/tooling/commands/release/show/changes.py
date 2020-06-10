@@ -40,11 +40,10 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization):
 
         for pr_num in pr_numbers:
             try:
-                payload = get_pr(pr_num, user_config, organization)
+                payload = get_pr(pr_num, user_config, org=organization)
             except Exception as e:
                 echo_failure(f'Unable to fetch info for PR #{pr_num}: {e}')
                 continue
-
             current_changelog_types = get_changelog_types(payload)
             if not current_changelog_types:
                 abort(f'No valid changelog labels found attached to PR #{pr_num}, please add one!')
@@ -59,7 +58,7 @@ def changes(ctx, check, tag_pattern, tag_prefix, dry_run, organization):
     else:
         for pr_num in pr_numbers:
             try:
-                payload = get_pr(pr_num, user_config, organization)
+                payload = get_pr(pr_num, user_config, org=organization)
             except Exception as e:
                 echo_failure(f'Unable to fetch info for PR #{pr_num}: {e}')
                 continue
