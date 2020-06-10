@@ -1122,6 +1122,7 @@ class VSphereCheck(AgentCheck):
                         if entity_type:
                             entity_tags.append('entity_type:%s' %entity_type)
 
+                        entity_tags.append('endpoint_uuid:%s' %i_key)
                         if entity_tags:
                             tags.extend(entity_tags)
 
