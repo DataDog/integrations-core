@@ -10,52 +10,53 @@ from datadog_checks.base.types import Event
 from .constants import SOURCE_TYPE_NAME
 
 
-def parse_event_v3(cf_event):
-    # type: (Dict[str, Any]) -> (Event, str, int)
-    # Parse a v3 event
-    # See http://v3-apidocs.cloudfoundry.org/version/3.84.0/index.html#list-audit-events for payload details.
-    event_ts = int(parser.isoparse(cf_event["created_at"]).timestamp())
-    event_guid = cf_event["guid"]
-    target = cf_event["target"]
-    actor = cf_event["actor"]
+def parse_event(cf_event, api_version):
+    # type: (Dict[str, Any], str) -> (Event, str, int)
+    dd_event = {}
+    event_guid = ""
+    event_ts = 0
 
-    dd_event = build_dd_event(
-        cf_event["type"],
-        event_guid,
-        event_ts,
-        actor["type"],
-        actor["name"],
-        actor["guid"],
-        target["type"],
-        target["name"],
-        target["guid"],
-        cf_event["space"]["guid"],
-        cf_event["organization"]["guid"],
-    )
-    return dd_event, event_guid, event_ts
+    if api_version == "v2":
+        # Parse a v2 event
+        # See https://apidocs.cloudfoundry.org/13.2.0/events/list_all_events.html for payload details.
+        event_entity = cf_event["entity"]
+        event_ts = int(parser.isoparse(event_entity["timestamp"]).timestamp())
+        event_guid = cf_event["metadata"]["guid"]
 
+        dd_event = build_dd_event(
+            event_entity["type"],
+            event_guid,
+            event_ts,
+            event_entity["actor_type"],
+            event_entity["actor_name"],
+            event_entity["actor"],
+            event_entity["actee_type"],
+            event_entity["actee_name"],
+            event_entity["actee"],
+            event_entity.get("space_guid"),  # Some events might not have a space associated
+            event_entity.get("organization_guid"),  # Some events might not have an org associated
+        )
+    elif api_version == "v3":
+        # Parse a v3 event
+        # See http://v3-apidocs.cloudfoundry.org/version/3.84.0/index.html#list-audit-events for payload details.
+        event_ts = int(parser.isoparse(cf_event["created_at"]).timestamp())
+        event_guid = cf_event["guid"]
+        target = cf_event["target"]
+        actor = cf_event["actor"]
 
-def parse_event_v2(cf_event):
-    # type: (Dict[str, Any]) -> (Event, str, int)
-    # Parse a v2 event
-    # See https://apidocs.cloudfoundry.org/13.2.0/events/list_all_events.html for payload details.
-    event_entity = cf_event["entity"]
-    event_ts = int(parser.isoparse(event_entity["timestamp"]).timestamp())
-    event_guid = cf_event["metadata"]["guid"]
-
-    dd_event = build_dd_event(
-        event_entity["type"],
-        event_guid,
-        event_ts,
-        event_entity["actor_type"],
-        event_entity["actor_name"],
-        event_entity["actor"],
-        event_entity["actee_type"],
-        event_entity["actee_name"],
-        event_entity["actee"],
-        event_entity["space_guid"],
-        event_entity["organization_guid"],
-    )
+        dd_event = build_dd_event(
+            cf_event["type"],
+            event_guid,
+            event_ts,
+            actor["type"],
+            actor["name"],
+            actor["guid"],
+            target["type"],
+            target["name"],
+            target["guid"],
+            cf_event.get("space", {}).get("guid"),  # Some events might not have a space associated
+            cf_event.get("organization", {}).get("guid"),  # Some events might not have an org associated
+        )
     return dd_event, event_guid, event_ts
 
 
@@ -93,3 +94,13 @@ def build_dd_event(
         "aggregation_key": event_guid,  # In case we send duplicates for any reason, they'll be aggregated in the app
     }
     return dd_event
+
+
+def get_next_url(payload, version):
+    # type: (Dict[str, Any], str) -> str
+    next_url = ""
+    if version == "v2":
+        next_url = payload.get("next_url", "")
+    elif version == "v3":
+        next_url = payload.get("pagination", {}).get("next", "")
+    return next_url
