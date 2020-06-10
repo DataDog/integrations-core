@@ -173,8 +173,11 @@ def test_cisco_voice(aggregator):
     aggregator.assert_metric('snmp.{}'.format("cccaPimStatus"), metric_type=aggregator.GAUGE, tags=pim_tags)
     aggregator.assert_metric('snmp.{}'.format("sysUpTimeInstance"), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    for router in CCCA_ROUTER_GAUGES:
-        aggregator.assert_metric('snmp.{}'.format(router), metric_type=aggregator.GAUGE, tags=tags)
+    instance_numbers = ['4446', '5179', '12093', '19363', '25033', '37738', '42562', '51845', '62906', '63361']
+    for metric in CCCA_ROUTER_GAUGES:
+        for instance_number in instance_numbers:
+            instance_tags = tags + ['instance_number:{}'.format(instance_number)]
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=instance_tags)
 
     aggregator.assert_all_metrics_covered()
 
