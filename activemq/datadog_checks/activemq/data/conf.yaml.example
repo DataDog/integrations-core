@@ -128,7 +128,7 @@ instances:
 
     ## @param rmi_client_timeout - number - optional - default: 15000
     ## The timeout to consider a remote connection, already successfully established, as lost.
-    ## If a connected remote JVM does not reply after `rmi_client_timeout` seconds jmxfetch
+    ## If a connected remote JVM does not reply after `rmi_client_timeout` milliseconds jmxfetch
     ## will give up on that connection and retry.
     #
     # rmi_client_timeout: 15000
