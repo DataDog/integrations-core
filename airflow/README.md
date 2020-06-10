@@ -161,62 +161,61 @@ _Available for Agent versions >6.0_
    ```
 
 2. Uncomment and edit this configuration block at the bottom of your `airflow.d/conf.yaml`:
+  Change the `path` and `service` parameter values and configure them for your environment.
 
-   Change the `path` and `service` parameter values and configure them for your environment.
+   - Configuration for DAG processor manager and Scheduler logs:
 
-   a. Configuration for DAG processor manager and Scheduler logs:
+      ```yaml
+      logs:
+        - type: file
+          path: "<PATH_TO_AIRFLOW>/logs/dag_processor_manager/dag_processor_manager.log"
+          source: airflow
+          service: "<SERVICE_NAME>"
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \[\d{4}\-\d{2}\-\d{2}
+        - type: file
+          path: "<PATH_TO_AIRFLOW>/logs/scheduler/*/*.log"
+          source: airflow
+          service: "<SERVICE_NAME>"
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \[\d{4}\-\d{2}\-\d{2}
+      ```
 
-     ```yaml
-     logs:
-       - type: file
-         path: '<PATH_TO_AIRFLOW>/logs/dag_processor_manager/dag_processor_manager.log'
-         source: airflow
-         service: '<SERVICE_NAME>'
-         log_processing_rules:
-           - type: multi_line
-             name: new_log_start_with_date
-             pattern: \[\d{4}\-\d{2}\-\d{2}
-       - type: file
-         path: '<PATH_TO_AIRFLOW>/logs/scheduler/*/*.log'
-         source: airflow
-         service: '<SERVICE_NAME>'
-         log_processing_rules:
-           - type: multi_line
-             name: new_log_start_with_date
-             pattern: \[\d{4}\-\d{2}\-\d{2}
-     ```
+        Regular clean up is recommended for scheduler logs with daily log rotation.
 
-     Regular clean up is recommended for scheduler logs with daily log rotation.
+   - Additional configuration for DAG tasks logs:
 
-   b. Additional configuration for DAG tasks logs:
+      ```yaml
+      logs:
+        - type: file
+          path: "<PATH_TO_AIRFLOW>/logs/*/*/*/*.log"
+          source: airflow
+          service: "<SERVICE_NAME>"
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \[\d{4}\-\d{2}\-\d{2}
+      ```
 
-     ```yaml
-     logs:
-       - type: file
-         path: '<PATH_TO_AIRFLOW>/logs/*/*/*/*.log'
-         source: airflow
-         service: '<SERVICE_NAME>'
-         log_processing_rules:
-           - type: multi_line
-             name: new_log_start_with_date
-             pattern: \[\d{4}\-\d{2}\-\d{2}
-     ```
+      Caveat: By default Airflow uses this log file template for tasks: `log_filename_template = {{ ti.dag_id }}/{{ ti.task_id }}/{{ ts }}/{{try_number }}.log`. The number of log files will grow quickly if not cleaned regularly. This pattern is used by Airflow UI to display logs individually for each executed task.
 
-     Caveat: By default Airflow uses this log file template for tasks: `log_filename_template = {{ ti.dag_id }}/{{ ti.task_id }}/{{ ts }}/{{   try_number }}.log`. The number of log files will grow quickly if not cleaned regularly. This pattern is used by Airflow UI to display logs individually for each executed task.
+      If you do not view logs in Airflow UI, Datadog recommends this configuration in `airflow.cfg`: `log_filename_template = dag_tasks.log`. Then log rotate this file and use this configuration:
 
-     If you do not view logs in Airflow UI, Datadog recommends this configuration in `airflow.cfg`: `log_filename_template = dag_tasks.log`. Then log rotate this file and use this configuration:
-
-     ```yaml
-     logs:
-       - type: file
-         path: '<PATH_TO_AIRFLOW>/logs/dag_tasks.log'
-         source: airflow
-         service: '<SERVICE_NAME>'
-         log_processing_rules:
-           - type: multi_line
-             name: new_log_start_with_date
-             pattern: \[\d{4}\-\d{2}\-\d{2}
-     ```
+      ```yaml
+      logs:
+        - type: file
+          path: "<PATH_TO_AIRFLOW>/logs/dag_tasks.log"
+          source: airflow
+          service: "<SERVICE_NAME>"
+          log_processing_rules:
+            - type: multi_line
+              name: new_log_start_with_date
+              pattern: \[\d{4}\-\d{2}\-\d{2}
+      ```
 
 3. [Restart the Agent][7].
 
