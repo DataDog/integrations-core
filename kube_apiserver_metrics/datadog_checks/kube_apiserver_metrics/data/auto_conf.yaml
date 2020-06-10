@@ -40,5 +40,5 @@ instances:
     ##
     ## Learn more about tagging: https://docs.datadoghq.com/tagging/
     #
-    # tags:
+    tags:
        - apiserver:%%host%%
