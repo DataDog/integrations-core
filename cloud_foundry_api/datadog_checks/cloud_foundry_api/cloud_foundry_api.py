@@ -104,7 +104,8 @@ class CloudFoundryApiCheck(AgentCheck):
         ] + self._tags
         try:
             res = self.http.get(
-                urljoin(self._uaa_url, "oauth/token"),
+                # Make sure to have at least one trailing slash to avoid surprises with urljoin
+                urljoin(self._uaa_url + "/", "oauth/token"),
                 auth=(self._client_id, self._client_secret),
                 params={"grant_type": "client_credentials"},
             )
@@ -203,7 +204,8 @@ class CloudFoundryApiCheck(AgentCheck):
                 "order_by": "-created_at",
             }
             headers = {"Authorization": "Bearer {}".format(self._oauth_token)}
-            url = urljoin(self._api_url, "v3/audit_events")
+            # Make sure to have at least one trailing slash to avoid surprises with urljoin
+            url = urljoin(self._api_url + "/", "v3/audit_events")
             return self.scroll_pages(url, params, headers, additional_tags)
 
         self.log.error("Unknown api version `%s`", self._api_version)
