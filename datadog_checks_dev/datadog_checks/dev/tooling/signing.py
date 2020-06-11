@@ -112,7 +112,8 @@ def update_link_metadata(checks, core_workflow=True):
         signing_key_path = os.getenv('IN_TOTO_SIGNING_KEY_PATH', '')
         signing_key = util.import_rsa_key_from_file(signing_key_path, os.getenv('IN_TOTO_SIGNING_KEY_PASSWORD'))
 
-        # NOTE: in-toto currently uses the first 8 characters of the signing keyID, the latter of which we assume is the key filename.
+        # NOTE: in-toto currently uses the first 8 characters of the signing keyID,
+        # the latter of which we assume is the key filename.
         key_id_prefix = os.path.basename(signing_key_path)[:8].lower()
 
         tag_link = f'{STEP_NAME}.{key_id_prefix}.link'
