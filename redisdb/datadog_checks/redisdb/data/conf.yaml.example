@@ -36,11 +36,11 @@ instances:
     #
     # password: <PASSWORD>
 
-    ## @param enable_client_command - boolean - optional
+    ## @param collect_client_metrics - boolean - optional
     ## Enable to collect metrics using the `CLIENT` command
     ## This requires the Redis CLIENT command to be available on your servers.
     #
-    # enable_client_command: false
+    # collect_client_metrics: false
 
     ## @param socket_timeout - integer - optional - default: 5
     ## Custom timeout for the check request.

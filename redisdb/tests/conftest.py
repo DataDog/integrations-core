@@ -84,7 +84,7 @@ def redis_instance():
         'password': PASSWORD,
         'keys': ['test_*'],
         'tags': ["foo:bar"],
-        'enable_client_command': True,
+        'collect_client_metrics': True,
     }
 
 
@@ -95,7 +95,7 @@ def replica_instance():
 
 @pytest.fixture(scope='session')
 def master_instance():
-    return {'host': HOST, 'port': MASTER_PORT, 'keys': ['test_*'], 'enable_client_command': True}
+    return {'host': HOST, 'port': MASTER_PORT, 'keys': ['test_*'], 'collect_client_metrics': True}
 
 
 @pytest.fixture
