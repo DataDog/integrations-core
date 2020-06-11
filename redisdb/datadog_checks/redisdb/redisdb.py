@@ -109,7 +109,7 @@ class Redis(AgentCheck):
         self.last_timestamp_seen = 0
         custom_tags = self.instance.get('tags', [])
         self.tags = self._get_tags(custom_tags)
-        self.collect_client_connection = is_affirmative(self.instance.get('collect_client_connection', False))
+        self.enable_client_command = is_affirmative(self.instance.get('enable_client_command', False))
         if ("host" not in self.instance or "port" not in self.instance) and "unix_socket_path" not in self.instance:
             raise ConfigurationError("You must specify a host/port couple or a unix_socket_path")
 
@@ -250,7 +250,7 @@ class Redis(AgentCheck):
             if metric_name is not None:
                 self.gauge(metric_name, value, tags=tags)
 
-        if self.collect_client_connection:
+        if self.enable_client_command:
             # Save client connections statistics
             clients = conn.client_list()
             clients_by_name = Counter(client["name"] or DEFAULT_CLIENT_NAME for client in clients)
