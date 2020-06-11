@@ -11,8 +11,8 @@ from datadog_checks.base.types import Event
 from .constants import SOURCE_TYPE_NAME
 
 
-def parse_event(cf_event, api_version):
-    # type: (Dict[str, Any], str) -> (Event, str, int)
+def parse_event(cf_event, api_version, additional_tags):
+    # type: (Dict[str, Any], str, List[str]) -> (Event, str, int)
     dd_event = {}
     event_guid = ""
     event_ts = 0
@@ -36,6 +36,7 @@ def parse_event(cf_event, api_version):
             event_entity["actee"],
             event_entity.get("space_guid"),  # Some events might not have a space associated
             event_entity.get("organization_guid"),  # Some events might not have an org associated
+            additional_tags,
         )
     elif api_version == "v3":
         # Parse a v3 event
@@ -57,6 +58,7 @@ def parse_event(cf_event, api_version):
             target["guid"],
             cf_event.get("space", {}).get("guid"),  # Some events might not have a space associated
             cf_event.get("organization", {}).get("guid"),  # Some events might not have an org associated
+            additional_tags,
         )
     return dd_event, event_guid, event_ts
 
@@ -73,8 +75,9 @@ def build_dd_event(
     target_guid,
     space_guid,
     org_guid,
+    additional_tags,
 ):
-    # type: (str, str, int, str, str, str, str, str, str, str, str) -> Event
+    # type: (str, str, int, str, str, str, str, str, str, str, str, List[str]) -> Event
     tags = [
         "event_type:{}".format(event_type),
         "{}_name:{}".format(target_type, target_name),
@@ -83,7 +86,7 @@ def build_dd_event(
         "{}_guid:{}".format(actor_type, actor_guid),
         "space_guid:{}".format(space_guid),
         "org_guid:{}".format(org_guid),
-    ]
+    ] + additional_tags
     dd_event = {
         "source_type_name": SOURCE_TYPE_NAME,
         "event_type": event_type,

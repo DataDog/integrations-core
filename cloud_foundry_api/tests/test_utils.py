@@ -10,8 +10,9 @@ from .constants import FREEZE_TIME
 
 @mock.patch("datadog_checks.cloud_foundry_api.utils.build_dd_event")
 def test_parse_event(build_dd_event_mock, event_v2, event_v3):
+    additional_tags = ["foo:bar"]
     # v2
-    _, event_guid, event_ts = parse_event(event_v2, "v2")
+    _, event_guid, event_ts = parse_event(event_v2, "v2", additional_tags)
     assert event_guid == "event_guid"
     assert event_ts == FREEZE_TIME
     build_dd_event_mock.assert_called_once_with(
@@ -26,11 +27,12 @@ def test_parse_event(build_dd_event_mock, event_v2, event_v3):
         "target_guid",
         "space_guid",
         "org_guid",
+        additional_tags
     )
 
     # v3
     build_dd_event_mock.reset_mock()
-    _, event_guid, event_ts = parse_event(event_v3, "v3")
+    _, event_guid, event_ts = parse_event(event_v3, "v3", additional_tags)
     assert event_guid == "event_guid"
     assert event_ts == FREEZE_TIME
     build_dd_event_mock.assert_called_once_with(
@@ -45,10 +47,12 @@ def test_parse_event(build_dd_event_mock, event_v2, event_v3):
         "target_guid",
         "space_guid",
         "org_guid",
+        additional_tags
     )
 
 
 def test_build_dd_event():
+    additional_tags = ["foo:bar"]
     event = build_dd_event(
         "event_type",
         "event_guid",
@@ -61,6 +65,7 @@ def test_build_dd_event():
         "target_guid",
         "space_guid",
         "org_guid",
+        additional_tags
     )
     tags = [
         "event_type:event_type",
@@ -70,6 +75,7 @@ def test_build_dd_event():
         "actor_type_guid:actor_guid",
         "space_guid:space_guid",
         "org_guid:org_guid",
+        "foo:bar",
     ]
     expected_event = {
         "source_type_name": "Cloud Foundry",

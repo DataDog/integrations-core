@@ -93,6 +93,7 @@ def test_get_events(_, instance, dd_events):
     with mock.patch.object(CloudFoundryApiCheck, "scroll_pages", scroll_pages_mock), mock.patch.object(
         CloudFoundryApiCheck, "get_oauth_token"
     ) as get_oauth_token_mock:
+        additional_tags = ["foo:bar"]
         check_v2 = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
         check_v2._api_version = "v2"
         check_v3 = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
@@ -104,21 +105,23 @@ def test_get_events(_, instance, dd_events):
 
         get_oauth_token_mock.side_effect = side_effect
 
-        events_v2 = check_v2.get_events()
+        events_v2 = check_v2.get_events(additional_tags)
         assert events_v2 == dd_events
         scroll_pages_mock.assert_called_once_with(
             "https://api.sys.domain.com/v2/events",
             {"q": "type IN audit1,audit2", "results-per-page": 45, "order-by": "timestamp", "order-direction": "desc"},
             {"Authorization": "Bearer oauth_token_v2"},
+            additional_tags
         )
 
         scroll_pages_mock.reset_mock()
-        events_v3 = check_v3.get_events()
+        events_v3 = check_v3.get_events(additional_tags)
         assert events_v3 == dd_events
         scroll_pages_mock.assert_called_once_with(
             "https://api.sys.domain.com/v3/audit_events",
             {"types": "audit1,audit2", "per_page": 45, "order_by": "-created_at"},
             {"Authorization": "Bearer oauth_token_v3"},
+            additional_tags
         )
 
 
@@ -135,7 +138,7 @@ def test_scroll_pages(http_mock, _, __, aggregator, instance, events_v3_p1, even
     check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
 
     with mock.patch.object(check, "log") as log_mock:
-        dd_events = check.scroll_pages("url", {"param": "foo"}, {"header": "bar"})
+        dd_events = check.scroll_pages("url", {"param": "foo"}, {"header": "bar"}, [])
 
     expected_calls = [
         (("url",), ({"params": {"param": "foo", "page": 1}, "headers": {"header": "bar"}})),
@@ -152,7 +155,7 @@ def test_scroll_pages(http_mock, _, __, aggregator, instance, events_v3_p1, even
     http_mock.reset_mock()
     # reset_mock doesn't reset side_effect or return_value, so manually reassign it
     http_mock.get.side_effect = (events_res_p1, events_res_p2)
-    dd_events = check.scroll_pages("url", {"param": "foo"}, {"header": "bar"})
+    dd_events = check.scroll_pages("url", {"param": "foo"}, {"header": "bar"}, [])
 
     expected_calls = [(("url",), ({"params": {"param": "foo", "page": 1}, "headers": {"header": "bar"}}))]
     assert http_mock.get.call_args_list == expected_calls
@@ -174,7 +177,7 @@ def test_scroll_pages_errors(_, __, aggregator, instance, events_v3_p1):
 
     with mock.patch.object(check, "_http") as http_mock:
         http_mock.get.side_effect = RequestException()
-        check.scroll_pages("", {}, {})
+        check.scroll_pages("", {}, {}, [])
         aggregator.assert_service_check(
             name="cloud_foundry_api.api.can_connect",
             status=CloudFoundryApiCheck.CRITICAL,
@@ -185,7 +188,7 @@ def test_scroll_pages_errors(_, __, aggregator, instance, events_v3_p1):
 
     with mock.patch.object(check, "_http") as http_mock:
         http_mock.get.return_value = mock.MagicMock(raise_for_status=mock.MagicMock(side_effect=HTTPError()))
-        check.scroll_pages("", {}, {})
+        check.scroll_pages("", {}, {}, [])
         aggregator.assert_service_check(
             name="cloud_foundry_api.api.can_connect",
             status=CloudFoundryApiCheck.CRITICAL,
@@ -196,7 +199,7 @@ def test_scroll_pages_errors(_, __, aggregator, instance, events_v3_p1):
 
     with mock.patch.object(check, "_http") as http_mock:
         http_mock.get.return_value = mock.MagicMock(json=mock.MagicMock(side_effect=ValueError()))
-        check.scroll_pages("", {}, {})
+        check.scroll_pages("", {}, {}, [])
         aggregator.assert_service_check(
             name="cloud_foundry_api.api.can_connect",
             status=CloudFoundryApiCheck.CRITICAL,
@@ -211,7 +214,7 @@ def test_scroll_pages_errors(_, __, aggregator, instance, events_v3_p1):
         events_res_p1 = mock.MagicMock()
         events_res_p1.json.return_value = events_v3_p1
         http_mock.get.side_effect = (events_res_p1, RequestException())
-        dd_events = check.scroll_pages("", {}, {})
+        dd_events = check.scroll_pages("", {}, {}, [])
         aggregator.assert_service_check(
             name="cloud_foundry_api.api.can_connect",
             status=CloudFoundryApiCheck.CRITICAL,

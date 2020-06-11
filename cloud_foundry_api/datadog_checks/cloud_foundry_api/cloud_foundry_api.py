@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import time
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import semver
 from requests.exceptions import HTTPError, RequestException
@@ -129,8 +129,8 @@ class CloudFoundryApiCheck(AgentCheck):
         self._token_expiration = int(time.time()) + payload["expires_in"]
         self.service_check(UAA_SERVICE_CHECK_NAME, CloudFoundryApiCheck.OK, tags=sc_tags)
 
-    def scroll_pages(self, url, params, headers):
-        # type: (str, Dict[str, Any], Dict[str, str]) -> Dict[str, Event]
+    def scroll_pages(self, url, params, headers, additional_tags):
+        # type: (str, Dict[str, Any], Dict[str, str], List[str]) -> Dict[str, Event]
         page = 1
         events = {}
         scroll = True
@@ -160,7 +160,7 @@ class CloudFoundryApiCheck(AgentCheck):
 
             for cf_event in payload.get("resources", []):
                 try:
-                    dd_event, event_guid, event_ts = parse_event(cf_event, self._api_version)
+                    dd_event, event_guid, event_ts = parse_event(cf_event, self._api_version, additional_tags)
                 except (ValueError, KeyError):
                     self.log.exception("Could not parse event %s", cf_event)
                     continue
@@ -183,8 +183,8 @@ class CloudFoundryApiCheck(AgentCheck):
         self.service_check(API_SERVICE_CHECK_NAME, CloudFoundryApiCheck.OK, tags=sc_tags)
         return events
 
-    def get_events(self):
-        # type: () -> Dict[str, Event]
+    def get_events(self, additional_tags):
+        # type: (List[str]) -> Dict[str, Event]
         self.get_oauth_token()
         if self._api_version == "v2":
             params = {
@@ -195,7 +195,7 @@ class CloudFoundryApiCheck(AgentCheck):
             }
             headers = {"Authorization": "Bearer {}".format(self._oauth_token)}
             url = "{}/v2/events".format(self._api_url)
-            return self.scroll_pages(url, params, headers)
+            return self.scroll_pages(url, params, headers, additional_tags)
         elif self._api_version == "v3":
             params = {
                 "types": self._event_filter,
@@ -204,15 +204,15 @@ class CloudFoundryApiCheck(AgentCheck):
             }
             headers = {"Authorization": "Bearer {}".format(self._oauth_token)}
             url = urljoin(self._api_url, "v3/audit_events")
-            return self.scroll_pages(url, params, headers)
+            return self.scroll_pages(url, params, headers, additional_tags)
 
         self.log.error("Unknown api version `%s`", self._api_version)
         return {}
 
     def check(self, _):
         # type: (Dict[str, Any]) -> None
-        events = self.get_events()
         tags = ["api_url:{}".format(urlparse(self._api_url)[1])] + self._tags
+        events = self.get_events(tags)
         self.count("events.count", len(events), tags=tags)
         for event in events.values():
             self.event(event)
