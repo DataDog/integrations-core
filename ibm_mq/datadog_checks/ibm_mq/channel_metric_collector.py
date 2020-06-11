@@ -104,6 +104,9 @@ class ChannelMetricCollector(object):
                 if channel_name in channels_to_skip:
                     continue
                 channel_tags = tags + ["channel:{}".format(channel_name)]
+                channel_dict = {}
+                for k, v in channel_info.items():
+                    channel_dict[CMQCFC_LOOKUP.get(k)] = v
 
                 self._submit_metrics_from_properties(channel_info, metrics.channel_status_metrics(), channel_tags)
 

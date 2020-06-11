@@ -38,10 +38,12 @@ $ docker exec -it ibm_mq runmqsc datadog
 
 ```
 # Display all channels
-$ DIS CHANNEL(*)
+DIS CHANNEL(*)
+DIS QUEUE(*)
 
-# Display one channels properties
+# Display properties
 DIS CHANNEL(DEV.APP.SVRCONN)
+DIS QUEUE(DEV.QUEUE.1)
 ``` 
 
 
