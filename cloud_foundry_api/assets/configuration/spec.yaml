@@ -9,11 +9,6 @@ files:
       required: true
       value:
         type: string
-    - name: uaa_url
-      description: URL of the UAA server.
-      required: true
-      value:
-        type: string
     - name: client_id
       description: |
         `client_id` used to authenticate with UAA and obtain an oauth token
@@ -29,16 +24,6 @@ files:
       value:
         type: string
       secret: true
-    - name: api_version
-      description: |
-        Version of the Cloud Controller API to target. Choose between `v2` and `v3`.
-        Depending on your Cloud Controller version, not all resources are available in `v3`.
-        Switch to `v2` if that is the case.
-      value:
-        type: string
-        pattern: v2|v3
-        default: v3
-        example: v3
     - name: event_filter
       description: |
         A list of the types of audit events to fetch.
@@ -47,11 +32,6 @@ files:
         type: array
         items:
           type: string
-        default:
-        - audit.app.restage
-        - audit.app.update
-        - audit.app.create
-        - app.crash
         example:
         - audit.app.restage
         - audit.app.update
@@ -66,6 +46,21 @@ files:
         default: 100
     - template: instances/default
     - template: instances/http
+      overrides:
+        username.hidden: true
+        auth_type.hidden: true
+        password.hidden: true
+        ntlm_domain.hidden: true
+        kerberos_auth.hidden: true
+        kerberos_cache.hidden: true
+        kerberos_delegate.hidden: true
+        kerberos_force_initiate.hidden: true
+        kerberos_hostname.hidden: true
+        kerberos_keytab.hidden: true
+        kerberos_principal.hidden: true
+        aws_region.hidden: true
+        aws_host.hidden: true
+        aws_service.hidden: true
   - template: init_config
     options:
     - template: init_config/default

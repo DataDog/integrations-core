@@ -8,6 +8,7 @@
       "critical"
     ],
     "groups": [
+      "host",
       "api_url"
     ],
     "name": "Can Connect",
@@ -22,7 +23,9 @@
       "critical"
     ],
     "groups": [
-      "uaa_url"
+      "host",
+      "uaa_url",
+      "api_url"
     ],
     "name": "Can Authenticate with UAA",
     "description": "Returns `OK` if the check is able to authenticate with the UAA server and obtain an oauth token, `CRITICAL` otherwise."
