@@ -563,3 +563,6 @@ snmp.dfInodesUsed,gauge,,node,,"[NetApp] The current number of inodes in use for
 snmp.dfInodesFree,gauge,,node,,"[NetApp] The current number of available inodes for a given filesystem.",0,snmp,
 snmp.ifHighInOctets,count,,byte,,"[NetApp] The total number of bytes received on the interface, including framing characters.",0,snmp,
 snmp.ifHighInOctets.rate,rate,,byte,second,"[NetApp] The number bytes per second received on the interface, including framing characters.",0,snmp,
+snmp.rttMonLatestRttOperCompletionTime,gauge,,millisecond,,The completion time of the latest RTT operation successfully completed.,0,snmp,
+snmp.rttMonLatestRttOperSense,gauge,,,,A sense code for the completion status of the latest RTT operation.,0,snmp,
+snmp.rttMonCtrlOperTimeoutOccurred,gauge,,,,This object will change its value for all RttMonRttTypes.,0,snmp,
