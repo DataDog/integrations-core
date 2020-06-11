@@ -69,6 +69,7 @@ def dd_environment(master_instance):
     """
     with docker_run(
         os.path.join(HERE, 'compose', '1m-2s.compose'),
+        env_vars={'REDIS_CONFIG': os.path.join(HERE, 'config', 'redis.conf')},
         conditions=[
             CheckCluster({'port': MASTER_PORT, 'db': 14, 'host': HOST}, {'port': REPLICA_PORT, 'db': 14, 'host': HOST})
         ],

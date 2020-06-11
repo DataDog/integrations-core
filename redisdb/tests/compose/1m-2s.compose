@@ -7,7 +7,10 @@ services:
       - "6382:6382"
     networks:
       - network1
-    command: redis-server --port 6382
+    command: redis-server /etc/redis.conf --port 6382
+    volumes:
+      - ${REDIS_CONFIG}:/etc/redis.conf
+
 
   redis-slave:
     image: "redis:${REDIS_VERSION}"
