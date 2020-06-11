@@ -6,7 +6,7 @@ import click
 from pathlib import Path
 import csv
 
-from ..console import CONTEXT_SETTINGS, echo_success
+from ...console import CONTEXT_SETTINGS, echo_success
 from .common import Release
 
 class ReportSerializer:

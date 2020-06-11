@@ -4,8 +4,8 @@
 import re
 import datetime
 
-from ..console import echo_failure, echo_info
-from ...github import get_compare, parse_pr_number, get_pr_from_hash, get_tags, get_tag, get_pr_of_repo, get_pr_labels, get_commit
+from ...console import echo_failure, echo_info
+from ....github import get_compare, parse_pr_number, get_pr_from_hash, get_tags, get_tag, get_pr_of_repo, get_pr_labels, get_commit
 
 class PullRequest:
     def __init__(self, number, title, url, labels):
