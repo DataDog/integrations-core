@@ -1264,11 +1264,13 @@ def test_cisco_asa_5525(aggregator):
     rtt_states = [3, 1, 6, 4, 6, 1, 6]
     rtt_gauges = ['rttMonLatestRttOperCompletionTime', 'rttMonLatestRttOperSense', 'rttMonCtrlOperTimeoutOccurred']
     for i in range(len(rtt_indexes)):
-        tags = ["rtt_index:{}".format(rtt_indexes[i]), "rtt_type:{}".format(rtt_types[i]), "rtt_state:{}".format(rtt_states[i])] + common_tags
+        tags = [
+            "rtt_index:{}".format(rtt_indexes[i]),
+            "rtt_type:{}".format(rtt_types[i]),
+            "rtt_state:{}".format(rtt_states[i]),
+        ] + common_tags
         for rtt in rtt_gauges:
-            aggregator.assert_metric(
-                'snmp.{}'.format(rtt), metric_type=aggregator.GAUGE, tags=tags
-            )
+            aggregator.assert_metric('snmp.{}'.format(rtt), metric_type=aggregator.GAUGE, tags=tags)
 
     aggregator.assert_all_metrics_covered()
 
