@@ -78,14 +78,7 @@ def dd_environment(master_instance):
 
 @pytest.fixture
 def redis_instance():
-    return {
-        'host': HOST,
-        'port': PORT,
-        'password': PASSWORD,
-        'keys': ['test_*'],
-        'tags': ["foo:bar"],
-        'collect_client_metrics': True,
-    }
+    return {'host': HOST, 'port': PORT, 'password': PASSWORD, 'keys': ['test_*'], 'tags': ["foo:bar"]}
 
 
 @pytest.fixture
@@ -95,7 +88,7 @@ def replica_instance():
 
 @pytest.fixture(scope='session')
 def master_instance():
-    return {'host': HOST, 'port': MASTER_PORT, 'keys': ['test_*'], 'collect_client_metrics': True}
+    return {'host': HOST, 'port': MASTER_PORT, 'keys': ['test_*']}
 
 
 @pytest.fixture
