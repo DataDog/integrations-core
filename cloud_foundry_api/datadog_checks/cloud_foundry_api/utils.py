@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 from dateutil import parser, tz
 
@@ -12,7 +12,7 @@ from .constants import SOURCE_TYPE_NAME
 
 
 def parse_event(cf_event, api_version, additional_tags):
-    # type: (Dict[str, Any], str, List[str]) -> (Event, str, int)
+    # type: (Dict[str, Any], str, List[str]) -> Tuple[Event, str, int]
     dd_event = {}
     event_guid = ""
     event_ts = 0

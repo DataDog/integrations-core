@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import semver
 from requests.exceptions import HTTPError, RequestException
@@ -54,7 +54,7 @@ class CloudFoundryApiCheck(AgentCheck):
         self._api_version, self._uaa_url = self.discover_api()
 
     def discover_api(self):
-        # type: () -> (str, str)
+        # type: () -> Tuple[str, str]
         self.log.info("Discovering Cloud Foundry API version and authentication endpoint")
         try:
             res = self.http.get(self._api_url)
@@ -133,7 +133,7 @@ class CloudFoundryApiCheck(AgentCheck):
     def scroll_pages(self, url, params, headers, additional_tags):
         # type: (str, Dict[str, Any], Dict[str, str], List[str]) -> Dict[str, Event]
         page = 1
-        events = {}
+        events = {}  # type: Event
         scroll = True
         sc_tags = ["api_url:{}".format(urlparse(self._api_url)[1])] + self._tags
         while scroll:
