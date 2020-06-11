@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 
-from datadog_checks.cloud_foundry_api.utils import build_dd_event, get_next_url, parse_event
+from datadog_checks.cloud_foundry_api.utils import build_dd_event, date_to_ts, get_next_url, parse_event
 
 from .constants import FREEZE_TIME
 
@@ -98,3 +98,11 @@ def test_get_next_url():
     # bad
     next_url = get_next_url({"bad": {"stuff": "next_url"}}, "v3")
     assert next_url == ""
+
+
+def test_date_to_ts():
+    expected_ts = 1591870273
+
+    assert date_to_ts("2020-06-11T10:11:13,461Z") == expected_ts
+    assert date_to_ts("2020-06-11T05:11:13,461-05:00") == expected_ts
+    assert date_to_ts("2020-06-11T11:11:13,461+01:00") == expected_ts

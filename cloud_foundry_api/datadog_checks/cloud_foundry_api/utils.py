@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datetime import datetime
 from typing import Any, Dict
 
-from dateutil import parser
+from dateutil import parser, tz
 
 from datadog_checks.base.types import Event
 
@@ -20,7 +21,7 @@ def parse_event(cf_event, api_version):
         # Parse a v2 event
         # See https://apidocs.cloudfoundry.org/13.2.0/events/list_all_events.html for payload details.
         event_entity = cf_event["entity"]
-        event_ts = int(parser.isoparse(event_entity["timestamp"]).timestamp())
+        event_ts = date_to_ts(event_entity["timestamp"])
         event_guid = cf_event["metadata"]["guid"]
 
         dd_event = build_dd_event(
@@ -39,7 +40,7 @@ def parse_event(cf_event, api_version):
     elif api_version == "v3":
         # Parse a v3 event
         # See http://v3-apidocs.cloudfoundry.org/version/3.84.0/index.html#list-audit-events for payload details.
-        event_ts = int(parser.isoparse(cf_event["created_at"]).timestamp())
+        event_ts = date_to_ts(cf_event["created_at"])
         event_guid = cf_event["guid"]
         target = cf_event["target"]
         actor = cf_event["actor"]
@@ -104,3 +105,8 @@ def get_next_url(payload, version):
     elif version == "v3":
         next_url = payload.get("pagination", {}).get("next", "")
     return next_url
+
+
+def date_to_ts(iso_string):
+    # type: (str) -> int
+    return int((parser.isoparse(iso_string) - datetime(1970, 1, 1, tzinfo=tz.UTC)).total_seconds())
