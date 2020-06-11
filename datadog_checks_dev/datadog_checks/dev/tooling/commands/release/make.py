@@ -172,7 +172,8 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude):
         if not updated_checks:
             abort('There are no new checks to sign and release!')
         echo_waiting('Updating release metadata...')
-        echo_info('Please touch your Yubikey immediately after entering your PIN!')
+        if core_workflow:
+            echo_info('Please touch your Yubikey immediately after entering your PIN!')
         try:
             commit_targets = update_link_metadata(updated_checks, core_workflow=core_workflow)
             git_commit(commit_targets, '[Release] Update metadata', force=True)
