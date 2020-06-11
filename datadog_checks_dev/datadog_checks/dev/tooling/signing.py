@@ -109,11 +109,14 @@ def update_link_metadata(checks, core_workflow=True):
         tag_link = f'{STEP_NAME}.{key_id_prefix}.link'
         options = {'gpg_keyid': key_id}
     else:
-        signing_key = util.import_rsa_key_from_file(
-            os.getenv('IN_TOTO_SIGNING_KEY_PATH'), os.getenv('IN_TOTO_SIGNING_KEY_PASSWORD')
-        )
+        signing_key_path = os.getenv('IN_TOTO_SIGNING_KEY_PATH', '')
+        signing_key = util.import_rsa_key_from_file(signing_key_path, os.getenv('IN_TOTO_SIGNING_KEY_PASSWORD'))
 
-        tag_link = f'{os.getenv("IN_TOTO_SIGNER")}.link'
+        # NOTE: in-toto currently uses the first 8 characters of the signing keyID,
+        # the latter of which we assume is the key filename.
+        key_id_prefix = os.path.basename(signing_key_path)[:8].lower()
+
+        tag_link = f'{STEP_NAME}.{key_id_prefix}.link'
         options = {'signing_key': signing_key}
 
     # Final location of metadata file.
