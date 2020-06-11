@@ -1,5 +1,10 @@
 # CHANGELOG - snmp
 
+## 3.4.0 / 2020-06-11
+
+* [Added] Add NetApp profile. See [#6841](https://github.com/DataDog/integrations-core/pull/6841).
+* [Fixed] Fix `instance_number` tag on Cisco voice router metrics. See [#6867](https://github.com/DataDog/integrations-core/pull/6867).
+
 ## 3.3.0 / 2020-06-10
 
 * [Added] Add Fortinet FortiGate profile. See [#6504](https://github.com/DataDog/integrations-core/pull/6504). Thanks [lindseyferretti](https://github.com/lindseyferretti).
