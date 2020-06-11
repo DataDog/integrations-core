@@ -1,5 +1,15 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.11.0 / 2020-06-11
+
+* [Added] Add automated signing workflow for non-core integrations. See [#6868](https://github.com/DataDog/integrations-core/pull/6868).
+* [Added] Allow ddev release command to work for different organizations. See [#6855](https://github.com/DataDog/integrations-core/pull/6855).
+* [Added] Add extra validation to manifest files for fields that cannot change. See [#6848](https://github.com/DataDog/integrations-core/pull/6848).
+* [Added] Validate that dashboards have required fields. See [#6833](https://github.com/DataDog/integrations-core/pull/6833).
+* [Fixed] Provide helpful error message when releasing a project with missing or improper tags. See [#6861](https://github.com/DataDog/integrations-core/pull/6861).
+* [Fixed] Adjust jmxfetch config. See [#6864](https://github.com/DataDog/integrations-core/pull/6864).
+* [Fixed] Remove unused dashboard fields in export. See [#6787](https://github.com/DataDog/integrations-core/pull/6787).
+
 ## 3.10.0 / 2020-06-08
 
 * [Added] Add option to open DogStatsD port on agent. See [#6777](https://github.com/DataDog/integrations-core/pull/6777).
