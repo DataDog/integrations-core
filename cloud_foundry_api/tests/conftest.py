@@ -55,15 +55,6 @@ def events_v3_p2():
 
 
 @pytest.fixture()
-def events_v2():
-    """
-    Returns raw events from API v2
-    """
-    with open(os.path.join(HERE, 'fixtures', 'events_v2.json')) as f:
-        return json.loads(f.read())
-
-
-@pytest.fixture()
 def dd_events():
     """
     Returns a dict of formatted events ready to send to Datadog
