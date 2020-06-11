@@ -5,17 +5,22 @@ import copy
 import time
 from typing import Any, Dict
 
+import semver
 from requests.exceptions import HTTPError, RequestException
+from six.moves.urllib_parse import urljoin, urlparse
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.base.types import Event
 
 from .constants import (
     API_SERVICE_CHECK_NAME,
+    DEFAULT_EVENT_FILTER,
     DEFAULT_PAGE_SIZE,
     MAX_LOOKBACK_SECONDS,
     MAX_PAGE_SIZE_V2,
     MAX_PAGE_SIZE_V3,
+    MIN_V3_VERSION,
     TOCKEN_EXPIRATION_BUFFER,
     UAA_SERVICE_CHECK_NAME,
 )
@@ -28,28 +33,78 @@ class CloudFoundryApiCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(CloudFoundryApiCheck, self).__init__(name, init_config, instances)
 
+        # Configuration
         self._api_url = self.instance.get("api_url")
-        self._uaa_url = self.instance.get("uaa_url")
+        if not self._api_url:
+            raise ConfigurationError("`api_url` parameter is required")
         self._client_id = self.instance.get("client_id")
-        self._client_secret = self.instance.get("client_id")
-        self._api_version = self.instance.get("api_version", "v3")
-        self._event_filter = ",".join(self.instance.get("event_filter", []))
+        if not self._client_id:
+            raise ConfigurationError("`client_id` parameter is required")
+        self._client_secret = self.instance.get("client_secret")
+        if not self._client_secret:
+            raise ConfigurationError("`client_secret` parameter is required")
+        self._event_filter = ",".join(self.instance.get("event_filter", DEFAULT_EVENT_FILTER))
         self._tags = self.instance.get("tags", [])
         self._per_page = self.instance.get("results_per_page", DEFAULT_PAGE_SIZE)
+
         self._last_event_guid = ""
         self._last_event_ts = 0
         self._oauth_token = None
         self._token_expiration = 0
+        self._api_version, self._uaa_url = self.discover_api()
+
+    def discover_api(self):
+        # type: () -> (str, str)
+        self.log.info("Discovering Cloud Foundry API version and authentication endpoint")
+        try:
+            res = self.http.get(self._api_url)
+        except RequestException:
+            self.log.exception("Error connecting to the API server")
+            raise
+        try:
+            res.raise_for_status()
+        except HTTPError:
+            self.log.exception("Error querying API information: response: %s", res.text)
+            raise
+        try:
+            payload = res.json()
+        except ValueError:
+            self.log.exception("Error decoding API information: response: %s", res.text)
+            raise
+
+        links = payload.get("links")
+        if not links:
+            raise CheckException("Unable to inspect API information from payload {}".format(payload))
+
+        api_v3_version = "0.0.0"
+        try:
+            api_v3_version = links["cloud_controller_v3"]["meta"]["version"]
+        except Exception:
+            self.log.debug("cloud_controller_v3 information not found, defaulting to v2")
+
+        try:
+            uaa_url = links["uaa"]["href"]
+        except Exception:
+            raise CheckException("Unable to collect API version and/or UAA URL from links {}".format(links))
+
+        api_version = "v2"
+        if semver.parse_version_info(api_v3_version) >= MIN_V3_VERSION:
+            api_version = "v3"
+        self.log.info("Discovered API `%s` and UAA URL `%s`", api_version, uaa_url)
+        return api_version, uaa_url
 
     def get_oauth_token(self):
         # type: () -> None
         if self._oauth_token is not None and self._token_expiration - TOCKEN_EXPIRATION_BUFFER > int(time.time()):
             return
         self.log.info("Refreshing access token")
-        sc_tags = ["uaa_url:{}".format(self._uaa_url)] + self._tags
+        sc_tags = [
+            "uaa_url:{}".format(urlparse(self._uaa_url)[1]),
+            "api_url:{}".format(urlparse(self._api_url)[1]),
+        ] + self._tags
         try:
             res = self.http.get(
-                "{}/oauth/token".format(self._uaa_url),
+                urljoin(self._uaa_url, "oauth/token"),
                 auth=(self._client_id, self._client_secret),
                 params={"grant_type": "client_credentials"},
             )
@@ -79,7 +134,7 @@ class CloudFoundryApiCheck(AgentCheck):
         page = 1
         events = {}
         scroll = True
-        sc_tags = ["api_url:{}".format(self._api_url)] + self._tags
+        sc_tags = ["api_url:{}".format(urlparse(self._api_url)[1])] + self._tags
         while scroll:
             params = copy.deepcopy(params)
             params["page"] = page
@@ -148,16 +203,16 @@ class CloudFoundryApiCheck(AgentCheck):
                 "order_by": "-created_at",
             }
             headers = {"Authorization": "Bearer {}".format(self._oauth_token)}
-            url = "{}/v3/audit_events".format(self._api_url)
+            url = urljoin(self._api_url, "v3/audit_events")
             return self.scroll_pages(url, params, headers)
 
-        self.log.error("Unknown api version `%s`, choose between `v2` and `v3`", self._api_version)
+        self.log.error("Unknown api version `%s`", self._api_version)
         return {}
 
     def check(self, _):
         # type: (Dict[str, Any]) -> None
         events = self.get_events()
-        tags = ["api_url:{}".format(self._api_url)] + self._tags
+        tags = ["api_url:{}".format(urlparse(self._api_url)[1])] + self._tags
         self.count("events.count", len(events), tags=tags)
         for event in events.values():
             self.event(event)
