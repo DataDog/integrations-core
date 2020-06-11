@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base import is_affirmative
+
 
 DEFAULT_METRICS = [
     # nginx metrics
@@ -43,7 +45,7 @@ class NginxIngressControllerCheck(OpenMetricsBaseCheck):
         # Allow for additional metric mappings
         metrics = instance.get('metrics', []) + DEFAULT_METRICS
 
-        if instance.get('collect_nginx_histograms', False):
+        if is_affirmative(instance.get('collect_nginx_histograms', False)):
             metrics += HISTOGRAM_METRICS
 
         super(NginxIngressControllerCheck, self).__init__(
