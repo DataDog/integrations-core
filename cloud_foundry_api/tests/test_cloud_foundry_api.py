@@ -7,11 +7,63 @@ import mock
 import pytest
 from requests.exceptions import HTTPError, RequestException
 
-from datadog_checks.base.errors import CheckException
+from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.cloud_foundry_api import CloudFoundryApiCheck
 
 from .constants import FREEZE_TIME
+
+
+@mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url"))
+def test_init_defaults(_, instance_defaults):
+    check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance_defaults])
+    assert check._api_url == "https://api.sys.domain.com"
+    assert check._client_id == "client_id"
+    assert check._client_secret == "client_secret"
+    assert check._event_filter == "audit.app.restage,audit.app.update,audit.app.create,app.crash"
+    assert check._tags == []
+    assert check._per_page == 100
+    assert check._api_version == "v3"
+    assert check._uaa_url == "uaa_url"
+    assert check._last_event_guid == ""
+    assert check._last_event_ts == 0
+    assert check._oauth_token == ""
+    assert check._token_expiration == 0
+
+
+@mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v2", "uaa_url"))
+def test_init(_, instance):
+    check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
+    assert check._api_url == "https://api.sys.domain.com"
+    assert check._client_id == "client_id"
+    assert check._client_secret == "client_secret"
+    assert check._event_filter == "audit1,audit2"
+    assert check._tags == ["foo:bar"]
+    assert check._per_page == 45
+    assert check._api_version == "v2"
+    assert check._uaa_url == "uaa_url"
+    assert check._last_event_guid == ""
+    assert check._last_event_ts == 0
+    assert check._oauth_token == ""
+    assert check._token_expiration == 0
+
+
+@mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v2", "uaa_url"))
+def test_init_bad_instance(_):
+    # No api_url
+    instance = {}
+    with pytest.raises(ConfigurationError, match="`api_url`"):
+        CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
+
+    # No client_id
+    instance["api_url"] = "api_url"
+    with pytest.raises(ConfigurationError, match="`client_id`"):
+        CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
+
+    # No client_secret
+    instance["client_id"] = "client_id"
+    with pytest.raises(ConfigurationError, match="`client_secret`"):
+        CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
 
 
 @mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url"))

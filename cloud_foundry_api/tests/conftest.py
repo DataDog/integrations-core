@@ -27,6 +27,15 @@ def instance():
     }
 
 
+@pytest.fixture
+def instance_defaults():
+    return {
+        "api_url": "https://api.sys.domain.com",
+        "client_id": "client_id",
+        "client_secret": "client_secret",
+    }
+
+
 @pytest.fixture()
 def events_v3_p1():
     """

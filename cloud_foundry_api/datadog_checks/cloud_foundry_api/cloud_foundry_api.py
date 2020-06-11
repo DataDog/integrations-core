@@ -49,7 +49,7 @@ class CloudFoundryApiCheck(AgentCheck):
 
         self._last_event_guid = ""
         self._last_event_ts = 0
-        self._oauth_token = None
+        self._oauth_token = ""
         self._token_expiration = 0
         self._api_version, self._uaa_url = self.discover_api()
 
