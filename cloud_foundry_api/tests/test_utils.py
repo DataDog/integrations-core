@@ -27,7 +27,7 @@ def test_parse_event(build_dd_event_mock, event_v2, event_v3):
         "target_guid",
         "space_guid",
         "org_guid",
-        additional_tags
+        additional_tags,
     )
 
     # v3
@@ -47,7 +47,7 @@ def test_parse_event(build_dd_event_mock, event_v2, event_v3):
         "target_guid",
         "space_guid",
         "org_guid",
-        additional_tags
+        additional_tags,
     )
 
 
@@ -65,7 +65,7 @@ def test_build_dd_event():
         "target_guid",
         "space_guid",
         "org_guid",
-        additional_tags
+        additional_tags,
     )
     tags = [
         "event_type:event_type",

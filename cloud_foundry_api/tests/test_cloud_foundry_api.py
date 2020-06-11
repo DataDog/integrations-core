@@ -111,7 +111,7 @@ def test_get_events(_, instance, dd_events):
             "https://api.sys.domain.com/v2/events",
             {"q": "type IN audit1,audit2", "results-per-page": 45, "order-by": "timestamp", "order-direction": "desc"},
             {"Authorization": "Bearer oauth_token_v2"},
-            additional_tags
+            additional_tags,
         )
 
         scroll_pages_mock.reset_mock()
@@ -121,7 +121,7 @@ def test_get_events(_, instance, dd_events):
             "https://api.sys.domain.com/v3/audit_events",
             {"types": "audit1,audit2", "per_page": 45, "order_by": "-created_at"},
             {"Authorization": "Bearer oauth_token_v3"},
-            additional_tags
+            additional_tags,
         )
 
 
