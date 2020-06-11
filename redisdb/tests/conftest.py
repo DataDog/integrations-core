@@ -95,7 +95,7 @@ def replica_instance():
 
 @pytest.fixture(scope='session')
 def master_instance():
-    return {'host': HOST, 'port': MASTER_PORT, 'keys': ['test_*']}
+    return {'host': HOST, 'port': MASTER_PORT, 'keys': ['test_*'], 'enable_client_command': True}
 
 
 @pytest.fixture
