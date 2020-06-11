@@ -84,7 +84,7 @@ def redis_instance():
         'password': PASSWORD,
         'keys': ['test_*'],
         'tags': ["foo:bar"],
-        'collect_client_connections': True,
+        'enable_client_command': True,
     }
 
 
