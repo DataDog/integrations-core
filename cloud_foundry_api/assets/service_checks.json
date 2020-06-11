@@ -8,7 +8,6 @@
       "critical"
     ],
     "groups": [
-      "host",
       "api_url"
     ],
     "name": "Can Connect",
@@ -23,7 +22,6 @@
       "critical"
     ],
     "groups": [
-      "host",
       "uaa_url",
       "api_url"
     ],
