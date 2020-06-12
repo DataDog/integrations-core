@@ -1,3 +1,7 @@
+## Datadog Agent version [7.20.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7201)
+
+* Disk [2.9.1](https://github.com/DataDog/integrations-core/blob/master/disk/CHANGELOG.md)
+
 ## Datadog Agent version [7.20.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7200)
 
 * Active Directory [1.8.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)
