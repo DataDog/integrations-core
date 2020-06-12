@@ -37,7 +37,6 @@ from .utils import (
 )
 
 DEFAULT_OID_BATCH_SIZE = 10
-TAGS_TO_SKIP_IF_EMPTY = ['snmp_host']
 
 
 def reply_invalid(oid):
@@ -411,11 +410,8 @@ class SnmpCheck(AgentCheck):
                     'You are trying to use a table column (OID `{}`) as a metric tag. This is not supported as '
                     '`metric_tags` can only refer to scalar OIDs.'.format(tag.symbol)
                 )
-            value = tag_values[0]
-            if tag.name in TAGS_TO_SKIP_IF_EMPTY and not value:
-                continue
             try:
-                extracted_tags.extend(tag.matched_tags(value))
+                extracted_tags.extend(tag.matched_tags(tag_values[0]))
             except re.error as e:
                 self.log.debug('Failed to match %s for %s: %s', tag_values[0], tag.symbol, e)
         return extracted_tags
