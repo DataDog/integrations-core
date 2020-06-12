@@ -1,0 +1,682 @@
+{
+    "author_info": {
+        "author_name": "Datadog"
+    },
+    "board_title": "HiveMQ",
+    "description": "The default dashboard for monitoring HiveMQ brokers including connections, subscriptions, and messages.",
+    "template_variables": [],
+    "widgets": [
+        {
+            "height": 6,
+            "sizing": "fit",
+            "type": "image",
+            "url": "data:image/png;base64,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",
+            "width": 21,
+            "x": 1,
+            "y": 1
+        },
+        {
+            "check": "hivemq.can_connect",
+            "group_by": [],
+            "grouping": "cluster",
+            "height": 10,
+            "tags": [
+                "*"
+            ],
+            "title": true,
+            "title_align": "center",
+            "title_size": 16,
+            "title_text": "Connected Nodes",
+            "type": "check_status",
+            "width": 21,
+            "x": 1,
+            "y": 8
+        },
+        {
+            "height": 8,
+            "tile_def": {
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "last",
+                        "q": "sum:hivemq.networking.connections.current{*}"
+                    }
+                ],
+                "viz": "query_value"
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Current Connections",
+            "type": "query_value",
+            "width": 21,
+            "x": 1,
+            "y": 19
+        },
+        {
+            "height": 10,
+            "tile_def": {
+                "autoscale": true,
+                "custom_links": [],
+                "custom_unit": "/s",
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "sum:hivemq.messages.incoming.total.count{*}.as_rate()"
+                    }
+                ],
+                "viz": "query_value"
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Incoming Message Rate",
+            "type": "query_value",
+            "width": 21,
+            "x": 1,
+            "y": 41
+        },
+        {
+            "height": 10,
+            "tile_def": {
+                "autoscale": true,
+                "custom_links": [],
+                "custom_unit": "/s",
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "sum:hivemq.messages.outgoing.total.count{*}.as_rate()"
+                    }
+                ],
+                "viz": "query_value"
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Outgoing Message Rate",
+            "type": "query_value",
+            "width": 21,
+            "x": 1,
+            "y": 54
+        },
+        {
+            "bgcolor": "vivid_yellow",
+            "font_size": "18",
+            "height": 5,
+            "html": "Connections",
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 33,
+            "x": 23,
+            "y": 1
+        },
+        {
+            "height": 14,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "sum:hivemq.networking.connections_closed.ungraceful.count{*} by {host}.as_count()",
+                        "style": {
+                            "palette": "warm",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Ungraceful Disconnects",
+            "type": "timeseries",
+            "width": 33,
+            "x": 23,
+            "y": 59
+        },
+        {
+            "height": 14,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "sum:hivemq.networking.connections.current{*} by {host}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Current Connections",
+            "type": "timeseries",
+            "width": 33,
+            "x": 23,
+            "y": 8
+        },
+        {
+            "height": 8,
+            "tile_def": {
+                "autoscale": true,
+                "custom_links": [],
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "last",
+                        "q": "sum:hivemq.subscriptions.overall.current{*}.as_count()"
+                    }
+                ],
+                "viz": "query_value"
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Subscriptions",
+            "type": "query_value",
+            "width": 21,
+            "x": 1,
+            "y": 30
+        },
+        {
+            "height": 14,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "sum:hivemq.networking.connections_closed.graceful.count{*} by {host}.as_count()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Graceful Disconnects",
+            "type": "timeseries",
+            "width": 33,
+            "x": 23,
+            "y": 42
+        },
+        {
+            "bgcolor": "vivid_yellow",
+            "font_size": "18",
+            "height": 5,
+            "html": "Subscriptions",
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 33,
+            "x": 57,
+            "y": 1
+        },
+        {
+            "height": 14,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.incoming.total.count{*} by {host}.as_rate()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Incoming Message Rate",
+            "type": "timeseries",
+            "width": 33,
+            "x": 91,
+            "y": 8
+        },
+        {
+            "height": 14,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.outgoing.total.count{*} by {host}.as_rate()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Outgoing Message Rate",
+            "type": "timeseries",
+            "width": 33,
+            "x": 91,
+            "y": 25
+        },
+        {
+            "height": 14,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.incoming.connect.count{*} by {host}.as_count()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Incoming Connect Messages",
+            "type": "timeseries",
+            "width": 33,
+            "x": 23,
+            "y": 25
+        },
+        {
+            "height": 14,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.dropped.count{*} by {host}.as_count()",
+                        "style": {
+                            "palette": "warm",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Messages Dropped",
+            "type": "timeseries",
+            "width": 33,
+            "x": 91,
+            "y": 42
+        },
+        {
+            "height": 14,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.dropped.queue_full.count{*}.as_count(), sum:hivemq.messages.dropped.not_writable.count{*}.as_count(), sum:hivemq.messages.dropped.internal_error.count{*}.as_count(), sum:hivemq.messages.dropped.message_too_large.count{*}.as_count(), sum:hivemq.messages.dropped.mqtt_packet_too_large.count{*}.as_count(), sum:hivemq.messages.dropped.qos_0_memory_exceeded.count{*}.as_count()",
+                        "style": {
+                            "palette": "warm",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Messages Dropped by Reason",
+            "type": "timeseries",
+            "width": 33,
+            "x": 91,
+            "y": 59
+        },
+        {
+            "bgcolor": "vivid_yellow",
+            "font_size": "18",
+            "height": 5,
+            "html": "Messages",
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 67,
+            "x": 91,
+            "y": 1
+        },
+        {
+            "height": 14,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.retained.current{*} by {host}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Retained Messages",
+            "type": "timeseries",
+            "width": 33,
+            "x": 125,
+            "y": 25
+        },
+        {
+            "height": 14,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "sum:hivemq.subscriptions.overall.current{*} by {host}.as_count()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Current Subscriptions",
+            "type": "timeseries",
+            "width": 33,
+            "x": 57,
+            "y": 8
+        },
+        {
+            "height": 14,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.incoming.subscribe.count{*} by {host}.as_rate()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Subscribe Request Rate",
+            "type": "timeseries",
+            "width": 33,
+            "x": 57,
+            "y": 25
+        },
+        {
+            "height": 14,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.incoming.unsubscribe.count{*} by {host}.as_rate()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Unsubscribe Request Rate",
+            "type": "timeseries",
+            "width": 33,
+            "x": 57,
+            "y": 42
+        },
+        {
+            "height": 14,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "sum:hivemq.publish.without_matching_subscribers{*} by {host}.as_count()",
+                        "style": {
+                            "palette": "warm",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Messages without Matching Subscribers",
+            "type": "timeseries",
+            "width": 33,
+            "x": 57,
+            "y": 59
+        },
+        {
+            "height": 14,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.queued.count{*} by {host}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Queued Messages",
+            "type": "timeseries",
+            "width": 33,
+            "x": 125,
+            "y": 8
+        },
+        {
+            "height": 14,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "sum:hivemq.messages.expired_messages{*} by {host}.as_count()",
+                        "style": {
+                            "palette": "warm",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Expired Messages",
+            "type": "timeseries",
+            "width": 33,
+            "x": 125,
+            "y": 42
+        }
+    ]
+}
