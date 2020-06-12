@@ -4,10 +4,9 @@ extends:
 
 sysobjectid: 1.3.6.1.4.1.9.1.693
 
-# Workaround due empty sysName
-# https://quickview.cloudapps.cisco.com/quickview/bug/CSCvf56919
-
 metric_tags:
+  # Workaround due empty sysName
+  # https://quickview.cloudapps.cisco.com/quickview/bug/CSCvf56919
   - tag: snmp_host
     OID: 1.3.6.1.4.1.9.9.473.1.1.1
     symbol: cccaName
