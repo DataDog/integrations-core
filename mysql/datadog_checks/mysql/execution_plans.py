@@ -129,7 +129,7 @@ class ExecutionPlansMixin(object):
                             'statement': datadog_agent.obfuscate_sql(sql_text),
                             'plan': plan,
                             'query_signature': compute_sql_signature(digest_text),
-                            'exec_plan_signature': compute_exec_plan_signature(plan),
+                            'plan_signature': compute_exec_plan_signature(plan),
                             'mysql': {
                                 'lock_time': row['lock_time_ns'],
                                 'rows_affected': row['rows_affected'],
