@@ -70,6 +70,7 @@ files:
               It will be run with sudo by default, so an entry needs to be added to the sudoers file.
               By default, these metrics will not be sent.
             value:
+              example: /usr/sbin/conntrack
               type: string
           - name: use_sudo_conntrack
             description: |
