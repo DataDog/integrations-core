@@ -84,6 +84,8 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
                 # Defaults that were set when gitlab_runner was based on PrometheusCheck
                 'send_monotonic_counter': instance.get('send_monotonic_counter', False),
                 'health_service_check': instance.get('health_service_check', False),
+                'metadata_metric_name': 'ci_runner_version_info',
+                'metadata_label_map': {'version': 'version'},
             }
         )
 
@@ -141,3 +143,9 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
         else:
             self.service_check(self.MASTER_SERVICE_CHECK_NAME, OpenMetricsBaseCheck.OK, tags=service_check_tags)
         self.log.debug("gitlab check succeeded")
+
+    def transform_metadata(self, metric, scraper_config):
+        # override the method in the base class to continue to send version metric
+        super(GitlabRunnerCheck, self).transform_metadata(metric, scraper_config)
+
+        self.submit_openmetric('ci_runner_version_info', metric, scraper_config)

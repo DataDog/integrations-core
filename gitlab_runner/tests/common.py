@@ -20,6 +20,8 @@ GITLAB_RUNNER_URL = "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_RUNNER_PORT
 
 GITLAB_RUNNER_TAGS = ['gitlab_host:{}'.format(HOST), 'gitlab_port:{}'.format(GITLAB_LOCAL_MASTER_PORT)]
 
+GITLAB_RUNNER_VERSION = os.environ['GITLAB_RUNNER_VERSION']
+
 CUSTOM_TAGS = ['optional:tag1']
 
 # Note that this is a subset of the ones defined in GitlabCheck
@@ -27,7 +29,6 @@ CUSTOM_TAGS = ['optional:tag1']
 # be available yet, hence we validate a stable subset
 ALLOWED_METRICS = [
     'ci_runner_errors',
-    'ci_runner_version_info',
     'process_max_fds',
     'process_open_fds',
     'process_resident_memory_bytes',
