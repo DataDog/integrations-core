@@ -1194,7 +1194,9 @@ def test_cisco_asa_5525(aggregator):
     stat_tags = [(2, 20), (5, 5)]
     for st in stat_tags:
         aggregator.assert_metric(
-            'snmp.cfwConnectionStatValue', metric_type=aggregator.GAUGE, tags=['stat_type:{}'.format(st[1]), 'service_type:{}'.format(st[0])] + common_tags
+            'snmp.cfwConnectionStatValue',
+            metric_type=aggregator.GAUGE,
+            tags=['stat_type:{}'.format(st[1]), 'service_type:{}'.format(st[0])] + common_tags,
         )
 
     aggregator.assert_metric('snmp.crasNumDeclinedSessions', metric_type=aggregator.GAUGE, tags=common_tags)
