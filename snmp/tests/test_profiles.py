@@ -1192,11 +1192,11 @@ def test_cisco_asa_5525(aggregator):
     aggregator.assert_metric('snmp.entPhySensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
 
     stat_tags = [(2, 20), (5, 5)]
-    for st in stat_tags:
+    for (svc, stat) in stat_tags:
         aggregator.assert_metric(
             'snmp.cfwConnectionStatValue',
             metric_type=aggregator.GAUGE,
-            tags=['stat_type:{}'.format(st[1]), 'service_type:{}'.format(st[0])] + common_tags,
+            tags=['stat_type:{}'.format(stat), 'service_type:{}'.format(svc)] + common_tags,
         )
 
     aggregator.assert_metric('snmp.crasNumDeclinedSessions', metric_type=aggregator.GAUGE, tags=common_tags)
@@ -1247,9 +1247,13 @@ def test_cisco_asa_5525(aggregator):
         conn_tags = ['connection_type:{}'.format(conn)] + common_tags
         aggregator.assert_metric('snmp.cfwConnectionStatCount', metric_type=aggregator.RATE, tags=conn_tags)
 
-    aggregator.assert_metric(
-        'snmp.cfwHardwareStatusValue', metric_type=aggregator.GAUGE, tags=['hardware_type:3'] + common_tags
-    )
+    hardware_tags = [(3, 'Secondary unit'), (5, 'Primary unit'), (6, 'Failover LAN Interface')]
+    for (htype, hdesc) in hardware_tags:
+        aggregator.assert_metric(
+            'snmp.cfwHardwareStatusValue',
+            metric_type=aggregator.GAUGE,
+            tags=['hardware_type:{}'.format(htype), 'hardware_desc:{}'.format(hdesc)] + common_tags,
+        )
 
     for switch in [4684, 4850, 8851, 9997, 15228, 16580, 24389, 30813, 36264]:
         aggregator.assert_metric(
