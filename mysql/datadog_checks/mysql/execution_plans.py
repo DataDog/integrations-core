@@ -5,7 +5,7 @@ import pymysql
 import datadog_agent
 from datadog_checks.base import is_affirmative
 
-from .sql import compute_sql_signature
+from .sql import compute_sql_signature, compute_exec_plan_signature
 
 
 VALID_EXPLAIN_STATEMENTS = frozenset({
@@ -129,6 +129,7 @@ class ExecutionPlansMixin(object):
                             'statement': datadog_agent.obfuscate_sql(sql_text),
                             'plan': plan,
                             'query_signature': compute_sql_signature(digest_text),
+                            'exec_plan_signature': compute_exec_plan_signature(plan),
                             'mysql': {
                                 'lock_time': row['lock_time_ns'],
                                 'rows_affected': row['rows_affected'],
