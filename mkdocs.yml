@@ -72,7 +72,9 @@ nav:
     - vSphere: architecture/vsphere.md
   - Process:
     - Integration release: process/integration-release.md
-    - Agent release: process/agent-release.md
+    - Agent release:
+      - process/agent-release/agent-release.md
+      - process/agent-release/post-release.md
   - FAQ:
     - FAQ: faq/faq.md
     - Acknowledgements: faq/acknowledgements.md
@@ -161,6 +163,7 @@ extra:
     - icon: fontawesome/brands/twitter
       link: https://twitter.com/datadoghq
     - icon: fontawesome/brands/instagram
+      link: https://www.instagram.com/datadoghq
       link: https://www.instagram.com/datadoghq
 extra_css:
   - assets/css/custom.css
