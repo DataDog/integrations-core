@@ -102,7 +102,7 @@ def test_compat_cisco_base_profiles(definition_file, equivalent_definition):
 def test_cisco_voice(aggregator):
     run_profile_check('cisco_icm')
 
-    tags = ['snmp_profile:cisco_icm', 'snmp_host:test'] + common.CHECK_TAGS
+    tags = ['snmp_profile:cisco_icm', 'snmp_host:', 'snmp_host:my.hostname'] + common.CHECK_TAGS
 
     resources = ["hrSWRunPerfMem", "hrSWRunPerfCPU"]
 
