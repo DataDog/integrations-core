@@ -1191,12 +1191,11 @@ def test_cisco_asa_5525(aggregator):
     sensor_tags = ['sensor_id:31', 'sensor_type:9'] + common_tags
     aggregator.assert_metric('snmp.entPhySensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
 
-    aggregator.assert_metric(
-        'snmp.cfwConnectionStatValue', metric_type=aggregator.GAUGE, tags=['stat_type:2'] + common_tags
-    )
-    aggregator.assert_metric(
-        'snmp.cfwConnectionStatValue', metric_type=aggregator.GAUGE, tags=['stat_type:5'] + common_tags
-    )
+    stat_tags = [(2, 20), (5, 5)]
+    for st in stat_tags:
+        aggregator.assert_metric(
+            'snmp.cfwConnectionStatValue', metric_type=aggregator.GAUGE, tags=['stat_type:{}'.format(st[1]), 'service_type:{}'.format(st[0])] + common_tags
+        )
 
     aggregator.assert_metric('snmp.crasNumDeclinedSessions', metric_type=aggregator.GAUGE, tags=common_tags)
     aggregator.assert_metric('snmp.crasNumSessions', metric_type=aggregator.GAUGE, tags=common_tags)
