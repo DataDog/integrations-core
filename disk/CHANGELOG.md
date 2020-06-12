@@ -1,5 +1,9 @@
 # CHANGELOG - disk
 
+## 2.10.1 / 2020-06-11
+
+* [Fixed] Rename disk check example config back to .default suffix. See [#6880](https://github.com/DataDog/integrations-core/pull/6880).
+
 ## 2.10.0 / 2020-06-09
 
 * [Added] Add disk timeout configuration option. See [#6826](https://github.com/DataDog/integrations-core/pull/6826).
