@@ -57,7 +57,7 @@ instances:
     ## It will be run with sudo by default, so an entry needs to be added to the sudoers file.
     ## By default, these metrics will not be sent.
     #
-    # conntrack_path: <CONNTRACK_PATH>
+    # conntrack_path: /usr/sbin/conntrack
 
     ## @param use_sudo_conntrack - boolean - optional - default: true
     ## Set to False to disable sudo when running `conntrack -S`
