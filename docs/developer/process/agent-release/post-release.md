@@ -58,3 +58,6 @@ Follow the following steps to add patch release:
 
 4. [Tag](agent-release.md#tag) the branch with the new bumped version `<MAJOR>.<MINOR>.<PATCH>-rc.1`.
 
+5. When the patch release is ready, follow the same steps to [finalize the release](post-release.md#finalize).
+Also manually update the changelog of the integrations that were released on the release branch, see [example](https://github.com/DataDog/integrations-core/pull/6617).
+
