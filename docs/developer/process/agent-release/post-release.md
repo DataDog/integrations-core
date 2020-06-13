@@ -32,11 +32,29 @@ Create a pull request and wait for approval before merging.
 Releases after the final Agent release should be reserved for critical issues only. Cherry-picking commits and releases for
  the patch release is mostly similar to the process for [preparing release candidates](agent-release.md#release-candidates).
 
-However, it's possible that from the time [code freeze ended](agent-release.md#release-week),
+However, it's possible that from the time [code freeze ended](agent-release.md#release-week) and a bugfix is needed,
 the integration has other non-critical commits or was released.
 The next section will describe the process for preparing the patch release candidates.
 
 ### Multiple check releases between bugfix release
 
+Given the effort of QA-ing the Agent release, any new changes should be _carefully_ selected and included for the patch.
 
+Follow the following steps to add patch release:
+
+1. Cherry-pick the bugfix commit to the [release branch](agent-release.md#branch).
+2. Release the integration on the release branch.
+    - Make a pull request with [integration release](../integration-release.md#new-integrations), then merge it to the release branch.
+
+    !!! important
+        Remember to trigger the release pipeline and build the wheel. You can do so by [tagging the release](../../ddev/cli.md#tag):
+
+            `ddev release tag <INTEGRATION>`
+
+        Note: only release PRs merged to master automatically build a wheel.
+
+
+3. Then pull the latest release branch so your branch has both the bugfix commit and release commit.
+
+4. [Tag](agent-release.md#tag) the branch with the new bumped version `<MAJOR>.<MINOR>.<PATCH>-rc.1`.
 
