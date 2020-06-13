@@ -164,7 +164,6 @@ extra:
       link: https://twitter.com/datadoghq
     - icon: fontawesome/brands/instagram
       link: https://www.instagram.com/datadoghq
-      link: https://www.instagram.com/datadoghq
 extra_css:
   - assets/css/custom.css
   - https://cdn.jsdelivr.net/gh/tonsky/FiraCode@4/distr/fira_code.css
