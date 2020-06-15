@@ -9,7 +9,6 @@ init_config:
     - ci_docker_machines_provider_machine_states
     - ci_runner_builds
     - ci_runner_errors
-    - ci_runner_version_info
     - ci_ssh_docker_machines_provider_machine_creation_duration_seconds
     - ci_ssh_docker_machines_provider_machine_states
     - gitlab_runner_autoscaling_machine_creation_duration_seconds
