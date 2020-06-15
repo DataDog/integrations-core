@@ -33,6 +33,7 @@ Releases after the final Agent release should be reserved for critical issues on
 
 However, it's possible that from the time [code freeze ended](agent-release.md#release-week) and a bugfix is needed,
 the integration has other non-critical commits or was released.
+
 The next section will describe the process for preparing the patch release candidates.
 
 ### Multiple check releases between bugfix release
