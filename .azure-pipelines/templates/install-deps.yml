@@ -36,7 +36,7 @@ steps:
       path: ${{ parameters.pip_cache_config.path }}
     displayName: 'Cache pip dependencies'
 
-- script: python -m pip install --disable-pip-version-check --upgrade pip setuptools
+- script: python -m pip install --disable-pip-version-check --upgrade pip setuptools wheel
   displayName: 'Upgrade Python packaging tools'
 
 - script: pip install --disable-pip-version-check git+git://github.com/ofek/codecov-python.git@datadog
