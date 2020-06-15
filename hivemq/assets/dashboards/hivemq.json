@@ -104,7 +104,7 @@
             "y": 54
         },
         {
-            "bgcolor": "vivid_yellow",
+            "bgcolor": "gray",
             "font_size": "18",
             "height": 5,
             "html": "Connections",
@@ -243,7 +243,7 @@
             "y": 42
         },
         {
-            "bgcolor": "vivid_yellow",
+            "bgcolor": "gray",
             "font_size": "18",
             "height": 5,
             "html": "Subscriptions",
@@ -427,7 +427,7 @@
             "y": 59
         },
         {
-            "bgcolor": "vivid_yellow",
+            "bgcolor": "gray",
             "font_size": "18",
             "height": 5,
             "html": "Messages",
