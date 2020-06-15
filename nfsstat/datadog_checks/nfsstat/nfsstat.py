@@ -42,9 +42,9 @@ class NfsStatCheck(AgentCheck):
         if 'No NFS mount point' in stats[0]:
             if not self.autofs_enabled:
                 self.warning("No NFS mount points were found.")
-                return
             else:
-                self.log.debug("AutoFS enabled.")
+                self.log.debug("AutoFS enabled: no mount points currently.")
+            return
 
         for l in stats:
             if not l:
