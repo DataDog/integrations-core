@@ -225,6 +225,7 @@ class VSphereCheck(AgentCheck):
             tags = []
             tags.append('vcenter_host:%s' % instance.get('host'))
             tags.append('vcenter_user:%s' % instance.get('username'))
+            tags.append('endpoint_uuid:%s' % instance.get('name'))
             self.log.debug(u"Alert info. title:%s , text:%s , type:%s , tags:%s",title,text,alert_type,tags)
             statsd.event(title = title, text = text, alert_type = alert_type, tags = tags)
 
