@@ -122,21 +122,21 @@ def test_cisco_voice(aggregator):
         "ccvpSipRtActiveCalls",
         "ccvpSipRtTotalCallLegs",
         "ccvpLicRtPortsInUse",
-    ]
-
-    cvp_counts = [
         "ccvpLicAggMaxPortsInUse",
     ]
+
     for cvp in cvp_gauges:
         aggregator.assert_metric('snmp.{}'.format(cvp), metric_type=aggregator.GAUGE, tags=tags)
 
-    for cvp in cvp_counts:
-        aggregator.assert_metric('snmp.{}'.format(cvp), metric_type=aggregator.RATE, tags=tags)
+    ccms_counts = ["ccmRejectedPhones", "ccmUnregisteredPhones"]
 
-    ccms = ["ccmRegisteredGateways", "ccmRejectedPhones", "ccmRegisteredPhones", "ccmUnregisteredPhones"]
+    ccms_gauges = ["ccmRegisteredGateways", "ccmRegisteredPhones"]
 
-    for ccm in ccms:
+    for ccm in ccms_counts:
         aggregator.assert_metric('snmp.{}'.format(ccm), metric_type=aggregator.RATE, tags=tags)
+
+    for ccm in ccms_gauges:
+        aggregator.assert_metric('snmp.{}'.format(ccm), metric_type=aggregator.GAUGE, tags=tags)
 
     calls = [
         "cvCallVolPeerIncomingCalls",
@@ -173,8 +173,11 @@ def test_cisco_voice(aggregator):
     aggregator.assert_metric('snmp.{}'.format("cccaPimStatus"), metric_type=aggregator.GAUGE, tags=pim_tags)
     aggregator.assert_metric('snmp.{}'.format("sysUpTimeInstance"), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
-    for router in CCCA_ROUTER_GAUGES:
-        aggregator.assert_metric('snmp.{}'.format(router), metric_type=aggregator.GAUGE, tags=tags)
+    instance_numbers = ['4446', '5179', '12093', '19363', '25033', '37738', '42562', '51845', '62906', '63361']
+    for metric in CCCA_ROUTER_GAUGES:
+        for instance_number in instance_numbers:
+            instance_tags = tags + ['instance_number:{}'.format(instance_number)]
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=instance_tags)
 
     aggregator.assert_all_metrics_covered()
 
@@ -1254,6 +1257,21 @@ def test_cisco_asa_5525(aggregator):
             tags=['chassis_switch_id:{}'.format(switch)] + common_tags,
         )
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+
+    # RTT
+    rtt_indexes = [1, 7, 10, 13, 15, 18, 20]
+    rtt_types = [22, 21, 17, 6, 20, 8, 16]
+    rtt_states = [3, 1, 6, 4, 6, 1, 6]
+    rtt_gauges = ['rttMonLatestRttOperCompletionTime', 'rttMonLatestRttOperSense', 'rttMonCtrlOperTimeoutOccurred']
+    for i in range(len(rtt_indexes)):
+        tags = [
+            "rtt_index:{}".format(rtt_indexes[i]),
+            "rtt_type:{}".format(rtt_types[i]),
+            "rtt_state:{}".format(rtt_states[i]),
+        ] + common_tags
+        for rtt in rtt_gauges:
+            aggregator.assert_metric('snmp.{}'.format(rtt), metric_type=aggregator.GAUGE, tags=tags)
+
     aggregator.assert_all_metrics_covered()
 
 
@@ -1646,4 +1664,187 @@ def test_apc_ups(aggregator):
         metric_type=aggregator.GAUGE,
         tags=['outlet_group_name:test_outlet'] + tags,
     )
+    aggregator.assert_all_metrics_covered()
+
+
+def test_fortinet_fortigate(aggregator):
+    run_profile_check('fortinet-fortigate')
+
+    common_tags = common.CHECK_TAGS + ['snmp_profile:fortinet-fortigate']
+
+    common_gauge_metrics = [
+        'fgSysCpuUsage',
+        'fgSysMemUsage',
+        'fgSysMemCapacity',
+        'fgSysLowMemUsage',
+        'fgSysLowMemCapacity',
+        'fgSysDiskUsage',
+        'fgSysDiskCapacity',
+        'fgSysSesCount',
+        'fgSysSesRate1',
+        'fgSysSes6Count',
+        'fgSysSes6Rate1',
+        'fgApHTTPConnections',
+        'fgApHTTPMaxConnections',
+        'fgVdNumber',
+        'fgVdMaxVdoms',
+    ]
+
+    processor_gauge_metrics = [
+        'fgProcessorUsage',
+        'fgProcessorSysUsage',
+    ]
+    processor_count_metrics = [
+        'fgProcessorPktRxCount',
+        'fgProcessorPktTxCount',
+        'fgProcessorPktDroppedCount',
+    ]
+    processor_tags = common_tags + ['processor_index:12']
+
+    vd_metrics = [
+        'fgVdEntOpMode',
+        'fgVdEntHaState',
+        'fgVdEntCpuUsage',
+        'fgVdEntMemUsage',
+        'fgVdEntSesCount',
+        'fgVdEntSesRate',
+    ]
+    vd_tags = common_tags + ['virtualdomain_index:4', 'virtualdomain_name:their oxen quaintly']
+
+    for metric in common_gauge_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+
+    for metric in processor_gauge_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=processor_tags, count=1)
+    for metric in processor_count_metrics:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=processor_tags, count=1
+        )
+
+    for metric in vd_metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=vd_tags, count=1)
+
+    # Interface
+    aggregator.assert_metric('snmp.fgIntfEntVdom', metric_type=aggregator.GAUGE, count=1)
+
+    # Firewall
+    firewall_tags = common_tags + ['policy_index:22']
+    for metric in ['fgFwPolPktCount', 'fgFwPolByteCount']:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=firewall_tags, count=1
+        )
+
+    # Firewall 6
+    firewall6_tags = common_tags + ['policy6_index:29']
+    for metric in ['fgFwPol6PktCount', 'fgFwPol6ByteCount']:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=firewall6_tags, count=1
+        )
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_netapp(aggregator):
+    run_profile_check('netapp')
+
+    profile_tags = [
+        'snmp_profile:netapp',
+        'snmp_host:example-datacenter.company',
+    ]
+
+    common_tags = common.CHECK_TAGS + profile_tags
+
+    gauges = [
+        'cfInterconnectStatus',
+        'miscCacheAge',
+        'ncHttpActiveCliConns',
+    ]
+    counts = [
+        'extcache64Hits',
+    ]
+    for metric in gauges:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    for metric in counts:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=common_tags, count=1
+        )
+
+    snapvault_counts = [
+        'svTotalFailures',
+    ]
+    snapvaults = [('5', '/vol/dir1', '5'), ('6', '/vol/dir3', '2'), ('18', '/vol/dir9', '4')]
+    for metric in snapvault_counts:
+        for index, destination, state in snapvaults:
+            tags = [
+                'index:{}'.format(index),
+                'destination:{}'.format(destination),
+                'state:{}'.format(state),
+            ] + common_tags
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+
+    snapmirrors = [('6', '1'), ('9', '5'), ('29', '1')]
+    snapmirror_gauges = [
+        'snapmirrorLag',
+    ]
+    snapmirror_counts = [
+        'snapmirrorTotalFailures',
+    ]
+    for index, state in snapmirrors:
+        tags = ['index:{}'.format(index), 'state:{}'.format(state)] + common_tags
+        for metric in snapmirror_gauges:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        for metric in snapmirror_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+
+    filesystem_gauges = [
+        'dfHighTotalKBytes',
+        'dfHighAvailKBytes',
+        'dfInodesUsed',
+        'dfInodesFree',
+    ]
+    filesystem_indexes = [
+        '1022',
+        '1023',
+        '1024',
+        '1025',
+        '1026',
+        '1027',
+        '1028',
+        '1029',
+        '1032',
+        '1033',
+    ]
+    filesystems = ['/vol/dir{}'.format(n) for n in range(1, len(filesystem_indexes) + 1)]
+    for metric in filesystem_gauges:
+        for index, filesystem in zip(filesystem_indexes, filesystems):
+            tags = ['index:{}'.format(index), 'filesystem:{}'.format(filesystem)] + common_tags
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    if_counts = [
+        'ifHighInOctets',
+    ]
+    if_rates = [
+        'ifHighInOctets.rate',
+    ]
+    interfaces = [
+        # Interface descriptions will be normalized in the backend, but we receive the raw DisplayString values here.
+        ('6', 'netgear ifX300 v1'),
+        ('7', 'junyper proto12 12.3'),
+        ('23', 'malabar yz42 10.2020'),
+    ]
+    for index, descr in interfaces:
+        tags = ['index:{}'.format(index), 'interface:{}'.format(descr)] + common_tags
+        for metric in if_counts:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1
+            )
+        for metric in if_rates:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
     aggregator.assert_all_metrics_covered()

@@ -67,7 +67,7 @@ class APIResponseError(Exception):
 class VersionInfo(object):
     def __init__(self, about_info):
         # type: (vim.AboutInfo) -> None
-        # Semver formatted version string
+        # SemVer formatted version string
         self.version_str = "{}+{}".format(about_info.version, about_info.build)
 
         # Text based information i.e 'VMware vCenter Server 6.7.0 build-14792544'

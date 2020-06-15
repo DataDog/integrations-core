@@ -6,12 +6,7 @@ import os
 import click
 import yaml
 
-from ..console import CONTEXT_SETTINGS
-
-
-@click.group(context_settings=CONTEXT_SETTINGS, short_help='SNMP utilities')
-def snmp():
-    pass
+from ...console import CONTEXT_SETTINGS
 
 
 def fetch_mib(mib):
@@ -32,7 +27,7 @@ def fetch_mib(mib):
     mibCompiler.compile(mib)
 
 
-@snmp.command(context_settings=CONTEXT_SETTINGS, short_help='Translate MIB name to OIDs in SNMP profiles')
+@click.command(context_settings=CONTEXT_SETTINGS, short_help='Translate MIB name to OIDs in SNMP profiles')
 @click.argument('profile_path')
 @click.pass_context
 def translate_profile(ctx, profile_path):

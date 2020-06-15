@@ -9,6 +9,7 @@ from ...utils import find_free_port, get_ip, path_join
 from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,
+    DEFAULT_DOGSTATSD_PORT,
     DEFAULT_PYTHON_VERSION,
     FAKE_API_KEY,
     MANIFEST_VERSION_PATTERN,
@@ -38,6 +39,7 @@ class DockerInterface(object):
         log_url=None,
         python_version=DEFAULT_PYTHON_VERSION,
         default_agent=False,
+        dogstatsd=False,
     ):
         self.check = check
         self.env = env
@@ -50,6 +52,7 @@ class DockerInterface(object):
         self.dd_url = dd_url
         self.log_url = log_url
         self.python_version = python_version or DEFAULT_PYTHON_VERSION
+        self.dogstatsd = dogstatsd
 
         self._agent_version = self.metadata.get('agent_version')
         self.container_name = f'dd_{self.check}_{self.env}'
@@ -254,6 +257,9 @@ class DockerInterface(object):
         # Any environment variables passed to the start command
         for key, value in sorted(env_vars.items()):
             command.extend(['-e', f'{key}={value}'])
+
+        if self.dogstatsd:
+            command.extend(['-p', f'{DEFAULT_DOGSTATSD_PORT}:{DEFAULT_DOGSTATSD_PORT}/udp'])
 
         if 'proxy' in self.metadata:
             if 'http' in self.metadata['proxy']:
