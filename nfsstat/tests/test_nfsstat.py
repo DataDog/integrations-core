@@ -6,6 +6,8 @@ import os
 
 import mock
 
+from copy import deepcopy
+
 from datadog_checks.base import ensure_unicode
 from datadog_checks.nfsstat import NfsStatCheck
 
@@ -25,11 +27,14 @@ class TestNfsstat:
     def test_no_devices(self, aggregator):
         instance = self.INSTANCES['main']
         c = NfsStatCheck(self.CHECK_NAME, self.INIT_CONFIG, [instance])
+        c.log = mock.MagicMock()
+
         with mock.patch(
             'datadog_checks.nfsstat.nfsstat.get_subprocess_output',
             return_value=('No NFS mount points were found', '', 0),
         ):
             c.check(instance)
+        c.log.warning.assert_called_once_with("No NFS mount points were found.", extra=mock.ANY)
 
     def test_check(self, aggregator):
         instance = self.INSTANCES['main']
@@ -55,5 +60,25 @@ class TestNfsstat:
         for metric in METRICS:
             aggregator.assert_metric(metric, tags=tags)
             aggregator.assert_metric(metric, tags=tags_unicode)
+
+        assert aggregator.metrics_asserted_pct == 100.0
+
+    def test_autofs_enabled(self, aggregator, caplog):
+        caplog.set_level(logging.DEBUG)
+        instance = self.INSTANCES['main']
+        init_config = deepcopy(self.INIT_CONFIG)
+        init_config['autofs_enabled'] = True
+        c = NfsStatCheck(self.CHECK_NAME, init_config, [instance])
+        c.log = mock.MagicMock()
+
+        with mock.patch(
+            'datadog_checks.nfsstat.nfsstat.get_subprocess_output',
+            return_value=('No NFS mount points were found', '', 0),
+        ):
+            c.check(instance)
+            assert 'AutoFS enabled.' in caplog.text
+
+        for metric in METRICS:
+            aggregator.assert_metric(metric)
 
         assert aggregator.metrics_asserted_pct == 100.0
