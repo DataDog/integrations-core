@@ -60,10 +60,10 @@ files:
         List of tags to attach to every metric, event and service check emitted by this integration.
 
         Learn more about tagging: https://docs.datadoghq.com/tagging/
+      enabled: true
       value:
         type: array
         items:
           type: string
-        enabled: true
         example:
           - "apiserver:%%host%%"
