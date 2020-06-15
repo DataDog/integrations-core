@@ -10,6 +10,8 @@ from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')
 
+CONTAINER_NAME = 'ibm_mq'
+
 HOST = get_docker_hostname()
 PORT = '11414'
 

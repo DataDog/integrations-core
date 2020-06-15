@@ -9,3 +9,14 @@ services:
       - LICENSE=accept
     ports:
       - "11414:1414"
+    volumes:
+      - './startup_commands.sh:/tmp/startup_commands.sh'
+#
+#  ibmmq2:
+#    container_name: ibm_mq2
+#    image: ibmcom/mq:${IBM_MQ_VERSION}
+#    environment:
+#      - MQ_QMGR_NAME=datadog
+#      - LICENSE=accept
+#    ports:
+#      - "11415:1414"

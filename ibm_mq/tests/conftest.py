@@ -8,9 +8,10 @@ import re
 import pytest
 from six.moves import range
 
-from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev import docker_run, run_command
+from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 from datadog_checks.ibm_mq import IbmMqCheck
+from tests.common import CONTAINER_NAME
 
 from . import common
 
@@ -116,6 +117,16 @@ def consume():
     qmgr.disconnect()
 
 
+def startup_commands():
+    run_docker_command(['bash', '/tmp/startup_commands.sh'])
+
+# def run_mq_command(command):
+
+
+def run_docker_command(command):
+    run_command(['docker', 'exec', CONTAINER_NAME] + command, check=True)
+
+
 @pytest.fixture(scope='session')
 def dd_environment():
 
@@ -127,6 +138,9 @@ def dd_environment():
     env = {'COMPOSE_DIR': common.COMPOSE_DIR}
 
     with docker_run(
-        common.COMPOSE_FILE_PATH, env_vars=env, conditions=[CheckDockerLogs('ibm_mq', log_pattern)], sleep=10
+        common.COMPOSE_FILE_PATH, env_vars=env, conditions=[
+                CheckDockerLogs('ibm_mq', log_pattern),
+                WaitFor(startup_commands, wait=1, attempts=1),
+            ], sleep=10
     ):
         yield common.INSTANCE, common.E2E_METADATA

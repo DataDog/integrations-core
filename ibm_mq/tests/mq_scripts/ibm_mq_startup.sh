@@ -3,7 +3,7 @@
 MQ_URL=https://ddintegrations.blob.core.windows.net/ibm-mq/9.1.0.4-IBM-MQC-Redist-LinuxX64.tar.gz
 
 apt-get update
-apt-get install gcc -y
+apt-get install gcc curl -y
 
 mkdir -p /tmp/mqm
 
@@ -16,4 +16,4 @@ done
 
 tar -C /tmp/mqm -xf /tmp/mq-client.tar.gz
 
-cp -r /tmp/mqm/samp /opt/mqm/samp
+cp -r /tmp/mqm/samp /opt/mqm

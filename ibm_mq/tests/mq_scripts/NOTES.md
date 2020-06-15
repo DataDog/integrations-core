@@ -98,3 +98,7 @@ class MD(MQOpts):
             ['OriginalLength', CMQC.MQOL_UNDEFINED, MQLONG_TYPE]]), **kw)
 
 ```
+
+```
+docker exec ibm_mq /opt/mqm/samp/bin/amqsevt  -m datadog -q SYSTEM.ADMIN.STATISTICS.QUEUE
+```
