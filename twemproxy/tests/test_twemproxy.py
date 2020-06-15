@@ -29,6 +29,25 @@ def test_integration(check, dd_environment, setup_request, aggregator):
     aggregator.assert_service_check('twemproxy.can_connect', status=Twemproxy.OK, tags=SC_TAGS, count=1)
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_metadata_integration(aggregator, datadog_agent, check):
+    check.check_id = 'test:123'
+    check.check(common.INSTANCE)
+
+    major, minor, patch = common.TWEMPROXY_VERSION.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': common.TWEMPROXY_VERSION,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
+
+
 @pytest.mark.e2e
 def test_e2e(dd_agent_check, setup_request, instance):
     aggregator = dd_agent_check(instance, rate=True)
