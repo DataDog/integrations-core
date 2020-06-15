@@ -63,8 +63,7 @@ class TestNfsstat:
 
         assert aggregator.metrics_asserted_pct == 100.0
 
-    def test_autofs_enabled(self, aggregator, caplog):
-        caplog.set_level(logging.DEBUG)
+    def test_autofs_enabled(self, aggregator):
         instance = self.INSTANCES['main']
         init_config = deepcopy(self.INIT_CONFIG)
         init_config['autofs_enabled'] = True
@@ -76,9 +75,4 @@ class TestNfsstat:
             return_value=('No NFS mount points were found', '', 0),
         ):
             c.check(instance)
-            assert 'AutoFS enabled.' in caplog.text
-
-        for metric in METRICS:
-            aggregator.assert_metric(metric)
-
-        assert aggregator.metrics_asserted_pct == 100.0
+        c.log.debug.assert_called_once_with("AutoFS enabled: no mount points currently.")
