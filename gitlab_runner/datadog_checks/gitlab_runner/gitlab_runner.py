@@ -72,6 +72,11 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
         if allowed_metrics is None:
             raise CheckException("At least one metric must be whitelisted in `allowed_metrics`.")
 
+        # Users may want to only report the version
+        # OpenMetricsCheck doesn't allow the metadata_metric_name to be one of the metrics
+        if 'ci_runner_version_info' in allowed_metrics:
+            allowed_metrics.remove('ci_runner_version_info')
+
         gitlab_runner_instance = deepcopy(instance)
 
         # gitlab_runner uses 'prometheus_endpoint' and not 'prometheus_url', so we have to rename the key
