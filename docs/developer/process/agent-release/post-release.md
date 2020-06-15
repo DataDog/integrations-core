@@ -22,7 +22,6 @@ Run the following commands to update the contents:
 
 Create a pull request and wait for approval before merging.
 
-
 ## Patches
 
 !!! important
@@ -60,4 +59,3 @@ Follow the following steps to add patch release:
 
 5. When the patch release is ready, follow the same steps to [finalize the release](post-release.md#finalize).
 Also manually update the changelog of the integrations that were released on the release branch, see [example](https://github.com/DataDog/integrations-core/pull/6617).
-
