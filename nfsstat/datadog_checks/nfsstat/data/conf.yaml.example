@@ -10,7 +10,7 @@ init_config:
     # nfsiostat_path: /usr/local/sbin/nfsiostat
 
     ## @param autofs_enabled - boolean - optional - default: false
-    ## If your environment uses AutoFS, enable this option to only log debug messages when there are no mounts.
+    ## If your environment uses AutoFS, enable this option to only log DEBUG-level messages when there are no mounts.
     ## See more information on AutoFS here: https://help.ubuntu.com/community/Autofs
     #
     # autofs_enabled: false
