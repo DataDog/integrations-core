@@ -20,7 +20,7 @@ files:
             value:
               example: http://localhost:50075
               type: string
-          - template: instances/tags
+          - template: instances/default
           - template: instances/http
       - template: logs
         example:
