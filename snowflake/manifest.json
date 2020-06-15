@@ -1,0 +1,33 @@
+{
+  "display_name": "Snowflake",
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "1.0.0",
+  "name": "snowflake",
+  "metric_prefix": "snowflake.",
+  "metric_to_check": "",
+  "creates_events": false,
+  "short_description": "",
+  "guid": "4813a514-e9a4-4f28-9b83-b4221b51b18b",
+  "support": "core",
+  "supported_os": [
+    "linux",
+    "mac_os",
+    "windows"
+  ],
+  "public_title": "Datadog-Snowflake Integration",
+  "categories": [
+    ""
+  ],
+  "type": "check",
+  "is_public": false,
+  "integration_id": "snowflake",
+  "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {},
+    "service_checks": "assets/service_checks.json"
+  }
+}
