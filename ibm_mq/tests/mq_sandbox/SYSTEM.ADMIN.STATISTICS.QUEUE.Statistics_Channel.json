@@ -1,0 +1,44 @@
+{
+  "eventSource": {
+    "objectName": "SYSTEM.ADMIN.STATISTICS.QUEUE",
+    "objectType": "Queue"
+  },
+  "eventType": {
+    "name": "Statistics Channel",
+    "value": 166
+  },
+  "eventReason": {
+    "name": "None",
+    "value": 0
+  },
+  "eventCreation": {
+    "timeStamp": "2020-06-16T09:22:59Z",
+    "epoch": 1592299379
+  },
+  "eventData": {
+    "queueMgrName": "QM1",
+    "startDate": "2020-06-16",
+    "startTime": "09.22.58",
+    "endDate": "2020-06-16",
+    "endTime": "09.22.59",
+    "commandLevel": 911,
+    "objectCount": 1,
+    "chlStatisticsData": [
+      {
+        "channelName": "GCP.B",
+        "channelType": "Clussdr",
+        "remoteQueueMgrName": "QM2",
+        "connectionName": "172.22.0.3(1415)",
+        "msgs": 0,
+        "bytes": 0,
+        "netTimeMin": 378,
+        "netTimeMax": 378,
+        "netTimeAvg": 378,
+        "fullBatches": 0,
+        "incompleteBatches": 1,
+        "avgBatchSize": 0,
+        "putRetries": 0
+      }
+    ]
+  }
+}
