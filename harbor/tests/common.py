@@ -17,6 +17,7 @@ HARBOR_METRICS = [
     ('harbor.projects.count', False),
     ('harbor.disk.free', True),
     ('harbor.disk.total', True),
+    ('harbor.registry.read_only', False),
 ]
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -95,5 +96,7 @@ REGISTRIES_FIXTURE = [
 VOLUME_INFO_FIXTURE = {"storage": {"total": 1e6, "free": 5e5}}
 
 SYSTEM_INFO_FIXTURE = {"harbor_version": "v{}-25bb24ca".format(os.environ['HARBOR_VERSION'])}
+if HARBOR_VERSION >= VERSION_1_5:
+    SYSTEM_INFO_FIXTURE['read_only'] = False
 if HARBOR_VERSION >= VERSION_1_6:
     SYSTEM_INFO_FIXTURE['with_chartmuseum'] = True

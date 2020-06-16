@@ -52,6 +52,16 @@ def test_submit_disk_metrics(aggregator, harbor_check, harbor_api):
     aggregator.assert_metric('harbor.disk.total', 1e6, tags=tags)
 
 
+@pytest.mark.usefixture("patch_requests")
+def test_submit_read_only_status(aggregator, harbor_check, harbor_api):
+    if harbor_api.harbor_version >= VERSION_1_5:
+        tags = ['tag1:val1', 'tag2']
+        harbor_check._submit_read_only_status(harbor_api, tags)
+        aggregator.assert_metric('harbor.registry.read_only', False, tags=tags)
+    else:
+        None
+
+
 def test_api__make_get_request(harbor_api):
     harbor_api.http = MagicMock()
     harbor_api.http.get = MagicMock(return_value=MockResponse({"json": True}, 200))
