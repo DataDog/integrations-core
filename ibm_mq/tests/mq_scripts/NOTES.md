@@ -100,5 +100,9 @@ class MD(MQOpts):
 ```
 
 ```
-docker exec ibm_mq /opt/mqm/samp/bin/amqsevt  -m datadog -q SYSTEM.ADMIN.STATISTICS.QUEUE
+docker exec ibm_mq1 /opt/mqm/samp/bin/amqsevt  -m datadog -q SYSTEM.ADMIN.STATISTICS.QUEUE
 ```
+
+
+
+https://cloud.google.com/solutions/deploying-ha-ibm-mq-cluster-on-compute-engine

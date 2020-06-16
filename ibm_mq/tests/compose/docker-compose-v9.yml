@@ -2,6 +2,7 @@ version: '3'
 
 services:
   ibmmq:
+    network_mode: host
     container_name: ibm_mq
     image: ibmcom/mq:${IBM_MQ_VERSION}
     environment:
@@ -9,14 +10,19 @@ services:
       - LICENSE=accept
     ports:
       - "11414:1414"
+      - "9443:9443"
     volumes:
-      - './startup_commands.sh:/tmp/startup_commands.sh'
-#
-#  ibmmq2:
-#    container_name: ibm_mq2
-#    image: ibmcom/mq:${IBM_MQ_VERSION}
-#    environment:
-#      - MQ_QMGR_NAME=datadog
-#      - LICENSE=accept
-#    ports:
-#      - "11415:1414"
+      # - './startup_commands.sh:/tmp/startup_commands.sh'
+      - './config.mqsc:/etc/mqm/config.mqsc'
+
+  ibmmq2:
+    network_mode: host
+    container_name: ibm_mq2
+    image: ibmcom/mq:${IBM_MQ_VERSION}
+    environment:
+      - MQ_QMGR_NAME=datadog
+      - LICENSE=accept
+    ports:
+      - "11415:1414"
+    volumes:
+      - './config.mqsc:/etc/mqm/config.mqsc'

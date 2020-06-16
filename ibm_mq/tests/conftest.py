@@ -120,8 +120,6 @@ def consume():
 def startup_commands():
     run_docker_command(['bash', '/tmp/startup_commands.sh'])
 
-# def run_mq_command(command):
-
 
 def run_docker_command(command):
     run_command(['docker', 'exec', CONTAINER_NAME] + command, check=True)
