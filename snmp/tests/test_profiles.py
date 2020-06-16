@@ -521,6 +521,19 @@ def test_meraki_cloud_controller(aggregator):
     for metric in if_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
 
+    # IF-MIB
+    if_tags = ['interface:eth0'] + common_tags
+    for metric in IF_COUNTS:
+        aggregator.assert_metric(
+            'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=if_tags, count=1
+        )
+
+    for metric in IF_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=if_tags, count=1)
+
+    for metric in IF_RATES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=if_tags, count=1)
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
 
