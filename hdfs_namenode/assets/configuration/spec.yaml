@@ -15,7 +15,8 @@ files:
                 a HDFS NameNode. The HDFS NameNode JMX URI is composed of the NameNode's hostname and port.
                 
                 The hostname and port can be found in the hdfs-site.xml conf file under
-                the property dfs.namenode.http-address
+                the property dfs.namenode.http-address.
+                https://hadoop.apache.org/docs/r2.7.1/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml
               required: true
               value:
                 example: http://localhost:50070
