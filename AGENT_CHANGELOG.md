@@ -1,3 +1,7 @@
+## Datadog Agent version [7.20.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7202)
+
+* Redis [2.1.1](https://github.com/DataDog/integrations-core/blob/master/redisdb/CHANGELOG.md)
+
 ## Datadog Agent version [7.20.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7201)
 
 * Disk [2.9.1](https://github.com/DataDog/integrations-core/blob/master/disk/CHANGELOG.md)
