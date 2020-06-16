@@ -65,8 +65,8 @@ PG_STAT_STATEMENTS_TAG_COLUMNS = {
 
 # Transformation functions to apply to each column before submission
 PG_STAT_STATEMENTS_TRANSFORM = {
-    # Truncate the query to 200 chars
-    'query': lambda q: q[:200],
+    # obfuscate then truncate the query to 200 chars
+    'query': lambda q: datadog_agent.obfuscate_sql(q)[:200],
 }
 
 
