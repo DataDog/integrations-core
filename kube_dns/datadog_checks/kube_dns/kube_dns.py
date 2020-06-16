@@ -19,7 +19,7 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
     # Set up metric_transformers
     METRIC_TRANSFORMERS = {}
 
-    def __init__(self, name, init_config, instances=None):
+    def __init__(self, name, init_config, instances):
         # Set up metric_transformers
         self.METRIC_TRANSFORMERS = {
             'kubedns_kubedns_dns_request_count_total': self.kubedns_kubedns_dns_request_count_total,
