@@ -7,7 +7,7 @@ from requests.exceptions import ConnectionError
 
 from datadog_checks.gitlab_runner import GitlabRunnerCheck
 
-from .common import BAD_CONFIG, CUSTOM_TAGS, HOST
+from .common import BAD_CONFIG, CONFIG, CUSTOM_TAGS, GITLAB_RUNNER_VERSION, HOST
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -32,3 +32,23 @@ def test_connection_failure(aggregator):
     aggregator.assert_service_check(
         GitlabRunnerCheck.PROMETHEUS_SERVICE_CHECK_NAME, status=GitlabRunnerCheck.CRITICAL, tags=CUSTOM_TAGS, count=1
     )
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_version_metadata(aggregator, datadog_agent):
+    check_instance = GitlabRunnerCheck('gitlab_runner', CONFIG['init_config'], instances=CONFIG['instances'])
+    check_instance.check_id = 'test:123'
+    check_instance.check(CONFIG['instances'][0])
+
+    raw_version = GITLAB_RUNNER_VERSION
+
+    major, minor, patch = raw_version.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': raw_version,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
