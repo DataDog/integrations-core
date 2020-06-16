@@ -2,7 +2,7 @@
     "author_info": {
         "author_name": "Datadog"
     },
-    "board_title": "HiveMQ",
+    "board_title": "HiveMQ Overview",
     "description": "The default dashboard for monitoring HiveMQ brokers including connections, subscriptions, and messages.",
     "template_variables": [],
     "widgets": [
