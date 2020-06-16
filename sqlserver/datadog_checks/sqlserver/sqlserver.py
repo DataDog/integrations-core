@@ -474,6 +474,8 @@ class SQLServer(AgentCheck):
         tags.append('alertMessage:%s' % alert_message)
         tags.append('endpoint_uuid:%s' % endpoint_uuid)
         tags.append('severity:WARNING')
+        tags.append('username:%s' % instance.get('username'))
+        tags.append('hostname:%s' % instance.get('host'))
         self.log.debug(u"Alert info. title:%s , text:%s , type:%s , tags:%s", alert_title, alert_message, ALERT_TYPE_ERROR, tags)
         statsd.event(title = alert_title, text = alert_message, alert_type = ALERT_TYPE_ERROR, tags = tags)
 
