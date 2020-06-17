@@ -63,8 +63,9 @@ files:
         example: "false"
     - name: query_timeout
       description: |
-        Abort any statement that takes more than the specified number of milliseconds, starting from the time the command
-        arrives at the server from the client. A value of zero (the default) turns this off.
+        Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
+        to all metric collection queries. Aborts any statement that takes more than the specified number of milliseconds,
+        starting from the time the command arrives at the server from the client. A value of zero turns this off.
         Cancelled queries won't log any metrics
       value:
         type: integer
@@ -118,7 +119,7 @@ files:
         type: boolean
         example: false
     - name: collect_count_metrics
-      description: Collect count metrics.
+      description: Collect count of user tables up to max_relations size from pg_stat_user_tables
       value:
         type: boolean
         example: true
