@@ -33,9 +33,7 @@ def test_check(aggregator, check):
             check.get_stat_info()
 
     with open(os.path.join(common.FIXTURE_DIR, "process_stats")) as f:
-        with patch(
-            'datadog_checks.linux_proc_extras.check.get_subprocess_output', return_value=(f.read(), "", 0)
-        ):
+        with patch('datadog_checks.linux_proc_extras.check.get_subprocess_output', return_value=(f.read(), "", 0)):
             check.get_process_states()
 
     # Assert metrics

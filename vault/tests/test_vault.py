@@ -8,8 +8,8 @@ import pytest
 import requests
 
 from datadog_checks.vault import Vault
-from datadog_checks.vault.errors import ApiUnreachable
 from datadog_checks.vault.check import Leader
+from datadog_checks.vault.errors import ApiUnreachable
 
 from .common import INSTANCES, MockResponse, auth_required, noauth_required
 from .utils import run_check

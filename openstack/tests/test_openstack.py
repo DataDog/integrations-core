@@ -120,9 +120,7 @@ def test_unscoped_from_config():
     mock_http_response['token'].pop('catalog')
     mock_http_response['token'].pop('project')
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
-    with mock.patch(
-        'datadog_checks.openstack.check.OpenStackUnscoped.request_auth_token', return_value=mock_response
-    ):
+    with mock.patch('datadog_checks.openstack.check.OpenStackUnscoped.request_auth_token', return_value=mock_response):
         with mock.patch(
             'datadog_checks.openstack.check.OpenStackUnscoped.request_project_list',
             return_value=MOCK_HTTP_PROJECTS_RESPONSE,

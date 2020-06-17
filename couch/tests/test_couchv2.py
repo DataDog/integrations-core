@@ -279,7 +279,7 @@ def test_compaction_metrics(aggregator, gauges, active_tasks):
     Database compaction tasks are super quick to run on small amounts of data, leading to the task sometimes
     being complete before the check queries for active tasks. This can lead to flaky results, so let's mock.
     """
-    from datadog_checks.couch import couch
+    from datadog_checks.couch import check as couch
 
     def _get_active_tasks(server, name, tags):
         return active_tasks
