@@ -20,7 +20,7 @@ def test_parser(mocked_check):
 
 
 def test_metrics(mocked_check, aggregator, instance):
-    with mock.patch("datadog_checks.riakcs.riakcs.S3Connection"):
+    with mock.patch("datadog_checks.riakcs.check.S3Connection"):
         mocked_check.check(instance)
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric(metric, tags=common.EXPECTED_TAGS)
@@ -42,7 +42,7 @@ def test_21_parser(mocked_check21):
 
 
 def test_21_metrics(mocked_check21, aggregator, instance21):
-    with mock.patch("datadog_checks.riakcs.riakcs.S3Connection"):
+    with mock.patch("datadog_checks.riakcs.check.S3Connection"):
         mocked_check21.check(instance21)
     for metric in common.EXPECTED_METRICS_21:
         aggregator.assert_metric(metric, tags=common.EXPECTED_TAGS)

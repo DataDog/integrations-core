@@ -3,6 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from .__about__ import __version__
-from .http_check import HTTPCheck
+from .check import HTTPCheck
 
 __all__ = ['__version__', 'HTTPCheck']

@@ -10,7 +10,7 @@ import pytest
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.openstack.openstack import (
+from datadog_checks.openstack.check import (
     IncompleteAuthScope,
     IncompleteConfig,
     IncompleteIdentity,
@@ -94,7 +94,7 @@ def test_from_config():
         OpenStackProjectScope.from_config(init_config, bad_instance_config)
 
     with mock.patch(
-        'datadog_checks.openstack.openstack.OpenStackProjectScope.request_auth_token', return_value=MOCK_HTTP_RESPONSE
+        'datadog_checks.openstack.check.OpenStackProjectScope.request_auth_token', return_value=MOCK_HTTP_RESPONSE
     ):
         append_config = good_instance_config.copy()
         append_config['append_tenant_id'] = True
@@ -121,14 +121,14 @@ def test_unscoped_from_config():
     mock_http_response['token'].pop('project')
     mock_response = MockHTTPResponse(response_dict=mock_http_response, headers={'X-Subject-Token': 'fake_token'})
     with mock.patch(
-        'datadog_checks.openstack.openstack.OpenStackUnscoped.request_auth_token', return_value=mock_response
+        'datadog_checks.openstack.check.OpenStackUnscoped.request_auth_token', return_value=mock_response
     ):
         with mock.patch(
-            'datadog_checks.openstack.openstack.OpenStackUnscoped.request_project_list',
+            'datadog_checks.openstack.check.OpenStackUnscoped.request_project_list',
             return_value=MOCK_HTTP_PROJECTS_RESPONSE,
         ):
             with mock.patch(
-                'datadog_checks.openstack.openstack.OpenStackUnscoped.get_token_for_project',
+                'datadog_checks.openstack.check.OpenStackUnscoped.get_token_for_project',
                 return_value=MOCK_HTTP_RESPONSE,
             ):
                 append_config = good_instance_config.copy()
@@ -174,7 +174,7 @@ def test_ensure_auth_scope(aggregator):
         openstack_check.get_scope_for_instance(instance)
 
     with mock.patch(
-        'datadog_checks.openstack.openstack.OpenStackProjectScope.request_auth_token', return_value=MOCK_HTTP_RESPONSE
+        'datadog_checks.openstack.check.OpenStackProjectScope.request_auth_token', return_value=MOCK_HTTP_RESPONSE
     ):
         scope = openstack_check.ensure_auth_scope(instance)
 

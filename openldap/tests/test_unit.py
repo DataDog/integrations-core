@@ -25,8 +25,8 @@ def test_check(check, aggregator, mocker):
         ],
     }
 
-    mocker.patch("datadog_checks.openldap.openldap.ldap3.Server", return_value=server_mock)
-    mocker.patch("datadog_checks.openldap.openldap.ldap3.Connection", return_value=conn_mock)
+    mocker.patch("datadog_checks.openldap.check.ldap3.Server", return_value=server_mock)
+    mocker.patch("datadog_checks.openldap.check.ldap3.Connection", return_value=conn_mock)
     check.check(instance)
     tags = ["url:fake_server"]
     aggregator.assert_service_check("openldap.can_connect", check.OK, tags=tags)
@@ -76,9 +76,9 @@ def test_check(check, aggregator, mocker):
 
 
 def test__get_tls_object(check, mocker):
-    os_mock = mocker.patch("datadog_checks.openldap.openldap.os")
-    ldap3_tls_mock = mocker.patch("datadog_checks.openldap.openldap.ldap3.core.tls.Tls")
-    ssl_mock = mocker.patch("datadog_checks.openldap.openldap.ssl")
+    os_mock = mocker.patch("datadog_checks.openldap.check.os")
+    ldap3_tls_mock = mocker.patch("datadog_checks.openldap.check.ldap3.core.tls.Tls")
+    ssl_mock = mocker.patch("datadog_checks.openldap.check.ssl")
 
     # Check no SSL
     assert check._get_tls_object(None) is None

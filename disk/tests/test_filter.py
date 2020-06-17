@@ -4,7 +4,7 @@
 import re
 
 from datadog_checks.dev.utils import ON_WINDOWS
-from datadog_checks.disk.disk import IGNORE_CASE, Disk
+from datadog_checks.disk.check import IGNORE_CASE, Disk
 
 from .mocks import MockPart
 from .utils import assert_regex_equal, requires_windows

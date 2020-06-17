@@ -414,7 +414,7 @@ def test_kubelet_credentials_update(monkeypatch, aggregator):
     )
     kubelet_conn_info = {'url': 'http://127.0.0.1:10255', 'ca_cert': False}
     with mock.patch('requests.get', return_value=get), mock.patch(
-        'datadog_checks.kubelet.kubelet.get_connection_info', return_value=kubelet_conn_info
+        'datadog_checks.kubelet.check.get_connection_info', return_value=kubelet_conn_info
     ):
         check.check(instance)
 
@@ -837,19 +837,19 @@ def test_retrieved_pod_list_failure(monkeypatch):
 
 def test_compute_pod_expiration_datetime(monkeypatch):
     # Invalid input
-    with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value="") as p:
+    with mock.patch("datadog_checks.kubelet.check.get_config", return_value="") as p:
         assert KubeletCheck._compute_pod_expiration_datetime() is None
         p.assert_called_with("kubernetes_pod_expiration_duration")
 
-    with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value="invalid"):
+    with mock.patch("datadog_checks.kubelet.check.get_config", return_value="invalid"):
         assert KubeletCheck._compute_pod_expiration_datetime() is None
 
     # Disabled
-    with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value="0"):
+    with mock.patch("datadog_checks.kubelet.check.get_config", return_value="0"):
         assert KubeletCheck._compute_pod_expiration_datetime() is None
 
     # Set to 15 minutes
-    with mock.patch("datadog_checks.kubelet.kubelet.get_config", return_value="900"):
+    with mock.patch("datadog_checks.kubelet.check.get_config", return_value="900"):
         expire = KubeletCheck._compute_pod_expiration_datetime()
         assert expire is not None
         now = datetime.utcnow().replace(tzinfo=UTC)

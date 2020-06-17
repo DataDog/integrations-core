@@ -69,7 +69,7 @@ def mock_type():
     paths = [
         'datadog_checks.vsphere.cache.type',
         'datadog_checks.vsphere.utils.type',
-        'datadog_checks.vsphere.vsphere.type',
+        'datadog_checks.vsphere.check.type',
         'datadog_checks.vsphere.api_rest.type',
     ]
     with ExitStack() as stack:
@@ -82,8 +82,8 @@ def mock_type():
 
 @pytest.fixture
 def mock_threadpool():
-    with patch('datadog_checks.vsphere.vsphere.ThreadPoolExecutor') as pool, patch(
-        'datadog_checks.vsphere.vsphere.as_completed', side_effect=lambda x: x
+    with patch('datadog_checks.vsphere.check.ThreadPoolExecutor') as pool, patch(
+        'datadog_checks.vsphere.check.as_completed', side_effect=lambda x: x
     ):
         pool.return_value.submit = lambda f, args: MagicMock(
             done=MagicMock(return_value=True), result=MagicMock(return_value=f(args)), exception=lambda: None
@@ -93,7 +93,7 @@ def mock_threadpool():
 
 @pytest.fixture
 def mock_api():
-    with patch('datadog_checks.vsphere.vsphere.VSphereAPI', MockedAPI):
+    with patch('datadog_checks.vsphere.check.VSphereAPI', MockedAPI):
         yield
 
 

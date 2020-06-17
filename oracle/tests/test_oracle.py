@@ -23,7 +23,7 @@ def test__get_connection_instant_client(check):
     service_check = mock.MagicMock()
     check.service_check = service_check
     expected_tags = ['server:localhost:1521', 'optional:tag1']
-    with mock.patch('datadog_checks.oracle.oracle.cx_Oracle') as cx:
+    with mock.patch('datadog_checks.oracle.check.cx_Oracle') as cx:
         cx.connect.return_value = con
         check.create_connection()
         assert check._connection == con
@@ -49,10 +49,10 @@ def test__get_connection_jdbc(check):
     jpype = mock.MagicMock(isJVMStarted=lambda: False)
 
     mocks = [
-        ('datadog_checks.oracle.oracle.cx_Oracle', cx),
-        ('datadog_checks.oracle.oracle.jdb', jdb),
-        ('datadog_checks.oracle.oracle.jpype', jpype),
-        ('datadog_checks.oracle.oracle.JDBC_IMPORT_ERROR', None),
+        ('datadog_checks.oracle.check.cx_Oracle', cx),
+        ('datadog_checks.oracle.check.jdb', jdb),
+        ('datadog_checks.oracle.check.jpype', jpype),
+        ('datadog_checks.oracle.check.JDBC_IMPORT_ERROR', None),
     ]
     with ExitStack() as stack:
         for mock_call in mocks:

@@ -1,4 +1,4 @@
 from .__about__ import __version__
-from .postgres import PostgreSql
+from .check import PostgreSql
 
 __all__ = ['__version__', 'PostgreSql']

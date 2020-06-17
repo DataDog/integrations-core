@@ -60,9 +60,9 @@ def backend_manual_unhealthy_mock(*args, **kwargs):
             return ensure_unicode(f.read()), u"", 0
 
 
-@mock.patch('datadog_checks.varnish.varnish.geteuid')
-@mock.patch('datadog_checks.varnish.varnish.Varnish._get_version_info')
-@mock.patch('datadog_checks.varnish.varnish.get_subprocess_output', side_effect=backend_manual_unhealthy_mock)
+@mock.patch('datadog_checks.varnish.check.geteuid')
+@mock.patch('datadog_checks.varnish.check.Varnish._get_version_info')
+@mock.patch('datadog_checks.varnish.check.get_subprocess_output', side_effect=backend_manual_unhealthy_mock)
 def test_command_line_manually_unhealthy(mock_subprocess, mock_version, mock_geteuid, aggregator, check, instance):
     """
     Test the varnishadm output for version >= 4.x with manually set health
@@ -97,9 +97,9 @@ def test_command_line_manually_unhealthy(mock_subprocess, mock_version, mock_get
     ]
 
 
-@mock.patch('datadog_checks.varnish.varnish.geteuid')
-@mock.patch('datadog_checks.varnish.varnish.Varnish._get_version_info')
-@mock.patch('datadog_checks.varnish.varnish.get_subprocess_output', side_effect=backend_list_mock)
+@mock.patch('datadog_checks.varnish.check.geteuid')
+@mock.patch('datadog_checks.varnish.check.Varnish._get_version_info')
+@mock.patch('datadog_checks.varnish.check.get_subprocess_output', side_effect=backend_list_mock)
 def test_command_line_post_varnish4(mock_subprocess, mock_version, mock_geteuid, aggregator, check, instance):
     """
     Test the Varnishadm output for version >= 4.x
@@ -134,9 +134,9 @@ def test_command_line_post_varnish4(mock_subprocess, mock_version, mock_geteuid,
     ]
 
 
-@mock.patch('datadog_checks.varnish.varnish.geteuid')
-@mock.patch('datadog_checks.varnish.varnish.Varnish._get_version_info')
-@mock.patch('datadog_checks.varnish.varnish.get_subprocess_output', side_effect=backend_list_mock_v5)
+@mock.patch('datadog_checks.varnish.check.geteuid')
+@mock.patch('datadog_checks.varnish.check.Varnish._get_version_info')
+@mock.patch('datadog_checks.varnish.check.get_subprocess_output', side_effect=backend_list_mock_v5)
 def test_command_line_post_varnish5(mock_subprocess, mock_version, mock_geteuid, aggregator, check, instance):
     """
     Test the Varnishadm output for version >= 5.x
@@ -179,9 +179,9 @@ def test_command_line_post_varnish5(mock_subprocess, mock_version, mock_geteuid,
     ]
 
 
-@mock.patch('datadog_checks.varnish.varnish.geteuid')
-@mock.patch('datadog_checks.varnish.varnish.Varnish._get_version_info')
-@mock.patch('datadog_checks.varnish.varnish.get_subprocess_output', side_effect=debug_health_mock)
+@mock.patch('datadog_checks.varnish.check.geteuid')
+@mock.patch('datadog_checks.varnish.check.Varnish._get_version_info')
+@mock.patch('datadog_checks.varnish.check.get_subprocess_output', side_effect=debug_health_mock)
 def test_command_line(mock_subprocess, mock_version, mock_geteuid, aggregator, check, instance):
     """
     Test the varnishadm output for Varnish < 4.x

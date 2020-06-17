@@ -5,7 +5,7 @@
 import os
 
 from datadog_checks.dev import get_docker_hostname
-from datadog_checks.yarn.yarn import YARN_APPS_PATH, YARN_CLUSTER_METRICS_PATH, YARN_NODES_PATH, YARN_SCHEDULER_PATH
+from datadog_checks.yarn.check import YARN_APPS_PATH, YARN_CLUSTER_METRICS_PATH, YARN_NODES_PATH, YARN_SCHEDULER_PATH
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 

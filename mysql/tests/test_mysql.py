@@ -244,8 +244,8 @@ def test__get_server_pid():
             # continue as the original `process_iter` function
             yield p
 
-    with mock.patch('datadog_checks.mysql.mysql.psutil.process_iter', process_iter):
-        with mock.patch('datadog_checks.mysql.mysql.PROC_NAME', 'this_shouldnt_exist'):
+    with mock.patch('datadog_checks.mysql.check.psutil.process_iter', process_iter):
+        with mock.patch('datadog_checks.mysql.check.PROC_NAME', 'this_shouldnt_exist'):
             # the pid should be none but without errors
             assert mysql_check._get_server_pid(None) is None
             assert mysql_check.log.exception.call_count == 0

@@ -285,7 +285,7 @@ def test_invalid_discovery_interval():
         check.check(instance)
 
 
-@mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")
+@mock.patch("datadog_checks.snmp.check.read_persistent_cache")
 def test_cache_discovered_host(read_mock):
     instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
     instance.pop('ip_address')
@@ -299,8 +299,8 @@ def test_cache_discovered_host(read_mock):
     assert '192.168.0.1' in check._config.discovered_instances
 
 
-@mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")
-@mock.patch("datadog_checks.snmp.snmp.write_persistent_cache")
+@mock.patch("datadog_checks.snmp.check.read_persistent_cache")
+@mock.patch("datadog_checks.snmp.check.write_persistent_cache")
 def test_cache_corrupted(write_mock, read_mock):
     instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
     instance.pop('ip_address')
@@ -314,7 +314,7 @@ def test_cache_corrupted(write_mock, read_mock):
     write_mock.assert_called_once_with('', '[]')
 
 
-@mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")
+@mock.patch("datadog_checks.snmp.check.read_persistent_cache")
 @mock.patch("datadog_checks.snmp.discovery.write_persistent_cache")
 def test_cache_building(write_mock, read_mock):
     instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
@@ -467,7 +467,7 @@ def test_discovery_tags():
     assert set(config.tags) == {'snmp_device:192.168.0.2', 'test:check', 'snmp_profile:generic-router'}
 
 
-@mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")
+@mock.patch("datadog_checks.snmp.check.read_persistent_cache")
 @mock.patch("threading.Thread")
 def test_cache_loading_tags(thread_mock, read_mock):
     """When loading discovered instances from cache, tags don't leak from one to the others."""

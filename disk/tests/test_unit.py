@@ -123,7 +123,7 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
     }
     c = Disk('disk', {}, [instance])
 
-    with mock.patch('datadog_checks.disk.disk.Disk._get_devices_label'):
+    with mock.patch('datadog_checks.disk.check.Disk._get_devices_label'):
         # _get_devices_label is only called on linux, so devices_label is manually filled
         # to make the test run on everything
         c.devices_label = {DEFAULT_DEVICE_NAME: 'label:mylab'}
@@ -161,7 +161,7 @@ def test_get_devices_label():
     c = Disk('disk', {}, [{}])
 
     with mock.patch(
-        "datadog_checks.disk.disk.get_subprocess_output",
+        "datadog_checks.disk.check.get_subprocess_output",
         return_value=mock_blkid_output(),
         __name__='get_subprocess_output',
     ):
@@ -229,7 +229,7 @@ def test_timeout_config(aggregator, gauge_metrics, rate_metrics):
         return lambda *args: fun(args)
 
     with mock.patch('psutil.disk_partitions', return_value=[MockPart()]), mock.patch(
-        'datadog_checks.disk.disk.timeout', return_value=no_timeout
+        'datadog_checks.disk.check.timeout', return_value=no_timeout
     ) as mock_timeout:
         c.check(instance)
 
@@ -257,7 +257,7 @@ def test_timeout_warning(aggregator, gauge_metrics, rate_metrics):
 
     with mock.patch('psutil.disk_partitions', return_value=[MockPart(), MockPart(mountpoint="/faulty")]), mock.patch(
         'psutil.disk_usage', return_value=m, __name__='disk_usage'
-    ), mock.patch('datadog_checks.disk.disk.timeout', return_value=faulty_timeout):
+    ), mock.patch('datadog_checks.disk.check.timeout', return_value=faulty_timeout):
         c.check({})
 
     # Check that the warning is called once for the faulty disk

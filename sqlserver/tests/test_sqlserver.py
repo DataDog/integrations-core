@@ -6,7 +6,7 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.sqlserver import SQLConnectionError
+from datadog_checks.sqlserver.check import SQLConnectionError
 
 from .common import CHECK_NAME, EXPECTED_METRICS, LOCAL_SERVER
 from .utils import not_windows_ci, windows_ci

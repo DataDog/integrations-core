@@ -126,7 +126,7 @@ def test_check_tsl_ca_cert(aggregator):
     }
 
     with mock.patch(
-        'datadog_checks.http_check.http_check.get_ca_certs_path',
+        'datadog_checks.http_check.check.get_ca_certs_path',
         new=lambda: os.path.join(HERE, 'fixtures', 'emptycert.pem'),
     ):
         check = HTTPCheck('http_check', {}, [instance])

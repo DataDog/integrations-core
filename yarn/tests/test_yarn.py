@@ -8,7 +8,7 @@ from requests.exceptions import SSLError
 from six import iteritems
 
 from datadog_checks.yarn import YarnCheck
-from datadog_checks.yarn.yarn import (
+from datadog_checks.yarn.check import (
     APPLICATION_STATUS_SERVICE_CHECK,
     SERVICE_CHECK_NAME,
     YARN_APP_METRICS,

@@ -1,4 +1,4 @@
 from .__about__ import __version__
-from .ceph import Ceph
+from .check import Ceph
 
 __all__ = ['__version__', 'Ceph']

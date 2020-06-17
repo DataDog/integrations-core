@@ -5,7 +5,7 @@ import pytest
 from datadog_test_libs.win.pdh_mocks import initialize_pdh_tests, pdh_mocks_fixture  # noqa: F401
 
 from datadog_checks.exchange_server import ExchangeCheck
-from datadog_checks.exchange_server.exchange_server import DEFAULT_COUNTERS
+from datadog_checks.exchange_server.check import DEFAULT_COUNTERS
 
 from .common import CHECK_NAME, METRIC_INSTANCES, MINIMAL_INSTANCE
 

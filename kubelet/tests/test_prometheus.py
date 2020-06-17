@@ -39,7 +39,7 @@ def check():
 @pytest.fixture
 def cadvisor_scraper(check):
     with mock.patch(
-        'datadog_checks.kubelet.kubelet.KubeletCheck.retrieve_pod_list',
+        'datadog_checks.kubelet.check.KubeletCheck.retrieve_pod_list',
         return_value=json.loads(mock_from_file('podlist_containerd.json')),
     ):
         check.pod_list = check.retrieve_pod_list()

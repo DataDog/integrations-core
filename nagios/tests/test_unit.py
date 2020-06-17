@@ -4,7 +4,7 @@
 
 from mock import MagicMock
 
-from datadog_checks.nagios.nagios import NagiosEventLogTailer
+from datadog_checks.nagios.check import NagiosEventLogTailer
 
 from .common import NAGIOS_TEST_LOG
 

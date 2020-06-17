@@ -70,7 +70,7 @@ def mock_hosts_e2e():
 @pytest.fixture(scope='session')
 def http_check():
     # Patch the function to return the certs located in the `tests/` folder
-    with patch('datadog_checks.http_check.http_check.get_ca_certs_path', new=mock_get_ca_certs_path):
+    with patch('datadog_checks.http_check.check.get_ca_certs_path', new=mock_get_ca_certs_path):
         yield HTTPCheck('http_check', {}, [{}])
 
 

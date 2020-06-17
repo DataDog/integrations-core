@@ -31,8 +31,8 @@ def get_mock_devices():
     return [device_tuple(device='/dev/disk1', mountpoint='/', fstype='btrfs', opts='local,multilabel')]
 
 
-@mock.patch('datadog_checks.btrfs.btrfs.psutil.disk_partitions', return_value=get_mock_devices())
-@mock.patch('datadog_checks.btrfs.btrfs.BTRFS.get_usage', return_value=mock_get_usage())
+@mock.patch('datadog_checks.btrfs.check.psutil.disk_partitions', return_value=get_mock_devices())
+@mock.patch('datadog_checks.btrfs.check.BTRFS.get_usage', return_value=mock_get_usage())
 def test_check(mock_get_usage, mock_device_list, aggregator):
     """
     Testing Btrfs check.

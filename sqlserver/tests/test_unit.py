@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.sqlserver import SQLConnectionError
+from datadog_checks.sqlserver.check import SQLConnectionError
 from datadog_checks.sqlserver.utils import set_default_driver_conf
 
 # mark the whole module

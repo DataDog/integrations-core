@@ -9,7 +9,7 @@ import pytest
 from mock import patch
 from six.moves import xmlrpc_client as xmlrpclib
 
-from datadog_checks.supervisord.supervisord import FORMAT_TIME  # pylint: disable=import-error,no-name-in-module
+from datadog_checks.supervisord.check import FORMAT_TIME  # pylint: disable=import-error,no-name-in-module
 
 from .common import TEST_CASES
 

@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from datadog_checks.iis.iis import DEFAULT_COUNTERS
+from datadog_checks.iis.check import DEFAULT_COUNTERS
 
 CHECK_NAME = 'iis'
 MINIMAL_INSTANCE = {'host': '.'}

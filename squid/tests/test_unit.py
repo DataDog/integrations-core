@@ -62,7 +62,7 @@ def test_get_counters(check):
     due to a missing = character.
     See https://github.com/DataDog/integrations-core/pull/1643
     """
-    with mock.patch('datadog_checks.squid.squid.requests.get') as g:
+    with mock.patch('datadog_checks.squid.check.requests.get') as g:
         with mock.patch('datadog_checks.squid.SquidCheck.submit_version'):
             g.return_value = mock.MagicMock(text="client_http.requests=42\n\n")
             check.parse_counter = mock.MagicMock(return_value=('foo', 'bar'))

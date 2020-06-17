@@ -9,7 +9,7 @@ from tests.common import EXCHANGE_MESSAGE_STATS
 
 import datadog_checks.base
 from datadog_checks.rabbitmq import RabbitMQ
-from datadog_checks.rabbitmq.rabbitmq import EXCHANGE_TYPE, NODE_TYPE, OVERVIEW_TYPE, RabbitMQException
+from datadog_checks.rabbitmq.check import EXCHANGE_TYPE, NODE_TYPE, OVERVIEW_TYPE, RabbitMQException
 
 from . import common, metrics
 

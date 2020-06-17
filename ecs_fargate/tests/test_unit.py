@@ -137,7 +137,7 @@ def test_failing_check(check, instance, aggregator):
     """
     Testing fargate metadata endpoint error.
     """
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', return_value=MockResponse("{}", 500)):
+    with mock.patch('datadog_checks.ecs_fargate.check.requests.get', return_value=MockResponse("{}", 500)):
         check.check(instance)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.CRITICAL, tags=INSTANCE_TAGS, count=1)
@@ -147,7 +147,7 @@ def test_invalid_response_check(check, instance, aggregator):
     """
     Testing invalid fargate metadata payload.
     """
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', return_value=MockResponse("{}", 200)):
+    with mock.patch('datadog_checks.ecs_fargate.check.requests.get', return_value=MockResponse("{}", 200)):
         check.check(instance)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.WARNING, tags=INSTANCE_TAGS, count=1)
@@ -157,8 +157,8 @@ def test_successful_check(check, instance, aggregator):
     """
     Testing successful fargate check.
     """
-    with mock.patch('datadog_checks.ecs_fargate.ecs_fargate.requests.get', side_effect=mocked_requests_get):
-        with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
+    with mock.patch('datadog_checks.ecs_fargate.check.requests.get', side_effect=mocked_requests_get):
+        with mock.patch("datadog_checks.ecs_fargate.check.get_tags", side_effect=mocked_get_tags):
             check.check(instance)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.OK, tags=INSTANCE_TAGS, count=1)

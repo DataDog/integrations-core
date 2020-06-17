@@ -2,6 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .__about__ import __version__
-from .kube_controller_manager import KubeControllerManagerCheck
+from .check import KubeControllerManagerCheck
 
 __all__ = ['__version__', 'KubeControllerManagerCheck']

@@ -91,7 +91,7 @@ def netstat_subprocess_mock(*args, **kwargs):
 @pytest.mark.skipif(platform.system() != 'Linux', reason="Only runs on Unix systems")
 def test_cx_state(aggregator, check):
     instance = {'collect_connection_state': True}
-    with mock.patch('datadog_checks.network.network.get_subprocess_output') as out:
+    with mock.patch('datadog_checks.network.check.get_subprocess_output') as out:
         out.side_effect = ss_subprocess_mock
         check._collect_cx_state = True
         check.check(instance)
@@ -105,10 +105,10 @@ def test_cx_state(aggregator, check):
             aggregator.assert_metric(metric, value=value)
 
 
-@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+@mock.patch('datadog_checks.network.check.Platform.is_linux', return_value=True)
 def test_cx_state_mocked(is_linux, aggregator, check):
     instance = {'collect_connection_state': True}
-    with mock.patch('datadog_checks.network.network.get_subprocess_output') as out:
+    with mock.patch('datadog_checks.network.check.get_subprocess_output') as out:
         out.side_effect = ss_subprocess_mock
         check._collect_cx_state = True
         check._is_collect_cx_state_runnable = lambda x: True
@@ -131,7 +131,7 @@ def test_add_conntrack_stats_metrics(aggregator, check):
         "cpu=1 found=21960 invalid=17288 ignore=475938848 insert=0 insert_failed=1 "
         "drop=1 early_drop=0 error=0 search_restart=36983181"
     )
-    with mock.patch('datadog_checks.network.network.get_subprocess_output') as subprocess:
+    with mock.patch('datadog_checks.network.check.get_subprocess_output') as subprocess:
         subprocess.return_value = mocked_conntrack_stats, None, None
         check._add_conntrack_stats_metrics(None, None, ['foo:bar'])
 
@@ -140,10 +140,10 @@ def test_add_conntrack_stats_metrics(aggregator, check):
             aggregator.assert_metric(metric, value=value[1], tags=['foo:bar', 'cpu:1'])
 
 
-@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=False)
-@mock.patch('datadog_checks.network.network.Platform.is_bsd', return_value=False)
-@mock.patch('datadog_checks.network.network.Platform.is_solaris', return_value=False)
-@mock.patch('datadog_checks.network.network.Platform.is_windows', return_value=True)
+@mock.patch('datadog_checks.network.check.Platform.is_linux', return_value=False)
+@mock.patch('datadog_checks.network.check.Platform.is_bsd', return_value=False)
+@mock.patch('datadog_checks.network.check.Platform.is_solaris', return_value=False)
+@mock.patch('datadog_checks.network.check.Platform.is_windows', return_value=True)
 def test_win_uses_psutil(is_linux, is_bsd, is_solaris, is_windows, check):
     with mock.patch.object(check, '_check_psutil') as _check_psutil:
         check.check({})
@@ -255,7 +255,7 @@ def test_cx_state_psutil(aggregator, check):
         'system.net.tcp6.opening': 0,
     }
 
-    with mock.patch('datadog_checks.network.network.psutil') as mock_psutil:
+    with mock.patch('datadog_checks.network.check.psutil') as mock_psutil:
         mock_psutil.net_connections.return_value = conn
         check._setup_metrics({})
         check._cx_state_psutil()
@@ -282,7 +282,7 @@ def test_cx_counters_psutil(aggregator, check):
             bytes_sent=0, bytes_recv=0, packets_sent=0, packets_recv=0, errin=0, errout=0, dropin=0, dropout=0
         ),
     }
-    with mock.patch('datadog_checks.network.network.psutil') as mock_psutil:
+    with mock.patch('datadog_checks.network.check.psutil') as mock_psutil:
         mock_psutil.net_io_counters.return_value = counters
         check._excluded_ifaces = ['Loopback Pseudo-Interface 1']
         check._exclude_iface_re = ''
@@ -328,7 +328,7 @@ def test_get_net_proc_base_location(aggregator, check, proc_location, envs, expe
 
 
 @pytest.mark.skipif(not PY3, reason="mock builtins only works on Python 3")
-@mock.patch('datadog_checks.network.network.Platform.is_linux', return_value=True)
+@mock.patch('datadog_checks.network.check.Platform.is_linux', return_value=True)
 def test_proc_permissions_error(aggregator, check, caplog):
     caplog.set_level(logging.DEBUG)
     with mock.patch('builtins.open', mock.mock_open()) as mock_file:

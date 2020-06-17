@@ -14,7 +14,7 @@ def test__init__():
     init_config = {'ca_certs': ''}
     # `get_ca_certs_path` needs to be mocked because it's used as fallback when
     # init_config doesn't contain `ca_certs`
-    with mock.patch('datadog_checks.http_check.http_check.get_ca_certs_path', return_value='bar'):
+    with mock.patch('datadog_checks.http_check.check.get_ca_certs_path', return_value='bar'):
         http_check = HTTPCheck('http_check', init_config, [{}])
         assert http_check.ca_certs == 'bar'
 

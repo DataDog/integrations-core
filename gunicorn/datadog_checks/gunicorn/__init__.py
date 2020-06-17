@@ -2,6 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .__about__ import __version__
-from .gunicorn import GUnicornCheck
+from .check import GUnicornCheck
 
 __all__ = ['__version__', 'GUnicornCheck']

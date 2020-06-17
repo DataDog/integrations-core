@@ -19,22 +19,22 @@ def test_check(aggregator, check):
 
     with open(os.path.join(common.FIXTURE_DIR, "entropy_avail")) as f:
         m = mock_open(read_data=f.read())
-        with patch('datadog_checks.linux_proc_extras.linux_proc_extras.open', m):
+        with patch('datadog_checks.linux_proc_extras.check.open', m):
             check.get_entropy_info()
 
     with open(os.path.join(common.FIXTURE_DIR, "inode-nr")) as f:
         m = mock_open(read_data=f.read())
-        with patch('datadog_checks.linux_proc_extras.linux_proc_extras.open', m):
+        with patch('datadog_checks.linux_proc_extras.check.open', m):
             check.get_inode_info()
 
     with open(os.path.join(common.FIXTURE_DIR, "proc-stat")) as f:
         m = mock_open(read_data=f.read())
-        with patch('datadog_checks.linux_proc_extras.linux_proc_extras.open', m):
+        with patch('datadog_checks.linux_proc_extras.check.open', m):
             check.get_stat_info()
 
     with open(os.path.join(common.FIXTURE_DIR, "process_stats")) as f:
         with patch(
-            'datadog_checks.linux_proc_extras.linux_proc_extras.get_subprocess_output', return_value=(f.read(), "", 0)
+            'datadog_checks.linux_proc_extras.check.get_subprocess_output', return_value=(f.read(), "", 0)
         ):
             check.get_process_states()
 

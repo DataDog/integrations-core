@@ -42,5 +42,5 @@ def mock_getconnection():
             yield None
 
     poll = mock.MagicMock(side_effect=messages_iter())
-    with mock.patch('datadog_checks.mapr.mapr.MaprCheck.get_connection', return_value=mock.MagicMock(poll=poll)):
+    with mock.patch('datadog_checks.mapr.check.MaprCheck.get_connection', return_value=mock.MagicMock(poll=poll)):
         yield

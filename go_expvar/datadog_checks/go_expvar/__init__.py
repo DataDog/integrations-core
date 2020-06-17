@@ -2,6 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .__about__ import __version__
-from .go_expvar import GoExpvar
+from .check import GoExpvar
 
 __all__ = ['__version__', 'GoExpvar']

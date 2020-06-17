@@ -188,8 +188,8 @@ def _setup_mocks():
     mock_conn.cursor.return_value = mock_cursor
 
     mocks = [
-        mock.patch('datadog_checks.cacti.cacti.rrdtool'),
-        mock.patch('datadog_checks.cacti.cacti.pymysql.connect', return_value=mock_conn),
+        mock.patch('datadog_checks.cacti.check.rrdtool'),
+        mock.patch('datadog_checks.cacti.check.pymysql.connect', return_value=mock_conn),
         mock.patch('datadog_checks.cacti.CactiCheck._get_rrd_info', return_value=MOCK_INFO),
         mock.patch('datadog_checks.cacti.CactiCheck._get_rrd_fetch', return_value=MOCK_FETCH),
     ]

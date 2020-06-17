@@ -31,8 +31,8 @@ def test_ssl_config_ok(aggregator):
 
     check = VerticaCheck('vertica', {}, [instance])
 
-    with mock.patch('datadog_checks.vertica.vertica.vertica') as vertica:
-        with mock.patch('datadog_checks.vertica.vertica.ssl') as ssl:
+    with mock.patch('datadog_checks.vertica.check.vertica') as vertica:
+        with mock.patch('datadog_checks.vertica.check.ssl') as ssl:
             vertica.connect.return_value = mock.MagicMock()
             tls_context = mock.MagicMock()
             ssl.SSLContext.return_value = tls_context
@@ -54,7 +54,7 @@ def test_client_logging_enabled(aggregator, instance):
 
     check = VerticaCheck('vertica', {}, [instance])
 
-    with mock.patch('datadog_checks.vertica.vertica.vertica') as vertica:
+    with mock.patch('datadog_checks.vertica.check.vertica') as vertica:
         check.check(instance)
 
         vertica.connect.assert_called_with(
@@ -75,7 +75,7 @@ def test_client_logging_disabled(aggregator, instance):
     instance['client_lib_log_level'] = None
     check = VerticaCheck('vertica', {}, [instance])
 
-    with mock.patch('datadog_checks.vertica.vertica.vertica') as vertica:
+    with mock.patch('datadog_checks.vertica.check.vertica') as vertica:
         check.check(instance)
 
         vertica.connect.assert_called_with(

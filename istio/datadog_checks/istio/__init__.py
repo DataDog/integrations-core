@@ -3,6 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from .__about__ import __version__
-from .istio import Istio
+from .check import Istio
 
 __all__ = ['Istio', '__version__']

@@ -9,7 +9,7 @@ MOCK_VERSION = '1.3.1'
 
 
 @mock.patch(
-    'datadog_checks.postfix.postfix.get_subprocess_output',
+    'datadog_checks.postfix.check.get_subprocess_output',
     return_value=('mail_version = {}'.format(MOCK_VERSION), None, None),
 )
 def test_collect_metadata(aggregator, datadog_agent):
