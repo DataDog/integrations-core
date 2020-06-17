@@ -74,7 +74,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ###### Kubernetes
 
-1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [daemonset configuration][6]:
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your [DaemonSet configuration][6]:
 
    ```yaml
      #(...)
@@ -111,7 +111,7 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
    ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
    ```
 
-3. Make sure that the Docker socket is mounted to the Datadog Agent. More information about the required configuration to collect logs with the Datadog Agent available in the [Docker documentation][8]
+3. Make sure that the Docker socket is mounted to the Datadog Agent. More information about the required configuration to collect logs with the Datadog Agent available in the [Docker documentation][11].
 
 4. [Restart the Agent][4].
 
@@ -147,3 +147,4 @@ Need help? Contact [Datadog support][10].
 [8]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [9]: https://github.com/DataDog/integrations-core/blob/master/twistlock/metadata.csv
 [10]: https://docs.datadoghq.com/help/
+[11]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation
