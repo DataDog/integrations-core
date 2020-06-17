@@ -4,9 +4,8 @@
 import threading
 from collections import namedtuple
 
-import pytest
 import mock
-from mock import MagicMock
+import pytest
 
 from datadog_checks.ssh_check import CheckSSH
 
@@ -115,8 +114,8 @@ def test_add_missing_keys(tmp_path):
     ],
 )
 def test_collect_metadata(version, metadata, datadog_agent):
-    client = MagicMock()
-    client.get_transport = MagicMock(return_value=namedtuple('Transport', ['remote_version'])(version))
+    client = mock.MagicMock()
+    client.get_transport = mock.MagicMock(return_value=namedtuple('Transport', ['remote_version'])(version))
 
     ssh = CheckSSH('ssh_check', {}, {}, list(common.INSTANCES.values()))
     ssh.check_id = 'test:123'
@@ -125,8 +124,8 @@ def test_collect_metadata(version, metadata, datadog_agent):
 
 
 def test_collect_bad_metadata(datadog_agent):
-    client = MagicMock()
-    client.get_transport = MagicMock(return_value=namedtuple('Transport', ['remote_version'])('Cannot parse this'))
+    client = mock.MagicMock()
+    client.get_transport = mock.MagicMock(return_value=namedtuple('Transport', ['remote_version'])('Cannot parse this'))
 
     ssh = CheckSSH('ssh_check', {}, {}, list(common.INSTANCES.values()))
     ssh.check_id = 'test:123'

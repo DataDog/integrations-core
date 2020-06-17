@@ -6,7 +6,7 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.dev import docker_run, get_here
+from datadog_checks.dev import docker_run, get_here, run_command
 from datadog_checks.ssh_check import CheckSSH
 
 from . import common
@@ -15,7 +15,7 @@ from . import common
 @pytest.fixture(scope="session")
 def dd_environment():
     env = {
-        "ROOT_PASSWORD": common.INSTANCE_INTEGRATION.get("password", "1234"),
+        "ROOT_PASSWORD": common.INSTANCE_INTEGRATION["password"],
         "SSH_SERVER_IMAGE": common.SSH_SERVER_IMAGE,
     }
 
@@ -24,7 +24,13 @@ def dd_environment():
         env_vars=env,
         log_patterns="Server listening on 0.0.0.0 port 22.",
     ):
-        yield common.INSTANCE_INTEGRATION
+        try:
+            yield common.INSTANCE_INTEGRATION
+        finally:
+            # Remove any key added when check connected to the sshd server during tests.
+            # This prevents 'host key for server xyz does not match' errors across test runs,
+            # since keys are generated at random by the sshd server upon first connection.
+            run_command(["ssh-keygen", "-R", common.INTEGRATION_ADDED_KEY_HOST])
 
 
 @pytest.fixture

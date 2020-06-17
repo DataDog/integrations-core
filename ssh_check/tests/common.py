@@ -18,27 +18,15 @@ INSTANCES = {
         'username': 'level1',
         'password': 'level1',
         'sftp_check': False,
-        'private_key_file': '',
-        'add_missing_keys': True,
         'tags': ['optional:tag1'],
     },
-    'bad_auth': {
-        'host': 'localhost',
-        'port': 22,
-        'username': 'test',
-        'password': 'yodawg',
-        'sftp_check': False,
-        'private_key_file': '',
-        'add_missing_keys': True,
-    },
+    'bad_auth': {'host': 'localhost', 'port': 22, 'username': 'test', 'password': 'yodawg', 'sftp_check': False},
     'bad_hostname': {
         'host': 'wronghost',
         'port': 22,
         'username': 'datadog01',
         'password': 'abcd',
         'sftp_check': False,
-        'private_key_file': '',
-        'add_missing_keys': True,
     },
 }
 
@@ -49,6 +37,8 @@ INSTANCE_INTEGRATION = {
     "username": "root",
     "add_missing_keys": True,
 }
+
+INTEGRATION_ADDED_KEY_HOST = "[127.0.0.1]:8022"
 
 
 def wait_for_threads():
