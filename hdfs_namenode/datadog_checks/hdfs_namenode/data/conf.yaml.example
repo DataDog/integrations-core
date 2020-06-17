@@ -182,7 +182,7 @@ instances:
     # kerberos_cache: <KERBEROS_CACHE>
 
     ## @param kerberos_delegate - boolean - optional - default: false
-    ## Set to `true` to enable Kerberos delegation of credentials to a server that requests delegation.
+    ## Set to `true` to enable kerberos delegation of credentials to a server that requests delegation.
     ##
     ## See https://github.com/requests/requests-kerberos#delegation
     #
@@ -198,7 +198,7 @@ instances:
 
     ## @param kerberos_hostname - string - optional
     ## Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't
-    ## match its Kerberos hostname (e.g. behind a content switch or load balancer).
+    ## match its kerberos hostname (e.g. behind a content switch or load balancer).
     ##
     ## See https://github.com/requests/requests-kerberos#hostname-override
     #
@@ -234,7 +234,7 @@ instances:
     # aws_host: <AWS_HOST>
 
     ## @param aws_service - string - optional
-    ## If your services require AWS Signature Version 4 signing, set the service code. For a list
+    ## If your services require AWS Signature Version 4 Signing, set the service code. For a list
     ## of available service codes, see https://docs.aws.amazon.com/general/latest/gr/rande.html
     ##
     ## Note that this setting is not necessary for official integrations.
@@ -331,10 +331,10 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs.
+## source  - required - Attribute that defines which Integration sent the logs
 ## service - required - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
-## tags - optional - Add tags to the collected logs.
+## tags - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #
