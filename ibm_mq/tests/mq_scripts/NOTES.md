@@ -106,3 +106,6 @@ docker exec ibm_mq1 /opt/mqm/samp/bin/amqsevt  -m datadog -q SYSTEM.ADMIN.STATIS
 
 
 https://cloud.google.com/solutions/deploying-ha-ibm-mq-cluster-on-compute-engine
+
+
+PYMQI_TEST_QM_NAME=QM1 PYMQI_TEST_QM_CHANNEL=DEV.ADMIN.SVRCONN PYMQI_TEST_QM_USER=admin PYMQI_TEST_QM_PASSWORD=passw0rd PYMQI_TEST_QM_PORT=11414 nosetests  tests/test_pcf.py:TestPCF.test_unpack

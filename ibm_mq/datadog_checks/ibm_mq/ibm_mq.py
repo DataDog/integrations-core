@@ -5,6 +5,7 @@
 from typing import Any
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.ibm_mq.custom_pymqi import CustomPCFExecute
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
 from . import connection, errors
@@ -45,10 +46,20 @@ class IbmMqCheck(AgentCheck):
                 MatchOptions=pymqi.CMQC.MQMO_MATCH_CORREL_ID)
 
             queue_name = 'SYSTEM.ADMIN.STATISTICS.QUEUE'
-            queue = pymqi.Queue(queue_manager, queue_name)
-            message = queue.get()
-            print("message", message)
-            queue.close()
+            while True:
+                try:
+                    queue = pymqi.Queue(queue_manager, queue_name)
+                    message = queue.get()
+                    header = CustomPCFExecute.unpack_header(message)
+                    if header.Command == pymqi.CMQCFC.MQCMD_STATISTICS_CHANNEL:
+                        print("header", header)
+                        unpacked = CustomPCFExecute.unpack(message)
+                        print("message", message)
+                        print("unpacked", unpacked)
+
+                    queue.close()
+                except Exception as ex:
+                    print("error: ", ex)
             self.service_check(self.SERVICE_CHECK, AgentCheck.OK, self.config.tags)
         except Exception as e:
             self.warning("cannot connect to queue manager: %s", e)

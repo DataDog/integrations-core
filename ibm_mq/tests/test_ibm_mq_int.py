@@ -15,7 +15,8 @@ from .common import QUEUE_METRICS, assert_all_metrics
 # pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
 
-def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
+# def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
+def test_check_metrics_and_service_checks(aggregator, instance):
     instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
     check = IbmMqCheck('ibm_mq', {}, [instance])
 
