@@ -300,7 +300,7 @@ def test_indexing_metrics(aggregator, gauges, active_tasks):
     Testing metrics coming from a running indexer would be extremely flaky,
     let's use mock.
     """
-    from datadog_checks.couch import couch
+    from datadog_checks.couch import check as couch
 
     def _get(url, tags, run_check=False):
         if '_active_tasks' in url:
