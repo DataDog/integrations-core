@@ -12,6 +12,8 @@ HOST = get_docker_hostname()
 PORT = os.getenv('POWERDNS_HOST_PORT_0', 8082)
 HERE = os.path.dirname(os.path.abspath(__file__))
 
+POWERDNS_RECURSOR_VERSION = os.environ['POWERDNS_RECURSOR_VERSION']
+
 CONFIG = {"host": HOST, "port": PORT, "api_key": "pdns_api_key"}
 
 CONFIG_V4 = {"host": HOST, "port": PORT, "version": 4, "api_key": "pdns_api_key"}

@@ -126,6 +126,37 @@ class PowerDNSRecursorCheck(AgentCheck):
                     self.gauge('powerdns.recursor.{}'.format(stat['name']), float(stat['value']), tags=tags)
                 elif stat['name'] in PowerDNSRecursorCheck.RATE_METRICS_V4:
                     self.rate('powerdns.recursor.{}'.format(stat['name']), float(stat['value']), tags=tags)
+        self._collect_metadata(config)
+
+    def _collect_metadata(self, config):
+        fallback_url = "http://{}:{}/api".format(config.host, config.port)
+        if config.version == 4:
+            url = fallback_url
+        else:
+            url = "http://{}:{}/servers/localhost/statistics".format(config.host, config.port)
+
+        try:
+            request = self.http.get(url)
+            request.raise_for_status()
+        except Exception as e:
+            try:
+                if fallback_url is url:
+                    raise
+                request = self.http.get(fallback_url)
+                request.raise_for_status()
+            except Exception:
+                self.log.warning('Error collecting PowerDNS Recursor version: %s', str(e))
+                return
+
+        if request.headers.get('Server'):
+            try:
+                # 'Server': 'PowerDNS/4.0.9'
+                version = request.headers['Server'].split('/')[1]
+                self.set_metadata('version', version)
+            except Exception as e:
+                self.log.warning('Error while decoding PowerDNS Recursor version: %e', str(e))
+        else:
+            self.log.warning("Couldn't find the PowerDNS Recursor Server version header")
 
     def _get_config(self, instance):
         required = ['host', 'port']
