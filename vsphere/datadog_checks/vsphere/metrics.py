@@ -68,8 +68,8 @@ HOST_METRICS = {
 
 # All metrics that can be collected from Datastores.
 DATASTORE_METRICS = {
-#     'datastore.numberReadAveraged.average' : "*",
-#     'datastore.numberWriteAveraged.average' : "*",
+    'datastore.numberReadAveraged.average' : None,
+    'datastore.numberWriteAveraged.average' : None,
     'disk.capacity.latest' : None,
     'disk.provisioned.latest' : None,
     'disk.used.latest' : None,

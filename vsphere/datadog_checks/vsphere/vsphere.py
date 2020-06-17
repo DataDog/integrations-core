@@ -38,6 +38,8 @@ except ImportError:
 
 # Default vCenter sampling interval
 REAL_TIME_INTERVAL = 20
+#https://www.vmware.com/support/developer/converter-sdk/conv61_apireference/vim.HistoricalInterval.html
+HISTORICAL_TIME_INTERVAL = 1800
 # Metrics are only collected on vSphere VMs marked by custom field value
 VM_MONITORING_FLAG = 'DatadogMonitored'
 # The size of the ThreadPool used to process the request queue
@@ -1209,6 +1211,7 @@ class VSphereCheck(AgentCheck):
         if i_key not in self.morlist:
             self.log.info(u"Not collecting metrics for this instance, nothing to do yet: {0}".format(i_key))
             return
+        server_instance = self._get_server_instance(instance)
 
         for resource_type in ALL_RESOURCES_WITH_METRICS:
             # Safeguard, let's avoid collecting multiple resource types in the same call
@@ -1239,8 +1242,16 @@ class VSphereCheck(AgentCheck):
                         query_spec.maxSample = 1  # Request a single datapoint
                     else:
                         # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
-                        # contain at least one element
-                        query_spec.startTime = datetime.now() - timedelta(hours=2)
+                        # contain at least one element based on the sampling period of the metrics being fetched
+                        # create offset time based on maximum overlap between historical intervals of 300 & 1800
+                        # for which datastore metrics r available
+                        # https://www.vmware.com/support/developer/converter-sdk/conv61_apireference/vim.PerformanceManager.QuerySpec.html
+                        # https://www.vmware.com/support/developer/converter-sdk/conv61_apireference/vim.HistoricalInterval.html
+
+                        offset_time = HISTORICAL_TIME_INTERVAL - 10
+                        server_time = server_instance.CurrentTime()
+                        query_spec.startTime = server_time - timedelta(seconds=offset_time)
+                        query_spec.endTime = server_time
 
                     query_specs.append(query_spec)
                 if query_specs:
@@ -1318,7 +1329,7 @@ class VSphereCheck(AgentCheck):
 
         # Second part: do the job
         self.collect_metrics(instance)
-        self._query_event(instance)
+        #self._query_event(instance)
 
         # For our own sanity
         self._clean()
