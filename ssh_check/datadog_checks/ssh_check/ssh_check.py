@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import re
 import time
 from collections import namedtuple
@@ -28,6 +29,7 @@ class CheckSSH(AgentCheck):
     SFTP_SERVICE_CHECK_NAME = 'sftp.can_connect'
 
     OPTIONS = [
+        # (option, required, default, type)
         ('host', True, None, str),
         ('port', False, 22, int),
         ('username', True, None, str),
@@ -87,9 +89,25 @@ class CheckSSH(AgentCheck):
                 self.warning("Private key file is invalid")
 
         client = paramiko.SSHClient()
-        if conf.add_missing_keys:
-            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        # Always load system known_hosts (as read-only).
         client.load_system_host_keys()
+
+        if conf.add_missing_keys:
+            # Configure the client so that it saves keys back to system known_hosts
+            # when connecting to a previously-unknown server.
+            # See: https://stackoverflow.com/questions/39523216/paramiko-add-host-key-to-known-hosts-permanently
+            host_keys = os.path.expanduser('~/.ssh/known_hosts')
+            try:
+                client.load_host_keys(host_keys)
+            except IOError as exc:
+                self.log.warning(
+                    'add_missing_keys: host keys file %r could not be loaded: %s. New keys will not be added.',
+                    host_keys,
+                    exc,
+                )
+            else:
+                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
         exception_message = "No errors occured"
         try:

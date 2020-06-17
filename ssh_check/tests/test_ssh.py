@@ -5,6 +5,7 @@ import threading
 from collections import namedtuple
 
 import pytest
+import mock
 from mock import MagicMock
 
 from datadog_checks.ssh_check import CheckSSH
@@ -48,6 +49,32 @@ def test_ssh_bad_config(aggregator):
     # Check that we've closed all connections, if not we're leaking threads
     common.wait_for_threads()
     assert nb_threads == threading.active_count()
+
+
+def test_add_missing_keys(tmp_path):
+    """
+    add_missing_keys option saves keys of previously unknown servers in host keys file.
+    """
+    instance = {
+        'host': 'io.netgarage.org',
+        'port': 22,
+        'username': 'level1',
+        'password': 'level1',
+        'add_missing_keys': True,
+    }
+    check = CheckSSH('ssh_check', {}, [instance])
+
+    host_keys = tmp_path / 'known_hosts'
+    host_keys.touch()
+
+    with mock.patch("os.path.expanduser") as m:
+        m.return_value = str(host_keys)
+        assert host_keys.read_text() == ''
+        check.check(instance)
+        lines = host_keys.read_text().splitlines()
+        assert len(lines) == 1
+        # "io.netgarage.org <ALGORITHM> <KEY>"
+        assert lines[0].startswith('io.netgarage.org')
 
 
 @pytest.mark.parametrize(
