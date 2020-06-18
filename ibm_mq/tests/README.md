@@ -24,6 +24,23 @@ Set up the following env vars in your test run configuration:
 * DYLD_LIBRARY_PATH=~/IBM-MQ-Toolkit-Mac-x64-9.1.2.0/lib64
 * IBM_MQ_VERSION= 8 or 9
 
+Caveat about DYLD_LIBRARY_PATH on MacOS
+=======================================
+
+You might not be able to set `DYLD_LIBRARY_PATH` environment variable due to MacOS ["Runtime Protections"](https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/RuntimeProtections/RuntimeProtections.html#//apple_ref/doc/uid/TP40016462-CH3-SW1) purging the variable.
+
+This example won't work on MacOS:
+
+```bash
+$ DYLD_LIBRARY_PATH=/opt/mqm/lib64 python -c 'import pymqi'
+...
+ModuleNotFoundError: No module named 'pymqe'
+```
+
+The workaround is to use a virtualenv, then set `DYLD_LIBRARY_PATH`, then import `pymqi`.
+
+This does not affect tox tests virtualenv is used.
+
 Development Tips
 ================
 
