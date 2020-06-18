@@ -5,23 +5,27 @@ import re
 
 import pytest
 
+from datadog_checks.ssh_check import CheckSSH
+
 from . import common
 
 pytestmark = pytest.mark.integration
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check, instance):
-    check.check(instance)
+def test_check(aggregator, instance):
+    check = CheckSSH('ssh_check', {}, [instance])
+    check.check(None)
     common._test_check(aggregator, instance)
     common.wait_for_threads()
 
 
 @pytest.mark.skipif(common.SSH_SERVER_VERSION is None, reason='No version')
 @pytest.mark.usefixtures("dd_environment")
-def test_metadata(aggregator, check, instance, datadog_agent):
+def test_metadata(aggregator, instance, datadog_agent):
+    check = CheckSSH('ssh_check', {}, [instance])
     check.check_id = 'test:123'
-    check.check(instance)
+    check.check(None)
 
     _, _, flavor, raw_version = re.split(r'[-_]', common.SSH_SERVER_VERSION)
     major, minor = raw_version.split(".")
