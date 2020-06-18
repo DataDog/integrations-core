@@ -4,6 +4,7 @@ files:
   options:
   - template: init_config
     options:
+      - template: init_config/default
       - template: init_config/http
   - template: instances
     options:
@@ -41,13 +42,13 @@ files:
         description: |
           To enable monitoring of a Standalone Spark cluster, the spark cluster
           mode must be set. Choose the cluster mode between :
-            * `spark_yarn_mode`
-            * `spark_standalone_mode`
-            * `spark_mesos_mode`
-            * `spark_driver_mode`
+           * `spark_yarn_mode`
+           * `spark_standalone_mode`
+           * `spark_mesos_mode`
+           * `spark_driver_mode`
         value:
           type: string
-          default: spark_yarn_mode
+          example: spark_yarn_mode
       - name: spark_ui_ports
         description: |
           If you're using multiple frameworks with Mesos, you can specify which
@@ -58,24 +59,25 @@ files:
           type: array
           items:
             type: integer
+          example:
+            - <PORT_1>
+            - <PORT_2>
       - name: spark_pre_20_mode
         description: |
           To use an older (versions prior to 2.0) Standalone Spark cluster,
           the 'spark_pre_20_mode' must be set to true
         value:
           type: boolean
-          default: false
           example: false
       - name: spark_proxy_enabled
         description: If you have enabled the spark UI proxy, set this to `true`
         value:
           type: boolean
-          default: false
           example: false
       - name: streaming_metrics
         description: Enable collection of streaming statistics. Spark Structured Streaming metrics are currently not supported.
         value:
           type: boolean
-          default: true
           example: true
+      - template: instances/default
       - template: instances/http

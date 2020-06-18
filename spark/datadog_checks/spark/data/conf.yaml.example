@@ -2,6 +2,13 @@
 #
 init_config:
 
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
     ## @param proxy - mapping - optional
     ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
@@ -69,12 +76,12 @@ instances:
     ## @param spark_cluster_mode - string - optional - default: spark_yarn_mode
     ## To enable monitoring of a Standalone Spark cluster, the spark cluster
     ## mode must be set. Choose the cluster mode between :
-    ##   * `spark_yarn_mode`
-    ##   * `spark_standalone_mode`
-    ##   * `spark_mesos_mode`
-    ##   * `spark_driver_mode`
+    ##  * `spark_yarn_mode`
+    ##  * `spark_standalone_mode`
+    ##  * `spark_mesos_mode`
+    ##  * `spark_driver_mode`
     #
-    # spark_cluster_mode: <SPARK_CLUSTER_MODE>
+    # spark_cluster_mode: spark_yarn_mode
 
     ## @param spark_ui_ports - list of integers - optional
     ## If you're using multiple frameworks with Mesos, you can specify which
@@ -82,23 +89,54 @@ instances:
     ## whose port don't match. If the check attempts to connect to a framework that
     ## requires authentication it will fail; this is to prevent that.
     #
-    # spark_ui_ports: []
+    # spark_ui_ports:
+    #   - <PORT_1>
+    #   - <PORT_2>
 
-    ## @param spark_pre_20_mode - boolean - optional - default: False
+    ## @param spark_pre_20_mode - boolean - optional - default: false
     ## To use an older (versions prior to 2.0) Standalone Spark cluster,
     ## the 'spark_pre_20_mode' must be set to true
     #
     # spark_pre_20_mode: false
 
-    ## @param spark_proxy_enabled - boolean - optional - default: False
+    ## @param spark_proxy_enabled - boolean - optional - default: false
     ## If you have enabled the spark UI proxy, set this to `true`
     #
     # spark_proxy_enabled: false
 
-    ## @param streaming_metrics - boolean - optional - default: True
+    ## @param streaming_metrics - boolean - optional - default: true
     ## Enable collection of streaming statistics. Spark Structured Streaming metrics are currently not supported.
     #
     # streaming_metrics: true
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
