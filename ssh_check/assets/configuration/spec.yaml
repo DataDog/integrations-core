@@ -29,7 +29,7 @@ files:
               type: string
 
           - name: port
-            description: Port to connect to.
+            description: Port used for SSH connection.
             value:
               example: 22
               type: integer
