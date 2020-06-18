@@ -21,8 +21,8 @@ files:
             value:
               example: http://localhost:50075
               type: string
-          - template: instances/default
           - template: instances/http
+          - template: instances/default
       - template: logs
         example:
         - type: file
