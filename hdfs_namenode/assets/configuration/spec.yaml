@@ -28,5 +28,3 @@ files:
           - type: file
             path: /var/log/hadoop-hdfs/*.log
             source: hdfs_namenode
-            service: <SERVICE_NAME>
-
