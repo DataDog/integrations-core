@@ -25,7 +25,7 @@ def test_check(aggregator, instance):
 def test_metadata(aggregator, instance, datadog_agent):
     check = CheckSSH('ssh_check', {}, [instance])
     check.check_id = 'test:123'
-    check.check(None)
+    check.check(instance)
 
     _, _, flavor, raw_version = re.split(r'[-_]', common.SSH_SERVER_VERSION)
     major, minor = raw_version.split(".")
