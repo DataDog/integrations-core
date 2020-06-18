@@ -19,7 +19,7 @@ def test_ssh(aggregator):
 
     nb_threads = threading.active_count()
 
-    check.check(None)
+    check.check(common.INSTANCES['main'])
 
     for sc in aggregator.service_checks(CheckSSH.SSH_SERVICE_CHECK_NAME):
         assert sc.status == CheckSSH.OK
