@@ -4,8 +4,6 @@
 
 import os
 
-import requests
-
 from datadog_checks.base.utils.common import get_docker_hostname
 
 HOST = get_docker_hostname()
@@ -30,10 +28,4 @@ def _config_sc_tags(config):
 
 
 def _get_pdns_version():
-    headers = {"X-API-Key": CONFIG['api_key']}
-    url = "http://{}:{}/api/v1/servers/localhost/statistics".format(HOST, PORT)
-    request = requests.get(url, headers=headers)
-    if request.status_code == 404:
-        return 3
-    else:
-        return 4
+    return int(POWERDNS_RECURSOR_VERSION[0])
