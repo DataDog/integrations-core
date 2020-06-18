@@ -29,7 +29,7 @@ instances:
     # password: <PASSWORD>
 
     ## @param port - integer - optional - default: 22
-    ## Port to connect to.
+    ## Port used for SSH connection.
     #
     # port: 22
 
@@ -39,7 +39,7 @@ instances:
     # sftp_check: true
 
     ## @param private_key_file - string - optional
-    ## File path to an SSH private key.
+    ## File path to a SSH private key.
     #
     # private_key_file: <PRIVATE_KEY_FILE>
 
