@@ -41,7 +41,7 @@ files:
               type: boolean
 
           - name: private_key_file
-            description: File path to an SSH private key.
+            description: File path to a SSH private key.
             value:
               type: string
 
@@ -58,4 +58,3 @@ files:
               type: boolean
 
           - template: instances/default
-
