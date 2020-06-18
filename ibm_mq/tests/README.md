@@ -39,7 +39,7 @@ ModuleNotFoundError: No module named 'pymqe'
 
 The workaround is to use a virtualenv, then set `DYLD_LIBRARY_PATH`, then import `pymqi`.
 
-This does not affect tox tests virtualenv is used.
+This does not affect tox tests since virtualenv is used.
 
 Development Tips
 ================
