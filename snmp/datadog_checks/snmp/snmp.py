@@ -28,13 +28,7 @@ from .mibs import MIBLoader
 from .models import OID
 from .parsing import ParsedMetric, ParsedMetricTag, ParsedTableMetric
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
-from .utils import (
-    OIDPrinter,
-    get_default_profiles,
-    get_profile_definition,
-    oid_pattern_specificity,
-    recursively_expand_base_profiles,
-)
+from .utils import OIDPrinter, get_default_profiles, get_profile_definition, recursively_expand_base_profiles
 
 DEFAULT_OID_BATCH_SIZE = 10
 
@@ -70,6 +64,7 @@ class SnmpCheck(AgentCheck):
 
         self.profiles = self._load_profiles()
         self.profiles_by_oid = self._get_profiles_mapping()
+        self.log.warning(self.profiles_by_oid)
 
         self._config = self._build_config(self.instance)
 
@@ -107,15 +102,18 @@ class SnmpCheck(AgentCheck):
         """
         profiles_by_oid = {}  # type: Dict[str, str]
         for name, profile in self.profiles.items():
-            sys_object_oid = profile['definition'].get('sysobjectid')
-            if sys_object_oid is not None:
-                profile_match = profiles_by_oid.get(sys_object_oid)
-                if profile_match:
-                    raise ConfigurationError(
-                        "Profile {} has the same sysObjectID ({}) as {}".format(name, sys_object_oid, profile_match)
-                    )
-                else:
-                    profiles_by_oid[sys_object_oid] = name
+            sys_object_oids = profile['definition'].get('sysobjectid')
+            if sys_object_oids is not None:
+                if type(sys_object_oids) is str:
+                    sys_object_oids = [sys_object_oids]
+                for sys_object_oid in sys_object_oids:
+                    profile_match = profiles_by_oid.get(sys_object_oid)
+                    if profile_match:
+                        raise ConfigurationError(
+                            "Profile {} has the same sysObjectID ({}) as {}".format(name, sys_object_oid, profile_match)
+                        )
+                    else:
+                        profiles_by_oid[sys_object_oid] = name
         return profiles_by_oid
 
     def _build_config(self, instance):
@@ -280,14 +278,14 @@ class SnmpCheck(AgentCheck):
         """
         Return the most specific profile that matches the given sysObjectID.
         """
-        profiles = [profile for oid, profile in self.profiles_by_oid.items() if fnmatch.fnmatch(sys_object_oid, oid)]
+        matched_oids = [
+            (oid, profile) for oid, profile in self.profiles_by_oid.items() if fnmatch.fnmatch(sys_object_oid, oid)
+        ]
 
-        if not profiles:
+        if not matched_oids:
             raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
 
-        return max(
-            profiles, key=lambda profile: oid_pattern_specificity(self.profiles[profile]['definition']['sysobjectid'])
-        )
+        return max(matched_oids, key=lambda oid: oid[0])[1]
 
     def _start_discovery(self):
         # type: () -> None

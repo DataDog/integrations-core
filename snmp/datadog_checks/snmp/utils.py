@@ -199,6 +199,7 @@ def oid_pattern_specificity(pattern):
 
     Suitable for use as a key function when sorting OID patterns.
     """
+    print(pattern)
     wildcard_key = -1  # Must be less than all digits, so that e.G. '1.*' is less specific than '1.n' for n = 0...9.
 
     parts = tuple(wildcard_key if digit == '*' else int(digit) for digit in pattern.lstrip('.').split('.'))
