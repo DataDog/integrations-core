@@ -64,7 +64,6 @@ class SnmpCheck(AgentCheck):
 
         self.profiles = self._load_profiles()
         self.profiles_by_oid = self._get_profiles_mapping()
-        self.log.warning(self.profiles_by_oid)
 
         self._config = self._build_config(self.instance)
 
