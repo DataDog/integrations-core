@@ -154,7 +154,7 @@ class PowerDNSRecursorCheck(AgentCheck):
                 version = request.headers['Server'].split('/')[1]
                 self.set_metadata('version', version)
             except Exception as e:
-                self.log.warning('Error while decoding PowerDNS Recursor version: %e', str(e))
+                self.log.warning('Error while decoding PowerDNS Recursor version: %s', str(e))
         else:
             self.log.warning("Couldn't find the PowerDNS Recursor Server version header")
 
