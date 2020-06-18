@@ -4,7 +4,7 @@
 
 ## Finalize
 
-On the day of the final stable release, [tag](#tag) the [branch](#branch) with `<MAJOR>.<MINOR>.0`.
+On the day of the final stable release, [tag](agent-release.md#tag) the [branch](agent-release.md#branch) with `<MAJOR>.<MINOR>.0`.
 
 After the main Agent release manager confirms successful deployment to a few targets, create a branch based on `master` and run:
 
