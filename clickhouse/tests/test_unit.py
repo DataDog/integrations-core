@@ -17,10 +17,9 @@ pytestmark = pytest.mark.unit
 def test_config(instance):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     check.check_id = 'test-clickhouse'
-    check.check = lambda _: None
 
     with mock.patch('clickhouse_driver.Client') as m:
-        check.run()
+        check.connect()
         m.assert_called_once_with(
             host=instance['server'],
             port=instance['port'],
