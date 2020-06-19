@@ -10,8 +10,7 @@
   "guid": "873153b6-5184-438a-8a32-1e2d2e490dde",
   "support": "core",
   "supported_os": [
-    "linux",
-    "mac_os"
+    "linux"
   ],
   "public_title": "Datadog-IBM MQ Integration",
   "categories": [
