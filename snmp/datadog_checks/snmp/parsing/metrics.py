@@ -142,6 +142,8 @@ def _parse_metric(metric):
         if 'symbols' not in metric:
             raise ConfigurationError('When specifying a table, you must specify a list of symbols')
         metric = cast(TableMetric, metric)
+        if not metric.get('metric_tags'):
+            raise ConfigurationError('When specifying a table, you must specify at least one additional tag')
         return _parse_table_metric(metric)
 
     raise ConfigurationError('When specifying a MIB, you must specify either a table or a symbol')
