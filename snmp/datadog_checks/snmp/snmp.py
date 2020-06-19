@@ -103,7 +103,7 @@ class SnmpCheck(AgentCheck):
         for name, profile in self.profiles.items():
             sys_object_oids = profile['definition'].get('sysobjectid')
             if sys_object_oids is not None:
-                if type(sys_object_oids) is str:
+                if isinstance(sys_object_oids, str):
                     sys_object_oids = [sys_object_oids]
                 for sys_object_oid in sys_object_oids:
                     profile_match = profiles_by_oid.get(sys_object_oid)
