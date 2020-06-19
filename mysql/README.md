@@ -412,7 +412,7 @@ Read our [series of blog posts][26] about monitoring MySQL with Datadog.
 [2]: https://mariadb.org
 [3]: https://mariadb.com/kb/en/library/mariadb-vs-mysql-compatibility
 [4]: https://app.datadoghq.com/account/settings#agent
-[5]: https://dev.mysql.com/doc/refman/5.7/en/adding-users.html
+[5]: https://dev.mysql.com/doc/refman/8.0/en/creating-accounts.html
 [6]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [7]: https://github.com/DataDog/integrations-core/blob/master/mysql/datadog_checks/mysql/data/conf.yaml.example
 [8]: https://dev.mysql.com/doc/refman/5.7/en/performance-schema-quick-start.html
@@ -432,5 +432,5 @@ Read our [series of blog posts][26] about monitoring MySQL with Datadog.
 [22]: https://docs.datadoghq.com/integrations/faq/can-i-collect-sql-server-performance-metrics-beyond-what-is-available-in-the-sys-dm-os-performance-counters-table-try-wmi/
 [23]: https://docs.datadoghq.com/integrations/faq/how-can-i-collect-more-metrics-from-my-sql-server-integration/
 [24]: https://docs.datadoghq.com/integrations/faq/database-user-lacks-privileges/
-[25]: https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-with-sql-stored-procedure/
+[25]: https://docs.datadoghq.com/integrations/guide/collect-sql-server-custom-metrics/#collecting-metrics-from-a-custom-procedure
 [26]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics

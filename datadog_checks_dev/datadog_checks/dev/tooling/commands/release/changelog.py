@@ -25,12 +25,13 @@ ChangelogEntry = namedtuple('ChangelogEntry', 'number, title, url, author, autho
 @click.argument('version')
 @click.argument('old_version', required=False)
 @click.option('--initial', is_flag=True)
+@click.option('--organization', '-r', default='DataDog')
 @click.option('--quiet', '-q', is_flag=True)
 @click.option('--dry-run', '-n', is_flag=True)
 @click.option('--output-file', '-o', default='CHANGELOG.md', show_default=True)
 @click.option('--tag-prefix', '-tp', default='v', show_default=True)
 @click.pass_context
-def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_file, tag_prefix):
+def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_file, tag_prefix, organization):
     """Perform the operations needed to update the changelog.
 
     This method is supposed to be used by other tasks and not directly.
@@ -40,6 +41,11 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_
 
     # sanity check on the version provided
     cur_version = old_version or get_version_string(check, tag_prefix=tag_prefix)
+    if not cur_version:
+        abort(
+            'Failed to retrieve the latest version. Please ensure your project or check has a proper set of tags '
+            'following SemVer and matches the provided tag_prefix and/or tag_pattern.'
+        )
     if parse_version_info(version.replace(tag_prefix, '', 1)) <= parse_version_info(
         cur_version.replace(tag_prefix, '', 1)
     ):
@@ -68,7 +74,7 @@ def changelog(ctx, check, version, old_version, initial, quiet, dry_run, output_
     generated_changelogs = 0
     for pr_num in pr_numbers:
         try:
-            payload = get_pr(pr_num, user_config)
+            payload = get_pr(pr_num, user_config, org=organization)
         except Exception as e:
             echo_failure(f'Unable to fetch info for PR #{pr_num}: {e}')
             continue

@@ -58,7 +58,7 @@ CAST_METRICS = [
     {'OID': "1.3.6.1.4.1.2021.10.1.6.1", 'name': "cpuload2"},  # Opaque
 ]
 
-CONSTRAINED_OID = [{"MIB": "RFC1213-MIB", "symbol": "tcpRtoAlgorithm"}]
+CONSTRAINED_OID = [{"MIB": "TCP-MIB", "symbol": "tcpRtoAlgorithm"}]
 
 DUMMY_MIB_OID = [
     ({"MIB": "DUMMY-MIB", "symbol": "scalar"}, AggregatorStub.GAUGE, 10),  # Integer

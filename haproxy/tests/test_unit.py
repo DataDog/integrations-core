@@ -370,3 +370,19 @@ def test_count_per_status_by_service_disable_service_tag(aggregator, check, hapr
     ]
     aggregator.assert_metric('haproxy.count_per_status', value=1, tags=tags)
     _assert_agg_statuses(aggregator, disable_service_tag=True)
+
+
+def test_enterprise_version_collection(datadog_agent, check, haproxy_mock_enterprise_version_info):
+    config = copy.deepcopy(BASE_CONFIG)
+    haproxy_check = check(config)
+    haproxy_check.check_id = 'test:123'
+    haproxy_check._collect_info_from_http("http://the_url_does_not_matter/")
+    expected_version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': '2',
+        'version.minor': '1',
+        'version.patch': '0',
+        'version.raw': '2.1.0-1.0.0-223.130',
+        'version.release': '1.0.0',
+    }
+    datadog_agent.assert_metadata('test:123', expected_version_metadata)

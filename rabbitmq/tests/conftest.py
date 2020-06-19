@@ -110,6 +110,7 @@ def setup_more(rabbitmq_admin_script):
             'exchange={}'.format(name),
             'routing_key={}'.format(name),
             'payload="hello, world"',
+            'properties={"timestamp": 1500000}',
         ]
         subprocess.check_call(cmd)
 
@@ -122,6 +123,7 @@ def setup_more(rabbitmq_admin_script):
             'exchange={}'.format(name),
             'routing_key=bad_key',
             'payload="unroutable"',
+            'properties={"timestamp": 1500000}',
         ]
         subprocess.check_call(cmd)
 
@@ -151,6 +153,7 @@ def setup_more_with_vhosts(rabbitmq_admin_script):
                 'exchange=amq.default',
                 'routing_key={}'.format(name),
                 'payload="hello, world"',
+                'properties={"timestamp": 1500000}',
             ]
             subprocess.check_call(cmd)
 

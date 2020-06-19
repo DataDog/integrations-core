@@ -15,6 +15,7 @@ class DatadogAgentStub(object):
 
     def __init__(self):
         self._metadata = {}
+        self._cache = {}
         self._config = self.get_default_config()
 
     def get_default_config(self):
@@ -22,6 +23,7 @@ class DatadogAgentStub(object):
 
     def reset(self):
         self._metadata.clear()
+        self._cache.clear()
         self._config = self.get_default_config()
 
     def assert_metadata(self, check_id, data):
@@ -55,6 +57,12 @@ class DatadogAgentStub(object):
 
     def tracemalloc_enabled(self, *args, **kwargs):
         return False
+
+    def write_persistent_cache(self, key, value):
+        self._cache[key] = value
+
+    def read_persistent_cache(self, key):
+        return self._cache.get(key, '')
 
 
 # Use the stub as a singleton

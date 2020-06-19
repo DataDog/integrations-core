@@ -6,7 +6,12 @@
 # Status metrics (e.g: powerSupplyStatus, temperatureProbeStatus, etc.) output one of the following: other(1), unknown(2), ok(3), nonCritical(4), critical(5), nonRecoverable(6)
 
 extends:
-  - idrac.yaml
+  - _base.yaml
+  - _dell-rac.yaml # These metrics are available in some Poweredge devices (e.g. r740)
+  - _intel-lan-adapters.yaml
+  - _generic-router-tcp.yaml
+  - _generic-router-udp.yaml
+  - _generic-router-ip.yaml
 
 sysobjectid: 1.3.6.1.4.1.674.10892.1.*
 

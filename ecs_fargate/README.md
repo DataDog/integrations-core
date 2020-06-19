@@ -127,10 +127,6 @@ Metrics are collected with [DogStatsD][13] through UDP port 8125.
 
 To send custom metrics by listening to DogStatsD packets from other containers, set the environment variable `DD_DOGSTATSD_NON_LOCAL_TRAFFIC` to `true` within the Datadog Agent container.
 
-#### Live process monitoring
-
-Enable Datadog's [Process Agent][14] with the environment variable `DD_PROCESS_AGENT_ENABLED` set to `true` in the Datadog Agent container. Because Amazon controls the underlying hosts for Fargate, live processes can only be collected from the Datadog Agent container.
-
 #### Other environment variables
 
 For environment variables available with the Docker Agent container, see the [Docker Agent][15] page. **Note**: Some variables are not be available for Fargate.
@@ -309,7 +305,6 @@ Need help? Contact [Datadog support][19].
 [11]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html#service_scheduler_replica
 [12]: https://github.com/DataDog/integrations-core/blob/master/ecs_fargate/datadog_checks/ecs_fargate/data/conf.yaml.example
 [13]: https://docs.datadoghq.com/developers/dogstatsd/
-[14]: https://docs.datadoghq.com/infrastructure/process/?tab=docker#installation
 [15]: https://docs.datadoghq.com/agent/docker/#environment-variables
 [16]: https://docs.aws.amazon.com/AmazonECS/latest/userguide/task_definition_parameters.html#container_definition_labels
 [17]: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cloudwatch-metrics.html

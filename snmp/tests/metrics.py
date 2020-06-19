@@ -316,3 +316,10 @@ PEER_RATES = [
     'bgpPeerOutTotalMessages',
     'bgpPeerFsmEstablishedTransitions',
 ]
+
+# Base profile metrics for Cisco voice
+CCCA_ROUTER_GAUGES = [
+    "cccaRouterAgentsLoggedOn",
+    "cccaRouterCallsInProgress",
+    "cccaRouterCallsInQueue",
+]

@@ -1,6 +1,7 @@
 name: Disk
 files:
   - name: disk.yaml
+    example_name: conf.yaml.default
     options:
       - template: init_config
       - template: instances
@@ -159,3 +160,9 @@ files:
             value:
               example: 0
               type: number
+          - name: timeout
+            description: Timeout of the disk query in seconds
+            value:
+              example: 5
+              default: 5
+              type: integer

@@ -24,6 +24,7 @@ from .config import InstanceConfig
 from .discovery import discover_instances
 from .exceptions import PySnmpError
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
+from .mibs import MIBLoader
 from .models import OID
 from .parsing import ParsedMetric, ParsedMetricTag, ParsedTableMetric
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
@@ -63,12 +64,13 @@ class SnmpCheck(AgentCheck):
         # Load Custom MIB directory
         self.mibs_path = self.init_config.get('mibs_folder')
 
+        self.optimize_mib_memory_usage = is_affirmative(self.init_config.get('optimize_mib_memory_usage', False))
+
         self.ignore_nonincreasing_oid = is_affirmative(self.init_config.get('ignore_nonincreasing_oid', False))
 
         self.profiles = self._load_profiles()
         self.profiles_by_oid = self._get_profiles_mapping()
 
-        self.instance['name'] = self._get_instance_name(self.instance)
         self._config = self._build_config(self.instance)
 
     def _load_profiles(self):
@@ -118,12 +120,15 @@ class SnmpCheck(AgentCheck):
 
     def _build_config(self, instance):
         # type: (dict) -> InstanceConfig
+        loader = MIBLoader.shared_instance() if self.optimize_mib_memory_usage else MIBLoader()
+
         return InstanceConfig(
             instance,
             global_metrics=self.init_config.get('global_metrics', []),
             mibs_path=self.mibs_path,
             profiles=self.profiles,
             profiles_by_oid=self.profiles_by_oid,
+            loader=loader,
         )
 
     def _get_instance_name(self, instance):
@@ -175,7 +180,7 @@ class SnmpCheck(AgentCheck):
                     self.ignore_nonincreasing_oid,
                 )
                 all_binds.extend(binds)
-            except PySnmpError as e:
+            except (PySnmpError, CheckException) as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
                 if not error:
                     error = message
@@ -223,7 +228,7 @@ class SnmpCheck(AgentCheck):
                     # If we didn't catch the metric using snmpget, try snmpnext
                     next_oids.extend(missing_results)
 
-            except PySnmpError as e:
+            except (PySnmpError, CheckException) as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
                 if not error:
                     error = message
@@ -249,7 +254,7 @@ class SnmpCheck(AgentCheck):
                 self.log.debug('Returned vars: %s', OIDPrinter(binds, with_values=True))
                 all_binds.extend(binds)
 
-            except PySnmpError as e:
+            except (PySnmpError, CheckException) as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
                 if not error:
                     error = message
@@ -380,7 +385,7 @@ class SnmpCheck(AgentCheck):
             self.warning(error)
         except Exception as e:
             if not error:
-                error = 'Failed to collect metrics for {} - {}'.format(instance['name'], e)
+                error = 'Failed to collect metrics for {} - {}'.format(self._get_instance_name(instance), e)
             self.warning(error)
         finally:
             # Report service checks

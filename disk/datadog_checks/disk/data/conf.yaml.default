@@ -142,3 +142,8 @@ instances:
     ## Exclude devices with a total disk size less than a minimum value (in MiB)
     #
     # min_disk_size: 0
+
+    ## @param timeout - integer - optional - default: 5
+    ## Timeout of the disk query in seconds
+    #
+    # timeout: 5

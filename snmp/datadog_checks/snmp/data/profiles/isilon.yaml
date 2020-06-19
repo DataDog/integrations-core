@@ -31,7 +31,7 @@ metrics:
       OID: 1.3.6.1.4.1.12124.1.1.2
       name: clusterHealth
   - MIB: ISILON-MIB
-    symbol: 
+    symbol:
       OID: 1.3.6.1.4.1.12124.1.2.1.1
       name: clusterIfsInBytes
   - MIB: ISILON-MIB

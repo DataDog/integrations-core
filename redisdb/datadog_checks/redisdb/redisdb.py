@@ -109,6 +109,7 @@ class Redis(AgentCheck):
         self.last_timestamp_seen = 0
         custom_tags = self.instance.get('tags', [])
         self.tags = self._get_tags(custom_tags)
+        self.collect_client_metrics = is_affirmative(self.instance.get('collect_client_metrics', False))
         if ("host" not in self.instance or "port" not in self.instance) and "unix_socket_path" not in self.instance:
             raise ConfigurationError("You must specify a host/port couple or a unix_socket_path")
 
@@ -149,6 +150,7 @@ class Redis(AgentCheck):
                     'host',
                     'port',
                     'db',
+                    'username',
                     'password',
                     'socket_timeout',
                     'connection_pool',
@@ -248,11 +250,12 @@ class Redis(AgentCheck):
             if metric_name is not None:
                 self.gauge(metric_name, value, tags=tags)
 
-        # Save client connections statistics
-        clients = conn.client_list()
-        clients_by_name = Counter(client["name"] or DEFAULT_CLIENT_NAME for client in clients)
-        for name, count in clients_by_name.items():
-            self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
+        if self.collect_client_metrics:
+            # Save client connections statistics
+            clients = conn.client_list()
+            clients_by_name = Counter(client["name"] or DEFAULT_CLIENT_NAME for client in clients)
+            for name, count in clients_by_name.items():
+                self.gauge("redis.net.connections", count, tags=tags + ['source:' + name])
 
         # Save the number of commands.
         self.rate('redis.net.commands', info['total_commands_processed'], tags=tags)

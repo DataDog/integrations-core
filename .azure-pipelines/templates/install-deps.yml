@@ -36,10 +36,10 @@ steps:
       path: ${{ parameters.pip_cache_config.path }}
     displayName: 'Cache pip dependencies'
 
-- script: python -m pip install --disable-pip-version-check --upgrade pip setuptools
+- script: python -m pip install --disable-pip-version-check --upgrade pip setuptools wheel
   displayName: 'Upgrade Python packaging tools'
 
-- script: pip install --disable-pip-version-check git+git://github.com/ofek/codecov-python.git@73271695d5e8ab2d6538a06e63b400f163f26487
+- script: pip install --disable-pip-version-check git+git://github.com/ofek/codecov-python.git@datadog
   displayName: 'Install Codecov'
 
 - ${{ if eq(parameters.repo, 'core') }}:

@@ -657,6 +657,18 @@ class AgentCheck(object):
 
         return entrypoint
 
+    def _persistent_cache_id(self, key):
+        # type: (str) -> str
+        return '{}_{}'.format(self.check_id, key)
+
+    def read_persistent_cache(self, key):
+        # type: (str) -> str
+        return datadog_agent.read_persistent_cache(self._persistent_cache_id(key))
+
+    def write_persistent_cache(self, key, value):
+        # type: (str, str) -> None
+        datadog_agent.write_persistent_cache(self._persistent_cache_id(key), value)
+
     def set_external_tags(self, external_tags):
         # type: (Sequence[ExternalTagType]) -> None
         # Example of external_tags format

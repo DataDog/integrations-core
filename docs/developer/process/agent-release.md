@@ -13,7 +13,11 @@ ships a snapshot of [integrations-core][].
 
 ## Setup
 
-Configure your [GitHub](../ddev/configuration.md#github) and [Trello](../ddev/configuration.md#trello) auth.
+Ensure that you have configured the following:
+
+- [GitHub](../ddev/configuration.md#github) credentials
+- [Trello](../ddev/configuration.md#trello) credentials
+- [Trello team mappings](../ddev/configuration.md#card-assignment)
 
 ## Freeze
 
@@ -24,6 +28,10 @@ all integrations with pending changes then branch off.
 
 1. Make a pull request to release [any new integrations](integration-release.md#new-integrations), then merge it and pull `master`
 1. Make a pull request to release [all changed integrations](integration-release.md#bulk-releases), then merge it and pull `master`
+
+!!! important
+    [Update PyPI](integration-release.md#pypi) if you released `datadog_checks_base` or `datadog_checks_dev`.
+
 
 ### Branch
 
@@ -58,11 +66,7 @@ would select all commits that were merged between the Git references.
 
 The command will display each change and prompt you to assign a team or skip. Purely documentation changes are automatically skipped.
 
-You must assign each item to a team member after creation and ensure no one is assigned to a change that they authored.
-
-If you would like to automate this, then add a `trello_users_$team` table in your [configuration](../ddev/configuration.md), with
-keys being GitHub usernames and values being their corresponding Trello IDs (not names). You can find current team member information
-in [this document](https://github.com/DataDog/devops/wiki/GitHub-usernames-and-Trello-IDs).
+Cards are automatically assigned if `$trello_users_$team` table is [configured](../ddev/configuration.md#card-assignment).
 
 ### Release candidates
 
@@ -85,17 +89,22 @@ After all fixes have been cherry-picked:
 
 ### Communication
 
-Update the `#agent-release-sync` channel with a daily status.
+The Agent Release Manager will post a [daily status](../ddev/cli.md#status) for the entire release cycle.
 
 ```
 #agent-integrations status:
-
-- TODO: X
-- In progress: X
-- Issues found: X
-- Awaiting build: X
+1. Status of the testing: [cards left | finished]
+2. Bugs found pending to fix: [description of bugs]
+3. Fixes done pending a new RC build: [link PRs of fixes]
 ```
 
+### Logs
+
+Each release candidate is deployed in a staging environment. We observe the `WARN` or `ERROR` level logs filtered with the facets
+ `Service:datadog-agent` and `index:main` and `LogMessage` to see if any unexpected or frequent errors start occurring that was not caught
+ during QA.
+ 
+ 
 ## Release week
 
 After QA week ends the code freeze is lifted, even if there are items yet to be tested. The release manager will continue
@@ -111,5 +120,12 @@ After the main Agent release manager confirms successful deployment to a few tar
 ddev agent changelog
 ddev agent integrations
 ```
+
+See more options for [`ddev agent changelog`](../ddev/cli.md#changelog) and [`ddev agent integrations`](../ddev/cli.md#integrations).
+
+Run the following commands to update the contents: 
+
+1. `ddev agent changelog -w -f` to update the existing [`AGENT_CHANGELOG`][agent-changelog] file
+2. `ddev agent integrations -w -f` to update the existing [`AGENT_INTEGRATIONS`][agent-integrations] file. 
 
 Create a pull request and wait for approval before merging.

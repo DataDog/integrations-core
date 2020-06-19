@@ -101,3 +101,9 @@ If not:
    where `<KEY>` is your API key and `<NAME>` is the name to give your token, e.g. `ReleaseTestingYourName`.
    Authorize access and copy your token.
 1. Run `ddev config set trello.token` and paste your token
+
+### Card Assignment
+
+To automatically assign [QA cards](../process/agent-release.md#create-items), add a `trello_users_$team` table, with keys being
+GitHub usernames and values being their corresponding Trello IDs (not names). You can find current team member
+information in [this document](https://github.com/DataDog/devops/wiki/GitHub-usernames-and-Trello-IDs).

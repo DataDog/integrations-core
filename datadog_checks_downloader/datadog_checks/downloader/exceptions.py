@@ -29,6 +29,15 @@ class NonDatadogPackage(CLIError):
 # Exceptions for the download module.
 
 
+class IncorrectRootLayoutType(Exception):
+    def __init__(self, found, expected):
+        self.found = found
+        self.expected = expected
+
+    def __str__(self):
+        return 'found {}, expected {}'.format(self.found, self.expected)
+
+
 class SimpleIndexError(Exception):
     def __init__(self, standard_distribution_name):
         self.standard_distribution_name = standard_distribution_name
@@ -102,11 +111,11 @@ class NoInTotoRootLayoutPublicKeysFound(TUFInTotoError):
     pass
 
 
-class RevokedDeveloper(TUFInTotoError):
+class RevokedDeveloperOrMachine(TUFInTotoError):
     MSG = "Step 'tag' requires '1' link metadata file(s), found '0'."
 
     def __init__(self, target_relpath, in_toto_root_layout):
-        super(RevokedDeveloper, self).__init__(target_relpath)
+        super(RevokedDeveloperOrMachine, self).__init__(target_relpath)
         self.in_toto_root_layout = in_toto_root_layout
 
     def __str__(self):
