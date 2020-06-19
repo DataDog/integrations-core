@@ -86,10 +86,14 @@ This validates that dashboards are formatted correctly. This means that they nee
 If you see a failure regarding use of the screen endpoint, consider using our dashboard [utility command](../ddev/cli.md#export) to generate your dashboard payload.
 
 ### Validate dependencies
+```python
 ddev validate dep
+```
 
 ### Validate manifest files
+```python
 ddev validate manifest -i
+```
 https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
 
 ### ddev validate metadata
@@ -108,8 +112,9 @@ This validates that saved views for an integration are formatted correctly and c
 
 
 ### Validate service check data
+```python
 ddev validate service-checks
-
+```
 https://docs.datadoghq.com/developers/integrations/check_references/#service-check-file
 
 ### Validate imports
