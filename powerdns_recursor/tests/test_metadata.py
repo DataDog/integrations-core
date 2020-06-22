@@ -26,19 +26,19 @@ def test_metadata_unit(datadog_agent):
     with mock.patch('requests.get', side_effect=requests.exceptions.Timeout()):
         check._collect_metadata(config_obj)
         datadog_agent.assert_metadata_count(0)
-        check.log.warning.assert_called_with('Error collecting PowerDNS Recursor version: %s', '')
+        check.log.debug.assert_called_with('Error collecting PowerDNS Recursor version: %s', '')
 
     datadog_agent.reset()
     with mock.patch('requests.get', return_value=common.MockResponse({}, 200)):
         check._collect_metadata(config_obj)
         datadog_agent.assert_metadata_count(0)
-        check.log.warning.assert_called_with("Couldn't find the PowerDNS Recursor Server version header")
+        check.log.debug.assert_called_with("Couldn't find the PowerDNS Recursor Server version header")
 
     datadog_agent.reset()
     with mock.patch('requests.get', return_value=common.MockResponse({'Server': 'wrong_stuff'}, 200)):
         check._collect_metadata(config_obj)
         datadog_agent.assert_metadata_count(0)
-        check.log.warning.assert_called_with(
+        check.log.debug.assert_called_with(
             'Error while decoding PowerDNS Recursor version: %s', 'list index out of range'
         )
 

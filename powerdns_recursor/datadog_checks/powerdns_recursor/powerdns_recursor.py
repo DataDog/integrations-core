@@ -129,27 +129,6 @@ class PowerDNSRecursorCheck(AgentCheck):
 
         self._collect_metadata(config)
 
-    @AgentCheck.metadata_entrypoint
-    def _collect_metadata(self, config):
-        url_v4 = "http://{}:{}/api".format(config.host, config.port)
-        url = "http://{}:{}/servers/localhost/statistics".format(config.host, config.port)
-
-        try:
-            response = self._get_pdns_response(config, url, url_v4)
-        except Exception as e:
-            self.log.debug('Error collecting PowerDNS Recursor version: %s', str(e))
-            return
-
-        if response.headers.get('Server'):
-            try:
-                # 'Server': 'PowerDNS/4.0.9'
-                version = response.headers['Server'].split('/')[1]
-                self.set_metadata('version', version)
-            except Exception as e:
-                self.log.debug('Error while decoding PowerDNS Recursor version: %s', str(e))
-        else:
-            self.log.debug("Couldn't find the PowerDNS Recursor Server version header")
-
     def _get_config(self, instance):
         required = ['host', 'port']
         for param in required:
@@ -191,7 +170,28 @@ class PowerDNSRecursorCheck(AgentCheck):
         except Exception:
             if url_v4 is url:
                 raise
-            request = self.http.get(url_v4)
-            request.raise_for_status()
+            response = self.http.get(url_v4)
+            response.raise_for_status()
 
-        return request
+        return response
+
+    @AgentCheck.metadata_entrypoint
+    def _collect_metadata(self, config):
+        url_v4 = "http://{}:{}/api".format(config.host, config.port)
+        url = "http://{}:{}/servers/localhost/statistics".format(config.host, config.port)
+
+        try:
+            response = self._get_pdns_response(config, url, url_v4)
+        except Exception as e:
+            self.log.debug('Error collecting PowerDNS Recursor version: %s', str(e))
+            return
+
+        if response.headers.get('Server'):
+            try:
+                # 'Server': 'PowerDNS/4.0.9'
+                version = response.headers['Server'].split('/')[1]
+                self.set_metadata('version', version)
+            except Exception as e:
+                self.log.debug('Error while decoding PowerDNS Recursor version: %s', str(e))
+        else:
+            self.log.debug("Couldn't find the PowerDNS Recursor Server version header")
