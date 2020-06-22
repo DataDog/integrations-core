@@ -31,7 +31,7 @@ Create a pull request and wait for approval before merging.
 Releases after the final Agent release should be reserved for critical issues only. Cherry-picking commits and releases for
  the patch release is mostly similar to the process for [preparing release candidates](pre-release.md#release-candidates).
 
-However, it's possible that from the time [code freeze ended]([pre-release.md#release-week) and a bugfix is needed,
+However, it's possible that from the time [code freeze ended](pre-release.md#release-week) and a bugfix is needed,
 the integration has other non-critical commits or was released.
 
 The next section will describe the process for preparing the patch release candidates.
