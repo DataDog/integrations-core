@@ -17,5 +17,7 @@ def compute_exec_plan_signature(normalized_json_plan):
     """
     Given a normalized json query execution plan, generate its 64-bit hex signature
     """
+    if not normalized_json_plan:
+        return None
     with_sorted_keys = json.dumps(json.loads(normalized_json_plan), sort_keys=True)
     return format(mmh3.hash64(with_sorted_keys, signed=False)[0], 'x')
