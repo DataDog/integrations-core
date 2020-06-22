@@ -641,9 +641,16 @@ class AgentCheck(object):
     def metadata_entrypoint(cls, method):
         # type: (Callable[..., None]) -> Callable[..., None]
         """
-        Mark a method as a metadata entrypoint.
+        Skip execution of the decorated method if metadata collection is disabled on the Agent.
 
-        This decorator provides automatic no-op behavior in case metadata collection is disabled on the Agent.
+        Usage:
+
+        ```python
+        class MyCheck(AgentCheck):
+            @AgentCheck.metadata_entrypoint
+            def collect_metadata(self):
+                ...
+        ```
         """
 
         @functools.wraps(method)
