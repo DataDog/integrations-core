@@ -176,7 +176,7 @@ def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):
 
 
 def test_collect_statistics_from_events(aggregator, instance):
-    instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
+    instance['mqcd_version'] = '9'
     check = IbmMqCheck('ibm_mq', {}, [instance])
 
     check.check(instance)

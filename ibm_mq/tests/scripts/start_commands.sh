@@ -15,3 +15,7 @@ for i in 2 4 8 16 32; do
 done
 
 tar -C /opt/mqm -xf /opt/mqm/mq-client.tar.gz
+
+# TODO: Remove when new version of pymqi is released
+export LD_LIBRARY_PATH=/opt/mqm/lib64:/opt/mqm/lib
+/opt/datadog-agent/embedded/bin/python -m pip install --upgrade --force-reinstall 'https://github.com/dsuch/pymqi/tarball/master#egg=pymqi&subdirectory=code'
