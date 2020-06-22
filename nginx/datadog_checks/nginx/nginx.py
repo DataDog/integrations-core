@@ -41,7 +41,10 @@ PLUS_API_ENDPOINTS = {
 PLUS_API_STREAM_ENDPOINTS = {
     "stream/server_zones": ["stream", "server_zones"],
     "stream/upstreams": ["stream", "upstreams"],
-    "stream/zone_sync": ["stream", "zone_sync"],  # API v3 and above.
+}
+
+PLUS_API_V3_STREAM_ENDPOINTS = {
+    "stream/zone_sync": ["stream", "zone_sync"],
 }
 
 TAGGED_KEYS = {
@@ -100,9 +103,7 @@ class Nginx(AgentCheck):
 
             # These are all the endpoints we have to call to get the same data as we did with the old API
             # since we can't get everything in one place anymore.
-            for endpoint, nest in chain(iteritems(PLUS_API_ENDPOINTS), iteritems(PLUS_API_STREAM_ENDPOINTS)):
-                if int(plus_api_version) < 3 and endpoint == "stream/zone_sync":
-                    continue
+            for endpoint, nest in self._get_plus_api_endpoints(plus_api_version):
                 response = self._get_plus_api_data(url, plus_api_version, endpoint, nest)
                 self.log.debug("Nginx Plus API version %s `response`: %s", plus_api_version, response)
                 metrics.extend(self.parse_json(response, tags))
@@ -197,6 +198,12 @@ class Nginx(AgentCheck):
             return payload
 
         return {keys[0]: self._nest_payload(keys[1:], payload)}
+
+    def _get_plus_api_endpoints(self, plus_api_version):
+        endpoints = chain(iteritems(PLUS_API_ENDPOINTS), iteritems(PLUS_API_STREAM_ENDPOINTS))
+        if int(plus_api_version) >= 3:
+            endpoints = chain(endpoints, iteritems(PLUS_API_V3_STREAM_ENDPOINTS))
+        return endpoints
 
     def _get_plus_api_data(self, api_url, plus_api_version, endpoint, nest):
         # Get the data from the Plus API and reconstruct a payload similar to what the old API returned
