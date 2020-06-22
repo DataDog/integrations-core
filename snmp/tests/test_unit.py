@@ -241,7 +241,7 @@ def test_duplicate_sysobjectid_error():
     SnmpCheck('snmp', init_config, [instance])
 
 
-def test_mapping_sysobjectids():
+def test_sysobjectid_list():
     profile_multiple = {'sysobjectid': ['1.3.6.1.4.1.9.1.241', '1.3.6.1.4.1.9.1.1790']}
     profile_single = {'sysobjectid': '1.3.6.1.4.1.9.1.3450'}
 
@@ -249,11 +249,11 @@ def test_mapping_sysobjectids():
     init_config = {'profiles': {'multiple': {'definition': profile_multiple}, 'single': {'definition': profile_single}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
-    assert check.profiles_by_oid['1.3.6.1.4.1.9.1.241'] == 'multiple'
-    assert check.profiles_by_oid['1.3.6.1.4.1.9.1.1790'] == 'multiple'
-    assert check.profiles_by_oid['1.3.6.1.4.1.9.1.3450'] == 'single'
-
-    assert len(check.profiles_by_oid) == 3
+    assert check.profiles_by_oid = {
+        '1.3.6.1.4.1.9.1.241': 'multiple',
+        '1.3.6.1.4.1.9.1.1790': 'multiple',
+        '1.3.6.1.4.1.9.1.3450': 'single',
+    }
 
 
 def test_no_address():
