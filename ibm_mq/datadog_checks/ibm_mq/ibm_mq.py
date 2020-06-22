@@ -8,9 +8,9 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
 from . import connection, errors
-from .channel_metric_collector import ChannelMetricCollector
 from .config import IBMMQConfig
-from .queue_metric_collector import QueueMetricCollector
+from .collectors import ChannelMetricCollector
+from .collectors import QueueMetricCollector
 
 try:
     import pymqi

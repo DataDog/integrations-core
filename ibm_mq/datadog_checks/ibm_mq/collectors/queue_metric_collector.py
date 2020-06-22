@@ -7,7 +7,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
 from datadog_checks.ibm_mq.metrics import GAUGE
 
-from . import metrics
+from .. import metrics
 
 try:
     import pymqi
