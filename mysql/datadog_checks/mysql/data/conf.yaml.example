@@ -2,13 +2,17 @@
 #
 init_config:
 
-    ## @param global_custom_queries - mapping - optional
+    ## @param global_custom_queries - list of mappings - optional
     ## Global custom queries can be applied to all instances using the
     ## `use_global_custom_queries` setting at the instance level.
     ##
-    ## See `custom_queries` defined below for syntax.
+    ## See `custom_queries` defined below for syntax and documentation about each option.
     #
-    # global_custom_queries: {}
+    # global_custom_queries:
+    #   - metric_prefix: mysql
+    #     query: <QUERY>
+    #     columns: <COLUMNS>
+    #     tags: <TAGS>
 
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
@@ -29,12 +33,12 @@ instances:
   - server: localhost
 
     ## @param user - string - required
-    ## Datadog username created to connect to MySQL.
+    ## Username used to connect to MySQL.
     #
-    user: <USER>
+    user: datadog
 
     ## @param pass - string - required
-    ## Password associated to the Datadog user.
+    ## Password associated to the MySQL user.
     #
     pass: <PASS>
 
@@ -58,24 +62,19 @@ instances:
     #
     # connect_timeout: 10
 
+    ## @param ssl - mapping - optional
     ## Use this section to configure a TLS connection between the Agent and MySQL.
+    ##
+    ## The following fields are supported:
+    ##
+    ## key: Path to a key file.
+    ## cert: Path to a cert file.
+    ## ca: Path to a CA bundle file.
     #
-    ssl:
-
-        ## @param key - string - optional
-        ## Path to a key file.
-        #
-        # key: <KEY>
-
-        ## @param cert - string - optional
-        ## Path to a cert file.
-        #
-        # cert: <CERT>
-
-        ## @param ca - string - optional
-        ## Path to a CA bundle file.
-        #
-        # ca: <CA>
+    # ssl:
+    #   key: <KEY_FILE_PATH>
+    #   cert: <CERT_FILE_PATH>
+    #   ca: <CA_PATH_FILE>
 
     ## @param use_global_custom_queries - string - optional - default: true
     ## How `global_custom_queries` should be used for this instance. There are 3 options:
@@ -86,52 +85,50 @@ instances:
     #
     # use_global_custom_queries: 'true'
 
+    ## @param custom_queries - list of mappings - optional
     ## A list of custom queries used to retrieve custom metrics.
+    ##
+    ## The following fields are expected:
+    ##
+    ## query:
+    ##   The SQL query to execute. It can be a simple statement, or a multi-line script.
+    ## columns:
+    ##   A list representing each column, ordered sequentially from left to right.
+    ##   The number of columns must be equal to the number of columns returned in the `query`.
+    ##
+    ##   Each column is an object with the following fields:
+    ##
+    ##   name:
+    ##     The suffix to append to `mysql.` to form the full metric name.
+    ##     If `type` is `tag`, this column is considered a tag and applied to every metric
+    ##     collected by this query.
+    ##   type:
+    ##     The submission method (gauge, monotonic_count, etc.).
+    ##     Use the 'tag' type to tag each metric in the row with the name and value
+    ##     of the item in this column.
+    ##     Use the 'count' type to perform aggregation for queries that return multiple
+    ##     rows with the same or no tags.
+    ## tags: (optional)
+    ##   A list of tags to apply to each metric.
     #
-    custom_queries:
+    # custom_queries:
+    #   - query: SELECT foo, COUNT(*) FROM table.events GROUP BY foo
+    #     columns:
+    #     - name: foo
+    #       type: tag
+    #     - name: event.total
+    #       type: gauge
+    #     tags:
+    #     - test:mysql
 
-      -
-        ## @param query - string - optional
-        ## The SQL query to execute. It can be a simple statement, or a multi-line script.
-        #
-        # query: <QUERY>
-
-        ## A list representing each column, ordered sequentially from left to right.
-        ## The number of columns must be equal to the number of columns returned in the `query`.
-        #
-        columns:
-
-          -
-            ## @param name - string - optional
-            ## The suffix to append to `mysql.` to form the full metric name.
-            ## If `type` is `tag`, this column is considered a tag and applied to every metric
-            ## collected by this query.
-            #
-            # name: <NAME>
-
-            ## @param type - string - optional
-            ## The submission method (gauge, monotonic_count, etc.).
-            ## Use the 'tag' type to tag each metric in the row with the name and value
-            ## of the item in this column.
-            ## Use the 'count' type to perform aggregation for queries that return multiple
-            ## rows with the same or no tags.
-            #
-            # type: <TYPE>
-
-        ## @param tags - list of strings - optional
-        ## A list of tags to apply to each metric.
-        #
-        # tags:
-        #   - <KEY_1>:<VALUE_1>
-        #   - <KEY_2>:<VALUE_2>
-
-    ## @param max_custom_queries - number - optional - default: 20
+    ## @param max_custom_queries - integer - optional - default: 20
     ## Set the maximum number of custom queries to execute with this integration.
     ##
     ## WARNING: This only applies to the deprecated `queries` option.
     #
     # max_custom_queries: 20
 
+    ## @param queries - list of mappings - optional
     ## Define custom queries to collect custom metrics from your MySQL database.
     ##
     ## See https://docs.datadoghq.com/integrations/faq/how-to-collect-metrics-from-custom-mysql-queries to learn more.
@@ -139,35 +136,13 @@ instances:
     ## WARNING: This option is deprecated and will be removed in a future release.
     ## Use the `custom_queries` option instead.
     #
-    queries:
-
-      -
-        ## @param query - string - optional
-        ## The SQL query to execute.
-        #
-        # query: <QUERY>
-
-        ## @param metric - string - optional
-        ## The metric name.
-        #
-        # metric: <METRIC>
-
-        ## @param type - string - optional
-        ## The metric type.
-        #
-        # type: <TYPE>
-
-        ## @param field - string - optional
-        ## The column name to retrieve the metric value from.
-        #
-        # field: <FIELD>
-
-        ## @param tags - list of strings - optional
-        ## A list of tags to apply to each metric.
-        #
-        # tags:
-        #   - <KEY_1>:<VALUE_1>
-        #   - <KEY_2>:<VALUE_2>
+    # queries:
+    #   - query: <QUERY>
+    #     metric: <METRIC_NAME>
+    #     tags:
+    #     - <METRIC_TAG_KEY>:<METRIC_TAG_VALUE>
+    #     type: <METRIC_TYPE>
+    #     field: <FIELD_NAME>
 
     ## Enable options to collect extra metrics from your MySQL integration.
     #
@@ -294,6 +269,10 @@ instances:
 #     path: <GENERAL_LOG_FILE_PATH>
 #     source: mysql
 #     service: <SERVICE>
+#     log_processing_rules:
+#     - type: multi_line
+#       name: new_log_start_with_date
+#       pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
 #   - type: file
 #     path: <ERROR_LOG_FILE_PATH>
 #     source: mysql

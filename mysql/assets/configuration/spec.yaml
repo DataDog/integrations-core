@@ -9,9 +9,17 @@ files:
               Global custom queries can be applied to all instances using the
               `use_global_custom_queries` setting at the instance level.
 
-              See `custom_queries` defined below for syntax.
+              See `custom_queries` defined below for syntax and documentation about each option.
+            multiple: true
             value:
-              type: object
+              type: array
+              items:
+                type: object
+              example:
+                - metric_prefix: mysql
+                  query: <QUERY>
+                  columns: <COLUMNS>
+                  tags: <TAGS>
 
           - template: init_config/default
 
@@ -30,14 +38,15 @@ files:
           - name: user
             required: true
             description: |
-              Datadog username created to connect to MySQL.
+              Username used to connect to MySQL.
             value:
               type: string
+              example: datadog
 
           - name: pass
             required: true
             description: |
-              Password associated to the Datadog user.
+              Password associated to the MySQL user.
             value:
               type: string
 
@@ -70,21 +79,25 @@ files:
           - name: ssl
             description: |
               Use this section to configure a TLS connection between the Agent and MySQL.
-            options:
-              - name: key
-                description: Path to a key file.
-                value:
-                  type: string
 
-              - name: cert
-                description: Path to a cert file.
-                value:
-                  type: string
+              The following fields are supported:
 
-              - name: ca
-                description: Path to a CA bundle file.
-                value:
+              key: Path to a key file.
+              cert: Path to a cert file.
+              ca: Path to a CA bundle file.
+            value:
+              type: object
+              properties:
+                - name: key
                   type: string
+                - name: cert
+                  type: string
+                - name: ca
+                  type: string
+              example:
+                key: <KEY_FILE_PATH>
+                cert: <CERT_FILE_PATH>
+                ca: <CA_PATH_FILE>
 
           - name: use_global_custom_queries
             description: |
@@ -100,48 +113,43 @@ files:
           - name: custom_queries
             description: |
               A list of custom queries used to retrieve custom metrics.
-            multiple: true
-            options:
-              - name: query
-                description: |
-                  The SQL query to execute. It can be a simple statement, or a multi-line script.
-                value:
-                  type: string
 
-              - name: columns
-                description: |
-                  A list representing each column, ordered sequentially from left to right.
-                  The number of columns must be equal to the number of columns returned in the `query`.
-                multiple: true
-                options:
-                  - name: name
-                    description: |
-                      The suffix to append to `mysql.` to form the full metric name.
-                      If `type` is `tag`, this column is considered a tag and applied to every metric
-                      collected by this query.
-                    value:
-                      type: string
+              The following fields are expected:
 
-                  - name: type
-                    description: |
-                      The submission method (gauge, monotonic_count, etc.).
-                      Use the 'tag' type to tag each metric in the row with the name and value
-                      of the item in this column.
-                      Use the 'count' type to perform aggregation for queries that return multiple
-                      rows with the same or no tags.
-                    value:
-                      type: string
+              query:
+                The SQL query to execute. It can be a simple statement, or a multi-line script.
+              columns:
+                A list representing each column, ordered sequentially from left to right.
+                The number of columns must be equal to the number of columns returned in the `query`.
 
-              - name: tags
-                description: |
-                  A list of tags to apply to each metric.
-                value:
-                  type: array
-                  items:
-                    type: string
-                  example:
-                    - <KEY_1>:<VALUE_1>
-                    - <KEY_2>:<VALUE_2>
+                Each column is an object with the following fields:
+
+                name:
+                  The suffix to append to `mysql.` to form the full metric name.
+                  If `type` is `tag`, this column is considered a tag and applied to every metric
+                  collected by this query.
+                type:
+                  The submission method (gauge, monotonic_count, etc.).
+                  Use the 'tag' type to tag each metric in the row with the name and value
+                  of the item in this column.
+                  Use the 'count' type to perform aggregation for queries that return multiple
+                  rows with the same or no tags.
+              tags: (optional)
+                A list of tags to apply to each metric.
+
+            value:
+              type: array
+              items:
+                type: object
+              example:
+                - query: "SELECT foo, COUNT(*) FROM table.events GROUP BY foo"
+                  columns:
+                    - name: foo
+                      type: tag
+                    - name: event.total
+                      type: gauge
+                  tags:
+                    - test:mysql
 
           - name: max_custom_queries
             description: |
@@ -149,7 +157,7 @@ files:
 
               WARNING: This only applies to the deprecated `queries` option.
             value:
-              type: number
+              type: integer
               example: 20
 
           - name: queries
@@ -160,42 +168,17 @@ files:
 
               WARNING: This option is deprecated and will be removed in a future release.
               Use the `custom_queries` option instead.
-            multiple: true
-            options:
-              - name: query
-                description: |
-                  The SQL query to execute.
-                value:
-                  type: string
-
-              - name: metric
-                description: |
-                  The metric name.
-                value:
-                  type: string
-
-              - name: type
-                description: |
-                  The metric type.
-                value:
-                  type: string
-
-              - name: field
-                description: |
-                  The column name to retrieve the metric value from.
-                value:
-                  type: string
-
-              - name: tags
-                description: |
-                  A list of tags to apply to each metric.
-                value:
-                  type: array
-                  items:
-                    type: string
-                  example:
-                    - <KEY_1>:<VALUE_1>
-                    - <KEY_2>:<VALUE_2>
+            value:
+              type: array
+              items:
+                type: object
+              example:
+                - query: <QUERY>
+                  metric: <METRIC_NAME>
+                  tags:
+                    - <METRIC_TAG_KEY>:<METRIC_TAG_VALUE>
+                  type: <METRIC_TYPE>
+                  field: <FIELD_NAME>
 
           - name: options
             description: |
@@ -301,6 +284,10 @@ files:
             path: "<GENERAL_LOG_FILE_PATH>"
             source: mysql
             service: "<SERVICE>"
+            log_processing_rules:
+              - type: multi_line
+                name: new_log_start_with_date
+                pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
 
           - type: file
             path: "<ERROR_LOG_FILE_PATH>"
@@ -314,6 +301,4 @@ files:
             log_processing_rules:
               - type: multi_line
                 name: new_slow_query_log_entry
-                pattern: "# Time:"
-                # If mysqld was started with `--log-short-format`, use:
-                # pattern: "# Query_time:"
+                pattern: "# Time:" # If mysqld was started with `--log-short-format`, use `pattern: "# Query_time:"`
