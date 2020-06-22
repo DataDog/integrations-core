@@ -22,30 +22,35 @@ class StatsCollector(object):
     def collect(self, queue_manager):
         queue_name = 'SYSTEM.ADMIN.STATISTICS.QUEUE'
         queue = pymqi.Queue(queue_manager, queue_name)
-        message = queue.get()
-        # self.check.log.info("RECEIVED MSG: %s", message)
 
-        unpacked, control = pymqi.PCFExecute.unpack(message)
+        try:
+            while True:
+                message = queue.get()
+                # self.check.log.info("RECEIVED MSG: %s", message)
 
-        # self.check.log.info("UNPACKED MSG: %s", unpacked)
+                unpacked, control = pymqi.PCFExecute.unpack(message)
 
-        header = unpack_header(message)
-        # self.check.log.info("UNPACKED HEADER: %s", header)
+                # self.check.log.info("UNPACKED MSG: %s", unpacked)
 
-        if header.Command == MQCMD_STATISTICS_CHANNEL:
-            self.check.log.info({
-                'type': 'MQCMD_STATISTICS_CHANNEL',
-                # 'mgr name': unpacked[MQCA_Q_MGR_NAME],
-            })
-        elif header.Command == MQCMD_STATISTICS_MQI:
-            self.check.log.info({
-                'type': 'MQCMD_STATISTICS_MQI',
-                # 'mgr name': unpacked[MQCA_Q_MGR_NAME],
-            })
-        elif header.Command == MQCMD_STATISTICS_Q:
-            self.check.log.info({
-                'type': 'MQCMD_STATISTICS_Q',
-                # 'mgr name': unpacked[MQCA_Q_MGR_NAME],
-            })
+                header = unpack_header(message)
+                # self.check.log.info("UNPACKED HEADER: %s", header)
+
+                if header.Command == MQCMD_STATISTICS_CHANNEL:
+                    self.check.log.info({
+                        'type': 'MQCMD_STATISTICS_CHANNEL',
+                        # 'mgr name': unpacked[MQCA_Q_MGR_NAME],
+                    })
+                elif header.Command == MQCMD_STATISTICS_MQI:
+                    self.check.log.info({
+                        'type': 'MQCMD_STATISTICS_MQI',
+                        # 'mgr name': unpacked[MQCA_Q_MGR_NAME],
+                    })
+                elif header.Command == MQCMD_STATISTICS_Q:
+                    self.check.log.info({
+                        'type': 'MQCMD_STATISTICS_Q',
+                        # 'mgr name': unpacked[MQCA_Q_MGR_NAME],
+                    })
+        except Exception as e:
+            self.check.log.info(e)
 
         queue.close()
