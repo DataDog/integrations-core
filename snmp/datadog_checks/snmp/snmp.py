@@ -294,7 +294,9 @@ class SnmpCheck(AgentCheck):
         if not matched_profiles_by_oid:
             raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
 
-        return max(matched_profiles_by_oid.keys(), key=lambda oid: oid_pattern_specificity(oid[0]))[1]
+        oid = max(matched_profiles_by_oid.keys(), key=lambda oid: oid_pattern_specificity(oid))
+
+        return matched_profiles_by_oid[oid]
 
     def _start_discovery(self):
         # type: () -> None
