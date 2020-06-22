@@ -131,7 +131,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     env_type = metadata['env_type']
 
     # TODO: remove this legacy fallback lookup in any future major version bump
-    legacy_fallback = ctx.obj.get('agent', '')
+    legacy_fallback = os.path.expanduser(ctx.obj.get('agent', ''))
     if os.path.isdir(legacy_fallback):
         legacy_fallback = ''
 
