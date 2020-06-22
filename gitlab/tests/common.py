@@ -94,7 +94,7 @@ METRICS = [
 ]
 
 METRICS_TO_TEST = [
-    "unicorn.workers",
+    "puma.workers",
     "rack.http_requests_total",
     "ruby.process_start_time_seconds",
     "rack.http_request_duration_seconds.sum",
