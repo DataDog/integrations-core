@@ -104,6 +104,10 @@ class InstanceConfig:
         ip_address = instance.get('ip_address')
         network_address = instance.get('network_address')
 
+        autodiscovery_subnet = instance.get('autodiscovery_subnet')
+        if autodiscovery_subnet:
+            self.tags.append('autodiscovery_subnet:{}'.format(autodiscovery_subnet))
+
         if not ip_address and not network_address:
             raise ConfigurationError('An IP address or a network address needs to be specified')
 

@@ -212,3 +212,7 @@ def generate_v3_instance_config(metrics, name=None, user=None, auth=None, auth_k
 
 def create_check(instance):
     return SnmpCheck('snmp', {}, [instance])
+
+
+def assert_common_metrics(aggregator, tags=None):
+    aggregator.assert_metric('snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags)

@@ -293,8 +293,9 @@ class SnmpCheck(AgentCheck):
                     write_persistent_cache(self.check_id, json.dumps([]))
                     break
                 instance = copy.deepcopy(self.instance)
-                instance.pop('network_address')
+                network_address = instance.pop('network_address')
                 instance['ip_address'] = host
+                instance['autodiscovery_subnet'] = network_address
 
                 host_config = self._build_config(instance)
                 self._config.discovered_instances[host] = host_config
@@ -380,6 +381,9 @@ class SnmpCheck(AgentCheck):
                 error = 'Failed to collect metrics for {} - {}'.format(self._get_instance_name(instance), e)
             self.warning(error)
         finally:
+            # At this point, `tags` include extra tags added in try clause
+            self.gauge('snmp.devices_monitored', 1, tags=tags)
+
             # Report service checks
             status = self.OK
             if error:
