@@ -5,6 +5,7 @@
 from typing import Any
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.ibm_mq.collectors.stats_collector import StatsCollector
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
 from . import connection, errors
@@ -34,6 +35,7 @@ class IbmMqCheck(AgentCheck):
             self.config, self.service_check, self.warning, self.send_metric, self.log
         )
         self.channel_metric_collector = ChannelMetricCollector(self.config, self.service_check, self.gauge, self.log)
+        self.stats_collector = StatsCollector(self)
 
     def check(self, _):
         try:
@@ -47,6 +49,7 @@ class IbmMqCheck(AgentCheck):
         try:
             self.channel_metric_collector.get_pcf_channel_metrics(queue_manager)
             self.queue_metric_collector.collect_queue_metrics(queue_manager)
+            self.stats_collector.collect(queue_manager)
         finally:
             queue_manager.disconnect()
 

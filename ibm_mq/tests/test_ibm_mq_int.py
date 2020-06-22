@@ -173,3 +173,12 @@ def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):
 
     for metric, _ in QUEUE_METRICS:
         aggregator.assert_metric(metric, tags=tags)
+
+
+def test_collect_statistics_from_events(aggregator, instance):
+    instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
+    check = IbmMqCheck('ibm_mq', {}, [instance])
+
+    check.check(instance)
+
+    assert_all_metrics(aggregator)
