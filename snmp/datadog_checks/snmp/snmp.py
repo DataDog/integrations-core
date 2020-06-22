@@ -109,17 +109,18 @@ class SnmpCheck(AgentCheck):
         profiles_by_oid = {}  # type: Dict[str, str]
         for name, profile in self.profiles.items():
             sys_object_oids = profile['definition'].get('sysobjectid')
-            if sys_object_oids is not None:
-                if isinstance(sys_object_oids, str):
-                    sys_object_oids = [sys_object_oids]
-                for sys_object_oid in sys_object_oids:
-                    profile_match = profiles_by_oid.get(sys_object_oid)
-                    if profile_match:
-                        raise ConfigurationError(
-                            "Profile {} has the same sysObjectID ({}) as {}".format(name, sys_object_oid, profile_match)
-                        )
-                    else:
-                        profiles_by_oid[sys_object_oid] = name
+            if sys_object_oids is None:
+                continue
+            if isinstance(sys_object_oids, str):
+                sys_object_oids = [sys_object_oids]
+            for sys_object_oid in sys_object_oids:
+                profile_match = profiles_by_oid.get(sys_object_oid)
+                if profile_match:
+                    raise ConfigurationError(
+                        "Profile {} has the same sysObjectID ({}) as {}".format(name, sys_object_oid, profile_match)
+                    )
+                else:
+                    profiles_by_oid[sys_object_oid] = name
         return profiles_by_oid
 
     def _build_config(self, instance):
@@ -286,14 +287,14 @@ class SnmpCheck(AgentCheck):
         """
         Return the most specific profile that matches the given sysObjectID.
         """
-        matched_oids = [
-            (oid, profile) for oid, profile in self.profiles_by_oid.items() if fnmatch.fnmatch(sys_object_oid, oid)
-        ]
+        matched_profiles_by_oid = {
+            oid: self.profiles_by_oid[oid] for oid in self.profiles_by_oid if fnmatch.fnmatch(sys_object_oid, oid)
+        }
 
-        if not matched_oids:
+        if not matched_profiles_by_oid:
             raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
 
-        return max(matched_oids, key=lambda oid: oid_pattern_specificity(oid[0]))[1]
+        return max(matched_profiles_by_oid.keys(), key=lambda oid: oid_pattern_specificity(oid[0]))[1]
 
     def _start_discovery(self):
         # type: () -> None

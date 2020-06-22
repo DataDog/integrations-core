@@ -249,7 +249,7 @@ def test_sysobjectid_list():
     init_config = {'profiles': {'multiple': {'definition': profile_multiple}, 'single': {'definition': profile_single}}}
     check = SnmpCheck('snmp', init_config, [instance])
 
-    assert check.profiles_by_oid = {
+    assert check.profiles_by_oid == {
         '1.3.6.1.4.1.9.1.241': 'multiple',
         '1.3.6.1.4.1.9.1.1790': 'multiple',
         '1.3.6.1.4.1.9.1.3450': 'single',
