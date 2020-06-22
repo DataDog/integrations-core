@@ -122,7 +122,7 @@ def dd_environment():
     if common.MQ_VERSION.startswith('9'):
         log_pattern = "AMQ5026I: The listener 'DEV.LISTENER.TCP' has started. ProcessId"
     elif common.MQ_VERSION == '8':
-        log_pattern = r".*QMNAME\(datadog\)\s*STATUS\(Running\).*"
+        log_pattern = r".*QMNAME\({}\)\s*STATUS\(Running\).*".format(common.QUEUE_MANAGER)
     else:
         raise RuntimeError('Invalid version: {}'.format(common.MQ_VERSION))
 
