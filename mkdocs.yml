@@ -73,7 +73,7 @@ nav:
   - Process:
     - Integration release: process/integration-release.md
     - Agent release:
-      - process/agent-release/agent-release.md
+      - process/agent-release/pre-release.md
       - process/agent-release/post-release.md
   - FAQ:
     - FAQ: faq/faq.md
