@@ -134,6 +134,7 @@ class ExecutionPlansMixin(object):
                             'debug': {
                                 'normalized_plan': normalized_plan,
                                 'obfuscated_plan': datadog_agent.obfuscate_sql_exec_plan(plan),
+                                'digest_text': digest_text,
                             },
                             'mysql': {
                                 'lock_time': row['lock_time_ns'],
@@ -151,7 +152,6 @@ class ExecutionPlansMixin(object):
                                 'sort_scan': row['sort_scan'],
                                 'no_index_used': row['no_index_used'],
                                 'no_good_index_used': row['no_good_index_used'],
-                                'digest_text': digest_text,
                             }
                         }
                     })
