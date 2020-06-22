@@ -1,3 +1,4 @@
+import json
 from contextlib import closing
 
 import pymysql
@@ -130,6 +131,7 @@ class ExecutionPlansMixin(object):
                             'statement': datadog_agent.obfuscate_sql(sql_text),
                             'query_signature': compute_sql_signature(digest_text),
                             'plan': plan,
+                            'plan_cost': self._parse_execution_plan_cost(plan),
                             'plan_signature': compute_exec_plan_signature(normalized_plan),
                             'debug': {
                                 'normalized_plan': normalized_plan,
@@ -180,3 +182,11 @@ class ExecutionPlansMixin(object):
                 raise
 
         return cursor.fetchone()[0]
+
+    @staticmethod
+    def _parse_execution_plan_cost(execution_plan):
+        """
+        Parses the total cost from the execution plan, if set. If not set, returns cost of 0.
+        """
+        cost = json.loads(execution_plan).get('query_block', {}).get('cost_info', {}).get('query_cost', 0.)
+        return float(cost or 0.)
