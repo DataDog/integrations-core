@@ -119,14 +119,16 @@ def consume():
 @pytest.fixture(scope='session')
 def dd_environment():
 
-    if common.MQ_VERSION == '9':
+    if common.MQ_VERSION.startswith('9'):
         log_pattern = "AMQ5026I: The listener 'DEV.LISTENER.TCP' has started. ProcessId"
     elif common.MQ_VERSION == '8':
         log_pattern = r".*QMNAME\(datadog\)\s*STATUS\(Running\).*"
+    else:
+        raise RuntimeError('Invalid version: {}'.format(common.MQ_VERSION))
 
     env = {'COMPOSE_DIR': common.COMPOSE_DIR}
 
     with docker_run(
-        common.COMPOSE_FILE_PATH, env_vars=env, conditions=[CheckDockerLogs('ibm_mq', log_pattern)], sleep=10
+        common.COMPOSE_FILE_PATH, env_vars=env, conditions=[CheckDockerLogs('ibm_mq1', log_pattern)], sleep=10
     ):
         yield common.INSTANCE, common.E2E_METADATA
