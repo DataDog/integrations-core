@@ -148,6 +148,7 @@ class ExecutionPlansMixin(object):
                                 'sort_scan': row['sort_scan'],
                                 'no_index_used': row['no_index_used'],
                                 'no_good_index_used': row['no_good_index_used'],
+                                'digest_text': digest_text,
                             }
                         }
                     })
