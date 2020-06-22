@@ -121,7 +121,7 @@ class ExecutionPlansMixin(object):
                 cursor.execute('SET sql_notes = 0')
                 # TODO: run these asynchronously / do some benchmarking to optimize
                 plan = self._run_explain(cursor, sql_text, schema)
-                normalized_plan, plan_signature = compute_exec_plan_signature(plan)
+                normalized_plan = compute_exec_plan_signature(plan)
                 if plan:
                     events.append({
                         'duration': duration_ns,
@@ -130,8 +130,11 @@ class ExecutionPlansMixin(object):
                             'statement': datadog_agent.obfuscate_sql(sql_text),
                             'query_signature': compute_sql_signature(digest_text),
                             'plan': plan,
-                            'normalized_plan': normalized_plan,
-                            'plan_signature': plan_signature,
+                            'plan_signature': compute_exec_plan_signature(normalized_plan),
+                            'debug': {
+                                'normalized_plan': normalized_plan,
+                                'obfuscated_plan': datadog_agent.obfuscate_sql_exec_plan(plan),
+                            },
                             'mysql': {
                                 'lock_time': row['lock_time_ns'],
                                 'rows_affected': row['rows_affected'],
