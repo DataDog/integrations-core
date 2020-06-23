@@ -396,9 +396,6 @@ def _parse_table_metric_tag(mib, parsed_table, metric_tag):
         index: 2
     ```
     """
-    if ('tag' not in metric_tag) and ('tags' not in metric_tag and 'match' not in metric_tag):
-        raise ConfigurationError('When specifying metric tags, you must specify a tag, or tags and match')
-
     if 'column' in metric_tag:
         metric_tag = cast(ColumnTableMetricTag, metric_tag)
         metric_tag_mib = metric_tag.get('MIB', mib)
