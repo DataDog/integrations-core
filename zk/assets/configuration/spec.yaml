@@ -31,7 +31,7 @@ files:
 
           - name: expected_mode
             description: |
-              If `expected_mode` is defined, a service check is send where the
+              If `expected_mode` is defined, a service check is sent where the
               status is determined by whether the current mode matches the expected.
 
               Available options are: `leader`, `follower`, `standalone`.
@@ -54,7 +54,6 @@ files:
         - type: file
           path: /var/log/zookeeper.log
           source: zookeeper
-          service: <SERVICE_NAME>
           log_processing_rules:
           - type: multi_line
             name: start_with_date
