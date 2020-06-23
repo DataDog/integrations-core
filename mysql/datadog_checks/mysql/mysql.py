@@ -1494,7 +1494,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
                 tags = []
                 if row['schema'] is not None:
                     tags.append('schema:' + row['schema'])
-                tags.append('query:' + row['query'[:200]])
+                tags.append('query:' + row['query'][:200])
                 tags.append('digest:' + row['digest'])
                 tags.append('query_signature:' + compute_sql_signature(row['query']))
                 metrics.append((name, row[col] - prev[col], fn, tags))
