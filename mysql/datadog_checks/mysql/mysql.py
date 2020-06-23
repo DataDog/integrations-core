@@ -883,6 +883,9 @@ class MySql(AgentCheck):
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Privileges error accessing the BINARY LOGS (must grant REPLICATION CLIENT): %s", e)
             return None
+        except (UnicodeDecodeError, UnicodeEncodeError) as e:
+            self.warning("Unicode error while accessing the BINARY LOGS: %s", e)
+            return None
 
     def _is_innodb_engine_enabled(self, db):
         # Whether InnoDB engine is available or not can be found out either
@@ -899,6 +902,9 @@ class MySql(AgentCheck):
 
         except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.NotSupportedError) as e:
             self.warning("Possibly innodb stats unavailable - error querying engines table: %s", e)
+            return False
+        except (UnicodeDecodeError, UnicodeEncodeError) as e:
+            self.warning("Unicode error while getting INNODB status: %s", e)
             return False
 
     def _get_replica_stats(self, db, is_mariadb, replication_channel):
@@ -930,6 +936,8 @@ class MySql(AgentCheck):
                 pass
             else:
                 self.warning("Privileges error getting replication status (must grant REPLICATION CLIENT): %s", e)
+        except (UnicodeDecodeError, UnicodeEncodeError) as e:
+            self.warning("Unicode error while getting replication status: %s", e)
 
         try:
             with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
@@ -939,6 +947,8 @@ class MySql(AgentCheck):
                     replica_results.update({'Binlog_enabled': True})
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Privileges error getting binlog information (must grant REPLICATION CLIENT): %s", e)
+        except (UnicodeDecodeError, UnicodeEncodeError) as e:
+            self.warning("Unicode error while getting binlog information: %s", e)
 
         return replica_results
 
@@ -966,6 +976,9 @@ class MySql(AgentCheck):
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Privileges error accessing the process tables (must grant PROCESS): %s", e)
             return {}
+        except (UnicodeDecodeError, UnicodeEncodeError) as e:
+            self.warning("Unicode error while getting slave status: %s", e)
+            return {}
 
     @classmethod
     def _are_values_numeric(cls, array):
@@ -984,6 +997,9 @@ class MySql(AgentCheck):
             self.warning(
                 "Privilege error or engine unavailable accessing the INNODB status tables (must grant PROCESS): %s", e,
             )
+            return {}
+        except (UnicodeDecodeError, UnicodeEncodeError) as e:
+            self.warning("Unicode error while getting INNODB status: %s", e)
             return {}
 
         if cursor.rowcount < 1:
