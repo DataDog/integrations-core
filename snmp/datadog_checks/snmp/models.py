@@ -93,6 +93,10 @@ class OID(object):
 class Device:
     """
     Represents an SNMP device from which we can query OIDs.
+
+    :param ip: The IP address of the device.
+    :param port: The UDP port on which the device will be queried.
+    :param target: An opaque string used by PySNMP to route queries to the device. See `utils.register_device_target()`.
     """
 
     def __init__(self, ip, port, target):

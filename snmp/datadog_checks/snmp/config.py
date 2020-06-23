@@ -14,15 +14,14 @@ from .pysnmp_types import (
     CommunityData,
     ContextData,
     OctetString,
-    UdpTransportTarget,
     UsmUserData,
     hlapi,
-    lcd,
     usmDESPrivProtocol,
     usmHMACMD5AuthProtocol,
 )
 from .resolver import OIDResolver
 from .types import OIDMatch
+from .utils import register_device_target
 
 
 class InstanceConfig:
@@ -115,8 +114,15 @@ class InstanceConfig:
 
         if ip_address:
             port = int(instance.get('port', 161))
-            transport = UdpTransportTarget((ip_address, port), timeout=timeout, retries=retries)
-            target, _ = lcd.configure(self._snmp_engine, self._auth_data, transport, self._context_data.contextName)
+            target = register_device_target(
+                ip_address,
+                port,
+                timeout=timeout,
+                retries=retries,
+                engine=self._snmp_engine,
+                auth_data=self._auth_data,
+                context_data=self._context_data,
+            )
             device = Device(ip=ip_address, port=port, target=target)
             self.device = device
             self.tags.extend(device.tags)

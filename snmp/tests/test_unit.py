@@ -28,7 +28,7 @@ from .utils import mock_profiles_confd_root
 pytestmark = pytest.mark.unit
 
 
-@mock.patch("datadog_checks.snmp.config.lcd")
+@mock.patch("datadog_checks.snmp.pysnmp_types.lcd")
 def test_parse_metrics(lcd_mock):
     # type: (Any) -> None
     lcd_mock.configure.return_value = ('addr', None)
