@@ -1420,7 +1420,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
         values to get the counts for the elapsed period. This is similar to monotonic_count, but
         several fields must be further processed from the delta values.
         """
-        DEFAULT_LIMIT = 200
+        DEFAULT_LIMIT = 10000
 
         sql_statement_summary ="""\
             SELECT `schema_name` as `schema`,
