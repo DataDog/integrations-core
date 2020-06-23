@@ -9,7 +9,7 @@ from datadog_checks.base import ConfigurationError, is_affirmative
 
 from .mibs import MIBLoader
 from .models import OID
-from .parsing import ParsedMetric, ParsedSymbolMetric, SymbolTag, parse_metric_tags, parse_metrics
+from .parsing import ParsedMetric, ParsedSymbolMetric, SymbolTag, parse_symbol_metric_tags, parse_metrics
 from .pysnmp_types import (
     CommunityData,
     ContextData,
@@ -289,7 +289,7 @@ class InstanceConfig:
     def parse_metric_tags(self, metric_tags):
         # type: (list) -> Tuple[List[OID], List[SymbolTag]]
         """Parse configuration for global metric_tags."""
-        result = parse_metric_tags(metric_tags, resolver=self._resolver)
+        result = parse_symbol_metric_tags(metric_tags, resolver=self._resolver)
         return result['oids'], result['parsed_symbol_tags']
 
     def add_uptime_metric(self):

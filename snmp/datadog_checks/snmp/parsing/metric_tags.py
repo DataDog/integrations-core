@@ -19,10 +19,10 @@ SymbolTag = NamedTuple('SymbolTag', [('parsed_metric_tag', ParsedMetricTag), ('s
 ParsedSymbolTagsResult = TypedDict('ParsedSymbolTagsResult', {'oids': List[OID], 'parsed_symbol_tags': List[SymbolTag]})
 
 
-def parse_metric_tags(metric_tags, resolver):
+def parse_symbol_metric_tags(metric_tags, resolver):
     # type: (List[MetricTag], OIDResolver) -> ParsedSymbolTagsResult
     """
-    Parse the `metric_tags` section of a config file, and return OIDs to fetch and metric tags to submit.
+    Parse the symbol based `metric_tags` section of a config file, and return OIDs to fetch and metric tags to submit.
     """
     oids = []  # type: List[OID]
     parsed_symbol_tags = []  # type: List[SymbolTag]
@@ -31,7 +31,7 @@ def parse_metric_tags(metric_tags, resolver):
         if 'symbol' not in metric_tag:
             raise ConfigurationError('A metric tag must specify a symbol: {}'.format(metric_tag))
 
-        result = _parse_metric_tag(metric_tag)
+        result = _parse_symbol_metric_tag(metric_tag)
 
         for name, oid in result.oids_to_resolve.items():
             resolver.register(oid, name)
@@ -65,21 +65,7 @@ MetricTag = TypedDict(
 )
 
 
-def get_parsed_metric_tag(metric_tag):
-    # type: (MetricTag) -> ParsedMetricTag
-    if 'tag' in metric_tag:
-        parsed_metric_tag = _parse_simple_metric_tag(metric_tag)
-    elif 'match' in metric_tag and 'tags' in metric_tag:
-        parsed_metric_tag = _parse_regex_metric_tag(metric_tag)
-    else:
-        raise ConfigurationError(
-            'A metric tag must specify either a tag, '
-            'or a mapping of tags and a regular expression: {}'.format(metric_tag)
-        )
-    return parsed_metric_tag
-
-
-def _parse_metric_tag(metric_tag):
+def _parse_symbol_metric_tag(metric_tag):
     # type: (MetricTag) -> MetricTagParseResult
     oids_to_resolve = {}
 
@@ -91,8 +77,22 @@ def _parse_metric_tag(metric_tag):
     else:
         raise ConfigurationError('A metric tag must specify an OID or a MIB: {}'.format(metric_tag))
 
-    symbol_tag = SymbolTag(parsed_metric_tag=get_parsed_metric_tag(metric_tag), symbol=metric_tag['symbol'])
+    symbol_tag = SymbolTag(parsed_metric_tag=parse_metric_tag(metric_tag), symbol=metric_tag['symbol'])
     return MetricTagParseResult(oid=oid, symbol_tag=symbol_tag, oids_to_resolve=oids_to_resolve)
+
+
+def parse_metric_tag(metric_tag):
+    # type: (MetricTag) -> ParsedMetricTag
+    if 'tag' in metric_tag:
+        parsed_metric_tag = _parse_simple_metric_tag(metric_tag)
+    elif 'match' in metric_tag and 'tags' in metric_tag:
+        parsed_metric_tag = _parse_regex_metric_tag(metric_tag)
+    else:
+        raise ConfigurationError(
+            'A metric tag must specify either a tag, '
+            'or a mapping of tags and a regular expression: {}'.format(metric_tag)
+        )
+    return parsed_metric_tag
 
 
 def _parse_simple_metric_tag(metric_tag):

@@ -11,7 +11,7 @@ from datadog_checks.base import ConfigurationError
 from ..models import OID
 from ..pysnmp_types import ObjectIdentity
 from ..resolver import OIDResolver
-from .metric_tags import MetricTag, get_parsed_metric_tag
+from .metric_tags import MetricTag, parse_metric_tag
 from .metrics_types import (
     ColumnTableMetricTag,
     IndexTableMetricTag,
@@ -410,7 +410,7 @@ def _parse_table_metric_tag(mib, parsed_table, metric_tag):
 
     if 'index' in metric_tag:
         metric_tag = cast(IndexTableMetricTag, metric_tag)
-        return parse_index_metric_tag(metric_tag)
+        return _parse_index_metric_tag(metric_tag)
 
     raise ConfigurationError('When specifying metric tags, you must specify either and index or a column')
 
@@ -424,7 +424,7 @@ def _parse_column_metric_tag(mib, parsed_table, metric_tag):
     return ParsedColumnMetricTag(
         oids_to_resolve=parsed_column.oids_to_resolve,
         column_tags=[
-            ColumnTag(parsed_metric_tag=get_parsed_metric_tag(cast(MetricTag, metric_tag)), column=parsed_column.name)
+            ColumnTag(parsed_metric_tag=parse_metric_tag(cast(MetricTag, metric_tag)), column=parsed_column.name)
         ],
         table_batches=batches,
     )
@@ -445,10 +445,10 @@ def _parse_other_table_column_metric_tag(mib, table, metric_tag):
     )
 
 
-def parse_index_metric_tag(metric_tag):
+def _parse_index_metric_tag(metric_tag):
     # type: (IndexTableMetricTag) -> ParsedTableMetricTag
     index_tags = [
-        IndexTag(parsed_metric_tag=get_parsed_metric_tag(cast(MetricTag, metric_tag)), index=metric_tag['index'])
+        IndexTag(parsed_metric_tag=parse_metric_tag(cast(MetricTag, metric_tag)), index=metric_tag['index'])
     ]
     index_mappings = {metric_tag['index']: metric_tag['mapping']} if 'mapping' in metric_tag else {}
 
