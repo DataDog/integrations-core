@@ -904,7 +904,7 @@ class MySql(AgentCheck):
             self.warning("Possibly innodb stats unavailable - error querying engines table: %s", e)
             return False
         except (UnicodeDecodeError, UnicodeEncodeError) as e:
-            self.warning("Unicode error while getting INNODB status: %s", e)
+            self.warning("Unicode error while getting INNODB stats: %s", e)
             return False
 
     def _get_replica_stats(self, db, is_mariadb, replication_channel):
