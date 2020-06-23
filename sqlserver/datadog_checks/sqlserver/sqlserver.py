@@ -849,6 +849,7 @@ class SqlComplexMetric(SqlServerMetric):
                         context = (metric_name, sorted_tags)
                         if cached_metrics_data.get(context):
                             value, timestamp = cached_metrics_data.get(context)
+                            value = 0 if value > report_value else value
                         else:
                             self.log.info("missing context {0}".format(context))
                             cached_metrics_data[context] = (report_value, current_timestamp)
