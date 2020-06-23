@@ -48,4 +48,4 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/cloud_foundry_api/metadata.csv
 [7]: https://docs.datadoghq.com/help
-[8]: https://github.com/DataDog/integrations-core/blob/master/cloud_foundry_api/assets/service_checks.csv
+[8]: https://github.com/DataDog/integrations-core/blob/master/cloud_foundry_api/assets/service_checks.json
