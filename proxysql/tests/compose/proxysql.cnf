@@ -3,6 +3,7 @@ datadir="/var/lib/proxysql"
 admin_variables=
 {
   admin_credentials="admin:admin;proxy:proxy"
+  stats_credentials="stats:stats;proxystats:proxystats"
   mysql_ifaces="0.0.0.0:6032"
 }
 
