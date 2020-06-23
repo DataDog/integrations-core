@@ -318,10 +318,10 @@ def test_section_example_indent():
         ## port / path / channel_path - required - Set port if type is tcp or udp.
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
-        ## source  - required - Attribute that defines which Integration sent the logs
+        ## source  - required - Attribute that defines which Integration sent the logs.
         ## service - required - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
-        ## tags - optional - Add tags to the collected logs
+        ## tags - optional - Add tags to the collected logs.
         ##
         ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
         #
@@ -380,10 +380,10 @@ def test_section_example_indent_required():
         ## port / path / channel_path - required - Set port if type is tcp or udp.
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
-        ## source  - required - Attribute that defines which Integration sent the logs
+        ## source  - required - Attribute that defines which Integration sent the logs.
         ## service - required - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
-        ## tags - optional - Add tags to the collected logs
+        ## tags - optional - Add tags to the collected logs.
         ##
         ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
         #

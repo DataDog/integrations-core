@@ -15,11 +15,11 @@ pytestmark = pytest.mark.unit
 
 
 def test_ssh(aggregator):
-    c = CheckSSH('ssh_check', {}, {}, list(common.INSTANCES.values()))
+    check = CheckSSH('ssh_check', {}, [common.INSTANCES['main']])
 
     nb_threads = threading.active_count()
 
-    c.check(common.INSTANCES['main'])
+    check.check(common.INSTANCES['main'])
 
     for sc in aggregator.service_checks(CheckSSH.SSH_SERVICE_CHECK_NAME):
         assert sc.status == CheckSSH.OK
@@ -32,15 +32,16 @@ def test_ssh(aggregator):
 
 
 def test_ssh_bad_config(aggregator):
-    c = CheckSSH('ssh_check', {}, {}, list(common.INSTANCES.values()))
 
     nb_threads = threading.active_count()
 
     with pytest.raises(Exception):
-        c.check(common.INSTANCES['bad_auth'])
+        check = CheckSSH('ssh_check', {}, [common.INSTANCES['bad_auth']])
+        check.check(common.INSTANCES['bad_auth'])
 
     with pytest.raises(Exception):
-        c.check(common.INSTANCES['bad_hostname'])
+        check = CheckSSH('ssh_check', {}, [common.INSTANCES['bad_hostname']])
+        check.check(common.INSTANCES['bad_hostname'])
 
     for sc in aggregator.service_checks(CheckSSH.SSH_SERVICE_CHECK_NAME):
         assert sc.status == CheckSSH.CRITICAL
@@ -91,7 +92,7 @@ def test_collect_metadata(version, metadata, datadog_agent):
     client = MagicMock()
     client.get_transport = MagicMock(return_value=namedtuple('Transport', ['remote_version'])(version))
 
-    ssh = CheckSSH('ssh_check', {}, {}, list(common.INSTANCES.values()))
+    ssh = CheckSSH('ssh_check', {}, [common.INSTANCES['main']])
     ssh.check_id = 'test:123'
     ssh._collect_metadata(client)
     datadog_agent.assert_metadata('test:123', metadata)
@@ -101,7 +102,7 @@ def test_collect_bad_metadata(datadog_agent):
     client = MagicMock()
     client.get_transport = MagicMock(return_value=namedtuple('Transport', ['remote_version'])('Cannot parse this'))
 
-    ssh = CheckSSH('ssh_check', {}, {}, list(common.INSTANCES.values()))
+    ssh = CheckSSH('ssh_check', {}, [common.INSTANCES['main']])
     ssh.check_id = 'test:123'
     ssh._collect_metadata(client)
     datadog_agent.assert_metadata_count(1)

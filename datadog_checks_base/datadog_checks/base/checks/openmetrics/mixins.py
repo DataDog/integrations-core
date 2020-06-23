@@ -804,7 +804,19 @@ class OpenMetricsScraperMixin(object):
                     hostname=custom_hostname,
                 )
             else:
-                sample[self.SAMPLE_LABELS]["quantile"] = str(float(sample[self.SAMPLE_LABELS]["quantile"]))
+                try:
+                    quantile = sample[self.SAMPLE_LABELS]["quantile"]
+                except KeyError:
+                    # TODO: In the Prometheus spec the 'quantile' label is optional, but it's not clear yet
+                    # what we should do in this case. Let's skip for now and submit the rest of metrics.
+                    message = (
+                        '"quantile" label not present in metric %r. '
+                        'Quantile-less summary metrics are not currently supported. Skipping...'
+                    )
+                    self.log.debug(message, metric_name)
+                    continue
+
+                sample[self.SAMPLE_LABELS]["quantile"] = str(float(quantile))
                 tags = self._metric_tags(metric_name, val, sample, scraper_config, hostname=custom_hostname)
                 self.gauge(
                     "{}.{}.quantile".format(scraper_config['namespace'], metric_name),

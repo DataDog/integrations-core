@@ -80,11 +80,11 @@ See the [example check configuration][4] for comprehensive descriptions of other
 
 For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying the parameters below.
 
-| Parameter            | Value                                                                          |
-| -------------------- | ------------------------------------------------------------------------------ |
-| `<INTEGRATION_NAME>` | `supervisord`                                                                  |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                  |
-| `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":"9001", "user":"<USERNAME>", "pass":"<PASSWORD>"}` |
+| Parameter            | Value                                                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `<INTEGRATION_NAME>` | `supervisord`                                                                                                      |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                                      |
+| `<INSTANCE_CONFIG>`  | `{"name":"<SUPERVISORD_SERVER_NAME>", "host":"%%host%%", "port":"9001", "user":"<USERNAME>", "pass":"<PASSWORD>"}` |
 
 ### Validation
 

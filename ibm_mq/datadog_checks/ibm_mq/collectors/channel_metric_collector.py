@@ -6,7 +6,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
 
-from . import metrics
+from .. import metrics
 
 try:
     import pymqi

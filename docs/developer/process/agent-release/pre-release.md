@@ -1,4 +1,4 @@
-# Agent release
+# Pre release
 
 -----
 
@@ -15,9 +15,9 @@ ships a snapshot of [integrations-core][].
 
 Ensure that you have configured the following:
 
-- [GitHub](../ddev/configuration.md#github) credentials
-- [Trello](../ddev/configuration.md#trello) credentials
-- [Trello team mappings](../ddev/configuration.md#card-assignment)
+- [GitHub](../../ddev/configuration.md#github) credentials
+- [Trello](../../ddev/configuration.md#trello) credentials
+- [Trello team mappings](../../ddev/configuration.md#card-assignment)
 
 ## Freeze
 
@@ -26,11 +26,11 @@ all integrations with pending changes then branch off.
 
 ### Release
 
-1. Make a pull request to release [any new integrations](integration-release.md#new-integrations), then merge it and pull `master`
-1. Make a pull request to release [all changed integrations](integration-release.md#bulk-releases), then merge it and pull `master`
+1. Make a pull request to release [any new integrations](../integration-release.md#new-integrations), then merge it and pull `master`
+1. Make a pull request to release [all changed integrations](../integration-release.md#bulk-releases), then merge it and pull `master`
 
 !!! important
-    [Update PyPI](integration-release.md#pypi) if you released `datadog_checks_base` or `datadog_checks_dev`.
+    [Update PyPI](../integration-release.md#pypi) if you released `datadog_checks_base` or `datadog_checks_dev`.
 
 
 ### Branch
@@ -54,7 +54,7 @@ We test all changes to integrations that were introduced since the last release.
 ### Create items
 
 Create an item for every change in [our board](https://trello.com/b/ICjijxr4/agent-release-sprint) using
-the Trello subcommand called [testable](../ddev/cli.md#testable).
+the Trello subcommand called [testable](../../ddev/cli.md#testable).
 
 For example:
 
@@ -66,7 +66,7 @@ would select all commits that were merged between the Git references.
 
 The command will display each change and prompt you to assign a team or skip. Purely documentation changes are automatically skipped.
 
-Cards are automatically assigned if `$trello_users_$team` table is [configured](../ddev/configuration.md#card-assignment).
+Cards are automatically assigned if `$trello_users_$team` table is [configured](../../ddev/configuration.md#card-assignment).
 
 ### Release candidates
 
@@ -75,7 +75,7 @@ The main Agent release manager will increment and build a new `rc` every day a b
 Before each build is triggered:
 
 1. Merge any fixes that have been approved, then pull `master`
-1. Release [all changed integrations](integration-release.md#bulk-releases) with the exception of `datadog_checks_dev`
+1. Release [all changed integrations](../integration-release.md#bulk-releases) with the exception of `datadog_checks_dev`
 
 For each fix merged, you must cherry-pick to the [branch](#branch):
 
@@ -89,7 +89,7 @@ After all fixes have been cherry-picked:
 
 ### Communication
 
-The Agent Release Manager will post a [daily status](../ddev/cli.md#status) for the entire release cycle.
+The Agent Release Manager will post a [daily status](../../ddev/cli.md#status) for the entire release cycle.
 
 ```
 #agent-integrations status:
@@ -109,23 +109,3 @@ Each release candidate is deployed in a staging environment. We observe the `WAR
 
 After QA week ends the code freeze is lifted, even if there are items yet to be tested. The release manager will continue
 the same process outlined above.
-
-## Finalize
-
-On the day of the final stable release, [tag](#tag) the [branch](#branch) with `<MAJOR>.<MINOR>.0`.
-
-After the main Agent release manager confirms successful deployment to a few targets, create a branch based on `master` and run:
-
-```
-ddev agent changelog
-ddev agent integrations
-```
-
-See more options for [`ddev agent changelog`](../ddev/cli.md#changelog) and [`ddev agent integrations`](../ddev/cli.md#integrations).
-
-Run the following commands to update the contents: 
-
-1. `ddev agent changelog -w -f` to update the existing [`AGENT_CHANGELOG`][agent-changelog] file
-2. `ddev agent integrations -w -f` to update the existing [`AGENT_INTEGRATIONS`][agent-integrations] file. 
-
-Create a pull request and wait for approval before merging.

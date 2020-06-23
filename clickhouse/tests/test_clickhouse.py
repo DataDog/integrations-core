@@ -28,6 +28,19 @@ def test_check(aggregator, instance):
     aggregator.assert_metric(
         'clickhouse.dictionary.item.current', tags=[server_tag, port_tag, 'db:default', 'foo:bar', 'dictionary:test']
     )
+    aggregator.assert_service_check("clickhouse.can_connect", count=1)
+
+
+def test_can_connect(aggregator, instance):
+    """
+    Regression test: a copy of the `can_connect` service check must be submitted for each check run.
+    (It used to be submitted only once on check init, which led to customer seeing "no data" in the UI.)
+    """
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    num_runs = 3
+    for _ in range(num_runs):
+        check.run()
+    aggregator.assert_service_check("clickhouse.can_connect", count=num_runs)
 
 
 def test_custom_queries(aggregator, instance):

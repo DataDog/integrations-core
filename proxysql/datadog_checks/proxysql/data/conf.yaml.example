@@ -33,6 +33,13 @@ instances:
     #
     password: <PROXYSQL_ADMIN_PASSWORD>
 
+    ## @param database_name - string - optional - default: stats
+    ## Sets the name of the database to query for stats. For proxysql admin users, this is "stats" (default).
+    ## For stats users (defined in Proxysql's admin-stats_credentials), this is "main".
+    ## See https://github.com/sysown/proxysql/issues/1661 for more details.
+    #
+    # database_name: stats
+
     ## @param tls_verify - boolean - optional - default: false
     ## Instructs the check to use SSL when connecting to ProxySQL
     #

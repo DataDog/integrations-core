@@ -498,6 +498,7 @@ def test_submit_summary(
     _sum.add_sample("my_summary", {"quantile": "0.5"}, 24547.0)
     _sum.add_sample("my_summary", {"quantile": "0.9"}, 25763.0)
     _sum.add_sample("my_summary", {"quantile": "0.99"}, 25763.0)
+    _sum.add_sample("my_summary", {}, 25764.0)  # Quantile-less not supported yet and should be skipped.
     check = mocked_prometheus_check
     check.submit_openmetric('custom.summary', _sum, mocked_prometheus_scraper_config)
 
@@ -507,6 +508,7 @@ def test_submit_summary(
     aggregator.assert_metric('prometheus.custom.summary.quantile', 24547.0, tags=['quantile:0.5'], count=1)
     aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.9'], count=1)
     aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.99'], count=1)
+    aggregator.assert_metric('prometheus.custom.summary.quantile', 25764.0, tags=[], count=0)
 
     # If `send_monotonic_with_gauge` is true, assert a monotonic_count with suffixed `.total` is submitted
     if count_monotonic_gauge:
