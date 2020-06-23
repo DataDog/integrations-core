@@ -49,6 +49,7 @@ DOGWEB_JSON_DASHBOARDS = (
     'varnish',
 )
 DOGWEB_CODE_GENERATED_DASHBOARDS = (
+    'activemq',
     'apache',
     'ceph',
     'cisco_aci',
