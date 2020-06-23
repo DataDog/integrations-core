@@ -1445,6 +1445,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
                 `sum_no_index_used` as `no_index_used`,
                 `sum_no_good_index_used` as `no_good_index_used`
             FROM performance_schema.events_statements_summary_by_digest
+            WHERE `digest_text` NOT LIKE 'EXPLAIN %'
             ORDER BY `avg_timer_wait` DESC"""
 
         METRICS = {
