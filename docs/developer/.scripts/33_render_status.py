@@ -1,7 +1,5 @@
 import os
 
-from datadog_checks.dev.tooling.commands.meta.catalog import DOGWEB_DASHBOARDS
-from datadog_checks.dev.tooling.constants import get_root
 from datadog_checks.dev.tooling.utils import (
     get_check_file,
     get_config_file,
