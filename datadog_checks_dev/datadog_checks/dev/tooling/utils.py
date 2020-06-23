@@ -18,6 +18,10 @@ from .git import get_latest_tag
 
 # match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
+DOGWEB_DASHBOARDS = ('btrfs', 'cassandra', 'couchbase', 'elasticsearch', 'fluentd', 'gearmand', 'iis', 'ibm_was',
+                     'immunio', 'kong', 'kyoto_tycoon', 'marathon', 'memcached', 'mysql', 'nginx', 'pgbouncer',
+                     'php_fpm', 'postfix', 'postgres', 'sqlserver', 'rabbitmq', 'riak', 'riakcs', 'solr', 'sqlserver',
+                     'tokumx', 'tomcat', 'varnish')
 
 
 def format_commit_id(commit_id):
@@ -395,6 +399,13 @@ def has_e2e(check):
 def is_tile_only(check):
     config_file = get_config_file(check)
     return not os.path.exists(config_file)
+
+
+def has_dashboard(check):
+    if check in DOGWEB_DASHBOARDS:
+        return True
+    dashboards_path = os.path.join(get_assets_directory(check), 'dashboards')
+    return os.path.isdir(dashboards_path) and len(os.listdir(dashboards_path)) > 0
 
 
 def find_legacy_signature(check):

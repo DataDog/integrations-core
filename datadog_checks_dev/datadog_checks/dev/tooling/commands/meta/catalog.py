@@ -33,7 +33,6 @@ CSV_COLUMNS = [
     'has_tests',
     'has_metadata',
 ]
-DOGWEB_DASHBOARDS = ('sqlserver', 'tomcat', 'pusher', 'sigsci', 'marathon', 'ibm_was', 'nginx', 'immunio')
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Create a catalog with information about integrations')
