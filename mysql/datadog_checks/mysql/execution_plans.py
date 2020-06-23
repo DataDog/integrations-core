@@ -86,6 +86,7 @@ class ExecutionPlansMixin(object):
               FROM performance_schema.events_statements_history_long
              WHERE sql_text IS NOT NULL
                AND event_name like %s
+               AND digest_text NOT LIKE %s
                AND timer_start > %s
           GROUP BY digest
           ORDER BY timer_wait DESC
@@ -93,7 +94,7 @@ class ExecutionPlansMixin(object):
             """
 
         with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
-            cursor.execute(query, ('statement/%', self._checkpoint, self.query_limit))
+            cursor.execute(query, ('statement/%', 'EXPLAIN %', self._checkpoint, self.query_limit))
             rows = cursor.fetchall()
 
         events = []
