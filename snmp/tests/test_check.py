@@ -201,6 +201,41 @@ def test_table(aggregator):
     aggregator.all_metrics_asserted()
 
 
+def test_table_regex_match(aggregator):
+    config = [
+        {
+            'MIB': "IF-MIB",
+            'table': "ifTable",
+            'symbols': ["ifInOctets", "ifOutOctets"],
+            'metric_tags': [
+                {'tag': "interface", 'column': "ifDescr"},
+                {'column': "ifDescr", 'match': '(\\w)(\\w+)', 'tags': {'prefix': '\\1', 'suffix': '\\2'}},
+            ],
+        }
+    ]
+    common_tags = ['snmp_device:localhost']
+
+    instance = common.generate_instance_config(config)
+    check = common.create_check(instance)
+
+    check.check(instance)
+
+    # Test metrics
+    for symbol in common.TABULAR_OBJECTS[0]['symbols']:
+        metric_name = "snmp." + symbol
+        for interface in ['tunl0', 'eth0', 'ip6tnl0']:
+            tags = common_tags + [
+                'interface:{}'.format(interface),
+                'prefix:{}'.format(interface[:1]),
+                'suffix:{}'.format(interface[1:]),
+            ]
+            aggregator.assert_metric(metric_name, tags=tags)
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+
+    aggregator.all_metrics_asserted()
+
+
 def test_resolved_table(aggregator):
     instance = common.generate_instance_config(common.RESOLVED_TABULAR_OBJECTS)
     check = common.create_check(instance)

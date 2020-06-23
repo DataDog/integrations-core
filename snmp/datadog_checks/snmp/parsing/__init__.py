@@ -1,8 +1,8 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from .metric_tags import parse_metric_tags
-from .metrics import parse_metrics
+from .metric_tags import ParsedSymbolTagsResult, SymbolTag, parse_metric_tags
+from .metrics import ColumnTag, IndexTag, parse_metrics
 from .parsed_metrics import ParsedMetric, ParsedMetricTag, ParsedSymbolMetric, ParsedTableMetric
 
 __all__ = [
@@ -10,6 +10,10 @@ __all__ = [
     'parse_metric_tags',
     'ParsedMetric',
     'ParsedMetricTag',
+    'ParsedSymbolTagsResult',
     'ParsedSymbolMetric',
     'ParsedTableMetric',
+    'ColumnTag',
+    'IndexTag',
+    'SymbolTag',
 ]
