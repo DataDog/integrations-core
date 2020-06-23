@@ -59,7 +59,7 @@ DOGWEB_CODE_GENERATED_DASHBOARDS = (
     'etcd',
     'gunicorn',
     'haproxy',
-    'hdfs_datenode',
+    'hdfs_datanode',
     'hdfs_namenode',
     'hyperv',
     'ibm_mq',
