@@ -585,8 +585,8 @@ class SQLServer(AgentCheck):
         custom_tags = instance.get('tags', [])
         instance_key = self._conn_key(instance, self.DEFAULT_DB_KEY)
 
-        with self.open_managed_db_connections(instance, self.DEFAULT_DB_KEY):
-            try:
+        try:
+            with self.open_managed_db_connections(instance, self.DEFAULT_DB_KEY):
                 # if the server was down at check __init__ key could be missing.
                 if instance_key not in self.instances_metrics:
                     self._make_metric_list_to_collect(instance, self.custom_metrics)
@@ -626,9 +626,9 @@ class SQLServer(AgentCheck):
                     for key, value in cumulative_rate_metrics.iteritems():
                         self.gauge("sqlserver.server.metric.{}".format(key), value, tags=custom_tags)
 
-            except Exception as e:
-                self.log.warning("Could not fetch metric due to %s" % e)
-                self.maybe_raise_alert(e, instance_key, instance)
+        except Exception as e:
+            self.log.warning("Could not fetch metric due to %s" % e)
+            self.maybe_raise_alert(e, instance_key, instance)
 
     def do_stored_procedure_check(self, instance, proc):
         """
@@ -766,7 +766,6 @@ class SQLServer(AgentCheck):
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                tags=service_check_tags, message=message)
 
-            self.maybe_raise_alert(e, conn_key, instance)
             self.register_heartbeat_collections(instance, e, True)
 
             password = instance.get('password')
