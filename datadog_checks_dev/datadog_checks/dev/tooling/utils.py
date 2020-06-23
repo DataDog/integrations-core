@@ -18,7 +18,7 @@ from .git import get_latest_tag
 
 # match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
-DOGWEB_DASHBOARDS = (
+DOGWEB_JSON_DASHBOARDS = (
     'btrfs',
     'cassandra',
     'couchbase',
@@ -47,6 +47,41 @@ DOGWEB_DASHBOARDS = (
     'tokumx',
     'tomcat',
     'varnish',
+)
+DOGWEB_CODE_GENERATED_DASHBOARDS = (
+    'apache',
+    'ceph',
+    'cisco_aci',
+    'consul',
+    'couchdb',
+    'cri',
+    'crio',
+    'etcd',
+    'gunicorn',
+    'haproxy',
+    'hdfs_datenode',
+    'hdfs_namenode',
+    'hyperv',
+    'ibm_mq',
+    'kafka',
+    'kube_controller_manager',
+    'kube_scheduler',
+    'kubernetes',
+    'lighttpd',
+    'mapreduce',
+    'marathon',
+    'mesos',
+    'mongodb',
+    'nginx',
+    'openstack',
+    'powerdns_recursor' 'rabbitmq',
+    'redis',
+    'sigsci',
+    'spark',
+    'twistlock',
+    'wmi',
+    'yarn',
+    'zk',
 )
 
 
@@ -428,7 +463,7 @@ def is_tile_only(check):
 
 
 def has_dashboard(check):
-    if check in DOGWEB_DASHBOARDS:
+    if check in DOGWEB_JSON_DASHBOARDS or check in DOGWEB_CODE_GENERATED_DASHBOARDS:
         return True
     dashboards_path = os.path.join(get_assets_directory(check), 'dashboards')
     return os.path.isdir(dashboards_path) and len(os.listdir(dashboards_path)) > 0
