@@ -93,7 +93,7 @@ class PgStatementsMixin(object):
         self.__pg_stat_statements_columns = None
 
         # TODO: Make this a configurable limit
-        self.query_limit = 500
+        self.query_limit = 10000
 
     def _execute_query(self, cursor, query, log_func=None):
         raise NotImplementedError('Check must implement _execute_query()')
