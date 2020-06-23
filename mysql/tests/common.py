@@ -21,3 +21,16 @@ SLAVE_PORT = 13307
 
 USER = 'dog'
 PASS = 'dog'
+
+
+class MockCursor:
+    def execute(self, command):
+        raise UnicodeDecodeError('encoding', b'object', 0, 1, command)
+
+    def close(self):
+        return MockCursor()
+
+
+class MockDatabase:
+    def cursor(self):
+        return MockCursor()

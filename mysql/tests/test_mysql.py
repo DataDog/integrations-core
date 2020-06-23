@@ -218,6 +218,19 @@ def _test_optional_metrics(aggregator, optional_metrics, at_least):
 
 
 @pytest.mark.unit
+def test_innodb_status_unicode_error():
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{}])
+    mysql_check.log = mock.MagicMock()
+
+    assert mysql_check._get_stats_from_innodb_status(common.MockDatabase()) == {}
+    mysql_check.log.warning.assert_called_with(
+        "Unicode error while getting INNODB status: "
+        "'encoding' codec can't decode byte 0x6f in position 0: SHOW /*!50000 ENGINE*/ INNODB STATUS",
+        extra=mock.ANY,
+    )
+
+
+@pytest.mark.unit
 def test__get_server_pid():
     """
     Test the logic looping through the processes searching for `mysqld`
