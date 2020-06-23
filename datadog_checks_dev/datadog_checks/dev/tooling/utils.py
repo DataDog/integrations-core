@@ -18,10 +18,36 @@ from .git import get_latest_tag
 
 # match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
-DOGWEB_DASHBOARDS = ('btrfs', 'cassandra', 'couchbase', 'elasticsearch', 'fluentd', 'gearmand', 'iis', 'ibm_was',
-                     'immunio', 'kong', 'kyoto_tycoon', 'marathon', 'memcached', 'mysql', 'nginx', 'pgbouncer',
-                     'php_fpm', 'postfix', 'postgres', 'sqlserver', 'rabbitmq', 'riak', 'riakcs', 'solr', 'sqlserver',
-                     'tokumx', 'tomcat', 'varnish')
+DOGWEB_DASHBOARDS = (
+    'btrfs',
+    'cassandra',
+    'couchbase',
+    'elasticsearch',
+    'fluentd',
+    'gearmand',
+    'iis',
+    'ibm_was',
+    'immunio',
+    'kong',
+    'kyoto_tycoon',
+    'marathon',
+    'memcached',
+    'mysql',
+    'nginx',
+    'pgbouncer',
+    'php_fpm',
+    'postfix',
+    'postgres',
+    'sqlserver',
+    'rabbitmq',
+    'riak',
+    'riakcs',
+    'solr',
+    'sqlserver',
+    'tokumx',
+    'tomcat',
+    'varnish',
+)
 
 
 def format_commit_id(commit_id):
