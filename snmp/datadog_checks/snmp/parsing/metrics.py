@@ -447,9 +447,7 @@ def _parse_other_table_column_metric_tag(mib, table, metric_tag):
 
 def _parse_index_metric_tag(metric_tag):
     # type: (IndexTableMetricTag) -> ParsedTableMetricTag
-    index_tags = [
-        IndexTag(parsed_metric_tag=parse_metric_tag(cast(MetricTag, metric_tag)), index=metric_tag['index'])
-    ]
+    index_tags = [IndexTag(parsed_metric_tag=parse_metric_tag(cast(MetricTag, metric_tag)), index=metric_tag['index'])]
     index_mappings = {metric_tag['index']: metric_tag['mapping']} if 'mapping' in metric_tag else {}
 
     return ParsedIndexMetricTag(index_tags=index_tags, index_mappings=index_mappings)

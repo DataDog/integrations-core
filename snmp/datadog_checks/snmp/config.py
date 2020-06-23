@@ -9,7 +9,7 @@ from datadog_checks.base import ConfigurationError, is_affirmative
 
 from .mibs import MIBLoader
 from .models import OID
-from .parsing import ParsedMetric, ParsedSymbolMetric, SymbolTag, parse_symbol_metric_tags, parse_metrics
+from .parsing import ParsedMetric, ParsedSymbolMetric, SymbolTag, parse_metrics, parse_symbol_metric_tags
 from .pysnmp_types import (
     CommunityData,
     ContextData,
