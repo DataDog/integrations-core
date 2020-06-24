@@ -25,6 +25,7 @@ E2E_METADATA_ORACLE_CLIENT = {
     'start_commands': [
         'bash /tmp/install_instant_client.sh',
         'apt-get install libaio1',  # `apt-get update` already ran in install_instant_client.sh
+        'apt-get install gcc'
     ],
     'env_vars': {'LD_LIBRARY_PATH': '/opt/oracle/instantclient_19_3'},
 }
@@ -36,7 +37,6 @@ E2E_METADATA_JDBC_CLIENT = {
     'docker_volumes': ['{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE)],
     'start_commands': [
         'bash /tmp/install_instant_client.sh'
-        'apt-get install gcc',  # `apt-get update` already ran in install_instant_client.sh
     ],
 }
 
