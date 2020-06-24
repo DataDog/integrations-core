@@ -342,11 +342,21 @@ def test_no_recursive_symlink_loop(aggregator):
     'stat_follow_symlinks, expected_dir_size, expected_file_sizes',
     [
         pytest.param(True, 250, [('file50', 50), ('file100', 100), ('file100sym', 100)], id='follow_sym'),
-        # file100sym = 76: that the length of the symlink path
-        pytest.param(False, 226, [('file50', 50), ('file100', 100), ('file100sym', 76)], id='not_follow_sym'),
+        # file100sym = 8 + len(dir): that's the length of the symlink file
+        pytest.param(
+            False,
+            lambda tdir: 150 + 8 + len(tdir),
+            [('file50', 50), ('file100', 100), ('file100sym', lambda tdir: 8 + len(tdir))],
+            id='not_follow_sym',
+        ),
     ],
 )
 def test_stat_follow_symlinks(aggregator, stat_follow_symlinks, expected_dir_size, expected_file_sizes):
+    def flatten_value(value):
+        if callable(value):
+            return value(tdir)
+        return value
+
     with temp_directory() as tdir:
 
         # Setup dir and files
@@ -372,7 +382,9 @@ def test_stat_follow_symlinks(aggregator, stat_follow_symlinks, expected_dir_siz
         check.check(instance)
 
         common_tags = ['name:{}'.format(tdir)]
-        aggregator.assert_metric('system.disk.directory.bytes', value=expected_dir_size, tags=common_tags)
+        aggregator.assert_metric(
+            'system.disk.directory.bytes', value=flatten_value(expected_dir_size), tags=common_tags
+        )
         for filename, size in expected_file_sizes:
             tags = common_tags + ['filename:{}'.format(os.path.join(tdir, filename))]
-            aggregator.assert_metric('system.disk.directory.file.bytes', value=size, tags=tags)
+            aggregator.assert_metric('system.disk.directory.file.bytes', value=flatten_value(size), tags=tags)
