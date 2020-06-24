@@ -40,7 +40,7 @@ class DirectoryCheck(AgentCheck):
 
         self.config = DirectoryConfig(self.instance)
 
-    def check(self, instance):
+    def check(self, _):
         if not exists(self.config.abs_directory):
             msg = (
                 "Either directory '{}' doesn't exist or the Agent doesn't "
