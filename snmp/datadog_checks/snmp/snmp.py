@@ -295,7 +295,9 @@ class SnmpCheck(AgentCheck):
                 instance = copy.deepcopy(self.instance)
                 network_address = instance.pop('network_address')
                 instance['ip_address'] = host
-                instance['autodiscovery_subnet'] = network_address
+
+                instance.setdefault('tags', [])
+                instance['tags'].append('autodiscovery_subnet:{}'.format(network_address))
 
                 host_config = self._build_config(instance)
                 self._config.discovered_instances[host] = host_config
