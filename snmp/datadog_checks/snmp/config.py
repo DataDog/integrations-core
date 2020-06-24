@@ -1,14 +1,13 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import ipaddress
 from collections import defaultdict
-from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple
+from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Tuple
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
 from .mibs import MIBLoader
-from .models import OID, Device
+from .models import OID, Device, SubNet
 from .parsing import ParsedMetric, ParsedMetricTag, ParsedSymbolMetric, parse_metric_tags, parse_metrics
 from .pysnmp_types import (
     CommunityData,
@@ -73,7 +72,7 @@ class InstanceConfig:
                 instance.pop(key)
 
         self.instance = instance
-        self.tags = instance.get('tags', [])
+        self.tags = list(instance.get('tags', []))  # Avoid possible tag leaks between subnet vs device configs.
         self.metrics = instance.get('metrics', [])
         metric_tags = instance.get('metric_tags', [])
 
@@ -88,7 +87,7 @@ class InstanceConfig:
         self._resolver = OIDResolver(mib_view_controller, self.enforce_constraints)
 
         self.device = None  # type: Optional[Device]
-        self.ip_network = None
+        self.subnet = None  # type: Optional[SubNet]
 
         self.discovered_instances = {}  # type: Dict[str, InstanceConfig]
         self.failing_instances = defaultdict(int)  # type: DefaultDict[str, int]
@@ -130,16 +129,16 @@ class InstanceConfig:
         if network_address:
             if isinstance(network_address, bytes):
                 network_address = network_address.decode('utf-8')
-            self.ip_network = ipaddress.ip_network(network_address)
 
-        ignored_ip_addresses = instance.get('ignored_ip_addresses', [])
+            ignored_ip_addresses = instance.get('ignored_ip_addresses', [])
+            if not isinstance(ignored_ip_addresses, list):
+                raise ConfigurationError(
+                    'ignored_ip_addresses should be a list (got {})'.format(type(ignored_ip_addresses))
+                )
 
-        if not isinstance(ignored_ip_addresses, list):
-            raise ConfigurationError(
-                'ignored_ip_addresses should be a list (got {})'.format(type(ignored_ip_addresses))
-            )
-
-        self.ignored_ip_addresses = set(ignored_ip_addresses)  # type: Set[str]
+            subnet = SubNet(cidr=network_address, ignored_ips=ignored_ip_addresses)
+            self.subnet = subnet
+            self.tags.extend(subnet.tags)
 
         if not self.metrics and not profiles_by_oid and not profile:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
@@ -256,18 +255,12 @@ class InstanceConfig:
 
     def network_hosts(self):
         # type: () -> Iterator[str]
-        if self.ip_network is None:
-            raise RuntimeError('Expected ip_network to be set to iterate over network hosts.')
+        if self.subnet is None:
+            raise RuntimeError('No subnet set')
 
-        for ip_address in self.ip_network.hosts():
-            host = str(ip_address)
-
+        for host in self.subnet.hosts():
             if host in self.discovered_instances:
                 continue
-
-            if host in self.ignored_ip_addresses:
-                continue
-
             yield host
 
     def parse_metrics(self, metrics):

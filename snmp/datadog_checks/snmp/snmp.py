@@ -317,26 +317,31 @@ class SnmpCheck(AgentCheck):
     def check(self, instance):
         # type: (Dict[str, Any]) -> None
         config = self._config
-        if config.ip_network:
-            if self._thread is None:
-                self._start_discovery()
-
-            executor = self._executor
-            if executor is None:
-                raise RuntimeError("Expected executor be set")
-
-            sent = []
-            for host, discovered in list(config.discovered_instances.items()):
-                future = executor.submit(self._check_device, discovered)
-                sent.append(future)
-                future.add_done_callback(functools.partial(self._on_check_device_done, host))
-            futures.wait(sent)
-
-            tags = ['network:{}'.format(config.ip_network)]
-            tags.extend(config.tags)
-            self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
+        if config.subnet is not None:
+            self._check_subnet(config)
         else:
             self._check_device(config)
+
+    def _check_subnet(self, config):
+        # type: (InstanceConfig) -> None
+        if config.subnet is None:
+            raise RuntimeError('No subnet set')  # pragma: no cover
+
+        if self._thread is None:
+            self._start_discovery()
+
+        executor = self._executor
+        if executor is None:
+            raise RuntimeError('Expected executor be set')
+
+        sent = []
+        for host, discovered in list(config.discovered_instances.items()):
+            future = executor.submit(self._check_device, discovered)
+            sent.append(future)
+            future.add_done_callback(functools.partial(self._on_check_device_done, host))
+        futures.wait(sent)
+
+        self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=config.tags)
 
     def _on_check_device_done(self, host, future):
         # type: (str, futures.Future) -> None

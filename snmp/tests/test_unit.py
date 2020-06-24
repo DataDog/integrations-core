@@ -178,6 +178,7 @@ def test_ignore_ip_addresses():
 
     instance = common.generate_instance_config(common.SUPPORTED_METRIC_TYPES)
     string_not_in_a_list = '192.168.1.0/29'
+    instance['network_address'] = '192.168.1.0/29'
     instance['ignored_ip_addresses'] = string_not_in_a_list
     with pytest.raises(ConfigurationError):
         SnmpCheck('snmp', {}, [instance])

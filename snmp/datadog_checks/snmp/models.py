@@ -4,8 +4,10 @@
 """
 Define our own models and interfaces for dealing with SNMP data.
 """
+import ipaddress
+from typing import Iterator, List, Optional, Sequence, Tuple, Union
 
-from typing import List, Optional, Sequence, Tuple, Union
+from datadog_checks.base import ConfigurationError
 
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
 from .pysnmp_inspect import object_identity_from_object_type
@@ -118,3 +120,51 @@ class Device:
     def __repr__(self):
         # type: () -> str
         return '<Device ip={!r}, port={}>'.format(self._ip, self._port)
+
+
+class SubNet:
+    """
+    Represents a sub-network identified by a CIDR range [0], for use in SNMP device auto-discovery.
+
+    :param cidr: CIDR representation of the network.
+    :param ignored_ips: a list of individual IP addresses to exclude from the network.
+
+    For example, `SubNet('10.0.0.0/28', ignored_ips=['10.0.0.2'])` represents all IPs from `10.0.0.0` to `10.0.0.15`,
+    except '10.0.0.2'.
+
+    [0]: https://www.ipaddressguide.com/cidr
+    """
+
+    def __init__(self, cidr, ignored_ips):
+        # type: (str, Sequence[str]) -> None
+        try:
+            self._ip_network = ipaddress.ip_network(cidr)
+        except ValueError as exc:
+            # Eg '<cidr> has host bits set'
+            raise ConfigurationError('CIDR {!r} looks invalid: {}'.format(cidr, exc))
+
+        self._ignored_ips = set(ignored_ips)
+
+    @property
+    def num_hosts(self):
+        # type: () -> int
+        return self._ip_network.num_addresses - len(self._ignored_ips)
+
+    @property
+    def tags(self):
+        # type: () -> List[str]
+        return ['network:{}'.format(self._ip_network)]
+
+    def hosts(self):
+        # type: () -> Iterator[str]
+        for address in self._ip_network.hosts():
+            host = str(address)
+            if host in self._ignored_ips:
+                continue
+            yield host
+
+    def __repr__(self):
+        # type: () -> str
+        return '<SubNet ip_version={}, cidr={!r}, ignored_ips=<{} IPs>, num_hosts={}>'.format(
+            self._ip_network.version, str(self._ip_network), len(self._ignored_ips), self.num_hosts
+        )
