@@ -33,7 +33,7 @@ from .utils import mock_profiles_confd_root
 pytestmark = pytest.mark.unit
 
 
-@mock.patch("datadog_checks.snmp.config.lcd")
+@mock.patch("datadog_checks.snmp.pysnmp_types.lcd")
 def test_parse_metrics(lcd_mock):
     # type: (Any) -> None
     lcd_mock.configure.return_value = ('addr', None)
@@ -256,24 +256,27 @@ def test_removing_host():
     warnings = []
     check.warning = warnings.append
     check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance)
-    msg = 'Failed to collect some metrics: No SNMP response received before timeout for instance 1.1.1.1'
 
     check._start_discovery = lambda: None
     check._executor = futures.ThreadPoolExecutor(max_workers=1)
     check.check(instance)
-    assert warnings == [msg]
+
+    assert len(warnings) == 1
+    warning = warnings[0]
+    msg = 'Failed to collect some metrics: No SNMP response received before timeout'
+    assert msg in warning
 
     check.check(instance)
-    assert warnings == [msg, msg]
+    assert warnings == [warning, warning]
 
     check.check(instance)
-    assert warnings == [msg, msg, msg]
+    assert warnings == [warning, warning, warning]
     # Instance has been removed
     assert check._config.discovered_instances == {}
 
     check.check(instance)
     # No new warnings produced
-    assert warnings == [msg, msg, msg]
+    assert warnings == [warning, warning, warning]
 
 
 def test_invalid_discovery_interval():
@@ -501,9 +504,10 @@ def test_failed_to_collect_metrics():
     instance['network_address'] = '192.168.0.0/24'
 
     check = SnmpCheck('snmp', {}, [instance])
+    check._config = config
     check.fetch_results = mock.Mock(return_value=ValueError("invalid value"))
 
-    check._check_with_config(config)
+    check.check(instance)
 
     assert len(check.warnings) == 1
     assert 'Failed to collect metrics for 127.0.0.123' in check.warnings[0]

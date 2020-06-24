@@ -327,18 +327,18 @@ class SnmpCheck(AgentCheck):
 
             sent = []
             for host, discovered in list(config.discovered_instances.items()):
-                future = executor.submit(self._check_with_config, discovered)
+                future = executor.submit(self._check_device, discovered)
                 sent.append(future)
-                future.add_done_callback(functools.partial(self._check_config_done, host))
+                future.add_done_callback(functools.partial(self._on_check_device_done, host))
             futures.wait(sent)
 
             tags = ['network:{}'.format(config.ip_network)]
             tags.extend(config.tags)
             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
-            self._check_with_config(config)
+            self._check_device(config)
 
-    def _check_config_done(self, host, future):
+    def _on_check_device_done(self, host, future):
         # type: (str, futures.Future) -> None
         config = self._config
         if future.result():
@@ -352,9 +352,12 @@ class SnmpCheck(AgentCheck):
             # Reset the counter if not's failing
             config.failing_instances.pop(host, None)
 
-    def _check_with_config(self, config):
+    def _check_device(self, config):
         # type: (InstanceConfig) -> Optional[str]
         # Reset errors
+        if config.device is None:
+            raise RuntimeError('No device set')  # pragma: no cover
+
         instance = config.instance
         error = results = None
         tags = config.tags
@@ -366,7 +369,7 @@ class SnmpCheck(AgentCheck):
                 config.add_profile_tag(profile)
 
             if config.all_oids or config.next_oids or config.bulk_oids:
-                self.log.debug('Querying device %s', config.ip_address)
+                self.log.debug('Querying %s', config.device)
                 config.add_uptime_metric()
                 results, error = self.fetch_results(config, config.all_oids, config.next_oids, config.bulk_oids)
                 tags = self.extract_metric_tags(config.parsed_metric_tags, results)
