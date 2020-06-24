@@ -222,11 +222,22 @@ def test_innodb_status_unicode_error():
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[{}])
     mysql_check.log = mock.MagicMock()
 
-    assert mysql_check._get_stats_from_innodb_status(common.MockDatabase()) == {}
+    class MockCursor:
+        def execute(self, command):
+            raise UnicodeDecodeError('encoding', b'object', 0, 1, command)
+
+        def close(self):
+            return MockCursor()
+
+    class MockDatabase:
+        def cursor(self):
+            return MockCursor()
+
+    assert mysql_check._get_stats_from_innodb_status(MockDatabase()) == {}
     mysql_check.log.warning.assert_called_with(
-        "Unicode error while getting INNODB status: "
+        "Unicode error while getting INNODB status "
+        "(if this warning is infrequent, metric collection won't be impacted): %s",
         "'encoding' codec can't decode byte 0x6f in position 0: SHOW /*!50000 ENGINE*/ INNODB STATUS",
-        extra=mock.ANY,
     )
 
 

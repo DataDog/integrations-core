@@ -986,7 +986,11 @@ class MySql(AgentCheck):
             )
             return {}
         except (UnicodeDecodeError, UnicodeEncodeError) as e:
-            self.warning("Unicode error while getting INNODB status: %s", e)
+            self.log.warning(
+                "Unicode error while getting INNODB status "
+                "(if this warning is infrequent, metric collection won't be impacted): %s",
+                str(e),
+            )
             return {}
 
         if cursor.rowcount < 1:
