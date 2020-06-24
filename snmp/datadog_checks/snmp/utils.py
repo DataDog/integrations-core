@@ -318,7 +318,7 @@ def register_device_target(ip, port, timeout, retries, engine, auth_data, contex
     transport = UdpTransportTarget((ip, port), timeout=timeout, retries=retries)
     target, _ = lcd.configure(engine, auth_data, transport, context_data.contextName)
     return target
-  
+
 
 def batches(lst, size):
     # type: (List[T], int) -> Iterator[List[T]]
