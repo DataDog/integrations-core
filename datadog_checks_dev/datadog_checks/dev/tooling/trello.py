@@ -49,7 +49,6 @@ class TrelloClient:
             'Processes': '5e7910789f92a918152b700d',
             'Trace': '5c050640ecb34f0915ec589a',
             'Tools and Libraries': '5ab12740841642c2a8829053',
-
         }
         self.progress_columns = {
             '55d1fe4cd3192ab85fa0f7ea': 'In Progress',  # INPROGRESS
