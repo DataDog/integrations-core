@@ -92,9 +92,6 @@ class PgStatementsMixin(object):
         # Available columns will be queried once and cached as the source of truth.
         self.__pg_stat_statements_columns = None
 
-        # TODO: Make this a configurable limit
-        self.query_limit = 10000
-
     def _execute_query(self, cursor, query, log_func=None):
         raise NotImplementedError('Check must implement _execute_query()')
 
@@ -136,7 +133,7 @@ class PgStatementsMixin(object):
         rows = self._execute_query(cursor, STATEMENTS_QUERY.format(cols=', '.join(columns)))
         if not rows:
             return
-        rows = rows[:self.query_limit]
+        rows = rows[:self.max_query_metrics]
 
         new_cache = {}
         for row in rows:

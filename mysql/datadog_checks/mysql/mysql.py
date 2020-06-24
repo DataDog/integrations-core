@@ -318,6 +318,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
 
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
+        self.max_query_metrics = int(self.instance.get('max_query_metrics', 300))
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -1420,7 +1421,6 @@ class MySql(ExecutionPlansMixin, AgentCheck):
         values to get the counts for the elapsed period. This is similar to monotonic_count, but
         several fields must be further processed from the delta values.
         """
-        DEFAULT_LIMIT = 10000
 
         sql_statement_summary ="""\
             SELECT `schema_name` as `schema`,
@@ -1470,7 +1470,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
         # - avg duration
         # - high lock time
 
-        rows = rows[:DEFAULT_LIMIT]
+        rows = rows[:self.max_query_metrics]
 
         # Given the queried rows, each row must be checked against its previous result
         # to derive the values in the elapsed period. Statements which appeared first this
