@@ -286,6 +286,11 @@ def test_non_existent_directory():
         dir_check.check(config)
 
 
+def test_missing_directory_config():
+    with pytest.raises(ConfigurationError):
+        DirectoryCheck('directory', {}, [{}])
+
+
 def test_non_existent_directory_ignore_missing():
     config = {'directory': '/non-existent/directory', 'ignore_missing': True}
     check = DirectoryCheck('directory', {}, [config])
