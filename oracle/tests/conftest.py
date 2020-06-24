@@ -34,7 +34,10 @@ E2E_METADATA_JDBC_CLIENT = {
     # the integration will fallback to JDBC client
     'use_jmx': True,  # Using jmx to have a ready to use java runtime
     'docker_volumes': ['{}/scripts/install_instant_client.sh:/tmp/install_instant_client.sh'.format(HERE)],
-    'start_commands': ['bash /tmp/install_instant_client.sh'],
+    'start_commands': [
+        'bash /tmp/install_instant_client.sh'
+        'apt-get install gcc',  # `apt-get update` already ran in install_instant_client.sh
+    ],
 }
 
 
