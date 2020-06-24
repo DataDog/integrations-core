@@ -20,7 +20,12 @@ from datadog_checks.snmp.config import InstanceConfig
 from datadog_checks.snmp.discovery import discover_instances
 from datadog_checks.snmp.parsing import ParsedSymbolMetric, ParsedTableMetric
 from datadog_checks.snmp.resolver import OIDTrie
-from datadog_checks.snmp.utils import _load_default_profiles, oid_pattern_specificity, recursively_expand_base_profiles
+from datadog_checks.snmp.utils import (
+    _load_default_profiles,
+    batches,
+    oid_pattern_specificity,
+    recursively_expand_base_profiles,
+)
 
 from . import common
 from .utils import mock_profiles_confd_root
@@ -28,7 +33,7 @@ from .utils import mock_profiles_confd_root
 pytestmark = pytest.mark.unit
 
 
-@mock.patch("datadog_checks.snmp.config.lcd")
+@mock.patch("datadog_checks.snmp.pysnmp_types.lcd")
 def test_parse_metrics(lcd_mock):
     # type: (Any) -> None
     lcd_mock.configure.return_value = ('addr', None)
@@ -251,24 +256,27 @@ def test_removing_host():
     warnings = []
     check.warning = warnings.append
     check._config.discovered_instances['1.1.1.1'] = InstanceConfig(discovered_instance)
-    msg = 'Failed to collect some metrics: No SNMP response received before timeout for instance 1.1.1.1'
 
     check._start_discovery = lambda: None
     check._executor = futures.ThreadPoolExecutor(max_workers=1)
     check.check(instance)
-    assert warnings == [msg]
+
+    assert len(warnings) == 1
+    warning = warnings[0]
+    msg = 'Failed to collect some metrics: No SNMP response received before timeout'
+    assert msg in warning
 
     check.check(instance)
-    assert warnings == [msg, msg]
+    assert warnings == [warning, warning]
 
     check.check(instance)
-    assert warnings == [msg, msg, msg]
+    assert warnings == [warning, warning, warning]
     # Instance has been removed
     assert check._config.discovered_instances == {}
 
     check.check(instance)
     # No new warnings produced
-    assert warnings == [msg, msg, msg]
+    assert warnings == [warning, warning, warning]
 
 
 def test_invalid_discovery_interval():
@@ -496,9 +504,30 @@ def test_failed_to_collect_metrics():
     instance['network_address'] = '192.168.0.0/24'
 
     check = SnmpCheck('snmp', {}, [instance])
+    check._config = config
     check.fetch_results = mock.Mock(return_value=ValueError("invalid value"))
 
-    check._check_with_config(config)
+    check.check(instance)
 
     assert len(check.warnings) == 1
     assert 'Failed to collect metrics for 127.0.0.123' in check.warnings[0]
+
+
+@pytest.mark.parametrize(
+    "items, size, output",
+    [
+        pytest.param([], 1, [], id="empty-list"),
+        pytest.param([1, 2, 3], 1, [[1], [2], [3]], id="1-batch"),
+        pytest.param([1, 2, 3, 4], 2, [[1, 2], [3, 4]], id="n-batch-exact"),
+        pytest.param([1, 2, 3], 2, [[1, 2], [3]], id="n-batch-short"),
+    ],
+)
+def test_batches(items, size, output):
+    # type: (list, int, list) -> None
+    assert list(batches(items, size=size)) == output
+
+
+@pytest.mark.parametrize("size", [0, -1])
+def test_batches_size_must_be_strictly_positive(size):
+    with pytest.raises(ValueError):
+        list(batches([1, 2, 3], size=size))

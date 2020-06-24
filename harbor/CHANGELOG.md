@@ -1,5 +1,9 @@
 # CHANGELOG - Harbor
 
+## 1.5.0 / 2020-06-23
+
+* [Added] Add status check for Harbor's read-only status. See [#6917](https://github.com/DataDog/integrations-core/pull/6917). Thanks [bksteiny](https://github.com/bksteiny).
+
 ## 1.4.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

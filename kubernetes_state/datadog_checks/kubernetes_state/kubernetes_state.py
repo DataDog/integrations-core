@@ -550,8 +550,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         if ts.isdigit():
             return int(ts)
         else:
-            msg = 'Cannot extract ts from job name {}'
-            self.log.debug(msg, name)
+            self.log.debug("Cannot extract ts from job name %s", name)
             return None
 
     # Labels attached: namespace, pod
