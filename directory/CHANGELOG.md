@@ -1,5 +1,12 @@
 # CHANGELOG - directory
 
+## 1.8.0 / 2020-06-24
+
+* [Added] Add option to not follow symlinks for stat. See [#6960](https://github.com/DataDog/integrations-core/pull/6960).
+* [Added] Make max file count configurable in the directory check. See [#6847](https://github.com/DataDog/integrations-core/pull/6847).
+* [Fixed] Simplify walker recursive condition. See [#6965](https://github.com/DataDog/integrations-core/pull/6965).
+* [Fixed] Refactor config. See [#6961](https://github.com/DataDog/integrations-core/pull/6961).
+
 ## 1.7.0 / 2020-06-03
 
 * [Added] Add `follow_symlinks` config option. See [#6800](https://github.com/DataDog/integrations-core/pull/6800).
