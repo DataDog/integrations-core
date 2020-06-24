@@ -381,7 +381,7 @@ class SnmpCheck(AgentCheck):
                 error = 'Failed to collect metrics for {} - {}'.format(self._get_instance_name(instance), e)
             self.warning(error)
         finally:
-            # At this point, `tags` include extra tags added in try clause
+            # At this point, `tags` might includes some extra tags added in try clause
             self.gauge('snmp.devices_monitored', 1, tags=tags)
 
             # Report service checks
