@@ -297,4 +297,8 @@ files:
             log_processing_rules:
               - type: multi_line
                 name: new_slow_query_log_entry
-                pattern: "# Time:" # If mysqld was started with `--log-short-format`, use `pattern: "# Query_time:"`
+                pattern: "# Time:"
+              # If the user runs mysqld with `--log-short-format` enabled. (This comment won't be present in the output.)
+              - type: multi_line
+                name: mysqld_log_short_format_new_slow_query_log_entry
+                pattern: "# Query_time:"

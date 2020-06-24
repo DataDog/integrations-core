@@ -282,3 +282,6 @@ instances:
 #     - type: multi_line
 #       name: new_slow_query_log_entry
 #       pattern: '# Time:'
+#     - type: multi_line
+#       name: mysqld_log_short_format_new_slow_query_log_entry
+#       pattern: '# Query_time:'
