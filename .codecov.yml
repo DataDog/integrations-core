@@ -83,6 +83,10 @@ coverage:
         target: 75
         flags:
         - clickhouse
+      Cloud Foundry API:
+        target: 75
+        flags:
+        - cloud_foundry_api
       CockroachDB:
         target: 75
         flags:
@@ -588,6 +592,11 @@ flags:
     paths:
     - clickhouse/datadog_checks/clickhouse
     - clickhouse/tests
+  cloud_foundry_api:
+    carryforward: true
+    paths:
+    - cloud_foundry_api/datadog_checks/cloud_foundry_api
+    - cloud_foundry_api/tests
   cockroachdb:
     carryforward: true
     paths:

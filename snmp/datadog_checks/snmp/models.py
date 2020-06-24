@@ -5,7 +5,7 @@
 Define our own models and interfaces for dealing with SNMP data.
 """
 
-from typing import Optional, Sequence, Tuple, Union
+from typing import List, Optional, Sequence, Tuple, Union
 
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
 from .pysnmp_inspect import object_identity_from_object_type
@@ -88,3 +88,33 @@ class OID(object):
     def __repr__(self):
         # type: () -> str
         return 'OID({!r})'.format(str(self))
+
+
+class Device:
+    """
+    Represents an SNMP device from which we can query OIDs.
+
+    :param ip: The IP address of the device.
+    :param port: The UDP port on which the device will be queried.
+    :param target: An opaque string used by PySNMP to route queries to the device. See `utils.register_device_target()`.
+    """
+
+    def __init__(self, ip, port, target):
+        # type: (str, int, str) -> None
+        self._ip = ip
+        self._port = port
+        self._target = target
+
+    @property
+    def target(self):
+        # type: () -> str
+        return self._target
+
+    @property
+    def tags(self):
+        # type: () -> List[str]
+        return ['snmp_device:{}'.format(self._ip)]
+
+    def __repr__(self):
+        # type: () -> str
+        return '<Device ip={!r}, port={}>'.format(self._ip, self._port)

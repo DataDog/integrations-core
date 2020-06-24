@@ -1,0 +1,2 @@
+# CHANGELOG - Cloud Foundry API
+

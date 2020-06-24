@@ -61,6 +61,10 @@ class HarborAPI(object):
         self.harbor_version = [int(s) for s in version_str]
         self.with_chartrepo = systeminfo.get('with_chartmuseum', False)
 
+    def read_only_status(self):
+        systeminfo = self._make_get_request(SYSTEM_INFO_URL)
+        return systeminfo.get('read_only', None)
+
     def _make_paginated_get_request(self, url):
         http_params = {'page_size': 100}
         resp = self.http.get(self._resolve_url(url), params=http_params)
