@@ -346,7 +346,7 @@ def test_no_recursive_symlink_loop(aggregator):
         pytest.param(False, 226, [('file50', 50), ('file100', 100), ('file100sym', 76)], id='not_follow_sym'),
     ],
 )
-def test_stat_follow_symlinks_true(aggregator, stat_follow_symlinks, expected_dir_size, expected_file_sizes):
+def test_stat_follow_symlinks(aggregator, stat_follow_symlinks, expected_dir_size, expected_file_sizes):
     with temp_directory() as tdir:
 
         # Setup dir and files
