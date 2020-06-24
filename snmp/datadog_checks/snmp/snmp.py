@@ -30,6 +30,7 @@ from .parsing import ParsedMetric, ParsedMetricTag, ParsedTableMetric
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
 from .utils import (
     OIDPrinter,
+    batches,
     get_default_profiles,
     get_profile_definition,
     oid_pattern_specificity,
@@ -203,12 +204,12 @@ class SnmpCheck(AgentCheck):
         # iso.3.6.1.2.1.25.4.2.1.7.224 = INTEGER: 2
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
         error = None
-        first_oid = 0
+        all_oids = [oid.as_object_type() for oid in all_oids]
+        next_oids = [oid.as_object_type() for oid in next_oids]
         all_binds = []
-        next_oids = [o.as_object_type() for o in next_oids]
-        while first_oid < len(all_oids):
+
+        for oids_batch in batches(all_oids, size=self.oid_batch_size):
             try:
-                oids_batch = [oid.as_object_type() for oid in all_oids[first_oid : first_oid + self.oid_batch_size]]
                 self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
 
                 var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
@@ -234,14 +235,8 @@ class SnmpCheck(AgentCheck):
                     error = message
                 self.warning(message)
 
-            # if we fail move onto next batch
-            first_oid += self.oid_batch_size
-
-        first_oid = 0
-        while first_oid < len(next_oids):
+        for oids_batch in batches(next_oids, size=self.oid_batch_size):
             try:
-                oids_batch = next_oids[first_oid : first_oid + self.oid_batch_size]
-
                 self.log.debug('Running SNMP command getNext on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
                 binds = list(
                     snmp_getnext(
@@ -259,9 +254,6 @@ class SnmpCheck(AgentCheck):
                 if not error:
                     error = message
                 self.warning(message)
-
-            # if we fail move onto next batch
-            first_oid += self.oid_batch_size
 
         return all_binds, error
 
