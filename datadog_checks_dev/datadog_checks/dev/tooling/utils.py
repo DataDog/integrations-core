@@ -22,7 +22,7 @@ DOGWEB_JSON_DASHBOARDS = (
     'btrfs',
     'cassandra',
     'couchbase',
-    'elasticsearch',
+    'elastic',
     'fluentd',
     'gearmand',
     'iis',
