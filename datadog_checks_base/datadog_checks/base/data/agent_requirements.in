@@ -22,6 +22,7 @@ httplib2==0.18.1
 in-toto==0.4.2
 ipaddress==1.0.22; python_version < '3.0'
 jaydebeapi==1.2.3
+jpype1==0.7.1  # 0.7.5 it's not py2 compatible
 kafka-python==2.0.0
 kazoo==2.6.1; sys_platform != 'win32'
 kubernetes==8.0.1
