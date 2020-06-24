@@ -103,7 +103,7 @@ class DirectoryCheck(AgentCheck):
 
             for file_entry in matched_files:
                 try:
-                    file_stat = file_entry.stat()
+                    file_stat = file_entry.stat(follow_symlinks=self.config.stat_follow_symlinks)
 
                 except OSError as ose:
                     self.warning('DirectoryCheck: could not stat file %s - %s', join(root, file_entry.name), ose)
