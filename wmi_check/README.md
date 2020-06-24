@@ -106,10 +106,6 @@ Each WMI query has 2 required options, `class` and `metrics` and six optional op
 
 The setting `[IDProcess, Win32_Process, Handle, CommandLine]` tags each process with its command line. Any instance number will be removed from tag_by values i.e. name:process#1 => name:process. NB: The agent must be running under an **Administrator** account for this to work as the `CommandLine` property is not accessible to non-admins.
 
-#### Metrics collection
-
-The WMI check can potentially emit [custom metrics][9], which may impact your [billing][10].
-
 ### Validation
 
 [Run the Agent's `status` subcommand][11] and look for `wmi_check` under the Checks section.
@@ -118,7 +114,7 @@ The WMI check can potentially emit [custom metrics][9], which may impact your [b
 
 ### Metrics
 
-See [metadata.csv][12] for a list of metrics provided by this integration.
+All metrics collected by the WMI check are forwarded to Datadog as [custom metrics][9], which may impact your [billing][10].
 
 ### Events
 
