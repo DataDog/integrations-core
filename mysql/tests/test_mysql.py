@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import logging
 import subprocess
 from os import environ
 
@@ -218,9 +219,8 @@ def _test_optional_metrics(aggregator, optional_metrics, at_least):
 
 
 @pytest.mark.unit
-def test_innodb_status_unicode_error():
+def test_innodb_status_unicode_error(caplog):
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[{}])
-    mysql_check.log = mock.MagicMock()
 
     class MockCursor:
         def execute(self, command):
@@ -233,12 +233,9 @@ def test_innodb_status_unicode_error():
         def cursor(self):
             return MockCursor()
 
+    caplog.at_level(logging.WARNING)
     assert mysql_check._get_stats_from_innodb_status(MockDatabase()) == {}
-    mysql_check.log.warning.assert_called_with(
-        "Unicode error while getting INNODB status "
-        "(if this warning is infrequent, metric collection won't be impacted): %s",
-        "'encoding' codec can't decode byte 0x6f in position 0: SHOW /*!50000 ENGINE*/ INNODB STATUS",
-    )
+    assert 'Unicode error while getting INNODB status' in caplog.text
 
 
 @pytest.mark.unit
