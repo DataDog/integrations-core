@@ -10,7 +10,6 @@ files:
               `use_global_custom_queries` setting at the instance level.
 
               See `custom_queries` defined below for syntax and documentation about each option.
-            multiple: true
             value:
               type: array
               items:

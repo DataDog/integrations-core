@@ -268,7 +268,6 @@ instances:
 #   - type: file
 #     path: <GENERAL_LOG_FILE_PATH>
 #     source: mysql
-#     service: <SERVICE>
 #     log_processing_rules:
 #     - type: multi_line
 #       name: new_log_start_with_date
@@ -276,11 +275,9 @@ instances:
 #   - type: file
 #     path: <ERROR_LOG_FILE_PATH>
 #     source: mysql
-#     service: <SERVICE>
 #   - type: file
 #     path: <SLOW_QUERY_LOG_FILE_PATH>
 #     source: mysql
-#     service: <SERVICE>
 #     log_processing_rules:
 #     - type: multi_line
 #       name: new_slow_query_log_entry
