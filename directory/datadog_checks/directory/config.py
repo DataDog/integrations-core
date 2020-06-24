@@ -11,10 +11,9 @@ MAX_FILEGAUGE_COUNT = 20
 
 class DirectoryConfig(object):
     def __init__(self, instance):
-        try:
-            directory = instance['directory']
-        except KeyError:
+        if 'directory' not in instance:
             raise ConfigurationError('DirectoryCheck: missing `directory` in config')
+        directory = instance['directory']
 
         self.abs_directory = abspath(directory)
         self.name = instance.get('name', directory)
