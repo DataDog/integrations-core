@@ -62,11 +62,10 @@ class DirectoryCheck(AgentCheck):
         max_filegauge_balance = self.config.max_filegauge_count
 
         # If we do not want to recursively search sub-directories only get the root.
-        walker = (
-            walk(self.config.abs_directory, self.config.follow_symlinks)
-            if self.config.recursive
-            else (next(walk(self.config.abs_directory, self.config.follow_symlinks)),)
-        )
+        walker = walk(self.config.abs_directory, self.config.follow_symlinks)
+        if not self.config.recursive:
+            # Only visit the first directory.
+            walker = [next(walker)]
 
         # Avoid repeated global lookups.
         get_length = len
