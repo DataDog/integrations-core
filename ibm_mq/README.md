@@ -23,12 +23,13 @@ export C_INCLUDE_PATH=/opt/mqm/inc
 
 ```
 
-**Note**: Agent v6+ uses Upstart or systemd to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of:
+**Note**: Agent v6+ uses `upstart`, `systemd` or `launchd` to orchestrate the datadog-agent service. Environment variables may need to be added to the service configuration files at the default locations of:
 
-- Upstart: `/etc/init/datadog-agent.conf`
-- Systemd: `/lib/systemd/system/datadog-agent.service`
+- Upstart (Linux): `/etc/init/datadog-agent.conf`
+- Systemd (Linux): `/lib/systemd/system/datadog-agent.service`
+- Launchd (MacOS): `~/Library/LaunchAgents/com.datadoghq.agent.plist`
 
-Find below an example of the configuration that's used for systemd:
+Example of the configuration for `systemd`:
 
 ```yaml
 [Unit]
@@ -50,7 +51,7 @@ ExecStart=/opt/datadog-agent/bin/agent/agent run -p /opt/datadog-agent/run/agent
 WantedBy=multi-user.target
 ```
 
-Here's an example of the upstart config:
+Example of the configuration for `upstart`:
 
 ```conf
 description "Datadog Agent"
@@ -75,6 +76,42 @@ end script
 post-stop script
   rm -f /opt/datadog-agent/run/agent.pid
 end script
+```
+
+Example of the configuration for `launchd`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>KeepAlive</key>
+        <dict>
+            <key>SuccessfulExit</key>
+            <false/>
+        </dict>
+        <key>Label</key>
+        <string>com.datadoghq.agent</string>
+        <key>EnvironmentVariables</key>
+        <dict>
+            <key>DD_LOG_TO_CONSOLE</key>
+            <string>false</string>
+            <key>LD_LIBRARY_PATH</key>
+            <string>/opt/mqm/lib64:/opt/mqm/lib</string>
+        </dict>
+        <key>ProgramArguments</key>
+        <array>
+            <string>/opt/datadog-agent/bin/agent/agent</string>
+            <string>run</string>
+        </array>
+        <key>StandardOutPath</key>
+        <string>/var/log/datadog/launchd.log</string>
+        <key>StandardErrorPath</key>
+        <string>/var/log/datadog/launchd.log</string>
+        <key>ExitTimeOut</key>
+        <integer>10</integer>
+    </dict>
+</plist>
 ```
 
 Each time there is an agent update, these files are wiped and will need to be updated again.

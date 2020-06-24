@@ -4,7 +4,9 @@
 """
 Type declarations, for type checking purposes only.
 """
-from typing import Literal, NamedTuple, Tuple, TypedDict
+from typing import Literal, NamedTuple, Tuple, TypedDict, TypeVar
+
+T = TypeVar("T")
 
 MetricDefinition = TypedDict(
     'MetricDefinition',

@@ -30,6 +30,7 @@ from .parsing import ColumnTag, IndexTag, ParsedMetric, ParsedTableMetric, Symbo
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
 from .utils import (
     OIDPrinter,
+    batches,
     get_default_profiles,
     get_profile_definition,
     oid_pattern_specificity,
@@ -203,12 +204,12 @@ class SnmpCheck(AgentCheck):
         # iso.3.6.1.2.1.25.4.2.1.7.224 = INTEGER: 2
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
         error = None
-        first_oid = 0
+        all_oids = [oid.as_object_type() for oid in all_oids]
+        next_oids = [oid.as_object_type() for oid in next_oids]
         all_binds = []
-        next_oids = [o.as_object_type() for o in next_oids]
-        while first_oid < len(all_oids):
+
+        for oids_batch in batches(all_oids, size=self.oid_batch_size):
             try:
-                oids_batch = [oid.as_object_type() for oid in all_oids[first_oid : first_oid + self.oid_batch_size]]
                 self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
 
                 var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
@@ -234,14 +235,8 @@ class SnmpCheck(AgentCheck):
                     error = message
                 self.warning(message)
 
-            # if we fail move onto next batch
-            first_oid += self.oid_batch_size
-
-        first_oid = 0
-        while first_oid < len(next_oids):
+        for oids_batch in batches(next_oids, size=self.oid_batch_size):
             try:
-                oids_batch = next_oids[first_oid : first_oid + self.oid_batch_size]
-
                 self.log.debug('Running SNMP command getNext on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
                 binds = list(
                     snmp_getnext(
@@ -259,9 +254,6 @@ class SnmpCheck(AgentCheck):
                 if not error:
                     error = message
                 self.warning(message)
-
-            # if we fail move onto next batch
-            first_oid += self.oid_batch_size
 
         return all_binds, error
 
@@ -335,18 +327,18 @@ class SnmpCheck(AgentCheck):
 
             sent = []
             for host, discovered in list(config.discovered_instances.items()):
-                future = executor.submit(self._check_with_config, discovered)
+                future = executor.submit(self._check_device, discovered)
                 sent.append(future)
-                future.add_done_callback(functools.partial(self._check_config_done, host))
+                future.add_done_callback(functools.partial(self._on_check_device_done, host))
             futures.wait(sent)
 
             tags = ['network:{}'.format(config.ip_network)]
             tags.extend(config.tags)
             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
-            self._check_with_config(config)
+            self._check_device(config)
 
-    def _check_config_done(self, host, future):
+    def _on_check_device_done(self, host, future):
         # type: (str, futures.Future) -> None
         config = self._config
         if future.result():
@@ -360,9 +352,12 @@ class SnmpCheck(AgentCheck):
             # Reset the counter if not's failing
             config.failing_instances.pop(host, None)
 
-    def _check_with_config(self, config):
+    def _check_device(self, config):
         # type: (InstanceConfig) -> Optional[str]
         # Reset errors
+        if config.device is None:
+            raise RuntimeError('No device set')  # pragma: no cover
+
         instance = config.instance
         error = results = None
         tags = config.tags
@@ -374,7 +369,7 @@ class SnmpCheck(AgentCheck):
                 config.add_profile_tag(profile)
 
             if config.all_oids or config.next_oids or config.bulk_oids:
-                self.log.debug('Querying device %s', config.ip_address)
+                self.log.debug('Querying %s', config.device)
                 config.add_uptime_metric()
                 results, error = self.fetch_results(config, config.all_oids, config.next_oids, config.bulk_oids)
                 tags = self.extract_metric_tags(config.parsed_metric_tags, results)

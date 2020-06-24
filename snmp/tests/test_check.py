@@ -962,7 +962,7 @@ def test_timeout(aggregator, caplog):
     aggregator.all_metrics_asserted()
 
     for record in caplog.records:
-        if "No SNMP response received before timeout for instance" in record.message:
+        if "No SNMP response received before timeout" in record.message:
             break
     else:
         pytest.fail()
