@@ -78,7 +78,7 @@ DOGWEB_CODE_GENERATED_DASHBOARDS = (
     'openstack',
     'powerdns_recursor',
     'rabbitmq',
-    'redis',
+    'redisdb',
     'sigsci',
     'spark',
     'twistlock',
