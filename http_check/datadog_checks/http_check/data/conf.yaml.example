@@ -304,7 +304,9 @@ instances:
 
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
-    ## Disable these by setting `tls_ignore_warning` to true.
+    ##
+    ## Note: due to current technical limitations, spurious warnings might still appear
+    ## even if `tls_ignore_warning` is set.
     #
     # tls_ignore_warning: false
 
