@@ -17,7 +17,6 @@ from datadog_checks.directory import DirectoryCheck
 from . import common
 
 temp_dir = None
-dir_check = DirectoryCheck('directory', {}, {})
 
 
 def setup_module(module):
@@ -80,6 +79,7 @@ def test_exclude_dirs(aggregator):
         for ed in exclude:
             create_file(os.path.join(td, ed, 'file'))
 
+        dir_check = DirectoryCheck('directory', {}, [instance])
         dir_check.check(instance)
 
     assert len(aggregator.metric_names) == 1
@@ -98,6 +98,7 @@ def test_directory_metrics(aggregator):
 
     for config in config_stubs:
         aggregator.reset()
+        dir_check = DirectoryCheck('directory', {}, [config])
         dir_check.check(config)
         dirtagname = config.get('dirtagname', "name")
         name = config.get('name', temp_dir + "/main")
@@ -134,6 +135,7 @@ def test_directory_metrics_many(aggregator):
 
     for config in config_stubs:
         aggregator.reset()
+        dir_check = DirectoryCheck('directory', {}, [config])
         dir_check.check(config)
         dirtagname = config.get('dirtagname', "name")
         name = config.get('name', temp_dir + "/many")
@@ -168,6 +170,7 @@ def test_file_metrics(aggregator):
 
     for config in config_stubs:
         aggregator.reset()
+        dir_check = DirectoryCheck('directory', {}, [config])
         dir_check.check(config)
         dirtagname = config.get('dirtagname', "name")
         name = config.get('name', temp_dir + "/main")
@@ -213,6 +216,7 @@ def test_file_metrics_many(aggregator):
 
     for config in config_stubs:
         aggregator.reset()
+        dir_check = DirectoryCheck('directory', {}, [config])
         dir_check.check(config)
         dirtagname = config.get('dirtagname', "name")
         name = config.get('name', temp_dir + "/many")
@@ -276,13 +280,20 @@ def test_non_existent_directory():
     """
     Missing or inaccessible directory coverage.
     """
+    config = {'directory': '/non-existent/directory'}
     with pytest.raises(ConfigurationError):
-        dir_check.check({'directory': '/non-existent/directory'})
+        dir_check = DirectoryCheck('directory', {}, [config])
+        dir_check.check(config)
+
+
+def test_missing_directory_config():
+    with pytest.raises(ConfigurationError):
+        DirectoryCheck('directory', {}, [{}])
 
 
 def test_non_existent_directory_ignore_missing():
     config = {'directory': '/non-existent/directory', 'ignore_missing': True}
-    check = DirectoryCheck('directory', {}, {})
+    check = DirectoryCheck('directory', {}, [config])
     check._get_stats = mock.MagicMock()
     check.check(config)
     check._get_stats.assert_called_once()
