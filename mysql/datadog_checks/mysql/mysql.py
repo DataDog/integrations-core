@@ -985,6 +985,13 @@ class MySql(AgentCheck):
                 "Privilege error or engine unavailable accessing the INNODB status tables (must grant PROCESS): %s", e,
             )
             return {}
+        except (UnicodeDecodeError, UnicodeEncodeError) as e:
+            self.log.warning(
+                "Unicode error while getting INNODB status "
+                "(typically harmless, but if this warning is frequent metric collection could be impacted): %s",
+                str(e),
+            )
+            return {}
 
         if cursor.rowcount < 1:
             # No data from SHOW ENGINE STATUS, even though the engine is enabled.

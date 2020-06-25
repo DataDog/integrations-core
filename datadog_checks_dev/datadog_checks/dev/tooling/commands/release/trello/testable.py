@@ -204,7 +204,15 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
         return
 
     if repo == 'integrations-core':
-        options = {'1': 'Integrations', '2': 'Containers', '3': 'Core', '4': 'Platform', 's': 'Skip', 'q': 'Quit'}
+        options = {
+            '1': 'Integrations',
+            '2': 'Containers',
+            '3': 'Core',
+            '4': 'Platform',
+            '5': 'Tools and Libraries',
+            's': 'Skip',
+            'q': 'Quit',
+        }
     else:
         options = {
             '1': 'Core',
@@ -215,6 +223,7 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
             '6': 'Processes',
             '7': 'Trace',
             '8': 'Integrations',
+            '9': 'Tools and Libraries',
             's': 'Skip',
             'q': 'Quit',
         }
