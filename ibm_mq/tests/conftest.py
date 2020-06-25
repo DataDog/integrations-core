@@ -8,8 +8,8 @@ import re
 import pytest
 from six.moves import range
 
-from datadog_checks.dev import docker_run, run_command
-from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
+from datadog_checks.dev import docker_run
+from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.ibm_mq import IbmMqCheck
 
 from . import common
