@@ -61,7 +61,7 @@ class IbmMqCheck(AgentCheck):
     def _collect_metadata(self):
         raw_version = self._get_version()
         if not raw_version:
-            self.log.warning("Version not found in stdout")
+            self.log.debug("Version not found in stdout")
             return
         self.log.debug('IBM MQ version: %s', raw_version)
         self.set_metadata('version', raw_version)
@@ -72,7 +72,7 @@ class IbmMqCheck(AgentCheck):
         try:
             pc_out, pc_err, _ = get_subprocess_output(cmd, self.log, False)
         except OSError as e:
-            self.log.warning("Error collecting IBM MQ version: %s", e)
+            self.log.debug("Error collecting IBM MQ version: %s", e)
             return None
 
         if pc_out is None:
