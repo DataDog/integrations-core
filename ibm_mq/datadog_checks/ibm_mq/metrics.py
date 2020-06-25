@@ -100,7 +100,6 @@ def channel_status_metrics():
         'mca_status': pymqi.CMQCFC.MQIACH_MCA_STATUS,
         'msgs': pymqi.CMQCFC.MQIACH_MSGS,
         'ssl_key_resets': pymqi.CMQCFC.MQIACH_SSL_KEY_RESETS,
-        # NOTE: Following metrics are NOT tested in e2e. I didn't managed to to get those metrics locally.
         'batches': pymqi.CMQCFC.MQIACH_BATCHES,
         'current_msgs': pymqi.CMQCFC.MQIACH_CURRENT_MSGS,
         'indoubt_status': pymqi.CMQCFC.MQIACH_INDOUBT_STATUS,
