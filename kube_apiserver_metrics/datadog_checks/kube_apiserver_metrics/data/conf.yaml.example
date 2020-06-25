@@ -327,7 +327,7 @@ instances:
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
     ##
-    ## Note: due to current technical limitations, spurious warnings might still appear
+    ## Note: due to the configuration of the other integrations, spurious warnings might still appear
     ## even if `tls_ignore_warning` is set.
     #
     # tls_ignore_warning: false
