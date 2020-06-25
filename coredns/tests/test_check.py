@@ -39,3 +39,5 @@ class TestCoreDNS:
 
         for metric in METRICS:
             aggregator.assert_metric(metric)
+
+        aggregator.assert_all_metrics_covered()
