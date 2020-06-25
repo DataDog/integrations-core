@@ -24,8 +24,9 @@ QUEUE = 'DEV.QUEUE.1'
 BAD_CHANNEL = 'DEV.NOTHERE.SVRCONN'
 
 MQ_VERSION = os.environ.get('IBM_MQ_VERSION', '9')
+MQ_COMPOSE = os.environ['IBM_MQ_COMPOSE']
 
-COMPOSE_FILE_NAME = 'docker-compose-v{}.yml'.format(MQ_VERSION)
+COMPOSE_FILE_NAME = 'docker-compose-v{}.yml'.format(MQ_COMPOSE)
 
 COMPOSE_FILE_PATH = os.path.join(COMPOSE_DIR, COMPOSE_FILE_NAME)
 
@@ -169,6 +170,13 @@ CHANNEL_STATUS_METRICS = [
     ('ibm_mq.channel.msgs', GAUGE),
     ('ibm_mq.channel.ssl_key_resets', GAUGE),
 ]
+
+if 'cluster' in MQ_COMPOSE:
+    CHANNEL_STATUS_METRICS.extend([
+        ('ibm_mq.channel.batches', GAUGE),
+        ('ibm_mq.channel.current_msgs', GAUGE),
+        ('ibm_mq.channel.indoubt_status', GAUGE),
+    ])
 
 METRICS = (
     [
