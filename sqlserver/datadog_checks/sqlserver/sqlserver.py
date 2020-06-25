@@ -80,9 +80,11 @@ NTNX__microsoft_sqlserver_sql_server_target = "NTNX__microsoft_sqlserver_sql_ser
 NTNX__microsoft_sqlserver_connection_setting = "NTNX__microsoft_sqlserver_connection_setting"
 ENDPOINT_UUID_STR = "endpoint_uuid"
 
+VIEW_SERVER_STATE_MSG = "VIEW SERVER STATE permission was denied"
+
 SQLCONNECTION_FAILURE_ALERTS = {
     "Login failed for user" : NTNX__microsoft_sqlserver_user_authn,
-    "VIEW SERVER STATE permission was denied" : NTNX__microsoft_sqlserver_view_server_state,
+    VIEW_SERVER_STATE_MSG : NTNX__microsoft_sqlserver_view_server_state,
     "Login timeout expired" : NTNX__microsoft_sqlserver_sql_server_target,
     "Incorrect syntax near" : NTNX__microsoft_sqlserver_connection_setting
 }
@@ -90,7 +92,7 @@ SQLCONNECTION_FAILURE_ALERTS = {
 # Appropriate alert messages for the alert types
 SQLCONNECTION_ALERT_MESSAGES = {
     NTNX__microsoft_sqlserver_user_authn : "Login failed for user ",
-    NTNX__microsoft_sqlserver_view_server_state : "VIEW SERVER STATE permission was denied",
+    NTNX__microsoft_sqlserver_view_server_state : VIEW_SERVER_STATE_MSG,
     NTNX__microsoft_sqlserver_connection_setting : "Supplied user does not have the right permissions",
     NTNX__microsoft_sqlserver_sql_server_target : "The target is not an SQL server or instance/port details are incorrect"
 }
@@ -251,8 +253,12 @@ class SQLServer(AgentCheck):
                                                             None))
             except SQLConnectionError:
                 raise
-            except Exception:
+            except Exception as e:
                 self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
+                # Raise this alert as any metric collection will not be successful if user
+                # does not have VIEW SERVER STATE permissions
+                if VIEW_SERVER_STATE_MSG in str(e):
+                    raise
                 continue
 
         # Load any custom metrics from conf.d/sqlserver.yaml
@@ -625,9 +631,10 @@ class SQLServer(AgentCheck):
                             self.log.error("Could not fetch metric %s for instance %s: %s" % (metric.datadog_name, instance.get("host", ""), e))
                     for key, value in cumulative_rate_metrics.iteritems():
                         self.gauge("sqlserver.server.metric.{}".format(key), value, tags=custom_tags)
-
+            self.register_heartbeat_collections(instance)
         except Exception as e:
             self.log.warning("Could not fetch metric due to %s" % e)
+            self.register_heartbeat_collections(instance, e, True)
             self.maybe_raise_alert(e, instance_key, instance)
 
     def do_stored_procedure_check(self, instance, proc):
@@ -759,14 +766,11 @@ class SQLServer(AgentCheck):
                     self.log.info("Could not close adodbapi db connection\n{0}".format(e))
 
                 self.connections[conn_key]['conn'] = rawconn
-            self.register_heartbeat_collections(instance)
         except Exception as e:
             cx = "%s - %s" % (host, database)
             message = "Unable to connect to SQL Server for instance %s." % cx
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL,
                                tags=service_check_tags, message=message)
-
-            self.register_heartbeat_collections(instance, e, True)
 
             password = instance.get('password')
             tracebk = traceback.format_exc()
