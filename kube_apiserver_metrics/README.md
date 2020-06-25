@@ -17,11 +17,11 @@ Refer to the dedicated documentation for [Cluster Level Checks][3].
 You can annotate the service of your apiserver with the following:
 
 ```yaml
-Annotations:
-  ad.datadoghq.com/endpoints.check_names: ["kube_apiserver_metrics"]
-  ad.datadoghq.com/endpoints.init_configs: [{}]
+annotations:
+  ad.datadoghq.com/endpoints.check_names: '["kube_apiserver_metrics"]'
+  ad.datadoghq.com/endpoints.init_configs: '[{}]'
   ad.datadoghq.com/endpoints.instances:
-    [{ "prometheus_url": "https://%%host%%:%%port%%/metrics", "bearer_token_auth": "true" }]
+    '[{ "prometheus_url": "https://%%host%%:%%port%%/metrics", "bearer_token_auth": "true" }]'
 ```
 
 Then the Datadog Cluster Agent schedules the check(s) for each endpoint onto Datadog Agent(s).
