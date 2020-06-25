@@ -3,23 +3,7 @@
         "author_name": "Datadog"
     },
     "board_title": "Istio Overview (v1.5+)",
-    "created": "2020-06-09T17:58:26.082012+00:00",
-    "created_by": {
-        "access_role": "adm",
-        "disabled": false,
-        "email": "support@datadoghq.com",
-        "handle": "support@datadoghq.com",
-        "is_admin": true,
-        "name": "Datadog",
-        "role": null,
-        "title": null,
-        "verified": true
-    },
     "description": "### Istio\n\nNote: This dashboard outlines new metrics from Istio `v1.5+.\n\n- [What is Istio](https://istio.io/docs/concepts/what-is-istio/)?\n- [Istiod](https://istio.io/docs/ops/deployment/architecture/)\n- [Envoy](https://istio.io/docs/concepts/what-is-istio/#envoy), a high performance proxy.\n    - XDS = Envoy management APIs that can be implemented by backend servers. \n        - These APIs support:\n            - Cluster discovery service (CDS)\n            - Route discovery service (RDS)\n            - Endpoint discovery service (EDS)\n            - Listener discovery service (LDS)",
-    "id": 1171035,
-    "modified": "2020-06-09T17:59:33.768417+00:00",
-    "new_id": "t59-b5k-r6s",
-    "read_only": false,
     "template_variables": [
         {
             "default": "*",
@@ -33,7 +17,6 @@
             "font_size": "18",
             "height": 5,
             "html": "Istiod resource usage",
-            "id": 0,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
@@ -48,7 +31,6 @@
             "font_size": "18",
             "height": 5,
             "html": "Mesh throughput",
-            "id": 1,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
@@ -60,14 +42,12 @@
         },
         {
             "height": 12,
-            "id": 2,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
-                "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.mesh.request.count{$cluster} by {host}, 10, 'mean', 'desc')",
+                        "q": "avg:istio.mesh.request.count{$cluster}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -76,6 +56,13 @@
                         "type": "area"
                     }
                 ],
+                "right_yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                },
                 "viz": "timeseries",
                 "yaxis": {
                     "includeZero": true,
@@ -85,8 +72,9 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
-            "title_align": "center",
+            "title_align": "left",
             "title_size": 16,
             "title_text": "Request count",
             "type": "timeseries",
@@ -96,16 +84,15 @@
         },
         {
             "height": 12,
-            "id": 3,
             "tile_def": {
-                "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(top(avg:istio.mesh.request.duration.milliseconds.sum{$cluster} by {host}, 10, 'mean', 'desc')/top(avg:istio.mesh.request.duration.milliseconds.count{$cluster} by {host}, 10, 'mean', 'desc'),10,'mean','desc')"
+                        "q": "top(avg:istio.mesh.request.duration.milliseconds.sum{$cluster}/avg:istio.mesh.request.duration.milliseconds.count{$cluster},10,'mean','desc')"
                     }
                 ],
                 "viz": "toplist"
             },
+            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -117,14 +104,12 @@
         },
         {
             "height": 12,
-            "id": 4,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
-                "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.mesh.response.size.sum{$cluster}, 10, 'mean', 'desc')/top(avg:istio.mesh.response.size.count{$cluster}, 10, 'mean', 'desc')",
+                        "q": "avg:istio.mesh.response.size.sum{$cluster}/avg:istio.mesh.response.size.count{$cluster}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -133,8 +118,23 @@
                         "type": "area"
                     }
                 ],
-                "viz": "timeseries"
+                "right_yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                },
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
             },
+            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -146,14 +146,12 @@
         },
         {
             "height": 12,
-            "id": 5,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
-                "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.go.threads{$cluster}, 10, 'mean', 'desc')",
+                        "q": "avg:istio.go.threads{$cluster}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -162,6 +160,13 @@
                         "type": "line"
                     }
                 ],
+                "right_yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                },
                 "viz": "timeseries",
                 "yaxis": {
                     "includeZero": true,
@@ -171,6 +176,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -182,13 +188,11 @@
         },
         {
             "height": 12,
-            "id": 6,
             "legend": false,
             "tile_def": {
-                "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.go.memstats.alloc_bytes{$cluster}, 10, 'mean', 'desc')",
+                        "q": "avg:istio.go.memstats.alloc_bytes{$cluster}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -197,6 +201,13 @@
                         "type": "line"
                     }
                 ],
+                "right_yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                },
                 "viz": "timeseries",
                 "yaxis": {
                     "includeZero": true,
@@ -206,6 +217,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -217,14 +229,12 @@
         },
         {
             "height": 12,
-            "id": 7,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
-                "custom_links": [],
                 "requests": [
                     {
-                        "q": "(top(avg:istio.go.memstats.heap_inuse_bytes{$cluster}, 10, 'mean', 'desc')/top(avg:istio.go.memstats.heap_alloc_bytes{$cluster}, 10, 'mean', 'desc'))*100",
+                        "q": "(avg:istio.go.memstats.heap_inuse_bytes{$cluster}/avg:istio.go.memstats.heap_alloc_bytes{$cluster})*100",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -233,6 +243,13 @@
                         "type": "line"
                     }
                 ],
+                "right_yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                },
                 "viz": "timeseries",
                 "yaxis": {
                     "includeZero": true,
@@ -242,6 +259,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -253,14 +271,12 @@
         },
         {
             "height": 12,
-            "id": 8,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
-                "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.go.memstats.gc_cpu_fraction{$cluster}, 10, 'mean', 'desc')",
+                        "q": "avg:istio.go.memstats.gc_cpu_fraction{$cluster}",
                         "style": {
                             "palette": "cool",
                             "type": "solid",
@@ -269,6 +285,13 @@
                         "type": "area"
                     }
                 ],
+                "right_yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                },
                 "viz": "timeseries",
                 "yaxis": {
                     "includeZero": true,
@@ -278,6 +301,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -289,14 +313,12 @@
         },
         {
             "height": 12,
-            "id": 9,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
-                "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.go.gc_duration_seconds.sum{$cluster}, 10, 'mean', 'desc')/top(avg:istio.go.gc_duration_seconds.count{$cluster}, 10, 'mean', 'desc')",
+                        "q": "avg:istio.go.gc_duration_seconds.sum{$cluster}/avg:istio.go.gc_duration_seconds.count{$cluster}",
                         "style": {
                             "palette": "cool",
                             "type": "solid",
@@ -305,6 +327,13 @@
                         "type": "area"
                     }
                 ],
+                "right_yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                },
                 "viz": "timeseries",
                 "yaxis": {
                     "includeZero": true,
@@ -314,6 +343,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -325,7 +355,6 @@
         },
         {
             "height": 5,
-            "id": 10,
             "sizing": "fit",
             "type": "image",
             "url": "https://s3.amazonaws.com/dd-integrations/istio/configuration/tile/logo.png",
@@ -335,14 +364,12 @@
         },
         {
             "height": 12,
-            "id": 11,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
-                "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.grpc.server.msg_sent_total{$cluster}.as_count(), 10, 'mean', 'desc'), top(avg:istio.grpc.server.msg_received_total{$cluster}.as_count(), 10, 'mean', 'desc')",
+                        "q": "avg:istio.grpc.server.msg_sent_total{$cluster}.as_count(), avg:istio.grpc.server.msg_received_total{$cluster}.as_count()",
                         "style": {
                             "palette": "cool",
                             "type": "solid",
@@ -351,6 +378,13 @@
                         "type": "area"
                     }
                 ],
+                "right_yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                },
                 "viz": "timeseries",
                 "yaxis": {
                     "includeZero": true,
@@ -360,6 +394,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -371,16 +406,15 @@
         },
         {
             "height": 12,
-            "id": 12,
             "tile_def": {
-                "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.go.gc_duration_seconds.sum{$cluster}, 10, 'mean', 'desc')"
+                        "q": "avg:istio.go.gc_duration_seconds.sum{$cluster}"
                     }
                 ],
                 "viz": "toplist"
             },
+            "time": {},
             "title": true,
             "title_align": "center",
             "title_size": 16,
@@ -395,7 +429,6 @@
             "font_size": "18",
             "height": 5,
             "html": "Pilot Traffic Management",
-            "id": 13,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
@@ -407,7 +440,6 @@
         },
         {
             "height": 12,
-            "id": 14,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -436,7 +468,6 @@
         },
         {
             "height": 12,
-            "id": 15,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -468,7 +499,6 @@
             "font_size": "18",
             "height": 5,
             "html": "Galley  Configuration Validation",
-            "id": 16,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
@@ -480,7 +510,6 @@
         },
         {
             "height": 12,
-            "id": 17,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -509,7 +538,6 @@
         },
         {
             "height": 12,
-            "id": 18,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -545,7 +573,6 @@
         },
         {
             "height": 12,
-            "id": 19,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -581,7 +608,6 @@
         },
         {
             "height": 12,
-            "id": 20,
             "legend": false,
             "tile_def": {
                 "custom_links": [],
@@ -616,7 +642,6 @@
         },
         {
             "height": 12,
-            "id": 21,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -652,7 +677,6 @@
         },
         {
             "height": 12,
-            "id": 22,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -688,7 +712,6 @@
         },
         {
             "height": 12,
-            "id": 23,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -724,14 +747,12 @@
         },
         {
             "height": 12,
-            "id": 24,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
-                "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.mesh.request.size.sum{$cluster}, 10, 'mean', 'desc')/top(avg:istio.mesh.request.size.count{$cluster}, 10, 'mean', 'desc')",
+                        "q": "avg:istio.mesh.request.size.sum{$cluster}/avg:istio.mesh.request.size.count{$cluster}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -740,6 +761,13 @@
                         "type": "area"
                     }
                 ],
+                "right_yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                },
                 "viz": "timeseries",
                 "yaxis": {
                     "includeZero": true,
@@ -749,6 +777,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": 16,
@@ -760,7 +789,6 @@
         },
         {
             "height": 12,
-            "id": 25,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -799,7 +827,6 @@
             "font_size": "18",
             "height": 5,
             "html": "Sidecar Injection",
-            "id": 26,
             "text_align": "center",
             "tick": true,
             "tick_edge": "bottom",
@@ -811,7 +838,6 @@
         },
         {
             "height": 12,
-            "id": 27,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -847,14 +873,12 @@
         },
         {
             "height": 12,
-            "id": 28,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
-                "custom_links": [],
                 "requests": [
                     {
-                        "q": "top(avg:istio.mesh.request.duration.milliseconds.sum{$cluster} by {host}, 10, 'mean', 'desc')/top(avg:istio.mesh.request.duration.milliseconds.count{$cluster} by {host}, 10, 'mean', 'desc')",
+                        "q": "avg:istio.mesh.request.duration.milliseconds.sum{$cluster}/avg:istio.mesh.request.duration.milliseconds.count{$cluster}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -863,6 +887,13 @@
                         "type": "line"
                     }
                 ],
+                "right_yaxis": {
+                    "include_zero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                },
                 "viz": "timeseries",
                 "yaxis": {
                     "includeZero": true,
@@ -872,6 +903,7 @@
                     "scale": "linear"
                 }
             },
+            "time": {},
             "title": true,
             "title_align": "left",
             "title_size": 16,
@@ -883,7 +915,6 @@
         },
         {
             "height": 12,
-            "id": 29,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
@@ -919,7 +950,6 @@
         },
         {
             "height": 12,
-            "id": 30,
             "legend": false,
             "legend_size": "0",
             "tile_def": {
