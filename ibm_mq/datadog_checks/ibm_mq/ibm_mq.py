@@ -68,7 +68,7 @@ class IbmMqCheck(AgentCheck):
 
     def _get_version(self):
 
-        cmd = "dspmqver"
+        cmd = self.instance.get("custom_version_cmd", "dspmqver")
         try:
             pc_out, pc_err, _ = get_subprocess_output(cmd, self.log, False)
         except OSError as e:

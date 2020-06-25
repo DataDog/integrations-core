@@ -42,6 +42,19 @@ INSTANCE = {
     'tags': ['foo:bar'],
 }
 
+INSTANCE_METADATA = {
+    'channel': CHANNEL,
+    'queue_manager': QUEUE_MANAGER,
+    'host': HOST,
+    'port': PORT,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'queues': [QUEUE],
+    'channels': [CHANNEL, BAD_CHANNEL],
+    'tags': ['foo:bar'],
+    'custom_version_cmd': 'docker exec ibm_mq dspmqver',
+}
+
 INSTANCE_WITH_CONNECTION_NAME = {
     'channel': CHANNEL,
     'queue_manager': QUEUE_MANAGER,
@@ -83,6 +96,7 @@ INSTANCE_COLLECT_ALL = {
     'password': PASSWORD,
     'auto_discover_queues': True,
     'channels': [CHANNEL, BAD_CHANNEL],
+    'custom_version_cmd': 'docker exec ibm_mq dspmqver',
 }
 
 INSTANCE_QUEUE_REGEX_TAG = {
@@ -97,7 +111,10 @@ INSTANCE_QUEUE_REGEX_TAG = {
 }
 
 E2E_METADATA = {
-    'docker_volumes': ['{}/scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE)],
+    'docker_volumes': [
+        '{}/scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE),
+        '/var/run/docker.sock:/var/run/docker.sock'
+    ],
     'start_commands': ['bash /tmp/start_commands.sh'],
     'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib', 'C_INCLUDE_PATH': '/opt/mqm/inc'},
 }
