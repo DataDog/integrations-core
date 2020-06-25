@@ -106,6 +106,8 @@ def test_cisco_voice(aggregator):
 
     resources = ["hrSWRunPerfMem", "hrSWRunPerfCPU"]
 
+    common.assert_common_metrics(aggregator, tags)
+
     for resource in resources:
         aggregator.assert_metric('snmp.{}'.format(resource), metric_type=aggregator.GAUGE, tags=tags)
 
@@ -231,6 +233,8 @@ def test_f5(aggregator):
     tags = ['snmp_profile:f5-big-ip', 'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal']
     tags += common.CHECK_TAGS
 
+    common.assert_common_metrics(aggregator, tags)
+
     for metric in gauges:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
     for metric in counts:
@@ -330,6 +334,9 @@ def test_f5(aggregator):
 def test_router(aggregator):
     run_profile_check('network')
     common_tags = common.CHECK_TAGS + ['snmp_profile:generic-router']
+
+    common.assert_common_metrics(aggregator, common_tags)
+
     for interface in ['eth0', 'eth1']:
         tags = ['interface:{}'.format(interface)] + common_tags
         for metric in IF_COUNTS:
@@ -381,6 +388,9 @@ def test_f5_router(aggregator):
     interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
     common_tags = ['snmp_profile:router', 'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal']
     common_tags.extend(common.CHECK_TAGS)
+
+    common.assert_common_metrics(aggregator, common_tags)
+
     for interface in interfaces:
         tags = ['interface:{}'.format(interface)] + common_tags
         for metric in IF_COUNTS:
@@ -408,6 +418,9 @@ def test_cisco_3850(aggregator):
     # We're not covering all interfaces
     interfaces = ["Gi1/0/{}".format(i) for i in range(1, 48)]
     common_tags = common.CHECK_TAGS + ['snmp_host:Cat-3850-4th-Floor.companyname.local', 'snmp_profile:cisco-3850']
+
+    common.assert_common_metrics(aggregator, common_tags)
+
     for interface in interfaces:
         tags = ['interface:{}'.format(interface)] + common_tags
         for metric in IF_COUNTS:
@@ -511,6 +524,9 @@ def test_meraki_cloud_controller(aggregator):
     run_profile_check('meraki-cloud-controller')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:meraki-cloud-controller', 'snmp_host:dashboard.meraki.com']
+
+    common.assert_common_metrics(aggregator, common_tags)
+
     dev_metrics = ['devStatus', 'devClientCount']
     dev_tags = ['device:Gymnasium', 'product:MR16-HW', 'network:L_NETWORK'] + common_tags
     for metric in dev_metrics:
@@ -544,6 +560,8 @@ def test_idrac(aggregator):
 
     interfaces = ['eth0', 'en1']
     common_tags = common.CHECK_TAGS + ['snmp_profile:idrac']
+
+    common.assert_common_metrics(aggregator, common_tags)
 
     for interface in interfaces:
         tags = ['adapter:{}'.format(interface)] + common_tags
@@ -641,6 +659,8 @@ def test_cisco_nexus(aggregator):
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
 
     common_tags = common.CHECK_TAGS + ['snmp_host:Nexus-eu1.companyname.managed', 'snmp_profile:cisco-nexus']
+
+    common.assert_common_metrics(aggregator, common_tags)
 
     for interface in interfaces:
         tags = ['interface:{}'.format(interface)] + common_tags
@@ -755,6 +775,8 @@ def test_dell_poweredge(aggregator):
     )
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:dell-poweredge']
+
+    common.assert_common_metrics(aggregator, common_tags)
 
     chassis_indexes = [29, 31]
     for chassis_index in chassis_indexes:
@@ -893,6 +915,8 @@ def test_hp_ilo4(aggregator):
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:hp-ilo4']
 
+    common.assert_common_metrics(aggregator, common_tags)
+
     for metric in status_gauges:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
@@ -941,6 +965,8 @@ def test_proliant(aggregator):
     run_profile_check('hpe-proliant')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:hpe-proliant']
+
+    common.assert_common_metrics(aggregator, common_tags)
 
     for metric in TCP_COUNTS:
         aggregator.assert_metric(
@@ -1094,6 +1120,8 @@ def test_generic_host_resources(aggregator):
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:generic']
 
+    common.assert_common_metrics(aggregator, common_tags)
+
     sys_metrics = [
         'snmp.hrSystemUptime',
         'snmp.hrSystemNumUsers',
@@ -1118,6 +1146,8 @@ def test_palo_alto(aggregator):
     run_profile_check('pan-common')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:palo-alto']
+
+    common.assert_common_metrics(aggregator, common_tags)
 
     session = [
         'panSessionUtilization',
@@ -1162,6 +1192,8 @@ def test_cisco_asa_5525(aggregator):
     run_profile_check('cisco_asa_5525')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-asa-5525', 'snmp_host:kept']
+
+    common.assert_common_metrics(aggregator, common_tags)
 
     for metric in TCP_COUNTS:
         aggregator.assert_metric(
@@ -1299,6 +1331,8 @@ def test_cisco_csr(aggregator):
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-csr1000v']
 
+    common.assert_common_metrics(aggregator, common_tags)
+
     tags = ['neighbor:244.12.239.177'] + common_tags
     for metric in PEER_GAUGES:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags)
@@ -1315,6 +1349,8 @@ def test_checkpoint_firewall(aggregator):
     run_profile_check('checkpoint-firewall')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:checkpoint-firewall']
+
+    common.assert_common_metrics(aggregator, common_tags)
 
     cpu_metrics = [
         'multiProcUserTime',
@@ -1377,6 +1413,8 @@ def test_arista(aggregator):
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:arista']
 
+    common.assert_common_metrics(aggregator, common_tags)
+
     aggregator.assert_metric(
         'snmp.aristaEgressQueuePktsDropped',
         metric_type=aggregator.MONOTONIC_COUNT,
@@ -1415,6 +1453,8 @@ def test_aruba(aggregator):
     run_profile_check('aruba')
 
     common_tags = common.CHECK_TAGS + ['snmp_profile:aruba']
+
+    common.assert_common_metrics(aggregator, common_tags)
 
     for fan in [18, 28]:
         fan_tags = common_tags + ['fan_index:{}'.format(fan)]
@@ -1482,6 +1522,8 @@ def test_chatsworth(aggregator):
         'legacy_pdu_version:1.2.3',
     ]
     common_tags = common.CHECK_TAGS + legacy_global_tags + ['snmp_profile:chatsworth_pdu']
+
+    common.assert_common_metrics(aggregator, common_tags)
 
     # Legacy metrics
     legacy_pdu_tags = common_tags
@@ -1618,6 +1660,9 @@ def test_isilon(aggregator):
         (1232918362, 1),
         (1383990869, 1),
     ]
+
+    common.assert_common_metrics(aggregator, common_tags)
+
     for metric in quota_metrics:
         for qid, qtype in quota_ids_types:
             tags = ['quota_id:{}'.format(qid), 'quota_type:{}'.format(qtype)] + common_tags
@@ -1675,6 +1720,8 @@ def test_apc_ups(aggregator):
         'upsAdvTestDiagnosticsResults',
     ]
 
+    common.assert_common_metrics(aggregator, tags)
+
     for metric in metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
     aggregator.assert_metric(
@@ -1729,6 +1776,8 @@ def test_fortinet_fortigate(aggregator):
     ]
     vd_tags = common_tags + ['virtualdomain_index:4', 'virtualdomain_name:their oxen quaintly']
 
+    common.assert_common_metrics(aggregator, common_tags)
+
     for metric in common_gauge_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=1)
 
@@ -1772,6 +1821,8 @@ def test_netapp(aggregator):
     ]
 
     common_tags = common.CHECK_TAGS + profile_tags
+
+    common.assert_common_metrics(aggregator, common_tags)
 
     gauges = [
         'cfInterconnectStatus',
