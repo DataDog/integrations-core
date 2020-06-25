@@ -1,10 +1,17 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_MQI, MQCMD_STATISTICS_Q
+from pymqi.CMQC import MQRC_NO_MSG_AVAILABLE
+from pymqi.CMQCFC import (
+    MQCMD_STATISTICS_CHANNEL,
+    MQCMD_STATISTICS_MQI,
+    MQCMD_STATISTICS_Q,
+    MQGACF_CHL_STATISTICS_DATA,
+    MQIAMO_MSGS,
+)
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute, unpack_header
+from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
 
 try:
     import pymqi
@@ -21,26 +28,25 @@ class StatsCollector(object):
     def collect(self, queue_manager):
         queue_name = 'SYSTEM.ADMIN.STATISTICS.QUEUE'
         queue = pymqi.Queue(queue_manager, queue_name)
-
         try:
             while True:
                 message = queue.get()
                 # self.check.log.info("RECEIVED MSG: %s", message)
-
-                unpacked, control = CustomPCFExecute.unpack(message)
-
                 # self.check.log.info("UNPACKED MSG: %s", unpacked)
-
-                header = unpack_header(message)
                 # self.check.log.info("UNPACKED HEADER: %s", header)
+                message, header = CustomPCFExecute.unpack(message)
 
                 if header.Command == MQCMD_STATISTICS_CHANNEL:
+                    channels = message[MQGACF_CHL_STATISTICS_DATA]
                     self.check.log.info(
                         {
                             'type': 'MQCMD_STATISTICS_CHANNEL',
-                            # 'mgr name': unpacked[MQCA_Q_MGR_NAME],
+                            'MQGACF_CHL_STATISTICS_DATA': message[MQGACF_CHL_STATISTICS_DATA],
                         }
                     )
+                    for channel in channels:
+                        self.check.log.info({'MQIAMO_MSGS': channel[MQIAMO_MSGS]})
+                        self.check.gauge('ibm_mq.stats.channel.msgs', channel[MQIAMO_MSGS])
                 elif header.Command == MQCMD_STATISTICS_MQI:
                     self.check.log.info(
                         {
@@ -55,7 +61,11 @@ class StatsCollector(object):
                             # 'mgr name': unpacked[MQCA_Q_MGR_NAME],
                         }
                     )
-        except Exception as e:
-            self.check.log.info(e)
-
-        queue.close()
+        except pymqi.MQMIError as err:
+            self.check.log.info(err)
+            if err.reason == MQRC_NO_MSG_AVAILABLE:
+                pass
+            else:
+                raise
+        finally:
+            queue.close()

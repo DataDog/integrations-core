@@ -171,6 +171,8 @@ CHANNEL_STATUS_METRICS = [
     ('ibm_mq.channel.ssl_key_resets', GAUGE),
 ]
 
+CHANNEL_STATS_METRICS = []
+
 if 'cluster' in MQ_COMPOSE:
     CHANNEL_STATUS_METRICS.extend(
         [
@@ -179,6 +181,7 @@ if 'cluster' in MQ_COMPOSE:
             ('ibm_mq.channel.indoubt_status', GAUGE),
         ]
     )
+    CHANNEL_STATS_METRICS.extend([('ibm_mq.stats.channel.msgs', GAUGE)])
 
 METRICS = (
     [
@@ -191,6 +194,7 @@ METRICS = (
     + QUEUE_STATUS_METRICS
     + CHANNEL_METRICS
     + CHANNEL_STATUS_METRICS
+    + CHANNEL_STATS_METRICS
 )
 
 OPTIONAL_METRICS = [
