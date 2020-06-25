@@ -10,7 +10,7 @@
   "guid": "4b8e9c18-1a13-43b0-a03c-186eb3221147",
   "support": "core",
   "supported_os": [
-    "linux",
+    "linux"
   ],
   "public_title": "Datadog-OOM Kill Integration",
   "categories": [
