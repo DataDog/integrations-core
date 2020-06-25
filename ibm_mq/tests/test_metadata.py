@@ -6,6 +6,8 @@ import pytest
 from datadog_checks.dev import run_command
 from datadog_checks.ibm_mq import IbmMqCheck
 
+from .common import GET_VERSION_CMD
+
 pytestmark = pytest.mark.e2e
 
 
@@ -14,8 +16,7 @@ def test_metadata(instance_metadata, datadog_agent):
     check.check_id = 'test:123'
     check.check(instance_metadata)
 
-    cmd = ["docker", "exec", "ibm_mq", "dspmqver"]
-    result = run_command(cmd, capture="out", check=True)
+    result = run_command(GET_VERSION_CMD, capture="out", check=True)
 
     raw_version = IbmMqCheck._parse_version(result.stdout)
     major, minor, patch, _ = raw_version.split('.')

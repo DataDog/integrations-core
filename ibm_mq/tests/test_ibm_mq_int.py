@@ -11,7 +11,7 @@ from datadog_checks.ibm_mq import IbmMqCheck
 from datadog_checks.dev import run_command
 
 from . import common
-from .common import QUEUE_METRICS, assert_all_metrics, MQ_VERSION_RAW
+from .common import QUEUE_METRICS, assert_all_metrics, MQ_VERSION_RAW, GET_VERSION_CMD
 
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
@@ -177,8 +177,7 @@ def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):
 
 
 def test_metadata_parsing():
-    cmd = ["docker", "exec", "ibm_mq", "dspmqver"]
-    result = run_command(cmd, capture="out", check=True)
+    result = run_command(GET_VERSION_CMD, capture="out", check=True)
 
     raw_version = IbmMqCheck._parse_version(result.stdout)
     assert raw_version == MQ_VERSION_RAW

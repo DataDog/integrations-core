@@ -30,6 +30,8 @@ COMPOSE_FILE_NAME = 'docker-compose-v{}.yml'.format(MQ_VERSION)
 
 COMPOSE_FILE_PATH = os.path.join(COMPOSE_DIR, COMPOSE_FILE_NAME)
 
+GET_VERSION_CMD = ["docker", "exec", "ibm_mq", "dspmqver"]
+
 INSTANCE = {
     'channel': CHANNEL,
     'queue_manager': QUEUE_MANAGER,
@@ -113,7 +115,7 @@ INSTANCE_QUEUE_REGEX_TAG = {
 E2E_METADATA = {
     'docker_volumes': [
         '{}/scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE),
-        '/var/run/docker.sock:/var/run/docker.sock'
+        '/var/run/docker.sock:/var/run/docker.sock',
     ],
     'start_commands': ['bash /tmp/start_commands.sh'],
     'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib', 'C_INCLUDE_PATH': '/opt/mqm/inc'},
