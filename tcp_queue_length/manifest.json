@@ -1,0 +1,27 @@
+{
+  "maintainer": "help@datadoghq.com",
+  "manifest_version": "0.0.1",
+  "metric_prefix": "tcp_queue.",
+  "metric_to_check": "tcp_queue.rqueue.size",
+  "name": "tcp_queue_length",
+  "short_description": "Track the size of the TCP buffers with Datadog",
+  "guid": "0468b098-43bd-4157-8a01-14065cfdcb7b",
+  "support": "core",
+  "supported_os": [
+    "linux"
+  ],
+  "public_title": "Datadog-TCP queue length Integration",
+  "categories": [
+    "network"
+  ],
+  "type": "check",
+  "is_public": true,
+  "display_name": "TCP queue length",
+  "creates_events": true,
+  "integration_id": "tcp_queue_length",
+  "assets": {
+    "monitors": {},
+    "dashboards": {},
+    "service_checks": {}
+  }
+}
