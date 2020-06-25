@@ -176,7 +176,7 @@ def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):
         aggregator.assert_metric(metric, tags=tags)
 
 
-def test_parsing():
+def test_metadata_parsing():
     cmd = ["docker", "exec", "ibm_mq", "dspmqver"]
     result = run_command(cmd, capture="out", check=True)
 
@@ -184,7 +184,7 @@ def test_parsing():
     assert raw_version == MQ_VERSION_RAW
 
 
-def test_parsing_fail():
+def test_metadata_parsing_fail():
     cmd = ["docker", "exec", "ibm_mq", "ls"]
     result = run_command(cmd, capture="out", check=True)
 
