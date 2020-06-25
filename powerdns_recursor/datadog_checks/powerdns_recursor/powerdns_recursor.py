@@ -127,6 +127,8 @@ class PowerDNSRecursorCheck(AgentCheck):
                 elif stat['name'] in PowerDNSRecursorCheck.RATE_METRICS_V4:
                     self.rate('powerdns.recursor.{}'.format(stat['name']), float(stat['value']), tags=tags)
 
+        self._collect_metadata(config)
+
     def _get_config(self, instance):
         required = ['host', 'port']
         for param in required:
@@ -144,24 +146,52 @@ class PowerDNSRecursorCheck(AgentCheck):
         return Config(host, port, version), tags
 
     def _get_pdns_stats(self, config, tags):
-        fallback_url = "http://{}:{}/api/v1/servers/localhost/statistics".format(config.host, config.port)
-        if config.version == 4:
-            url = fallback_url
-        else:
-            url = "http://{}:{}/servers/localhost/statistics".format(config.host, config.port)
+        url_v4 = "http://{}:{}/api/v1/servers/localhost/statistics".format(config.host, config.port)
+        url = "http://{}:{}/servers/localhost/statistics".format(config.host, config.port)
 
         service_check_tags = ['recursor_host:{}'.format(config.host), 'recursor_port:{}'.format(config.port)] + tags
+
         try:
-            request = self.http.get(url)
-            request.raise_for_status()
+            request = self._get_pdns_response(config, url, url_v4)
         except Exception:
-            try:
-                if fallback_url is url:
-                    raise
-                request = self.http.get(fallback_url)
-                request.raise_for_status()
-            except Exception:
-                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
-                raise
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
+            raise
+
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
         return request.json()
+
+    def _get_pdns_response(self, config, url, url_v4):
+        if config.version == 4:
+            url = url_v4
+
+        try:
+            response = self.http.get(url)
+            response.raise_for_status()
+        except Exception:
+            if url_v4 is url:
+                raise
+            response = self.http.get(url_v4)
+            response.raise_for_status()
+
+        return response
+
+    @AgentCheck.metadata_entrypoint
+    def _collect_metadata(self, config):
+        url_v4 = "http://{}:{}/api".format(config.host, config.port)
+        url = "http://{}:{}/servers/localhost/statistics".format(config.host, config.port)
+
+        try:
+            response = self._get_pdns_response(config, url, url_v4)
+        except Exception as e:
+            self.log.debug('Error collecting PowerDNS Recursor version: %s', str(e))
+            return
+
+        if response.headers.get('Server'):
+            try:
+                # 'Server': 'PowerDNS/4.0.9'
+                version = response.headers['Server'].split('/')[1]
+                self.set_metadata('version', version)
+            except Exception as e:
+                self.log.debug('Error while decoding PowerDNS Recursor version: %s', str(e))
+        else:
+            self.log.debug("Couldn't find the PowerDNS Recursor Server version header")
