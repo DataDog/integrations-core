@@ -24,6 +24,7 @@ QUEUE = 'DEV.QUEUE.1'
 BAD_CHANNEL = 'DEV.NOTHERE.SVRCONN'
 
 MQ_VERSION = os.environ.get('IBM_MQ_VERSION', '9')
+MQ_VERSION_RAW = os.environ.get('IBM_MQ_VERSION_RAW', '9.1.1.0')
 
 COMPOSE_FILE_NAME = 'docker-compose-v{}.yml'.format(MQ_VERSION)
 

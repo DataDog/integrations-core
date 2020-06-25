@@ -8,9 +8,10 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.ibm_mq import IbmMqCheck
+from datadog_checks.dev import run_command
 
 from . import common
-from .common import QUEUE_METRICS, assert_all_metrics
+from .common import QUEUE_METRICS, assert_all_metrics, MQ_VERSION_RAW
 
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
@@ -173,3 +174,19 @@ def test_check_regex_tag(aggregator, instance_queue_regex_tag, seed_data):
 
     for metric, _ in QUEUE_METRICS:
         aggregator.assert_metric(metric, tags=tags)
+
+
+def test_parsing():
+    cmd = ["docker", "exec", "ibm_mq", "dspmqver"]
+    result = run_command(cmd, capture="out", check=True)
+
+    raw_version = IbmMqCheck._parse_version(result.stdout)
+    assert raw_version == MQ_VERSION_RAW
+
+
+def test_parsing_fail():
+    cmd = ["docker", "exec", "ibm_mq", "ls"]
+    result = run_command(cmd, capture="out", check=True)
+
+    raw_version = IbmMqCheck._parse_version(result.stdout)
+    assert raw_version is None
