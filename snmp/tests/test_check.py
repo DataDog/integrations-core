@@ -12,7 +12,7 @@ import mock
 import pytest
 import yaml
 
-from datadog_checks.base import ConfigurationError
+from datadog_checks.base import ConfigurationError, to_native_string
 from datadog_checks.dev import temp_dir
 from datadog_checks.snmp import SnmpCheck
 
@@ -679,11 +679,15 @@ def test_profile_sys_object_no_metrics():
 def test_discovery(aggregator):
     host = socket.gethostbyname(common.HOST)
     network = ipaddress.ip_network(u'{}/29'.format(host), strict=False).with_prefixlen
-    check_tags = ['snmp_device:{}'.format(host), 'snmp_profile:profile1']
+    check_tags = [
+        'snmp_device:{}'.format(host),
+        'snmp_profile:profile1',
+        'autodiscovery_subnet:{}'.format(to_native_string(network)),
+    ]
     instance = {
         'name': 'snmp_conf',
         # Make sure the check handles bytes
-        'network_address': network.encode('utf-8'),
+        'network_address': to_native_string(network),
         'port': common.PORT,
         'community_string': 'public',
         'retries': 0,
@@ -713,7 +717,7 @@ def test_discovery(aggregator):
     aggregator.assert_metric('snmp.sysUpTimeInstance')
     aggregator.assert_metric('snmp.discovered_devices_count', tags=['network:{}'.format(network)])
 
-    common.assert_common_metrics(aggregator)
+    aggregator.assert_metric('snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=check_tags)
     aggregator.assert_all_metrics_covered()
 
 

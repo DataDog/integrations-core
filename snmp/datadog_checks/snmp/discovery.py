@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import copy
 import json
 import time
 import weakref
@@ -33,11 +32,8 @@ def discover_instances(config, interval, check_ref):
             check = check_ref()
             if check is None or not check._running:
                 return
-            instance = copy.deepcopy(config.instance)
-            instance.pop('network_address')
-            instance['ip_address'] = host
 
-            host_config = check._build_config(instance)
+            host_config = check._build_autodiscovery_config(config.instance, host)
 
             try:
                 sys_object_oid = check.fetch_sysobject_oid(host_config)
