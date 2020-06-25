@@ -44,7 +44,8 @@ class IbmMqCheck(AgentCheck):
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, self.config.tags)
             return
 
-        self._collect_metadata()
+        if self.is_metadata_collection_enabled():
+            self._collect_metadata()
 
         try:
             self.channel_metric_collector.get_pcf_channel_metrics(queue_manager)
