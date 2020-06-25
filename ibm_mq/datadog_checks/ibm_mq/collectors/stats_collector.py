@@ -30,6 +30,7 @@ class StatsCollector(object):
         queue = pymqi.Queue(queue_manager, queue_name)
         try:
             while True:
+                # https://github.com/dsuch/pymqi/blob/0995dfb80c92646421bd4abb0f7f8a0d39fe0a08/code/tests/test_pcf.py#L183-L187
                 message = queue.get()
                 # self.check.log.info("RECEIVED MSG: %s", message)
                 # self.check.log.info("UNPACKED MSG: %s", unpacked)
