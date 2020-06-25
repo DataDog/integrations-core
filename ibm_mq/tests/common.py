@@ -172,11 +172,13 @@ CHANNEL_STATUS_METRICS = [
 ]
 
 if 'cluster' in MQ_COMPOSE:
-    CHANNEL_STATUS_METRICS.extend([
-        ('ibm_mq.channel.batches', GAUGE),
-        ('ibm_mq.channel.current_msgs', GAUGE),
-        ('ibm_mq.channel.indoubt_status', GAUGE),
-    ])
+    CHANNEL_STATUS_METRICS.extend(
+        [
+            ('ibm_mq.channel.batches', GAUGE),
+            ('ibm_mq.channel.current_msgs', GAUGE),
+            ('ibm_mq.channel.indoubt_status', GAUGE),
+        ]
+    )
 
 METRICS = (
     [
