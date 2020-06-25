@@ -77,23 +77,24 @@ STATSD_SERVER_PORT = 9000
 NTNX__microsoft_sqlserver_user_authn = "NTNX__microsoft_sqlserver_user_authn"
 NTNX__microsoft_sqlserver_view_server_state = "NTNX__microsoft_sqlserver_view_server_state"
 NTNX__microsoft_sqlserver_sql_server_target = "NTNX__microsoft_sqlserver_sql_server_target"
-NTNX__microsoft_sqlserver_connection_setting = "NTNX__microsoft_sqlserver_connection_setting"
+NTNX__microsoft_sqlserver_select_permissions = "NTNX__microsoft_sqlserver_select_permissions"
 ENDPOINT_UUID_STR = "endpoint_uuid"
 
 VIEW_SERVER_STATE_MSG = "VIEW SERVER STATE permission was denied"
+SELECT_SERVER_STATE_MSG = "SELECT permission was denied"
 
 SQLCONNECTION_FAILURE_ALERTS = {
     "Login failed for user" : NTNX__microsoft_sqlserver_user_authn,
     VIEW_SERVER_STATE_MSG : NTNX__microsoft_sqlserver_view_server_state,
     "Login timeout expired" : NTNX__microsoft_sqlserver_sql_server_target,
-    "Incorrect syntax near" : NTNX__microsoft_sqlserver_connection_setting
+    SELECT_SERVER_STATE_MSG : NTNX__microsoft_sqlserver_select_permissions
 }
 
 # Appropriate alert messages for the alert types
 SQLCONNECTION_ALERT_MESSAGES = {
     NTNX__microsoft_sqlserver_user_authn : "Login failed for user ",
     NTNX__microsoft_sqlserver_view_server_state : VIEW_SERVER_STATE_MSG,
-    NTNX__microsoft_sqlserver_connection_setting : "Supplied user does not have the right permissions",
+    NTNX__microsoft_sqlserver_select_permissions : SELECT_SERVER_STATE_MSG,
     NTNX__microsoft_sqlserver_sql_server_target : "The target is not an SQL server or instance/port details are incorrect"
 }
 
@@ -256,8 +257,8 @@ class SQLServer(AgentCheck):
             except Exception as e:
                 self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
                 # Raise this alert as any metric collection will not be successful if user
-                # does not have VIEW SERVER STATE permissions
-                if VIEW_SERVER_STATE_MSG in str(e):
+                # does not have VIEW SERVER STATE permissions or SELECT permissions
+                if (VIEW_SERVER_STATE_MSG in str(e) or SELECT_SERVER_STATE_MSG in str(e)):
                     raise
                 continue
 
