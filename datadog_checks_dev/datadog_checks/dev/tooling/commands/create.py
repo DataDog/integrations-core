@@ -94,7 +94,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     """
         Create scaffolding for a new integration.
         
-        NAME: use the display name as the integration would appear in documentation.
+        NAME: Use the display name as the integration would appear in documentation.
     """
 
     if name.islower():
