@@ -40,8 +40,8 @@ Configure the Airflow check included in the [Datadog Agent][2] package to collec
    ```conf
    [scheduler]
    statsd_on = True
-   statsd_host = localhost # or <VM_IP_address>
-   statsd_port = 8125
+   statsd_host = localhost  # Hostname or IP of server running the Datadog Agent
+   statsd_port = 8125       # DogStatsD port configured in the Datadog Agent
    statsd_prefix = airflow
    ```
 
