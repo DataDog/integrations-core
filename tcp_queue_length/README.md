@@ -58,6 +58,17 @@ For each TCP connection, `tcp_queue_length` collects the minimum and the maximum
 
 See [metadata.csv][4] for a list of metrics provided by this integration.
 
+### Service Checks
+
+The TCP Queue Length check does not include any service checks.
+
+### Events
+
+The TCP Queue Length check does not include any events.
+
+## Troubleshooting
+
+Need help? Contact [Datadog support][5].
 
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/tcp_queue_length.d/conf.yaml.example
 [2]: https://github.com/helm/charts/tree/master/stable/datadog
