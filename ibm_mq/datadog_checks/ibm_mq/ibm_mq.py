@@ -84,5 +84,9 @@ class IbmMqCheck(AgentCheck):
     def _parse_version(output):
         for line in output.splitlines():
             line = line.strip()
-            if line.startswith("Version:"):
-                return line.split()[1]
+            try:
+                if line.startswith("Version:"):
+                    return line.split()[1]
+            except BaseException:
+                return None
+
