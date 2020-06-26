@@ -172,3 +172,26 @@ def test_channel_queue_config_error(instance_config):
         IBMMQConfig(instance_config)
 
     assert 'channel, queue_manager are required configurations' in str(excinfo.value)
+
+
+def test_ssl_connection_creation(instance):
+    """
+    Test that we are not getting unicode/bytes type error.
+
+    TODO: We should test SSL in e2e
+    """
+    instance['ssl_auth'] = 'yes'
+    instance['ssl_cipher_spec'] = 'TLS_RSA_WITH_AES_256_CBC_SHA256'
+    instance['ssl_key_repository_location'] = '/dummy'
+
+    check = IbmMqCheck('ibm_mq', {}, [instance])
+
+    check.check(instance)
+
+    assert len(check.warnings) == 1
+    warning = check.warnings[0]
+
+    # Check that we are not getting a unicode/bytes type error but a MQRC_KEY_REPOSITORY_ERROR (dummy location)
+    assert 'bytes' not in warning
+    assert 'unicode' not in warning
+    assert 'MQRC_KEY_REPOSITORY_ERROR' in warning
