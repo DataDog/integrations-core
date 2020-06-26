@@ -13,5 +13,3 @@ services:
       - CEPH_DEMO_BUCKET=demo
       - DEBUG=verbose
       - SREE_VERSION=leseb-Sree-v0.1-0-g4ab9969
-    volumes:
-      - ./ceph.conf:/etc/ceph/ceph.conf
