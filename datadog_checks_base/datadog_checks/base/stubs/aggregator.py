@@ -14,6 +14,7 @@ from .similar import build_similar_elements_msg
 
 log = logging.getLogger(__name__)
 
+
 def normalize_tags(tags, sort=False):
     # The base class ensures the Agent receives bytes in PY2 and unicode in PY3.
     # This function makes sure strings are compared with the same type.
