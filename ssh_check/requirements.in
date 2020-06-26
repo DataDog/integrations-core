@@ -3,6 +3,6 @@ cffi==1.11.5
 cryptography==2.3.1
 enum34==1.1.6
 ipaddress==1.0.22
-paramiko==2.1.5
+paramiko==2.1.6
 pyasn1==0.4.2
 pycparser==2.18
