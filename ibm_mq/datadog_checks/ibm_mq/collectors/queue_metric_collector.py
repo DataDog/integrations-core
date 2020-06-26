@@ -4,7 +4,7 @@
 
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
+from datadog_checks.base import AgentCheck, to_native_string
 from datadog_checks.ibm_mq.metrics import GAUGE
 
 from .. import metrics
@@ -80,7 +80,7 @@ class QueueMetricCollector(object):
         queues = []
 
         for queue_type in SUPPORTED_QUEUE_TYPES:
-            args = {pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(mq_pattern_filter), pymqi.CMQC.MQIA_Q_TYPE: queue_type}
+            args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(mq_pattern_filter), pymqi.CMQC.MQIA_Q_TYPE: queue_type}
             try:
                 pcf = pymqi.PCFExecute(queue_manager)
                 response = pcf.MQCMD_INQUIRE_Q(args)
@@ -89,7 +89,7 @@ class QueueMetricCollector(object):
             else:
                 for queue_info in response:
                     queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
-                    queues.append(ensure_unicode(queue).strip())
+                    queues.append(to_native_string(queue).strip())
 
         return queues
 
@@ -112,7 +112,7 @@ class QueueMetricCollector(object):
         Grab stats from queues
         """
         try:
-            args = {pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(queue_name), pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL}
+            args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name), pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL}
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_Q(args)
         except pymqi.MQMIError as e:
@@ -141,7 +141,7 @@ class QueueMetricCollector(object):
     def get_pcf_queue_status_metrics(self, queue_manager, queue_name, tags):
         try:
             args = {
-                pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(queue_name),
+                pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name),
                 pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL,
                 pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
             }
@@ -167,7 +167,7 @@ class QueueMetricCollector(object):
 
     def get_pcf_queue_reset_metrics(self, queue_manager, queue_name, tags):
         try:
-            args = {pymqi.CMQC.MQCA_Q_NAME: ensure_bytes(queue_name)}
+            args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name)}
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_RESET_Q_STATS(args)
         except pymqi.MQMIError as e:
