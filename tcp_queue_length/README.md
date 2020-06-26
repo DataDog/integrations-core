@@ -32,7 +32,11 @@ system_probe_config:
   enable_tcp_queue_length: true
 ```
 
-For the “core” agent, a `tcp_queue_length.d/conf.yaml` file is needed in the `conf.d` directory [with the following content][1].
+1. Edit the `tcp_queue_length.d/conf.yaml` file, in the `conf.d/` folder at the root of your
+   Agent's configuration directory to start collecting your tcp_queue_length performance data.
+   See the [sample tcp_queue_length.d/conf.yaml][1] for all available configuration options.
+
+2. [Restart the Agent][3].
 
 The `only_count_nb_contexts` parameter controls whether:
 * the check should collect all the data—that is, the size of the TCP queues for every single connection (`false`)
