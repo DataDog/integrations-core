@@ -16,7 +16,7 @@
   ],
   "type": "check",
   "is_public": true,
-  "display_name": "TCP queue length",
+  "display_name": "TCP Queue Length",
   "creates_events": true,
   "integration_id": "tcp_queue_length",
   "assets": {
