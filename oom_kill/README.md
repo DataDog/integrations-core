@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors the kernel OOM kill process through the Datadog Agent. It also depends on Live Processes and the System Probe.
+This check monitors the kernel OOM kill process through the Datadog Agent and the System Probe.
 
 ## Setup
 
@@ -34,23 +34,21 @@ system_probe_config:
   enable_oom_kill: true
 ```
 
-3. Ensure that [Live Processes][2] is enabled.
-
-4. [Restart the Agent][3].
+3. [Restart the Agent][2].
 
 ### Configuration with Helm
 
-With the [Datadog Helm chart][4], ensure that `datadog.processAgent`, `datadog.systemProbe` and `datadog.systemProbe.enableOOMKill` parameters are enabled in the `values.yaml` file.
+With the [Datadog Helm chart][3], ensure that the `datadog.systemProbe` and `datadog.systemProbe.enableOOMKill` parameters are enabled in the `values.yaml` file.
 
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `oom_kill` under the Checks section.
+[Run the Agent's status subcommand][4] and look for `oom_kill` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][6] for a list of metrics provided by this check.
+See [metadata.csv][5] for a list of metrics provided by this check.
 
 ### Service Checks
 
@@ -62,12 +60,11 @@ The OOM Kill check submits an event for each OOM Kill that includes the killed p
 
 ## Troubleshooting
 
-Need help? Contact [Datadog support][7].
+Need help? Contact [Datadog support][6].
 
 [1]: https://docs.datadoghq.com/agent/guide/
-[2]: https://docs.datadoghq.com/infrastructure/process
-[3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[4]: https://github.com/helm/charts/tree/master/stable/datadog
-[5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[6]: https://github.com/DataDog/integrations-core/blob/master/oom_kill/metadata.csv
-[7]: https://docs.datadoghq.com/help/
+[2]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
+[3]: https://github.com/helm/charts/tree/master/stable/datadog
+[4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[5]: https://github.com/DataDog/integrations-core/blob/master/oom_kill/metadata.csv
+[6]: https://docs.datadoghq.com/help/
