@@ -4,7 +4,85 @@ files:
   options:
   - template: init_config
     options:
-    - template: init_config/default
+      - template: init_config/default
   - template: instances
     options:
-    - template: instances/default
+      - name: account
+        required: true
+        description: |
+          Name of your account (provided by Snowflake), including the platform and region if applicable.
+        value:
+          type: string
+          example: <ACCOUNT>
+      - name: user
+        required: true
+        description: Login name for the user.
+        value:
+          type: string
+          example: <USER>
+      - name: password
+        required: true
+        description: Password for the user
+        value:
+          type: string
+          example: <PASSWORD>
+#      - name: database
+#        description: Name of the default database to use.
+#        value:
+#          type: string
+#          example: SNOWFLAKE
+#      - name: schema
+#        description: Name of the default schema to use for the database.
+#        value:
+#          type: string
+#          example: ACCOUNT_USAGE
+      - name: role
+        description: Name of the default role to use.
+        value:
+          type: string
+          example: ACCOUNTADMIN
+      - name: warehouse
+        description: Name of the default warehouse to use.
+        value:
+          type: string
+          example: <WAREHOUSE>
+      - name: passcode_in_password
+        description: |
+          Enable if the Multi-Factor Authentication passcode is embedded in the login password.
+        value:
+          type: boolean
+          example: false
+      - name: passcode
+        description: The passcode provided by Duo when using MFA for login.
+        value:
+          type: string
+          example: <PASSCODE>
+      - name: autocommit
+        description: |
+          Disable to deactivate autocommit mode in the session.
+        value:
+          type: boolean
+          example: true
+      - name: client_prefetch_threads
+        description: |
+          The number of threads used to download the results sets. Increasing the value improves fetch
+          performance but requires more memory.
+        value:
+          type: integer
+          example: 4
+      - name: login_timeout
+        description: |
+          Timeout in seconds for login. The login request gives up after the timeout length if the HTTP response succeeds.
+        value:
+          type: integer
+          example: 60
+      - name: ocsp_response_cache_filename
+        description: |
+          URI for the OCSP response cache file. By default, the OCSP response cache file is created in the cache directory:
+            Linux   - ~/.cache/snowflake/ocsp_response_cache
+            macOS   - ~/Library/Caches/Snowflake/ocsp_response_cache
+            Windows - %USERPROFILE%\AppData\Local\Snowflake\Caches\ocsp_response_cache
+        value:
+          type: string
+          example: <OCSP_RESPONSE_CACHE_FILENAME>
+      - template: instances/default

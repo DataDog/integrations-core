@@ -13,7 +13,65 @@ init_config:
 #
 instances:
 
-  -
+    ## @param account - string - required
+    ## Name of your account (provided by Snowflake), including the platform and region if applicable.
+    #
+  - account: <ACCOUNT>
+
+    ## @param user - string - required
+    ## Login name for the user.
+    #
+    user: <USER>
+
+    ## @param password - string - required
+    ## Password for the user
+    #
+    password: <PASSWORD>
+
+    ## @param role - string - optional - default: ACCOUNTADMIN
+    ## Name of the default role to use.
+    #
+    # role: ACCOUNTADMIN
+
+    ## @param warehouse - string - optional
+    ## Name of the default warehouse to use.
+    #
+    # warehouse: <WAREHOUSE>
+
+    ## @param passcode_in_password - boolean - optional - default: false
+    ## Enable if the Multi-Factor Authentication passcode is embedded in the login password.
+    #
+    # passcode_in_password: false
+
+    ## @param passcode - string - optional
+    ## The passcode provided by Duo when using MFA for login.
+    #
+    # passcode: <PASSCODE>
+
+    ## @param autocommit - boolean - optional - default: true
+    ## Disable to deactivate autocommit mode in the session.
+    #
+    # autocommit: true
+
+    ## @param client_prefetch_threads - integer - optional - default: 4
+    ## The number of threads used to download the results sets. Increasing the value improves fetch
+    ## performance but requires more memory.
+    #
+    # client_prefetch_threads: 4
+
+    ## @param login_timeout - integer - optional - default: 60
+    ## Timeout in seconds for login. The login request gives up after the timeout length if the HTTP response succeeds.
+    #
+    # login_timeout: 60
+
+    ## @param ocsp_response_cache_filename - string - optional
+    ## URI for the OCSP response cache file. By default, the OCSP response cache file is created in the cache directory:
+    ##   Linux   - ~/.cache/snowflake/ocsp_response_cache
+    ##   macOS   - ~/Library/Caches/Snowflake/ocsp_response_cache
+    ##   Windows - %USERPROFILE%\AppData\Local\Snowflake\Caches\ocsp_response_cache
+    #
+    # ocsp_response_cache_filename: <OCSP_RESPONSE_CACHE_FILENAME>
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
