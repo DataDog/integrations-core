@@ -133,7 +133,7 @@ class PgStatementsMixin(object):
         rows = self._execute_query(cursor, STATEMENTS_QUERY.format(cols=', '.join(columns)))
         if not rows:
             return
-        rows = rows[:self.max_query_metrics]
+        rows = rows[:self.config.max_query_metrics]
 
         new_cache = {}
         for row in rows:
