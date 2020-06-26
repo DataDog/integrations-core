@@ -1,4 +1,4 @@
-# Generic network interfaces metrics for routers.
+# Generic network interfaces metrics.
 #
 metrics:
 - MIB: IF-MIB
