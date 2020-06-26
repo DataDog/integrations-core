@@ -617,6 +617,50 @@ def test_profile_sys_object(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+def test_profile_sysoid_list(aggregator, caplog):
+    definition = {
+        'metric_tags': [{'OID': '1.3.6.1.2.1.1.2', 'symbol': 'sysoid', 'tag': 'snmp_oid'}],
+        'metrics': [{'OID': "1.3.6.1.2.1.7.1.0", 'name': "IAmACounter32"}],
+        'sysobjectid': ['1.3.6.1.4.1.232.1.2', '1.3.6.1.4.1.1.2.1.3.4'],
+    }
+    init_config = {'profiles': {'profile1': {'definition': definition}}}
+
+    caplog.at_level(logging.WARNING)
+
+    devices_matched = [
+        {'community_string': 'hpe-proliant', 'sysobjectid': '1.3.6.1.4.1.232.1.2'},
+        {'community_string': 'network', 'sysobjectid': '1.3.6.1.4.1.1.2.1.3.4'},
+    ]
+    common_tags = common.CHECK_TAGS + ['snmp_profile:profile1']
+    for device in devices_matched:
+        instance = common.generate_instance_config([])
+        instance['community_string'] = device['community_string']
+        check = SnmpCheck('snmp', init_config, [instance])
+        check.check(instance)
+
+        tags = common_tags + ['snmp_oid:{}'.format(device['sysobjectid'])]
+        aggregator.assert_metric('snmp.IAmACounter32', tags=tags, count=1)
+
+        aggregator.assert_all_metrics_covered()
+
+        aggregator.reset()
+
+    devices_not_matched = [
+        {'community_string': '3850', 'sysobjectid': '1.3.6.1.4.1.9.1.1745'},
+    ]
+    for device in devices_not_matched:
+        instance = common.generate_instance_config([])
+        instance['community_string'] = device['community_string']
+        check = SnmpCheck('snmp', init_config, [instance])
+        check.check(instance)
+
+        assert 'No profile matching sysObjectID 1.3.6.1.4.1.9.1.1745' in caplog.text
+
+        aggregator.assert_all_metrics_covered()
+
+        aggregator.reset()
+
+
 @pytest.mark.parametrize(
     'most_specific_oid, least_specific_oid',
     [
