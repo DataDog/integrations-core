@@ -48,11 +48,6 @@ instances:
     #
     # passcode: <PASSCODE>
 
-    ## @param autocommit - boolean - optional - default: true
-    ## Disable to deactivate autocommit mode in the session.
-    #
-    # autocommit: true
-
     ## @param client_prefetch_threads - integer - optional - default: 4
     ## The number of threads used to download the results sets. Increasing the value improves fetch
     ## performance but requires more memory.

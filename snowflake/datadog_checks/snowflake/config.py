@@ -1,0 +1,44 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from typing import List, Optional
+
+from datadog_checks.base import ConfigurationError, is_affirmative
+
+from .types import Instance
+
+
+class Config(object):
+    """
+    Hold instance configuration for a Snowflake check.
+    Encapsulates the validation of an `instance` dictionary and authentication options.
+    """
+
+    def __init__(self, instance=None):
+        # type: (Instance) -> None
+        if instance is None:
+            instance = {}
+
+        account = instance.get('account')
+        user = instance.get('user')
+        password = instance.get('password')
+        role = instance.get('role', 'ACCOUNTADMIN')
+        warehouse = instance.get('warehouse')
+        passcode_in_password = instance.get('passcode_in_password', False)
+        passcode = instance.get('passcode')
+        client_prefetch_threads = instance.get('client_prefetch_threads', 4)
+        login_timeout = instance.get('login_timeout', 60)
+        ocsp_response_cache_filename = instance.get('ocsp_response_cache_filename')
+        tags = instance.get('tags', [])
+
+        if account is None:
+            raise ConfigurationError('Must specify an account')
+
+        if user is None or password is None:
+            raise ConfigurationError('Must specify a user and password')
+
+        if not isinstance(tags, list):
+            raise ConfigurationError('tags {!r} must be a list (got {!r})'.format(tags, type(tags)))
+
+        if is_affirmative(passcode_in_password) and passcode is None:
+            raise ConfigurationError('MFA enabled, please specify a passcode')
