@@ -26,9 +26,10 @@ yum install -y kernel-headers-$(uname -r)
 
 Enabling the `tcp_queue_length` integration requires both the `system-probe` and the core agent to have the configuration option enabled.
 
-Inside the `system-probe.yaml` configuration file, the following parameter must be set:
+Inside the `system-probe.yaml` configuration file, the following parameters must be set:
 ```yaml
 system_probe_config:
+  enabled: true
   enable_tcp_queue_length: true
 ```
 
@@ -44,7 +45,8 @@ The `only_count_nb_contexts` parameter controls whether:
 
 ### Configuration with Helm
 
-With the [Datadog Helm chart][2], the `datadog.systemProbe.enableTCPQueueLength` parameter is the only thing to set in `values.yaml` to enable the check.
+With the [Datadog Helm chart][2], we must ensure that `system-probe` is activated by setting `datadog.systemProbe.enabled` to `true` in the `values.yaml` file.
+Then, the check can be activated by setting the `datadog.systemProbe.enableTCPQueueLength` parameter.
 
 ### Validation
 
@@ -74,3 +76,4 @@ Need help? Contact [Datadog support][5].
 [2]: https://github.com/helm/charts/tree/master/stable/datadog
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://github.com/DataDog/integrations-core/blob/master/tcp_queue_length/metadata.csv
+[5]: https://docs.datadoghq.com/help/
