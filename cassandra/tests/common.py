@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from datadog_checks.dev import get_docker_hostname, get_here
-from datadog_checks.dev.jmx import JVM_E2E_METRICS
+from datadog_checks.dev.jmx import JVM_E2E_METRICS, JMX_E2E_METRICS
 
 CHECK_NAME = "cassandra"
 
@@ -89,4 +89,4 @@ CASSANDRA_E2E_METRICS = [
     "cassandra.write_latency.95th_percentile",
     "cassandra.write_latency.99th_percentile",
     "cassandra.write_latency.one_minute_rate",
-] + CASSANDRA_JVM_E2E_METRICS
+] + CASSANDRA_JVM_E2E_METRICS + JMX_E2E_METRICS

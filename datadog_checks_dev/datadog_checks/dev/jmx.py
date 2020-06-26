@@ -3,10 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 JVM_E2E_METRICS = [
-    'jmx.gc.major_collection_count',
-    'jmx.gc.major_collection_time',
-    'jmx.gc.minor_collection_count',
-    'jmx.gc.minor_collection_time',
     'jvm.buffer_pool.direct.capacity',
     'jvm.buffer_pool.direct.count',
     'jvm.buffer_pool.direct.used',
@@ -32,4 +28,11 @@ JVM_E2E_METRICS = [
     'jvm.non_heap_memory_max',
     'jvm.os.open_file_descriptors',
     'jvm.thread_count',
+]
+
+JMX_E2E_METRICS = [
+    'jmx.gc.major_collection_count',
+    'jmx.gc.major_collection_time',
+    'jmx.gc.minor_collection_count',
+    'jmx.gc.minor_collection_time',
 ]
