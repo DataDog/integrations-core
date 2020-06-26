@@ -57,12 +57,6 @@ files:
         value:
           type: string
           example: <PASSCODE>
-      - name: autocommit
-        description: |
-          Disable to deactivate autocommit mode in the session.
-        value:
-          type: boolean
-          example: true
       - name: client_prefetch_threads
         description: |
           The number of threads used to download the results sets. Increasing the value improves fetch
