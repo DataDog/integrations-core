@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import pytest
+
 from datadog_checks.dev.jmx import JVM_E2E_METRICS
 
 

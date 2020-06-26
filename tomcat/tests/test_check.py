@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-from datadog_checks.dev.jmx import JVM_E2E_METRICS
 
+from datadog_checks.dev.jmx import JVM_E2E_METRICS
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import TOMCAT_E2E_METRICS
