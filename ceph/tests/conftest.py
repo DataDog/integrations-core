@@ -8,7 +8,6 @@ import pytest
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
-from datadog_checks.dev.subprocess import run_command
 
 from .common import BASIC_CONFIG, HERE
 
@@ -32,12 +31,4 @@ def dd_environment():
             CheckDockerLogs(compose_file, 'Running on http://0.0.0.0:5000/'),
         ],
     ):
-        # Clean the disk space warning
-        run_command(
-            ['docker', 'exec', 'dd-test-ceph', 'ceph', 'tell', 'mon.*', 'injectargs', '--mon_data_avail_warn', '5']
-        )
-        # Restart for the change to take effect
-        run_command(['docker', 'restart', 'dd-test-ceph'])
-        condition = CheckDockerLogs(compose_file, 'Cluster is now healthy')
-        condition()
         yield BASIC_CONFIG, E2E_METADATA
