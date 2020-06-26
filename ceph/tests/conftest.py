@@ -36,7 +36,10 @@ def dd_environment():
         run_command(
             ['docker', 'exec', 'dd-test-ceph', 'ceph', 'tell', 'mon.*', 'injectargs', '--mon_data_avail_warn', '5']
         )
-        # Wait a bit for the change to take effect
+        # Restart for the change to take effect
+        run_command(
+            ['docker', 'restart', 'dd-test-ceph']
+        )
         condition = CheckDockerLogs(compose_file, 'Cluster is now healthy')
         condition()
         yield BASIC_CONFIG, E2E_METADATA
