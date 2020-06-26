@@ -17,8 +17,6 @@
   "public_title": "Datadog-Flink Integration",
   "categories": [
     "processing",
-    "data streams",
-    "dataflow",
     "log collection"
   ],
   "type": "check",

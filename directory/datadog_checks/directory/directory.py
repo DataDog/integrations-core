@@ -2,11 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from fnmatch import fnmatch
-from os.path import abspath, exists, join, relpath
-from re import compile as re_compile
+from os.path import exists, join, relpath
 from time import time
+from typing import Any
 
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.directory.config import DirectoryConfig
 
 from .traverse import walk
 
@@ -32,81 +33,39 @@ class DirectoryCheck(AgentCheck):
     """
 
     SOURCE_TYPE_NAME = 'system'
-    MAX_FILEGAUGE_COUNT = 20
 
-    def check(self, instance):
-        try:
-            directory = instance['directory']
-        except KeyError:
-            raise ConfigurationError('DirectoryCheck: missing `directory` in config')
+    def __init__(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
+        super(DirectoryCheck, self).__init__(*args, **kwargs)
 
-        abs_directory = abspath(directory)
-        name = instance.get('name', directory)
-        pattern = instance.get('pattern')
-        exclude_dirs = instance.get('exclude_dirs', [])
-        exclude_dirs_pattern = re_compile('|'.join(exclude_dirs)) if exclude_dirs else None
-        dirs_patterns_full = is_affirmative(instance.get('dirs_patterns_full', False))
-        recursive = is_affirmative(instance.get('recursive', False))
-        dirtagname = instance.get('dirtagname', 'name')
-        filetagname = instance.get('filetagname', 'filename')
-        filegauges = is_affirmative(instance.get('filegauges', False))
-        countonly = is_affirmative(instance.get('countonly', False))
-        ignore_missing = is_affirmative(instance.get('ignore_missing', False))
-        follow_symlinks = is_affirmative(instance.get('follow_symlinks', True))
-        custom_tags = instance.get('tags', [])
-        max_filegauge_count = instance.get('max_filegauge_count', self.MAX_FILEGAUGE_COUNT)
+        self.config = DirectoryConfig(self.instance)
 
-        if not exists(abs_directory):
+    def check(self, _):
+        if not exists(self.config.abs_directory):
             msg = (
                 "Either directory '{}' doesn't exist or the Agent doesn't "
-                "have permissions to access it, skipping.".format(abs_directory)
+                "have permissions to access it, skipping.".format(self.config.abs_directory)
             )
 
-            if not ignore_missing:
+            if not self.config.ignore_missing:
                 raise ConfigurationError(msg)
 
             self.log.warning(msg)
 
-        self._get_stats(
-            abs_directory,
-            name,
-            dirtagname,
-            filetagname,
-            filegauges,
-            pattern,
-            exclude_dirs_pattern,
-            dirs_patterns_full,
-            recursive,
-            follow_symlinks,
-            countonly,
-            custom_tags,
-            max_filegauge_count,
-        )
+        self._get_stats()
 
-    def _get_stats(
-        self,
-        directory,
-        name,
-        dirtagname,
-        filetagname,
-        filegauges,
-        pattern,
-        exclude_dirs_pattern,
-        dirs_patterns_full,
-        recursive,
-        follow_symlinks,
-        countonly,
-        tags,
-        max_filegauge_count,
-    ):
-        dirtags = ['{}:{}'.format(dirtagname, name)]
-        dirtags.extend(tags)
+    def _get_stats(self):
+        dirtags = ['{}:{}'.format(self.config.dirtagname, self.config.name)]
+        dirtags.extend(self.config.tags)
         directory_bytes = 0
         directory_files = 0
-        max_filegauge_balance = max_filegauge_count
+        max_filegauge_balance = self.config.max_filegauge_count
 
         # If we do not want to recursively search sub-directories only get the root.
-        walker = walk(directory, follow_symlinks) if recursive else (next(walk(directory, follow_symlinks)),)
+        walker = walk(self.config.abs_directory, self.config.follow_symlinks)
+        if not self.config.recursive:
+            # Only visit the first directory.
+            walker = [next(walker)]
 
         # Avoid repeated global lookups.
         get_length = len
@@ -115,20 +74,22 @@ class DirectoryCheck(AgentCheck):
             matched_files = []
             adjust_max_filegauge = False
 
-            if exclude_dirs_pattern is not None:
-                if dirs_patterns_full:
-                    dirs[:] = [d for d in dirs if not exclude_dirs_pattern.search(d.path)]
+            if self.config.exclude_dirs_pattern is not None:
+                if self.config.dirs_patterns_full:
+                    dirs[:] = [d for d in dirs if not self.config.exclude_dirs_pattern.search(d.path)]
                 else:
-                    dirs[:] = [d for d in dirs if not exclude_dirs_pattern.search(d.name)]
+                    dirs[:] = [d for d in dirs if not self.config.exclude_dirs_pattern.search(d.name)]
 
-            if pattern is not None:
+            if self.config.pattern is not None:
                 # Check if the path of the file relative to the directory
                 # matches the pattern. Also check if the absolute path of the
                 # filename matches the pattern, for compatibility with previous
                 # agent versions.
                 for file_entry in files:
                     filename = join(root, file_entry.name)
-                    if fnmatch(filename, pattern) or fnmatch(relpath(filename, directory), pattern):
+                    if fnmatch(filename, self.config.pattern) or fnmatch(
+                        relpath(filename, self.config.abs_directory), self.config.pattern
+                    ):
                         matched_files.append(file_entry)
             else:
                 matched_files = list(files)
@@ -137,20 +98,20 @@ class DirectoryCheck(AgentCheck):
             directory_files += matched_files_length
 
             # We're just looking to count the files.
-            if countonly:
+            if self.config.countonly:
                 continue
 
             for file_entry in matched_files:
                 try:
-                    file_stat = file_entry.stat()
+                    file_stat = file_entry.stat(follow_symlinks=self.config.stat_follow_symlinks)
 
                 except OSError as ose:
                     self.warning('DirectoryCheck: could not stat file %s - %s', join(root, file_entry.name), ose)
                 else:
                     # file specific metrics
                     directory_bytes += file_stat.st_size
-                    if filegauges and matched_files_length <= max_filegauge_balance:
-                        filetags = ['{}:{}'.format(filetagname, join(root, file_entry.name))]
+                    if self.config.filegauges and matched_files_length <= max_filegauge_balance:
+                        filetags = ['{}:{}'.format(self.config.filetagname, join(root, file_entry.name))]
                         filetags.extend(dirtags)
                         self.gauge('system.disk.directory.file.bytes', file_stat.st_size, tags=filetags)
                         self.gauge(
@@ -175,5 +136,5 @@ class DirectoryCheck(AgentCheck):
         self.gauge('system.disk.directory.files', directory_files, tags=dirtags)
 
         # total file size
-        if not countonly:
+        if not self.config.countonly:
             self.gauge('system.disk.directory.bytes', directory_bytes, tags=dirtags)

@@ -485,7 +485,12 @@ def test_discovery_tags():
     discover_instances(check._config, 0, weakref.ref(check))
 
     config = check._config.discovered_instances['192.168.0.2']
-    assert set(config.tags) == {'snmp_device:192.168.0.2', 'test:check', 'snmp_profile:generic-router'}
+    assert set(config.tags) == {
+        'snmp_device:192.168.0.2',
+        'test:check',
+        'snmp_profile:generic-router',
+        'autodiscovery_subnet:192.168.0.0/29',
+    }
 
 
 @mock.patch("datadog_checks.snmp.snmp.read_persistent_cache")
@@ -504,7 +509,7 @@ def test_cache_loading_tags(thread_mock, read_mock):
     check._start_discovery()
 
     config = check._config.discovered_instances['192.168.0.2']
-    assert set(config.tags) == {'snmp_device:192.168.0.2', 'test:check'}
+    assert set(config.tags) == {'autodiscovery_subnet:192.168.0.0/29', 'test:check', 'snmp_device:192.168.0.2'}
 
 
 def test_failed_to_collect_metrics():

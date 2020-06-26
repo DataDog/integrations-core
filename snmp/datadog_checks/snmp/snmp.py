@@ -132,6 +132,17 @@ class SnmpCheck(AgentCheck):
             loader=loader,
         )
 
+    def _build_autodiscovery_config(self, source_instance, ip_address):
+        # type: (dict, str) -> InstanceConfig
+        instance = copy.deepcopy(source_instance)
+        network_address = instance.pop('network_address')
+        instance['ip_address'] = ip_address
+
+        instance.setdefault('tags', [])
+        instance['tags'].append('autodiscovery_subnet:{}'.format(network_address))
+
+        return self._build_config(instance)
+
     def _get_instance_name(self, instance):
         # type: (Dict[str, Any]) -> Optional[str]
         name = instance.get('name')
@@ -292,12 +303,7 @@ class SnmpCheck(AgentCheck):
                 except ValueError:
                     write_persistent_cache(self.check_id, json.dumps([]))
                     break
-                instance = copy.deepcopy(self.instance)
-                instance.pop('network_address')
-                instance['ip_address'] = host
-
-                host_config = self._build_config(instance)
-                self._config.discovered_instances[host] = host_config
+                self._config.discovered_instances[host] = self._build_autodiscovery_config(self.instance, host)
 
         raw_discovery_interval = self._config.instance.get('discovery_interval', 3600)
         try:
@@ -383,6 +389,12 @@ class SnmpCheck(AgentCheck):
                 error = 'Failed to collect metrics for {} - {}'.format(self._get_instance_name(instance), e)
             self.warning(error)
         finally:
+            # At this point, `tags` might include some extra tags added in try clause
+
+            # Sending `snmp.devices_monitored` with value 1 will allow users to count devices
+            # by using `sum by {X}` queries in UI. X being a tag like `autodiscovery_subnet`, `snmp_profile`, etc
+            self.gauge('snmp.devices_monitored', 1, tags=tags)
+
             # Report service checks
             status = self.OK
             if error:

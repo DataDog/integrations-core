@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import logging
 import subprocess
 from os import environ
 
@@ -215,6 +216,26 @@ def _test_optional_metrics(aggregator, optional_metrics, at_least):
     after = len(aggregator.not_asserted())
 
     assert before - after > at_least
+
+
+@pytest.mark.unit
+def test_innodb_status_unicode_error(caplog):
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{}])
+
+    class MockCursor:
+        def execute(self, command):
+            raise UnicodeDecodeError('encoding', b'object', 0, 1, command)
+
+        def close(self):
+            return MockCursor()
+
+    class MockDatabase:
+        def cursor(self):
+            return MockCursor()
+
+    caplog.at_level(logging.WARNING)
+    assert mysql_check._get_stats_from_innodb_status(MockDatabase()) == {}
+    assert 'Unicode error while getting INNODB status' in caplog.text
 
 
 @pytest.mark.unit
