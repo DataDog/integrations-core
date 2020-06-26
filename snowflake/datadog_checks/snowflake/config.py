@@ -42,3 +42,15 @@ class Config(object):
 
         if is_affirmative(passcode_in_password) and passcode is None:
             raise ConfigurationError('MFA enabled, please specify a passcode')
+
+        self.account = account # type: str
+        self.user = user # type: str
+        self.password = password # type: str
+        self.role = role # type: Optional[str]
+        self.warehouse = warehouse # type: Optional[str]
+        self.passcode_in_password = passcode_in_password # type: bool
+        self.passcode = passcode # type: Optional[str]
+        self.client_prefetch_threads = client_prefetch_threads # type: int
+        self.login_timeout = login_timeout # type: int
+        self.ocsp_response_cache_filename = ocsp_response_cache_filename # type: Optional[str]
+        self.tags = tags # type: List[str]
