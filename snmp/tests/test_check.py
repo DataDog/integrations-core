@@ -202,7 +202,7 @@ def test_table(aggregator):
 
 
 def test_table_regex_match(aggregator):
-    config = [
+    metrics = [
         {
             'MIB': "IF-MIB",
             'table': "ifTable",
@@ -215,7 +215,7 @@ def test_table_regex_match(aggregator):
     ]
     common_tags = ['snmp_device:localhost']
 
-    instance = common.generate_instance_config(config)
+    instance = common.generate_instance_config(metrics)
     check = common.create_check(instance)
 
     check.check(instance)
