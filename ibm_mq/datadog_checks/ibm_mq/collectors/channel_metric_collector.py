@@ -4,7 +4,7 @@
 
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
+from datadog_checks.base import AgentCheck, to_native_string
 
 from .. import metrics
 
@@ -45,7 +45,7 @@ class ChannelMetricCollector(object):
         self.gauge = gauge
 
     def get_pcf_channel_metrics(self, queue_manager):
-        args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes('*')}
+        args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ensure_bytes('*')}
         try:
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_CHANNEL(args)
@@ -57,7 +57,7 @@ class ChannelMetricCollector(object):
             self.gauge(mname, channels, tags=self.config.tags_no_channel)
 
             for channel_info in response:
-                channel_name = ensure_unicode(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
+                channel_name = to_native_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
                 channel_tags = self.config.tags_no_channel + ["channel:{}".format(channel_name)]
 
                 self._submit_metrics_from_properties(channel_info, metrics.channel_metrics(), channel_tags)
@@ -83,7 +83,7 @@ class ChannelMetricCollector(object):
         channels_to_skip = channels_to_skip or []
         search_channel_tags = tags + ["channel:{}".format(search_channel_name)]
         try:
-            args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: ensure_bytes(search_channel_name)}
+            args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ensure_bytes(search_channel_name)}
             pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(args)
             self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.OK, search_channel_tags)
@@ -95,7 +95,7 @@ class ChannelMetricCollector(object):
                 self.log.warning("Error getting CHANNEL status for channel %s: %s", search_channel_name, e)
         else:
             for channel_info in response:
-                channel_name = ensure_unicode(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
+                channel_name = to_native_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
                 if channel_name in channels_to_skip:
                     continue
                 channel_tags = tags + ["channel:{}".format(channel_name)]
