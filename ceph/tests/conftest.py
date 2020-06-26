@@ -3,10 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+import time
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, run_command
 from datadog_checks.dev.conditions import CheckDockerLogs
 
 from .common import BASIC_CONFIG, HERE
@@ -31,4 +32,10 @@ def dd_environment():
             CheckDockerLogs(compose_file, 'Running on http://0.0.0.0:5000/'),
         ],
     ):
+        # Clean the disk space warning
+        run_command(
+            ['docker', 'exec', 'dd-test-ceph', 'ceph', 'tell', 'mon.*', 'injectargs', '--mon_data_avail_warn', '5']
+        )
+        # Wait a bit for the change to take effect
+        time.sleep(5)
         yield BASIC_CONFIG, E2E_METADATA
