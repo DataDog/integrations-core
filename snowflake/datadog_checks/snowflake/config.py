@@ -5,8 +5,6 @@ from typing import List, Optional
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
-from .types import Instance
-
 
 class Config(object):
     """
@@ -15,7 +13,6 @@ class Config(object):
     """
 
     def __init__(self, instance=None):
-        # type: (Instance) -> None
         if instance is None:
             instance = {}
 
