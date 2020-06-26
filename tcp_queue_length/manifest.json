@@ -4,7 +4,7 @@
   "metric_prefix": "tcp_queue.",
   "metric_to_check": "tcp_queue.rqueue.size",
   "name": "tcp_queue_length",
-  "short_description": "Track the size of the TCP buffers with Datadog",
+  "short_description": "Track the size of the TCP buffers with Datadog.",
   "guid": "0468b098-43bd-4157-8a01-14065cfdcb7b",
   "support": "core",
   "supported_os": [
