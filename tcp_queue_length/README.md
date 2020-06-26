@@ -24,7 +24,7 @@ yum install -y kernel-headers-$(uname -r)
 
 ### Configuration
 
-Enabling it requires to enable it both for `system-probe` and the core agent.
+Enabling the `tcp_queue_length` integration requires both the `system-probe` and the core agent to have the configuration option enabled.
 
 Inside the `system-probe.yaml` configuration file, the following parameter must be set:
 ```yaml
