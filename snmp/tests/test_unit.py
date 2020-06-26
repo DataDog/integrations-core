@@ -149,7 +149,6 @@ def test_parse_metrics(lcd_mock):
     assert column_tag.column == 'baz'
     assert column_tag.parsed_metric_tag.name == 'test'
     assert isinstance(bar, ParsedTableMetric)
-    assert isinstance(bar, ParsedTableMetric)
     assert bar.name == 'bar'
     column_tag = bar.column_tags[0]
     assert column_tag.column == 'baz'
