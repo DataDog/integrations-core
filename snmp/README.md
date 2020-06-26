@@ -34,24 +34,21 @@ Regardless of the collection strategy, you can leverage Datadog's [`sysObjectID`
 
 The easiest way to get started with the SNMP integration is to point it at the IP address of an SNMP device.
 
-For a minimal setup, we'll use the `generic-router` profile. It collects generic metrics exposed by most network devices (such as ones in `IF-MIB`, `IP-MIB`, etc).
-
 For SNMPv2 devices:
 
-1. Configure an instance specifying i) the IP address of the device, ii) the `community` string of the device, and iii) the `generic-router` profile:
+1. Configure an instance specifying i) the IP address of the device, ii) the `community` string of the device:
 
     ```yaml
     instances:
       - ip_address: "<IP_ADDRESS>"
         community: "<COMMUNITY>"
-        profile: generic-router
     ```
 
 2. [Restart the Agent][31].
 
 For SNMPv3 devices:
 
-1. Configure an instance specifying i) the IP address of the device, ii) SNMPv3 credentials of the device, i.e. `user` and any of `auth_protocol`, `auth_key`, `priv_protocol`, and `priv_key` (as appropriate for your device), and iii) the `generic-router` profile:
+1. Configure an instance specifying i) the IP address of the device, ii) SNMPv3 credentials of the device, i.e. `user` and any of `auth_protocol`, `auth_key`, `priv_protocol`, and `priv_key` (as appropriate for your device):
 
     ```yaml
     instances:
@@ -62,22 +59,22 @@ For SNMPv3 devices:
         # authKey: "<AUTH_KEY>"
         # privProtocol: AES
         # privKey: "<PRIV_KEY>"
-        profile: generic-router
     ```
 
 2. [Restart the Agent][31].
 
+The Agent will then start collecting relevant metrics by matching your device against one of [Datadog's out-of-the-box device profiles](#metric-definition-by-profile).
+
 Once metrics are reporting, you can expand your setup in various ways:
 
-* Use a more specific [`sysObjectID` mapped device profile](#sysobjectid-mapped-device-profiles) to collect metrics specific to your device.
 * Add more instances to collect metrics from more devices on your network.
 * Consider using [Autodiscovery](#autodiscovery) if you need to collect metrics from lots of devices across a dynamic network.
 
 #### Autodiscovery
 
-As the number of devices to collect metrics from grows, individual device configuration can become tedious. You may also want to configure your SNMP integration so that it automatically discovers new devices added to your network, or stops monitoring devices that were removed from the network.
+As an alternative to specifying individual devices, you can use autodiscovery to automatically discover all the devices on your network.
 
-Autodiscovery addresses these use cases by prodiving a way to automatically discover devices and [map them](#sysobjectid-mapped-device-profiles) to device profiles based on their `sysObjectID`.
+Autodiscovery will poll each IP on the configured subnet, and check for a response from the SNMP device. The Datadog Agent will then lookup the `sysObjectID` of the discovered device, and map it to one of [Datadog's out-of-the-box device profiles](#metric-definition-by-profile), which consist of lists of predefined metrics to be collected for various types of devices.
 
 To use Autodiscovery with the SNMP check:
 
@@ -178,7 +175,7 @@ If necessary, additional metrics can be defined in the instances. These metrics 
 
 Profiles can be used interchangeably, such that devices that share MIB dependencies can reuse the same profiles. For example, the Cisco c3850 profile can be used across many Cisco switches.
 
-* [Generic router][7]
+* [Generic router][7] _(Default profile in case no other profile matches)_
 * [Cisco ASA 5525][8]
 * [Cisco c3850][9]
 * [Cisco Nexus][10]
