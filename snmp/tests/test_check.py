@@ -233,7 +233,7 @@ def test_table_regex_match(aggregator):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_resolved_table(aggregator):
