@@ -120,10 +120,15 @@ def test_parse_metrics(lcd_mock):
     foo, bar = parsed_metrics
     assert isinstance(foo, ParsedTableMetric)
     assert foo.name == 'foo'
-    assert foo.index_tags == [('test', '1')]
+    assert len(foo.index_tags) == 1
+    index_tag = foo.index_tags[0]
+    assert index_tag.index == '1'
+    assert index_tag.parsed_metric_tag.name == 'test'
     assert isinstance(bar, ParsedTableMetric)
     assert bar.name == 'bar'
-    assert bar.index_tags == [('test', '1')]
+    index_tag = bar.index_tags[0]
+    assert index_tag.index == '1'
+    assert index_tag.parsed_metric_tag.name == 'test'
 
     # MIB with table, symbols, metrics_tags column
     metrics = [
@@ -140,10 +145,14 @@ def test_parse_metrics(lcd_mock):
     foo, bar = parsed_metrics
     assert isinstance(foo, ParsedTableMetric)
     assert foo.name == 'foo'
-    assert foo.column_tags == [('test', 'baz')]
+    column_tag = foo.column_tags[0]
+    assert column_tag.column == 'baz'
+    assert column_tag.parsed_metric_tag.name == 'test'
     assert isinstance(bar, ParsedTableMetric)
     assert bar.name == 'bar'
-    assert bar.column_tags == [('test', 'baz')]
+    column_tag = bar.column_tags[0]
+    assert column_tag.column == 'baz'
+    assert column_tag.parsed_metric_tag.name == 'test'
 
     # MIB with table, symbols, metrics_tags column with OID
     metrics = [
@@ -160,10 +169,14 @@ def test_parse_metrics(lcd_mock):
     foo, bar = parsed_metrics
     assert isinstance(foo, ParsedTableMetric)
     assert foo.name == 'foo'
-    assert foo.column_tags == [('test', 'baz')]
+    column_tag = foo.column_tags[0]
+    assert column_tag.column == 'baz'
+    assert column_tag.parsed_metric_tag.name == 'test'
     assert isinstance(bar, ParsedTableMetric)
     assert bar.name == 'bar'
-    assert foo.column_tags == [('test', 'baz')]
+    column_tag = bar.column_tags[0]
+    assert column_tag.column == 'baz'
+    assert column_tag.parsed_metric_tag.name == 'test'
 
 
 def test_ignore_ip_addresses():

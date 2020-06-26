@@ -5,7 +5,11 @@
 Containers from parsed metrics data.
 """
 
-from typing import Any, Dict, Iterator, List, Pattern, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Pattern, Union
+
+if TYPE_CHECKING:
+    # needed to avoid circular import
+    from .metrics import ColumnTag, IndexTag
 
 
 class ParsedSymbolMetric(object):
@@ -31,8 +35,8 @@ class ParsedTableMetric(object):
     def __init__(
         self,
         name,  # type: str
-        index_tags,  # type: List[Tuple[str, int]]
-        column_tags,  # type: List[Tuple[str, str]]
+        index_tags,  # type: List[IndexTag]
+        column_tags,  # type: List[ColumnTag]
         forced_type=None,  # type: str
     ):
         # type: (...) -> None
@@ -46,12 +50,11 @@ ParsedMetric = Union[ParsedSymbolMetric, ParsedTableMetric]
 
 
 class ParsedSimpleMetricTag(object):
-    __slots__ = ('name', 'symbol')
+    __slots__ = ('name',)
 
-    def __init__(self, name, symbol):
-        # type: (str, str) -> None
+    def __init__(self, name):
+        # type: (str) -> None
         self.name = name
-        self.symbol = symbol
 
     def matched_tags(self, value):
         # type: (Any) -> Iterator[str]
@@ -61,10 +64,9 @@ class ParsedSimpleMetricTag(object):
 class ParsedMatchMetricTag(object):
     __slots__ = ('tags', 'symbol', 'pattern')
 
-    def __init__(self, tags, symbol, pattern):
-        # type: (Dict[str, str], str, Pattern) -> None
+    def __init__(self, tags, pattern):
+        # type: (Dict[str, str], Pattern) -> None
         self.tags = tags
-        self.symbol = symbol
         self.pattern = pattern
 
     def matched_tags(self, value):
