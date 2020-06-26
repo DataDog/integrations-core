@@ -17,6 +17,11 @@ HOST = get_docker_hostname()
     "cassandra.total_blocked_tasks",
 """
 
+# For some reason, those two metrics are not provided by cassandra.
+CASSANDRA_JVM_METRICS_NOT_PRESENT = {'jvm.gc.cms.count', 'jvm.gc.parnew.time'}
+
+CASSANDRA_JVM_E2E_METRICS = list(set(JVM_E2E_METRICS) - CASSANDRA_JVM_METRICS_NOT_PRESENT)
+
 CASSANDRA_E2E_METRICS = [
     "cassandra.bloom_filter_false_ratio",
     "cassandra.bytes_flushed.count",
@@ -84,4 +89,4 @@ CASSANDRA_E2E_METRICS = [
     "cassandra.write_latency.95th_percentile",
     "cassandra.write_latency.99th_percentile",
     "cassandra.write_latency.one_minute_rate",
-] + JVM_E2E_METRICS
+] + CASSANDRA_JVM_E2E_METRICS
