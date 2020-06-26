@@ -54,7 +54,7 @@ INSTANCE_METADATA = {
     'queues': [QUEUE],
     'channels': [CHANNEL, BAD_CHANNEL],
     'tags': ['foo:bar'],
-    'custom_version_cmd': 'docker exec ibm_mq dspmqver',
+    'version_output_cmd': 'docker exec ibm_mq dspmqver',
 }
 
 INSTANCE_WITH_CONNECTION_NAME = {
@@ -98,7 +98,7 @@ INSTANCE_COLLECT_ALL = {
     'password': PASSWORD,
     'auto_discover_queues': True,
     'channels': [CHANNEL, BAD_CHANNEL],
-    'custom_version_cmd': 'docker exec ibm_mq dspmqver',
+    'version_output_cmd': 'docker exec ibm_mq dspmqver',
 }
 
 INSTANCE_QUEUE_REGEX_TAG = {
