@@ -26,7 +26,7 @@ def test_check(aggregator, check, instance):
     for gauge in common.GAUGE_OTHER:
         aggregator.assert_metric(gauge, count=1)
 
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.usefixtures('dd_environment')

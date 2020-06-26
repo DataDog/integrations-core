@@ -15,7 +15,7 @@ def test_bad_ping_reply(check, instance, aggregator, ping_url_tag):
     check.check(instance)
 
     aggregator.assert_service_check('php_fpm.can_ping', status=check.CRITICAL, tags=expected_tags)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_status(check, instance, aggregator, ping_url_tag):

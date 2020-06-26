@@ -26,4 +26,4 @@ def test_e2e(dd_agent_check):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()

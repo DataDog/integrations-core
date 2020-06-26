@@ -57,7 +57,7 @@ def _assert_check(aggregator):
             'kong.can_connect', status=Kong.OK, tags=['kong_host:localhost', 'kong_port:8001'] + expected_tags, count=1
         )
 
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -68,4 +68,4 @@ def test_connection_failure(aggregator, check):
         'kong.can_connect', status=Kong.CRITICAL, tags=['kong_host:localhost', 'kong_port:1111'], count=1
     )
 
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import logging
 from collections import OrderedDict, defaultdict
 
 from six import iteritems
@@ -11,6 +12,7 @@ from ..utils.common import ensure_unicode, to_native_string
 from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
 from .similar import build_similar_elements_msg
 
+log = logging.getLogger(__name__)
 
 def normalize_tags(tags, sort=False):
     # The base class ensures the Agent receives bytes in PY2 and unicode in PY3.
@@ -419,6 +421,10 @@ class AggregatorStub(object):
         self._events = []
 
     def all_metrics_asserted(self):
+        """
+        Deprecated, use `assert_all_metrics_covered` instead.
+        """
+        log.warning("`AggregatorStub.all_metrics_asserted` is deprecated. Used `assert_all_metrics_covered` instead.")
         assert self.metrics_asserted_pct >= 100.0
 
     def not_asserted(self):

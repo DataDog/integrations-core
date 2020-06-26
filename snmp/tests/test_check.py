@@ -63,7 +63,7 @@ def test_type_support(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_transient_error(aggregator):
@@ -103,7 +103,7 @@ def test_snmpget(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_custom_mib(aggregator):
@@ -141,7 +141,7 @@ def test_scalar(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_enforce_constraint(aggregator):
@@ -176,7 +176,7 @@ def test_unenforce_constraint(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_table(aggregator):
@@ -203,7 +203,7 @@ def test_table(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_resolved_table(aggregator):
@@ -225,7 +225,7 @@ def test_resolved_table(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_table_v3_MD5_DES(aggregator):
@@ -265,7 +265,7 @@ def test_table_v3_MD5_DES(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_table_v3_MD5_AES(aggregator):
@@ -305,7 +305,7 @@ def test_table_v3_MD5_AES(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_table_v3_SHA_DES(aggregator):
@@ -344,7 +344,7 @@ def test_table_v3_SHA_DES(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_table_v3_SHA_AES(aggregator):
@@ -383,7 +383,7 @@ def test_table_v3_SHA_AES(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_bulk_table(aggregator):
@@ -413,7 +413,7 @@ def test_bulk_table(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_invalid_metric(aggregator):
@@ -449,7 +449,7 @@ def test_forcedtype_metric(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_invalid_forcedtype_metric(aggregator):
@@ -486,7 +486,7 @@ def test_scalar_with_tags(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_network_failure(aggregator):
@@ -505,7 +505,7 @@ def test_network_failure(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_cast_metrics(aggregator):
@@ -518,7 +518,7 @@ def test_cast_metrics(aggregator):
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_profile(aggregator):
@@ -640,7 +640,7 @@ def test_profile_sys_object_unknown(aggregator, caplog):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.CRITICAL, tags=common.CHECK_TAGS, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
     # Via network discovery...
 
@@ -817,7 +817,7 @@ def test_metric_tag_symbol(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_metric_tag_oid(aggregator):
@@ -839,7 +839,7 @@ def test_metric_tag_oid(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_metric_tag_profile_manual(aggregator):
@@ -866,7 +866,7 @@ def test_metric_tag_profile_manual(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_metric_tag_profile_sysoid(aggregator):
@@ -893,7 +893,7 @@ def test_metric_tag_profile_sysoid(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_metric_tags_misconfiguration():
@@ -975,7 +975,7 @@ def test_metric_tag_matching(aggregator):
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=tags, at_least=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_timeout(aggregator, caplog):
@@ -997,7 +997,7 @@ def test_timeout(aggregator, caplog):
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     common.assert_common_metrics(aggregator)
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
     for record in caplog.records:
         if "No SNMP response received before timeout" in record.message:

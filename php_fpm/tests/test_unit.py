@@ -30,7 +30,7 @@ def test_bad_ping(aggregator):
     aggregator.assert_service_check(
         'php_fpm.can_ping', status=check.CRITICAL, tags=['ping_url:http://foo:9001/ping', 'some_tag']
     )
-    aggregator.all_metrics_asserted()
+    aggregator.assert_all_metrics_covered()
 
 
 def test_should_not_retry(check, instance):
