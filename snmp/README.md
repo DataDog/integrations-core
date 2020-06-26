@@ -21,7 +21,7 @@ The SNMP check is included in the [Datadog Agent][1] package. No additional inst
 
 Edit the configuration options in the `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample snmp.d/conf.yaml][3] for all available configuration options.
 
-The Datadog SNMP check supports collecting metrics from individual devices, or auto-discovering devices on entire subnets.
+The Datadog SNMP check supports collecting metrics from individual devices, or auto-discovering devices (unique IP addresses) on entire subnets.
 
 Which collection strategy to choose mainly depends on how many devices are present on your network, and how dynamic the network is (i.e. how frequently devices are added or removed):
 
