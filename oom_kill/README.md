@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors the kernel OOM kill process through the Datadog Agent and the System Probe.
+This check monitors the kernel OOM (out of memory) kill process through the Datadog Agent and the System Probe.
 
 ## Setup
 
