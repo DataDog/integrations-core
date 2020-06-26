@@ -476,24 +476,26 @@ class VSphereCheck(AgentCheck):
 
         return cluster_mors
 
-    def addClusterUuid(self,instance,cluster_name):
+    def addClusterUuid(self,instance,cluster_mor,cluster_name):
         i_key = self._instance_key(instance)
         cluster_cache = self.cache_uuids[i_key].get(vim.ClusterComputeResource)
-        if cluster_name:
-            cluster_uuid = cluster_cache.get(cluster_name,None)
-            if cluster_uuid is None:
+        cluster_uuid = cluster_cache.get(cluster_mor,None)
+        if cluster_uuid is None:
+            if cluster_name:
                 try:
-                    cluster_name_bytes = cluster_name.encode('utf-8')
-                    cluster_uuid = str(uuid.uuid5(uuid.NAMESPACE_OID, cluster_name_bytes))
-                    cluster_cache.update({cluster_name : cluster_uuid})
-                    self.log.debug(u"Added uuid : %s for cluster : %s",cluster_uuid,cluster_name)
+                    cluster_id = i_key + cluster_name
+                    cluster_id_bytes = cluster_id.encode('utf-8')
+                    cluster_uuid = str(uuid.uuid5(uuid.NAMESPACE_OID, cluster_id_bytes))
+
                 except UnicodeError:
                     self.log.warning(u"Unable to generate uuid for cluster %s",cluster_name)
-                    pass
+                else:
+                    cluster_cache.update({cluster_mor : cluster_uuid})
+                    self.log.debug(u"Added uuid : %s for cluster : %s",cluster_uuid,cluster_name)
             else:
-                self.log.debug(u"uuid already added for cluster %s",cluster_name)
+                self.log.warning(u"unable to add uuid for empty cluster name")
         else:
-            self.log.warning(u"unable to add uuid for empty cluster name")
+            self.log.debug(u"uuid already added for cluster %s",cluster_name)
 
     def getClustersToMonitor(self,instance):
         i_key = self._instance_key(instance)
@@ -510,8 +512,8 @@ class VSphereCheck(AgentCheck):
                     for vcenter_cluster in vcenter_clusters:
                         cluster_mor = cluster_mors.get(vcenter_cluster)
                         if cluster_mor:
+                            self.addClusterUuid(instance,cluster_mor,vcenter_cluster)
                             monitor_clusters.append(cluster_mor)
-                            self.addClusterUuid(instance,vcenter_cluster)
                         else:
                             self.log.warning("Invalid cluster name %s",vcenter_cluster)
 
@@ -739,37 +741,40 @@ class VSphereCheck(AgentCheck):
 
         def getDatastoreUuid(mor,properties,datastore_cache):
             ds_uuid = None
-            mor_name = str(mor)
+            ds_name = properties.get('name','')
             ds_type = properties.get("summary.type")
             ds_info = properties.get("info")
-            if mor_name and ds_type and ds_info is not None:
+            if ds_type and ds_info is not None:
                 if ds_type == "VMFS":
                     if ds_info.vmfs is not None:
                         ds_uuid = ds_info.vmfs.uuid
                 elif ds_type == "NFS":
-                    ds_uuid = datastore_cache.get(mor_name,None)
+                    ds_uuid = datastore_cache.get(mor,None)
                     if ds_uuid is None:
-                        ds_id = mor_name + ":" + ds_info.url
+                        mor_name = str(mor)
+                        ds_id = mor_name + ds_info.url
                         try:
                             ds_id_bytes = ds_id.encode('utf-8')
                             ds_uuid = str(uuid.uuid5(uuid.NAMESPACE_OID, ds_id_bytes))
-                            datastore_cache.update({mor_name : ds_uuid})
+
                         except UnicodeError:
-                            self.log.warning(u"Unable to generate uuid for datastore %s",mor_name)
-                            ds_uuid = ""
-                            pass
+                            self.log.warning(u"Unable to generate uuid for datastore %s",ds_name)
+                            ds_uuid = None
+                        else:
+                            datastore_cache.update({mor : ds_uuid})
+                            self.log.debug(u"uuid %s generated for datastore %s",ds_uuid,ds_name)
+
                     else:
-                        self.log.debug(u"uuid found for datastore %s",mor_name)
+                        self.log.debug(u"uuid found for datastore %s",ds_name)
                 else:
                     self.log.debug(u"Unsupported filesystem volume type : %s",ds_type)
 
             return ds_uuid
 
-        def getClusterUuid(properties,cluster_cache):
+        def getClusterUuid(cluster_mor,cluster_name,cluster_cache):
             cluster_uuid = None
-            cluster_name = properties.get("name")
-            if cluster_name and cluster_cache:
-                cluster_uuid = cluster_cache.get(cluster_name,None)
+            if cluster_mor and cluster_cache:
+                cluster_uuid = cluster_cache.get(cluster_mor,None)
                 if cluster_uuid:
                     self.log.debug(u"uuid found for cluster %s",cluster_name)
 
@@ -867,7 +872,7 @@ class VSphereCheck(AgentCheck):
                             hostname = None
                             entity_type = "cluster"
                             cluster_cache = uuid_cache.get(vim.ClusterComputeResource,{})
-                            entity_id = getClusterUuid(properties,cluster_cache)
+                            entity_id = getClusterUuid(mor,properties.get("name",''),cluster_cache)
 
                         if entity_type and entity_id:
                             if vsphere_type:
