@@ -69,7 +69,7 @@ For SNMPv3 devices:
 
 Once metrics are reporting, you can expand your setup in various ways:
 
-* Use a more specific [`sysObjectID` mapped device profile](#sysobjectid-mapped-device-profiles) to collect metrics specific to your device make and model.
+* Use a more specific [`sysObjectID` mapped device profile](#sysobjectid-mapped-device-profiles) to collect metrics specific to your device.
 * Add more instances to collect metrics from more devices on your network.
 * Consider using [Autodiscovery](#autodiscovery) if you need to collect metrics from lots of devices across a dynamic network.
 
