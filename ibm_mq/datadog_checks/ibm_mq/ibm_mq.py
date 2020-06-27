@@ -89,4 +89,3 @@ class IbmMqCheck(AgentCheck):
                     return line.split()[1]
             except BaseException:
                 return None
-
