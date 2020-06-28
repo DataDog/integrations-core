@@ -33,6 +33,7 @@ class StatsCollector(object):
         self.log.debug("Start stats collection")
         try:
             while True:
+                # TODO: collect only from agent startup
                 bin_message = queue.get()
                 message, header = CustomPCFExecute.unpack(bin_message)
                 if header.Command == MQCMD_STATISTICS_CHANNEL:
