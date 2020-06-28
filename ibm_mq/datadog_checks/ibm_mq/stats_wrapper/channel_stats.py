@@ -1,3 +1,7 @@
+# (C) Datadog, Inc. 2020-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+
 from pymqi.CMQCFC import MQCACH_CHANNEL_NAME, MQGACF_CHL_STATISTICS_DATA, MQIACH_CHANNEL_TYPE, MQIAMO_MSGS
 
 from datadog_checks.base import to_native_string

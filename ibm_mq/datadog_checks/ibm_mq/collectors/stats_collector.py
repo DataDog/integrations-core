@@ -7,7 +7,7 @@ from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_MQI, MQCMD_S
 from datadog_checks.base import AgentCheck
 from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
 
-from ..stats_wrapper.channel_stats import ChannelStats
+from ..stats_wrapper import ChannelStats
 
 try:
     import pymqi
@@ -15,6 +15,7 @@ try:
 except ImportError as e:
     pymqiException = e
     pymqi = None
+
 
 STATISTICS_QUEUE_NAME = 'SYSTEM.ADMIN.STATISTICS.QUEUE'
 

@@ -177,7 +177,7 @@ CHANNEL_STATUS_METRICS = [
     ('ibm_mq.channel.ssl_key_resets', GAUGE),
 ]
 
-CHANNEL_STATS_METRICS = []
+CHANNEL_STATS_METRICS = [('ibm_mq.stats.channel.msgs', GAUGE)]
 
 if IS_CLUSTER:
     CHANNEL_STATUS_METRICS.extend(
@@ -187,7 +187,6 @@ if IS_CLUSTER:
             ('ibm_mq.channel.indoubt_status', GAUGE),
         ]
     )
-    CHANNEL_STATS_METRICS.extend([('ibm_mq.stats.channel.msgs', GAUGE)])
 
 METRICS = (
     [
