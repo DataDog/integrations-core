@@ -5,11 +5,14 @@ import os
 
 import mock
 import pytest
-from datadog_checks.dev.utils import get_metadata_metrics
+from pymqi import MQMIError
+from pymqi.CMQC import MQCC_FAILED, MQRC_NO_MSG_AVAILABLE
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.ibm_mq import IbmMqCheck
+
 from . import common
 from .common import QUEUE_METRICS, assert_all_metrics
 
@@ -190,24 +193,36 @@ def test_channel_stats_metrics(aggregator, instance):
     instance['collect_statistics_metrics'] = True
 
     check = IbmMqCheck('ibm_mq', {}, [instance])
-    check.channel_metric_collector = mock.MagicMock()
-    check.queue_metric_collector = mock.MagicMock()
 
-    with open(os.path.join(common.HERE, 'fixtures', 'statistics_channel.data'), 'rb') as f:
-        statistics_channel = f.read()
+    with open(os.path.join(common.HERE, 'fixtures', 'statistics_channel.data'), 'rb') as channel_file, open(
+        os.path.join(common.HERE, 'fixtures', 'statistics_queue.data'), 'rb'
+    ) as queue_file:
+        channel_data = channel_file.read()
+        queue_data = queue_file.read()
         with mock.patch('datadog_checks.ibm_mq.collectors.stats_collector.Queue') as queue:
-            queue().get.return_value = statistics_channel
-
+            queue().get.side_effect = [
+                channel_data,
+                queue_data,
+                MQMIError(MQCC_FAILED, MQRC_NO_MSG_AVAILABLE),
+            ]
             check.check(instance)
 
-    tags = [
+    channel_tags = [
         'channel:GCP.A',
         'channel_type:clusrcvr',
         'remote_q_mgr_name:QM2',
         'connection_name:192.168.32.2',
     ]
     for metric, metric_type in common.CHANNEL_STATS_METRICS:
-        aggregator.assert_metric(metric, tags=tags)
-        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), tags=tags)
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), tags=channel_tags)
 
+    queue_tags = [
+        'definition_type:local',
+        'queue:SYSTEM.CHLAUTH.DATA.QUEUE',
+        'queue_type:local',
+    ]
+    for metric, metric_type in common.QUEUE_STATS_METRICS:
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), tags=queue_tags)
+
+    assert_all_metrics(aggregator)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

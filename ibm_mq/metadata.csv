@@ -71,3 +71,4 @@ ibm_mq.stats.channel.put_retries,gauge,,message,,"The number of times in the tim
 ibm_mq.stats.channel.full_batches,gauge,,message,,The number of batches processed by the channel that were sent because the value of the channel attributes BATCHSZ or BATCHLIM was reached.,0,ibm_mq,stats chan full batches
 ibm_mq.stats.channel.incomplete_batches,gauge,,message,,"The number of batches processed by the channel, that were sent without the value of the channel attribute BATCHSZ being reached.",0,ibm_mq,stats chan incomplete batches
 ibm_mq.stats.channel.avg_batch_size,gauge,,message,,The average batch size of batches processed by the channel.,0,ibm_mq,stats chan avg batch size
+ibm_mq.stats.queue.q_min_depth,gauge,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth

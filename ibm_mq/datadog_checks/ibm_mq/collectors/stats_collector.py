@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from pymqi.CMQC import MQGMO_NO_WAIT, MQRC_NO_MSG_AVAILABLE
+from pymqi.CMQC import MQRC_NO_MSG_AVAILABLE
 from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_MQI, MQCMD_STATISTICS_Q
 from six import iteritems
 
@@ -35,15 +35,12 @@ class StatsCollector(object):
             while True:
                 bin_message = queue.get()
                 message, header = CustomPCFExecute.unpack(bin_message)
-                print("message", message)
-
                 if header.Command == MQCMD_STATISTICS_CHANNEL:
                     self._collect_channel_stats(message)
                 elif header.Command == MQCMD_STATISTICS_MQI:
                     self.check.log.debug('MQCMD_STATISTICS_MQI not implemented yet')
                 elif header.Command == MQCMD_STATISTICS_Q:
-                    pass
-                    # self._collect_queue_stats(message)
+                    self._collect_queue_stats(message)
                 else:
                     self.check.log.debug('Unknown/NotImplemented command: {}'.format(header.Command))
         except pymqi.MQMIError as err:
