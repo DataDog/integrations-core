@@ -22,9 +22,6 @@ except ImportError as e:
 
 STATISTICS_QUEUE_NAME = 'SYSTEM.ADMIN.STATISTICS.QUEUE'
 
-QUEUE_OPTIONS = 0
-QUEUE_GET_OPTIONS = MQGMO_NO_WAIT
-
 
 class StatsCollector(object):
     def __init__(self, check):
@@ -32,23 +29,21 @@ class StatsCollector(object):
         self.check = check
 
     def collect(self, queue_manager):
-        queue = Queue(queue_manager, STATISTICS_QUEUE_NAME, QUEUE_OPTIONS)
+        queue = Queue(queue_manager, STATISTICS_QUEUE_NAME)
         self.check.log.debug("Start stats collection")
-        get_opts = pymqi.GMO(
-            Options=QUEUE_GET_OPTIONS, Version=pymqi.CMQC.MQGMO_VERSION_2, MatchOptions=pymqi.CMQC.MQMO_MATCH_CORREL_ID
-        )
-        get_md = pymqi.MD()
         try:
             while True:
-                bin_message = queue.get(None, get_md, get_opts)
+                bin_message = queue.get()
                 message, header = CustomPCFExecute.unpack(bin_message)
+                print("message", message)
 
                 if header.Command == MQCMD_STATISTICS_CHANNEL:
                     self._collect_channel_stats(message)
                 elif header.Command == MQCMD_STATISTICS_MQI:
                     self.check.log.debug('MQCMD_STATISTICS_MQI not implemented yet')
                 elif header.Command == MQCMD_STATISTICS_Q:
-                    self._collect_queue_stats(message)
+                    pass
+                    # self._collect_queue_stats(message)
                 else:
                     self.check.log.debug('Unknown/NotImplemented command: {}'.format(header.Command))
         except pymqi.MQMIError as err:

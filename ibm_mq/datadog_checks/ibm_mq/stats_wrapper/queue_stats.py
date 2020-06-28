@@ -4,7 +4,7 @@
 from pymqi.CMQC import MQCA_Q_NAME, MQIA_DEFINITION_TYPE, MQIA_Q_TYPE
 from pymqi.CMQCFC import MQGACF_Q_STATISTICS_DATA
 
-from datadog_checks.base import to_native_string
+from ..utils import sanitize_strings
 
 try:
     import pymqi
@@ -39,7 +39,7 @@ def get_queue_def_type(raw_type):
 
 class QueueInfo(object):
     def __init__(self, raw_properties):
-        self.name = to_native_string(raw_properties[MQCA_Q_NAME]).strip()
+        self.name = sanitize_strings(raw_properties[MQCA_Q_NAME])
         self.type = get_queue_type(raw_properties[MQIA_Q_TYPE])
         self.definition_type = get_queue_def_type(raw_properties[MQIA_DEFINITION_TYPE])
         self.properties = raw_properties
