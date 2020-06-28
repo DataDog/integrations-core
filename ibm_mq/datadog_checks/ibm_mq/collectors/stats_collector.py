@@ -58,5 +58,7 @@ class StatsCollector(object):
             tags = [
                 'channel:{}'.format(channel_info.name),
                 'channel_type:{}'.format(channel_info.type),
+                'remote_q_mgr_name:{}'.format(channel_info.remote_q_mgr_name),
+                'connection_name:{}'.format(channel_info.connection_name),
             ]
             self.check.gauge('ibm_mq.stats.channel.msgs', channel_info.msgs, tags=tags)

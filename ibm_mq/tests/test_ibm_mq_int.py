@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import mock
 import pytest
 from six import iteritems
 
@@ -182,3 +183,30 @@ def test_collect_statistics_from_events(aggregator, instance):
     check.check(instance)
 
     assert_all_metrics(aggregator)
+
+
+def test_channel_stats_metrics(aggregator, instance):
+    instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
+
+    check = IbmMqCheck('ibm_mq', {}, [instance])
+    check.channel_metric_collector = mock.MagicMock()
+    check.queue_metric_collector = mock.MagicMock()
+
+    with open(os.path.join(common.HERE, 'fixtures', 'statistics_channel.data'), 'rb') as f:
+        statistics_channel = f.read()
+        with mock.patch('datadog_checks.ibm_mq.collectors.stats_collector.Queue') as queue:
+            queue().get.return_value = statistics_channel
+
+            check.check(instance)
+
+    tags = [
+        'channel:GCP.A',
+        'channel_type:clusrcvr',
+        'remote_q_mgr_name:QM2',
+        'connection_name:192.168.32.2',
+    ]
+    for metric, metric_type in common.CHANNEL_STATS_METRICS:
+        aggregator.assert_metric(metric, tags=tags)
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), tags=tags)
+
+    aggregator.assert_all_metrics_covered()

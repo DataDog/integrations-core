@@ -198,25 +198,3 @@ def test_ssl_connection_creation(instance):
     assert 'bytes' not in warning
     assert 'unicode' not in warning
     assert 'MQRC_KEY_REPOSITORY_ERROR' in warning
-
-
-def test_channel_stats_metrics(aggregator, instance):
-    instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
-
-    check = IbmMqCheck('ibm_mq', {}, [instance])
-    check.channel_metric_collector = mock.MagicMock()
-    check.queue_metric_collector = mock.MagicMock()
-
-    with open(os.path.join(common.HERE, 'fixtures', 'statistics_channel.data'), 'rb') as f:
-        statistics_channel = f.read()
-        with mock.patch('datadog_checks.ibm_mq.collectors.stats_collector.Queue') as queue:
-            queue().get.return_value = statistics_channel
-
-            check.check(instance)
-
-    tags = ['channel:GCP.A', 'channel_type:clusrcvr']
-    for metric, metric_type in common.CHANNEL_STATS_METRICS:
-        aggregator.assert_metric(metric, tags=tags)
-        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), tags=tags)
-
-    aggregator.assert_all_metrics_covered()

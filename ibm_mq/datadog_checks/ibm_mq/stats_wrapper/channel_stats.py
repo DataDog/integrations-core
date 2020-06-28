@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-from pymqi.CMQCFC import MQCACH_CHANNEL_NAME, MQGACF_CHL_STATISTICS_DATA, MQIACH_CHANNEL_TYPE, MQIAMO_MSGS
+from pymqi.CMQC import MQCA_REMOTE_Q_MGR_NAME
+from pymqi.CMQCFC import MQCACH_CHANNEL_NAME, MQGACF_CHL_STATISTICS_DATA, MQIACH_CHANNEL_TYPE, MQIAMO_MSGS, \
+    MQCACH_CONNECTION_NAME
 
 from datadog_checks.base import to_native_string
 
@@ -30,6 +31,8 @@ class ChannelInfo(object):
     def __init__(self, raw_channel_info):
         self.name = to_native_string(raw_channel_info[MQCACH_CHANNEL_NAME]).strip()
         self.type = get_channel_type(raw_channel_info[MQIACH_CHANNEL_TYPE])
+        self.remote_q_mgr_name = to_native_string(raw_channel_info[MQCA_REMOTE_Q_MGR_NAME]).strip()
+        self.connection_name = to_native_string(raw_channel_info[MQCACH_CONNECTION_NAME]).strip()
         self.msgs = raw_channel_info[MQIAMO_MSGS]
 
 
