@@ -177,7 +177,11 @@ CHANNEL_STATUS_METRICS = [
     ('ibm_mq.channel.ssl_key_resets', GAUGE),
 ]
 
-CHANNEL_STATS_METRICS = [('ibm_mq.stats.channel.msgs', GAUGE)]
+CHANNEL_STATS_METRICS = [
+    ('ibm_mq.stats.channel.msgs', GAUGE),
+    ('ibm_mq.stats.channel.bytes', GAUGE),
+    ('ibm_mq.stats.channel.put_retries', GAUGE),
+]
 
 if IS_CLUSTER:
     CHANNEL_STATUS_METRICS.extend(

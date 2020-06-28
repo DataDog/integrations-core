@@ -3,7 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from pymqi.CMQC import MQCA_REMOTE_Q_MGR_NAME
 from pymqi.CMQCFC import MQCACH_CHANNEL_NAME, MQGACF_CHL_STATISTICS_DATA, MQIACH_CHANNEL_TYPE, MQIAMO_MSGS, \
-    MQCACH_CONNECTION_NAME
+    MQCACH_CONNECTION_NAME, MQIAMO64_BYTES, MQIAMO_FULL_BATCHES, MQIAMO_INCOMPLETE_BATCHES, MQIAMO_AVG_BATCH_SIZE, \
+    MQIAMO_PUT_RETRIES
 
 from datadog_checks.base import to_native_string
 
@@ -29,11 +30,11 @@ def get_channel_type(raw_type):
 
 class ChannelInfo(object):
     def __init__(self, raw_channel_info):
+        self.raw = raw_channel_info
         self.name = to_native_string(raw_channel_info[MQCACH_CHANNEL_NAME]).strip()
         self.type = get_channel_type(raw_channel_info[MQIACH_CHANNEL_TYPE])
         self.remote_q_mgr_name = to_native_string(raw_channel_info[MQCA_REMOTE_Q_MGR_NAME]).strip()
         self.connection_name = to_native_string(raw_channel_info[MQCACH_CONNECTION_NAME]).strip()
-        self.msgs = raw_channel_info[MQIAMO_MSGS]
 
 
 class ChannelStats(object):

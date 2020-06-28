@@ -3,9 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from pymqi.CMQC import MQRC_NO_MSG_AVAILABLE
 from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_MQI, MQCMD_STATISTICS_Q
+from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
+from ..metrics import channel_stats_metrics, METRIC_PREFIX
 
 from ..stats_wrapper import ChannelStats
 
@@ -61,4 +63,15 @@ class StatsCollector(object):
                 'remote_q_mgr_name:{}'.format(channel_info.remote_q_mgr_name),
                 'connection_name:{}'.format(channel_info.connection_name),
             ]
-            self.check.gauge('ibm_mq.stats.channel.msgs', channel_info.msgs, tags=tags)
+            prefix = '{}.stats.channel'.format(METRIC_PREFIX)
+            metrics_map = channel_stats_metrics()
+            self._submit_metrics_from_properties(prefix, channel_info.raw, metrics_map, tags)
+
+    def _submit_metrics_from_properties(self, prefix, properties, metrics_map, tags):
+        for metric_name, pymqi_type in iteritems(metrics_map):
+            metric_full_name = '{}.{}'.format(prefix, metric_name)
+            if pymqi_type not in properties:
+                self.check.log.debug("metric not found: %s", metric_name)
+                continue
+            metric_value = int(properties[pymqi_type])
+            self.check.gauge(metric_full_name, metric_value, tags=tags)

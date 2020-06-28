@@ -106,6 +106,17 @@ def channel_status_metrics():
     }
 
 
+def channel_stats_metrics():
+    return {
+        'msgs': pymqi.CMQCFC.MQIAMO_MSGS,
+        'bytes': pymqi.CMQCFC.MQIAMO64_BYTES,
+        'full_batches': pymqi.CMQCFC.MQIAMO_FULL_BATCHES,
+        'incomplete_batches': pymqi.CMQCFC.MQIAMO_INCOMPLETE_BATCHES,
+        'avg_batch_size': pymqi.CMQCFC.MQIAMO_AVG_BATCH_SIZE,
+        'put_retries': pymqi.CMQCFC.MQIAMO_PUT_RETRIES,
+    }
+
+
 def depth_percent(queue_info):
     if pymqi.CMQC.MQIA_CURRENT_Q_DEPTH not in queue_info or pymqi.CMQC.MQIA_MAX_Q_DEPTH not in queue_info:
         return None
