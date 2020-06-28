@@ -27,12 +27,12 @@ def get_channel_type(raw_type):
 
 
 class ChannelInfo(object):
-    def __init__(self, raw_channel_info):
-        self.raw = raw_channel_info
-        self.name = to_native_string(raw_channel_info[MQCACH_CHANNEL_NAME]).strip()
-        self.type = get_channel_type(raw_channel_info[MQIACH_CHANNEL_TYPE])
-        self.remote_q_mgr_name = to_native_string(raw_channel_info[MQCA_REMOTE_Q_MGR_NAME]).strip()
-        self.connection_name = to_native_string(raw_channel_info[MQCACH_CONNECTION_NAME]).strip()
+    def __init__(self, raw_properties):
+        self.name = to_native_string(raw_properties[MQCACH_CHANNEL_NAME]).strip()
+        self.type = get_channel_type(raw_properties[MQIACH_CHANNEL_TYPE])
+        self.remote_q_mgr_name = to_native_string(raw_properties[MQCA_REMOTE_Q_MGR_NAME]).strip()
+        self.connection_name = to_native_string(raw_properties[MQCACH_CONNECTION_NAME]).strip()
+        self.properties = raw_properties
 
 
 class ChannelStats(object):

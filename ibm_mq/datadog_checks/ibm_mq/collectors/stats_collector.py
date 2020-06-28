@@ -65,7 +65,7 @@ class StatsCollector(object):
             ]
             prefix = '{}.stats.channel'.format(METRIC_PREFIX)
             metrics_map = channel_stats_metrics()
-            self._submit_metrics_from_properties(prefix, channel_info.raw, metrics_map, tags)
+            self._submit_metrics_from_properties(prefix, channel_info.properties, metrics_map, tags)
 
     def _submit_metrics_from_properties(self, prefix, properties, metrics_map, tags):
         for metric_name, pymqi_type in iteritems(metrics_map):
