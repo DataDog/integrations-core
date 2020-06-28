@@ -46,12 +46,15 @@ def test_stats_metrics(aggregator, instance, seed_data, seed_cluster_data):
     instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
     check = IbmMqCheck('ibm_mq', {}, [instance])
 
-    for _ in range(30):
+    # stats metrics might take some time to be available
+    for _ in range(60):
         check.check(instance)
         if 'ibm_mq.stats.channel.msgs' in aggregator.metric_names:
             break
         time.sleep(1)
         aggregator.reset()
+    else:
+        assert False, "Stats metrics are not present"
 
     assert_all_metrics(aggregator, extra_metrics=common.CHANNEL_STATS_METRICS)
 
