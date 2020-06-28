@@ -10,7 +10,7 @@ from .common import CHANNEL_STATS_METRICS, assert_all_metrics
 
 
 @pytest.mark.e2e
-def test_e2e_check_all(dd_agent_check, instance_collect_all, seed_cluster_data):
+def test_e2e_check_all(dd_agent_check, instance_collect_all):
     aggregator = dd_agent_check(instance_collect_all, rate=True)
 
     assert_all_metrics(aggregator, extra_metrics=CHANNEL_STATS_METRICS)
