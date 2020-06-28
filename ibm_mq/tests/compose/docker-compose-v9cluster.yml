@@ -12,7 +12,7 @@ services:
       - "9443:9443"
     volumes:
       - './startup_commands.sh:/tmp/startup_commands.sh'
-      - './config1.mqsc:/etc/mqm/config.mqsc'
+      - './cluster-config1.mqsc:/etc/mqm/config.mqsc'
 
     networks:
       - ibm-net
@@ -27,7 +27,7 @@ services:
       - "11415:1414"
       - "9444:9443"
     volumes:
-      - './config2.mqsc:/etc/mqm/config.mqsc'
+      - './cluster-config2.mqsc:/etc/mqm/config.mqsc'
 
     networks:
       - ibm-net
