@@ -198,6 +198,7 @@ METRICS = (
 
 OPTIONAL_METRICS = [
     'ibm_mq.queue.max_channels',
+    'ibm_mq.stats.channel.msgs',  # not always present at each check run
 ]
 
 
@@ -209,7 +210,8 @@ def assert_all_metrics(aggregator, extra_metrics=None):
     for metric, metric_type in metrics:
         aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()))
 
-    for metric in OPTIONAL_METRICS:
+    optional_metrics = set(OPTIONAL_METRICS) - set(metrics)
+    for metric in optional_metrics:
         aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
