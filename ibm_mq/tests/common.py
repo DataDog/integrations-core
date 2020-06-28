@@ -194,7 +194,6 @@ METRICS = (
     + QUEUE_STATUS_METRICS
     + CHANNEL_METRICS
     + CHANNEL_STATUS_METRICS
-    + CHANNEL_STATS_METRICS
 )
 
 OPTIONAL_METRICS = [
@@ -202,8 +201,12 @@ OPTIONAL_METRICS = [
 ]
 
 
-def assert_all_metrics(aggregator):
-    for metric, metric_type in METRICS:
+def assert_all_metrics(aggregator, extra_metrics=None):
+    metrics = METRICS.copy()
+    if extra_metrics:
+        metrics += extra_metrics
+
+    for metric, metric_type in metrics:
         aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()))
 
     for metric in OPTIONAL_METRICS:
