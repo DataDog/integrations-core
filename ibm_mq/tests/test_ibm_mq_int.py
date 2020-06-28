@@ -55,7 +55,7 @@ def test_stats_metrics(aggregator, instance, seed_data, seed_cluster_data):
         time.sleep(1)
         aggregator.reset()
     else:
-        assert False, "Stats metrics are not present"
+        raise RuntimeError("Stats metrics are not present")
 
     assert_all_metrics(aggregator, extra_metrics=common.CHANNEL_STATS_METRICS)
 
