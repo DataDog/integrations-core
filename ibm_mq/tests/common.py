@@ -211,6 +211,9 @@ METRICS = (
 
 OPTIONAL_METRICS = [
     'ibm_mq.queue.max_channels',
+    'ibm_mq.stats.channel.full_batches',
+    'ibm_mq.stats.channel.incomplete_batches',
+    'ibm_mq.stats.channel.avg_batch_size',
 ]
 
 # stats metrics are not always present at each check run
