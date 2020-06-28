@@ -7,8 +7,9 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
+from datadog_checks.ibm_mq.stats_wrapper.queue_stats import QueueStats
 
-from ..metrics import METRIC_PREFIX, channel_stats_metrics
+from ..metrics import METRIC_PREFIX, channel_stats_metrics, queue_stats_metrics
 from ..stats_wrapper import ChannelStats
 
 try:
@@ -30,7 +31,6 @@ class StatsCollector(object):
     def collect(self, queue_manager):
         queue = Queue(queue_manager, STATISTICS_QUEUE_NAME)
         self.check.log.debug("Start stats collection")
-
         try:
             while True:
                 bin_message = queue.get()
@@ -41,11 +41,9 @@ class StatsCollector(object):
                 elif header.Command == MQCMD_STATISTICS_MQI:
                     self.check.log.debug('MQCMD_STATISTICS_MQI not implemented yet')
                 elif header.Command == MQCMD_STATISTICS_Q:
-                    self.check.log.debug('MQCMD_STATISTICS_Q not implemented yet')
+                    self._collect_queue_stats(message)
                 else:
                     self.check.log.debug('Unknown command: {}'.format(header.Command))
-                if header.Control == pymqi.CMQCFC.MQCFC_LAST:
-                    break
         except pymqi.MQMIError as err:
             if err.reason == MQRC_NO_MSG_AVAILABLE:
                 pass
@@ -66,6 +64,18 @@ class StatsCollector(object):
             prefix = '{}.stats.channel'.format(METRIC_PREFIX)
             metrics_map = channel_stats_metrics()
             self._submit_metrics_from_properties(prefix, channel_info.properties, metrics_map, tags)
+
+    def _collect_queue_stats(self, message):
+        queue_stats = QueueStats(message)
+        for queue_info in queue_stats.channels:
+            tags = [
+                'queue:{}'.format(queue_info.name),
+                'queue_type:{}'.format(queue_info.type),
+                'definition_type:{}'.format(queue_info.definition_type),
+            ]
+            prefix = '{}.stats.queue'.format(METRIC_PREFIX)
+            metrics_map = queue_stats_metrics()
+            self._submit_metrics_from_properties(prefix, queue_info.properties, metrics_map, tags)
 
     def _submit_metrics_from_properties(self, prefix, properties, metrics_map, tags):
         for metric_name, pymqi_type in iteritems(metrics_map):

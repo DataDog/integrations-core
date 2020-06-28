@@ -183,6 +183,10 @@ CHANNEL_STATS_METRICS = [
     ('ibm_mq.stats.channel.put_retries', GAUGE),
 ]
 
+QUEUE_STATS_METRICS = [
+    ('ibm_mq.stats.queue.q_min_depth', GAUGE),
+]
+
 if IS_CLUSTER:
     CHANNEL_STATUS_METRICS.extend(
         [
@@ -203,6 +207,7 @@ METRICS = (
     + QUEUE_STATUS_METRICS
     + CHANNEL_METRICS
     + CHANNEL_STATUS_METRICS
+    + QUEUE_STATS_METRICS
 )
 
 OPTIONAL_METRICS = [

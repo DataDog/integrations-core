@@ -118,6 +118,12 @@ def channel_stats_metrics():
     }
 
 
+def queue_stats_metrics():
+    return {
+        'q_min_depth': pymqi.CMQCFC.MQIAMO_Q_MIN_DEPTH,
+    }
+
+
 def depth_percent(queue_info):
     if pymqi.CMQC.MQIA_CURRENT_Q_DEPTH not in queue_info or pymqi.CMQC.MQIA_MAX_Q_DEPTH not in queue_info:
         return None
