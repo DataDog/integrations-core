@@ -8,7 +8,6 @@ import time
 
 import pytest
 from six.moves import range
-from tests.common import MQ_COMPOSE
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
@@ -69,7 +68,7 @@ def seed_data():
 
 @pytest.fixture
 def seed_cluster_data():
-    if 'cluster' not in MQ_COMPOSE:
+    if not common.IS_CLUSTER:
         return
     publish_cluster()
     wait_channel_stats()

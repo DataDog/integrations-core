@@ -4,6 +4,8 @@
 
 import os
 
+import pytest
+
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
@@ -24,11 +26,15 @@ QUEUE = 'DEV.QUEUE.1'
 BAD_CHANNEL = 'DEV.NOTHERE.SVRCONN'
 
 MQ_VERSION = os.environ.get('IBM_MQ_VERSION', '9')
-MQ_COMPOSE = os.environ['IBM_MQ_COMPOSE']
+MQ_COMPOSE_VERSION = os.environ['IBM_MQ_COMPOSE_VERSION']
 
-COMPOSE_FILE_NAME = 'docker-compose-v{}.yml'.format(MQ_COMPOSE)
+IS_CLUSTER = 'cluster' in MQ_COMPOSE_VERSION
+
+COMPOSE_FILE_NAME = 'docker-compose-v{}.yml'.format(MQ_COMPOSE_VERSION)
 
 COMPOSE_FILE_PATH = os.path.join(COMPOSE_DIR, COMPOSE_FILE_NAME)
+
+requires_cluster = pytest.mark.skipif(not IS_CLUSTER, reason='Requires cluster setup')
 
 INSTANCE = {
     'channel': CHANNEL,
@@ -173,7 +179,7 @@ CHANNEL_STATUS_METRICS = [
 
 CHANNEL_STATS_METRICS = []
 
-if 'cluster' in MQ_COMPOSE:
+if IS_CLUSTER:
     CHANNEL_STATUS_METRICS.extend(
         [
             ('ibm_mq.channel.batches', GAUGE),
