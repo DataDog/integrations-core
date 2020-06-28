@@ -11,7 +11,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.ibm_mq import IbmMqCheck
 
 from . import common
-from .common import QUEUE_METRICS, assert_all_metrics
+from .common import QUEUE_METRICS, assert_all_metrics, requires_cluster
 
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
@@ -42,6 +42,7 @@ def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
     aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=discoverable_tags, count=1)
 
 
+@requires_cluster
 def test_stats_metrics(aggregator, instance, seed_data, seed_cluster_data):
     instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
     check = IbmMqCheck('ibm_mq', {}, [instance])
