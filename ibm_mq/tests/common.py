@@ -203,7 +203,7 @@ OPTIONAL_METRICS = [
 
 
 def assert_all_metrics(aggregator, extra_metrics=None):
-    metrics = METRICS.copy()
+    metrics = METRICS[:]
     if extra_metrics:
         metrics += extra_metrics
 
