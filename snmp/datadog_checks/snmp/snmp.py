@@ -26,7 +26,7 @@ from .exceptions import PySnmpError
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
 from .mibs import MIBLoader
 from .models import OID
-from .parsing import ParsedMetric, ParsedMetricTag, ParsedTableMetric
+from .parsing import ColumnTag, IndexTag, ParsedMetric, ParsedTableMetric, SymbolTag
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
 from .utils import (
     OIDPrinter,
@@ -405,7 +405,7 @@ class SnmpCheck(AgentCheck):
         return error
 
     def extract_metric_tags(self, metric_tags, results):
-        # type: (List[ParsedMetricTag], Dict[str, dict]) -> List[str]
+        # type: (List[SymbolTag], Dict[str, dict]) -> List[str]
         extracted_tags = []  # type: List[str]
         for tag in metric_tags:
             if tag.symbol not in results:
@@ -418,7 +418,7 @@ class SnmpCheck(AgentCheck):
                     '`metric_tags` can only refer to scalar OIDs.'.format(tag.symbol)
                 )
             try:
-                extracted_tags.extend(tag.matched_tags(tag_values[0]))
+                extracted_tags.extend(tag.parsed_metric_tag.matched_tags(tag_values[0]))
             except re.error as e:
                 self.log.debug('Failed to match %s for %s: %s', tag_values[0], tag.symbol, e)
         return extracted_tags
@@ -460,8 +460,8 @@ class SnmpCheck(AgentCheck):
         self,
         index,  # type: Tuple[str, ...]
         results,  # type: Dict[str, dict]
-        index_tags,  # type: List[Tuple[str, int]]
-        column_tags,  # type: List[Tuple[str, str]]
+        index_tags,  # type: List[IndexTag]
+        column_tags,  # type: List[ColumnTag]
     ):
         # type: (...) -> List[str]
         """
@@ -477,26 +477,27 @@ class SnmpCheck(AgentCheck):
         """
         tags = []  # type: List[str]
 
-        for name, raw_index_value in index_tags:
+        for index_tag in index_tags:
+            raw_index_value = index_tag.index
             try:
                 value = index[raw_index_value - 1]
             except IndexError:
-                self.log.warning('Not enough indexes, skipping tag %s', name)
+                self.log.warning('Not enough indexes, skipping index %s', raw_index_value)
                 continue
-            tags.append('{}:{}'.format(name, value))
+            tags.extend(index_tag.parsed_metric_tag.matched_tags(value))
 
-        for name, raw_column_value in column_tags:
+        for column_tag in column_tags:
+            raw_column_value = column_tag.column
             try:
                 column_value = results[raw_column_value][index]
             except KeyError:
                 self.log.warning('Column %s not present in the table, skipping this tag', raw_column_value)
                 continue
             if reply_invalid(column_value):
-                self.log.warning("Can't deduct tag from column for tag %s", name)
+                self.log.warning("Can't deduct tag from column %s", column_tag.column)
                 continue
             value = column_value.prettyPrint()
-            tags.append('{}:{}'.format(name, value))
-
+            tags.extend(column_tag.parsed_metric_tag.matched_tags(value))
         return tags
 
     def monotonic_count_and_rate(self, metric, value, tags):

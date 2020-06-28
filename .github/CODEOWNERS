@@ -74,12 +74,12 @@ assets/               @DataDog/agent-integrations @DataDog/integrations-tools-an
 # Checks base
 /datadog_checks_base/ @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
 
-# To keep ProdSec up-to-date with changes to requirements.txt.
-requirements.in                                           @DataDog/prodsec
-requirements.txt                                          @DataDog/prodsec
+# To keep Security up-to-date with changes to requirements.txt.
+requirements.in                                           @trishankatdatadog
+requirements.txt                                          @trishankatdatadog
 # As well as the signing tool.
-datadog_checks_dev/datadog_checks/dev/tooling/signing.py  @DataDog/prodsec
+datadog_checks_dev/datadog_checks/dev/tooling/signing.py  @trishankatdatadog
 # As well as the secure downloader.
-/datadog_checks_downloader/                               @DataDog/prodsec
+/datadog_checks_downloader/                               @trishankatdatadog
 # As well as the wheel building process
-.gitlab-ci.yml                                            @DataDog/prodsec
+.gitlab-ci.yml                                            @trishankatdatadog

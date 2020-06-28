@@ -11,6 +11,7 @@ from datadog_checks.base import ConfigurationError
 from ..models import OID
 from ..pysnmp_types import ObjectIdentity
 from ..resolver import OIDResolver
+from .metric_tags import MetricTag, parse_metric_tag
 from .metrics_types import (
     ColumnTableMetricTag,
     IndexTableMetricTag,
@@ -21,7 +22,7 @@ from .metrics_types import (
     TableMetric,
     TableMetricTag,
 )
-from .parsed_metrics import ParsedMetric, ParsedSymbolMetric, ParsedTableMetric
+from .parsed_metrics import ParsedMetric, ParsedMetricTag, ParsedSymbolMetric, ParsedTableMetric
 
 ParseMetricsResult = TypedDict(
     'ParseMetricsResult',
@@ -285,10 +286,7 @@ def _parse_table_metric(metric):
         table_oids.append(parsed_symbol.oid)
 
         parsed_table_metric = ParsedTableMetric(
-            parsed_symbol.name,
-            index_tags=[(tag.name, tag.index) for tag in index_tags],
-            column_tags=[(tag.name, tag.column) for tag in column_tags],
-            forced_type=metric.get('forced_type'),
+            parsed_symbol.name, index_tags=index_tags, column_tags=column_tags, forced_type=metric.get('forced_type'),
         )
         parsed_metrics.append(parsed_table_metric)
 
@@ -324,8 +322,8 @@ def merge_table_batches(target, source):
     return merged
 
 
-IndexTag = NamedTuple('IndexTag', [('name', str), ('index', int)])
-ColumnTag = NamedTuple('ColumnTag', [('name', str), ('column', str)])
+IndexTag = NamedTuple('IndexTag', [('parsed_metric_tag', ParsedMetricTag), ('index', int)])
+ColumnTag = NamedTuple('ColumnTag', [('parsed_metric_tag', ParsedMetricTag), ('column', str)])
 
 ParsedColumnMetricTag = NamedTuple(
     'ParsedColumnMetricTag',
@@ -398,9 +396,6 @@ def _parse_table_metric_tag(mib, parsed_table, metric_tag):
         index: 2
     ```
     """
-    if 'tag' not in metric_tag:
-        raise ConfigurationError('When specifying metric tags, you must specify a tag')
-
     if 'column' in metric_tag:
         metric_tag = cast(ColumnTableMetricTag, metric_tag)
         metric_tag_mib = metric_tag.get('MIB', mib)
@@ -415,7 +410,7 @@ def _parse_table_metric_tag(mib, parsed_table, metric_tag):
 
     if 'index' in metric_tag:
         metric_tag = cast(IndexTableMetricTag, metric_tag)
-        return parse_index_metric_tag(metric_tag)
+        return _parse_index_metric_tag(metric_tag)
 
     raise ConfigurationError('When specifying metric tags, you must specify either and index or a column')
 
@@ -428,7 +423,9 @@ def _parse_column_metric_tag(mib, parsed_table, metric_tag):
 
     return ParsedColumnMetricTag(
         oids_to_resolve=parsed_column.oids_to_resolve,
-        column_tags=[ColumnTag(name=metric_tag['tag'], column=parsed_column.name)],
+        column_tags=[
+            ColumnTag(parsed_metric_tag=parse_metric_tag(cast(MetricTag, metric_tag)), column=parsed_column.name)
+        ],
         table_batches=batches,
     )
 
@@ -448,9 +445,9 @@ def _parse_other_table_column_metric_tag(mib, table, metric_tag):
     )
 
 
-def parse_index_metric_tag(metric_tag):
+def _parse_index_metric_tag(metric_tag):
     # type: (IndexTableMetricTag) -> ParsedTableMetricTag
-    index_tags = [IndexTag(name=metric_tag['tag'], index=metric_tag['index'])]
+    index_tags = [IndexTag(parsed_metric_tag=parse_metric_tag(cast(MetricTag, metric_tag)), index=metric_tag['index'])]
     index_mappings = {metric_tag['index']: metric_tag['mapping']} if 'mapping' in metric_tag else {}
 
     return ParsedIndexMetricTag(index_tags=index_tags, index_mappings=index_mappings)
