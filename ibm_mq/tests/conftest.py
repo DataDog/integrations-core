@@ -13,6 +13,7 @@ from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.ibm_mq import IbmMqCheck
 from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
+from tests.common import MQ_COMPOSE
 
 from . import common
 
@@ -68,6 +69,8 @@ def seed_data():
 
 @pytest.fixture
 def seed_cluster_data():
+    if 'cluster' not in MQ_COMPOSE:
+        return
     publish_cluster()
     wait_channel_stats()
 
