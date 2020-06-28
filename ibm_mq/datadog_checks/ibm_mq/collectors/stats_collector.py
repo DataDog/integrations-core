@@ -51,7 +51,6 @@ class StatsCollector(object):
         try:
             while True:
                 raw_message = queue.get()
-                print(raw_message)
                 message, header = CustomPCFExecute.unpack(raw_message)
 
                 if header.Command == MQCMD_STATISTICS_CHANNEL:
@@ -70,6 +69,7 @@ class StatsCollector(object):
                             'channel_type:{}'.format(channel_type),
                         ]
                         self.check.gauge('ibm_mq.stats.channel.msgs', channel_info[MQIAMO_MSGS], tags=tags)
+                        self.check.gauge('ibm_mq.stats.channel.msgs2', channel_info[MQIAMO_MSGS], tags=tags)
                 elif header.Command == MQCMD_STATISTICS_MQI:
                     self.check.log.debug('MQCMD_STATISTICS_MQI not implemented yet')
                 elif header.Command == MQCMD_STATISTICS_Q:
