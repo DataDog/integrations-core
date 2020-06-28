@@ -43,7 +43,7 @@ class StatsCollector(object):
                 elif header.Command == MQCMD_STATISTICS_Q:
                     self._collect_queue_stats(message)
                 else:
-                    self.check.log.debug('Unknown command: {}'.format(header.Command))
+                    self.check.log.debug('Unknown/NotImplemented command: {}'.format(header.Command))
         except pymqi.MQMIError as err:
             if err.reason == MQRC_NO_MSG_AVAILABLE:
                 pass
