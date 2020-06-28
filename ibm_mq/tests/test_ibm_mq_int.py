@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-import time
 
 import pytest
 from six import iteritems
@@ -11,7 +10,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.ibm_mq import IbmMqCheck
 
 from . import common
-from .common import QUEUE_METRICS, assert_all_metrics, requires_cluster
+from .common import QUEUE_METRICS, assert_all_metrics
 
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
@@ -40,24 +39,6 @@ def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
 
     discoverable_tags = tags + ['channel:*']
     aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=discoverable_tags, count=1)
-
-
-@requires_cluster
-def test_stats_metrics(aggregator, instance, seed_data, seed_cluster_data):
-    instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
-    check = IbmMqCheck('ibm_mq', {}, [instance])
-
-    # stats metrics might take some time to be available
-    for _ in range(60):
-        check.check(instance)
-        if 'ibm_mq.stats.channel.msgs' in aggregator.metric_names:
-            break
-        time.sleep(1)
-        aggregator.reset()
-    else:
-        raise RuntimeError("Stats metrics are not present")
-
-    assert_all_metrics(aggregator, extra_metrics=common.CHANNEL_STATS_METRICS)
 
 
 def test_check_connection_name_one(aggregator, instance_with_connection_name):
