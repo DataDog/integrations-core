@@ -19,6 +19,8 @@ except ImportError as e:
     pymqiException = e
     pymqi = None
 
+STATISTICS_QUEUE_NAME = 'SYSTEM.ADMIN.STATISTICS.QUEUE'
+
 
 class StatsCollector(object):
     def __init__(self, check):
@@ -26,17 +28,12 @@ class StatsCollector(object):
         self.check = check
 
     def collect(self, queue_manager):
-        queue_name = 'SYSTEM.ADMIN.STATISTICS.QUEUE'
-        queue = pymqi.Queue(queue_manager, queue_name)
-        self.check.log.info("Start collect stats")
+        queue = pymqi.Queue(queue_manager, STATISTICS_QUEUE_NAME)
+        self.check.log.debug("Start stats collection")
 
         try:
             while True:
-                # https://github.com/dsuch/pymqi/blob/0995dfb80c92646421bd4abb0f7f8a0d39fe0a08/code/tests/test_pcf.py#L183-L187
                 message = queue.get()
-                # self.check.log.info("RECEIVED MSG: %s", message)
-                # self.check.log.info("UNPACKED MSG: %s", unpacked)
-                # self.check.log.info("UNPACKED HEADER: %s", header)
                 message, header = CustomPCFExecute.unpack(message)
 
                 if header.Command == MQCMD_STATISTICS_CHANNEL:
@@ -51,21 +48,14 @@ class StatsCollector(object):
                         self.check.log.info({'MQIAMO_MSGS': channel[MQIAMO_MSGS]})
                         self.check.gauge('ibm_mq.stats.channel.msgs', channel[MQIAMO_MSGS])
                 elif header.Command == MQCMD_STATISTICS_MQI:
-                    self.check.log.info(
-                        {
-                            'type': 'MQCMD_STATISTICS_MQI',
-                            # 'mgr name': unpacked[MQCA_Q_MGR_NAME],
-                        }
-                    )
+                    self.check.log.debug('MQCMD_STATISTICS_MQI not implemented yet')
                 elif header.Command == MQCMD_STATISTICS_Q:
-                    self.check.log.info(
-                        {
-                            'type': 'MQCMD_STATISTICS_Q',
-                            # 'mgr name': unpacked[MQCA_Q_MGR_NAME],
-                        }
-                    )
+                    self.check.log.debug('MQCMD_STATISTICS_Q not implemented yet')
+                else:
+                    self.check.log.debug('Unknown command: {}'.format(header.Command))
+                if header.Control == pymqi.CMQCFC.MQCFC_LAST:
+                    break
         except pymqi.MQMIError as err:
-            self.check.log.info(err)
             if err.reason == MQRC_NO_MSG_AVAILABLE:
                 pass
             else:
