@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import time
 
 import pytest
 from six import iteritems
@@ -15,13 +16,13 @@ from .common import QUEUE_METRICS, assert_all_metrics
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
 
-def test_check_metrics_and_service_checks(aggregator, instance, seed_data, seed_cluster_data):
+def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
     instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
     check = IbmMqCheck('ibm_mq', {}, [instance])
 
     check.check(instance)
 
-    assert_all_metrics(aggregator, extra_metrics=common.CHANNEL_STATS_METRICS)
+    assert_all_metrics(aggregator)
 
     tags = [
         'queue_manager:{}'.format(common.QUEUE_MANAGER),
@@ -39,6 +40,20 @@ def test_check_metrics_and_service_checks(aggregator, instance, seed_data, seed_
 
     discoverable_tags = tags + ['channel:*']
     aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=discoverable_tags, count=1)
+
+
+def test_stats_metrics(aggregator, instance, seed_data, seed_cluster_data):
+    instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
+    check = IbmMqCheck('ibm_mq', {}, [instance])
+
+    for _ in range(30):
+        check.check(instance)
+        if 'ibm_mq.stats.channel.msgs' in aggregator.metric_names:
+            break
+        time.sleep(1)
+        aggregator.reset()
+
+    assert_all_metrics(aggregator, extra_metrics=common.CHANNEL_STATS_METRICS)
 
 
 def test_check_connection_name_one(aggregator, instance_with_connection_name):
