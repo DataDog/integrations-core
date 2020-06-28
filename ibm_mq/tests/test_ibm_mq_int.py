@@ -8,6 +8,7 @@ import pytest
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.ibm_mq import IbmMqCheck
 
 from . import common
@@ -210,3 +211,4 @@ def test_channel_stats_metrics(aggregator, instance):
         aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), tags=tags)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

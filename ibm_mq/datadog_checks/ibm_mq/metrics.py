@@ -110,10 +110,11 @@ def channel_stats_metrics():
     return {
         'msgs': pymqi.CMQCFC.MQIAMO_MSGS,
         'bytes': pymqi.CMQCFC.MQIAMO64_BYTES,
+        'put_retries': pymqi.CMQCFC.MQIAMO_PUT_RETRIES,
+        # Following metrics are currently not covered by e2e tests
         'full_batches': pymqi.CMQCFC.MQIAMO_FULL_BATCHES,
         'incomplete_batches': pymqi.CMQCFC.MQIAMO_INCOMPLETE_BATCHES,
         'avg_batch_size': pymqi.CMQCFC.MQIAMO_AVG_BATCH_SIZE,
-        'put_retries': pymqi.CMQCFC.MQIAMO_PUT_RETRIES,
     }
 
 
