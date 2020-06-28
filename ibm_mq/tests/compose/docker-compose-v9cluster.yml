@@ -2,7 +2,6 @@ version: '3'
 
 services:
   ibm_mq1:
-#    network_mode: host
     container_name: ibm_mq1
     image: ibmcom/mq:9
     environment:
@@ -19,7 +18,6 @@ services:
       - ibm-net
 
   ibm_mq2:
-#    network_mode: host
     container_name: ibm_mq2
     image: ibmcom/mq:9
     environment:
