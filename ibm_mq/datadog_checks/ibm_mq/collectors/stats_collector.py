@@ -28,6 +28,8 @@ class StatsCollector(object):
     def collect(self, queue_manager):
         queue_name = 'SYSTEM.ADMIN.STATISTICS.QUEUE'
         queue = pymqi.Queue(queue_manager, queue_name)
+        self.check.log.info("Start collect stats")
+
         try:
             while True:
                 # https://github.com/dsuch/pymqi/blob/0995dfb80c92646421bd4abb0f7f8a0d39fe0a08/code/tests/test_pcf.py#L183-L187

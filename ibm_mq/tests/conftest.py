@@ -9,8 +9,9 @@ import pytest
 from six.moves import range
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 from datadog_checks.ibm_mq import IbmMqCheck
+from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
 
 from . import common
 
@@ -65,14 +66,11 @@ def seed_data():
 
 
 def publish():
-    # Late import to not require it for e2e
     import pymqi
 
-    conn_info = "%s(%s)" % (common.HOST, common.PORT)
+    qm = get_queue_manager()
 
-    qmgr = pymqi.connect(common.QUEUE_MANAGER, common.CHANNEL, conn_info, common.USERNAME, common.PASSWORD)
-
-    queue = pymqi.Queue(qmgr, common.QUEUE)
+    queue = pymqi.Queue(qm, common.QUEUE)
 
     for i in range(10):
         try:
@@ -82,22 +80,19 @@ def publish():
         except Exception as e:
             log.info("exception publishing: %s", e)
             queue.close()
-            qmgr.disconnect()
+            qm.disconnect()
             return
 
     queue.close()
-    qmgr.disconnect()
+    qm.disconnect()
 
 
 def consume():
-    # Late import to not require it for e2e
     import pymqi
 
-    conn_info = "%s(%s)" % (common.HOST, common.PORT)
+    queue_manager = get_queue_manager()
 
-    qmgr = pymqi.connect(common.QUEUE_MANAGER, common.CHANNEL, conn_info, common.USERNAME, common.PASSWORD)
-
-    queue = pymqi.Queue(qmgr, common.QUEUE)
+    queue = pymqi.Queue(queue_manager, common.QUEUE)
 
     for _ in range(10):
         try:
@@ -107,13 +102,58 @@ def consume():
             if not re.search("MQRC_NO_MSG_AVAILABLE", e.errorAsString()):
                 print(e)
                 queue.close()
-                qmgr.disconnect()
+                queue_manager.disconnect()
                 return
             else:
                 pass
 
     queue.close()
-    qmgr.disconnect()
+    queue_manager.disconnect()
+
+
+def get_queue_manager():
+    # Late import to not require it for e2e
+    import pymqi
+
+    conn_info = "%s(%s)" % (common.HOST, common.PORT)
+    queue_manager = pymqi.connect(common.QUEUE_MANAGER, common.CHANNEL, conn_info, common.USERNAME, common.PASSWORD)
+
+    return queue_manager
+
+
+def wait_channel_stats():
+    import pymqi
+
+    queue_manager = get_queue_manager()
+
+    queue_name = 'SYSTEM.ADMIN.STATISTICS.QUEUE'
+    queue = pymqi.Queue(queue_manager, queue_name, pymqi.CMQC.MQOO_BROWSE)
+
+    get_opts = pymqi.GMO(
+        Options=pymqi.CMQC.MQGMO_NO_SYNCPOINT
+        | pymqi.CMQC.MQGMO_FAIL_IF_QUIESCING
+        | pymqi.CMQC.MQGMO_WAIT
+        | pymqi.CMQC.MQGMO_BROWSE_NEXT,
+        Version=pymqi.CMQC.MQGMO_VERSION_2,
+        MatchOptions=pymqi.CMQC.MQMO_MATCH_CORREL_ID,
+    )
+    get_md = pymqi.MD()
+
+    channel_stat_found = False
+    while True:
+        try:
+            raw_message = queue.get(None, get_md, get_opts)
+            msg, header = CustomPCFExecute.unpack(raw_message)
+            if header.Command == pymqi.CMQCFC.MQCMD_STATISTICS_CHANNEL:
+                print("Got MQCMD_STATISTICS_CHANNEL")
+                channel_stat_found = True
+        except Exception as e:
+            print(e)
+            break
+
+    queue.close()
+    queue_manager.disconnect()
+    return channel_stat_found
 
 
 @pytest.fixture(scope='session')
@@ -129,6 +169,9 @@ def dd_environment():
     env = {'COMPOSE_DIR': common.COMPOSE_DIR}
 
     with docker_run(
-        common.COMPOSE_FILE_PATH, env_vars=env, conditions=[CheckDockerLogs('ibm_mq1', log_pattern)], sleep=10
+        common.COMPOSE_FILE_PATH,
+        env_vars=env,
+        conditions=[CheckDockerLogs('ibm_mq1', log_pattern), WaitFor(wait_channel_stats)],
+        sleep=10,
     ):
         yield common.INSTANCE, common.E2E_METADATA

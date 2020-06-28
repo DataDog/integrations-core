@@ -4,7 +4,7 @@
 
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode, to_native_string
+from datadog_checks.base import AgentCheck, to_native_string
 
 from .. import metrics
 
