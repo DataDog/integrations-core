@@ -173,8 +173,8 @@ class CustomPCFExecute(PCFExecute):
                 group_count = parameter.ParameterCount
                 index += group_count
                 group = {}
-                res[parameter.Parameter] = res.get(parameter.Parameter, [])
-                res[parameter.Parameter].append(group)
+                res[parameter.Parameter] = res.get(parameter.Parameter, [])  # type: ignore
+                res[parameter.Parameter].append(group)  # type: ignore
             elif parameter_type == CMQCFC.MQCFT_BYTE_STRING:
                 parameter = CFBS()
                 parameter.unpack(message[cursor : cursor + CMQCFC.MQCFBS_STRUC_LENGTH_FIXED])
@@ -194,7 +194,7 @@ class CustomPCFExecute(PCFExecute):
             else:
                 res[parameter.Parameter] = value
 
-        return res, mqcfh
+        return res, mqcfh  # type: ignore
 
 
 #
