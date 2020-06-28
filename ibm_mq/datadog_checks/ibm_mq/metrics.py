@@ -108,6 +108,7 @@ def channel_status_metrics():
 
 def channel_stats_metrics():
     return {
+        # TODO: Should be count
         'msgs': pymqi.CMQCFC.MQIAMO_MSGS,
         'bytes': pymqi.CMQCFC.MQIAMO64_BYTES,
         'put_retries': pymqi.CMQCFC.MQIAMO_PUT_RETRIES,
