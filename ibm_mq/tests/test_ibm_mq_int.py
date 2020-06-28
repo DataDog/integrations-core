@@ -208,7 +208,14 @@ def test_channel_stats_metrics(aggregator, instance):
             ]
             check.check(instance)
 
-    channel_tags = [
+    common_tags = [
+        'queue_manager:{}'.format(common.QUEUE_MANAGER),
+        'mq_host:{}'.format(common.HOST),
+        'port:{}'.format(common.PORT),
+        'connection_name:{}({})'.format(common.HOST, common.PORT),
+        'foo:bar',
+    ]
+    channel_tags = common_tags + [
         'channel:GCP.A',
         'channel_type:clusrcvr',
         'remote_q_mgr_name:QM2',
@@ -217,7 +224,7 @@ def test_channel_stats_metrics(aggregator, instance):
     for metric, metric_type in common.CHANNEL_STATS_METRICS:
         aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), tags=channel_tags)
 
-    queue_tags = [
+    queue_tags = common_tags + [
         'definition_type:local',
         'queue:SYSTEM.CHLAUTH.DATA.QUEUE',
         'queue_type:local',

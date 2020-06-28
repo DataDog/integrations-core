@@ -35,7 +35,7 @@ class IbmMqCheck(AgentCheck):
             self.config, self.service_check, self.warning, self.send_metric, self.log
         )
         self.channel_metric_collector = ChannelMetricCollector(self.config, self.service_check, self.gauge, self.log)
-        self.stats_collector = StatsCollector(self)
+        self.stats_collector = StatsCollector(self.config, self.gauge, self.log)
 
     def check(self, _):
         try:

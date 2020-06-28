@@ -5,7 +5,6 @@ from pymqi.CMQC import MQRC_NO_MSG_AVAILABLE
 from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_MQI, MQCMD_STATISTICS_Q
 from six import iteritems
 
-from datadog_checks.base import AgentCheck
 from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
 from datadog_checks.ibm_mq.stats_wrapper.queue_stats import QueueStats
 
@@ -24,13 +23,14 @@ STATISTICS_QUEUE_NAME = 'SYSTEM.ADMIN.STATISTICS.QUEUE'
 
 
 class StatsCollector(object):
-    def __init__(self, check):
-        # type: (AgentCheck) -> None
-        self.check = check
+    def __init__(self, config, gauge, log):
+        self.config = config
+        self.gauge = gauge
+        self.log = log
 
     def collect(self, queue_manager):
         queue = Queue(queue_manager, STATISTICS_QUEUE_NAME)
-        self.check.log.debug("Start stats collection")
+        self.log.debug("Start stats collection")
         try:
             while True:
                 bin_message = queue.get()
@@ -38,11 +38,11 @@ class StatsCollector(object):
                 if header.Command == MQCMD_STATISTICS_CHANNEL:
                     self._collect_channel_stats(message)
                 elif header.Command == MQCMD_STATISTICS_MQI:
-                    self.check.log.debug('MQCMD_STATISTICS_MQI not implemented yet')
+                    self.log.debug('MQCMD_STATISTICS_MQI not implemented yet')
                 elif header.Command == MQCMD_STATISTICS_Q:
                     self._collect_queue_stats(message)
                 else:
-                    self.check.log.debug('Unknown/NotImplemented command: {}'.format(header.Command))
+                    self.log.debug('Unknown/NotImplemented command: %s', header.Command)
         except pymqi.MQMIError as err:
             if err.reason == MQRC_NO_MSG_AVAILABLE:
                 pass
@@ -54,7 +54,7 @@ class StatsCollector(object):
     def _collect_channel_stats(self, message):
         channel_stats = ChannelStats(message)
         for channel_info in channel_stats.channels:
-            tags = [
+            tags = self.config.tags_no_channel + [
                 'channel:{}'.format(channel_info.name),
                 'channel_type:{}'.format(channel_info.type),
                 'remote_q_mgr_name:{}'.format(channel_info.remote_q_mgr_name),
@@ -67,7 +67,7 @@ class StatsCollector(object):
     def _collect_queue_stats(self, message):
         queue_stats = QueueStats(message)
         for queue_info in queue_stats.channels:
-            tags = [
+            tags = self.config.tags_no_channel + [
                 'queue:{}'.format(queue_info.name),
                 'queue_type:{}'.format(queue_info.type),
                 'definition_type:{}'.format(queue_info.definition_type),
@@ -80,7 +80,7 @@ class StatsCollector(object):
         for metric_name, pymqi_type in iteritems(metrics_map):
             metric_full_name = '{}.{}'.format(prefix, metric_name)
             if pymqi_type not in properties:
-                self.check.log.debug("metric not found: %s", metric_name)
+                self.log.debug("metric not found: %s", metric_name)
                 continue
             metric_value = int(properties[pymqi_type])
-            self.check.gauge(metric_full_name, metric_value, tags=tags)
+            self.gauge(metric_full_name, metric_value, tags=tags)
