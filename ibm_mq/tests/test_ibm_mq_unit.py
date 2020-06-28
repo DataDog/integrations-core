@@ -1,12 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
 
-import mock
 import pytest
 from six import iteritems
-from tests import common
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.ibm_mq import IbmMqCheck

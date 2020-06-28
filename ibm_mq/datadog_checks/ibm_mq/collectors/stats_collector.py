@@ -7,8 +7,8 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
-from ..metrics import channel_stats_metrics, METRIC_PREFIX
 
+from ..metrics import METRIC_PREFIX, channel_stats_metrics
 from ..stats_wrapper import ChannelStats
 
 try:
