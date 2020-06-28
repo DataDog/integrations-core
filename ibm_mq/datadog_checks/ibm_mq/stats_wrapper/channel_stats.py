@@ -4,7 +4,7 @@
 from pymqi.CMQC import MQCA_REMOTE_Q_MGR_NAME
 from pymqi.CMQCFC import MQCACH_CHANNEL_NAME, MQCACH_CONNECTION_NAME, MQGACF_CHL_STATISTICS_DATA, MQIACH_CHANNEL_TYPE
 
-from datadog_checks.base import to_native_string
+from ..utils import sanitize_strings
 
 try:
     import pymqi
@@ -28,10 +28,10 @@ def get_channel_type(raw_type):
 
 class ChannelInfo(object):
     def __init__(self, raw_properties):
-        self.name = to_native_string(raw_properties[MQCACH_CHANNEL_NAME]).strip()
+        self.name = sanitize_strings(raw_properties[MQCACH_CHANNEL_NAME])
         self.type = get_channel_type(raw_properties[MQIACH_CHANNEL_TYPE])
-        self.remote_q_mgr_name = to_native_string(raw_properties[MQCA_REMOTE_Q_MGR_NAME]).strip()
-        self.connection_name = to_native_string(raw_properties[MQCACH_CONNECTION_NAME]).strip()
+        self.remote_q_mgr_name = sanitize_strings(raw_properties[MQCA_REMOTE_Q_MGR_NAME])
+        self.connection_name = sanitize_strings(raw_properties[MQCACH_CONNECTION_NAME])
         self.properties = raw_properties
 
 

@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from pymqi.CMQC import MQRC_NO_MSG_AVAILABLE
+from pymqi.CMQC import MQGMO_NO_WAIT, MQRC_NO_MSG_AVAILABLE
 from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_MQI, MQCMD_STATISTICS_Q
 from six import iteritems
 
@@ -22,6 +22,9 @@ except ImportError as e:
 
 STATISTICS_QUEUE_NAME = 'SYSTEM.ADMIN.STATISTICS.QUEUE'
 
+QUEUE_OPTIONS = 0
+QUEUE_GET_OPTIONS = MQGMO_NO_WAIT
+
 
 class StatsCollector(object):
     def __init__(self, check):
@@ -29,11 +32,15 @@ class StatsCollector(object):
         self.check = check
 
     def collect(self, queue_manager):
-        queue = Queue(queue_manager, STATISTICS_QUEUE_NAME)
+        queue = Queue(queue_manager, STATISTICS_QUEUE_NAME, QUEUE_OPTIONS)
         self.check.log.debug("Start stats collection")
+        get_opts = pymqi.GMO(
+            Options=QUEUE_GET_OPTIONS, Version=pymqi.CMQC.MQGMO_VERSION_2, MatchOptions=pymqi.CMQC.MQMO_MATCH_CORREL_ID
+        )
+        get_md = pymqi.MD()
         try:
             while True:
-                bin_message = queue.get()
+                bin_message = queue.get(None, get_md, get_opts)
                 message, header = CustomPCFExecute.unpack(bin_message)
 
                 if header.Command == MQCMD_STATISTICS_CHANNEL:

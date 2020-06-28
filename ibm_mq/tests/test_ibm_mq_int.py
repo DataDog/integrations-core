@@ -5,14 +5,16 @@ import os
 
 import mock
 import pytest
+from pymqi.CMQC import MQGMO_BROWSE_NEXT, MQOO_BROWSE
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.dev.utils import get_metadata_metrics, running_on_ci
 from datadog_checks.ibm_mq import IbmMqCheck
+from datadog_checks.ibm_mq.collectors.stats_collector import QUEUE_GET_OPTIONS, QUEUE_OPTIONS
 
 from . import common
-from .common import QUEUE_METRICS, assert_all_metrics
+from .common import CHANNEL_STATS_METRICS, QUEUE_METRICS, QUEUE_STATS_METRICS, assert_all_metrics
 
 pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration]
 
@@ -41,6 +43,44 @@ def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
 
     discoverable_tags = tags + ['channel:*']
     aggregator.assert_service_check('ibm_mq.channel', check.OK, tags=discoverable_tags, count=1)
+
+
+def test_stats_metrics(aggregator, instance, seed_data):
+    instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
+    instance['collect_statistics_metrics'] = True
+    check = IbmMqCheck('ibm_mq', {}, [instance])
+
+    # local: only browse, so that the test can run multiple time.
+    # ci: no browse, this test can/should only run once
+    if running_on_ci():
+        check.check(instance)
+    else:
+        with mock.patch(
+            'datadog_checks.ibm_mq.collectors.stats_collector.QUEUE_GET_OPTIONS', QUEUE_GET_OPTIONS | MQGMO_BROWSE_NEXT
+        ), mock.patch('datadog_checks.ibm_mq.collectors.stats_collector.QUEUE_OPTIONS', QUEUE_OPTIONS | MQOO_BROWSE):
+            check.check(instance)
+
+    for metric, metric_type in QUEUE_STATS_METRICS:
+        aggregator.assert_metric_has_tag_prefix(metric, 'queue:')
+        aggregator.assert_metric_has_tag_prefix(metric, 'queue_type:')
+        aggregator.assert_metric_has_tag_prefix(metric, 'definition_type:')
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()))
+
+    tag_groups = [
+        ['channel:GCP.A', 'channel_type:clusrcvr', 'connection_name:192.168.208.2', 'remote_q_mgr_name:QM2'],
+        ['channel:GCP.B', 'channel_type:clussdr', 'connection_name:192.168.208.2(1414)', 'remote_q_mgr_name:QM2'],
+    ]
+    for tags in tag_groups:
+        aggregator.assert_metric('ibm_mq.stats.channel.msgs', metric_type=aggregator.GAUGE, tags=tags)
+
+    for metric, metric_type in CHANNEL_STATS_METRICS:
+        aggregator.assert_metric_has_tag_prefix(metric, 'channel:')
+        aggregator.assert_metric_has_tag_prefix(metric, 'channel_type:')
+        aggregator.assert_metric_has_tag_prefix(metric, 'remote_q_mgr_name:')
+        aggregator.assert_metric_has_tag_prefix(metric, 'connection_name:')
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()))
+
+    assert_all_metrics(aggregator)
 
 
 def test_check_connection_name_one(aggregator, instance_with_connection_name):
@@ -210,5 +250,4 @@ def test_channel_stats_metrics(aggregator, instance):
         aggregator.assert_metric(metric, tags=tags)
         aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), tags=tags)
 
-    aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
