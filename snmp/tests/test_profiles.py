@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import logging
+
 import pytest
 
 from datadog_checks.base import ConfigurationError
@@ -48,14 +50,17 @@ from .metrics import (
 )
 
 
-def test_load_profiles():
+def test_load_profiles(caplog):
     instance = common.generate_instance_config([])
     check = SnmpCheck('snmp', {}, [instance])
+    caplog.at_level(logging.WARNING)
     for name, profile in check.profiles.items():
         try:
             check._config.refresh_with_profile(profile)
         except ConfigurationError as e:
             pytest.fail("Profile `{}` is not configured correctly: {}".format(name, e))
+        assert 'table has not metric_tags section.' not in caplog.text
+        caplog.clear()
 
 
 def run_profile_check(recording_name):

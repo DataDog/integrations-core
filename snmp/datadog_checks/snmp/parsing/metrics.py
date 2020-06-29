@@ -255,7 +255,7 @@ def _parse_table_metric(metric):
     table_batches = {}  # type: TableBatches
 
     if metric.get('metric_tags'):
-        for metric_tag in metric.get('metric_tags'):
+        for metric_tag in metric['metric_tags']:
             parsed_table_metric_tag = _parse_table_metric_tag(mib, parsed_table, metric_tag)
 
             if isinstance(parsed_table_metric_tag, ParsedColumnMetricTag):
@@ -278,9 +278,8 @@ def _parse_table_metric(metric):
     else:
         logger = logging.getLogger('snmp')
         logger.warning(
-            "{} table has not metric_tags section. If the table has multiple rows, metrics will be missing.".format(
-                metric['table']
-            )
+            "%s table has not metric_tags section. If the table has multiple rows, metrics may be missing.",
+            str(metric['table']),
         )
 
     # Then process symbols in the table.

@@ -88,7 +88,7 @@ def test_parse_metrics(lcd_mock, caplog):
     assert isinstance(foo, ParsedTableMetric)
     assert bar.name == 'bar'
     assert (
-        'foo_table table has not metric_tags section. If the table has multiple rows, metrics will be missing.'
+        'foo_table table has not metric_tags section. If the table has multiple rows, metrics may be missing.'
         in caplog.text
     )
 
