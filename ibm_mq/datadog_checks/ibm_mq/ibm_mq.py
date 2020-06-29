@@ -4,7 +4,6 @@
 from typing import Any
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
 from . import connection, errors
@@ -45,7 +44,7 @@ class IbmMqCheck(AgentCheck):
             return
 
         if self.is_metadata_collection_enabled():
-            self._collect_metadata()
+            self.set_metadata('version', self.queue_metric_collector._collect_metadata(queue_manager))
 
         try:
             self.channel_metric_collector.get_pcf_channel_metrics(queue_manager)
@@ -58,34 +57,3 @@ class IbmMqCheck(AgentCheck):
             getattr(self, metric_type)(metric_name, metric_value, tags=tags)
         else:
             self.log.warning("Unknown metric type `%s` for metric `%s`", metric_type, metric_name)
-
-    def _collect_metadata(self):
-        raw_version = self._get_version()
-        if not raw_version:
-            self.log.debug("Version not found in stdout")
-            return
-        self.log.debug('IBM MQ version: %s', raw_version)
-        self.set_metadata('version', raw_version)
-
-    def _get_version(self):
-
-        cmd = self.instance.get("version_output_cmd", "dspmqver")
-        try:
-            pc_out, pc_err, _ = get_subprocess_output(cmd, self.log, False)
-        except OSError as e:
-            self.log.debug("Error collecting IBM MQ version: %s", e)
-            return None
-
-        if pc_out is None:
-            return None
-        return self._parse_version(pc_out)
-
-    @staticmethod
-    def _parse_version(output):
-        for line in output.splitlines():
-            line = line.strip()
-            try:
-                if line.startswith("Version:"):
-                    return line.split()[1]
-            except BaseException:
-                return None

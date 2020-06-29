@@ -140,14 +140,6 @@ instances:
     #   SYSTEM.*: queue_type:system
     #   DEV.*: role:dev,queue_type:default
 
-    ## @param version_output_cmd - string - optional - default: dspmqver
-    ## Custom command to run dspmqver to collect IBM MQ version if applicable. The agent will try to run
-    ## the `dspmqver` command by default to collect the version, but if the command doesn't work or another 
-    ## command is needed (e.g. docker exec ibm_mq dspmqver) the version will not be collected. This will not 
-    ## affect the collection of any metrics. 
-    #
-    # version_output_cmd: dspmqver
-
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

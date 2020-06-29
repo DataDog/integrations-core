@@ -179,3 +179,34 @@ class QueueMetricCollector(object):
                     metric_full_name = '{}.queue.{}'.format(metrics.METRIC_PREFIX, metric_name)
                     metric_value = int(queue_info[pymqi_type])
                     self.send_metric(metric_type, metric_full_name, metric_value, tags)
+
+    def _collect_metadata(self, queue_manager):
+        raw_version = self._get_version(queue_manager)
+        if not raw_version:
+            self.log.debug("Version not found in stdout")
+            return
+        self.log.debug('IBM MQ version: %s', raw_version)
+        return raw_version
+        # self.set_metadata('version', raw_version)
+
+    def _get_version(self, queue_manager):
+
+        pcf = pymqi.PCFExecute(queue_manager)
+        resp = pcf.MQCMD_INQUIRE_Q_MGR()
+        try:
+            version = resp[0][2120].decode("utf-8")
+        except OSError as e:
+            self.log.debug("Error collecting IBM MQ version: %s", e)
+            return None
+
+        if version is None:
+            return None
+        return self._parse_version(version)
+
+    @staticmethod
+    def _parse_version(version):
+        output = ""
+        for i in range(0, len(version), 2):
+            pairs = version[i : i + 2].strip("0") if version[i] == "0" else version[i : i + 2]
+            output += pairs + "." if len(pairs) else "0."
+        return output[: len(output) - 1] if output[-1] == "." else output
