@@ -1,12 +1,22 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import datetime as dt
+
 from pymqi.CMQC import MQRC_NO_MSG_AVAILABLE
-from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_MQI, MQCMD_STATISTICS_Q
+from pymqi.CMQCFC import (
+    MQCAMO_START_DATE,
+    MQCAMO_START_TIME,
+    MQCMD_STATISTICS_CHANNEL,
+    MQCMD_STATISTICS_MQI,
+    MQCMD_STATISTICS_Q,
+)
 from six import iteritems
 
+from datadog_checks.base.utils.time import ensure_aware_datetime
 from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
 from datadog_checks.ibm_mq.stats_wrapper.queue_stats import QueueStats
+from datadog_checks.ibm_mq.utils import sanitize_strings
 
 from ..metrics import METRIC_PREFIX, channel_stats_metrics, queue_stats_metrics
 from ..stats_wrapper import ChannelStats
@@ -29,15 +39,30 @@ class StatsCollector(object):
         self.log = log
 
     def collect(self, queue_manager):
+        self.log.debug("Collect stats from %s", self.config.instance_creation_datetime)
         queue = Queue(queue_manager, STATISTICS_QUEUE_NAME)
-        self.log.debug("Start stats collection")
+
         try:
             while True:
-                # TODO: collect only from agent startup
                 bin_message = queue.get()
                 message, header = CustomPCFExecute.unpack(bin_message)
+
+                # date might contain extra chars, we only keep 10 first that match the format YYYY-MM-DD
+                start_date = sanitize_strings(message[MQCAMO_START_DATE][:10])
+                start_time = sanitize_strings(message[MQCAMO_START_TIME])  # date format YYYY-MM-DD
+
+                naive_start_datetime = dt.datetime.strptime('{} {}'.format(start_date, start_time), '%Y-%m-%d %H.%M.%S')
+                start_datetime = ensure_aware_datetime(naive_start_datetime)
+
+                if start_datetime < self.config.instance_creation_datetime:
+                    self.log.debug(
+                        "Skipping messages created before agent startup. " "(message time: %s, agent startup time: %s)",
+                        start_datetime,
+                        self.config.instance_creation_datetime,
+                    )
+                    continue
+
                 if header.Command == MQCMD_STATISTICS_CHANNEL:
-                    self.log.debug('collect channel stats')
                     self._collect_channel_stats(message)
                 elif header.Command == MQCMD_STATISTICS_MQI:
                     self.log.debug('MQCMD_STATISTICS_MQI not implemented yet')

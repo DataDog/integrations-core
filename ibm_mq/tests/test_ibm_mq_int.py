@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import datetime as dt
 import os
 
 import mock
@@ -10,6 +11,7 @@ from pymqi.CMQC import MQCC_FAILED, MQRC_NO_MSG_AVAILABLE
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.time import ensure_aware_datetime
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.ibm_mq import IbmMqCheck
 
@@ -194,6 +196,9 @@ def test_channel_stats_metrics(aggregator, instance):
     instance['collect_statistics_metrics'] = True
 
     check = IbmMqCheck('ibm_mq', {}, [instance])
+
+    # make sure time is before fixture messages start time
+    check.config.instance_creation_datetime = ensure_aware_datetime(dt.datetime(year=2000, month=1, day=1))
 
     with open(os.path.join(common.HERE, 'fixtures', 'statistics_channel.data'), 'rb') as channel_file, open(
         os.path.join(common.HERE, 'fixtures', 'statistics_queue.data'), 'rb'

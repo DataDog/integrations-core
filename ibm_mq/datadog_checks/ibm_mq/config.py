@@ -10,6 +10,7 @@ from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.base.utils.time import get_current_datetime
 
 try:
     import pymqi
@@ -130,6 +131,8 @@ class IBMMQConfig:
             raise ConfigurationError(
                 "mqcd_version must be a number between 1 and 9. {} found.".format(raw_mqcd_version)
             )
+
+        self.instance_creation_datetime = get_current_datetime()
 
     def add_queues(self, new_queues):
         # add queues without duplication
