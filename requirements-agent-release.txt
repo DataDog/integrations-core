@@ -6,7 +6,7 @@ datadog-airflow==1.4.0
 datadog-amazon-msk==1.1.0
 datadog-ambari==1.4.0; sys_platform != 'win32'
 datadog-apache==1.13.0
-datadog-aspdotnet==1.5.0; sys_platform == 'win32'
+datadog-aspdotnet==1.6.0; sys_platform == 'win32'
 datadog-btrfs==1.10.0; sys_platform != 'win32'
 datadog-cacti==1.7.0; sys_platform == 'linux2'
 datadog-cassandra-nodetool==1.6.0
