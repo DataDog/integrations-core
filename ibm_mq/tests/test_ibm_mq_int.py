@@ -23,7 +23,6 @@ pytestmark = [pytest.mark.usefixtures("dd_environment"), pytest.mark.integration
 
 def test_check_metrics_and_service_checks(aggregator, instance, seed_data):
     instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
-    instance['collect_statistics_metrics'] = True
     check = IbmMqCheck('ibm_mq', {}, [instance])
 
     check.check(instance)
@@ -193,7 +192,6 @@ def test_collect_statistics_from_events(aggregator, instance):
 
 def test_channel_stats_metrics(aggregator, instance):
     instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
-    instance['collect_statistics_metrics'] = True
 
     check = IbmMqCheck('ibm_mq', {}, [instance])
 
