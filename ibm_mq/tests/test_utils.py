@@ -10,12 +10,12 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize(
-    'input,expected',
+    'input_string,expected',
     [
         pytest.param('abc\x00\x00\x00\x00', 'abc', id='strip_null_chars'),
         pytest.param('   123    ', '123', id='strip_whitespaces'),
         pytest.param('   abc123    \x00\x00\x00\x00', 'abc123', id='strip_whitespaces_and_null_chars'),
     ],
 )
-def test_sanitize_strings(input, expected):
-    assert expected == sanitize_strings(input)
+def test_sanitize_strings(input_string, expected):
+    assert expected == sanitize_strings(input_string)
