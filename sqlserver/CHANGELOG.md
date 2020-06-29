@@ -4,7 +4,7 @@
 
 * [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
 * [Added] Add default `freetds` driver for Docker Agent. See [#6636](https://github.com/DataDog/integrations-core/pull/6636).
-* [Added] Add sqlserver log support. See [#6625](https://github.com/DataDog/integrations-core/pull/6625).
+* [Added] Add log support. See [#6625](https://github.com/DataDog/integrations-core/pull/6625).
 * [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
 
 ## 1.17.0 / 2020-05-17
