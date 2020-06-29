@@ -47,4 +47,4 @@ class QueueInfo(object):
 
 class QueueStats(object):
     def __init__(self, raw_message):
-        self.channels = [QueueInfo(channel) for channel in raw_message[MQGACF_Q_STATISTICS_DATA]]
+        self.queues = [QueueInfo(channel) for channel in raw_message[MQGACF_Q_STATISTICS_DATA]]

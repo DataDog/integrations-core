@@ -37,6 +37,7 @@ class StatsCollector(object):
                 bin_message = queue.get()
                 message, header = CustomPCFExecute.unpack(bin_message)
                 if header.Command == MQCMD_STATISTICS_CHANNEL:
+                    self.log.debug('collect channel stats')
                     self._collect_channel_stats(message)
                 elif header.Command == MQCMD_STATISTICS_MQI:
                     self.log.debug('MQCMD_STATISTICS_MQI not implemented yet')
@@ -54,6 +55,7 @@ class StatsCollector(object):
 
     def _collect_channel_stats(self, message):
         channel_stats = ChannelStats(message)
+        self.log.debug('Collect channel stats. Number of channels: %s', len(channel_stats.channels))
         for channel_info in channel_stats.channels:
             tags = self.config.tags_no_channel + [
                 'channel:{}'.format(channel_info.name),
@@ -67,7 +69,8 @@ class StatsCollector(object):
 
     def _collect_queue_stats(self, message):
         queue_stats = QueueStats(message)
-        for queue_info in queue_stats.channels:
+        self.log.debug('Collect queue stats. Number of queues: %s', len(queue_stats.queues))
+        for queue_info in queue_stats.queues:
             tags = self.config.tags_no_channel + [
                 'queue:{}'.format(queue_info.name),
                 'queue_type:{}'.format(queue_info.type),

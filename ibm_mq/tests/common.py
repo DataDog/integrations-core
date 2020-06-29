@@ -46,6 +46,7 @@ INSTANCE = {
     'queues': [QUEUE],
     'channels': [CHANNEL, BAD_CHANNEL],
     'tags': ['foo:bar'],
+    'collect_statistics_metrics': True,
 }
 
 INSTANCE_WITH_CONNECTION_NAME = {
@@ -88,6 +89,7 @@ INSTANCE_COLLECT_ALL = {
     'username': USERNAME,
     'password': PASSWORD,
     'auto_discover_queues': True,
+    'collect_statistics_metrics': True,
     'channels': [CHANNEL, BAD_CHANNEL],
 }
 
