@@ -6,7 +6,7 @@
 * [Fixed] Refactor to make encoding more consistent. See [#6995](https://github.com/DataDog/integrations-core/pull/6995).
 * [Fixed] Ensure bytes for ssl connection. See [#6913](https://github.com/DataDog/integrations-core/pull/6913).
 * [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
-* [Fixed] IBM mq refactor. See [#6752](https://github.com/DataDog/integrations-core/pull/6752).
+* [Fixed] Move metrics collection logic to separate files. See [#6752](https://github.com/DataDog/integrations-core/pull/6752).
 
 ## 3.6.0 / 2020-05-17
 

@@ -4,7 +4,7 @@
 
 * [Added] Refactor to use Agent 6+ signature. See [#6906](https://github.com/DataDog/integrations-core/pull/6906).
 * [Fixed] Fix debug log line for job metrics. See [#6700](https://github.com/DataDog/integrations-core/pull/6700).
-* [Fixed] added test for persistent volume without a storage class + fix. See [#6615](https://github.com/DataDog/integrations-core/pull/6615).
+* [Fixed] Fix issue when the storage class of a persistent volume is empty and add test. See [#6615](https://github.com/DataDog/integrations-core/pull/6615).
 
 ## 5.4.1 / 2020-05-21
 

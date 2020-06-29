@@ -2,11 +2,11 @@
 
 ## 5.0.0 / 2020-06-29
 
-* [Added] postgres specs. See [#6547](https://github.com/DataDog/integrations-core/pull/6547).
+* [Added] Add config specs. See [#6547](https://github.com/DataDog/integrations-core/pull/6547).
 * [Fixed] Remove references to `use_psycopg2`. See [#6975](https://github.com/DataDog/integrations-core/pull/6975).
 * [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
-* [Fixed] PG extract config to new class. See [#6500](https://github.com/DataDog/integrations-core/pull/6500).
-* [Changed] PG relations limit config. See [#6725](https://github.com/DataDog/integrations-core/pull/6725).
+* [Fixed] Extract config to new class. See [#6500](https://github.com/DataDog/integrations-core/pull/6500).
+* [Changed] Add `max_relations` config. See [#6725](https://github.com/DataDog/integrations-core/pull/6725).
 
 ## 4.0.0 / 2020-05-17
 
