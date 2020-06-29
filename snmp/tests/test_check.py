@@ -640,6 +640,7 @@ def test_profile_sysoid_list(aggregator, caplog):
 
         tags = common_tags + ['snmp_oid:{}'.format(device['sysobjectid'])]
         aggregator.assert_metric('snmp.IAmACounter32', tags=tags, count=1)
+        aggregator.assert_metric('snmp.devices_monitored', tags=tags, count=1, value=1)
 
         aggregator.assert_all_metrics_covered()
 
@@ -655,6 +656,7 @@ def test_profile_sysoid_list(aggregator, caplog):
         check.check(instance)
 
         assert 'No profile matching sysObjectID 1.3.6.1.4.1.9.1.1745' in caplog.text
+        aggregator.assert_metric('snmp.devices_monitored', tags=common.CHECK_TAGS, count=1, value=1)
 
         aggregator.assert_all_metrics_covered()
 
