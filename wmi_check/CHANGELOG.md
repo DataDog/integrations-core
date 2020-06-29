@@ -1,5 +1,11 @@
 # CHANGELOG - wmi_check
 
+## 1.9.0 / 2020-06-29
+
+* [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
+* [Added] Support multiple properties in tag_by. See [#6614](https://github.com/DataDog/integrations-core/pull/6614).
+* [Fixed] Remove multi-instances support. See [#6325](https://github.com/DataDog/integrations-core/pull/6325).
+
 ## 1.8.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

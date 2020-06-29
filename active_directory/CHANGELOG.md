@@ -1,5 +1,10 @@
 # CHANGELOG - active_directory
 
+## 1.9.0 / 2020-06-29
+
+* [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+
 ## 1.8.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

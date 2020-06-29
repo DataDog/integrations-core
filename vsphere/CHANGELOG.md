@@ -1,5 +1,14 @@
 # CHANGELOG - vsphere
 
+## 5.3.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Added] Add collect events fallback. See [#6658](https://github.com/DataDog/integrations-core/pull/6658).
+* [Added] Filter by allowed events. See [#6659](https://github.com/DataDog/integrations-core/pull/6659).
+* [Fixed] Provide helpful error message when releasing a project with missing or improper tags. See [#6861](https://github.com/DataDog/integrations-core/pull/6861).
+* [Fixed] Move event to non legacy folder. See [#6751](https://github.com/DataDog/integrations-core/pull/6751).
+* [Fixed] Avoid calling get_latest_event_timestamp. See [#6656](https://github.com/DataDog/integrations-core/pull/6656).
+
 ## 5.2.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

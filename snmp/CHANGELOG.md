@@ -1,5 +1,16 @@
 # CHANGELOG - snmp
 
+## 3.5.0 / 2020-06-29
+
+* [Added] Add regex match support for Tables. See [#6951](https://github.com/DataDog/integrations-core/pull/6951).
+* [Added] Add snmp.devices_monitored metric. See [#6941](https://github.com/DataDog/integrations-core/pull/6941).
+* [Added] Add IF-MIB metrics to the Meraki profile. See [#6905](https://github.com/DataDog/integrations-core/pull/6905).
+* [Added] Add RTT metrics. See [#6872](https://github.com/DataDog/integrations-core/pull/6872).
+* [Fixed] Clean up of unused extends in meraki cloud profile. See [#6981](https://github.com/DataDog/integrations-core/pull/6981).
+* [Fixed] [Refactor] Add device abstraction. See [#6953](https://github.com/DataDog/integrations-core/pull/6953).
+* [Fixed] [Refactor] Clean up batching implementation. See [#6952](https://github.com/DataDog/integrations-core/pull/6952).
+* [Fixed] Add index tagging to cfwConnectionStatValue. See [#6897](https://github.com/DataDog/integrations-core/pull/6897).
+
 ## 3.4.0 / 2020-06-11
 
 * [Added] Add NetApp profile. See [#6841](https://github.com/DataDog/integrations-core/pull/6841).
