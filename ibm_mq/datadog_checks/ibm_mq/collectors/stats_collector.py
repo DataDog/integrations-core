@@ -36,7 +36,10 @@ class StatsCollector(object):
         try:
             while True:
                 bin_message = queue.get()
+                self.log.trace('Stats binary message: %s', bin_message)
+
                 message, header = CustomPCFExecute.unpack(bin_message)
+                self.log.trace('Stats unpacked message: %s, Stats unpacked header: %s', message, header)
 
                 stats = self.get_stats_object(message, header)
 
