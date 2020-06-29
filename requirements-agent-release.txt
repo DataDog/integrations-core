@@ -101,7 +101,7 @@ datadog-powerdns-recursor==1.7.0
 datadog-presto==2.1.0
 datadog-process==1.15.0
 datadog-prometheus==3.3.0
-datadog-proxysql==1.1.0
+datadog-proxysql==1.2.0
 datadog-rabbitmq==1.14.0
 datadog-redisdb==2.1.0
 datadog-rethinkdb==1.1.0
