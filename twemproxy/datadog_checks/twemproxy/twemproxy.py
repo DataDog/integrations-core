@@ -103,7 +103,7 @@ class Twemproxy(AgentCheck):
 
         if version is None:
             self.log.warning('Error collecting Twemproxy version')
-        else:
+        elif self.is_metadata_collection_enabled():
             self.set_metadata('version', version)
 
     def _get_data(self, instance):
