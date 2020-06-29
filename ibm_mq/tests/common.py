@@ -4,8 +4,6 @@
 
 import os
 
-import pytest
-
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 

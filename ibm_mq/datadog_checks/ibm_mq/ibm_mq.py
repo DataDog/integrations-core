@@ -71,6 +71,12 @@ class IbmMqCheck(AgentCheck):
             try:
                 metric_value = int(properties[pymqi_type])
             except ValueError as e:
-                self.log.debug("Cannot convert `%s` to int for metric `%s` ang tags `%s`: %s", properties[pymqi_type], metric_name, tags, e)
+                self.log.debug(
+                    "Cannot convert `%s` to int for metric `%s` ang tags `%s`: %s",
+                    properties[pymqi_type],
+                    metric_name,
+                    tags,
+                    e,
+                )
                 return
             self.send_metric(metric_type, metric_full_name, metric_value, tags)
