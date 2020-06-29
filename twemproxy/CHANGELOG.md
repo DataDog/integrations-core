@@ -1,5 +1,9 @@
 # CHANGELOG - twemproxy
 
+## 1.7.0 / 2020-06-29
+
+* [Added] Collect version metadata. See [#6899](https://github.com/DataDog/integrations-core/pull/6899).
+
 ## 1.6.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
