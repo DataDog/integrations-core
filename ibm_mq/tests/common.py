@@ -34,8 +34,6 @@ COMPOSE_FILE_NAME = 'docker-compose-v{}.yml'.format(MQ_COMPOSE_VERSION)
 
 COMPOSE_FILE_PATH = os.path.join(COMPOSE_DIR, COMPOSE_FILE_NAME)
 
-requires_cluster = pytest.mark.skipif(not IS_CLUSTER, reason='Requires cluster setup')
-
 INSTANCE = {
     'channel': CHANNEL,
     'queue_manager': QUEUE_MANAGER,
