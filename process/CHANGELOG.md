@@ -1,5 +1,9 @@
 # CHANGELOG - process
 
+## 1.15.0 / 2020-06-29
+
+* [Added] Config specs and new agent signature. See [#6781](https://github.com/DataDog/integrations-core/pull/6781).
+
 ## 1.14.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
