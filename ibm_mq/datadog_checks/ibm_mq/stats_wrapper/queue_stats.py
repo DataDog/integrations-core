@@ -36,7 +36,7 @@ def get_queue_type(raw_type):
 
 
 def get_queue_def_type(raw_type):
-    return QUEUE_TYPE_TO_STR.get(raw_type, 'unknown')
+    return QUEUE_DEFINITION_TYPE_TO_STR.get(raw_type, 'unknown')
 
 
 class QueueInfo(object):

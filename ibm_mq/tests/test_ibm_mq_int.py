@@ -190,7 +190,7 @@ def test_collect_statistics_from_events(aggregator, instance):
     assert_all_metrics(aggregator)
 
 
-def test_channel_stats_metrics(aggregator, instance):
+def test_stats_metrics(aggregator, instance):
     instance['mqcd_version'] = os.getenv('IBM_MQ_VERSION')
 
     check = IbmMqCheck('ibm_mq', {}, [instance])
@@ -228,7 +228,7 @@ def test_channel_stats_metrics(aggregator, instance):
         aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), tags=channel_tags)
 
     queue_tags = common_tags + [
-        'definition_type:local',
+        'definition_type:predefined',
         'queue:SYSTEM.CHLAUTH.DATA.QUEUE',
         'queue_type:local',
     ]
