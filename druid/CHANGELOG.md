@@ -3,7 +3,7 @@
 ## 1.4.0 / 2020-06-29
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
-* [Added] druid config specs. See [#6728](https://github.com/DataDog/integrations-core/pull/6728).
+* [Added] Add config specs. See [#6728](https://github.com/DataDog/integrations-core/pull/6728).
 * [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
 
 ## 1.3.0 / 2020-05-17
@@ -27,4 +27,3 @@
 
 * [Added] Adhere to logging call convention. See [#4735](https://github.com/DataDog/integrations-core/pull/4735).
 * [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
-
