@@ -68,5 +68,9 @@ class IbmMqCheck(AgentCheck):
             if pymqi_type not in properties:
                 self.log.debug("MQ type `%s` not found in properties for metric `%s` and tags `%s`", metric_name, tags)
                 continue
-            metric_value = int(properties[pymqi_type])
+            try:
+                metric_value = int(properties[pymqi_type])
+            except ValueError as e:
+                self.log.debug("Cannot convert `%s` to int for metric `%s` ang tags `%s`: %s", properties[pymqi_type], metric_name, tags, e)
+                return
             self.send_metric(metric_type, metric_full_name, metric_value, tags)
