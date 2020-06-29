@@ -39,7 +39,7 @@ datadog-external-dns==1.1.0
 datadog-flink==1.2.1
 datadog-fluentd==1.9.0
 datadog-gearmand==1.6.0; sys_platform != 'win32'
-datadog-gitlab-runner==2.8.0
+datadog-gitlab-runner==2.9.0
 datadog-gitlab==4.1.0
 datadog-go-expvar==1.9.0
 datadog-gunicorn==1.11.0; sys_platform != 'win32'
