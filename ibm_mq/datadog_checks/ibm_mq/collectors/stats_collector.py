@@ -1,22 +1,14 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import datetime as dt
 
 from pymqi.CMQC import MQRC_NO_MSG_AVAILABLE
-from pymqi.CMQCFC import (
-    MQCAMO_START_DATE,
-    MQCAMO_START_TIME,
-    MQCMD_STATISTICS_CHANNEL,
-    MQCMD_STATISTICS_MQI,
-    MQCMD_STATISTICS_Q,
-)
+from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_MQI, MQCMD_STATISTICS_Q
 from six import iteritems
 
-from datadog_checks.base.utils.time import ensure_aware_datetime
 from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
+from datadog_checks.ibm_mq.stats_wrapper.base_stats import BaseStats
 from datadog_checks.ibm_mq.stats_wrapper.queue_stats import QueueStats
-from datadog_checks.ibm_mq.utils import sanitize_strings
 
 from ..metrics import METRIC_PREFIX, channel_stats_metrics, queue_stats_metrics
 from ..stats_wrapper import ChannelStats
@@ -47,27 +39,20 @@ class StatsCollector(object):
                 bin_message = queue.get()
                 message, header = CustomPCFExecute.unpack(bin_message)
 
-                # date might contain extra chars, we only keep 10 first that match the format YYYY-MM-DD
-                start_date = sanitize_strings(message[MQCAMO_START_DATE][:10])
-                start_time = sanitize_strings(message[MQCAMO_START_TIME])  # date format YYYY-MM-DD
+                stats = self.get_stats_object(message, header)
 
-                naive_start_datetime = dt.datetime.strptime('{} {}'.format(start_date, start_time), '%Y-%m-%d %H.%M.%S')
-                start_datetime = ensure_aware_datetime(naive_start_datetime)
-
-                if start_datetime < self.config.instance_creation_datetime:
+                if stats.start_datetime < self.config.instance_creation_datetime:
                     self.log.debug(
-                        "Skipping messages created before agent startup. " "(message time: %s, agent startup time: %s)",
-                        start_datetime,
+                        "Skipping messages created before agent startup. Message time: %s / Agent startup time: %s",
+                        stats.start_datetime,
                         self.config.instance_creation_datetime,
                     )
                     continue
 
-                if header.Command == MQCMD_STATISTICS_CHANNEL:
-                    self._collect_channel_stats(message)
-                elif header.Command == MQCMD_STATISTICS_MQI:
-                    self.log.debug('MQCMD_STATISTICS_MQI not implemented yet')
-                elif header.Command == MQCMD_STATISTICS_Q:
-                    self._collect_queue_stats(message)
+                if isinstance(stats, ChannelStats):
+                    self._collect_channel_stats(stats)
+                elif isinstance(stats, QueueStats):
+                    self._collect_queue_stats(stats)
                 else:
                     self.log.debug('Unknown/NotImplemented command: %s', header.Command)
         except pymqi.MQMIError as err:
@@ -78,8 +63,7 @@ class StatsCollector(object):
         finally:
             queue.close()
 
-    def _collect_channel_stats(self, message):
-        channel_stats = ChannelStats(message)
+    def _collect_channel_stats(self, channel_stats):
         self.log.debug('Collect channel stats. Number of channels: %s', len(channel_stats.channels))
         for channel_info in channel_stats.channels:
             tags = self.config.tags_no_channel + [
@@ -92,8 +76,7 @@ class StatsCollector(object):
             metrics_map = channel_stats_metrics()
             self._submit_metrics_from_properties(prefix, channel_info.properties, metrics_map, tags)
 
-    def _collect_queue_stats(self, message):
-        queue_stats = QueueStats(message)
+    def _collect_queue_stats(self, queue_stats):
         self.log.debug('Collect queue stats. Number of queues: %s', len(queue_stats.queues))
         for queue_info in queue_stats.queues:
             tags = self.config.tags_no_channel + [
@@ -113,3 +96,15 @@ class StatsCollector(object):
                 continue
             metric_value = int(properties[pymqi_type])
             self.gauge(metric_full_name, metric_value, tags=tags)
+
+    @staticmethod
+    def get_stats_object(message, header):
+        if header.Command == MQCMD_STATISTICS_CHANNEL:
+            stats = ChannelStats(message)
+        elif header.Command == MQCMD_STATISTICS_MQI:
+            stats = BaseStats(message)
+        elif header.Command == MQCMD_STATISTICS_Q:
+            stats = QueueStats(message)
+        else:
+            stats = BaseStats(message)
+        return stats

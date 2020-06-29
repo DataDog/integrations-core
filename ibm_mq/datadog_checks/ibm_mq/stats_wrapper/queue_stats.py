@@ -4,6 +4,8 @@
 from pymqi.CMQC import MQCA_Q_NAME, MQIA_DEFINITION_TYPE, MQIA_Q_TYPE
 from pymqi.CMQCFC import MQGACF_Q_STATISTICS_DATA
 
+from datadog_checks.ibm_mq.stats_wrapper.base_stats import BaseStats
+
 from ..utils import sanitize_strings
 
 try:
@@ -45,6 +47,7 @@ class QueueInfo(object):
         self.properties = raw_properties
 
 
-class QueueStats(object):
+class QueueStats(BaseStats):
     def __init__(self, raw_message):
+        super().__init__(raw_message)
         self.queues = [QueueInfo(channel) for channel in raw_message[MQGACF_Q_STATISTICS_DATA]]

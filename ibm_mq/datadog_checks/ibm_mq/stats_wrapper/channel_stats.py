@@ -4,6 +4,8 @@
 from pymqi.CMQC import MQCA_REMOTE_Q_MGR_NAME
 from pymqi.CMQCFC import MQCACH_CHANNEL_NAME, MQCACH_CONNECTION_NAME, MQGACF_CHL_STATISTICS_DATA, MQIACH_CHANNEL_TYPE
 
+from datadog_checks.ibm_mq.stats_wrapper.base_stats import BaseStats
+
 from ..utils import sanitize_strings
 
 try:
@@ -35,6 +37,7 @@ class ChannelInfo(object):
         self.properties = raw_properties
 
 
-class ChannelStats(object):
+class ChannelStats(BaseStats):
     def __init__(self, raw_message):
+        super().__init__(raw_message)
         self.channels = [ChannelInfo(channel) for channel in raw_message[MQGACF_CHL_STATISTICS_DATA]]
