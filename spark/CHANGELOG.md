@@ -1,5 +1,10 @@
 # CHANGELOG - spark
 
+## 1.13.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Added] Add config specs. See [#6921](https://github.com/DataDog/integrations-core/pull/6921).
+
 ## 1.12.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
