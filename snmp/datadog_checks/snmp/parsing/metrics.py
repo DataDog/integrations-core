@@ -4,6 +4,7 @@
 """
 Helpers for parsing the `metrics` section of a config file.
 """
+import logging
 from typing import Dict, List, NamedTuple, Sequence, TypedDict, Union, cast
 
 from datadog_checks.base import ConfigurationError
@@ -142,8 +143,6 @@ def _parse_metric(metric):
         if 'symbols' not in metric:
             raise ConfigurationError('When specifying a table, you must specify a list of symbols')
         metric = cast(TableMetric, metric)
-        if not metric.get('metric_tags'):
-            raise ConfigurationError('When specifying a table, you must specify at least one additional tag')
         return _parse_table_metric(metric)
 
     raise ConfigurationError('When specifying a MIB, you must specify either a table or a symbol')
@@ -255,26 +254,34 @@ def _parse_table_metric(metric):
     index_mappings = []
     table_batches = {}  # type: TableBatches
 
-    for metric_tag in metric.get('metric_tags', []):
-        parsed_table_metric_tag = _parse_table_metric_tag(mib, parsed_table, metric_tag)
+    if metric.get('metric_tags'):
+        for metric_tag in metric.get('metric_tags'):
+            parsed_table_metric_tag = _parse_table_metric_tag(mib, parsed_table, metric_tag)
 
-        if isinstance(parsed_table_metric_tag, ParsedColumnMetricTag):
-            oids_to_resolve.update(parsed_table_metric_tag.oids_to_resolve)
-            column_tags.extend(parsed_table_metric_tag.column_tags)
-            table_batches = merge_table_batches(table_batches, parsed_table_metric_tag.table_batches)
+            if isinstance(parsed_table_metric_tag, ParsedColumnMetricTag):
+                oids_to_resolve.update(parsed_table_metric_tag.oids_to_resolve)
+                column_tags.extend(parsed_table_metric_tag.column_tags)
+                table_batches = merge_table_batches(table_batches, parsed_table_metric_tag.table_batches)
 
-        else:
-            index_tags.extend(parsed_table_metric_tag.index_tags)
+            else:
+                index_tags.extend(parsed_table_metric_tag.index_tags)
 
-            for index, mapping in parsed_table_metric_tag.index_mappings.items():
-                # Need to do manual resolution.
-                for symbol in metric['symbols']:
-                    index_mappings.append(IndexMapping(symbol['name'], index=index, mapping=mapping))
+                for index, mapping in parsed_table_metric_tag.index_mappings.items():
+                    # Need to do manual resolution.
+                    for symbol in metric['symbols']:
+                        index_mappings.append(IndexMapping(symbol['name'], index=index, mapping=mapping))
 
-                for tag in metric.get('metric_tags', []):
-                    if 'column' in tag:
-                        tag = cast(ColumnTableMetricTag, tag)
-                        index_mappings.append(IndexMapping(tag['column']['name'], index=index, mapping=mapping))
+                    for tag in metric.get('metric_tags', []):
+                        if 'column' in tag:
+                            tag = cast(ColumnTableMetricTag, tag)
+                            index_mappings.append(IndexMapping(tag['column']['name'], index=index, mapping=mapping))
+    else:
+        logger = logging.getLogger('snmp')
+        logger.warning(
+            "{} table has not metric_tags section. If the table has multiple rows, metrics will be missing.".format(
+                metric['table']
+            )
+        )
 
     # Then process symbols in the table.
 

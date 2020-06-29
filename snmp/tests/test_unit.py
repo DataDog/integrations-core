@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import copy
+import logging
 import os
 import time
 import weakref
@@ -34,7 +35,7 @@ pytestmark = pytest.mark.unit
 
 
 @mock.patch("datadog_checks.snmp.pysnmp_types.lcd")
-def test_parse_metrics(lcd_mock):
+def test_parse_metrics(lcd_mock, caplog):
     # type: (Any) -> None
     lcd_mock.configure.return_value = ('addr', None)
 
@@ -76,9 +77,20 @@ def test_parse_metrics(lcd_mock):
         config.parse_metrics(metrics)
 
     # MIB with table and symbols but no metric_tags
+    caplog.at_level(logging.WARNING)
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"]}]
-    with pytest.raises(ConfigurationError):
-        config.parse_metrics(metrics)
+    _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
+    assert len(next_oids) == 2
+    assert len(parsed_metrics) == 2
+    foo, bar = parsed_metrics
+    assert isinstance(foo, ParsedTableMetric)
+    assert foo.name == 'foo'
+    assert isinstance(foo, ParsedTableMetric)
+    assert bar.name == 'bar'
+    assert (
+        'foo_table table has not metric_tags section. If the table has multiple rows, metrics will be missing.'
+        in caplog.text
+    )
 
     # MIB with table, symbols, bad metrics_tags
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"], "metric_tags": [{}]}]
