@@ -1,5 +1,10 @@
 # CHANGELOG - Nfsstat
 
+## 1.6.0 / 2020-06-29
+
+* [Added] Avoid logging warnings if AutoFS is enabled. See [#6903](https://github.com/DataDog/integrations-core/pull/6903).
+* [Added] Add specs and use new signature. See [#6780](https://github.com/DataDog/integrations-core/pull/6780).
+
 ## 1.5.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
