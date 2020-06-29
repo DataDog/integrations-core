@@ -108,10 +108,12 @@ def channel_status_metrics():
 
 def channel_stats_metrics():
     return {
-        # TODO: Should be count
+        # Most stats metrics are count since we want to add up the values
+        # if there are multiple messages of same type for a single check run.
         'msgs': (pymqi.CMQCFC.MQIAMO_MSGS, COUNT),
         'bytes': (pymqi.CMQCFC.MQIAMO64_BYTES, COUNT),
         'put_retries': (pymqi.CMQCFC.MQIAMO_PUT_RETRIES, COUNT),
+
         # Following metrics are currently not covered by e2e tests
         'full_batches': (pymqi.CMQCFC.MQIAMO_FULL_BATCHES, COUNT),
         'incomplete_batches': (pymqi.CMQCFC.MQIAMO_INCOMPLETE_BATCHES, COUNT),
