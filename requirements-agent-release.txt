@@ -114,7 +114,7 @@ datadog-snmp==3.5.0
 datadog-solr==1.4.1
 datadog-spark==1.13.0
 datadog-sqlserver==1.18.0
-datadog-squid==1.6.0
+datadog-squid==1.7.0
 datadog-ssh-check==1.11.0
 datadog-statsd==1.4.0
 datadog-supervisord==1.6.0
