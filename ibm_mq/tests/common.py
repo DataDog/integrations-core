@@ -222,16 +222,11 @@ OPTIONAL_METRICS = [
 OPTIONAL_METRICS.extend([m for m, _ in CHANNEL_STATS_METRICS + QUEUE_STATS_METRICS])
 
 
-def assert_all_metrics(aggregator, extra_metrics=None):
-    metrics = METRICS[:]
-    if extra_metrics:
-        metrics += extra_metrics
-
-    for metric, metric_type in metrics:
+def assert_all_metrics(aggregator):
+    for metric, metric_type in METRICS:
         aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()))
 
-    optional_metrics = set(OPTIONAL_METRICS) - set(metrics)
-    for metric in optional_metrics:
+    for metric in OPTIONAL_METRICS:
         aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
