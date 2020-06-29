@@ -77,7 +77,7 @@ def test_parse_metrics(lcd_mock):
 
     # MIB with table and symbols but no metric_tags
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"]}]
-    with pytest.raises(Exception):
+    with pytest.raises(ConfigurationError):
         config.parse_metrics(metrics)
 
     # MIB with table, symbols, bad metrics_tags
