@@ -1,5 +1,10 @@
 # CHANGELOG - haproxy
 
+## 2.10.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Fixed] Fix version parsing with haproxy enterprise version. See [#6774](https://github.com/DataDog/integrations-core/pull/6774).
+
 ## 2.9.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
