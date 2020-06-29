@@ -65,11 +65,14 @@ def seed_data():
 
 
 def publish():
+    # Late import to not require it for e2e
     import pymqi
 
-    qm = get_queue_manager()
+    conn_info = "%s(%s)" % (common.HOST, common.PORT)
 
-    queue = pymqi.Queue(qm, common.QUEUE)
+    qmgr = pymqi.connect(common.QUEUE_MANAGER, common.CHANNEL, conn_info, common.USERNAME, common.PASSWORD)
+
+    queue = pymqi.Queue(qmgr, common.QUEUE)
 
     for i in range(10):
         try:
@@ -79,19 +82,22 @@ def publish():
         except Exception as e:
             log.info("exception publishing: %s", e)
             queue.close()
-            qm.disconnect()
+            qmgr.disconnect()
             return
 
     queue.close()
-    qm.disconnect()
+    qmgr.disconnect()
 
 
 def consume():
+    # Late import to not require it for e2e
     import pymqi
 
-    queue_manager = get_queue_manager()
+    conn_info = "%s(%s)" % (common.HOST, common.PORT)
 
-    queue = pymqi.Queue(queue_manager, common.QUEUE)
+    qmgr = pymqi.connect(common.QUEUE_MANAGER, common.CHANNEL, conn_info, common.USERNAME, common.PASSWORD)
+
+    queue = pymqi.Queue(qmgr, common.QUEUE)
 
     for _ in range(10):
         try:
@@ -101,23 +107,13 @@ def consume():
             if not re.search("MQRC_NO_MSG_AVAILABLE", e.errorAsString()):
                 print(e)
                 queue.close()
-                queue_manager.disconnect()
+                qmgr.disconnect()
                 return
             else:
                 pass
 
     queue.close()
-    queue_manager.disconnect()
-
-
-def get_queue_manager():
-    # Late import to not require it for e2e
-    import pymqi
-
-    conn_info = "%s(%s)" % (common.HOST, common.PORT)
-    queue_manager = pymqi.connect(common.QUEUE_MANAGER, common.CHANNEL, conn_info, common.USERNAME, common.PASSWORD)
-
-    return queue_manager
+    qmgr.disconnect()
 
 
 @pytest.fixture(scope='session')
