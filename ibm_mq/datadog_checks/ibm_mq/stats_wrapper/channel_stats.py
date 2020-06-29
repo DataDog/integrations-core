@@ -39,5 +39,5 @@ class ChannelInfo(object):
 
 class ChannelStats(BaseStats):
     def __init__(self, raw_message):
-        super().__init__(raw_message)
+        super(ChannelStats, self).__init__(raw_message)
         self.channels = [ChannelInfo(channel) for channel in raw_message[MQGACF_CHL_STATISTICS_DATA]]

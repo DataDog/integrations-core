@@ -223,7 +223,7 @@ def assert_all_metrics(aggregator):
     for metric, metric_type in METRICS:
         aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()))
 
-    for metric in OPTIONAL_METRICS:
+    for metric, metric_type in OPTIONAL_METRICS:
         aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), at_least=0)
 
     aggregator.assert_all_metrics_covered()
