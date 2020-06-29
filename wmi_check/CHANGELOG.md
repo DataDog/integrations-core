@@ -4,7 +4,7 @@
 
 * [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
 * [Added] Support multiple properties in tag_by. See [#6614](https://github.com/DataDog/integrations-core/pull/6614).
-* [Fixed] wmi check to not use instance. See [#6325](https://github.com/DataDog/integrations-core/pull/6325).
+* [Fixed] Remove multi-instances support. See [#6325](https://github.com/DataDog/integrations-core/pull/6325).
 
 ## 1.8.0 / 2020-05-17
 
