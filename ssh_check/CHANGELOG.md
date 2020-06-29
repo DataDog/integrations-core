@@ -1,5 +1,10 @@
 # CHANGELOG - ssh_check
 
+## 1.11.1 / 2020-06-29
+
+* [Fixed] Add config specs. See [#6923](https://github.com/DataDog/integrations-core/pull/6923).
+* [Fixed] Agent6 style init. See [#6924](https://github.com/DataDog/integrations-core/pull/6924).
+
 ## 1.11.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

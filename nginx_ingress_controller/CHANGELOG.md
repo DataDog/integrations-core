@@ -1,5 +1,10 @@
 # CHANGELOG - nginx-ingress-controller
 
+## 1.5.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+
 ## 1.4.0 / 2020-06-12
 
 * [Added] Add flag to collect subset of histogram metrics. See [#6860](https://github.com/DataDog/integrations-core/pull/6860).

@@ -1,5 +1,11 @@
 # CHANGELOG - rabbitmq
 
+## 1.15.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Added] Add head_message_timestamp metric. See [#6809](https://github.com/DataDog/integrations-core/pull/6809).
+* [Fixed] Continue check execution when only a few vhosts are unhealthy. See [#6954](https://github.com/DataDog/integrations-core/pull/6954).
+
 ## 1.14.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
