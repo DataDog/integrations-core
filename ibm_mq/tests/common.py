@@ -180,9 +180,9 @@ CHANNEL_STATUS_METRICS = [
 ]
 
 CHANNEL_STATS_METRICS = [
-    ('ibm_mq.stats.channel.msgs', GAUGE),
-    ('ibm_mq.stats.channel.bytes', GAUGE),
-    ('ibm_mq.stats.channel.put_retries', GAUGE),
+    ('ibm_mq.stats.channel.msgs', COUNT),
+    ('ibm_mq.stats.channel.bytes', COUNT),
+    ('ibm_mq.stats.channel.put_retries', COUNT),
 ]
 
 QUEUE_STATS_METRICS = [
@@ -212,14 +212,15 @@ METRICS = (
 )
 
 OPTIONAL_METRICS = [
-    'ibm_mq.queue.max_channels',
-    'ibm_mq.stats.channel.full_batches',
-    'ibm_mq.stats.channel.incomplete_batches',
-    'ibm_mq.stats.channel.avg_batch_size',
+    ('ibm_mq.queue.max_channels', GAUGE),
+    ('ibm_mq.stats.channel.full_batches', COUNT),
+    ('ibm_mq.stats.channel.incomplete_batches', COUNT),
+    ('ibm_mq.stats.channel.avg_batch_size', GAUGE),
 ]
 
 # stats metrics are not always present at each check run
-OPTIONAL_METRICS.extend([m for m, _ in CHANNEL_STATS_METRICS + QUEUE_STATS_METRICS])
+OPTIONAL_METRICS.extend(CHANNEL_STATS_METRICS)
+OPTIONAL_METRICS.extend(QUEUE_STATS_METRICS)
 
 
 def assert_all_metrics(aggregator):
@@ -227,6 +228,6 @@ def assert_all_metrics(aggregator):
         aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()))
 
     for metric in OPTIONAL_METRICS:
-        aggregator.assert_metric(metric, at_least=0)
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), at_least=0)
 
     aggregator.assert_all_metrics_covered()

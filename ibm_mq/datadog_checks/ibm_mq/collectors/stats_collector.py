@@ -4,7 +4,6 @@
 
 from pymqi.CMQC import MQRC_NO_MSG_AVAILABLE
 from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_MQI, MQCMD_STATISTICS_Q
-from six import iteritems
 
 from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
 from datadog_checks.ibm_mq.stats_wrapper.base_stats import BaseStats
@@ -25,9 +24,9 @@ STATISTICS_QUEUE_NAME = 'SYSTEM.ADMIN.STATISTICS.QUEUE'
 
 
 class StatsCollector(object):
-    def __init__(self, config, gauge, log):
+    def __init__(self, config, send_metrics_from_properties, log):
         self.config = config
-        self.gauge = gauge
+        self.send_metrics_from_properties = send_metrics_from_properties
         self.log = log
 
     def collect(self, queue_manager):
@@ -74,7 +73,7 @@ class StatsCollector(object):
             ]
             prefix = '{}.stats.channel'.format(METRIC_PREFIX)
             metrics_map = channel_stats_metrics()
-            self._submit_metrics_from_properties(prefix, channel_info.properties, metrics_map, tags)
+            self.send_metrics_from_properties(channel_info.properties, metrics_map, prefix, tags)
 
     def _collect_queue_stats(self, queue_stats):
         self.log.debug('Collect queue stats. Number of queues: %s', len(queue_stats.queues))
@@ -86,16 +85,7 @@ class StatsCollector(object):
             ]
             prefix = '{}.stats.queue'.format(METRIC_PREFIX)
             metrics_map = queue_stats_metrics()
-            self._submit_metrics_from_properties(prefix, queue_info.properties, metrics_map, tags)
-
-    def _submit_metrics_from_properties(self, prefix, properties, metrics_map, tags):
-        for metric_name, pymqi_type in iteritems(metrics_map):
-            metric_full_name = '{}.{}'.format(prefix, metric_name)
-            if pymqi_type not in properties:
-                self.log.debug("metric not found: %s", metric_name)
-                continue
-            metric_value = int(properties[pymqi_type])
-            self.gauge(metric_full_name, metric_value, tags=tags)
+            self.send_metrics_from_properties(queue_info.properties, metrics_map, prefix, tags)
 
     @staticmethod
     def get_stats_object(message, header):

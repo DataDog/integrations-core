@@ -4,6 +4,8 @@
 
 from typing import Any
 
+from six import iteritems
+
 from datadog_checks.base import AgentCheck
 from datadog_checks.ibm_mq.collectors.stats_collector import StatsCollector
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
@@ -32,10 +34,10 @@ class IbmMqCheck(AgentCheck):
             raise errors.PymqiException("You need to install pymqi: {}".format(pymqiException))
 
         self.queue_metric_collector = QueueMetricCollector(
-            self.config, self.service_check, self.warning, self.send_metric, self.log
+            self.config, self.service_check, self.warning, self.send_metric, self.send_metrics_from_properties, self.log
         )
         self.channel_metric_collector = ChannelMetricCollector(self.config, self.service_check, self.gauge, self.log)
-        self.stats_collector = StatsCollector(self.config, self.gauge, self.log)
+        self.stats_collector = StatsCollector(self.config, self.send_metrics_from_properties, self.log)
 
     def check(self, _):
         try:
@@ -59,3 +61,12 @@ class IbmMqCheck(AgentCheck):
             getattr(self, metric_type)(metric_name, metric_value, tags=tags)
         else:
             self.log.warning("Unknown metric type `%s` for metric `%s`", metric_type, metric_name)
+
+    def send_metrics_from_properties(self, properties, metrics_map, prefix, tags):
+        for metric_name, (pymqi_type, metric_type) in iteritems(metrics_map):
+            metric_full_name = '{}.{}'.format(prefix, metric_name)
+            if pymqi_type not in properties:
+                self.log.debug("Metric not found: %s. tags: %s", metric_name, tags)
+                continue
+            metric_value = int(properties[pymqi_type])
+            self.send_metric(metric_type, metric_full_name, metric_value, tags)

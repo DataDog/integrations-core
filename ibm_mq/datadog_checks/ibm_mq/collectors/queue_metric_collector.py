@@ -24,11 +24,12 @@ class QueueMetricCollector(object):
     QUEUE_SERVICE_CHECK = 'ibm_mq.queue'
     QUEUE_MANAGER_SERVICE_CHECK = 'ibm_mq.queue_manager'
 
-    def __init__(self, config, service_check, warning, send_metric, log):
+    def __init__(self, config, service_check, warning, send_metric, send_metrics_from_properties, log):
         self.config = config
         self.service_check = service_check
         self.warning = warning
         self.send_metric = send_metric
+        self.send_metrics_from_properties = send_metrics_from_properties
         self.log = log
         self.queues = set(self.config.queues)
 
@@ -183,7 +184,6 @@ class QueueMetricCollector(object):
         else:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
-                for metric_name, (pymqi_type, metric_type) in iteritems(metrics.pcf_status_reset_metrics()):
-                    metric_full_name = '{}.queue.{}'.format(metrics.METRIC_PREFIX, metric_name)
-                    metric_value = int(queue_info[pymqi_type])
-                    self.send_metric(metric_type, metric_full_name, metric_value, tags)
+                metrics_map = metrics.pcf_status_reset_metrics()
+                prefix = "{}.queue".format(metrics.METRIC_PREFIX)
+                self.send_metrics_from_properties(queue_info, metrics_map, prefix, tags)
