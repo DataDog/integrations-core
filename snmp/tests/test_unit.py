@@ -117,7 +117,9 @@ def test_parse_metrics(lcd_mock, caplog):
     foo = parsed_metrics[0]
     assert isinstance(foo, ParsedTableMetric)
     assert foo.name == 'foo'
-    assert foo.index_tags == [('test', '1')]
+    index_tag = foo.index_tags[0]
+    assert index_tag.index == '1'
+    assert index_tag.parsed_metric_tag.name == 'test'
 
     # MIB with table, symbols, metrics_tags index
     metrics = [
