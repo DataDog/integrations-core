@@ -206,7 +206,11 @@ class QueueMetricCollector(object):
     @staticmethod
     def _parse_version(version):
         output = ""
-        for i in range(0, len(version), 2):
-            pairs = version[i : i + 2].strip("0") if version[i] == "0" else version[i : i + 2]
-            output += pairs + "." if len(pairs) else "0."
-        return output[: len(output) - 1] if output[-1] == "." else output
+        try:
+            if len(version) == 8:
+                for i in range(0, len(version), 2):
+                    pairs = version[i : i + 2].strip("0") if version[i] == "0" else version[i : i + 2]
+                    output += pairs + "." if len(pairs) else "0."
+                return output[: len(output) - 1] if output[-1] == "." else output
+        except BaseException:
+            return None
