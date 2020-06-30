@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from contextlib import closing
 import snowflake.connector as sf
 
 from datadog_checks.base import AgentCheck
@@ -35,25 +36,27 @@ class SnowflakeCheck(AgentCheck):
 
         self._query_manager = QueryManager(
             self,
-            self.execute_query,
+            self.execute_query_raw,
             queries=[queries.StorageUsageMetrics],
             tags=self._tags,
         )
 
         self.check_initializations.append(self._query_manager.compile_queries)
 
-
     def check(self, _):
         # Connect
         self.connect(self.config)
         self._query_manager.execute()
-        #val = self.execute_query("select storage_bytes, stage_bytes, failsafe_bytes from STORAGE_USAGE order by usage_date desc limit 1;")
+        #val = self.execute_query_raw("select storage_bytes, stage_bytes, failsafe_bytes from STORAGE_USAGE order by usage_date desc limit 1;")
         #raise Exception(val.fetchone()[0])
 
-
-    def execute_query(self, query):
-        cursor = self._conn.cursor()
-        return cursor.execute(query)
+    def execute_query_raw(self, query):
+        with closing(self._conn.cursor()) as cursor:
+            cursor.execute(query)
+            if cursor.rowcount is None or cursor.rowcount < 1:
+                self.log.warning("Failed to fetch records from query: `%s`.", query)
+                return []
+            return cursor.fetchall()
 
     def connect(self, config):
         if self._conn is not None:

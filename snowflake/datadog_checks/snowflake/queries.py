@@ -6,7 +6,6 @@ from datadog_checks.base.utils.db import Query
 
 
 # https://docs.snowflake.com/en/sql-reference/account-usage/storage_usage.html
-# Grab
 StorageUsageMetrics = Query(
     {
         'name': 'storage.metrics',
