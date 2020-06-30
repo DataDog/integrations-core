@@ -7,9 +7,9 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.snowflake import SnowflakeCheck
 
 
-def test_check(aggregator, instance):
+def test_check(dd_run_check, aggregator, instance):
     # type: (AggregatorStub, Dict[str, Any]) -> None
     check = SnowflakeCheck('snowflake', {}, [instance])
-    check.check(instance)
+    dd_run_check(check)
 
     aggregator.assert_all_metrics_covered()
