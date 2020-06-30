@@ -417,7 +417,16 @@ def _parse_table_metric_tag(mib, parsed_table, metric_tag):
 
 def _parse_column_metric_tag(mib, parsed_table, metric_tag):
     # type: (str, ParsedSymbol, ColumnTableMetricTag) -> ParsedColumnMetricTag
-    parsed_column = _parse_symbol(mib, metric_tag['column'])
+    column = metric_tag['column']
+
+    if isinstance(column, dict) and 'table' in column:
+        # Prevent a common error due to bad indentation...
+        raise ConfigurationError(
+            'found unexpected "table" key in column {} '
+            '("table" should be set on the `metric_tag` - this is probably an indentation issue)'.format(column)
+        )
+
+    parsed_column = _parse_symbol(mib, column)
 
     batches = {TableBatchKey(mib, table=parsed_table.name): TableBatch(parsed_table.oid, oids=[parsed_column.oid])}
 
