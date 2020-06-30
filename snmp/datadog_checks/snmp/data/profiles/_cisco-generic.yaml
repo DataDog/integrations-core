@@ -212,12 +212,12 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.9.9.42.1.2.9.1.10
           name: rttMonCtrlOperState
-          table: rttMonCtrlOperTable
+        table: rttMonCtrlOperTable
         tag: rtt_state
       - column:
           OID: 1.3.6.1.4.1.9.9.42.1.2.1.1.4
           name: rttMonCtrlAdminRttType
-          table: rttMonCtrlAdminTable
+        table: rttMonCtrlAdminTable
         tag: rtt_type
       - index: 1
         tag: rtt_index
@@ -237,7 +237,7 @@ metrics:
       - column:
           OID: 1.3.6.1.4.1.9.9.42.1.2.1.1.4
           name: rttMonCtrlAdminRttType
-          table: rttMonCtrlAdminTable
+        table: rttMonCtrlAdminTable
         tag: rtt_type
       - index: 1
         tag: rtt_index
