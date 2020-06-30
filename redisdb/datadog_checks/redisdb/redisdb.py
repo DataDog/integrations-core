@@ -137,9 +137,7 @@ class Redis(AgentCheck):
         else:
             return instance.get('host'), instance.get('port'), instance.get('db')
 
-    def _get_conn(self, instance=None):
-        if instance is None:
-            instance = self.instance
+    def _get_conn(self, instance):
         no_cache = is_affirmative(instance.get('disable_connection_cache', False))
         key = self._generate_instance_key(instance)
 
@@ -187,7 +185,7 @@ class Redis(AgentCheck):
         return tags
 
     def _check_db(self):
-        conn = self._get_conn()
+        conn = self._get_conn(self.instance)
         # Ping the database for info, and track the latency.
         # Process the service check: the check passes if we can connect to Redis
         start = time.time()
@@ -424,7 +422,7 @@ class Redis(AgentCheck):
         within the time range between the last seen entries and now
 
         """
-        conn = self._get_conn()
+        conn = self._get_conn(self.instance)
         if not self.instance.get(MAX_SLOW_ENTRIES_KEY):
             try:
                 max_slow_entries = int(conn.config_get(MAX_SLOW_ENTRIES_KEY)[MAX_SLOW_ENTRIES_KEY])
