@@ -18,7 +18,7 @@
   ],
   "type": "check",
   "is_public": true,
-  "integration_id": "oom_kill",
+  "integration_id": "oom-kill",
   "assets": {
     "dashboards": {},
     "monitors": {},
