@@ -1,5 +1,9 @@
 # CHANGELOG - snmp
 
+## 3.5.2 / 2020-06-30
+
+* [Fixed] Fix tag names for cisco asa profile. See [#7027](https://github.com/DataDog/integrations-core/pull/7027).
+
 ## 3.5.1 / 2020-06-30
 
 * [Fixed] Fix wrong indentation of `table` key in column metric tags. See [#7024](https://github.com/DataDog/integrations-core/pull/7024).
