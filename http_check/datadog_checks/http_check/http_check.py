@@ -28,7 +28,7 @@ DEFAULT_EXPIRE_DAYS_WARNING = 14
 DEFAULT_EXPIRE_DAYS_CRITICAL = 7
 DEFAULT_EXPIRE_WARNING = DEFAULT_EXPIRE_DAYS_WARNING * 24 * 3600
 DEFAULT_EXPIRE_CRITICAL = DEFAULT_EXPIRE_DAYS_CRITICAL * 24 * 3600
-MESSAGE_LENGTH = 2500  # https://docs.datadoghq.com/api/v1/service-checks/
+CONTENT_LENGTH = 200
 
 DATA_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH']
 
@@ -89,7 +89,8 @@ class HTTPCheck(AgentCheck):
         def send_status_down(loginfo, down_msg):
             # TODO: A6 log needs bytes and cannot handle unicode
             self.log.info(loginfo)
-            down_msg = self._include_content(include_content, down_msg, content)
+            if include_content:
+                down_msg += '\nContent: {}'.format(content[:CONTENT_LENGTH])
             service_checks.append((self.SC_STATUS, AgentCheck.CRITICAL, down_msg))
 
         # Store tags in a temporary list so that we don't modify the global tags data structure
@@ -178,7 +179,9 @@ class HTTPCheck(AgentCheck):
                 message = "Incorrect HTTP return code for url {}. Expected {}, got {}.".format(
                     addr, expected_code, str(r.status_code)
                 )
-                message = self._include_content(include_content, message, content)
+
+                if include_content:
+                    message += '\nContent: {}'.format(content[:CONTENT_LENGTH])
 
                 self.log.info(message)
 
@@ -350,10 +353,3 @@ class HTTPCheck(AgentCheck):
 
         else:
             return AgentCheck.OK, days_left, seconds_left, "Days left: {}".format(days_left)
-
-    @staticmethod
-    def _include_content(include_content, message, content):
-        if include_content:
-            message += '\nContent: {}'.format(content[:MESSAGE_LENGTH])
-            message = message[:MESSAGE_LENGTH]
-        return message
