@@ -1,5 +1,9 @@
 # CHANGELOG - snmp
 
+## 3.5.1 / 2020-06-30
+
+* [Fixed] Fix wrong indentation of `table` key in column metric tags. See [#7024](https://github.com/DataDog/integrations-core/pull/7024).
+
 ## 3.5.0 / 2020-06-29
 
 * [Added] Add regex match support for Tables. See [#6951](https://github.com/DataDog/integrations-core/pull/6951).
