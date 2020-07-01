@@ -22,7 +22,7 @@
     Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
     to specify hosts that must bypass proxies.
 
-    The SOCKS protocol is also supported like so:
+    The SOCKS protocol is also supported, for example:
 
       socks5://user:pass@host:port
 
@@ -113,7 +113,7 @@
     example: false
     type: boolean
   description: |
-    Set to `true` to enable Kerberos delegation of credentials to a server that requests delegation.
+    Set to `true` to enable kerberos delegation of credentials to a server that requests delegation.
 
     See https://github.com/requests/requests-kerberos#delegation
 - name: kerberos_force_initiate
@@ -130,7 +130,7 @@
     type: string
   description: |
     Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't
-    match its Kerberos hostname (e.g. behind a content switch or load balancer).
+    match its kerberos hostname (e.g. behind a content switch or load balancer).
 
     See https://github.com/requests/requests-kerberos#hostname-override
 - name: kerberos_principal
@@ -150,26 +150,26 @@
   value:
     type: string
   description: |
-    If your services require AWS Signature Version 4 signing, set the region.
+    If your services require AWS Signature Version 4 Signing, set the region.
 
     See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 - name: aws_host
   value:
     type: string
   description: |
-    If your services require AWS Signature Version 4 signing, set the host.
+    If your services require AWS Signature Version 4 Signing, set the host.
 
-    Note that this setting is not necessary for official integrations.
+    Note: This setting is not necessary for official integrations.
 
     See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 - name: aws_service
   value:
     type: string
   description: |
-    If your services require AWS Signature Version 4 signing, set the service code. For a list
+    If your services require AWS Signature Version 4 Signing, set the service code. For a list
     of available service codes, see https://docs.aws.amazon.com/general/latest/gr/rande.html
 
-    Note that this setting is not necessary for official integrations.
+    Note: This setting is not necessary for official integrations.
 
     See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 - name: tls_verify
@@ -190,10 +190,6 @@
   description: |
     If `tls_verify` is disabled, security warnings are logged by the check.
     Disable those by setting `tls_ignore_warning` to true.
-
-    Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
-    If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
-    to true.
 - name: tls_cert
   value:
     example: <CERT_PATH>
