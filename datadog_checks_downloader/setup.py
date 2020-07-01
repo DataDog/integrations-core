@@ -52,7 +52,7 @@ setup(
     ],
     packages=['datadog_checks.downloader'],
     # Run-time dependencies
-    install_requires=get_dependencies(),
+    extras_require={'deps': get_dependencies()},
     # NOTE: Copy over TUF directories, and root metadata.
     package_data={
         'datadog_checks.downloader': [
