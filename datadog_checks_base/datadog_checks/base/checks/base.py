@@ -33,7 +33,6 @@ from ..utils.common import ensure_bytes, to_native_string
 from ..utils.http import RequestsWrapper
 from ..utils.limiter import Limiter
 from ..utils.metadata import MetadataManager
-from ..utils.proxy import config_proxy_skip
 from ..utils.secrets import SecretsSanitizer
 
 try:
