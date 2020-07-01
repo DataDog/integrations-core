@@ -39,22 +39,22 @@ except ImportError:
 # Default vCenter sampling interval
 REAL_TIME_INTERVAL = 20
 #https://www.vmware.com/support/developer/converter-sdk/conv61_apireference/vim.HistoricalInterval.html
-HISTORICAL_TIME_INTERVAL = 1800
+DATASTORE_TIME_INTERVAL = 1800
+CLUSTER_TIME_INTERVAL = 7200
 # Metrics are only collected on vSphere VMs marked by custom field value
 VM_MONITORING_FLAG = 'DatadogMonitored'
 # The size of the ThreadPool used to process the request queue
-DEFAULT_SIZE_POOL = 4
+DEFAULT_SIZE_POOL = 10
 # The interval in seconds between two refresh of the entities list
 REFRESH_MORLIST_INTERVAL = 3 * 60
 # The interval in seconds between two refresh of metrics metadata (id<->name)
 REFRESH_METRICS_METADATA_INTERVAL = 10 * 60
-# The amount of jobs batched at the same time in the queue to query available metrics
-BATCH_MORLIST_SIZE = 50
+
 # Maximum number of objects to collect at once by the propertyCollector. The size of the response returned by the query
 # is significantly lower than the size of the queryPerf response, so allow specifying a different value.
 BATCH_COLLECTOR_SIZE = 500
 
-DEFAULT_METRICS_PER_QUERY = 500
+DEFAULT_METRICS_PER_QUERY = 5000
 DEFAULT_MAX_QUERY_METRICS = 64
 # the vcenter maxquerymetrics option
 MAX_QUERY_METRICS_OPTION = "config.vpxd.stats.maxQueryMetrics"
@@ -117,9 +117,6 @@ class VSphereCheck(AgentCheck):
         self.event_config = {}
         # Batch size for property collector
         self.batch_collector_size = init_config.get("batch_property_collector_size", BATCH_COLLECTOR_SIZE)
-
-        # Batch size for query available metrics
-        self.batch_morlist_size = init_config.get('batch_morlist_size', BATCH_MORLIST_SIZE)
 
         # Metrics Query size
         self.max_historical_metrics = init_config.get("max_historical_metrics", DEFAULT_MAX_QUERY_METRICS)
@@ -539,12 +536,13 @@ class VSphereCheck(AgentCheck):
 
         return monitor_clusters
 
-    def createPropertyOptions(self):
-            retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
-            # To limit the number of objects retrieved per call.
-            # If batch_collector_size is 0, collect maximum number of objects.
-            retr_opts.maxObjects = self.batch_collector_size or None
-            return retr_opts
+    def createPropertyOptions(self,max_object_count = None):
+        retr_opts = vmodl.query.PropertyCollector.RetrieveOptions()
+        # To limit the number of objects retrieved per call.
+        # If batch_collector_size is 0, collect maximum number of objects.
+        if max_object_count is not None:
+            retr_opts.maxObjects = max_object_count
+        return retr_opts
 
     def _discover_mor(self, instance, tags, regexes=None, include_only_marked=False):
         """
@@ -1247,15 +1245,19 @@ class VSphereCheck(AgentCheck):
                     if resource_type in REALTIME_RESOURCES:
                         query_spec.intervalId = REAL_TIME_INTERVAL
                         query_spec.maxSample = 1  # Request a single datapoint
-                    else:
-                        # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
-                        # contain at least one element based on the sampling period of the metrics being fetched
+                    # We cannot use `maxSample` for historical metrics, let's specify a timewindow that will
+                    # contain at least one element based on the sampling period of the metrics being fetched
+                    elif resource_type == vim.ClusterComputeResource:
+                        #use 2 hours as timewindow for cluster metrics
+                        server_time = server_instance.CurrentTime()
+                        query_spec.startTime = server_time - timedelta(seconds=CLUSTER_TIME_INTERVAL)
+                        query_spec.endTime = server_time
+                    elif resource_type == vim.Datastore:
                         # create offset time based on maximum overlap between historical intervals of 300 & 1800
                         # for which datastore metrics r available
                         # https://www.vmware.com/support/developer/converter-sdk/conv61_apireference/vim.PerformanceManager.QuerySpec.html
                         # https://www.vmware.com/support/developer/converter-sdk/conv61_apireference/vim.HistoricalInterval.html
-
-                        offset_time = HISTORICAL_TIME_INTERVAL - 10
+                        offset_time = DATASTORE_TIME_INTERVAL - 10
                         server_time = server_instance.CurrentTime()
                         query_spec.startTime = server_time - timedelta(seconds=offset_time)
                         query_spec.endTime = server_time
