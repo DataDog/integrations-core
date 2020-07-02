@@ -4,13 +4,17 @@
 
 import logging
 import re
-from typing import Dict, List, Pattern
 
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.utils.time import get_current_datetime
+
+try:
+    from typing import Dict, List, Pattern
+except ImportError:
+    pass
 
 try:
     import pymqi

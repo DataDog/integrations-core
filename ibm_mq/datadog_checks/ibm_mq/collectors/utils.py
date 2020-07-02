@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Dict, Optional, Union
 
 import pymqi
 from pymqi import (
@@ -22,6 +21,13 @@ from pymqi import (
     Queue,
     is_unicode,
 )
+
+
+try:
+    from typing import Dict, Optional, Union
+except ImportError:
+    pass
+
 
 INTEGER64_TYPE = 'q'
 

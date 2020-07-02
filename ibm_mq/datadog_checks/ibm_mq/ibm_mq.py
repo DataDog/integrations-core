@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import Any
 
 from six import iteritems
 
@@ -13,6 +12,11 @@ from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 from . import connection, errors
 from .collectors import ChannelMetricCollector, QueueMetricCollector
 from .config import IBMMQConfig
+
+try:
+    from typing import Any
+except ImportError:
+    pass
 
 try:
     import pymqi
