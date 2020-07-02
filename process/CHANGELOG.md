@@ -1,5 +1,9 @@
 # CHANGELOG - process
 
+## 1.15.1 / 2020-07-02
+
+* [Fixed] Fix NoSuchProcess log message level. See [#7045](https://github.com/DataDog/integrations-core/pull/7045).
+
 ## 1.15.0 / 2020-06-29
 
 * [Added] Config specs and new agent signature. See [#6781](https://github.com/DataDog/integrations-core/pull/6781).
