@@ -28,7 +28,7 @@ export C_INCLUDE_PATH=/opt/mqm/inc
 - Upstart (Linux): `/etc/init/datadog-agent.conf`
 - Systemd (Linux): `/lib/systemd/system/datadog-agent.service`
 - Launchd (MacOS): `~/Library/LaunchAgents/com.datadoghq.agent.plist`
-  - This only works if MacOS SIP is disabled (might not be recommended depending on your security policy). This is due to [SIP purging `LD_LIBRARY_PATH`][12].
+  - This only works if MacOS SIP is disabled (might not be recommended depending on your security policy). This is due to [SIP purging `LD_LIBRARY_PATH` environ variable][12].
 
 Example of the configuration for `systemd`:
 
