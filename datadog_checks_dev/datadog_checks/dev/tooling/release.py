@@ -114,6 +114,12 @@ def update_agent_requirements(req_file, check, newline):
 
 def build_package(package_path, sdist):
     with chdir(package_path):
+        # Clean up needed before build. Files built previously and now delete might still persist in build directory
+        # and will be included in the final wheel. This is not desired.
+        result = run_command([sys.executable, 'setup.py', 'clean', '--all'], capture='out')
+        if result.code != 0:
+            return result
+
         result = run_command([sys.executable, 'setup.py', 'bdist_wheel', '--universal'], capture='out')
         if result.code != 0:
             return result
