@@ -2,11 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import datetime as dt
 import logging
 import re
 
 from dateutil.tz import UTC
-import datetime as dt
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
