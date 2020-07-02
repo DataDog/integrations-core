@@ -625,8 +625,6 @@ def test_profile_sysoid_list(aggregator, caplog):
     }
     init_config = {'profiles': {'profile1': {'definition': definition}}}
 
-    caplog.at_level(logging.WARNING)
-
     devices_matched = [
         {'community_string': 'hpe-proliant', 'sysobjectid': '1.3.6.1.4.1.232.1.2'},
         {'community_string': 'network', 'sysobjectid': '1.3.6.1.4.1.1.2.1.3.4'},
@@ -646,6 +644,7 @@ def test_profile_sysoid_list(aggregator, caplog):
 
         aggregator.reset()
 
+    caplog.at_level(logging.WARNING)
     devices_not_matched = [
         {'community_string': '3850', 'sysobjectid': '1.3.6.1.4.1.9.1.1745'},
     ]
@@ -661,6 +660,7 @@ def test_profile_sysoid_list(aggregator, caplog):
         aggregator.assert_all_metrics_covered()
 
         aggregator.reset()
+        caplog.clear()
 
 
 @pytest.mark.parametrize(
