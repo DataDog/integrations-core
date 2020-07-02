@@ -78,14 +78,12 @@ class QueueMetricCollector(object):
         self.queues.update(queues)
 
     def _discover_queues(self, queue_manager, mq_pattern_filter):
-        from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
-
         queues = []
 
         for queue_type in SUPPORTED_QUEUE_TYPES:
             args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(mq_pattern_filter), pymqi.CMQC.MQIA_Q_TYPE: queue_type}
             try:
-                pcf = CustomPCFExecute(queue_manager)
+                pcf = pymqi.PCFExecute(queue_manager)
                 response = pcf.MQCMD_INQUIRE_Q(args)
             except pymqi.MQMIError as e:
                 self.warning("Error discovering queue: %s", e)
@@ -114,11 +112,9 @@ class QueueMetricCollector(object):
         """
         Grab stats from queues
         """
-        from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
-
         try:
             args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name), pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL}
-            pcf = CustomPCFExecute(queue_manager)
+            pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_Q(args)
         except pymqi.MQMIError as e:
             self.warning("Error getting queue stats for %s: %s", queue_name, e)
@@ -144,15 +140,13 @@ class QueueMetricCollector(object):
                     self.log.debug("Attribute %s (%s) not found for queue %s", metric_suffix, mq_attr, queue_name)
 
     def get_pcf_queue_status_metrics(self, queue_manager, queue_name, tags):
-        from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
-
         try:
             args = {
                 pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name),
                 pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_ALL,
                 pymqi.CMQCFC.MQIACF_Q_STATUS_ATTRS: pymqi.CMQCFC.MQIACF_ALL,
             }
-            pcf = CustomPCFExecute(queue_manager)
+            pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_Q_STATUS(args)
         except pymqi.MQMIError as e:
             self.warning("Error getting pcf queue stats for %s: %s", queue_name, e)
@@ -173,11 +167,9 @@ class QueueMetricCollector(object):
                         self.log.debug(msg)
 
     def get_pcf_queue_reset_metrics(self, queue_manager, queue_name, tags):
-        from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
-
         try:
             args = {pymqi.CMQC.MQCA_Q_NAME: pymqi.ensure_bytes(queue_name)}
-            pcf = CustomPCFExecute(queue_manager)
+            pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_RESET_Q_STATS(args)
         except pymqi.MQMIError as e:
             self.warning("Error getting pcf queue stats for %s: %s", queue_name, e)

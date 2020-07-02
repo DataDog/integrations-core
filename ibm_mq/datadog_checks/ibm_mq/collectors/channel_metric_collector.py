@@ -49,7 +49,7 @@ class ChannelMetricCollector(object):
 
         args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ensure_bytes('*')}
         try:
-            pcf = CustomPCFExecute(queue_manager)
+            pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_CHANNEL(args)
         except pymqi.MQMIError as e:
             self.log.warning("Error getting CHANNEL stats %s", e)
@@ -82,13 +82,11 @@ class ChannelMetricCollector(object):
 
         :param search_channel_name might contain wildcard characters
         """
-        from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
-
         channels_to_skip = channels_to_skip or []
         search_channel_tags = tags + ["channel:{}".format(search_channel_name)]
         try:
             args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ensure_bytes(search_channel_name)}
-            pcf = CustomPCFExecute(queue_manager)
+            pcf = pymqi.PCFExecute(queue_manager)
             response = pcf.MQCMD_INQUIRE_CHANNEL_STATUS(args)
             self.service_check(self.CHANNEL_SERVICE_CHECK, AgentCheck.OK, search_channel_tags)
         except pymqi.MQMIError as e:

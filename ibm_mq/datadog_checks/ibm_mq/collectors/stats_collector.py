@@ -5,7 +5,6 @@
 from pymqi.CMQC import MQRC_NO_MSG_AVAILABLE
 from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_MQI, MQCMD_STATISTICS_Q
 
-from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
 from datadog_checks.ibm_mq.stats_wrapper.base_stats import BaseStats
 from datadog_checks.ibm_mq.stats_wrapper.queue_stats import QueueStats
 
@@ -38,7 +37,7 @@ class StatsCollector(object):
                 bin_message = queue.get()
                 self.log.trace('Stats binary message: %s', bin_message)
 
-                message, header = CustomPCFExecute.unpack(bin_message)
+                message, header = pymqi.PCFExecute.unpack(bin_message)
                 self.log.trace('Stats unpacked message: %s, Stats unpacked header: %s', message, header)
 
                 stats = self.get_stats_object(message, header)
