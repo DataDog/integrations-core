@@ -1,0 +1,571 @@
+{
+    "author_info": {
+        "author_name": "Datadog"
+    },
+    "board_title": "Hazelcast Overview",
+    "description": "This dashboard provides a high-level overview of the health and performance of your Hazelcast IMDG deployment.\n\nFor further reading on monitoring Hazelcast, see our official [Hazelcast integration documentation](https://docs.datadoghq.com/integrations/hazelcast/).\n\nClone this template to make changes and add your own graphs and widgets.",
+    "template_variables": [],
+    "widgets": [
+        {
+            "height": 11,
+            "sizing": "zoom",
+            "type": "image",
+            "url": "/static/images/saas_logos/bot/hazelcast@2x.png",
+            "width": 24,
+            "x": 1,
+            "y": 1
+        },
+        {
+            "height": 9,
+            "tile_def": {
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "q": "avg:hazelcast.instance.member_count{*}"
+                    }
+                ],
+                "viz": "query_value"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Member count",
+            "type": "query_value",
+            "width": 18,
+            "x": 27,
+            "y": 1
+        },
+        {
+            "height": 9,
+            "tile_def": {
+                "autoscale": true,
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "last",
+                        "q": "avg:hazelcast.instance.partition_service.active_partition_count{*}"
+                    }
+                ],
+                "viz": "query_value"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Active partitions",
+            "type": "query_value",
+            "width": 18,
+            "x": 46,
+            "y": 1
+        },
+        {
+            "height": 9,
+            "tile_def": {
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "sum",
+                        "q": "avg:hazelcast.member.backup_timeouts{*}"
+                    }
+                ],
+                "viz": "query_value"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Backups timed out",
+            "type": "query_value",
+            "width": 18,
+            "x": 65,
+            "y": 1
+        },
+        {
+            "height": 9,
+            "tile_def": {
+                "autoscale": true,
+                "precision": 2,
+                "requests": [
+                    {
+                        "aggregator": "sum",
+                        "q": "avg:hazelcast.member.failed_backups{*}"
+                    }
+                ],
+                "viz": "query_value"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Backups failed",
+            "type": "query_value",
+            "width": 18,
+            "x": 84,
+            "y": 1
+        },
+        {
+            "height": 13,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:hazelcast.member.free_memory{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Available memory",
+            "type": "timeseries",
+            "width": 39,
+            "x": 1,
+            "y": 21
+        },
+        {
+            "height": 13,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "avg:hazelcast.member.system_cpu_load{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "CPU load",
+            "type": "timeseries",
+            "width": 39,
+            "x": 1,
+            "y": 37
+        },
+        {
+            "height": 13,
+            "legend": false,
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:hazelcast.instance.managed_executor_service.remaining_queue_capacity{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Remaining work queue capacity",
+            "type": "timeseries",
+            "width": 39,
+            "x": 1,
+            "y": 69
+        },
+        {
+            "height": 13,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "avg:hazelcast.member.thread_count{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Thread Count",
+            "type": "timeseries",
+            "width": 39,
+            "x": 1,
+            "y": 53
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "18",
+            "height": 5,
+            "html": "Map performance",
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 79,
+            "x": 42,
+            "y": 14
+        },
+        {
+            "height": 13,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "avg:hazelcast.imap.local_put_operation_count{*}",
+                        "style": {
+                            "palette": "green",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Map put operations",
+            "type": "timeseries",
+            "width": 39,
+            "x": 42,
+            "y": 21
+        },
+        {
+            "height": 13,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "avg:hazelcast.imap.local_remove_operation_count{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Map remove operations",
+            "type": "timeseries",
+            "width": 39,
+            "x": 42,
+            "y": 53
+        },
+        {
+            "height": 13,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "avg:hazelcast.imap.local_total_get_latency{*}",
+                        "style": {
+                            "palette": "purple",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Map total get latency",
+            "type": "timeseries",
+            "width": 39,
+            "x": 82,
+            "y": 37
+        },
+        {
+            "height": 13,
+            "legend": false,
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "avg:hazelcast.imap.local_total_put_latency{*}",
+                        "style": {
+                            "palette": "green",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Map put latency",
+            "type": "timeseries",
+            "width": 39,
+            "x": 82,
+            "y": 21
+        },
+        {
+            "height": 13,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "avg:hazelcast.imap.local_total_remove_latency{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Map remove latency",
+            "type": "timeseries",
+            "width": 39,
+            "x": 82,
+            "y": 53
+        },
+        {
+            "bgcolor": "gray",
+            "font_size": "18",
+            "height": 5,
+            "html": "Cluster health",
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "type": "note",
+            "width": 39,
+            "x": 1,
+            "y": 14
+        },
+        {
+            "height": 13,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "avg:hazelcast.imap.local_get_operation_count{*}",
+                        "style": {
+                            "palette": "purple",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Map get operations",
+            "type": "timeseries",
+            "width": 39,
+            "x": 42,
+            "y": 37
+        },
+        {
+            "height": 13,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "custom_links": [],
+                "requests": [
+                    {
+                        "q": "avg:hazelcast.imap.local_backup_count{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Map backup count",
+            "type": "timeseries",
+            "width": 39,
+            "x": 82,
+            "y": 69
+        },
+        {
+            "height": 9,
+            "tile_def": {
+                "precision": 0,
+                "requests": [
+                    {
+                        "aggregator": "last",
+                        "q": "avg:hazelcast.member.migration_active{*}"
+                    }
+                ],
+                "viz": "query_value"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Active migrations",
+            "type": "query_value",
+            "width": 18,
+            "x": 103,
+            "y": 1
+        },
+        {
+            "height": 13,
+            "legend": false,
+            "legend_size": "0",
+            "tile_def": {
+                "requests": [
+                    {
+                        "q": "avg:hazelcast.imap.local_hits{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "viz": "timeseries",
+                "yaxis": {
+                    "includeZero": true,
+                    "label": "",
+                    "max": "auto",
+                    "min": "auto",
+                    "scale": "linear"
+                }
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Map hits",
+            "type": "timeseries",
+            "width": 39,
+            "x": 42,
+            "y": 69
+        }
+    ]
+}
