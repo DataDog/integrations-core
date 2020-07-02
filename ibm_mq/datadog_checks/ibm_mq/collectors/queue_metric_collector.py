@@ -4,7 +4,7 @@
 
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, to_native_string
+from datadog_checks.base import AgentCheck, to_string
 from datadog_checks.ibm_mq.metrics import GAUGE
 
 from .. import metrics
@@ -92,7 +92,7 @@ class QueueMetricCollector(object):
             else:
                 for queue_info in response:
                     queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
-                    queues.append(to_native_string(queue).strip())
+                    queues.append(to_string(queue).strip())
 
         return queues
 
