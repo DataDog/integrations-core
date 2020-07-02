@@ -37,18 +37,20 @@ class SnowflakeCheck(AgentCheck):
         self._query_manager = QueryManager(
             self,
             self.execute_query_raw,
-            queries=[queries.StorageUsageMetrics],
+            queries=[
+                queries.StorageUsageMetrics,
+                queries.CreditUsage,
+            ],
             tags=self._tags,
         )
 
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def check(self, _):
-        # Connect
         self.connect(self.config)
         self._query_manager.execute()
-        #val = self.execute_query_raw("select storage_bytes, stage_bytes, failsafe_bytes from STORAGE_USAGE order by usage_date desc limit 1;")
-        #raise Exception(val.fetchone()[0])
+        #val = self.execute_query_raw("select SERVICE_TYPE, NAME, CREDITS_USED_COMPUTE, CREDITS_USED_CLOUD_SERVICES, CREDITS_USED from METERING_HISTORY where start_time >= to_timestamp_ltz('2020-06-30 08:00:00.000 -0700');")
+        #raise Exception(val)
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor()) as cursor:
