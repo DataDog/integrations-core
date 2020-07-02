@@ -45,8 +45,6 @@ class ChannelMetricCollector(object):
         self.gauge = gauge
 
     def get_pcf_channel_metrics(self, queue_manager):
-        from datadog_checks.ibm_mq.collectors.utils import CustomPCFExecute
-
         args = {pymqi.CMQCFC.MQCACH_CHANNEL_NAME: pymqi.ensure_bytes('*')}
         try:
             pcf = pymqi.PCFExecute(queue_manager)

@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import datetime as dt
 
+from dateutil.tz import UTC
 from pymqi.CMQCFC import MQCAMO_START_DATE, MQCAMO_START_TIME
-
-from datadog_checks.base.utils.time import ensure_aware_datetime
 
 from ..utils import sanitize_strings
 
@@ -27,4 +26,8 @@ class BaseStats(object):
         time = sanitize_strings(raw_time)  # date format YYYY-MM-DD
 
         naive_start_datetime = dt.datetime.strptime('{} {}'.format(date, time), '%Y-%m-%d %H.%M.%S')
-        return ensure_aware_datetime(naive_start_datetime)
+
+        # TODO: Use datadog_checks.base.utils.time.ensure_aware_datetime
+        #       when integration don't need to be backward compatible anymore
+        #       with agent versions without ensure_aware_datetime
+        return naive_start_datetime.replace(tzinfo=UTC)

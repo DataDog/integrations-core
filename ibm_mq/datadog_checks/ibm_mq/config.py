@@ -5,11 +5,12 @@
 import logging
 import re
 
+from dateutil.tz import UTC
+import datetime as dt
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.base.utils.time import get_current_datetime
 
 try:
     from typing import Dict, List, Pattern
@@ -136,7 +137,7 @@ class IBMMQConfig:
                 "mqcd_version must be a number between 1 and 9. {} found.".format(raw_mqcd_version)
             )
 
-        self.instance_creation_datetime = get_current_datetime()
+        self.instance_creation_datetime = dt.datetime.now(UTC)
 
     def add_queues(self, new_queues):
         # add queues without duplication
