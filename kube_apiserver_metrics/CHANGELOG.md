@@ -1,5 +1,9 @@
 # CHANGELOG - Kube_apiserver_metrics
 
+## 1.4.1 / 2020-07-02
+
+* [Fixed] Fix default value in example configuration file. See [#7034](https://github.com/DataDog/integrations-core/pull/7034).
+
 ## 1.4.0 / 2020-06-29
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
