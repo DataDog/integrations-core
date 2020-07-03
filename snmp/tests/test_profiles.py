@@ -1732,6 +1732,7 @@ def test_apc_ups(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_fortinet_fortigate(aggregator):
     run_profile_check('fortinet-fortigate')
 
@@ -1787,6 +1788,9 @@ def test_fortinet_fortigate(aggregator):
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=processor_tags, count=1
         )
+        aggregator.assert_metric(
+            'snmp.{}.rate'.format(metric), metric_type=aggregator.RATE, tags=processor_tags, count=1
+        )
 
     for metric in vd_metrics:
         aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=vd_tags, count=1)
@@ -1800,12 +1804,18 @@ def test_fortinet_fortigate(aggregator):
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=firewall_tags, count=1
         )
+        aggregator.assert_metric(
+            'snmp.{}.rate'.format(metric), metric_type=aggregator.RATE, tags=firewall_tags, count=1
+        )
 
     # Firewall 6
     firewall6_tags = common_tags + ['policy6_index:29']
     for metric in ['fgFwPol6PktCount', 'fgFwPol6ByteCount']:
         aggregator.assert_metric(
             'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=firewall6_tags, count=1
+        )
+        aggregator.assert_metric(
+            'snmp.{}.rate'.format(metric), metric_type=aggregator.RATE, tags=firewall6_tags, count=1
         )
 
     aggregator.assert_all_metrics_covered()
