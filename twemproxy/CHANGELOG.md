@@ -1,5 +1,9 @@
 # CHANGELOG - twemproxy
 
+## 1.7.1 / 2020-07-03
+
+* [Fixed] Don't collect version if metadata is not enabled. See [#7010](https://github.com/DataDog/integrations-core/pull/7010).
+
 ## 1.7.0 / 2020-06-29
 
 * [Added] Collect version metadata. See [#6899](https://github.com/DataDog/integrations-core/pull/6899).
