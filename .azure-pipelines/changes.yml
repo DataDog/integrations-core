@@ -29,6 +29,7 @@ jobs:
     job_name: Changed
     check: '--changed datadog_checks_base datadog_checks_dev active_directory aspdotnet disk dns_check dotnetclr exchange_server iis pdh_check sqlserver tcp_check win32_event_log windows_service wmi_check'
     display: Windows
+    validate: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
       restoreKeys: |
