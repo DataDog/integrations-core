@@ -5,11 +5,11 @@
 from pymqi.CMQC import MQRC_NO_MSG_AVAILABLE
 from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_Q
 
-from datadog_checks.ibm_mq.stats_wrapper.base_stats import BaseStats
-from datadog_checks.ibm_mq.stats_wrapper.queue_stats import QueueStats
+from datadog_checks.ibm_mq.stats.base_stats import BaseStats
+from datadog_checks.ibm_mq.stats.queue_stats import QueueStats
 
 from ..metrics import METRIC_PREFIX, channel_stats_metrics, queue_stats_metrics
-from ..stats_wrapper import ChannelStats
+from ..stats import ChannelStats
 
 try:
     import pymqi
@@ -46,7 +46,7 @@ class StatsCollector(object):
                 message, header = pymqi.PCFExecute.unpack(bin_message)
                 self.log.trace('Stats unpacked message: %s, Stats unpacked header: %s', message, header)
 
-                stats = self.get_stats_object(message, header)
+                stats = self._get_stats(message, header)
 
                 # We only collect metrics generated after the check instance creation.
                 if stats.start_datetime < self.config.instance_creation_datetime:
@@ -98,7 +98,7 @@ class StatsCollector(object):
             self.send_metrics_from_properties(queue_info.properties, metrics_map, prefix, tags)
 
     @staticmethod
-    def get_stats_object(message, header):
+    def _get_stats(message, header):
         if header.Command == MQCMD_STATISTICS_CHANNEL:
             stats = ChannelStats(message)
         elif header.Command == MQCMD_STATISTICS_Q:
