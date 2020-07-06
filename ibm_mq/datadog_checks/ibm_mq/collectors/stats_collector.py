@@ -54,7 +54,7 @@ class StatsCollector(object):
                 if stats.start_datetime < self.config.instance_creation_datetime:
                     self.log.debug(
                         "Skipping messages created before agent startup. "
-                        + "Message time: %s / Check instance creation time: %s",
+                        "Message time: %s / Check instance creation time: %s",
                         stats.start_datetime,
                         self.config.instance_creation_datetime,
                     )
