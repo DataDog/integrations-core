@@ -6,7 +6,7 @@ import pymysql
 import datadog_agent
 from datadog_checks.base import is_affirmative
 
-from .sql import compute_sql_signature, compute_exec_plan_signature
+from datadog_checks.base.utils.db.sql import compute_sql_signature, compute_exec_plan_signature
 
 
 VALID_EXPLAIN_STATEMENTS = frozenset({
@@ -124,13 +124,14 @@ class ExecutionPlansMixin(object):
                 # TODO: run these asynchronously / do some benchmarking to optimize
                 plan = self._run_explain(cursor, sql_text, schema)
                 normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True) if plan else None
+                obfuscated_statement = datadog_agent.obfuscate_sql(sql_text)
                 if plan:
                     events.append({
                         'duration': duration_ns,
                         'db': {
                             'instance': schema,
-                            'statement': datadog_agent.obfuscate_sql(sql_text),
-                            'query_signature': compute_sql_signature(digest_text),
+                            'statement': obfuscated_statement,
+                            'query_signature': compute_sql_signature(obfuscated_statement),
                             'plan': plan,
                             'plan_cost': self._parse_execution_plan_cost(plan),
                             'plan_signature': compute_exec_plan_signature(normalized_plan),

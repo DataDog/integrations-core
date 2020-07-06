@@ -78,3 +78,6 @@ typing==3.7.4.1; python_version < '3.0'
 uptime==3.0.1
 vertica-python==0.10.1
 win-inet-pton==1.1.0; sys_platform == 'win32' and python_version < '3.0'
+# TEMP: once counts are fixed (https://github.com/DataDog/datadog-agent/pull/5876) then can switch to sending metrics
+# directly through the aggregator instead of via statsd
+datadog==0.37.1

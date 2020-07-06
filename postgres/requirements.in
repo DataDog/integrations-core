@@ -1,3 +1,6 @@
 psycopg2-binary==2.8.4
 mmh3==2.5.1
 semver==2.9.0
+# TEMP: once counts are fixed (https://github.com/DataDog/datadog-agent/pull/5876) then can switch to sending metrics
+# directly through the aggregator instead of via statsd
+datadog==0.37.1

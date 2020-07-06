@@ -153,13 +153,13 @@ class PostgreSql(PgStatementsMixin, AgentCheck):
 
         return results
 
-    def _execute_query(self, cursor, query, log_func=None):
+    def _execute_query(self, cursor, query, params=(), log_func=None):
         if log_func is None:
             log_func = self.warning
 
         results = None
         try:
-            cursor.execute(query)
+            cursor.execute(query, params)
             results = cursor.fetchall()
         except psycopg2.errors.FeatureNotSupported as e:
             # This happens for example when trying to get replication metrics
@@ -293,6 +293,9 @@ class PostgreSql(PgStatementsMixin, AgentCheck):
 
         for scope in list(metric_scope) + self.config.custom_metrics:
             self._query_scope(cursor, scope, instance_tags, scope in self.config.custom_metrics, relations_config)
+
+        if self.config.collect_execution_plans:
+            self._collect_execution_plans(instance_tags)
 
         cursor.close()
 
