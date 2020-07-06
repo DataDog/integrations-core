@@ -87,10 +87,7 @@ def test_parse_metrics(lcd_mock, caplog):
     assert foo.name == 'foo'
     assert isinstance(foo, ParsedTableMetric)
     assert bar.name == 'bar'
-    assert (
-        'foo_table table has not metric_tags section. If the table has multiple rows, metrics may be missing.'
-        in caplog.text
-    )
+    assert 'foo_table table has not metric_tags section, all its metrics will use the same tags.' in caplog.text
 
     # MIB with table, symbols, bad metrics_tags
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"], "metric_tags": [{}]}]

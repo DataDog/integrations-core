@@ -59,7 +59,7 @@ def test_load_profiles(caplog):
             check._config.refresh_with_profile(profile)
         except ConfigurationError as e:
             pytest.fail("Profile `{}` is not configured correctly: {}".format(name, e))
-        assert 'table has not metric_tags section.' not in caplog.text
+        assert 'table has not metric_tags section' not in caplog.text
         caplog.clear()
 
 

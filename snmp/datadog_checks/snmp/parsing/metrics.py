@@ -278,7 +278,10 @@ def _parse_table_metric(metric):
     else:
         logger = logging.getLogger('snmp')
         logger.warning(
-            "%s table has not metric_tags section. If the table has multiple rows, metrics may be missing.",
+            "%s table has not metric_tags section, all its metrics will use the same tags."
+            "If the table has multiple rows, only one row will be submitted."
+            "Please add at least one discriminating metric tag (such as a row index) "
+            "to ensure metrics of all rows are submitted.",
             str(metric['table']),
         )
 
