@@ -5,7 +5,7 @@ import click
 
 from ...e2e import create_interface, get_configured_envs
 from ...testing import complete_active_checks, complete_configured_envs
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 
 
 @click.command('shell', context_settings=CONTEXT_SETTINGS, short_help='Run a shell inside agent container')
