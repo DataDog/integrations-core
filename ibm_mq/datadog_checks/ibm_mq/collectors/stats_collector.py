@@ -20,6 +20,8 @@ except ImportError as e:
 
 
 STATISTICS_QUEUE_NAME = 'SYSTEM.ADMIN.STATISTICS.QUEUE'
+STATS_METRIC_CHANNEL_PREFIX = '{}.stats.channel'.format(METRIC_PREFIX)
+STATS_METRIC_QUEUE_PREFIX = '{}.stats.queue'.format(METRIC_PREFIX)
 
 
 class StatsCollector(object):
@@ -81,9 +83,8 @@ class StatsCollector(object):
                 'remote_q_mgr_name:{}'.format(channel_info.remote_q_mgr_name),
                 'connection_name:{}'.format(channel_info.connection_name),
             ]
-            prefix = '{}.stats.channel'.format(METRIC_PREFIX)
             metrics_map = channel_stats_metrics()
-            self.send_metrics_from_properties(channel_info.properties, metrics_map, prefix, tags)
+            self.send_metrics_from_properties(channel_info.properties, metrics_map=metrics_map, prefix=STATS_METRIC_CHANNEL_PREFIX, tags=tags)
 
     def _collect_queue_stats(self, queue_stats):
         self.log.debug('Collect queue stats. Number of queues: %s', len(queue_stats.queues))
@@ -93,9 +94,8 @@ class StatsCollector(object):
                 'queue_type:{}'.format(queue_info.type),
                 'definition_type:{}'.format(queue_info.definition_type),
             ]
-            prefix = '{}.stats.queue'.format(METRIC_PREFIX)
             metrics_map = queue_stats_metrics()
-            self.send_metrics_from_properties(queue_info.properties, metrics_map, prefix, tags)
+            self.send_metrics_from_properties(queue_info.properties, metrics_map=metrics_map, prefix=STATS_METRIC_QUEUE_PREFIX, tags=tags)
 
     @staticmethod
     def _get_stats(message, header):
