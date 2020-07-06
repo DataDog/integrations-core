@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+
 import click
 
 from ..console import CONTEXT_SETTINGS
@@ -18,7 +19,8 @@ def jmx():
 @click.pass_context
 def query_endpoint(ctx, host, port, domain):
     import jpype
-    from jpype import java, javax
+    from jpype import java
+    from jpype import javax
 
     url = "service:jmx:rmi:///jndi/rmi://{}:{}/jmxrmi".format(host, port)
     jpype.startJVM(convertStrings=False)
