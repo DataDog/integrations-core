@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class ParsedSymbolMetric(object):
-    __slots__ = ('name', 'tags', 'forced_type', 'enforce_scalar')
+    __slots__ = ('name', 'tags', 'forced_type', 'enforce_scalar', 'options')
 
     def __init__(
         self,
@@ -21,16 +21,18 @@ class ParsedSymbolMetric(object):
         tags=None,  # type: List[str]
         forced_type=None,  # type: str
         enforce_scalar=True,  # type: bool
+        options=None,  # type: dict
     ):
         # type: (...) -> None
         self.name = name
         self.tags = tags or []
         self.forced_type = forced_type
         self.enforce_scalar = enforce_scalar
+        self.options = options
 
 
 class ParsedTableMetric(object):
-    __slots__ = ('name', 'index_tags', 'column_tags', 'forced_type')
+    __slots__ = ('name', 'index_tags', 'column_tags', 'forced_type', 'options')
 
     def __init__(
         self,
@@ -38,12 +40,14 @@ class ParsedTableMetric(object):
         index_tags,  # type: List[IndexTag]
         column_tags,  # type: List[ColumnTag]
         forced_type=None,  # type: str
+        options=None,  # type: dict
     ):
         # type: (...) -> None
         self.name = name
         self.index_tags = index_tags
         self.column_tags = column_tags
         self.forced_type = forced_type
+        self.options = options
 
 
 ParsedMetric = Union[ParsedSymbolMetric, ParsedTableMetric]
