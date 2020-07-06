@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from pymqi.CMQC import MQRC_NO_MSG_AVAILABLE
-from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_MQI, MQCMD_STATISTICS_Q
+from pymqi.CMQCFC import MQCMD_STATISTICS_CHANNEL, MQCMD_STATISTICS_Q
 
 from datadog_checks.ibm_mq.stats_wrapper.base_stats import BaseStats
 from datadog_checks.ibm_mq.stats_wrapper.queue_stats import QueueStats
@@ -29,10 +29,16 @@ class StatsCollector(object):
         self.log = log
 
     def collect(self, queue_manager):
-        self.log.debug("Collect stats from %s", self.config.instance_creation_datetime)
+        """
+        Collect Statistics Messages
+
+        Docs: https://www.ibm.com/support/knowledgecenter/SSFKSJ_9.1.0/com.ibm.mq.mon.doc/q037320_.htm
+        """
+        self.log.debug("Collect stats newer than %s", self.config.instance_creation_datetime)
         queue = Queue(queue_manager, STATISTICS_QUEUE_NAME)
 
         try:
+            # It's expected for the loop to stop when pymqi.MQMIError is raised with reason MQRC_NO_MSG_AVAILABLE.
             while True:
                 bin_message = queue.get()
                 self.log.trace('Stats binary message: %s', bin_message)
@@ -42,9 +48,11 @@ class StatsCollector(object):
 
                 stats = self.get_stats_object(message, header)
 
+                # We only collect metrics generated after the check instance creation.
                 if stats.start_datetime < self.config.instance_creation_datetime:
                     self.log.debug(
-                        "Skipping messages created before agent startup. Message time: %s / Agent startup time: %s",
+                        "Skipping messages created before agent startup. "
+                        + "Message time: %s / Check instance creation time: %s",
                         stats.start_datetime,
                         self.config.instance_creation_datetime,
                     )
@@ -93,8 +101,6 @@ class StatsCollector(object):
     def get_stats_object(message, header):
         if header.Command == MQCMD_STATISTICS_CHANNEL:
             stats = ChannelStats(message)
-        elif header.Command == MQCMD_STATISTICS_MQI:
-            stats = BaseStats(message)
         elif header.Command == MQCMD_STATISTICS_Q:
             stats = QueueStats(message)
         else:
