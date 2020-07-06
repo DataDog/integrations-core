@@ -3,6 +3,7 @@ parameters:
 
 steps:
 - script: |
+    python --version
     pip install isort==5.0.3
     isort --check-only --diff isort_test_file.py
   displayName: 'Validate ISORT'
