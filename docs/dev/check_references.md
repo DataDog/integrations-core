@@ -56,13 +56,13 @@ Arguments:
 
 ### Optional parameters
 
-An optional parameter must be commented by default. Before every line the parameter spans on, add `#` (note the space) with the same indentation as the `@param` specification.
+An optional parameter must be commented by default. Before every line the parameter spans on, add `#` with the same indentation as the `@param` specification.
 
 ### Block comments
 
 You can add a block comment anywhere in the configuration file with the following rules:
 
-- Comments start with `##` (note the space)
+- Comments start with `##`
 - Comments should be indented like any variable (the hyphen doesn't count)
 
 For more information about YAML syntax, see [Wikipedia][2]. Feel free to play around with the [Online YAML Parser][3], too!

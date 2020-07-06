@@ -107,8 +107,6 @@ def manifest(ctx, fix, include_extras, repo_url):
 
     echo_info("Validating all manifest.json files...")
     for check_name in sorted(os.listdir(root)):
-        if check_name != 'new_integration':
-            continue
         manifest_file = os.path.join(root, check_name, 'manifest.json')
 
         if file_exists(manifest_file):

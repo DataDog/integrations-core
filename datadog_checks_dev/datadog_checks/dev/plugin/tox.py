@@ -77,7 +77,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
     commands = [
         'flake8 --config=../.flake8 .',
         'black --check --diff .',
-        'isort --check-only --diff --recursive .',
+        'isort --check-only --diff .',
     ]
 
     if sections['testenv'].get(TYPES_FLAG, 'false').lower() == 'true':
@@ -125,7 +125,7 @@ def add_style_formatter(config, sections, make_envconfig, reader):
         # Run formatter AFTER sorting imports
         'commands': '\n'.join(
             [
-                'isort --recursive .',
+                'isort .',
                 'black .',
                 'python -c "print(\'\\n[NOTE] flake8 may still report style errors for things black cannot fix, '
                 'these will need to be fixed manually.\')"',

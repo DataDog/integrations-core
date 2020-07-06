@@ -19,9 +19,9 @@ metrics:
         name: cfwConnectionStatValue
     metric_tags:
       - index: 1
-        tag: stat_type
-      - index: 2
         tag: service_type
+      - index: 2
+        tag: stat_type
 
   - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
     symbol:

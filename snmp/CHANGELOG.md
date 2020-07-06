@@ -1,5 +1,17 @@
 # CHANGELOG - snmp
 
+## 3.5.3 / 2020-07-01
+
+* [Fixed] Fix autodiscovery_subnet var in auto_conf.yaml. See [#7029](https://github.com/DataDog/integrations-core/pull/7029).
+
+## 3.5.2 / 2020-06-30
+
+* [Fixed] Fix tag names for cisco asa profile. See [#7027](https://github.com/DataDog/integrations-core/pull/7027).
+
+## 3.5.1 / 2020-06-30
+
+* [Fixed] Fix wrong indentation of `table` key in column metric tags. See [#7024](https://github.com/DataDog/integrations-core/pull/7024).
+
 ## 3.5.0 / 2020-06-29
 
 * [Added] Add regex match support for Tables. See [#6951](https://github.com/DataDog/integrations-core/pull/6951).
