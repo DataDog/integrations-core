@@ -34,6 +34,9 @@ def shell(check, env):
 
     environment = create_interface(check, env)
 
+    if environment.ENV_TYPE == 'local':
+        abort('Shell subcommand only available for docker e2e environments')
+
     result = environment.shell()
 
     if result.code:
