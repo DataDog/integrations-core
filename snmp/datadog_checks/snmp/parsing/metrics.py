@@ -232,8 +232,9 @@ def _parse_symbol(mib, symbol):
     if isinstance(symbol, str):
         oid = OID(ObjectIdentity(mib, symbol))
         return ParsedSymbol(name=symbol, oid=oid, oids_to_resolve={})
+    raw_oid = symbol['OID']
 
-    oid = OID(symbol['OID'])
+    oid = OID(raw_oid)
     name = symbol['name']
     return ParsedSymbol(name=name, oid=oid, oids_to_resolve={name: oid})
 

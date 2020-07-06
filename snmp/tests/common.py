@@ -26,7 +26,7 @@ SNMP_CONTAINER_NAME = 'dd-snmp'
 
 CHECK_TAGS = ['snmp_device:{}'.format(HOST)]
 
-SNMP_CONF = {'name': 'snmp_conf', 'ip_address': HOST, 'port': PORT, 'community_string': 'public'}
+SNMP_CONF = {'name': 'snmp_conf', 'ip_address': HOST, 'port': PORT, 'community_string': 'public', 'bulk_threshold': 1}
 
 SNMP_V3_CONF = {
     'name': 'snmp_v3_conf',

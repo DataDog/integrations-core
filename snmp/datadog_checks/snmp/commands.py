@@ -14,6 +14,7 @@ from datadog_checks.base.errors import CheckException
 
 from .config import InstanceConfig
 
+CMD_COUNT = 0
 
 def _handle_error(ctx, config):
     # type: (dict, InstanceConfig) -> None
@@ -40,6 +41,7 @@ def snmp_get(config, oids, lookup_mib):
 
     ctx = {}  # type: Dict[str, Any]
 
+    print("oids len: {}, oids:{}".format(len(oids), oids))
     var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
 
     cmdgen.GetCommandGenerator().sendVarBinds(
@@ -52,6 +54,9 @@ def snmp_get(config, oids, lookup_mib):
         ctx,
     )
 
+    config._call_count += 1
+    print("snmp_get var_binds", var_binds)
+
     config._snmp_engine.transportDispatcher.runDispatcher()
 
     _handle_error(ctx, config)
@@ -62,6 +67,8 @@ def snmp_get(config, oids, lookup_mib):
 def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
     # type: (InstanceConfig, list, bool, bool) -> Generator
     """Call SNMP GETNEXT on a list of oids. It will iterate on the results if it happens to be under the same prefix."""
+
+    config._call_count += 1
 
     if config.device is None:
         raise RuntimeError('No device set')  # pragma: no cover
@@ -84,6 +91,8 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
     gen = cmdgen.NextCommandGenerator()
 
     while True:
+        print("snmp_getnext var_binds", var_binds)
+        config._call_count += 1
         gen.sendVarBinds(
             config._snmp_engine,
             config.device.target,
@@ -130,12 +139,16 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
 
     ctx = {}  # type: Dict[str, Any]
 
+    # var_binds = [oid, oid]
+
     var_binds = [oid]
     initial_var = vbProcessor.makeVarBinds(config._snmp_engine, var_binds)[0][0]
 
     gen = cmdgen.BulkCommandGenerator()
 
     while True:
+        config._call_count += 1
+        print("snmp_bulk var_binds", var_binds)
         gen.sendVarBinds(
             config._snmp_engine,
             config.device.target,

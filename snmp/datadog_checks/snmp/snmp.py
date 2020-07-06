@@ -18,7 +18,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
 
-from .commands import snmp_bulk, snmp_get, snmp_getnext
+from .commands import snmp_bulk, snmp_get, snmp_getnext, CMD_COUNT
 from .compat import read_persistent_cache, write_persistent_cache
 from .config import InstanceConfig
 from .discovery import discover_instances
@@ -223,6 +223,7 @@ class SnmpCheck(AgentCheck):
             try:
                 self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
 
+                print("oids_batch", oids_batch)
                 var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
                 self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
 
@@ -237,6 +238,7 @@ class SnmpCheck(AgentCheck):
                         all_binds.append(var)
 
                 if missing_results:
+                    print("missing_results", missing_results)
                     # If we didn't catch the metric using snmpget, try snmpnext
                     next_oids.extend(missing_results)
 
@@ -246,6 +248,7 @@ class SnmpCheck(AgentCheck):
                     error = message
                 self.warning(message)
 
+        print("next_oids", next_oids)
         for oids_batch in batches(next_oids, size=self.oid_batch_size):
             try:
                 self.log.debug('Running SNMP command getNext on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
@@ -343,6 +346,7 @@ class SnmpCheck(AgentCheck):
             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
             self._check_device(config)
+        print("CMD_COUNT: ", config._call_count)
 
     def _on_check_device_done(self, host, future):
         # type: (str, futures.Future) -> None
