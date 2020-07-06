@@ -11,8 +11,10 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info
 @click.command('shell', context_settings=CONTEXT_SETTINGS, short_help='Run a shell inside agent container')
 @click.argument('check', autocompletion=complete_active_checks)
 @click.argument('env', autocompletion=complete_configured_envs, required=False)
-def shell(check, env):
-    """Restart an Agent to detect environment changes."""
+@click.option('-v', '--install-vim', is_flag=True, help='Optionally install editing/viewing tools vim and less')
+@click.option('-i', '--install-tools', multiple=True, help='Optionally install custom tools')
+def shell(check, env, install_vim, install_tools):
+    """Run a shell inside the Agent docker container."""
     envs = get_configured_envs(check)
     if not envs:
         echo_failure(f'No active environments found for `{check}`.')
@@ -36,6 +38,12 @@ def shell(check, env):
 
     if environment.ENV_TYPE == 'local':
         abort('Shell subcommand only available for docker e2e environments')
+
+    if install_vim or install_tools:
+        tools = 'less vim ' if install_vim else ' '
+        tools += ' '.join(install_tools)
+        echo_info('Installing helper tools ..')
+        environment.exec_command('/bin/bash -c "apt update && apt install -y {}"'.format(tools))
 
     result = environment.shell()
 
