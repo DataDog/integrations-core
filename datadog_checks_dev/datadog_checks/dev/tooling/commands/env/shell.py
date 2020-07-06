@@ -40,10 +40,11 @@ def shell(check, env, install_vim, install_tools):
         abort('Shell subcommand only available for docker e2e environments')
 
     if install_vim or install_tools:
-        tools = 'less vim ' if install_vim else ' '
-        tools += ' '.join(install_tools)
+        tools = list(install_tools)
+        if install_vim:
+            tools.extend(('less', 'vim'))
         echo_info('Installing helper tools ..')
-        environment.exec_command('/bin/bash -c "apt update && apt install -y {}"'.format(tools))
+        environment.exec_command(f'apt update && apt install -y {" ".join(tools)}')
 
     result = environment.shell()
 
