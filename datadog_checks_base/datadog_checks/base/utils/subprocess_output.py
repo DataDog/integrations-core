@@ -8,12 +8,12 @@ from six import string_types
 from .. import ensure_unicode
 
 try:
-    from _util import get_subprocess_output as subprocess_output
     from _util import SubprocessOutputEmptyError  # noqa
+    from _util import get_subprocess_output as subprocess_output
 except ImportError:
     # No agent
-    from ..stubs._util import subprocess_output
     from ..stubs._util import SubprocessOutputEmptyError  # noqa
+    from ..stubs._util import subprocess_output
 
 
 log = logging.getLogger(__name__)
