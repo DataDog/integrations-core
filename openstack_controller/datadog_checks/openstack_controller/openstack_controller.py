@@ -7,12 +7,12 @@ from collections import defaultdict
 from datetime import datetime
 
 import requests
-from openstack.config.loader import OpenStackConfig
 from six import iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
 from datadog_checks.base.utils.tracing import traced
+from openstack.config.loader import OpenStackConfig
 
 from .api import ApiFactory
 from .exceptions import (

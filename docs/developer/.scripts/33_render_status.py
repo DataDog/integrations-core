@@ -7,7 +7,11 @@ from datadog_checks.dev.tooling.utils import (
     get_readme_file,
     get_valid_checks,
     get_valid_integrations,
-    is_tile_only, has_e2e, has_dashboard)
+    has_dashboard,
+    has_e2e,
+    is_tile_only,
+)
+
 MARKER = '<docs-insert-status>'
 
 

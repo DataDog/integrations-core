@@ -1,17 +1,16 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 import json
 from datetime import datetime, timedelta
 
 import mock
 import pytest
-from kubernetes.config.dateutil import format_rfc3339
 from six import iteritems, string_types
 
 from datadog_checks.base import AgentCheck, KubeLeaderElectionBaseCheck
 from datadog_checks.base.checks.kube_leader import ElectionRecord
+from kubernetes.config.dateutil import format_rfc3339
 
 # Trigger lazy imports
 try:

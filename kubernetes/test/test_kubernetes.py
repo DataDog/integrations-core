@@ -2,18 +2,19 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import os
+import unittest
+
 # stdlib
 import mock
-import unittest
-import os
 
 # 3p
 import simplejson as json
+from checks import AgentCheck
 from nose.plugins.attrib import attr
 
 # project
 from tests.checks.common import AgentCheckTest, Fixtures
-from checks import AgentCheck
 from utils.kubernetes.kubeutil import KubeUtil, detect_is_k8s
 
 CPU = "CPU"

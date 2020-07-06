@@ -5,23 +5,23 @@
 """kubernetes check
 Collects metrics from cAdvisor instance
 """
-# stdlib
-from collections import defaultdict
-from fnmatch import fnmatch
+import calendar
 import numbers
 import re
 import time
-import calendar
 
-# 3p
-from requests.exceptions import ConnectionError
+# stdlib
+from collections import defaultdict
+from fnmatch import fnmatch
 
 # project
 from checks import AgentCheck
 from config import _is_affirmative
+
+# 3p
+from requests.exceptions import ConnectionError
 from utils.kubernetes import KubeUtil
 from utils.service_discovery.sd_backend import get_sd_backend
-
 
 NAMESPACE = "kubernetes"
 DEFAULT_MAX_DEPTH = 10
