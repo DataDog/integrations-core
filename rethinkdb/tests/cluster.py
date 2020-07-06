@@ -6,9 +6,10 @@ from contextlib import contextmanager
 from typing import Iterator, List
 
 import rethinkdb
+from rethinkdb import r
+
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.docker import temporarily_stop_service
-from rethinkdb import r
 
 from .common import (
     AGENT_PASSWORD,
