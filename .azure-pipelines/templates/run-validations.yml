@@ -2,6 +2,9 @@ parameters:
   repo: 'core'
 
 steps:
+- script: isort --check-only --diff isort_test_file.py
+  displayName: 'Validate ISORT'
+
 - script: ddev validate ci
   displayName: 'Validate CI configuration'
 
