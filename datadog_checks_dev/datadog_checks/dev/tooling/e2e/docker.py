@@ -285,6 +285,9 @@ class DockerInterface(object):
     def restart_agent(self):
         return run_command(['docker', 'restart', self.container_name], capture=True)
 
+    def shell(self):
+        return self.exec_command('/bin/bash', interactive=True)
+
 
 def get_docker_networks():
     command = ['docker', 'network', 'ls', '--format', '{{.Name}}']
