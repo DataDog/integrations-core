@@ -6,7 +6,7 @@ from __future__ import division
 import os
 import platform
 import re
-import xml.etree.ElementTree as ET
+from xml.etree import ElementTree as ET
 
 import psutil
 from six import iteritems, string_types

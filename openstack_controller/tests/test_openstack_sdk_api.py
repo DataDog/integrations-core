@@ -1,6 +1,5 @@
 import mock
 import pytest
-from openstack.exceptions import SDKException
 
 from datadog_checks.openstack_controller.api import OpenstackSDKApi
 from datadog_checks.openstack_controller.exceptions import (
@@ -9,6 +8,7 @@ from datadog_checks.openstack_controller.exceptions import (
     MissingNeutronEndpoint,
     MissingNovaEndpoint,
 )
+from openstack.exceptions import SDKException
 
 from . import common
 

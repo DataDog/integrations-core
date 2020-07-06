@@ -4,13 +4,13 @@
 from collections import defaultdict
 from time import time
 
+from six import string_types
+
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from kafka import KafkaAdminClient, KafkaClient
 from kafka import errors as kafka_errors
 from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
 from kafka.structs import TopicPartition
-from six import string_types
-
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
 from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT, KAFKA_INTERNAL_TOPICS
 from .legacy_0_10_2 import LegacyKafkaCheck_0_10_2

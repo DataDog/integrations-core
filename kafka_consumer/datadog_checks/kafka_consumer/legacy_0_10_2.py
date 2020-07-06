@@ -6,15 +6,15 @@ from __future__ import division
 from collections import defaultdict
 from time import time
 
-from kafka import KafkaClient
-from kafka import errors as kafka_errors
-from kafka.protocol.commit import GroupCoordinatorRequest, OffsetFetchRequest
-from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
 from kazoo.client import KazooClient
 from kazoo.exceptions import NoNodeError
 from six import string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from kafka import KafkaClient
+from kafka import errors as kafka_errors
+from kafka.protocol.commit import GroupCoordinatorRequest, OffsetFetchRequest
+from kafka.protocol.offset import OffsetRequest, OffsetResetStrategy, OffsetResponse
 
 from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT, KAFKA_INTERNAL_TOPICS
 
