@@ -39,6 +39,14 @@ or a wildcard pattern to address multiple device models:
 sysobjectid: 1.3.6.1.131.12.4.*
 ```
 
+or even a list of those:
+
+```yaml
+sysobjectid:
+  - 1.3.6.1.131.12.4.*
+  - 1.3.6.1.4.1.232.9.4.10
+```
+
 ### `extends`
 
 _(Optional)_
