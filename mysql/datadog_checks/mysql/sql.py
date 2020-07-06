@@ -4,12 +4,19 @@ import datadog_agent
 import mmh3
 
 
+def compute_normalized_query(query):
+    """
+    Given a raw SQL query, apply agent normalization rules on the query
+    """
+    return datadog_agent.obfuscate_sql(query)
+
+
 def compute_sql_signature(query):
     """
     Given a raw SQL query or prepared statement, generate a 64-bit hex signature
     on the normalized query.
     """
-    normalized = datadog_agent.obfuscate_sql(query)
+    normalized = compute_normalized_query(query)
     return format(mmh3.hash64(normalized, signed=False)[0], 'x')
 
 
