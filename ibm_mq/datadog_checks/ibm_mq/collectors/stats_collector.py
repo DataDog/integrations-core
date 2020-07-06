@@ -84,7 +84,9 @@ class StatsCollector(object):
                 'connection_name:{}'.format(channel_info.connection_name),
             ]
             metrics_map = channel_stats_metrics()
-            self.send_metrics_from_properties(channel_info.properties, metrics_map=metrics_map, prefix=STATS_METRIC_CHANNEL_PREFIX, tags=tags)
+            self.send_metrics_from_properties(
+                channel_info.properties, metrics_map=metrics_map, prefix=STATS_METRIC_CHANNEL_PREFIX, tags=tags
+            )
 
     def _collect_queue_stats(self, queue_stats):
         self.log.debug('Collect queue stats. Number of queues: %s', len(queue_stats.queues))
@@ -95,7 +97,9 @@ class StatsCollector(object):
                 'definition_type:{}'.format(queue_info.definition_type),
             ]
             metrics_map = queue_stats_metrics()
-            self.send_metrics_from_properties(queue_info.properties, metrics_map=metrics_map, prefix=STATS_METRIC_QUEUE_PREFIX, tags=tags)
+            self.send_metrics_from_properties(
+                queue_info.properties, metrics_map=metrics_map, prefix=STATS_METRIC_QUEUE_PREFIX, tags=tags
+            )
 
     @staticmethod
     def _get_stats(message, header):
