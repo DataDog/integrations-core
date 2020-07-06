@@ -15,6 +15,7 @@ TYPES_FLAG = 'dd_check_types'
 MYPY_ARGS_OPTION = 'dd_mypy_args'
 E2E_READY_CONDITION = 'e2e ready if'
 FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
+ISORT_DEP = 'isort[pyproject]==4.3.21'  # cap isort due to https://github.com/timothycrosley/isort/issues/1278
 
 
 @tox.hookimpl
@@ -71,7 +72,7 @@ def add_style_checker(config, sections, make_envconfig, reader):
         'flake8-bugbear',
         'flake8-logging-format',
         'black',
-        'isort[pyproject]>=4.3.15',
+        ISORT_DEP,
     ]
 
     commands = [
@@ -115,13 +116,18 @@ def add_style_checker(config, sections, make_envconfig, reader):
 def add_style_formatter(config, sections, make_envconfig, reader):
     # testenv:format_style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_FORMATTER_ENV_NAME)
+    dependencies = [
+        'flake8',
+        'black',
+        ISORT_DEP,
+    ]
     sections[section] = {
         'platform': 'linux|darwin|win32',
         # These tools require Python 3.6+
         # more info: https://github.com/ambv/black/issues/439#issuecomment-411429907
         'basepython': 'python3',
         'skip_install': 'true',
-        'deps': 'flake8\nblack\nisort[pyproject]>=4.3.15',
+        'deps': '\n'.join(dependencies),
         # Run formatter AFTER sorting imports
         'commands': '\n'.join(
             [
