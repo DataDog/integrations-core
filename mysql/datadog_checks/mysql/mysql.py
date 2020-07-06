@@ -19,7 +19,7 @@ from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
 from .execution_plans import ExecutionPlansMixin
-from .sql import compute_sql_signature, compute_normalized_query
+from datadog_checks.base.utils.db.sql import compute_sql_signature
 
 try:
     import psutil
@@ -1502,7 +1502,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
                 tags = []
                 if row['schema'] is not None:
                     tags.append('schema:' + row['schema'])
-                tags.append('query:' + compute_normalized_query(row['query'])[:200])
+                tags.append('query:' + datadog_agent.obfuscate_sql(row['query'])[:200])
                 tags.append('digest:' + row['digest'])
                 tags.append('query_signature:' + compute_sql_signature(row['query']))
                 metrics.append((name, row[col] - prev[col], fn, tags))

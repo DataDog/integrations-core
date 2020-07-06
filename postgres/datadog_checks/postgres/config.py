@@ -45,6 +45,11 @@ class PostgresConfig:
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
         self.collect_default_db = is_affirmative(instance.get('collect_default_database', False))
         self.collect_statement_metrics = is_affirmative(instance.get('collect_statement_metrics', False))
+        self.collect_execution_plans = is_affirmative(instance.get('collect_execution_plans', False))
+        self.collect_exec_plan_sample_sleep = instance.get('collect_exec_plan_sample_sleep', 0)
+        self.collect_exec_plan_time_limit = instance.get('collect_exec_plan_time_limit', 5)
+        self.collect_exec_plan_event_limit = instance.get('collect_exec_plan_event_limit', 1000)
+        self.collect_exec_plan_function = instance.get('collect_exec_plan_function', 'public.explain_statement')
         self.custom_queries = instance.get('custom_queries', [])
 
         if not self.host:
