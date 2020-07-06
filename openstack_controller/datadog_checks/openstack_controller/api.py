@@ -5,9 +5,8 @@ from os import environ
 
 import requests
 import simplejson as json
-from six.moves.urllib.parse import urljoin
-
 from openstack import connection
+from six.moves.urllib.parse import urljoin
 
 from .exceptions import (
     AuthenticationNeeded,
