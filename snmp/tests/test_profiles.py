@@ -1718,7 +1718,12 @@ def test_apc_ups(aggregator):
         'upsAdvOutputLoad',
         'upsBasicBatteryTimeOnBattery',
         'upsAdvTestDiagnosticsResults',
+        'upsBasicStateOutputState.AVRTrimActive',
+        'upsBasicStateOutputState.BatteriesDischarged',
+        'upsBasicStateOutputState.LowBatteryOnBattery',
+        'upsBasicStateOutputState.NoBatteriesAttached',
         'upsBasicStateOutputState.OnLine',
+        'upsBasicStateOutputState.ReplaceBattery',
     ]
 
     common.assert_common_metrics(aggregator, tags)
