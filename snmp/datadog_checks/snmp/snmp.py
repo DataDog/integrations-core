@@ -523,7 +523,11 @@ class SnmpCheck(AgentCheck):
             metric_name = self.normalize(name, prefix='snmp')
 
         if forced_type is not None:
-            metric = as_metric_with_forced_type(snmp_value, forced_type, options)
+            try:
+                metric = as_metric_with_forced_type(snmp_value, forced_type, options)
+            except Exception as e:
+                self.log.error('Unable to coerce %s to %s: %s', name, forced_type, e)
+                return
             if metric is None:
                 raise ConfigurationError('Invalid forced-type {!r} for metric {!r}'.format(forced_type, name))
         else:
