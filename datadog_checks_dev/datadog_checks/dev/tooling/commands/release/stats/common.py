@@ -1,12 +1,20 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import re
 import datetime
+import re
 
+from ....github import (
+    get_commit,
+    get_compare,
+    get_pr_from_hash,
+    get_pr_labels,
+    get_pr_of_repo,
+    get_tag,
+    get_tags,
+    parse_pr_number,
+)
 from ...console import echo_failure, echo_info
-from ....github import get_compare, parse_pr_number, get_pr_from_hash, get_tags
-from ....github import get_tag, get_pr_of_repo, get_pr_labels, get_commit
 
 
 class PullRequest:
