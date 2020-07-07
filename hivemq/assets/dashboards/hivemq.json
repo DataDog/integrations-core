@@ -1,5 +1,5 @@
 {
-  "board_title": "HiveMQ",
+  "board_title": "HiveMQ Overview",
   "read_only": false,
   "description": "The default dashboard for monitoring HiveMQ brokers including connections, subscriptions, and messages.",
   "created": "2020-07-07T18:59:17.091896+00:00",
