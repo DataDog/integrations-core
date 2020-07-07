@@ -9,7 +9,7 @@ Get metrics from the Kubernetes service in real time to:
 - Visualize and monitor Kubernetes states
 - Be notified about Kubernetes failovers and events.
 
-Note: This check only works with agent 5. For agent 6+ refer to the [kubelet check][14].
+Note: This check only works with Agent v5. For Agent v6+, refer to the [kubelet check][14].
 
 ## Setup
 
