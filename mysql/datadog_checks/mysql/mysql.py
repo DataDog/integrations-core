@@ -318,7 +318,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
 
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
-        self.max_query_metrics = int(self.instance.get('max_query_metrics', 300))
+        self.max_query_metrics = int(self.instance.get('options', {}).get('max_query_metrics', 300))
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -1478,6 +1478,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
         # - high lock time
 
         rows = rows[:self.max_query_metrics]
+
 
         # Given the queried rows, each row must be checked against its previous result
         # to derive the values in the elapsed period. Statements which appeared first this
