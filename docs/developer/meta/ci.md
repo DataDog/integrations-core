@@ -59,7 +59,8 @@ See the [ddev documentation](../ddev/cli.md#validate) and [source code](https://
     A list of the current validations can be found [here](https://github.com/DataDog/integrations-core/blob/master/.azure-pipelines/templates/run-validations.yml)
 
 
-### Validate CI configuration
+### CI configuration
+
 ```
 ddev validate ci
 ```
@@ -69,14 +70,16 @@ This validates that all CI entries for integrations are valid. This includes che
 !!! tip 
     Run `ddev validate ci --fix` to resolve most errors.
 
-### Validate Agent requirements
+### Agent requirements
+
 ```
 ddev validate agent-reqs
 ```
 
 This validates that each integration version is in sync with the [`requirements-agent-release.txt`](https://github.com/DataDog/integrations-core/blob/master/requirements-agent-release.txt) file. It is uncommon for this to fail because the release process is automated.
 
-### Validate default configuration files
+### Default configuration files
+
 ```
 ddev validate config
 ```
@@ -84,7 +87,8 @@ This verifies that the config specs for all integrations are valid by enforcing 
 
 If you see failures regarding formatting or missing parameters, see our [config spec](config-specs.md#schema) documentation for more details on how to construc configuration specs.
 
-### Validate dashboard definition files
+### Dashboard definition files
+
 ```
 ddev validate dashboards
 ```
@@ -94,7 +98,8 @@ This validates that dashboards are formatted correctly. This means that they nee
 !!! tip 
     If you see a failure regarding use of the screen endpoint, consider using our dashboard [utility command](../ddev/cli.md#export) to generate your dashboard payload.
 
-### Validate dependencies
+### Dependencies
+
 ```
 ddev validate dep
 ```
@@ -108,21 +113,24 @@ This command:
 
 This validation only applies if your work introduces new external dependencies.
 
-### Validate manifest files
+### Manifest files
+
 ```
 ddev validate manifest -i
 ```
 
 This validates that the manifest files contain required fields, are formatted correctly, and don't contain common errors. See the [Datadog Docs](https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file) for more detailed constraints. 
 
-### Validate metadata
+### Metadata
+
 ```
 ddev validate metadata
 ```
 
 This checks that every `metadata.csv` file is formatted correctly. See the [Datadog Docs](https://docs.datadoghq.com/developers/integrations/check_references/#metrics-metadata-file) for more detailed constraints. 
 
-### Validate saved views data
+### Saved views data
+
 ```
 ddev validate saved-views
 ```
@@ -132,14 +140,16 @@ This validates that saved views for an integration are formatted correctly and c
 !!! tip 
     View [example saved views](https://github.com/DataDog/integrations-core/tree/master/postgres/assets/saved_views) for inspiration and guidance.
 
-### Validate service check data
+### Service check data
+
 ```
 ddev validate service-checks
 ```
 
 This checks that every service check file is formatted correctly. See the [Datadog Docs](https://docs.datadoghq.com/developers/integrations/check_references/#service-check-file) for more specific constraints.
 
-### Validate imports
+### Imports
+
 ``` 
 ddev validate imports
 ```
