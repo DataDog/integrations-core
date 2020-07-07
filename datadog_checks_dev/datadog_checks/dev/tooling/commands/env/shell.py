@@ -43,8 +43,8 @@ def shell(check, env, install_vim, install_tools):
         tools = list(install_tools)
         if install_vim:
             tools.extend(('less', 'vim'))
-        echo_info('Installing helper tools ..')
-        environment.exec_command(f'apt update && apt install -y {" ".join(tools)}')
+        echo_info(f'Installing helper tools: {", ".join(tools)}')
+        environment.exec_command('/bin/bash -c "apt update && apt install -y {}"'.format(" ".join(tools)))
 
     result = environment.shell()
 
