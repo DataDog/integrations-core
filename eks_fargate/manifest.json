@@ -10,12 +10,8 @@
   "description": "Collect your Amazon EKS metrics, traces, and logs.",
   "guid": "e9e58fb9-696b-4e3c-9058-c144a1d9a737",
   "support": "core",
-  "supported_os": [
-    "linux",
-    "mac_os",
-    "windows"
-  ],
-  "public_title": "Datadog-EKS fargate Integration",
+  "supported_os": [],
+  "public_title": "Datadog-Amazon EKS on AWS Fargate Integration",
   "categories": [
     "cloud",
     "aws",
