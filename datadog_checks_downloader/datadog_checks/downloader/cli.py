@@ -5,6 +5,7 @@
 
 # 1st party.
 import argparse
+import os
 import re
 
 # 2nd party.
@@ -21,6 +22,34 @@ def __is_canonical(version):
 
     P = r'^([1-9]\d*!)?(0|[1-9]\d*)(\.(0|[1-9]\d*))*((a|b|rc)(0|[1-9]\d*))?(\.post(0|[1-9]\d*))?(\.dev(0|[1-9]\d*))?$'
     return re.match(P, version) is not None
+
+
+def __find_shipped_integrations():
+    root = os.path.dirname(os.path.abspath(__file__))
+    filename = 'requirements-agent-release.txt'
+
+    integrations = set()
+
+    while True:
+        file_path = os.path.join(root, filename)
+        if os.path.isfile(file_path):
+            break
+
+        new_root = os.path.dirname(root)
+        if new_root == root:
+            return integrations
+
+        root = new_root
+
+    with open(file_path, 'rb') as f:
+        contents = f.read().decode('utf-8')
+
+    for line in contents.splitlines():
+        integration, separator, _ = line.strip().partition('==')
+        if separator:
+            integrations.add(integration)
+
+    return integrations
 
 
 # Public module functions.
@@ -63,6 +92,11 @@ def download():
 
     if version and not __is_canonical(version):
         raise NonCanonicalVersion(version)
+
+    if root_layout_type == 'extras':
+        shipped_integrations = __find_shipped_integrations()
+        if standard_distribution_name in shipped_integrations:
+            print('WARNING: {} is a known core integration'.format(standard_distribution_name))
 
     tuf_downloader = TUFDownloader(
         repository_url_prefix=repository_url_prefix, root_layout_type=root_layout_type, verbose=verbose
