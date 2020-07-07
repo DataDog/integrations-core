@@ -1,5 +1,13 @@
 # CHANGELOG - IBM MQ
 
+## 3.7.0 / 2020-06-29
+
+* [Added] Add MacOS Support. See [#6927](https://github.com/DataDog/integrations-core/pull/6927).
+* [Fixed] Refactor to make encoding more consistent. See [#6995](https://github.com/DataDog/integrations-core/pull/6995).
+* [Fixed] Ensure bytes for ssl connection. See [#6913](https://github.com/DataDog/integrations-core/pull/6913).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+* [Fixed] Move metrics collection logic to separate files. See [#6752](https://github.com/DataDog/integrations-core/pull/6752).
+
 ## 3.6.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

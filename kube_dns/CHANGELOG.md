@@ -1,5 +1,9 @@
 # CHANGELOG - Kube-dns
 
+## 2.4.1 / 2020-06-29
+
+* [Fixed] Use agent 6 signature. See [#6907](https://github.com/DataDog/integrations-core/pull/6907).
+
 ## 2.4.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

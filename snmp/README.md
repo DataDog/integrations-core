@@ -4,7 +4,7 @@
 
 Simple Network Management Protocol (SNMP) is a standard for monitoring network-connected devices, such as routers, switches, servers, and firewalls. This check collects SNMP metrics from your network devices.
 
-SNMP uses sysOIDs (System Object Identifiers) to uniquely identify devices, and OIDs (Object Identifiers) to uniquely identify managed objects. OIDs follow a hierarchical tree pattern: under the root is ISO, which is numbered 1. The next level is ORG and numbered 3 and so on, with each level being separated by a `.`.
+SNMP uses sysObjectIDs (System Object Identifiers) to uniquely identify devices, and OIDs (Object Identifiers) to uniquely identify managed objects. OIDs follow a hierarchical tree pattern: under the root is ISO, which is numbered 1. The next level is ORG and numbered 3 and so on, with each level being separated by a `.`.
 
 A MIB (Management Information Base) acts as a translator between OIDs and human readable names, and organizes a subset of the hierarchy. Because of the way the tree is structured, most SNMP values start with the same set of objects:
 
@@ -19,11 +19,62 @@ The SNMP check is included in the [Datadog Agent][1] package. No additional inst
 
 ### Configuration
 
-The Datadog SNMP check auto-discovers network devices on a provided subnet, and collects metrics using Datadog's sysOID mapped device profiles.
+Edit the configuration options in the `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample snmp.d/conf.yaml][3] for all available configuration options.
 
-Edit the subnet and SNMP version in the `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample snmp.d/conf.yaml][3] for all available configuration options.
+The Datadog SNMP check supports collecting metrics from individual devices, or auto-discovering devices (unique IP addresses) on entire subnets.
+
+Which collection strategy to choose mainly depends on how many devices are present on your network, and how dynamic the network is (i.e. how frequently devices are added or removed):
+
+- For small and mostly static networks, see [Monitoring individual devices](#monitoring-individual-devices).
+- For larger and/or dynamic networks, see [Autodiscovery](#autodiscovery).
+
+Regardless of the collection strategy, you can leverage Datadog's [`sysObjectID` mapped device profiles](#sysobjectid-mapped-device-profiles) to automatically collect relevant metrics from your devices.
+
+#### Monitoring individual devices
+
+The easiest way to get started with the SNMP integration is to point it at the IP address of an SNMP device.
+
+For SNMPv2 devices:
+
+1. Configure an instance specifying i) the IP address of the device, ii) the `community` string of the device:
+
+    ```yaml
+    instances:
+      - ip_address: "<IP_ADDRESS>"
+        community: "<COMMUNITY>"
+    ```
+
+2. [Restart the Agent][31].
+
+For SNMPv3 devices:
+
+1. Configure an instance specifying i) the IP address of the device, ii) SNMPv3 credentials of the device, i.e. `user` and any of `auth_protocol`, `auth_key`, `priv_protocol`, and `priv_key` (as appropriate for your device):
+
+    ```yaml
+    instances:
+      - ip_address: "<IP_ADDRESS>"
+        user: "<USER>"
+        ## Configure these as appropriate
+        # authProtocol: SHA
+        # authKey: "<AUTH_KEY>"
+        # privProtocol: AES
+        # privKey: "<PRIV_KEY>"
+    ```
+
+2. [Restart the Agent][31].
+
+The Agent will then start collecting relevant metrics by matching your device against one of [Datadog's out-of-the-box device profiles](#metric-definition-by-profile).
+
+Once metrics are reporting, you can expand your setup in various ways:
+
+* Add more instances to collect metrics from more devices on your network.
+* Consider using [Autodiscovery](#autodiscovery) if you need to collect metrics from lots of devices across a dynamic network.
 
 #### Autodiscovery
+
+As an alternative to specifying individual devices, you can use autodiscovery to automatically discover all the devices on your network.
+
+Autodiscovery will poll each IP on the configured subnet, and check for a response from the SNMP device. The Datadog Agent will then lookup the `sysObjectID` of the discovered device, and map it to one of [Datadog's out-of-the-box device profiles](#metric-definition-by-profile), which consist of lists of predefined metrics to be collected for various types of devices.
 
 To use Autodiscovery with the SNMP check:
 
@@ -88,7 +139,7 @@ instances:
        - "<KEY_2>:<VALUE_2>"
 ```
 
-##### sysOID mapped device profiles
+##### sysObjectID mapped device profiles
 
 Profiles allow the SNMP check to reuse metric definitions across several device types or instances. Profiles define metrics the same way as instances, either inline in the configuration file or in separate files. Each instance can only match a single profile. For example, you can define a profile in the `init_config` section:
 
@@ -124,7 +175,7 @@ If necessary, additional metrics can be defined in the instances. These metrics 
 
 Profiles can be used interchangeably, such that devices that share MIB dependencies can reuse the same profiles. For example, the Cisco c3850 profile can be used across many Cisco switches.
 
-* [Generic router][7]
+* [Generic router][7] _(Default profile in case no other profile matches)_
 * [Cisco ASA 5525][8]
 * [Cisco c3850][9]
 * [Cisco Nexus][10]
@@ -206,3 +257,4 @@ Additional helpful documentation, links, and articles:
 [28]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco_isr_4431.yaml
 [29]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/fortinet-fortigate.yaml
 [30]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/netapp.yaml
+[31]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

@@ -1,5 +1,10 @@
 # CHANGELOG - win32_event_log
 
+## 2.5.0 / 2020-06-29
+
+* [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
+* [Added] Override CaseInsensitiveDict `copy()` function. See [#6715](https://github.com/DataDog/integrations-core/pull/6715).
+
 ## 2.4.0 / 2020-05-17
 
 * [Added] Refactor check to support new implementation. See [#6639](https://github.com/DataDog/integrations-core/pull/6639).

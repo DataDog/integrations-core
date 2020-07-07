@@ -1,32 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from datadog_checks.dev.jmx import JVM_E2E_METRICS
 
 GAUGES = [
-    'jvm.thread_count',
-    'jvm.gc.survivor_size',
-    'jvm.heap_memory_committed',
-    'jvm.non_heap_memory_committed',
-    'jvm.buffer_pool.direct.count',
-    'jvm.cpu_load.process',
-    'jvm.non_heap_memory_max',
-    'jvm.gc.cms.count',
-    'jvm.gc.eden_size',
-    'jvm.heap_memory',
-    'jvm.buffer_pool.mapped.count',
-    'jvm.buffer_pool.mapped.capacity',
-    'jvm.non_heap_memory_init',
-    'jvm.buffer_pool.direct.capacity',
-    'jvm.os.open_file_descriptors',
-    'jvm.loaded_classes',
-    'jvm.gc.parnew.time',
-    'jvm.non_heap_memory',
-    'jvm.buffer_pool.direct.used',
-    'jvm.buffer_pool.mapped.used',
-    'jvm.heap_memory_init',
-    'jvm.gc.old_gen_size',
-    'jvm.cpu_load.system',
-    'jvm.heap_memory_max',
     'ignite.cache.offheap_miss_percentage',
     'ignite.jobs.wait_time.maximum',
     'ignite.cache.size',
@@ -176,7 +153,7 @@ GAUGES = [
     'ignite.jobs.waiting.average',
     'ignite.checkpoint.last_copied_on_write_pages',
     'ignite.wal.last_rollover',
-]
+] + JVM_E2E_METRICS
 
 COUNTS = [
     "ignite.cache.commits",

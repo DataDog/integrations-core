@@ -1,5 +1,9 @@
 # CHANGELOG - Hyper-V
 
+## 1.3.0 / 2020-06-29
+
+* [Added] Add config and use new agent signature. See [#6779](https://github.com/DataDog/integrations-core/pull/6779).
+
 ## 1.2.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

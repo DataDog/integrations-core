@@ -1,5 +1,9 @@
 # CHANGELOG - tokumx
 
+## 2.3.1 / 2020-06-29
+
+* [Fixed] Add config specs and change signature. See [#6729](https://github.com/DataDog/integrations-core/pull/6729).
+
 ## 2.3.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

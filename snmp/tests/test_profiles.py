@@ -1236,7 +1236,7 @@ def test_cisco_asa_5525(aggregator):
     sensor_tags = ['sensor_id:31', 'sensor_type:9'] + common_tags
     aggregator.assert_metric('snmp.entPhySensorValue', metric_type=aggregator.GAUGE, tags=sensor_tags, count=1)
 
-    stat_tags = [(2, 20), (5, 5)]
+    stat_tags = [(20, 2), (5, 5)]
     for (svc, stat) in stat_tags:
         aggregator.assert_metric(
             'snmp.cfwConnectionStatValue',
