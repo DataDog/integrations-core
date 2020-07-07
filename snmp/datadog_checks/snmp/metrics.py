@@ -61,6 +61,6 @@ def as_metric_with_forced_type(value, forced_type, options):
 
     if forced_type == 'flag_stream':
         index = int(options['placement']) - 1
-        return {'type': 'gauge', 'value': int(value[index])}
+        return {'type': 'gauge', 'value': int(str(value)[index])}
 
     return None

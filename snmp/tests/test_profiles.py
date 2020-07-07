@@ -1718,12 +1718,6 @@ def test_apc_ups(aggregator):
         'upsAdvOutputLoad',
         'upsBasicBatteryTimeOnBattery',
         'upsAdvTestDiagnosticsResults',
-        'upsBasicStateOutputState.AVRTrimActive',
-        'upsBasicStateOutputState.BatteriesDischarged',
-        'upsBasicStateOutputState.LowBatteryOnBattery',
-        'upsBasicStateOutputState.NoBatteriesAttached',
-        'upsBasicStateOutputState.OnLine',
-        'upsBasicStateOutputState.ReplaceBattery',
     ]
 
     common.assert_common_metrics(aggregator, tags)
@@ -1734,6 +1728,24 @@ def test_apc_ups(aggregator):
         'snmp.upsOutletGroupStatusGroupState',
         metric_type=aggregator.GAUGE,
         tags=['outlet_group_name:test_outlet'] + tags,
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.AVRTrimActive', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.BatteriesDischarged', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.LowBatteryOnBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.NoBatteriesAttached', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.OnLine', 0, metric_type=aggregator.GAUGE, tags=tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.ReplaceBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
     )
     aggregator.assert_all_metrics_covered()
 
