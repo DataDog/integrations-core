@@ -8,7 +8,7 @@ files:
   - template: instances
     options:
       - name: url
-        description: Riak stats url to connect to.
+        description: The Riak stats URL to connect to.
         required: true
         value:
           type: string
@@ -56,7 +56,7 @@ files:
   - template: instances
     options:
     - name: url
-      description: Riak stats url to connect to.
+      description: The Riak stats URL to connect to.
       required: true
       value:
         type: string
