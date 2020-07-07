@@ -19,10 +19,7 @@ class PullRequest:
     @classmethod
     def from_github_pr(cls, gh_pr):
         return PullRequest(
-            number=gh_pr['number'],
-            title=gh_pr['title'],
-            url=gh_pr['html_url'],
-            labels=get_pr_labels(gh_pr)
+            number=gh_pr['number'], title=gh_pr['title'], url=gh_pr['html_url'], labels=get_pr_labels(gh_pr)
         )
 
     @classmethod
@@ -71,7 +68,7 @@ class Commit:
             title=gh_commit['commit']['message'],
             date=datetime.datetime.strptime(gh_commit['commit']['committer']['date'], '%Y-%m-%dT%H:%M:%SZ'),
             author=f"@{gh_commit['committer']['login']} - {gh_commit['commit']['committer']['name']}",
-            pull_request=pull_request
+            pull_request=pull_request,
         )
 
     @classmethod
@@ -110,13 +107,10 @@ class Tag:
             return Tag(
                 ref=gh_tag.get('ref', gh_tag.get('tag')),
                 sha=gh_tag.get('sha', None),
-                commit_sha=gh_tag['object']['sha']
+                commit_sha=gh_tag['object']['sha'],
             )
         else:
-            return Tag(
-                ref=gh_tag['ref'],
-                sha=gh_tag['object']['sha']
-            )
+            return Tag(ref=gh_tag['ref'], sha=gh_tag['object']['sha'])
 
     @classmethod
     def get(cls, ctx, tag_sha):
@@ -144,8 +138,9 @@ class Release:
         echo_info(f'Fetching commits using compare from parent of "{from_ref}" to "{to_ref}"...')
         commits = Commit.from_github_compare(ctx, f'{from_ref}^', to_ref)
         echo_info(f'Fetching tags matching "/{version_re}/"...')
-        rc_tags = [tag for tag in Tag.list_from_github(ctx)
-                   if version_re.match(tag.name) or tag.name == release_version]
+        rc_tags = [
+            tag for tag in Tag.list_from_github(ctx) if version_re.match(tag.name) or tag.name == release_version
+        ]
 
         for rc_tag in rc_tags:
             # we are forced to reload tags as the github does not return the tag's commit's SHA
@@ -169,8 +164,4 @@ class Release:
             if commit.sha == rc_tags[tag_index].commit_sha:
                 tag_index += 1
 
-        return Release(
-            release_version=release_version,
-            commits=commits,
-            rc_tags=rc_tags
-        )
+        return Release(release_version=release_version, commits=commits, rc_tags=rc_tags)

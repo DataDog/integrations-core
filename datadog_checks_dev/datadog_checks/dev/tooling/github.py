@@ -39,18 +39,14 @@ def get_commit(repo, commit_sha, config):
 
 
 def get_tag(repo, ref, config):
-    response = requests.get(
-        f'https://api.github.com/repos/DataDog/{repo}/git/tags/{ref}', auth=get_auth_info(config),
-    )
+    response = requests.get(f'https://api.github.com/repos/DataDog/{repo}/git/tags/{ref}', auth=get_auth_info(config),)
 
     response.raise_for_status()
     return response.json()
 
 
 def get_tags(repo, config):
-    response = requests.get(
-        f'https://api.github.com/repos/DataDog/{repo}/git/refs/tags', auth=get_auth_info(config),
-    )
+    response = requests.get(f'https://api.github.com/repos/DataDog/{repo}/git/refs/tags', auth=get_auth_info(config),)
 
     response.raise_for_status()
     return response.json()
@@ -113,8 +109,7 @@ def get_pr(pr_num, config=None, raw=False, org='DataDog'):
 
 def get_pr_from_hash(commit_hash, repo, config=None, raw=False):
     response = requests.get(
-        f'https://api.github.com/search/issues?q=sha:{commit_hash}+repo:DataDog/{repo}',
-        auth=get_auth_info(config),
+        f'https://api.github.com/search/issues?q=sha:{commit_hash}+repo:DataDog/{repo}', auth=get_auth_info(config),
     )
 
     if raw:

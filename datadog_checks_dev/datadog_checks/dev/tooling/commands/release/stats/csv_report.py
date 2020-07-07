@@ -40,7 +40,7 @@ class ReportSerializer:
             'Release candidates': len(self.release.rc_tags),
             'Number of Commits': len(self.release.commits),
             'Commits with unknown PR': len([commit for commit in self.release.commits if commit.pull_request is None]),
-            'Release time (days)': self._release_delay()
+            'Release time (days)': self._release_delay(),
         }
 
     def _release_delay(self):
@@ -67,18 +67,11 @@ class ReportSerializer:
         if commit.included_in_tag:
             next_tag = commit.included_in_tag.name
 
-        return {
-            'SHA': commit.sha,
-            'Title': title,
-            'URL': url,
-            'Teams': ' & '.join(teams),
-            'Next tag': next_tag
-        }
+        return {'SHA': commit.sha, 'Title': title, 'URL': url, 'Teams': ' & '.join(teams), 'Next tag': next_tag}
 
 
 @click.command(
-    context_settings=CONTEXT_SETTINGS,
-    short_help="Writes the CSV report about a specific release",
+    context_settings=CONTEXT_SETTINGS, short_help="Writes the CSV report about a specific release",
 )
 @click.option('--from-ref', '-f', help="Reference to start stats on", required=True)
 @click.option('--to-ref', '-t', help="Reference to end stats at", required=True)
