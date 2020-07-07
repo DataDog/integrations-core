@@ -5,7 +5,9 @@ import re
 import datetime
 
 from ...console import echo_failure, echo_info
-from ....github import get_compare, parse_pr_number, get_pr_from_hash, get_tags, get_tag, get_pr_of_repo, get_pr_labels, get_commit
+from ....github import get_compare, parse_pr_number, get_pr_from_hash, get_tags
+from ....github import get_tag, get_pr_of_repo, get_pr_labels, get_commit
+
 
 class PullRequest:
     def __init__(self, number, title, url, labels):
@@ -76,7 +78,7 @@ class Commit:
     def from_github_compare(cls, ctx, from_ref, to_ref):
         comparison = get_compare(from_ref, to_ref, 'datadog-agent', config=ctx.obj)
 
-        return [ Commit.from_github_commit(ctx, gh_commit) for gh_commit in comparison['commits'] ]
+        return [Commit.from_github_commit(ctx, gh_commit) for gh_commit in comparison['commits']]
 
     @classmethod
     def get(cls, ctx, sha):
@@ -123,7 +125,7 @@ class Tag:
     @classmethod
     def list_from_github(cls, ctx):
         gh_tags = get_tags('datadog-agent', config=ctx.obj)
-        return [ Tag.from_github_tag(gh_tag) for gh_tag in gh_tags ]
+        return [Tag.from_github_tag(gh_tag) for gh_tag in gh_tags]
 
 
 class Release:
@@ -142,7 +144,8 @@ class Release:
         echo_info(f'Fetching commits using compare from parent of "{from_ref}" to "{to_ref}"...')
         commits = Commit.from_github_compare(ctx, f'{from_ref}^', to_ref)
         echo_info(f'Fetching tags matching "/{version_re}/"...')
-        rc_tags = [ tag for tag in Tag.list_from_github(ctx) if version_re.match(tag.name) or tag.name == release_version ]
+        rc_tags = [tag for tag in Tag.list_from_github(ctx)
+                   if version_re.match(tag.name) or tag.name == release_version]
 
         for rc_tag in rc_tags:
             # we are forced to reload tags as the github does not return the tag's commit's SHA
@@ -151,7 +154,7 @@ class Release:
                 echo_info(f'Reloading tag "{rc_tag.name}" as it does not have a commit SHA')
                 rc_tag.reload(ctx)
 
-        echo_info(f'Assigning release candidates to commits...')
+        echo_info('Assigning release candidates to commits...')
         # assign commits to release candidates
         tag_index = 0
 

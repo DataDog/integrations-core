@@ -9,6 +9,7 @@ import csv
 from ...console import CONTEXT_SETTINGS, echo_success
 from .common import Release
 
+
 class ReportSerializer:
     def __init__(self, release):
         self.release = release
@@ -25,7 +26,7 @@ class ReportSerializer:
 
     def write_changes(self, filepath):
         with open(filepath, 'w', newline='') as csvfile:
-            changes = [ self._change(commit) for commit in self.release.commits ]
+            changes = [self._change(commit) for commit in self.release.commits]
             fieldnames = changes[0].keys()
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
@@ -38,7 +39,7 @@ class ReportSerializer:
             'Release Branch': self.release.release_version,
             'Release candidates': len(self.release.rc_tags),
             'Number of Commits': len(self.release.commits),
-            'Commits with unknown PR': len([commit for commit in self.release.commits if commit.pull_request is None ]),
+            'Commits with unknown PR': len([commit for commit in self.release.commits if commit.pull_request is None]),
             'Release time (days)': self._release_delay()
         }
 
@@ -59,7 +60,7 @@ class ReportSerializer:
         pull_request = commit.pull_request
 
         if pull_request:
-            teams = [ label.rpartition('/')[-1] for label in pull_request.labels if label.startswith('team') ]
+            teams = [label.rpartition('/')[-1] for label in pull_request.labels if label.startswith('team')]
             title = pull_request.title
             url = pull_request.url
 
@@ -102,5 +103,3 @@ def csv_report(ctx, from_ref, to_ref, release_version, output_folder=None):
     serializer.write_changes(folder.joinpath('changes.csv'))
 
     echo_success(f'Successfully wrote reports to directory `{output_folder}`')
-
-
