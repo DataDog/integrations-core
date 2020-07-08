@@ -40,6 +40,7 @@ class SnowflakeCheck(AgentCheck):
             queries=[
                 queries.StorageUsageMetrics,
                 queries.CreditUsage,
+                queries.WarehouseCreditUsage,
             ],
             tags=self._tags,
         )
