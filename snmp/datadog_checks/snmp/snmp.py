@@ -178,6 +178,9 @@ class SnmpCheck(AgentCheck):
         results = defaultdict(dict)  # type: DefaultDict[str, Dict[Tuple[str, ...], Any]]
         enforce_constraints = config.enforce_constraints
 
+        print("all_oids", all_oids)
+        print("next_oids", next_oids)
+        print("bulk_oids", bulk_oids)
         all_binds, error = self.fetch_oids(config, all_oids, next_oids, enforce_constraints=enforce_constraints)
 
         for oid in bulk_oids:

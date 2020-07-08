@@ -69,11 +69,13 @@ def _parse_symbol_metric_tag(metric_tag):
     # type: (MetricTag) -> MetricTagParseResult
     oids_to_resolve = {}
 
-    if 'MIB' in metric_tag:
-        oid = OID(ObjectIdentity(metric_tag['MIB'], metric_tag['symbol']))
-    elif 'OID' in metric_tag:
+    if 'OID' in metric_tag:
         oid = OID(metric_tag['OID'])
         oids_to_resolve[metric_tag['symbol']] = oid
+    elif 'MIB' in metric_tag:
+        # TODO: This might generate OID without parts.
+        #  Which might trigger: UnresolvedOID('OID parts are not available yet')
+        oid = OID(ObjectIdentity(metric_tag['MIB'], metric_tag['symbol']))
     else:
         raise ConfigurationError('A metric tag must specify an OID or a MIB: {}'.format(metric_tag))
 
