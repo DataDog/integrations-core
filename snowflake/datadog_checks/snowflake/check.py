@@ -50,6 +50,7 @@ class SnowflakeCheck(AgentCheck):
     def check(self, _):
         self.connect(self.config)
         self._query_manager.execute()
+        self._collect_version()
         #val = self.execute_query_raw("select SERVICE_TYPE, NAME, CREDITS_USED_COMPUTE, CREDITS_USED_CLOUD_SERVICES, CREDITS_USED from METERING_HISTORY where start_time >= to_timestamp_ltz('2020-06-30 08:00:00.000 -0700');")
         #raise Exception(val)
 
@@ -67,18 +68,18 @@ class SnowflakeCheck(AgentCheck):
             return
         try:
             conn = sf.connect(
-                user = self.config.user,
-                password = self.config.password,
-                account = self.config.account,
-                database = "SNOWFLAKE", # This integration only queries SNOWFLAKE DB and ACCOUNT_USAGE schema
-                schema = "ACCOUNT_USAGE",
-                warehouse= self.config.warehouse,
-                role = self.config.role,
-                passcode_in_password = self.config.passcode_in_password,
-                passcode = self.config.passcode,
-                client_prefetch_threads = self.config.client_prefetch_threads,
-                login_timeout = self.config.login_timeout,
-                ocsp_response_cache_filename = self.config.ocsp_response_cache_filename,
+                user=self.config.user,
+                password=self.config.password,
+                account=self.config.account,
+                database="SNOWFLAKE", # This integration only queries SNOWFLAKE DB and ACCOUNT_USAGE schema
+                schema="ACCOUNT_USAGE",
+                warehouse=self.config.warehouse,
+                role=self.config.role,
+                passcode_in_password=self.config.passcode_in_password,
+                passcode=self.config.passcode,
+                client_prefetch_threads=self.config.client_prefetch_threads,
+                login_timeout=self.config.login_timeout,
+                ocsp_response_cache_filename=self.config.ocsp_response_cache_filename,
             )
         except Exception as e:
             msg = "Unable to connect to Snowflake: {}".format(e)
@@ -86,3 +87,14 @@ class SnowflakeCheck(AgentCheck):
         else:
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
             self._conn = conn
+
+    @AgentCheck.metadata_entrypoint
+    def _collect_version(self):
+        try:
+            raw_version = self.execute_query_raw("select current_version();")
+            version = raw_version[0][0]
+        except Exception as e:
+            self.log.debug("Error collecting version for Snowflake: %s", e)
+
+        if version:
+            self.set_metadata('version', version)
