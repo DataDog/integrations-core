@@ -158,7 +158,7 @@ Additional helpful documentation, links, and articles:
 
 - [Monitor IBM DB2 with Datadog][12]
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ibm_db2/assets/images/dashboard_overview.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ibm_db2/images/dashboard_overview.png
 [2]: https://www.ibm.com/analytics/us/en/db2
 [3]: https://docs.datadoghq.com/agent/
 [4]: https://github.com/ibmdb/python-ibmdb/tree/master/IBM_DB/ibm_db
