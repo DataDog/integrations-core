@@ -15,6 +15,6 @@ init_config:
 instances:
 
     ## @param url - string - required
-    ## Riak stats url to connect to.
+    ## The Riak stats URL to connect to.
     #
   - url: http://%%host%%:8098/stats

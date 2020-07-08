@@ -22,7 +22,6 @@ files:
         description: Set to true to disable CA cert verification.
         value:
           type: boolean
-          default: false
           example: false
       - template: instances/default
   - template: logs
