@@ -25,7 +25,6 @@ class MetadataCollector(object):
             return
 
     def _get_version(self, queue_manager):
-
         pcf = pymqi.PCFExecute(queue_manager)
         resp = pcf.MQCMD_INQUIRE_Q_MGR()
         try:

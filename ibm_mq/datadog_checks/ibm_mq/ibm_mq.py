@@ -7,7 +7,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
 from . import connection, errors
-from .collectors import ChannelMetricCollector, QueueMetricCollector, MetadataCollector
+from .collectors import ChannelMetricCollector, MetadataCollector, QueueMetricCollector
 from .config import IBMMQConfig
 
 try:
@@ -68,5 +68,6 @@ class IbmMqCheck(AgentCheck):
                 self.log.debug('Found ibm_mq version: %s', raw_ver)
             else:
                 self.log.debug('Could not retrieve ibm_mq version info')
-        except BaseException:
+        except BaseException as e:
+            self.log.debug('Could not retrieve ibm_mq version info: %s', e)
             return None
