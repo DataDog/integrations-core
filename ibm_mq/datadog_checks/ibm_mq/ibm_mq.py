@@ -46,7 +46,7 @@ class IbmMqCheck(AgentCheck):
 
         if self.is_metadata_collection_enabled():
             self.collect_metadata(queue_manager)
-           
+
         try:
             self.channel_metric_collector.get_pcf_channel_metrics(queue_manager)
             self.queue_metric_collector.collect_queue_metrics(queue_manager)
@@ -61,13 +61,12 @@ class IbmMqCheck(AgentCheck):
 
     def collect_metadata(self, queue_manager):
         try:
-            version_parts = self.metadata_collector._collect_metadata(queue_manager)
-            print(version_parts)
-            if version_parts:
-                raw_version = version_parts["major"]+"."+version_parts["minor"]+"."+version_parts["mod"]+"."+version_parts["fix"]
-                self.set_metadata('version', raw_version, scheme='parts', part_map=version_parts)
-                self.log.debug('Found ibm_mq version: %s', raw_version)
+            ver_part = self.metadata_collector._collect_metadata(queue_manager)
+            if ver_part:
+                raw_ver = ver_part["major"] + "." + ver_part["minor"] + "." + ver_part["mod"] + "." + ver_part["fix"]
+                self.set_metadata('version', raw_ver, scheme='parts', part_map=ver_part)
+                self.log.debug('Found ibm_mq version: %s', raw_ver)
             else:
-                self.log.debug('Could not retrieve ibm_mq version info: %s', raw_version)
+                self.log.debug('Could not retrieve ibm_mq version info')
         except BaseException:
-            pass
+            return None

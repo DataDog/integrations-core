@@ -10,8 +10,8 @@ except ImportError as e:
     pymqiException = e
     pymqi = None
 
-class MetadataCollector(object):
 
+class MetadataCollector(object):
     def __init__(self, log):
         self.log = log
 
@@ -41,7 +41,7 @@ class MetadataCollector(object):
     @staticmethod
     def _parse_version(version):
         try:
-            major, minor, mod, fix = [int(version[i:i+2]) for i in range(0, len(version), 2)]
+            major, minor, mod, fix = [int(version[i : i + 2]) for i in range(0, len(version), 2)]
             return {
                 'major': str(int(major)),
                 'minor': str(int(minor)),
