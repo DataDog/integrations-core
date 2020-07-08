@@ -127,7 +127,7 @@ This validates that the manifest files contain required fields, are formatted co
 ddev validate metadata
 ```
 
-This checks that every `metadata.csv` file is formatted correctly. See the [Datadog Docs](https://docs.datadoghq.com/developers/integrations/check_references/#metrics-metadata-file) for more detailed constraints. 
+This checks that every `metadata.csv` file is formatted correctly. See the [Datadog docs](https://docs.datadoghq.com/developers/integrations/check_references/#metrics-metadata-file) for more detailed constraints. 
 
 ### Saved views data
 
