@@ -354,7 +354,7 @@ def read_metric_data_file(check_name):
 
 def read_metadata_rows(metadata_file):
     """
-    Iterate over the rows of a file such as `metadata.csv` and `README.md`.
+    Iterate over the rows of a `metadata.csv` file.
     """
     with io.open(metadata_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f, delimiter=',')
