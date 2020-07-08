@@ -262,13 +262,14 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         """Report the broker highwater offsets."""
         reported_contexts = 0
         for (topic, partition), highwater_offset in self._highwater_offsets.items():
-            if reported_contexts == contexts_available:
+            if reported_contexts >= contexts_available:
                 self.log.debug("Skipping remaining highwater offsets because context limit has been reached")
-                return reported_contexts
+                break
             broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
             broker_tags.extend(self._custom_tags)
             self.gauge('broker_offset', highwater_offset, tags=broker_tags)
             reported_contexts += 1
+        return reported_contexts
 
     def _report_consumer_offsets_and_lag(self, consumer_offsets, contexts_available, **kwargs):
         """Report the consumer group offsets and consumer lag."""
@@ -276,7 +277,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
         for (consumer_group, topic, partition), consumer_offset in consumer_offsets.items():
             if reported_contexts >= contexts_available:
                 self.log.debug("Skipping remaining consumer and lag offsets because context limit has been reached")
-                return reported_contexts
+                break
 
             consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
             if 'source' in kwargs:
@@ -323,6 +324,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                     partition,
                 )
                 self._kafka_client.cluster.request_update()  # force metadata update on next poll()
+        return reported_contexts
 
     def _get_zk_path_children(self, zk_path, name_for_error):
         """Fetch child nodes for a given Zookeeper path."""
