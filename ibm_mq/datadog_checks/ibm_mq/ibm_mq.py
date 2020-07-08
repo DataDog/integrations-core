@@ -7,7 +7,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
 from . import connection, errors
-from .collectors import ChannelMetricCollector, QueueMetricCollector
+from .collectors import ChannelMetricCollector, QueueMetricCollector, MetadataCollector
 from .config import IBMMQConfig
 
 try:
@@ -33,6 +33,7 @@ class IbmMqCheck(AgentCheck):
             self.config, self.service_check, self.warning, self.send_metric, self.log
         )
         self.channel_metric_collector = ChannelMetricCollector(self.config, self.service_check, self.gauge, self.log)
+        self.metadata_collector = MetadataCollector(self.log)
 
     def check(self, _):
         try:
@@ -44,8 +45,8 @@ class IbmMqCheck(AgentCheck):
             return
 
         if self.is_metadata_collection_enabled():
-            self.set_metadata('version', self.queue_metric_collector._collect_metadata(queue_manager))
-
+            self.collect_metadata(queue_manager)
+           
         try:
             self.channel_metric_collector.get_pcf_channel_metrics(queue_manager)
             self.queue_metric_collector.collect_queue_metrics(queue_manager)
@@ -57,3 +58,16 @@ class IbmMqCheck(AgentCheck):
             getattr(self, metric_type)(metric_name, metric_value, tags=tags)
         else:
             self.log.warning("Unknown metric type `%s` for metric `%s`", metric_type, metric_name)
+
+    def collect_metadata(self, queue_manager):
+        try:
+            version_parts = self.metadata_collector._collect_metadata(queue_manager)
+            print(version_parts)
+            if version_parts:
+                raw_version = version_parts["major"]+"."+version_parts["minor"]+"."+version_parts["mod"]+"."+version_parts["fix"]
+                self.set_metadata('version', raw_version, scheme='parts', part_map=version_parts)
+                self.log.debug('Found ibm_mq version: %s', raw_version)
+            else:
+                self.log.debug('Could not retrieve ibm_mq version info: %s', raw_version)
+        except BaseException:
+            pass

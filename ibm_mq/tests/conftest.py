@@ -29,12 +29,6 @@ def instance():
 
 
 @pytest.fixture
-def instance_metadata():
-    inst = copy.deepcopy(common.INSTANCE_METADATA)
-    return inst
-
-
-@pytest.fixture
 def instance_with_connection_name():
     inst = copy.deepcopy(common.INSTANCE_WITH_CONNECTION_NAME)
     return inst

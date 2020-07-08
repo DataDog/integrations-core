@@ -181,21 +181,22 @@ class QueueMetricCollector(object):
                     self.send_metric(metric_type, metric_full_name, metric_value, tags)
 
     def _collect_metadata(self, queue_manager):
-        raw_version = self._get_version(queue_manager)
-        if not raw_version:
-            self.log.debug("Version not found in stdout")
+
+        try:
+            raw_version = self._get_version(queue_manager)
+            self.log.debug('IBM MQ version: %s', raw_version)
+            return raw_version
+        except BaseException:
+            self.log.debug("Version cannot be retreived")
             return
-        self.log.debug('IBM MQ version: %s', raw_version)
-        return raw_version
-        # self.set_metadata('version', raw_version)
 
     def _get_version(self, queue_manager):
 
         pcf = pymqi.PCFExecute(queue_manager)
         resp = pcf.MQCMD_INQUIRE_Q_MGR()
         try:
-            version = resp[0][2120].decode("utf-8")
-        except OSError as e:
+            version = to_native_string(resp[0][2120])
+        except BaseException as e:
             self.log.debug("Error collecting IBM MQ version: %s", e)
             return None
 

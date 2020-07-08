@@ -10,18 +10,19 @@ from .common import MQ_VERSION_RAW
 pytestmark = pytest.mark.e2e
 
 
-def test_metadata(instance_metadata, datadog_agent):
-    check = IbmMqCheck('ibm_mq', {}, [instance_metadata])
+def test_metadata(instance, datadog_agent):
+    check = IbmMqCheck('ibm_mq', {}, [instance])
     check.check_id = 'test:123'
-    check.check(instance_metadata)
+    check.check(instance)
 
     raw_version = MQ_VERSION_RAW
-    major, minor, patch, _ = raw_version.split('.')
+    major, minor, mod, fix = raw_version.split('.')
     version_metadata = {
-        'version.scheme': 'semver',
+        'version.scheme': 'ibm_mq',
         'version.major': major,
         'version.minor': minor,
-        'version.patch': patch,
+        'version.mod': mod,
+        'version.fix': fix,
         'version.raw': raw_version,
     }
 

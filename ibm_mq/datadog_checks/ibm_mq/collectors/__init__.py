@@ -3,5 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .channel_metric_collector import ChannelMetricCollector
 from .queue_metric_collector import QueueMetricCollector
+from .metadata_collector import MetadataCollector
 
-__all__ = ['ChannelMetricCollector', 'QueueMetricCollector']
+__all__ = ['ChannelMetricCollector', 'QueueMetricCollector', 'MetadataCollector']
