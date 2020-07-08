@@ -136,6 +136,10 @@ def get_check_file(check_name):
     return os.path.join(get_root(), check_name, 'datadog_checks', check_name, check_name + '.py')
 
 
+def get_readme_file(check_name):
+    return os.path.join(get_root(), check_name, 'README.md')
+
+
 def check_root():
     """Check if root has already been set."""
     existing_root = get_root()
@@ -233,10 +237,6 @@ def get_tox_file(check_name):
 
 def get_metadata_file(check_name):
     return os.path.join(get_root(), check_name, 'metadata.csv')
-
-
-def get_readme_file(check_name):
-    return os.path.join(get_root(), check_name, 'README.md')
 
 
 def get_saved_views(check_name):
@@ -352,11 +352,11 @@ def read_metric_data_file(check_name):
     return read_file(os.path.join(get_root(), check_name, 'metadata.csv'))
 
 
-def read_metadata_rows(asset_file):
+def read_metadata_rows(metadata_file):
     """
     Iterate over the rows of a file such as `metadata.csv` and `README.md`.
     """
-    with io.open(asset_file, 'r', encoding='utf-8') as f:
+    with io.open(metadata_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f, delimiter=',')
 
         # Read header
