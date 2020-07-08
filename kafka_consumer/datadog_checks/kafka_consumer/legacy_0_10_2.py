@@ -115,13 +115,13 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 total_contexts,
                 self._context_limit,
             )
-
-        # Report the metics
-        self._report_highwater_offsets()
-        self._report_consumer_offsets_and_lag(self._kafka_consumer_offsets)
-        # if someone is in the middle of migrating their offset storage from zookeeper to kafka, they need to identify
-        # which source is reporting which offsets. So we tag zookeeper with 'source:zk'
-        self._report_consumer_offsets_and_lag(self._zk_consumer_offsets, source='zk')
+        context_available = self._context_limit
+        # Report the metrics
+        context_available -= self._report_highwater_offsets(context_available)
+        context_available -= self._report_consumer_offsets_and_lag(self._kafka_consumer_offsets, context_available)
+        # if someone is in the middle of migrating their offset storage from zookeeper to kafka,
+        # they need to identify which source is reporting which offsets. So we tag zookeeper with 'source:zk'
+        self._report_consumer_offsets_and_lag(self._zk_consumer_offsets, context_available, source='zk')
 
     def _create_kafka_client(self):
         kafka_conn_str = self.instance.get('kafka_connect_str')
@@ -258,16 +258,26 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                         "partition: %s." % (topic, partition)
                     )
 
-    def _report_highwater_offsets(self):
+    def _report_highwater_offsets(self, contexts_available):
         """Report the broker highwater offsets."""
+        reported_contexts = 0
         for (topic, partition), highwater_offset in self._highwater_offsets.items():
+            if reported_contexts == contexts_available:
+                self.log.debug("Skipping remaining highwater offsets because context limit has been reached")
+                return reported_contexts
             broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
             broker_tags.extend(self._custom_tags)
             self.gauge('broker_offset', highwater_offset, tags=broker_tags)
+            reported_contexts += 1
 
-    def _report_consumer_offsets_and_lag(self, consumer_offsets, **kwargs):
+    def _report_consumer_offsets_and_lag(self, consumer_offsets, contexts_available, **kwargs):
         """Report the consumer group offsets and consumer lag."""
+        reported_contexts = 0
         for (consumer_group, topic, partition), consumer_offset in consumer_offsets.items():
+            if reported_contexts >= contexts_available:
+                self.log.debug("Skipping remaining consumer and lag offsets because context limit has been reached")
+                return reported_contexts
+
             consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
             if 'source' in kwargs:
                 consumer_group_tags.append('source:%s' % kwargs['source'])
@@ -276,6 +286,8 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                 # report consumer offset if the partition is valid because even if leaderless the consumer offset will
                 # be valid once the leader failover completes
                 self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
+                reported_contexts += 1
+
                 if (topic, partition) not in self._highwater_offsets:
                     self.log.warning(
                         "Consumer group: %s has offsets for topic: %s partition: %s, but no stored highwater offset "
@@ -287,7 +299,9 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                     continue
 
                 consumer_lag = self._highwater_offsets[(topic, partition)] - consumer_offset
-                self.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
+                if reported_contexts < contexts_available:
+                    self.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
+                    reported_contexts += 1
 
                 if consumer_lag < 0:  # this will effectively result in data loss, so emit an event for max visibility
                     title = "Negative consumer lag for group: {}.".format(consumer_group)
