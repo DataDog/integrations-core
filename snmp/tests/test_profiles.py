@@ -67,6 +67,7 @@ def run_profile_check(recording_name):
 
     instance['community_string'] = recording_name
     instance['enforce_mib_constraints'] = False
+    instance['bulk_threshold'] = 1
     check = SnmpCheck('snmp', {}, [instance])
     check.check(instance)
     for command, count in check._config._calls_count.items():

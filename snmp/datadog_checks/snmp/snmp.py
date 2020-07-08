@@ -253,25 +253,29 @@ class SnmpCheck(AgentCheck):
                 self.warning(message)
 
         print("all_missing_results {}: {}".format(len(all_missing_results), all_missing_results))
-        for oids_batch in batches(next_oids, size=self.oid_batch_size):
-            try:
-                self.log.debug('Running SNMP command getNext on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
-                binds = list(
-                    snmp_getnext(
-                        config,
-                        oids_batch,
-                        lookup_mib=enforce_constraints,
-                        ignore_nonincreasing_oid=self.ignore_nonincreasing_oid,
-                    )
-                )
-                self.log.debug('Returned vars: %s', OIDPrinter(binds, with_values=True))
-                all_binds.extend(binds)
 
-            except (PySnmpError, CheckException) as e:
-                message = 'Failed to collect some metrics: {}'.format(e)
-                if not error:
-                    error = message
-                self.warning(message)
+        # We shouldn't need next_oids
+        # Call should be either aim a specific OID (all_oids) or use bulk for tables
+        next_oids = []
+        # for oids_batch in batches(next_oids, size=self.oid_batch_size):
+        #     try:
+        #         self.log.debug('Running SNMP command getNext on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
+        #         binds = list(
+        #             snmp_getnext(
+        #                 config,
+        #                 oids_batch,
+        #                 lookup_mib=enforce_constraints,
+        #                 ignore_nonincreasing_oid=self.ignore_nonincreasing_oid,
+        #             )
+        #         )
+        #         self.log.debug('Returned vars: %s', OIDPrinter(binds, with_values=True))
+        #         all_binds.extend(binds)
+        #
+        #     except (PySnmpError, CheckException) as e:
+        #         message = 'Failed to collect some metrics: {}'.format(e)
+        #         if not error:
+        #             error = message
+        #         self.warning(message)
 
         return all_binds, error
 
