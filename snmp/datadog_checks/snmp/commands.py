@@ -171,6 +171,7 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
         _handle_error(ctx, config)
 
         for var_binds in ctx['var_bind_table']:
+            print_varbinds('bulk2', var_binds)
             name, value = var_binds[0]
             if endOfMibView.isSameTypeWith(value):
                 return
