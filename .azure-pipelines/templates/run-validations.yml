@@ -25,6 +25,9 @@ steps:
 - script: ddev validate metadata
   displayName: 'Validate metric data'
 
+- script: ddev validate readmes
+  displayName: 'Validate README files'
+
 - script: ddev validate saved-views
   displayName: 'Validate saved views data'
 
