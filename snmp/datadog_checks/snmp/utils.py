@@ -77,11 +77,8 @@ def _read_profile_definition(definition_file):
     # type: (str) -> Dict[str, Any]
     definition_file = _resolve_definition_file(definition_file)
 
-    try:
-        with open(definition_file) as f:
-            return yaml.safe_load(f)
-    except FileNotFoundError as e:
-        raise e
+    with open(definition_file) as f:
+        return yaml.safe_load(f)
 
 
 def recursively_expand_base_profiles(definition):

@@ -381,7 +381,7 @@ def test_f5_router(aggregator):
     instance['community_string'] = 'f5'
     instance['enforce_mib_constraints'] = False
 
-    init_config = {'profiles': {'router': {'definition_file': 'generic-router.yaml'}}}
+    init_config = {'profiles': {'router': {'definition_file': 'generic-network.yaml'}}}
     check = SnmpCheck('snmp', init_config, [instance])
     check.check(instance)
 
