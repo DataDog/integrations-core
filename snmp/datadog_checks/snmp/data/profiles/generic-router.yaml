@@ -1,5 +1,4 @@
 # Generic profile for network devices
-# Note: This profile is deprecated, use generic-network instead
 #
 
 extends:

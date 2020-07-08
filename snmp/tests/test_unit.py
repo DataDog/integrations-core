@@ -454,12 +454,12 @@ def test_profile_override():
 
     with temp_dir() as tmp:
         with mock_profiles_confd_root(tmp):
-            profile_file = os.path.join(tmp, 'generic-network.yaml')
+            profile_file = os.path.join(tmp, 'generic-router.yaml')
             with open(profile_file, 'w') as f:
                 f.write(yaml.safe_dump(profile))
 
             profiles = _load_default_profiles()
-            assert profiles['generic-network'] == {'definition': profile}
+            assert profiles['generic-router'] == {'definition': profile}
 
 
 def test_discovery_tags():
@@ -488,7 +488,7 @@ def test_discovery_tags():
     assert set(config.tags) == {
         'snmp_device:192.168.0.2',
         'test:check',
-        'snmp_profile:generic-network',
+        'snmp_profile:generic-router',
         'autodiscovery_subnet:192.168.0.0/29',
     }
 

@@ -120,7 +120,7 @@ init_config:
   #   f5-big-ip:
   #     definition_file: f5-big-ip.yaml
   #   router:
-  #     definition_file: generic-network.yaml
+  #     definition_file: generic-router.yaml
   #   cisco-3850:
   #     definition_file: cisco-3850.yaml
   #   meraki-cloud-controller:

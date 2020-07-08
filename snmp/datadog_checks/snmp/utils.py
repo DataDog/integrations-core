@@ -128,7 +128,7 @@ def _load_default_profiles():
             try:
                 recursively_expand_base_profiles(definition)
             except Exception:
-                logger.error("Could not expand base profile {}" % filename)
+                logger.error("Could not expand base profile {}", filename)
                 raise
             profiles[base] = {'definition': definition}
 
