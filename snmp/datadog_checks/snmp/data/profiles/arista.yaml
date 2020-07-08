@@ -2,7 +2,7 @@ extends:
   - _base.yaml
   - _generic-if.yaml
   - _generic-ip.yaml
-  - _generic-resources.yaml
+  - _generic-host-resources.yaml
   - _generic-ospf.yaml
   - _generic-bgp4.yaml
   - _generic-tcp.yaml
