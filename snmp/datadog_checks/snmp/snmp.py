@@ -252,7 +252,7 @@ class SnmpCheck(AgentCheck):
                     error = message
                 self.warning(message)
 
-        print("all_missing_results {}: {}".format(all_missing_results, missing_results))
+        print("all_missing_results {}: {}".format(len(all_missing_results), all_missing_results))
         for oids_batch in batches(next_oids, size=self.oid_batch_size):
             try:
                 self.log.debug('Running SNMP command getNext on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
