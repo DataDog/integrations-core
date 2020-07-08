@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import logging
 from typing import Any, Dict, Generator
 
 from pyasn1.type.univ import Null
@@ -13,6 +14,15 @@ from pysnmp.proto.rfc1905 import endOfMibView
 from datadog_checks.base.errors import CheckException
 
 from .config import InstanceConfig
+
+
+logger = logging.getLogger(__name__)
+
+
+def print_varbinds(command, varbinds):
+    logger.warning("SNMP %s with var_binds len %s", command, len(varbinds))
+    for oid, _ in varbinds:
+        logger.warning("SNMP %s with oid: %s", command, oid)
 
 
 def _handle_error(ctx, config):
@@ -43,6 +53,7 @@ def snmp_get(config, oids, lookup_mib):
     var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
 
     config._calls_count['get'] += 1
+    print_varbinds('get', var_binds)
     cmdgen.GetCommandGenerator().sendVarBinds(
         config._snmp_engine,
         config.device.target,
@@ -86,6 +97,7 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
 
     while True:
         config._calls_count['getnext'] += 1
+        print_varbinds('getnext', var_binds)
         gen.sendVarBinds(
             config._snmp_engine,
             config.device.target,
@@ -139,6 +151,7 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
 
     while True:
         config._calls_count['bulk'] += 1
+        print_varbinds('bulk', var_binds)
         gen.sendVarBinds(
             config._snmp_engine,
             config.device.target,
