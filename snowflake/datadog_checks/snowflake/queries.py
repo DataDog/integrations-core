@@ -28,9 +28,9 @@ StorageUsageMetrics = Query(
 # )
 
 # https://docs.snowflake.com/en/sql-reference/account-usage/metering_history.html
+# TODO: Update start time value with last_ts
 CreditUsage = Query(
     {
-
         'name': 'billing.metrics',
         'query': "select SERVICE_TYPE, NAME, CREDITS_USED_COMPUTE, CREDITS_USED_CLOUD_SERVICES, CREDITS_USED from METERING_HISTORY where start_time >= to_timestamp_ltz('2020-06-30 08:00:00.000 -0700');",
         'columns': [
@@ -42,3 +42,18 @@ CreditUsage = Query(
         ],
     }
 )
+
+# https://docs.snowflake.com/en/sql-reference/account-usage/warehouse_metering_history.html
+WarehouseCreditUsage = Query(
+    {
+        'name': 'billings.warehouse.metrics',
+        'query': "select WAREHOUSE_NAME, CREDITS_USED_COMPUTE, CREDITS_USED_CLOUD_SERVICES, CREDITS_USED from WAREHOUSE_METERING_HISTORY where start_time >= to_timestamp_ltz('2020-06-30 08:00:00.000 -0700');",
+        'columns': [
+            {'name': 'warehouse', 'type': 'tag'},
+            {'name': 'billing.virtual_warehouse', 'type': 'gauge'},
+            {'name': 'billing.cloud_service', 'type': 'gauge'},
+            {'name': 'billing.total', 'type': 'gauge'},
+        ],
+    }
+)
+
