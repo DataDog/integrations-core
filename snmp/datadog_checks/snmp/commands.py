@@ -145,7 +145,8 @@ def snmp_bulk(config, table_oid, column_oids, non_repeaters, max_repetitions, lo
 
     ctx = {}  # type: Dict[str, Any]
 
-    logger.warning("column_oids: %s", column_oids)
+    logger.warning("table oid %s", table_oid)
+    logger.warning("column_oids len %s: %s", len(column_oids), column_oids)
     var_binds = [oid.as_object_type() for oid in column_oids]
     table_oid_obj = OID(table_oid)
     print("table_oid_obj", table_oid_obj)
@@ -157,7 +158,7 @@ def snmp_bulk(config, table_oid, column_oids, non_repeaters, max_repetitions, lo
 
     while True:
         config._calls_count['bulk'] += 1
-        # print_varbinds('bulk', var_binds)
+        logger.warning('bulk_call')
         gen.sendVarBinds(
             config._snmp_engine,
             config.device.target,
@@ -174,17 +175,19 @@ def snmp_bulk(config, table_oid, column_oids, non_repeaters, max_repetitions, lo
 
         _handle_error(ctx, config)
 
+        logger.warning("count total: %s", sum(len(v) for v in ctx['var_bind_table']))
+
         for var_binds in ctx['var_bind_table']:
-            print_varbinds('bulk2', var_binds)
+            print_varbinds('bulk_loop', var_binds)
             for varbind in var_binds:
                 name, value = varbind
-                logger.warning("endOfMibView.isSameTypeWith(value): %s", endOfMibView.isSameTypeWith(value))
+                # logger.warning("endOfMibView.isSameTypeWith(value): %s", endOfMibView.isSameTypeWith(value))
                 if endOfMibView.isSameTypeWith(value):
                     return
-                logger.warning("table_oid: %s name: %s", table_oid, name)
+                # logger.warning("table_oid: %s name: %s", table_oid, name)
                 # if initial_var.isPrefixOf(name):
                 if str(name).startswith(table_oid):
-                    logger.warning("yield name: %s", name)
+                    # logger.warning("yield name: %s", name)
                     yield varbind
                 else:
                     return
