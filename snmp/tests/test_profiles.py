@@ -69,6 +69,8 @@ def run_profile_check(recording_name):
     instance['enforce_mib_constraints'] = False
     check = SnmpCheck('snmp', {}, [instance])
     check.check(instance)
+    for command, count in check._config._calls_count.items():
+        print("Command {}: {}".format(command, count))
 
 
 @pytest.mark.unit
@@ -185,7 +187,7 @@ def test_cisco_voice(aggregator):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_f5(aggregator):
+def test_f5_base(aggregator):
     run_profile_check('f5')
 
     gauges = [
@@ -328,6 +330,7 @@ def test_f5(aggregator):
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
     aggregator.assert_all_metrics_covered()
+    1/0
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -1105,6 +1108,8 @@ def test_proliant(aggregator):
 
     aggregator.assert_all_metrics_covered()
 
+    1/0
+
 
 @pytest.mark.usefixtures("dd_environment")
 def test_generic_host_resources(aggregator):
@@ -1323,6 +1328,8 @@ def test_cisco_asa_5525(aggregator):
             aggregator.assert_metric('snmp.{}'.format(rtt), metric_type=aggregator.GAUGE, tags=tags)
 
     aggregator.assert_all_metrics_covered()
+
+    1/0
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -1809,6 +1816,7 @@ def test_fortinet_fortigate(aggregator):
         )
 
     aggregator.assert_all_metrics_covered()
+    1/0
 
 
 @pytest.mark.usefixtures("dd_environment")

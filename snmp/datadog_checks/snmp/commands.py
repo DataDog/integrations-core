@@ -42,6 +42,7 @@ def snmp_get(config, oids, lookup_mib):
 
     var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
 
+    config._calls_count['get'] += 1
     cmdgen.GetCommandGenerator().sendVarBinds(
         config._snmp_engine,
         config.device.target,
@@ -84,6 +85,7 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
     gen = cmdgen.NextCommandGenerator()
 
     while True:
+        config._calls_count['getnext'] += 1
         gen.sendVarBinds(
             config._snmp_engine,
             config.device.target,
@@ -136,6 +138,7 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
     gen = cmdgen.BulkCommandGenerator()
 
     while True:
+        config._calls_count['bulk'] += 1
         gen.sendVarBinds(
             config._snmp_engine,
             config.device.target,
