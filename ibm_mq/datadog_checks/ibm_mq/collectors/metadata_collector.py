@@ -20,8 +20,8 @@ class MetadataCollector(object):
             raw_version = self._get_version(queue_manager)
             self.log.debug('IBM MQ version: %s', raw_version)
             return raw_version
-        except BaseException:
-            self.log.debug("Version cannot be retreived")
+        except BaseException as e:
+            self.log.debug("Version could not be retreived: %s", e)
             return
 
     def _get_version(self, queue_manager):
@@ -29,6 +29,7 @@ class MetadataCollector(object):
         resp = pcf.MQCMD_INQUIRE_Q_MGR()
         try:
             version = to_native_string(resp[0][2120])
+            self.log.debug("IBM MQ version from response: %s", version)
         except BaseException as e:
             self.log.debug("Error collecting IBM MQ version: %s", e)
             return None
