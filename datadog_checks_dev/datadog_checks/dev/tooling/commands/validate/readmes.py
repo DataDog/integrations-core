@@ -9,7 +9,7 @@ from ...utils import complete_valid_checks, get_valid_integrations, read_readme_
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 IMAGE_EXTENSIONS = {"png", "jpg"}
-
+NON_TILE_INTEGRATIONS = {"sortdb", "hbase_master", "kube_proxy"}
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate README.md files')
 @click.pass_context
@@ -25,15 +25,24 @@ def readmes(ctx, integration):
 
     errors = False
     integrations = []
+    
     if integration:
         integrations = [integration]
     else:
         integrations = sorted(get_valid_integrations())
 
     for integration in integrations:
+        has_overview = False
+        has_setup = False
 
         lines = read_readme_file(integration)
         for line_no, line in lines:
+            
+            if "## Overview" in line:
+                has_overview = True
+            
+            if "## Setup" in line:
+                has_setup = True
 
             for ext in IMAGE_EXTENSIONS:
                 if ext in line:
@@ -50,6 +59,14 @@ def readmes(ctx, integration):
                             f"https://raw.githubusercontent.com/DataDog/{repo}/master/{integration}/images/<IMAGE_NAME>"
                         )
                         continue
+                    
+        if not has_overview and integration not in NON_TILE_INTEGRATIONS:
+            errors = True
+            echo_failure(f"{integration} readme file does not have an overview section")
+            
+        if not has_setup and integration not in NON_TILE_INTEGRATIONS:
+            errors = True
+            echo_failure(f"{integration} readme file does not have a setup section")
 
     if errors:
         abort()
