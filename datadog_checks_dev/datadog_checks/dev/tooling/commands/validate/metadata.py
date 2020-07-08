@@ -6,7 +6,7 @@ from collections import defaultdict
 
 import click
 
-from ...utils import complete_valid_checks, get_metadata_file, get_metric_sources, load_manifest, read_asset_file_rows
+from ...utils import complete_valid_checks, get_metadata_file, get_metric_sources, load_manifest, read_metadata_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
@@ -242,7 +242,7 @@ def metadata(check, check_duplicates):
 
         metric_prefix_error_shown = False
 
-        for line, row in read_asset_file_rows(metadata_file):
+        for line, row in read_metadata_rows(metadata_file):
             # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
             if None in row.values():
                 errors = True

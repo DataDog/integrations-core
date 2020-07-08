@@ -11,7 +11,7 @@ from ast import literal_eval
 import requests
 import semver
 
-from ..utils import dir_exists, file_exists, read_file, write_file
+from ..utils import dir_exists, file_exists, read_file, read_file_lines, write_file
 from .config import load_config
 from .constants import NOT_CHECKS, REPO_CHOICES, REPO_OPTIONS_MAP, VERSION_BUMP, get_root, set_root
 from .git import get_latest_tag
@@ -134,10 +134,6 @@ def string_to_toml_type(s):
 
 def get_check_file(check_name):
     return os.path.join(get_root(), check_name, 'datadog_checks', check_name, check_name + '.py')
-
-
-def get_readme_file(check_name):
-    return os.path.join(get_root(), check_name, 'README.md')
 
 
 def check_root():
@@ -356,7 +352,7 @@ def read_metric_data_file(check_name):
     return read_file(os.path.join(get_root(), check_name, 'metadata.csv'))
 
 
-def read_asset_file_rows(asset_file):
+def read_metadata_rows(asset_file):
     """
     Iterate over the rows of a file such as `metadata.csv` and `README.md`.
     """
@@ -368,6 +364,11 @@ def read_asset_file_rows(asset_file):
 
         for line_no, row in enumerate(reader, 2):
             yield line_no, row
+
+
+def read_readme_file(check_name):
+    for line_no, line in enumerate(read_file_lines(get_readme_file(check_name))):
+        yield line_no, line
 
 
 def read_version_file(check_name):
