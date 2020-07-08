@@ -56,7 +56,7 @@ In short, each validation is a ``ddev`` command, which fails if the component it
 See the [ddev documentation](../ddev/cli.md#validate) and [source code](https://github.com/DataDog/integrations-core/tree/master/datadog_checks_dev/datadog_checks/dev/tooling/commands/validate) for the full docs for each validation.
 
 !!! tip 
-    A list of the current validations can be found [here](https://github.com/DataDog/integrations-core/blob/master/.azure-pipelines/templates/run-validations.yml)
+    A list of the current validations can be found [here](https://github.com/DataDog/integrations-core/blob/master/.azure-pipelines/templates/run-validations.yml).
 
 
 ### CI configuration
@@ -65,7 +65,7 @@ See the [ddev documentation](../ddev/cli.md#validate) and [source code](https://
 ddev validate ci
 ```
 
-This validates that all CI entries for integrations are valid. This includes checking if the integration has the correct codecov config, and has a valid CI entry if it is testable.
+This validates that all CI entries for integrations are valid. This includes checking if the integration has the correct [codecov][codecov-home] config, and has a valid CI entry if it is testable.
 
 !!! tip 
     Run `ddev validate ci --fix` to resolve most errors.
