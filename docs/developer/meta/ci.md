@@ -146,7 +146,7 @@ This validates that saved views for an integration are formatted correctly and c
 ddev validate service-checks
 ```
 
-This checks that every service check file is formatted correctly. See the [Datadog Docs](https://docs.datadoghq.com/developers/integrations/check_references/#service-check-file) for more specific constraints.
+This checks that every service check file is formatted correctly. See the [Datadog docs](https://docs.datadoghq.com/developers/integrations/check_references/#service-check-file) for more specific constraints.
 
 ### Imports
 
