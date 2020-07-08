@@ -7,6 +7,7 @@
 import argparse
 import os
 import re
+import sys
 
 # 2nd party.
 from .download import DEFAULT_ROOT_LAYOUT_TYPE, REPOSITORY_URL_PREFIX, ROOT_LAYOUTS, TUFDownloader
@@ -25,6 +26,8 @@ def __is_canonical(version):
 
 
 def __find_shipped_integrations():
+    # Recurse up from site-packages until we find the Agent root directory.
+    # The relative path differs between operating systems.
     root = os.path.dirname(os.path.abspath(__file__))
     filename = 'requirements-agent-release.txt'
 
@@ -96,7 +99,8 @@ def download():
     if root_layout_type == 'extras':
         shipped_integrations = __find_shipped_integrations()
         if standard_distribution_name in shipped_integrations:
-            print('WARNING: {} is a known core integration'.format(standard_distribution_name))
+            sys.stderr.write('WARNING: {} is a known core integration'.format(standard_distribution_name))
+            sys.stderr.flush()
 
     tuf_downloader = TUFDownloader(
         repository_url_prefix=repository_url_prefix, root_layout_type=root_layout_type, verbose=verbose
