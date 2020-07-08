@@ -9,7 +9,7 @@ from ...console import abort, echo_info
 
 
 class RCBuildCardsUpdater:
-    version_regex = r'(\d*)\.(\d*)\.(\d*)([-~])rc\.(\d*)'
+    version_regex = r'(\d*)\.(\d*)\.(\d*)([-~])rc([\.-])(\d*)'
 
     def __init__(self, trello: TrelloClient, release_version: str):
         self.__trello = trello
@@ -19,10 +19,10 @@ class RCBuildCardsUpdater:
                 f'{release_version} is an invalid release version. A valid release version is for example 7.21.0-rc.3')
 
         groups = match.groups()
-        if len(groups) != 5:
+        if len(groups) != 6:
             raise Exception('Regex in RCBuildCardsUpdater is not correct')
 
-        (_, self.__minor, self.__patch, _, self.__rc) = groups
+        (_, self.__minor, self.__patch, _, _, self.__rc) = groups
 
     def update_cards(self):
         rc_build_cards = [
@@ -30,13 +30,12 @@ class RCBuildCardsUpdater:
             'DyjjKkZD',  # [A6] Windows
             'BOvSs9Le',  # [IOT] Linux
             'hu1JXJ18',  # [A7] Linux + Docker
-            'E7bHwa14',  # [A6] Linux + Docker
-            'dYrSpOLW']  # macOS
-        
+            'E7bHwa14']  # [A6] Linux + Docker
+
         for card_id in rc_build_cards:
             card = self.__trello.get_card(card_id)
             description = card['desc']
-            new_version = f'\\g<1>.{self.__minor}.{self.__patch}\\g<4>rc.{self.__rc}'
+            new_version = f'\\g<1>.{self.__minor}.{self.__patch}\\g<4>rc\\g<5>{self.__rc}'
             new_description = re.sub(
                 self.version_regex, new_version, description)
             updated_card = {
