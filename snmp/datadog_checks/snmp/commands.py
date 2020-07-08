@@ -149,6 +149,8 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
 
     gen = cmdgen.BulkCommandGenerator()
 
+    logger.warning("SNMP bulk for oid %s", oid)
+
     while True:
         config._calls_count['bulk'] += 1
         print_varbinds('bulk', var_binds)
