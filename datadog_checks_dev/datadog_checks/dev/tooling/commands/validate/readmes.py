@@ -5,7 +5,7 @@ import re
 
 import click
 
-from ...utils import complete_valid_checks, get_readme_file, get_valid_integrations, read_readme_file
+from ...utils import complete_valid_checks, get_valid_integrations, read_readme_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 IMAGE_EXTENSIONS = {"png", "jpg"}
@@ -24,15 +24,13 @@ def readmes(ctx, integration):
     repo = ctx.obj['repo_name']
 
     errors = False
-    all_readmes = {}
+    integrations = []
     if integration:
-        all_readmes[integration] = get_readme_file(integration)
+        integrations = [integration]
     else:
         integrations = sorted(get_valid_integrations())
-        for integration in integrations:
-            all_readmes[integration] = get_readme_file(integration)
 
-    for integration, readme_file in all_readmes.items():
+    for integration in integrations:
 
         lines = read_readme_file(integration)
         for line_no, line in lines:
