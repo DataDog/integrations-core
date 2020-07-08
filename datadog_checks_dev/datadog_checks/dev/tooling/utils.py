@@ -239,6 +239,10 @@ def get_metadata_file(check_name):
     return os.path.join(get_root(), check_name, 'metadata.csv')
 
 
+def get_readme_file(check_name):
+    return os.path.join(get_root(), check_name, 'README.md')
+
+
 def get_saved_views(check_name):
     paths = load_manifest(check_name).get('assets', {}).get('saved_views', {})
     views = []
@@ -352,11 +356,11 @@ def read_metric_data_file(check_name):
     return read_file(os.path.join(get_root(), check_name, 'metadata.csv'))
 
 
-def read_metadata_rows(metadata_file):
+def read_asset_file_rows(asset_file):
     """
-    Iterate over the rows of a `metadata.csv` file.
+    Iterate over the rows of a file such as `metadata.csv` and `README.md`.
     """
-    with io.open(metadata_file, 'r', encoding='utf-8') as f:
+    with io.open(asset_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f, delimiter=',')
 
         # Read header
@@ -396,7 +400,7 @@ def load_manifest(check_name):
 
 def load_saved_views(path):
     """
-    Load the manifest file into a dictionary
+    Load the saved view file into a dictionary
     """
     if file_exists(path):
         return json.loads(read_file(path).strip())
