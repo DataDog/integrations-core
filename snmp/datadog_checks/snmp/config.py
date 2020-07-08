@@ -178,7 +178,8 @@ class InstanceConfig:
         self.metrics.extend(metrics)
         self.all_oids.extend(all_oids)
         self.next_oids.extend(next_oids)
-        self.bulk_oids.extend(bulk_oids)
+        for k, v in bulk_oids.items():
+            self.bulk_oids[str(k)].extend(v)
         self.parsed_metrics.extend(parsed_metrics)
         self.parsed_metric_tags.extend(parsed_metric_tags)
         self.all_oids.extend(tag_oids)
@@ -272,7 +273,7 @@ class InstanceConfig:
             yield host
 
     def parse_metrics(self, metrics):
-        # type: (list) -> Tuple[List[OID], List[OID], List[OID], List[ParsedMetric]]
+        # type: (list) -> Tuple[List[OID], List[OID], Dict[str, List[OID]], List[ParsedMetric]]
         """Parse configuration and returns data to be used for SNMP queries."""
         # Use bulk for SNMP version > 1 only.
         bulk_threshold = self.bulk_threshold if self._auth_data.mpModel else 0

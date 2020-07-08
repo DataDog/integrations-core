@@ -12,6 +12,7 @@ from pysnmp.proto import errind
 from pysnmp.proto.rfc1905 import endOfMibView
 
 from datadog_checks.base.errors import CheckException
+from datadog_checks.snmp.models import OID
 
 from .config import InstanceConfig
 
@@ -126,8 +127,8 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
         initial_vars = new_initial_vars
 
 
-def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_nonincreasing_oid):
-    # type: (InstanceConfig, hlapi.ObjectType, int, int, bool, bool) -> Generator
+def snmp_bulk(config, table_oid, column_oids, non_repeaters, max_repetitions, lookup_mib, ignore_nonincreasing_oid):
+    # type: (InstanceConfig, Any, Any, int, int, bool, bool) -> Generator
     """Call SNMP GETBULK on an oid."""
 
     if config.device is None:
@@ -144,16 +145,19 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
 
     ctx = {}  # type: Dict[str, Any]
 
-    var_binds = [oid]
-    initial_var = vbProcessor.makeVarBinds(config._snmp_engine, var_binds)[0][0]
+    logger.warning("column_oids: %s", column_oids)
+    var_binds = [oid.as_object_type() for oid in column_oids]
+    table_oid_obj = OID(table_oid)
+    print("table_oid_obj", table_oid_obj)
+    initial_var = vbProcessor.makeVarBinds(config._snmp_engine, [table_oid_obj.as_object_type()])[0][0]
 
     gen = cmdgen.BulkCommandGenerator()
 
-    logger.warning("SNMP bulk for oid %s", oid)
+    logger.warning("SNMP bulk for var_binds %s", var_binds)
 
     while True:
         config._calls_count['bulk'] += 1
-        print_varbinds('bulk', var_binds)
+        # print_varbinds('bulk', var_binds)
         gen.sendVarBinds(
             config._snmp_engine,
             config.device.target,
@@ -172,10 +176,15 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
 
         for var_binds in ctx['var_bind_table']:
             print_varbinds('bulk2', var_binds)
-            name, value = var_binds[0]
-            if endOfMibView.isSameTypeWith(value):
-                return
-            if initial_var.isPrefixOf(name):
-                yield var_binds[0]
-            else:
-                return
+            for varbind in var_binds:
+                name, value = varbind
+                logger.warning("endOfMibView.isSameTypeWith(value): %s", endOfMibView.isSameTypeWith(value))
+                if endOfMibView.isSameTypeWith(value):
+                    return
+                logger.warning("table_oid: %s name: %s", table_oid, name)
+                # if initial_var.isPrefixOf(name):
+                if str(name).startswith(table_oid):
+                    logger.warning("yield name: %s", name)
+                    yield varbind
+                else:
+                    return

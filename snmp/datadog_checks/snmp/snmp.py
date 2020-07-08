@@ -164,7 +164,7 @@ class SnmpCheck(AgentCheck):
         config,  # type: InstanceConfig
         all_oids,  # type: List[OID]
         next_oids,  # type: List[OID]
-        bulk_oids,  # type: List[OID]
+        bulk_oids,  # type: Dict[str, List[OID]]
     ):
         # type: (...) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], Optional[str]]
         """
@@ -178,15 +178,18 @@ class SnmpCheck(AgentCheck):
         results = defaultdict(dict)  # type: DefaultDict[str, Dict[Tuple[str, ...], Any]]
         enforce_constraints = config.enforce_constraints
 
-        print("bulk_oids", [str(oid) for oid in bulk_oids])
+        for table_oid, column_oids in bulk_oids.items():
+            print("bulk table", table_oid)
+            print("    column oids", [str(oid) for oid in column_oids])
         all_binds, error = self.fetch_oids(config, all_oids, next_oids, enforce_constraints=enforce_constraints)
 
-        for oid in bulk_oids:
+        for table_oid, column_oids in bulk_oids.items():
             try:
-                self.log.debug('Running SNMP command getBulk on OID %s', oid)
+                self.log.debug('Running SNMP command getBulk on table_oid %s', table_oid)
                 binds = snmp_bulk(
                     config,
-                    oid.as_object_type(),
+                    table_oid,
+                    column_oids,
                     self._NON_REPEATERS,
                     self._MAX_REPETITIONS,
                     enforce_constraints,
@@ -198,9 +201,11 @@ class SnmpCheck(AgentCheck):
                 if not error:
                     error = message
                 self.warning(message)
+                raise
 
         for result_oid, value in all_binds:
             match = config.resolve_oid(OID(result_oid))
+            self.log.warning("result_oid: %s value: %s, match: %s", result_oid, value, match)
             results[match.name][match.indexes] = value
         self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
         # Freeze the result
@@ -396,6 +401,7 @@ class SnmpCheck(AgentCheck):
             error = str(e)
             self.warning(error)
         except Exception as e:
+            raise
             if not error:
                 error = 'Failed to collect metrics for {} - {}'.format(self._get_instance_name(instance), e)
             self.warning(error)

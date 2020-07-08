@@ -4,6 +4,7 @@
 """
 Helpers for parsing the `metrics` section of a config file.
 """
+from collections import defaultdict
 from typing import Dict, List, NamedTuple, Sequence, TypedDict, Union, cast
 
 from datadog_checks.base import ConfigurationError
@@ -26,7 +27,7 @@ from .parsed_metrics import ParsedMetric, ParsedMetricTag, ParsedSymbolMetric, P
 
 ParseMetricsResult = TypedDict(
     'ParseMetricsResult',
-    {'oids': List[OID], 'next_oids': List[OID], 'bulk_oids': List[OID], 'parsed_metrics': List[ParsedMetric]},
+    {'oids': List[OID], 'next_oids': List[OID], 'bulk_oids': Dict[str, List[OID]], 'parsed_metrics': List[ParsedMetric]},
 )
 
 
@@ -37,7 +38,7 @@ def parse_metrics(metrics, resolver, bulk_threshold=0):
     """
     oids = []
     next_oids = []
-    bulk_oids = []
+    bulk_oids = defaultdict(list)
     parsed_metrics = []  # type: List[ParsedMetric]
 
     for metric in metrics:
@@ -55,7 +56,7 @@ def parse_metrics(metrics, resolver, bulk_threshold=0):
         for batch in result.table_batches.values():
             should_query_in_bulk = bulk_threshold and len(batch.oids) > bulk_threshold
             if should_query_in_bulk:
-                bulk_oids.append(batch.table_oid)
+                bulk_oids[str(batch.table_oid)].extend(batch.oids)
             else:
                 # NOTE: we should issue GETNEXT commands for these OIDs, because GET commands on table column OIDs
                 # never succeed.
