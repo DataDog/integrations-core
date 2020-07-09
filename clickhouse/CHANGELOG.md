@@ -1,5 +1,9 @@
 # CHANGELOG - ClickHouse
 
+## 1.3.2 / 2020-07-09
+
+* [Fixed] Ping existing Clickhouse connections before sending OK. Otherwise try connecting again before sending CRITICAL. See [#7006](https://github.com/DataDog/integrations-core/pull/7006). Thanks [isaachui](https://github.com/isaachui).
+
 ## 1.3.1 / 2020-06-19
 
 * [Fixed] Submit `can_connect` service check on each check run. See [#6926](https://github.com/DataDog/integrations-core/pull/6926).
