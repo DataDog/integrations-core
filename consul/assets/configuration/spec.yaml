@@ -17,6 +17,14 @@ files:
       value:
         type: string
         example: http://localhost:8500
+    - name: use_prometheus_endpoint
+      description: |
+        Whether to use the prometheus endpoint to get more metrics.
+        The prometheus endpoint is available since Consul v1.1.0
+      value:
+        type: boolean
+        default: false
+        example: false
     - name: catalog_checks
       description: Set to true to perform checks against the Consul service catalog.
       value:

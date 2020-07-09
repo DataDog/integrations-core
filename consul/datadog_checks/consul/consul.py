@@ -12,7 +12,7 @@ import requests
 from six import iteritems, iterkeys, itervalues
 from six.moves.urllib.parse import urljoin
 
-from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base import OpenMetricsBaseCheck, is_affirmative
 from datadog_checks.consul.common import (
     CONSUL_CAN_CONNECT,
     CONSUL_CATALOG_CHECK,
@@ -27,14 +27,38 @@ from datadog_checks.consul.common import (
     distance,
 )
 
+from .metrics import METRIC_MAP
+
+
 NodeStatus = namedtuple('NodeStatus', ['node_id', 'service_name', 'service_tags_set', 'status'])
 
 
-class ConsulCheck(AgentCheck):
+class ConsulCheck(OpenMetricsBaseCheck):
     def __init__(self, name, init_config, instances):
-        super(ConsulCheck, self).__init__(name, init_config, instances)
+        instance = instances[0]
+        self.url = instance.get('url')
 
-        self.url = self.instance.get('url')
+        # Set the prometheus endpoint configuration
+        self.use_prometheus_endpoint = instance.get('use_prometheus_endpoint', False)
+        if self.use_prometheus_endpoint:
+            instance['prometheus_url'] = '{}/v1/agent/metrics?format=prometheus'.format(self.url)
+
+            if 'headers' not in instance:
+                instance['headers'] = {'X-Consul-Token': instance.get('acl_token')}
+            else:
+                instance['headers'].setdefault('X-Consul-Token', instance.get('acl_token'))
+
+        default_instances = {
+            'consul': {
+                'prometheus_url': '',
+                'namespace': 'consul',
+                'metrics': [METRIC_MAP],
+                'send_histogram_buckets': True,
+            }
+        }
+
+        super(ConsulCheck, self).__init__(name, init_config, instances, default_instances=default_instances, default_namespace='consul')
+
         self.base_tags = self.instance.get('tags', [])
 
         self.single_node_install = is_affirmative(self.instance.get('single_node_install', False))
@@ -66,6 +90,7 @@ class ConsulCheck(AgentCheck):
 
         if 'acl_token' in self.instance:
             self.http.options['headers']['X-Consul-Token'] = self.instance['acl_token']
+
 
     def consul_request(self, endpoint):
         url = urljoin(self.url, endpoint)
@@ -238,7 +263,10 @@ class ConsulCheck(AgentCheck):
 
         return service_tags
 
-    def check(self, _):
+    def check(self, instance):
+
+        if self.use_prometheus_endpoint:
+            self._check_prometheus_endpoint(instance)
 
         self._check_for_leader_change()
         self._collect_metadata()
@@ -275,7 +303,7 @@ class ConsulCheck(AgentCheck):
                 sc_id = '{}/{}/{}'.format(check['CheckID'], check.get('ServiceID', ''), check.get('ServiceName', ''))
                 status = STATUS_SC.get(check['Status'])
                 if status is None:
-                    status = AgentCheck.UNKNOWN
+                    status = self.UNKNOWN
 
                 if sc_id not in sc:
                     tags = ["check:{}".format(check["CheckID"])]
@@ -296,9 +324,9 @@ class ConsulCheck(AgentCheck):
 
         except Exception as e:
             self.log.error(e)
-            self.service_check(CONSUL_CHECK, AgentCheck.CRITICAL, tags=service_check_tags)
+            self.service_check(CONSUL_CHECK, self.CRITICAL, tags=service_check_tags)
         else:
-            self.service_check(CONSUL_CHECK, AgentCheck.OK, tags=service_check_tags)
+            self.service_check(CONSUL_CHECK, self.OK, tags=service_check_tags)
 
         if self.perform_catalog_checks:
             # Collect node by service, and service by node counts for a whitelist of services
@@ -530,3 +558,14 @@ class ConsulCheck(AgentCheck):
         self.log.debug("Agent version is `%s`", agent_version)
         if agent_version:
             self.set_metadata('version', agent_version)
+
+    def _check_prometheus_endpoint(self, instance):
+        scraper_config = self.get_scraper_config(instance)
+
+        # We should be specifying metrics for checks that are vanilla OpenMetricsBaseCheck-based
+        if not scraper_config['metrics_mapper']:
+            raise CheckException(
+                "You have to collect at least one metric from the endpoint: {}".format(scraper_config['prometheus_url'])
+            )
+
+        self.process(scraper_config)

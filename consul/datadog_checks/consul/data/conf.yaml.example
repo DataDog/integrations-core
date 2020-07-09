@@ -52,6 +52,12 @@ instances:
     #
   - url: http://localhost:8500
 
+    ## @param use_prometheus_endpoint - boolean - optional - default: False
+    ## Whether to use the prometheus endpoint to get more metrics.
+    ## The prometheus endpoint is available since Consul v1.1.0
+    #
+    # use_prometheus_endpoint: false
+
     ## @param catalog_checks - boolean - optional - default: false
     ## Set to true to perform checks against the Consul service catalog.
     #
