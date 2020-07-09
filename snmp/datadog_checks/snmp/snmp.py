@@ -178,9 +178,6 @@ class SnmpCheck(AgentCheck):
         results = defaultdict(dict)  # type: DefaultDict[str, Dict[Tuple[str, ...], Any]]
         enforce_constraints = config.enforce_constraints
 
-        for table_oid, column_oids in bulk_oids.items():
-            print("bulk table", table_oid)
-            print("    column oids", [str(oid) for oid in column_oids])
         all_binds, error = self.fetch_oids(config, all_oids, next_oids, enforce_constraints=enforce_constraints)
 
         for table_oid, column_oids in bulk_oids.items():
@@ -201,11 +198,9 @@ class SnmpCheck(AgentCheck):
                 if not error:
                     error = message
                 self.warning(message)
-                raise
 
         for result_oid, value in all_binds:
             match = config.resolve_oid(OID(result_oid))
-            self.log.warning("result_oid: %s value: %s, match: %s", result_oid, value, match)
             results[match.name][match.indexes] = value
         self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
         # Freeze the result
@@ -221,13 +216,10 @@ class SnmpCheck(AgentCheck):
         # iso.3.6.1.2.1.25.4.2.1.7.224 = INTEGER: 2
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
         error = None
-        print("all_oids", [str(oid) for oid in all_oids])
-        print("next_oids orig", [str(oid) for oid in next_oids])
         all_oids = [oid.as_object_type() for oid in all_oids]
         next_oids = [oid.as_object_type() for oid in next_oids]
         all_binds = []
 
-        all_missing_results = []
         for oids_batch in batches(all_oids, size=self.oid_batch_size):
             try:
                 self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
@@ -248,7 +240,6 @@ class SnmpCheck(AgentCheck):
                 if missing_results:
                     # If we didn't catch the metric using snmpget, try snmpnext
                     next_oids.extend(missing_results)
-                    all_missing_results.extend(missing_results)
 
 
             except (PySnmpError, CheckException) as e:
@@ -257,30 +248,29 @@ class SnmpCheck(AgentCheck):
                     error = message
                 self.warning(message)
 
-        print("all_missing_results {}: {}".format(len(all_missing_results), all_missing_results))
 
         # We shouldn't need next_oids
         # Call should be either aim a specific OID (all_oids) or use bulk for tables
         next_oids = []
-        # for oids_batch in batches(next_oids, size=self.oid_batch_size):
-        #     try:
-        #         self.log.debug('Running SNMP command getNext on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
-        #         binds = list(
-        #             snmp_getnext(
-        #                 config,
-        #                 oids_batch,
-        #                 lookup_mib=enforce_constraints,
-        #                 ignore_nonincreasing_oid=self.ignore_nonincreasing_oid,
-        #             )
-        #         )
-        #         self.log.debug('Returned vars: %s', OIDPrinter(binds, with_values=True))
-        #         all_binds.extend(binds)
-        #
-        #     except (PySnmpError, CheckException) as e:
-        #         message = 'Failed to collect some metrics: {}'.format(e)
-        #         if not error:
-        #             error = message
-        #         self.warning(message)
+        for oids_batch in batches(next_oids, size=self.oid_batch_size):
+            try:
+                self.log.debug('Running SNMP command getNext on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
+                binds = list(
+                    snmp_getnext(
+                        config,
+                        oids_batch,
+                        lookup_mib=enforce_constraints,
+                        ignore_nonincreasing_oid=self.ignore_nonincreasing_oid,
+                    )
+                )
+                self.log.debug('Returned vars: %s', OIDPrinter(binds, with_values=True))
+                all_binds.extend(binds)
+
+            except (PySnmpError, CheckException) as e:
+                message = 'Failed to collect some metrics: {}'.format(e)
+                if not error:
+                    error = message
+                self.warning(message)
 
         return all_binds, error
 
