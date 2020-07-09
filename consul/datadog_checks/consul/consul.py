@@ -40,6 +40,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
         # Set the prometheus endpoint configuration
         self.use_prometheus_endpoint = instance.get('use_prometheus_endpoint', False)
+        instance.setdefault('prometheus_url', '')
         if self.use_prometheus_endpoint:
             instance['prometheus_url'] = '{}/v1/agent/metrics?format=prometheus'.format(self.url)
 
@@ -50,7 +51,6 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
         default_instances = {
             'consul': {
-                'prometheus_url': '',
                 'namespace': 'consul',
                 'metrics': [METRIC_MAP],
                 'send_histogram_buckets': True,
