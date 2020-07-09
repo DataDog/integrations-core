@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import Any, Dict, Generator
+from typing import Any, Dict, Generator, List
 
 from pyasn1.type.univ import Null
 from pysnmp.entity.rfc3413 import cmdgen
@@ -10,6 +10,7 @@ from pysnmp.proto import errind
 from pysnmp.proto.rfc1905 import endOfMibView
 
 from datadog_checks.base.errors import CheckException
+from datadog_checks.snmp.models import OID
 
 from .config import InstanceConfig
 
@@ -112,7 +113,7 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
 
 
 def snmp_bulk(config, table_oid, column_oids, non_repeaters, max_repetitions, lookup_mib, ignore_nonincreasing_oid):
-    # type: (InstanceConfig, Any, Any, int, int, bool, bool) -> Generator
+    # type: (InstanceConfig, str, List[OID], int, int, bool, bool) -> Generator
     """Call SNMP GETBULK on an oid."""
 
     if config.device is None:
@@ -130,6 +131,7 @@ def snmp_bulk(config, table_oid, column_oids, non_repeaters, max_repetitions, lo
     ctx = {}  # type: Dict[str, Any]
 
     var_binds = [oid.as_object_type() for oid in column_oids]
+    table_var = vbProcessor.makeVarBinds(config._snmp_engine, [OID(table_oid).as_object_type()])[0][0]
 
     gen = cmdgen.BulkCommandGenerator()
 
@@ -155,8 +157,7 @@ def snmp_bulk(config, table_oid, column_oids, non_repeaters, max_repetitions, lo
                 name, value = varbind
                 if endOfMibView.isSameTypeWith(value):
                     return
-                # if initial_var.isPrefixOf(name):
-                if str(name).startswith(table_oid):
+                if table_var.isPrefixOf(name):
                     yield varbind
                 else:
                     return
