@@ -61,13 +61,9 @@ def readmes(ctx, integration):
                         )
                         continue
 
-        if not has_overview and integration not in NON_TILE_INTEGRATIONS:
+        if not (has_overview and has_setup) and integration not in NON_TILE_INTEGRATIONS:
             errors = True
-            echo_failure(f"{integration} readme file does not have an overview section")
-
-        if not has_setup and integration not in NON_TILE_INTEGRATIONS:
-            errors = True
-            echo_failure(f"{integration} readme file does not have a setup section")
+            echo_failure(f"{integration} readme file does not have an overview and setup section")
 
     if errors:
         abort()
