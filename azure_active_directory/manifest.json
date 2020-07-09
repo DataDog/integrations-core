@@ -1,5 +1,5 @@
 {
-  "display_name": "azure_active_directory",
+  "display_name": "Azure Active Directory",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "azure_active_directory",
