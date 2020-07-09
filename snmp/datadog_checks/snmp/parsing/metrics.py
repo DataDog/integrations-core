@@ -27,7 +27,12 @@ from .parsed_metrics import ParsedMetric, ParsedMetricTag, ParsedSymbolMetric, P
 
 ParseMetricsResult = TypedDict(
     'ParseMetricsResult',
-    {'oids': List[OID], 'next_oids': List[OID], 'bulk_oids': Dict[str, List[OID]], 'parsed_metrics': List[ParsedMetric]},
+    {
+        'oids': List[OID],
+        'next_oids': List[OID],
+        'bulk_oids': Dict[str, List[OID]],
+        'parsed_metrics': List[ParsedMetric],
+    },
 )
 
 

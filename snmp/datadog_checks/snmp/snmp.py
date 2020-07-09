@@ -241,13 +241,11 @@ class SnmpCheck(AgentCheck):
                     # If we didn't catch the metric using snmpget, try snmpnext
                     next_oids.extend(missing_results)
 
-
             except (PySnmpError, CheckException) as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
                 if not error:
                     error = message
                 self.warning(message)
-
 
         for oids_batch in batches(next_oids, size=self.oid_batch_size):
             try:

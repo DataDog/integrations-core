@@ -1,18 +1,15 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import logging
 from typing import Any, Dict, Generator
 
 from pyasn1.type.univ import Null
-from pysnmp import hlapi
 from pysnmp.entity.rfc3413 import cmdgen
 from pysnmp.hlapi.asyncore.cmdgen import vbProcessor
 from pysnmp.proto import errind
 from pysnmp.proto.rfc1905 import endOfMibView
 
 from datadog_checks.base.errors import CheckException
-from datadog_checks.snmp.models import OID
 
 from .config import InstanceConfig
 
