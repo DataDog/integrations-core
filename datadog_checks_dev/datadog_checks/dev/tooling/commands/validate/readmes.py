@@ -41,7 +41,7 @@ def readmes(ctx, integration):
 
             if "## Overview" == line.strip():
                 has_overview = True
-            
+
             if "## Setup" == line.strip():
                 has_setup = True
 
