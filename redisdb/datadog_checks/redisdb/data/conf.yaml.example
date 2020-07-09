@@ -23,7 +23,7 @@ instances:
     #
     port: 6379
 
-    ## @param unix_socket_path - string - optional - default: /var/run/redis/redis.sock
+    ## @param unix_socket_path - string - optional
     ## Connect through a unix socket instead of using a `host` and a `port`.
     #
     # unix_socket_path: /var/run/redis/redis.sock
