@@ -12,7 +12,7 @@ import requests
 from six import iteritems, iterkeys, itervalues
 from six.moves.urllib.parse import urljoin
 
-from datadog_checks.base import OpenMetricsBaseCheck, is_affirmative
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 from datadog_checks.consul.common import (
     CONSUL_CAN_CONNECT,
     CONSUL_CATALOG_CHECK,
@@ -28,7 +28,6 @@ from datadog_checks.consul.common import (
 )
 
 from .metrics import METRIC_MAP
-
 
 NodeStatus = namedtuple('NodeStatus', ['node_id', 'service_name', 'service_tags_set', 'status'])
 
@@ -50,14 +49,12 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 instance['headers'].setdefault('X-Consul-Token', instance.get('acl_token'))
 
         default_instances = {
-            'consul': {
-                'namespace': 'consul',
-                'metrics': [METRIC_MAP],
-                'send_histogram_buckets': True,
-            }
+            'consul': {'namespace': 'consul', 'metrics': [METRIC_MAP], 'send_histograms_buckets': True}
         }
 
-        super(ConsulCheck, self).__init__(name, init_config, instances, default_instances=default_instances, default_namespace='consul')
+        super(ConsulCheck, self).__init__(
+            name, init_config, instances, default_instances=default_instances, default_namespace='consul'
+        )
 
         self.base_tags = self.instance.get('tags', [])
 
@@ -90,7 +87,6 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
         if 'acl_token' in self.instance:
             self.http.options['headers']['X-Consul-Token'] = self.instance['acl_token']
-
 
     def consul_request(self, endpoint):
         url = urljoin(self.url, endpoint)
@@ -562,9 +558,8 @@ class ConsulCheck(OpenMetricsBaseCheck):
     def _check_prometheus_endpoint(self, instance):
         scraper_config = self.get_scraper_config(instance)
 
-        # We should be specifying metrics for checks that are vanilla OpenMetricsBaseCheck-based
         if not scraper_config['metrics_mapper']:
-            raise CheckException(
+            raise ConfigurationError(
                 "You have to collect at least one metric from the endpoint: {}".format(scraper_config['prometheus_url'])
             )
 
