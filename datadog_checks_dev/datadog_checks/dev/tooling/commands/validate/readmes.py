@@ -39,10 +39,10 @@ def readmes(ctx, integration):
         lines = read_readme_file(integration)
         for line_no, line in lines:
 
-            if "## Overview" in line:
+            if "## Overview" == line.strip():
                 has_overview = True
-
-            if "## Setup" in line:
+            
+            if "## Setup" == line.strip():
                 has_setup = True
 
             for ext in IMAGE_EXTENSIONS:
