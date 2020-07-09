@@ -17,7 +17,7 @@ BROKER_METRICS = ['kafka.broker_offset']
 CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
 
 
-@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.usefixtures("dd_environment")
 def test_check_kafka(aggregator, kafka_instance):
     """
     Testing Kafka_consumer check.
@@ -48,7 +48,7 @@ def assert_check_kafka(aggregator, consumer_groups):
     aggregator.assert_all_metrics_covered()
 
 
-@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.usefixtures('dd_environment', 'mock_dns')
 def test_consumer_config_error(caplog):
     instance = {'kafka_connect_str': KAFKA_CONNECT_STR, 'kafka_consumer_offsets': True, 'tags': ['optional:tag1']}
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [instance])
@@ -60,7 +60,7 @@ def test_consumer_config_error(caplog):
     assert 'monitor_unlisted_consumer_groups is False' in caplog.text
 
 
-@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.usefixtures('dd_environment', 'mock_dns')
 def test_no_topics(aggregator, kafka_instance):
     kafka_instance['consumer_groups'] = {'my_consumer': {}}
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
@@ -72,7 +72,7 @@ def test_no_topics(aggregator, kafka_instance):
     assert_check_kafka(aggregator, {'my_consumer': {'marvel': [0]}})
 
 
-@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.usefixtures('dd_environment', 'mock_dns')
 def test_no_partitions(aggregator, kafka_instance):
     kafka_instance['consumer_groups'] = {'my_consumer': {'marvel': []}}
     kafka_consumer_check = KafkaCheck('kafka_consumer', {}, [kafka_instance])
