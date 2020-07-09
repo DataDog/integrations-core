@@ -61,7 +61,8 @@ def parse_metrics(metrics, resolver, bulk_threshold=0):
         for batch in result.table_batches.values():
             should_query_in_bulk = bulk_threshold and len(batch.oids) > bulk_threshold
             if should_query_in_bulk:
-                batch.table_oid.resolve(resolver._mib_view_controller)
+                if batch.table_oid._parts is None:
+                    batch.table_oid.resolve(resolver._mib_view_controller)
                 bulk_oids[str(batch.table_oid)].extend(batch.oids)
             else:
                 # NOTE: we should issue GETNEXT commands for these OIDs, because GET commands on table column OIDs
