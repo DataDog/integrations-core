@@ -80,6 +80,10 @@ def download():
     )
 
     parser.add_argument(
+        '--force', action='store_true', help='Force download even if the type of integration may be incorrect.'
+        )
+
+    parser.add_argument(
         '-v', '--verbose', action='count', default=0, help='Show verbose information about TUF and in-toto.'
     )
 
@@ -88,6 +92,7 @@ def download():
     standard_distribution_name = args.standard_distribution_name
     version = args.version
     root_layout_type = args.type
+    force = args.force
     verbose = args.verbose
 
     if not standard_distribution_name.startswith('datadog-'):
@@ -99,8 +104,13 @@ def download():
     if root_layout_type == 'extras':
         shipped_integrations = __find_shipped_integrations()
         if standard_distribution_name in shipped_integrations:
-            sys.stderr.write('WARNING: {} is a known core integration'.format(standard_distribution_name))
+            sys.stderr.write(
+                '{}: {} is a known core integration'.format('WARNING' if force else 'ERROR', standard_distribution_name)
+            )
             sys.stderr.flush()
+
+            if not force:
+                sys.exit(1)
 
     tuf_downloader = TUFDownloader(
         repository_url_prefix=repository_url_prefix, root_layout_type=root_layout_type, verbose=verbose
