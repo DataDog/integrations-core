@@ -133,9 +133,6 @@ def snmp_bulk(config, table_oid, column_oids, non_repeaters, max_repetitions, lo
     ctx = {}  # type: Dict[str, Any]
 
     var_binds = [oid.as_object_type() for oid in column_oids]
-    table_oid_obj = OID(table_oid)
-    print("table_oid_obj", table_oid_obj)
-    initial_var = vbProcessor.makeVarBinds(config._snmp_engine, [table_oid_obj.as_object_type()])[0][0]
 
     gen = cmdgen.BulkCommandGenerator()
 

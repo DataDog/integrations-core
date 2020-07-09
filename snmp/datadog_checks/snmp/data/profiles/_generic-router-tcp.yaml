@@ -4,49 +4,50 @@ metrics:
 - MIB: TCP-MIB
   forced_type: monotonic_count
   symbol:
-    OID: 1.3.6.1.2.1.6.5.0
+    OID: 1.3.6.1.2.1.6.5
     name: tcpActiveOpens
 - MIB: TCP-MIB
   forced_type: monotonic_count
   symbol:
-    OID: 1.3.6.1.2.1.6.6.0
+    OID: 1.3.6.1.2.1.6.6
     name: tcpPassiveOpens
 - MIB: TCP-MIB
   forced_type: monotonic_count
   symbol:
-    OID: 1.3.6.1.2.1.6.7.0
+    OID: 1.3.6.1.2.1.6.7
     name: tcpAttemptFails
 - MIB: TCP-MIB
   forced_type: monotonic_count
   symbol:
-    OID: 1.3.6.1.2.1.6.8.0
+    OID: 1.3.6.1.2.1.6.8
     name: tcpEstabResets
 - MIB: TCP-MIB
   symbol:
-    OID: 1.3.6.1.2.1.6.9.0
+    OID: 1.3.6.1.2.1.6.9
     name: tcpCurrEstab
 - MIB: TCP-MIB
   forced_type: monotonic_count
   symbol:
-    OID: 1.3.6.1.2.1.6.17.0
+    OID: 1.3.6.1.2.1.6.17
     name: tcpHCInSegs
 - MIB: TCP-MIB
   forced_type: monotonic_count
   symbol:
-    OID: 1.3.6.1.2.1.6.18.0
+    OID: 1.3.6.1.2.1.6.18
     name: tcpHCOutSegs
 - MIB: TCP-MIB
   forced_type: monotonic_count
   symbol:
-    OID: 1.3.6.1.2.1.6.12.0
+    OID: 1.3.6.1.2.1.6.12
     name: tcpRetransSegs
 - MIB: TCP-MIB
   forced_type: monotonic_count
   symbol:
-    OID: 1.3.6.1.2.1.6.14.0
+    OID: 1.3.6.1.2.1.6.14
     name: tcpInErrs
 - MIB: TCP-MIB
   forced_type: monotonic_count
   symbol:
-    OID: 1.3.6.1.2.1.6.15.0
+    OID: 1.3.6.1.2.1.6.15
     name: tcpOutRsts
+
