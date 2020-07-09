@@ -703,7 +703,7 @@
             "title": true,
             "title_align": "left",
             "title_size": 16,
-            "title_text": "Sum of containers per node",
+            "title_text": "Number of containers per node",
             "type": "timeseries",
             "width": 57,
             "x": 58,
@@ -718,7 +718,8 @@
                         "aggregator": "avg",
                         "limit": 25,
                         "order": "asc",
-                        "q": "avg:kubernetes_state.node.cpu_allocatable{$host, $cluster} by {host}"
+                        "q": "avg:kubernetes_state.node.cpu_allocatable{$host, $cluster} by {host}",
+                        "alias": "CPU Available"
                     }
                 ],
                 "viz": "query_table"
@@ -741,7 +742,8 @@
                         "aggregator": "avg",
                         "limit": 25,
                         "order": "asc",
-                        "q": "avg:kubernetes_state.node.pods_allocatable{$cluster,$host} by {host}"
+                        "q": "avg:kubernetes_state.node.pods_allocatable{$cluster,$host} by {host}",
+                        "alias": "Pods Available"
                     }
                 ],
                 "viz": "query_table"
@@ -764,7 +766,8 @@
                         "aggregator": "avg",
                         "limit": 25,
                         "order": "asc",
-                        "q": "avg:kubernetes_state.node.memory_allocatable{$cluster,$host} by {host}"
+                        "q": "avg:kubernetes_state.node.memory_allocatable{$cluster,$host} by {host}",
+                        "alias": "Memory Available"
                     }
                 ],
                 "viz": "query_table"
