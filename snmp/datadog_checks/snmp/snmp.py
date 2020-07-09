@@ -249,9 +249,6 @@ class SnmpCheck(AgentCheck):
                 self.warning(message)
 
 
-        # We shouldn't need next_oids
-        # Call should be either aim a specific OID (all_oids) or use bulk for tables
-        next_oids = []
         for oids_batch in batches(next_oids, size=self.oid_batch_size):
             try:
                 self.log.debug('Running SNMP command getNext on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
@@ -391,7 +388,6 @@ class SnmpCheck(AgentCheck):
             error = str(e)
             self.warning(error)
         except Exception as e:
-            raise
             if not error:
                 error = 'Failed to collect metrics for {} - {}'.format(self._get_instance_name(instance), e)
             self.warning(error)
