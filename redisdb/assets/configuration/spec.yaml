@@ -25,6 +25,7 @@ files:
       value:
         type: string
         example: /var/run/redis/redis.sock
+        default: null
     - name: db
       description: |
         Index of the database (keyspace) to use.
