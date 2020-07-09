@@ -37,8 +37,6 @@ class IbmMqCheck(AgentCheck):
 
     def check(self, _):
         try:
-            import pdb
-            pdb.set_trace()
             queue_manager = connection.get_queue_manager_connection(self.config)
             self.service_check(self.SERVICE_CHECK, AgentCheck.OK, self.config.tags)
         except Exception as e:
