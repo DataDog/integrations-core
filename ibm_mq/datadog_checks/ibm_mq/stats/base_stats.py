@@ -28,6 +28,7 @@ class BaseStats(object):
         naive_start_datetime = dt.datetime.strptime('{} {}'.format(date, time), '%Y-%m-%d %H.%M.%S')
 
         # TODO: Use datadog_checks.base.utils.time.ensure_aware_datetime
-        #       when integration don't need to be backward compatible anymore
-        #       with agent versions without ensure_aware_datetime
+        #       when the integration doesn't need to be backward compatible anymore
+        #       with agent versions without ensure_aware_datetime.
+        #       When doing that, bump the base package in setup.py 
         return naive_start_datetime.replace(tzinfo=UTC)

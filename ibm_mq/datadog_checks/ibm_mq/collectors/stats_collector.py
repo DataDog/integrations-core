@@ -36,7 +36,7 @@ class StatsCollector(object):
 
         Docs: https://www.ibm.com/support/knowledgecenter/SSFKSJ_9.1.0/com.ibm.mq.mon.doc/q037320_.htm
         """
-        self.log.debug("Collect stats newer than %s", self.config.instance_creation_datetime)
+        self.log.debug("Collecting stats newer than %s", self.config.instance_creation_datetime)
         queue = Queue(queue_manager, STATISTICS_QUEUE_NAME)
 
         try:
