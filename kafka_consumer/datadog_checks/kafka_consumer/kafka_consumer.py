@@ -87,21 +87,24 @@ class KafkaCheck(AgentCheck):
 
         # Fetch Kafka consumer offsets
         try:
-            self._get_consumer_offsets(self._context_limit)
+            self._get_consumer_offsets()
         except Exception:
             self.log.exception("There was a problem collecting consumer offsets from Kafka.")
             # don't raise because we might get valid broker offsets
 
         # Fetch the broker highwater offsets
         try:
-            self._get_highwater_offsets(self._context_limit - len(self._consumer_offsets))
+            if len(self._consumer_offsets) < self._context_limit:
+                self._get_highwater_offsets()
+            else:
+                self.log.warning("Contex limit reached. Skipping highwater collection")
         except Exception:
             self.log.exception("There was a problem collecting the highwater mark offsets.")
             # Unlike consumer offsets, fail immediately because we can't calculate consumer lag w/o highwater_offsets
             raise
 
         total_contexts = len(self._consumer_offsets) + len(self._highwater_offsets)
-        if total_contexts > self._context_limit:
+        if total_contexts >= self._context_limit:
             self.warning(
                 """Discovered %s metric contexts - this exceeds the maximum number of %s contexts permitted by the
                 check. Please narrow your target by specifying in your kafka_consumer.yaml the consumer groups, topics
@@ -111,8 +114,8 @@ class KafkaCheck(AgentCheck):
             )
 
         # Report the metrics
-        self._report_highwater_offsets()
-        self._report_consumer_offsets_and_lag()
+        self._report_highwater_offsets(self._context_limit)
+        self._report_consumer_offsets_and_lag(self._context_limit - len(self._highwater_offsets))
 
     def _create_kafka_admin_client(self, api_version):
         """Return a KafkaAdminClient."""
@@ -150,7 +153,7 @@ class KafkaCheck(AgentCheck):
             raise RuntimeError("Local cluster metadata cache did not populate.")
         return kafka_admin_client
 
-    def _get_highwater_offsets(self, contexts_to_fetch):
+    def _get_highwater_offsets(self):
         """Fetch highwater offsets for topic_partitions in the Kafka cluster.
 
         Do this for all partitions in the cluster because even if it has no consumers, we may want to measure whether
@@ -246,22 +249,31 @@ class KafkaCheck(AgentCheck):
                         "partition: %s." % (topic, partition)
                     )
 
-    def _report_highwater_offsets(self):
+    def _report_highwater_offsets(self, contexts_limit):
         """Report the broker highwater offsets."""
+        reported_contexts = 0
         for (topic, partition), highwater_offset in self._highwater_offsets.items():
             broker_tags = ['topic:%s' % topic, 'partition:%s' % partition]
             broker_tags.extend(self._custom_tags)
             self.gauge('broker_offset', highwater_offset, tags=broker_tags)
+            reported_contexts += 1
+            if reported_contexts == contexts_limit:
+                return
 
-    def _report_consumer_offsets_and_lag(self):
+    def _report_consumer_offsets_and_lag(self, contexts_limit):
         """Report the consumer offsets and consumer lag."""
+        reported_contexts = 0
         for (consumer_group, topic, partition), consumer_offset in self._consumer_offsets.items():
+            if reported_contexts >= contexts_limit:
+                return
             consumer_group_tags = ['topic:%s' % topic, 'partition:%s' % partition, 'consumer_group:%s' % consumer_group]
             consumer_group_tags.extend(self._custom_tags)
             if partition in self._kafka_client._client.cluster.partitions_for_topic(topic):
                 # report consumer offset if the partition is valid because even if leaderless the consumer offset will
                 # be valid once the leader failover completes
                 self.gauge('consumer_offset', consumer_offset, tags=consumer_group_tags)
+                reported_contexts += 1
+
                 if (topic, partition) not in self._highwater_offsets:
                     self.log.warning(
                         "Consumer group: %s has offsets for topic: %s partition: %s, but no stored highwater offset "
@@ -273,7 +285,9 @@ class KafkaCheck(AgentCheck):
                     continue
 
                 consumer_lag = self._highwater_offsets[(topic, partition)] - consumer_offset
-                self.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
+                if reported_contexts < contexts_limit:
+                    self.gauge('consumer_lag', consumer_lag, tags=consumer_group_tags)
+                    reported_contexts += 1
 
                 if consumer_lag < 0:
                     # this will effectively result in data loss, so emit an event for max visibility
@@ -297,7 +311,7 @@ class KafkaCheck(AgentCheck):
                 )
                 self._kafka_client._client.cluster.request_update()  # force metadata update on next poll()
 
-    def _get_consumer_offsets(self, contexts_to_fetch):
+    def _get_consumer_offsets(self):
         """Fetch Consumer Group offsets from Kafka.
 
         Also fetch consumer_groups, topics, and partitions if not already specified.
@@ -322,18 +336,12 @@ class KafkaCheck(AgentCheck):
 
         if self._monitor_unlisted_consumer_groups:
             for broker in self._kafka_client._client.cluster.brokers():
-                if len(self._consumer_offsets) >= contexts_to_fetch:
-                    self.log.debug("Context limit reached, skipping further fetching")
-                    break
                 list_groups_future = self._kafka_client._list_consumer_groups_send_request(broker.nodeId)
                 list_groups_future.add_callback(self._list_groups_callback, broker.nodeId)
                 self._consumer_futures.append(list_groups_future)
         elif self._consumer_groups:
             self._validate_listed_consumer_groups()
             for consumer_group in self._consumer_groups:
-                if len(self._consumer_offsets) >= contexts_to_fetch:
-                    self.log.debug("Context limit reached, skipping further fetching")
-                    break
                 find_coordinator_future = self._kafka_client._find_coordinator_id_send_request(consumer_group)
                 find_coordinator_future.add_callback(self._find_coordinator_callback, consumer_group)
                 self._consumer_futures.append(find_coordinator_future)
