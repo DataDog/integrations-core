@@ -78,3 +78,16 @@ def instance_bad_token():
         'self_leader_check': True,
         'acl_token': 'wrong_token',
     }
+
+
+@pytest.fixture
+def instance_prometheus():
+    return {
+        'url': common.URL,
+        'use_prometheus_endpoint': True,
+        'catalog_checks': False,
+        'network_latency_checks': False,
+        'new_leader_checks': False,
+        'self_leader_check': False,
+        'acl_token': 'token',
+    }

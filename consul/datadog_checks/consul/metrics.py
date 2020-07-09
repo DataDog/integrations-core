@@ -35,10 +35,8 @@ METRIC_MAP = {
     'consul_serf_queue_Query': 'serf.queue.query',
     'consul_serf_snapshot_appendline': 'serf.snapshot.appendLine',
     'consul_serf_snapshot_compact': 'serf.snapshot.compact',
-
     # TODO: waiting for https://github.com/hashicorp/consul/pull/8271
     # 'consul_http': 'http',
-
     # TODO: waiting for https://github.com/hashicorp/raft/pull/409
     # 'consul_raft_replication_installSnapshot': 'raft.replication.installSnapshot',
     # 'consul_raft_replication_heartbeat': 'raft.replication.heartbeat',
