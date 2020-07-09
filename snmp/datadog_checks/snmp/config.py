@@ -156,7 +156,6 @@ class InstanceConfig:
             self.add_profile_tag(profile)
 
         self._uptime_metric_added = False
-        self._calls_count = defaultdict(int)
 
     def resolve_oid(self, oid):
         # type: (OID) -> OIDMatch

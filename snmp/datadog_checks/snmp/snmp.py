@@ -52,7 +52,7 @@ class SnmpCheck(AgentCheck):
     _thread = None
     _executor = None
     _NON_REPEATERS = 0
-    _MAX_REPETITIONS = 1000
+    _MAX_REPETITIONS = 128
     _thread_factory = threading.Thread  # Store as an attribute for easier mocking.
 
     def __init__(self, *args, **kwargs):
