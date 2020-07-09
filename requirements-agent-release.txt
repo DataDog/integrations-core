@@ -16,7 +16,7 @@ datadog-checks-base==11.12.0
 datadog-checks-downloader==3.0.0
 datadog-cilium==1.2.0
 datadog-cisco-aci==1.10.0
-datadog-clickhouse==1.3.1
+datadog-clickhouse==1.3.2
 datadog-cockroachdb==1.3.0
 datadog-confluent-platform==1.1.1
 datadog-consul==1.15.0
@@ -50,7 +50,7 @@ datadog-hdfs-datanode==1.14.0; sys_platform != 'win32'
 datadog-hdfs-namenode==1.13.0; sys_platform != 'win32'
 datadog-hive==1.3.1
 datadog-hivemq==1.1.0
-datadog-http-check==4.9.0
+datadog-http-check==4.9.1
 datadog-hyperv==1.3.0; sys_platform == 'win32'
 datadog-ibm-db2==1.5.0
 datadog-ibm-mq==3.7.0; sys_platform != 'win32'
