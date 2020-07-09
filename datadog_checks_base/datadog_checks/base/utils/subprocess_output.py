@@ -19,7 +19,7 @@ except ImportError:
 log = logging.getLogger(__name__)
 
 
-def get_subprocess_output(command, log, raise_on_empty_output=True, log_debug=True):
+def get_subprocess_output(command, log, raise_on_empty_output=True, log_debug=True, env=None):
     """
     Run the given subprocess command and return its output. Raise an Exception
     if an error occurs.
@@ -50,7 +50,7 @@ def get_subprocess_output(command, log, raise_on_empty_output=True, log_debug=Tr
     if log_debug:
         log.debug('Running get_subprocess_output with cmd: %s', cmd_args)
 
-    out, err, returncode = subprocess_output(cmd_args, raise_on_empty_output)
+    out, err, returncode = subprocess_output(cmd_args, raise_on_empty_output, env=env)
 
     log.debug(
         'get_subprocess_output returned (len(out): %s ; len(err): %s ; returncode: %s)', len(out), len(err), returncode

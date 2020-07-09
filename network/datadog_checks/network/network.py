@@ -270,7 +270,12 @@ class Network(AgentCheck):
             return False
 
         if proc_location != "/proc":
-            self.warning("Cannot collect connection state: currently with a custom /proc path: %s", proc_location)
+            # If we have `ss`, we're fine with a non-standard `/proc` location
+            try:
+                get_subprocess_output("ss --help", env={"PROC_ROOT": proc_location})
+                return True
+            except OSError:
+                self.warning("Cannot collect connection state: currently with a custom /proc path: %s", proc_location)
             return False
 
         return True
@@ -298,7 +303,7 @@ class Network(AgentCheck):
                     # bug that print `tcp` even if it's `udp`
                     # The `-H` flag isn't available on old versions of `ss`.
                     cmd = "ss --numeric --tcp --all --ipv{} | cut -d ' ' -f 1 | sort | uniq -c".format(ip_version)
-                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log)
+                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env={"PROC_ROOT": proc_location})
 
                     # 7624 CLOSE-WAIT
                     #   72 ESTAB
@@ -310,7 +315,7 @@ class Network(AgentCheck):
                     self._parse_short_state_lines(lines, metrics, self.tcp_states['ss'], ip_version=ip_version)
 
                     cmd = "ss --numeric --udp --all --ipv{} | wc -l".format(ip_version)
-                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log)
+                    output, _, _ = get_subprocess_output(["sh", "-c", cmd], self.log, env={"PROC_ROOT": proc_location})
                     metric = self.cx_state_gauge[('udp{}'.format(ip_version), 'connections')]
                     metrics[metric] = int(output) - 1  # Remove header
 
