@@ -39,7 +39,7 @@ This integration uses log forwarding from Azure using Event hub to Datadog and c
 9. Select Save to save the setting.
 
 Logs should start coming into the platform after about 15 minutes.
-For more details on the setup find [directions here][3]
+For more details on the setup, see the [Azure tutorial][3].
 
 ## Data Collected
 
