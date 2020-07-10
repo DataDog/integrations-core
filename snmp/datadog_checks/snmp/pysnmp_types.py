@@ -20,7 +20,7 @@ from pysnmp.hlapi import (
 )
 from pysnmp.hlapi.asyncore.cmdgen import lcd
 from pysnmp.hlapi.transport import AbstractTransportTarget
-from pysnmp.proto.rfc1902 import ObjectName, Opaque
+from pysnmp.proto.rfc1902 import ObjectIdentifier, ObjectName, Opaque
 from pysnmp.proto.rfc3412 import MsgAndPduDispatcher
 from pysnmp.smi.builder import DirMibSource, MibBuilder
 from pysnmp.smi.exval import endOfMibView, noSuchInstance, noSuchObject
@@ -42,6 +42,7 @@ __all__ = [
     'MsgAndPduDispatcher',
     'noSuchInstance',
     'noSuchObject',
+    'ObjectIdentifier',
     'ObjectIdentity',
     'ObjectName',
     'ObjectType',

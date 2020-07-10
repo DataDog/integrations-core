@@ -7,13 +7,13 @@ from pyasn1.type.univ import Null
 from pysnmp.entity.rfc3413 import cmdgen
 from pysnmp.hlapi.asyncore.cmdgen import vbProcessor
 from pysnmp.proto import errind
-from pysnmp.proto.rfc1902 import ObjectIdentifier
 from pysnmp.proto.rfc1905 import endOfMibView
 
 from datadog_checks.base.errors import CheckException
 from datadog_checks.snmp.utils import oid_is_prefix
 
 from .config import InstanceConfig
+from .pysnmp_types import ObjectIdentifier
 
 
 def _handle_error(ctx, config):
