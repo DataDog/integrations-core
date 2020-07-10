@@ -4,6 +4,7 @@
 import os
 
 import pytest
+from datadog_test_libs.mock_dns import mock_socket
 from six import iteritems
 
 from datadog_checks.dev import TempDir, docker_run
@@ -16,43 +17,31 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CA_CERT = os.path.join(HERE, 'compose', 'ca.crt')
 
 HOSTNAME_TO_PORT_MAPPING = {
-    "tls-v1-1.valid.mock": 4444,
-    "tls-v1-2.valid.mock": 4445,
-    "tls-v1-3.valid.mock": 4446,
+    "tls-v1-1.valid.mock": ('127.0.0.1', 4444),
+    "tls-v1-2.valid.mock": ('127.0.0.1', 4445),
+    "tls-v1-3.valid.mock": ('127.0.0.1', 4446),
+    "valid.mock": ('127.0.0.1', 4443),
+    "expired.mock": ('127.0.0.1', 4443),
+    "wronghost.mock": ('127.0.0.1', 4443),
+    "selfsigned.mock": ('127.0.0.1', 4443),
 }
 
 
 @pytest.fixture(scope='session', autouse=True)
-def dd_environment(instance_e2e):
+def dd_environment(instance_e2e, mock_local_tls_dns):
     with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=5):
         e2e_metadata = {'docker_volumes': ['{}:{}'.format(CA_CERT, CA_CERT)]}
         yield instance_e2e, e2e_metadata
 
 
-@pytest.fixture(scope='session', autouse=True)
-def mock_dns():
-    import socket
-
-    _orig_getaddrinfo = socket.getaddrinfo
-
-    def patched_getaddrinfo(host, *args, **kwargs):
-        if host.endswith('.mock'):
-            # nginx doesn't support multiple tls versions from the same container
-            port = HOSTNAME_TO_PORT_MAPPING.get(host, 4443)
-
-            # See socket.getaddrinfo, just updating the hostname here.
-            # https://docs.python.org/3/library/socket.html#socket.getaddrinfo
-            return [(2, 1, 6, '', ('127.0.0.1', port))]
-
-        return _orig_getaddrinfo(host, *args, **kwargs)
-
-    socket.getaddrinfo = patched_getaddrinfo
-    yield
-    socket.getaddrinfo = _orig_getaddrinfo
+@pytest.fixture(scope='session')
+def mock_local_tls_dns():
+    with mock_socket(HOSTNAME_TO_PORT_MAPPING):
+        yield
 
 
 @pytest.fixture(scope='session', autouse=True)
-def certs(dd_environment, mock_dns):
+def certs(dd_environment):
     downloads = {'https://valid.mock': 'valid.pem', 'https://expired.mock': 'expired.pem'}
     raw_downloads = {
         'https://valid.mock': 'valid.crt',
