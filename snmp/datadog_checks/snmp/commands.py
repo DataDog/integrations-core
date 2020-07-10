@@ -7,6 +7,7 @@ from pyasn1.type.univ import Null
 from pysnmp.entity.rfc3413 import cmdgen
 from pysnmp.hlapi.asyncore.cmdgen import vbProcessor
 from pysnmp.proto import errind
+from pysnmp.proto.rfc1902 import ObjectIdentifier
 from pysnmp.proto.rfc1905 import endOfMibView
 
 from datadog_checks.base.errors import CheckException
@@ -153,7 +154,7 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
         _handle_error(ctx, config)
 
         for var_binds in ctx['var_bind_table']:
-            name, value = var_binds[0]
+            name, value = var_binds[0]  # type: (ObjectIdentifier, Any)
             if endOfMibView.isSameTypeWith(value):
                 return
             if oid_is_prefix(name.asTuple(), initial_var):

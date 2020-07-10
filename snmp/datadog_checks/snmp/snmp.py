@@ -216,11 +216,11 @@ class SnmpCheck(AgentCheck):
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
         error = None
 
-        all_oids = [oid.as_tuple() for oid in all_oids]
-        next_oids = [oid.as_tuple() for oid in next_oids]
+        all_oids_tup = [oid.as_tuple() for oid in all_oids]
+        next_oids_tup = [oid.as_tuple() for oid in next_oids]
         all_binds = []
 
-        for oids_batch in batches(all_oids, size=self.oid_batch_size):
+        for oids_batch in batches(all_oids_tup, size=self.oid_batch_size):
             try:
                 self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
 
@@ -239,7 +239,7 @@ class SnmpCheck(AgentCheck):
 
                 if missing_results:
                     # If we didn't catch the metric using snmpget, try snmpnext
-                    next_oids.extend(missing_results)
+                    next_oids_tup.extend(missing_results)
 
             except (PySnmpError, CheckException) as e:
                 message = 'Failed to collect some metrics: {}'.format(e)
@@ -247,7 +247,7 @@ class SnmpCheck(AgentCheck):
                     error = message
                 self.warning(message)
 
-        for oids_batch in batches(next_oids, size=self.oid_batch_size):
+        for oids_batch in batches(next_oids_tup, size=self.oid_batch_size):
             try:
                 self.log.debug('Running SNMP command getNext on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
                 binds = list(
