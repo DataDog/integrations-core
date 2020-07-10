@@ -57,6 +57,9 @@ class ConsulCheck(OpenMetricsBaseCheck):
             name, init_config, instances, default_instances=default_instances, default_namespace='consul'
         )
 
+        # Get the scraper_config in the constructor
+        self.scraper_config = self.get_scraper_config(instance)
+
         self.base_tags = self.instance.get('tags', [])
 
         self.single_node_install = is_affirmative(self.instance.get('single_node_install', False))
@@ -260,10 +263,10 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
         return service_tags
 
-    def check(self, instance):
-
+    def check(self, _):
+        # The prometheus endpoint is available since Consul 1.1.0
         if self.use_prometheus_endpoint:
-            self._check_prometheus_endpoint(instance)
+            self._check_prometheus_endpoint()
 
         self._check_for_leader_change()
         self._collect_metadata()
@@ -556,16 +559,16 @@ class ConsulCheck(OpenMetricsBaseCheck):
         if agent_version:
             self.set_metadata('version', agent_version)
 
-    def _check_prometheus_endpoint(self, instance):
-        scraper_config = self.get_scraper_config(instance)
-
-        if not scraper_config['metrics_mapper']:
+    def _check_prometheus_endpoint(self):
+        if not self.scraper_config['metrics_mapper']:
             raise ConfigurationError(
-                "You have to collect at least one metric from the endpoint: {}".format(scraper_config['prometheus_url'])
+                "You have to collect at least one metric from the endpoint: {}".format(
+                    self.scraper_config['prometheus_url']
+                )
             )
 
         try:
-            self.process(scraper_config)
+            self.process(self.scraper_config)
         # /v1/agent/metrics is available since 0.9.1, but /v1/agent/metrics?format=prometheus is available since 1.1.0
         except ValueError as e:
             self.log.warning(
