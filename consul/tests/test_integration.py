@@ -84,17 +84,17 @@ def test_acl_forbidden(instance_bad_token, dd_environment):
 @pytest.mark.integration
 def test_prometheus_endpoint(aggregator, dd_environment, instance_prometheus, caplog):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [instance_prometheus])
+    common_tags = instance_prometheus['tags']
 
     if common.PROMETHEUS_ENDPOINT_AVAILABLE:
         consul_check.check(instance_prometheus)
 
         aggregator.assert_service_check(
-            'consul.prometheus.health', tags=['endpoint:{}/v1/agent/metrics?format=prometheus'.format(common.URL)]
+            'consul.prometheus.health', tags=common_tags + ['endpoint:{}/v1/agent/metrics?format=prometheus'.format(common.URL)]
         )
 
         for metric in common.PROMETHEUS_METRICS:
-            # TODO: tags
-            aggregator.assert_metric(metric, tags=[], count=1)
+            aggregator.assert_metric(metric, tags=common_tags, count=1)
 
         aggregator.assert_metric('consul.peers', value=3, count=1)
 
