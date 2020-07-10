@@ -21,31 +21,31 @@ files:
         type: integer
         example: 6379
     - name: unix_socket_path
-      description: Connect through a unix socket instead of using a `host` and a `port`.
+      description: Connect through a unix socket instead of using a `host` and `port`.
       value:
         type: string
         example: /var/run/redis/redis.sock
         default: null
     - name: db
       description: |
-        Index of the database (keyspace) to use.
-        The index 0 is the default and any other index will result in a SELECT command to be sent upon connection
-        to select the desired database. For redis.clone this can also be NA in which case the same database is
+        The index of the database (keyspace) to use.
+        The default is index 0. Any other index results in a SELECT command sent upon connection
+        to choose the desired database. For redis.clone, this can also be NA in which case the same database is
         used as in rc.
       value:
         type: integer
         example: 0
     - name: username
-      description: The username to use for the connection. Redis 6+ only.
+      description: The username for the connection. Redis 6+ only.
       value:
           type: string
     - name: password
-      description: The password to use for the connection.
+      description: The password for the connection.
       value:
         type: string
     - name: collect_client_metrics
       description: |
-        Enable to collect metrics using the `CLIENT` command
+        Collects metrics using the `CLIENT` command.
         This requires the Redis CLIENT command to be available on your servers.
       value:
         type: boolean
@@ -61,17 +61,17 @@ files:
         type: boolean
         example: false
     - name: ssl_keyfile
-      description: Path to the client-side private keyfile.
+      description: The path to the client-side private keyfile.
       value:
         type: string
         example: "<CERT_KEY_PATH>"
     - name: ssl_certfile
-      description: Path to the client-side certificate file.
+      description: The path to the client-side certificate file.
       value:
         type: string
         example: "<CERT_PEM_PATH>"
     - name: ssl_ca_certs
-      description: Path to the ca_certs file
+      description:  The path to the ca_certs file.
       value:
         type: string
         example: "<CERT_PATH>"
@@ -88,9 +88,9 @@ files:
     - name: keys
       description: |
         Enter the list of keys to collect the lengths from.
-        Length is 1 for strings
-        Length is zero for keys that have a type other than list, set, hash, or sorted set.
-        Note: Keys can be expressed as patterns, see https://redis.io/commands/keys
+        The length is 1 for strings.
+        The length is zero for keys that have a type other than list, set, hash, or sorted set.
+        Note: Keys can be expressed as patterns, see https://redis.io/commands/keys.
       value:
         type: array
         items:
@@ -107,11 +107,11 @@ files:
         example: true
     - name: slowlog-max-len
       description: |
-        Set the maximum number of entries to fetch from the slow query log
+        Set the maximum number of entries to fetch from the slow query log.
         By default, the check reads this value from the redis config, but is limited to 128.
         
         Set a custom value here if you need to get more than 128 slowlog entries every 15 seconds.
-        Warning: It may impact the performance of your redis instance
+        Warning: Higher values may impact the performance of your Redis instance.
       value:
         type: integer
         example: 128
@@ -122,8 +122,8 @@ files:
         example: false
     - name: disable_connection_cache
       description: |
-        Set to true to enable connections cache to make The check attempts to reuse the same Redis connections
-        at every collection cycle. If disabled, this would prevent stale connections.
+        Enable the connections cache so the check attempts to reuse the same Redis connections
+        at every collection cycle. If disabled, this prevents stale connections.
       value:
         type: boolean
         example: false
