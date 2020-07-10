@@ -145,6 +145,7 @@ class InstanceConfig:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
         self.all_oids, self.next_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
+
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
             self.all_oids.extend(tag_oids)
@@ -156,19 +157,23 @@ class InstanceConfig:
             self.add_profile_tag(profile)
 
         self._uptime_metric_added = False
+        self._resolve_parts()
 
     def resolve_oid(self, oid):
         # type: (OID) -> OIDMatch
         return self._resolver.resolve_oid(oid)
 
-    def resolve_parts(self, oid):
-        # type: (OID) -> None
-        return self._resolver.resolve_parts(oid)
+    def _resolve_parts(self):
+        # type: () -> None
+        for oid in self.all_oids + self.next_oids + self.bulk_oids:
+            self._resolver.resolve_parts(oid)
 
     def refresh_with_profile(self, profile):
         # type: (Dict[str, Any]) -> None
         metrics = profile['definition'].get('metrics', [])
         all_oids, next_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics)
+        for oid in all_oids + next_oids + bulk_oids:
+            self._resolver.resolve_parts(oid)
 
         metric_tags = profile['definition'].get('metric_tags', [])
         tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
@@ -185,6 +190,7 @@ class InstanceConfig:
         self.parsed_metrics.extend(parsed_metrics)
         self.parsed_metric_tags.extend(parsed_metric_tags)
         self.all_oids.extend(tag_oids)
+        self._resolve_parts()
 
     def add_profile_tag(self, profile_name):
         # type: (str) -> None

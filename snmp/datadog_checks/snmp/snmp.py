@@ -181,8 +181,6 @@ class SnmpCheck(AgentCheck):
         all_binds, error = self.fetch_oids(config, all_oids, next_oids, enforce_constraints=enforce_constraints)
 
         for oid in bulk_oids:
-            self._config.resolve_parts(oid)
-
             try:
                 self.log.debug('Running SNMP command getBulk on OID %s', oid)
                 binds = snmp_bulk(
@@ -217,9 +215,6 @@ class SnmpCheck(AgentCheck):
         # iso.3.6.1.2.1.25.4.2.1.7.224 = INTEGER: 2
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
         error = None
-
-        for oid in all_oids + next_oids:
-            self._config.resolve_parts(oid)
 
         all_oids = [oid.as_tuple() for oid in all_oids]
         next_oids = [oid.as_tuple() for oid in next_oids]
@@ -278,9 +273,8 @@ class SnmpCheck(AgentCheck):
         # type: (InstanceConfig) -> str
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
-        # oid = ObjectType(ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2, 0)))
         oid = (1, 3, 6, 1, 2, 1, 1, 2, 0)
-        # self.log.debug('Running SNMP command on OID: %s', OIDPrinter((oid,), with_values=False))
+        self.log.debug('Running SNMP command on OID: %s', oid)
         var_binds = snmp_get(config, [oid], lookup_mib=False)
         self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
         return var_binds[0][1].prettyPrint()
