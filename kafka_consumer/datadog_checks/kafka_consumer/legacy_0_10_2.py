@@ -224,7 +224,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
             response = self._make_blocking_req(request, node_id=broker.nodeId)
             self._process_highwater_offsets(response)
             if len(self._highwater_offsets) >= contexts_limit:
-                self.log.debug("Context limit reached, not collecting more highwater offsets")
+                self.log.debug("Context limit reached. Skipping highwater offsets collection.")
                 return
 
     def _process_highwater_offsets(self, response):
@@ -374,7 +374,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                         gathered_contexts += 1
 
                         if gathered_contexts >= contexts_limit:
-                            self.log.debug("Context limit reached, not collecting more zk consumer offsets")
+                            self.log.debug("Context limit reached. Skipping zk consumer offsets collection.")
                             return
                     except NoNodeError:
                         self.log.info('No zookeeper node at %s', zk_path)
@@ -426,7 +426,7 @@ class LegacyKafkaCheck_0_10_2(AgentCheck):
                             gathered_contexts += 1
 
                             if gathered_contexts >= contexts_limit:
-                                self.log.debug("Context limit reached, not collecting more kafka consumer offsets")
+                                self.log.debug("Context limit reached. Skipping kafka consumer offsets collection.")
                                 return
                 else:
                     self.log.info("unable to find group coordinator for %s", consumer_group)
