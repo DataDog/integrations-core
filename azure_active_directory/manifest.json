@@ -6,7 +6,7 @@
   "metric_prefix": "azure_active_directory.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "Analyze your Azure Active Directory activity logs ",
+  "short_description": "Analyze your Azure Active Directory activity logs",
   "guid": "1f6dbea8-db4a-4b0e-bfe8-f69efb3e877b",
   "support": "core",
   "supported_os": [
