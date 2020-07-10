@@ -353,6 +353,8 @@ def oid_is_prefix(oid, oid_prefix):
     True
     ```
     """
+    if len(oid) < len(oid_prefix):
+        return False
     for idx, value in enumerate(oid_prefix):
         if oid[idx] != value:
             return False

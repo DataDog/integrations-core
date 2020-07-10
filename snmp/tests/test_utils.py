@@ -5,6 +5,7 @@ import pytest
 from datadog_checks.snmp.exceptions import CouldNotDecodeOID, UnresolvedOID
 from datadog_checks.snmp.models import OID
 from datadog_checks.snmp.pysnmp_types import MibViewController, ObjectIdentity, ObjectName, ObjectType, SnmpEngine
+from datadog_checks.snmp.utils import oid_is_prefix
 
 
 @pytest.mark.unit
@@ -108,3 +109,19 @@ def test_oid_mib_symbol(identity, mib, symbol, prefix):
     assert mib_symbol.mib == mib
     assert mib_symbol.symbol == symbol
     assert mib_symbol.prefix == prefix
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'oid, prefix_oid, expected_is_prefix',
+    [
+        pytest.param((1, 2, 3, 4), (1, 2, 3), True, id='is_prefix'),
+        pytest.param((1, 2, 3), (1, 2, 3), True, id='same_length'),
+        pytest.param((1, 2), (1, 2, 3), False, id='is_not_prefix'),
+        pytest.param((1, 2, 4), (1, 2, 3), False, id='is_not_prefix_same_length'),
+    ],
+)
+def test_oid_is_prefix(oid, prefix_oid, expected_is_prefix):
+    # type: (tuple, tuple, bool) -> None
+
+    assert oid_is_prefix(oid, prefix_oid) == expected_is_prefix
