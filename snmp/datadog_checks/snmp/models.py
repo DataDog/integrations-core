@@ -24,7 +24,8 @@ class OID(object):
     def __init__(self, value):
         # type: (Union[Sequence[int], str, ObjectName, ObjectIdentity, ObjectType]) -> None
         parts = None  # type: Optional[Tuple[int, ...]]
-
+        self._value = value
+        print("value type", type(self._value))
         try:
             parts = parse_as_oid_tuple(value)
         except CouldNotDecodeOID:

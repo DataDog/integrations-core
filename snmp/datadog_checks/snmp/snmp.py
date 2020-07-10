@@ -220,7 +220,7 @@ class SnmpCheck(AgentCheck):
             try:
                 all_oids2.append(oid.as_tuple())
             except UnresolvedOID:
-                self._config._resolver._resolve_from_mibs(oid)
+                oid.resolve(self._config._resolver._mib_view_controller)
                 all_oids2.append(oid.as_tuple())
 
         next_oids2 = []
@@ -228,7 +228,7 @@ class SnmpCheck(AgentCheck):
             try:
                 next_oids2.append(oid.as_tuple())
             except UnresolvedOID:
-                self._config._resolver._resolve_from_mibs(oid)
+                oid.resolve(self._config._resolver._mib_view_controller)
                 next_oids2.append(oid.as_tuple())
 
         all_oids = all_oids2
@@ -404,7 +404,6 @@ class SnmpCheck(AgentCheck):
         except Exception as e:
             if not error:
                 error = 'Failed to collect metrics for {} - {}'.format(self._get_instance_name(instance), e)
-                raise
             self.warning(error)
         finally:
             # At this point, `tags` might include some extra tags added in try clause
