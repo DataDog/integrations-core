@@ -101,7 +101,7 @@ def download():
     if version and not __is_canonical(version):
         raise NonCanonicalVersion(version)
 
-    if root_layout_type == 'extras':
+    if root_layout_type != 'core':
         shipped_integrations = __find_shipped_integrations()
         if standard_distribution_name in shipped_integrations:
             sys.stderr.write(
