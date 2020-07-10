@@ -90,5 +90,5 @@ def instance_prometheus():
         'new_leader_checks': False,
         'self_leader_check': False,
         'acl_token': 'token',
-        'tags': ['foo:bar']
+        'tags': ['foo:bar'],
     }

@@ -90,7 +90,8 @@ def test_prometheus_endpoint(aggregator, dd_environment, instance_prometheus, ca
         consul_check.check(instance_prometheus)
 
         aggregator.assert_service_check(
-            'consul.prometheus.health', tags=common_tags + ['endpoint:{}/v1/agent/metrics?format=prometheus'.format(common.URL)]
+            'consul.prometheus.health',
+            tags=common_tags + ['endpoint:{}/v1/agent/metrics?format=prometheus'.format(common.URL)],
         )
 
         for metric in common.PROMETHEUS_METRICS:
