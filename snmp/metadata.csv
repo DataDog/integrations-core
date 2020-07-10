@@ -76,6 +76,7 @@ snmp.fgVdEntSesCount,gauge,,session,,[Fortinet FortiGate] The number of active s
 snmp.fgVdEntSesRate,gauge,,session,second,[Fortinet FortiGate] The session setup rate on the virtual domain.,0,snmp,
 snmp.fgVdNumber,gauge,,,,[Fortinet FortiGate] The number of virtual domains in vdTable.,0,snmp,
 snmp.fgVdMaxVdoms,gauge,,,,[Fortinet FortiGate] The maximum number of virtual domains allowed on the device as allowed by hardware and/or licensing.,0,snmp,
+snmp.fgIntfEntVdom,gauge,,,,[Fortinet FortiGate] The virtual domain the interface belongs to. This index corresponds to the index used by fgVdTable.,0,snmp,
 snmp.fgFwPolPktCount,count,,packet,,[Fortinet FortiGate] The number of packets matched to policy (passed or blocked depending on policy action). Count is from the time the policy became active.,0,snmp,
 snmp.fgFwPolPktCount.rate,gauge,,packet,second,[Fortinet FortiGate] The number of packets per second matched to policy (passed or blocked depending on policy action). Count is from the time the policy became active.,0,snmp,
 snmp.fgFwPolByteCount,count,,packet,,[Fortinet FortiGate] The number of bytes in packets matching the policy.,0,snmp,

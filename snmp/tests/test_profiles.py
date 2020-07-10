@@ -1819,6 +1819,7 @@ def test_fortinet_fortigate(aggregator):
         )
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 @pytest.mark.usefixtures("dd_environment")
