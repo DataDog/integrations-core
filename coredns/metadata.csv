@@ -18,7 +18,7 @@ coredns.forward_response_rcode_count,count,,response,,count of RCODEs per upstre
 coredns.forward_healthcheck_failure_count,count,,entry,,number of failed health checks per upstream,-1,coredns,forward failed healthchecks
 coredns.forward_healthcheck_broken_count,count,,entry,,counter of when all upstreams are unhealthy,-1,coredns,forward all healthchecks broken
 coredns.forward_max_concurrent_rejects,gauge,,query,,"Counter of the number of queries rejected because the concurrent queries were at maximum.",-1,coredns,max concurrent queries
-coredns.forward_sockets_open,count,,connection,,number of sockets open per upstream,-1,coredns,forward open sockets
+coredns.forward_sockets_open,gauge,,connection,,number of sockets open per upstream,-1,coredns,forward open sockets
 coredns.health_request_duration.count,count,,,,"Count for the histogram of the time (in seconds) each request took.",-1,coredns,health req duration count
 coredns.health_request_duration.sum,gauge,,,,"Sum for the histogram of the time (in seconds) each request took.",-1,coredns,health req duration count
 coredns.request_size.bytes.sum,gauge,,byte,,size of the request in bytes,0,coredns,request size
