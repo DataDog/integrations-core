@@ -1941,4 +1941,5 @@ def test_cisco_catalyst(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+    aggregator.assert_metric('snmp.devices_monitored', count=1)
     aggregator.assert_all_metrics_covered()
