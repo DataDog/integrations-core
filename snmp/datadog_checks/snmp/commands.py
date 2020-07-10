@@ -40,7 +40,9 @@ def snmp_get(config, oids, lookup_mib):
 
     ctx = {}  # type: Dict[str, Any]
 
-    var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
+    print("oids", oids)
+    # var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
+    var_binds = [(oid, None) for oid in oids]
 
     cmdgen.GetCommandGenerator().sendVarBinds(
         config._snmp_engine,
@@ -77,9 +79,11 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
 
     ctx = {}  # type: Dict[str, Any]
 
-    initial_vars = [x[0] for x in vbProcessor.makeVarBinds(config._snmp_engine, oids)]
+    # initial_var_binds = [(oid, None) for oid in oids]
+    # initial_vars = [x[0] for x in vbProcessor.makeVarBinds(config._snmp_engine, oids)]
+    initial_vars = oids
 
-    var_binds = oids
+    var_binds = [(oid, None) for oid in oids]
 
     gen = cmdgen.NextCommandGenerator()
 
@@ -103,7 +107,10 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
         new_initial_vars = []
         for col, var_bind in enumerate(ctx['var_bind_table']):
             name, val = var_bind
-            if not isinstance(val, Null) and initial_vars[col].isPrefixOf(name):
+            col_oid = initial_vars[col]
+
+            is_prefix = col_oid == name.asTuple()[:len(col_oid)]
+            if not isinstance(val, Null) and is_prefix:
                 var_binds.append(var_bind)
                 new_initial_vars.append(initial_vars[col])
                 yield var_bind

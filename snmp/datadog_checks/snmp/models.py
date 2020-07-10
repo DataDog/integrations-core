@@ -58,6 +58,8 @@ class OID(object):
         # type: (MibViewController) -> None
         self._object_identity.resolveWithMib(mib_view_controller)
         self._parts = parse_as_oid_tuple(self._object_identity)
+        # print("self._parts", self._parts)
+        # 1/0
 
     def as_tuple(self):
         # type: () -> Tuple[int, ...]

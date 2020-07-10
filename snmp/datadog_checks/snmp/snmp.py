@@ -22,7 +22,7 @@ from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, write_persistent_cache
 from .config import InstanceConfig
 from .discovery import discover_instances
-from .exceptions import PySnmpError
+from .exceptions import PySnmpError, UnresolvedOID
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
 from .mibs import MIBLoader
 from .models import OID
@@ -215,8 +215,24 @@ class SnmpCheck(AgentCheck):
         # iso.3.6.1.2.1.25.4.2.1.7.224 = INTEGER: 2
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
         error = None
-        all_oids = [oid.as_object_type() for oid in all_oids]
-        next_oids = [oid.as_object_type() for oid in next_oids]
+        all_oids2 = []
+        for oid in all_oids:
+            try:
+                all_oids2.append(oid.as_tuple())
+            except UnresolvedOID:
+                self._config._resolver._resolve_from_mibs(oid)
+                all_oids2.append(oid.as_tuple())
+
+        next_oids2 = []
+        for oid in next_oids:
+            try:
+                next_oids2.append(oid.as_tuple())
+            except UnresolvedOID:
+                self._config._resolver._resolve_from_mibs(oid)
+                next_oids2.append(oid.as_tuple())
+
+        all_oids = all_oids2
+        next_oids = next_oids2
         all_binds = []
 
         for oids_batch in batches(all_oids, size=self.oid_batch_size):
@@ -232,7 +248,7 @@ class SnmpCheck(AgentCheck):
                     result_oid, value = var
                     if reply_invalid(value):
                         oid_tuple = result_oid.asTuple()
-                        missing_results.append(ObjectType(ObjectIdentity(oid_tuple)))
+                        missing_results.append(oid_tuple)
                     else:
                         all_binds.append(var)
 
@@ -272,8 +288,9 @@ class SnmpCheck(AgentCheck):
         # type: (InstanceConfig) -> str
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
-        oid = ObjectType(ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2, 0)))
-        self.log.debug('Running SNMP command on OID: %s', OIDPrinter((oid,), with_values=False))
+        # oid = ObjectType(ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2, 0)))
+        oid = (1, 3, 6, 1, 2, 1, 1, 2, 0)
+        # self.log.debug('Running SNMP command on OID: %s', OIDPrinter((oid,), with_values=False))
         var_binds = snmp_get(config, [oid], lookup_mib=False)
         self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
         return var_binds[0][1].prettyPrint()
@@ -387,6 +404,7 @@ class SnmpCheck(AgentCheck):
         except Exception as e:
             if not error:
                 error = 'Failed to collect metrics for {} - {}'.format(self._get_instance_name(instance), e)
+                raise
             self.warning(error)
         finally:
             # At this point, `tags` might include some extra tags added in try clause
