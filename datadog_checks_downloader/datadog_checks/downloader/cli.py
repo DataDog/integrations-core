@@ -81,7 +81,7 @@ def download():
 
     parser.add_argument(
         '--force', action='store_true', help='Force download even if the type of integration may be incorrect.'
-        )
+    )
 
     parser.add_argument(
         '-v', '--verbose', action='count', default=0, help='Show verbose information about TUF and in-toto.'
