@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
-import itertools
+import logging
 from collections import defaultdict
 from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple
 
@@ -23,6 +23,8 @@ from .pysnmp_types import (
 from .resolver import OIDResolver
 from .types import OIDMatch
 from .utils import register_device_target
+
+logger = logging.getLogger(__name__)
 
 
 class InstanceConfig:
@@ -53,15 +55,7 @@ class InstanceConfig:
         'aes256c': 'usmAesCfb256Protocol',
     }
 
-    def __init__(
-        self,
-        instance,  # type: dict
-        global_metrics=None,  # type: List[dict]
-        mibs_path=None,  # type: str
-        profiles=None,  # type: Dict[str, dict]
-        profiles_by_oid=None,  # type: Dict[str, str]
-        loader=None,  # type: MIBLoader
-    ):
+    def __init__(self, instance, global_metrics=None, mibs_path=None, profiles=None, profiles_by_oid=None, loader=None):
         # type: (...) -> None
         global_metrics = [] if global_metrics is None else global_metrics
         profiles = {} if profiles is None else profiles
@@ -166,8 +160,20 @@ class InstanceConfig:
 
     def _resolve_oids(self):
         # type: () -> None
-        for oid in itertools.chain(self.all_oids, self.next_oids, self.bulk_oids):
-            self._resolver.resolve_with_mib(oid)
+        def get_valid_oids(oids):
+            res_oids = []
+            for oid in oids:
+                try:
+                    self._resolver.resolve_with_mib(oid)
+                    res_oids.append(oid)
+                except Exception as e:
+                    # Cannot print `oid`, since the oid might not be ready.
+                    logger.warning('Cannot resolve oid: %s', e)
+            return res_oids
+
+        self.all_oids = get_valid_oids(self.all_oids)
+        self.next_oids = get_valid_oids(self.next_oids)
+        self.bulk_oids = get_valid_oids(self.bulk_oids)
 
     def refresh_with_profile(self, profile):
         # type: (Dict[str, Any]) -> None

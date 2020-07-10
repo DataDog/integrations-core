@@ -452,16 +452,17 @@ def test_bulk_table(aggregator):
     aggregator.all_metrics_asserted()
 
 
-def test_invalid_metric(aggregator):
+def test_invalid_metric(aggregator, caplog):
     """
     Invalid metrics raise a Warning and a critical service check
     """
     instance = common.generate_instance_config(common.INVALID_METRICS)
     check = common.create_check(instance)
-    check.check(instance)
+    with caplog.at_level(logging.WARNING):
+        check.check(instance)
 
-    # Test service check
-    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.WARNING, tags=common.CHECK_TAGS, at_least=1)
+    assert 'Cannot resolve oid: No symbol IF-MIB::ImWrong' in caplog.text
+    assert 'Cannot resolve oid: No symbol IF-MIB::MeToo' in caplog.text
 
 
 def test_forcedtype_metric(aggregator):
