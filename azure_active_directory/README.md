@@ -19,7 +19,7 @@ This integration uses log forwarding from Azure using Event hub to Datadog and c
    
 3. Select Export Settings.
 
-4. In the Diagnostics settings pane, do either of the following:
+4. In the Diagnostics settings pane, do one of the following:
 
    - To change existing settings, select Edit setting.
    - To add new settings, select Add diagnostics setting. You can have up to three settings.
