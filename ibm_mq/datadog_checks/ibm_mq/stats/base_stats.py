@@ -30,5 +30,5 @@ class BaseStats(object):
         # TODO: Use datadog_checks.base.utils.time.ensure_aware_datetime
         #       when the integration doesn't need to be backward compatible anymore
         #       with agent versions without ensure_aware_datetime.
-        #       When doing that, bump the base package in setup.py 
+        #       When doing that, bump the base package in setup.py
         return naive_start_datetime.replace(tzinfo=UTC)
