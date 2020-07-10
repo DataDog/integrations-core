@@ -9,6 +9,7 @@ from itertools import islice
 from time import time as timestamp
 
 import requests
+from requests import HTTPError
 from six import iteritems, iterkeys, itervalues
 from six.moves.urllib.parse import urljoin
 
@@ -563,4 +564,21 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 "You have to collect at least one metric from the endpoint: {}".format(scraper_config['prometheus_url'])
             )
 
-        self.process(scraper_config)
+        try:
+            self.process(scraper_config)
+        # /v1/agent/metrics is available since 0.9.1, but /v1/agent/metrics?format=prometheus is available since 1.1.0
+        except ValueError as e:
+            self.log.warning(
+                "This Consul version probably does not support the prometheus endpoint. "
+                "Update Consul or set back `use_prometheus_endpoint` to false to remove this warning. %s",
+                str(e),
+            )
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                self.log.warning(
+                    "This Consul version (< 1.1.0) does not support the prometheus endpoint. "
+                    "Update Consul or set back `use_prometheus_endpoint` to false to remove this warning. %s",
+                    str(e),
+                )
+            else:
+                raise
