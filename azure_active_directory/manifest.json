@@ -16,6 +16,7 @@
   ],
   "public_title": "Datadog-Azure Active Directory Integration",
   "categories": [
+    "azure",
     "log collection",
     "security"
   ],
