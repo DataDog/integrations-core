@@ -22,12 +22,12 @@ from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, write_persistent_cache
 from .config import InstanceConfig
 from .discovery import discover_instances
-from .exceptions import PySnmpError, UnresolvedOID
+from .exceptions import PySnmpError
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
 from .mibs import MIBLoader
 from .models import OID
 from .parsing import ColumnTag, IndexTag, ParsedMetric, ParsedTableMetric, SymbolTag
-from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
+from .pysnmp_types import noSuchInstance, noSuchObject
 from .utils import (
     OIDPrinter,
     batches,

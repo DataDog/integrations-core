@@ -4,7 +4,6 @@
 from typing import Any, Dict, Generator
 
 from pyasn1.type.univ import Null
-from pysnmp import hlapi
 from pysnmp.entity.rfc3413 import cmdgen
 from pysnmp.hlapi.asyncore.cmdgen import vbProcessor
 from pysnmp.proto import errind
