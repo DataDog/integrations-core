@@ -47,12 +47,18 @@ OPTIONAL_ATTRIBUTES = {
     'process_signatures',
 }
 
+MARKETPLACE_ATTRIBUTES = {
+    'author',
+    'pricing',
+    'terms',
+}
+
 METRIC_TO_CHECK_WHITELIST = {
     'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
     'riakcs.bucket_list_pool.workers',  # RiakCS 2.1 metric, but metadata.csv lists RiakCS 2.0 metrics only.
 }
 
-ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
+ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES | MARKETPLACE_ATTRIBUTES
 
 INTEGRATION_ID_REGEX = r'^[a-z][a-z0-9-]{0,254}(?<!-)$'
 
@@ -99,6 +105,7 @@ def manifest(ctx, fix, include_extras, repo_url):
 
     root = get_root()
     is_extras = ctx.obj['repo_choice'] == 'extras'
+    is_marketplace = ctx.obj['repo_choice'] == 'marketplace'
     formatted_repo_url = repo_url or raw_gh_url.format(os.path.basename(root))
     ok_checks = 0
     failed_checks = 0
@@ -251,7 +258,7 @@ def manifest(ctx, fix, include_extras, repo_url):
                 display_queue.append((echo_failure, output))
 
             # maintainer
-            if not is_extras:
+            if not is_extras and not is_marketplace:
                 correct_maintainer = 'help@datadoghq.com'
                 maintainer = decoded.get('maintainer')
                 if maintainer != correct_maintainer:
@@ -306,7 +313,13 @@ def manifest(ctx, fix, include_extras, repo_url):
                         display_queue.append((echo_failure, f'  metric_to_check not in metadata.csv: {metric!r}'))
 
             # support
-            correct_support = 'contrib' if is_extras else 'core'
+            if is_extras:
+                correct_support = 'contrib'
+            elif is_marketplace:
+                correct_support = 'partner'
+            else:
+                correct_support = 'core'
+
             support = decoded.get('support')
             if support != correct_support:
                 file_failures += 1
