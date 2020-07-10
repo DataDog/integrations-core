@@ -102,7 +102,7 @@ def test_oid_mib_symbol(identity, mib, symbol, prefix):
     oid = OID(identity)
 
     mib_view_controller = MibViewController(SnmpEngine().getMibBuilder())
-    oid.resolve(mib_view_controller)
+    oid.resolve_with_mib(mib_view_controller)
 
     mib_symbol = oid.get_mib_symbol()
     assert mib_symbol.mib == mib

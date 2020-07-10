@@ -199,7 +199,7 @@ class SnmpCheck(AgentCheck):
                 self.warning(message)
 
         for result_oid, value in all_binds:
-            match = config.resolve_oid(OID(result_oid))
+            match = config.get_oid_match(OID(result_oid))
             results[match.name][match.indexes] = value
         self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
         # Freeze the result

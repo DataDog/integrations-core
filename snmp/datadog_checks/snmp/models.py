@@ -24,6 +24,7 @@ class OID(object):
     def __init__(self, value):
         # type: (Union[Sequence[int], str, ObjectName, ObjectIdentity, ObjectType]) -> None
         parts = None  # type: Optional[Tuple[int, ...]]
+
         try:
             parts = parse_as_oid_tuple(value)
         except CouldNotDecodeOID:
@@ -54,7 +55,7 @@ class OID(object):
         self._object_identity = object_identity  # type: ObjectIdentity
         self._resolved = False
 
-    def resolve(self, mib_view_controller):
+    def resolve_with_mib(self, mib_view_controller):
         # type: (MibViewController) -> None
         if not self._resolved:
             self._object_identity.resolveWithMib(mib_view_controller)

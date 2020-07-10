@@ -114,7 +114,7 @@ class OIDResolver(object):
             # if enforce_constraints is false, then MIB resolution has not been done yet
             # so we need to do it manually. We have to specify the mibs that we will need
             # to resolve the name.
-            oid.resolve(self._mib_view_controller)
+            oid.resolve_with_mib(self._mib_view_controller)
 
         mib_symbol = oid.get_mib_symbol()
 
@@ -142,7 +142,7 @@ class OIDResolver(object):
 
         return tuple(tags)
 
-    def resolve_oid(self, oid):
+    def get_oid_match(self, oid):
         # type: (OID) -> OIDMatch
         """Resolve an OID to a name and its indexes.
 
@@ -167,6 +167,6 @@ class OIDResolver(object):
         tag_index = self._resolve_tag_index(tail, name=name)
         return OIDMatch(name=name, indexes=tag_index)
 
-    def resolve_parts(self, oid):
+    def resolve_with_mib(self, oid):
         # type: (OID) -> None
-        oid.resolve(self._mib_view_controller)
+        oid.resolve_with_mib(self._mib_view_controller)

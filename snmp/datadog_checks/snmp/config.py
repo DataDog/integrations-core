@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
+import itertools
 from collections import defaultdict
 from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple
 
@@ -157,23 +158,21 @@ class InstanceConfig:
             self.add_profile_tag(profile)
 
         self._uptime_metric_added = False
-        self._resolve_parts()
+        self._resolve_oids()
 
-    def resolve_oid(self, oid):
+    def get_oid_match(self, oid):
         # type: (OID) -> OIDMatch
-        return self._resolver.resolve_oid(oid)
+        return self._resolver.get_oid_match(oid)
 
-    def _resolve_parts(self):
+    def _resolve_oids(self):
         # type: () -> None
-        for oid in self.all_oids + self.next_oids + self.bulk_oids:
-            self._resolver.resolve_parts(oid)
+        for oid in itertools.chain(self.all_oids, self.next_oids, self.bulk_oids):
+            self._resolver.resolve_with_mib(oid)
 
     def refresh_with_profile(self, profile):
         # type: (Dict[str, Any]) -> None
         metrics = profile['definition'].get('metrics', [])
         all_oids, next_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics)
-        for oid in all_oids + next_oids + bulk_oids:
-            self._resolver.resolve_parts(oid)
 
         metric_tags = profile['definition'].get('metric_tags', [])
         tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
@@ -190,7 +189,7 @@ class InstanceConfig:
         self.parsed_metrics.extend(parsed_metrics)
         self.parsed_metric_tags.extend(parsed_metric_tags)
         self.all_oids.extend(tag_oids)
-        self._resolve_parts()
+        self._resolve_oids()
 
     def add_profile_tag(self, profile_name):
         # type: (str) -> None
