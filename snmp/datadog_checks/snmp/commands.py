@@ -11,6 +11,7 @@ from pysnmp.proto import errind
 from pysnmp.proto.rfc1905 import endOfMibView
 
 from datadog_checks.base.errors import CheckException
+from datadog_checks.snmp.utils import oid_is_prefix
 
 from .config import InstanceConfig
 
@@ -40,8 +41,6 @@ def snmp_get(config, oids, lookup_mib):
 
     ctx = {}  # type: Dict[str, Any]
 
-    print("oids", oids)
-    # var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
     var_binds = [(oid, None) for oid in oids]
 
     cmdgen.GetCommandGenerator().sendVarBinds(
@@ -79,8 +78,6 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
 
     ctx = {}  # type: Dict[str, Any]
 
-    # initial_var_binds = [(oid, None) for oid in oids]
-    # initial_vars = [x[0] for x in vbProcessor.makeVarBinds(config._snmp_engine, oids)]
     initial_vars = oids
 
     var_binds = [(oid, None) for oid in oids]
@@ -107,11 +104,7 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
         new_initial_vars = []
         for col, var_bind in enumerate(ctx['var_bind_table']):
             name, val = var_bind
-
-            col_oid = initial_vars[col]
-            is_prefix = col_oid == name.asTuple()[:len(col_oid)]
-
-            if not isinstance(val, Null) and is_prefix:
+            if not isinstance(val, Null) and oid_is_prefix(name.asTuple(), initial_vars[col]):
                 var_binds.append(var_bind)
                 new_initial_vars.append(initial_vars[col])
                 yield var_bind
@@ -164,8 +157,7 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
             name, value = var_binds[0]
             if endOfMibView.isSameTypeWith(value):
                 return
-            is_prefix = initial_var == name.asTuple()[:len(initial_var)]
-            if is_prefix:
+            if oid_is_prefix(name.asTuple(), initial_var):
                 yield var_binds[0]
             else:
                 return

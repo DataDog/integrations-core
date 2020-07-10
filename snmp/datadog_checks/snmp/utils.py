@@ -338,3 +338,22 @@ def batches(lst, size):
 
     for index in range(0, len(lst), size):
         yield lst[index : index + size]
+
+
+def oid_is_prefix(oid, oid_prefix):
+    # type: (tuple, tuple) -> bool
+    """
+    Return whether an `oid` (tuple) is prefixed by `oid_prefix` (tuple).
+
+    Example:
+
+    ```python
+    >>> xs = (1, 2, 3, 4, 5)
+    >>> oid_is_prefix((1, 2, 3, 4, 5), (1, 2, 3))
+    True
+    ```
+    """
+    for idx, value in enumerate(oid_prefix):
+        if oid[idx] != value:
+            return False
+    return True
