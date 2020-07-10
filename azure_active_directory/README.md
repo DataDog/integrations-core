@@ -9,7 +9,7 @@ This integration allows you to ingest your [Azure AD activity logs][1] (audit an
 
 ### Installation
 
-This integration uses log forwarding from Azure using Event hub to Datadog and cofiguring Azure AD to forward activity logs to the event hub.
+This integration forwards logs to Datadog using Azure with Event Hubs. Configure Azure AD to forward activity logs to the event hub.
 
 ### Configuration
 
