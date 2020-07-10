@@ -3,7 +3,7 @@
 ## Overview
 
 Azure Active Directory is a cloud hosted Active Directory offering by Microsoft Azure.
-This integration allows you to ingest your [Azure AD activity logs][1] (Audit and SignIn logs) to Datadog.
+This integration allows you to ingest your [Azure AD activity logs][1] (audit and sign-in logs) to Datadog.
 
 ## Setup
 
