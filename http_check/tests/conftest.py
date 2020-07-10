@@ -5,12 +5,12 @@ import os
 import sys
 
 import pytest
+from datadog_test_libs.mock_dns import mock_e2e_agent, mock_socket
 from mock import patch
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.http_check import HTTPCheck
-from datadog_test_libs.mock_dns import mock_e2e_agent, mock_socket
 
 from .common import CONFIG_E2E, HERE
 
