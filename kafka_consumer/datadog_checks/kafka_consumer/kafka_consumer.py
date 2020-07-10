@@ -480,6 +480,4 @@ class KafkaCheck(AgentCheck):
     @staticmethod
     def batchify(iterable, batch_size):
         iterable = list(iterable)
-        length = len(iterable)
-        for i in range(0, length, batch_size):
-            yield iterable[i : min(i + batch_size, length)]
+        return (iterable[i : i + batch_size] for i in range(0, len(iterable), batch_size))
