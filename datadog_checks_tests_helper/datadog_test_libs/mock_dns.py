@@ -5,8 +5,10 @@ from datadog_checks.dev import run_command
 
 
 @contextmanager
-def mock_socket(src_to_dest_mapping):
+def mock_local(src_to_dest_mapping):
     """
+    Mock 'socket' to resolve hostname based on a provided mapping.
+    This method has no effect for e2e tests.
     :param src_to_dest_mapping: Mapping from source hostname to a tuple of destination hostname and port
     """
     import socket
@@ -39,7 +41,12 @@ def mock_socket(src_to_dest_mapping):
 
 @contextmanager
 def mock_e2e_agent(check_name, hosts):
-    """Only for e2e testing"""
+    """
+    Only useful in e2e tests, this method will find the relevant agent container and update its hosts file.
+    No mapping can be done, all hostname in 'hosts' will redirect to localhost. There is no port redirection.
+    :param check_name: The name of the current check, used to determine the agent container name.
+    :param hosts: The list of hosts to redirect to localhost
+    """
     container_id = "dd_{}_{}".format(check_name, os.environ["TOX_ENV_NAME"])
     commands = []
     for host in hosts:

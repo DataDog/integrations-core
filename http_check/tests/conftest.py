@@ -5,7 +5,7 @@ import os
 import sys
 
 import pytest
-from datadog_test_libs.mock_dns import mock_e2e_agent, mock_socket
+from datadog_test_libs.mock_dns import mock_e2e_agent, mock_local
 from mock import patch
 
 from datadog_checks.dev import docker_run
@@ -37,7 +37,7 @@ def mock_http_e2e_hosts():
 @pytest.fixture(scope='session')
 def mock_local_http_dns():
     mapping = {x: ('127.0.0.1', 443) for x in MOCKED_HOSTS}
-    with mock_socket(mapping):
+    with mock_local(mapping):
         yield
 
 
