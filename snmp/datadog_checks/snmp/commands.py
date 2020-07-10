@@ -107,9 +107,10 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
         new_initial_vars = []
         for col, var_bind in enumerate(ctx['var_bind_table']):
             name, val = var_bind
-            col_oid = initial_vars[col]
 
+            col_oid = initial_vars[col]
             is_prefix = col_oid == name.asTuple()[:len(col_oid)]
+
             if not isinstance(val, Null) and is_prefix:
                 var_binds.append(var_bind)
                 new_initial_vars.append(initial_vars[col])
@@ -120,7 +121,7 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
 
 
 def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_nonincreasing_oid):
-    # type: (InstanceConfig, hlapi.ObjectType, int, int, bool, bool) -> Generator
+    # type: (InstanceConfig, tuple, int, int, bool, bool) -> Generator
     """Call SNMP GETBULK on an oid."""
 
     if config.device is None:
@@ -137,8 +138,8 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
 
     ctx = {}  # type: Dict[str, Any]
 
-    var_binds = [oid]
-    initial_var = vbProcessor.makeVarBinds(config._snmp_engine, var_binds)[0][0]
+    var_binds = [(oid, None)]
+    initial_var = oid
 
     gen = cmdgen.BulkCommandGenerator()
 
@@ -150,7 +151,7 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
             config._context_data.contextName,
             non_repeaters,
             max_repetitions,
-            vbProcessor.makeVarBinds(config._snmp_engine, var_binds),
+            var_binds,
             callback,
             ctx,
         )
@@ -163,7 +164,8 @@ def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_no
             name, value = var_binds[0]
             if endOfMibView.isSameTypeWith(value):
                 return
-            if initial_var.isPrefixOf(name):
+            is_prefix = initial_var == name.asTuple()[:len(initial_var)]
+            if is_prefix:
                 yield var_binds[0]
             else:
                 return

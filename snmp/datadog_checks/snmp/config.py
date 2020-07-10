@@ -161,6 +161,10 @@ class InstanceConfig:
         # type: (OID) -> OIDMatch
         return self._resolver.resolve_oid(oid)
 
+    def resolve_parts(self, oid):
+        # type: (OID) -> None
+        return self._resolver.resolve_parts(oid)
+
     def refresh_with_profile(self, profile):
         # type: (Dict[str, Any]) -> None
         metrics = profile['definition'].get('metrics', [])

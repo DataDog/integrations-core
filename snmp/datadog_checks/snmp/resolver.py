@@ -166,3 +166,7 @@ class OIDResolver(object):
 
         tag_index = self._resolve_tag_index(tail, name=name)
         return OIDMatch(name=name, indexes=tag_index)
+
+    def resolve_parts(self, oid):
+        # type: (OID) -> None
+        oid.resolve(self._mib_view_controller)

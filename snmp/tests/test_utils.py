@@ -78,7 +78,7 @@ def test_oid_from_unresolved_instance(value, expected_tuple):
     with pytest.raises(UnresolvedOID):
         oid.as_tuple()
 
-    object_type = oid.as_object_type()
+    object_type = ObjectType(oid._object_identity)
 
     # Verify returned ObjectType instance is valid by decoding it.
     mib_view_controller = MibViewController(SnmpEngine().getMibBuilder())

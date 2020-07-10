@@ -181,11 +181,13 @@ class SnmpCheck(AgentCheck):
         all_binds, error = self.fetch_oids(config, all_oids, next_oids, enforce_constraints=enforce_constraints)
 
         for oid in bulk_oids:
+            self._config.resolve_parts(oid)
+
             try:
                 self.log.debug('Running SNMP command getBulk on OID %s', oid)
                 binds = snmp_bulk(
                     config,
-                    oid.as_object_type(),
+                    oid.as_tuple(),
                     self._NON_REPEATERS,
                     self._MAX_REPETITIONS,
                     enforce_constraints,
@@ -215,24 +217,12 @@ class SnmpCheck(AgentCheck):
         # iso.3.6.1.2.1.25.4.2.1.7.224 = INTEGER: 2
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
         error = None
-        all_oids2 = []
-        for oid in all_oids:
-            try:
-                all_oids2.append(oid.as_tuple())
-            except UnresolvedOID:
-                oid.resolve(self._config._resolver._mib_view_controller)
-                all_oids2.append(oid.as_tuple())
 
-        next_oids2 = []
-        for oid in next_oids:
-            try:
-                next_oids2.append(oid.as_tuple())
-            except UnresolvedOID:
-                oid.resolve(self._config._resolver._mib_view_controller)
-                next_oids2.append(oid.as_tuple())
+        for oid in all_oids + next_oids:
+            self._config.resolve_parts(oid)
 
-        all_oids = all_oids2
-        next_oids = next_oids2
+        all_oids = [oid.as_tuple() for oid in all_oids]
+        next_oids = [oid.as_tuple() for oid in next_oids]
         all_binds = []
 
         for oids_batch in batches(all_oids, size=self.oid_batch_size):

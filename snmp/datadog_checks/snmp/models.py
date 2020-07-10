@@ -54,23 +54,20 @@ class OID(object):
 
         self._parts = parts
         self._object_identity = object_identity  # type: ObjectIdentity
+        self._resolved = False
 
     def resolve(self, mib_view_controller):
         # type: (MibViewController) -> None
-        self._object_identity.resolveWithMib(mib_view_controller)
-        self._parts = parse_as_oid_tuple(self._object_identity)
-        # print("self._parts", self._parts)
-        # 1/0
+        if not self._resolved:
+            self._object_identity.resolveWithMib(mib_view_controller)
+            self._parts = parse_as_oid_tuple(self._object_identity)
+            self._resolved = True
 
     def as_tuple(self):
         # type: () -> Tuple[int, ...]
         if self._parts is None:
             raise UnresolvedOID('OID parts are not available yet')
         return self._parts
-
-    def as_object_type(self):
-        # type: () -> ObjectType
-        return ObjectType(self._object_identity)
 
     def get_mib_symbol(self):
         # type: () -> MIBSymbol
