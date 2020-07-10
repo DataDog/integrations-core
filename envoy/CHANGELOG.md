@@ -1,5 +1,9 @@
 # CHANGELOG - Envoy
 
+## 1.16.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
 ## 1.15.2 / 2020-05-26
 
 * [Fixed] Handle server info for envoy <= 1.8. See [#6740](https://github.com/DataDog/integrations-core/pull/6740).

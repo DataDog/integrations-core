@@ -75,7 +75,7 @@ See [metadata.csv][9] for a list of metrics provided by this check.
 
 ### Events
 
-This check watches vCenter's Event Manager for events and emits them to Datadog. It does NOT emit the following event types:
+This check watches vCenter's Event Manager for events and emits them to Datadog. It emits the following event types:
 
 - AlarmStatusChangedEvent:Gray
 - VmBeingHotMigratedEvent

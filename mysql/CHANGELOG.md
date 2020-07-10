@@ -1,5 +1,10 @@
 # CHANGELOG - mysql
 
+## 1.15.0 / 2020-06-29
+
+* [Added] Catch unicode error. See [#6947](https://github.com/DataDog/integrations-core/pull/6947).
+* [Fixed] Add config spec. See [#6908](https://github.com/DataDog/integrations-core/pull/6908).
+
 ## 1.14.0 / 2020-06-03
 
 * [Added] Add custom queries. See [#6776](https://github.com/DataDog/integrations-core/pull/6776).

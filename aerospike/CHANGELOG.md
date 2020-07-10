@@ -1,5 +1,9 @@
 # CHANGELOG - Aerospike
 
+## 1.8.1 / 2020-07-10
+
+* [Fixed] Parse batch-index read latency metrics. See [#6991](https://github.com/DataDog/integrations-core/pull/6991).
+
 ## 1.8.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

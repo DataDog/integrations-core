@@ -26,9 +26,16 @@ from .exceptions import PySnmpError
 from .metrics import as_metric_with_forced_type, as_metric_with_inferred_type
 from .mibs import MIBLoader
 from .models import OID
-from .parsing import ParsedMetric, ParsedMetricTag, ParsedTableMetric
+from .parsing import ColumnTag, IndexTag, ParsedMetric, ParsedTableMetric, SymbolTag
 from .pysnmp_types import ObjectIdentity, ObjectType, noSuchInstance, noSuchObject
-from .utils import OIDPrinter, get_default_profiles, get_profile_definition, recursively_expand_base_profiles
+from .utils import (
+    OIDPrinter,
+    batches,
+    get_default_profiles,
+    get_profile_definition,
+    oid_pattern_specificity,
+    recursively_expand_base_profiles,
+)
 
 DEFAULT_OID_BATCH_SIZE = 10
 
@@ -102,17 +109,18 @@ class SnmpCheck(AgentCheck):
         profiles_by_oid = {}  # type: Dict[str, str]
         for name, profile in self.profiles.items():
             sys_object_oids = profile['definition'].get('sysobjectid')
-            if sys_object_oids is not None:
-                if isinstance(sys_object_oids, str):
-                    sys_object_oids = [sys_object_oids]
-                for sys_object_oid in sys_object_oids:
-                    profile_match = profiles_by_oid.get(sys_object_oid)
-                    if profile_match:
-                        raise ConfigurationError(
-                            "Profile {} has the same sysObjectID ({}) as {}".format(name, sys_object_oid, profile_match)
-                        )
-                    else:
-                        profiles_by_oid[sys_object_oid] = name
+            if sys_object_oids is None:
+                continue
+            if isinstance(sys_object_oids, str):
+                sys_object_oids = [sys_object_oids]
+            for sys_object_oid in sys_object_oids:
+                profile_match = profiles_by_oid.get(sys_object_oid)
+                if profile_match:
+                    raise ConfigurationError(
+                        "Profile {} has the same sysObjectID ({}) as {}".format(name, sys_object_oid, profile_match)
+                    )
+                else:
+                    profiles_by_oid[sys_object_oid] = name
         return profiles_by_oid
 
     def _build_config(self, instance):
@@ -127,6 +135,17 @@ class SnmpCheck(AgentCheck):
             profiles_by_oid=self.profiles_by_oid,
             loader=loader,
         )
+
+    def _build_autodiscovery_config(self, source_instance, ip_address):
+        # type: (dict, str) -> InstanceConfig
+        instance = copy.deepcopy(source_instance)
+        network_address = instance.pop('network_address')
+        instance['ip_address'] = ip_address
+
+        instance.setdefault('tags', [])
+        instance['tags'].append('autodiscovery_subnet:{}'.format(network_address))
+
+        return self._build_config(instance)
 
     def _get_instance_name(self, instance):
         # type: (Dict[str, Any]) -> Optional[str]
@@ -200,12 +219,12 @@ class SnmpCheck(AgentCheck):
         # iso.3.6.1.2.1.25.4.2.1.7.224 = INTEGER: 2
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
         error = None
-        first_oid = 0
+        all_oids = [oid.as_object_type() for oid in all_oids]
+        next_oids = [oid.as_object_type() for oid in next_oids]
         all_binds = []
-        next_oids = [o.as_object_type() for o in next_oids]
-        while first_oid < len(all_oids):
+
+        for oids_batch in batches(all_oids, size=self.oid_batch_size):
             try:
-                oids_batch = [oid.as_object_type() for oid in all_oids[first_oid : first_oid + self.oid_batch_size]]
                 self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
 
                 var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
@@ -231,14 +250,8 @@ class SnmpCheck(AgentCheck):
                     error = message
                 self.warning(message)
 
-            # if we fail move onto next batch
-            first_oid += self.oid_batch_size
-
-        first_oid = 0
-        while first_oid < len(next_oids):
+        for oids_batch in batches(next_oids, size=self.oid_batch_size):
             try:
-                oids_batch = next_oids[first_oid : first_oid + self.oid_batch_size]
-
                 self.log.debug('Running SNMP command getNext on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
                 binds = list(
                     snmp_getnext(
@@ -257,9 +270,6 @@ class SnmpCheck(AgentCheck):
                     error = message
                 self.warning(message)
 
-            # if we fail move onto next batch
-            first_oid += self.oid_batch_size
-
         return all_binds, error
 
     def fetch_sysobject_oid(self, config):
@@ -277,14 +287,16 @@ class SnmpCheck(AgentCheck):
         """
         Return the most specific profile that matches the given sysObjectID.
         """
-        matched_oids = [
-            (oid, profile) for oid, profile in self.profiles_by_oid.items() if fnmatch.fnmatch(sys_object_oid, oid)
-        ]
+        matched_profiles_by_oid = {
+            oid: self.profiles_by_oid[oid] for oid in self.profiles_by_oid if fnmatch.fnmatch(sys_object_oid, oid)
+        }
 
-        if not matched_oids:
+        if not matched_profiles_by_oid:
             raise ConfigurationError('No profile matching sysObjectID {}'.format(sys_object_oid))
 
-        return max(matched_oids, key=lambda oid: oid[0])[1]
+        oid = max(matched_profiles_by_oid.keys(), key=lambda oid: oid_pattern_specificity(oid))
+
+        return matched_profiles_by_oid[oid]
 
     def _start_discovery(self):
         # type: () -> None
@@ -297,12 +309,7 @@ class SnmpCheck(AgentCheck):
                 except ValueError:
                     write_persistent_cache(self.check_id, json.dumps([]))
                     break
-                instance = copy.deepcopy(self.instance)
-                instance.pop('network_address')
-                instance['ip_address'] = host
-
-                host_config = self._build_config(instance)
-                self._config.discovered_instances[host] = host_config
+                self._config.discovered_instances[host] = self._build_autodiscovery_config(self.instance, host)
 
         raw_discovery_interval = self._config.instance.get('discovery_interval', 3600)
         try:
@@ -332,18 +339,18 @@ class SnmpCheck(AgentCheck):
 
             sent = []
             for host, discovered in list(config.discovered_instances.items()):
-                future = executor.submit(self._check_with_config, discovered)
+                future = executor.submit(self._check_device, discovered)
                 sent.append(future)
-                future.add_done_callback(functools.partial(self._check_config_done, host))
+                future.add_done_callback(functools.partial(self._on_check_device_done, host))
             futures.wait(sent)
 
             tags = ['network:{}'.format(config.ip_network)]
             tags.extend(config.tags)
             self.gauge('snmp.discovered_devices_count', len(config.discovered_instances), tags=tags)
         else:
-            self._check_with_config(config)
+            self._check_device(config)
 
-    def _check_config_done(self, host, future):
+    def _on_check_device_done(self, host, future):
         # type: (str, futures.Future) -> None
         config = self._config
         if future.result():
@@ -357,9 +364,12 @@ class SnmpCheck(AgentCheck):
             # Reset the counter if not's failing
             config.failing_instances.pop(host, None)
 
-    def _check_with_config(self, config):
+    def _check_device(self, config):
         # type: (InstanceConfig) -> Optional[str]
         # Reset errors
+        if config.device is None:
+            raise RuntimeError('No device set')  # pragma: no cover
+
         instance = config.instance
         error = results = None
         tags = config.tags
@@ -371,7 +381,7 @@ class SnmpCheck(AgentCheck):
                 config.add_profile_tag(profile)
 
             if config.all_oids or config.next_oids or config.bulk_oids:
-                self.log.debug('Querying device %s', config.ip_address)
+                self.log.debug('Querying %s', config.device)
                 config.add_uptime_metric()
                 results, error = self.fetch_results(config, config.all_oids, config.next_oids, config.bulk_oids)
                 tags = self.extract_metric_tags(config.parsed_metric_tags, results)
@@ -385,6 +395,12 @@ class SnmpCheck(AgentCheck):
                 error = 'Failed to collect metrics for {} - {}'.format(self._get_instance_name(instance), e)
             self.warning(error)
         finally:
+            # At this point, `tags` might include some extra tags added in try clause
+
+            # Sending `snmp.devices_monitored` with value 1 will allow users to count devices
+            # by using `sum by {X}` queries in UI. X being a tag like `autodiscovery_subnet`, `snmp_profile`, etc
+            self.gauge('snmp.devices_monitored', 1, tags=tags)
+
             # Report service checks
             status = self.OK
             if error:
@@ -395,7 +411,7 @@ class SnmpCheck(AgentCheck):
         return error
 
     def extract_metric_tags(self, metric_tags, results):
-        # type: (List[ParsedMetricTag], Dict[str, dict]) -> List[str]
+        # type: (List[SymbolTag], Dict[str, dict]) -> List[str]
         extracted_tags = []  # type: List[str]
         for tag in metric_tags:
             if tag.symbol not in results:
@@ -408,7 +424,7 @@ class SnmpCheck(AgentCheck):
                     '`metric_tags` can only refer to scalar OIDs.'.format(tag.symbol)
                 )
             try:
-                extracted_tags.extend(tag.matched_tags(tag_values[0]))
+                extracted_tags.extend(tag.parsed_metric_tag.matched_tags(tag_values[0]))
             except re.error as e:
                 self.log.debug('Failed to match %s for %s: %s', tag_values[0], tag.symbol, e)
         return extracted_tags
@@ -450,8 +466,8 @@ class SnmpCheck(AgentCheck):
         self,
         index,  # type: Tuple[str, ...]
         results,  # type: Dict[str, dict]
-        index_tags,  # type: List[Tuple[str, int]]
-        column_tags,  # type: List[Tuple[str, str]]
+        index_tags,  # type: List[IndexTag]
+        column_tags,  # type: List[ColumnTag]
     ):
         # type: (...) -> List[str]
         """
@@ -467,26 +483,27 @@ class SnmpCheck(AgentCheck):
         """
         tags = []  # type: List[str]
 
-        for name, raw_index_value in index_tags:
+        for index_tag in index_tags:
+            raw_index_value = index_tag.index
             try:
                 value = index[raw_index_value - 1]
             except IndexError:
-                self.log.warning('Not enough indexes, skipping tag %s', name)
+                self.log.warning('Not enough indexes, skipping index %s', raw_index_value)
                 continue
-            tags.append('{}:{}'.format(name, value))
+            tags.extend(index_tag.parsed_metric_tag.matched_tags(value))
 
-        for name, raw_column_value in column_tags:
+        for column_tag in column_tags:
+            raw_column_value = column_tag.column
             try:
                 column_value = results[raw_column_value][index]
             except KeyError:
                 self.log.warning('Column %s not present in the table, skipping this tag', raw_column_value)
                 continue
             if reply_invalid(column_value):
-                self.log.warning("Can't deduct tag from column for tag %s", name)
+                self.log.warning("Can't deduct tag from column %s", column_tag.column)
                 continue
             value = column_value.prettyPrint()
-            tags.append('{}:{}'.format(name, value))
-
+            tags.extend(column_tag.parsed_metric_tag.matched_tags(value))
         return tags
 
     def monotonic_count_and_rate(self, metric, value, tags):

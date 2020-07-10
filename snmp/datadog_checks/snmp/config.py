@@ -8,21 +8,20 @@ from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple
 from datadog_checks.base import ConfigurationError, is_affirmative
 
 from .mibs import MIBLoader
-from .models import OID
-from .parsing import ParsedMetric, ParsedMetricTag, ParsedSymbolMetric, parse_metric_tags, parse_metrics
+from .models import OID, Device
+from .parsing import ParsedMetric, ParsedSymbolMetric, SymbolTag, parse_metrics, parse_symbol_metric_tags
 from .pysnmp_types import (
     CommunityData,
     ContextData,
     OctetString,
-    UdpTransportTarget,
     UsmUserData,
     hlapi,
-    lcd,
     usmDESPrivProtocol,
     usmHMACMD5AuthProtocol,
 )
 from .resolver import OIDResolver
 from .types import OIDMatch
+from .utils import register_device_target
 
 
 class InstanceConfig:
@@ -88,7 +87,7 @@ class InstanceConfig:
         mib_view_controller = loader.get_mib_view_controller(mibs_path)
         self._resolver = OIDResolver(mib_view_controller, self.enforce_constraints)
 
-        self.ip_address = None
+        self.device = None  # type: Optional[Device]
         self.ip_network = None
 
         self.discovered_instances = {}  # type: Dict[str, InstanceConfig]
@@ -97,6 +96,9 @@ class InstanceConfig:
         self.workers = int(instance.get('workers', self.DEFAULT_WORKERS))
 
         self.bulk_threshold = int(instance.get('bulk_threshold', self.DEFAULT_BULK_THRESHOLD))
+
+        self._auth_data = self.get_auth_data(instance)
+        self._context_data = ContextData(*self.get_context_data(instance))
 
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
         retries = int(instance.get('retries', self.DEFAULT_RETRIES))
@@ -111,10 +113,19 @@ class InstanceConfig:
             raise ConfigurationError('Only one of IP address and network address must be specified')
 
         if ip_address:
-            self._transport = self.get_transport_target(instance, timeout, retries)
-
-            self.ip_address = ip_address
-            self.tags.append('snmp_device:{}'.format(self.ip_address))
+            port = int(instance.get('port', 161))
+            target = register_device_target(
+                ip_address,
+                port,
+                timeout=timeout,
+                retries=retries,
+                engine=self._snmp_engine,
+                auth_data=self._auth_data,
+                context_data=self._context_data,
+            )
+            device = Device(ip=ip_address, port=port, target=target)
+            self.device = device
+            self.tags.extend(device.tags)
 
         if network_address:
             if isinstance(network_address, bytes):
@@ -133,8 +144,6 @@ class InstanceConfig:
         if not self.metrics and not profiles_by_oid and not profile:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
-        self._auth_data = self.get_auth_data(instance)
-
         self.all_oids, self.next_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
@@ -146,14 +155,7 @@ class InstanceConfig:
             self.refresh_with_profile(profiles[profile])
             self.add_profile_tag(profile)
 
-        self._context_data = ContextData(*self.get_context_data(instance))
-
         self._uptime_metric_added = False
-
-        if ip_address:
-            self._addr_name, _ = lcd.configure(
-                self._snmp_engine, self._auth_data, self._transport, self._context_data.contextName
-            )
 
     def resolve_oid(self, oid):
         # type: (OID) -> OIDMatch
@@ -183,16 +185,6 @@ class InstanceConfig:
     def add_profile_tag(self, profile_name):
         # type: (str) -> None
         self.tags.append('snmp_profile:{}'.format(profile_name))
-
-    @staticmethod
-    def get_transport_target(instance, timeout, retries):
-        # type: (Dict[str, Any], float, int) -> Any
-        """
-        Generate a Transport target object based on the instance's configuration
-        """
-        ip_address = instance['ip_address']
-        port = int(instance.get('port', 161))  # Default SNMP port
-        return UdpTransportTarget((ip_address, port), timeout=timeout, retries=retries)
 
     @classmethod
     def get_auth_data(cls, instance):
@@ -287,10 +279,10 @@ class InstanceConfig:
         return result['oids'], result['next_oids'], result['bulk_oids'], result['parsed_metrics']
 
     def parse_metric_tags(self, metric_tags):
-        # type: (list) -> Tuple[List[OID], List[ParsedMetricTag]]
+        # type: (list) -> Tuple[List[OID], List[SymbolTag]]
         """Parse configuration for global metric_tags."""
-        result = parse_metric_tags(metric_tags, resolver=self._resolver)
-        return result['oids'], result['parsed_metric_tags']
+        result = parse_symbol_metric_tags(metric_tags, resolver=self._resolver)
+        return result['oids'], result['parsed_symbol_tags']
 
     def add_uptime_metric(self):
         # type: () -> None

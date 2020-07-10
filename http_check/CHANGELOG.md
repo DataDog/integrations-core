@@ -1,5 +1,13 @@
 # CHANGELOG - http_check
 
+## 4.9.1 / 2020-07-09
+
+* [Fixed] Raise http service check message limit. See [#7008](https://github.com/DataDog/integrations-core/pull/7008).
+
+## 4.9.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
 ## 4.8.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

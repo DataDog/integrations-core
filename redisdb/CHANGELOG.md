@@ -1,5 +1,11 @@
 # CHANGELOG - redisdb
 
+## 3.0.0 / 2020-06-29
+
+* [Added] Upgrade redis dependency to support `username` in connection strings. See [#6708](https://github.com/DataDog/integrations-core/pull/6708).
+* [Fixed] Add flag to enable CLIENT command metrics. See [#6877](https://github.com/DataDog/integrations-core/pull/6877).
+* [Changed] Collect port and host from same source in _generate_instance_key. See [#6680](https://github.com/DataDog/integrations-core/pull/6680).
+
 ## 2.1.1 / 2020-06-11
 
 * [Fixed] Add flag to enable CLIENT command metrics. See [#6877](https://github.com/DataDog/integrations-core/pull/6877).

@@ -4,6 +4,7 @@
 import socket
 
 from datadog_checks.dev import get_docker_hostname, get_here
+from datadog_checks.dev.jmx import JVM_E2E_METRICS
 
 CHECK_NAME = "kafka"
 
@@ -59,29 +60,4 @@ KAFKA_E2E_METRICS = [
     "kafka.session.zookeeper.expire.rate",
     "kafka.session.zookeeper.readonly.rate",
     "kafka.session.zookeeper.sync.rate",
-    # JVM metrics:
-    "jvm.buffer_pool.direct.capacity",
-    "jvm.buffer_pool.direct.count",
-    "jvm.buffer_pool.direct.used",
-    "jvm.buffer_pool.mapped.capacity",
-    "jvm.buffer_pool.mapped.count",
-    "jvm.buffer_pool.mapped.used",
-    "jvm.cpu_load.process",
-    "jvm.cpu_load.system",
-    "jvm.gc.cms.count",
-    "jvm.gc.eden_size",
-    "jvm.gc.old_gen_size",
-    "jvm.gc.parnew.time",
-    "jvm.gc.survivor_size",
-    "jvm.heap_memory",
-    "jvm.heap_memory_committed",
-    "jvm.heap_memory_init",
-    "jvm.heap_memory_max",
-    "jvm.loaded_classes",
-    "jvm.non_heap_memory",
-    "jvm.non_heap_memory_committed",
-    "jvm.non_heap_memory_init",
-    "jvm.non_heap_memory_max",
-    "jvm.os.open_file_descriptors",
-    "jvm.thread_count",
-]
+] + JVM_E2E_METRICS

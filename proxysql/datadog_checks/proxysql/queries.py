@@ -6,7 +6,7 @@ from datadog_checks.base.utils.db import Query
 STATS_MYSQL_GLOBAL = Query(
     {
         'name': 'stats_mysql_global',
-        'query': 'SELECT * FROM stats.stats_mysql_global',
+        'query': 'SELECT * FROM stats_mysql_global',
         'columns': [
             {
                 'name': 'Variable_Name',
@@ -112,7 +112,7 @@ STATS_COMMAND_COUNTERS = Query(
         'name': 'stats_mysql_commands_counters',
         'query': 'SELECT Command, Total_time_us, Total_cnt, cnt_100us, cnt_500us, cnt_1ms, cnt_5ms, cnt_10ms, '
         'cnt_50ms, cnt_100ms, cnt_500ms, cnt_1s, cnt_5s, cnt_10s, cnt_INFs FROM '
-        'stats.stats_mysql_commands_counters',
+        'stats_mysql_commands_counters',
         'columns': [
             # the type of SQL command that has been executed. Examples: FLUSH, INSERT, KILL, SELECT FOR UPDATE, etc.
             {'name': 'sql_command', 'type': 'tag'},
@@ -145,7 +145,7 @@ STATS_MYSQL_CONNECTION_POOL = Query(
         'name': 'stats_mysql_connection_pool',
         # Need explicit selections as some columns are unusable.
         'query': 'SELECT hostgroup, srv_host, srv_port, status, ConnUsed, ConnFree, ConnOK, ConnERR, Queries, '
-        'Bytes_data_sent, Bytes_data_recv, Latency_us FROM stats.stats_mysql_connection_pool',
+        'Bytes_data_sent, Bytes_data_recv, Latency_us FROM stats_mysql_connection_pool',
         'columns': [
             # the hostgroup in which the backend server belongs. Note that a single backend server can belong to more
             # than one hostgroup
@@ -190,7 +190,7 @@ STATS_MYSQL_CONNECTION_POOL = Query(
 STATS_MYSQL_USERS = Query(
     {
         'name': 'stats_mysql_users',
-        'query': 'SELECT username, frontend_connections, frontend_max_connections FROM stats.stats_mysql_users',
+        'query': 'SELECT username, frontend_connections, frontend_max_connections FROM stats_mysql_users',
         'columns': [
             {'name': 'username', 'type': 'tag'},
             {'name': 'frontend.user_connections', 'type': 'gauge'},
@@ -202,7 +202,7 @@ STATS_MYSQL_USERS = Query(
 STATS_MEMORY_METRICS = Query(
     {
         'name': 'stats_memory_metrics',
-        'query': 'SELECT * FROM stats.stats_memory_metrics',
+        'query': 'SELECT * FROM stats_memory_metrics',
         'columns': [
             {
                 'name': 'Variable_Name',
@@ -242,7 +242,7 @@ STATS_MEMORY_METRICS = Query(
 STATS_MYSQL_QUERY_RULES = Query(
     {
         'name': 'stats_mysql_query_rules',
-        'query': 'SELECT rule_id, hits FROM stats.stats_mysql_query_rules',
+        'query': 'SELECT rule_id, hits FROM stats_mysql_query_rules',
         'columns': [{'name': 'rule_id', 'type': 'tag'}, {'name': 'query_rules.rule_hits', 'type': 'rate'}],
     }
 )

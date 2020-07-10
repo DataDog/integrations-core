@@ -2,7 +2,7 @@
 
 ## 1.9.0 / 2020-05-20
 
-* [Added] Upgrade httplib2 to 0.18.0. See [#6702](https://github.com/DataDog/integrations-core/pull/6702).
+* [Added] Upgrade httplib2 to 0.18.1. See [#6702](https://github.com/DataDog/integrations-core/pull/6702).
 
 ## 1.8.0 / 2020-05-17
 

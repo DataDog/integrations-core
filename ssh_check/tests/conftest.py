@@ -7,7 +7,6 @@ from copy import deepcopy
 import pytest
 
 from datadog_checks.dev import docker_run, get_here
-from datadog_checks.ssh_check import CheckSSH
 
 from . import common
 
@@ -25,11 +24,6 @@ def dd_environment():
         log_patterns="Server listening on 0.0.0.0 port 22.",
     ):
         yield common.INSTANCE_INTEGRATION
-
-
-@pytest.fixture
-def check():
-    return CheckSSH("ssh_check", {}, {})
 
 
 @pytest.fixture

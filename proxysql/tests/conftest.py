@@ -18,7 +18,10 @@ MYSQL_USER = 'proxysql'
 MYSQL_PASS = 'pass'
 PROXY_ADMIN_USER = 'proxy'
 PROXY_ADMIN_PASS = 'proxy'
+PROXY_STATS_USER = 'proxystats'
+PROXY_STATS_PASS = 'proxystats'
 MYSQL_DATABASE = 'test'
+PROXY_MAIN_DATABASE = 'main'
 PROXYSQL_VERSION = os.environ['PROXYSQL_VERSION']
 
 BASIC_INSTANCE = {
@@ -45,6 +48,22 @@ INSTANCE_ALL_METRICS = {
     ],
 }
 
+INSTANCE_ALL_METRICS_STATS = {
+    'host': DOCKER_HOST,
+    'port': PROXY_ADMIN_PORT,
+    'username': PROXY_STATS_USER,
+    'password': PROXY_STATS_PASS,
+    'database_name': PROXY_MAIN_DATABASE,
+    'tags': ["application:test"],
+    'additional_metrics': [
+        'command_counters_metrics',
+        'connection_pool_metrics',
+        'users_metrics',
+        'memory_metrics',
+        'query_rules_metrics',
+    ],
+}
+
 
 @pytest.fixture
 def instance_basic():
@@ -54,6 +73,11 @@ def instance_basic():
 @pytest.fixture()
 def instance_all_metrics(instance_basic):
     return deepcopy(INSTANCE_ALL_METRICS)
+
+
+@pytest.fixture()
+def instance_stats_user(instance_basic):
+    return deepcopy(INSTANCE_ALL_METRICS_STATS)
 
 
 @pytest.fixture(scope='session')

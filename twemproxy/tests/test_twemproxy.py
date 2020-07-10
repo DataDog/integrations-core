@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.twemproxy import Twemproxy
 
 from . import common, metrics
@@ -66,3 +67,4 @@ def test_e2e(dd_agent_check, setup_request, instance):
 
     # Test service check
     aggregator.assert_service_check('twemproxy.can_connect', status=Twemproxy.OK, tags=SC_TAGS, count=2)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

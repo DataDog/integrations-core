@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 3.0.0 / 2020-06-18
+
+* [Added] Support multiple root layouts. See [#6856](https://github.com/DataDog/integrations-core/pull/6856).
+
 ## 2.5.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
