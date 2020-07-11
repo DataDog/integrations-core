@@ -386,11 +386,14 @@ class SnmpCheck(AgentCheck):
                 self.log.debug('Querying %s', config.device)
                 config.add_uptime_metric()
                 results, oids, error = self.fetch_results(config, config.all_oids, config.next_oids, config.bulk_oids)
-                config.all_oids = oids
-                config.next_oids = []
                 tags = self.extract_metric_tags(config.parsed_metric_tags, results)
                 tags.extend(config.tags)
                 self.report_metrics(config.parsed_metrics, results, tags)
+
+                # Use only snmpget for following calls
+                config.all_oids = oids
+                config.next_oids = []
+                config.bulk_oids = []
         except CheckException as e:
             error = str(e)
             self.warning(error)
