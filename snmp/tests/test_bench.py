@@ -41,10 +41,12 @@ def test_tabular_no_bulk(benchmark):
 
     benchmark(check.check, instance)
 
+instance = generate_instance_config([])
+instance['community_string'] = 'f5'
+init = {'oid_batch_size': 128}
+
+check = SnmpCheck('snmp', init, [instance])
+
 
 def test_profile_f5(benchmark):
-    instance = generate_instance_config([])
-    instance['community_string'] = 'f5'
-    check = SnmpCheck('snmp', {}, [instance])
-
     benchmark(check.check, instance)

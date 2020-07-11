@@ -67,7 +67,7 @@ def run_profile_check(recording_name):
 
     instance['community_string'] = recording_name
     instance['enforce_mib_constraints'] = False
-    check = SnmpCheck('snmp', {}, [instance])
+    check = SnmpCheck('snmp', {'oid_batch_size': 1000}, [instance])
     check.check(instance)
     return check
 
