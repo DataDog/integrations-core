@@ -41,42 +41,14 @@ def test_tabular_no_bulk(benchmark):
 
     benchmark(check.check, instance)
 
-instance = generate_instance_config([])
-instance['community_string'] = 'f5'
 
-check10 = SnmpCheck('snmp', {'oid_batch_size': 10}, [instance])
-check32 = SnmpCheck('snmp', {'oid_batch_size': 32}, [instance])
-check64 = SnmpCheck('snmp', {'oid_batch_size': 64}, [instance])
-check128 = SnmpCheck('snmp', {'oid_batch_size': 128}, [instance])
-check256 = SnmpCheck('snmp', {'oid_batch_size': 256}, [instance])
-# check512 = SnmpCheck('snmp', {'oid_batch_size': 512}, [instance])
+@pytest.mark.parametrize('oid_batch_size', [
+    10, 32, 64, 128, 256
+])
+def test_profile_f5(oid_batch_size, benchmark):
+    instance = generate_instance_config([])
+    instance['community_string'] = 'f5'
 
-check10.check(None)
-check32.check(None)
-check64.check(None)
-check128.check(None)
-check256.check(None)
-# check512.check(None)
+    check = SnmpCheck('snmp', {'oid_batch_size': oid_batch_size}, [instance])
 
-
-def test_profile_f5_10(benchmark):
-    benchmark(check10.check, instance)
-
-
-def test_profile_f5_32(benchmark):
-    benchmark(check32.check, instance)
-
-
-def test_profile_f5_64(benchmark):
-    benchmark(check64.check, instance)
-
-
-def test_profile_f5_128(benchmark):
-    benchmark(check128.check, instance)
-
-
-def test_profile_f5_256(benchmark):
-    benchmark(check256.check, instance)
-
-# def test_profile_f5_512(benchmark):
-#     benchmark(check512.check, instance)
+    benchmark.pedantic(check.check, args=(instance, ), iterations=1, rounds=5, warmup_rounds=2)
