@@ -4,6 +4,7 @@
 
 import pytest
 
+from datadog_checks.snmp import SnmpCheck
 from .common import BULK_TABULAR_OBJECTS, TABULAR_OBJECTS, create_check, generate_instance_config
 
 pytestmark = pytest.mark.usefixtures("dd_environment")
@@ -37,5 +38,13 @@ def test_tabular_no_bulk(benchmark):
     # Don't use bulk requests
     instance['bulk_threshold'] = 100
     check = create_check(instance)
+
+    benchmark(check.check, instance)
+
+
+def test_profile_f5(benchmark):
+    instance = generate_instance_config([])
+    instance['community_string'] = 'f5'
+    check = SnmpCheck('snmp', {}, [instance])
 
     benchmark(check.check, instance)

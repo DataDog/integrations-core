@@ -170,7 +170,7 @@ class SnmpCheck(AgentCheck):
         next_oids,  # type: List[OID]
         bulk_oids,  # type: List[OID]
     ):
-        # type: (...) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], Optional[str]]
+        # type: (...) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], List[OID], Optional[str]]
         """
         Perform a snmpwalk on the domain specified by the oids, on the device
         configured in instance.
@@ -183,7 +183,6 @@ class SnmpCheck(AgentCheck):
         enforce_constraints = config.enforce_constraints
 
         all_binds, error = self.fetch_oids(config, all_oids, next_oids, enforce_constraints=enforce_constraints)
-
         for oid in bulk_oids:
             try:
                 self.log.debug('Running SNMP command getBulk on OID %s', oid)
@@ -202,13 +201,16 @@ class SnmpCheck(AgentCheck):
                     error = message
                 self.warning(message)
 
+        oids = []
         for result_oid, value in all_binds:
-            match = config.resolve_oid(OID(result_oid))
+            oid = OID(result_oid)
+            oids.append(oid)
+            match = config.resolve_oid(oid)
             results[match.name][match.indexes] = value
         self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
         # Freeze the result
         results.default_factory = None  # type: ignore
-        return results, error
+        return results, oids, error
 
     def fetch_oids(self, config, all_oids, next_oids, enforce_constraints):
         # type: (InstanceConfig, List[OID], List[OID], bool) -> Tuple[List[Any], Optional[str]]
@@ -383,7 +385,9 @@ class SnmpCheck(AgentCheck):
             if config.all_oids or config.next_oids or config.bulk_oids:
                 self.log.debug('Querying %s', config.device)
                 config.add_uptime_metric()
-                results, error = self.fetch_results(config, config.all_oids, config.next_oids, config.bulk_oids)
+                results, oids, error = self.fetch_results(config, config.all_oids, config.next_oids, config.bulk_oids)
+                config.all_oids = oids
+                config.next_oids = []
                 tags = self.extract_metric_tags(config.parsed_metric_tags, results)
                 tags.extend(config.tags)
                 self.report_metrics(config.parsed_metrics, results, tags)
