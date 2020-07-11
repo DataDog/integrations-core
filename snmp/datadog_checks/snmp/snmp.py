@@ -201,16 +201,16 @@ class SnmpCheck(AgentCheck):
                     error = message
                 self.warning(message)
 
-        oids = []
+        scalar_oids = []
         for result_oid, value in all_binds:
             oid = OID(result_oid)
-            oids.append(oid)
+            scalar_oids.append(oid)
             match = config.resolve_oid(oid)
             results[match.name][match.indexes] = value
         self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
         # Freeze the result
         results.default_factory = None  # type: ignore
-        return results, oids, error
+        return results, scalar_oids, error
 
     def fetch_oids(self, config, all_oids, next_oids, enforce_constraints):
         # type: (InstanceConfig, List[OID], List[OID], bool) -> Tuple[List[Any], Optional[str]]
@@ -385,15 +385,13 @@ class SnmpCheck(AgentCheck):
             if config.all_oids or config.next_oids or config.bulk_oids:
                 self.log.debug('Querying %s', config.device)
                 config.add_uptime_metric()
-                results, oids, error = self.fetch_results(config, config.all_oids, config.next_oids, config.bulk_oids)
+                results, scalar_oids, error = self.fetch_results(
+                    config, config.all_oids, config.next_oids, config.bulk_oids
+                )
+                config.set_get_only_oids(scalar_oids)
                 tags = self.extract_metric_tags(config.parsed_metric_tags, results)
                 tags.extend(config.tags)
                 self.report_metrics(config.parsed_metrics, results, tags)
-
-                # Use only snmpget for following calls
-                config.all_oids = oids
-                config.next_oids = []
-                config.bulk_oids = []
         except CheckException as e:
             error = str(e)
             self.warning(error)

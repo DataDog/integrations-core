@@ -296,3 +296,12 @@ class InstanceConfig:
         parsed_metric = ParsedSymbolMetric('sysUpTimeInstance', forced_type='gauge')
         self.parsed_metrics.append(parsed_metric)
         self._uptime_metric_added = True
+
+    def set_get_only_oids(self, get_oids):
+        # type: (List[OID]) -> None
+        """
+        Set `get oids` to be used for following calls.
+        """
+        self.all_oids = get_oids
+        self.next_oids = []
+        self.bulk_oids = []
