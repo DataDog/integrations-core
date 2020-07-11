@@ -297,11 +297,11 @@ class InstanceConfig:
         self.parsed_metrics.append(parsed_metric)
         self._uptime_metric_added = True
 
-    def set_get_only_oids(self, get_oids):
+    def set_get_only_oids(self, scalar_oids):
         # type: (List[OID]) -> None
         """
         Set `get oids` to be used for following calls.
         """
-        self.all_oids = get_oids
+        self.all_oids = scalar_oids
         self.next_oids = []
         self.bulk_oids = []
