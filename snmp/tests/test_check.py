@@ -1086,3 +1086,32 @@ def test_timeout(aggregator, caplog):
             break
     else:
         pytest.fail()
+
+
+def test_use_saved_oids(aggregator):
+    instance = common.generate_instance_config(common.TABULAR_OBJECTS)
+    check = common.create_check(instance)
+
+    def run_check():
+        aggregator.reset()
+        check.check(instance)
+
+        # Test metrics
+        for symbol in common.TABULAR_OBJECTS[0]['symbols']:
+            metric_name = "snmp." + symbol
+            aggregator.assert_metric(metric_name, at_least=1)
+            aggregator.assert_metric_has_tag(metric_name, common.CHECK_TAGS[0], at_least=1)
+
+            for mtag in common.TABULAR_OBJECTS[0]['metric_tags']:
+                tag = mtag['tag']
+                aggregator.assert_metric_has_tag_prefix(metric_name, tag, at_least=1)
+        aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+
+        # Test service check
+        aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
+
+        common.assert_common_metrics(aggregator)
+        aggregator.all_metrics_asserted()
+
+    for _ in range(3):
+        run_check()
