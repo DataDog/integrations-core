@@ -10,7 +10,6 @@ from ...utils import complete_valid_checks, get_root, get_valid_integrations, re
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 IMAGE_EXTENSIONS = {".png", ".jpg"}
-NON_TILE_INTEGRATIONS = {"sortdb", "hbase_master", "kube_proxy"}
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate README.md files')
@@ -69,7 +68,7 @@ def readmes(ctx, integration):
                             errors = True
                             echo_failure(f"{integration} image: {rel_path} is linked in its readme but does not exist")
 
-        if not (has_overview and has_setup) and integration not in NON_TILE_INTEGRATIONS:
+        if not (has_overview and has_setup):
             errors = True
             echo_failure(f"{integration} readme file does not have an overview and setup section")
 
