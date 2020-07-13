@@ -1136,9 +1136,27 @@ def test_oids_cache_refresh(refresh_interval, has_next_bulk_oids):
         assert bool(check._config.oids_config.bulk_oids) is has_next_bulk_oids
 
 
+GETNEXT_CALL_COUNT_PER_CHECK_RUN = 5
+
+
 @pytest.mark.parametrize(
     "refresh_interval, getnext_call_counts, getnext_call_count_after_reset",
-    [pytest.param(0, [5, 10, 15], 20), pytest.param(3600, [5, 5, 5], 10)],
+    [
+        pytest.param(
+            0,
+            [
+                1 * GETNEXT_CALL_COUNT_PER_CHECK_RUN,
+                2 * GETNEXT_CALL_COUNT_PER_CHECK_RUN,
+                3 * GETNEXT_CALL_COUNT_PER_CHECK_RUN,
+            ],
+            4 * GETNEXT_CALL_COUNT_PER_CHECK_RUN,
+        ),
+        pytest.param(
+            3600,
+            [GETNEXT_CALL_COUNT_PER_CHECK_RUN, GETNEXT_CALL_COUNT_PER_CHECK_RUN, GETNEXT_CALL_COUNT_PER_CHECK_RUN],
+            2 * GETNEXT_CALL_COUNT_PER_CHECK_RUN,
+        ),
+    ],
 )
 def test_oids_cache_command_calls(refresh_interval, getnext_call_counts, getnext_call_count_after_reset):
     instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
