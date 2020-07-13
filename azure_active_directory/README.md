@@ -17,7 +17,7 @@ This integration forwards logs to Datadog using Azure with Event Hubs. Configure
 
 2. In Azure portal, select _Azure Active Directory > Monitoring > Audit logs_.
    
-3. Select Export Settings.
+3. Select **Export Settings**.
 
 4. In the Diagnostics settings pane, do one of the following:
 
