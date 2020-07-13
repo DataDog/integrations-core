@@ -34,7 +34,6 @@ This integration forwards logs to Datadog using Azure with Event Hubs. Configure
 
    - To send audit logs, select the **AuditLogs** check box.
    - To send sign-in logs, select the SignInLogs check box.
-    we recommend that you select both
   
 9. Select Save to save the setting.
 
