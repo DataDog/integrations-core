@@ -46,8 +46,6 @@ instances:
 
 Since version 19.1, Gunicorn [provides an option][7] to send its metrics to a daemon that implements the StatsD protocol, such as [DogStatsD][8]. As with many Gunicorn options, you can either pass it to `gunicorn` on the CLI (`--statsd-host`) or set it in your app's configuration file (`statsd_host`). Configure your app to send metrics to DogStatsD at `"localhost:8125"`, and restart the app.
 
-**Note**: If you are using this option, do **not** add the metric collection configuration block to `gunicorn.d/conf.yaml`. That is, if you are connecting Gunicorn to DogStatsD, ignore the directions in the [Metric Collection](#metric-collection) section of this document.
-
 #### Log collection
 
 _Available for Agent versions >6.0_
