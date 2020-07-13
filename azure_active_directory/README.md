@@ -46,7 +46,7 @@ For more details on the setup, see the [Azure tutorial][3].
 
 This integration allows you to setup log ingestion for Azure Active Directory activity logs.
 
-This inlcudes
+This includes the following:
 
    - Sign-ins – Provides information about the usage of managed applications and user sign-in activities.
 
