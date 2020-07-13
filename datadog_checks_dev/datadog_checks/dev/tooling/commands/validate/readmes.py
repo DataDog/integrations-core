@@ -2,10 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from os import path
 
 import click
 
-from ...utils import complete_valid_checks, get_valid_integrations, read_readme_file
+from ...utils import complete_valid_checks, get_root, get_valid_integrations, read_readme_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 IMAGE_EXTENSIONS = {"png", "jpg"}
@@ -49,17 +50,24 @@ def readmes(ctx, integration):
                 if ext in line:
                     IMAGE_REGEX = (
                         rf".*https:\/\/raw\.githubusercontent\.com\/DataDog\/"
-                        rf"{re.escape(repo)}\/master\/{re.escape(integration)}\/images\/.*.\.{ext}.*"
+                        rf"{re.escape(repo)}\/master\/({re.escape(integration)}\/images\/.*.\.{ext}).*"
                     )
 
-                    if not re.match(IMAGE_REGEX, line):
+                    match = re.match(IMAGE_REGEX, line)
+                    if not match:
                         errors = True
                         echo_failure(f"{integration} readme file does not have a valid image file on line {line_no}")
                         echo_info(
                             f"This image path must be in the form: "
                             f"https://raw.githubusercontent.com/DataDog/{repo}/master/{integration}/images/<IMAGE_NAME>"
                         )
-                        continue
+
+                    rel_path = match.groups()[0]
+                    if rel_path:
+                        file_path = path.join(get_root(), rel_path)
+                        if not path.exists(file_path):
+                            errors = True
+                            echo_failure(f"{integration} image: {rel_path} is linked in its readme but does not exist")
 
         if not (has_overview and has_setup) and integration not in NON_TILE_INTEGRATIONS:
             errors = True
