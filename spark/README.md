@@ -75,11 +75,11 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
            path: <LOG_FILE_PATH>
            source: scylla
            service: <SERVICE_NAME>
-           #To handle multi line that starts with yyyy-mm-dd use the following pattern
-           #log_processing_rules:
-           #  - type: multi_line
-           #    pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
-           #    name: new_log_start_with_date
+           # To handle multi line that starts with yyyy-mm-dd use the following pattern
+           # log_processing_rules:
+           #   - type: multi_line
+           #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+           #     name: new_log_start_with_date
      ```
 
 3. [Restart the Agent][6].
