@@ -38,7 +38,7 @@ This integration forwards logs to Datadog using Azure with Event Hubs. Configure
   
 9. Select Save to save the setting.
 
-Logs should start coming into the platform after about 15 minutes.
+Logs should start coming into Datadog within 15 minutes.
 For more details on the setup, see the [Azure tutorial][3].
 
 ## Data Collected
