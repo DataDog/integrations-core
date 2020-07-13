@@ -26,7 +26,7 @@ def get_readme_mappings():
 
     start = readme.find('dogstatsd_mapper_profiles:')
     end = readme[start:].find('```')
-    return readme[start : start + end]
+    return readme[start: start + end]
 
 
 def create_datadog_config(datadog_config):
