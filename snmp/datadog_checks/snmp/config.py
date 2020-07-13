@@ -148,7 +148,6 @@ class InstanceConfig:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
         self.all_oids, self.next_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
-
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
             self.all_oids.extend(tag_oids)
