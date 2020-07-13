@@ -7,9 +7,8 @@ from datadog_checks.ibm_mq import IbmMqCheck
 
 from .common import MQ_VERSION_RAW
 
-pytestmark = pytest.mark.e2e
 
-
+@pytest.mark.integration
 def test_metadata(instance, datadog_agent):
     check = IbmMqCheck('ibm_mq', {}, [instance])
     check.check_id = 'test:123'

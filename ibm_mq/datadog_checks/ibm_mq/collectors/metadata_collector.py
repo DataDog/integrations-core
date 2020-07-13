@@ -11,6 +11,11 @@ except ImportError as e:
     pymqi = None
 
 
+# TODO: Use actual imports once bumping over 1.11.1 (not py2 compatible)
+MQIACF_Q_MGR_ATTRS = 1001  # pymqi.CMQCFC.MQIACF_Q_MGR_ATTRS
+MQCA_VERSION = 2120  # pymqi.CMQC.MQCA_VERSION
+
+
 class MetadataCollector(object):
     def __init__(self, log):
         self.log = log
@@ -26,9 +31,10 @@ class MetadataCollector(object):
 
     def _get_version(self, queue_manager):
         pcf = pymqi.PCFExecute(queue_manager)
-        resp = pcf.MQCMD_INQUIRE_Q_MGR({pymqi.CMQCFC.MQIACF_Q_MGR_ATTRS: [pymqi.CMQC.MQCA_VERSION]})
+        resp = pcf.MQCMD_INQUIRE_Q_MGR({MQIACF_Q_MGR_ATTRS: [MQCA_VERSION]})
+
         try:
-            version = to_native_string(resp[0][pymqi.CMQC.MQCA_VERSION])
+            version = to_native_string(resp[0][MQCA_VERSION])
             self.log.debug("IBM MQ version from response: %s", version)
         except Exception as e:
             self.log.debug("Error collecting IBM MQ version: %s", e)
