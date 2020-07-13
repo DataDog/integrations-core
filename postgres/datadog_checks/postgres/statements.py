@@ -184,7 +184,12 @@ class PgStatementsMixin(object):
             if row['calls'] - prev['calls'] <= 0:
                 continue
 
-            obfuscated_query = datadog_agent.obfuscate_sql(row['query'])
+            try:
+                obfuscated_query = datadog_agent.obfuscate_sql(row['query'])
+            except Exception as e:
+                self.log.warn("failed to obfuscate query '%s': %s", row['query'], e)
+                continue
+
             tags = ['query_signature:' + compute_sql_signature(obfuscated_query)] + instance_tags
             for tag_column, (_, alias) in PG_STAT_STATEMENTS_TAG_COLUMNS.items():
                 if tag_column not in self._pg_stat_statements_columns:
