@@ -160,7 +160,8 @@ class InstanceConfig:
 
     def _resolve_oids(self):
         # type: () -> None
-        def get_valid_oids(oids):
+        def get_resolved_valid_oids(oids):
+            # type: (List[OID]) -> List[OID]
             res_oids = []
             for oid in oids:
                 try:
@@ -171,9 +172,9 @@ class InstanceConfig:
                     logger.warning('Cannot resolve oid: %s', e)
             return res_oids
 
-        self.all_oids = get_valid_oids(self.all_oids)
-        self.next_oids = get_valid_oids(self.next_oids)
-        self.bulk_oids = get_valid_oids(self.bulk_oids)
+        self.all_oids = get_resolved_valid_oids(self.all_oids)
+        self.next_oids = get_resolved_valid_oids(self.next_oids)
+        self.bulk_oids = get_resolved_valid_oids(self.bulk_oids)
 
     def refresh_with_profile(self, profile):
         # type: (Dict[str, Any]) -> None
