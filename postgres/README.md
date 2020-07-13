@@ -75,9 +75,6 @@ Follow the instructions below to configure this check for an Agent running on a 
      ## The hostname to connect to.
      ## NOTE: Even if the server name is "localhost", the agent connects to
      ## PostgreSQL using TCP/IP, unless you also provide a value for the sock key.
-     ## If `use_psycopg2` is enabled, use the directory containing
-     ## the UNIX socket (ex: `/run/postgresql/`) otherwise, use the full path to
-     ##  the socket file (ex: `/run/postgresql/.s.PGSQL.5433`).
      #
      - host: localhost
 

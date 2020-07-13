@@ -28,6 +28,7 @@ export C_INCLUDE_PATH=/opt/mqm/inc
 - Upstart (Linux): `/etc/init/datadog-agent.conf`
 - Systemd (Linux): `/lib/systemd/system/datadog-agent.service`
 - Launchd (MacOS): `~/Library/LaunchAgents/com.datadoghq.agent.plist`
+  - This only works if MacOS SIP is disabled (might not be recommended depending on your security policy). This is due to [SIP purging `LD_LIBRARY_PATH` environ variable][12].
 
 Example of the configuration for `systemd`:
 
@@ -281,3 +282,4 @@ Additional helpful documentation, links, and articles:
 [9]: https://github.com/DataDog/integrations-core/blob/master/ibm_mq/metadata.csv
 [10]: https://docs.datadoghq.com/help/
 [11]: https://www.datadoghq.com/blog/monitor-ibmmq-with-datadog
+[12]: https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/RuntimeProtections/RuntimeProtections.html#//apple_ref/doc/uid/TP40016462-CH3-SW1

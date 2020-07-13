@@ -40,8 +40,12 @@ def init_db():
     }
     client.put(key, bins)
 
-    for _ in range(10):
+    batch_keys = []
+    for i in range(10):
         client.get(key)
+        batch_key = ('test', 'demo', 'key' + str(i))
+        batch_keys.append(batch_key)
+    client.get_many(batch_keys)
 
     client.close()
 

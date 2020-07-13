@@ -82,4 +82,4 @@ instances:
     tags:
       # The autodiscovery subnet the device is part of.
       # Used by Agent autodiscovery to pass subnet name.
-      - "autodiscovery_subnet:%%autodiscovery_subnet%%"
+      - "autodiscovery_subnet:%%extra_autodiscovery_subnet%%"

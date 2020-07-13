@@ -12,7 +12,7 @@ from six import string_types
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 
-from .constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT, KAFKA_INTERNAL_TOPICS
+from .constants import BROKER_REQUESTS_BATCH_SIZE, CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT, KAFKA_INTERNAL_TOPICS
 from .legacy_0_10_2 import LegacyKafkaCheck_0_10_2
 
 
@@ -67,6 +67,7 @@ class KafkaCheck(AgentCheck):
             self.instance.get('monitor_all_broker_highwatermarks', False)
         )
         self._consumer_groups = self.instance.get('consumer_groups', {})
+        self._broker_requests_batch_size = self.instance.get('broker_requests_batch_size', BROKER_REQUESTS_BATCH_SIZE)
 
         kafka_version = self.instance.get('kafka_client_api_version')
         if isinstance(kafka_version, str):
@@ -179,36 +180,38 @@ class KafkaCheck(AgentCheck):
         if not self._monitor_all_broker_highwatermarks:
             tps_with_consumer_offset = {(topic, partition) for (_, topic, partition) in self._consumer_offsets}
 
-        for broker in self._kafka_client._client.cluster.brokers():
-            broker_led_partitions = self._kafka_client._client.cluster.partitions_for_broker(broker.nodeId)
-            if broker_led_partitions is None:
-                continue
-            # Take the partitions for which this broker is the leader and group them by topic in order to construct the
-            # OffsetRequest while simultaneously filtering out partitions we want to exclude
-            partitions_grouped_by_topic = defaultdict(list)
-            for topic, partition in broker_led_partitions:
-                # No sense fetching highwater offsets for internal topics
-                if topic not in KAFKA_INTERNAL_TOPICS and (
-                    self._monitor_all_broker_highwatermarks or (topic, partition) in tps_with_consumer_offset
-                ):
-                    partitions_grouped_by_topic[topic].append(partition)
+        for batch in self.batchify(self._kafka_client._client.cluster.brokers(), self._broker_requests_batch_size):
+            for broker in batch:
+                broker_led_partitions = self._kafka_client._client.cluster.partitions_for_broker(broker.nodeId)
+                if broker_led_partitions is None:
+                    continue
 
-            # Construct the OffsetRequest
-            max_offsets = 1
-            request = OffsetRequest[0](
-                replica_id=-1,
-                topics=[
-                    (topic, [(partition, OffsetResetStrategy.LATEST, max_offsets) for partition in partitions])
-                    for topic, partitions in partitions_grouped_by_topic.items()
-                ],
-            )
+                # Take the partitions for which this broker is the leader and group them by topic in order to construct
+                # the OffsetRequest while simultaneously filtering out partitions we want to exclude
+                partitions_grouped_by_topic = defaultdict(list)
+                for topic, partition in broker_led_partitions:
+                    # No sense fetching highwater offsets for internal topics
+                    if topic not in KAFKA_INTERNAL_TOPICS and (
+                        self._monitor_all_broker_highwatermarks or (topic, partition) in tps_with_consumer_offset
+                    ):
+                        partitions_grouped_by_topic[topic].append(partition)
 
-            highwater_future = self._kafka_client._send_request_to_node(node_id=broker.nodeId, request=request)
-            highwater_future.add_callback(self._highwater_offsets_callback)
-            highwater_futures.append(highwater_future)
+                # Construct the OffsetRequest
+                max_offsets = 1
+                request = OffsetRequest[0](
+                    replica_id=-1,
+                    topics=[
+                        (topic, [(partition, OffsetResetStrategy.LATEST, max_offsets) for partition in partitions])
+                        for topic, partitions in partitions_grouped_by_topic.items()
+                    ],
+                )
 
-        # Loop until all futures resolved.
-        self._kafka_client._wait_for_futures(highwater_futures)
+                highwater_future = self._kafka_client._send_request_to_node(node_id=broker.nodeId, request=request)
+                highwater_future.add_callback(self._highwater_offsets_callback)
+                highwater_futures.append(highwater_future)
+
+            # Loop until all futures resolved.
+            self._kafka_client._wait_for_futures(highwater_futures)
 
     def _highwater_offsets_callback(self, response):
         """Callback that parses an OffsetFetchResponse and saves it to the highwater_offsets dict."""
@@ -473,3 +476,8 @@ class KafkaCheck(AgentCheck):
             # have multiple sections of code instantiating clients
             kafka_client.close()
         return kafka_version
+
+    @staticmethod
+    def batchify(iterable, batch_size):
+        iterable = list(iterable)
+        return (iterable[i : i + batch_size] for i in range(0, len(iterable), batch_size))

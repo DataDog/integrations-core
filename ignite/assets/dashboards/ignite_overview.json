@@ -1,807 +1,851 @@
 {
-    "author_info": {
-        "author_name": "Datadog"
+  "board_title": "Ignite Overview",
+  "read_only": false,
+  "description": "## Ignite\n\nThis dashboard provides a high-level overview of your Ignite instances so you can monitor metrics related to memory statistics and workers, storage, and network.\n\n- [Official integration docs](https://docs.datadoghq.com/integrations/ignite/)\n- See [Ignite documentation](https://ignite.apache.org/) for more information\n\nClone this template to make changes and add your own graphs and widgets. (cloned)",
+  "created": "2020-06-26T20:00:04.068440+00:00",
+  "new_id": "968-mhs-ck5",
+  "modified": "2020-07-07T14:24:56.744124+00:00",
+  "created_by": {
+    "disabled": false,
+    "handle": "mallory.mooney@datadoghq.com",
+    "name": "Mallory Mooney",
+    "title": null,
+    "is_admin": false,
+    "role": null,
+    "access_role": "st",
+    "verified": true,
+    "email": "mallory.mooney@datadoghq.com",
+    "icon": "https://secure.gravatar.com/avatar/d3371ccb820d39ee0dc8b112488d6553?s=48&d=retro"
+  },
+  "template_variables": [
+    {
+      "default": "*",
+      "prefix": "host",
+      "name": "host"
     },
-    "board_title": "Ignite Overview",
-    "created": "2020-06-02T18:05:18.717078+00:00",
-    "created_by": {
-        "access_role": "adm",
-        "disabled": false,
-        "email": "support@datadoghq.com",
-        "handle": "support@datadoghq.com",
-        "is_admin": true,
-        "name": "Datadog",
-        "role": null,
-        "title": null,
-        "verified": true
+    {
+      "default": "*",
+      "prefix": "instance",
+      "name": "instance"
+    }
+  ],
+  "widgets": [
+    {
+      "sizing": "zoom",
+      "y": 1,
+      "width": 36,
+      "url": "https://static.datadoghq.com/static/images/saas_logos/bot/ignite@2x.png",
+      "x": 1,
+      "type": "image",
+      "height": 13
     },
-    "description": "## Ignite\n\nThis dashboard provides a high-level overview of your Ignite instances so you can monitor metrics related to memory statistics and workers, storage, and network.\n\n- [Official integration docs](https://docs.datadoghq.com/integrations/ignite/)\n- See the [Ignite documentation](https://ignite.apache.org/) for more information\n\nClone this template to make changes and add your own graphs and widgets.\n",
-    "id": 1152772,
-    "modified": "2020-06-02T21:03:24.771314+00:00",
-    "new_id": "q6t-sid-qnd",
-    "read_only": false,
-    "template_variables": [],
-    "widgets": [
-        {
-            "height": 7,
-            "id": 0,
-            "sizing": "zoom",
-            "type": "image",
-            "url": "https://static.datadoghq.com/static/images/saas_logos/bot/ignite@2x.png",
-            "width": 17,
-            "x": 1,
-            "y": 1
-        },
-        {
-            "bgcolor": "gray",
-            "font_size": "24",
-            "height": 7,
-            "html": "Memory",
-            "id": 3,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 64,
-            "x": 20,
-            "y": 1
-        },
-        {
-            "bgcolor": "gray",
-            "font_size": "24",
-            "height": 7,
-            "html": "Cache",
-            "id": 4,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 85,
-            "x": 86,
-            "y": 1
-        },
-        {
-            "height": 8,
-            "id": 5,
-            "tile_def": {
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "q": "avg:ignite.cache.gets{*}.as_count()"
-                    }
-                ],
-                "viz": "query_value"
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Total GETs",
+      "height": 13,
+      "tile_def": {
+        "viz": "query_value",
+        "requests": [
+          {
+            "q": "avg:ignite.cache.gets{$host,$instance}.as_count()",
+            "aggregator": "avg"
+          }
+        ],
+        "custom_links": [],
+        "precision": 0
+      },
+      "width": 17,
+      "y": 38,
+      "x": 146,
+      "type": "query_value"
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Current heap size used",
+      "height": 15,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ignite.heap_memory_used{$host,$instance}",
+            "style": {
+              "palette": "dog_classic",
+              "width": "normal",
+              "type": "solid"
             },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Total GETs",
-            "type": "query_value",
-            "width": 20,
-            "x": 86,
-            "y": 10
-        },
-        {
-            "height": 15,
-            "id": 6,
-            "legend": false,
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:ignite.heap_memory_used{*}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Current heap size used",
-            "type": "timeseries",
-            "width": 41,
-            "x": 1,
-            "y": 10
-        },
-        {
-            "height": 15,
-            "id": 9,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:ignite.non_heap_memory_used{*}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Current non-heap memory size used",
-            "type": "timeseries",
-            "width": 41,
-            "x": 43,
-            "y": 10
-        },
-        {
-            "height": 15,
-            "id": 11,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:ignite.physical_memory_pages{*}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Number of pages in physical RAM",
-            "type": "timeseries",
-            "width": 41,
-            "x": 1,
-            "y": 28
-        },
-        {
-            "height": 15,
-            "id": 12,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:ignite.max_memory_size{*} by {region}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Maximum memory size by region",
-            "type": "timeseries",
-            "width": 41,
-            "x": 43,
-            "y": 28
-        },
-        {
-            "bgcolor": "gray",
-            "font_size": "24",
-            "height": 7,
-            "html": "Threads",
-            "id": 13,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 83,
-            "x": 1,
-            "y": 46
-        },
-        {
-            "height": 15,
-            "id": 14,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "sum:ignite.threads.pool_size{*}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Total number of threads in the pool",
-            "type": "timeseries",
-            "width": 41,
-            "x": 1,
-            "y": 55
-        },
-        {
-            "height": 15,
-            "id": 15,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "sum:ignite.threads.active{*}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Total number of active threads",
-            "type": "timeseries",
-            "width": 41,
-            "x": 43,
-            "y": 55
-        },
-        {
-            "height": 15,
-            "id": 16,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "sum:ignite.threads.completed_tasks{*}.as_count(), sum:ignite.threads.tasks{*}.as_count()-sum:ignite.threads.completed_tasks{*}.as_count()",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "area"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Number of completed vs incomplete tasks",
-            "type": "timeseries",
-            "width": 41,
-            "x": 1,
-            "y": 73
-        },
-        {
-            "height": 15,
-            "id": 17,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "sum:ignite.threads.active{*}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Total number of active threads",
-            "type": "timeseries",
-            "width": 41,
-            "x": 43,
-            "y": 73
-        },
-        {
-            "height": 8,
-            "id": 18,
-            "tile_def": {
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "q": "avg:ignite.cache.puts{*}.as_count()"
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Total PUTs",
-            "type": "query_value",
-            "width": 20,
-            "x": 108,
-            "y": 10
-        },
-        {
-            "height": 13,
-            "id": 21,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:ignite.cache.average_get_time{*}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Average GET time",
-            "type": "timeseries",
-            "width": 42,
-            "x": 86,
-            "y": 22
-        },
-        {
-            "height": 13,
-            "id": 22,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:ignite.cache.average_put_time{*}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Average PUT time",
-            "type": "timeseries",
-            "width": 42,
-            "x": 86,
-            "y": 38
-        },
-        {
-            "height": 13,
-            "id": 23,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:ignite.cache.commit_queue_size{*}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Transaction committed queue size",
-            "type": "timeseries",
-            "width": 42,
-            "x": 129,
-            "y": 22
-        },
-        {
-            "height": 8,
-            "id": 24,
-            "tile_def": {
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "q": "avg:ignite.cache.total_partitions{*}"
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Total partitions",
-            "type": "query_value",
-            "width": 20,
-            "x": 130,
-            "y": 10
-        },
-        {
-            "height": 8,
-            "id": 25,
-            "tile_def": {
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "q": "avg:ignite.cache.backups{*}"
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Total backups",
-            "type": "query_value",
-            "width": 20,
-            "x": 151,
-            "y": 10
-        },
-        {
-            "height": 13,
-            "id": 26,
-            "legend": false,
-            "legend_size": "0",
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:ignite.cache.commit_queue_size{*}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Number of partitions in state MOVING",
-            "type": "timeseries",
-            "width": 42,
-            "x": 129,
-            "y": 38
-        },
-        {
-            "bgcolor": "gray",
-            "font_size": "24",
-            "height": 7,
-            "html": "Pages",
-            "id": 27,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 42,
-            "x": 86,
-            "y": 55
-        },
-        {
-            "height": 8,
-            "id": 28,
-            "tile_def": {
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "q": "avg:ignite.pages_read{*}.as_count()"
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Total pages read",
-            "type": "query_value",
-            "width": 20,
-            "x": 86,
-            "y": 64
-        },
-        {
-            "height": 13,
-            "id": 30,
-            "legend": false,
-            "tile_def": {
-                "requests": [
-                    {
-                        "q": "avg:ignite.dirty_pages{*}",
-                        "style": {
-                            "palette": "dog_classic",
-                            "type": "solid",
-                            "width": "normal"
-                        },
-                        "type": "line"
-                    }
-                ],
-                "viz": "timeseries",
-                "yaxis": {
-                    "includeZero": true,
-                    "label": "",
-                    "max": "auto",
-                    "min": "auto",
-                    "scale": "linear"
-                }
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Number of pages in memory not synchronized",
-            "type": "timeseries",
-            "width": 42,
-            "x": 86,
-            "y": 75
-        },
-        {
-            "bgcolor": "gray",
-            "font_size": "24",
-            "height": 7,
-            "html": "Jobs",
-            "id": 32,
-            "text_align": "center",
-            "tick": true,
-            "tick_edge": "bottom",
-            "tick_pos": "50%",
-            "type": "note",
-            "width": 42,
-            "x": 129,
-            "y": 55
-        },
-        {
-            "height": 9,
-            "id": 34,
-            "tile_def": {
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "q": "avg:ignite.jobs.active.current{*}"
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Current active jobs",
-            "type": "query_value",
-            "width": 20,
-            "x": 129,
-            "y": 64
-        },
-        {
-            "height": 9,
-            "id": 35,
-            "tile_def": {
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "q": "avg:ignite.jobs.rejected.current{*}"
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Current rejected jobs",
-            "type": "query_value",
-            "width": 20,
-            "x": 151,
-            "y": 64
-        },
-        {
-            "height": 9,
-            "id": 36,
-            "tile_def": {
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "q": "avg:ignite.jobs.executed.total{*}.as_count()"
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Total executed jobs",
-            "type": "query_value",
-            "width": 20,
-            "x": 129,
-            "y": 77
-        },
-        {
-            "height": 9,
-            "id": 37,
-            "tile_def": {
-                "custom_unit": "sec",
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "q": "avg:ignite.jobs.wait_time.average{*}"
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Average wait time",
-            "type": "query_value",
-            "width": 20,
-            "x": 151,
-            "y": 77
-        },
-        {
-            "height": 8,
-            "id": 38,
-            "tile_def": {
-                "precision": 0,
-                "requests": [
-                    {
-                        "aggregator": "avg",
-                        "q": "avg:ignite.pages_written{*}.as_count()"
-                    }
-                ],
-                "viz": "query_value"
-            },
-            "time": {},
-            "title": true,
-            "title_align": "left",
-            "title_size": 16,
-            "title_text": "Total pages written",
-            "type": "query_value",
-            "width": 20,
-            "x": 108,
-            "y": 64
+            "type": "line"
+          }
+        ],
+        "custom_links": [],
+        "yaxis": {
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "label": "",
+          "includeZero": true
         }
-    ]
+      },
+      "width": 71,
+      "y": 92,
+      "x": 38,
+      "type": "timeseries",
+      "legend": false
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Current non-heap memory size used",
+      "height": 15,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ignite.non_heap_memory_used{$host,$instance}",
+            "style": {
+              "palette": "dog_classic",
+              "width": "normal",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "custom_links": [],
+        "yaxis": {
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 71,
+      "y": 74,
+      "x": 38,
+      "legend_size": "0",
+      "type": "timeseries",
+      "legend": false
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Number of pages in physical RAM",
+      "height": 15,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ignite.physical_memory_pages{$host,$instance}",
+            "style": {
+              "palette": "dog_classic",
+              "width": "normal",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "custom_links": [],
+        "yaxis": {
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 71,
+      "y": 38,
+      "x": 38,
+      "legend_size": "0",
+      "type": "timeseries",
+      "legend": false
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Maximum memory size by region",
+      "height": 15,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ignite.max_memory_size{$host,$instance} by {region}",
+            "style": {
+              "palette": "dog_classic",
+              "width": "normal",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "custom_links": [],
+        "yaxis": {
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 71,
+      "y": 56,
+      "x": 38,
+      "legend_size": "0",
+      "type": "timeseries",
+      "legend": false
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Total number of threads in the pool",
+      "height": 15,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "sum:ignite.threads.pool_size{$host,$instance}",
+            "style": {
+              "palette": "dog_classic",
+              "width": "normal",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "custom_links": [],
+        "yaxis": {
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 71,
+      "y": 139,
+      "x": 38,
+      "legend_size": "0",
+      "type": "timeseries",
+      "legend": false
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Number of completed vs incomplete tasks",
+      "height": 15,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "sum:ignite.threads.completed_tasks{$host,$instance}.as_count(), sum:ignite.threads.tasks{$host,$instance}.as_count()-sum:ignite.threads.completed_tasks{$host,$instance}.as_count()",
+            "style": {
+              "palette": "dog_classic",
+              "width": "normal",
+              "type": "solid"
+            },
+            "type": "area"
+          }
+        ],
+        "custom_links": [],
+        "yaxis": {
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 71,
+      "y": 157,
+      "x": 38,
+      "legend_size": "0",
+      "type": "timeseries",
+      "legend": false
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Total number of active threads",
+      "height": 15,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "sum:ignite.threads.active{$host,$instance}",
+            "style": {
+              "palette": "dog_classic",
+              "width": "normal",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "custom_links": [],
+        "yaxis": {
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 71,
+      "y": 121,
+      "x": 38,
+      "legend_size": "0",
+      "type": "timeseries",
+      "legend": false
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Total PUTs",
+      "height": 13,
+      "tile_def": {
+        "viz": "query_value",
+        "requests": [
+          {
+            "q": "avg:ignite.cache.puts{$host,$instance}.as_count()",
+            "aggregator": "avg"
+          }
+        ],
+        "custom_links": [],
+        "precision": 0
+      },
+      "width": 17,
+      "y": 38,
+      "x": 164,
+      "type": "query_value"
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Average GET time",
+      "height": 15,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ignite.cache.average_get_time{$host,$instance}",
+            "style": {
+              "palette": "dog_classic",
+              "width": "normal",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "custom_links": [],
+        "yaxis": {
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 71,
+      "y": 90,
+      "x": 110,
+      "legend_size": "0",
+      "type": "timeseries",
+      "legend": false
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Average PUT time",
+      "height": 15,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ignite.cache.average_put_time{$host,$instance}",
+            "style": {
+              "palette": "dog_classic",
+              "width": "normal",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "custom_links": [],
+        "yaxis": {
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 71,
+      "y": 108,
+      "x": 110,
+      "legend_size": "0",
+      "type": "timeseries",
+      "legend": false
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Transaction committed queue size",
+      "height": 15,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ignite.cache.commit_queue_size{$host,$instance}",
+            "style": {
+              "palette": "dog_classic",
+              "width": "normal",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "custom_links": [],
+        "yaxis": {
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 71,
+      "y": 54,
+      "x": 110,
+      "legend_size": "0",
+      "type": "timeseries",
+      "legend": false
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Total partitions",
+      "height": 13,
+      "tile_def": {
+        "viz": "query_value",
+        "requests": [
+          {
+            "q": "avg:ignite.cache.total_partitions{$host,$instance}",
+            "aggregator": "avg"
+          }
+        ],
+        "custom_links": [],
+        "precision": 0
+      },
+      "width": 17,
+      "y": 38,
+      "x": 128,
+      "type": "query_value"
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Total backups",
+      "height": 13,
+      "tile_def": {
+        "viz": "query_value",
+        "requests": [
+          {
+            "q": "avg:ignite.cache.backups{$host,$instance}",
+            "aggregator": "avg"
+          }
+        ],
+        "custom_links": [],
+        "precision": 0
+      },
+      "width": 17,
+      "y": 38,
+      "x": 110,
+      "type": "query_value"
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Number of partitions in state MOVING",
+      "height": 15,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ignite.cache.cluster_moving_partitions{$instance,$host} by {host}",
+            "style": {
+              "palette": "dog_classic",
+              "width": "normal",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "custom_links": [],
+        "right_yaxis": {
+          "max": "auto",
+          "include_zero": true,
+          "scale": "linear",
+          "min": "auto",
+          "label": ""
+        },
+        "yaxis": {
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 71,
+      "y": 72,
+      "x": 110,
+      "legend_size": "0",
+      "type": "timeseries",
+      "legend": false
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Total pages read",
+      "height": 13,
+      "tile_def": {
+        "viz": "query_value",
+        "requests": [
+          {
+            "q": "avg:ignite.pages_read{$host,$instance}.as_count()",
+            "aggregator": "avg"
+          }
+        ],
+        "custom_links": [],
+        "precision": 0
+      },
+      "width": 17,
+      "y": 11,
+      "x": 146,
+      "type": "query_value"
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Number of pages in memory not synchronized",
+      "height": 13,
+      "tile_def": {
+        "viz": "timeseries",
+        "requests": [
+          {
+            "q": "avg:ignite.dirty_pages{$host,$instance}",
+            "style": {
+              "palette": "dog_classic",
+              "width": "normal",
+              "type": "solid"
+            },
+            "type": "line"
+          }
+        ],
+        "custom_links": [],
+        "right_yaxis": {
+          "max": "auto",
+          "include_zero": true,
+          "scale": "linear",
+          "min": "auto",
+          "label": ""
+        },
+        "yaxis": {
+          "scale": "linear",
+          "min": "auto",
+          "max": "auto",
+          "label": "",
+          "includeZero": true
+        }
+      },
+      "width": 35,
+      "y": 11,
+      "x": 110,
+      "type": "timeseries",
+      "legend": false
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Current active",
+      "height": 13,
+      "tile_def": {
+        "viz": "query_value",
+        "requests": [
+          {
+            "q": "avg:ignite.jobs.active.current{$host,$instance}",
+            "aggregator": "avg"
+          }
+        ],
+        "custom_links": [],
+        "precision": 0
+      },
+      "width": 17,
+      "y": 11,
+      "x": 38,
+      "type": "query_value"
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Total executed",
+      "height": 13,
+      "tile_def": {
+        "viz": "query_value",
+        "requests": [
+          {
+            "q": "avg:ignite.jobs.executed.total{$host,$instance}.as_count()",
+            "aggregator": "avg"
+          }
+        ],
+        "custom_links": [],
+        "precision": 0
+      },
+      "width": 17,
+      "y": 11,
+      "x": 56,
+      "type": "query_value"
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Average wait time",
+      "height": 13,
+      "tile_def": {
+        "viz": "query_value",
+        "requests": [
+          {
+            "q": "avg:ignite.jobs.wait_time.average{$host,$instance}",
+            "aggregator": "avg"
+          }
+        ],
+        "custom_links": [],
+        "precision": 0,
+        "custom_unit": "sec"
+      },
+      "width": 17,
+      "y": 11,
+      "x": 74,
+      "type": "query_value"
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Total pages written",
+      "height": 13,
+      "tile_def": {
+        "viz": "query_value",
+        "requests": [
+          {
+            "q": "avg:ignite.pages_written{$host,$instance}.as_count()",
+            "aggregator": "avg"
+          }
+        ],
+        "custom_links": [],
+        "precision": 0
+      },
+      "width": 17,
+      "y": 11,
+      "x": 164,
+      "type": "query_value"
+    },
+    {
+      "font_size": "18",
+      "width": 36,
+      "tick_pos": "50%",
+      "tick_edge": "left",
+      "text_align": "left",
+      "height": 45,
+      "bgcolor": "white",
+      "html": "With this dashboard, you can get a high-level view of your Apache Ignite deployments and troubleshoot performance issues, including:\n\n- when a node goes offline or is kicked out of a cluster\n- unresponsive applications due to insufficient heap space on a node\n- drops in cache size, resulting in data loss\n- page write throttling\n\nTo learn more about our Ignite integration, see:\n\n- Our [official integration documentation](https://docs.datadoghq.com/integrations/ignite)\n- Our [blog post](https://www.datadoghq.com/blog/monitor-apache-ignite-with-datadog)\n\nYou can clone this dashboard, copy and paste widgets from other out-of-the-box dashboards, and create your own visualizations for your custom applications.",
+      "y": 15,
+      "x": 1,
+      "tick": false,
+      "type": "note"
+    },
+    {
+      "font_size": "18",
+      "width": 71,
+      "tick_pos": "50%",
+      "tick_edge": "bottom",
+      "text_align": "center",
+      "height": 10,
+      "bgcolor": "blue",
+      "html": "# Memory\nThese metrics show memory usage across Ignite clusters",
+      "y": 27,
+      "x": 38,
+      "tick": false,
+      "type": "note"
+    },
+    {
+      "font_size": "18",
+      "width": 71,
+      "tick_pos": "50%",
+      "tick_edge": "bottom",
+      "text_align": "center",
+      "height": 10,
+      "bgcolor": "blue",
+      "html": "# Threads\nThese metrics show data for node thread pools ",
+      "y": 110,
+      "x": 38,
+      "tick": false,
+      "type": "note"
+    },
+    {
+      "font_size": "18",
+      "width": 71,
+      "tick_pos": "50%",
+      "tick_edge": "bottom",
+      "text_align": "center",
+      "height": 10,
+      "bgcolor": "blue",
+      "html": "# Cache\nThese metrics represent the distributed cache for Ignite nodes",
+      "y": 27,
+      "x": 110,
+      "tick": false,
+      "type": "note"
+    },
+    {
+      "font_size": "18",
+      "width": 35,
+      "tick_pos": "50%",
+      "tick_edge": "right",
+      "text_align": "left",
+      "height": 19,
+      "bgcolor": "gray",
+      "html": "A node\u2019s health can be affected by increases in heap space usage such as inefficient SQL queries that return large result sets. You can optimize the queries that are consuming the most memory by splitting them up into smaller ones or using lazy queries.",
+      "y": 84,
+      "x": 1,
+      "tick": true,
+      "type": "note"
+    },
+    {
+      "font_size": "18",
+      "width": 31,
+      "tick_pos": "50%",
+      "tick_edge": "left",
+      "text_align": "left",
+      "height": 14,
+      "bgcolor": "gray",
+      "html": "A sudden drop in cache size could be an indicator that memory was lost when a node was restarted. This can happen if there are no available backups. ",
+      "y": 48,
+      "x": 184,
+      "tick": true,
+      "type": "note"
+    },
+    {
+      "title_size": 16,
+      "title": true,
+      "title_align": "left",
+      "title_text": "Current rejected jobs",
+      "height": 13,
+      "tile_def": {
+        "viz": "query_value",
+        "requests": [
+          {
+            "q": "avg:ignite.jobs.rejected.current{$host,$instance}",
+            "aggregator": "avg"
+          }
+        ],
+        "custom_links": [],
+        "precision": 0
+      },
+      "width": 17,
+      "y": 11,
+      "x": 92,
+      "type": "query_value"
+    },
+    {
+      "font_size": "16",
+      "width": 71,
+      "tick_pos": "50%",
+      "tick_edge": "bottom",
+      "text_align": "center",
+      "height": 9,
+      "bgcolor": "vivid_blue",
+      "html": "# Job Summary\n",
+      "y": 1,
+      "x": 38,
+      "tick": false,
+      "type": "note"
+    },
+    {
+      "font_size": "16",
+      "width": 71,
+      "tick_pos": "50%",
+      "tick_edge": "bottom",
+      "text_align": "center",
+      "height": 9,
+      "bgcolor": "vivid_blue",
+      "html": "# Page Summary\n",
+      "y": 1,
+      "x": 110,
+      "tick": false,
+      "type": "note"
+    },
+    {
+      "font_size": "18",
+      "width": 31,
+      "tick_pos": "50%",
+      "tick_edge": "left",
+      "text_align": "left",
+      "height": 30,
+      "bgcolor": "gray",
+      "html": "Periodically, Ignite starts a checkpointing process to sync dirty pages between RAM and specific partition files on disk to ensure pages are up to date and free up disk space.\n\nIf there is an issue, you may see a spike in pages that are not synchronized, and the number of page writes may drop to zero. This could halt any update operations until Ignite can successfully complete the checkpointing process.\n",
+      "y": 1,
+      "x": 184,
+      "tick": true,
+      "type": "note"
+    },
+    {
+      "font_size": "18",
+      "width": 35,
+      "tick_pos": "50%",
+      "tick_edge": "right",
+      "text_align": "left",
+      "height": 25,
+      "bgcolor": "gray",
+      "html": "Ignite uses a variety of thread pools to efficiently manage cache, compute grid, query, and other critical processes. By default, Ignite will automatically manage the number of threads in each of these pools.\n\nMonitoring thread activity ensures there are enough threads in a pool to process incoming jobs and not block I/O operations.",
+      "y": 128,
+      "x": 1,
+      "tick": true,
+      "type": "note"
+    },
+    {
+      "font_size": "18",
+      "width": 31,
+      "tick_pos": "50%",
+      "tick_edge": "left",
+      "text_align": "left",
+      "height": 30,
+      "bgcolor": "gray",
+      "html": "Ignite uses cache partitions by default, which divides data into partitions that are equally distributed across nodes. Partitions are rebalanced automatically as nodes are added or removed from a cluster, known as affinity colocation.\n\nYou can monitor the state of your rebalanced partitions to ensure they are evenly distributed across participating nodes. If not, tuning the affinity function may be needed.\n\n",
+      "y": 69,
+      "x": 184,
+      "tick": true,
+      "type": "note"
+    }
+  ],
+  "id": 65996
 }

@@ -29,9 +29,21 @@ Follow the instructions below to configure this check for an Agent running on a 
        ## @param port - integer - required
        ## Enter the port of the host to connect to.
        port: 6379
+
+       ## @param username - string - optional
+       ## The username to use for the connection. Redis 6+ only.
+       #
+       # username: <USERNAME>
+
+       ## @param password - string - optional
+       ## The password to use for the connection.
+       #
+       # password: <PASSWORD>
    ```
 
-2. [Restart the Agent][5].
+2. If using Redis 6+ and ACLs, ensure that the user has at least `DB  Viewer` permissions at the Database level, and `Cluster Viewer` permissions if operating in a cluster environment.  For more details, see the [documentation][16].
+
+3. [Restart the Agent][5].
 
 ##### Log collection
 
@@ -173,3 +185,4 @@ Additional helpful documentation, links, and articles:
 [13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
 [14]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [15]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
+[16]: https://docs.redislabs.com/latest/rs/administering/access-control/user-roles/#cluster-management-roles

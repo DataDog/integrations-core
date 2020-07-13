@@ -48,7 +48,7 @@ class TrelloClient:
             'Networks': '5e79109821620a60014fc016',
             'Processes': '5e7910789f92a918152b700d',
             'Trace': '5c050640ecb34f0915ec589a',
-            'Tools and Libraries': '5ab12740841642c2a8829053',
+            'Tools and Libs': '5ab12740841642c2a8829053',
         }
         self.progress_columns = {
             '55d1fe4cd3192ab85fa0f7ea': 'In Progress',  # INPROGRESS
@@ -100,7 +100,7 @@ class TrelloClient:
         map_team_list = {v: k for k, v in self.team_list_map.items()}
 
         counts = {
-            k: {'Total': 0, 'In Progress': 0, 'Issues Found': 0, 'Awaiting Build': 0, 'Done': 0}
+            k: {'Total': 0, 'Inbox': 0, 'In Progress': 0, 'Issues Found': 0, 'Awaiting Build': 0, 'Done': 0}
             for k in map_label.values()
         }
 
@@ -110,13 +110,13 @@ class TrelloClient:
             for label in labels:
                 if label['name'] in self.label_map:
                     team = label['name']
-                    counts[team]['Total'] += 1
                     id_list = card['idList']
+
                     if id_list in map_team_list:
-                        # Team's Inbox
-                        # NOTE: This is "In Progress" but not technically started, yet
-                        counts[team]['In Progress'] += 1
+                        counts[team]['Total'] += 1
+                        counts[team]['Inbox'] += 1
                     elif id_list in self.progress_columns:
+                        counts[team]['Total'] += 1
                         counts[team][self.progress_columns[id_list]] += 1
 
         return counts

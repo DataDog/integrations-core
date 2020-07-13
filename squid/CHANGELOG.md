@@ -1,5 +1,10 @@
 # CHANGELOG - Squid
 
+## 1.7.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Fixed] Fix formatting of a log line. See [#6990](https://github.com/DataDog/integrations-core/pull/6990).
+
 ## 1.6.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).

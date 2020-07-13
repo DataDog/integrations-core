@@ -168,6 +168,13 @@ instances:
     #
     # ssl_crlfile: <SSL_FILE_PATH>
 
+    ## @param broker_requests_batch_size - integer - optional - default: 30
+    ## The OffsetRequests sent to each broker are batched by the kafka_consumer check in groups of 30 by default.
+    ## If the batch size is too big, you may see KafkaTimeoutError exceptions in the logs while running the wakeup calls.
+    ## If the batch size is too small, the check will take longer to run.
+    #
+    # broker_requests_batch_size: 30
+
     ## DEPRECATED:
     ## The following settings are only used when fetching consumer offsets from Zookeeper.
     ## This functionality is deprecated and will be removed at some point in the future.
