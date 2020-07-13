@@ -24,7 +24,7 @@ This integration forwards logs to Datadog using Azure with Event Hubs. Configure
    - To change existing settings, select **Edit setting**.
    - To add new settings, select **Add diagnostics setting**. You can have up to three settings.
 
-5. Select the Stream to an event hub check box, and then select Event Hub/Configure.
+5. Select the **Stream to an event hub** check box, and then select **Event Hub/Configure**.
 
 6. Select the Azure subscription and Event Hubs namespace that you created earlier to route the logs to.
    
