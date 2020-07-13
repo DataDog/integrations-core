@@ -20,7 +20,7 @@ Note: If you edit the namespace & metrics name, or add any other metric they are
 
 Contribute to the integration if you want to add a relevant metric.
 
-## Validation
+### Validation
 
 [Run the Agent's `status` subcommand][1] and look for `kube_proxy` under the Checks section.
 
