@@ -9,7 +9,7 @@ import click
 from ...utils import complete_valid_checks, get_root, get_valid_integrations, read_readme_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
-IMAGE_EXTENSIONS = {"png", "jpg"}
+IMAGE_EXTENSIONS = {".png", ".jpg"}
 NON_TILE_INTEGRATIONS = {"sortdb", "hbase_master", "kube_proxy"}
 
 
@@ -50,7 +50,7 @@ def readmes(ctx, integration):
                 if ext in line:
                     IMAGE_REGEX = (
                         rf".*https:\/\/raw\.githubusercontent\.com\/DataDog\/"
-                        rf"{re.escape(repo)}\/master\/({re.escape(integration)}\/images\/.*.\.{ext}).*"
+                        rf"{re.escape(repo)}\/master\/({re.escape(integration)}\/images\/.*.{ext}).*"
                     )
 
                     match = re.match(IMAGE_REGEX, line)
