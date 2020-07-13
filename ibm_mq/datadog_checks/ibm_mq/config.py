@@ -13,7 +13,8 @@ from datadog_checks.base.constants import ServiceCheck
 
 try:
     import pymqi
-except ImportError:
+except ImportError as e:
+    pymqiException = e
     pymqi = None
 else:
     # Since pymqi is not be available/installed on win/macOS when running e2e,
@@ -145,6 +146,8 @@ class IBMMQConfig:
 
     @staticmethod
     def get_channel_status_mapping(channel_status_mapping_raw):
+        if pymqi is None:
+            raise pymqiException
         if channel_status_mapping_raw:
             custom_mapping = {}
             for ibm_mq_status_raw, service_check_status_raw in channel_status_mapping_raw.items():

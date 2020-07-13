@@ -26,9 +26,9 @@ class MetadataCollector(object):
 
     def _get_version(self, queue_manager):
         pcf = pymqi.PCFExecute(queue_manager)
-        resp = pcf.MQCMD_INQUIRE_Q_MGR()
+        resp = pcf.MQCMD_INQUIRE_Q_MGR({pymqi.CMQCFC.MQIACF_Q_MGR_ATTRS: [pymqi.CMQC.MQCA_VERSION]})
         try:
-            version = to_native_string(resp[0][2120])
+            version = to_native_string(resp[0][pymqi.CMQC.MQCA_VERSION])
             self.log.debug("IBM MQ version from response: %s", version)
         except Exception as e:
             self.log.debug("Error collecting IBM MQ version: %s", e)
