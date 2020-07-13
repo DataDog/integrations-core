@@ -253,7 +253,7 @@ class YarnCheck(AgentCheck):
                 val = app_json[yarn_key]
                 if val:
                     if split_app_tags and yarn_key == 'applicationTags':
-                        splitted_tags = self.__split_yarn_application_tags(val, dd_tag)
+                        splitted_tags = self._split_yarn_application_tags(val, dd_tag)
                         tags.extend(splitted_tags)
                     else:
                         tags.append('{tag}:{value}'.format(tag=dd_tag, value=val))
@@ -261,7 +261,7 @@ class YarnCheck(AgentCheck):
                 self.log.error("Invalid value %s for application_tag", yarn_key)
         return tags
 
-    def __split_yarn_application_tags(self, application_tags, dd_tag):
+    def _split_yarn_application_tags(self, application_tags, dd_tag):
         """Splits the YARN application tags string, if formatted as
         "key1:val1,key2:val2" into Datadog application tags as such:
             app_key1: val1
