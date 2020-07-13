@@ -1137,9 +1137,10 @@ def test_oids_cache_refresh(refresh_interval, has_next_bulk_oids):
 
 
 @pytest.mark.parametrize(
-    "refresh_interval, getnext_call_counts", [pytest.param(0, [5, 10, 15]), pytest.param(3600, [5, 5, 5])]
+    "refresh_interval, getnext_call_counts, getnext_call_count_after_reset",
+    [pytest.param(0, [5, 10, 15], 20), pytest.param(3600, [5, 5, 5], 10)],
 )
-def test_oids_cache_command_calls(refresh_interval, getnext_call_counts):
+def test_oids_cache_command_calls(refresh_interval, getnext_call_counts, getnext_call_count_after_reset):
     instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
     instance['refresh_scalar_oids_cache_interval'] = refresh_interval
     check = common.create_check(instance)
@@ -1149,3 +1150,7 @@ def test_oids_cache_command_calls(refresh_interval, getnext_call_counts):
         for call_count in getnext_call_counts:
             check.check(instance)
             assert snmp_getnext.call_count == call_count
+
+        check._config.oids_config._last_ts = 0
+        check.check(instance)
+        assert snmp_getnext.call_count == getnext_call_count_after_reset
