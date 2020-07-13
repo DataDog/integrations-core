@@ -13,3 +13,9 @@ files:
         port.value.example: 9999
         port.description: Solr JMX port to connect to.
         name.value.example: solr_instance
+  - template: logs
+    example:
+    - type: file
+      path: /var/solr/logs/solr.log
+      source: solr
+      service: <SERVICE_NAME>

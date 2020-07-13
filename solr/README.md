@@ -117,6 +117,43 @@ List of filters is only supported in Datadog Agent > 5.3.0. If you are using an 
 
 For containerized environments, see the [Autodiscovery with JMX][2] guide.
 
+##### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+      ```yaml
+       logs_enabled: true
+     ```
+
+2. By default, Datadog's integration pipeline supports the following conversion [pattern][8 ]:
+
+   ```text
+   %d{yyyy-MM-dd HH:mm:ss} [%thread] %level{length=10} %c{1}:%L - %m%n
+   ```
+
+    Clone and edit the [integration pipeline][9 ] if you have a different format.
+
+
+3. Uncomment and edit the logs configuration block in your `solr.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample solr.d/solr.yaml][6] for all available configuration options.
+
+      ```yaml
+       logs:
+         - type: file
+           path: /var/solr/logs/solr.log # or your custom log location
+           source: solr
+           service: <SERVICE_NAME>
+           # To handle multi line that starts with yyyy-mm-dd use the following pattern
+           # log_processing_rules:
+           #   - type: multi_line
+           #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+           #     name: new_log_start_with_date
+     ```
+
+4. [Restart the Agent][7].
+
+See [Datadog's documentation][10] for additional information on how to configure the Agent for log collection in Docker environments.
+
+
 ### Validation
 
 [Run the Agent's status subcommand][8] and look for `solr` under the Checks section.
@@ -188,3 +225,5 @@ attribute:
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/solr/metadata.csv
+[10]: https://docs.datadoghq.com/agent/docker/log/
+[11]: https://logging.apache.org/log4j/2.x/manual/layouts.html#Patterns
