@@ -122,6 +122,6 @@ def test_oid_mib_symbol(identity, mib, symbol, prefix):
     ],
 )
 def test_oid_is_prefix(oid, prefix_oid, expected_is_prefix):
-    # type: (tuple, tuple, bool) -> None
+    # type: (Tuple[int, ...], Tuple[int], bool) -> None
 
     assert oid_is_prefix(oid, prefix_oid) == expected_is_prefix

@@ -341,7 +341,7 @@ def batches(lst, size):
 
 
 def oid_is_prefix(oid, oid_prefix):
-    # type: (tuple, tuple) -> bool
+    # type: (Tuple[int, ...], Tuple[int, ...]) -> bool
     """
     Return whether an `oid` (tuple) is prefixed by `oid_prefix` (tuple).
 

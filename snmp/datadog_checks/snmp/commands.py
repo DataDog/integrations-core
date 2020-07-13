@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import Any, Dict, Generator
+from typing import Any, Dict, Generator, Tuple
 
 from pyasn1.type.univ import Null
 from pysnmp.entity.rfc3413 import cmdgen
@@ -114,7 +114,7 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
 
 
 def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_nonincreasing_oid):
-    # type: (InstanceConfig, tuple, int, int, bool, bool) -> Generator
+    # type: (InstanceConfig, Tuple[int, ...], int, int, bool, bool) -> Generator
     """Call SNMP GETBULK on an oid."""
 
     if config.device is None:
