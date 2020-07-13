@@ -44,8 +44,7 @@ class IbmMqCheck(AgentCheck):
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, self.config.tags)
             return
 
-        if self.is_metadata_collection_enabled():
-            self.collect_metadata(queue_manager)
+        self._collect_metadata(queue_manager)
 
         try:
             self.channel_metric_collector.get_pcf_channel_metrics(queue_manager)
@@ -59,15 +58,15 @@ class IbmMqCheck(AgentCheck):
         else:
             self.log.warning("Unknown metric type `%s` for metric `%s`", metric_type, metric_name)
 
-    def collect_metadata(self, queue_manager):
+    @AgentCheck.metadata_entrypoint
+    def _collect_metadata(self, queue_manager):
         try:
-            ver_part = self.metadata_collector._collect_metadata(queue_manager)
+            ver_part = self.metadata_collector.collect_metadata(queue_manager)
             if ver_part:
                 raw_ver = ver_part["major"] + "." + ver_part["minor"] + "." + ver_part["mod"] + "." + ver_part["fix"]
                 self.set_metadata('version', raw_ver, scheme='parts', part_map=ver_part)
                 self.log.debug('Found ibm_mq version: %s', raw_ver)
             else:
                 self.log.debug('Could not retrieve ibm_mq version info')
-        except BaseException as e:
+        except Exception as e:
             self.log.debug('Could not retrieve ibm_mq version info: %s', e)
-            return None

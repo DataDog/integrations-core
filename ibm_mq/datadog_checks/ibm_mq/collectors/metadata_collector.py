@@ -15,12 +15,12 @@ class MetadataCollector(object):
     def __init__(self, log):
         self.log = log
 
-    def _collect_metadata(self, queue_manager):
+    def collect_metadata(self, queue_manager):
         try:
             raw_version = self._get_version(queue_manager)
             self.log.debug('IBM MQ version: %s', raw_version)
             return raw_version
-        except BaseException as e:
+        except Exception as e:
             self.log.debug("Version could not be retreived: %s", e)
             return
 
@@ -30,7 +30,7 @@ class MetadataCollector(object):
         try:
             version = to_native_string(resp[0][2120])
             self.log.debug("IBM MQ version from response: %s", version)
-        except BaseException as e:
+        except Exception as e:
             self.log.debug("Error collecting IBM MQ version: %s", e)
             return None
 
@@ -48,5 +48,5 @@ class MetadataCollector(object):
                 'mod': str(int(mod)),
                 'fix': str(int(fix)),
             }
-        except BaseException:
+        except Exception:
             return None
