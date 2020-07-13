@@ -51,6 +51,9 @@ class PostgresConfig:
         self.collect_exec_plan_event_limit = instance.get('collect_exec_plan_event_limit', 1000)
         self.collect_exec_plan_function = instance.get('collect_exec_plan_function', 'public.explain_statement')
         self.custom_queries = instance.get('custom_queries', [])
+        # default for both pg_stat_functions is to query the default views
+        self.pg_stat_activity_function = instance.get('pg_stat_activity_function', 'pg_stat_activity')
+        self.pg_stat_statements_function = instance.get('pg_stat_statements_function', 'pg_stat_statements')
 
         if not self.host:
             raise ConfigurationError('Please specify a Postgres host to connect to.')

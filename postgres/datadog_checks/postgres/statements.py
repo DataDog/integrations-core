@@ -35,12 +35,13 @@ class EventEncoder(json.JSONEncoder):
 # but not when it is run every 100ms for instance. Full queries can be quite large.
 STATEMENTS_QUERY = """
 SELECT {cols}
-  FROM pg_stat_statements
+  FROM {pg_stat_statements_function} as pg_stat_statements 
   LEFT JOIN pg_roles
          ON pg_stat_statements.userid = pg_roles.oid
   LEFT JOIN pg_database
          ON pg_stat_statements.dbid = pg_database.oid
   WHERE pg_database.datname = %s
+  AND query != '<insufficient privilege>'
 ORDER BY (pg_stat_statements.total_time / NULLIF(pg_stat_statements.calls, 0)) DESC;
 """
 
@@ -163,8 +164,10 @@ class PgStatementsMixin(object):
                 if alias in self._pg_stat_statements_columns or alias in PG_STAT_STATEMENTS_TAG_COLUMNS:
                     columns.append('{column} AS {alias}'.format(column=column, alias=alias))
 
-        rows = self._execute_query(cursor, STATEMENTS_QUERY.format(cols=', '.join(columns)),
-                                   params=(self.config.dbname,))
+        rows = self._execute_query(cursor, STATEMENTS_QUERY.format(
+            cols=', '.join(columns),
+            pg_stat_statements_function=self.config.pg_stat_statements_function
+        ), params=(self.config.dbname,))
         if not rows:
             return
         rows = rows[:self.config.max_query_metrics]
@@ -202,10 +205,10 @@ class PgStatementsMixin(object):
     def _get_new_pg_stat_activity(self, instance_tags=None):
         start_time = time.time()
         query = """
-        SELECT * FROM pg_stat_activity
+        SELECT * FROM {pg_stat_activity_function} 
         WHERE datname = %s
         AND coalesce(TRIM(query), '') != ''
-        """
+        """.format(pg_stat_activity_function=self.config.pg_stat_activity_function)
         self.db.rollback()
         with self.db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             if self._activity_last_query_start:
@@ -228,6 +231,9 @@ class PgStatementsMixin(object):
 
     def can_explain_statement(self, statement):
         # TODO: cleaner query cleaning to strip comments, etc.
+        if statement == '<insufficient privilege>':
+            self.log.warn("insufficient privilege. cannot collect query. review the setup instructions at (TODO: add documentation link).")
+            return False
         if statement.strip().split(' ', 1)[0].lower() not in VALID_EXPLAIN_STATEMENTS:
             return False
         if statement.startswith('SELECT {}'.format(self.config.collect_exec_plan_function)):
@@ -246,9 +252,12 @@ class PgStatementsMixin(object):
                 ))
                 result = cursor.fetchone()
                 statsd.histogram("dd.postgres.run_explain.time", (time.time() - start_time) * 1000, tags=instance_tags)
+            except psycopg2.errors.UndefinedFunction:
+                self.log.warn("failed to collect execution plan due to undefined explain_function: %s. refer to setup documentation (TODO link)", self.config.collect_exec_plan_function)
+                return None
             except Exception as e:
                 statsd.increment("dd.postgres.run_explain.error")
-                self.log.error("failed to collect execution plan for query='%s': %s", statement, e)
+                self.log.error("failed to collect execution plan for query='%s'. (%s): %s", statement, type(e), e)
                 return None
         if not result or len(result) < 1 or len(result[0]) < 1:
             return None
@@ -322,7 +331,8 @@ class PgStatementsMixin(object):
             samples = self._get_new_pg_stat_activity(instance_tags=instance_tags)
             events = self._explain_new_pg_stat_activity(samples, seen_statements, seen_statement_plan_sigs,
                                                         instance_tags)
-            self._submit_log_events(events)
+            if events:
+                self._submit_log_events(events)
             time.sleep(self.config.collect_exec_plan_sample_sleep)
 
         self.gauge("dd.postgres.collect_execution_plans.total.time", (time.time() - start_time) * 1000,
