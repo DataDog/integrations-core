@@ -322,24 +322,27 @@ class OidsConfig(object):
         self._parsed_scalar_oids.extend(parsed_scalar_oids)
         self._parsed_next_oids.extend(parsed_next_oids)
         self._parsed_bulk_oids.extend(parsed_bulk_oids)
-        self._reset_oids()
+        self.reset_oids()
 
     def has_oids(self):
         # type: () -> bool
         return bool(self.scalar_oids or self.next_oids or self.bulk_oids)
 
+    def should_reset(self):
+        # type: () -> bool
+        elapsed = time.time() - self._last_ts
+        return elapsed > self._refresh_interval_sec
+
     def update_oids(self, new_scalar_oids):
         # type: (List[OID]) -> None
-        elapsed = time.time() - self._last_ts
-        if self._refresh_interval_sec > elapsed:
-            self._reset_oids()
-        else:
-            self.scalar_oids = new_scalar_oids
-            self.next_oids = []
-            self.bulk_oids = []
+        if self._refresh_interval_sec <= 0:
+            return
+        self.scalar_oids = new_scalar_oids
+        self.next_oids = []
+        self.bulk_oids = []
         self._last_ts = time.time()
 
-    def _reset_oids(self):
+    def reset_oids(self):
         # type: () -> None
         self.scalar_oids = self._parsed_scalar_oids
         self.next_oids = self._parsed_next_oids

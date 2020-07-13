@@ -18,7 +18,7 @@ from datadog_checks.snmp import SnmpCheck
 
 from . import common
 
-pytestmark = pytest.mark.usefixtures("dd_environment")
+# pytestmark = pytest.mark.usefixtures("dd_environment")
 
 
 def test_command_generator():
@@ -1115,3 +1115,37 @@ def test_use_saved_oids(aggregator):
 
     for _ in range(3):
         run_check()
+
+
+@pytest.mark.parametrize("refresh_interval, has_next_bulk_oids", [pytest.param(0, True), pytest.param(3600, False)])
+def test_oids_cache_refresh(refresh_interval, has_next_bulk_oids):
+    instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
+    instance['bulk_threshold'] = 10
+    instance['refresh_scalar_oids_cache_interval'] = refresh_interval
+    check = common.create_check(instance)
+
+    assert bool(check._config.oids_config.scalar_oids) is False
+    assert bool(check._config.oids_config.next_oids) is True
+    assert bool(check._config.oids_config.bulk_oids) is True
+
+    check.check(instance)
+
+    for _ in range(3):
+        assert bool(check._config.oids_config.scalar_oids) is True
+        assert bool(check._config.oids_config.next_oids) is has_next_bulk_oids
+        assert bool(check._config.oids_config.bulk_oids) is has_next_bulk_oids
+
+
+@pytest.mark.parametrize(
+    "refresh_interval, getnext_call_counts", [pytest.param(0, [5, 10, 15]), pytest.param(3600, [5, 5, 5])]
+)
+def test_oids_cache_command_calls(refresh_interval, getnext_call_counts):
+    instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
+    instance['refresh_scalar_oids_cache_interval'] = refresh_interval
+    check = common.create_check(instance)
+
+    with mock.patch('datadog_checks.snmp.snmp.snmp_getnext') as snmp_getnext:
+        assert snmp_getnext.call_count == 0
+        for call_count in getnext_call_counts:
+            check.check(instance)
+            assert snmp_getnext.call_count == call_count

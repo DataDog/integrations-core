@@ -54,7 +54,7 @@ def test_profile_f5_with_oids_cache(oid_batch_size, benchmark):
 
 
 @pytest.mark.parametrize('refresh_scalar_oids_cache_interval', [0, 3600])
-def test_oids_cache(refresh_scalar_oids_cache_interval, benchmark):
+def test_oids_cache_bench(refresh_scalar_oids_cache_interval, benchmark):
     instance = generate_instance_config(BULK_TABULAR_OBJECTS)
     instance['refresh_scalar_oids_cache_interval'] = refresh_scalar_oids_cache_interval
     check = create_check(instance)
