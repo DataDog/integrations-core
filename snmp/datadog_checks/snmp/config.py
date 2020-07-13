@@ -55,7 +55,15 @@ class InstanceConfig:
         'aes256c': 'usmAesCfb256Protocol',
     }
 
-    def __init__(self, instance, global_metrics=None, mibs_path=None, profiles=None, profiles_by_oid=None, loader=None):
+    def __init__(
+        self,
+        instance,  # type: dict
+        global_metrics=None,  # type: List[dict]
+        mibs_path=None,  # type: str
+        profiles=None,  # type: Dict[str, dict]
+        profiles_by_oid=None,  # type: Dict[str, str]
+        loader=None,  # type: MIBLoader
+    ):
         # type: (...) -> None
         global_metrics = [] if global_metrics is None else global_metrics
         profiles = {} if profiles is None else profiles
