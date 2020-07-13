@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
+import time
 from collections import defaultdict
 from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple
 
@@ -32,6 +33,7 @@ class InstanceConfig:
     DEFAULT_ALLOWED_FAILURES = 3
     DEFAULT_BULK_THRESHOLD = 0
     DEFAULT_WORKERS = 5
+    DEFAULT_REFRESH_SCALAR_OIDS_CACHE_INTERVAL = 3600
 
     AUTH_PROTOCOL_MAPPING = {
         'md5': 'usmHMACMD5AuthProtocol',
@@ -144,10 +146,16 @@ class InstanceConfig:
         if not self.metrics and not profiles_by_oid and not profile:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
-        self.all_oids, self.next_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
+        parsed_scalar_oids, parsed_next_oids, parsed_bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
-            self.all_oids.extend(tag_oids)
+            parsed_scalar_oids.extend(tag_oids)
+
+        refresh_interval_sec = instance.get(
+            'refresh_scalar_oids_cache_interval', self.DEFAULT_REFRESH_SCALAR_OIDS_CACHE_INTERVAL
+        )
+        self.oids_config = OidsConfig(refresh_interval_sec)
+        self.oids_config.add_parsed_oids(parsed_scalar_oids, parsed_next_oids, parsed_bulk_oids)
 
         if profile:
             if profile not in profiles:
@@ -164,7 +172,7 @@ class InstanceConfig:
     def refresh_with_profile(self, profile):
         # type: (Dict[str, Any]) -> None
         metrics = profile['definition'].get('metrics', [])
-        all_oids, next_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics)
+        parsed_scalar_oids, parsed_next_oids, parsed_bulk_oids, parsed_metrics = self.parse_metrics(metrics)
 
         metric_tags = profile['definition'].get('metric_tags', [])
         tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
@@ -175,12 +183,9 @@ class InstanceConfig:
         # In the future we'll probably want to implement de-duplication.
 
         self.metrics.extend(metrics)
-        self.all_oids.extend(all_oids)
-        self.next_oids.extend(next_oids)
-        self.bulk_oids.extend(bulk_oids)
+        self.oids_config.add_parsed_oids(parsed_scalar_oids + tag_oids, parsed_next_oids, parsed_bulk_oids)
         self.parsed_metrics.extend(parsed_metrics)
         self.parsed_metric_tags.extend(parsed_metric_tags)
-        self.all_oids.extend(tag_oids)
 
     def add_profile_tag(self, profile_name):
         # type: (str) -> None
@@ -290,18 +295,52 @@ class InstanceConfig:
             return
         # Reference sysUpTimeInstance directly, see http://oidref.com/1.3.6.1.2.1.1.3.0
         uptime_oid = OID('1.3.6.1.2.1.1.3.0')
-        self.all_oids.append(uptime_oid)
+        self.oids_config.add_parsed_oids([uptime_oid], [], [])
         self._resolver.register(uptime_oid, 'sysUpTimeInstance')
 
         parsed_metric = ParsedSymbolMetric('sysUpTimeInstance', forced_type='gauge')
         self.parsed_metrics.append(parsed_metric)
         self._uptime_metric_added = True
 
-    def set_get_only_oids(self, scalar_oids):
+
+class OidsConfig(object):
+    def __init__(self, refresh_interval_sec):
+        # type: (bool) -> None
+        self._refresh_interval_sec = refresh_interval_sec
+        self._last_ts = 0  # type: float
+
+        self._parsed_scalar_oids = []  # type: List[OID]
+        self._parsed_next_oids = []  # type: List[OID]
+        self._parsed_bulk_oids = []  # type: List[OID]
+
+        self.scalar_oids = []  # type: List[OID]
+        self.next_oids = []  # type: List[OID]
+        self.bulk_oids = []  # type: List[OID]
+
+    def add_parsed_oids(self, parsed_scalar_oids, parsed_next_oids, parsed_bulk_oids):
+        # type: (List[OID], List[OID], List[OID]) -> None
+        self._parsed_scalar_oids.extend(parsed_scalar_oids)
+        self._parsed_next_oids.extend(parsed_next_oids)
+        self._parsed_bulk_oids.extend(parsed_bulk_oids)
+        self._reset_oids()
+
+    def has_oids(self):
+        # type: () -> bool
+        return bool(self.scalar_oids or self.next_oids or self.bulk_oids)
+
+    def update_oids(self, new_scalar_oids):
         # type: (List[OID]) -> None
-        """
-        Set `get oids` to be used for following calls.
-        """
-        self.all_oids = scalar_oids
-        self.next_oids = []
-        self.bulk_oids = []
+        elapsed = time.time() - self._last_ts
+        if self._refresh_interval_sec > elapsed:
+            self._reset_oids()
+        else:
+            self.scalar_oids = new_scalar_oids
+            self.next_oids = []
+            self.bulk_oids = []
+        self._last_ts = time.time()
+
+    def _reset_oids(self):
+        # type: () -> None
+        self.scalar_oids = self._parsed_scalar_oids
+        self.next_oids = self._parsed_next_oids
+        self.bulk_oids = self._parsed_bulk_oids

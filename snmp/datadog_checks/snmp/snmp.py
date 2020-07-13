@@ -164,11 +164,7 @@ class SnmpCheck(AgentCheck):
             return None
 
     def fetch_results(
-        self,
-        config,  # type: InstanceConfig
-        all_oids,  # type: List[OID]
-        next_oids,  # type: List[OID]
-        bulk_oids,  # type: List[OID]
+        self, config,  # type: InstanceConfig
     ):
         # type: (...) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], List[OID], Optional[str]]
         """
@@ -182,8 +178,13 @@ class SnmpCheck(AgentCheck):
         results = defaultdict(dict)  # type: DefaultDict[str, Dict[Tuple[str, ...], Any]]
         enforce_constraints = config.enforce_constraints
 
-        all_binds, error = self.fetch_oids(config, all_oids, next_oids, enforce_constraints=enforce_constraints)
-        for oid in bulk_oids:
+        all_binds, error = self.fetch_oids(
+            config,
+            config.oids_config.scalar_oids,
+            config.oids_config.next_oids,
+            enforce_constraints=enforce_constraints,
+        )
+        for oid in config.oids_config.bulk_oids:
             try:
                 self.log.debug('Running SNMP command getBulk on OID %s', oid)
                 binds = snmp_bulk(
@@ -212,7 +213,7 @@ class SnmpCheck(AgentCheck):
         results.default_factory = None  # type: ignore
         return results, scalar_oids, error
 
-    def fetch_oids(self, config, all_oids, next_oids, enforce_constraints):
+    def fetch_oids(self, config, scalar_oids, next_oids, enforce_constraints):
         # type: (InstanceConfig, List[OID], List[OID], bool) -> Tuple[List[Any], Optional[str]]
         # UPDATE: We used to perform only a snmpgetnext command to fetch metric values.
         # It returns the wrong value when the OID passed is referring to a specific leaf.
@@ -221,11 +222,11 @@ class SnmpCheck(AgentCheck):
         # iso.3.6.1.2.1.25.4.2.1.7.224 = INTEGER: 2
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
         error = None
-        all_oids = [oid.as_object_type() for oid in all_oids]
+        scalar_oids = [oid.as_object_type() for oid in scalar_oids]
         next_oids = [oid.as_object_type() for oid in next_oids]
         all_binds = []
 
-        for oids_batch in batches(all_oids, size=self.oid_batch_size):
+        for oids_batch in batches(scalar_oids, size=self.oid_batch_size):
             try:
                 self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
 
@@ -376,19 +377,17 @@ class SnmpCheck(AgentCheck):
         error = results = None
         tags = config.tags
         try:
-            if not (config.all_oids or config.next_oids or config.bulk_oids):
+            if not (config.oids_config.has_oids()):
                 sys_object_oid = self.fetch_sysobject_oid(config)
                 profile = self._profile_for_sysobject_oid(sys_object_oid)
                 config.refresh_with_profile(self.profiles[profile])
                 config.add_profile_tag(profile)
 
-            if config.all_oids or config.next_oids or config.bulk_oids:
+            if config.oids_config.has_oids():
                 self.log.debug('Querying %s', config.device)
                 config.add_uptime_metric()
-                results, scalar_oids, error = self.fetch_results(
-                    config, config.all_oids, config.next_oids, config.bulk_oids
-                )
-                config.set_get_only_oids(scalar_oids)
+                results, scalar_oids, error = self.fetch_results(config)
+                config.oids_config.update_oids(scalar_oids)
                 tags = self.extract_metric_tags(config.parsed_metric_tags, results)
                 tags.extend(config.tags)
                 self.report_metrics(config.parsed_metrics, results, tags)

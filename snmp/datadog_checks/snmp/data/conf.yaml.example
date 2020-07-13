@@ -374,3 +374,11 @@ instances:
     #    tags:
     #        host: \2
     #        device_type: \1
+
+    ## @param refresh_scalar_oids_cache_interval - integer - optional - default: 3600
+    ## Number of seconds between each discovering and caching of scalar instance oids using GETNEXT and GETBULK.
+    ## Using scalar instance oids to fetch metrics data is more efficient than using GETNEXT and GETBULK.
+    ## Table oids are fetched once using GETNEXT or GETBULK then cached as scalar instance oids for following
+    ## check runs at each refresh.
+    #
+    # refresh_scalar_oids_cache_interval: 3600
