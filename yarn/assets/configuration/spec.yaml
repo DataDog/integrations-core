@@ -83,6 +83,14 @@ files:
               type: array
               items:
                 type: string
+          - name: split_yarn_application_tags
+            description: |
+              Set this parameter to true to split YARN application tags string formatted as
+              `key1:value1,key2:value2,...` into Datadog application tags as such:
+              `app_key1: value1`, `app_key2: value2`, etc.
+            value:
+              example: false
+              type: boolean
 
           - template: instances/http
           - template: instances/default

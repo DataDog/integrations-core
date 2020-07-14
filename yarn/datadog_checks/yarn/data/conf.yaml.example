@@ -112,15 +112,6 @@ instances:
     #   - <QUEUE_NAME_1>
     #   - <QUEUE_NAME_2>
 
-    ## @param tags - list of key:value elements - optional
-    ## List of tags to attach to every metric, event, and service check emitted by this Integration.
-    ##
-    ## Learn more about tagging: https://docs.datadoghq.com/tagging/
-    #
-    # tags:
-    #   - <KEY_1>:<VALUE_1>
-    #   - <KEY_2>:<VALUE_2>
-
     ## @param split_yarn_application_tags - boolean - optional - default: false
     ## Set this parameter to true to split YARN application tags string formatted as
     ## `key1:value1,key2:value2,...` into Datadog application tags as such:
@@ -204,7 +195,7 @@ instances:
     ## a domain that is used in the check. For NTLM Auth, append
     ## the username to domain, not as the `username` parameter.
     #
-    # ntlm_domain: <NTLM_DOMAIN>/<USERNAME>
+    # ntlm_domain: <NTLM_DOMAIN>\<USERNAME>
 
     ## @param kerberos_auth - string - optional - default: disabled
     ## If your services use Kerberos authentication, you can specify the Kerberos
