@@ -21,7 +21,7 @@ TRACE_LEVEL = 7
 LOGGER_FRAME_SEARCH_MAX_DEPTH = 50
 
 
-default_fallback_logger = logging.getLogger(__name__)
+DEFAULT_FALLBACK_LOGGER = logging.getLogger(__name__)
 
 
 class AgentLogger(logging.getLoggerClass()):
@@ -169,11 +169,14 @@ def get_check_logger(default_logger=None):
     from datadog_checks.base import AgentCheck
 
     for i in range(LOGGER_FRAME_SEARCH_MAX_DEPTH):
-        frame = sys._getframe(i)
+        try:
+            frame = sys._getframe(i)
+        except ValueError:
+            break
         if 'self' in frame.f_locals:
             check = frame.f_locals['self']
             if isinstance(check, AgentCheck):
                 return check.log
     if default_logger is not None:
         return default_logger
-    return default_fallback_logger
+    return DEFAULT_FALLBACK_LOGGER
