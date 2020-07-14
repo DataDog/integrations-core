@@ -30,7 +30,10 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "Replication Behind Master": "assets/recommended_monitors/mysql_replication_seconds_behind_master.json",
+      "Slave Replication Not Running": "assets/recommended_monitors/mysql_replication_slave.json"
+    },
     "dashboards": {},
     "saved_views": {
       "operations": "assets/saved_views/operations.json",

@@ -72,7 +72,9 @@ assets/               @DataDog/agent-integrations @DataDog/integrations-tools-an
 /process/                                 @DataDog/agent-integrations @DataDog/agent-platform
 
 # Checks base
-/datadog_checks_base/ @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
+/datadog_checks_base/                                          @DataDog/agent-core @DataDog/agent-integrations
+/datadog_checks_base/datadog_checks/base/checks/openmetrics/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
+/datadog_checks_base/datadog_checks/base/checks/kube_leader/   @DataDog/agent-core @DataDog/agent-integrations @DataDog/container-integrations
 
 # To keep Security up-to-date with changes to requirements.txt.
 requirements.in                                           @trishankatdatadog

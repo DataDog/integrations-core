@@ -11,7 +11,7 @@ metrics:
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Current CPU usage (percentage).
-      OID: 1.3.6.1.4.1.12356.101.4.1.3
+      OID: 1.3.6.1.4.1.12356.101.4.1.3.0
       name: fgSysCpuUsage
 
   ### Processors
@@ -20,7 +20,7 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.12356.101.4.4.2
       name: fgProcessorTable
-    forced_type: monotonic_count
+    forced_type: monotonic_count_and_rate
     symbols:
       # The total number of packets received by this processor.
       - OID: 1.3.6.1.4.1.12356.101.4.4.2.1.6
@@ -59,34 +59,34 @@ metrics:
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Current memory utilization (percentage).
-      OID: 1.3.6.1.4.1.12356.101.4.1.4
+      OID: 1.3.6.1.4.1.12356.101.4.1.4.0
       name: fgSysMemUsage
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Total physical memory (RAM) installed (KB).
-      OID: 1.3.6.1.4.1.12356.101.4.1.5
+      OID: 1.3.6.1.4.1.12356.101.4.1.5.0
       name: fgSysMemCapacity
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Current lowmem utilization (percentage). Lowmem is memory available for the kernel's own data structures and kernel specific tables. The system can get into a bad state if it runs out of lowmem.
-      OID: 1.3.6.1.4.1.12356.101.4.1.9
+      OID: 1.3.6.1.4.1.12356.101.4.1.9.0
       name: fgSysLowMemUsage
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Total lowmem capacity (KB). See fgSysLowMemUsage for the description of lowmem.
-      OID: 1.3.6.1.4.1.12356.101.4.1.10
+      OID: 1.3.6.1.4.1.12356.101.4.1.10.0
       name: fgSysLowMemCapacity
 
   ### Disk
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Current hard disk usage (MB), if disk is present.
-      OID: 1.3.6.1.4.1.12356.101.4.1.6
+      OID: 1.3.6.1.4.1.12356.101.4.1.6.0
       name: fgSysDiskUsage
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Total hard disk capacity (MB), if disk is present.
-      OID: 1.3.6.1.4.1.12356.101.4.1.7
+      OID: 1.3.6.1.4.1.12356.101.4.1.7.0
       name: fgSysDiskCapacity
 
   ### Virtual Domains
@@ -127,12 +127,12 @@ metrics:
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # The number of virtual domains in vdTable.
-      OID: 1.3.6.1.4.1.12356.101.3.1.1
+      OID: 1.3.6.1.4.1.12356.101.3.1.1.0
       name: fgVdNumber
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # The maximum number of virtual domains allowed on the device as allowed by hardware and/or licensing.
-      OID: 1.3.6.1.4.1.12356.101.3.1.2
+      OID: 1.3.6.1.4.1.12356.101.3.1.2.0
       name: fgVdMaxVdoms
 
   ### Interfaces
@@ -162,32 +162,32 @@ metrics:
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Number of active sessions on the device.
-      OID: 1.3.6.1.4.1.12356.101.4.1.8
+      OID: 1.3.6.1.4.1.12356.101.4.1.8.0
       name: fgSysSesCount
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # The average session setup rate over the past minute.
-      OID: 1.3.6.1.4.1.12356.101.4.1.11
+      OID: 1.3.6.1.4.1.12356.101.4.1.11.0
       name: fgSysSesRate1
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Number of active ipv6 sessions on the device.
-      OID: 1.3.6.1.4.1.12356.101.4.1.15
+      OID: 1.3.6.1.4.1.12356.101.4.1.15.0
       name: fgSysSes6Count
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # The average ipv6 session setup rate over the past minute.
-      OID: 1.3.6.1.4.1.12356.101.4.1.16
+      OID: 1.3.6.1.4.1.12356.101.4.1.16.0
       name: fgSysSes6Rate1
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # HTTP proxy current connections.
-      OID: 1.3.6.1.4.1.12356.101.10.100.4
+      OID: 1.3.6.1.4.1.12356.101.10.100.4.0
       name: fgApHTTPConnections
   - MIB: FORTINET-FORTIGATE-MIB
     symbol:
       # Maximum number of connections supported by HTTP proxy.
-      OID: 1.3.6.1.4.1.12356.101.10.100.5
+      OID: 1.3.6.1.4.1.12356.101.10.100.5.0
       name: fgApHTTPMaxConnections
 
   ### Firewall
@@ -196,7 +196,7 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.12356.101.5.1.2.1
       name: fgFwPolStatsTable
-    forced_type: monotonic_count
+    forced_type: monotonic_count_and_rate
     symbols:
       # Number of packets matched to policy (passed or blocked, depending on policy action). Count is from the time the policy became active.
       - OID: 1.3.6.1.4.1.12356.101.5.1.2.1.1.2
@@ -216,7 +216,7 @@ metrics:
     table:
       OID: 1.3.6.1.4.1.12356.101.5.1.2.2
       name: fgFwPol6StatsTable
-    forced_type: monotonic_count
+    forced_type: monotonic_count_and_rate
     symbols:
       # Number of packets matched to policy (passed or blocked, depending on policy action). Count is from the time the policy became active.
       - OID: 1.3.6.1.4.1.12356.101.5.1.2.2.1.2

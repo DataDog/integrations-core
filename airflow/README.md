@@ -23,7 +23,9 @@ All three steps below are needed for the Airflow integration to work properly. B
 
 Configure the Airflow check included in the [Datadog Agent][2] package to collect health metrics and service checks.
 
-Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Airflow service checks. See the [sample airflow.d/conf.yaml][3] for all available configuration options.
+(Optional) Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Airflow service checks. See the [sample airflow.d/conf.yaml][3] for all available configuration options.
+
+**Note**: If you are using containers, see [Autodiscovery Container Identifiers][12] for details.
 
 #### Step 2: Connect Airflow to DogStatsD (included in the Datadog Agent) by using Airflow `statsd` feature to collect metrics
 
@@ -38,8 +40,8 @@ Edit the `airflow.d/conf.yaml` file, in the `conf.d/` folder at the root of your
    ```conf
    [scheduler]
    statsd_on = True
-   statsd_host = localhost
-   statsd_port = 8125
+   statsd_host = localhost  # Hostname or IP of server running the Datadog Agent
+   statsd_port = 8125       # DogStatsD port configured in the Datadog Agent
    statsd_prefix = airflow
    ```
 
@@ -231,12 +233,10 @@ See [metadata.csv][6] for a list of metrics provided by this check.
 
 ### Service Checks
 
-**airflow.can_connect**:
-
+**airflow.can_connect**:<br>
 Returns `CRITICAL` if unable to connect to Airflow. Returns `OK` otherwise.
 
-**airflow.healthy**:
-
+**airflow.healthy**:<br>
 Returns `CRITICAL` if Airflow is not healthy. Returns `OK` otherwise.
 
 ### Events
@@ -268,3 +268,4 @@ Need help? Contact [Datadog support][7].
 [9]: https://docs.datadoghq.com/agent/
 [10]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
 [11]: https://airflow.apache.org/docs/stable/_modules/airflow/contrib/hooks/datadog_hook.html
+[12]: https://docs.datadoghq.com/agent/guide/ad_identifiers/

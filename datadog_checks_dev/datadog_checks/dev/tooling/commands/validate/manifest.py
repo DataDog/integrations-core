@@ -362,20 +362,6 @@ def manifest(ctx, fix, include_extras, repo_url):
                 if not public_title or not isinstance(public_title, str):
                     file_failures += 1
                     display_queue.append((echo_failure, '  required non-null string: public_title'))
-                else:
-                    title_start = 'Datadog-'
-                    title_end = ' Integration'
-                    section_char_set = set(public_title[len(title_start) : -len(title_end)].lower())
-                    check_name_char_set = set(check_name.lower())
-                    character_overlap = check_name_char_set & section_char_set
-
-                    correct_start = public_title.startswith(title_start)
-                    correct_end = public_title.endswith(title_end)
-                    overlap_enough = len(character_overlap) > int(len(check_name_char_set) * 0.5)
-
-                    if not (correct_start and correct_end and overlap_enough):
-                        file_failures += 1
-                        display_queue.append((echo_failure, f'  invalid `public_title`: {public_title}'))
 
                 # categories
                 categories = decoded.get('categories')

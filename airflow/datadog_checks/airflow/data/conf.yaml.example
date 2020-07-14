@@ -46,7 +46,7 @@ init_config:
 instances:
 
     ## @param url - string - required
-    ## URL used to connect to the Airflow instance.
+    ## The URL used to connect to the Airflow instance (use the Airflow web server REST API endpoint).
     #
   - url: <URL>
 
@@ -126,7 +126,7 @@ instances:
     ## a domain that is used in the check. For NTLM Auth, append
     ## the username to domain, not as the `username` parameter.
     #
-    # ntlm_domain: <NTLM_DOMAIN>/<USERNAME>
+    # ntlm_domain: <NTLM_DOMAIN>\<USERNAME>
 
     ## @param kerberos_auth - string - optional - default: disabled
     ## If your services use Kerberos authentication, you can specify the Kerberos
