@@ -151,9 +151,7 @@ class InstanceConfig:
         if tag_oids:
             parsed_scalar_oids.extend(tag_oids)
 
-        refresh_interval_sec = instance.get(
-            'refresh_oids_cache_interval', self.DEFAULT_REFRESH_OIDS_CACHE_INTERVAL
-        )
+        refresh_interval_sec = instance.get('refresh_oids_cache_interval', self.DEFAULT_REFRESH_OIDS_CACHE_INTERVAL)
         self.oids_config = OidsConfig(refresh_interval_sec)
         self.oids_config.add_parsed_oids(parsed_scalar_oids, parsed_next_oids, parsed_bulk_oids)
 
