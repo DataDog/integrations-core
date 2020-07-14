@@ -58,6 +58,6 @@ def test_oids_cache_bench(refresh_scalar_oids_cache_interval, benchmark):
     instance = generate_instance_config([])
     instance['community_string'] = 'f5'
     instance['refresh_scalar_oids_cache_interval'] = refresh_scalar_oids_cache_interval
-    check = create_check(instance)
+    check = SnmpCheck('snmp', {'oid_batch_size': 256}, [instance])
 
     benchmark.pedantic(check.check, args=(instance,), iterations=1, rounds=5, warmup_rounds=1)
