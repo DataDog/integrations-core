@@ -113,7 +113,7 @@
     example: false
     type: boolean
   description: |
-    Set to `true` to enable kerberos delegation of credentials to a server that requests delegation.
+    Set to `true` to enable Kerberos delegation of credentials to a server that requests delegation.
 
     See https://github.com/requests/requests-kerberos#delegation
 - name: kerberos_force_initiate
@@ -130,7 +130,7 @@
     type: string
   description: |
     Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't
-    match its kerberos hostname (e.g. behind a content switch or load balancer).
+    match its Kerberos hostname (e.g. behind a content switch or load balancer).
 
     See https://github.com/requests/requests-kerberos#hostname-override
 - name: kerberos_principal
