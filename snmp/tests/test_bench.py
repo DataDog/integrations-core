@@ -53,11 +53,13 @@ def test_profile_f5_with_oids_cache(oid_batch_size, benchmark):
     benchmark.pedantic(check.check, args=(instance,), iterations=1, rounds=5, warmup_rounds=1)
 
 
-@pytest.mark.parametrize('refresh_scalar_oids_cache_interval', [0, 3600])
-def test_oids_cache_bench(refresh_scalar_oids_cache_interval, benchmark):
+@pytest.mark.parametrize(
+    'refresh_scalar_oids_cache_interval,oid_batch_size', [(0, 10), (0, 256), (3600, 10), (3600, 256)]
+)
+def test_oids_cache_bench(refresh_scalar_oids_cache_interval, oid_batch_size, benchmark):
     instance = generate_instance_config([])
     instance['community_string'] = 'f5'
     instance['refresh_scalar_oids_cache_interval'] = refresh_scalar_oids_cache_interval
-    check = SnmpCheck('snmp', {'oid_batch_size': 256}, [instance])
+    check = SnmpCheck('snmp', {'oid_batch_size': oid_batch_size}, [instance])
 
     benchmark.pedantic(check.check, args=(instance,), iterations=1, rounds=5, warmup_rounds=1)
