@@ -357,14 +357,14 @@ class OidsConfig(object):
 
     def _is_cache_enabled(self):
         # type: () -> bool
-        return self._refresh_interval_sec <= 0
+        return self._refresh_interval_sec > 0
 
     def update_scalar_oids(self, new_scalar_oids):
         # type: (List[OID]) -> None
         """
         Use only scalar oids for following snmp calls.
         """
-        if self._is_cache_enabled():
+        if not self._is_cache_enabled():
             return
         self._all_scalar_oids = new_scalar_oids
         self._use_scalar_oids = True
@@ -375,7 +375,7 @@ class OidsConfig(object):
         """
         Weather we should reset oids to initial parsed oids.
         """
-        if self._is_cache_enabled():
+        if not self._is_cache_enabled():
             return False
         elapsed = time.time() - self._last_ts
         return elapsed > self._refresh_interval_sec
