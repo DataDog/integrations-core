@@ -18,7 +18,7 @@ except ImportError:
 # Arbitrary number less than 10 (DEBUG)
 TRACE_LEVEL = 7
 
-MAX_LOGGER_FRAME_SEARCH = 50
+LOGGER_FRAME_SEARCH_MAX_DEPTH = 50
 
 
 default_fallback_logger = logging.getLogger(__name__)
@@ -168,7 +168,7 @@ def get_check_logger(default_logger=None):
     """
     from datadog_checks.base import AgentCheck
 
-    for i in range(MAX_LOGGER_FRAME_SEARCH):
+    for i in range(LOGGER_FRAME_SEARCH_MAX_DEPTH):
         frame = sys._getframe(i)
         if 'self' in frame.f_locals:
             check = frame.f_locals['self']
