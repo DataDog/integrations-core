@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import sys
 from typing import Callable
 
 from six import PY2, text_type
@@ -165,7 +166,6 @@ def get_check_logger(default_logger=None):
     """
     Search the current AgentCheck log starting from closest stack frame.
     """
-    import sys
     from datadog_checks.base import AgentCheck
 
     for i in range(MAX_LOGGER_FRAME_SEARCH):
