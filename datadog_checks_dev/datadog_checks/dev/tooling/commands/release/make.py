@@ -71,7 +71,6 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude, a
     repo_choice = ctx.obj['repo_choice']
     core_workflow = repo_choice == 'core'
 
-    # don't run the task on the master branch
     if get_current_branch() == 'master':
         # This is potentially unsafe, abort if not explicit
         if core_workflow or not allow_master:
