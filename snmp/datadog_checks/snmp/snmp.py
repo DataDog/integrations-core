@@ -377,7 +377,7 @@ class SnmpCheck(AgentCheck):
         error = results = None
         tags = config.tags
         if config.oids_config.should_reset():
-            config.oids_config.reset_oids()
+            config.oids_config.reset()
         try:
             if not (config.oids_config.has_oids()):
                 sys_object_oid = self.fetch_sysobject_oid(config)
