@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import re
 
+import psycopg2
 import semver
 
 V8_3 = semver.parse("8.3.0")
@@ -19,6 +20,16 @@ def get_raw_version(db):
     cursor.execute('SHOW SERVER_VERSION;')
     raw_version = cursor.fetchone()[0]
     return raw_version
+
+
+def is_aurora(db):
+    cursor = db.cursor()
+    try:
+        cursor.execute('select AURORA_VERSION();')
+        return True
+    except psycopg2.errors.UndefinedFunction:
+        db.rollback()
+        return False
 
 
 def parse_version(raw_version):
