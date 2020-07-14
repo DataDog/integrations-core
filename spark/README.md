@@ -67,7 +67,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
        logs_enabled: true
      ```
 
-2. Uncomment and edit the logs configuration block in your `spark.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample spark.d/conf.yaml][14] for all available configuration options.
+2. Uncomment and edit the logs configuration block in your `spark.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample spark.d/conf.yaml][5] for all available configuration options.
 
       ```yaml
        logs:
@@ -84,7 +84,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 3. [Restart the Agent][6].
 
-See [Datadog's documentation][15] for additional information on how to configure the Agent for log collection in Docker environments.
+See [Datadog's documentation][14] for additional information on how to configure the Agent for log collection in Docker environments.
 
 
 ### Validation
@@ -145,5 +145,4 @@ Additional helpful documentation, links, and articles:
 [11]: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-connect-master-node-ssh.html
 [12]: https://www.datadoghq.com/blog/monitoring-spark
 [13]: https://spark.apache.org/
-[14]: https://github.com/DataDog/integrations-core/blob/master/spark/datadog_checks/spark/data/conf.yaml.example
-[15]: https://docs.datadoghq.com/agent/docker/log/
+[14]:  https://docs.datadoghq.com/agent/docker/log/
