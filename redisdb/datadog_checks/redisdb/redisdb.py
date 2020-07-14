@@ -131,17 +131,16 @@ class Redis(AgentCheck):
             self.log.exception("Cannot parse dictionary string: %s", string)
             return default
 
-    def _generate_instance_key(self, instance):
-        if 'unix_socket_path' in instance:
-            return instance.get('unix_socket_path'), instance.get('db')
+    @staticmethod
+    def _generate_instance_key(instance_config):
+        if 'unix_socket_path' in instance_config:
+            return instance_config.get('unix_socket_path'), instance_config.get('db')
         else:
-            return instance.get('host'), instance.get('port'), instance.get('db')
+            return instance_config.get('host'), instance_config.get('port'), instance_config.get('db')
 
-    def _get_conn(self, instance=None):
-        if instance is None:
-            instance = self.instance
-        no_cache = is_affirmative(instance.get('disable_connection_cache', False))
-        key = self._generate_instance_key(instance)
+    def _get_conn(self, instance_config):
+        no_cache = is_affirmative(instance_config.get('disable_connection_cache', False))
+        key = self._generate_instance_key(instance_config)
 
         if no_cache or key not in self.connections:
             try:
@@ -165,8 +164,8 @@ class Redis(AgentCheck):
                 ]
 
                 # Set a default timeout (in seconds) if no timeout is specified in the instance config
-                instance['socket_timeout'] = instance.get('socket_timeout', 5)
-                connection_params = dict((k, instance[k]) for k in list_params if k in instance)
+                instance_config['socket_timeout'] = instance_config.get('socket_timeout', 5)
+                connection_params = dict((k, instance_config[k]) for k in list_params if k in instance_config)
                 # If caching is disabled, we overwrite the dictionary value so the old connection
                 # will be closed as soon as the corresponding Python object gets garbage collected
                 self.connections[key] = redis.Redis(**connection_params)
@@ -187,7 +186,7 @@ class Redis(AgentCheck):
         return tags
 
     def _check_db(self):
-        conn = self._get_conn()
+        conn = self._get_conn(self.instance)
         # Ping the database for info, and track the latency.
         # Process the service check: the check passes if we can connect to Redis
         start = time.time()
@@ -424,7 +423,7 @@ class Redis(AgentCheck):
         within the time range between the last seen entries and now
 
         """
-        conn = self._get_conn()
+        conn = self._get_conn(self.instance)
         if not self.instance.get(MAX_SLOW_ENTRIES_KEY):
             try:
                 max_slow_entries = int(conn.config_get(MAX_SLOW_ENTRIES_KEY)[MAX_SLOW_ENTRIES_KEY])

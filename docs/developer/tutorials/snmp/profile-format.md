@@ -39,6 +39,14 @@ or a wildcard pattern to address multiple device models:
 sysobjectid: 1.3.6.1.131.12.4.*
 ```
 
+or a list of fully-defined OID / wildcard patterns:
+
+```yaml
+sysobjectid:
+  - 1.3.6.1.131.12.4.*
+  - 1.3.6.1.4.1.232.9.4.10
+```
+
 ### `extends`
 
 _(Optional)_
@@ -366,7 +374,7 @@ metric_tags:
     symbol: sysName
     tag: snmp_host
   - # From an OID:
-    OID: 1.3.6.1.2.1.1.5
+    OID: 1.3.6.1.2.1.1.5.0
     symbol: sysName
     tag: snmp_host
   - # With regular expression matching

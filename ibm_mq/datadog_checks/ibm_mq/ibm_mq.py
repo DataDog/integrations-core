@@ -2,14 +2,21 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from typing import Any
+
+from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.ibm_mq.collectors.stats_collector import StatsCollector
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
 from . import connection, errors
 from .collectors import ChannelMetricCollector, QueueMetricCollector
 from .config import IBMMQConfig
+
+try:
+    from typing import Any
+except ImportError:
+    pass
 
 try:
     import pymqi
@@ -31,9 +38,10 @@ class IbmMqCheck(AgentCheck):
             raise errors.PymqiException("You need to install pymqi: {}".format(pymqiException))
 
         self.queue_metric_collector = QueueMetricCollector(
-            self.config, self.service_check, self.warning, self.send_metric, self.log
+            self.config, self.service_check, self.warning, self.send_metric, self.send_metrics_from_properties, self.log
         )
         self.channel_metric_collector = ChannelMetricCollector(self.config, self.service_check, self.gauge, self.log)
+        self.stats_collector = StatsCollector(self.config, self.send_metrics_from_properties, self.log)
 
     def check(self, _):
         try:
@@ -47,6 +55,8 @@ class IbmMqCheck(AgentCheck):
         try:
             self.channel_metric_collector.get_pcf_channel_metrics(queue_manager)
             self.queue_metric_collector.collect_queue_metrics(queue_manager)
+            if self.config.collect_statistics_metrics:
+                self.stats_collector.collect(queue_manager)
         finally:
             queue_manager.disconnect()
 
@@ -55,3 +65,22 @@ class IbmMqCheck(AgentCheck):
             getattr(self, metric_type)(metric_name, metric_value, tags=tags)
         else:
             self.log.warning("Unknown metric type `%s` for metric `%s`", metric_type, metric_name)
+
+    def send_metrics_from_properties(self, properties, metrics_map, prefix, tags):
+        for metric_name, (pymqi_type, metric_type) in iteritems(metrics_map):
+            metric_full_name = '{}.{}'.format(prefix, metric_name)
+            if pymqi_type not in properties:
+                self.log.debug("MQ type `%s` not found in properties for metric `%s` and tags `%s`", metric_name, tags)
+                continue
+            try:
+                metric_value = int(properties[pymqi_type])
+            except ValueError as e:
+                self.log.debug(
+                    "Cannot convert `%s` to int for metric `%s` ang tags `%s`: %s",
+                    properties[pymqi_type],
+                    metric_name,
+                    tags,
+                    e,
+                )
+                return
+            self.send_metric(metric_type, metric_full_name, metric_value, tags)

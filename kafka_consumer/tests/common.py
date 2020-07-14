@@ -4,6 +4,7 @@
 import os
 import socket
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.kafka_consumer.legacy_0_10_2 import LegacyKafkaCheck_0_10_2
 
@@ -14,6 +15,11 @@ KAFKA_CONNECT_STR = '{}:9092'.format(HOST_IP)
 ZK_CONNECT_STR = '{}:2181'.format(HOST)
 TOPICS = ['marvel', 'dc']
 PARTITIONS = [0, 1]
+USE_MULTIPLE_BROKERS = is_affirmative(os.environ['USE_MULTIPLE_BROKERS'])
+if USE_MULTIPLE_BROKERS:
+    DOCKER_IMAGE_PATH = os.path.join(HERE, 'docker', 'multiple-brokers.yaml')
+else:
+    DOCKER_IMAGE_PATH = os.path.join(HERE, 'docker', 'single-broker.yaml')
 
 
 def is_supported(flavor):

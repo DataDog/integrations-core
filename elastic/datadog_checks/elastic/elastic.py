@@ -15,6 +15,7 @@ from .metrics import (
     CLUSTER_PENDING_TASKS,
     health_stats_for_version,
     index_stats_for_version,
+    node_system_stats_for_version,
     pshard_stats_for_version,
     stats_for_version,
 )
@@ -62,6 +63,9 @@ class ESCheck(AgentCheck):
 
         health_url, stats_url, pshard_stats_url, pending_tasks_url = self._get_urls(version, config.cluster_stats)
         stats_metrics = stats_for_version(version)
+        if config.cluster_stats:
+            # Include Node System metrics
+            stats_metrics.update(node_system_stats_for_version(version))
         pshard_stats_metrics = pshard_stats_for_version(version)
 
         # Load stats data.
