@@ -17,6 +17,11 @@ except ImportError:
 # Arbitrary number less than 10 (DEBUG)
 TRACE_LEVEL = 7
 
+MAX_LOGGER_FRAME_SEARCH = 50
+
+
+default_fallback_logger = logging.getLogger(__name__)
+
 
 class AgentLogger(logging.getLoggerClass()):
     def trace(self, msg, *args, **kwargs):
@@ -154,3 +159,21 @@ def init_logging():
     urllib_logger = logging.getLogger("requests.packages.urllib3")
     urllib_logger.setLevel(logging.WARN)
     urllib_logger.propagate = True
+
+
+def get_check_logger(default_logger=None):
+    """
+    Search the current AgentCheck log starting from closest stack frame.
+    """
+    import sys
+    from datadog_checks.base import AgentCheck
+
+    for i in range(MAX_LOGGER_FRAME_SEARCH):
+        frame = sys._getframe(i)
+        if 'self' in frame.f_locals:
+            check = frame.f_locals['self']
+            if isinstance(check, AgentCheck):
+                return check.log
+    if default_logger is not None:
+        return default_logger
+    return default_fallback_logger
