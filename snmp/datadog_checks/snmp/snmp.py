@@ -389,7 +389,7 @@ class SnmpCheck(AgentCheck):
                 self.log.debug('Querying %s', config.device)
                 config.add_uptime_metric()
                 results, scalar_oids, error = self.fetch_results(config)
-                config.oids_config.update_oids(scalar_oids)
+                config.oids_config.update_scalar_oids(scalar_oids)
                 tags = self.extract_metric_tags(config.parsed_metric_tags, results)
                 tags.extend(config.tags)
                 self.report_metrics(config.parsed_metrics, results, tags)

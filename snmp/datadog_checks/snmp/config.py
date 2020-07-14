@@ -304,6 +304,9 @@ class InstanceConfig:
 
 
 class OidsConfig(object):
+    """
+    Manages scalar/next/bulk oids to be used for snmp PDU calls.
+    """
     def __init__(self, refresh_interval_sec):
         # type: (bool) -> None
         self._refresh_interval_sec = refresh_interval_sec
@@ -326,21 +329,30 @@ class OidsConfig(object):
 
     def has_oids(self):
         # type: () -> bool
+        """
+        Check weather some scalar/next/bulk oids are present.
+        """
         return bool(self.scalar_oids or self.next_oids or self.bulk_oids)
 
-    def should_reset(self):
-        # type: () -> bool
-        elapsed = time.time() - self._last_ts
-        return elapsed > self._refresh_interval_sec
-
-    def update_oids(self, new_scalar_oids):
+    def update_scalar_oids(self, new_scalar_oids):
         # type: (List[OID]) -> None
+        """
+        Use only scalar oids for following snmp calls.
+        """
         if self._refresh_interval_sec <= 0:
             return
         self.scalar_oids = new_scalar_oids
         self.next_oids = []
         self.bulk_oids = []
         self._last_ts = time.time()
+
+    def should_reset(self):
+        # type: () -> bool
+        """
+        Weather we should reset oids to initial parsed oids.
+        """
+        elapsed = time.time() - self._last_ts
+        return elapsed > self._refresh_interval_sec
 
     def reset_oids(self):
         # type: () -> None
