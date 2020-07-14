@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.14.2 / 2020-07-14
+
+* [Fixed] Allow ddev release to commit directly to master for extras integrations. See [#7127](https://github.com/DataDog/integrations-core/pull/7127).
+
 ## 3.14.1 / 2020-07-14
 
 * [Fixed] Fix ddev release extras. See [#7124](https://github.com/DataDog/integrations-core/pull/7124).
