@@ -73,7 +73,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
        logs:
          - type: file
            path: <LOG_FILE_PATH>
-           source: scylla
+           source: spark
            service: <SERVICE_NAME>
            # To handle multi line that starts with yyyy-mm-dd use the following pattern
            # log_processing_rules:
