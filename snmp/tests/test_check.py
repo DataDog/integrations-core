@@ -1123,11 +1123,11 @@ def test_oids_cache_metrics_collected_using_scalar_oids(aggregator):
 @pytest.mark.parametrize("refresh_interval, has_next_bulk_oids", [pytest.param(0, True), pytest.param(3600, False)])
 def test_oids_cache_config_update(refresh_interval, has_next_bulk_oids):
     """
-    Check weather config oids are correctly updated when refresh_scalar_oids_cache_interval is enabled and not enable.
+    Check weather config oids are correctly updated when refresh_oids_cache_interval is enabled and not enable.
     """
     instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
     instance['bulk_threshold'] = 10
-    instance['refresh_scalar_oids_cache_interval'] = refresh_interval
+    instance['refresh_oids_cache_interval'] = refresh_interval
     check = common.create_check(instance)
 
     assert bool(check._config.oids_config.scalar_oids) is False
@@ -1171,10 +1171,10 @@ GETNEXT_CALL_COUNT_PER_CHECK_RUN = 5
 )
 def test_oids_cache_command_calls(refresh_interval, getnext_call_counts, getnext_call_count_after_reset):
     """
-    Check that less snmp PDU calls are made using `refresh_scalar_oids_cache_interval` config.
+    Check that less snmp PDU calls are made using `refresh_oids_cache_interval` config.
     """
     instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
-    instance['refresh_scalar_oids_cache_interval'] = refresh_interval
+    instance['refresh_oids_cache_interval'] = refresh_interval
     check = common.create_check(instance)
 
     with mock.patch('datadog_checks.snmp.snmp.snmp_getnext') as snmp_getnext:
