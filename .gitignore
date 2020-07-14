@@ -52,7 +52,6 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 .benchmarks/
-benchmark_*.svg
 .junit/
 
 # Translations
