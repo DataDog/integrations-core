@@ -114,7 +114,7 @@ def update_link_metadata(checks, core_workflow=True):
 
         # NOTE: in-toto currently uses the first 8 characters of the signing keyID,
         # the latter of which we assume is the key filename.
-        key_id_prefix = os.path.basename(signing_key_path)[:8].lower()
+        key_id_prefix = signing_key['keyid'][:8].lower()
 
         tag_link = f'{STEP_NAME}.{key_id_prefix}.link'
         options = {'signing_key': signing_key}
