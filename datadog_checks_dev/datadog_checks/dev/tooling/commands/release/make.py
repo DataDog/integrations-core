@@ -71,10 +71,8 @@ def make(ctx, checks, version, initial_release, skip_sign, sign_only, exclude, a
     repo_choice = ctx.obj['repo_choice']
     core_workflow = repo_choice == 'core'
 
-    if get_current_branch() == 'master':
-        # This is potentially unsafe, abort if not explicit
-        if core_workflow or not allow_master:
-            abort('Please create a release branch, you do not want to commit to master directly.')
+    if get_current_branch() == 'master' and (core_workflow or not allow_master):
+        abort('Please create a release branch, you do not want to commit to master directly.')
 
     # Signing is done by a pipeline in a separate commit
     if not core_workflow and not sign_only:
