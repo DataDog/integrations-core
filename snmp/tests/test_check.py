@@ -18,7 +18,7 @@ from datadog_checks.snmp import SnmpCheck
 
 from . import common
 
-# pytestmark = pytest.mark.usefixtures("dd_environment")
+pytestmark = pytest.mark.usefixtures("dd_environment")
 
 
 def test_command_generator():
