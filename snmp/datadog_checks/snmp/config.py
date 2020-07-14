@@ -307,6 +307,7 @@ class OidsConfig(object):
     """
     Manages scalar/next/bulk oids to be used for snmp PDU calls.
     """
+
     def __init__(self, refresh_interval_sec):
         # type: (bool) -> None
         self._refresh_interval_sec = refresh_interval_sec

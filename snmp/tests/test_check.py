@@ -1088,7 +1088,10 @@ def test_timeout(aggregator, caplog):
         pytest.fail()
 
 
-def test_use_saved_oids(aggregator):
+def test_oids_cache_metrics_collected_using_scalar_oids(aggregator):
+    """
+    Test if we still collect all metrics using saved scalar oids.
+    """
     instance = common.generate_instance_config(common.TABULAR_OBJECTS)
     check = common.create_check(instance)
 
@@ -1118,7 +1121,10 @@ def test_use_saved_oids(aggregator):
 
 
 @pytest.mark.parametrize("refresh_interval, has_next_bulk_oids", [pytest.param(0, True), pytest.param(3600, False)])
-def test_oids_cache_refresh(refresh_interval, has_next_bulk_oids):
+def test_oids_cache_config_update(refresh_interval, has_next_bulk_oids):
+    """
+    Check weather config oids are correctly updated when refresh_scalar_oids_cache_interval is enabled and not enable.
+    """
     instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
     instance['bulk_threshold'] = 10
     instance['refresh_scalar_oids_cache_interval'] = refresh_interval
@@ -1128,9 +1134,8 @@ def test_oids_cache_refresh(refresh_interval, has_next_bulk_oids):
     assert bool(check._config.oids_config.next_oids) is True
     assert bool(check._config.oids_config.bulk_oids) is True
 
-    check.check(instance)
-
     for _ in range(3):
+        check.check(instance)
         assert bool(check._config.oids_config.scalar_oids) is True
         assert bool(check._config.oids_config.next_oids) is has_next_bulk_oids
         assert bool(check._config.oids_config.bulk_oids) is has_next_bulk_oids
@@ -1142,6 +1147,16 @@ GETNEXT_CALL_COUNT_PER_CHECK_RUN = 5
 @pytest.mark.parametrize(
     "refresh_interval, getnext_call_counts, getnext_call_count_after_reset",
     [
+        # When the cache is enabled.
+        # GETNEXT calls are made only at the first check and run and after every reset
+        pytest.param(
+            3600,
+            [GETNEXT_CALL_COUNT_PER_CHECK_RUN, GETNEXT_CALL_COUNT_PER_CHECK_RUN, GETNEXT_CALL_COUNT_PER_CHECK_RUN],
+            2 * GETNEXT_CALL_COUNT_PER_CHECK_RUN,
+            id='cache_enabled',
+        ),
+        # When the cache is disabled.
+        # GETNEXT calls are made only at the first check and run and after every reset
         pytest.param(
             0,
             [
@@ -1150,15 +1165,14 @@ GETNEXT_CALL_COUNT_PER_CHECK_RUN = 5
                 3 * GETNEXT_CALL_COUNT_PER_CHECK_RUN,
             ],
             4 * GETNEXT_CALL_COUNT_PER_CHECK_RUN,
-        ),
-        pytest.param(
-            3600,
-            [GETNEXT_CALL_COUNT_PER_CHECK_RUN, GETNEXT_CALL_COUNT_PER_CHECK_RUN, GETNEXT_CALL_COUNT_PER_CHECK_RUN],
-            2 * GETNEXT_CALL_COUNT_PER_CHECK_RUN,
+            id='cache_disabled',
         ),
     ],
 )
 def test_oids_cache_command_calls(refresh_interval, getnext_call_counts, getnext_call_count_after_reset):
+    """
+    Check that less snmp PDU calls are made using `refresh_scalar_oids_cache_interval` config.
+    """
     instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
     instance['refresh_scalar_oids_cache_interval'] = refresh_interval
     check = common.create_check(instance)
