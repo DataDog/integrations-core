@@ -317,9 +317,29 @@ class OidsConfig(object):
         self._parsed_next_oids = []  # type: List[OID]
         self._parsed_bulk_oids = []  # type: List[OID]
 
-        self.scalar_oids = []  # type: List[OID]
-        self.next_oids = []  # type: List[OID]
-        self.bulk_oids = []  # type: List[OID]
+        self._all_scalar_oids = []  # type: List[OID]
+        self._use_scalar_oids = False
+
+    @property
+    def scalar_oids(self):
+        # type: () -> List[OID]
+        if self._use_scalar_oids:
+            return self._all_scalar_oids
+        return self._parsed_scalar_oids
+
+    @property
+    def next_oids(self):
+        # type: () -> List[OID]
+        if self._use_scalar_oids:
+            return []
+        return self._parsed_next_oids
+
+    @property
+    def bulk_oids(self):
+        # type: () -> List[OID]
+        if self._use_scalar_oids:
+            return []
+        return self._parsed_bulk_oids
 
     def add_parsed_oids(self, parsed_scalar_oids, parsed_next_oids, parsed_bulk_oids):
         # type: (List[OID], List[OID], List[OID]) -> None
@@ -335,16 +355,19 @@ class OidsConfig(object):
         """
         return bool(self.scalar_oids or self.next_oids or self.bulk_oids)
 
+    def _is_cache_enabled(self):
+        # type: () -> bool
+        return self._refresh_interval_sec <= 0
+
     def update_scalar_oids(self, new_scalar_oids):
         # type: (List[OID]) -> None
         """
         Use only scalar oids for following snmp calls.
         """
-        if self._refresh_interval_sec <= 0:
+        if self._is_cache_enabled():
             return
-        self.scalar_oids = new_scalar_oids
-        self.next_oids = []
-        self.bulk_oids = []
+        self._all_scalar_oids = new_scalar_oids
+        self._use_scalar_oids = True
         self._last_ts = time.time()
 
     def should_reset(self):
@@ -352,11 +375,12 @@ class OidsConfig(object):
         """
         Weather we should reset oids to initial parsed oids.
         """
+        if self._is_cache_enabled():
+            return False
         elapsed = time.time() - self._last_ts
         return elapsed > self._refresh_interval_sec
 
     def reset_oids(self):
         # type: () -> None
-        self.scalar_oids = self._parsed_scalar_oids
-        self.next_oids = self._parsed_next_oids
-        self.bulk_oids = self._parsed_bulk_oids
+        self._all_scalar_oids = []
+        self._use_scalar_oids = False
