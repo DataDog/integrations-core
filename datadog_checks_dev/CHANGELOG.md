@@ -1,5 +1,9 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.14.1 / 2020-07-14
+
+* [Fixed] Fix ddev release extras. See [#7124](https://github.com/DataDog/integrations-core/pull/7124).
+
 ## 3.14.0 / 2020-07-14
 
 * [Added] Add ddev release-stats tool for agent's release. See [#6850](https://github.com/DataDog/integrations-core/pull/6850).
