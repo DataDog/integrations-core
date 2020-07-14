@@ -318,26 +318,26 @@ class OidsConfig(object):
         self._parsed_bulk_oids = []  # type: List[OID]
 
         self._all_scalar_oids = []  # type: List[OID]
-        self._use_scalar_oids = False
+        self._use_scalar_oids_cache = False
 
     @property
     def scalar_oids(self):
         # type: () -> List[OID]
-        if self._use_scalar_oids:
+        if self._use_scalar_oids_cache:
             return self._all_scalar_oids
         return self._parsed_scalar_oids
 
     @property
     def next_oids(self):
         # type: () -> List[OID]
-        if self._use_scalar_oids:
+        if self._use_scalar_oids_cache:
             return []
         return self._parsed_next_oids
 
     @property
     def bulk_oids(self):
         # type: () -> List[OID]
-        if self._use_scalar_oids:
+        if self._use_scalar_oids_cache:
             return []
         return self._parsed_bulk_oids
 
@@ -366,8 +366,11 @@ class OidsConfig(object):
         """
         if not self._is_cache_enabled():
             return
+        # Do not update if we are already using scalar oids cache.
+        if self._use_scalar_oids_cache:
+            return
         self._all_scalar_oids = new_scalar_oids
-        self._use_scalar_oids = True
+        self._use_scalar_oids_cache = True
         self._last_ts = time.time()
 
     def should_reset(self):
@@ -383,4 +386,4 @@ class OidsConfig(object):
     def reset_oids(self):
         # type: () -> None
         self._all_scalar_oids = []
-        self._use_scalar_oids = False
+        self._use_scalar_oids_cache = False
