@@ -1,0 +1,249 @@
+# HELP admission_webhooks_certificate_expiry Time left before the certificate expires in hours.
+# TYPE admission_webhooks_certificate_expiry gauge
+admission_webhooks_certificate_expiry 9.416617185589166
+# HELP admission_webhooks_mutation_attempts Number of pod mutation attempts by mutation type (agent config, standard tags).
+# TYPE admission_webhooks_mutation_attempts gauge
+admission_webhooks_mutation_attempts{injected="false",mutation_type="agent_config"} 180806
+# HELP admission_webhooks_reconcile_success Number of reconcile success per controller.
+# TYPE admission_webhooks_reconcile_success gauge
+admission_webhooks_reconcile_success{controller="secrets"} 1753
+admission_webhooks_reconcile_success{controller="webhooks"} 49
+# HELP admission_webhooks_webhooks_received Number of mutation webhook requests received.
+# TYPE admission_webhooks_webhooks_received gauge
+admission_webhooks_webhooks_received 180806
+# HELP aggregator__flush Count of flush
+# TYPE aggregator__flush counter
+aggregator__flush{data_type="events",state="ok"} 5.683227e+06
+aggregator__flush{data_type="series",state="ok"} 69055
+aggregator__flush{data_type="service_checks",state="ok"} 310686
+# HELP aggregator__processed Amount of metrics/services_checks/events processed by the aggregator
+# TYPE aggregator__processed counter
+aggregator__processed{data_type="dogstatsd_metrics"} 1
+aggregator__processed{data_type="events"} 5.683353e+06
+aggregator__processed{data_type="metrics"} 69054
+aggregator__processed{data_type="service_checks"} 276167
+# HELP api_requests Counter of requests made to the cluster agent API.
+# TYPE api_requests counter
+api_requests{handler="GetEndpointsConfigs",status="200"} 1.46070512e+08
+api_requests{handler="getCheckConfigs",status="200"} 6302
+api_requests{handler="getCheckConfigs",status="302"} 1
+api_requests{handler="getCheckConfigs",status="500"} 494
+api_requests{handler="getEndpointsCheckConfigs",status="302"} 4542
+api_requests{handler="getNodeMetadata",status="200"} 423935
+api_requests{handler="getPodMetadata",status="200"} 3.06863254e+08
+api_requests{handler="getPodMetadataForNode",status="200"} 2.3567363e+08
+api_requests{handler="postCheckStatus",status="200"} 417129
+api_requests{handler="postCheckStatus",status="302"} 17
+# HELP checks__events Events count
+# TYPE checks__events counter
+checks__events{check_name="kubernetes_apiserver"} 5.683352e+06
+# HELP checks__execution_time Check execution time
+# TYPE checks__execution_time gauge
+checks__execution_time{check_name="kubernetes_apiserver"} 2050
+# HELP checks__metrics_samples Metrics count
+# TYPE checks__metrics_samples counter
+checks__metrics_samples{check_name="kubernetes_apiserver"} 0
+# HELP checks__runs Check runs
+# TYPE checks__runs counter
+checks__runs{check_name="kubernetes_apiserver",state="fail"} 3
+checks__runs{check_name="kubernetes_apiserver",state="ok"} 34524
+# HELP checks__services_checks Service checks count
+# TYPE checks__services_checks counter
+checks__services_checks{check_name="kubernetes_apiserver"} 241640
+# HELP checks__warnings Check warnings
+# TYPE checks__warnings counter
+checks__warnings{check_name="kubernetes_apiserver"} 3
+# HELP cluster_checks_busyness Busyness of a node per the number of metrics submitted and average duration of all checks run
+# TYPE cluster_checks_busyness gauge
+cluster_checks_busyness{join_leader="true",node="foo"} 3657
+# HELP cluster_checks_configs_dangling Number of check configurations not dispatched.
+# TYPE cluster_checks_configs_dangling gauge
+cluster_checks_configs_dangling{join_leader="true"} 0
+# HELP cluster_checks_configs_dispatched Number of check configurations dispatched, by node.
+# TYPE cluster_checks_configs_dispatched gauge
+cluster_checks_configs_dispatched{join_leader="true",node="foo"} 31
+# HELP cluster_checks_nodes_reporting Number of node agents reporting.
+# TYPE cluster_checks_nodes_reporting gauge
+cluster_checks_nodes_reporting{join_leader="true"} 9
+# HELP cluster_checks_rebalancing_decisions Total number of check rebalancing decisions
+# TYPE cluster_checks_rebalancing_decisions counter
+cluster_checks_rebalancing_decisions{join_leader="true"} 4589
+# HELP cluster_checks_rebalancing_duration_seconds Duration of the check rebalancing algorithm last execution
+# TYPE cluster_checks_rebalancing_duration_seconds gauge
+cluster_checks_rebalancing_duration_seconds{join_leader="true"} 0.002682512
+# HELP cluster_checks_successful_rebalancing_moves Total number of successful check rebalancing decisions
+# TYPE cluster_checks_successful_rebalancing_moves counter
+cluster_checks_successful_rebalancing_moves{join_leader="true"} 4589
+# HELP cluster_checks_updating_stats_duration_seconds Duration of collecting stats from check runners and updating cache
+# TYPE cluster_checks_updating_stats_duration_seconds gauge
+cluster_checks_updating_stats_duration_seconds{join_leader="true"} 0.050987865
+# HELP datadog_requests Counter of requests made to Datadog
+# TYPE datadog_requests counter
+datadog_requests{join_leader="true",status="error"} 1
+datadog_requests{join_leader="true",status="success"} 69043
+# HELP external_metrics_delay_seconds freshness of the metric evaluated from querying Datadog
+# TYPE external_metrics_delay_seconds gauge
+external_metrics_delay_seconds{join_leader="true",metric="kubernetes.cpu.usage.total"} 41
+# HELP external_metrics_processed_value value processed from querying Datadog
+# TYPE external_metrics_processed_value gauge
+external_metrics_processed_value{join_leader="true",metric="kubernetes.cpu.usage.total"} 8.0226661796875e+07
+# HELP forwarder__connection_events Count of new connection events grouped by type of event
+# TYPE forwarder__connection_events counter
+forwarder__connection_events{connection_event_type="connection_success"} 52
+forwarder__connection_events{connection_event_type="dns_lookup_success"} 52
+# HELP forwarder__transactions Forwarder telemetry
+# TYPE forwarder__transactions counter
+forwarder__transactions{endpoint="https://app.datadoghq.com.",route="intake"} 33680
+# HELP go_gc_duration_seconds A summary of the GC invocation durations.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 1.5071e-05
+go_gc_duration_seconds{quantile="0.25"} 1.8595e-05
+go_gc_duration_seconds{quantile="0.5"} 2.2509e-05
+go_gc_duration_seconds{quantile="0.75"} 4.9669e-05
+go_gc_duration_seconds{quantile="1"} 0.015402036
+go_gc_duration_seconds_sum 15.142729159
+go_gc_duration_seconds_count 101006
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 6262
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.13.11"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 2.92362008e+08
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 2.44702991116e+13
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 1.1354836e+07
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 2.15513650785e+11
+# HELP go_memstats_gc_cpu_fraction The fraction of this program's available CPU time used by the GC since the program started.
+# TYPE go_memstats_gc_cpu_fraction gauge
+go_memstats_gc_cpu_fraction 0.013457194517537085
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 3.5446784e+07
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 2.92362008e+08
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 3.98508032e+08
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 4.70925312e+08
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 2.516598e+06
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 2.65183232e+08
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 8.69433344e+08
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.595334421612011e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 2.15516167383e+11
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 6944
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 16384
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 8.654632e+06
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 1.056768e+07
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 4.70397072e+08
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 5.253668e+06
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 7.0090752e+07
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 7.0090752e+07
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 1.002163448e+09
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 19
+# HELP jsonstream__bytes_in Count of bytes entering the jsonstream serializer
+# TYPE jsonstream__bytes_in counter
+jsonstream__bytes_in 5.238238034e+09
+# HELP jsonstream__bytes_out Count of bytes out the jsonstream serializer
+# TYPE jsonstream__bytes_out counter
+jsonstream__bytes_out 5.58380477e+08
+# HELP jsonstream__total_calls Total calls to the jsontream serializer
+# TYPE jsonstream__total_calls counter
+jsonstream__total_calls 102734
+# HELP jsonstream__total_items Total items in the jsonstream serializer
+# TYPE jsonstream__total_items counter
+jsonstream__total_items 413421
+# HELP jsonstream__total_payloads Total payloads in the jsonstream serializer
+# TYPE jsonstream__total_payloads counter
+jsonstream__total_payloads 102734
+# HELP leader_election_is_leader The label is_leader is true if the reporting pod is leader, equals false otherwise.
+# TYPE leader_election_is_leader gauge
+leader_election_is_leader{is_leader="true",join_leader="true"} 1
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 286059.44
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 5933
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 9.99665664e+08
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.59481650612e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 2.38245888e+09
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes -1
+# HELP rate_limit_queries_limit maximum number of queries allowed in the period
+# TYPE rate_limit_queries_limit gauge
+rate_limit_queries_limit{endpoint="/api/v1/query",join_leader="true"} 10000
+# HELP rate_limit_queries_period period of rate limiting
+# TYPE rate_limit_queries_period gauge
+rate_limit_queries_period{endpoint="/api/v1/query",join_leader="true"} 3600
+# HELP rate_limit_queries_remaining number of queries remaining before next reset
+# TYPE rate_limit_queries_remaining gauge
+rate_limit_queries_remaining{endpoint="/api/v1/query",join_leader="true"} 8296
+# HELP rate_limit_queries_reset number of seconds before next reset
+# TYPE rate_limit_queries_reset gauge
+rate_limit_queries_reset{endpoint="/api/v1/query",join_leader="true"} 2000
+# HELP scheduler__checks_entered How many checks entered the scheduler
+# TYPE scheduler__checks_entered gauge
+scheduler__checks_entered{check_name="kubernetes_apiserver"} 1
+# HELP scheduler__queues_count How many queues were opened
+# TYPE scheduler__queues_count counter
+scheduler__queues_count{check_name="kubernetes_apiserver"} 1
+# HELP transactions__retry_queue_size Retry queue size
+# TYPE transactions__retry_queue_size gauge
+transactions__retry_queue_size{domain="https://app.datadoghq.com."} 0
+# HELP transactions__success Count of successful transactions
+# TYPE transactions__success counter
+transactions__success{domain="https://app.datadoghq.com."} 102734
