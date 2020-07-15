@@ -1486,7 +1486,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
         # run will emit no metrics. If the table was truncated or cumulative counts were
         # lost since the last run, this run will emit no metrics.
 
-        metrics = []
+        metrics = dict()
 
         new_cache = {}
         for row in rows:
@@ -1504,16 +1504,24 @@ class MySql(ExecutionPlansMixin, AgentCheck):
                 tags = []
                 if row['schema'] is not None:
                     tags.append('schema:' + row['schema'])
-                tags.append('digest:' + row['digest'])
                 obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
-                tags.append('query_signature:' + compute_sql_signature(obfuscated_statement))
+                query_signature = compute_sql_signature(obfuscated_statement)
+                tags.append('query_signature:' + query_signature)
                 if self.escape_query_commas_hack:
                     obfuscated_statement = obfuscated_statement.replace(', ', '，').replace(',', '，')
                 tags.append('query:' + obfuscated_statement[:200])
-                metrics.append((name, row[col] - prev[col], fn, tags))
+
+                # Merge metrics in cases where the query signature differs from the DB digest
+                key = '|'.join([name] + sorted(tags))
+                value = row[col] - prev[col]
+                if key in metrics:
+                    self.log.warning(f'Query Collision: {key}')
+                    _, prev_value, _, _ = metrics[key]
+                    value += prev_value
+                metrics[key] = (name, value, fn, tags)
 
         self.statement_cache = new_cache
-        return metrics
+        return list(metrics.values())
 
     def _query_size_per_schema(self, db):
         # Fetches the avg query execution time per schema and returns the
