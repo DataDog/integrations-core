@@ -1,5 +1,9 @@
 # CHANGELOG - activemq
 
+## 1.5.2 / 2020-07-15
+
+* [Fixed] Add new_gc_metrics to all jmx integrations. See [#7073](https://github.com/DataDog/integrations-core/pull/7073).
+
 ## 1.5.1 / 2020-06-29
 
 * [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
