@@ -58,7 +58,7 @@ PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({
 # Count columns to be converted to metrics
 PG_STAT_STATEMENTS_METRIC_COLUMNS = {
     'calls': ('pg_stat_statements.calls', 'postgresql.queries.count', AgentCheck.count),
-    'total_time': ('pg_stat_statements.total_time', 'postgresql.queries.time', AgentCheck.count),
+    'total_time': ('pg_stat_statements.total_time * 1000000', 'postgresql.queries.time', AgentCheck.count),
     'rows': ('pg_stat_statements.rows', 'postgresql.queries.rows', AgentCheck.count),
     'shared_blks_hit': ('pg_stat_statements.shared_blks_hit', 'postgresql.queries.shared_blks_hit', AgentCheck.count),
     'shared_blks_read': ('pg_stat_statements.shared_blks_read', 'postgresql.queries.shared_blks_read', AgentCheck.count),
