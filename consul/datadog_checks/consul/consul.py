@@ -50,7 +50,13 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 instance['headers'].setdefault('X-Consul-Token', instance.get('acl_token'))
 
         default_instances = {
-            'consul': {'namespace': 'consul', 'metrics': [METRIC_MAP], 'send_histograms_buckets': True, 'send_distribution_counts_as_monotonic': True, 'send_distribution_sums_as_monotonic': True}
+            'consul': {
+                'namespace': 'consul',
+                'metrics': [METRIC_MAP],
+                'send_histograms_buckets': True,
+                'send_distribution_counts_as_monotonic': True,
+                'send_distribution_sums_as_monotonic': True,
+            }
         }
 
         super(ConsulCheck, self).__init__(
