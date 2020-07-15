@@ -134,6 +134,6 @@ def depth_percent(queue_info):
     depth_max = queue_info[pymqi.CMQC.MQIA_MAX_Q_DEPTH]
 
     depth_fraction = depth_current / depth_max
-    depth_percent = depth_fraction * 100
+    depth_as_percent = depth_fraction * 100
 
-    return depth_percent
+    return depth_as_percent
