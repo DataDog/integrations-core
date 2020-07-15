@@ -25,7 +25,8 @@ REQUIRES = [
     "contextlib2; python_version < '3.0'",
     'coverage>=5.0.3',
     'mock',
-    'psutil',
+    "psutil; sys_platform != 'win32'",
+    "psutil<=5.7.0; sys_platform == 'win32'",  # cap psutil due to https://github.com/giampaolo/psutil/issues/1790
     'PyYAML>=5.3',
     'pytest',
     'pytest-benchmark>=3.2.1',
