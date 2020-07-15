@@ -162,7 +162,7 @@ Instead of using DogStatsD, you can use the `use_prometheus_endpoint` to get the
 
 **Note**: Use either the DogStatsD method or the OpenMetrics method,  do not enable both for the same instance or there will be duplicated metrics.
 
-1. Configure Consul to expose metrics to the Prometheus endpoint. Set the `prometheus_retention_time` nested under the top-level `telemetry` key of the main Consul configuration file:
+1. Configure Consul to expose metrics to the Prometheus endpoint. Set the [`prometheus_retention_time`][17] nested under the top-level `telemetry` key of the main Consul configuration file:
 
     ```conf
     {
@@ -259,3 +259,4 @@ Need help? Contact [Datadog support][13].
 [14]: https://www.datadoghq.com/blog/monitor-consul-health-and-performance-with-datadog
 [15]: https://engineering.datadoghq.com/consul-at-datadog
 [16]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
+[17]: https://www.consul.io/docs/agent/options#telemetry-prometheus_retention_time
