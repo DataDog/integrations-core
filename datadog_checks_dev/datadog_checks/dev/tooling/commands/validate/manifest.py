@@ -58,7 +58,8 @@ METRIC_TO_CHECK_WHITELIST = {
     'riakcs.bucket_list_pool.workers',  # RiakCS 2.1 metric, but metadata.csv lists RiakCS 2.0 metrics only.
 }
 
-ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES | MARKETPLACE_ATTRIBUTES
+ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
+ALL_MARKETPLACE_ATTRIBUTES = ALL_ATTRIBUTES | MARKETPLACE_ATTRIBUTES
 
 INTEGRATION_ID_REGEX = r'^[a-z][a-z0-9-]{0,254}(?<!-)$'
 
@@ -132,7 +133,8 @@ def manifest(ctx, fix, include_extras, repo_url):
 
             # attributes are valid
             attrs = set(decoded)
-            for attr in sorted(attrs - ALL_ATTRIBUTES):
+            all_attributes = ALL_MARKETPLACE_ATTRIBUTES if is_marketplace else ALL_ATTRIBUTES
+            for attr in sorted(attrs - all_attributes):
                 file_failures += 1
                 display_queue.append((echo_failure, f'  Attribute `{attr}` is invalid'))
             for attr in sorted(REQUIRED_ATTRIBUTES - attrs):
