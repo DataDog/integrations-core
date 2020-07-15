@@ -5,7 +5,7 @@ import os
 import sys
 
 import pytest
-from datadog_test_libs.mock_dns import mock_e2e_agent, mock_local
+from datadog_test_libs.utils.mock_dns import mock_e2e_agent, mock_local
 from mock import patch
 
 from datadog_checks.dev import docker_run

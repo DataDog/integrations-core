@@ -34,9 +34,13 @@ def mock_local(src_to_dest_mapping):
 
     socket.getaddrinfo = patched_getaddrinfo
     socket.socket.connect = patched_connect
-    yield
-    socket.getaddrinfo = _orig_getaddrinfo
-    socket.socket.connect = _orig_connect
+    try:
+        yield
+    except Exception:
+        raise
+    finally:
+        socket.getaddrinfo = _orig_getaddrinfo
+        socket.socket.connect = _orig_connect
 
 
 @contextmanager
