@@ -10,19 +10,6 @@
   value:
     type: integer
 
-- name: new_gc_metrics
-  description: |
-    Set to true to use better metric names for garbage collection metrics.
-    jvm.gc.cms.count   => jvm.gc.minor_collection_count
-                          jvm.gc.major_collection_count
-    jvm.gc.parnew.time => jvm.gc.minor_collection_time
-                          jvm.gc.major_collection_time
-    The default value is false to ensure backward compatibility.
-  value:
-    type: boolean
-    example: false
-    default: false
-
 - name: jmx_url
   description: JMX URL to connect to. Can be used instead of host/port configs.
   hidden: true
