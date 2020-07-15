@@ -338,3 +338,13 @@ def batches(lst, size):
 
     for index in range(0, len(lst), size):
         yield lst[index : index + size]
+
+
+def sanitize_varbind_value(s):
+    """
+    Sanitize varbind values
+    """
+    found = s.find('\x00')
+    if found >= 0:
+        s = s[:found]
+    return s.strip()

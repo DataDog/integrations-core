@@ -9,6 +9,8 @@ from typing import Any, Optional
 
 from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 
+from datadog_checks.snmp.utils import sanitize_varbind_value
+
 from .compat import total_time_to_temporal_percent
 from .pysnmp_inspect import is_counter, is_gauge, is_opaque
 from .types import MetricDefinition
@@ -44,6 +46,7 @@ def as_metric_with_inferred_type(value):
 
 def as_metric_with_forced_type(value, forced_type):
     # type: (Any, str) -> Optional[MetricDefinition]
+    value = sanitize_varbind_value(value)
     if forced_type == 'gauge':
         return {'type': 'gauge', 'value': int(value)}
 

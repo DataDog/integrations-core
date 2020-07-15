@@ -5,6 +5,7 @@ import pytest
 from datadog_checks.snmp.exceptions import CouldNotDecodeOID, UnresolvedOID
 from datadog_checks.snmp.models import OID
 from datadog_checks.snmp.pysnmp_types import MibViewController, ObjectIdentity, ObjectName, ObjectType, SnmpEngine
+from datadog_checks.snmp.utils import sanitize_varbind_value
 
 
 @pytest.mark.unit
@@ -108,3 +109,15 @@ def test_oid_mib_symbol(identity, mib, symbol, prefix):
     assert mib_symbol.mib == mib
     assert mib_symbol.symbol == symbol
     assert mib_symbol.prefix == prefix
+
+
+@pytest.mark.parametrize(
+    'input_string,expected',
+    [
+        pytest.param('abc\x00\x00\x00\x00', 'abc', id='strip_null_chars'),
+        pytest.param('   123    ', '123', id='strip_whitespaces'),
+        pytest.param('   abc123    \x00\x00\x00\x00', 'abc123', id='strip_whitespaces_and_null_chars'),
+    ],
+)
+def test_sanitize_varbind_value(input_string, expected):
+    assert expected == sanitize_varbind_value(input_string)
