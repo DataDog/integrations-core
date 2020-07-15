@@ -195,6 +195,8 @@ class PgStatementsMixin(object):
                 if tag_column not in self._pg_stat_statements_columns:
                     continue
                 value = PG_STAT_STATEMENTS_TRANSFORM.get(tag_column, lambda x: x)(row[tag_column])
+                if self.config.escape_query_commas_hack and tag_column == 'query':
+                    value = value.replace(', ', '，').replace(',', '，')
                 tags.append('{alias}:{value}'.format(alias=alias, value=value))
 
             for alias, (_, name, fn) in PG_STAT_STATEMENTS_METRIC_COLUMNS.items():

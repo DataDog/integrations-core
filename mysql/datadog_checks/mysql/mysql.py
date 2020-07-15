@@ -319,6 +319,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.max_query_metrics = int(self.instance.get('options', {}).get('max_query_metrics', 300))
+        self.escape_query_commas_hack = self.instance.get('options', {}).get('escape_query_commas_hack', False)
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -1503,10 +1504,12 @@ class MySql(ExecutionPlansMixin, AgentCheck):
                 tags = []
                 if row['schema'] is not None:
                     tags.append('schema:' + row['schema'])
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
-                tags.append('query:' + obfuscated_statement[:200])
                 tags.append('digest:' + row['digest'])
+                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
                 tags.append('query_signature:' + compute_sql_signature(obfuscated_statement))
+                if self.escape_query_commas_hack:
+                    obfuscated_statement = obfuscated_statement.replace(', ', '，').replace(',', '，')
+                tags.append('query:' + obfuscated_statement[:200])
                 metrics.append((name, row[col] - prev[col], fn, tags))
 
         self.statement_cache = new_cache
