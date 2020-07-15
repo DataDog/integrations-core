@@ -30,6 +30,9 @@
   "type": "check",
   "integration_id": "redis",
   "assets": {
+    "configuration": {
+       "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "saved_views": {
