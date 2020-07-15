@@ -47,6 +47,7 @@ def as_metric_with_inferred_type(value):
 def as_metric_with_forced_type(value, forced_type):
     # type: (Any, str) -> Optional[MetricDefinition]
     value = float(sanitize_varbind_value(value))
+
     if forced_type == 'gauge':
         return {'type': 'gauge', 'value': value}
 
