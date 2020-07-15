@@ -1,0 +1,13 @@
+snmp_listener:
+  workers: 5
+  discovery_interval: 10
+  configs:
+    - network: 172.25.0.0/28
+      port: 1161
+      version: 2
+      timeout: 1
+      retries: 2
+      community: network
+
+listeners:
+  - name: snmp

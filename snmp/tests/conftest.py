@@ -16,7 +16,7 @@ from .common import (
     SCALAR_OBJECTS_WITH_TAGS,
     TABULAR_OBJECTS,
     generate_container_instance_config,
-)
+    HERE, IS_AGENT_AUTODISCOVERY)
 
 FILES = [
     "https://ddintegrations.blob.core.windows.net/snmp/3850.snmprec",
@@ -26,12 +26,23 @@ E2E_METADATA = {
     'start_commands': [
         # Ensure the Agent has access to profile definition files.
         'cp -r /home/snmp/datadog_checks/snmp/data/profiles /etc/datadog-agent/conf.d/snmp.d/',
+        'cp -r /home/snmp/datadog_checks/snmp/data/auto_conf.yaml /etc/datadog-agent/conf.d/snmp.d/auto_conf.yaml',
     ],
 }
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
+    e2e_metadata = E2E_METADATA
+    if IS_AGENT_AUTODISCOVERY:
+        instance_config = {}
+        e2e_metadata['docker_volumes'] = [
+            '{}/compose/datadog.yaml:/etc/datadog-agent/datadog.yaml'.format(HERE)
+        ]
+    else:
+        instance_config = generate_container_instance_config(
+            SCALAR_OBJECTS + SCALAR_OBJECTS_WITH_TAGS + TABULAR_OBJECTS
+        )
     with TempDir('snmprec') as tmp_dir:
         data_dir = os.path.join(tmp_dir, 'data')
         env = {'DATA_DIR': data_dir}
@@ -43,6 +54,4 @@ def dd_environment():
                     output.write(response.content)
 
         with docker_run(os.path.join(COMPOSE_DIR, 'docker-compose.yaml'), env_vars=env, log_patterns="Listening at"):
-            yield generate_container_instance_config(
-                SCALAR_OBJECTS + SCALAR_OBJECTS_WITH_TAGS + TABULAR_OBJECTS
-            ), E2E_METADATA
+            yield instance_config, E2E_METADATA

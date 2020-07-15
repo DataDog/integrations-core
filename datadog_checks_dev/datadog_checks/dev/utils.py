@@ -228,6 +228,14 @@ def load_jmx_config():
     return example_config
 
 
+def get_check_data_dir():
+    # Only called in tests of a check, so just go back one frame
+    root = find_check_root(depth=1)
+
+    check = basepath(root)
+    return path_join(root, 'datadog_checks', check, 'data')
+
+
 def find_check_root(depth=0):
     # Account for this call
     depth += 1

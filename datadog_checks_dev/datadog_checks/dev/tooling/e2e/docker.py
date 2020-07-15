@@ -1,11 +1,14 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import re
 from contextlib import contextmanager
 
+import yaml
+
 from ...subprocess import run_command
-from ...utils import find_free_port, get_ip, path_join
+from ...utils import find_free_port, get_ip, path_join, get_check_data_dir
 from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,
@@ -98,6 +101,9 @@ class DockerInterface(object):
         cmd += f' {command}'
 
         return run_command(cmd, **kwargs)
+
+    def copy_command(self, src, dst):
+        return run_command(f'docker cp {self.container_name}:{src} {dst}')
 
     def run_check(
         self,
