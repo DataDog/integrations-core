@@ -393,6 +393,7 @@ class SnmpCheck(AgentCheck):
         except Exception as e:
             if not error:
                 error = 'Failed to collect metrics for {} - {}'.format(self._get_instance_name(instance), e)
+            self.log.debug(error, exc_info=True)
             self.warning(error)
         finally:
             # At this point, `tags` might include some extra tags added in try clause

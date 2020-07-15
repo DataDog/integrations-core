@@ -28,7 +28,7 @@ class ParsedSymbolMetric(object):
         self.tags = tags or []
         self.forced_type = forced_type
         self.enforce_scalar = enforce_scalar
-        self.options = options
+        self.options = options or {}
 
 
 class ParsedTableMetric(object):
@@ -47,7 +47,7 @@ class ParsedTableMetric(object):
         self.index_tags = index_tags
         self.column_tags = column_tags
         self.forced_type = forced_type
-        self.options = options
+        self.options = options or {}
 
 
 ParsedMetric = Union[ParsedSymbolMetric, ParsedTableMetric]
