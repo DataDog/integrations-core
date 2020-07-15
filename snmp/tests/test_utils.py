@@ -132,6 +132,7 @@ def test_sanitize_varbind_value(input_string, expected):
     [
         pytest.param('10', 'gauge', {'type': 'gauge', 'value': 10}, id='gauge_integer'),
         pytest.param(b'10\x00', 'gauge', {'type': 'gauge', 'value': 10}, id='gauge_bytes'),
+        pytest.param(b'1.00\x00', 'gauge', {'type': 'gauge', 'value': 1.0}, id='gauge_bytes_float'),
         pytest.param('3.14', 'gauge', {'type': 'gauge', 'value': 3.14}, id='gauge_float'),
         pytest.param('3.14', 'percent', {'type': 'rate', 'value': 314}, id='percent_float'),
         pytest.param('3.14', 'counter', {'type': 'rate', 'value': 3.14}, id='counter_float'),
