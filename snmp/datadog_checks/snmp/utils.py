@@ -4,7 +4,10 @@
 import os
 from typing import Any, Dict, Iterator, List, Mapping, Sequence, Tuple, Union
 
+import six
 import yaml
+
+from datadog_checks.base import to_native_string
 
 from .compat import get_config
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
@@ -344,6 +347,9 @@ def sanitize_varbind_value(s):
     """
     Sanitize varbind values
     """
+    if not (isinstance(s, (six.string_types, six.binary_type))):
+        return s
+    s = to_native_string(s)
     found = s.find('\x00')
     if found >= 0:
         s = s[:found]

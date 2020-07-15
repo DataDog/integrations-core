@@ -46,20 +46,20 @@ def as_metric_with_inferred_type(value):
 
 def as_metric_with_forced_type(value, forced_type):
     # type: (Any, str) -> Optional[MetricDefinition]
-    value = sanitize_varbind_value(value)
+    value = float(sanitize_varbind_value(value))
     if forced_type == 'gauge':
-        return {'type': 'gauge', 'value': int(value)}
+        return {'type': 'gauge', 'value': value}
 
     if forced_type == 'percent':
-        return {'type': 'rate', 'value': total_time_to_temporal_percent(int(value), scale=1)}
+        return {'type': 'rate', 'value': total_time_to_temporal_percent(value, scale=1)}
 
     if forced_type == 'counter':
-        return {'type': 'rate', 'value': int(value)}
+        return {'type': 'rate', 'value': value}
 
     if forced_type == 'monotonic_count':
-        return {'type': 'monotonic_count', 'value': int(value)}
+        return {'type': 'monotonic_count', 'value': value}
 
     if forced_type == 'monotonic_count_and_rate':
-        return {'type': 'monotonic_count_and_rate', 'value': int(value)}
+        return {'type': 'monotonic_count_and_rate', 'value': value}
 
     return None

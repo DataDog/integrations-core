@@ -3,6 +3,7 @@ from typing import Any, Tuple
 import pytest
 
 from datadog_checks.snmp.exceptions import CouldNotDecodeOID, UnresolvedOID
+from datadog_checks.snmp.metrics import as_metric_with_forced_type
 from datadog_checks.snmp.models import OID
 from datadog_checks.snmp.pysnmp_types import MibViewController, ObjectIdentity, ObjectName, ObjectType, SnmpEngine
 from datadog_checks.snmp.utils import sanitize_varbind_value
@@ -117,7 +118,31 @@ def test_oid_mib_symbol(identity, mib, symbol, prefix):
         pytest.param('abc\x00\x00\x00\x00', 'abc', id='strip_null_chars'),
         pytest.param('   123    ', '123', id='strip_whitespaces'),
         pytest.param('   abc123    \x00\x00\x00\x00', 'abc123', id='strip_whitespaces_and_null_chars'),
+        pytest.param(b'abc\x00\x00\x00\x00', 'abc', id='strip_null_chars_bytes'),
+        pytest.param(b'   123    ', '123', id='strip_whitespaces_bytes'),
+        pytest.param(10, 10, id='not_text_or_binary_type'),
     ],
 )
 def test_sanitize_varbind_value(input_string, expected):
     assert expected == sanitize_varbind_value(input_string)
+
+
+@pytest.mark.parametrize(
+    'input_string,forced_type,expected',
+    [
+        pytest.param('10', 'gauge', {'type': 'gauge', 'value': 10}, id='gauge_integer'),
+        pytest.param(b'10\x00', 'gauge', {'type': 'gauge', 'value': 10}, id='gauge_bytes'),
+        pytest.param('3.14', 'gauge', {'type': 'gauge', 'value': 3.14}, id='gauge_float'),
+        pytest.param('3.14', 'percent', {'type': 'rate', 'value': 314}, id='percent_float'),
+        pytest.param('3.14', 'counter', {'type': 'rate', 'value': 3.14}, id='counter_float'),
+        pytest.param('3.14', 'monotonic_count', {'type': 'monotonic_count', 'value': 3.14}, id='monotonic_count_float'),
+        pytest.param(
+            '3.14',
+            'monotonic_count_and_rate',
+            {'type': 'monotonic_count_and_rate', 'value': 3.14},
+            id='monotonic_count_and_rate_float',
+        ),
+    ],
+)
+def test_as_metric_with_forced_type(input_string, forced_type, expected):
+    assert expected == as_metric_with_forced_type(input_string, forced_type)
