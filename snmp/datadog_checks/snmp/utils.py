@@ -344,10 +344,11 @@ def batches(lst, size):
 
 
 def sanitize_varbind_value(s):
+    # type: (Any) -> str
     """
     Sanitize varbind values
     """
-    if not (isinstance(s, (six.string_types, six.binary_type))):
+    if not (isinstance(s, six.string_types) or isinstance(s, six.binary_type)):
         return s
     s = to_native_string(s)
     found = s.find('\x00')
