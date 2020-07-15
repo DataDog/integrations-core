@@ -13,7 +13,7 @@ from requests import HTTPError
 from six import iteritems, iterkeys, itervalues
 from six.moves.urllib.parse import urljoin
 
-from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
+from datadog_checks.base import OpenMetricsBaseCheck, is_affirmative
 from datadog_checks.consul.common import (
     CONSUL_CAN_CONNECT,
     CONSUL_CATALOG_CHECK,
@@ -566,13 +566,6 @@ class ConsulCheck(OpenMetricsBaseCheck):
             self.set_metadata('version', agent_version)
 
     def _check_prometheus_endpoint(self):
-        if not self.scraper_config['metrics_mapper']:
-            raise ConfigurationError(
-                "You have to collect at least one metric from the endpoint: {}".format(
-                    self.scraper_config['prometheus_url']
-                )
-            )
-
         try:
             self.process(self.scraper_config)
         # /v1/agent/metrics is available since 0.9.1, but /v1/agent/metrics?format=prometheus is available since 1.1.0
