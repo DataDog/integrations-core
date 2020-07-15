@@ -150,14 +150,14 @@
   value:
     type: string
   description: |
-    If your services require AWS Signature Version 4 Signing, set the region.
+    If your services require AWS Signature Version 4 signing, set the region.
 
     See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 - name: aws_host
   value:
     type: string
   description: |
-    If your services require AWS Signature Version 4 Signing, set the host.
+    If your services require AWS Signature Version 4 signing, set the host.
 
     Note: This setting is not necessary for official integrations.
 
@@ -166,7 +166,7 @@
   value:
     type: string
   description: |
-    If your services require AWS Signature Version 4 Signing, set the service code. For a list
+    If your services require AWS Signature Version 4 signing, set the service code. For a list
     of available service codes, see https://docs.aws.amazon.com/general/latest/gr/rande.html
 
     Note: This setting is not necessary for official integrations.
