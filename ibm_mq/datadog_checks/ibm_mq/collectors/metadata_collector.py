@@ -2,7 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from datadog_checks.base.utils.common import to_native_string
+# TODO: change to from datadog_checks.base.utils.common import to_native_string when bumping base agent requirement
+from datadog_checks.base import to_string as to_native_string
 
 try:
     import pymqi

@@ -71,11 +71,11 @@ class IbmMqCheck(AgentCheck):
     @AgentCheck.metadata_entrypoint
     def _collect_metadata(self, queue_manager):
         try:
-            ver_part = self.metadata_collector.collect_metadata(queue_manager)
-            if ver_part:
-                raw_ver = ver_part["major"] + "." + ver_part["minor"] + "." + ver_part["mod"] + "." + ver_part["fix"]
-                self.set_metadata('version', raw_ver, scheme='parts', part_map=ver_part)
-                self.log.debug('Found ibm_mq version: %s', raw_ver)
+            version = self.metadata_collector.collect_metadata(queue_manager)
+            if version:
+                raw_version = '{}.{}.{}.{}'.format(version["major"], version["minor"], version["mod"], version["fix"])
+                self.set_metadata('version', raw_version, scheme='parts', part_map=version)
+                self.log.debug('Found ibm_mq version: %s', raw_version)
             else:
                 self.log.debug('Could not retrieve ibm_mq version info')
         except Exception as e:
