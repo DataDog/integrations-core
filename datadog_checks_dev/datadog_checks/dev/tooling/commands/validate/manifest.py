@@ -61,6 +61,8 @@ METRIC_TO_CHECK_WHITELIST = {
 ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
 ALL_MARKETPLACE_ATTRIBUTES = ALL_ATTRIBUTES | MARKETPLACE_ATTRIBUTES
 
+REQUIRED_MARKETPLACE_ATTRIBUTES = REQUIRED_ATTRIBUTES | MARKETPLACE_ATTRIBUTES
+
 INTEGRATION_ID_REGEX = r'^[a-z][a-z0-9-]{0,254}(?<!-)$'
 
 
@@ -134,10 +136,11 @@ def manifest(ctx, fix, include_extras, repo_url):
             # attributes are valid
             attrs = set(decoded)
             all_attributes = ALL_MARKETPLACE_ATTRIBUTES if is_marketplace else ALL_ATTRIBUTES
+            required_attributes = REQUIRED_MARKETPLACE_ATTRIBUTES if is_marketplace else REQUIRED_ATTRIBUTES
             for attr in sorted(attrs - all_attributes):
                 file_failures += 1
                 display_queue.append((echo_failure, f'  Attribute `{attr}` is invalid'))
-            for attr in sorted(REQUIRED_ATTRIBUTES - attrs):
+            for attr in sorted(required_attributes - attrs):
                 file_failures += 1
                 display_queue.append((echo_failure, f'  Attribute `{attr}` is required'))
             for attr in sorted(REQUIRED_ASSET_ATTRIBUTES - set(decoded.get('assets', {}))):
