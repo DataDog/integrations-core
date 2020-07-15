@@ -279,6 +279,10 @@ class AerospikeCheck(AgentCheck):
             if ns_metric_name_match:
                 ns = ns_metric_name_match.groups()[0]
                 metric_name = ns_metric_name_match.groups()[1]
+            elif line.startswith("batch-index"):
+                # https://www.aerospike.com/docs/operations/monitor/latency/#batch-index
+                ns = None
+                metric_name = "batch-index"
             else:
                 self.log.warning("Invalid data. Namespace and/or metric name not found in line: `%s`", line)
                 # Since the data come by pair and the order matters it's safer to return right away than submitting
@@ -303,7 +307,7 @@ class AerospikeCheck(AgentCheck):
         for ns, v in iteritems(ns_latencies):
             metric_names = v.get("metric_names", [])
             metric_values = v.get("metric_values", [])
-            namespace_tags = ['namespace:{}'.format(ns)]
+            namespace_tags = ['namespace:{}'.format(ns)] if ns else []
             namespace_tags.extend(self._tags)
             if len(metric_names) == len(metric_values):
                 for i in range(len(metric_names)):

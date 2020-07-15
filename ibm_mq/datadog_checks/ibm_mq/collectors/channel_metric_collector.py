@@ -4,7 +4,7 @@
 
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, to_native_string
+from datadog_checks.base import AgentCheck, to_string
 
 from .. import metrics
 
@@ -57,7 +57,7 @@ class ChannelMetricCollector(object):
             self.gauge(mname, channels, tags=self.config.tags_no_channel)
 
             for channel_info in response:
-                channel_name = to_native_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
+                channel_name = to_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
                 channel_tags = self.config.tags_no_channel + ["channel:{}".format(channel_name)]
 
                 self._submit_metrics_from_properties(channel_info, metrics.channel_metrics(), channel_tags)
@@ -95,7 +95,7 @@ class ChannelMetricCollector(object):
                 self.log.warning("Error getting CHANNEL status for channel %s: %s", search_channel_name, e)
         else:
             for channel_info in response:
-                channel_name = to_native_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
+                channel_name = to_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
                 if channel_name in channels_to_skip:
                     continue
                 channel_tags = tags + ["channel:{}".format(channel_name)]
