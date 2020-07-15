@@ -19,8 +19,8 @@ files:
         example: http://localhost:8500
     - name: use_prometheus_endpoint
       description: |
-        Whether to use the prometheus endpoint to get more metrics.
-        The prometheus endpoint is available since Consul v1.1.0
+        Whether to use the Prometheus endpoint to get more metrics.
+        The Prometheus endpoint is available for Consul versions v1.1.0 or higher.
       value:
         type: boolean
         default: false

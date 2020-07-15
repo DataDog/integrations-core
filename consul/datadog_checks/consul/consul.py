@@ -39,7 +39,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         self.url = instance.get('url')
 
         # Set the prometheus endpoint configuration
-        self.use_prometheus_endpoint = instance.get('use_prometheus_endpoint', False)
+        self.use_prometheus_endpoint = is_affirmative(instance.get('use_prometheus_endpoint', False))
         instance.setdefault('prometheus_url', '')
         if self.use_prometheus_endpoint:
             instance['prometheus_url'] = '{}/v1/agent/metrics?format=prometheus'.format(self.url)
@@ -50,7 +50,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 instance['headers'].setdefault('X-Consul-Token', instance.get('acl_token'))
 
         default_instances = {
-            'consul': {'namespace': 'consul', 'metrics': [METRIC_MAP], 'send_histograms_buckets': True}
+            'consul': {'namespace': 'consul', 'metrics': [METRIC_MAP], 'send_histograms_buckets': True, 'send_distribution_counts_as_monotonic': True, 'send_distribution_sums_as_monotonic': True}
         }
 
         super(ConsulCheck, self).__init__(
@@ -264,7 +264,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
         return service_tags
 
     def check(self, _):
-        # The prometheus endpoint is available since Consul 1.1.0
+        # The Prometheus endpoint is available since Consul 1.1.0
         if self.use_prometheus_endpoint:
             self._check_prometheus_endpoint()
 
