@@ -99,6 +99,7 @@ def create_datadog_conf_file(tmp_dir):
                     'privacy_protocol': 'des',
                     'context_engine_id': 'my-engine-id',
                     'context_name': 'my-context-name',
+                    'ignored_ip_addresses': {'{}.0.2'.format(prefix): True},
                 },
             ],
         },

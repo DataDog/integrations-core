@@ -138,4 +138,11 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip):
 
     common.assert_common_metrics(aggregator, common_tags)
 
+    # test ignored IPs
+    tags = [
+        'snmp_device:{}'.format(_build_device_ip(container_ip, '2')),
+        'autodiscovery_subnet:{}.0.0/27'.format(subnet_prefix),
+    ]
+    aggregator.assert_metric('snmp.devices_monitored', count=0, tags=tags)
+
     aggregator.assert_all_metrics_covered()
