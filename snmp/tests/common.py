@@ -180,7 +180,7 @@ RESOLVED_TABULAR_OBJECTS = [
 ]
 
 agent_autodiscovery_only = pytest.mark.skipif(AUTODISCOVERY_TYPE != 'agent', reason='Agent discovery only')
-python_autodiscovery_only = pytest.mark.skipif(AUTODISCOVERY_TYPE != 'python', reason='Agent discovery only')
+python_autodiscovery_only = pytest.mark.skipif(AUTODISCOVERY_TYPE != 'python', reason='Python discovery only')
 
 
 def generate_instance_config(metrics, template=None):
