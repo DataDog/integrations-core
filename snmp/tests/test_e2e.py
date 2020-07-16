@@ -51,6 +51,11 @@ def test_e2e_python(dd_agent_check):
 @pytest.mark.e2e
 @common.agent_autodiscovery_only
 def test_e2e_agent_autodiscovery(dd_agent_check, container_ip):
+    """
+    Test Agent Autodiscovery
+
+    The assertions match `snmp_listener` configuration in `datadog.yaml`. See `dd_environment` setup.
+    """
     snmp_device = _build_device_ip(container_ip)
     aggregator = dd_agent_check({'init_config': {}, 'instances': []}, rate=True)
     common_tags = [

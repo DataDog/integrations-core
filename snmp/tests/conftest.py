@@ -15,6 +15,7 @@ from datadog_checks.dev.docker import get_container_ip
 from .common import (
     AUTODISCOVERY_TYPE,
     COMPOSE_DIR,
+    PORT,
     SCALAR_OBJECTS,
     SCALAR_OBJECTS_WITH_TAGS,
     SNMP_CONTAINER_NAME,
@@ -69,11 +70,11 @@ def create_datadog_conf_file(tmp_dir):
             'configs': [
                 {
                     'network': '{}/28'.format(get_container_ip(SNMP_CONTAINER_NAME)),
-                    'port': 1161,
+                    'port': PORT,
+                    'community': 'network',
                     'version': 2,
                     'timeout': 1,
                     'retries': 2,
-                    'community': 'network',
                 }
             ],
         },
