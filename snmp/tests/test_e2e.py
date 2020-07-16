@@ -57,11 +57,14 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip):
     The assertions match `snmp_listener` configuration in `datadog.yaml`. See `dd_environment` setup.
     """
     snmp_device = _build_device_ip(container_ip)
+    subnet_prefix = ".".join(container_ip.split('.')[:2])
     aggregator = dd_agent_check({'init_config': {}, 'instances': []}, rate=True)
+
+    # === network profile ===
     common_tags = [
         'snmp_profile:generic-router',
         'snmp_device:{}'.format(snmp_device),
-        'autodiscovery_subnet:{}/28'.format(container_ip),
+        'autodiscovery_subnet:{}.0.0/29'.format(subnet_prefix),
     ]
 
     common.assert_common_metrics(aggregator, common_tags)
@@ -88,5 +91,41 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip):
             for interface in ['17', '21']:
                 tags = ['ipversion:{}'.format(version), 'interface:{}'.format(interface)] + common_tags
                 aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.COUNT, tags=tags, count=1)
+
+    # ==== apc_ups profile ===
+    common_tags = [
+        'snmp_device:{}'.format(snmp_device),
+        'autodiscovery_subnet:{}.0.0/28'.format(subnet_prefix),
+        'snmp_profile:apc_ups',
+        'model:APC Smart-UPS 600',
+        'firmware_version:2.0.3-test',
+        'serial_num:test_serial',
+        'ups_name:testIdentName',
+    ]
+    metrics = [
+        'upsAdvBatteryNumOfBadBattPacks',
+        'upsAdvBatteryReplaceIndicator',
+        'upsAdvBatteryRunTimeRemaining',
+        'upsAdvBatteryTemperature',
+        'upsAdvBatteryCapacity',
+        'upsHighPrecInputFrequency',
+        'upsHighPrecInputLineVoltage',
+        'upsHighPrecOutputCurrent',
+        'upsAdvInputLineFailCause',
+        'upsAdvOutputLoad',
+        'upsBasicBatteryTimeOnBattery',
+        'upsAdvTestDiagnosticsResults',
+    ]
+
+    common.assert_common_metrics(aggregator, common_tags)
+
+    for metric in metrics:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
+    aggregator.assert_metric(
+        'snmp.upsOutletGroupStatusGroupState',
+        metric_type=aggregator.GAUGE,
+        count=2,
+        tags=['outlet_group_name:test_outlet'] + common_tags,
+    )
 
     aggregator.assert_all_metrics_covered()

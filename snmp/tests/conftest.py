@@ -63,19 +63,29 @@ def dd_environment():
 
 
 def create_datadog_conf_file(tmp_dir):
+    container_ip = get_container_ip(SNMP_CONTAINER_NAME)
+    prefix = ".".join(container_ip.split('.')[:2])
     datadog_conf = {
         'snmp_listener': {
             'workers': 4,
             'discovery_interval': 10,
             'configs': [
                 {
-                    'network': '{}/28'.format(get_container_ip(SNMP_CONTAINER_NAME)),
+                    'network': '{}.0.0/29'.format(prefix),
                     'port': PORT,
                     'community': 'network',
                     'version': 2,
                     'timeout': 1,
                     'retries': 2,
-                }
+                },
+                {
+                    'network': '{}.0.0/28'.format(prefix),
+                    'port': PORT,
+                    'community': 'apc_ups',
+                    'version': 2,
+                    'timeout': 1,
+                    'retries': 2,
+                },
             ],
         },
         'listeners': [{'name': 'snmp'}],
