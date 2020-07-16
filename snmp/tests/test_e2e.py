@@ -20,9 +20,10 @@ from datadog_checks.snmp import SnmpCheck
 from . import common
 
 
-def _build_device_ip(container_ip):
+def _build_device_ip(container_ip, last_digit='1'):
+    last_digit = str(last_digit)
     snmp_device = container_ip.split('.')
-    snmp_device[len(snmp_device) - 1] = '1'
+    snmp_device[len(snmp_device) - 1] = last_digit
     snmp_device = '.'.join(snmp_device)
     return snmp_device
 
@@ -128,5 +129,13 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip):
         count=2,
         tags=['outlet_group_name:test_outlet'] + common_tags,
     )
+
+    # ==== test snmp v3 ===
+    common_tags = [
+        'snmp_device:{}'.format(snmp_device),
+        'autodiscovery_subnet:{}.0.0/27'.format(subnet_prefix),
+    ]
+
+    common.assert_common_metrics(aggregator, common_tags)
 
     aggregator.assert_all_metrics_covered()
