@@ -54,7 +54,8 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip):
     """
     Test Agent Autodiscovery
 
-    The assertions match `snmp_listener` configuration in `datadog.yaml`. See `dd_environment` setup.
+    The assertions match `snmp_listener` configuration in `datadog.yaml`.
+    See `dd_environment` setup in `conftest.py`.
     """
     snmp_device = _build_device_ip(container_ip)
     subnet_prefix = ".".join(container_ip.split('.')[:2])
