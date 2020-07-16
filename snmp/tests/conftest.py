@@ -47,6 +47,7 @@ def dd_environment():
                 response = requests.get(data_file)
                 with open(os.path.join(data_dir, data_file.rsplit('/', 1)[1]), 'wb') as output:
                     output.write(response.content)
+
         with docker_run(os.path.join(COMPOSE_DIR, 'docker-compose.yaml'), env_vars=env, log_patterns="Listening at"):
             if AUTODISCOVERY_TYPE == 'agent':
                 instance_config = {}
@@ -57,7 +58,6 @@ def dd_environment():
                 instance_config = generate_container_instance_config(
                     SCALAR_OBJECTS + SCALAR_OBJECTS_WITH_TAGS + TABULAR_OBJECTS
                 )
-
             yield instance_config, E2E_METADATA
 
 
@@ -83,3 +83,8 @@ def create_datadog_conf_file(tmp_dir):
     with open(datadog_conf_file, 'w') as file:
         file.write(yaml.dump(datadog_conf))
     return datadog_conf_file
+
+
+@pytest.fixture
+def container_ip():
+    return get_container_ip(SNMP_CONTAINER_NAME)

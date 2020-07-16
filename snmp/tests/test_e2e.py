@@ -20,6 +20,13 @@ from datadog_checks.snmp import SnmpCheck
 from . import common
 
 
+def _build_device_ip(container_ip):
+    snmp_device = container_ip.split('.')
+    snmp_device[len(snmp_device) - 1] = '1'
+    snmp_device = '.'.join(snmp_device)
+    return snmp_device
+
+
 @pytest.mark.e2e
 @common.python_autodiscovery_only
 def test_e2e_python(dd_agent_check):
@@ -43,13 +50,13 @@ def test_e2e_python(dd_agent_check):
 
 @pytest.mark.e2e
 @common.agent_autodiscovery_only
-def test_e2e_agent_autodiscovery(dd_agent_check):
+def test_e2e_agent_autodiscovery(dd_agent_check, container_ip):
+    snmp_device = _build_device_ip(container_ip)
     aggregator = dd_agent_check({'init_config': {}, 'instances': []}, rate=True)
     common_tags = [
         'snmp_profile:generic-router',
-        'snmp_device:172.25.0.1',
-        'autodiscovery_subnet:172.25.0.0/28',
-        # 'snmp_device:172.25.0.2',
+        'snmp_device:{}'.format(snmp_device),
+        'autodiscovery_subnet:{}/28'.format(container_ip),
     ]
 
     common.assert_common_metrics(aggregator, common_tags)
