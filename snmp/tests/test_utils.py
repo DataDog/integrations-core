@@ -146,4 +146,4 @@ def test_sanitize_varbind_value(input_string, expected):
     ],
 )
 def test_as_metric_with_forced_type(input_string, forced_type, expected):
-    assert expected == as_metric_with_forced_type(input_string, forced_type)
+    assert expected == as_metric_with_forced_type(input_string, forced_type, options={})
