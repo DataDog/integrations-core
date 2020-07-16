@@ -5,4 +5,4 @@ tcp_queue.rqueue.max,gauge,,byte,,TCP receive queue maximum size,0,tcp_queue_len
 tcp_queue.wqueue.size,gauge,,byte,,TCP send buffer size,0,tcp_queue_length,wqueue_size
 tcp_queue.wqueue.min,gauge,,byte,,TCP send queue minimum size,0,tcp_queue_length,wqueue_min
 tcp_queue.wqueue.max,gauge,,byte,,TCP send queue maximum size,0,tcp_queue_length,wqueue_max
-tcp_queue.nb_contexts,gauge,,,,Total number of connections,0,tcp_queue_length,nb_contexts
+tcp_queue.nb_contexts,gauge,,connection,,Total number of connections,0,tcp_queue_length,nb_contexts

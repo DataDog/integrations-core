@@ -37,11 +37,10 @@ system_probe_config:
    Agent's configuration directory to start collecting your tcp_queue_length performance data.
    See the [sample tcp_queue_length.d/conf.yaml][1] for all available configuration options.
 
+    The `only_count_nb_contexts` parameter is enabled by default and collects only the number of timeseries it would normally collect. If disabled, the check will collect all data-- that is, the size of the TCP queues for every single connection.
+
 2. [Restart the Agent][3].
 
-The `only_count_nb_contexts` parameter controls whether:
-* the check should collect all the data—that is, the size of the TCP queues for every single connection (`false`)
-* the check should collect only the number of timeseries it would normally collect (`true`). This is the default.
 
 ### Configuration with Helm
 
