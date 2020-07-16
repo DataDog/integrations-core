@@ -134,7 +134,6 @@ class SnmpCheck(AgentCheck):
             profiles=self.profiles,
             profiles_by_oid=self.profiles_by_oid,
             loader=loader,
-            logger=self.log,
         )
 
     def _build_autodiscovery_config(self, source_instance, ip_address):
