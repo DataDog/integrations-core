@@ -174,7 +174,7 @@ def render_e2e_progress():
 
 
 def render_process_signatures_progress():
-    exclude = {'datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader'}
+    exclude = {'datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader', 'snowflake'}
     valid_checks = sorted([c for c in get_valid_checks() if c not in exclude])
     total_checks = len(valid_checks)
     checks_with_ps = 0
