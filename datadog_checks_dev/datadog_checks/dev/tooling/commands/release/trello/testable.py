@@ -284,15 +284,21 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
         pr_labels = sorted(get_pr_labels(pr_data))
         documentation_pr = False
         nochangelog_pr = True
+        skip_qa = False
         for label in pr_labels:
-            if label.startswith('documentation'):
+            if label == "qa/skip-qa":
+                skip_qa = True
+            elif label.startswith('documentation'):
                 documentation_pr = True
-
-            if label.startswith(CHANGELOG_LABEL_PREFIX) and label.split('/', 1)[1] != CHANGELOG_TYPE_NONE:
+            elif label.startswith(CHANGELOG_LABEL_PREFIX) and label.split('/', 1)[1] != CHANGELOG_TYPE_NONE:
                 nochangelog_pr = False
 
         if documentation_pr and nochangelog_pr:
             echo_info(f'Skipping documentation {format_commit_id(commit_id)}.')
+            continue
+
+        if skip_qa:
+            echo_info(f'Skipping because of skip-qa label {format_commit_id(commit_id)}.')
             continue
 
         pr_milestone = get_pr_milestone(pr_data)
