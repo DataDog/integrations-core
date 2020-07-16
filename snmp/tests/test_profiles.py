@@ -47,6 +47,8 @@ from .metrics import (
     VOLTAGE_GAUGES,
 )
 
+pytestmark = common.python_autodiscovery_only
+
 
 def test_load_profiles():
     instance = common.generate_instance_config([])

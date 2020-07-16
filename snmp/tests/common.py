@@ -6,7 +6,8 @@ import copy
 import logging
 import os
 
-from datadog_checks.base import is_affirmative
+import pytest
+
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
@@ -18,7 +19,7 @@ HOST = get_docker_hostname()
 PORT = 1161
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')
-IS_AGENT_AUTODISCOVERY = is_affirmative(os.environ.get('AGENT_AUTODISCOVERY'))
+AUTODISCOVERY_TYPE = os.environ['AUTODISCOVERY_TYPE']
 
 AUTH_PROTOCOLS = {'MD5': 'usmHMACMD5AuthProtocol', 'SHA': 'usmHMACSHAAuthProtocol'}
 PRIV_PROTOCOLS = {'DES': 'usmDESPrivProtocol', 'AES': 'usmAesCfb128Protocol'}
@@ -177,6 +178,9 @@ RESOLVED_TABULAR_OBJECTS = [
         ],
     }
 ]
+
+agent_autodiscovery_only = pytest.mark.skipif(AUTODISCOVERY_TYPE != 'agent', reason='Agent discovery only')
+python_autodiscovery_only = pytest.mark.skipif(AUTODISCOVERY_TYPE != 'python', reason='Agent discovery only')
 
 
 def generate_instance_config(metrics, template=None):
