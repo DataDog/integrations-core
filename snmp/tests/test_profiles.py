@@ -1729,6 +1729,24 @@ def test_apc_ups(aggregator):
         metric_type=aggregator.GAUGE,
         tags=['outlet_group_name:test_outlet'] + tags,
     )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.AVRTrimActive', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.BatteriesDischarged', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.LowBatteryOnBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.NoBatteriesAttached', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.OnLine', 0, metric_type=aggregator.GAUGE, tags=tags, count=1
+    )
+    aggregator.assert_metric(
+        'snmp.upsBasicStateOutputState.ReplaceBattery', 1, metric_type=aggregator.GAUGE, tags=tags, count=1
+    )
     aggregator.assert_all_metrics_covered()
 
 
@@ -1927,4 +1945,30 @@ def test_netapp(aggregator):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=tags, count=1)
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', metric_type=aggregator.GAUGE, tags=common_tags, count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_cisco_catalyst(aggregator):
+    run_profile_check('cisco-catalyst')
+    common_tags = common.CHECK_TAGS + ['snmp_host:catalyst-6000.example', 'snmp_profile:cisco-catalyst']
+
+    sensors = [5, 9]
+    for sensor in sensors:
+        tags = ['sensor_id:{}'.format(sensor), 'sensor_type:10'] + common_tags
+        aggregator.assert_metric('snmp.entSensorValue', metric_type=aggregator.GAUGE, tags=tags, count=1)
+    interfaces = ["Gi1/0/{}".format(i) for i in [6, 10, 12, 18, 22, 25, 27]]
+    for interface in interfaces:
+        tags = ['interface:{}'.format(interface)] + common_tags
+        for metric in CIE_METRICS:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    frus = [1001, 1010, 2001, 2010]
+    for fru in frus:
+        tags = ['fru:{}'.format(fru)] + common_tags
+        for metric in FRU_METRICS:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+    aggregator.assert_metric('snmp.devices_monitored', count=1)
     aggregator.assert_all_metrics_covered()
