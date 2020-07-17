@@ -147,6 +147,19 @@ For containerized environments, see the [Autodiscovery with JMX][2] guide.
            #   - type: multi_line
            #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
            #     name: new_log_start_with_date
+        - type: file
+           path: /var/solr/logs/solr_slow_requests.log # or your custom log location
+           source: solr
+           service: <SERVICE_NAME>
+           # To handle multi line that starts with yyyy-mm-dd use the following pattern
+           # log_processing_rules:
+           #   - type: multi_line
+           #     pattern: \d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])
+           #     name: new_log_start_with_date
+        - type: file
+           path: /var/solr/logs/solr_gc.log # or your custom log location
+           source: solr
+           service: <SERVICE_NAME>
      ```
 
 4. [Restart the Agent][7].

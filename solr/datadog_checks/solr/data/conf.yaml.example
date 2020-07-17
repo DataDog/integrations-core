@@ -190,3 +190,11 @@ instances:
 #     path: /var/solr/logs/solr.log
 #     source: solr
 #     service: <SERVICE_NAME>
+#   - type: file
+#     path: /var/solr/logs/solr_slow_requests.log
+#     source: solr
+#     service: <SERVICE_NAME>
+#   - type: file
+#     path: /var/solr/logs/solr_gc.log
+#     source: solr
+#     service: <SERVICE_NAME>
