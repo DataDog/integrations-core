@@ -24,6 +24,8 @@ from .resolver import OIDResolver
 from .types import OIDMatch
 from .utils import register_device_target
 
+local_logger = getLogger(__name__)
+
 
 class InstanceConfig:
     """Parse and hold configuration about a single instance."""
@@ -74,7 +76,7 @@ class InstanceConfig:
             if value in (None, ""):
                 instance.pop(key)
 
-        self.logger = getLogger(__name__) if logger is None else logger
+        self.logger = local_logger if logger is None else logger
 
         self.instance = instance
         self.tags = instance.get('tags', [])
