@@ -304,6 +304,7 @@ class SnmpCheck(AgentCheck):
         cache = read_persistent_cache(self.check_id)
         if cache:
             hosts = json.loads(cache)
+            print("_start_discovery.hosts", hosts)
             for host in hosts:
                 try:
                     ipaddress.ip_address(host)
