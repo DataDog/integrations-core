@@ -1,0 +1,4 @@
+# Generic IP metrics for routers
+
+extends:
+  - _generic-ip.yaml

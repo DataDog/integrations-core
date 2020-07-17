@@ -1,0 +1,5 @@
+# Generic network interfaces metrics for routers.
+#
+
+extends:
+  - _generic-if.yaml

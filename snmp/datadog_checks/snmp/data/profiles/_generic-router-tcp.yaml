@@ -1,0 +1,4 @@
+# Generic TCP metrics for routers.
+
+extends:
+  - _generic-tcp.yaml

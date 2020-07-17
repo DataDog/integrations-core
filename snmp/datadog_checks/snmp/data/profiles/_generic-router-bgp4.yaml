@@ -1,0 +1,5 @@
+# Peer
+# This table contains one entry per neightbor (BGP peer) and information about the connections with BGP peers.
+
+extends:
+  - _generic-bgp4.yaml

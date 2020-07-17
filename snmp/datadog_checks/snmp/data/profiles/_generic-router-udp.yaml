@@ -1,0 +1,4 @@
+# Generic UDP metrics for routers.
+
+extends:
+  - _generic-udp.yaml
