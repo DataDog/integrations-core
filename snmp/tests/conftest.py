@@ -78,7 +78,9 @@ def _autodiscovery_ready():
         if 'autodiscovery_subnet' in result_line:
             autodiscovery_checks.append(result_line)
 
-    assert len(autodiscovery_checks) == 5
+    # assert subnets discovered by `snmp_listener` config from datadog.yaml
+    expected_autodiscovery_checks = 5
+    assert len(autodiscovery_checks) == expected_autodiscovery_checks
 
 
 def create_datadog_conf_file(tmp_dir):

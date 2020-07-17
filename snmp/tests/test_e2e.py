@@ -19,6 +19,8 @@ from datadog_checks.snmp import SnmpCheck
 
 from . import common
 
+pytestmark = pytest.mark.e2e
+
 
 def _build_device_ip(container_ip, last_digit='1'):
     last_digit = str(last_digit)
@@ -28,7 +30,6 @@ def _build_device_ip(container_ip, last_digit='1'):
     return snmp_device
 
 
-@pytest.mark.e2e
 @common.python_autodiscovery_only
 def test_e2e_python(dd_agent_check):
     metrics = common.SUPPORTED_METRIC_TYPES
@@ -49,7 +50,6 @@ def test_e2e_python(dd_agent_check):
     aggregator.all_metrics_asserted()
 
 
-@pytest.mark.e2e
 @common.agent_autodiscovery_only
 @pytest.mark.usefixtures("autodiscovery_ready")
 def test_e2e_agent_autodiscovery(dd_agent_check, container_ip):
