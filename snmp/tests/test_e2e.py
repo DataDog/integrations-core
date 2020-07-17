@@ -130,6 +130,19 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
         tags=['outlet_group_name:test_outlet'] + common_tags,
     )
 
+    ups_basic_state_output_state_metrics = [
+        'snmp.upsBasicStateOutputState.AVRTrimActive',
+        'snmp.upsBasicStateOutputState.BatteriesDischarged',
+        'snmp.upsBasicStateOutputState.LowBatteryOnBattery',
+        'snmp.upsBasicStateOutputState.NoBatteriesAttached',
+        'snmp.upsBasicStateOutputState.OnLine',
+        'snmp.upsBasicStateOutputState.ReplaceBattery',
+    ]
+    for metric in ups_basic_state_output_state_metrics:
+        aggregator.assert_metric(
+            metric, metric_type=aggregator.GAUGE, count=2, tags=common_tags,
+        )
+
     # ==== test snmp v3 ===
     common_tags = [
         'snmp_device:{}'.format(snmp_device),
