@@ -34,6 +34,7 @@ def discover_instances(config, interval, check_ref):
                 return
 
             host_config = check._build_autodiscovery_config(config.instance, host)
+            print("discover_instances.host_config", host_config)
 
             try:
                 sys_object_oid = check.fetch_sysobject_oid(host_config)
