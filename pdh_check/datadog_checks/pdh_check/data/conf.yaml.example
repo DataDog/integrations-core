@@ -39,7 +39,13 @@ instances:
     # admin_share: c$
 
     ## @param countersetname - string - required
-    ## The name of the performance counter set
+    ## The name of the performance counter set.
+    ##
+    ##   The following example fetches the number of processes and users:
+    ##   # - countersetname: Processor
+    ##   #   metrics:
+    ##   #     - ['% Processor Time', pdh.processor.time, gauge]
+    ##   #     - ['% User Time', pdh.processor.user.time, gauge]
     #
     countersetname: <COUNTER_SET_NAME>
 
