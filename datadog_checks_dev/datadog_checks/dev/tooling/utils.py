@@ -7,6 +7,7 @@ import json
 import os
 import re
 from ast import literal_eval
+from json.decoder import JSONDecodeError
 
 import requests
 import semver
@@ -458,6 +459,16 @@ def has_e2e(check):
                     if 'pytest.mark.e2e' in test_file.read():
                         return True
     return False
+
+
+def has_process_signature(check):
+    manifest_file = get_manifest_file(check)
+    try:
+        with open(manifest_file) as f:
+            manifest = json.loads(f.read())
+    except JSONDecodeError as e:
+        raise Exception("Cannot decode {}: {}".format(manifest_file, e))
+    return len(manifest.get('process_signatures', [])) > 0
 
 
 def is_tile_only(check):

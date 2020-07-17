@@ -393,6 +393,7 @@ class SnmpCheck(AgentCheck):
         except Exception as e:
             if not error:
                 error = 'Failed to collect metrics for {} - {}'.format(self._get_instance_name(instance), e)
+            self.log.debug(error, exc_info=True)
             self.warning(error)
         finally:
             # At this point, `tags` might include some extra tags added in try clause
@@ -450,7 +451,7 @@ class SnmpCheck(AgentCheck):
             if isinstance(metric, ParsedTableMetric):
                 for index, val in iteritems(results[name]):
                     metric_tags = tags + self.get_index_tags(index, results, metric.index_tags, metric.column_tags)
-                    self.submit_metric(name, val, metric.forced_type, metric_tags)
+                    self.submit_metric(name, val, metric.forced_type, metric_tags, metric.options)
             else:
                 result = list(results[name].items())
                 if len(result) > 1:
@@ -460,7 +461,7 @@ class SnmpCheck(AgentCheck):
                         continue
                 val = result[0][1]
                 metric_tags = tags + metric.tags
-                self.submit_metric(name, val, metric.forced_type, metric_tags)
+                self.submit_metric(name, val, metric.forced_type, metric_tags, metric.options)
 
     def get_index_tags(
         self,
@@ -512,8 +513,8 @@ class SnmpCheck(AgentCheck):
         self.monotonic_count(metric, value, tags=tags)
         self.rate("{}.rate".format(metric), value, tags=tags)
 
-    def submit_metric(self, name, snmp_value, forced_type, tags):
-        # type: (str, Any, Optional[str], List[str]) -> None
+    def submit_metric(self, name, snmp_value, forced_type, tags, options):
+        # type: (str, Any, Optional[str], List[str], dict) -> None
         """
         Convert the values reported as pysnmp-Managed Objects to values and
         report them to the aggregator.
@@ -523,10 +524,17 @@ class SnmpCheck(AgentCheck):
             self.log.warning('No such Mib available: %s', name)
             return
 
-        metric_name = self.normalize(name, prefix='snmp')
+        if 'metric_suffix' in options:
+            metric_name = self.normalize('{}.{}'.format(name, options['metric_suffix']), prefix='snmp')
+        else:
+            metric_name = self.normalize(name, prefix='snmp')
 
         if forced_type is not None:
-            metric = as_metric_with_forced_type(snmp_value, forced_type)
+            try:
+                metric = as_metric_with_forced_type(snmp_value, forced_type, options)
+            except Exception as e:
+                self.log.error('Unable to coerce %s to %s: %s', name, forced_type, e)
+                return
             if metric is None:
                 raise ConfigurationError('Invalid forced-type {!r} for metric {!r}'.format(forced_type, name))
         else:

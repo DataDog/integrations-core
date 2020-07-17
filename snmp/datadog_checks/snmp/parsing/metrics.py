@@ -164,7 +164,11 @@ def _parse_oid_metric(metric):
     oid = OID(metric['OID'])
 
     parsed_symbol_metric = ParsedSymbolMetric(
-        name, tags=metric.get('metric_tags', []), forced_type=metric.get('forced_type'), enforce_scalar=False
+        name,
+        tags=metric.get('metric_tags', []),
+        forced_type=metric.get('forced_type'),
+        enforce_scalar=False,
+        options=metric.get('options', {}),
     )
 
     return MetricParseResult(
@@ -195,7 +199,10 @@ def _parse_symbol_metric(metric):
     parsed_symbol = _parse_symbol(mib, symbol)
 
     parsed_symbol_metric = ParsedSymbolMetric(
-        parsed_symbol.name, tags=metric.get('metric_tags', []), forced_type=metric.get('forced_type')
+        parsed_symbol.name,
+        tags=metric.get('metric_tags', []),
+        forced_type=metric.get('forced_type'),
+        options=metric.get('options', {}),
     )
 
     return MetricParseResult(
@@ -286,7 +293,11 @@ def _parse_table_metric(metric):
         table_oids.append(parsed_symbol.oid)
 
         parsed_table_metric = ParsedTableMetric(
-            parsed_symbol.name, index_tags=index_tags, column_tags=column_tags, forced_type=metric.get('forced_type'),
+            parsed_symbol.name,
+            index_tags=index_tags,
+            column_tags=column_tags,
+            forced_type=metric.get('forced_type'),
+            options=metric.get('options', {}),
         )
         parsed_metrics.append(parsed_table_metric)
 
