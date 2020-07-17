@@ -840,3 +840,38 @@ class TestCheckInitializations:
         check.run()
 
         assert check.initialize.call_count == 2
+
+
+def test_agent_check_deletion():
+    check_deleted = False
+    config_deleted = False
+
+    class MyConfig(object):
+        def __init__(self, log):
+            self.log = log
+
+        def __del__(self):
+            nonlocal config_deleted
+            config_deleted = True
+
+    class MyCheck(AgentCheck):
+        def __init__(self, *args, **kwargs):
+            super(MyCheck, self).__init__(*args, **kwargs)
+            self.config = MyConfig(self.log)
+
+        def check(self, _):
+            pass
+
+        def __del__(self):
+            nonlocal check_deleted
+            check_deleted = True
+
+    check = MyCheck()
+
+    assert check_deleted is False
+    assert config_deleted is False
+
+    del check
+
+    assert check_deleted is True
+    assert config_deleted is True

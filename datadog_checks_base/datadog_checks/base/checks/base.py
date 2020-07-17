@@ -10,6 +10,7 @@ import logging
 import re
 import traceback
 import unicodedata
+import weakref
 from collections import defaultdict, deque
 from os.path import basename
 from typing import Any, Callable, DefaultDict, Deque, Dict, List, Optional, Sequence, Tuple, Union
@@ -17,6 +18,7 @@ from typing import Any, Callable, DefaultDict, Deque, Dict, List, Optional, Sequ
 import yaml
 from six import binary_type, iteritems, text_type
 
+from datadog_checks.base.utils.weakref import WeakDeque
 from ..config import is_affirmative
 from ..constants import ServiceCheck
 from ..types import (
@@ -183,7 +185,7 @@ class AgentCheck(object):
         self.hostname = datadog_agent.get_hostname()  # type: str
 
         logger = logging.getLogger('{}.{}'.format(__name__, self.name))
-        self.log = CheckLoggingAdapter(logger, self)
+        self.log = CheckLoggingAdapter(logger, weakref.ref(self))
 
         # TODO: Remove with Agent 5
         # Set proxy settings
@@ -236,7 +238,7 @@ class AgentCheck(object):
         self.metric_limiter = self._get_metric_limiter(self.name, instance=self.instance)
 
         # Functions that will be called exactly once (if successful) before the first check run
-        self.check_initializations = deque([self.send_config_metadata])  # type: Deque[Callable[[], None]]
+        self.check_initializations = WeakDeque([self.send_config_metadata])  # type: Deque[Callable[[], None]]
 
     def _get_metric_limiter(self, name, instance=None):
         # type: (str, InstanceType) -> Optional[Limiter]

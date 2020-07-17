@@ -25,10 +25,10 @@ class AgentLogger(logging.getLoggerClass()):
 
 
 class CheckLoggingAdapter(logging.LoggerAdapter):
-    def __init__(self, logger, check):
+    def __init__(self, logger, check_ref):
         super(CheckLoggingAdapter, self).__init__(logger, {})
-        self.check = check
-        self.check_id = self.check.check_id
+        self.check_ref = check_ref
+        self.check_id = check_ref().check_id
 
     def setup_sanitization(self, sanitize):
         # type: (Callable[[str], str]) -> None
@@ -39,13 +39,10 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
     def process(self, msg, kwargs):
         # Cache for performance
         if not self.check_id:
-            self.check_id = self.check.check_id
+            self.check_id = self.check_ref().check_id
             # Default to `unknown` for checks that log during
             # `__init__` and therefore have no `check_id` yet
             self.extra['_check_id'] = self.check_id or 'unknown'
-            if self.check_id:
-                # Break the reference cycle, once we resolved check_id we don't need the check anymore
-                self.check = None
 
         kwargs.setdefault('extra', self.extra)
         return msg, kwargs
