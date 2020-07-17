@@ -25,7 +25,7 @@ from .resolver import OIDResolver
 from .types import OIDMatch
 from .utils import register_device_target
 
-local_logger = getLogger(__name__)
+local_logger = weakref.ref(getLogger(__name__))  # type: weakref.ReferenceType[Logger]
 
 
 class InstanceConfig:
@@ -77,7 +77,7 @@ class InstanceConfig:
             if value in (None, ""):
                 instance.pop(key)
 
-        self.logger = local_logger if logger is None else weakref.ref(logger)
+        self.logger = local_logger if logger is None else weakref.ref(logger)  # type: weakref.ReferenceType[Logger]
 
         self.instance = instance
         self.tags = instance.get('tags', [])
@@ -282,7 +282,7 @@ class InstanceConfig:
         """Parse configuration and returns data to be used for SNMP queries."""
         # Use bulk for SNMP version > 1 only.
         bulk_threshold = self.bulk_threshold if self._auth_data.mpModel else 0
-        result = parse_metrics(metrics, resolver=self._resolver, logger=self.logger, bulk_threshold=bulk_threshold)
+        result = parse_metrics(metrics, resolver=self._resolver, logger=self.logger(), bulk_threshold=bulk_threshold)
         return result['oids'], result['next_oids'], result['bulk_oids'], result['parsed_metrics']
 
     def parse_metric_tags(self, metric_tags):
