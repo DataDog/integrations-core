@@ -1,12 +1,15 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from typing import Any, Dict, Generator, List, Tuple
+
 from six import iteritems
 
-from .common import is_metric, build_metric_to_submit
+from .common import build_metric_to_submit, is_metric
 
 
 def parse_summary_storage_base_metrics(data, tags):
+     #  type: (Dict[str, Any], List[str]) -> Generator[Tuple, None, None]
     """
     Collect Base Storage Metrics
     """
@@ -36,7 +39,10 @@ def parse_summary_storage_base_metrics(data, tags):
                         ]
                         for forest_key, forest_value in iteritems(forest_data):
                             if forest_key == 'disk-size':
-                                yield build_metric_to_submit("forests.storage.forest.{}".format(forest_key), forest_value,
-                                                   tags=forest_tags)
+                                yield build_metric_to_submit(
+                                    "forests.storage.forest.{}".format(forest_key), forest_value, tags=forest_tags
+                                )
                 elif is_metric(host_value):
-                    yield build_metric_to_submit("forests.storage.host.{}".format(host_key), host_value, tags=location_tags)
+                    yield build_metric_to_submit(
+                        "forests.storage.host.{}".format(host_key), host_value, tags=location_tags
+                    )
