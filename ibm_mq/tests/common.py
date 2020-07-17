@@ -25,6 +25,7 @@ BAD_CHANNEL = 'DEV.NOTHERE.SVRCONN'
 
 MQ_VERSION = os.environ.get('IBM_MQ_VERSION', '9')
 MQ_COMPOSE_VERSION = os.environ['IBM_MQ_COMPOSE_VERSION']
+MQ_VERSION_RAW = os.environ.get('IBM_MQ_VERSION_RAW', '9.1.1.0')
 
 IS_CLUSTER = 'cluster' in MQ_COMPOSE_VERSION
 
@@ -43,6 +44,18 @@ INSTANCE = {
     'channels': [CHANNEL, BAD_CHANNEL],
     'tags': ['foo:bar'],
     'collect_statistics_metrics': True,
+}
+
+INSTANCE_METADATA = {
+    'channel': CHANNEL,
+    'queue_manager': QUEUE_MANAGER,
+    'host': HOST,
+    'port': PORT,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'queues': [QUEUE],
+    'channels': [CHANNEL, BAD_CHANNEL],
+    'tags': ['foo:bar'],
 }
 
 INSTANCE_WITH_CONNECTION_NAME = {

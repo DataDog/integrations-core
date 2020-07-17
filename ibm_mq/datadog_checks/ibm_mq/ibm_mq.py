@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
@@ -10,7 +9,7 @@ from datadog_checks.ibm_mq.collectors.stats_collector import StatsCollector
 from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
 from . import connection, errors
-from .collectors import ChannelMetricCollector, QueueMetricCollector
+from .collectors import ChannelMetricCollector, MetadataCollector, QueueMetricCollector
 from .config import IBMMQConfig
 
 try:
@@ -41,6 +40,7 @@ class IbmMqCheck(AgentCheck):
             self.config, self.service_check, self.warning, self.send_metric, self.send_metrics_from_properties, self.log
         )
         self.channel_metric_collector = ChannelMetricCollector(self.config, self.service_check, self.gauge, self.log)
+        self.metadata_collector = MetadataCollector(self.log)
         self.stats_collector = StatsCollector(self.config, self.send_metrics_from_properties, self.log)
 
     def check(self, _):
@@ -51,6 +51,8 @@ class IbmMqCheck(AgentCheck):
             self.warning("cannot connect to queue manager: %s", e)
             self.service_check(self.SERVICE_CHECK, AgentCheck.CRITICAL, self.config.tags)
             return
+
+        self._collect_metadata(queue_manager)
 
         try:
             self.channel_metric_collector.get_pcf_channel_metrics(queue_manager)
@@ -65,6 +67,19 @@ class IbmMqCheck(AgentCheck):
             getattr(self, metric_type)(metric_name, metric_value, tags=tags)
         else:
             self.log.warning("Unknown metric type `%s` for metric `%s`", metric_type, metric_name)
+
+    @AgentCheck.metadata_entrypoint
+    def _collect_metadata(self, queue_manager):
+        try:
+            version = self.metadata_collector.collect_metadata(queue_manager)
+            if version:
+                raw_version = '{}.{}.{}.{}'.format(version["major"], version["minor"], version["mod"], version["fix"])
+                self.set_metadata('version', raw_version, scheme='parts', part_map=version)
+                self.log.debug('Found ibm_mq version: %s', raw_version)
+            else:
+                self.log.debug('Could not retrieve ibm_mq version info')
+        except Exception as e:
+            self.log.debug('Could not retrieve ibm_mq version info: %s', e)
 
     def send_metrics_from_properties(self, properties, metrics_map, prefix, tags):
         for metric_name, (pymqi_type, metric_type) in iteritems(metrics_map):
