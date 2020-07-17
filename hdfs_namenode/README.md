@@ -121,7 +121,7 @@ Need help? Contact [Datadog support][119].
 - [How to collect Hadoop metrics][1112]
 - [How to monitor Hadoop with Datadog][1113]
 
-[111]: https://raw.githubusercontent.com/DataDog/integrations-core/master/hdfs_datanode/images/hadoop_dashboard.png
+[111]: https://raw.githubusercontent.com/DataDog/integrations-core/master/hdfs_namenode/images/hadoop_dashboard.png
 [112]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [113]: https://app.datadoghq.com/account/settings#agent
 [114]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

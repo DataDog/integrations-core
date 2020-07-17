@@ -127,7 +127,7 @@ The Druid check does not include any events.
 
 Need help? Contact [Datadog support][12].
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/druid/assets/images/druid_dashboard_overview.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/druid/images/druid_dashboard_overview.png
 [2]: https://docs.datadoghq.com/developers/dogstatsd/
 [3]: https://druid.apache.org/docs/latest/operations/metrics.html
 [4]: https://docs.datadoghq.com/agent/

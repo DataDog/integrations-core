@@ -103,6 +103,7 @@ YARN_CONFIG = {
         }
     ]
 }
+
 YARN_CONFIG_STATUS_MAPPING = {
     'instances': [
         {
@@ -134,6 +135,29 @@ YARN_CONFIG_EXCLUDING_APP = {
             'tags': list(CUSTOM_TAGS),
             'application_tags': {'app_id': 'id', 'app_queue': 'queue'},
             'collect_app_metrics': 'false',
+        }
+    ]
+}
+
+YARN_CONFIG_SPLIT_APPLICATION_TAGS = {
+    'instances': [
+        {
+            'resourcemanager_uri': RM_ADDRESS,
+            'cluster_name': CLUSTER_NAME,
+            'tags': list(CUSTOM_TAGS),
+            'application_tags': {'app_id': 'id', 'app_queue': 'queue', 'app_tags': 'applicationTags'},
+            'split_yarn_application_tags': 'true',
+            "application_status_mapping": {
+                'ALL': 'unknown',
+                'NEW': 'ok',
+                'NEW_SAVING': 'ok',
+                'SUBMITTED': 'ok',
+                'ACCEPTED': 'ok',
+                'RUNNING': 'ok',
+                'FINISHED': 'ok',
+                'FAILED': 'warning',
+                'KILLED': 'warning',
+            },
         }
     ]
 }

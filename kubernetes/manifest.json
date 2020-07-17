@@ -25,7 +25,8 @@
   "assets": {
     "monitors": {},
     "dashboards": {
-      "Kubernetes - Pods": "assets/dashboards/kubernetes_pods.json"
+      "Kubernetes - Pods": "assets/dashboards/kubernetes_pods.json",
+      "Kubernetes Nodes Overview": "assets/dashboards/kubernetes_nodes.json"
     },
     "service_checks": "assets/service_checks.json"
   }

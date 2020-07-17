@@ -65,3 +65,10 @@ ibm_mq.queue_manager.max_msg_list,gauge,,byte,,the length of the longest message
 ibm_mq.queue.max_channels,gauge,,connection,,the max number of channels that can be connected,0,ibm_mq,max channels
 ibm_mq.queue.oldest_message_age,gauge,,second,,the age of the oldest message on the queue in seconds,0,ibm_mq,oldest message
 ibm_mq.queue.uncommitted_msgs,gauge,,message,,the number of uncommitted messages on the queue.,0,ibm_mq,uncommitted msgs
+ibm_mq.stats.channel.msgs,count,,message,,The number of persistent and nonpersistent messages sent or received.,0,ibm_mq,stats chan msgs
+ibm_mq.stats.channel.bytes,count,,message,,The number of bytes sent or received for persistent and nonpersistent messages.,0,ibm_mq,stats chan msgs
+ibm_mq.stats.channel.put_retries,count,,message,,"The number of times in the time interval that a message failed to be put, and entered a retry loop.",0,ibm_mq,stats chan put retries
+ibm_mq.stats.channel.full_batches,count,,message,,The number of batches processed by the channel that were sent because the value of the channel attributes BATCHSZ or BATCHLIM was reached.,0,ibm_mq,stats chan full batches
+ibm_mq.stats.channel.incomplete_batches,count,,message,,"The number of batches processed by the channel, that were sent without the value of the channel attribute BATCHSZ being reached.",0,ibm_mq,stats chan incomplete batches
+ibm_mq.stats.channel.avg_batch_size,gauge,,message,,The average batch size of batches processed by the channel.,0,ibm_mq,stats chan avg batch size
+ibm_mq.stats.queue.q_min_depth,gauge,,message,,The minimum queue depth during the monitoring period.,0,ibm_mq,stats queue q min depth

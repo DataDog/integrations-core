@@ -4,7 +4,7 @@
 
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, to_native_string
+from datadog_checks.base import AgentCheck, to_string
 from datadog_checks.ibm_mq.metrics import GAUGE
 
 from .. import metrics
@@ -24,11 +24,12 @@ class QueueMetricCollector(object):
     QUEUE_SERVICE_CHECK = 'ibm_mq.queue'
     QUEUE_MANAGER_SERVICE_CHECK = 'ibm_mq.queue_manager'
 
-    def __init__(self, config, service_check, warning, send_metric, log):
+    def __init__(self, config, service_check, warning, send_metric, send_metrics_from_properties, log):
         self.config = config
         self.service_check = service_check
         self.warning = warning
         self.send_metric = send_metric
+        self.send_metrics_from_properties = send_metrics_from_properties
         self.log = log
         self.queues = set(self.config.queues)
 
@@ -89,7 +90,7 @@ class QueueMetricCollector(object):
             else:
                 for queue_info in response:
                     queue = queue_info[pymqi.CMQC.MQCA_Q_NAME]
-                    queues.append(to_native_string(queue).strip())
+                    queues.append(to_string(queue).strip())
 
         return queues
 
@@ -175,7 +176,6 @@ class QueueMetricCollector(object):
         else:
             # Response is a list. It likely has only one member in it.
             for queue_info in response:
-                for metric_name, (pymqi_type, metric_type) in iteritems(metrics.pcf_status_reset_metrics()):
-                    metric_full_name = '{}.queue.{}'.format(metrics.METRIC_PREFIX, metric_name)
-                    metric_value = int(queue_info[pymqi_type])
-                    self.send_metric(metric_type, metric_full_name, metric_value, tags)
+                metrics_map = metrics.pcf_status_reset_metrics()
+                prefix = "{}.queue".format(metrics.METRIC_PREFIX)
+                self.send_metrics_from_properties(queue_info, metrics_map, prefix, tags)

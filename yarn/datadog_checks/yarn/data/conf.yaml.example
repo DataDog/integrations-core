@@ -105,6 +105,13 @@ instances:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
 
+    ## @param split_yarn_application_tags - boolean - optional - default: false
+    ## Set this parameter to true to split YARN application tags string formatted as
+    ## `key1:value1,key2:value2,...` into Datadog application tags as such:
+    ## `app_key1: value1`, `app_key2: value2`, etc.
+    #
+    # split_yarn_application_tags: false
+
     ## @param proxy - object - optional
     ## This overrides the `proxy` setting in `init_config`.
     ##
