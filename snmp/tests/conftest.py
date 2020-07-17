@@ -85,14 +85,14 @@ def _autodiscovery_ready():
 
 def create_datadog_conf_file(tmp_dir):
     container_ip = get_container_ip(SNMP_CONTAINER_NAME)
-    prefix = ".".join(container_ip.split('.')[:2])
+    prefix = ".".join(container_ip.split('.')[:3])
     datadog_conf = {
         'snmp_listener': {
             'workers': 4,
             'discovery_interval': 10,
             'configs': [
                 {
-                    'network': '{}.0.0/29'.format(prefix),
+                    'network': '{}.0/29'.format(prefix),
                     'port': PORT,
                     'community': 'network',
                     'version': 2,
@@ -100,7 +100,7 @@ def create_datadog_conf_file(tmp_dir):
                     'retries': 2,
                 },
                 {
-                    'network': '{}.0.0/28'.format(prefix),
+                    'network': '{}.0/28'.format(prefix),
                     'port': PORT,
                     'community': 'apc_ups',
                     'version': 2,
@@ -108,7 +108,7 @@ def create_datadog_conf_file(tmp_dir):
                     'retries': 2,
                 },
                 {
-                    'network': '{}.0.0/27'.format(prefix),
+                    'network': '{}.0/27'.format(prefix),
                     'port': PORT,
                     'version': 3,
                     'timeout': 1,
@@ -120,7 +120,7 @@ def create_datadog_conf_file(tmp_dir):
                     'privacy_protocol': 'des',
                     'context_engine_id': 'my-engine-id',
                     'context_name': 'my-context-name',
-                    'ignored_ip_addresses': {'{}.0.2'.format(prefix): True},
+                    'ignored_ip_addresses': {'{}.2'.format(prefix): True},
                 },
             ],
         },
