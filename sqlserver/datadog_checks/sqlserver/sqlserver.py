@@ -78,16 +78,20 @@ NTNX__microsoft_sqlserver_user_authn = "NTNX__microsoft_sqlserver_user_authn"
 NTNX__microsoft_sqlserver_view_server_state = "NTNX__microsoft_sqlserver_view_server_state"
 NTNX__microsoft_sqlserver_sql_server_target = "NTNX__microsoft_sqlserver_sql_server_target"
 NTNX__microsoft_sqlserver_select_permissions = "NTNX__microsoft_sqlserver_select_permissions"
+NTNX__microsoft_sqlserver_incorrect_permissions = "NTNX__microsoft_sqlserver_incorrect_permissions"
+
 ENDPOINT_UUID_STR = "endpoint_uuid"
 
 VIEW_SERVER_STATE_MSG = "VIEW SERVER STATE permission was denied"
 SELECT_SERVER_STATE_MSG = "SELECT permission was denied"
+INSUFFICIENT_PERM_MSG = "The user does not have permission to perform this action"
 
 SQLCONNECTION_FAILURE_ALERTS = {
     "Login failed for user" : NTNX__microsoft_sqlserver_user_authn,
     VIEW_SERVER_STATE_MSG : NTNX__microsoft_sqlserver_view_server_state,
     "Login timeout expired" : NTNX__microsoft_sqlserver_sql_server_target,
-    SELECT_SERVER_STATE_MSG : NTNX__microsoft_sqlserver_select_permissions
+    SELECT_SERVER_STATE_MSG : NTNX__microsoft_sqlserver_select_permissions,
+    INSUFFICIENT_PERM_MSG : NTNX__microsoft_sqlserver_incorrect_permissions
 }
 
 # Appropriate alert messages for the alert types
@@ -95,7 +99,8 @@ SQLCONNECTION_ALERT_MESSAGES = {
     NTNX__microsoft_sqlserver_user_authn : "Login failed for user ",
     NTNX__microsoft_sqlserver_view_server_state : VIEW_SERVER_STATE_MSG,
     NTNX__microsoft_sqlserver_select_permissions : SELECT_SERVER_STATE_MSG,
-    NTNX__microsoft_sqlserver_sql_server_target : "The target is not an SQL server or instance/port details are incorrect"
+    NTNX__microsoft_sqlserver_sql_server_target : "The target is not an SQL server or instance/port details are incorrect",
+    NTNX__microsoft_sqlserver_incorrect_permissions : "Insufficient permissions to perform action"
 }
 
 ALERT_TYPE_ERROR = 'error'
@@ -258,7 +263,10 @@ class SQLServer(AgentCheck):
                 self.log.warning("Can't load the metric %s, ignoring", name, exc_info=True)
                 # Raise this alert as any metric collection will not be successful if user
                 # does not have VIEW SERVER STATE permissions or SELECT permissions
-                if (VIEW_SERVER_STATE_MSG in str(e) or SELECT_SERVER_STATE_MSG in str(e)):
+                # Incase of older versions of SQL Server, the failure message is generic as 
+                # The user does not have permission to perform this action and does not provide details of what went wrong
+                # In such cases, we want to raise a generic alert. INSUFFICIENT_PERM_MSG - Refers to this alert
+                if (VIEW_SERVER_STATE_MSG in str(e) or SELECT_SERVER_STATE_MSG in str(e) or INSUFFICIENT_PERM_MSG in str(e)):
                     raise
                 continue
 
