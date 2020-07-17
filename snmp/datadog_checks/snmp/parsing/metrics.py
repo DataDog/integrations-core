@@ -4,8 +4,8 @@
 """
 Helpers for parsing the `metrics` section of a config file.
 """
-# from logging import Logger
-from typing import Any, Dict, List, NamedTuple, Sequence, TypedDict, Union, cast
+from logging import Logger
+from typing import Dict, List, NamedTuple, Sequence, TypedDict, Union, cast
 
 from datadog_checks.base import ConfigurationError
 
@@ -32,7 +32,7 @@ ParseMetricsResult = TypedDict(
 
 
 def parse_metrics(metrics, resolver, logger, bulk_threshold=0):
-    # type: (List[Metric], OIDResolver, Any, int) -> ParseMetricsResult
+    # type: (List[Metric], OIDResolver, Logger, int) -> ParseMetricsResult
     """
     Parse the `metrics` section of a config file, and return OIDs to fetch and metrics to submit.
     """
@@ -90,7 +90,7 @@ MetricParseResult = NamedTuple(
 
 
 def _parse_metric(metric, logger):
-    # type: (Metric, Any) -> MetricParseResult
+    # type: (Metric, Logger) -> MetricParseResult
     """
     Parse a single metric in the `metrics` section of a config file.
 
@@ -240,7 +240,7 @@ def _parse_symbol(mib, symbol):
 
 
 def _parse_table_metric(metric, logger):
-    # type: (TableMetric, Any) -> MetricParseResult
+    # type: (TableMetric, Logger) -> MetricParseResult
     mib = metric['MIB']
 
     parsed_table = _parse_symbol(mib, metric['table'])

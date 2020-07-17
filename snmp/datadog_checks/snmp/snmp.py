@@ -304,6 +304,7 @@ class SnmpCheck(AgentCheck):
         cache = read_persistent_cache(self.check_id)
         if cache:
             hosts = json.loads(cache)
+            print('Cached hosts len {}'.format(len(hosts)))
             for host in hosts:
                 try:
                     ipaddress.ip_address(host)
@@ -320,6 +321,8 @@ class SnmpCheck(AgentCheck):
             raise ConfigurationError(message)
 
         # Pass a weakref to the discovery function to not have a reference cycle
+        print(self._config.discovered_instances)
+        print(list(self._config.network_hosts()))
         self._thread = self._thread_factory(
             target=discover_instances, args=(self._config, discovery_interval, weakref.ref(self)), name=self.name
         )

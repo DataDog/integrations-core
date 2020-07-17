@@ -55,6 +55,7 @@ def discover_instances(config, interval, check_ref):
 
             config.discovered_instances[host] = host_config
 
+            print(json.dumps(list(config.discovered_instances)))
             write_persistent_cache(check.check_id, json.dumps(list(config.discovered_instances)))
             del check
 
@@ -62,6 +63,7 @@ def discover_instances(config, interval, check_ref):
         if check is None:
             return
         # Write again at the end of the loop, in case some host have been removed since last
+        print(json.dumps(list(config.discovered_instances)))
         write_persistent_cache(check.check_id, json.dumps(list(config.discovered_instances)))
         del check
 

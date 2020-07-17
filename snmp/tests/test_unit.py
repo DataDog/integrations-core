@@ -382,6 +382,8 @@ def test_cache_building(write_mock, read_mock):
     check._config.discovered_instances['192.168.0.1'] = InstanceConfig(discovered_instance)
     check._start_discovery()
 
+    print(write_mock.call_count)
+
     try:
         for _ in range(30):
             if write_mock.call_count:
@@ -390,6 +392,7 @@ def test_cache_building(write_mock, read_mock):
     finally:
         check._running = False
 
+    print(write_mock.call_count)
     write_mock.assert_called_once_with('', '["192.168.0.1"]')
 
 

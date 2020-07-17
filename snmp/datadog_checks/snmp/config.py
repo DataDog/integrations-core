@@ -3,7 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
 from collections import defaultdict
-from logging import getLogger
+from logging import Logger, getLogger
 from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple
 
 from datadog_checks.base import ConfigurationError, is_affirmative
@@ -61,7 +61,7 @@ class InstanceConfig:
         profiles=None,  # type: Dict[str, dict]
         profiles_by_oid=None,  # type: Dict[str, str]
         loader=None,  # type: MIBLoader
-        logger=None,  # type: Any
+        logger=None,  # type: Logger
     ):
         # type: (...) -> None
         global_metrics = [] if global_metrics is None else global_metrics
