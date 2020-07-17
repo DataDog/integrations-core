@@ -9,7 +9,7 @@ import pytest
 import requests
 import yaml
 
-from datadog_checks.dev import TempDir, docker_run
+from datadog_checks.dev import TempDir, WaitFor, docker_run, run_command
 from datadog_checks.dev.docker import get_container_ip
 
 from .common import (
@@ -20,6 +20,7 @@ from .common import (
     SCALAR_OBJECTS_WITH_TAGS,
     SNMP_CONTAINER_NAME,
     TABULAR_OBJECTS,
+    TOX_ENV_NAME,
     generate_container_instance_config,
 )
 
@@ -60,6 +61,24 @@ def dd_environment():
                     SCALAR_OBJECTS + SCALAR_OBJECTS_WITH_TAGS + TABULAR_OBJECTS
                 )
             yield instance_config, E2E_METADATA
+
+
+@pytest.fixture
+def autodiscovery_ready():
+    WaitFor(lambda: _autodiscovery_ready())()
+
+
+def _autodiscovery_ready():
+    result = run_command(
+        ['docker', 'exec', 'dd_snmp_{}'.format(TOX_ENV_NAME), 'agent', 'configcheck'], capture=True, check=True,
+    )
+
+    autodiscovery_checks = []
+    for result_line in result.stdout.splitlines():
+        if 'autodiscovery_subnet' in result_line:
+            autodiscovery_checks.append(result_line)
+
+    assert len(autodiscovery_checks) == 5
 
 
 def create_datadog_conf_file(tmp_dir):

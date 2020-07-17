@@ -20,6 +20,7 @@ PORT = 1161
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')
 AUTODISCOVERY_TYPE = os.environ['AUTODISCOVERY_TYPE']
+TOX_ENV_NAME = os.environ['TOX_ENV_NAME']
 
 AUTH_PROTOCOLS = {'MD5': 'usmHMACMD5AuthProtocol', 'SHA': 'usmHMACSHAAuthProtocol'}
 PRIV_PROTOCOLS = {'DES': 'usmDESPrivProtocol', 'AES': 'usmAesCfb128Protocol'}

@@ -51,6 +51,7 @@ def test_e2e_python(dd_agent_check):
 
 @pytest.mark.e2e
 @common.agent_autodiscovery_only
+@pytest.mark.usefixtures("autodiscovery_ready")
 def test_e2e_agent_autodiscovery(dd_agent_check, container_ip):
     """
     Test Agent Autodiscovery
