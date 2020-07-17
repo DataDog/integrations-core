@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from six import iteritems
+from typing import Any, List, Optional, Tuple
 
 from ..constants import GAUGE_UNITS
 
@@ -11,6 +12,7 @@ class MarkLogicParserException(RuntimeError):
 
 
 def build_metric_to_submit(metric_name, value_data, tags=None):
+    #  type: (str, Any, Optional[List[str]]) -> Optional[Tuple]
     if isinstance(value_data, (int, float)):
         return 'gauge', metric_name, value_data, tags
     elif 'units' in value_data and 'value' in value_data:

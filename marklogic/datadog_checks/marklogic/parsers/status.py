@@ -41,6 +41,7 @@ def _parse_status_metrics(metric_prefix, metrics, tags):
             yield build_metric_to_submit("{}.{}".format(metric_prefix, total_key), data[total_key], tags)
             for metric in _parse_status_metrics(metric_prefix, data[prop_type + '-detail'], tags):
                 yield metric
+        # TODO: remove, seems redundant
         elif key == 'load-properties':
             yield build_metric_to_submit("{}.total-load".format(metric_prefix), data['total-load'], tags)
             for metric in _parse_status_metrics(metric_prefix, data['load-detail'], tags):
