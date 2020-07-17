@@ -29,6 +29,7 @@ def discover_instances(config, interval, check_ref):
     while True:
         start_time = time.time()
         for host in config.network_hosts():
+            print("discover_instances.host", host)
             check = check_ref()
             if check is None or not check._running:
                 return
@@ -54,7 +55,9 @@ def discover_instances(config, interval, check_ref):
                 host_config.refresh_with_profile(check.profiles[profile])
                 host_config.add_profile_tag(profile)
 
+            print("config.discovered_instances BEFORE", config.discovered_instances)
             config.discovered_instances[host] = host_config
+            print("config.discovered_instances AFTER", config.discovered_instances)
 
             write_persistent_cache(check.check_id, json.dumps(list(config.discovered_instances)))
             del check
