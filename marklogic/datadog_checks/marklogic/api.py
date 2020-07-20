@@ -14,6 +14,7 @@ class MarkLogicApi(object):
         self._base_url = api_url + '/manage/v2'
 
     def get_status_data(self, resource=None, name=None, group=None):
+        # type: (str, str, str) -> Dict[str, Any]
         """
         Example url:
             - http://localhost:8002/manage/v2/hosts?view=status
@@ -37,7 +38,10 @@ class MarkLogicApi(object):
         return resp.json()
 
     def get_requests_data(self, resource=None, name=None, group=None):
+        # type: (str, str, str) -> Dict[str, Any]
         """
+        TODO: may be removed
+        https://docs.marklogic.com/REST/GET/manage/v2/requests
         Example url:
             - http://localhost:8002/manage/v2/requests?format=json (cluster level)
             - http://localhost:8002/manage/v2/requests?format=json&server-id=Admin&group-id=Default
@@ -54,7 +58,8 @@ class MarkLogicApi(object):
         resp.raise_for_status()
         return resp.json()
 
-    def get_forest_storage_data(self, name=None, group=None):
+    def get_forests_storage_data(self, name=None, group=None):
+        # type: (str, str) -> Dict[str, Any]
         """
         Example url:
             - http://localhost:8002/manage/v2/forests?format=json&view=storage
@@ -76,16 +81,16 @@ class MarkLogicApi(object):
     def get_resources(self):
         data = self._get_raw_resources()
         from pprint import pprint
+
         pprint(data)
         resources = {}
         for group in data['cluster-query']['relations']['relation-group']:
             resource_type = group['typeref']
             resources[resource_type] = []
             for rel in group['relation']:
-                resources[resource_type].append({
-                    'id': rel['idref'],
-                    'name': rel['nameref'],
-                })
+                resources[resource_type].append(
+                    {'id': rel['idref'], 'name': rel['nameref'],}
+                )
         return resources
 
     def _get_raw_resources(self):

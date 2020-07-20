@@ -9,7 +9,7 @@ from .common import build_metric_to_submit, is_metric
 
 
 def parse_summary_storage_base_metrics(data, tags):
-     #  type: (Dict[str, Any], List[str]) -> Generator[Tuple, None, None]
+    #  type: (Dict[str, Any], List[str]) -> Generator[Tuple, None, None]
     """
     Collect Base Storage Metrics
     """

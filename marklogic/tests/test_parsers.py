@@ -6,12 +6,12 @@ import os
 import pytest
 import yaml
 
+from datadog_checks.marklogic.parsers.common import MarkLogicParserException, build_metric_to_submit
 from datadog_checks.marklogic.parsers.status import (
     parse_summary_status_base_metrics,
     parse_summary_status_resource_metrics,
 )
 from datadog_checks.marklogic.parsers.storage import parse_summary_storage_base_metrics
-from datadog_checks.marklogic.parsers.common import build_metric_to_submit, MarkLogicParserException
 
 from .common import HERE
 
@@ -26,7 +26,12 @@ def test_build_metric_to_submit():
     assert build_metric_to_submit('forests.stuff', 33, ['tést:tèst']) == ('gauge', 'forests.stuff', 33, ['tést:tèst'])
 
     # Gauge with units
-    assert build_metric_to_submit('forests.stuff', {'units': 'MB/sec', 'value': 42.2}) == ('gauge', 'forests.stuff', 42.2, None)
+    assert build_metric_to_submit('forests.stuff', {'units': 'MB/sec', 'value': 42.2}) == (
+        'gauge',
+        'forests.stuff',
+        42.2,
+        None,
+    )
 
     # Unkonwn unit
     assert build_metric_to_submit('forests.stuff', {'units': 'unknown', 'value': 42.2}) == None

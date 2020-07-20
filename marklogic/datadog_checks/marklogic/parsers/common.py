@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from six import iteritems
 from typing import Any, List, Optional, Tuple
+
+from six import iteritems
 
 from ..constants import GAUGE_UNITS
 
@@ -21,7 +22,9 @@ def build_metric_to_submit(metric_name, value_data, tags=None):
         if units in GAUGE_UNITS:
             return 'gauge', metric_name, value, tags
     else:
-        raise MarkLogicParserException("Invalid metric: metric_suffix={}, metric_data={}, tags={}".format(metric_name, value_data, tags))
+        raise MarkLogicParserException(
+            "Invalid metric: metric_suffix={}, metric_data={}, tags={}".format(metric_name, value_data, tags)
+        )
 
 
 def is_metric(data):

@@ -82,7 +82,7 @@ class MarklogicCheck(AgentCheck):
         """
         Collect Base Storage Metrics
         """
-        data = self.api.get_forest_storage_data()
+        data = self.api.get_forests_storage_data()
         metrics = parse_summary_storage_base_metrics(data, self.config.tags)
         self.submit_metrics(metrics)
 
