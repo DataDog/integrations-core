@@ -14,6 +14,21 @@ except ImportError:
     from ..stubs import datadog_agent
 
 
+DEFAULT_METRIC_LIMITS = {
+    # TODO: Reduce limits after usage patterns are better understood
+    'count': (10000, 10000),
+    'errors': (10000, 10000),
+    'time': (10000, 10000),
+    'select_scan': (200, 200),
+    'select_full_join': (200, 200),
+    'no_index_used': (200, 200),
+    'no_good_index_used': (200, 200),
+    'lock_time': (200, 200),
+    'rows_affected': (500, 500),
+    'rows_sent': (500, 500),
+    'rows_examined': (500, 500),
+}
+
 class MySQLStatementMetrics:
     """
     MySQLStatementMetrics collects database metrics per normalized MySQL statement
@@ -24,8 +39,7 @@ class MySQLStatementMetrics:
 
         dbm_enabled = is_affirmative(datadog_agent.get_config('deep_database_monitoring'))
         self.enabled = dbm_enabled and not instance.get('options', {}).get('disable_query_metrics', False)
-        self.max_query_metrics = int(instance.get('options', {}).get('max_query_metrics', 500))
-        self.max_query_metrics_sort = int(instance.get('options', {}).get('max_query_metrics_sort', 100))
+        self.query_metric_limits = instance.get('options', {}).get('query_metric_limits', DEFAULT_METRIC_LIMITS)
         self.escape_query_commas_hack = instance.get('options', {}).get('escape_query_commas_hack', False)
     
     def get_per_statement_metrics(self, db):
@@ -47,8 +61,7 @@ class MySQLStatementMetrics:
         }
         rows = self._query_summary_per_statement(db)
         rows = self._compute_derivative_rows(rows, METRICS.keys(), key=lambda row: (row['schema'], row['digest']))
-        rows = self._apply_row_limit(rows, 'count', True, METRICS.keys(), self.max_query_metrics, 
-                                     top_k=self.max_query_metrics_sort, bottom_k=self.max_query_metrics_sort)
+        rows = self._apply_row_limits(rows, self.query_metric_limits, 'count', True, key=lambda row: (row['schema'], row['digest']))
 
         metrics = dict()
         for row in rows:
@@ -123,7 +136,7 @@ class MySQLStatementMetrics:
             prev = self.statement_cache.get(row_key)
             if prev is None:
                 continue
-            if any([row[k] - prev[k] < 0 for k in metrics]):
+            if any([row[k] - prev[k] <= 0 for k in metrics]):
                 # The table was truncated or stats reset; begin tracking again from this point
                 continue
             result.append({k: row[k] - prev[k] if k in metrics else row[k] 
@@ -133,41 +146,46 @@ class MySQLStatementMetrics:
         return result
 
     @staticmethod
-    def _apply_row_limit(rows, metric, metric_descending, secondary_metrics, limit, top_k, bottom_k):
+    def _apply_row_limits(rows, metric_limits, tiebreaker_metric, tiebreaker_reverse, key):
         """
-        Limits the number of rows while trying to ensure coverage across metrics. To ensure coverage of each 
-        available metric when sorted, this function selects the top K and bottom K rows of each metric targeted. 
-        However the resulting row count can be lower or higher than the target limit; in these cases, the
-        primary metric will be used to truncate or fill rows which are below or above the query metric limit.
+        Limits the number of rows ensuring that the top k and bottom k of each metric are present. To increase
+        the overlap of rows across metics with the same values (such as 0), the tiebreaker metric is used as a second
+        sort dimension.
 
-        The primary metric assumes ascending or descending are the most "interesting" values. For instance the
-        'count' metric is more valuable descending since the most frequent queries should be kept over the less
-        frequent queries.
+        Attributes:
+            metric_limits (dict): Dict containing the top k and bottom k limits for each metric as a 2-element tuple
+                ex:
+                >>> metrics = {
+                >>>     'count': (200, 50),
+                >>>     'time': (200, 100),
+                >>>     'lock_time': (50, 50),
+                >>>     ...
+                >>>     'rows_sent': (100, 0),
+                >>> }
+            tiebreaker_metric (str): The metric used to resolve ties, intended to increase overlap in different metrics
+            tiebreaker_reverse (bool): Whether the tiebreaker metric should in reverse order (descending)
+            row_key (callable): Function which uniquely identifies a row
         """
-        if len(rows) < limit or len(rows) == 0:
+        if len(rows) == 0:
             return rows
 
         limited = dict()
-        row_key = lambda row: '|'.join([str(item[1]) for item in sorted(row.items(), key=lambda x: x[0])])
-        for m in secondary_metrics:
-            sorted_rows = sorted(rows, key=lambda row: row[m])
-            top = sorted_rows[0:top_k]
-            bottom = sorted_rows[bottom_k:]
 
-            for row in top + bottom:
-                key = row_key(row)
-                limited[key] = row
+        for metric, (top_k, bottom_k) in metric_limits.items():
+            # sort_key uses a secondary sort dimension so that if there are a lot of
+            # the same values (like 0), then there will be more overlap in selected rows
+            # over time
+            if tiebreaker_reverse:
+                sort_key = lambda row: (row[metric], -row[tiebreaker_metric])
+            else:
+                sort_key = lambda row: (row[metric], row[tiebreaker_metric])
+            sorted_rows = sorted(rows, key=sort_key)
 
-        # Once the top and bottom of secondary metrics are all accounted for, 
-        # fill the list by primary metric (if necessary) or truncate by primary metric (if necessary)
-        if len(limited) < limit:
-            for row in sorted(rows, key=lambda row: row[metric], reverse=metric_descending):
-                key = row_key(row)
-                limited[row] = row
-                if len(limited) == limit:
-                    break
-            return list(limited.values())
-        else:
-            limited = list(limited.values())
-            limited.sort(key=lambda row: row[metric], reverse=metric_descending)
-            return limited[:limit]
+            top = sorted_rows[len(sorted_rows)-top_k:]
+            bottom = sorted_rows[:bottom_k]
+            for row in top:
+                limited[key(row)] = row
+            for row in bottom:
+                limited[key(row)] = row
+
+        return list(limited.values())
