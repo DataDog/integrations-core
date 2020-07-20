@@ -136,8 +136,11 @@ class MySQLStatementMetrics:
             prev = self.statement_cache.get(row_key)
             if prev is None:
                 continue
-            if any([row[k] - prev[k] <= 0 for k in metrics]):
+            if any([row[k] - prev[k] < 0 for k in metrics]):
                 # The table was truncated or stats reset; begin tracking again from this point
+                continue
+            if all([row[k] - prev[k] == 0 for k in metrics]):
+                # No metrics to report; query did not run
                 continue
             result.append({k: row[k] - prev[k] if k in metrics else row[k] 
                            for k in row})
