@@ -7,11 +7,27 @@ import pymysql
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db.sql import compute_sql_signature
+from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
+
+
+METRICS = {
+    'count': ('mysql.queries.count', AgentCheck.count),
+    'errors': ('mysql.queries.errors', AgentCheck.count),
+    'time': ('mysql.queries.time', AgentCheck.count),
+    'select_scan': ('mysql.queries.select_scan', AgentCheck.count),
+    'select_full_join': ('mysql.queries.select_full_join', AgentCheck.count),
+    'no_index_used': ('mysql.queries.no_index_used', AgentCheck.count),
+    'no_good_index_used': ('mysql.queries.no_good_index_used', AgentCheck.count),
+    'lock_time': ('mysql.queries.lock_time', AgentCheck.count),
+    'rows_affected': ('mysql.queries.rows_affected', AgentCheck.count),
+    'rows_sent': ('mysql.queries.rows_sent', AgentCheck.count),
+    'rows_examined': ('mysql.queries.rows_examined', AgentCheck.count),
+}
 
 
 DEFAULT_METRIC_LIMITS = {
@@ -29,39 +45,24 @@ DEFAULT_METRIC_LIMITS = {
     'rows_examined': (500, 500),
 }
 
-class MySQLStatementMetrics:
+class MySQLStatementMetrics(StatementMetrics):
     """
     MySQLStatementMetrics collects database metrics per normalized MySQL statement
     """
 
     def __init__(self, instance):
-        self.statement_cache = dict()
-
-        dbm_enabled = is_affirmative(datadog_agent.get_config('deep_database_monitoring'))
-        self.enabled = dbm_enabled and not instance.get('options', {}).get('disable_query_metrics', False)
+        super(MySQLStatementMetrics, self).__init__()
+        self.is_disabled = instance.get('options', {}).get('disable_query_metrics', False)
         self.query_metric_limits = instance.get('options', {}).get('query_metric_limits', DEFAULT_METRIC_LIMITS)
         self.escape_query_commas_hack = instance.get('options', {}).get('escape_query_commas_hack', False)
     
     def get_per_statement_metrics(self, db):
-        if not self.enabled:
+        if self.is_disabled or not self.is_enabled:
             return []
 
-        METRICS = {
-            'count': ('mysql.queries.count', AgentCheck.count),
-            'errors': ('mysql.queries.errors', AgentCheck.count),
-            'time': ('mysql.queries.time', AgentCheck.count),
-            'select_scan': ('mysql.queries.select_scan', AgentCheck.count),
-            'select_full_join': ('mysql.queries.select_full_join', AgentCheck.count),
-            'no_index_used': ('mysql.queries.no_index_used', AgentCheck.count),
-            'no_good_index_used': ('mysql.queries.no_good_index_used', AgentCheck.count),
-            'lock_time': ('mysql.queries.lock_time', AgentCheck.count),
-            'rows_affected': ('mysql.queries.rows_affected', AgentCheck.count),
-            'rows_sent': ('mysql.queries.rows_sent', AgentCheck.count),
-            'rows_examined': ('mysql.queries.rows_examined', AgentCheck.count),
-        }
         rows = self._query_summary_per_statement(db)
         rows = self._compute_derivative_rows(rows, METRICS.keys(), key=lambda row: (row['schema'], row['digest']))
-        rows = self._apply_row_limits(rows, self.query_metric_limits, 'count', True, key=lambda row: (row['schema'], row['digest']))
+        rows = self._apply_limits(rows, self.query_metric_limits, 'count', True, key=lambda row: (row['schema'], row['digest']))
 
         metrics = dict()
 
@@ -123,73 +124,3 @@ class MySQLStatementMetrics:
             return []
         
         return rows
-
-    def _compute_derivative_rows(self, rows, metrics, key):
-        """
-        Given a list of rows, compute the derivative from the previous run for each row
-        using the `key` function.
-        """
-        result = []
-        new_cache = {}
-        for row in rows:
-            row_key = key(row)
-            new_cache[row_key] = row
-            prev = self.statement_cache.get(row_key)
-            if prev is None:
-                continue
-            if any([row[k] - prev[k] < 0 for k in metrics]):
-                # The table was truncated or stats reset; begin tracking again from this point
-                continue
-            if all([row[k] - prev[k] == 0 for k in metrics]):
-                # No metrics to report; query did not run
-                continue
-            result.append({k: row[k] - prev[k] if k in metrics else row[k] 
-                           for k in row})
-
-        self.statement_cache = new_cache
-        return result
-
-    @staticmethod
-    def _apply_row_limits(rows, metric_limits, tiebreaker_metric, tiebreaker_reverse, key):
-        """
-        Limits the number of rows ensuring that the top k and bottom k of each metric are present. To increase
-        the overlap of rows across metics with the same values (such as 0), the tiebreaker metric is used as a second
-        sort dimension.
-
-        Attributes:
-            metric_limits (dict): Dict containing the top k and bottom k limits for each metric as a 2-element tuple
-                ex:
-                >>> metrics = {
-                >>>     'count': (200, 50),
-                >>>     'time': (200, 100),
-                >>>     'lock_time': (50, 50),
-                >>>     ...
-                >>>     'rows_sent': (100, 0),
-                >>> }
-            tiebreaker_metric (str): The metric used to resolve ties, intended to increase overlap in different metrics
-            tiebreaker_reverse (bool): Whether the tiebreaker metric should in reverse order (descending)
-            row_key (callable): Function which uniquely identifies a row
-        """
-        if len(rows) == 0:
-            return rows
-
-        limited = dict()
-
-        for metric, (top_k, bottom_k) in metric_limits.items():
-            # sort_key uses a secondary sort dimension so that if there are a lot of
-            # the same values (like 0), then there will be more overlap in selected rows
-            # over time
-            if tiebreaker_reverse:
-                sort_key = lambda row: (row[metric], -row[tiebreaker_metric])
-            else:
-                sort_key = lambda row: (row[metric], row[tiebreaker_metric])
-            sorted_rows = sorted(rows, key=sort_key)
-
-            top = sorted_rows[len(sorted_rows)-top_k:]
-            bottom = sorted_rows[:bottom_k]
-            for row in top:
-                limited[key(row)] = row
-            for row in bottom:
-                limited[key(row)] = row
-
-        return list(limited.values())
