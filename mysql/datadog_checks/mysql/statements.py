@@ -64,17 +64,18 @@ class MySQLStatementMetrics:
         rows = self._apply_row_limits(rows, self.query_metric_limits, 'count', True, key=lambda row: (row['schema'], row['digest']))
 
         metrics = dict()
-        for row in rows:
-            for col, (name, metric_type) in METRICS.items():
-                tags = []
-                if row['schema'] is not None:
-                    tags.append('schema:' + row['schema'])
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
-                if self.escape_query_commas_hack:
-                    obfuscated_statement = obfuscated_statement.replace(', ', '，').replace(',', '，')
-                tags.append('query:' + obfuscated_statement[:200])
-                tags.append('query_signature:' + compute_sql_signature(obfuscated_statement))
 
+        for row in rows:
+            tags = []
+            if row['schema'] is not None:
+                tags.append('schema:' + row['schema'])
+            obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
+            if self.escape_query_commas_hack:
+                obfuscated_statement = obfuscated_statement.replace(', ', '，').replace(',', '，')
+            tags.append('query:' + obfuscated_statement[:200])
+            tags.append('query_signature:' + compute_sql_signature(obfuscated_statement))
+
+            for col, (name, metric_type) in METRICS.items():
                 # Merge metrics in cases where the query signature differs from the DB digest
                 value = row[col]
                 key = '|'.join([name] + sorted(tags))
