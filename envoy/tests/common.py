@@ -16,12 +16,18 @@ HOST = get_docker_hostname()
 PORT = '8001'
 INSTANCES = {
     'main': {'stats_url': 'http://{}:{}/stats'.format(HOST, PORT)},
-    'whitelist': {'stats_url': 'http://{}:{}/stats'.format(HOST, PORT), 'metric_whitelist': [r'envoy\.cluster\..*']},
-    'blacklist': {'stats_url': 'http://{}:{}/stats'.format(HOST, PORT), 'metric_blacklist': [r'envoy\.cluster\..*']},
-    'whitelist_blacklist': {
+    'included_metrics': {
         'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
-        'metric_whitelist': [r'envoy\.cluster\.'],
-        'metric_blacklist': [r'envoy\.cluster\.out\.'],
+        'metric_whitelist': [r'envoy\.cluster\..*'],
+    },
+    'excluded_metrics': {
+        'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
+        'metric_blacklist': [r'envoy\.cluster\..*'],
+    },
+    'included_excluded_metrics': {
+        'stats_url': 'http://{}:{}/stats'.format(HOST, PORT),
+        'included_metrics': [r'envoy\.cluster\.'],
+        'excluded_metrics': [r'envoy\.cluster\.out\.'],
     },
 }
 ENVOY_VERSION = os.getenv('ENVOY_VERSION')
