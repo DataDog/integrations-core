@@ -30,7 +30,7 @@ files:
         example:
           - <DATABASE_1>
           - <DATABASE_2>
-        default: None
+        default: all
     - name: db_exclude
       description: |
         The `db_exclude` should contain the names of any databases meant to be excluded

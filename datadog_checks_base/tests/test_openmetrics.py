@@ -42,8 +42,11 @@ class MockResponse:
         pass
 
 
+FAKE_ENDPOINT = 'http://fake.endpoint:10055/metrics'
+
+
 PROMETHEUS_CHECK_INSTANCE = {
-    'prometheus_url': 'http://fake.endpoint:10055/metrics',
+    'prometheus_url': FAKE_ENDPOINT,
     'metrics': [{'process_virtual_memory_bytes': 'process.vm.bytes'}],
     'namespace': 'prometheus',
     # Defaults for checks that were based on PrometheusCheck
@@ -2534,3 +2537,51 @@ def test_http_handler(mocked_openmetrics_check_factory):
 
     assert http_handler.options['headers']['accept-encoding'] == 'gzip'
     assert http_handler.options['headers']['accept'] == 'text/plain'
+
+
+def test_simple_type_overrides(aggregator, mocked_prometheus_check, text_data):
+    """
+    Test that metric type is overridden correctly.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['type_overrides'] = {"process_virtual_memory_bytes": "counter"}
+
+    # Make sure we don't send counters as gauges
+    instance['send_monotonic_counter'] = True
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+    check.process(config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', count=1, metric_type=aggregator.MONOTONIC_COUNT)
+
+    assert len(check.config_map[FAKE_ENDPOINT]['_type_override_patterns']) == 0
+    assert len(check.config_map[FAKE_ENDPOINT]['type_overrides']) == 1
+
+
+def test_wildcard_type_overrides(aggregator, mocked_prometheus_check, text_data):
+    """
+    Test that metric type is overridden correctly with wildcard.
+    """
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['type_overrides'] = {"*_virtual_memory_*": "counter"}
+
+    # Make sure we don't send counters as gauges
+    instance['send_monotonic_counter'] = True
+
+    config = check.get_scraper_config(instance)
+    config['_dry_run'] = False
+
+    check.poll = mock.MagicMock(return_value=MockResponse(text_data, text_content_type))
+    check.process(config)
+
+    aggregator.assert_metric('prometheus.process.vm.bytes', count=1, metric_type=aggregator.MONOTONIC_COUNT)
+
+    # assert the pattern was stored correctly
+    assert len(check.config_map[FAKE_ENDPOINT]['_type_override_patterns']) == 1
+    assert list(check.config_map[FAKE_ENDPOINT]['_type_override_patterns'].values())[0] == 'counter'
+    assert len(check.config_map[FAKE_ENDPOINT]['type_overrides']) == 0

@@ -247,6 +247,20 @@ class OpenMetricsScraperMixin(object):
         config['type_overrides'] = default_instance.get('type_overrides', {})
         config['type_overrides'].update(instance.get('type_overrides', {}))
 
+        # `_type_override_patterns` is a dictionary where we store Pattern objects
+        # that match metric names as keys, and their corresponding metric type overrrides as values.
+        config['_type_override_patterns'] = {}
+
+        with_wildcards = set()
+        for metric, type in iteritems(config['type_overrides']):
+            if '*' in metric:
+                config['_type_override_patterns'][compile(translate(metric))] = type
+                with_wildcards.add(metric)
+
+        # cleanup metric names with wildcards from the 'type_overrides' dict
+        for metric in with_wildcards:
+            del config['type_overrides'][metric]
+
         # Some metrics are retrieved from differents hosts and often
         # a label can hold this information, this transfers it to the hostname
         config['label_to_hostname'] = instance.get('label_to_hostname', default_instance.get('label_to_hostname', None))
@@ -392,7 +406,14 @@ class OpenMetricsScraperMixin(object):
             self._send_telemetry_counter(
                 self.TELEMETRY_COUNTER_METRICS_INPUT_COUNT, len(metric.samples), scraper_config
             )
-            metric.type = scraper_config['type_overrides'].get(metric.name, metric.type)
+            type_override = scraper_config['type_overrides'].get(metric.name)
+            if type_override:
+                metric.type = type_override
+            elif scraper_config['_type_override_patterns']:
+                for pattern, new_type in iteritems(scraper_config['_type_override_patterns']):
+                    if pattern.search(metric.name):
+                        metric.type = new_type
+                        break
             if metric.type not in self.METRIC_TYPES:
                 continue
             metric.name = self._remove_metric_prefix(metric.name, scraper_config)
