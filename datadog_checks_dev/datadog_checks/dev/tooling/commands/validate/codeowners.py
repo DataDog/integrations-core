@@ -12,16 +12,18 @@ DIRECTORY_REGEX = re.compile(r"\/(.*)\/$")
 
 
 IGNORE_TILES = {
+    'auth0',
     'bluematador',
     'bonsai',
     'buddy',
-    'launchdarkly',
     'concourse_ci',
-    'auth0',
-    'gremlin',
+    'launchdarkly',
     'lacework',
+    'gremlin',
+    'perimeterx',
     'rigor',
     'rookout',
+    'rundeck',
     'squadcast',
 }
 
@@ -49,7 +51,7 @@ def create_codeowners_map():
 @click.command(
     context_settings=CONTEXT_SETTINGS, short_help='Validate `CODEOWNERS` file has an entry for each integration'
 )
-def codeowners():
+def codeowners(ctx):
     """Validate that every integration has an entry in the `CODEOWNERS` file."""
 
     has_failed = False
@@ -69,4 +71,4 @@ def codeowners():
             )
 
     if not has_failed:
-        echo_success("All integrations have codeowners.")
+        echo_success("All integrations have valid codeowners.")
