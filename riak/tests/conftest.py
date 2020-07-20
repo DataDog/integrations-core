@@ -41,7 +41,7 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return Riak('riak', {}, {})
+    return Riak('riak', {}, [deepcopy(common.INSTANCE)])
 
 
 @pytest.fixture

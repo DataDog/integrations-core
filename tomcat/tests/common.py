@@ -2,16 +2,19 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from datadog_checks.dev import get_here
+from datadog_checks.dev.jmx import JVM_E2E_METRICS
 
 CHECK_NAME = "tomcat"
 
 HERE = get_here()
 
-"""
-These metrics cannot be added to E2E yet because they are rate and count types.
-They are visiable in the console but not to this test.
-
-Metrics To add to e2e test:
+TOMCAT_E2E_METRICS = [
+    # Tomcat
+    "tomcat.max_time",
+    "tomcat.threads.busy",
+    "tomcat.threads.count",
+    "tomcat.threads.max",
+    # Rates
     "tomcat.bytes_sent",
     "tomcat.bytes_rcvd",
     "tomcat.error_count",
@@ -20,42 +23,10 @@ Metrics To add to e2e test:
     "tomcat.servlet.processing_time",
     "tomcat.servlet.error_count",
     "tomcat.servlet.request_count",
-    "tomcat.cache.access_count",
-    "tomcat.cache.hits_count",
     "tomcat.jsp.count",
     "tomcat.jsp.reload_count",
-"""
-
-
-TOMCAT_E2E_METRICS = [
-    # Tomcat
-    "tomcat.max_time",
-    "tomcat.threads.busy",
-    "tomcat.threads.count",
-    "tomcat.threads.max",
-    # JVM
-    "jvm.buffer_pool.direct.capacity",
-    "jvm.buffer_pool.direct.count",
-    "jvm.buffer_pool.direct.used",
-    "jvm.buffer_pool.mapped.capacity",
-    "jvm.buffer_pool.mapped.count",
-    "jvm.buffer_pool.mapped.used",
-    "jvm.cpu_load.process",
-    "jvm.cpu_load.system",
-    "jvm.gc.cms.count",
-    "jvm.gc.eden_size",
-    "jvm.gc.old_gen_size",
-    "jvm.gc.parnew.time",
-    "jvm.gc.survivor_size",
-    "jvm.heap_memory",
-    "jvm.heap_memory_committed",
-    "jvm.heap_memory_init",
-    "jvm.heap_memory_max",
-    "jvm.loaded_classes",
-    "jvm.non_heap_memory",
-    "jvm.non_heap_memory_committed",
-    "jvm.non_heap_memory_init",
-    "jvm.non_heap_memory_max",
-    "jvm.os.open_file_descriptors",
-    "jvm.thread_count",
-]
+    "tomcat.string_cache.access_count",
+    "tomcat.string_cache.hit_count",
+    "tomcat.web.cache.hit_count",
+    "tomcat.web.cache.lookup_count",
+] + JVM_E2E_METRICS

@@ -55,7 +55,7 @@ ASP_APP_INSTANCES = (
 def test_basic_check(aggregator):
     initialize_pdh_tests()
     instance = MINIMAL_INSTANCE
-    c = AspdotnetCheck(CHECK_NAME, {}, {}, [instance])
+    c = AspdotnetCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
     for metric in ASP_METRICS:
@@ -72,7 +72,7 @@ def test_basic_check(aggregator):
 def test_with_tags(aggregator):
     initialize_pdh_tests()
     instance = INSTANCE_WITH_TAGS
-    c = AspdotnetCheck(CHECK_NAME, {}, {}, [instance])
+    c = AspdotnetCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
     for metric in ASP_METRICS:

@@ -52,6 +52,13 @@ def value_type_string(value):
         return value_type
 
 
+def option_enabled(option):
+    if 'enabled' in option:
+        return bool(option['enabled'])
+
+    return option['required']
+
+
 def write_description(option, writer, indent, option_type):
     description = option['description']
     deprecation = option['deprecation']
@@ -103,13 +110,21 @@ def write_option(option, writer, indent='', start_list=False):
         example = value.get('example')
         example_type = type(example)
         if not required:
-            if example_type is bool:
-                writer.write(' - default: ', 'true' if example else 'false')
-            elif example_type in (int, float):
-                writer.write(' - default: ', str(example))
-            elif example_type is str:
-                if example and not (example[0] == '<' and example[-1] == '>'):
-                    writer.write(' - default: ', example)
+            if 'default' in value:
+                default = value['default']
+                if default is not None:
+                    if type(default) is str:
+                        writer.write(' - default: ', default)
+                    else:
+                        writer.write(' - default: ', repr(default))
+            else:
+                if example_type is bool:
+                    writer.write(' - default: ', 'true' if example else 'false')
+                elif example_type in (int, float):
+                    writer.write(' - default: ', str(example))
+                elif example_type is str:
+                    if example and not (example[0] == '<' and example[-1] == '>'):
+                        writer.write(' - default: ', example)
 
         writer.write('\n')
 
@@ -139,7 +154,7 @@ def write_option(option, writer, indent='', start_list=False):
         example_indent = '  ' if example_type is list and example else ''
         for i, line in enumerate(option_yaml.splitlines()):
             writer.write(indent)
-            if not required:
+            if not option_enabled(option):
                 writer.write('# ')
 
             if i > 0:
@@ -153,7 +168,7 @@ def write_option(option, writer, indent='', start_list=False):
 
         if 'options' in option:
             multiple = option['multiple']
-            options = option['options']
+            options = sorted(option['options'], key=lambda opt: -opt['display_priority'])
             next_indent = indent + '    '
             writer.write(indent, option_name, ':', '\n')
             if options:
@@ -163,7 +178,7 @@ def write_option(option, writer, indent='', start_list=False):
 
                     writer.write('\n')
                     if i == 0 and multiple:
-                        if opt['required']:
+                        if option_enabled(opt):
                             write_option(opt, writer, next_indent, start_list=True)
                         else:
                             writer.write(next_indent[:-2], '-\n')
@@ -180,7 +195,7 @@ def write_option(option, writer, indent='', start_list=False):
 
             example_indent = '  ' if type(example) is list and example else ''
             for i, line in enumerate(option_yaml.splitlines()):
-                if not option['required']:
+                if not option_enabled(option):
                     writer.write(indent, '# ')
 
                 if i > 0:

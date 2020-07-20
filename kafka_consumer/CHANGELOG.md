@@ -1,5 +1,9 @@
 # CHANGELOG - kafka_consumer
 
+## 2.5.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 2.4.0 / 2020-02-22
 
 * [Added] Re-enable `kafka_client_api_version` option. See [#5726](https://github.com/DataDog/integrations-core/pull/5726).

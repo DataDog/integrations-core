@@ -7,6 +7,7 @@ import os
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.haproxy import HAProxy
 
 from .common import (
@@ -21,12 +22,13 @@ from .common import (
     CONFIG_TCPSOCKET,
     CONFIG_UNIXSOCKET,
     FRONTEND_CHECK,
+    FRONTEND_SERVICES,
     SERVICE_CHECK_NAME,
     STATS_SOCKET,
     STATS_URL,
     STATS_URL_OPEN,
-    haproxy_less_than_1_7,
-    platform_supports_sockets,
+    STICKTABLE_TYPES,
+    requires_haproxy_tcp_stats,
     requires_shareable_unix_socket,
     requires_socket_support,
 )
@@ -86,6 +88,33 @@ def _test_service_checks(aggregator, services=None, count=1):
         aggregator.assert_service_check(SERVICE_CHECK_NAME, status=HAProxy.OK, count=count, tags=tags)
 
 
+def _test_sticktable_metrics(aggregator, services=None, count=1):
+    """
+    Checks that sticktable metrics are correctly reported. This requires the
+    check to be done over a proper stats socket (not http)
+    """
+
+    haproxy_version = os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2]
+    if haproxy_version < ['1', '5']:
+        # We can't gather stick-table metrics for version 1.4
+        return
+    if not services:
+        services = BACKEND_SERVICES + FRONTEND_SERVICES
+
+    total_metrics = 0
+    for table, type_tag in STICKTABLE_TYPES.items():
+        if table not in services:
+            continue
+        total_metrics += 1
+        tags = ['haproxy_service:' + table, 'stick_type:' + type_tag]
+        aggregator.assert_metric("haproxy.sticktable.used", tags=tags, count=count)
+        aggregator.assert_metric("haproxy.sticktable.size", tags=tags, count=count)
+
+    # Assert that we don't have additional unexpected metrics with the same name
+    aggregator.assert_metric("haproxy.sticktable.used", count=total_metrics)
+    aggregator.assert_metric("haproxy.sticktable.size", count=total_metrics)
+
+
 @requires_socket_support
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
@@ -101,6 +130,7 @@ def test_check(aggregator, check, instance):
     _test_service_checks(aggregator, count=0)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
 @requires_socket_support
@@ -141,6 +171,23 @@ def test_check_service_filter(aggregator, check, instance):
     aggregator.assert_all_metrics_covered()
 
 
+@requires_haproxy_tcp_stats
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.integration
+def test_check_service_filter_tcp(aggregator, check):
+    instance = copy.deepcopy(CONFIG_TCPSOCKET)
+    instance['services_include'] = ['datadog']
+    instance['services_exclude'] = ['.*']
+    check = check(instance)
+    check.check(instance)
+    shared_tag = ["instance_url:{0}".format(STATS_SOCKET)]
+
+    _test_backend_metrics(aggregator, shared_tag, ['datadog'], check_aggregates=False, add_addr_tag=True)
+    _test_sticktable_metrics(aggregator, services=['datadog'])
+
+    aggregator.assert_all_metrics_covered()
+
+
 @requires_socket_support
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
@@ -171,10 +218,7 @@ def test_open_config(aggregator, check):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.skipif(
-    haproxy_less_than_1_7 or not platform_supports_sockets,
-    reason='Sockets with operator level are only available with haproxy 1.7',
-)
+@requires_haproxy_tcp_stats
 def test_tcp_socket(aggregator, check):
     config = copy.deepcopy(CONFIG_TCPSOCKET)
     check = check(config)
@@ -184,6 +228,7 @@ def test_tcp_socket(aggregator, check):
 
     _test_frontend_metrics(aggregator, shared_tag)
     _test_backend_metrics(aggregator, shared_tag, add_addr_tag=True)
+    _test_sticktable_metrics(aggregator)
 
     aggregator.assert_all_metrics_covered()
 
@@ -193,7 +238,7 @@ def test_tcp_socket(aggregator, check):
 @pytest.mark.integration
 def test_unixsocket_config(aggregator, check, dd_environment):
     config = copy.deepcopy(CONFIG_UNIXSOCKET)
-    unixsocket_url = dd_environment["unixsocket_url"]
+    unixsocket_url = dd_environment['instances'][0]["unixsocket_url"]
     config['url'] = unixsocket_url
     check = check(config)
     check.check(config)
@@ -202,6 +247,7 @@ def test_unixsocket_config(aggregator, check, dd_environment):
 
     _test_frontend_metrics(aggregator, shared_tag)
     _test_backend_metrics(aggregator, shared_tag, add_addr_tag=True)
+    _test_sticktable_metrics(aggregator)
 
     aggregator.assert_all_metrics_covered()
 
@@ -240,7 +286,7 @@ def test_uptime_skip_http(check, aggregator):
 @pytest.mark.integration
 def test_version_metadata_unix_socket(check, version_metadata, dd_environment, datadog_agent):
     config = copy.deepcopy(CONFIG_UNIXSOCKET)
-    unixsocket_url = dd_environment["unixsocket_url"]
+    unixsocket_url = dd_environment['instances'][0]["unixsocket_url"]
     config['url'] = unixsocket_url
     check = check(config)
     check.check_id = 'test:123'
@@ -256,12 +302,9 @@ def test_version_metadata_unix_socket(check, version_metadata, dd_environment, d
     datadog_agent.assert_metadata_count(metadata_count)
 
 
+@requires_haproxy_tcp_stats
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.skipif(
-    haproxy_less_than_1_7 or not platform_supports_sockets,
-    reason='Sockets with operator level are only available with haproxy 1.7',
-)
 def test_version_metadata_tcp_socket(check, version_metadata, datadog_agent):
     config = copy.deepcopy(CONFIG_TCPSOCKET)
     check = check(config)
@@ -278,12 +321,9 @@ def test_version_metadata_tcp_socket(check, version_metadata, datadog_agent):
     datadog_agent.assert_metadata_count(metadata_count)
 
 
+@requires_haproxy_tcp_stats
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-@pytest.mark.skipif(
-    haproxy_less_than_1_7 or not platform_supports_sockets,
-    reason='Uptime is only reported on the stats socket in v1.7+',
-)
 def test_uptime_skip_tcp(aggregator, check, dd_environment):
     config = copy.deepcopy(CONFIG_TCPSOCKET)
     config['startup_grace_seconds'] = 20

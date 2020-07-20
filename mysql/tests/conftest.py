@@ -25,18 +25,11 @@ def config_e2e():
         'init_config': {},
         'instances': [{'server': common.HOST, 'user': common.USER, 'pass': common.PASS, 'port': common.PORT}],
         'logs': [
-            {
-                'type': 'file',
-                'path': '{}/mysql.log'.format(logs_path),
-                'source': 'mysql',
-                'sourcecategory': 'database',
-                'service': 'local_mysql',
-            },
+            {'type': 'file', 'path': '{}/mysql.log'.format(logs_path), 'source': 'mysql', 'service': 'local_mysql'},
             {
                 'type': 'file',
                 'path': '{}/mysql_slow.log'.format(logs_path),
                 'source': 'mysql',
-                'sourcecategory': 'database',
                 'service': 'local_mysql',
                 'log_processing_rules': [
                     {'type': 'multi_line', 'name': 'log_starts_with_time', 'pattern': '# Time: '},
@@ -106,6 +99,27 @@ def instance_complex():
                 'metric': 'bob.age',
                 'type': 'gauge',
                 'field': 'age',
+            },
+        ],
+    }
+
+
+@pytest.fixture
+def instance_custom_queries():
+    return {
+        'server': common.HOST,
+        'user': common.USER,
+        'pass': common.PASS,
+        'port': common.PORT,
+        'tags': tags.METRIC_TAGS,
+        'custom_queries': [
+            {
+                'query': "SELECT * from testdb.users where name='Alice' limit 1;",
+                'columns': [{}, {'name': 'alice.age', 'type': 'gauge'}],
+            },
+            {
+                'query': "SELECT * from testdb.users where name='Bob' limit 1;",
+                'columns': [{}, {'name': 'bob.age', 'type': 'gauge'}],
             },
         ],
     }

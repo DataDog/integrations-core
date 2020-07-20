@@ -16,7 +16,7 @@ PORT = '11414'
 USERNAME = 'admin'
 PASSWORD = 'passw0rd'
 
-QUEUE_MANAGER = 'datadog'
+QUEUE_MANAGER = 'QM1'
 CHANNEL = 'DEV.ADMIN.SVRCONN'
 
 QUEUE = 'DEV.QUEUE.1'
@@ -24,12 +24,29 @@ QUEUE = 'DEV.QUEUE.1'
 BAD_CHANNEL = 'DEV.NOTHERE.SVRCONN'
 
 MQ_VERSION = os.environ.get('IBM_MQ_VERSION', '9')
+MQ_COMPOSE_VERSION = os.environ['IBM_MQ_COMPOSE_VERSION']
+MQ_VERSION_RAW = os.environ.get('IBM_MQ_VERSION_RAW', '9.1.1.0')
 
-COMPOSE_FILE_NAME = 'docker-compose-v{}.yml'.format(MQ_VERSION)
+IS_CLUSTER = 'cluster' in MQ_COMPOSE_VERSION
+
+COMPOSE_FILE_NAME = 'docker-compose-v{}.yml'.format(MQ_COMPOSE_VERSION)
 
 COMPOSE_FILE_PATH = os.path.join(COMPOSE_DIR, COMPOSE_FILE_NAME)
 
 INSTANCE = {
+    'channel': CHANNEL,
+    'queue_manager': QUEUE_MANAGER,
+    'host': HOST,
+    'port': PORT,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'queues': [QUEUE],
+    'channels': [CHANNEL, BAD_CHANNEL],
+    'tags': ['foo:bar'],
+    'collect_statistics_metrics': True,
+}
+
+INSTANCE_METADATA = {
     'channel': CHANNEL,
     'queue_manager': QUEUE_MANAGER,
     'host': HOST,
@@ -81,6 +98,7 @@ INSTANCE_COLLECT_ALL = {
     'username': USERNAME,
     'password': PASSWORD,
     'auto_discover_queues': True,
+    'collect_statistics_metrics': True,
     'channels': [CHANNEL, BAD_CHANNEL],
 }
 
@@ -96,15 +114,8 @@ INSTANCE_QUEUE_REGEX_TAG = {
 }
 
 E2E_METADATA = {
-    # This script makes the necessary setup to be able to compile pymqi on the agent machine
-    'start_commands': [
-        'apt-get update',
-        'apt-get install gcc -y',
-        'mkdir /opt/mqm',
-        'curl -L -o /opt/mqm/mq-client.tar.gz '
-        'https://ddintegrations.blob.core.windows.net/ibm-mq/9.1.0.4-IBM-MQC-Redist-LinuxX64.tar.gz',
-        'tar -C /opt/mqm -xf /opt/mqm/mq-client.tar.gz',
-    ],
+    'docker_volumes': ['{}/scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE)],
+    'start_commands': ['bash /tmp/start_commands.sh'],
     'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib', 'C_INCLUDE_PATH': '/opt/mqm/inc'},
 }
 
@@ -177,6 +188,25 @@ CHANNEL_STATUS_METRICS = [
     ('ibm_mq.channel.ssl_key_resets', GAUGE),
 ]
 
+CHANNEL_STATS_METRICS = [
+    ('ibm_mq.stats.channel.msgs', COUNT),
+    ('ibm_mq.stats.channel.bytes', COUNT),
+    ('ibm_mq.stats.channel.put_retries', COUNT),
+]
+
+QUEUE_STATS_METRICS = [
+    ('ibm_mq.stats.queue.q_min_depth', GAUGE),
+]
+
+if IS_CLUSTER:
+    CHANNEL_STATUS_METRICS.extend(
+        [
+            ('ibm_mq.channel.batches', GAUGE),
+            ('ibm_mq.channel.current_msgs', GAUGE),
+            ('ibm_mq.channel.indoubt_status', GAUGE),
+        ]
+    )
+
 METRICS = (
     [
         ('ibm_mq.queue_manager.dist_lists', GAUGE),
@@ -191,15 +221,22 @@ METRICS = (
 )
 
 OPTIONAL_METRICS = [
-    'ibm_mq.queue.max_channels',
+    ('ibm_mq.queue.max_channels', GAUGE),
+    ('ibm_mq.stats.channel.full_batches', COUNT),
+    ('ibm_mq.stats.channel.incomplete_batches', COUNT),
+    ('ibm_mq.stats.channel.avg_batch_size', GAUGE),
 ]
+
+# stats metrics are not always present at each check run
+OPTIONAL_METRICS.extend(CHANNEL_STATS_METRICS)
+OPTIONAL_METRICS.extend(QUEUE_STATS_METRICS)
 
 
 def assert_all_metrics(aggregator):
     for metric, metric_type in METRICS:
         aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()))
 
-    for metric in OPTIONAL_METRICS:
-        aggregator.assert_metric(metric, at_least=0)
+    for metric, metric_type in OPTIONAL_METRICS:
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), at_least=0)
 
     aggregator.assert_all_metrics_covered()

@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import random
 
+import pytest
 import redis
 
 from datadog_checks.redisdb import Redis
@@ -12,6 +13,8 @@ from datadog_checks.redisdb import Redis
 from .common import HOST, PASSWORD, PORT
 
 TEST_KEY = "testkey"
+
+pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
 
 
 def test_slowlog(aggregator, redis_instance):
@@ -28,7 +31,7 @@ def test_slowlog(aggregator, redis_instance):
 
     assert db.slowlog_len() > 0
 
-    redis_check = Redis('redisdb', {}, {})
+    redis_check = Redis('redisdb', {}, [redis_instance])
     redis_check.check(redis_instance)
 
     expected_tags = ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'command:LPUSH']
@@ -51,7 +54,7 @@ def test_custom_slowlog(aggregator, redis_instance):
 
     assert db.slowlog_len() > 0
 
-    redis_check = Redis('redisdb', {}, {})
+    redis_check = Redis('redisdb', {}, [redis_instance])
     redis_check.check(redis_instance)
 
     # Let's check that we didn't put more than one slowlog entry in the

@@ -6,7 +6,7 @@ steps:
 # Azure checks out the code from the PR but leaves us in a detached state.
 # Because ddev cannot work in that state, we create a branch.
 # Only applies to PRs
-- script: git checkout -B $(System.PullRequest.SourceBranch)
+- script: git checkout -B azure/$(System.PullRequest.SourceBranch)
   condition: eq(variables['Build.Reason'], 'PullRequest')
   displayName: 'Create branch from PR'
 
@@ -19,6 +19,6 @@ steps:
 
 # Switch to the pull request branch last. Also see:
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables#system-variables
-- script: git checkout $(System.PullRequest.SourceBranch)
+- script: git checkout azure/$(System.PullRequest.SourceBranch)
   condition: eq(variables['Build.Reason'], 'PullRequest')
   displayName: 'Checkout branch'

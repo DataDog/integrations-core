@@ -12,15 +12,18 @@ VERSION_1_8 = [1, 8, 0]
 
 HARBOR_COMPONENTS = ['chartmuseum', 'registry', 'redis', 'jobservice', 'registryctl', 'portal', 'core', 'database']
 
+HARBOR_VERSION = [int(i) for i in os.environ['HARBOR_VERSION'].split('.')]
+
 HARBOR_METRICS = [
     # Metric_name, requires admin privileges
     ('harbor.projects.count', False),
     ('harbor.disk.free', True),
     ('harbor.disk.total', True),
 ]
+if HARBOR_VERSION >= VERSION_1_5:
+    HARBOR_METRICS.append(('harbor.registry.read_only', False))
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-HARBOR_VERSION = [int(i) for i in os.environ['HARBOR_VERSION'].split('.')]
 URL = 'http://{}'.format(get_docker_hostname())
 INSTANCE = {'url': URL, 'username': 'NotAnAdmin', 'password': 'Str0ngPassw0rd'}
 ADMIN_INSTANCE = {'url': URL, 'username': 'admin', 'password': 'Harbor12345'}
@@ -95,5 +98,7 @@ REGISTRIES_FIXTURE = [
 VOLUME_INFO_FIXTURE = {"storage": {"total": 1e6, "free": 5e5}}
 
 SYSTEM_INFO_FIXTURE = {"harbor_version": "v{}-25bb24ca".format(os.environ['HARBOR_VERSION'])}
+if HARBOR_VERSION >= VERSION_1_5:
+    SYSTEM_INFO_FIXTURE['read_only'] = False
 if HARBOR_VERSION >= VERSION_1_6:
     SYSTEM_INFO_FIXTURE['with_chartmuseum'] = True

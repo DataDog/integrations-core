@@ -43,5 +43,5 @@ Need help? Contact [Datadog support][7].
 [4]: https://github.com/DataDog/integrations-core/blob/master/nfsstat/datadog_checks/nfsstat/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/nfsstat/metadata.csv
-[7]: https://docs.datadoghq.com/help
-[8]: https://docs.datadoghq.com/monitors/monitor_types/network
+[7]: https://docs.datadoghq.com/help/
+[8]: https://docs.datadoghq.com/monitors/monitor_types/network/

@@ -1,5 +1,26 @@
 # CHANGELOG - gitlab
 
+## 4.1.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+
+## 4.0.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Add config spec. See [#6151](https://github.com/DataDog/integrations-core/pull/6151).
+* [Changed] Remove duplicates in metadata and assert metrics with metadata. See [#6516](https://github.com/DataDog/integrations-core/pull/6516).
+
+## 3.0.0 / 2020-04-04
+
+* [Added] Add new gitlab metrics. See [#6166](https://github.com/DataDog/integrations-core/pull/6166).
+* [Added] Include gitlab host and port tag for all metrics. See [#6177](https://github.com/DataDog/integrations-core/pull/6177).
+* [Added] Add version metadata. See [#5786](https://github.com/DataDog/integrations-core/pull/5786).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+* [Changed] Remap gitlab metrics. See [#6150](https://github.com/DataDog/integrations-core/pull/6150).
+* [Changed] Gitlab revamp. See [#5971](https://github.com/DataDog/integrations-core/pull/5971).
+
 ## 2.8.1 / 2020-02-22
 
 * [Fixed] Fix metric validation. See [#5581](https://github.com/DataDog/integrations-core/pull/5581).

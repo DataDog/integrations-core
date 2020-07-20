@@ -1283,6 +1283,28 @@ class TestColumnTransformers:
         )
         aggregator.assert_all_metrics_covered()
 
+    def test_temporal_percent_cast_to_float(self, aggregator):
+        query_manager = create_query_manager(
+            {
+                'name': 'test query',
+                'query': 'foo',
+                'columns': [
+                    {'name': 'test', 'type': 'tag'},
+                    {'name': 'test.foo', 'type': 'temporal_percent', 'scale': 1},
+                ],
+                'tags': ['test:bar'],
+            },
+            executor=mock_executor([['tag1', '5.2']]),
+            tags=['test:foo'],
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        aggregator.assert_metric(
+            'test.foo', 520, metric_type=aggregator.RATE, tags=['test:foo', 'test:bar', 'test:tag1']
+        )
+        aggregator.assert_all_metrics_covered()
+
     def test_match_global(self, aggregator):
         query_manager = create_query_manager(
             {

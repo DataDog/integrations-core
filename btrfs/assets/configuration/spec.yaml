@@ -1,0 +1,19 @@
+name: Btrfs
+files:
+  - name: btrfs.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/default
+      - template: instances
+        options:
+          - name: excluded_devices
+            description: List of devices to exclude.
+            value:
+              example:
+                - <DEVICE_1>
+                - <DEVICE_2>
+              type: array
+              items:
+                type: string
+          - template: instances/default

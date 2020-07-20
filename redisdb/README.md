@@ -29,9 +29,21 @@ Follow the instructions below to configure this check for an Agent running on a 
        ## @param port - integer - required
        ## Enter the port of the host to connect to.
        port: 6379
+
+       ## @param username - string - optional
+       ## The username to use for the connection. Redis 6+ only.
+       #
+       # username: <USERNAME>
+
+       ## @param password - string - optional
+       ## The password to use for the connection.
+       #
+       # password: <PASSWORD>
    ```
 
-2. [Restart the Agent][5].
+2. If using Redis 6+ and ACLs, ensure that the user has at least `DB  Viewer` permissions at the Database level, and `Cluster Viewer` permissions if operating in a cluster environment.  For more details, see the [documentation][16].
+
+3. [Restart the Agent][5].
 
 ##### Log collection
 
@@ -50,13 +62,20 @@ _Available for Agent versions >6.0_
      - type: file
        path: /var/log/redis_6379.log
        source: redis
-       sourcecategory: database
        service: myapplication
    ```
 
     Change the `path` and `service` parameter values and configure them for your environment. See the [sample redisdb.yaml][4] for all available configuration options.
 
 3. [Restart the Agent][5].
+
+##### Trace collection
+
+Datadog APM integrates with Redis to see the traces across your distributed system. Trace collection is enabled by default in the Datadog Agent v6+. To start collecting traces:
+
+1. [Enable trace collection in Datadog][6].
+2. [Instrument your application that makes requests to Redis][7].
+
 
 #### Containerized
 
@@ -74,21 +93,38 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][11].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][13].
 
 | Parameter      | Value                                               |
 | -------------- | --------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "redis", "service": "<YOUR_APP_NAME>"}` |
 
+##### Trace collection
+
+APM for containerized apps is supported on hosts running Agent v6+ but requires extra configuration to begin collecting traces.
+
+Required environment variables on the Agent container:
+
+| Parameter            | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `<DD_API_KEY>` | `api_key`                                                                  |
+| `<DD_APM_ENABLED>`      | true                                                              |
+| `<DD_APM_NON_LOCAL_TRAFFIC>`  | true |
+
+See [Tracing Kubernetes Applications][14] and the [Kubernetes Daemon Setup][15] for a complete list of available environment variables and configuration.
+
+Then, [instrument your application container][7] and set `DD_AGENT_HOST` to the name of your Agent container.
+
+
 ### Validation
 
-[Run the Agent's status subcommand][6] and look for `redisdb` under the Checks section.
+[Run the Agent's status subcommand][8] and look for `redisdb` under the Checks section.
 
 ## Data Collected
 
 ### Metrics
 
-See [metadata.csv][7] for a list of metrics provided by this integration.
+See [metadata.csv][9] for a list of metrics provided by this integration.
 
 ### Events
 
@@ -104,7 +140,7 @@ Returns `CRITICAL` if this Redis instance is unable to connect to its master ins
 
 ## Troubleshooting
 
-- [Redis Integration Error: "unknown command 'CONFIG'"][8]
+- [Redis Integration Error: "unknown command 'CONFIG'"][10]
 
 ### Agent cannot connect
 
@@ -132,16 +168,21 @@ Configure a `password` in `redisdb.yaml`.
 
 Additional helpful documentation, links, and articles:
 
-- [How to monitor Redis performance metrics][10]
+- [How to monitor Redis performance metrics][12]
 
-[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/redisdb/datadog_checks/redisdb/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[7]: https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv
-[8]: https://docs.datadoghq.com/integrations/faq/redis-integration-error-unknown-command-config
-[9]: https://docs.datadoghq.com/developers/integrations
-[10]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics
-[11]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#setup
+[6]: https://docs.datadoghq.com/tracing/send_traces/
+[7]: https://docs.datadoghq.com/tracing/setup/
+[8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[9]: https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv
+[10]: https://docs.datadoghq.com/integrations/faq/redis-integration-error-unknown-command-config/
+[11]: https://docs.datadoghq.com/developers/integrations/
+[12]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics
+[13]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup
+[14]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
+[15]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
+[16]: https://docs.redislabs.com/latest/rs/administering/access-control/user-roles/#cluster-management-roles

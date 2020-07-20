@@ -13,7 +13,7 @@ from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.utils import ON_WINDOWS, create_file, running_on_ci
 from datadog_checks.vault import Vault
 
-from .common import COMPOSE_FILE, HEALTH_ENDPOINT, INSTANCES
+from .common import COMPOSE_FILE, HEALTH_ENDPOINT, INSTANCES, get_vault_server_config_file
 from .utils import get_client_token_path, set_client_token_path
 
 
@@ -40,6 +40,13 @@ def instance():
 
 
 @pytest.fixture(scope='session')
+def no_token_instance():
+    inst = INSTANCES['main'].copy()
+    inst['no_token'] = True
+    return inst
+
+
+@pytest.fixture(scope='session')
 def e2e_instance():
     inst = INSTANCES['main'].copy()
     inst['client_token_path'] = '/home/vault-sink/token'
@@ -58,7 +65,7 @@ def dd_environment(e2e_instance):
 
         with docker_run(
             COMPOSE_FILE,
-            env_vars={'JWT_DIR': jwt_dir, 'SINK_DIR': sink_dir},
+            env_vars={'JWT_DIR': jwt_dir, 'SINK_DIR': sink_dir, 'SERVER_CONFIG_FILE': get_vault_server_config_file()},
             conditions=[WaitAndUnsealVault(HEALTH_ENDPOINT), ApplyPermissions(token_file)],
             sleep=10,
             mount_logs=True,
@@ -102,9 +109,14 @@ class WaitAndUnsealVault(WaitFor):
             err = run_command("docker exec vault-leader vault operator unseal {}".format(k), capture=True).stderr
             if err:
                 raise Exception("Can't unseal vault-leader. \n{}".format(err))
+
+            time.sleep(2)
+
             err = run_command("docker exec vault-replica vault operator unseal {}".format(k), capture=True).stderr
             if err:
                 raise Exception("Can't unseal vault-replica. \n{}".format(err))
+
+            time.sleep(2)
 
         root_token = [line for line in result if 'Initial Root Token' in line]
         if not root_token:

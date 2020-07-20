@@ -5,13 +5,22 @@ import itertools
 from contextlib import closing
 
 import cx_Oracle
-import jaydebeapi as jdb
-import jpype
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.db import QueryManager
 
 from . import queries
+
+try:
+    import jaydebeapi as jdb
+    import jpype
+
+    JDBC_IMPORT_ERROR = None
+except ImportError as e:
+    jdb = None
+    jpype = None
+    JDBC_IMPORT_ERROR = e
+
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'oracle'
 MAX_CUSTOM_RESULTS = 100
@@ -114,6 +123,13 @@ class Oracle(AgentCheck):
         try:
             if use_oracle_client:
                 connection = cx_Oracle.connect(connect_string)
+            elif JDBC_IMPORT_ERROR:
+                self.log.error(
+                    "Oracle client is unavailable and the integration is unable to import JDBC libraries. You may not "
+                    "have the Microsoft Visual C++ Runtime 2015 installed on your system. Please double check your "
+                    "installation and refer to the Datadog documentation for more information."
+                )
+                raise JDBC_IMPORT_ERROR
             else:
                 try:
                     if jpype.isJVMStarted() and not jpype.isThreadAttachedToJVM():

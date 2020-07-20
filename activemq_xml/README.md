@@ -58,9 +58,9 @@ Need help? Contact [Datadog support][116].
 [111]: https://app.datadoghq.com/account/settings#agent
 [112]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [113]: https://github.com/DataDog/integrations-core/blob/master/activemq_xml/datadog_checks/activemq_xml/data/conf.yaml.example
-[114]: https://docs.datadoghq.com/developers/metrics/custom_metrics
-[115]: https://docs.datadoghq.com/account_management/billing/custom_metrics
-[116]: https://docs.datadoghq.com/help
+[114]: https://docs.datadoghq.com/developers/metrics/custom_metrics/
+[115]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
+[116]: https://docs.datadoghq.com/help/
 [117]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [118]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
 [119]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information

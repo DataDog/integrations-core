@@ -14,6 +14,7 @@ from datadog_checks.haproxy import HAProxy
 from .common import (
     CHECK_CONFIG,
     CHECK_CONFIG_OPEN,
+    CONFIG_TCPSOCKET,
     HAPROXY_VERSION,
     HERE,
     PASSWORD,
@@ -52,8 +53,8 @@ def dd_environment():
             with TempDir() as temp_dir:
                 host_socket_path = os.path.join(temp_dir, 'datadog-haproxy-stats.sock')
                 env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy.cfg')
-                if os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] >= ['1', '7']:
-                    env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy-1_7.cfg')
+                if os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] >= ['1', '6']:
+                    env['HAPROXY_CONFIG'] = os.path.join(HERE, 'compose', 'haproxy-1_6.cfg')
                 env['HAPROXY_SOCKET_DIR'] = temp_dir
 
                 with docker_run(
@@ -78,7 +79,7 @@ def dd_environment():
                     config = deepcopy(CHECK_CONFIG)
                     unixsocket_url = 'unix://{0}'.format(host_socket_path)
                     config['unixsocket_url'] = unixsocket_url
-                    yield config
+                    yield {'instances': [config, CONFIG_TCPSOCKET]}
         else:
             yield deepcopy(CHECK_CONFIG_OPEN)
 
@@ -112,6 +113,15 @@ def haproxy_mock_evil():
     p = mock.patch('requests.get', return_value=mock.Mock(content=data))
     yield p.start()
     p.stop()
+
+
+@pytest.fixture(scope="module")
+def haproxy_mock_enterprise_version_info():
+    filepath = os.path.join(HERE, 'fixtures', 'enterprise_version_info.html')
+    with open(filepath, 'rb') as f:
+        data = f.read()
+    with mock.patch('requests.get', return_value=mock.Mock(content=data)) as p:
+        yield p
 
 
 @pytest.fixture(scope="session")

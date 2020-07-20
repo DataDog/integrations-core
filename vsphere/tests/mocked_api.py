@@ -4,13 +4,14 @@
 import json
 import os
 import re
-from datetime import datetime
 
 from mock import MagicMock
 from pyVmomi import vim
 from requests import Response
 from six import iteritems
 from tests.common import HERE
+
+from datadog_checks.vsphere.api import VersionInfo
 
 
 class MockedCounter(object):
@@ -26,9 +27,19 @@ class MockedAPI(object):
         self.config = config
         self.infrastructure_data = {}
         self.metrics_data = []
+        self.mock_events = []
 
     def check_health(self):
         return True
+
+    def get_version(self):
+        about = MagicMock(
+            version='6.7.0',
+            build='123456789',
+            fullName='VMware vCenter Server 6.7.0 build-14792544',
+            apiType='VirtualCenter',
+        )
+        return VersionInfo(about)
 
     def recursive_parse_topology(self, subtree, parent=None):
         current_mor = MagicMock(spec=getattr(vim, subtree['spec']), _moId=subtree['mo_id'])
@@ -94,8 +105,8 @@ class MockedAPI(object):
     def get_max_query_metrics(self):
         return 256
 
-    def get_latest_event_timestamp(self):
-        return datetime.now()
+    def get_new_events(self, start_time):
+        return self.mock_events
 
 
 class MockResponse(Response):
@@ -110,9 +121,7 @@ class MockResponse(Response):
 
 def mock_http_rest_api(method, url, *args, **kwargs):
     if method == 'get':
-        if re.match(r'.*/category$', url):
-            return MockResponse({"value": ['cat_id_1', 'cat_id_2']}, 200)
-        elif re.match(r'.*/category/id:.*$', url):
+        if re.match(r'.*/category/id:.*$', url):
             parts = url.split('_')
             num = parts[len(parts) - 1]
             return MockResponse(
@@ -127,8 +136,6 @@ def mock_http_rest_api(method, url, *args, **kwargs):
                 },
                 200,
             )
-        elif re.match(r'.*/tagging/tag$', url):
-            return MockResponse({"value": ['tag_id_1', 'tag_id_2', 'tag_id_3']}, 200)
         elif re.match(r'.*/tagging/tag/id:.*$', url):
             parts = url.split('_')
             num = parts[len(parts) - 1]
@@ -148,14 +155,13 @@ def mock_http_rest_api(method, url, *args, **kwargs):
         assert kwargs['headers']['Content-Type'] == 'application/json'
         if re.match(r'.*/session$', url):
             return MockResponse({"value": "dummy-token"}, 200,)
-        elif re.match(r'.*/tagging/tag-association\?~action=list-attached-objects-on-tags$', url):
+        elif re.match(r'.*/tagging/tag-association\?~action=list-attached-tags-on-objects$', url):
             return MockResponse(
                 {
                     "value": [
-                        {"tag_id": "tag_id_1", "object_ids": [{"id": "VM4-4-1", "type": "VirtualMachine"}]},
-                        {"tag_id": "tag_id_2", "object_ids": [{"id": "VM4-4-1", "type": "VirtualMachine"}]},
-                        {"tag_id": "tag_id_2", "object_ids": [{"id": "10.0.0.104-1", "type": "HostSystem"}]},
-                        {"tag_id": "tag_id_2", "object_ids": [{"id": "NFS-Share-1", "type": "Datastore"}]},
+                        {"object_id": {"id": "VM4-4-1", "type": "VirtualMachine"}, "tag_ids": ["tag_id_1", "tag_id_2"]},
+                        {"object_id": {"id": "10.0.0.104-1", "type": "HostSystem"}, "tag_ids": ["tag_id_2"]},
+                        {"object_id": {"id": "NFS-Share-1", "type": "Datastore"}, "tag_ids": ["tag_id_2"]},
                     ]
                 },
                 200,

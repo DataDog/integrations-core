@@ -1,0 +1,21 @@
+{
+  "name": "PGBouncer log per user evolution",
+  "type": "logs",
+  "page": "analytics",
+  "query": "source:pgbouncer",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": ["source", "service", "host", "status", "@db.user", "@db.instance", "@network.destination.ip", "@network.destination.port"],
+  "options": {
+    "group_bys": [
+      { "facet": "@db.user" }
+    ],
+    "aggregations": [
+      { "metric": "count", "type": "count" }
+    ],
+    "step_ms": "30000",
+    "limit": "50",
+    "widget": "timeseries"
+  }
+}

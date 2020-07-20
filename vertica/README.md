@@ -78,7 +78,7 @@ Vertica does not include any events.
 Need help? Contact [Datadog support][10].
 
 [1]: https://www.vertica.com
-[2]: https://docs.datadoghq.com/agent
+[2]: https://docs.datadoghq.com/agent/
 [3]: https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/AdministratorsGuide/DBUsersAndPrivileges/Roles/SYSMONITORROLE.htm
 [4]: https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/SQLReferenceManual/Functions/VerticaFunctions/LicenseManagement/AUDIT_LICENSE_SIZE.htm
 [5]: https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/AdministratorsGuide/Licensing/MonitoringDatabaseSizeForLicenseCompliance.htm
@@ -86,5 +86,5 @@ Need help? Contact [Datadog support][10].
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/?#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/?#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/vertica/metadata.csv
-[10]: https://docs.datadoghq.com/help
+[10]: https://docs.datadoghq.com/help/
 [11]: https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/Glossary/vsql.htm

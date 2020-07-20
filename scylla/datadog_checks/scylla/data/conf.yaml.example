@@ -92,6 +92,10 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
+    ##
+    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
+    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
+    ## to true.
     #
     # tls_ignore_warning: false
 
@@ -130,7 +134,6 @@ instances:
 ## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
 ## service - mandatory - Name of the service that generated the log
 ## source  - mandatory - Attribute that defines which Integration sent the logs
-## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
 ## tags: - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
@@ -139,7 +142,6 @@ instances:
 #   - type: file
 #     path: <LOG_FILE_PATH>
 #     source: scylla
-#     sourcecategory: database
 #     service: <SERVICE>
 #     #To handle multi line that starts with yyyy-mm-dd or yyyy-dd-mm use the following pattern
 #     #log_processing_rules:

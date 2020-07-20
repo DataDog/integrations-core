@@ -79,9 +79,8 @@ By default Haproxy sends logs over UDP to port 514. The Agent can listen for the
    logs:
      - type: udp
        port: 514
-       service: haproxy
+       service: <SERVICE_NAME>
        source: haproxy
-       sourcecategory: http_web_access
    ```
 
     Change the `service` parameter value and configure it for your environment. See the [sample haproxy.d/conf.yaml][5] for all available configuration options.
@@ -123,7 +122,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][7]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][8].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
 
 | Parameter      | Value                                                |
 | -------------- | ---------------------------------------------------- |
@@ -162,18 +161,18 @@ Need help? Contact [Datadog support][11].
 - [HA Proxy Multi Process Configuration][15]
 - [How to collect HAProxy metrics][13]
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/39f2cb0977c0e0446a0e905d15d2e9a4349b3b5d/haproxy/images/haproxy-dash.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://www.haproxy.org/download/1.7/doc/management.txt
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [5]: https://github.com/DataDog/integrations-core/blob/master/haproxy/datadog_checks/haproxy/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
-[7]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[8]: https://docs.datadoghq.com/agent/docker/log/
+[7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[8]: https://docs.datadoghq.com/agent/kubernetes/log/
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/haproxy/metadata.csv
-[11]: https://docs.datadoghq.com/help
+[11]: https://docs.datadoghq.com/help/
 [12]: https://www.datadoghq.com/blog/monitoring-haproxy-performance-metrics
 [13]: https://www.datadoghq.com/blog/how-to-collect-haproxy-metrics
 [14]: https://www.datadoghq.com/blog/monitor-haproxy-with-datadog
-[15]: https://docs.datadoghq.com/integrations/faq/haproxy-multi-process
+[15]: https://docs.datadoghq.com/integrations/faq/haproxy-multi-process/

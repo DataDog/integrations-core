@@ -4,7 +4,7 @@
   "manifest_version": "1.0.0",
   "name": "sap_hana",
   "metric_prefix": "sap_hana.",
-  "metric_to_check": "sap_hana.connection.active",
+  "metric_to_check": "sap_hana.uptime",
   "creates_events": false,
   "short_description": "Monitor memory, network, volume, and other metrics from your SAP HANA system.",
   "guid": "85dace7c-baf5-4bcc-9fbb-4d3a6b841359",

@@ -1,6 +1,5 @@
 parameters:
   pip_cache_config: null
-
 jobs:
 - template: ./test-all.yml
   parameters:
@@ -72,6 +71,9 @@ jobs:
     - checkName: clickhouse
       displayName: ClickHouse
       os: linux
+    - checkName: cloud_foundry_api
+      displayName: Cloud Foundry API
+      os: linux
     - checkName: cockroachdb
       displayName: CockroachDB
       os: linux
@@ -103,8 +105,11 @@ jobs:
       displayName: Disk (Windows)
       os: windows
     - checkName: dns_check
-      displayName: DNS
+      displayName: DNS (Linux)
       os: linux
+    - checkName: dns_check
+      displayName: DNS (Windows)
+      os: windows
     - checkName: dotnetclr
       displayName: .NET CLR
       os: windows
@@ -156,6 +161,9 @@ jobs:
     - checkName: harbor
       displayName: Harbor
       os: linux
+    - checkName: hazelcast
+      displayName: Hazelcast
+      os: linux
     - checkName: hdfs_datanode
       displayName: HDFS Datanode
       os: linux
@@ -164,6 +172,9 @@ jobs:
       os: linux
     - checkName: hive
       displayName: Hive
+      os: linux
+    - checkName: hivemq
+      displayName: HiveMQ
       os: linux
     - checkName: http_check
       displayName: HTTP
@@ -176,6 +187,9 @@ jobs:
       os: linux
     - checkName: ibm_was
       displayName: IBM WAS
+      os: linux
+    - checkName: ignite
+      displayName: Ignite
       os: linux
     - checkName: iis
       displayName: IIS
@@ -312,11 +326,17 @@ jobs:
     - checkName: prometheus
       displayName: Prometheus
       os: linux
+    - checkName: proxysql
+      displayName: ProxySQL
+      os: linux
     - checkName: rabbitmq
       displayName: RabbitMQ
       os: linux
     - checkName: redisdb
       displayName: Redis
+      os: linux
+    - checkName: rethinkdb
+      displayName: RethinkDB
       os: linux
     - checkName: riak
       displayName: Riak
@@ -364,8 +384,11 @@ jobs:
       displayName: System Swap
       os: linux
     - checkName: tcp_check
-      displayName: TCP
+      displayName: TCP (Linux)
       os: linux
+    - checkName: tcp_check
+      displayName: TCP (Windows)
+      os: windows
     - checkName: teamcity
       displayName: TeamCity
       os: linux

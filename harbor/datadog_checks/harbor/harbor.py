@@ -97,6 +97,11 @@ class HarborCheck(AgentCheck):
         self.gauge('harbor.disk.free', disk_free, tags=base_tags)
         self.gauge('harbor.disk.total', disk_total, tags=base_tags)
 
+    def _submit_read_only_status(self, api, base_tags):
+        read_only_status = api.read_only_status()
+        if read_only_status is not None:
+            self.gauge('harbor.registry.read_only', int(read_only_status), tags=base_tags)
+
     def check(self, instance):
         harbor_url = instance["url"]
         tags = instance.get("tags", [])
@@ -106,6 +111,7 @@ class HarborCheck(AgentCheck):
             self._check_registries_health(api, tags)
             self._submit_project_metrics(api, tags)
             self._submit_disk_metrics(api, tags)
+            self._submit_read_only_status(api, tags)
         except Exception:
             self.log.exception("An error occured when collecting Harbor metrics")
             self.service_check(CAN_CONNECT, AgentCheck.CRITICAL)

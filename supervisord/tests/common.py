@@ -4,7 +4,7 @@
 
 import os
 
-from datadog_checks.checks.base import ServiceCheck
+from datadog_checks.base.checks.base import ServiceCheck
 from datadog_checks.dev import get_docker_hostname
 
 PROCESSES = ["program_0", "program_1", "program_2"]
@@ -181,6 +181,21 @@ TEST_CASES = [
             {'name': 'server0', 'host': 'localhost', 'port': 9010, 'user': 'invalid_user', 'pass': 'invalid_pass'}
         ],
         'error_message': """Username or password to server0 are incorrect.""",
+    },
+    {
+        'instances': [
+            {
+                'name': 'server0',
+                'socket': 'unix:///correct/path/supervisor.sock',
+                'user': 'invalid_user',
+                'pass': 'invalid_pass',
+            }
+        ],
+        'error_message': """Username or password to server0 are incorrect.""",
+    },
+    {
+        'instances': [{'name': 'server0', 'socket': 'unix:///invalid_socket'}],
+        'error_message': """Cannot connect to unix:///invalid_socket. Make sure supervisor is running and socket is enabled and socket file has the right permissions.""",  # noqa E501
     },
     {
         'instances': [

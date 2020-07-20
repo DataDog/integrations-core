@@ -1,4 +1,4 @@
-from datadog_checks.stubs import aggregator
+from datadog_checks.base.stubs import aggregator
 
 LINKERD_FIXTURE_METRICS = {
     'jvm:start_time': 'jvm.start_time',

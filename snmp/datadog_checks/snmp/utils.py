@@ -2,13 +2,24 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
-from typing import Any, Dict, Mapping, Sequence, Tuple, Union
+from typing import Any, Dict, Iterator, List, Mapping, Sequence, Tuple, Union
 
 import yaml
 
 from .compat import get_config
-from .exceptions import CouldNotDecodeOID, SmiError
-from .pysnmp_types import ObjectIdentity, ObjectName, ObjectType, endOfMibView, noSuchInstance
+from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
+from .pysnmp_types import (
+    ContextData,
+    ObjectIdentity,
+    ObjectName,
+    ObjectType,
+    SnmpEngine,
+    UdpTransportTarget,
+    endOfMibView,
+    lcd,
+    noSuchInstance,
+)
+from .types import T
 
 
 def get_profile_definition(profile):
@@ -91,9 +102,9 @@ def recursively_expand_base_profiles(definition):
         definition.setdefault('metric_tags', []).extend(base_definition.get('metric_tags', []))
 
 
-def get_default_profiles():
+def _load_default_profiles():
     # type: () -> Dict[str, Any]
-    """Return all the profiles installed on the system."""
+    """Load all the profiles installed on the system."""
     profiles = {}
     paths = [_get_profiles_site_root(), _get_profiles_confd_root()]
 
@@ -110,9 +121,20 @@ def get_default_profiles():
             if is_abstract:
                 continue
 
-            profiles[base] = {'definition_file': os.path.join(path, filename)}
+            definition = _read_profile_definition(os.path.join(path, filename))
+            recursively_expand_base_profiles(definition)
+            profiles[base] = {'definition': definition}
 
     return profiles
+
+
+_default_profiles = _load_default_profiles()
+
+
+def get_default_profiles():
+    # type: () -> Dict[str, Any]
+    """Return all the profiles installed on the system."""
+    return _default_profiles
 
 
 def parse_as_oid_tuple(value):
@@ -125,7 +147,9 @@ def parse_as_oid_tuple(value):
     Raises:
     -------
     CouldNotDecodeOID:
-        If `value` is of an unsupported type, or if it is supported by the OID could not be inferred from it.
+        If `value` is of an unsupported type.
+    UnresolvedOID:
+        If `value` refers to an OID passed in MIB symbol that has not been resolved yet.
     """
     if isinstance(value, (list, tuple)):
         # Eg: `(1, 3, 6, 1, 2, 1, 1, 1, 0)`
@@ -155,9 +179,7 @@ def parse_as_oid_tuple(value):
         try:
             object_name = value.getOid()  # type: ObjectName
         except SmiError as exc:
-            # Not resolved yet. Probably us building an `ObjectIdentity` instance manually...
-            # We should be using our `OID` model in that case, so let's fail.
-            raise CouldNotDecodeOID('Could not infer OID from `ObjectIdentity`: {!r}'.format(exc))
+            raise UnresolvedOID(exc)
 
         return parse_as_oid_tuple(object_name)
 
@@ -167,9 +189,7 @@ def parse_as_oid_tuple(value):
         try:
             object_identity = value[0]
         except SmiError as exc:
-            # Not resolved yet. Probably us building an `ObjectType` instance manually...
-            # We should be using our `OID` model in that case, so let's fail.
-            raise CouldNotDecodeOID('Could not infer OID from `ObjectType`: {!r}'.format(exc))
+            raise UnresolvedOID(exc)
 
         return parse_as_oid_tuple(object_identity)
 
@@ -250,7 +270,7 @@ class OIDPrinter(object):
         key = oid[0]
         if not isinstance(key, ObjectName):
             key = key.getOid()
-        return "'{}': {}".format(key.prettyPrint(), value)
+        return "'{}': {}".format(key.prettyPrint(), value.replace('\x00', ''))
 
     def oid_dict(self, key, value):
         # type: (str, Dict[Any, Any]) -> str
@@ -278,7 +298,7 @@ class OIDPrinter(object):
             displayed = values[0]
         else:
             displayed = '{{{}}}'.format(', '.join(values))
-        return "'{}': {}".format(key, displayed)
+        return "'{}': {}".format(key, displayed.replace('\x00', ''))
 
     def __str__(self):
         # type: () -> str
@@ -288,3 +308,33 @@ class OIDPrinter(object):
             return '{{{}}}'.format(', '.join(self.oid_str_value(oid) for oid in self.oids))
         else:
             return '({})'.format(', '.join("'{}'".format(self.oid_str(oid)) for oid in self.oids))
+
+
+def register_device_target(ip, port, timeout, retries, engine, auth_data, context_data):
+    # type: (str, int, float, int, SnmpEngine, Any, ContextData) -> str
+    """
+    Register a device by IP and port, and return an opaque string that can be used later to execute PySNMP commands.
+    """
+    transport = UdpTransportTarget((ip, port), timeout=timeout, retries=retries)
+    target, _ = lcd.configure(engine, auth_data, transport, context_data.contextName)
+    return target
+
+
+def batches(lst, size):
+    # type: (List[T], int) -> Iterator[List[T]]
+    """
+    Iterate through `lst` and yield batches of at most `size` items.
+
+    Example:
+
+    ```python
+    >>> xs = [1, 2, 3, 4, 5]
+    >>> list(batches(xs, size=2))
+    [[1, 2], [3, 4], [5]]
+    ```
+    """
+    if size <= 0:
+        raise ValueError('Batch size must be > 0')
+
+    for index in range(0, len(lst), size):
+        yield lst[index : index + size]

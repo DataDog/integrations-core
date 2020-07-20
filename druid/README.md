@@ -127,7 +127,7 @@ The Druid check does not include any events.
 
 Need help? Contact [Datadog support][12].
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/druid/assets/images/druid_dashboard_overview.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/druid/images/druid_dashboard_overview.png
 [2]: https://docs.datadoghq.com/developers/dogstatsd/
 [3]: https://druid.apache.org/docs/latest/operations/metrics.html
 [4]: https://docs.datadoghq.com/agent/
@@ -138,4 +138,4 @@ Need help? Contact [Datadog support][12].
 [9]: https://druid.apache.org/docs/latest/operations/including-extensions.html
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [11]: https://github.com/DataDog/integrations-core/blob/master/druid/metadata.csv
-[12]: https://docs.datadoghq.com/help
+[12]: https://docs.datadoghq.com/help/

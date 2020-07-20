@@ -1,5 +1,15 @@
 # CHANGELOG - supervisord
 
+## 1.6.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.5.0 / 2020-04-04
+
+* [Added] Make error message more explicit. See [#6211](https://github.com/DataDog/integrations-core/pull/6211).
+* [Added] Enable basic authentication for socket option (unix_http_server). See [#6239](https://github.com/DataDog/integrations-core/pull/6239).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.4.0 / 2020-02-22
 
 * [Added] Upgrade supervisor dependency. See [#5627](https://github.com/DataDog/integrations-core/pull/5627).

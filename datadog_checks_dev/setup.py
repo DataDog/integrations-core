@@ -35,6 +35,7 @@ REQUIRES = [
     'six',
     "shutilwhich==1.1.0; python_version < '3.0'",
     "subprocess32==3.5.4; python_version < '3.0'",
+    'tenacity',
 ]
 
 
@@ -57,7 +58,6 @@ setup(
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
@@ -69,15 +69,13 @@ setup(
     include_package_data=True,
     extras_require={
         'cli': [
-            'appdirs',
+            'appdirs>=1.4.4',
             'atomicwrites',
-            'click',
+            'click>7',
             'colorama',
             'docker-compose>=1.25',
             'in-toto>=0.4.2',
             'pip-tools',
-            'pylint',
-            'Pillow',
             'pyperclip>=1.7.0',
             'semver',
             'setuptools>=38.6.0',

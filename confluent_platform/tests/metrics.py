@@ -5,24 +5,86 @@
 
 BROKER_METRICS = [
     'confluent.kafka.cluster.partition.under_min_isr',
-    'confluent.kafka.controller.leader_election_rate_and_time_ms.avg',
     'confluent.kafka.controller.active_controller_count',
+    'confluent.kafka.controller.leader_election_rate_and_time_ms.avg',
+    'confluent.kafka.controller.leader_election_rate_and_time_ms.rate',
     'confluent.kafka.controller.offline_partitions_count',
-    'confluent.kafka.network.request_channel.request_queue_size',
+    'confluent.kafka.controller.unclean_leader_elections_per_sec.rate',
+    'confluent.kafka.network.request.local_time_ms.50percentile',
+    'confluent.kafka.network.request.local_time_ms.75percentile',
+    'confluent.kafka.network.request.local_time_ms.95percentile',
+    'confluent.kafka.network.request.local_time_ms.98percentile',
+    'confluent.kafka.network.request.local_time_ms.99percentile',
+    'confluent.kafka.network.request.local_time_ms.999percentile',
     'confluent.kafka.network.request.local_time_ms.avg',
+    'confluent.kafka.network.request.local_time_ms.rate',
+    'confluent.kafka.network.request.remote_time_ms.50percentile',
+    'confluent.kafka.network.request.remote_time_ms.75percentile',
+    'confluent.kafka.network.request.remote_time_ms.95percentile',
+    'confluent.kafka.network.request.remote_time_ms.98percentile',
+    'confluent.kafka.network.request.remote_time_ms.99percentile',
+    'confluent.kafka.network.request.remote_time_ms.999percentile',
     'confluent.kafka.network.request.remote_time_ms.avg',
+    'confluent.kafka.network.request.remote_time_ms.rate',
+    'confluent.kafka.network.request.request_queue_time_ms.50percentile',
+    'confluent.kafka.network.request.request_queue_time_ms.75percentile',
+    'confluent.kafka.network.request.request_queue_time_ms.95percentile',
+    'confluent.kafka.network.request.request_queue_time_ms.98percentile',
+    'confluent.kafka.network.request.request_queue_time_ms.99percentile',
+    'confluent.kafka.network.request.request_queue_time_ms.999percentile',
     'confluent.kafka.network.request.request_queue_time_ms.avg',
+    'confluent.kafka.network.request.request_queue_time_ms.rate',
+    'confluent.kafka.network.request.requests_per_sec.rate',
+    'confluent.kafka.network.request.response_queue_time_ms.50percentile',
+    'confluent.kafka.network.request.response_queue_time_ms.75percentile',
+    'confluent.kafka.network.request.response_queue_time_ms.95percentile',
+    'confluent.kafka.network.request.response_queue_time_ms.98percentile',
+    'confluent.kafka.network.request.response_queue_time_ms.99percentile',
+    'confluent.kafka.network.request.response_queue_time_ms.999percentile',
     'confluent.kafka.network.request.response_queue_time_ms.avg',
+    'confluent.kafka.network.request.response_queue_time_ms.rate',
+    'confluent.kafka.network.request.response_send_time_ms.50percentile',
+    'confluent.kafka.network.request.response_send_time_ms.75percentile',
+    'confluent.kafka.network.request.response_send_time_ms.95percentile',
+    'confluent.kafka.network.request.response_send_time_ms.98percentile',
+    'confluent.kafka.network.request.response_send_time_ms.99percentile',
+    'confluent.kafka.network.request.response_send_time_ms.999percentile',
     'confluent.kafka.network.request.response_send_time_ms.avg',
+    'confluent.kafka.network.request.response_send_time_ms.rate',
+    'confluent.kafka.network.request.total_time_ms.50percentile',
+    'confluent.kafka.network.request.total_time_ms.75percentile',
+    'confluent.kafka.network.request.total_time_ms.95percentile',
+    'confluent.kafka.network.request.total_time_ms.98percentile',
+    'confluent.kafka.network.request.total_time_ms.99percentile',
+    'confluent.kafka.network.request.total_time_ms.999percentile',
     'confluent.kafka.network.request.total_time_ms.avg',
+    'confluent.kafka.network.request.total_time_ms.rate',
+    'confluent.kafka.network.request_channel.request_queue_size',
     'confluent.kafka.network.socket_server.network_processor_avg_idle_percent',
     'confluent.kafka.server.delayed_operation_purgatory.purgatory_size',
     'confluent.kafka.server.delayed_operation_purgatory.purgatory_size',
     'confluent.kafka.server.replica_fetcher_manager.max_lag',
+    'confluent.kafka.server.replica_manager.isr_expands_per_sec.rate',
+    'confluent.kafka.server.replica_manager.isr_shrinks_per_sec.rate',
     'confluent.kafka.server.replica_manager.leader_count',
     'confluent.kafka.server.replica_manager.partition_count',
     'confluent.kafka.server.replica_manager.under_min_isr_partition_count',
     'confluent.kafka.server.replica_manager.under_replicated_partitions',
+    'confluent.kafka.server.request_handler_pool.avg_idle_percent.rate',
+    'confluent.kafka.server.session.zoo_keeper_auth_failures_per_sec.rate',
+    'confluent.kafka.server.session.zoo_keeper_disconnects_per_sec.rate',
+    'confluent.kafka.server.session.zoo_keeper_expires_per_sec.rate',
+    'confluent.kafka.server.session.zoo_keeper_read_only_connects_per_sec.rate',
+    'confluent.kafka.server.session.zoo_keeper_sasl_authentications_per_sec.rate',
+    'confluent.kafka.server.session.zoo_keeper_sync_connects_per_sec.rate',
+    'confluent.kafka.server.topic.bytes_in_per_sec.rate',
+    'confluent.kafka.server.topic.bytes_out_per_sec.rate',
+    'confluent.kafka.server.topic.bytes_rejected_per_sec.rate',
+    'confluent.kafka.server.topic.failed_fetch_requests_per_sec.rate',
+    'confluent.kafka.server.topic.failed_produce_requests_per_sec.rate',
+    'confluent.kafka.server.topic.messages_in_per_sec.rate',
+    'confluent.kafka.server.topic.total_fetch_requests_per_sec.rate',
+    'confluent.kafka.server.topic.total_produce_requests_per_sec.rate',
 ]
 
 CONNECT_METRICS = [
@@ -49,6 +111,44 @@ CONNECT_METRICS_OPTIONAL = [
     'confluent.kafka.connect.worker_rebalance.rebalance_max_time_ms',
 ]
 
+
+CONNECT_TASK = [
+    'confluent.kafka.connect.connector_task.batch_size_avg',
+    'confluent.kafka.connect.connector_task.batch_size_max',
+    'confluent.kafka.connect.connector_task.offset_commit_avg_time_ms',
+    'confluent.kafka.connect.connector_task.offset_commit_failure_percentage',
+    'confluent.kafka.connect.connector_task.offset_commit_max_time_ms',
+    'confluent.kafka.connect.connector_task.offset_commit_success_percentage',
+    'confluent.kafka.connect.connector_task.pause_ratio',
+    'confluent.kafka.connect.connector_task.running_ratio',
+    'confluent.kafka.connect.source_task.poll_batch_avg_time_ms',
+    'confluent.kafka.connect.source_task.poll_batch_max_time_ms',
+    'confluent.kafka.connect.source_task.source_record_active_count',
+    'confluent.kafka.connect.source_task.source_record_active_count_avg',
+    'confluent.kafka.connect.source_task.source_record_active_count_max',
+    'confluent.kafka.connect.source_task.source_record_poll_rate',
+    'confluent.kafka.connect.source_task.source_record_poll_total',
+    'confluent.kafka.connect.source_task.source_record_write_rate',
+    'confluent.kafka.connect.source_task.source_record_write_total',
+    'confluent.kafka.connect.task_error.deadletterqueue_produce_failures',
+    'confluent.kafka.connect.task_error.deadletterqueue_produce_requests',
+    'confluent.kafka.connect.task_error.last_error_timestamp',
+    'confluent.kafka.connect.task_error.total_errors_logged',
+    'confluent.kafka.connect.task_error.total_record_errors',
+    'confluent.kafka.connect.task_error.total_record_failures',
+    'confluent.kafka.connect.task_error.total_records_skipped',
+    'confluent.kafka.connect.task_error.total_retries',
+]
+
+CONNECT_PER_CONNECTOR_METRICS = [
+    'confluent.kafka.connect.worker.connector_destroyed_task_count',
+    'confluent.kafka.connect.worker.connector_failed_task_count',
+    'confluent.kafka.connect.worker.connector_paused_task_count',
+    'confluent.kafka.connect.worker.connector_running_task_count',
+    'confluent.kafka.connect.worker.connector_total_task_count',
+    'confluent.kafka.connect.worker.connector_unassigned_task_count',
+]
+
 REST_JETTY_METRICS = [
     'confluent.kafka.rest.jetty.connections_active',
 ]
@@ -58,7 +158,7 @@ REST_JETTY_METRICS_OPTIONAL = [
     'confluent.kafka.rest.jetty.connections_closed_rate',
 ]
 
-REST_JERSEY_METRICS_OPTIONAL = [
+REST_JERSEY_METRICS = [
     'confluent.kafka.rest.jersey.brokers.list.request_error_rate',
     'confluent.kafka.rest.jersey.consumer.assign_v2.request_error_rate',
     'confluent.kafka.rest.jersey.consumer.assignment_v2.request_error_rate',
@@ -254,7 +354,10 @@ KSQL_QUERY_STATS = [
 ALWAYS_PRESENT_METRICS = (
     BROKER_METRICS
     + CONNECT_METRICS
+    + CONNECT_TASK
+    + CONNECT_PER_CONNECTOR_METRICS
     + REST_JETTY_METRICS
+    + REST_JERSEY_METRICS
     + SCHEMA_REGISTRY_JETTY_METRICS
     + SCHEMA_REGISTRY_METRICS
     + PRODUCER_METRICS
@@ -272,7 +375,6 @@ ALWAYS_PRESENT_METRICS = (
 NOT_ALWAYS_PRESENT_METRICS = (
     BROKER_OPTIONAL_METRICS
     + SCHEMA_REGISTRY_JERSEY_METRICS
-    + REST_JERSEY_METRICS_OPTIONAL
     + REST_JETTY_METRICS_OPTIONAL
     + CONNECT_METRICS_OPTIONAL
     + CONSUMER_FETCH_METRICS

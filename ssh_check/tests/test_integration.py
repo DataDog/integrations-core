@@ -5,13 +5,16 @@ import re
 
 import pytest
 
+from datadog_checks.ssh_check import CheckSSH
+
 from . import common
 
 pytestmark = pytest.mark.integration
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_check(aggregator, check, instance):
+def test_check(aggregator, instance):
+    check = CheckSSH('ssh_check', {}, [instance])
     check.check(instance)
     common._test_check(aggregator, instance)
     common.wait_for_threads()
@@ -19,7 +22,8 @@ def test_check(aggregator, check, instance):
 
 @pytest.mark.skipif(common.SSH_SERVER_VERSION is None, reason='No version')
 @pytest.mark.usefixtures("dd_environment")
-def test_metadata(aggregator, check, instance, datadog_agent):
+def test_metadata(aggregator, instance, datadog_agent):
+    check = CheckSSH('ssh_check', {}, [instance])
     check.check_id = 'test:123'
     check.check(instance)
 

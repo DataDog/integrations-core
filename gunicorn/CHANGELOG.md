@@ -1,5 +1,15 @@
 # CHANGELOG - gunicorn
 
+## 1.11.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.10.0 / 2020-04-04
+
+* [Added] Upgrade psutil to 5.7.0. See [#6243](https://github.com/DataDog/integrations-core/pull/6243).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 1.9.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).

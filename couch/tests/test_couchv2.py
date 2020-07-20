@@ -93,12 +93,12 @@ def _assert_check(aggregator, gauges):
         for gauge in gauges["erlang_gauges"]:
             aggregator.assert_metric(gauge)
 
-    for db, dd in {"kennel": "dummy", "_replicator": "_replicator", "_users": "_auth"}.items():
+    for db, dd in {"kennel": "dummy"}.items():
         for gauge in gauges["by_dd_gauges"]:
             expected_tags = ["design_document:{}".format(dd), "language:javascript", "db:{}".format(db)]
             aggregator.assert_metric(gauge, tags=expected_tags)
 
-    for db in ["_users", "_global_changes", "_replicator", "kennel"]:
+    for db in ["kennel", "db1"]:
         for gauge in gauges["by_db_gauges"]:
             expected_tags = ["db:{}".format(db)]
             aggregator.assert_metric(gauge, tags=expected_tags)
@@ -126,7 +126,7 @@ def test_db_whitelisting(aggregator, gauges):
 
     for n in [common.NODE1, common.NODE2, common.NODE3]:
         node = deepcopy(n)
-        node['db_whitelist'] = ['kennel']
+        node['db_whitelist'] = ['db0']
         configs.append(node)
 
     for config in configs:
@@ -134,14 +134,15 @@ def test_db_whitelisting(aggregator, gauges):
         check.check(config)
 
     for _ in configs:
-        for db in ['_users', '_global_changes', '_replicator']:
+        for db in ['db0']:
+            expected_tags = ["db:{}".format(db)]
+            for gauge in gauges["by_db_gauges"]:
+                aggregator.assert_metric(gauge, tags=expected_tags)
+
+        for db in ['db1']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=0)
-
-        for gauge in gauges["by_db_gauges"]:
-            expected_tags = ["db:kennel"]
-            aggregator.assert_metric(gauge, tags=expected_tags)
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -151,7 +152,7 @@ def test_db_blacklisting(aggregator, gauges):
 
     for node in [common.NODE1, common.NODE2, common.NODE3]:
         config = deepcopy(node)
-        config['db_blacklist'] = ['kennel']
+        config['db_blacklist'] = ['db0']
         configs.append(config)
 
     for config in configs:
@@ -159,14 +160,15 @@ def test_db_blacklisting(aggregator, gauges):
         check.check(config)
 
     for _ in configs:
-        for db in ['_users', '_global_changes', '_replicator']:
+        for db in ['db1']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags)
 
-        for gauge in gauges["by_db_gauges"]:
-            expected_tags = ["db:kennel"]
-            aggregator.assert_metric(gauge, tags=expected_tags, count=0)
+        for db in ['db0']:
+            expected_tags = ["db:{}".format(db)]
+            for gauge in gauges["by_db_gauges"]:
+                aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -190,12 +192,12 @@ def test_check_without_names(aggregator, gauges):
         for gauge in gauges["replication_tasks_gauges"]:
             aggregator.assert_metric(gauge)
 
-    for db, dd in {"kennel": "dummy", "_replicator": "_replicator", "_users": "_auth"}.items():
+    for db, dd in {"kennel": "dummy"}.items():
         expected_tags = ["design_document:{}".format(dd), "language:javascript", "db:{}".format(db)]
         for gauge in gauges["by_dd_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
 
-    for db in ["_users", "_global_changes", "_replicator", "kennel"]:
+    for db in ["kennel"]:
         expected_tags = ["db:{}".format(db)]
         for gauge in gauges["by_db_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
@@ -214,81 +216,49 @@ def test_check_without_names(aggregator, gauges):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_only_max_nodes_are_scanned(aggregator, gauges):
+@pytest.mark.parametrize('number_nodes', [1, 2, 3])
+def test_only_max_nodes_are_scanned(aggregator, gauges, number_nodes):
     config = deepcopy(common.NODE1)
     config.pop("name")
-    config['max_nodes_per_check'] = 2
+    config['max_nodes_per_check'] = number_nodes
 
     check = CouchDb(common.CHECK_NAME, {}, [config])
     check.check(config)
 
-    for gauge in gauges["erlang_gauges"]:
-        aggregator.assert_metric(gauge)
+    metrics = []
+    for metric_list in aggregator._metrics.values():
+        metrics.extend(metric_list)
 
-    for gauge in gauges["replication_tasks_gauges"]:
-        aggregator.assert_metric(gauge)
+    instance_tags = set()
+    for m in metrics:
+        for tag in m.tags:
+            if tag.startswith('instance:'):
+                instance_tags.add(tag)
 
-    for config in [common.NODE1, common.NODE2]:
-        expected_tags = ["instance:{}".format(config["name"])]
-        for gauge in gauges["cluster_gauges"]:
-            aggregator.assert_metric(gauge, tags=expected_tags)
-
-    for db in ["_users", "_global_changes", "_replicator"]:
-        expected_tags = ["db:{}".format(db)]
-        for gauge in gauges["by_db_gauges"]:
-            aggregator.assert_metric(gauge, tags=expected_tags)
-
-    for db, dd in {"_replicator": "_replicator", "_users": "_auth"}.items():
-        expected_tags = ["design_document:{}".format(dd), "language:javascript", "db:{}".format(db)]
-        for gauge in gauges["by_dd_gauges"]:
-            aggregator.assert_metric(gauge, tags=expected_tags)
-
-    expected_tags = ["instance:{}".format(config["server"])]
-    # One for the version as we don't have any names to begin with
-    aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=1)
-
-    for node in [common.NODE1, common.NODE2]:
-        expected_tags = ["instance:{}".format(node["name"])]
-        # One for the server stats, the version is already loaded
-        aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=1)
-
-    expected_tags = ["instance:{}".format(common.NODE3["name"])]
-    for gauge in gauges["cluster_gauges"]:
-        aggregator.assert_metric(gauge, tags=expected_tags, count=0)
-
-    for db in ['_users', '_global_changes', '_replicator', 'kennel']:
-        expected_tags = [expected_tags[0], "db:{}".format(db)]
-        for gauge in gauges["by_db_gauges"]:
-            aggregator.assert_metric(gauge, tags=expected_tags, count=0)
-
-    expected_tags = ["instance:{}".format(common.NODE3["name"])]
-    aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=0)
-
-    aggregator.assert_all_metrics_covered()
+    assert len(instance_tags) == number_nodes
 
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_only_max_dbs_are_scanned(aggregator, gauges):
-    configs = []
-    for node in [common.NODE1, common.NODE2, common.NODE3]:
-        config = deepcopy(node)
-        config["max_dbs_per_check"] = 1
-        configs.append(config)
+@pytest.mark.parametrize('number_db', [1, 2, 3])
+def test_only_max_dbs_are_scanned(aggregator, gauges, number_db):
+    config = deepcopy(common.NODE1)
+    config["max_dbs_per_check"] = number_db
 
-    for config in configs:
-        check = CouchDb(common.CHECK_NAME, {}, [config])
-        check.check(config)
+    check = CouchDb(common.CHECK_NAME, {}, [config])
+    check.check(config)
 
-    for db in ['kennel', '_replicator']:
-        expected_tags = ["db:{}".format(db)]
-        for gauge in gauges["by_db_gauges"]:
-            aggregator.assert_metric(gauge, tags=expected_tags, count=0)
+    metrics = []
+    for metric_list in aggregator._metrics.values():
+        metrics.extend(metric_list)
 
-    for db in ['_global_changes', '_users']:
-        expected_tags = ["db:{}".format(db)]
-        for gauge in gauges["by_db_gauges"]:
-            aggregator.assert_metric(gauge, tags=expected_tags, count=1)
+    db_tags = set()
+    for m in metrics:
+        for tag in m.tags:
+            if tag.startswith('db:'):
+                db_tags.add(tag)
+
+    assert len(db_tags) == number_db
 
 
 @pytest.mark.usefixtures('dd_environment')

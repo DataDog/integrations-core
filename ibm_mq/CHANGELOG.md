@@ -1,5 +1,27 @@
 # CHANGELOG - IBM MQ
 
+## 3.7.0 / 2020-06-29
+
+* [Added] Add MacOS Support. See [#6927](https://github.com/DataDog/integrations-core/pull/6927).
+* [Fixed] Refactor to make encoding more consistent. See [#6995](https://github.com/DataDog/integrations-core/pull/6995).
+* [Fixed] Ensure bytes for ssl connection. See [#6913](https://github.com/DataDog/integrations-core/pull/6913).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+* [Fixed] Move metrics collection logic to separate files. See [#6752](https://github.com/DataDog/integrations-core/pull/6752).
+
+## 3.6.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 3.5.1 / 2020-04-08
+
+* [Fixed] Don't import pymqi unconditionally. See [#6286](https://github.com/DataDog/integrations-core/pull/6286).
+
+## 3.5.0 / 2020-04-04
+
+* [Added] Apply config specs to IBM MQ. See [#5903](https://github.com/DataDog/integrations-core/pull/5903).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 3.4.0 / 2020-03-11
 
 * [Added] Add `connection_name` configuration. See [#6015](https://github.com/DataDog/integrations-core/pull/6015).

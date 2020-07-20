@@ -27,13 +27,13 @@ The [ibm_db][4] client library is required. To install it, ensure you have a wor
 For Agent versions <= 6.11:
 
 ```text
-"C:\Program Files\Datadog\Datadog Agent\embedded\Scripts\python.exe" -m pip install ibm_db==3.0.1
+"C:\Program Files\Datadog\Datadog Agent\embedded\python.exe" -m pip install ibm_db==3.0.1
 ```
 
 For Agent versions >= 6.12:
 
 ```text
-"C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\Scripts\python.exe" -m pip install ibm_db==3.0.1
+"C:\Program Files\Datadog\Datadog Agent\embedded<PYTHON_MAJOR_VERSION>\python.exe" -m pip install ibm_db==3.0.1
 ```
 
 On Linux there may be need for XML functionality. If you encounter errors during
@@ -120,7 +120,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][7]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][8].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][8].
 
 | Parameter      | Value                                                                                                                                                                                                |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -158,15 +158,15 @@ Additional helpful documentation, links, and articles:
 
 - [Monitor IBM DB2 with Datadog][12]
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ibm_db2/assets/images/dashboard_overview.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/ibm_db2/images/dashboard_overview.png
 [2]: https://www.ibm.com/analytics/us/en/db2
-[3]: https://docs.datadoghq.com/agent
+[3]: https://docs.datadoghq.com/agent/
 [4]: https://github.com/ibmdb/python-ibmdb/tree/master/IBM_DB/ibm_db
 [5]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/datadog_checks/ibm_db2/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent
-[7]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[8]: https://docs.datadoghq.com/agent/docker/log/
+[7]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[8]: https://docs.datadoghq.com/agent/kubernetes/log/
 [9]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [10]: https://github.com/DataDog/integrations-core/blob/master/ibm_db2/metadata.csv
-[11]: https://docs.datadoghq.com/help
+[11]: https://docs.datadoghq.com/help/
 [12]: https://www.datadoghq.com/blog/monitor-db2-with-datadog

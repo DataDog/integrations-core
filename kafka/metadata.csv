@@ -6,14 +6,10 @@ kafka.net.processor.avg.idle.pct.rate,gauge,10,fraction,,Average fraction of tim
 kafka.messages_in.rate,gauge,10,message,,Incoming message rate.,0,kafka,messages in
 kafka.request.channel.queue.size,gauge,10,request,,Number of queued requests.,-1,kafka,req channel queue size
 kafka.request.fetch.failed.rate,gauge,10,request,,Number of client fetch request failures.,-1,kafka,req fetch fail
-kafka.request.fetch.failed_per_second,gauge,10,request,second,Rate of client fetch request failures per second.,-1,kafka,req fetch fail rate
 kafka.request.handler.avg.idle.pct.rate,gauge,10,fraction,,Average fraction of time the request handler threads are idle.,1,kafka,req handle avg idle
 kafka.request.produce.time.avg,gauge,10,millisecond,,Average time for a produce request.,0,kafka,req prod time avg
 kafka.request.produce.time.99percentile,gauge,10,millisecond,,Time for produce requests for 99th percentile.,0,kafka,req prod time 99
-kafka.request.produce.failed_per_second,gauge,10,request,second,Rate of failed produce requests per second.,-1,kafka,req prod fail rate
 kafka.request.produce.failed.rate,gauge,10,request,,Number of failed produce requests.,-1,kafka,req prod fail
-kafka.request.fetch.time.avg,gauge,10,millisecond,,Average time per fetch request.,0,kafka,req fetch time avg
-kafka.request.fetch.time.99percentile,gauge,10,millisecond,,Time for fetch requests for 99th percentile.,0,kafka,req fetch time 99
 kafka.request.update_metadata.time.avg,gauge,10,millisecond,,Average time for a request to update metadata.,0,kafka,req update meta time avg
 kafka.request.update_metadata.time.99percentile,gauge,10,millisecond,,Time for update metadata requests for 99th percentile.,0,kafka,req update meta time 99
 kafka.request.metadata.time.avg,gauge,10,millisecond,,Average time for metadata request.,0,kafka,req meta time avg

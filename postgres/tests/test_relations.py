@@ -1,7 +1,10 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import psycopg2
 import pytest
+
+from .common import DB_NAME, HOST, PORT
 
 RELATION_METRICS = [
     'postgresql.seq_scans',
@@ -70,7 +73,7 @@ def test_relations_metrics(aggregator, integration_check, pg_instance):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_relations_metrics2(aggregator, integration_check, pg_instance):
+def test_relations_metrics_regex(aggregator, integration_check, pg_instance):
     pg_instance['relations'] = [
         {'relation_regex': '.*', 'schemas': ['hello', 'hello2']},
         # Empty schemas means all schemas, even though the first relation matches first.
@@ -81,16 +84,8 @@ def test_relations_metrics2(aggregator, integration_check, pg_instance):
     posgres_check.check(pg_instance)
 
     expected_tags = {}
-    expected_size_tags = {}
     for relation in relations:
         expected_tags[relation] = pg_instance['tags'] + [
-            'server:{}'.format(pg_instance['host']),
-            'port:{}'.format(pg_instance['port']),
-            'db:%s' % pg_instance['dbname'],
-            'table:{}'.format(relation.lower()),
-            'schema:public',
-        ]
-        expected_size_tags[relation] = pg_instance['tags'] + [
             'server:{}'.format(pg_instance['host']),
             'port:{}'.format(pg_instance['port']),
             'db:%s' % pg_instance['dbname'],
@@ -107,7 +102,29 @@ def test_relations_metrics2(aggregator, integration_check, pg_instance):
             aggregator.assert_metric(name, count=0, tags=expected_tags[relation])
 
         for name in RELATION_SIZE_METRICS:
-            aggregator.assert_metric(name, count=1, tags=expected_size_tags[relation])
+            aggregator.assert_metric(name, count=1, tags=expected_tags[relation])
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_max_relations(aggregator, integration_check, pg_instance):
+    pg_instance.update({'relations': [{'relation_regex': '.*'}], 'max_relations': 1})
+    posgres_check = integration_check(pg_instance)
+    posgres_check.check(pg_instance)
+
+    for name in RELATION_METRICS:
+        relation_metrics = []
+        for m in aggregator._metrics[name]:
+            if any(['table:' in tag for tag in m.tags]):
+                relation_metrics.append(m)
+        assert len(relation_metrics) == 1
+
+    for name in RELATION_SIZE_METRICS:
+        relation_metrics = []
+        for m in aggregator._metrics[name]:
+            if any(['table:' in tag for tag in m.tags]):
+                relation_metrics.append(m)
+        assert len(relation_metrics) == 1
 
 
 @pytest.mark.integration
@@ -130,3 +147,28 @@ def test_index_metrics(aggregator, integration_check, pg_instance):
 
     for name in IDX_METRICS:
         aggregator.assert_metric(name, count=1, tags=expected_tags)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_locks_metrics(aggregator, integration_check, pg_instance):
+    pg_instance['relations'] = ['persons']
+    pg_instance['query_timeout'] = 1000  # One of the relation queries waits for the table to not be locked
+
+    check = integration_check(pg_instance)
+    with psycopg2.connect(host=HOST, dbname=DB_NAME, user="postgres", password="datad0g") as conn:
+        with conn.cursor() as cur:
+            cur.execute('LOCK persons')
+            check.check(pg_instance)
+
+    expected_tags = pg_instance['tags'] + [
+        'server:{}'.format(HOST),
+        'port:{}'.format(PORT),
+        'db:datadog_test',
+        'lock_mode:AccessExclusiveLock',
+        'lock_type:relation',
+        'table:persons',
+        'schema:public',
+    ]
+
+    aggregator.assert_metric('postgresql.locks', count=1, tags=expected_tags)

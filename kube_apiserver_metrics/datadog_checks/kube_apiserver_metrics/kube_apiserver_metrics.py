@@ -6,8 +6,25 @@ from re import match
 
 from six import iteritems
 
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.errors import CheckException
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base.errors import CheckException
+
+METRICS = {
+    'apiserver_current_inflight_requests': 'current_inflight_requests',
+    'apiserver_longrunning_gauge': 'longrunning_gauge',
+    'go_threads': 'go_threads',
+    'go_goroutines': 'go_goroutines',
+    'APIServiceRegistrationController_depth': 'APIServiceRegistrationController_depth',
+    'etcd_object_counts': 'etcd_object_counts',
+    'rest_client_request_latency_seconds': 'rest_client_request_latency_seconds',
+    'apiserver_admission_webhook_admission_latencies_seconds': 'admission_webhook_admission_latencies_seconds',
+    'apiserver_admission_step_admission_latencies_seconds': 'admission_step_admission_latencies_seconds',
+    'apiserver_admission_controller_admission_duration_seconds': 'admission_controller_admission_duration_seconds',
+    # fmt: off
+    'apiserver_admission_step_admission_latencies_seconds_summary':
+        'admission_step_admission_latencies_seconds_summary',
+    # fmt: on
+}
 
 
 class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
@@ -23,7 +40,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     DEFAULT_SSL_VERIFY = False
     DEFAULT_BEARER_TOKEN_AUTH = True
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances=None):
         # Set up metrics_transformers
         self.metric_transformers = {
             'apiserver_audit_event_total': self.apiserver_audit_event_total,
@@ -40,23 +57,8 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
         super(KubeAPIServerMetricsCheck, self).__init__(
             name,
             init_config,
-            agentConfig,
             instances=instances,
-            default_instances={
-                "kube_apiserver": {
-                    'namespace': 'kube_apiserver',
-                    'metrics': [
-                        {
-                            'apiserver_current_inflight_requests': 'current_inflight_requests',
-                            'apiserver_longrunning_gauge': 'longrunning_gauge',
-                            'go_threads': 'go_threads',
-                            'go_goroutines': 'go_goroutines',
-                            'APIServiceRegistrationController_depth': 'APIServiceRegistrationController_depth',
-                            'etcd_object_counts': 'etcd_object_counts',
-                        }
-                    ],
-                }
-            },
+            default_instances={"kube_apiserver": {'namespace': 'kube_apiserver', 'metrics': [METRICS]}},
             default_namespace="kube_apiserver",
         )
 

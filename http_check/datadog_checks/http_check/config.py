@@ -4,7 +4,7 @@
 from collections import namedtuple
 
 from datadog_checks.base import ConfigurationError, ensure_unicode, is_affirmative
-from datadog_checks.utils.headers import headers as agent_headers
+from datadog_checks.base.utils.headers import headers as agent_headers
 
 DEFAULT_EXPECTED_CODE = r'(1|2|3)\d\d'
 

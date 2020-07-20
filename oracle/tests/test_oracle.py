@@ -1,6 +1,10 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+try:
+    from contextlib import ExitStack
+except ImportError:
+    from contextlib2 import ExitStack
 
 import mock
 import pytest
@@ -36,19 +40,30 @@ def test__get_connection_jdbc(check):
     service_check = mock.MagicMock()
     check.service_check = service_check
     expected_tags = ['server:localhost:1521', 'optional:tag1']
-    with mock.patch('datadog_checks.oracle.oracle.cx_Oracle') as cx:
-        cx.DatabaseError = RuntimeError
-        cx.clientversion.side_effect = cx.DatabaseError()
-        with mock.patch('datadog_checks.oracle.oracle.jdb') as jdb:
-            with mock.patch('datadog_checks.oracle.oracle.jpype') as jpype:
-                jpype.isJVMStarted.return_value = False
-                jdb.connect.return_value = con
-                check.create_connection()
-                assert check._connection == con
-                jdb.connect.assert_called_with(
-                    'oracle.jdbc.OracleDriver', 'jdbc:oracle:thin:@//localhost:1521/xe', ['system', 'oracle'], None
-                )
-                service_check.assert_called_with(check.SERVICE_CHECK_NAME, check.OK, tags=expected_tags)
+
+    cx = mock.MagicMock(DatabaseError=RuntimeError)
+    cx.clientversion.side_effect = cx.DatabaseError()
+
+    jdb = mock.MagicMock()
+    jdb.connect.return_value = con
+    jpype = mock.MagicMock(isJVMStarted=lambda: False)
+
+    mocks = [
+        ('datadog_checks.oracle.oracle.cx_Oracle', cx),
+        ('datadog_checks.oracle.oracle.jdb', jdb),
+        ('datadog_checks.oracle.oracle.jpype', jpype),
+        ('datadog_checks.oracle.oracle.JDBC_IMPORT_ERROR', None),
+    ]
+    with ExitStack() as stack:
+        for mock_call in mocks:
+            stack.enter_context(mock.patch(*mock_call))
+        check.create_connection()
+
+    assert check._connection == con
+    jdb.connect.assert_called_with(
+        'oracle.jdbc.OracleDriver', 'jdbc:oracle:thin:@//localhost:1521/xe', ['system', 'oracle'], None
+    )
+    service_check.assert_called_with(check.SERVICE_CHECK_NAME, check.OK, tags=expected_tags)
 
 
 def test__get_connection_failure(check):

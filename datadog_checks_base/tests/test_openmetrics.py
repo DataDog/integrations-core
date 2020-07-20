@@ -13,6 +13,7 @@ import mock
 import pytest
 import requests
 from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily, SummaryMetricFamily
+from prometheus_client.samples import Sample
 from six import iteritems
 from urllib3.exceptions import InsecureRequestWarning
 
@@ -122,6 +123,16 @@ def mock_get():
         ),
     ):
         yield text_data
+
+
+def test_config_instance(mocked_prometheus_check):
+    """Ensure scraper config persists instance options"""
+    check = mocked_prometheus_check
+    instance = copy.deepcopy(PROMETHEUS_CHECK_INSTANCE)
+    instance['new_option'] = 'test123'
+
+    config = check.create_scraper_configuration(instance)
+    config['new_option'] = 'test123'
 
 
 def test_process(text_data, mocked_prometheus_check, mocked_prometheus_scraper_config, ref_gauge):
@@ -379,110 +390,238 @@ def test_submit_gauge_with_exclude_labels(aggregator, mocked_prometheus_check, m
     )
 
 
-def test_submit_counter(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+@pytest.mark.parametrize(
+    'config, counter_metric_monotonic, counter_with_gauge',
+    (
+        ({'send_monotonic_counter': True}, True, False),
+        ({'send_monotonic_counter': False}, False, False),
+        ({'send_monotonic_counter': False, 'send_monotonic_with_gauge': True}, False, True),
+        ({'send_monotonic_counter': True, 'send_monotonic_with_gauge': True}, True, False),
+    ),
+    ids=(
+        'default',
+        'override default send_monotonic_counter',
+        'send monotonic_counter with gauge',
+        'ignore send_monotonic_with_gauge flag',
+    ),
+)
+def test_submit_counter(
+    aggregator,
+    mocked_prometheus_check,
+    mocked_prometheus_scraper_config,
+    config,
+    counter_metric_monotonic,
+    counter_with_gauge,
+):
+    # Determine expected metric types for counter metrics
+    counter_type = aggregator.GAUGE
+    if counter_metric_monotonic:
+        counter_type = aggregator.MONOTONIC_COUNT
+
+    metric_name = 'prometheus.custom.counter'
     _counter = CounterMetricFamily('my_counter', 'Random counter')
     _counter.add_metric([], 42)
+    mocked_prometheus_scraper_config.update(config)
     check = mocked_prometheus_check
     check.submit_openmetric('custom.counter', _counter, mocked_prometheus_scraper_config)
-    aggregator.assert_metric('prometheus.custom.counter', 42, tags=[], count=1)
+    aggregator.assert_metric(metric_name, 42, tags=[], count=1, metric_type=counter_type)
+
+    if counter_with_gauge:
+        aggregator.assert_metric(metric_name + '.total', 42, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT)
+
     aggregator.assert_all_metrics_covered()
 
 
-def test_submit_summary(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+@pytest.mark.parametrize(
+    'config, count_metric_monotonic, sum_metric_monotonic, count_monotonic_gauge, sum_monotonic_gauge',
+    (
+        ({}, False, False, False, False),
+        ({'send_distribution_counts_as_monotonic': True}, True, False, False, False),
+        ({'send_distribution_sums_as_monotonic': True}, False, True, False, False),
+        (
+            {'send_distribution_counts_as_monotonic': True, 'send_distribution_sums_as_monotonic': True},
+            True,
+            True,
+            False,
+            False,
+        ),
+        ({'send_monotonic_with_gauge': True}, False, False, True, True),
+        ({'send_monotonic_with_gauge': True, 'send_distribution_counts_as_monotonic': True}, True, False, False, True),
+        ({'send_monotonic_with_gauge': True, 'send_distribution_sums_as_monotonic': True}, False, True, True, False),
+        (
+            {
+                'send_monotonic_with_gauge': True,
+                'send_distribution_sums_as_monotonic': True,
+                'send_distribution_counts_as_monotonic': True,
+            },
+            True,
+            True,
+            False,
+            False,
+        ),
+    ),
+    ids=(
+        'default',
+        'count only as monotonic_count',
+        'sum only as monotonic_count',
+        'count and sum as monotonic_count',
+        'count and sum with monotonic and gauge',
+        'count only with monotonic_count and gauge',
+        'sum only with monotonic_count and gauge',
+        'ignore send_montonic_with_gauge flag',
+    ),
+)
+def test_submit_summary(
+    aggregator,
+    mocked_prometheus_check,
+    mocked_prometheus_scraper_config,
+    config,
+    count_metric_monotonic,
+    sum_metric_monotonic,
+    count_monotonic_gauge,
+    sum_monotonic_gauge,
+):
+
+    # Determine expected metric types for `.count` and `.sum` metrics
+    count_type = aggregator.GAUGE
+    sum_type = aggregator.GAUGE
+
+    if count_metric_monotonic:
+        count_type = aggregator.MONOTONIC_COUNT
+    if sum_metric_monotonic:
+        sum_type = aggregator.MONOTONIC_COUNT
+
+    mocked_prometheus_scraper_config.update(config)
+
     _sum = SummaryMetricFamily('my_summary', 'Random summary')
     _sum.add_metric([], 5.0, 120512.0)
     _sum.add_sample("my_summary", {"quantile": "0.5"}, 24547.0)
     _sum.add_sample("my_summary", {"quantile": "0.9"}, 25763.0)
     _sum.add_sample("my_summary", {"quantile": "0.99"}, 25763.0)
+    _sum.add_sample("my_summary", {}, 25764.0)  # Quantile-less not supported yet and should be skipped.
     check = mocked_prometheus_check
     check.submit_openmetric('custom.summary', _sum, mocked_prometheus_scraper_config)
-    aggregator.assert_metric('prometheus.custom.summary.count', 5.0, tags=[], count=1, metric_type=aggregator.GAUGE)
-    aggregator.assert_metric('prometheus.custom.summary.sum', 120512.0, tags=[], count=1)
+
+    aggregator.assert_metric('prometheus.custom.summary.count', 5.0, tags=[], count=1, metric_type=count_type)
+    aggregator.assert_metric('prometheus.custom.summary.sum', 120512.0, tags=[], count=1, metric_type=sum_type)
+
     aggregator.assert_metric('prometheus.custom.summary.quantile', 24547.0, tags=['quantile:0.5'], count=1)
     aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.9'], count=1)
     aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.99'], count=1)
+    aggregator.assert_metric('prometheus.custom.summary.quantile', 25764.0, tags=[], count=0)
+
+    # If `send_monotonic_with_gauge` is true, assert a monotonic_count with suffixed `.total` is submitted
+    if count_monotonic_gauge:
+        aggregator.assert_metric(
+            'prometheus.custom.summary.count.total', 5.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT
+        )
+
+    if sum_monotonic_gauge:
+        aggregator.assert_metric(
+            'prometheus.custom.summary.sum.total', 120512.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT,
+        )
+
     aggregator.assert_all_metrics_covered()
 
 
-def test_submit_summary_with_monotonic_count(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    _sum = SummaryMetricFamily('my_summary', 'Random summary')
-    _sum.add_metric([], 5.0, 120512.0)
-    _sum.add_sample("my_summary", {"quantile": "0.5"}, 24547.0)
-    _sum.add_sample("my_summary", {"quantile": "0.9"}, 25763.0)
-    _sum.add_sample("my_summary", {"quantile": "0.99"}, 25763.0)
-    check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['send_distribution_counts_as_monotonic'] = True
-    check.submit_openmetric('custom.summary', _sum, mocked_prometheus_scraper_config)
+def assert_histogram_counts(aggregator, count_type, suffix=False):
+    # Refactor commonly used metric assertion for the `test_submit_histogram` tests
+    metric_name = 'prometheus.custom.histogram.count'
+    # Append `.total` to monotonic_count metrics submitted with gauge
+    if suffix:
+        metric_name += '.total'
+
     aggregator.assert_metric(
-        'prometheus.custom.summary.count', 5.0, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT
+        metric_name, 4, tags=['upper_bound:none'], count=1, metric_type=count_type,
     )
-    aggregator.assert_metric('prometheus.custom.summary.sum', 120512.0, tags=[], count=1)
-    aggregator.assert_metric('prometheus.custom.summary.quantile', 24547.0, tags=['quantile:0.5'], count=1)
-    aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.9'], count=1)
-    aggregator.assert_metric('prometheus.custom.summary.quantile', 25763.0, tags=['quantile:0.99'], count=1)
-    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metric(
+        metric_name, 1, tags=['upper_bound:1.0'], count=1, metric_type=count_type,
+    )
+    aggregator.assert_metric(
+        metric_name, 2, tags=['upper_bound:31104000.0'], count=1, metric_type=count_type,
+    )
+    aggregator.assert_metric(
+        metric_name, 3, tags=['upper_bound:432400000.0'], count=1, metric_type=count_type,
+    )
 
 
-def test_submit_histogram(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
+@pytest.mark.parametrize(
+    'config, count_metric_monotonic, sum_metric_monotonic, count_monotonic_gauge, sum_monotonic_gauge',
+    (
+        ({}, False, False, False, False),
+        ({'send_distribution_counts_as_monotonic': True}, True, False, False, False),
+        ({'send_distribution_sums_as_monotonic': True}, False, True, False, False),
+        (
+            {'send_distribution_counts_as_monotonic': True, 'send_distribution_sums_as_monotonic': True},
+            True,
+            True,
+            False,
+            False,
+        ),
+        ({'send_monotonic_with_gauge': True}, False, False, True, True),
+        ({'send_monotonic_with_gauge': True, 'send_distribution_counts_as_monotonic': True}, True, False, False, True),
+        ({'send_monotonic_with_gauge': True, 'send_distribution_sums_as_monotonic': True}, False, True, True, False),
+        (
+            {
+                'send_monotonic_with_gauge': True,
+                'send_distribution_sums_as_monotonic': True,
+                'send_distribution_counts_as_monotonic': True,
+            },
+            True,
+            True,
+            False,
+            False,
+        ),
+    ),
+    ids=(
+        'default',
+        'count only as monotonic_count',
+        'sum only as monotonic_count',
+        'count and sum as monotonic_count',
+        'count and sum with monotonic and gauge',
+        'count only with monotonic_count and gauge',
+        'sum only with monotonic_count and gauge',
+        'ignore send_montonic_with_gauge flag',
+    ),
+)
+def test_submit_histograms(
+    aggregator,
+    mocked_prometheus_check,
+    mocked_prometheus_scraper_config,
+    config,
+    count_metric_monotonic,
+    sum_metric_monotonic,
+    count_monotonic_gauge,
+    sum_monotonic_gauge,
+):
+    # Determine expected metric types for `.count` and `.sum` metrics
+    count_type = aggregator.GAUGE
+    sum_type = aggregator.GAUGE
+    if count_metric_monotonic:
+        count_type = aggregator.MONOTONIC_COUNT
+    if sum_metric_monotonic:
+        sum_type = aggregator.MONOTONIC_COUNT
+
     _histo = HistogramMetricFamily('my_histogram', 'my_histogram')
     _histo.add_metric(
         [], buckets=[("-Inf", 0), ("1", 1), ("3.1104e+07", 2), ("4.324e+08", 3), ("+Inf", 4)], sum_value=1337
     )
     check = mocked_prometheus_check
-    check.submit_openmetric('custom.histogram', _histo, mocked_prometheus_scraper_config)
-    aggregator.assert_metric('prometheus.custom.histogram.sum', 1337, tags=[], count=1)
-    aggregator.assert_metric(
-        'prometheus.custom.histogram.count', 4, tags=['upper_bound:none'], count=1, metric_type=aggregator.GAUGE
-    )
-    aggregator.assert_metric(
-        'prometheus.custom.histogram.count', 1, tags=['upper_bound:1.0'], count=1, metric_type=aggregator.GAUGE
-    )
-    aggregator.assert_metric(
-        'prometheus.custom.histogram.count', 2, tags=['upper_bound:31104000.0'], count=1, metric_type=aggregator.GAUGE
-    )
-    aggregator.assert_metric(
-        'prometheus.custom.histogram.count', 3, tags=['upper_bound:432400000.0'], count=1, metric_type=aggregator.GAUGE
-    )
-    aggregator.assert_all_metrics_covered()
+    mocked_prometheus_scraper_config.update(config)
 
-
-def test_submit_histogram_with_monotonic_count(aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):
-    _histo = HistogramMetricFamily('my_histogram', 'my_histogram')
-    _histo.add_metric(
-        [], buckets=[("-Inf", 0), ("1", 1), ("3.1104e+07", 2), ("4.324e+08", 3), ("+Inf", 4)], sum_value=1337
-    )
-    check = mocked_prometheus_check
-    mocked_prometheus_scraper_config['send_distribution_counts_as_monotonic'] = True
     check.submit_openmetric('custom.histogram', _histo, mocked_prometheus_scraper_config)
-    aggregator.assert_metric('prometheus.custom.histogram.sum', 1337, tags=[], count=1)
-    aggregator.assert_metric(
-        'prometheus.custom.histogram.count',
-        4,
-        tags=['upper_bound:none'],
-        count=1,
-        metric_type=aggregator.MONOTONIC_COUNT,
-    )
-    aggregator.assert_metric(
-        'prometheus.custom.histogram.count',
-        1,
-        tags=['upper_bound:1.0'],
-        count=1,
-        metric_type=aggregator.MONOTONIC_COUNT,
-    )
-    aggregator.assert_metric(
-        'prometheus.custom.histogram.count',
-        2,
-        tags=['upper_bound:31104000.0'],
-        count=1,
-        metric_type=aggregator.MONOTONIC_COUNT,
-    )
-    aggregator.assert_metric(
-        'prometheus.custom.histogram.count',
-        3,
-        tags=['upper_bound:432400000.0'],
-        count=1,
-        metric_type=aggregator.MONOTONIC_COUNT,
-    )
+    aggregator.assert_metric('prometheus.custom.histogram.sum', 1337, tags=[], count=1, metric_type=sum_type)
+    assert_histogram_counts(aggregator, count_type)
+
+    # If `send_monotonic_with_gauge` is true, assert a monotonic_count with suffixed `.total` is submitted
+    if count_monotonic_gauge:
+        assert_histogram_counts(aggregator, aggregator.MONOTONIC_COUNT, True)
+
+    if sum_monotonic_gauge:
+        aggregator.assert_metric(
+            'prometheus.custom.histogram.sum.total', 1337, tags=[], count=1, metric_type=aggregator.MONOTONIC_COUNT
+        )
+
     aggregator.assert_all_metrics_covered()
 
 
@@ -632,6 +771,8 @@ def test_parse_one_counter(p_check, mocked_prometheus_scraper_config):
 
     expected_etcd_metric = CounterMetricFamily('go_memstats_mallocs_total', 'Total number of mallocs.')
     expected_etcd_metric.add_metric([], 18713)
+    # Fix up the _total change
+    expected_etcd_metric.name = 'go_memstats_mallocs_total'
 
     # Iter on the generator to get all metrics
     response = MockResponse(text_data, text_content_type)
@@ -976,67 +1117,67 @@ def test_decumulate_histogram_buckets(p_check, mocked_prometheus_scraper_config)
         'rest_client_request_latency_seconds_bucket', 'Request latency in seconds. Broken down by verb and URL.'
     )
     expected_metric.samples = [
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.004', 'lower_bound': '0.002', 'verb': 'GET'},
             81.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.001', 'lower_bound': '0', 'verb': 'GET'},
             254.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.002', 'lower_bound': '0.001', 'verb': 'GET'},
             367.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.008', 'lower_bound': '0.004', 'verb': 'GET'},
             25.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.016', 'lower_bound': '0.008', 'verb': 'GET'},
             11.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.032', 'lower_bound': '0.016', 'verb': 'GET'},
             6.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.064', 'lower_bound': '0.032', 'verb': 'GET'},
             4.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.128', 'lower_bound': '0.064', 'verb': 'GET'},
             6.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.256', 'lower_bound': '0.128', 'verb': 'GET'},
             1.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '0.512', 'lower_bound': '0.256', 'verb': 'GET'},
             0.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '+Inf', 'lower_bound': '0.512', 'verb': 'GET'},
             0.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_sum',
             {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'},
             2.185820220000001,
         ),
-        ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0),
+        Sample('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0),
     ]
 
     current_metric = metrics[0]
@@ -1065,17 +1206,17 @@ def test_decumulate_histogram_buckets_single_bucket(p_check, mocked_prometheus_s
         'rest_client_request_latency_seconds_bucket', 'Request latency in seconds. Broken down by verb and URL.'
     )
     expected_metric.samples = [
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '+Inf', 'lower_bound': '0', 'verb': 'GET'},
             755.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_sum',
             {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'},
             2.185820220000001,
         ),
-        ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0),
+        Sample('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0),
     ]
 
     current_metric = metrics[0]
@@ -1129,40 +1270,42 @@ def test_decumulate_histogram_buckets_multiple_contexts(p_check, mocked_promethe
     )
 
     expected_metric.samples = [
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '1', 'lower_bound': '0', 'verb': 'GET'},
             100.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '2', 'lower_bound': '1.0', 'verb': 'GET'},
             100.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '+Inf', 'lower_bound': '2.0', 'verb': 'GET'},
             100.0,
         ),
-        ('rest_client_request_latency_seconds_sum', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 256.0),
-        ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 300.0),
-        (
+        Sample('rest_client_request_latency_seconds_sum', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 256.0),
+        Sample('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 300.0),
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '1', 'lower_bound': '0', 'verb': 'POST'},
             50.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '2', 'lower_bound': '1.0', 'verb': 'POST'},
             50.0,
         ),
-        (
+        Sample(
             'rest_client_request_latency_seconds_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '+Inf', 'lower_bound': '2.0', 'verb': 'POST'},
             50.0,
         ),
-        ('rest_client_request_latency_seconds_sum', {'url': 'http://127.0.0.1:8080/api', 'verb': 'POST'}, 200.0),
-        ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'POST'}, 150.0),
+        Sample('rest_client_request_latency_seconds_sum', {'url': 'http://127.0.0.1:8080/api', 'verb': 'POST'}, 200.0),
+        Sample(
+            'rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'POST'}, 150.0
+        ),
     ]
 
     current_metric = metrics[0]
@@ -1192,33 +1335,33 @@ def test_decumulate_histogram_buckets_negative_buckets(p_check, mocked_prometheu
 
     expected_metric = HistogramMetricFamily('random_histogram_bucket', 'Nonsense histogram.')
     expected_metric.samples = [
-        (
+        Sample(
             'random_histogram_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '-Inf', 'lower_bound': '-inf', 'verb': 'GET'},
             0.0,
         ),
-        (
+        Sample(
             'random_histogram_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '-10.0', 'lower_bound': '-inf', 'verb': 'GET'},
             50.0,
         ),
-        (
+        Sample(
             'random_histogram_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '-2.0', 'lower_bound': '-10.0', 'verb': 'GET'},
             5.0,
         ),
-        (
+        Sample(
             'random_histogram_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '15.0', 'lower_bound': '-2.0', 'verb': 'GET'},
             10.0,
         ),
-        (
+        Sample(
             'random_histogram_bucket',
             {'url': 'http://127.0.0.1:8080/api', 'le': '+Inf', 'lower_bound': '15.0', 'verb': 'GET'},
             5.0,
         ),
-        ('random_histogram_sum', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 3.14),
-        ('random_histogram_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 70.0),
+        Sample('random_histogram_sum', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 3.14),
+        Sample('random_histogram_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 70.0),
     ]
 
     current_metric = metrics[0]
@@ -1246,12 +1389,12 @@ def test_decumulate_histogram_buckets_no_buckets(p_check, mocked_prometheus_scra
         'random_histogram_bucket', 'Request latency in seconds. Broken down by verb and URL.'
     )
     expected_metric.samples = [
-        (
+        Sample(
             'rest_client_request_latency_seconds_sum',
             {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'},
             2.185820220000001,
         ),
-        ('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0),
+        Sample('rest_client_request_latency_seconds_count', {'url': 'http://127.0.0.1:8080/api', 'verb': 'GET'}, 755.0),
     ]
 
     current_metric = metrics[0]
@@ -1598,8 +1741,9 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['label_joins'] = {
         'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node', 'pod_ip']},
+        'kube_pod_labels': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['*']},
         'kube_deployment_labels': {
-            'label_to_match': 'deployment',
+            'label_to_match': ['deployment'],
             'labels_to_get': [
                 'label_addonmanager_kubernetes_io_mode',
                 'label_k8s_app',
@@ -1630,6 +1774,9 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
             'pod_ip:11.32.3.14',
+            'label_k8s_app:event-exporter',
+            'label_pod_template_hash:958884745',
+            'label_version:v0.1.7',
         ],
         count=1,
     )
@@ -1642,6 +1789,11 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
             'pod_ip:11.132.0.7',
+            'label_controller_revision_hash:3483772856',
+            'label_k8s_app:fluentd-gcp',
+            'label_kubernetes_io_cluster_service:true',
+            'label_pod_template_generation:1',
+            'label_version:v2.0.9',
         ],
         count=1,
     )
@@ -1654,6 +1806,11 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
             'pod_ip:11.132.0.14',
+            'label_controller_revision_hash:3483772856',
+            'label_k8s_app:fluentd-gcp',
+            'label_kubernetes_io_cluster_service:true',
+            'label_pod_template_generation:1',
+            'label_version:v2.0.9',
         ],
         count=1,
     )
@@ -1666,6 +1823,9 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
             'pod_ip:11.32.5.7',
+            'label_k8s_app:heapster',
+            'label_pod_template_hash:2027615481',
+            'label_version:v1.4.3',
         ],
         count=1,
     )
@@ -1678,6 +1838,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
             'pod_ip:11.32.3.10',
+            'label_k8s_app:kube-dns',
+            'label_pod_template_hash:3092422022',
         ],
         count=1,
     )
@@ -1690,6 +1852,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
             'pod_ip:11.32.3.9',
+            'label_k8s_app:kube-dns',
+            'label_pod_template_hash:3092422022',
         ],
         count=1,
     )
@@ -1702,6 +1866,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
             'pod_ip:11.32.5.6',
+            'label_k8s_app:kube-dns-autoscaler',
+            'label_pod_template_hash:97162954',
         ],
         count=1,
     )
@@ -1714,6 +1880,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
             'pod_ip:11.132.0.7',
+            'label_component:kube-proxy',
+            'label_tier:node',
         ],
         count=1,
     )
@@ -1726,6 +1894,9 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
             'pod_ip:11.32.5.45',
+            'label_app:kube-state-metrics',
+            'label_pod_template_hash:3918010230',
+            'label_release:ungaged-panther',
         ],
         count=1,
     )
@@ -1738,6 +1909,9 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
             'pod_ip:11.32.3.14',
+            'label_k8s_app:event-exporter',
+            'label_pod_template_hash:958884745',
+            'label_version:v0.1.7',
         ],
         count=1,
     )
@@ -1750,6 +1924,11 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
             'pod_ip:11.132.0.7',
+            'label_controller_revision_hash:3483772856',
+            'label_k8s_app:fluentd-gcp',
+            'label_kubernetes_io_cluster_service:true',
+            'label_pod_template_generation:1',
+            'label_version:v2.0.9',
         ],
         count=1,
     )
@@ -1762,6 +1941,11 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
             'pod_ip:11.132.0.14',
+            'label_controller_revision_hash:3483772856',
+            'label_k8s_app:fluentd-gcp',
+            'label_kubernetes_io_cluster_service:true',
+            'label_pod_template_generation:1',
+            'label_version:v2.0.9',
         ],
         count=1,
     )
@@ -1774,6 +1958,9 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-j75z',
             'pod_ip:11.32.5.7',
+            'label_k8s_app:heapster',
+            'label_pod_template_hash:2027615481',
+            'label_version:v1.4.3',
         ],
         count=1,
     )
@@ -1786,6 +1973,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
             'pod_ip:11.32.3.10',
+            'label_k8s_app:kube-dns',
+            'label_pod_template_hash:3092422022',
         ],
         count=1,
     )
@@ -1798,6 +1987,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
             'condition:true',
             'node:gke-foobar-test-kube-default-pool-9b4ff111-0kch',
             'pod_ip:11.32.3.9',
+            'label_k8s_app:kube-dns',
+            'label_pod_template_hash:3092422022',
         ],
         count=1,
     )
@@ -1807,8 +1998,8 @@ def test_label_joins(aggregator, mocked_prometheus_check, mocked_prometheus_scra
         tags=[
             'namespace:kube-system',
             'deployment:event-exporter-v0.1.7',
-            'label_k8s_app:event-exporter',
             'label_addonmanager_kubernetes_io_mode:Reconcile',
+            'label_k8s_app:event-exporter',
             'label_kubernetes_io_cluster_service:true',
         ],
         count=1,
@@ -2092,6 +2283,60 @@ def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_pro
         check.process(mocked_prometheus_scraper_config)
         assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
         assert mocked_prometheus_scraper_config['_label_mapping']['pod']['dd-agent-62bgh']['phase'] == 'Test'
+
+
+def test_label_to_match_single(benchmark, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+    """ Tests label join and hostname override on a metric """
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['namespace'] = 'ksm'
+    mocked_prometheus_scraper_config['label_joins'] = {
+        'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']},
+        '1': {'label_to_match': 'pod', 'labels_to_get': ['node']},
+        '2': {'label_to_match': 'pod', 'labels_to_get': ['node']},
+        '3': {'label_to_match': 'pod', 'labels_to_get': ['node']},
+        '4': {'label_to_match': 'pod', 'labels_to_get': ['node']},
+        '5': {'label_to_match': 'pod', 'labels_to_get': ['node']},
+        '6': {'label_to_match': 'pod', 'labels_to_get': ['node']},
+        '7': {'label_to_match': 'pod', 'labels_to_get': ['node']},
+        '8': {'label_to_match': 'pod', 'labels_to_get': ['node']},
+        '9': {'label_to_match': 'pod', 'labels_to_get': ['node']},
+    }
+    mocked_prometheus_scraper_config['label_to_hostname'] = 'node'
+    mocked_prometheus_scraper_config['metrics_mapper'] = {'kube_pod_status_ready': 'pod.ready'}
+
+    @benchmark
+    def run_check():
+        # dry run to build mapping
+        check.process(mocked_prometheus_scraper_config)
+        # run with submit
+        check.process(mocked_prometheus_scraper_config)
+
+
+def test_label_to_match_multiple(benchmark, mocked_prometheus_check, mocked_prometheus_scraper_config, mock_get):
+    """ Tests label join and hostname override on a metric """
+    check = mocked_prometheus_check
+    mocked_prometheus_scraper_config['namespace'] = 'ksm'
+    mocked_prometheus_scraper_config['label_joins'] = {
+        'kube_pod_info': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+        '1': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+        '2': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+        '3': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+        '4': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+        '5': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+        '6': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+        '7': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+        '8': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+        '9': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+    }
+    mocked_prometheus_scraper_config['label_to_hostname'] = 'node'
+    mocked_prometheus_scraper_config['metrics_mapper'] = {'kube_pod_status_ready': 'pod.ready'}
+
+    @benchmark
+    def run_check():
+        # dry run to build mapping
+        check.process(mocked_prometheus_scraper_config)
+        # run with submit
+        check.process(mocked_prometheus_scraper_config)
 
 
 def test_health_service_check_ok(mock_get, aggregator, mocked_prometheus_check, mocked_prometheus_scraper_config):

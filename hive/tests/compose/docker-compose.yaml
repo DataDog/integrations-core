@@ -29,8 +29,8 @@ services:
     environment:
       HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: "jdbc:derby"
       SERVICE_PRECONDITION: "namenode:50070 datanode:50075"
-      JMX_METASTORE: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=8808"
-      JMX_HIVESERVER: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=8809"
+      JMX_METASTORE: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=8808 -Dcom.sun.management.jmxremote.rmi.port=8808 -Djava.rmi.server.hostname=localhost"
+      JMX_HIVESERVER: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=8809 -Dcom.sun.management.jmxremote.rmi.port=8809 -Djava.rmi.server.hostname=localhost"
     ports:
       - "10000:10000"
       - "10002:10002"

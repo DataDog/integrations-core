@@ -132,7 +132,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][13
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][13].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][14].
 
 | Parameter      | Value                                                  |
 | -------------- | ------------------------------------------------------ |
@@ -177,8 +177,8 @@ Additional helpful documentation, links, and articles:
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/activemq/metadata.csv
-[10]: https://docs.datadoghq.com/help
+[10]: https://docs.datadoghq.com/help/
 [11]: https://www.datadoghq.com/blog/activemq-architecture-and-metrics
 [12]: https://www.datadoghq.com/blog/monitor-activemq-metrics-performance
-[13]: https://docs.datadoghq.com/agent/autodiscovery/integrations
-[14]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#setup
+[13]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[14]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup

@@ -7,10 +7,9 @@ from collections import OrderedDict, defaultdict
 
 from six import iteritems
 
-from datadog_checks.base.stubs.common import HistogramBucketStub, MetricStub, ServiceCheckStub
-from datadog_checks.base.stubs.similar import build_similar_elements_msg
-
 from ..utils.common import ensure_unicode, to_native_string
+from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
+from .similar import build_similar_elements_msg
 
 
 def normalize_tags(tags, sort=False):
@@ -26,8 +25,12 @@ def normalize_tags(tags, sort=False):
 
 class AggregatorStub(object):
     """
-    Mainly used for unit testing checks, this stub makes possible to execute
-    a check without a running Agent.
+    This implements the methods defined by the Agent's
+    [C bindings](https://github.com/DataDog/datadog-agent/blob/master/rtloader/common/builtins/aggregator.c)
+    which in turn call the
+    [Go backend](https://github.com/DataDog/datadog-agent/blob/master/pkg/collector/python/aggregator.go).
+
+    It also provides utility methods for test assertions.
     """
 
     # Replicate the Enum we have on the Agent
@@ -42,6 +45,7 @@ class AggregatorStub(object):
             ('historate', 6),
         )
     )
+    METRIC_ENUM_MAP_REV = {v: k for k, v in iteritems(METRIC_ENUM_MAP)}
     GAUGE, RATE, COUNT, MONOTONIC_COUNT, COUNTER, HISTOGRAM, HISTORATE = list(METRIC_ENUM_MAP.values())
     AGGREGATE_TYPES = {COUNT, COUNTER}
     IGNORED_METRICS = {'datadog.agent.profile.memory.check_run_alloc'}
@@ -223,7 +227,7 @@ class AggregatorStub(object):
             if expected_tags and expected_tags != sorted(metric.tags):
                 continue
 
-            if hostname and hostname != metric.hostname:
+            if hostname is not None and hostname != metric.hostname:
                 continue
 
             if metric_type is not None and metric_type != metric.type:
@@ -301,6 +305,45 @@ class AggregatorStub(object):
             msg += '\nMissing Metrics:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
         assert condition, msg
 
+    def assert_metrics_using_metadata(self, metadata_metrics, check_metric_type=True, exclude=None):
+        """
+        Assert metrics using metadata.csv
+
+        Checking type: Since we are asserting the in-app metric type (NOT submission type),
+        asserting the type make sense only for e2e (metrics collected from agent).
+        For integration tests, set kwarg `check_metric_type=False`.
+
+        Usage:
+
+            from datadog_checks.dev.utils import get_metadata_metrics
+            aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+        """
+
+        exclude = exclude or []
+        errors = set()
+        for metric_name, metric_stubs in iteritems(self._metrics):
+            if metric_name in exclude:
+                continue
+            for metric_stub in metric_stubs:
+
+                if metric_stub.name not in metadata_metrics:
+                    errors.add("Expect `{}` to be in metadata.csv.".format(metric_stub.name))
+                    continue
+
+                if check_metric_type:
+                    expected_metric_type = metadata_metrics[metric_stub.name]['metric_type']
+                    actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
+
+                    if expected_metric_type != actual_metric_type:
+                        errors.add(
+                            "Expect `{}` to have type `{}` but got `{}`.".format(
+                                metric_stub.name, expected_metric_type, actual_metric_type
+                            )
+                        )
+
+        assert not errors, "Metadata assertion errors using metadata.csv:" + "\n\t- ".join([''] + sorted(errors))
+
     def assert_no_duplicate_all(self):
         """
         Assert no duplicate metrics and service checks have been submitted.
@@ -313,10 +356,11 @@ class AggregatorStub(object):
         Assert no duplicate metrics have been submitted.
 
         Metrics are considered duplicate when all following fields match:
-            - metric name
-            - type (gauge, rate, etc)
-            - tags
-            - hostname
+
+        - metric name
+        - type (gauge, rate, etc)
+        - tags
+        - hostname
         """
         # metric types that intended to be called multiple times are ignored
         ignored_types = [self.COUNT, self.MONOTONIC_COUNT, self.COUNTER]

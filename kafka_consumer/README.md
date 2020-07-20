@@ -69,9 +69,9 @@ The Kafka-consumer check does not include any service checks.
 [116]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
 [117]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [118]: https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/metadata.csv
-[119]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka
-[1110]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub
-[1111]: https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application
+[119]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
+[1110]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub/
+[1111]: https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application/
 [1112]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
 [1113]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [1114]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog

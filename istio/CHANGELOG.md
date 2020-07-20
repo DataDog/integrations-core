@@ -1,5 +1,37 @@
 # CHANGELOG - istio
 
+## 3.4.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+
+## 3.3.0 / 2020-06-09
+
+* [Added] Enable `send_monotonic_with_gauge` to submit mesh metrics as monotonic counts. See [#5707](https://github.com/DataDog/integrations-core/pull/5707).
+
+## 3.2.1 / 2020-05-22
+
+* [Fixed] Remove `destination_service` and `source_workload` from label blacklist. See [#6712](https://github.com/DataDog/integrations-core/pull/6712).
+
+## 3.2.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Add TCP mesh metrics mapping. See [#6466](https://github.com/DataDog/integrations-core/pull/6466).
+
+## 3.1.0 / 2020-04-23
+
+* [Added] Add autodiscovery config and default tag exclusion. See [#6375](https://github.com/DataDog/integrations-core/pull/6375).
+* [Added] Support istiod metrics. See [#6426](https://github.com/DataDog/integrations-core/pull/6426).
+* [Added] Refactor to support different versions of istio. See [#6360](https://github.com/DataDog/integrations-core/pull/6360).
+* [Added] Add configuration template spec. See [#6320](https://github.com/DataDog/integrations-core/pull/6320).
+* [Added] Refactor check and support new Agent signature. See [#6341](https://github.com/DataDog/integrations-core/pull/6341).
+
+## 3.0.0 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Do not fail on octet stream content type for OpenMetrics. See [#5843](https://github.com/DataDog/integrations-core/pull/5843).
+* [Changed] Blacklist metric `mcp_source.request_acks_total` due to high cardinality. See [#6185](https://github.com/DataDog/integrations-core/pull/6185).
+
 ## 2.4.2 / 2019-08-26
 
 * [Fixed] Blacklist `galley_mcp_source_message_size_bytes` histogram. See [#4433](https://github.com/DataDog/integrations-core/pull/4433).

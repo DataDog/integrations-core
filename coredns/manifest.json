@@ -15,7 +15,8 @@
   "categories": [
     "containers",
     "network",
-    "autodiscovery"
+    "autodiscovery",
+    "log collection"
   ],
   "type": "check",
   "aliases": [],

@@ -4,7 +4,7 @@
 
 import os.path
 
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 HOST = get_docker_hostname()
 PORT = '1978'

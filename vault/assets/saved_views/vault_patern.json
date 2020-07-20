@@ -1,0 +1,9 @@
+{ 
+  "name": "Vault patterns",
+  "type": "logs",
+  "page": "patterns",
+  "query": "source:vault",
+  "timerange": {
+    "interval_ms": 3600000
+  }
+}

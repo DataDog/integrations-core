@@ -4,7 +4,28 @@
 		"preread": "2017-11-23T09:26:37.501577422Z",
 		"num_procs": 0,
 		"pids_stats": {},
-		"network": {},
+		"networks": {
+            "eth0": {
+                "rx_bytes": 5338,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 36,
+                "tx_bytes": 648,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 8
+            },
+            "eth5": {
+                "rx_bytes": 4641,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 26,
+                "tx_bytes": 690,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 9
+            }
+        },
 		"memory_stats": {
 			"stats": {
 				"cache": 794624,
@@ -103,13 +124,24 @@
 			"throttling_data": {}
 		},
 		"storage_stats": {}
-	},
-	"c912d0f0f204360ee90ce67c0d083c3514975f149b854f38a48deac611e82e48": {
+    },
+    "c912d0f0f204360ee90ce67c0d083c3514975f149b854f38a48deac611e82e48": {
 		"read": "2017-11-23T09:26:38.507160628Z",
 		"preread": "2017-11-23T09:26:37.507043806Z",
 		"num_procs": 0,
 		"pids_stats": {},
-		"network": {},
+		"networks": {
+            "eth1": {
+                "rx_bytes": 268836870,
+                "rx_packets": 181745,
+                "rx_errors": 0,
+                "rx_dropped": 0,
+                "tx_bytes": 455081,
+                "tx_packets": 5815,
+                "tx_errors": 0,
+                "tx_dropped": 0
+            }
+        },
 		"memory_stats": {
 			"stats": {
 				"cache": 6496256,

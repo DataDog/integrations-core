@@ -1,5 +1,22 @@
 # CHANGELOG - dns_check
 
+## 1.7.0 / 2020-06-29
+
+* [Added] Refactor and remove legacy hack for Agent 5's build system. See [#6682](https://github.com/DataDog/integrations-core/pull/6682).
+
+## 1.6.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Add config spec. See [#6560](https://github.com/DataDog/integrations-core/pull/6560).
+
+## 1.5.2 / 2020-04-24
+
+* [Fixed] Fix missing `time.clock` attribute in Python 3.8. See [#6478](https://github.com/DataDog/integrations-core/pull/6478).
+
+## 1.5.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.5.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).

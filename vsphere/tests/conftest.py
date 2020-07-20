@@ -5,7 +5,19 @@ import os
 
 import pytest
 from mock import MagicMock, Mock, patch
-from tests.mocked_api import MockedAPI, mock_http_rest_api
+
+from .common import LAB_INSTANCE
+from .mocked_api import MockedAPI, mock_http_rest_api
+
+try:
+    from contextlib import ExitStack
+except ImportError:
+    from contextlib2 import ExitStack
+
+
+@pytest.fixture(scope='session')
+def dd_environment():
+    yield LAB_INSTANCE
 
 
 @pytest.fixture()
@@ -35,15 +47,36 @@ def historical_instance():
     }
 
 
+@pytest.fixture()
+def events_only_instance():
+    return {
+        'use_legacy_check_version': False,
+        'host': os.environ.get('VSPHERE_URL', 'FAKE'),
+        'username': os.environ.get('VSPHERE_USERNAME', 'FAKE'),
+        'password': os.environ.get('VSPHERE_PASSWORD', 'FAKE'),
+        'ssl_verify': False,
+        'collect_events_only': True,
+    }
+
+
 @pytest.fixture
 def mock_type():
-    with patch('datadog_checks.vsphere.cache.type') as cache_type, patch(
-        'datadog_checks.vsphere.utils.type'
-    ) as utils_type, patch('datadog_checks.vsphere.vsphere.type') as vsphere_type:
+    """
+    mock the result of the `type` built-in function to work on mock.MagicMock().
+    Without the fixture, type(MagicMock(spec=int)) = MagicMock
+    With the fixture, type(MagicMock(spec=int)) = int
+    """
+    paths = [
+        'datadog_checks.vsphere.cache.type',
+        'datadog_checks.vsphere.utils.type',
+        'datadog_checks.vsphere.vsphere.type',
+        'datadog_checks.vsphere.api_rest.type',
+    ]
+    with ExitStack() as stack:
         new_type_function = lambda x: x.__class__ if isinstance(x, Mock) else type(x)  # noqa: E731
-        cache_type.side_effect = new_type_function
-        utils_type.side_effect = new_type_function
-        vsphere_type.side_effect = new_type_function
+        for path in paths:
+            type_function = stack.enter_context(patch(path))
+            type_function.side_effect = new_type_function
         yield
 
 

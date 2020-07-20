@@ -147,7 +147,7 @@ instances:
     ## a domain that is used in the check. For NTLM Auth, append
     ## the username to domain, not as the `username` parameter.
     #
-    # ntlm_domain: <NTLM_DOMAIN>/<USERNAME>
+    # ntlm_domain: <NTLM_DOMAIN>\<USERNAME>
 
     ## @param kerberos_auth - string - optional - default: disabled
     ## If your services use Kerberos authentication, you can specify the Kerberos
@@ -161,8 +161,14 @@ instances:
     #
     # kerberos_auth: disabled
 
+    ## @param kerberos_cache - string - optional
+    ## Sets the KRB5CCNAME environment variable.
+    ## It should point to a credential cache with a valid TGT.
+    #
+    # kerberos_cache: <KERBEROS_CACHE>
+
     ## @param kerberos_delegate - boolean - optional - default: false
-    ## Set to `true` to enable kerberos delegation of credentials to a server that requests delegation.
+    ## Set to `true` to enable Kerberos delegation of credentials to a server that requests delegation.
     ##
     ## See https://github.com/requests/requests-kerberos#delegation
     #
@@ -178,7 +184,7 @@ instances:
 
     ## @param kerberos_hostname - string - optional
     ## Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't
-    ## match its kerberos hostname (e.g. behind a content switch or load balancer).
+    ## match its Kerberos hostname (e.g. behind a content switch or load balancer).
     ##
     ## See https://github.com/requests/requests-kerberos#hostname-override
     #
@@ -198,14 +204,14 @@ instances:
     # kerberos_keytab: <KEYTAB_FILE_PATH>
 
     ## @param aws_region - string - optional
-    ## If your services require AWS Signature Version 4 Signing, set the region.
+    ## If your services require AWS Signature Version 4 signing, set the region.
     ##
     ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
     #
     # aws_region: <AWS_REGION>
 
     ## @param aws_host - string - optional
-    ## If your services require AWS Signature Version 4 Signing, set the host.
+    ## If your services require AWS Signature Version 4 signing, set the host.
     ##
     ## Note that this setting is not necessary for official integrations.
     ##
@@ -214,7 +220,7 @@ instances:
     # aws_host: <AWS_HOST>
 
     ## @param aws_service - string - optional
-    ## If your services require AWS Signature Version 4 Signing, set the service code. For a list
+    ## If your services require AWS Signature Version 4 signing, set the service code. For a list
     ## of available service codes, see https://docs.aws.amazon.com/general/latest/gr/rande.html
     ##
     ## Note that this setting is not necessary for official integrations.
@@ -228,9 +234,18 @@ instances:
     #
     # tls_verify: true
 
+    ## @param tls_use_host_header - boolean - optional - default: false
+    ## If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
+    #
+    # tls_use_host_header: false
+
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
+    ##
+    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
+    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
+    ## to true.
     #
     # tls_ignore_warning: false
 
@@ -335,11 +350,10 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs
+## source  - required - Attribute that defines which Integration sent the logs.
 ## service - required - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
-## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
-## tags - optional - Add tags to the collected logs
+## tags - optional - Add tags to the collected logs.
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #

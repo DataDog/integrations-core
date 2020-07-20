@@ -37,6 +37,7 @@ redis.mem.overhead,gauge,,byte,,Sum of all overheads allocated by Redis for mana
 redis.net.clients,gauge,,connection,,The number of connected clients (excluding slaves).,0,redis,clients
 redis.net.commands,gauge,,command,,The number of commands processed by the server.,0,redis,net commands
 redis.net.commands.instantaneous_ops_per_sec,gauge,,command,second,The number of commands processed by the server per second.,0,redis,net commands
+redis.net.connections,gauge,,connection,,The number of connections tagged by client name.,0,redis,connections
 redis.net.rejected,gauge,,connection,,The number of rejected connections.,-1,redis,net rejected
 redis.net.slaves,gauge,,connection,,The number of connected slaves.,0,redis,slaves
 redis.net.maxclients,gauge,,connection,,The maximum number of connected clients.,0,redis,maxclients

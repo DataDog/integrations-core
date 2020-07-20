@@ -23,6 +23,9 @@
   "type": "check",
   "integration_id": "cisco-aci",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json"

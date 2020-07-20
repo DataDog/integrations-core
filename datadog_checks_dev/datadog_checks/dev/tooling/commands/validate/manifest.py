@@ -7,10 +7,11 @@ import re
 import uuid
 
 import click
+import requests
 
 from ....utils import file_exists, read_file, write_file
 from ...constants import get_root
-from ...utils import parse_version_parts
+from ...utils import get_metadata_file, parse_version_parts, read_metadata_rows
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_warning
 
 REQUIRED_ATTRIBUTES = {
@@ -31,6 +32,8 @@ REQUIRED_ATTRIBUTES = {
     'type',
 }
 
+FIELDS_NOT_ALLOWED_TO_CHANGE = ["integration_id", "display_name", "guid"]
+
 REQUIRED_ASSET_ATTRIBUTES = {'monitors', 'dashboards', 'service_checks'}
 
 OPTIONAL_ATTRIBUTES = {
@@ -44,25 +47,64 @@ OPTIONAL_ATTRIBUTES = {
     'process_signatures',
 }
 
+METRIC_TO_CHECK_WHITELIST = {
+    'openstack.controller',  # "Artificial" metric, shouldn't be listed in metadata file.
+    'riakcs.bucket_list_pool.workers',  # RiakCS 2.1 metric, but metadata.csv lists RiakCS 2.0 metrics only.
+}
+
 ALL_ATTRIBUTES = REQUIRED_ATTRIBUTES | OPTIONAL_ATTRIBUTES
 
 INTEGRATION_ID_REGEX = r'^[a-z][a-z0-9-]{0,254}(?<!-)$'
 
 
+def is_metric_in_metadata_file(metric, check):
+    """
+    Return True if `metric` is listed in the check's `metadata.csv` file, False otherwise.
+    """
+    metadata_file = get_metadata_file(check)
+    for _, row in read_metadata_rows(metadata_file):
+        if row['metric_name'] == metric:
+            return True
+    return False
+
+
+def get_original_manifest_field(check_name, field_to_check, repo_url, manifests_from_master):
+    repo_url = f'{repo_url}/{check_name}/manifest.json'
+    if manifests_from_master.get(check_name):
+        data = manifests_from_master.get(check_name)
+    else:
+        data = requests.get(repo_url.format(check_name))
+        manifests_from_master[check_name] = data
+
+    if data.status_code == 404:
+        # This integration isn't on the provided repo yet, so it's field can change
+        return None
+
+    data.raise_for_status()
+    decoded_master = data.json()
+    return decoded_master.get(field_to_check)
+
+
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `manifest.json` files')
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
-@click.option('--include-extras', '-i', is_flag=True, help='Include optional fields')
+@click.option('--include-extras', '-i', is_flag=True, help='Include optional fields, and extra validations')
+@click.option(
+    '--repo_url', '-r', help='The raw github URL to the base of the repository to compare manifest fields against'
+)
 @click.pass_context
-def manifest(ctx, fix, include_extras):
+def manifest(ctx, fix, include_extras, repo_url):
     """Validate `manifest.json` files."""
     all_guids = {}
+    raw_gh_url = 'https://raw.githubusercontent.com/DataDog/{}/master/'
 
     root = get_root()
     is_extras = ctx.obj['repo_choice'] == 'extras'
-
+    formatted_repo_url = repo_url or raw_gh_url.format(os.path.basename(root))
     ok_checks = 0
     failed_checks = 0
     fixed_checks = 0
+    manifests_from_master = {}
+
     echo_info("Validating all manifest.json files...")
     for check_name in sorted(os.listdir(root)):
         manifest_file = os.path.join(root, check_name, 'manifest.json')
@@ -254,6 +296,15 @@ def manifest(ctx, fix, include_extras):
                 file_failures += 1
                 display_queue.append((echo_failure, '  should contain 80 characters maximum: short_description'))
 
+            # metric_to_check
+            metric_to_check = decoded.get('metric_to_check')
+            if metric_to_check:
+                metrics_to_check = metric_to_check if isinstance(metric_to_check, list) else [metric_to_check]
+                for metric in metrics_to_check:
+                    if not is_metric_in_metadata_file(metric, check_name) and metric not in METRIC_TO_CHECK_WHITELIST:
+                        file_failures += 1
+                        display_queue.append((echo_failure, f'  metric_to_check not in metadata.csv: {metric!r}'))
+
             # support
             correct_support = 'contrib' if is_extras else 'core'
             support = decoded.get('support')
@@ -273,6 +324,27 @@ def manifest(ctx, fix, include_extras):
                     display_queue.append((echo_failure, output))
 
             if include_extras:
+                # Ensure attributes haven't changed
+                for field in FIELDS_NOT_ALLOWED_TO_CHANGE:
+                    original_value = get_original_manifest_field(
+                        check_name, field, formatted_repo_url, manifests_from_master
+                    )
+                    output = f'Attribute `{field}` is not allowed to be modified.'
+                    if original_value and original_value != decoded.get(field):
+                        file_failures += 1
+                        if fix:
+                            decoded[field] = original_value
+                            file_failures -= 1
+                            file_fixed = True
+                            display_queue.append((echo_warning, output))
+                            display_queue.append((echo_success, f'  original {field}: {original_value}'))
+                        else:
+                            output += f" Please use the existing value: {original_value}"
+                            display_queue.append((echo_failure, output))
+                    elif not original_value:
+                        output = f"  No existing field on default branch: {field}"
+                        display_queue.append((echo_warning, output))
+
                 # supported_os
                 supported_os = decoded.get('supported_os')
                 if not supported_os or not isinstance(supported_os, list):
@@ -290,20 +362,6 @@ def manifest(ctx, fix, include_extras):
                 if not public_title or not isinstance(public_title, str):
                     file_failures += 1
                     display_queue.append((echo_failure, '  required non-null string: public_title'))
-                else:
-                    title_start = 'Datadog-'
-                    title_end = ' Integration'
-                    section_char_set = set(public_title[len(title_start) : -len(title_end)].lower())
-                    check_name_char_set = set(check_name.lower())
-                    character_overlap = check_name_char_set & section_char_set
-
-                    correct_start = public_title.startswith(title_start)
-                    correct_end = public_title.endswith(title_end)
-                    overlap_enough = len(character_overlap) > int(len(check_name_char_set) * 0.5)
-
-                    if not (correct_start and correct_end and overlap_enough):
-                        file_failures += 1
-                        display_queue.append((echo_failure, f'  invalid `public_title`: {public_title}'))
 
                 # categories
                 categories = decoded.get('categories')

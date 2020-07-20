@@ -103,9 +103,9 @@ SAP HANA does not include any events.
 Need help? Contact [Datadog support][7].
 
 [1]: https://www.sap.com/products/hana.html
-[2]: https://docs.datadoghq.com/agent
+[2]: https://docs.datadoghq.com/agent/
 [3]: https://github.com/DataDog/integrations-core/blob/master/sap_hana/datadog_checks/sap_hana/data/conf.yaml.example
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-restart-the-agent
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/sap_hana/metadata.csv
-[7]: https://docs.datadoghq.com/help
+[7]: https://docs.datadoghq.com/help/

@@ -1,5 +1,20 @@
 # CHANGELOG - Ambari
 
+## 1.4.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+
+## 1.3.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Add config spec. See [#6307](https://github.com/DataDog/integrations-core/pull/6307).
+
+## 1.2.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 1.2.0 / 2019-12-02
 
 * [Added] Standardize logging format. See [#4898](https://github.com/DataDog/integrations-core/pull/4898).

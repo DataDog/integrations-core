@@ -7,8 +7,8 @@ from copy import deepcopy
 
 from six import iteritems
 
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.utils.tagging import tagger
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 
 from .common import get_pod_by_uid, is_static_pending_pod, replace_container_rt_prefix
 
@@ -39,6 +39,7 @@ class CadvisorPrometheusScraperMixin(object):
             'container_cpu_load_average_10s': self.container_cpu_load_average_10s,
             'container_cpu_system_seconds_total': self.container_cpu_system_seconds_total,
             'container_cpu_user_seconds_total': self.container_cpu_user_seconds_total,
+            'container_cpu_cfs_periods_total': self.container_cpu_cfs_periods_total,
             'container_cpu_cfs_throttled_periods_total': self.container_cpu_cfs_throttled_periods_total,
             'container_cpu_cfs_throttled_seconds_total': self.container_cpu_cfs_throttled_seconds_total,
             'container_fs_reads_bytes_total': self.container_fs_reads_bytes_total,
@@ -74,7 +75,6 @@ class CadvisorPrometheusScraperMixin(object):
                 # so the key is different than the kubelet scraper.
                 'prometheus_url': instance.get('cadvisor_metrics_endpoint', 'dummy_url/cadvisor'),
                 'ignore_metrics': [
-                    'container_cpu_cfs_periods_total',
                     'container_fs_inodes_free',
                     'container_fs_inodes_total',
                     'container_fs_io_current',
@@ -302,11 +302,6 @@ class CadvisorPrometheusScraperMixin(object):
             if self.pod_list_utils.is_excluded(c_id, pod_uid):
                 continue
 
-            tags = tagger.tag(replace_container_rt_prefix(c_id), tagger.HIGH)
-            if not tags:
-                continue
-            tags += scraper_config['custom_tags']
-
             # FIXME we are forced to do that because the Kubelet PodList isn't updated
             # for static pods, see https://github.com/kubernetes/kubernetes/pull/59948
             pod = self._get_pod_by_metric_label(sample[self.SAMPLE_LABELS])
@@ -314,9 +309,14 @@ class CadvisorPrometheusScraperMixin(object):
                 pod_tags = tagger.tag('kubernetes_pod_uid://%s' % pod["metadata"]["uid"], tagger.HIGH)
                 if not pod_tags:
                     continue
-                tags += pod_tags
-                tags += self._get_kube_container_name(sample[self.SAMPLE_LABELS])
-                tags = list(set(tags))
+                pod_tags += self._get_kube_container_name(sample[self.SAMPLE_LABELS])
+                tags = list(set(pod_tags))
+            else:
+                tags = tagger.tag(replace_container_rt_prefix(c_id), tagger.HIGH)
+
+            if not tags:
+                continue
+            tags += scraper_config['custom_tags']
 
             for label in labels:
                 value = sample[self.SAMPLE_LABELS].get(label)
@@ -466,6 +466,10 @@ class CadvisorPrometheusScraperMixin(object):
 
     def container_cpu_user_seconds_total(self, metric, scraper_config):
         metric_name = scraper_config['namespace'] + '.cpu.user.total'
+        self._process_container_metric('rate', metric_name, metric, scraper_config)
+
+    def container_cpu_cfs_periods_total(self, metric, scraper_config):
+        metric_name = scraper_config['namespace'] + '.cpu.cfs.periods'
         self._process_container_metric('rate', metric_name, metric, scraper_config)
 
     def container_cpu_cfs_throttled_periods_total(self, metric, scraper_config):

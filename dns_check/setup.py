@@ -19,8 +19,12 @@ with open(path.join(HERE, "datadog_checks", "dns_check", "__about__.py")) as f:
     exec(f.read(), ABOUT)
 
 
-def get_requirements(fpath):
-    with open(path.join(HERE, fpath), encoding='utf-8') as f:
+def get_dependencies():
+    dep_file = path.join(HERE, 'requirements.in')
+    if not path.isfile(dep_file):
+        return []
+
+    with open(dep_file, encoding='utf-8') as f:
         return f.readlines()
 
 
@@ -54,6 +58,7 @@ setup(
     packages=['datadog_checks.dns_check'],
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
+    extras_require={'deps': get_dependencies()},
     # Extra files to ship with the wheel package
     include_package_data=True,
 )

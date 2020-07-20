@@ -6,8 +6,8 @@ import os
 import mock
 import pytest
 
+from datadog_checks.base.utils.common import ensure_unicode
 from datadog_checks.kubernetes_state import KubernetesState
-from datadog_checks.utils.common import ensure_unicode
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIXTURES_PATH = os.path.join(HERE, 'fixtures')
@@ -231,14 +231,35 @@ def mock_from_file(fname):
 
 @pytest.fixture
 def instance():
-    return {'host': 'foo', 'kube_state_url': 'http://foo', 'tags': ['optional:tag1'], 'telemetry': False}
+    return {
+        'host': 'foo',
+        'kube_state_url': 'http://foo',
+        'tags': ['optional:tag1'],
+        'telemetry': False,
+    }
+
+
+def _check(instance, mock_file="prometheus.txt"):
+    check = KubernetesState(CHECK_NAME, {}, [instance])
+    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file(mock_file), 'text/plain'))
+    return check
 
 
 @pytest.fixture
 def check(instance):
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
-    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
-    return check
+    return _check(instance)
+
+
+@pytest.fixture
+def check_with_join_kube_labels(instance):
+    instance['join_kube_labels'] = True
+    return _check(instance)
+
+
+@pytest.fixture
+def check_with_join_standard_tag_labels(instance,):
+    instance['join_standard_tags'] = True
+    return _check(instance=instance, mock_file="ksm-standard-tags-gke.txt")
 
 
 def assert_not_all_zeroes(aggregator, metric_name):
@@ -316,6 +337,12 @@ def test_update_kube_state_metrics(aggregator, instance, check):
         tags=['storageclass:local-data', 'phase:bound', 'optional:tag1'],
         value=2,
     )
+    # No storage class
+    aggregator.assert_metric(
+        NAMESPACE + '.persistentvolumes.by_phase',
+        tags=['storageclass:unknown', 'phase:bound', 'optional:tag1'],
+        value=1,
+    )
     aggregator.assert_metric(
         NAMESPACE + '.persistentvolumes.by_phase',
         tags=['storageclass:local-data', 'phase:failed', 'optional:tag1'],
@@ -361,6 +388,167 @@ def test_update_kube_state_metrics_v040(aggregator, instance, check):
     # assert resourcequota_was_collected(aggregator)
 
 
+def test_join_kube_labels(aggregator, instance, check_with_join_kube_labels):
+    # run check twice to have pod/node mapping
+    for _ in range(2):
+        check_with_join_kube_labels.check(instance)
+
+    aggregator.assert_metric(
+        NAMESPACE + '.container.ready',
+        tags=[
+            'container:kube-state-metrics',
+            'kube_container_name:kube-state-metrics',
+            'kube_namespace:default',
+            'label_app:kube-state-metrics',
+            'label_pod_template_hash:639670438',
+            'label_release:jaundiced-numbat',
+            'namespace:default',
+            'node:minikube',
+            'optional:tag1',
+            'phase:running',
+            'pod:jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj',
+            'pod_name:jaundiced-numbat-kube-state-metrics-b7fbc487d-4phhj',
+            'pod_phase:running',
+        ],
+        value=1,
+    )
+    aggregator.assert_metric(
+        NAMESPACE + '.deployment.replicas',
+        tags=[
+            'deployment:jaundiced-numbat-kube-state-metrics',
+            'kube_deployment:jaundiced-numbat-kube-state-metrics',
+            'kube_namespace:default',
+            'label_app:kube-state-metrics',
+            'label_chart:kube-state-metrics-0.3.1',
+            'label_heritage:tiller',
+            'label_release:jaundiced-numbat',
+            'namespace:default',
+            'optional:tag1',
+        ],
+        value=1,
+    )
+
+
+def test_join_standard_tags_labels(aggregator, instance, check_with_join_standard_tag_labels):
+    # run check twice to have pod/node mapping
+    for _ in range(2):
+        check_with_join_standard_tag_labels.check(instance)
+
+    # Pod standard tags
+    aggregator.assert_metric(
+        NAMESPACE + '.container.ready',
+        tags=[
+            'container:master',
+            'kube_container_name:master',
+            'kube_namespace:default',
+            'namespace:default',
+            'optional:tag1',
+            'node:gke-abcdef-cluster-default-pool-53c8a4ea-z9rw',
+            'phase:running',
+            'pod:redis-599d64fcb9-c654j',
+            'pod_name:redis-599d64fcb9-c654j',
+            'pod_phase:running',
+            "env:dev",
+            "service:redis",
+            "version:v1",
+        ],
+        value=1,
+    )
+
+    # Deployment standard tags
+    aggregator.assert_metric(
+        NAMESPACE + '.deployment.replicas',
+        tags=[
+            'deployment:redis',
+            'kube_deployment:redis',
+            'kube_namespace:default',
+            'namespace:default',
+            'optional:tag1',
+            "env:dev",
+            "service:redis",
+            "version:v1",
+        ],
+        value=1,
+    )
+
+    # ReplicaSet standard tags
+    aggregator.assert_metric(
+        NAMESPACE + '.replicaset.replicas_ready',
+        tags=[
+            'replicaset:redis-599d64fcb9',
+            'kube_replica_set:redis-599d64fcb9',
+            'kube_namespace:default',
+            'namespace:default',
+            'optional:tag1',
+            "env:dev",
+            "service:redis",
+            "version:v1",
+        ],
+        value=1,
+    )
+
+    # Daemonset standard tags
+    aggregator.assert_metric(
+        NAMESPACE + '.daemonset.desired',
+        tags=[
+            'daemonset:datadog-monitoring',
+            'kube_daemon_set:datadog-monitoring',
+            'kube_namespace:default',
+            'namespace:default',
+            'optional:tag1',
+            "env:dev",
+            "service:datadog-agent",
+            "version:7",
+        ],
+        value=3,
+    )
+
+    # StatefulSet standard tags
+    aggregator.assert_metric(
+        NAMESPACE + '.statefulset.replicas_ready',
+        tags=[
+            'statefulset:web',
+            'kube_namespace:default',
+            'namespace:default',
+            'optional:tag1',
+            "env:dev",
+            "service:web",
+            "version:v1",
+        ],
+        value=2,
+    )
+
+    # Job standard tags
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded',
+        tags=[
+            'job_name:curl-job',
+            'kube_namespace:default',
+            'namespace:default',
+            'optional:tag1',
+            "env:dev",
+            "service:curl-job",
+            "version:v1",
+        ],
+        value=1,
+    )
+
+    # CronJob standard tags
+    aggregator.assert_metric(
+        NAMESPACE + '.job.succeeded',
+        tags=[
+            'job_name:curl-cron-job',
+            'kube_namespace:default',
+            'namespace:default',
+            'optional:tag1',
+            "env:dev",
+            "service:curl-cron-job",
+            "version:v1",
+        ],
+        value=1,
+    )
+
+
 def test_join_custom_labels(aggregator, instance, check):
     instance['label_joins'] = {
         'kube_deployment_labels': {
@@ -389,12 +577,12 @@ def test_join_custom_labels(aggregator, instance, check):
 
 def test_disabling_hostname_override(instance):
     endpoint = instance['kube_state_url']
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     scraper_config = check.config_map[endpoint]
     assert scraper_config['label_to_hostname'] == "node"
 
     instance["hostname_override"] = False
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     scraper_config = check.config_map[endpoint]
     assert scraper_config['label_to_hostname'] is None
 
@@ -427,7 +615,7 @@ def test_extract_timestamp(check):
 
 
 def test_job_counts(aggregator, instance):
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     payload = mock_from_file("prometheus.txt")
     check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
 
@@ -549,7 +737,7 @@ def test_job_counts(aggregator, instance):
 
 def test_keep_ksm_labels_desactivated(aggregator, instance):
     instance['keep_ksm_labels'] = False
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
     check.check(instance)
     for _ in range(2):
@@ -560,7 +748,7 @@ def test_keep_ksm_labels_desactivated(aggregator, instance):
 
 
 def test_experimental_labels(aggregator, instance):
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
     for _ in range(2):
         check.check(instance)
@@ -568,7 +756,7 @@ def test_experimental_labels(aggregator, instance):
     assert aggregator.metrics(NAMESPACE + '.hpa.spec_target_metric') == []
 
     instance['experimental_metrics'] = True
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
     for _ in range(2):
         check.check(instance)
@@ -591,7 +779,7 @@ def test_telemetry(aggregator, instance):
     instance['telemetry'] = True
     instance['experimental_metrics'] = True
 
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
 
     endpoint = instance['kube_state_url']
@@ -600,9 +788,9 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=90707.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=914.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1288.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=91486.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=926.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1300.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=374.0)
     aggregator.assert_metric(

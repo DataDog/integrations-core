@@ -9,7 +9,7 @@ import mock
 # project
 from datadog_checks.btrfs import BTRFS
 
-btrfs_check = BTRFS('btrfs', {}, {})
+btrfs_check = BTRFS('btrfs', {}, [{}])
 
 
 def mock_get_usage():

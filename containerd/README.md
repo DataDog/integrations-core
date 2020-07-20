@@ -82,6 +82,6 @@ The Containerd Check can collect events. Use `filters` to select the relevant ev
 Need help? Contact [Datadog support][2].
 
 [1]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/containerd.d/conf.yaml.example
-[2]: https://docs.datadoghq.com/help
+[2]: https://docs.datadoghq.com/help/
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://github.com/DataDog/integrations-core/blob/master/containerd/metadata.csv

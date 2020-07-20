@@ -1,5 +1,19 @@
 # CHANGELOG - iis
 
+## 2.10.0 / 2020-06-29
+
+* [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
+
+## 2.9.0 / 2020-05-17
+
+* [Added] Monitor application pools. See [#6549](https://github.com/DataDog/integrations-core/pull/6549).
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 2.8.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 2.8.0 / 2019-12-02
 
 * [Added] Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).

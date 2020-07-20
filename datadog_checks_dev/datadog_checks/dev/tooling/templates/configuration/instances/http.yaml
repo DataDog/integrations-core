@@ -83,7 +83,7 @@
   description: The password to use if services are behind basic or NTLM auth.
 - name: ntlm_domain
   value:
-    example: <NTLM_DOMAIN>/<USERNAME>
+    example: <NTLM_DOMAIN>\<USERNAME>
     type: string
   description: |
     If your services use NTLM authentication, you can specify
@@ -102,12 +102,18 @@
       - disabled
 
     See https://github.com/requests/requests-kerberos#mutual-authentication
+- name: kerberos_cache
+  value:
+    type: string
+  description: |
+    Sets the KRB5CCNAME environment variable.
+    It should point to a credential cache with a valid TGT.
 - name: kerberos_delegate
   value:
     example: false
     type: boolean
   description: |
-    Set to `true` to enable kerberos delegation of credentials to a server that requests delegation.
+    Set to `true` to enable Kerberos delegation of credentials to a server that requests delegation.
 
     See https://github.com/requests/requests-kerberos#delegation
 - name: kerberos_force_initiate
@@ -124,7 +130,7 @@
     type: string
   description: |
     Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't
-    match its kerberos hostname (e.g. behind a content switch or load balancer).
+    match its Kerberos hostname (e.g. behind a content switch or load balancer).
 
     See https://github.com/requests/requests-kerberos#hostname-override
 - name: kerberos_principal
@@ -144,14 +150,14 @@
   value:
     type: string
   description: |
-    If your services require AWS Signature Version 4 Signing, set the region.
+    If your services require AWS Signature Version 4 signing, set the region.
 
     See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
 - name: aws_host
   value:
     type: string
   description: |
-    If your services require AWS Signature Version 4 Signing, set the host.
+    If your services require AWS Signature Version 4 signing, set the host.
 
     Note that this setting is not necessary for official integrations.
 
@@ -160,7 +166,7 @@
   value:
     type: string
   description: |
-    If your services require AWS Signature Version 4 Signing, set the service code. For a list
+    If your services require AWS Signature Version 4 signing, set the service code. For a list
     of available service codes, see https://docs.aws.amazon.com/general/latest/gr/rande.html
 
     Note that this setting is not necessary for official integrations.
@@ -171,6 +177,12 @@
     example: true
     type: boolean
   description: Instructs the check to validate the TLS certificate of services.
+- name: tls_use_host_header
+  value:
+    example: false
+    type: boolean
+  description: |
+    If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
 - name: tls_ignore_warning
   value:
     example: false
@@ -178,6 +190,10 @@
   description: |
     If `tls_verify` is disabled, security warnings are logged by the check.
     Disable those by setting `tls_ignore_warning` to true.
+
+    Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
+    If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
+    to true.
 - name: tls_cert
   value:
     example: <CERT_PATH>

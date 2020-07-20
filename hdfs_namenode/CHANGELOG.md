@@ -1,5 +1,18 @@
 # CHANGELOG - hdfs_namenode
 
+## 1.13.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Added] Add config specs. See [#6904](https://github.com/DataDog/integrations-core/pull/6904).
+
+## 1.12.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.11.1 / 2020-04-04
+
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 1.11.0 / 2020-02-22
 
 * [Added] Add log section to hdfs integrations. See [#4632](https://github.com/DataDog/integrations-core/pull/4632).

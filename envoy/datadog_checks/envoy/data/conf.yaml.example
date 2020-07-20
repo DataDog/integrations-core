@@ -37,8 +37,8 @@ instances:
     #
   - stats_url: http://localhost:80/stats
 
-    ## @param metric_whitelist - list of strings - optional
-    ## Whitelist metrics using regular expressions.
+    ## @param included_metrics - list of strings - optional
+    ## Includes metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
     ## to have certain tags decide whether or not to keep or ignore metrics.
     ## For an exhaustive list of all metrics and tags, see:
@@ -46,15 +46,15 @@ instances:
     ##
     ## If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
     ##
-    ## The example whitelist below will include:
+    ## The example list below will include:
     ##   - cluster.in.0000.lb_subsets_active
     ##   - cluster.out.alerting-event-evaluator-test.datadog.svc.cluster.local
     #
-    # metric_whitelist:
+    # included_metrics:
     #   - cluster\.(in|out)\..*
 
-    ## @param metric_blacklist - list of strings - optional
-    ## Blacklist metrics using regular expressions.
+    ## @param excluded_metrics - list of strings - optional
+    ## Excludes metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
     ## to have certain tags decide whether or not to keep or ignore metrics.
     ## For an exhaustive list of all metrics and tags, see:
@@ -62,11 +62,11 @@ instances:
     ##
     ## If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
     ##
-    ## The example blacklist below will exclude:
+    ## The example list below will exclude:
     ##   - http.admin.downstream_cx_active
     ##   - http.http.rds.0000.control_plane.rate_limit_enforced
     #
-    # metric_blacklist:
+    # excluded_metrics:
     #   - ^http\..*
 
     ## @param cache_metrics - boolean - optional - default: true
@@ -132,7 +132,7 @@ instances:
     ## If your services uses NTLM authentication, you can
     ## specify a domain that is used in the check. For NTLM Auth,
     ## append the username to domain, not as the `username` parameter.
-    ## Example: <NTLM_DOMAIN>/<USERNAME>
+    ## Example: <NTLM_DOMAIN>\<USERNAME>
     #
     # ntlm_domain: <DOMAIN>
 
@@ -192,6 +192,10 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable these by setting `tls_ignore_warning` to true.
+    ##
+    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
+    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
+    ## to true.
     #
     # tls_ignore_warning: false
 
@@ -258,7 +262,6 @@ instances:
 ## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
 ## service - mandatory - Name of the service that generated the log
 ## source  - mandatory - Attribute that defines which Integration sent the logs
-## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
 ## tags: - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/

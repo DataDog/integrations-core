@@ -11,8 +11,7 @@ from requests.exceptions import Timeout
 from six import iteritems
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.errors import ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError
 
 DEFAULT_MASTER_PORT = 5050
 

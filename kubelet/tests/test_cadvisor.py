@@ -61,7 +61,9 @@ def test_kubelet_check_cadvisor(monkeypatch, aggregator, tagger):
     monkeypatch.setattr(
         check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods_list_1.2.json')))
     )
-    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
+    mock_resp = mock.Mock(status_code=200, raise_for_status=mock.Mock())
+    mock_resp.json = mock.Mock(return_value=NODE_SPEC)
+    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=mock_resp))
     monkeypatch.setattr(
         check, '_retrieve_stats', mock.Mock(return_value=json.loads(mock_from_file('stats_summary.json')))
     )

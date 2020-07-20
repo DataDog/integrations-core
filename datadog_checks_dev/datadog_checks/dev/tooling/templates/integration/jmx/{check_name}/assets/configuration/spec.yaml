@@ -4,33 +4,7 @@ files:
   options:
   - template: init_config
     options:
-    - name: is_jmx
-      required: true
-      description: Whether or not this file is a configuration for a JMX integration.
-      value:
-        example: true
-        type: boolean
-    - name: collect_default_metrics
-      required: true
-      description: Whether or not the check should collect all default metrics.
-      value:
-        example: true
-        type: boolean
-    - template: init_config/default
+    - template: init_config/jmx
   - template: instances
     options:
-    - template: instances/default
-- name: metrics.yaml
-  example_name: metrics.yaml
-  options:
-  - name: jmx_metrics
-    description: |
-      Default metrics collected by this check. You should not have to modify this.
-      See Cassandra's metrics.yaml as an example:
-      https://github.com/DataDog/integrations-core/blob/master/cassandra/datadog_checks/cassandra/data/metrics.yaml
-    value:
-      example: []
-      type: array
-      items:
-        type: object
-        properties: []
+    - template: instances/jmx

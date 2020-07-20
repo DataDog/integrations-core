@@ -13,8 +13,10 @@ from contextlib import contextmanager
 
 from six import raise_from
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.config import is_affirmative
+
+from .utils import set_default_driver_conf
 
 try:
     import adodbapi
@@ -29,6 +31,8 @@ except ImportError:
 
 if adodbapi is None and pyodbc is None:
     raise ImportError('adodbapi or pyodbc must be installed to use this check.')
+
+set_default_driver_conf()
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'sql server'
 ALL_INSTANCES = 'ALL'
@@ -116,8 +120,8 @@ class SQLServer(AgentCheck):
         DM_OS_VIRTUAL_FILE_STATS,
     ]
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances):
+        super(SQLServer, self).__init__(name, init_config, instances)
 
         # Cache connections
         self.connections = {}

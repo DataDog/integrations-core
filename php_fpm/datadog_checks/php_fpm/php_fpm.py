@@ -9,8 +9,7 @@ from flup.client.fcgi_app import FCGIApp
 from six import PY3, StringIO, iteritems, string_types
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative
 
 # Relax param filtering
 FCGIApp._environPrefixes.extend(('DOCUMENT_', 'SCRIPT_'))

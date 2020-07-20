@@ -7,9 +7,8 @@ import time
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, run_command
 from datadog_checks.dev.conditions import CheckDockerLogs
-from datadog_checks.dev.subprocess import run_command
 
 from .common import BASIC_CONFIG, HERE
 
@@ -26,11 +25,12 @@ E2E_METADATA = {
 def dd_environment():
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
     # We need a custom condition to wait a bit longer
-    condition = CheckDockerLogs(compose_file, 'spawning ceph --cluster ceph -w', wait=5)
     with docker_run(
         compose_file=compose_file,
-        conditions=[condition],
-        sleep=5,  # Let's wait just a little bit after ceph got spawned to remove flakyness
+        conditions=[
+            CheckDockerLogs(compose_file, 'spawning ceph --cluster ceph -w', wait=5),
+            CheckDockerLogs(compose_file, 'Running on http://0.0.0.0:5000/'),
+        ],
     ):
         # Clean the disk space warning
         run_command(

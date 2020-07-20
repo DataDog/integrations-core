@@ -22,3 +22,9 @@ ecs.fargate.mem.mapped_file,gauge,,byte,,# of bytes of mapped file (includes tmp
 ecs.fargate.mem.max_usage,gauge,,byte,,Show max memory usage recorded,0,amazon_fargate,mem max usage
 ecs.fargate.mem.hierarchical_memory_limit,gauge,,byte,,# of bytes of memory limit with regard to hierarchy under which the memory cgroup is,0,amazon_fargate,mem hierarchical limit
 ecs.fargate.mem.hierarchical_memsw_limit,gauge,,byte,,# of bytes of memory+swap limit with regard to hierarchy under which memory cgroup is,0,amazon_fargate,mem hierarchical mem swap limit
+ecs.fargate.net.rcvd_errors,gauge,,error,,# received errors (Fargate 1.4.0+ required),-1,amazon_fargate,received net errors
+ecs.fargate.net.sent_errors,gauge,,error,,# sent errors (Fargate 1.4.0+ required),-1,amazon_fargate,sent net errors
+ecs.fargate.net.packet.in_dropped,gauge,,packet,,# ingoing packets dropped (Fargate 1.4.0+ required),-1,amazon_fargate,in packets dropped
+ecs.fargate.net.packet.out_dropped,gauge,,packet,,# outgoing packets dropped (Fargate 1.4.0+ required),-1,amazon_fargate,out packets dropped
+ecs.fargate.net.bytes_rcvd,rate,,byte,,# bytes received (Fargate 1.4.0+ required),0,amazon_fargate, bytes received
+ecs.fargate.net.bytes_sent,rate,,byte,,# bytes sent (Fargate 1.4.0+ required),0,amazon_fargate,bytes sent

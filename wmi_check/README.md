@@ -106,10 +106,6 @@ Each WMI query has 2 required options, `class` and `metrics` and six optional op
 
 The setting `[IDProcess, Win32_Process, Handle, CommandLine]` tags each process with its command line. Any instance number will be removed from tag_by values i.e. name:process#1 => name:process. NB: The agent must be running under an **Administrator** account for this to work as the `CommandLine` property is not accessible to non-admins.
 
-#### Metrics collection
-
-The WMI check can potentially emit [custom metrics][9], which may impact your [billing][10].
-
 ### Validation
 
 [Run the Agent's `status` subcommand][11] and look for `wmi_check` under the Checks section.
@@ -118,7 +114,7 @@ The WMI check can potentially emit [custom metrics][9], which may impact your [b
 
 ### Metrics
 
-See [metadata.csv][12] for a list of metrics provided by this integration.
+All metrics collected by the WMI check are forwarded to Datadog as [custom metrics][9], which may impact your [billing][10].
 
 ### Events
 
@@ -136,13 +132,13 @@ Need help? Contact [Datadog support][13].
 [2]: https://msdn.microsoft.com/en-us/library/system.diagnostics.performancecounter(v=vs.110.aspx)
 [3]: https://wmie.codeplex.com
 [4]: https://msdn.microsoft.com/en-us/powershell/scripting/getting-started/cookbooks/getting-wmi-objects--get-wmiobject-
-[5]: https://docs.datadoghq.com/integrations/faq/how-to-retrieve-wmi-metrics
+[5]: https://docs.datadoghq.com/integrations/faq/how-to-retrieve-wmi-metrics/
 [6]: https://msdn.microsoft.com/en-us/library/windows/desktop/aa394084.aspx
 [7]: https://technet.microsoft.com/en-us/library/Hh921475.aspx
 [8]: https://msdn.microsoft.com/en-us/library/aa393067.aspx
-[9]: https://docs.datadoghq.com/developers/metrics/custom_metrics
-[10]: https://docs.datadoghq.com/account_management/billing/custom_metrics
+[9]: https://docs.datadoghq.com/developers/metrics/custom_metrics/
+[10]: https://docs.datadoghq.com/account_management/billing/custom_metrics/
 [11]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [12]: https://github.com/DataDog/integrations-core/blob/master/wmi_check/metadata.csv
-[13]: https://docs.datadoghq.com/help
+[13]: https://docs.datadoghq.com/help/
 [14]: https://docs.datadoghq.com/integrations/pdh_check/

@@ -9,10 +9,11 @@ import pytest
 from six import iteritems
 
 from datadog_checks.base.utils.platform import Platform
+from datadog_checks.base.utils.timeout import TimeoutException
 from datadog_checks.disk import Disk
 
-from .common import DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
-from .mocks import MockDiskMetrics, mock_blkid_output
+from .common import DEFAULT_DEVICE_BASE_NAME, DEFAULT_DEVICE_NAME, DEFAULT_FILE_SYSTEM, DEFAULT_MOUNT_POINT
+from .mocks import MockDiskMetrics, MockPart, mock_blkid_output
 
 
 def test_default_options():
@@ -30,6 +31,7 @@ def test_default_options():
     assert check._device_tag_re == []
     assert check._service_check_rw is False
     assert check._min_disk_size == 0
+    assert check._timeout == 5
 
 
 def test_bad_config():
@@ -56,6 +58,7 @@ def test_default(aggregator, gauge_metrics, rate_metrics):
                 DEFAULT_FILE_SYSTEM,
                 'filesystem:{}'.format(DEFAULT_FILE_SYSTEM),
                 'device:{}'.format(DEFAULT_DEVICE_NAME),
+                'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME),
             ]
         else:
             tags = []
@@ -64,7 +67,11 @@ def test_default(aggregator, gauge_metrics, rate_metrics):
             aggregator.assert_metric(name, value=value, tags=tags)
 
         for name, value in iteritems(rate_metrics):
-            aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME)])
+            aggregator.assert_metric(
+                name,
+                value=value,
+                tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME)],
+            )
 
     aggregator.assert_all_metrics_covered()
 
@@ -90,10 +97,18 @@ def test_use_mount(aggregator, instance_basic_mount, gauge_metrics, rate_metrics
     c.check(instance_basic_mount)
 
     for name, value in iteritems(gauge_metrics):
-        aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_MOUNT_POINT)])
+        aggregator.assert_metric(
+            name,
+            value=value,
+            tags=['device:{}'.format(DEFAULT_MOUNT_POINT), 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME)],
+        )
 
     for name, value in iteritems(rate_metrics):
-        aggregator.assert_metric(name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME)])
+        aggregator.assert_metric(
+            name,
+            value=value,
+            tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME)],
+        )
 
     aggregator.assert_all_metrics_covered()
 
@@ -115,14 +130,28 @@ def test_device_tagging(aggregator, gauge_metrics, rate_metrics):
         c.check(instance)
 
     # Assert metrics
-    tags = ['type:dev', 'tag:two', 'device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1', 'label:mylab']
+    tags = [
+        'type:dev',
+        'tag:two',
+        'device:{}'.format(DEFAULT_DEVICE_NAME),
+        'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME),
+        'optional:tags1',
+        'label:mylab',
+    ]
 
     for name, value in iteritems(gauge_metrics):
         aggregator.assert_metric(name, value=value, tags=tags)
 
     for name, value in iteritems(rate_metrics):
         aggregator.assert_metric(
-            name, value=value, tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'optional:tags1', 'label:mylab']
+            name,
+            value=value,
+            tags=[
+                'device:{}'.format(DEFAULT_DEVICE_NAME),
+                'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME),
+                'optional:tags1',
+                'label:mylab',
+            ],
         )
 
     aggregator.assert_all_metrics_covered()
@@ -155,6 +184,7 @@ def test_min_disk_size(aggregator, gauge_metrics, rate_metrics):
 
     for name in rate_metrics:
         aggregator.assert_metric_has_tag(name, 'device:{}'.format(DEFAULT_DEVICE_NAME))
+        aggregator.assert_metric_has_tag(name, 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME))
 
     aggregator.assert_all_metrics_covered()
 
@@ -168,7 +198,7 @@ def test_labels_from_blkid_cache_file(aggregator, instance_blkid_cache_file, gau
     c = Disk('disk', {}, [instance_blkid_cache_file])
     c.check(instance_blkid_cache_file)
     for metric in chain(gauge_metrics, rate_metrics):
-        aggregator.assert_metric(metric, tags=['device:/dev/sda1', 'label:MYLABEL'])
+        aggregator.assert_metric(metric, tags=['device:/dev/sda1', 'device_name:sda1', 'label:MYLABEL'])
 
 
 @pytest.mark.skipif(not Platform.is_linux(), reason='disk labels are only available on Linux')
@@ -182,4 +212,62 @@ def test_blkid_cache_file_contains_no_labels(
     c = Disk('disk', {}, [instance_blkid_cache_file_no_label])
     c.check(instance_blkid_cache_file_no_label)
     for metric in chain(gauge_metrics, rate_metrics):
-        aggregator.assert_metric(metric, tags=['device:/dev/sda1'])
+        aggregator.assert_metric(metric, tags=['device:/dev/sda1', 'device_name:sda1'])
+
+
+@pytest.mark.usefixtures('psutil_mocks')
+def test_timeout_config(aggregator, gauge_metrics, rate_metrics):
+    """Test timeout configuration value is used on every timeout on the check."""
+
+    # Arbitrary value
+    TIMEOUT_VALUE = 42
+    instance = {'timeout': TIMEOUT_VALUE}
+    c = Disk('disk', {}, [instance])
+
+    # Mock timeout version
+    def no_timeout(fun):
+        return lambda *args: fun(args)
+
+    with mock.patch('psutil.disk_partitions', return_value=[MockPart()]), mock.patch(
+        'datadog_checks.disk.disk.timeout', return_value=no_timeout
+    ) as mock_timeout:
+        c.check(instance)
+
+    mock_timeout.assert_called_with(TIMEOUT_VALUE)
+
+
+@pytest.mark.usefixtures('psutil_mocks')
+def test_timeout_warning(aggregator, gauge_metrics, rate_metrics):
+    """Test a warning is raised when there is a Timeout exception."""
+
+    # Raise exception for "/faulty" mountpoint
+    def faulty_timeout(fun):
+        def f(mountpoint):
+            if mountpoint == "/faulty":
+                raise TimeoutException
+            else:
+                return fun(mountpoint)
+
+        return f
+
+    c = Disk('disk', {}, [{}])
+    c.log = mock.MagicMock()
+    m = MockDiskMetrics()
+    m.total = 0
+
+    with mock.patch('psutil.disk_partitions', return_value=[MockPart(), MockPart(mountpoint="/faulty")]), mock.patch(
+        'psutil.disk_usage', return_value=m, __name__='disk_usage'
+    ), mock.patch('datadog_checks.disk.disk.timeout', return_value=faulty_timeout):
+        c.check({})
+
+    # Check that the warning is called once for the faulty disk
+    c.log.warning.assert_called_once()
+
+    for name in gauge_metrics:
+        aggregator.assert_metric(name, count=0)
+
+    for name in rate_metrics:
+        aggregator.assert_metric_has_tag(name, 'device:{}'.format(DEFAULT_DEVICE_NAME))
+        aggregator.assert_metric_has_tag(name, 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME))
+
+    aggregator.assert_all_metrics_covered()

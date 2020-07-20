@@ -229,7 +229,7 @@ def options_validator(options, loader, file_name, *sections):
         if not isinstance(description, str):
             loader.errors.append(
                 '{}, {}, {}{}: Attribute `description` must be a string'.format(
-                    loader.source, file_name, sections_display, option_name, description
+                    loader.source, file_name, sections_display, option_name
                 )
             )
 
@@ -245,6 +245,14 @@ def options_validator(options, loader, file_name, *sections):
         if not isinstance(option['hidden'], bool):
             loader.errors.append(
                 '{}, {}, {}{}: Attribute `hidden` must be true or false'.format(
+                    loader.source, file_name, sections_display, option_name
+                )
+            )
+
+        option.setdefault('display_priority', 0)
+        if not isinstance(option['display_priority'], int):
+            loader.errors.append(
+                '{}, {}, {}{}: Attribute `display_priority` must be an integer'.format(
                     loader.source, file_name, sections_display, option_name
                 )
             )

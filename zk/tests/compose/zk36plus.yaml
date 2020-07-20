@@ -1,0 +1,11 @@
+version: '3.5'
+
+services:
+  zk:
+    image: "zookeeper:${ZK_VERSION}"
+    ports:
+      - "12181:2181"
+      - "7000:7000"
+      - "8080:8080"
+    volumes:
+      - ./zoo36.cfg:/conf/zoo.cfg

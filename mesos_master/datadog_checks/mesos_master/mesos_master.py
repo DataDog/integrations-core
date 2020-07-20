@@ -10,8 +10,8 @@ import requests
 from six import iteritems
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.errors import CheckException
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.errors import CheckException
 
 
 class MesosMaster(AgentCheck):
@@ -275,7 +275,12 @@ class MesosMaster(AgentCheck):
                         self.GAUGE('mesos.role.frameworks.count', len(role['frameworks']), tags=role_tags)
                         self.GAUGE('mesos.role.weight', role['weight'], tags=role_tags)
                         for key_name, (metric_name, metric_func) in iteritems(self.ROLE_RESOURCES_METRICS):
-                            metric_func(self, metric_name, role['resources'][key_name], tags=role_tags)
+                            try:
+                                metric_func(self, metric_name, role['resources'][key_name], tags=role_tags)
+                            except KeyError:
+                                self.log.debug(
+                                    'Unable to access metrics for master role resource: {}.  Skipping.', key_name
+                                )
 
             stats_metrics = self._get_master_stats(url, instance_tags)
             if stats_metrics is not None:

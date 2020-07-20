@@ -13,7 +13,10 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "etcd.",
-  "metric_to_check": "etcd.store.watchers",
+  "metric_to_check": [
+    "etcd.store.watchers",
+    "etcd.server.has_leader"
+  ],
   "name": "etcd",
   "process_signatures": [
     "etcd"

@@ -1,5 +1,25 @@
 # CHANGELOG - win32_event_log
 
+## 2.5.0 / 2020-06-29
+
+* [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
+* [Added] Override CaseInsensitiveDict `copy()` function. See [#6715](https://github.com/DataDog/integrations-core/pull/6715).
+
+## 2.4.0 / 2020-05-17
+
+* [Added] Refactor check to support new implementation. See [#6639](https://github.com/DataDog/integrations-core/pull/6639).
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Fixed] Add wmi integration test and fix filter sampler. See [#6576](https://github.com/DataDog/integrations-core/pull/6576).
+* [Fixed] WMI base typing and instance free API. See [#6329](https://github.com/DataDog/integrations-core/pull/6329).
+
+## 2.3.4 / 2020-04-16
+
+* [Fixed] Normalize integers. See [#6357](https://github.com/DataDog/integrations-core/pull/6357).
+
+## 2.3.3 / 2020-04-04
+
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 2.3.2 / 2020-02-25
 
 * [Fixed] Bump minimum base check on wmi checks. See [#5860](https://github.com/DataDog/integrations-core/pull/5860).

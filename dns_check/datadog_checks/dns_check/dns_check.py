@@ -7,17 +7,15 @@ from __future__ import unicode_literals
 import time
 
 import dns.resolver
+from six import PY3
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.utils.platform import Platform
+from datadog_checks.base.utils.platform import Platform
 
-# These imports are necessary because otherwise dynamic type
-# resolution will fail on windows without it.
-# See more here: https://github.com/rthalley/dnspython/issues/39.
-if Platform.is_win32():
-    from dns.rdtypes.ANY import *  # noqa
-    from dns.rdtypes.IN import *  # noqa
-
+if PY3:
+    # use higher precision clock available in Python3
+    time_func = time.perf_counter
+elif Platform.is_win32():
     # for tiny time deltas, time.time on Windows reports the same value
     # of the clock more than once, causing the computation of response_time
     # to be often 0; let's use time.clock that is more precise.

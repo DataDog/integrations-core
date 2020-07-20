@@ -1,4 +1,4 @@
-FROM quantumobject/docker-cacti
+FROM quantumobject/docker-cacti:1.2.8
 
 # username and password is admin/Admin23@
 COPY alldb_backup.sql /var/backups/

@@ -80,11 +80,11 @@ See the [example check configuration][4] for comprehensive descriptions of other
 
 For containerized environments, see the [Autodiscovery Integration Templates][10] for guidance on applying the parameters below.
 
-| Parameter            | Value                                                                          |
-| -------------------- | ------------------------------------------------------------------------------ |
-| `<INTEGRATION_NAME>` | `supervisord`                                                                  |
-| `<INIT_CONFIG>`      | blank or `{}`                                                                  |
-| `<INSTANCE_CONFIG>`  | `{"host":"%%host%%", "port":"9001", "user":"<USERNAME>", "pass":"<PASSWORD>"}` |
+| Parameter            | Value                                                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `<INTEGRATION_NAME>` | `supervisord`                                                                                                      |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                                      |
+| `<INSTANCE_CONFIG>`  | `{"name":"<SUPERVISORD_SERVER_NAME>", "host":"%%host%%", "port":"9001", "user":"<USERNAME>", "pass":"<PASSWORD>"}` |
 
 ### Validation
 
@@ -138,6 +138,6 @@ Need help? Contact [Datadog support][8].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/supervisord/metadata.csv
-[8]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/help/
 [9]: https://www.datadoghq.com/blog/supervisor-monitors-your-processes-datadog-monitors-supervisor
-[10]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[10]: https://docs.datadoghq.com/agent/kubernetes/integrations/

@@ -20,7 +20,7 @@ INSTANCE_E2E = {
 INSTANCE_UNIT = {
     'prometheus_url': 'http://localhost:10249/metrics',
     'namespace': 'prometheus',
-    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1'],
+    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1_total'],
     'send_histograms_buckets': True,
     'send_monotonic_counter': True,
 }

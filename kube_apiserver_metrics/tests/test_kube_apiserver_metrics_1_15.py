@@ -54,6 +54,10 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.http_requests_total',
         NAMESPACE + '.authenticated_user_requests',
         NAMESPACE + '.apiserver_request_total',
+        NAMESPACE + '.rest_client_request_latency_seconds.sum',
+        NAMESPACE + '.rest_client_request_latency_seconds.count',
+        NAMESPACE + '.admission_controller_admission_duration_seconds.sum',
+        NAMESPACE + '.admission_controller_admission_duration_seconds.count',
     ]
     COUNT_METRICS = [
         NAMESPACE + '.audit_event.count',
@@ -70,7 +74,7 @@ class TestKubeAPIServerMetrics:
         Testing kube_apiserver_metrics metrics collection.
         """
 
-        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [instance])
+        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [instance])
         check.check(instance)
 
         # check that we then get the count metrics also

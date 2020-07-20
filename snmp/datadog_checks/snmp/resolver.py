@@ -5,7 +5,9 @@
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Optional, Tuple
 
-from .pysnmp_types import MibViewController, ObjectIdentity, ObjectType
+from .models import OID
+from .pysnmp_types import MibViewController
+from .types import OIDMatch
 
 
 class OIDTreeNode(object):
@@ -28,20 +30,20 @@ class OIDTrie(object):
         # type: () -> None
         self._root = OIDTreeNode()
 
-    def set(self, oid, name):
+    def set(self, parts, name):
         # type: (Tuple[int, ...], str) -> None
         node = self._root
-        for part in oid:
+        for part in parts:
             node = node.children[part]
         node.name = name
 
-    def match(self, oid):
+    def match(self, parts):
         # type: (Tuple[int, ...]) -> Tuple[Tuple[int, ...], Optional[str]]
         node = self._root
         matched = []
         name = None
 
-        for part in oid:
+        for part in parts:
             child = node.children.get(part)
             if child is None:
                 break
@@ -91,12 +93,12 @@ class OIDResolver(object):
         self._enforce_constraints = enforce_constraints
 
     def register(self, oid, name):
-        # type: (Tuple[int, ...], str) -> None
+        # type: (OID, str) -> None
         """Register a translation from a name to an OID.
 
         Corresponds to XXX(1) and XXX(2) in the summary listing.
         """
-        self._resolver.set(oid, name)
+        self._resolver.set(oid.as_tuple(), name)
 
     def register_index(self, tag, index, mapping):
         # type: (str, int, Dict[int, str]) -> None
@@ -106,17 +108,17 @@ class OIDResolver(object):
         """
         self._index_resolvers[tag][index] = mapping
 
-    def _resolve_from_mibs(self, oid_tuple, oid):
-        # type: (Tuple[int, ...], ObjectType) -> Tuple[str, Tuple[str, ...]]
+    def _resolve_from_mibs(self, oid):
+        # type: (OID) -> OIDMatch
         if not self._enforce_constraints:
             # if enforce_constraints is false, then MIB resolution has not been done yet
             # so we need to do it manually. We have to specify the mibs that we will need
             # to resolve the name.
-            oid = ObjectIdentity(oid_tuple).resolveWithMib(self._mib_view_controller)
+            oid.resolve(self._mib_view_controller)
 
-        _, name, indexes = oid.getMibSymbol()
+        mib_symbol = oid.get_mib_symbol()
 
-        return name, tuple(index.prettyPrint() for index in indexes)
+        return OIDMatch(name=mib_symbol.symbol, indexes=mib_symbol.prefix)
 
     def _resolve_tag_index(self, tail, name):
         # type: (Tuple[int, ...], str) -> Tuple[str, ...]
@@ -141,7 +143,7 @@ class OIDResolver(object):
         return tuple(tags)
 
     def resolve_oid(self, oid):
-        # type: (ObjectType) -> Tuple[str, Tuple[str, ...]]
+        # type: (OID) -> OIDMatch
         """Resolve an OID to a name and its indexes.
 
         This will perform either:
@@ -153,14 +155,14 @@ class OIDResolver(object):
         name: the name of the metric associated to `oid`.
         tag_index: a sequence of tag values. k-th item in the sequence corresponds to the k-th entry in `metric_tags`.
         """
-        oid_tuple = oid.asTuple()
-        prefix, name = self._resolver.match(oid_tuple)
+        parts = oid.as_tuple()
+        prefix, name = self._resolver.match(parts)
 
         if name is None:
-            return self._resolve_from_mibs(oid_tuple, oid=oid)
+            return self._resolve_from_mibs(oid)
 
-        # Example: oid: (1, 3, 6, 1, 2, 1, 1), prefix: (1, 3, 6, 1) -> tail: (2, 1, 1)
-        tail = oid_tuple[len(prefix) :]
+        # Example: parts: (1, 3, 6, 1, 2, 1, 1), prefix: (1, 3, 6, 1) -> tail: (2, 1, 1)
+        tail = parts[len(prefix) :]
 
         tag_index = self._resolve_tag_index(tail, name=name)
-        return name, tag_index
+        return OIDMatch(name=name, indexes=tag_index)

@@ -98,7 +98,7 @@ def set_value(ctx, key, value):
         scrubbing = any(fnmatch(key, pattern) for pattern in SECRET_KEYS)
         value = click.prompt(f'Value for `{key}`', hide_input=scrubbing)
 
-    if key in ('core', 'extras', 'agent') and not value.startswith('~'):
+    if key in ('repos.core', 'repos.extras', 'repos.agent') and not value.startswith('~'):
         value = os.path.abspath(value)
 
     user_config = new_config = ctx.obj

@@ -4,8 +4,18 @@
 
 
 class DatadogAgentStub(object):
+    """
+    This implements the methods defined by the Agent's
+    [C bindings](https://github.com/DataDog/datadog-agent/blob/master/rtloader/common/builtins/datadog_agent.c)
+    which in turn call the
+    [Go backend](https://github.com/DataDog/datadog-agent/blob/master/pkg/collector/python/datadog_agent.go).
+
+    It also provides utility methods for test assertions.
+    """
+
     def __init__(self):
         self._metadata = {}
+        self._cache = {}
         self._config = self.get_default_config()
 
     def get_default_config(self):
@@ -13,6 +23,7 @@ class DatadogAgentStub(object):
 
     def reset(self):
         self._metadata.clear()
+        self._cache.clear()
         self._config = self.get_default_config()
 
     def assert_metadata(self, check_id, data):
@@ -46,6 +57,12 @@ class DatadogAgentStub(object):
 
     def tracemalloc_enabled(self, *args, **kwargs):
         return False
+
+    def write_persistent_cache(self, key, value):
+        self._cache[key] = value
+
+    def read_persistent_cache(self, key):
+        return self._cache.get(key, '')
 
 
 # Use the stub as a singleton

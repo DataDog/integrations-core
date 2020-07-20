@@ -115,7 +115,7 @@ class ConfigTemplates(object):
                 else:
                     raise ValueError(
                         'Template override has no named mapping `{}`'.format(
-                            '.'.join(override_keys) if override_keys else override, final_key
+                            '.'.join(override_keys) if override_keys else override
                         )
                     )
             else:

@@ -66,7 +66,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][1]
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][10].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][10].
 
 | Parameter      | Value                                               |
 | -------------- | --------------------------------------------------- |
@@ -95,13 +95,13 @@ Returns `CRITICAL` if the Agent cannot connect to Squid to collect metrics, othe
 
 Need help? Contact [Datadog support][8].
 
-[1]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[1]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [4]: https://github.com/DataDog/integrations-core/blob/master/squid/datadog_checks/squid/data/conf.yaml.example
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/squid/metadata.csv
-[8]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/help/
 [9]: http://www.squid-cache.org/
-[10]: https://docs.datadoghq.com/agent/docker/log/?tab=containerinstallation#setup
+[10]: https://docs.datadoghq.com/agent/kubernetes/log/?tab=containerinstallation#setup

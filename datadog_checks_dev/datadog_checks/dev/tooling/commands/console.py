@@ -6,6 +6,7 @@ import sys
 
 import click
 
+from ...subprocess import run_command
 from ...tooling.constants import INTEGRATION_REPOS, set_root
 
 try:
@@ -83,6 +84,21 @@ def abort(text=None, code=1, out=False):
     if text is not None:
         click.secho(text, fg='red', bold=True, err=not out, color=DISPLAY_COLOR)
     sys.exit(code)
+
+
+def run_or_abort(command, ignore_exit_code=False, **kwargs):
+    try:
+        result = run_command(command, **kwargs)
+    except Exception:
+        if not isinstance(command, str):
+            command = ' '.join(command)
+
+        abort(f'Error running command: {command}')
+    else:
+        if not ignore_exit_code and result.code:
+            abort(result.stdout + result.stderr, code=result.code)
+
+        return result
 
 
 def validate_check_arg(ctx, param, value):

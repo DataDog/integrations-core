@@ -11,8 +11,8 @@ from os import geteuid
 from six import PY3, iteritems
 from six.moves import filter
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.subprocess_output import get_subprocess_output
+from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 if PY3:
     long = int

@@ -1,5 +1,26 @@
 # CHANGELOG - zk
 
+## 2.6.1 / 2020-06-29
+
+* [Fixed] Use Agent6 style init. See [#6949](https://github.com/DataDog/integrations-core/pull/6949).
+
+## 2.6.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 2.5.0 / 2020-05-04
+
+* [Added] Add new metrics for ZK version 3.6. See [#6421](https://github.com/DataDog/integrations-core/pull/6421).
+
+## 2.4.2 / 2020-04-13
+
+* [Fixed] Handle non-integers when parsing latency values. See [#6323](https://github.com/DataDog/integrations-core/pull/6323).
+
+## 2.4.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
 ## 2.4.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).

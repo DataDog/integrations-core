@@ -19,9 +19,7 @@ from .common import (
 )
 
 FILES = [
-    "https://ddintegrations.blob.core.windows.net/snmp/f5.snmprec",
     "https://ddintegrations.blob.core.windows.net/snmp/3850.snmprec",
-    "https://ddintegrations.blob.core.windows.net/snmp/hpe-proliant.snmprec",
 ]
 
 E2E_METADATA = {
@@ -34,7 +32,7 @@ E2E_METADATA = {
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    with TempDir('snmprec', COMPOSE_DIR) as tmp_dir:
+    with TempDir('snmprec') as tmp_dir:
         data_dir = os.path.join(tmp_dir, 'data')
         env = {'DATA_DIR': data_dir}
         if not os.path.exists(data_dir):

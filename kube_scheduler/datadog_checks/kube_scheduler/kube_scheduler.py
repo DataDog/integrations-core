@@ -4,8 +4,8 @@
 from __future__ import division
 
 from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.config import is_affirmative
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base.config import is_affirmative
 
 DEFAULT_COUNTERS = {
     # Number of HTTP requests, partitioned by status code, method, and host.

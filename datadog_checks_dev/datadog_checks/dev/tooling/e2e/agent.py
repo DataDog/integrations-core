@@ -5,8 +5,8 @@ from os.path import expanduser
 
 from .platform import LINUX, MAC, WINDOWS
 
-DEFAULT_AGENT_VERSION = 6
-DEFAULT_PYTHON_VERSION = 2
+DEFAULT_AGENT_VERSION = 7
+DEFAULT_PYTHON_VERSION = 3
 
 # Make checks run at most once every second
 DEFAULT_SAMPLING_COLLECTION_INTERVAL = 1
@@ -22,6 +22,8 @@ DEFAULT_SAMPLING_WAIT_TIME = 15
 FAKE_API_KEY = 'a' * 32
 
 MANIFEST_VERSION_PATTERN = r'agent (\d)'
+
+DEFAULT_DOGSTATSD_PORT = 8125
 
 
 def get_rate_flag(agent_version):

@@ -4,7 +4,10 @@
 
 This check monitors [TLS][1] protocol versions, certificate expiration and validity, etc.
 
-**Note**: Only TCP is supported.
+**Notes**:
+
+1. Only TCP is supported.
+2. Only leaf / end user certificates are verified (not intermediate and root certificates).
 
 ## Setup
 
@@ -67,5 +70,5 @@ Need help? Contact [Datadog support][8].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/tls/metadata.csv
 [7]: https://github.com/DataDog/integrations-core/blob/master/tls/assets/service_checks.json
-[8]: https://docs.datadoghq.com/help
-[9]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/agent/kubernetes/integrations/

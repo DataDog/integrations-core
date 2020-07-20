@@ -10,7 +10,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "external_dns.",
-  "metric_to_check": "external_dns.source.endpoints_total",
+  "metric_to_check": "external_dns.source.endpoints.total",
   "name": "external_dns",
   "public_title": "Datadog-External DNS Integration",
   "short_description": "Track all your External DNS metrics with Datadog",

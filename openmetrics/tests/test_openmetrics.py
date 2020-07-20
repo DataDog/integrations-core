@@ -13,7 +13,7 @@ pytestmark = pytest.mark.usefixtures("poll_mock")
 instance = {
     'prometheus_url': 'http://localhost:10249/metrics',
     'namespace': 'openmetrics',
-    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1'],
+    'metrics': [{'metric1': 'renamed.metric1'}, 'metric2', 'counter1_total'],
     'send_histograms_buckets': True,
     'send_monotonic_counter': True,
 }
@@ -32,7 +32,9 @@ def test_openmetrics_check(aggregator):
         tags=['timestamp:123', 'node:host2', 'matched_label:foobar'],
         metric_type=aggregator.GAUGE,
     )
-    aggregator.assert_metric(CHECK_NAME + '.counter1', tags=['node:host2'], metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric(
+        CHECK_NAME + '.counter1_total', tags=['node:host2'], metric_type=aggregator.MONOTONIC_COUNT
+    )
     aggregator.assert_all_metrics_covered()
 
 
@@ -50,7 +52,7 @@ def test_openmetrics_check_counter_gauge(aggregator):
         tags=['timestamp:123', 'node:host2', 'matched_label:foobar'],
         metric_type=aggregator.GAUGE,
     )
-    aggregator.assert_metric(CHECK_NAME + '.counter1', tags=['node:host2'], metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(CHECK_NAME + '.counter1_total', tags=['node:host2'], metric_type=aggregator.GAUGE)
     aggregator.assert_all_metrics_covered()
 
 

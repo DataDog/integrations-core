@@ -115,6 +115,7 @@ class VerticaCheck(AgentCheck):
             self.query_resource_pool_status()
             self.query_disk_storage()
             self.query_resource_usage()
+            self.query_version()
             self.query_custom()
         finally:
             self._view.clear()
@@ -476,6 +477,17 @@ class VerticaCheck(AgentCheck):
 
             self.gauge('node.resource_requests', node['request_count'], tags=tags)
             self.gauge('thread.active', node['active_thread_count'], tags=tags)
+
+    @AgentCheck.metadata_entrypoint
+    def query_version(self):
+        # https://www.vertica.com/docs/9.2.x/HTML/Content/Authoring/AdministratorsGuide/Diagnostics/DeterminingYourVersionOfVertica.htm
+        for v in self.iter_rows(views.Version):
+            version = v['version'].replace('Vertica Analytic Database v', '')
+
+            # Force the last part to represent the build part of semver
+            version = version.replace('-', '+', 1)
+
+            self.set_metadata('version', version)
 
     def query_custom(self):
         for custom_query in self._custom_queries:

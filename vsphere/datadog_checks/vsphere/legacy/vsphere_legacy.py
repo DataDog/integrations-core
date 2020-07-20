@@ -18,18 +18,17 @@ from pyVmomi import vmodl  # pylint: disable=E0611
 from six import itervalues
 from six.moves import range
 
-from datadog_checks.base import ensure_unicode, to_native_string
-from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base import AgentCheck, ensure_unicode, to_string
 from datadog_checks.base.checks.libs.thread_pool import SENTINEL, Pool
 from datadog_checks.base.checks.libs.timer import Timer
 from datadog_checks.base.checks.libs.vmware.all_metrics import ALL_METRICS
 from datadog_checks.base.checks.libs.vmware.basic_metrics import BASIC_METRICS
 from datadog_checks.base.config import is_affirmative
 
+from ..event import VSphereEvent
 from .cache_config import CacheConfig
 from .common import REALTIME_RESOURCES, SOURCE_TYPE
 from .errors import BadConfigError, ConnectionError
-from .event import VSphereEvent
 from .metadata_cache import MetadataCache, MetadataNotFoundError
 from .mor_cache import MorCache, MorNotFoundError
 from .objects_queue import ObjectsQueue
@@ -879,7 +878,7 @@ class VSphereLegacyCheck(AgentCheck):
                     if not hostname:  # no host tags available
                         tags.extend(mor['tags'])
                     else:
-                        hostname = to_native_string(hostname)
+                        hostname = to_string(hostname)
                         if self.excluded_host_tags:
                             tags.extend(mor["excluded_host_tags"])
 
@@ -977,6 +976,11 @@ class VSphereLegacyCheck(AgentCheck):
             self.gauge('vsphere.vm.count', vm_count, tags=tags)
 
     def check(self, instance):
+        self.warning(
+            "DEPRECATION NOTICE: You are using a deprecated version of the vSphere integration. "
+            "To use the newer version, please update your configuration file based on the provided example. "
+            "Look for the `use_legacy_check_version` configuration option."
+        )
         try:
             self.exception_printed = 0
 

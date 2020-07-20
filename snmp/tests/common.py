@@ -7,9 +7,9 @@ import logging
 import os
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.snmp import SnmpCheck
-from datadog_checks.utils.common import get_docker_hostname
 
 log = logging.getLogger(__name__)
 
@@ -58,7 +58,7 @@ CAST_METRICS = [
     {'OID': "1.3.6.1.4.1.2021.10.1.6.1", 'name': "cpuload2"},  # Opaque
 ]
 
-CONSTRAINED_OID = [{"MIB": "RFC1213-MIB", "symbol": "tcpRtoAlgorithm"}]
+CONSTRAINED_OID = [{"MIB": "TCP-MIB", "symbol": "tcpRtoAlgorithm"}]
 
 DUMMY_MIB_OID = [
     ({"MIB": "DUMMY-MIB", "symbol": "scalar"}, AggregatorStub.GAUGE, 10),  # Integer
@@ -151,10 +151,18 @@ BULK_TABULAR_OBJECTS = [
             "ipSystemStatsHCOutOctets",
             "ipSystemStatsInMcastPkts",
         ],
+        'metric_tags': [{'tag': "dumbindex", 'index': 1}],
     },
 ]
 
-INVALID_METRICS = [{'MIB': "IF-MIB", 'table': "noIdeaWhatIAmDoingHere", 'symbols': ["ImWrong", "MeToo"]}]
+INVALID_METRICS = [
+    {
+        'MIB': "IF-MIB",
+        'table': "noIdeaWhatIAmDoingHere",
+        'symbols': ["ImWrong", "MeToo"],
+        'metric_tags': [{'tag': "dumbindex", 'index': 1}],
+    }
+]
 
 PLAY_WITH_GET_NEXT_METRICS = [
     {"OID": "1.3.6.1.2.1.4.31.3.1.3.2", "name": "needFallback"},
@@ -212,3 +220,7 @@ def generate_v3_instance_config(metrics, name=None, user=None, auth=None, auth_k
 
 def create_check(instance):
     return SnmpCheck('snmp', {}, [instance])
+
+
+def assert_common_metrics(aggregator, tags=None):
+    aggregator.assert_metric('snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags)

@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+import sys
+from typing import Callable
 
 from six import PY2, text_type
 
@@ -16,6 +18,11 @@ except ImportError:
 # Arbitrary number less than 10 (DEBUG)
 TRACE_LEVEL = 7
 
+LOGGER_FRAME_SEARCH_MAX_DEPTH = 50
+
+
+DEFAULT_FALLBACK_LOGGER = logging.getLogger(__name__)
+
 
 class AgentLogger(logging.getLoggerClass()):
     def trace(self, msg, *args, **kwargs):
@@ -29,6 +36,12 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
         self.check = check
         self.check_id = self.check.check_id
 
+    def setup_sanitization(self, sanitize):
+        # type: (Callable[[str], str]) -> None
+        for handler in self.logger.handlers:
+            if isinstance(handler, AgentLogHandler):
+                handler.setFormatter(SanitizationFormatter(handler.formatter, sanitize=sanitize))
+
     def process(self, msg, kwargs):
         # Cache for performance
         if not self.check_id:
@@ -36,6 +49,9 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
             # Default to `unknown` for checks that log during
             # `__init__` and therefore have no `check_id` yet
             self.extra['_check_id'] = self.check_id or 'unknown'
+            if self.check_id:
+                # Break the reference cycle, once we resolved check_id we don't need the check anymore
+                self.check = None
 
         kwargs.setdefault('extra', self.extra)
         return msg, kwargs
@@ -49,21 +65,49 @@ class CheckLoggingAdapter(logging.LoggerAdapter):
             self.log(logging.WARNING, msg, *args, **kwargs)
 
 
+class CheckLogFormatter(logging.Formatter):
+    def format(self, record):
+        # type: (logging.LogRecord) -> str
+        message = to_native_string(super(CheckLogFormatter, self).format(record))
+        return "{} | ({}:{}) | {}".format(
+            # Default to `-` for non-check logs
+            getattr(record, '_check_id', '-'),
+            getattr(record, '_filename', record.filename),
+            getattr(record, '_lineno', record.lineno),
+            message,
+        )
+
+
 class AgentLogHandler(logging.Handler):
     """
     This handler forwards every log to the Go backend allowing python checks to
     log message within the main agent logging system.
     """
 
+    def __init__(self):
+        # type: () -> None
+        super(AgentLogHandler, self).__init__()
+        self.formatter = CheckLogFormatter()  # type: logging.Formatter
+
     def emit(self, record):
-        msg = "{} | ({}:{}) | {}".format(
-            # Default to `-` for non-check logs
-            getattr(record, '_check_id', '-'),
-            getattr(record, '_filename', record.filename),
-            getattr(record, '_lineno', record.lineno),
-            to_native_string(self.format(record)),
-        )
-        datadog_agent.log(msg, record.levelno)
+        # type: (logging.LogRecord) -> None
+        message = self.format(record)
+        datadog_agent.log(message, record.levelno)
+
+
+class SanitizationFormatter(logging.Formatter):
+    """
+    A formatter-like object that sanitizes log messages to hide sensitive data.
+    """
+
+    def __init__(self, parent, sanitize):
+        # type: (logging.Formatter, Callable[[str], str]) -> None
+        self.parent = parent
+        self.sanitize = sanitize
+
+    def format(self, record):
+        # type: (logging.LogRecord) -> str
+        return self.sanitize(self.parent.format(record))
 
 
 LOG_LEVEL_MAP = {
@@ -98,6 +142,7 @@ def _get_py_loglevel(lvl):
 
 
 def init_logging():
+    # type: () -> None
     """
     Initialize logging (set up forwarding to Go backend and sane defaults)
     """
@@ -115,3 +160,23 @@ def init_logging():
     urllib_logger = logging.getLogger("requests.packages.urllib3")
     urllib_logger.setLevel(logging.WARN)
     urllib_logger.propagate = True
+
+
+def get_check_logger(default_logger=None):
+    """
+    Search the current AgentCheck log starting from closest stack frame.
+    """
+    from datadog_checks.base import AgentCheck
+
+    for i in range(LOGGER_FRAME_SEARCH_MAX_DEPTH):
+        try:
+            frame = sys._getframe(i)
+        except ValueError:
+            break
+        if 'self' in frame.f_locals:
+            check = frame.f_locals['self']
+            if isinstance(check, AgentCheck):
+                return check.log
+    if default_logger is not None:
+        return default_logger
+    return DEFAULT_FALLBACK_LOGGER

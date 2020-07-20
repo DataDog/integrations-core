@@ -1,0 +1,17 @@
+{ 
+  "name": "PGBouncer error and warning",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:pgbouncer status:(error OR warn) ",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": ["source", "service", "host", "status", "@db.user", "@db.instance", "@network.destination.ip", "@network.destination.port"],
+  "options": {
+    "columns": ["status", "host"],
+    "show_date_column": true,
+    "show_message_column": true,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}

@@ -2,10 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from fnmatch import fnmatch
 
 from ..subprocess import run_command
 from ..utils import chdir, path_join, read_file_binary, write_file_binary
-from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_EXTENSIONS, get_root
+from .constants import NON_TESTABLE_FILES, TESTABLE_FILE_PATTERNS, get_root
 from .e2e import get_active_checks, get_configured_envs
 from .git import files_changed
 from .utils import complete_set_root, get_testable_checks
@@ -181,6 +182,7 @@ def construct_pytest_options(
     enter_pdb=False,
     debug=False,
     bench=False,
+    latest_metrics=False,
     coverage=False,
     junit=False,
     marker='',
@@ -208,6 +210,10 @@ def construct_pytest_options(
         pytest_options += ' --benchmark-only --benchmark-cprofile=tottime'
     else:
         pytest_options += ' --benchmark-skip'
+
+    if latest_metrics:
+        pytest_options += ' --run-latest-metrics'
+        marker = 'latest_metrics'
 
     if junit:
         test_group = 'e2e' if e2e else 'unit'
@@ -250,10 +256,20 @@ def pytest_coverage_sources(*checks):
 
 def testable_files(files):
     """
-    Given a list of files, return the files that have an extension listed in TESTABLE_FILE_EXTENSIONS and are
+    Given a list of files, return only those that match any of the TESTABLE_FILE_PATTERNS and are
     not blacklisted by NON_TESTABLE_FILES (metrics.yaml, auto_conf.yaml)
     """
-    return [f for f in files if f.endswith(TESTABLE_FILE_EXTENSIONS) and not f.endswith(NON_TESTABLE_FILES)]
+    filtered = []
+
+    for f in files:
+        if f.endswith(NON_TESTABLE_FILES):
+            continue
+
+        match = any(fnmatch(f, pattern) for pattern in TESTABLE_FILE_PATTERNS)
+        if match:
+            filtered.append(f)
+
+    return filtered
 
 
 def get_changed_checks():

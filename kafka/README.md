@@ -53,6 +53,7 @@ _Available for Agent versions >6.0_
      %d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
      %d [%t] %-5p %c - %m%n
      %r [%t] %p %c %x - %m%n
+     [%d] %p %m (%c)%n
    ```
 
     Clone and edit the [integration pipeline][9] if you have a different format.
@@ -90,7 +91,7 @@ For containerized environments, see the [Autodiscovery with JMX][10] guide.
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Docker log collection][11].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][11].
 
 | Parameter      | Value                                              |
 | -------------- | -------------------------------------------------- |
@@ -142,7 +143,7 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 - [Monitoring Kafka with Datadog][19]
 
 [1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/kafka/images/kafka_dashboard.png
-[2]: https://docs.datadoghq.com/integrations/java
+[2]: https://docs.datadoghq.com/integrations/java/
 [3]: https://docs.datadoghq.com/integrations/kafka/#agent-check-kafka-consumer
 [4]: https://app.datadoghq.com/account/settings#agent
 [5]: https://github.com/DataDog/jmxfetch
@@ -151,12 +152,12 @@ Returns `CRITICAL` if the Agent is unable to connect to and collect metrics from
 [8]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [9]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
 [10]: https://docs.datadoghq.com/agent/guide/autodiscovery-with-jmx/?tab=containerizedagent
-[11]: https://docs.datadoghq.com/agent/docker/log/
+[11]: https://docs.datadoghq.com/agent/kubernetes/log/
 [12]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [13]: https://github.com/DataDog/integrations-core/blob/master/kafka/metadata.csv
-[14]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka
-[15]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub
-[16]: https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application
+[14]: https://docs.datadoghq.com/integrations/faq/troubleshooting-and-deep-dive-for-kafka/
+[15]: https://docs.datadoghq.com/integrations/faq/agent-failed-to-retrieve-rmierver-stub/
+[16]: https://docs.datadoghq.com/integrations/faq/producer-and-consumer-metrics-don-t-appear-in-my-datadog-application/
 [17]: https://www.datadoghq.com/blog/monitoring-kafka-performance-metrics
 [18]: https://www.datadoghq.com/blog/collecting-kafka-performance-metrics
 [19]: https://www.datadoghq.com/blog/monitor-kafka-with-datadog

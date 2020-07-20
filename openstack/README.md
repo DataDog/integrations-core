@@ -1,5 +1,9 @@
 # Openstack Integration
 
+<div class="alert alert-warning">
+<b>Important Note</b>: This integration only applies to OpenStack versions 12 and below (non-containerized OpenStack). If you are looking to collect metrics from OpenStack v13 and above (containerized OpenStack) please use the <a href="https://docs.datadoghq.com/integrations/openstack_controller/">OpenStack Controller integration.</a>
+</div>
+
 ![OpenStack default dashboard][1]
 
 ## Overview
@@ -167,7 +171,7 @@ See also these other Datadog blog posts:
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/openstack/metadata.csv
-[8]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/help/
 [9]: https://www.datadoghq.com/blog/openstack-monitoring-nova
 [10]: https://www.datadoghq.com/blog/install-openstack-in-two-commands
 [11]: https://www.datadoghq.com/blog/openstack-host-aggregates-flavors-availability-zones

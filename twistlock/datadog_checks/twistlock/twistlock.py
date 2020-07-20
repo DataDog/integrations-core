@@ -10,6 +10,7 @@ from dateutil import parser, tz
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.serialization import json
 
 from .config import Config
 from .utils import normalize_api_data_inplace
@@ -322,7 +323,7 @@ class TwistlockCheck(AgentCheck):
         try:
             # it's possible to get a null response from the server
             # {} is a bit easier to deal with
-            j = response.json() or {}
+            j = json.loads(response.content) or {}
             if 'err' in j:
                 err_msg = "Error in response: {}".format(j.get("err"))
                 self.log.error(err_msg)

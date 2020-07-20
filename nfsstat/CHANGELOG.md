@@ -1,5 +1,19 @@
 # CHANGELOG - Nfsstat
 
+## 1.6.0 / 2020-06-29
+
+* [Added] Avoid logging warnings if AutoFS is enabled. See [#6903](https://github.com/DataDog/integrations-core/pull/6903).
+* [Added] Add specs and use new signature. See [#6780](https://github.com/DataDog/integrations-core/pull/6780).
+
+## 1.5.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Fixed] Fix nfsiostat command. See [#6650](https://github.com/DataDog/integrations-core/pull/6650).
+
+## 1.4.2 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.4.1 / 2019-05-30
 
 * [Fixed] Fix non-ascii mounted folder name. See [#3805](https://github.com/DataDog/integrations-core/pull/3805).

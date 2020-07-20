@@ -51,6 +51,12 @@ gitlab_cache_operations_total{controller="RootController",action="index",operati
 gitlab_cache_operations_total{controller="SessionsController",action="new",operation="delete"} 102
 gitlab_cache_operations_total{controller="SessionsController",action="new",operation="read"} 832
 gitlab_cache_operations_total{controller="SessionsController",action="new",operation="write"} 117
+# HELP job_waiter_started_total Multiprocess metric
+# TYPE job_waiter_started_total counter
+job_waiter_started_total 2
+# HELP job_waiter_timeouts_total Multiprocess metric
+# TYPE job_waiter_timeouts_total counter
+job_waiter_timeouts_total 1
 # HELP gitlab_rails_queue_duration_seconds Multiprocess metric
 # TYPE gitlab_rails_queue_duration_seconds histogram
 gitlab_rails_queue_duration_seconds_bucket{le="+Inf"} 217

@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import re
 
+import pytest
 import requests
 
 # Make sure this expected metrics list is up to date with:
@@ -19,6 +20,11 @@ EXPECTED_METRICS = [
     'scheduler_heartbeat',
     'dag_processing.processes',
     'scheduler.tasks.killed_externally',
+    'scheduler.tasks.running',
+    'scheduler.tasks.starving',
+    'sla_email_notification_failure',
+    'ti.start.<dagid>.<taskid>',
+    'ti.finish.<dagid>.<taskid>.<state>',
     'dagbag_size',
     'dag_processing.import_errors',
     'dag_processing.total_parse_time',
@@ -29,8 +35,10 @@ EXPECTED_METRICS = [
     'executor.queued_tasks',
     'executor.running_tasks',
     'pool.open_slots.<pool_name>',
-    'pool.used_slots.<pool_name>',
+    'pool.queued_slots.<pool_name>',
+    'pool.running_slots.<pool_name>',
     'pool.starving_tasks.<pool_name>',
+    # 'pool.used_slots.<pool_name>' appears on https://airflow.apache.org/docs/1.10.11/metrics.html
     'dagrun.dependency-check.<dag_id>',
     'dag.<dag_id>.<task_id>.duration',
     'dag_processing.last_duration.<dag_file>',
@@ -42,6 +50,7 @@ EXPECTED_METRICS = [
 METRIC_PATTERN = re.compile(r'^``([^`]+)``\s+(.*)', re.MULTILINE)
 
 
+@pytest.mark.latest_metrics
 def test_check_metrics_up_to_date():
     url = 'https://raw.githubusercontent.com/apache/airflow/master/docs/metrics.rst'
     resp = requests.get(url)

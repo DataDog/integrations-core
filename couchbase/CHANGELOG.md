@@ -1,5 +1,19 @@
 # CHANGELOG - couchbase
 
+## 1.14.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
+## 1.13.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.12.2 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+* [Fixed] Update `conf.yaml.example` log collection section. See [#5977](https://github.com/DataDog/integrations-core/pull/5977).
+
 ## 1.12.1 / 2019-12-06
 
 * [Fixed] Fix version metadata parsing. See [#5148](https://github.com/DataDog/integrations-core/pull/5148).

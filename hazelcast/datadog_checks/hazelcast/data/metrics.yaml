@@ -1,0 +1,883 @@
+jmx_metrics:
+  # Management Center metrics
+  # https://docs.hazelcast.org/docs/management-center/latest/manual/html/index.html#clustered-jmx-api
+  - include:
+      domain: ManagementCenter
+      exclude_tags:
+        - name
+        - type
+      attribute:
+        LicenseExpirationTime:
+          alias: hazelcast.mc.license_expiration_time
+          metric_type: gauge
+
+  # Overview
+  # https://docs.hazelcast.org/docs/latest/manual/html-single/index.html#jmx-api-per-member
+  - include:
+      domain: com.hazelcast
+      type: HazelcastInstance
+      exclude_tags:
+        - instance
+        - name
+        - type
+      tags:
+        hazelcast_instance: $instance
+      attribute:
+        running:
+          alias: hazelcast.instance.running
+          metric_type: gauge
+        version:
+          alias: hazelcast.instance.version
+          metric_type: gauge
+        memberCount:
+          alias: hazelcast.instance.member_count
+          metric_type: gauge
+  - include:
+      domain: com.hazelcast
+      type: HazelcastInstance.PartitionServiceMBean
+      exclude_tags:
+        - instance
+        - name
+        - type
+      tags:
+        hazelcast_instance: $instance
+      attribute:
+        partitionCount:
+          alias: hazelcast.instance.partition_service.partition_count
+          metric_type: gauge
+        activePartitionCount:
+          alias: hazelcast.instance.partition_service.active_partition_count
+          metric_type: gauge
+        isClusterSafe:
+          alias: hazelcast.instance.partition_service.is_cluster_safe
+          metric_type: gauge
+        isLocalMemberSafe:
+          alias: hazelcast.instance.partition_service.is_local_member_safe
+          metric_type: gauge
+  - include:
+      domain: com.hazelcast
+      type: HazelcastInstance.ManagedExecutorService
+      exclude_tags:
+        - instance
+        - name
+        - type
+      tags:
+        hazelcast_instance: $instance
+      attribute:
+        queueSize:
+          alias: hazelcast.instance.managed_executor_service.queue_size
+          metric_type: gauge
+        poolSize:
+          alias: hazelcast.instance.managed_executor_service.pool_size
+          metric_type: gauge
+        maximumPoolSize:
+          alias: hazelcast.instance.managed_executor_service.maximum_pool_size
+          metric_type: gauge
+        remainingQueueCapacity:
+          alias: hazelcast.instance.managed_executor_service.remaining_queue_capacity
+          metric_type: gauge
+        isShutdown:
+          alias: hazelcast.instance.managed_executor_service.is_shutdown
+          metric_type: gauge
+        isTerminated:
+          alias: hazelcast.instance.managed_executor_service.is_terminated
+          metric_type: gauge
+        completedTaskCount:
+          alias: hazelcast.instance.managed_executor_service.completed_task_count
+          metric_type: gauge
+
+  # Map
+  - include:
+      domain: com.hazelcast
+      type: IMap
+      exclude_tags:
+        - instance
+        - name
+        - type
+      tags:
+        hazelcast_instance: $instance
+      attribute:
+        localBackupCount:
+          alias: hazelcast.imap.local_backup_count
+          metric_type: gauge
+        localBackupEntryCount:
+          alias: hazelcast.imap.local_backup_entry_count
+          metric_type: gauge
+        localBackupEntryMemoryCost:
+          alias: hazelcast.imap.local_backup_entry_memory_cost
+          metric_type: gauge
+        localCreationTime:
+          alias: hazelcast.imap.local_creation_time
+          metric_type: gauge
+        localDirtyEntryCount:
+          alias: hazelcast.imap.local_dirty_entry_count
+          metric_type: gauge
+        localEventOperationCount:
+          alias: hazelcast.imap.local_event_operation_count
+          metric_type: gauge
+        localGetOperationCount:
+          alias: hazelcast.imap.local_get_operation_count
+          metric_type: gauge
+        localHeapCost:
+          alias: hazelcast.imap.local_heap_cost
+          metric_type: gauge
+        localHits:
+          alias: hazelcast.imap.local_hits
+          metric_type: gauge
+        localLastAccessTime:
+          alias: hazelcast.imap.local_last_access_time
+          metric_type: gauge
+        localLastUpdateTime:
+          alias: hazelcast.imap.local_last_update_time
+          metric_type: gauge
+        localLockedEntryCount:
+          alias: hazelcast.imap.local_locked_entry_count
+          metric_type: gauge
+        localMaxGetLatency:
+          alias: hazelcast.imap.local_max_get_latency
+          metric_type: gauge
+        localMaxPutLatency:
+          alias: hazelcast.imap.local_max_put_latency
+          metric_type: gauge
+        localMaxRemoveLatency:
+          alias: hazelcast.imap.local_max_remove_latency
+          metric_type: gauge
+        localOtherOperationCount:
+          alias: hazelcast.imap.local_other_operation_count
+          metric_type: gauge
+        localOwnedEntryCount:
+          alias: hazelcast.imap.local_owned_entry_count
+          metric_type: gauge
+        localOwnedEntryMemoryCost:
+          alias: hazelcast.imap.local_owned_entry_memory_cost
+          metric_type: gauge
+        localPutOperationCount:
+          alias: hazelcast.imap.local_put_operation_count
+          metric_type: gauge
+        localRemoveOperationCount:
+          alias: hazelcast.imap.local_remove_operation_count
+          metric_type: gauge
+        localTotal:
+          alias: hazelcast.imap.local_total
+          metric_type: gauge
+        localTotalGetLatency:
+          alias: hazelcast.imap.local_total_get_latency
+          metric_type: gauge
+        localTotalPutLatency:
+          alias: hazelcast.imap.local_total_put_latency
+          metric_type: gauge
+        localTotalRemoveLatency:
+          alias: hazelcast.imap.local_total_remove_latency
+          metric_type: gauge
+        size:
+          alias: hazelcast.imap.size
+          metric_type: gauge
+
+  # MultiMap
+  - include:
+      domain: com.hazelcast
+      type: MultiMap
+      exclude_tags:
+        - instance
+        - name
+        - type
+      tags:
+        hazelcast_instance: $instance
+      attribute:
+        localBackupCount:
+          alias: hazelcast.multimap.local_backup_count
+          metric_type: gauge
+        localBackupEntryCount:
+          alias: hazelcast.multimap.local_backup_entry_count
+          metric_type: gauge
+        localBackupEntryMemoryCost:
+          alias: hazelcast.multimap.local_backup_entry_memory_cost
+          metric_type: gauge
+        localCreationTime:
+          alias: hazelcast.multimap.local_creation_time
+          metric_type: gauge
+        localEventOperationCount:
+          alias: hazelcast.multimap.local_event_operation_count
+          metric_type: gauge
+        localGetOperationCount:
+          alias: hazelcast.multimap.local_get_operation_count
+          metric_type: gauge
+        localHits:
+          alias: hazelcast.multimap.local_hits
+          metric_type: gauge
+        localLastAccessTime:
+          alias: hazelcast.multimap.local_last_access_time
+          metric_type: gauge
+        localLastUpdateTime:
+          alias: hazelcast.multimap.local_last_update_time
+          metric_type: gauge
+        localLockedEntryCount:
+          alias: hazelcast.multimap.local_locked_entry_count
+          metric_type: gauge
+        localMaxGetLatency:
+          alias: hazelcast.multimap.local_max_get_latency
+          metric_type: gauge
+        localMaxPutLatency:
+          alias: hazelcast.multimap.local_max_put_latency
+          metric_type: gauge
+        localMaxRemoveLatency:
+          alias: hazelcast.multimap.local_max_remove_latency
+          metric_type: gauge
+        localOtherOperationCount:
+          alias: hazelcast.multimap.local_other_operation_count
+          metric_type: gauge
+        localOwnedEntryCount:
+          alias: hazelcast.multimap.local_owned_entry_count
+          metric_type: gauge
+        localOwnedEntryMemoryCost:
+          alias: hazelcast.multimap.local_owned_entry_memory_cost
+          metric_type: gauge
+        localPutOperationCount:
+          alias: hazelcast.multimap.local_put_operation_count
+          metric_type: gauge
+        localRemoveOperationCount:
+          alias: hazelcast.multimap.local_remove_operation_count
+          metric_type: gauge
+        localTotal:
+          alias: hazelcast.multimap.local_total
+          metric_type: gauge
+        localTotalGetLatency:
+          alias: hazelcast.multimap.local_total_get_latency
+          metric_type: gauge
+        localTotalPutLatency:
+          alias: hazelcast.multimap.local_total_put_latency
+          metric_type: gauge
+        localTotalRemoveLatency:
+          alias: hazelcast.multimap.local_total_remove_latency
+          metric_type: gauge
+        size:
+          alias: hazelcast.multimap.size
+          metric_type: gauge
+
+  # Replicated Map
+  - include:
+      domain: com.hazelcast
+      type: ReplicatedMap
+      exclude_tags:
+        - instance
+        - name
+        - type
+      tags:
+        hazelcast_instance: $instance
+      attribute:
+        localCreationTime:
+          alias: hazelcast.replicatedmap.local_creation_time
+          metric_type: gauge
+        localEventOperationCount:
+          alias: hazelcast.replicatedmap.local_event_operation_count
+          metric_type: gauge
+        localGetOperationCount:
+          alias: hazelcast.replicatedmap.local_get_operation_count
+          metric_type: gauge
+        localHits:
+          alias: hazelcast.replicatedmap.local_hits
+          metric_type: gauge
+        localLastAccessTime:
+          alias: hazelcast.replicatedmap.local_last_access_time
+          metric_type: gauge
+        localLastUpdateTime:
+          alias: hazelcast.replicatedmap.local_last_update_time
+          metric_type: gauge
+        localMaxGetLatency:
+          alias: hazelcast.replicatedmap.local_max_get_latency
+          metric_type: gauge
+        localMaxPutLatency:
+          alias: hazelcast.replicatedmap.local_max_put_latency
+          metric_type: gauge
+        localMaxRemoveLatency:
+          alias: hazelcast.replicatedmap.local_max_remove_latency
+          metric_type: gauge
+        localOtherOperationCount:
+          alias: hazelcast.replicatedmap.local_other_operation_count
+          metric_type: gauge
+        localOwnedEntryCount:
+          alias: hazelcast.replicatedmap.local_owned_entry_count
+          metric_type: gauge
+        localPutOperationCount:
+          alias: hazelcast.replicatedmap.local_put_operation_count
+          metric_type: gauge
+        localRemoveOperationCount:
+          alias: hazelcast.replicatedmap.local_remove_operation_count
+          metric_type: gauge
+        localTotal:
+          alias: hazelcast.replicatedmap.local_total
+          metric_type: gauge
+        localTotalGetLatency:
+          alias: hazelcast.replicatedmap.local_total_get_latency
+          metric_type: gauge
+        localTotalPutLatency:
+          alias: hazelcast.replicatedmap.local_total_put_latency
+          metric_type: gauge
+        localTotalRemoveLatency:
+          alias: hazelcast.replicatedmap.local_total_remove_latency
+          metric_type: gauge
+        size:
+          alias: hazelcast.replicatedmap.size
+          metric_type: gauge
+
+  # Member details
+  - include:
+      domain: com.hazelcast
+      type: Metrics
+      exclude_tags:
+        - instance
+        - name
+        - type
+        - tag.*
+      tags:
+        hazelcast_instance: $instance
+      attribute:
+        acceptedSocketCount:
+          alias: hazelcast.member.accepted_socket_count
+          metric_type: gauge
+        activeCount:
+          alias: hazelcast.member.active_count
+          metric_type: gauge
+        activeMembers:
+          alias: hazelcast.member.active_members
+          metric_type: gauge
+        activeMembersCommitIndex:
+          alias: hazelcast.member.active_members_commit_index
+          metric_type: gauge
+        asyncOperations:
+          alias: hazelcast.member.async_operations
+          metric_type: gauge
+        availableProcessors:
+          alias: hazelcast.member.available_processors
+          metric_type: gauge
+        backupTimeoutMillis:
+          alias: hazelcast.member.backup_timeout_millis
+          metric_type: gauge
+        backupTimeouts:
+          alias: hazelcast.member.backup_timeouts
+          metric_type: gauge
+        bytesRead:
+          alias: hazelcast.member.bytes_read
+          metric_type: gauge
+        bytesReceived:
+          alias: hazelcast.member.bytes_received
+          metric_type: gauge
+        bytesSend:
+          alias: hazelcast.member.bytes_send
+          metric_type: gauge
+        bytesTransceived:
+          alias: hazelcast.member.bytes_transceived
+          metric_type: gauge
+        bytesWritten:
+          alias: hazelcast.member.bytes_written
+          metric_type: gauge
+        callTimeoutCount:
+          alias: hazelcast.member.call_timeout_count
+          metric_type: gauge
+        clientCount:
+          alias: hazelcast.member.client_count
+          metric_type: gauge
+        closedCount:
+          alias: hazelcast.member.closed_count
+          metric_type: gauge
+        clusterStartTime:
+          alias: hazelcast.member.cluster_start_time
+          metric_type: gauge
+        clusterTime:
+          alias: hazelcast.member.cluster_time
+          metric_type: gauge
+        clusterTimeDiff:
+          alias: hazelcast.member.cluster_time_diff
+          metric_type: gauge
+        clusterUpTime:
+          alias: hazelcast.member.cluster_up_time
+          metric_type: gauge
+        commitCount:
+          alias: hazelcast.member.commit_count
+          metric_type: gauge
+        committedHeap:
+          alias: hazelcast.member.committed_heap
+          metric_type: gauge
+        committedNative:
+          alias: hazelcast.member.committed_native
+          metric_type: gauge
+        committedVirtualMemorySize:
+          alias: hazelcast.member.committed_virtual_memory_size
+          metric_type: gauge
+        completedCount:
+          alias: hazelcast.member.completed_count
+          metric_type: gauge
+        completedMigrations:
+          alias: hazelcast.member.completed_migrations
+          metric_type: gauge
+        completedOperationBatchCount:
+          alias: hazelcast.member.completed_operation_batch_count
+          metric_type: gauge
+        completedOperationCount:
+          alias: hazelcast.member.completed_operation_count
+          metric_type: gauge
+        completedPacketCount:
+          alias: hazelcast.member.completed_packet_count
+          metric_type: gauge
+        completedPartitionSpecificRunnableCount:
+          alias: hazelcast.member.completed_partition_specific_runnable_count
+          metric_type: gauge
+        completedRunnableCount:
+          alias: hazelcast.member.completed_runnable_count
+          metric_type: gauge
+        completedTaskCount:
+          alias: hazelcast.member.completed_task_count
+          metric_type: gauge
+        completedTasks:
+          alias: hazelcast.member.completed_tasks
+          metric_type: gauge
+        completedTotalCount:
+          alias: hazelcast.member.completed_total_count
+          metric_type: gauge
+        connectionListenerCount:
+          alias: hazelcast.member.connection_listener_count
+          metric_type: gauge
+        connectionType:
+          alias: hazelcast.member.connection_type
+          metric_type: gauge
+        count:
+          alias: hazelcast.member.count
+          metric_type: gauge
+        createdCount:
+          alias: hazelcast.member.created_count
+          metric_type: gauge
+        daemonThreadCount:
+          alias: hazelcast.member.daemon_thread_count
+          metric_type: gauge
+        delayedExecutionCount:
+          alias: hazelcast.member.delayed_execution_count
+          metric_type: gauge
+        destroyedCount:
+          alias: hazelcast.member.destroyed_count
+          metric_type: gauge
+        destroyedGroupIds:
+          alias: hazelcast.member.destroyed_group_ids
+          metric_type: gauge
+        elapsedDestinationCommitTime:
+          alias: hazelcast.member.elapsed_destination_commit_time
+          metric_type: gauge
+        elapsedMigrationOperationTime:
+          alias: hazelcast.member.elapsed_migration_operation_time
+          metric_type: gauge
+        elapsedMigrationTime:
+          alias: hazelcast.member.elapsed_migration_time
+          metric_type: gauge
+        errorCount:
+          alias: hazelcast.member.error_count
+          metric_type: gauge
+        eventCount:
+          alias: hazelcast.member.event_count
+          metric_type: gauge
+        eventQueueSize:
+          alias: hazelcast.member.event_queue_size
+          metric_type: gauge
+        eventsProcessed:
+          alias: hazelcast.member.events_processed
+          metric_type: gauge
+        exceptionCount:
+          alias: hazelcast.member.exception_count
+          metric_type: gauge
+        failedBackups:
+          alias: hazelcast.member.failed_backups
+          metric_type: gauge
+        framesTransceived:
+          alias: hazelcast.member.frames_transceived
+          metric_type: gauge
+        freeHeap:
+          alias: hazelcast.member.free_heap
+          metric_type: gauge
+        freeMemory:
+          alias: hazelcast.member.free_memory
+          metric_type: gauge
+        freeNative:
+          alias: hazelcast.member.free_native
+          metric_type: gauge
+        freePhysical:
+          alias: hazelcast.member.free_physical
+          metric_type: gauge
+        freePhysicalMemorySize:
+          alias: hazelcast.member.free_physical_memory_size
+          metric_type: gauge
+        freeSpace:
+          alias: hazelcast.member.free_space
+          metric_type: gauge
+        freeSwapSpaceSize:
+          alias: hazelcast.member.free_swap_space_size
+          metric_type: gauge
+        genericPriorityQueueSize:
+          alias: hazelcast.member.generic_priority_queue_size
+          metric_type: gauge
+        genericQueueSize:
+          alias: hazelcast.member.generic_queue_size
+          metric_type: gauge
+        genericThreadCount:
+          alias: hazelcast.member.generic_thread_count
+          metric_type: gauge
+        groups:
+          alias: hazelcast.member.groups
+          metric_type: gauge
+        heartbeatBroadcastPeriodMillis:
+          alias: hazelcast.member.heartbeat_broadcast_period_millis
+          metric_type: gauge
+        heartbeatPacketsReceived:
+          alias: hazelcast.member.heartbeat_packets_received
+          metric_type: gauge
+        heartbeatPacketsSent:
+          alias: hazelcast.member.heartbeat_packets_sent
+          metric_type: gauge
+        idleTimeMillis:
+          alias: hazelcast.member.idle_time_millis
+          metric_type: gauge
+        idleTimeMs:
+          alias: hazelcast.member.idle_time_ms
+          metric_type: gauge
+        imbalanceDetectedCount:
+          alias: hazelcast.member.imbalance_detected_count
+          metric_type: gauge
+        inProgressCount:
+          alias: hazelcast.member.in_progress_count
+          metric_type: gauge
+        invocationScanPeriodMillis:
+          alias: hazelcast.member.invocation_scan_period_millis
+          metric_type: gauge
+        invocationTimeoutMillis:
+          alias: hazelcast.member.invocation_timeout_millis
+          metric_type: gauge
+        invocations.lastCallId:
+          alias: hazelcast.member.invocations.last_call_id
+          metric_type: gauge
+        invocations.pending:
+          alias: hazelcast.member.invocations.pending
+          metric_type: gauge
+        invocations.usedPercentage:
+          alias: hazelcast.member.invocations.used_percentage
+          metric_type: gauge
+        ioThreadId:
+          alias: hazelcast.member.io_thread_id
+          metric_type: gauge
+        lastHeartbeat:
+          alias: hazelcast.member.last_heartbeat
+          metric_type: gauge
+        lastRepartitionTime:
+          alias: hazelcast.member.last_repartition_time
+          metric_type: gauge
+        listenerCount:
+          alias: hazelcast.member.listener_count
+          metric_type: gauge
+        loadedClassesCount:
+          alias: hazelcast.member.loaded_classes_count
+          metric_type: gauge
+        localClockTime:
+          alias: hazelcast.member.local_clock_time
+          metric_type: gauge
+        localPartitionCount:
+          alias: hazelcast.member.local_partition_count
+          metric_type: gauge
+        majorCount:
+          alias: hazelcast.member.major_count
+          metric_type: gauge
+        majorTime:
+          alias: hazelcast.member.major_time
+          metric_type: gauge
+        maxBackupCount:
+          alias: hazelcast.member.max_backup_count
+          metric_type: gauge
+        maxClusterTimeDiff:
+          alias: hazelcast.member.max_cluster_time_diff
+          metric_type: gauge
+        maxFileDescriptorCount:
+          alias: hazelcast.member.max_file_descriptor_count
+          metric_type: gauge
+        maxHeap:
+          alias: hazelcast.member.max_heap
+          metric_type: gauge
+        maxMemory:
+          alias: hazelcast.member.max_memory
+          metric_type: gauge
+        maxMetadata:
+          alias: hazelcast.member.max_metadata
+          metric_type: gauge
+        maxNative:
+          alias: hazelcast.member.max_native
+          metric_type: gauge
+        maximumPoolSize:
+          alias: hazelcast.member.maximum_pool_size
+          metric_type: gauge
+        memberGroupsSize:
+          alias: hazelcast.member.member_groups_size
+          metric_type: gauge
+        migrationActive:
+          alias: hazelcast.member.migration_active
+          metric_type: gauge
+        migrationCompletedCount:
+          alias: hazelcast.member.migration_completed_count
+          metric_type: gauge
+        migrationQueueSize:
+          alias: hazelcast.member.migration_queue_size
+          metric_type: gauge
+        minorCount:
+          alias: hazelcast.member.minor_count
+          metric_type: gauge
+        minorTime:
+          alias: hazelcast.member.minor_time
+          metric_type: gauge
+        missingMembers:
+          alias: hazelcast.member.missing_members
+          metric_type: gauge
+        monitorCount:
+          alias: hazelcast.member.monitor_count
+          metric_type: gauge
+        nodes:
+          alias: hazelcast.member.nodes
+          metric_type: gauge
+        normalFramesRead:
+          alias: hazelcast.member.normal_frames_read
+          metric_type: gauge
+        normalFramesWritten:
+          alias: hazelcast.member.normal_frames_written
+          metric_type: gauge
+        normalPendingCount:
+          alias: hazelcast.member.normal_pending_count
+          metric_type: gauge
+        normalTimeouts:
+          alias: hazelcast.member.normal_timeouts
+          metric_type: gauge
+        openFileDescriptorCount:
+          alias: hazelcast.member.open_file_descriptor_count
+          metric_type: gauge
+        openedCount:
+          alias: hazelcast.member.opened_count
+          metric_type: gauge
+        operationTimeoutCount:
+          alias: hazelcast.member.operation_timeout_count
+          metric_type: gauge
+        ownerId:
+          alias: hazelcast.member.owner_id
+          metric_type: gauge
+        packetsReceived:
+          alias: hazelcast.member.packets_received
+          metric_type: gauge
+        packetsSend:
+          alias: hazelcast.member.packets_send
+          metric_type: gauge
+        parkQueueCount:
+          alias: hazelcast.member.park_queue_count
+          metric_type: gauge
+        partitionThreadCount:
+          alias: hazelcast.member.partition_thread_count
+          metric_type: gauge
+        peakThreadCount:
+          alias: hazelcast.member.peak_thread_count
+          metric_type: gauge
+        plannedMigrations:
+          alias: hazelcast.member.planned_migrations
+          metric_type: gauge
+        poolSize:
+          alias: hazelcast.member.pool_size
+          metric_type: gauge
+        priorityFramesRead:
+          alias: hazelcast.member.priority_frames_read
+          metric_type: gauge
+        priorityFramesTransceived:
+          alias: hazelcast.member.priority_frames_transceived
+          metric_type: gauge
+        priorityFramesWritten:
+          alias: hazelcast.member.priority_frames_written
+          metric_type: gauge
+        priorityPendingCount:
+          alias: hazelcast.member.priority_pending_count
+          metric_type: gauge
+        priorityQueueSize:
+          alias: hazelcast.member.priority_queue_size
+          metric_type: gauge
+        priorityWriteQueueSize:
+          alias: hazelcast.member.priority_write_queue_size
+          metric_type: gauge
+        processCount:
+          alias: hazelcast.member.process_count
+          metric_type: gauge
+        processCpuLoad:
+          alias: hazelcast.member.process_cpu_load
+          metric_type: gauge
+        processCpuTime:
+          alias: hazelcast.member.process_cpu_time
+          metric_type: gauge
+        proxyCount:
+          alias: hazelcast.member.proxy_count
+          metric_type: gauge
+        publicationCount:
+          alias: hazelcast.member.publication_count
+          metric_type: gauge
+        queueCapacity:
+          alias: hazelcast.member.queue_capacity
+          metric_type: gauge
+        queueSize:
+          alias: hazelcast.member.queue_size
+          metric_type: gauge
+        rejectedCount:
+          alias: hazelcast.member.rejected_count
+          metric_type: gauge
+        remainingQueueCapacity:
+          alias: hazelcast.member.remaining_queue_capacity
+          metric_type: gauge
+        replicaSyncRequestsCounter:
+          alias: hazelcast.member.replica_sync_requests_counter
+          metric_type: gauge
+        replicaSyncSemaphore:
+          alias: hazelcast.member.replica_sync_semaphore
+          metric_type: gauge
+        responseQueueSize:
+          alias: hazelcast.member.response_queue_size
+          metric_type: gauge
+        responses.backupCount:
+          alias: hazelcast.member.responses.backup_count
+          metric_type: gauge
+        responses.errorCount:
+          alias: hazelcast.member.responses.error_count
+          metric_type: gauge
+        responses.missingCount:
+          alias: hazelcast.member.responses.missing_count
+          metric_type: gauge
+        responses.normalCount:
+          alias: hazelcast.member.responses.normal_count
+          metric_type: gauge
+        responses.timeoutCount:
+          alias: hazelcast.member.responses.timeout_count
+          metric_type: gauge
+        retryCount:
+          alias: hazelcast.member.retry_count
+          metric_type: gauge
+        rollbackCount:
+          alias: hazelcast.member.rollback_count
+          metric_type: gauge
+        runningCount:
+          alias: hazelcast.member.running_count
+          metric_type: gauge
+        runningGenericCount:
+          alias: hazelcast.member.running_generic_count
+          metric_type: gauge
+        runningPartitionCount:
+          alias: hazelcast.member.running_partition_count
+          metric_type: gauge
+        scheduled:
+          alias: hazelcast.member.scheduled
+          metric_type: gauge
+        selectorIOExceptionCount:
+          alias: hazelcast.member.selector_i_o_exception_count
+          metric_type: gauge
+        selectorRebuildCount:
+          alias: hazelcast.member.selector_rebuild_count
+          metric_type: gauge
+        selectorRecreateCount:
+          alias: hazelcast.member.selector_recreate_count
+          metric_type: gauge
+        size:
+          alias: hazelcast.member.size
+          metric_type: gauge
+        startCount:
+          alias: hazelcast.member.start_count
+          metric_type: gauge
+        startedMigrations:
+          alias: hazelcast.member.started_migrations
+          metric_type: gauge
+        stateVersion:
+          alias: hazelcast.member.state_version
+          metric_type: gauge
+        syncDeliveryFailureCount:
+          alias: hazelcast.member.sync_delivery_failure_count
+          metric_type: gauge
+        systemCpuLoad:
+          alias: hazelcast.member.system_cpu_load
+          metric_type: gauge
+        systemLoadAverage:
+          alias: hazelcast.member.system_load_average
+          metric_type: gauge
+        taskQueueSize:
+          alias: hazelcast.member.task_queue_size
+          metric_type: gauge
+        terminatedRaftNodeGroupIds:
+          alias: hazelcast.member.terminated_raft_node_group_ids
+          metric_type: gauge
+        textCount:
+          alias: hazelcast.member.text_count
+          metric_type: gauge
+        threadCount:
+          alias: hazelcast.member.thread_count
+          metric_type: gauge
+        totalCompletedMigrations:
+          alias: hazelcast.member.total_completed_migrations
+          metric_type: gauge
+        totalElapsedDestinationCommitTime:
+          alias: hazelcast.member.total_elapsed_destination_commit_time
+          metric_type: gauge
+        totalElapsedMigrationOperationTime:
+          alias: hazelcast.member.total_elapsed_migration_operation_time
+          metric_type: gauge
+        totalElapsedMigrationTime:
+          alias: hazelcast.member.total_elapsed_migration_time
+          metric_type: gauge
+        totalFailureCount:
+          alias: hazelcast.member.total_failure_count
+          metric_type: gauge
+        totalLoadedClassesCount:
+          alias: hazelcast.member.total_loaded_classes_count
+          metric_type: gauge
+        totalMemory:
+          alias: hazelcast.member.total_memory
+          metric_type: gauge
+        totalParkedOperationCount:
+          alias: hazelcast.member.total_parked_operation_count
+          metric_type: gauge
+        totalPhysical:
+          alias: hazelcast.member.total_physical
+          metric_type: gauge
+        totalPhysicalMemorySize:
+          alias: hazelcast.member.total_physical_memory_size
+          metric_type: gauge
+        totalRegistrations:
+          alias: hazelcast.member.total_registrations
+          metric_type: gauge
+        totalSpace:
+          alias: hazelcast.member.total_space
+          metric_type: gauge
+        totalStartedThreadCount:
+          alias: hazelcast.member.total_started_thread_count
+          metric_type: gauge
+        totalSwapSpaceSize:
+          alias: hazelcast.member.total_swap_space_size
+          metric_type: gauge
+        unknownTime:
+          alias: hazelcast.member.unknown_time
+          metric_type: gauge
+        unknownCount:
+          alias: hazelcast.member.unknown_count
+          metric_type: gauge
+        unloadedClassesCount:
+          alias: hazelcast.member.unloaded_classes_count
+          metric_type: gauge
+        uptime:
+          alias: hazelcast.member.uptime
+          metric_type: gauge
+        usableSpace:
+          alias: hazelcast.member.usable_space
+          metric_type: gauge
+        usedHeap:
+          alias: hazelcast.member.used_heap
+          metric_type: gauge
+        usedMemory:
+          alias: hazelcast.member.used_memory
+          metric_type: gauge
+        usedMetadata:
+          alias: hazelcast.member.used_metadata
+          metric_type: gauge
+        usedNative:
+          alias: hazelcast.member.used_native
+          metric_type: gauge
+        writeQueueSize:
+          alias: hazelcast.member.write_queue_size
+          metric_type: gauge

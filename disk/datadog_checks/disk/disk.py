@@ -16,8 +16,19 @@ from datadog_checks.base.utils.platform import Platform
 from datadog_checks.base.utils.subprocess_output import SubprocessOutputEmptyError, get_subprocess_output
 from datadog_checks.base.utils.timeout import TimeoutException, timeout
 
-# See: https://github.com/DataDog/integrations-core/pull/1109#discussion_r167133580
-IGNORE_CASE = re.I if platform.system() == 'Windows' else 0
+if platform.system() == 'Windows':
+    # See: https://github.com/DataDog/integrations-core/pull/1109#discussion_r167133580
+    IGNORE_CASE = re.I
+
+    def _base_device_name(device):
+        return device.strip('\\').lower()
+
+
+else:
+    IGNORE_CASE = 0
+
+    def _base_device_name(device):
+        return os.path.basename(device)
 
 
 class Disk(AgentCheck):
@@ -47,7 +58,7 @@ class Disk(AgentCheck):
         self._service_check_rw = is_affirmative(instance.get('service_check_rw', False))
         self._min_disk_size = instance.get('min_disk_size', 0) * 1024 * 1024
         self._blkid_cache_file = instance.get('blkid_cache_file')
-
+        self._timeout = instance.get('timeout', 5)
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
         self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
@@ -67,10 +78,13 @@ class Disk(AgentCheck):
 
             # Get disk metrics here to be able to exclude on total usage
             try:
-                disk_usage = timeout(5)(psutil.disk_usage)(part.mountpoint)
+                disk_usage = timeout(self._timeout)(psutil.disk_usage)(part.mountpoint)
             except TimeoutException:
                 self.log.warning(
-                    u'Timeout while retrieving the disk usage of `%s` mountpoint. Skipping...', part.mountpoint
+                    u'Timeout after %d seconds while retrieving the disk usage of `%s` mountpoint. '
+                    u'You might want to change the timeout length in the settings.',
+                    self._timeout,
+                    part.mountpoint,
                 )
                 continue
             except Exception as e:
@@ -105,6 +119,7 @@ class Disk(AgentCheck):
                 device_name = device_name.strip('\\').lower()
 
             tags.append('device:{}'.format(device_name))
+            tags.append('device_name:{}'.format(_base_device_name(part.device)))
             for metric_name, metric_value in iteritems(self._collect_part_metrics(part, disk_usage)):
                 self.gauge(metric_name, metric_value, tags=tags)
 
@@ -220,9 +235,14 @@ class Disk(AgentCheck):
         metrics = {}
         # we need to timeout this, too.
         try:
-            inodes = timeout(5)(os.statvfs)(mountpoint)
+            inodes = timeout(self._timeout)(os.statvfs)(mountpoint)
         except TimeoutException:
-            self.log.warning(u'Timeout while retrieving the disk usage of `%s` mountpoint. Skipping...', mountpoint)
+            self.log.warning(
+                u'Timeout after %d seconds while retrieving the disk usage of `%s` mountpoint. '
+                u'You might want to change the timeout length in the settings.',
+                self._timeout,
+                mountpoint,
+            )
             return metrics
         except Exception as e:
             self.log.warning('Unable to get disk metrics for %s: %s', mountpoint, e)
@@ -250,6 +270,7 @@ class Disk(AgentCheck):
                 write_time_pct = disk.write_time * 100 / 1000
                 metric_tags = [] if self._custom_tags is None else self._custom_tags[:]
                 metric_tags.append('device:{}'.format(disk_name))
+                metric_tags.append('device_name:{}'.format(_base_device_name(disk_name)))
                 if self.devices_label.get(disk_name):
                     metric_tags.append(self.devices_label.get(disk_name))
                 self.rate(self.METRIC_DISK.format('read_time_pct'), read_time_pct, tags=metric_tags)

@@ -1,4 +1,4 @@
-# active_directory Integration
+# Active Directory Integration
 
 ## Overview
 
@@ -9,6 +9,8 @@ Get metrics and logs from Microsoft Active Directory to visualize and monitor it
 ### Installation
 
 The Agent's Active Directory check is included in the [Datadog Agent][1] package, so you don't need to install anything else on your servers.
+
+If installing the Datadog Agent on a domain environment, see [the installation requirements for the Agent][9]
 
 ### Configuration
 
@@ -74,4 +76,5 @@ Need help? Contact [Datadog support][8].
 [5]: https://www.rubydoc.info/gems/activedirectory/0.9.3
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/active_directory/metadata.csv
-[8]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/agent/faq/windows-agent-ddagent-user/#installation-in-a-domain-environment

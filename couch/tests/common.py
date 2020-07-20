@@ -5,7 +5,7 @@
 import os
 import re
 
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 CHECK_NAME = "couch"
 CHECK_ID = 'test:123'
@@ -52,8 +52,10 @@ BAD_CONFIG = {"server": "http://localhost:11111"}
 
 BAD_CONFIG_TAGS = ["instance:http://localhost:11111"]
 
-NODE1 = {"server": URL, "user": USER, "password": PASSWORD, "name": "node1@127.0.0.1"}
+NODE1 = {"server": URL, "user": USER, "password": PASSWORD, "name": "couchdb@couchdb-1.example.com"}
 
-NODE2 = {"server": URL, "user": USER, "password": PASSWORD, "name": "node2@127.0.0.1"}
+NODE2 = {"server": URL, "user": USER, "password": PASSWORD, "name": "couchdb@couchdb-2.example.com"}
 
-NODE3 = {"server": URL, "user": USER, "password": PASSWORD, "name": "node3@127.0.0.1"}
+NODE3 = {"server": URL, "user": USER, "password": PASSWORD, "name": "couchdb@couchdb-3.example.com"}
+
+ALL_NODES = [NODE1, NODE2, NODE3]

@@ -9,10 +9,10 @@ from copy import deepcopy
 
 from six import iteritems
 
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.config import is_affirmative
-from datadog_checks.errors import CheckException
-from datadog_checks.utils.common import to_native_string
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.common import to_string
 
 try:
     # this module is only available in agent 6
@@ -70,7 +70,7 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     DEFAULT_METRIC_LIMIT = 0
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         # We do not support more than one instance of kube-state-metrics
         instance = instances[0]
         kubernetes_state_instance = self._create_kubernetes_state_prometheus_instance(instance)
@@ -81,7 +81,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         self.keep_ksm_labels = is_affirmative(kubernetes_state_instance.get('keep_ksm_labels', True))
 
         generic_instances = [kubernetes_state_instance]
-        super(KubernetesState, self).__init__(name, init_config, agentConfig, instances=generic_instances)
+        super(KubernetesState, self).__init__(name, init_config, instances=generic_instances)
 
         self.condition_to_status_positive = {'true': self.OK, 'false': self.CRITICAL, 'unknown': self.UNKNOWN}
 
@@ -177,6 +177,8 @@ class KubernetesState(OpenMetricsBaseCheck):
 
         extra_labels = ksm_instance.get('label_joins', {})
         hostname_override = is_affirmative(ksm_instance.get('hostname_override', True))
+        join_kube_labels = is_affirmative(ksm_instance.get('join_kube_labels', False))
+        join_standard_tags = is_affirmative(ksm_instance.get('join_standard_tags', False))
 
         ksm_instance.update(
             {
@@ -326,14 +328,14 @@ class KubernetesState(OpenMetricsBaseCheck):
                     'kube_verticalpodautoscaler_labels',
                 ],
                 'label_joins': {
-                    'kube_pod_info': {'label_to_match': 'pod', 'labels_to_get': ['node']},
-                    'kube_pod_status_phase': {'label_to_match': 'pod', 'labels_to_get': ['phase']},
+                    'kube_pod_info': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['node']},
+                    'kube_pod_status_phase': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['phase']},
                     'kube_persistentvolume_info': {
-                        'label_to_match': 'persistentvolume',
+                        'labels_to_match': ['persistentvolume'],  # Persistent Volumes are not namespaced
                         'labels_to_get': ['storageclass'],
                     },
                     'kube_persistentvolumeclaim_info': {
-                        'label_to_match': 'persistentvolumeclaim',
+                        'labels_to_match': ['persistentvolumeclaim', 'namespace'],
                         'labels_to_get': ['storageclass'],
                     },
                 },
@@ -359,6 +361,54 @@ class KubernetesState(OpenMetricsBaseCheck):
             ksm_instance['ignore_metrics'].extend(experimental_metrics_mapping.keys())
 
         ksm_instance['prometheus_url'] = endpoint
+
+        if join_kube_labels:
+            ksm_instance['label_joins'].update(
+                {
+                    'kube_pod_labels': {'labels_to_match': ['pod', 'namespace'], 'labels_to_get': ['*']},
+                    'kube_deployment_labels': {'labels_to_match': ['deployment', 'namespace'], 'labels_to_get': ['*']},
+                    'kube_daemonset_labels': {'labels_to_match': ['daemonset', 'namespace'], 'labels_to_get': ['*']},
+                }
+            )
+
+        labels_to_get = [
+            "label_tags_datadoghq_com_env",
+            "label_tags_datadoghq_com_service",
+            "label_tags_datadoghq_com_version",
+        ]
+
+        if join_standard_tags:
+            ksm_instance['label_joins'].update(
+                {
+                    "kube_pod_labels": {"labels_to_match": ["pod", "namespace"], "labels_to_get": labels_to_get},
+                    "kube_deployment_labels": {
+                        "labels_to_match": ["deployment", "namespace"],
+                        "labels_to_get": labels_to_get,
+                    },
+                    "kube_replicaset_labels": {
+                        "labels_to_match": ["replicaset", "namespace"],
+                        "labels_to_get": labels_to_get,
+                    },
+                    "kube_daemonset_labels": {
+                        "labels_to_match": ["daemonset", "namespace"],
+                        "labels_to_get": labels_to_get,
+                    },
+                    "kube_statefulset_labels": {
+                        "labels_to_match": ["statefulset", "namespace"],
+                        "labels_to_get": labels_to_get,
+                    },
+                    "kube_job_labels": {"labels_to_match": ["job_name", "namespace"], "labels_to_get": labels_to_get},
+                }
+            )
+
+            ksm_instance.setdefault("labels_mapper", {}).update(
+                {
+                    "label_tags_datadoghq_com_env": "env",
+                    "label_tags_datadoghq_com_service": "service",
+                    "label_tags_datadoghq_com_version": "version",
+                }
+            )
+
         ksm_instance['label_joins'].update(extra_labels)
         if hostname_override:
             ksm_instance['label_to_hostname'] = 'node'
@@ -459,7 +509,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         Lookups the labels_mapper table to see if replacing the tag name is
         necessary, then returns a "name:value" tag string
         """
-        return '%s:%s' % (scraper_config['labels_mapper'].get(name, name), to_native_string(value).lower())
+        return '%s:%s' % (scraper_config['labels_mapper'].get(name, name), to_string(value).lower())
 
     def _label_to_tag(self, name, labels, scraper_config, tag_name=None):
         """
@@ -500,8 +550,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         if ts.isdigit():
             return int(ts)
         else:
-            msg = 'Cannot extract ts from job name {}'
-            self.log.debug(msg, name)
+            self.log.debug("Cannot extract ts from job name %s", name)
             return None
 
     # Labels attached: namespace, pod
@@ -811,9 +860,13 @@ class KubernetesState(OpenMetricsBaseCheck):
         object_counter = Counter()
 
         for sample in metric.samples:
-            tags = [
-                self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config) for l in config['allowed_labels']
-            ] + scraper_config['custom_tags']
+            tags = []
+            for l in config['allowed_labels']:
+                tag = self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config)
+                if tag is None:
+                    tag = self._format_tag(l, "unknown", scraper_config)
+                tags.append(tag)
+            tags += scraper_config['custom_tags']
             object_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
         for tags, count in iteritems(object_counter):
@@ -829,10 +882,10 @@ class KubernetesState(OpenMetricsBaseCheck):
         tag_name = scraper_config['labels_mapper'].get(label_name, label_name)
         # then try to use the kube_labels_mapper
         kube_tag_name = kube_labels_mapper.get(tag_name, tag_name)
-        label_value = to_native_string(label_value).lower()
-        tags.append('{}:{}'.format(to_native_string(kube_tag_name), label_value))
+        label_value = to_string(label_value).lower()
+        tags.append('{}:{}'.format(to_string(kube_tag_name), label_value))
         if self.keep_ksm_labels and (kube_tag_name != tag_name):
-            tags.append('{}:{}'.format(to_native_string(tag_name), label_value))
+            tags.append('{}:{}'.format(to_string(tag_name), label_value))
         return tags
 
     def _metric_tags(self, metric_name, val, sample, scraper_config, hostname=None):

@@ -6,7 +6,7 @@ import re
 
 from six import iteritems
 
-from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.base.utils.containers import hash_mutable
 
 from . import exceptions, helpers
 

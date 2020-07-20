@@ -6,11 +6,13 @@ import os
 
 import requests
 
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 HOST = get_docker_hostname()
 PORT = os.getenv('POWERDNS_HOST_PORT_0', 8082)
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+POWERDNS_RECURSOR_VERSION = os.environ['POWERDNS_RECURSOR_VERSION']
 
 CONFIG = {"host": HOST, "port": PORT, "api_key": "pdns_api_key"}
 
@@ -28,10 +30,14 @@ def _config_sc_tags(config):
 
 
 def _get_pdns_version():
-    headers = {"X-API-Key": CONFIG['api_key']}
-    url = "http://{}:{}/api/v1/servers/localhost/statistics".format(HOST, PORT)
-    request = requests.get(url, headers=headers)
-    if request.status_code == 404:
-        return 3
-    else:
-        return 4
+    return int(POWERDNS_RECURSOR_VERSION[0])
+
+
+class MockResponse:
+    def __init__(self, headers, status_code):
+        self.headers = headers
+        self.status_code = status_code
+
+    def raise_for_status(self):
+        if self.status_code != 200:
+            raise requests.exceptions.HTTPError()

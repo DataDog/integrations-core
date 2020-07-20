@@ -1,0 +1,132 @@
+name: WMI
+files:
+- name: wmi_check.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+
+  - template: instances
+    options:
+    - name: class
+      required: true
+      description: |
+        The name of the WMI class, for example `Win32_OperatingSystem`.
+        You can find many of the standard class names on the MSDN docs:
+
+        https://msdn.microsoft.com/en-us/library/windows/desktop/aa394084.aspx
+      value:
+        type: string
+    - name: metrics
+      required: true
+      description: |
+        list of metrics you want to capture, with each item in the list being a set of:
+        [<WMI_PROPERTY_NAME>, <METRIC_NAME>, <METRIC_TYPE>]
+
+         * <WMI_PROPERTY_NAME> is something like `NumberOfUsers` or `ThreadCount`.
+                                The standard properties are also available on the MSDN docs
+                                for each class.
+
+         * <METRIC_NAME> is the name you want to show up in Datadog.
+
+         * <METRIC_TYPE> is from the standard choices for all agent checks, such as gauge, rate, histogram or counter.
+      value:
+        type: array
+        items:
+          type: array
+          items:
+            type: string
+        compact_example: true
+        example:
+        - [<WMI_PROPERTY_NAME>, <METRIC_NAME>, <METRIC_TYPE>]
+    - name: host
+      required: false
+      description: |
+        The optional target of the WMI query.
+        If you set this option, make sure that Remote Management is enabled on the target host:
+
+        https://technet.microsoft.com/en-us/library/Hh921475.aspx
+      value:
+        example: localhost
+        type: string
+    - name: username
+      required: false
+      description: If authentication is needed, specify a `username` here.
+      value:
+        type: string
+    - name: password
+      required: false
+      description: If authentication is needed, specify a `password` here.
+      value:
+        type: string
+    - name: namespace
+      description: The optional WMI namespace to connect to.
+      value:
+        type: string
+        example: cimv2
+    - name: filters
+      description: |
+        A list of filters on the WMI query you may want.
+        Filters can be in one of these forms:
+          [{<FILTER_PROPERTY>: <FILTER_VALUE>},...] or
+          [{FILTER_PROPERTY>: [<FILTER_OPERATOR>, <FILTER_VALUE>]},...]
+
+        All metrics are filtered out if any given property:
+          1. Has one or more filter(s) applied to it, AND
+          2. None of its filters evaluate to 'True'
+
+        Providing just a <FILTER_VALUE> defaults to the '=' comparison operator.
+
+          * <FILTER_PROPERTY> the name of the filter, for example 'PercentProcessorTime'.
+      value:
+        type: array
+        items:
+          type: object
+        compact_example: true
+        example:
+          - {<FILTER_PROPERTY>: [<FILTER_OPERATOR>, <FILTER_VALUE>]}
+          - {<FILTER_PROPERTY>: <FILTER_VALUE>}
+    - name: provider
+      description: |
+        The WMI provider.
+        It is used to request WMI data from the non-default provider. Available options are: `32` or `64`.
+
+        See https://msdn.microsoft.com/en-us/library/aa393067.aspx
+      value:
+        type: integer
+        example: 64
+    - name: tag_by
+      description: |
+        The `tag_by` parameter lets you tag each metric with a property from the WMI class you're using.
+        This is only useful when you will have multiple values for your WMI query.
+        Comma-separated list of property names
+      value:
+        type: string
+        default: null
+        example: Name,Label
+    - name: tag_queries
+      description: |
+        The `tag_queries`  parameter lets you specify a list of queries, to tag metrics with a target class property.
+        Each item in the list is a set of :
+
+        `[<LINK_SOURCE_PROPERTY>, <TARGET_CLASS>, <LINK_TARGET_CLASS_PROPERTY>, <TARGET_PROPERTY>]`
+
+          * `<LINK_SOURCE_PROPERTY>` contains the link value
+          * `<TARGET_CLASS>` is the class to link to
+          * `<LINK_TARGET_CLASS_PROPERTY>` is the target class property to link to
+          * `<TARGET_PROPERTY>` contains the value to tag with
+
+        It translates to a WMI query:
+
+        SELECT '<TARGET_PROPERTY>' FROM '<TARGET_CLASS>' WHERE '<LINK_TARGET_CLASS_PROPERTY>' = '<LINK_SOURCE_PROPERTY>'
+      value:
+        type: array
+        items:
+          type: array
+          items:
+            type: string
+        compact_example: true
+        example:
+          - [<LINK_SOURCE_PROPERTY>, <TARGET_CLASS>, <LINK_TARGET_CLASS_PROPERTY>, <TARGET_PROPERTY>]
+
+    - template: instances/default

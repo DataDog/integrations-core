@@ -43,4 +43,4 @@ Need help? Contact [Datadog support][6].
 [3]: https://github.com/DataDog/integrations-core/blob/master/disk/datadog_checks/disk/data/conf.yaml.default
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [5]: https://github.com/DataDog/integrations-core/blob/master/disk/metadata.csv
-[6]: https://docs.datadoghq.com/help
+[6]: https://docs.datadoghq.com/help/

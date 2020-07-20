@@ -1,5 +1,17 @@
 # CHANGELOG - openstack
 
+## 1.10.1 / 2020-06-29
+
+* [Fixed] Use agent v6 init signature. See [#6830](https://github.com/DataDog/integrations-core/pull/6830).
+
+## 1.10.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.9.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
 ## 1.9.0 / 2020-01-13
 
 * [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).

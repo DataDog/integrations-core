@@ -148,6 +148,6 @@ Need help? Contact [Datadog support][8].
 [5]: https://github.com/DataDog/integrations-core/blob/master/ceph/datadog_checks/ceph/data/conf.yaml.example
 [6]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/ceph/metadata.csv
-[8]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/help/
 [9]: https://www.datadoghq.com/blog/monitor-ceph-datadog
 [10]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

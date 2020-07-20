@@ -46,7 +46,16 @@ METRIC_VAL_CHECKS_OLD = {
 pytestmark = pytest.mark.usefixtures('dd_environment')
 
 
+@pytest.mark.parametrize(
+    'instance_authdb',
+    [
+        pytest.param(common.INSTANCE_AUTHDB, id='standard'),
+        pytest.param(common.INSTANCE_AUTHDB_ALT, id='standard-alternative'),
+        pytest.param(common.INSTANCE_AUTHDB_LEGACY_CONFIG, id='legacy'),
+    ],
+)
 def test_mongo(aggregator, check, instance_authdb):
+    check = check(instance_authdb)
     check.check(instance_authdb)
 
     metric_names = aggregator.metric_names
@@ -58,7 +67,12 @@ def test_mongo(aggregator, check, instance_authdb):
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
 
 
+@pytest.mark.parametrize(
+    'instance_user',
+    [pytest.param(common.INSTANCE_USER, id='standard'), pytest.param(common.INSTANCE_USER_LEGACY_CONFIG, id='legacy')],
+)
 def test_mongo2(aggregator, check, instance_user):
+    check = check(instance_user)
     check.check(instance_user)
 
     tags = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT1), 'db:test']
@@ -74,6 +88,7 @@ def test_mongo2(aggregator, check, instance_user):
 
 
 def test_mongo_old_config(aggregator, check, instance):
+    check = check(instance)
     check.check(instance)
 
     metric_names = aggregator.metric_names
@@ -86,6 +101,7 @@ def test_mongo_old_config(aggregator, check, instance):
 
 
 def test_mongo_old_config_2(aggregator, check, instance):
+    check = check(instance)
     check.check(instance)
 
     metric_names = aggregator.metric_names
@@ -98,6 +114,7 @@ def test_mongo_old_config_2(aggregator, check, instance):
 
 
 def test_mongo_1valid_and_1invalid_custom_queries(aggregator, check, instance_1valid_and_1invalid_custom_queries):
+    check = check(instance_1valid_and_1invalid_custom_queries)
     # Run the check against our running server
     check.check(instance_1valid_and_1invalid_custom_queries)
 
@@ -108,6 +125,7 @@ def test_mongo_1valid_and_1invalid_custom_queries(aggregator, check, instance_1v
 
 def test_mongo_custom_queries(aggregator, check, instance_custom_queries):
     # Run the check against our running server
+    check = check(instance_custom_queries)
     check.check(instance_custom_queries)
 
     aggregator.assert_metric("dd.custom.mongo.count", value=70, count=1, metric_type=aggregator.GAUGE)
@@ -141,6 +159,7 @@ def test_mongo_custom_queries(aggregator, check, instance_custom_queries):
 
 
 def test_metadata(check, instance, datadog_agent):
+    check = check(instance)
     check.check_id = 'test:123'
     major, minor = common.MONGODB_VERSION.split('.')[:2]
     version_metadata = {'version.scheme': 'semver', 'version.major': major, 'version.minor': minor}

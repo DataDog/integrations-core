@@ -186,5 +186,5 @@ Additional helpful documentation, links, and articles:
 [6]: http://www.postfix.org/postqueue.1.html
 [7]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [8]: https://github.com/DataDog/integrations-core/blob/master/postfix/metadata.csv
-[9]: https://docs.datadoghq.com/help
+[9]: https://docs.datadoghq.com/help/
 [10]: https://www.datadoghq.com/blog/monitor-postfix-queues

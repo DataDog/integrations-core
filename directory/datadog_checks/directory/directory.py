@@ -2,13 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from fnmatch import fnmatch
-from os.path import abspath, exists, join, relpath
-from re import compile as re_compile
+from os.path import exists, join, relpath
 from time import time
+from typing import Any
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import is_affirmative
-from datadog_checks.errors import ConfigurationError
+from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.directory.config import DirectoryConfig
 
 from .traverse import walk
 
@@ -35,110 +34,84 @@ class DirectoryCheck(AgentCheck):
 
     SOURCE_TYPE_NAME = 'system'
 
-    def check(self, instance):
-        try:
-            directory = instance['directory']
-        except KeyError:
-            raise ConfigurationError('DirectoryCheck: missing `directory` in config')
+    def __init__(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
+        super(DirectoryCheck, self).__init__(*args, **kwargs)
 
-        abs_directory = abspath(directory)
-        name = instance.get('name', directory)
-        pattern = instance.get('pattern')
-        exclude_dirs = instance.get('exclude_dirs', [])
-        exclude_dirs_pattern = re_compile('|'.join(exclude_dirs)) if exclude_dirs else None
-        dirs_patterns_full = is_affirmative(instance.get('dirs_patterns_full', False))
-        recursive = is_affirmative(instance.get('recursive', False))
-        dirtagname = instance.get('dirtagname', 'name')
-        filetagname = instance.get('filetagname', 'filename')
-        filegauges = is_affirmative(instance.get('filegauges', False))
-        countonly = is_affirmative(instance.get('countonly', False))
-        ignore_missing = is_affirmative(instance.get('ignore_missing', False))
-        custom_tags = instance.get('tags', [])
+        self.config = DirectoryConfig(self.instance)
 
-        if not exists(abs_directory):
+    def check(self, _):
+        if not exists(self.config.abs_directory):
             msg = (
                 "Either directory '{}' doesn't exist or the Agent doesn't "
-                "have permissions to access it, skipping.".format(abs_directory)
+                "have permissions to access it, skipping.".format(self.config.abs_directory)
             )
 
-            if not ignore_missing:
+            if not self.config.ignore_missing:
                 raise ConfigurationError(msg)
 
             self.log.warning(msg)
 
-        self._get_stats(
-            abs_directory,
-            name,
-            dirtagname,
-            filetagname,
-            filegauges,
-            pattern,
-            exclude_dirs_pattern,
-            dirs_patterns_full,
-            recursive,
-            countonly,
-            custom_tags,
-        )
+        self._get_stats()
 
-    def _get_stats(
-        self,
-        directory,
-        name,
-        dirtagname,
-        filetagname,
-        filegauges,
-        pattern,
-        exclude_dirs_pattern,
-        dirs_patterns_full,
-        recursive,
-        countonly,
-        tags,
-    ):
-        dirtags = ['{}:{}'.format(dirtagname, name)]
-        dirtags.extend(tags)
+    def _get_stats(self):
+        dirtags = ['{}:{}'.format(self.config.dirtagname, self.config.name)]
+        dirtags.extend(self.config.tags)
         directory_bytes = 0
         directory_files = 0
+        max_filegauge_balance = self.config.max_filegauge_count
 
         # If we do not want to recursively search sub-directories only get the root.
-        walker = walk(directory) if recursive else (next(walk(directory)),)
+        walker = walk(self.config.abs_directory, self.config.follow_symlinks)
+        if not self.config.recursive:
+            # Only visit the first directory.
+            walker = [next(walker)]
 
         # Avoid repeated global lookups.
         get_length = len
 
         for root, dirs, files in walker:
-            directory_files += get_length(files)
+            matched_files = []
+            adjust_max_filegauge = False
 
-            if exclude_dirs_pattern is not None:
-                if dirs_patterns_full:
-                    dirs[:] = [d for d in dirs if not exclude_dirs_pattern.search(d.path)]
+            if self.config.exclude_dirs_pattern is not None:
+                if self.config.dirs_patterns_full:
+                    dirs[:] = [d for d in dirs if not self.config.exclude_dirs_pattern.search(d.path)]
                 else:
-                    dirs[:] = [d for d in dirs if not exclude_dirs_pattern.search(d.name)]
+                    dirs[:] = [d for d in dirs if not self.config.exclude_dirs_pattern.search(d.name)]
 
-            for file_entry in files:
-                if pattern:
-                    # Check if the path of the file relative to the directory
-                    # matches the pattern. Also check if the absolute path of the
-                    # filename matches the pattern, for compatibility with previous
-                    # agent versions.
+            if self.config.pattern is not None:
+                # Check if the path of the file relative to the directory
+                # matches the pattern. Also check if the absolute path of the
+                # filename matches the pattern, for compatibility with previous
+                # agent versions.
+                for file_entry in files:
                     filename = join(root, file_entry.name)
-                    if not (fnmatch(filename, pattern) or fnmatch(relpath(filename, directory), pattern)):
-                        directory_files -= 1
-                        continue
+                    if fnmatch(filename, self.config.pattern) or fnmatch(
+                        relpath(filename, self.config.abs_directory), self.config.pattern
+                    ):
+                        matched_files.append(file_entry)
+            else:
+                matched_files = list(files)
 
-                # We're just looking to count the files.
-                if countonly:
-                    continue
+            matched_files_length = get_length(matched_files)
+            directory_files += matched_files_length
 
+            # We're just looking to count the files.
+            if self.config.countonly:
+                continue
+
+            for file_entry in matched_files:
                 try:
-                    file_stat = file_entry.stat()
+                    file_stat = file_entry.stat(follow_symlinks=self.config.stat_follow_symlinks)
 
                 except OSError as ose:
                     self.warning('DirectoryCheck: could not stat file %s - %s', join(root, file_entry.name), ose)
                 else:
                     # file specific metrics
                     directory_bytes += file_stat.st_size
-                    if filegauges and directory_files <= 20:
-                        filetags = ['{}:{}'.format(filetagname, join(root, file_entry.name))]
+                    if self.config.filegauges and matched_files_length <= max_filegauge_balance:
+                        filetags = ['{}:{}'.format(self.config.filetagname, join(root, file_entry.name))]
                         filetags.extend(dirtags)
                         self.gauge('system.disk.directory.file.bytes', file_stat.st_size, tags=filetags)
                         self.gauge(
@@ -147,6 +120,7 @@ class DirectoryCheck(AgentCheck):
                         self.gauge(
                             'system.disk.directory.file.created_sec_ago', time() - file_stat.st_ctime, tags=filetags
                         )
+                        adjust_max_filegauge = True
                     else:
                         self.histogram('system.disk.directory.file.bytes', file_stat.st_size, tags=dirtags)
                         self.histogram(
@@ -155,10 +129,12 @@ class DirectoryCheck(AgentCheck):
                         self.histogram(
                             'system.disk.directory.file.created_sec_ago', time() - file_stat.st_ctime, tags=dirtags
                         )
+            if adjust_max_filegauge:
+                max_filegauge_balance -= matched_files_length
 
         # number of files
         self.gauge('system.disk.directory.files', directory_files, tags=dirtags)
 
         # total file size
-        if not countonly:
+        if not self.config.countonly:
             self.gauge('system.disk.directory.bytes', directory_bytes, tags=dirtags)

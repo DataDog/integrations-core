@@ -17,10 +17,9 @@ pytestmark = pytest.mark.unit
 def test_config(instance):
     check = ClickhouseCheck('clickhouse', {}, [instance])
     check.check_id = 'test-clickhouse'
-    check.check = lambda _: None
 
     with mock.patch('clickhouse_driver.Client') as m:
-        check.run()
+        check.connect()
         m.assert_called_once_with(
             host=instance['server'],
             port=instance['port'],
@@ -57,18 +56,19 @@ def test_error_query(instance):
     check.log.error.assert_any_call('Error querying %s: %s', 'system.metrics', mock.ANY)
 
 
+@pytest.mark.latest_metrics
 @pytest.mark.parametrize(
     'metrics, ignored_columns, metric_source_url',
     [
         (
             queries.SystemMetrics.query_data['columns'][1]['items'],
             {'Revision', 'VersionInteger'},
-            'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/dbms/src/Common/CurrentMetrics.cpp',
+            'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/src/Common/CurrentMetrics.cpp',
         ),
         (
             queries.SystemEvents.query_data['columns'][1]['items'],
             set(),
-            'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/dbms/src/Common/ProfileEvents.cpp',
+            'https://raw.githubusercontent.com/ClickHouse/ClickHouse/master/src/Common/ProfileEvents.cpp',
         ),
     ],
     ids=['SystemMetrics', 'SystemEvents'],

@@ -35,6 +35,7 @@ def assert_common_metrics(aggregator):
     aggregator.assert_metric('redis.stats.keyspace_misses', count=1, tags=tags)
     aggregator.assert_metric('redis.pubsub.channels', count=2, tags=tags)
     aggregator.assert_metric('redis.net.clients', count=2, tags=tags)
+    aggregator.assert_metric('redis.net.connections', count=2, tags=tags + ['source:unknown'])
     aggregator.assert_metric('redis.mem.used', count=2, tags=tags)
     aggregator.assert_metric('redis.mem.peak', count=2, tags=tags)
     aggregator.assert_metric('redis.stats.keyspace_hits', count=1, tags=tags)

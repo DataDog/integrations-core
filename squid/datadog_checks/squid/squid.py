@@ -8,7 +8,7 @@ import requests
 from six import iteritems
 
 # project
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'squid'
 
@@ -141,7 +141,7 @@ class SquidCheck(AgentCheck):
 
         match = VERSION_REGEX.match(server_version)
         if match is None:
-            self.log.debug("Squid version is unknown: %", server_version)
+            self.log.debug("Squid version is unknown: %s", server_version)
             return None
 
         version = match.group(1)

@@ -4,6 +4,7 @@
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.gitlab_runner import GitlabRunnerCheck
 
 from .common import ALLOWED_METRICS, CONFIG, CUSTOM_TAGS, GITLAB_RUNNER_TAGS
@@ -44,3 +45,4 @@ def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(CONFIG, rate=True)
 
     assert_check(aggregator)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

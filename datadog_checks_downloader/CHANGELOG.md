@@ -1,5 +1,19 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 3.1.0 / 2020-07-14
+
+* [Added] Update to v6 root from @FlorianVeaux. See [#7115](https://github.com/DataDog/integrations-core/pull/7115).
+* [Added] Add warning when selecting an extras integration that resides in core. See [#7079](https://github.com/DataDog/integrations-core/pull/7079).
+* [Added] Add dependencies to setup.py. See [#7030](https://github.com/DataDog/integrations-core/pull/7030).
+
+## 3.0.0 / 2020-06-18
+
+* [Added] Support multiple root layouts. See [#6856](https://github.com/DataDog/integrations-core/pull/6856).
+
+## 2.5.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 2.4.0 / 2020-02-26
 
 * [Added] Bump securesystemslib to 0.14.2. See [#5890](https://github.com/DataDog/integrations-core/pull/5890).

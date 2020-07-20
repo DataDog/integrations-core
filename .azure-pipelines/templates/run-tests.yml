@@ -4,6 +4,7 @@ parameters:
   test: false
   test_e2e: false
   benchmark: false
+  latest_metrics: false
   repo: ''
 
 steps:
@@ -27,6 +28,10 @@ steps:
 - ${{ if eq(parameters.benchmark, 'true') }}:
   - script: ddev test --bench --junit ${{ parameters.check }}
     displayName: 'Run benchmarks'
+
+- ${{ if eq(parameters.latest_metrics, 'true') }}:
+    - script: ddev test --latest-metrics --junit ${{ parameters.check }}
+      displayName: 'Verify latest metrics supported'
 
 - task: PublishTestResults@2 # Task info: https://docs.microsoft.com/en-gb/azure/devops/pipelines/tasks/test/publish-test-results
   condition: succeededOrFailed()
