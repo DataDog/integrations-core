@@ -35,7 +35,7 @@ def test_get_status_data():
     api = MarkLogicApi(http, 'http://localhost:8000')
 
     assert api.get_status_data(resource='server') == {'foo': 'bar'}
-    assert http.url == 'http://localhost:8000/manage/v2/forests'
+    assert http.url == 'http://localhost:8000/manage/v2/server'
     assert http.params == {'view': 'status', 'format': 'json'}
 
     # TODO: when get_status_data will support it

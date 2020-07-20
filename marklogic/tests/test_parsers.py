@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
@@ -214,7 +216,7 @@ def test_parse_summary_storage_base_metrics():
 
     result = list(parse_summary_storage_base_metrics(forests_storage_data, ['foo:bar']))
 
-    assert result == EXPECTED_RESULT
+    assert sorted(result) == sorted(EXPECTED_RESULT)
 
 
 def test_parse_summary_status_base_metrics():
@@ -320,7 +322,7 @@ def test_parse_summary_status_base_metrics():
 
     result = list(parse_summary_status_base_metrics(status_base_data, ['foo:bar']))
 
-    assert result == EXPECTED_RESULT
+    assert sorted(result) == sorted(EXPECTED_RESULT)
 
 
 def test_parse_summary_status_resource_metrics():
@@ -374,4 +376,4 @@ def test_parse_summary_status_resource_metrics():
 
     result = list(parse_summary_status_resource_metrics('forest', status_resource_data, ['foo:bar']))
 
-    assert result == EXPECTED_RESULT
+    assert sorted(result) == sorted(EXPECTED_RESULT)
