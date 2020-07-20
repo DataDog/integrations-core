@@ -1,8 +1,6 @@
 # JMX Tools
 
-## JMXTerm
-
-# List MBeans via JMXTerm
+## List MBeans via JMXTerm
 
 ```
 curl -L https://github.com/jiaqi/jmxterm/releases/download/v1.0.1/jmxterm-1.0.1-uber.jar -o /tmp/jmxterm-1.0.1-uber.jar
