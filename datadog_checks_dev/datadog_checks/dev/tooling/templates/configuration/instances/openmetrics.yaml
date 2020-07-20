@@ -76,6 +76,7 @@
     Type override allows you to override a type in the prometheus payload
     or type an untyped metrics (they're ignored by default).
     Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, `summary`
+    The "*" wildcard can be used to match multiple metric names.
   value:
     example:
       <METRIC_NAME>: <METRIC_TYPE>
