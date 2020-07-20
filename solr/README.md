@@ -125,13 +125,13 @@ For containerized environments, see the [Autodiscovery with JMX][2] guide.
        logs_enabled: true
      ```
 
-2. By default, Datadog's integration pipeline supports the following conversion [pattern][8 ]:
+2. Solr uses the `log4j` logger by default. To customize the logging format, edit the [`server/resources/log4j2.xml`][12] file. By default, Datadog's integration pipeline supports the following conversion [pattern][11]:
 
    ```text
-   %d{yyyy-MM-dd HH:mm:ss} [%thread] %level{length=10} %c{1}:%L - %m%n
+   %maxLen{%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p (%t) [%X{collection} %X{shard} %X{replica} %X{core}] %c{1.} %m%notEmpty{ =>%ex{short}}}{10240}%n
    ```
 
-    Clone and edit the [integration pipeline][9 ] if you have a different format.
+    Clone and edit the [integration pipeline][13] if you have a different format.
 
 
 3. Uncomment and edit the logs configuration block in your `solr.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample solr.d/solr.yaml][6] for all available configuration options.
@@ -139,7 +139,7 @@ For containerized environments, see the [Autodiscovery with JMX][2] guide.
       ```yaml
        logs:
          - type: file
-           path: /var/solr/logs/solr.log # or your custom log location
+           path: /var/solr/logs/solr.log
            source: solr
            service: <SERVICE_NAME>
            # To handle multi line that starts with yyyy-mm-dd use the following pattern
@@ -227,3 +227,5 @@ attribute:
 [9]: https://github.com/DataDog/integrations-core/blob/master/solr/metadata.csv
 [10]: https://docs.datadoghq.com/agent/docker/log/
 [11]: https://logging.apache.org/log4j/2.x/manual/layouts.html#Patterns
+[12]: https://lucene.apache.org/solr/guide/configuring-logging.html#permanent-logging-settings
+[13]: https://docs.datadoghq.com/logs/processing/#integration-pipelines
