@@ -1,106 +1,16 @@
-version: '3.7'
+version: '3'
 services:
-  solr1:
+  solr:
     image: solr:${SOLR_VERSION}
-    container_name: solr1
     ports:
-     - "8981:8983"
-     - "18981:18983"
-    environment:
-      ENABLE_REMOTE_JMX_OPTS: "true"
-      RMI_PORT: 18981
-      # `java.rmi.server.hostname=localhost` is needed to local connect to JMX endpoint
-      SOLR_OPTS: >-
-        -Djava.rmi.server.hostname=localhost
-      ZK_HOST: zoo1:2181,zoo2:2181,zoo3:2181
-    networks:
-      - solr
-    depends_on:
-      - zoo1
-      - zoo2
-      - zoo3
-
-  solr2:
-    image: solr:${SOLR_VERSION}
-    container_name: solr2
-    ports:
-     - "8982:8983"
-     - "18982:18983"
-    environment:
-      ENABLE_REMOTE_JMX_OPTS: "true"
-      RMI_PORT: 18982
-      # `java.rmi.server.hostname=localhost` is needed to local connect to JMX endpoint
-      SOLR_OPTS: >-
-        -Djava.rmi.server.hostname=localhost
-      ZK_HOST: zoo1:2181,zoo2:2181,zoo3:2181
-    networks:
-      - solr
-    depends_on:
-      - zoo1
-      - zoo2
-      - zoo3
-
-  solr3:
-    image: solr:${SOLR_VERSION}
-    container_name: solr3
-    ports:
-     - "8983:8983"
-     - "18983:18983"
+     - 8983:8983
+     - 18983:18983
     command:
-     - solr-precreate 
-     - gettingstarted
+      - solr-precreate
+      - gettingstarted
     environment:
-      ZK_HOST: zoo1:2181,zoo2:2181,zoo3:2181
       ENABLE_REMOTE_JMX_OPTS: "true"
       RMI_PORT: 18983
       # `java.rmi.server.hostname=localhost` is needed to local connect to JMX endpoint
       SOLR_OPTS: >-
         -Djava.rmi.server.hostname=localhost
-    networks:
-      - solr
-    depends_on:
-      - zoo1
-      - zoo2
-      - zoo3
-
-  zoo1:
-    image: zookeeper:3.5
-    container_name: zoo1
-    restart: always
-    hostname: zoo1
-    ports:
-      - 2181:2181
-    environment:
-      ZOO_MY_ID: 1
-      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
-    networks:
-      - solr
-
-  zoo2:
-    image: zookeeper:3.5
-    container_name: zoo2
-    restart: always
-    hostname: zoo2
-    ports:
-      - 2182:2181
-    environment:
-      ZOO_MY_ID: 2
-      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=0.0.0.0:2888:3888;2181 server.3=zoo3:2888:3888;2181
-    networks:
-      - solr
-
-  zoo3:
-    image: zookeeper:3.5
-    container_name: zoo3
-    restart: always
-    hostname: zoo3
-    ports:
-      - 2183:2181
-    environment:
-      ZOO_MY_ID: 3
-      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=0.0.0.0:2888:3888;2181
-    networks:
-      - solr
-
-networks:
-  solr:
