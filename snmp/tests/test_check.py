@@ -1120,14 +1120,22 @@ def test_oids_cache_metrics_collected_using_scalar_oids(aggregator):
         run_check()
 
 
-@pytest.mark.parametrize("refresh_interval, has_next_bulk_oids", [pytest.param(0, True), pytest.param(3600, False)])
-def test_oids_cache_config_update(refresh_interval, has_next_bulk_oids):
+@pytest.mark.parametrize(
+    "configs, has_next_bulk_oids",
+    [
+        pytest.param({}, True, id='default_config'),
+        pytest.param({'refresh_oids_cache_interval': 0}, True, id='explicit_disable_config'),
+        pytest.param({'refresh_oids_cache_interval': 60}, False, id='enabled_config_60'),
+        pytest.param({'refresh_oids_cache_interval': 3600}, False, id='enabled_config_3600'),
+    ],
+)
+def test_oids_cache_config_update(configs, has_next_bulk_oids):
     """
     Check weather config oids are correctly updated when refresh_oids_cache_interval is enabled and not enable.
     """
     instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
     instance['bulk_threshold'] = 10
-    instance['refresh_oids_cache_interval'] = refresh_interval
+    instance.update(configs)
     check = common.create_check(instance)
 
     assert bool(check._config.oids_config.scalar_oids) is False
