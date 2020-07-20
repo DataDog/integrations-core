@@ -37,7 +37,7 @@ Follow the instructions below to configure this check for an Agent running on a 
      - server: http://localhost:5984
    ```
 
-    **Note**: provide a `db_whitelist` and `db_blacklist` to control which databases the Agent should and should not collect metrics from.
+    **Note**: provide a `db_include` and `db_exclude` to control which databases the Agent should and should not collect metrics from.
 
 2. [Restart the Agent][5].
 
