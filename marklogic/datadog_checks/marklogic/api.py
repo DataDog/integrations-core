@@ -79,21 +79,22 @@ class MarkLogicApi(object):
         return resp.json()
 
     def get_resources(self):
+        # type: () -> Dict[str, Any]
+        # TODO: How useful is it
         data = self._get_raw_resources()
-        from pprint import pprint
-
-        pprint(data)
         resources = {}
+
         for group in data['cluster-query']['relations']['relation-group']:
             resource_type = group['typeref']
             resources[resource_type] = []
             for rel in group['relation']:
-                resources[resource_type].append(
-                    {'id': rel['idref'], 'name': rel['nameref'],}
-                )
+                resources[resource_type].append({'id': rel['idref'], 'name': rel['nameref']})
         return resources
 
     def _get_raw_resources(self):
+        # type: () -> Dict[str, Any]
+        # This resource address returns the summary of all of the resources in the local cluster,
+        # or resources in the local cluster that match a query.
         # http://localhost:8002/manage/v2?view=query&format=json
         params = {
             'view': 'query',
