@@ -1,17 +1,16 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict
-
 from pprint import pprint
+from typing import Any
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from .config import Config
+
 from .api import MarkLogicApi
-from .parsers.status import parse_summary_status_resource_metrics, \
-    parse_summary_status_base_metrics
-from .parsers.storage import parse_summary_storage_base_metrics
+from .config import Config
 from .constants import RESOURCE_TYPES
+from .parsers.status import parse_summary_status_base_metrics, parse_summary_status_resource_metrics
+from .parsers.storage import parse_summary_storage_base_metrics
 
 
 class MarklogicCheck(AgentCheck):
@@ -135,8 +134,10 @@ Rates & Loads Metrics aka Status metrics (view=status)
         - http://localhost:8002/manage/v2/forests/Security?view=status&format=json
         - http://localhost:8002/manage/v2/databases/Extensions?view=status&format=json
         - http://localhost:8002/manage/v2/hosts/2871b05b4bdc?view=status&format=json
-        - http://localhost:8002/manage/v2/transactions?format=json (already in http://localhost:8002/manage/v2/hosts?view=status)
-        - http://localhost:8002/manage/v2/servers?view=status&format=json (already in http://localhost:8002/manage/v2/hosts?view=status)
+        - http://localhost:8002/manage/v2/transactions?format=json
+            (already in http://localhost:8002/manage/v2/hosts?view=status)
+        - http://localhost:8002/manage/v2/servers?view=status&format=json
+            (already in http://localhost:8002/manage/v2/hosts?view=status)
     - metric name: marklogic.status_summary.<METRIC_NAME>
     - metric name: marklogic.status.<METRIC_NAME>
 

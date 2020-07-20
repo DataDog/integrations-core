@@ -1,9 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
-import pytest
-
 from datadog_checks.marklogic.api import MarkLogicApi
 
 
@@ -73,7 +70,7 @@ def test_get_resources():
                 'relation-group': [
                     {
                         'typeref': 'databases',
-                        'relation-count': {'units': 'quantity', 'value': 2,},
+                        'relation-count': {'units': 'quantity', 'value': 2},
                         'relation': [
                             {
                                 'uriref': "/manage/v2/databases/App-Services",
@@ -89,7 +86,7 @@ def test_get_resources():
                     },
                     {
                         'typeref': 'forests',
-                        'relation-count': {'units': 'quantity', 'value': 2,},
+                        'relation-count': {'units': 'quantity', 'value': 2},
                         'relation': [
                             {
                                 'uriref': "/manage/v2/forests/Modules",
@@ -112,12 +109,12 @@ def test_get_resources():
 
     assert api.get_resources() == {
         'databases': [
-            {'id': '255818103205892753', 'name': 'App-Services',},
-            {'id': '5004266825873163057', 'name': 'Documents',},
+            {'id': '255818103205892753', 'name': 'App-Services'},
+            {'id': '5004266825873163057', 'name': 'Documents'},
         ],
         'forests': [
-            {'id': '16024526243775340149', 'name': 'Modules',},
-            {'id': '17254568917360711355', 'name': 'Extensions',},
+            {'id': '16024526243775340149', 'name': 'Modules'},
+            {'id': '17254568917360711355', 'name': 'Extensions'},
         ],
     }
     assert http.url == 'http://localhost:8000/manage/v2'

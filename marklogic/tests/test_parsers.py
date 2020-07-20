@@ -36,7 +36,7 @@ def test_build_metric_to_submit():
     )
 
     # Unkonwn unit
-    assert build_metric_to_submit('forests.stuff', {'units': 'unknown', 'value': 42.2}) == None
+    assert build_metric_to_submit('forests.stuff', {'units': 'unknown', 'value': 42.2}) is None
 
     with pytest.raises(MarkLogicParserException):
         build_metric_to_submit('forests.stuff', {'unknown': 3})

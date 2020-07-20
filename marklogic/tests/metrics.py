@@ -10,7 +10,6 @@ FOREST_STATUS_SUMMARY_METRICS = [
     'marklogic.forests.restore-count',
     'marklogic.forests.state-not-open',
     'marklogic.forests.total-forests',
-
     # from /manage/v2/forests
     'marklogic.forests.backup-read-load',
     'marklogic.forests.backup-read-rate',
@@ -171,8 +170,10 @@ STORAGE_FOREST_METRICS = [
 ]
 
 
-GLOBAL_METRICS = (FOREST_STATUS_SUMMARY_METRICS
-                  + HOST_STATUS_METRICS
-                  + REQUESTS_STATUS_METRICS
-                  + SERVER_STATUS_METRICS
-                  + TRANSACTION_STATUS_METRICS)
+GLOBAL_METRICS = (
+    FOREST_STATUS_SUMMARY_METRICS
+    + HOST_STATUS_METRICS
+    + REQUESTS_STATUS_METRICS
+    + SERVER_STATUS_METRICS
+    + TRANSACTION_STATUS_METRICS
+)

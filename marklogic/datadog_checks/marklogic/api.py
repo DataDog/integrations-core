@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict
 
-from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import RequestsWrapper
 
 
@@ -22,8 +21,10 @@ class MarkLogicApi(object):
             - http://localhost:8002/manage/v2/forests/Security?view=status&format=json
             - http://localhost:8002/manage/v2/databases/Extensions?view=status&format=json
             - http://localhost:8002/manage/v2/hosts/2871b05b4bdc?view=status&format=json
-            - http://localhost:8002/manage/v2/transactions?format=json (already in http://localhost:8002/manage/v2/hosts?view=status)
-            - http://localhost:8002/manage/v2/servers?view=status&format=json (already in http://localhost:8002/manage/v2/hosts?view=status)
+            - http://localhost:8002/manage/v2/transactions?format=json
+                (already in http://localhost:8002/manage/v2/hosts?view=status)
+            - http://localhost:8002/manage/v2/servers?view=status&format=json
+                (already in http://localhost:8002/manage/v2/hosts?view=status)
         """
         params = {
             'view': 'status',

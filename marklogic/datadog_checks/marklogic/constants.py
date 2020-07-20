@@ -3,21 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 RESOURCE_TYPES = {
-    'cluster': {
-        'plural': None,
-    },
-    'forest': {
-        'plural': 'forests',
-    },
-    'database': {
-        'plural': 'databases',
-    },
-    'host': {
-        'plural': 'hosts',
-    },
-    'server': {
-        'plural': 'servers',
-    },
+    'cluster': {'plural': None},
+    'forest': {'plural': 'forests'},
+    'database': {'plural': 'databases'},
+    'host': {'plural': 'hosts'},
+    'server': {'plural': 'servers'},
 }
 
 GAUGE_UNITS = [

@@ -9,7 +9,7 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.marklogic import MarklogicCheck
 
 from .common import INSTANCE
-from .metrics import GLOBAL_METRICS, STORAGE_HOST_METRICS, STORAGE_FOREST_METRICS
+from .metrics import GLOBAL_METRICS, STORAGE_FOREST_METRICS, STORAGE_HOST_METRICS
 
 
 @pytest.mark.integration
@@ -48,4 +48,3 @@ def test_e2e(dd_agent_check):
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
-
