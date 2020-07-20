@@ -2,28 +2,39 @@ import weakref
 from collections import deque
 
 
-class WeakDeque(deque):
+class WeakDeque(object):
+    """
+    Weakref implementation of Deque
+
+    Caveat:
+        - Some deque methods are not implemented.
+    """
     def __init__(self, iterable):
-        super(WeakDeque, self).__init__(weakref.ref(i) for i in iterable)
+        self.deq = deque(weakref.ref(i) for i in iterable)
 
     def append(self, x):
-        super(WeakDeque, self).append(weakref.ref(x))
+        self.deq.append(weakref.ref(x))
 
     def appendleft(self, x):
-        super(WeakDeque, self).appendleft(weakref.ref(x))
+        self.deq.appendleft(weakref.ref(x))
 
     def extend(self, iterable):
-        super(WeakDeque, self).extend(weakref.ref(i) for i in iterable)
+        self.deq.extend(weakref.ref(i) for i in iterable)
 
     def extendleft(self, iterable):
-        super(WeakDeque, self).extendleft(weakref.ref(i) for i in iterable)
+        self.deq.extendleft(weakref.ref(i) for i in iterable)
 
     def pop(self, *args):
-        return super(WeakDeque, self).pop(*args)()
+        while True:
+            val = self.deq.pop(*args)()
+            if val is not None:
+                return val
 
     def popleft(self):
-        return super(WeakDeque, self).popleft()()
+        while True:
+            val = self.deq.popleft()()
+            if val is not None:
+                return val
 
-    def remove(self, *args):
-        raise NotImplemented('Method not implemented')
-
+    def __len__(self):
+        return len(self.deq)
