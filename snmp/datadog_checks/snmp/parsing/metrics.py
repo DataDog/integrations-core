@@ -277,8 +277,8 @@ def _parse_table_metric(metric, logger):
                             index_mappings.append(IndexMapping(tag['column']['name'], index=index, mapping=mapping))
     elif logger:
         logger.warning(
-            "%s table doesn't have a 'metric_tags' section, all its metrics will use the same tags."
-            "If the table has multiple rows, only one row will be submitted."
+            "%s table doesn't have a 'metric_tags' section, all its metrics will use the same tags. "
+            "If the table has multiple rows, only one row will be submitted. "
             "Please add at least one discriminating metric tag (such as a row index) "
             "to ensure metrics of all rows are submitted.",
             str(metric['table']),

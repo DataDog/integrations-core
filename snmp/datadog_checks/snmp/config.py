@@ -25,7 +25,7 @@ from .resolver import OIDResolver
 from .types import OIDMatch
 from .utils import register_device_target
 
-local_logger = weakref.ref(getLogger(__name__))  # type: weakref.ReferenceType[Logger]
+local_logger = getLogger(__name__)
 
 
 class InstanceConfig:
@@ -77,7 +77,7 @@ class InstanceConfig:
             if value in (None, ""):
                 instance.pop(key)
 
-        self.logger = local_logger if logger is None else weakref.ref(logger)  # type: weakref.ReferenceType[Logger]
+        self.logger = weakref.ref(local_logger) if logger is None else weakref.ref(logger)
 
         self.instance = instance
         self.tags = instance.get('tags', [])
