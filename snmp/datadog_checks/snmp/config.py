@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
-import weakref
 import time
+import weakref
 from collections import defaultdict
 from logging import Logger, getLogger
 from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple
