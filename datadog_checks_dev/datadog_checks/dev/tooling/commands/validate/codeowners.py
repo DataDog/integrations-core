@@ -10,7 +10,7 @@ from ..console import CONTEXT_SETTINGS, echo_failure, echo_success
 
 DIRECTORY_REGEX = re.compile(r"\/(.*)\/$")
 
-
+# Integrations that are known to be tiles and have email-based codeowners
 IGNORE_TILES = {
     'auth0',
     'bluematador',
