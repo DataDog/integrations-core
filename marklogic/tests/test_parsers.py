@@ -11,7 +11,7 @@ from datadog_checks.marklogic.parsers.status import (
     parse_summary_status_resource_metrics,
 )
 from datadog_checks.marklogic.parsers.storage import parse_summary_storage_base_metrics
-from datadog_checks.marklogic.parsers.common import build_metric_to_submit
+from datadog_checks.marklogic.parsers.common import build_metric_to_submit, MarkLogicParserException
 
 from .common import HERE
 
@@ -30,6 +30,9 @@ def test_build_metric_to_submit():
 
     # Unkonwn unit
     assert build_metric_to_submit('forests.stuff', {'units': 'unknown', 'value': 42.2}) == None
+
+    with pytest.raises(MarkLogicParserException):
+        build_metric_to_submit('forests.stuff', {'unknown': 3})
 
 
 def test_parse_summary_storage_base_metrics():
