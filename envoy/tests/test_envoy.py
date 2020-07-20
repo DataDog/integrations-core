@@ -48,9 +48,9 @@ def test_success_fixture(aggregator):
 
 @pytest.mark.unit
 def test_retrocompatible_config():
-    instance = INSTANCES['main']
-    instance['metric_whitelist'] = INSTANCES['included_excluded_metrics']['included_metrics']
-    instance['metric_blacklist'] = INSTANCES['included_excluded_metrics']['excluded_metrics']
+    instance = deepcopy(INSTANCES['main'])
+    instance['metric_whitelist'] = deepcopy(INSTANCES['included_excluded_metrics']['included_metrics'])
+    instance['metric_blacklist'] = deepcopy(INSTANCES['included_excluded_metrics']['excluded_metrics'])
 
     c1 = Envoy(CHECK_NAME, {}, [instance])
     c2 = Envoy(CHECK_NAME, {}, [INSTANCES['included_excluded_metrics']])
