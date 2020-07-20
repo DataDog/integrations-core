@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 
 import copy
+import logging
 import os
 import time
 import weakref
@@ -34,7 +35,7 @@ pytestmark = pytest.mark.unit
 
 
 @mock.patch("datadog_checks.snmp.pysnmp_types.lcd")
-def test_parse_metrics(lcd_mock):
+def test_parse_metrics(lcd_mock, caplog):
     # type: (Any) -> None
     lcd_mock.configure.return_value = ('addr', None)
 
@@ -75,7 +76,8 @@ def test_parse_metrics(lcd_mock):
     with pytest.raises(Exception):
         config.parse_metrics(metrics)
 
-    # MIB with table and symbols
+    # MIB with table and symbols but no metric_tags
+    caplog.at_level(logging.WARNING)
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"]}]
     _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
     assert len(next_oids) == 2
@@ -85,6 +87,9 @@ def test_parse_metrics(lcd_mock):
     assert foo.name == 'foo'
     assert isinstance(foo, ParsedTableMetric)
     assert bar.name == 'bar'
+    assert (
+        "foo_table table doesn't have a 'metric_tags' section, all its metrics will use the same tags." in caplog.text
+    )
 
     # MIB with table, symbols, bad metrics_tags
     metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": ["foo", "bar"], "metric_tags": [{}]}]
@@ -97,13 +102,23 @@ def test_parse_metrics(lcd_mock):
         config.parse_metrics(metrics)
 
     # Table with manual OID
-    metrics = [{"MIB": "foo_mib", "table": "foo_table", "symbols": [{"OID": "1.2.3", "name": "foo"}]}]
+    metrics = [
+        {
+            "MIB": "foo_mib",
+            "table": "foo_table",
+            "symbols": [{"OID": "1.2.3", "name": "foo"}],
+            "metric_tags": [{"tag": "test", "index": "1"}],
+        }
+    ]
     _, next_oids, _, parsed_metrics = config.parse_metrics(metrics)
     assert len(next_oids) == 1
     assert len(parsed_metrics) == 1
     foo = parsed_metrics[0]
     assert isinstance(foo, ParsedTableMetric)
     assert foo.name == 'foo'
+    index_tag = foo.index_tags[0]
+    assert index_tag.index == '1'
+    assert index_tag.parsed_metric_tag.name == 'test'
 
     # MIB with table, symbols, metrics_tags index
     metrics = [

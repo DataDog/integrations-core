@@ -88,6 +88,14 @@ Configure the Airflow check included in the [Datadog Agent][2] package to collec
            name: "airflow.pool.open_slots"
            tags:
              pool_name: "$1"
+         - match: "pool.queued_slots.*"
+           name: "airflow.pool.queued_slots"
+           tags:
+             pool_name: "$1"
+         - match: "pool.running_slots.*"
+           name: "airflow.pool.running_slots"
+           tags:
+             pool_name: "$1"
          - match: "airflow.pool.used_slots.*"
            name: "airflow.pool.used_slots"
            tags:
@@ -127,6 +135,12 @@ Configure the Airflow check included in the [Datadog Agent][2] package to collec
            name: "airflow.dagrun.schedule_delay"
            tags:
              dag_id: "$1"
+         - match: 'scheduler.tasks.running'
+           name: "airflow.scheduler.tasks.running"
+         - match: 'scheduler.tasks.starving'
+           name: "airflow.scheduler.tasks.starving"
+         - match: sla_email_notification_failure
+           name: 'airflow.sla_email_notification_failure'
          - match: 'airflow\.task_removed_from_dag\.(.*)'
            match_type: "regex"
            name: "airflow.dag.task_removed"
@@ -141,6 +155,17 @@ Configure the Airflow check included in the [Datadog Agent][2] package to collec
            name: "airflow.task.instance_created"
            tags:
              task_class: "$1"
+         - match: "ti.start.*.*"
+           name: "airflow.ti.start"
+           tags:
+             dagid: "$1"
+             taskid: "$2"
+         - match: "ti.finish.*.*.*"
+           name: "airflow.ti.finish"
+           tags:
+             dagid: "$1"
+             taskid: "$2"
+             state: "$3"
    ```
 
 #### Step 3: Restart Datadog Agent and Airflow

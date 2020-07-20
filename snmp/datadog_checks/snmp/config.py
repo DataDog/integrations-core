@@ -2,8 +2,10 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
+import weakref
 import time
 from collections import defaultdict
+from logging import Logger, getLogger
 from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple
 
 from datadog_checks.base import ConfigurationError, is_affirmative
@@ -23,6 +25,8 @@ from .pysnmp_types import (
 from .resolver import OIDResolver
 from .types import OIDMatch
 from .utils import register_device_target
+
+local_logger = getLogger(__name__)
 
 
 class InstanceConfig:
@@ -62,6 +66,7 @@ class InstanceConfig:
         profiles=None,  # type: Dict[str, dict]
         profiles_by_oid=None,  # type: Dict[str, str]
         loader=None,  # type: MIBLoader
+        logger=None,  # type: Logger
     ):
         # type: (...) -> None
         global_metrics = [] if global_metrics is None else global_metrics
@@ -73,6 +78,8 @@ class InstanceConfig:
         for key, value in list(instance.items()):
             if value in (None, ""):
                 instance.pop(key)
+
+        self.logger = weakref.ref(local_logger) if logger is None else weakref.ref(logger)
 
         self.instance = instance
         self.tags = instance.get('tags', [])
@@ -278,7 +285,7 @@ class InstanceConfig:
         """Parse configuration and returns data to be used for SNMP queries."""
         # Use bulk for SNMP version > 1 only.
         bulk_threshold = self.bulk_threshold if self._auth_data.mpModel else 0
-        result = parse_metrics(metrics, resolver=self._resolver, bulk_threshold=bulk_threshold)
+        result = parse_metrics(metrics, resolver=self._resolver, logger=self.logger(), bulk_threshold=bulk_threshold)
         return result['oids'], result['next_oids'], result['bulk_oids'], result['parsed_metrics']
 
     def parse_metric_tags(self, metric_tags):

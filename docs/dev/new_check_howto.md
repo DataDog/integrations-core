@@ -69,7 +69,7 @@ One of the developer toolkit features is the `create` command, which creates the
 Let's try a dry-run using the `-n/--dry-run` flag, which won't write anything to disk.
 
 ```bash
-ddev create -n awesome
+ddev create -n Awesome
 ```
 
 This displays the path where the files would have been written, as well as the structure itself. For now, just make sure that the path in the _first line_ of output matches your Extras repository.
@@ -79,7 +79,7 @@ This displays the path where the files would have been written, as well as the s
 The interactive mode is a wizard for creating new integrations. By answering a handful of questions, the scaffolding will be set up and lightly pre-configured for you.
 
 ```bash
-ddev create awesome
+ddev create Awesome
 ```
 
 After answering the questions, the output matches that of the dry-run above, except in this case the scaffolding for your new integration actually exists!

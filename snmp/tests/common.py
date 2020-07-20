@@ -151,10 +151,18 @@ BULK_TABULAR_OBJECTS = [
             "ipSystemStatsHCOutOctets",
             "ipSystemStatsInMcastPkts",
         ],
+        'metric_tags': [{'tag': "dumbindex", 'index': 1}],
     },
 ]
 
-INVALID_METRICS = [{'MIB': "IF-MIB", 'table': "noIdeaWhatIAmDoingHere", 'symbols': ["ImWrong", "MeToo"]}]
+INVALID_METRICS = [
+    {
+        'MIB': "IF-MIB",
+        'table': "noIdeaWhatIAmDoingHere",
+        'symbols': ["ImWrong", "MeToo"],
+        'metric_tags': [{'tag': "dumbindex", 'index': 1}],
+    }
+]
 
 PLAY_WITH_GET_NEXT_METRICS = [
     {"OID": "1.3.6.1.2.1.4.31.3.1.3.2", "name": "needFallback"},

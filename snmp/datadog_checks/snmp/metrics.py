@@ -42,8 +42,8 @@ def as_metric_with_inferred_type(value):
         return {'type': 'gauge', 'value': number}
 
 
-def as_metric_with_forced_type(value, forced_type):
-    # type: (Any, str) -> Optional[MetricDefinition]
+def as_metric_with_forced_type(value, forced_type, options):
+    # type: (Any, str, dict) -> Optional[MetricDefinition]
     if forced_type == 'gauge':
         return {'type': 'gauge', 'value': int(value)}
 
@@ -58,5 +58,9 @@ def as_metric_with_forced_type(value, forced_type):
 
     if forced_type == 'monotonic_count_and_rate':
         return {'type': 'monotonic_count_and_rate', 'value': int(value)}
+
+    if forced_type == 'flag_stream':
+        index = int(options['placement']) - 1
+        return {'type': 'gauge', 'value': int(str(value)[index])}
 
     return None

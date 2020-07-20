@@ -905,7 +905,7 @@ def test_metric_tag_symbol(aggregator):
 def test_metric_tag_oid(aggregator):
     metrics = common.SUPPORTED_METRIC_TYPES
     instance = common.generate_instance_config(metrics)
-    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName', 'tag': 'snmp_host'}]
+    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5.0', 'symbol': 'sysName', 'tag': 'snmp_host'}]
     check = common.create_check(instance)
 
     check.check(instance)
@@ -928,7 +928,7 @@ def test_metric_tag_profile_manual(aggregator):
     instance = common.generate_instance_config([])
     instance['profile'] = 'profile1'
     definition = {
-        'metric_tags': [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName', 'tag': 'snmp_host'}],
+        'metric_tags': [{'OID': '1.3.6.1.2.1.1.5.0', 'symbol': 'sysName', 'tag': 'snmp_host'}],
         'metrics': common.SUPPORTED_METRIC_TYPES,
     }
     init_config = {'profiles': {'profile1': {'definition': definition}}}
@@ -954,7 +954,7 @@ def test_metric_tag_profile_manual(aggregator):
 def test_metric_tag_profile_sysoid(aggregator):
     instance = common.generate_instance_config([])
     definition = {
-        'metric_tags': [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName', 'tag': 'snmp_host'}],
+        'metric_tags': [{'OID': '1.3.6.1.2.1.1.5.0', 'symbol': 'sysName', 'tag': 'snmp_host'}],
         'metrics': common.SUPPORTED_METRIC_TYPES,
         'sysobjectid': '1.3.6.1.4.1.8072.3.2.10',
     }
@@ -982,11 +982,11 @@ def test_metric_tags_misconfiguration():
     metrics = common.SUPPORTED_METRIC_TYPES
     instance = common.generate_instance_config(metrics)
 
-    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5', 'tag': 'snmp_host'}]
+    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5.0', 'tag': 'snmp_host'}]
     with pytest.raises(ConfigurationError):
         common.create_check(instance)
 
-    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName'}]
+    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5.0', 'symbol': 'sysName'}]
     with pytest.raises(ConfigurationError):
         common.create_check(instance)
 
