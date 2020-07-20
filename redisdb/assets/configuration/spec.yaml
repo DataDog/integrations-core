@@ -135,3 +135,26 @@ files:
       path:  /var/log/redis_6379.log
       source: redis
       service: "<SERVICE>"
+
+- name: auto_conf.yaml
+  options:
+    - template: ad_identifiers
+      overrides:
+        value.example:
+          - redis
+    - template: init_config
+      options: []
+    - template: instances
+      options:
+        - name: host
+          required: true
+          description: Enter the host to connect to.
+          value:
+            example: '%%host%%'
+            type: string
+        - name: port
+          required: true
+          description: Enter the port of the host to connect to.
+          value:
+            example: 6379
+            type: integer
