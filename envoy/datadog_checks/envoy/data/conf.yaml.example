@@ -53,6 +53,24 @@ instances:
     #
   - stats_url: http://localhost:80/stats
 
+    ## @param username - string - optional
+    ## The username to use if services are behind basic auth.
+    ## Note: The Envoy admin endpoint does not support auth until:
+    ##   https://github.com/envoyproxy/envoy/issues/2763
+    ## For an alternative, see:
+    ##   https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
+    #
+    # username: <USERNAME>
+
+    ## @param password - string - optional
+    ## The password to use if services are behind basic or NTLM auth.
+    ## Note: The Envoy admin endpoint does not support auth until:
+    ##     https://github.com/envoyproxy/envoy/issues/2763
+    ## For an alternative, see:
+    ##     https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
+    #
+    # password: <PASSWORD>
+
     ## @param included_metrics - list of strings - optional - default: None
     ## Includes metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
@@ -180,24 +198,6 @@ instances:
     ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
     #
     # auth_type: basic
-
-    ## @param username - string - optional
-    ## The username to use if services are behind basic auth.
-    ## Note: The Envoy admin endpoint does not support auth until:
-    ##   https://github.com/envoyproxy/envoy/issues/2763
-    ## For an alternative, see:
-    ##   https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
-    #
-    # username: <USERNAME>
-
-    ## @param password - string - optional
-    ## The password to use if services are behind basic or NTLM auth.
-    ## Note: The Envoy admin endpoint does not support auth until:
-    ##     https://github.com/envoyproxy/envoy/issues/2763
-    ## For an alternative, see:
-    ##     https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
-    #
-    # password: <PASSWORD>
 
     ## @param ntlm_domain - string - optional
     ## If your services use NTLM authentication, you can specify

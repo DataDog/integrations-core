@@ -10,6 +10,7 @@ files:
     options:
     - name: stats_url
       required: true
+      display_priority: 3
       description: |
         The admin endpoint to connect to. It must be accessible:
         https://www.envoyproxy.io/docs/envoy/latest/operations/admin
@@ -74,12 +75,14 @@ files:
             https://github.com/envoyproxy/envoy/issues/2763
           For an alternative, see:
             https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
+        username.display_priority: 2
         password.description: |
           The password to use if services are behind basic or NTLM auth.
           Note: The Envoy admin endpoint does not support auth until:
               https://github.com/envoyproxy/envoy/issues/2763
           For an alternative, see:
               https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
+        password.display_priority: 1
   - template: logs
     example:
     - type: file
