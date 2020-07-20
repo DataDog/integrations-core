@@ -37,8 +37,8 @@ instances:
     #
   - stats_url: http://localhost:80/stats
 
-    ## @param metric_whitelist - list of strings - optional
-    ## Whitelist metrics using regular expressions.
+    ## @param included_metrics - list of strings - optional
+    ## Includes metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
     ## to have certain tags decide whether or not to keep or ignore metrics.
     ## For an exhaustive list of all metrics and tags, see:
@@ -46,15 +46,15 @@ instances:
     ##
     ## If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
     ##
-    ## The example whitelist below will include:
+    ## The example list below will include:
     ##   - cluster.in.0000.lb_subsets_active
     ##   - cluster.out.alerting-event-evaluator-test.datadog.svc.cluster.local
     #
-    # metric_whitelist:
+    # included_metrics:
     #   - cluster\.(in|out)\..*
 
-    ## @param metric_blacklist - list of strings - optional
-    ## Blacklist metrics using regular expressions.
+    ## @param excluded_metrics - list of strings - optional
+    ## Excludes metrics using regular expressions.
     ## The filtering occurs before tag extraction, so you have the option
     ## to have certain tags decide whether or not to keep or ignore metrics.
     ## For an exhaustive list of all metrics and tags, see:
@@ -62,11 +62,11 @@ instances:
     ##
     ## If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
     ##
-    ## The example blacklist below will exclude:
+    ## The example list below will exclude:
     ##   - http.admin.downstream_cx_active
     ##   - http.http.rds.0000.control_plane.rate_limit_enforced
     #
-    # metric_blacklist:
+    # excluded_metrics:
     #   - ^http\..*
 
     ## @param cache_metrics - boolean - optional - default: true
