@@ -54,6 +54,7 @@ class VSphereConfig(object):
         self.should_collect_events = instance.get("collect_events", self.collection_type == 'realtime')
         self.use_collect_events_fallback = instance.get("use_collect_events_fallback", False)
         self.should_collect_tags = is_affirmative(instance.get("collect_tags", False))
+        self.should_collect_attributes = is_affirmative(instance.get("collect_attributes", False))
         self.tags_prefix = instance.get("tags_prefix", DEFAULT_VSPHERE_TAG_PREFIX)
         self.excluded_host_tags = instance.get("excluded_host_tags", [])
         self.base_tags = instance.get("tags", []) + ["vcenter_server:{}".format(self.hostname)]

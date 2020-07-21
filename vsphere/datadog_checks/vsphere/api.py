@@ -8,6 +8,7 @@ from typing import Any, Callable, List, TypeVar, cast
 
 from pyVim import connect
 from pyVmomi import SoapAdapter, vim, vmodl
+from six import itervalues
 
 from datadog_checks.base.log import CheckLoggingAdapter
 from datadog_checks.vsphere.config import VSphereConfig
@@ -188,7 +189,9 @@ class VSphereAPI(object):
         for resource in ALL_RESOURCES:
             property_spec = vmodl.query.PropertyCollector.PropertySpec()
             property_spec.type = resource
-            property_spec.pathSet = ["name", "parent", "customValue"]
+            property_spec.pathSet = ["name", "parent"]
+            if self.config.should_collect_attributes:
+                property_spec.pathSet.append("customValue")
             if resource == vim.VirtualMachine:
                 property_spec.pathSet.append("runtime.powerState")
                 property_spec.pathSet.append("runtime.host")
@@ -242,6 +245,28 @@ class VSphereAPI(object):
 
         root_folder = self._conn.content.rootFolder
         infrastructure_data[root_folder] = {"name": root_folder.name, "parent": None}
+
+        # Clean up attributes, at the moment they are custom pyvmomi objects and the attribute keys are not resolved.
+        if self.config.should_collect_attributes:
+            # Mapping of attribute key UID to the attribute key name.
+            import pdb
+
+            pdb.set_trace()
+            attribute_keys = {x.key: x.name for x in self._conn.content.customFieldsManager.field}
+            for props in itervalues(infrastructure_data):
+                mor_attributes = {}
+                if 'customValue' not in props:
+                    continue
+                for attribute in props.pop('customValue'):
+                    # The attribute key is always unique
+                    attr_key = attribute_keys.get(attribute.key)
+                    if attr_key is None:
+                        self.log.debug("Unable to resolve attribute key with ID: %s", attribute.key)
+                        continue
+                    attr_value = attribute.value
+                    mor_attributes[attr_key] = attr_value
+
+                props['attributes'] = mor_attributes
         return cast(InfrastructureData, infrastructure_data)
 
     @smart_retry

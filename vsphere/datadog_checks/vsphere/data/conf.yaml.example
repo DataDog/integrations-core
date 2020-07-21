@@ -209,6 +209,17 @@ instances:
     #
     # collect_tags: false
 
+    ## @param collect_attributes - boolean - optional - default: false
+    ## If true, the vSphere attributes will be collected and submitted as Datadog tags.
+    ## The final tag sent to Datadog is composed of 'tags_prefix' + vSphere attribute category as key and
+    ## the vSphere attribute value as value:
+    ##    <ATTR_CATEGORY>:<ATTR_VAL>
+    ## Examples:
+    ## - os_type:windows
+    ## - application_name:my_app
+    #
+    # collect_attributes: false
+
     ## @param tags_prefix - boolean - optional - default: ''
     ## Custom tags attached to vSphere resources will be prefixed with this prefix when collected.
     ## Example use cases:

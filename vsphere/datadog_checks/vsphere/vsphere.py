@@ -235,6 +235,11 @@ class VSphereCheck(AgentCheck):
 
             tags.extend(get_parent_tags_recursively(mor, infrastructure_data))
             tags.append('vsphere_type:{}'.format(mor_type_str))
+
+            # Attach tags from fetched attributes.
+            for attr_key, attr_val in iteritems(properties.get('attributes', {})):
+                tags.append('{}{}:{}'.format(self.config.tags_prefix, attr_key, attr_val))
+
             mor_payload = {"tags": tags}  # type: Dict[str, Any]
 
             if hostname:
