@@ -263,7 +263,7 @@ class PgStatementsMixin(object):
                 self.log.warn("failed to collect execution plan due to undefined explain_function: %s. refer to setup documentation (TODO link)", self.config.collect_exec_plan_function)
                 return None
             except Exception as e:
-                statsd.increment("dd.postgres.run_explain.error")
+                statsd.increment("dd.postgres.run_explain.error", tags=instance_tags)
                 self.log.error("failed to collect execution plan for query='%s'. (%s): %s", statement, type(e), e)
                 return None
         if not result or len(result) < 1 or len(result[0]) < 1:
