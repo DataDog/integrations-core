@@ -1,0 +1,93 @@
+name: CouchDB
+files:
+- name: couch.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: server
+      required: true
+      description: The Couch server's url.
+      display_priority: 3
+      value:
+        example: http://localhost:5984
+        type: string
+    - name: db_include
+      description: |
+        The `db_include` should contain the names of the databases meant to be checked.
+        If no include list is specified, all databases will be checked.
+
+        Note that no more than 50 databases can be checked at the same time, if you have
+        included more than 50 or if you have more than 50 databases update the `max_dbs_per_check`
+        parameter accordingly.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - <DATABASE_1>
+          - <DATABASE_2>
+        default: all
+    - name: db_exclude
+      description: |
+        The `db_exclude` should contain the names of any databases meant to be excluded
+        from being checked. If a database is listed both as included and excluded,
+        the exclusion takes precedence.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - <DATABASE_1>
+          - <DATABASE_2>
+        default: None
+    - name: max_dbs_per_check
+      description: Number of databases to scan per check.
+      value:
+        type: integer
+        example: 50
+    - name: name
+      description: CouchDB 2.x only. If not provided, the check scans up to max_nodes_per_check nodes of the cluster.
+      value:
+        type: string
+        example: <ERLANG_NAME>
+        default: None
+    - name: max_nodes_per_check
+      description: CouchDB 2.x only. How many nodes each check reports if no name is provided.
+      value:
+        type: integer
+        example: 10
+        default: 20
+    - template: instances/default
+    - template: instances/http
+      overrides:
+        username.description: The username to use if services are behind basic auth.
+        username.display_priority: 2
+        password.description: The password to use if services are behind basic or NTLM auth.
+        password.display_priority: 1
+
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/couchdb/couch.log
+      source: couchdb
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - couchdb
+  - template: init_config
+    options: []
+  - template: instances
+    options:
+    - name: server
+      required: true
+      description: The Couch server's url.
+      value:
+        example: http://%%host%%:5984
+        type: string
