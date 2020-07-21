@@ -15,6 +15,15 @@ from six import PY3, iteritems, itervalues, text_type
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
+from .queries import (
+    SQL_95TH_PERCENTILE,
+    SQL_AVG_QUERY_RUN_TIME,
+    SQL_INNODB_ENGINES,
+    SQL_PROCESS_LIST,
+    SQL_QUERY_SCHEMA_SIZE,
+    SQL_WORKER_THREADS,
+)
+
 try:
     import psutil
 
@@ -890,11 +899,7 @@ class MySql(AgentCheck):
         # table. Later is choosen because that involves no string parsing.
         try:
             with closing(db.cursor()) as cursor:
-                cursor.execute(
-                    "select engine from information_schema.ENGINES where engine='InnoDB' and \
-                    support != 'no' and support != 'disabled'"
-                )
-
+                cursor.execute(SQL_INNODB_ENGINES)
                 return cursor.rowcount > 0
 
         except (pymysql.err.InternalError, pymysql.err.OperationalError, pymysql.err.NotSupportedError) as e:
@@ -953,9 +958,9 @@ class MySql(AgentCheck):
                 if above_560 and nonblocking:
                     # Query `performance_schema.threads` instead of `
                     # information_schema.processlist` to avoid mutex impact on performance.
-                    cursor.execute("SELECT THREAD_ID, NAME FROM performance_schema.threads WHERE NAME LIKE '%worker'")
+                    cursor.execute(SQL_WORKER_THREADS)
                 else:
-                    cursor.execute("SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND LIKE '%Binlog dump%'")
+                    cursor.execute(SQL_PROCESS_LIST)
                 slave_results = cursor.fetchall()
                 slaves = 0
                 for _ in slave_results:
@@ -1312,19 +1317,9 @@ class MySql(AgentCheck):
     def _get_query_exec_time_95th_us(self, db):
         # Fetches the 95th percentile query execution time and returns the value
         # in microseconds
-        sql_95th_percentile = """SELECT `avg_us`, `ro` as `percentile` FROM
-            (SELECT `avg_us`, @rownum := @rownum + 1 as `ro` FROM
-                (SELECT ROUND(avg_timer_wait / 1000000) as `avg_us`
-                    FROM performance_schema.events_statements_summary_by_digest
-                    ORDER BY `avg_us` ASC) p,
-                (SELECT @rownum := 0) r) q
-            WHERE q.`ro` > ROUND(.95*@rownum)
-            ORDER BY `percentile` ASC
-            LIMIT 1"""
-
         try:
             with closing(db.cursor()) as cursor:
-                cursor.execute(sql_95th_percentile)
+                cursor.execute(SQL_95TH_PERCENTILE)
 
                 if cursor.rowcount < 1:
                     self.warning(
@@ -1344,16 +1339,9 @@ class MySql(AgentCheck):
     def _query_exec_time_per_schema(self, db):
         # Fetches the avg query execution time per schema and returns the
         # value in microseconds
-
-        sql_avg_query_run_time = """\
-            SELECT schema_name, ROUND((SUM(sum_timer_wait) / SUM(count_star)) / 1000000) AS avg_us
-            FROM performance_schema.events_statements_summary_by_digest
-            WHERE schema_name IS NOT NULL
-            GROUP BY schema_name"""
-
         try:
             with closing(db.cursor()) as cursor:
-                cursor.execute(sql_avg_query_run_time)
+                cursor.execute(SQL_AVG_QUERY_RUN_TIME)
 
                 if cursor.rowcount < 1:
                     self.warning(
@@ -1378,17 +1366,9 @@ class MySql(AgentCheck):
     def _query_size_per_schema(self, db):
         # Fetches the avg query execution time per schema and returns the
         # value in microseconds
-
-        sql_query_schema_size = """
-        SELECT   table_schema,
-                 IFNULL(SUM(data_length+index_length)/1024/1024,0) AS total_mb
-                 FROM     information_schema.tables
-                 GROUP BY table_schema;
-        """
-
         try:
             with closing(db.cursor()) as cursor:
-                cursor.execute(sql_query_schema_size)
+                cursor.execute(SQL_QUERY_SCHEMA_SIZE)
 
                 if cursor.rowcount < 1:
                     self.warning("Failed to fetch records from the information schema 'tables' table.")
