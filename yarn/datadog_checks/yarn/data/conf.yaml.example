@@ -409,8 +409,6 @@ instances:
 #   - type: file
 #     path: /usr/local/hadoop/logs/yarn-root-nodemanager-yarn-container.log
 #     source: yarn
-#     service: <SERVICE_NAME>
 #   - type: file
 #     path: /usr/local/hadoop/logs/yarn--resourcemanager-yarn-container.log
 #     source: yarn
-#     service: <SERVICE_NAME>
