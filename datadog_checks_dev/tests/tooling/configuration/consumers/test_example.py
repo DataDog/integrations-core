@@ -854,7 +854,9 @@ def test_option_description_length_limit_with_noqa():
             value:
               type: string
               example: something
-        """.format('a' * DESCRIPTION_LINE_LENGTH_LIMIT + ' /noqa')
+        """.format(
+            'a' * DESCRIPTION_LINE_LENGTH_LIMIT + ' /noqa'
+        )
     )
 
     files = consumer.render()
@@ -863,10 +865,12 @@ def test_option_description_length_limit_with_noqa():
     assert contents == normalize_yaml(
         """
         ## @param foo - string - optional - default: something
-        ## aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        ## {}
         #
         # foo: something
-        """
+        """.format(
+            'a' * DESCRIPTION_LINE_LENGTH_LIMIT
+        )
     )
 
 
