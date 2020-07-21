@@ -23,13 +23,14 @@ def parse_summary_status_base_metrics(data, tags):
         if not key.endswith('-status'):
             continue
         resource_type = resource_data['typeref']
-        metrics = resource_data['{}-status-summary'.format(resource_type)]
-        # TODO: Ignore already collected metrics
+        # Ignore already collected metrics
         #       - forests-status-summary
         #       - hosts-status-summary
         #       - servers-status-summary
-        for metric in _parse_status_metrics(resource_type, metrics, tags):
-            yield metric
+        if resource_type not in ['forests', 'hosts', 'servers']:
+            metrics = resource_data['{}-status-summary'.format(resource_type)]
+            for metric in _parse_status_metrics(resource_type, metrics, tags):
+                yield metric
 
 
 def _parse_status_metrics(metric_prefix, metrics, tags):
@@ -40,11 +41,6 @@ def _parse_status_metrics(metric_prefix, metrics, tags):
             total_key = 'total-' + prop_type
             yield build_metric_to_submit("{}.{}".format(metric_prefix, total_key), data[total_key], tags)
             for metric in _parse_status_metrics(metric_prefix, data[prop_type + '-detail'], tags):
-                yield metric
-        # TODO: remove, seems redundant
-        elif key == 'load-properties':
-            yield build_metric_to_submit("{}.total-load".format(metric_prefix), data['total-load'], tags)
-            for metric in _parse_status_metrics(metric_prefix, data['load-detail'], tags):
                 yield metric
         elif is_metric(data):
             yield build_metric_to_submit("{}.{}".format(metric_prefix, key), data, tags)

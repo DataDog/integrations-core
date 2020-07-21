@@ -10,8 +10,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
 PORT = 8002
 API_URL = "http://{}:{}".format(HOST, PORT)
-USERNAME = 'admin'
-PASSWORD = 'admin'
+ADMIN_USERNAME = 'admin'
+ADMIN_PASSWORD = 'admin'
+USERNAME = 'datadog'
+PASSWORD = 'datadog'
 
 INSTANCE = {
     'url': API_URL,

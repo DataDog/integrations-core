@@ -39,7 +39,7 @@ class MarklogicCheck(AgentCheck):
     def check(self, _):
         # type: (Any) -> None
         # TODO: Handle errors:
-        #       - Continue if one of the processor fail
+        #       - X Continue if one of the processor fail
         #       - Add service check (can connect, status service check)
         # No need to query base requests metrics, they are already collect in by process_base_status
         # self.process_requests_metrics_by_resource()
@@ -47,10 +47,13 @@ class MarklogicCheck(AgentCheck):
         self.resources_to_monitor = self.get_resources_to_monitor()
 
         for collector in self.collectors:
-            # TODO: try/catch
-            collector()
+            try:
+                collector()
+            except Exception as e:
+                self.log.error("Collector %s failed while collecting metrics: %s", collector, str(e)) 
 
     def collect_summary_status_resource_metrics(self):
+        # type: () -> None
         """
         Collect Summary Status Resource Metrics.
 
@@ -64,6 +67,7 @@ class MarklogicCheck(AgentCheck):
             self.submit_metrics(metrics)
 
     def collect_summary_status_base_metrics(self):
+        # type: () -> None
         """
         Collect Summary Status Base Metrics.
 
@@ -78,6 +82,7 @@ class MarklogicCheck(AgentCheck):
         self.submit_metrics(metrics)
 
     def collect_summary_storage_base_metrics(self):
+        # type: () -> None
         """
         Collect Base Storage Metrics
         """
@@ -86,12 +91,14 @@ class MarklogicCheck(AgentCheck):
         self.submit_metrics(metrics)
 
     def collect_per_resource_status_metrics(self):
+        # type: () -> None
         """
         Collect Per Resource Status Metrics.
         """
         pprint(self.resources_to_monitor)
 
     def get_resources_to_monitor(self):
+        # type: () -> None
         resources = self.api.get_resources()
         pprint(self.config.resource_filters)
         pprint(resources)
