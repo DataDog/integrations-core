@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict
-
 import pytest
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
@@ -15,7 +13,7 @@ from .metrics import GLOBAL_METRICS, STORAGE_FOREST_METRICS, STORAGE_HOST_METRIC
 @pytest.mark.integration
 @pytest.mark.usefixtures("dd_environment")
 def test_check(aggregator):
-    # type: (AggregatorStub, Dict[str, Any]) -> None
+    # type: (AggregatorStub) -> None
     check = MarklogicCheck('marklogic', {}, [INSTANCE])
 
     check.check(INSTANCE)
@@ -42,6 +40,7 @@ def test_check(aggregator):
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
+    # type (Any) -> None
     aggregator = dd_agent_check(INSTANCE, rate=True)
 
     for metric in GLOBAL_METRICS:

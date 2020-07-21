@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from typing import Any, Dict
 
 
 class Config:
@@ -16,6 +17,7 @@ class Config:
 
 class ResourceFilter:
     def __init__(self, raw_filter):
+        # type: (Dict[str, Any]) -> None
         # TODO: Validate config
         self.resource = raw_filter['resource']
         self.name = re.compile(raw_filter['name'])

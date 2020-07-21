@@ -1,19 +1,22 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from typing import Any, Dict
+
 from datadog_checks.marklogic.api import MarkLogicApi
 
 
 class MockResponseWrapper:
-    def __init__(self, return_value, status=200):
+    def __init__(self, return_value):
+        # type: (Dict[str, Any]) -> None
         self.ret = return_value
-        self.status = status
 
     def raise_for_status(self):
-        if self.status != 200:
-            raise Exception()
+        # type: () -> None
+        pass
 
     def json(self):
+        # type: () -> Dict[str, Any]
         return self.ret
 
 
@@ -22,12 +25,14 @@ class MockRequestsWrapper:
         self.ret = MockResponseWrapper(return_value)
 
     def get(self, url, params):
+        # type: (str, Dict[str, str]) -> MockResponseWrapper
         self.url = url
         self.params = params
         return self.ret
 
 
 def test_get_status_data():
+    # type: () -> None
     http = MockRequestsWrapper({'foo': 'bar'})
     api = MarkLogicApi(http, 'http://localhost:8000')
 
@@ -40,6 +45,7 @@ def test_get_status_data():
 
 
 def test_get_requests_data():
+    # type: () -> None
     http = MockRequestsWrapper({'foo': 'bar'})
     api = MarkLogicApi(http, 'http://localhost:8000')
 
@@ -52,6 +58,7 @@ def test_get_requests_data():
 
 
 def test_get_forests_storage_data():
+    # type: () -> None
     http = MockRequestsWrapper({'foo': 'bar'})
     api = MarkLogicApi(http, 'http://localhost:8000')
 
@@ -64,6 +71,7 @@ def test_get_forests_storage_data():
 
 
 def test_get_resources():
+    # type: () -> None
     cluster_query_resp = {
         'cluster-query': {
             'relations': {

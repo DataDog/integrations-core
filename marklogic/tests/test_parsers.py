@@ -4,6 +4,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from typing import Any, Dict
 
 import pytest
 import yaml
@@ -19,11 +20,13 @@ from .common import HERE
 
 
 def read_fixture_file(fname):
+    # type: (str) -> Dict[str, Any]
     with open(os.path.join(HERE, 'fixtures', fname)) as f:
         return yaml.safe_load(f.read())
 
 
 def test_build_metric_to_submit():
+    # type: () -> None
     # Simple int gauge metric
     assert build_metric_to_submit('forests.stuff', 33, ['tést:tèst']) == ('gauge', 'forests.stuff', 33, ['tést:tèst'])
 
@@ -43,6 +46,7 @@ def test_build_metric_to_submit():
 
 
 def test_parse_summary_storage_base_metrics():
+    # type: () -> None
     forests_storage_data = read_fixture_file('storage/forests_storage.yaml')
 
     EXPECTED_RESULT = [
@@ -220,6 +224,7 @@ def test_parse_summary_storage_base_metrics():
 
 
 def test_parse_summary_status_base_metrics():
+    # type: () -> None
     status_base_data = read_fixture_file('status/base_status.yaml')
 
     EXPECTED_RESULT = [
@@ -326,6 +331,7 @@ def test_parse_summary_status_base_metrics():
 
 
 def test_parse_summary_status_resource_metrics():
+    # type: () -> None
     status_resource_data = read_fixture_file('status/forests_status.yaml')
 
     EXPECTED_RESULT = [

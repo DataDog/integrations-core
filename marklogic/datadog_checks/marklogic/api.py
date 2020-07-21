@@ -83,7 +83,7 @@ class MarkLogicApi(object):
         # type: () -> Dict[str, Any]
         # TODO: How useful is it
         data = self._get_raw_resources()
-        resources = {}
+        resources = {}  # type: Dict[str, Any]
 
         for group in data['cluster-query']['relations']['relation-group']:
             resource_type = group['typeref']

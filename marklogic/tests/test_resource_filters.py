@@ -10,6 +10,7 @@ from .common import INSTANCE
 
 
 def test_resources_to_monitor():
+    # type: () -> None
     instance = INSTANCE.copy()
     instance['resource_filters'] = [{'resource': 'database', 'name': 'Documents'}]
     check = MarklogicCheck('marklogic', {}, [instance])
