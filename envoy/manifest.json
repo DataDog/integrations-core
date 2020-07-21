@@ -25,6 +25,9 @@
   "type": "check",
   "integration_id": "envoy",
   "assets": {
+     "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "Envoy - Overview": "assets/dashboards/envoy_overview.json"

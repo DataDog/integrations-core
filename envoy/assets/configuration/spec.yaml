@@ -1,0 +1,90 @@
+name: Envoy
+files:
+- name: envoy.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: stats_url
+      required: true
+      display_priority: 3
+      description: |
+        The admin endpoint to connect to. It must be accessible:
+        https://www.envoyproxy.io/docs/envoy/latest/operations/admin
+        Add a `?usedonly` on the end if you wish to ignore
+        unused metrics instead of reporting them as `0`.
+      value:
+        example: http://localhost:80/stats
+        type: string
+    - name: included_metrics
+      description: |
+        Includes metrics using regular expressions.
+        The filtering occurs before tag extraction, so you have the option
+        to have certain tags decide whether or not to keep or ignore metrics.
+        For an exhaustive list of all metrics and tags, see:
+        https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
+
+        If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
+
+        The example list below will include:
+          - cluster.in.0000.lb_subsets_active
+          - cluster.out.alerting-event-evaluator-test.datadog.svc.cluster.local
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - cluster\.(in|out)\..*
+        default: None
+    - name: excluded_metrics
+      description: |
+        Excludes metrics using regular expressions.
+        The filtering occurs before tag extraction, so you have the option
+        to have certain tags decide whether or not to keep or ignore metrics.
+        For an exhaustive list of all metrics and tags, see:
+        https://github.com/DataDog/integrations-core/blob/master/envoy/datadog_checks/envoy/metrics.py
+
+        If you surround patterns by quotes, be sure to escape backslashes with an extra backslash.
+
+        The example list below will exclude:
+          - http.admin.downstream_cx_active
+          - http.http.rds.0000.control_plane.rate_limit_enforced
+      value:
+        type: array
+        items:
+          type: string
+        example:
+          - ^http\..*
+        default: None
+    - name: cache_metrics
+      description: |
+        Results are cached by default to decrease CPU utilization, at
+        the expense of some memory. Disable by setting this to false.
+      value:
+        type: boolean
+        example: true
+    - template: instances/default
+    - template: instances/http
+      overrides:
+        username.description: |
+          The username to use if services are behind basic auth.
+          Note: The Envoy admin endpoint does not support auth until:
+            https://github.com/envoyproxy/envoy/issues/2763
+          For an alternative, see:
+            https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
+        username.display_priority: 2
+        password.description: |
+          The password to use if services are behind basic or NTLM auth.
+          Note: The Envoy admin endpoint does not support auth until:
+              https://github.com/envoyproxy/envoy/issues/2763
+          For an alternative, see:
+              https://gist.github.com/ofek/6051508cd0dfa98fc6c13153b647c6f8
+        password.display_priority: 1
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/envoy.log
+      source: envoy
