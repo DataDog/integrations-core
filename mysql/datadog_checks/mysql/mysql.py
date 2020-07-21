@@ -10,6 +10,7 @@ from collections import defaultdict, namedtuple
 from contextlib import closing, contextmanager
 
 import pymysql
+from .collection_utils import collect_scalar, collect_string, collect_all_scalars, collect_type
 from six import PY3, iteritems, itervalues, text_type
 
 from datadog_checks.base import AgentCheck, is_affirmative
@@ -500,7 +501,7 @@ class MySql(AgentCheck):
             ]
 
             for inno_k in innodb_keys:
-                results[inno_k] = self._collect_scalar(inno_k, results)
+                results[inno_k] = collect_scalar(inno_k, results)
 
             try:
                 innodb_page_size = results['Innodb_page_size']
@@ -547,9 +548,9 @@ class MySql(AgentCheck):
             results['Binlog_space_usage_bytes'] = self._get_binary_log_stats(db)
 
         # Compute key cache utilization metric
-        key_blocks_unused = self._collect_scalar('Key_blocks_unused', results)
-        key_cache_block_size = self._collect_scalar('key_cache_block_size', results)
-        key_buffer_size = self._collect_scalar('key_buffer_size', results)
+        key_blocks_unused = collect_scalar('Key_blocks_unused', results)
+        key_cache_block_size = collect_scalar('key_cache_block_size', results)
+        key_buffer_size = collect_scalar('key_buffer_size', results)
         results['Key_buffer_size'] = key_buffer_size
 
         try:
@@ -558,9 +559,9 @@ class MySql(AgentCheck):
                 key_cache_utilization = 1 - ((key_blocks_unused * key_cache_block_size) / key_buffer_size)
                 results['Key_cache_utilization'] = key_cache_utilization
 
-            results['Key_buffer_bytes_used'] = self._collect_scalar('Key_blocks_used', results) * key_cache_block_size
+            results['Key_buffer_bytes_used'] = collect_scalar('Key_blocks_used', results) * key_cache_block_size
             results['Key_buffer_bytes_unflushed'] = (
-                self._collect_scalar('Key_blocks_not_flushed', results) * key_cache_block_size
+                collect_scalar('Key_blocks_not_flushed', results) * key_cache_block_size
             )
         except TypeError as e:
             self.log.error("Not all Key metrics are available, unable to compute: %s", e)
@@ -608,12 +609,12 @@ class MySql(AgentCheck):
 
             # get slave running form global status page
             slave_running_status = AgentCheck.UNKNOWN
-            slave_running = self._collect_string('Slave_running', results)
+            slave_running = collect_string('Slave_running', results)
             binlog_running = results.get('Binlog_enabled', False)
             # slaves will only be collected iff user has PROCESS privileges.
-            slaves = self._collect_scalar('Slaves_connected', results)
-            slave_io_running = self._collect_type('Slave_IO_Running', results, dict)
-            slave_sql_running = self._collect_type('Slave_SQL_Running', results, dict)
+            slaves = collect_scalar('Slaves_connected', results)
+            slave_io_running = collect_type('Slave_IO_Running', results, dict)
+            slave_sql_running = collect_type('Slave_SQL_Running', results, dict)
             if slave_io_running:
                 slave_io_running = any(v.lower().strip() == 'yes' for v in itervalues(slave_io_running))
             if slave_sql_running:
@@ -686,7 +687,7 @@ class MySql(AgentCheck):
 
     def _is_master(self, slaves, results):
         # master uuid only collected in slaves
-        master_host = self._collect_string('Master_Host', results)
+        master_host = collect_string('Master_Host', results)
         if slaves > 0 or not master_host:
             return True
 
@@ -695,7 +696,7 @@ class MySql(AgentCheck):
     def _submit_metrics(self, variables, db_results, tags):
         for variable, metric in iteritems(variables):
             metric_name, metric_type = metric
-            for tag, value in self._collect_all_scalars(variable, db_results):
+            for tag, value in collect_all_scalars(variable, db_results):
                 metric_tags = list(tags)
                 if tag:
                     metric_tags.append(tag)
@@ -724,29 +725,6 @@ class MySql(AgentCheck):
         version = (int(mysql_version[0]), int(mysql_version[1]), patchlevel)
 
         return version >= compat_version
-
-    def _collect_all_scalars(self, key, dictionary):
-        if key not in dictionary or dictionary[key] is None:
-            yield None, None
-        elif isinstance(dictionary[key], dict):
-            for tag, _ in iteritems(dictionary[key]):
-                yield tag, self._collect_type(tag, dictionary[key], float)
-        else:
-            yield None, self._collect_type(key, dictionary, float)
-
-    def _collect_scalar(self, key, mapping):
-        return self._collect_type(key, mapping, float)
-
-    def _collect_string(self, key, mapping):
-        return self._collect_type(key, mapping, text_type)
-
-    def _collect_type(self, key, mapping, the_type):
-        self.log.debug("Collecting data with %s", key)
-        if key not in mapping:
-            self.log.debug("%s returned None", key)
-            return None
-        self.log.debug("Collecting done, value %s", mapping[key])
-        return the_type(mapping[key])
 
     def _collect_dict(self, metric_type, field_metric_map, query, db, tags):
         """
@@ -1306,7 +1284,7 @@ class MySql(AgentCheck):
         return results
 
     def _get_variable_enabled(self, results, var):
-        enabled = self._collect_string(var, results)
+        enabled = collect_string(var, results)
         return enabled and enabled.lower().strip() == 'on'
 
     def _get_query_exec_time_95th_us(self, db):
