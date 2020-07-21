@@ -7,7 +7,7 @@ import pymysql
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
+from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits, is_dbm_enabled
 
 try:
     import datadog_agent
@@ -45,24 +45,26 @@ DEFAULT_METRIC_LIMITS = {
     'rows_examined': (500, 500),
 }
 
-class MySQLStatementMetrics(StatementMetrics):
+class MySQLStatementMetrics:
     """
     MySQLStatementMetrics collects database metrics per normalized MySQL statement
     """
 
-    def __init__(self, instance):
+    def __init__(self, instance, log):
         super(MySQLStatementMetrics, self).__init__()
+        self.log = log
+        self._state = StatementMetrics(self.log)
         self.is_disabled = instance.get('options', {}).get('disable_query_metrics', False)
         self.query_metric_limits = instance.get('options', {}).get('query_metric_limits', DEFAULT_METRIC_LIMITS)
         self.escape_query_commas_hack = instance.get('options', {}).get('escape_query_commas_hack', False)
     
     def get_per_statement_metrics(self, db):
-        if self.is_disabled or not self.is_enabled:
+        if self.is_disabled or not is_dbm_enabled():
             return []
 
         rows = self._query_summary_per_statement(db)
-        rows = self._compute_derivative_rows(rows, METRICS.keys(), key=lambda row: (row['schema'], row['digest']))
-        rows = self._apply_limits(rows, self.query_metric_limits, 'count', True, key=lambda row: (row['schema'], row['digest']))
+        rows = self._state.compute_derivative_rows(rows, METRICS.keys(), key=lambda row: (row['schema'], row['digest']))
+        rows = apply_row_limits(rows, self.query_metric_limits, 'count', True, key=lambda row: (row['schema'], row['digest']))
 
         metrics = dict()
 
