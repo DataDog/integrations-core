@@ -18,6 +18,7 @@ from six import PY3, iteritems, itervalues, text_type
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
+from .statements import MySQLStatementMetrics
 from .execution_plans import ExecutionPlansMixin
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 
@@ -308,8 +309,6 @@ class MySql(ExecutionPlansMixin, AgentCheck):
         ExecutionPlansMixin.__init__(self)
         self.qcache_stats = {}
         self.metadata = None
-        # Cache to compare the statement metrics to the previous collection
-        self.statement_cache = {}
 
         self._tags = list(self.instance.get('tags', []))
 
@@ -318,8 +317,8 @@ class MySql(ExecutionPlansMixin, AgentCheck):
 
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
-        self.max_query_metrics = int(self.instance.get('options', {}).get('max_query_metrics', 300))
-        self.escape_query_commas_hack = self.instance.get('options', {}).get('escape_query_commas_hack', False)
+
+        self._statement_metrics = MySQLStatementMetrics(self.instance, self.log)
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -392,7 +391,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
                 # Metric collection
                 self._collect_metrics(db, tags, options, queries, max_custom_queries)
                 self._collect_system_metrics(host, db, tags)
-                self._collect_queries(db, tags, options)
+                self._collect_statement_metrics(db, tags, options)
                 self._collect_execution_plans(db, tags, options)
 
                 # keeping track of these:
@@ -709,15 +708,12 @@ class MySql(ExecutionPlansMixin, AgentCheck):
             if len(queries) > max_custom_queries:
                 self.warning("Maximum number (%s) of custom queries reached.  Skipping the rest.", max_custom_queries)
 
-    def _collect_queries(self, db, tags, options):
-        if not(is_affirmative(options.get('extra_performance_queries', False))):
-            return False
-
+    def _collect_statement_metrics(self, db, tags, options):
         tags = list(set(self.service_check_tags + tags))
-        summary_metrics = self._query_summary_per_statement(db)
+        summary_metrics = self._statement_metrics.get_per_statement_metrics(db)
 
         for metric_name, value, fn, metric_tags in summary_metrics:
-            fn(metric_name, value, tags=metric_tags + tags)
+            fn(self, metric_name, value, tags=metric_tags + tags)
 
     def _is_master(self, slaves, results):
         # master uuid only collected in slaves
@@ -1421,107 +1417,6 @@ class MySql(ExecutionPlansMixin, AgentCheck):
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Avg exec time performance metrics unavailable at this time: %s", e)
             return None
-
-    def _query_summary_per_statement(self, db):
-        """
-        Collects per-statement metrics from performance schema. Because the statement sums are
-        cumulative, the results of the previous run are stored and subtracted from the current
-        values to get the counts for the elapsed period. This is similar to monotonic_count, but
-        several fields must be further processed from the delta values.
-        """
-
-        sql_statement_summary ="""\
-            SELECT `schema_name` as `schema`,
-                `digest` as `digest`,
-                `digest_text` as `query`,
-                `count_star` as `count`,
-                `sum_timer_wait` / 1000 as `time`,
-                `sum_lock_time` / 1000 as `lock_time`,
-                `sum_errors` as `errors`,
-                `sum_rows_affected` as `rows_affected`,
-                `sum_rows_sent` as `rows_sent`,
-                `sum_rows_examined` as `rows_examined`,
-                `sum_select_scan` as `select_scan`,
-                `sum_select_full_join` as `select_full_join`,
-                `sum_no_index_used` as `no_index_used`,
-                `sum_no_good_index_used` as `no_good_index_used`
-            FROM performance_schema.events_statements_summary_by_digest
-            WHERE `digest_text` NOT LIKE 'EXPLAIN %'
-            ORDER BY `avg_timer_wait` DESC"""
-
-        METRICS = {
-            'count': ('mysql.queries.count', self.count),
-            'errors': ('mysql.queries.errors', self.count),
-            'time': ('mysql.queries.time', self.count),
-            'select_scan': ('mysql.queries.select_scan', self.count),
-            'select_full_join': ('mysql.queries.select_full_join', self.count),
-            'no_index_used': ('mysql.queries.no_index_used', self.count),
-            'no_good_index_used': ('mysql.queries.no_good_index_used', self.count),
-            'lock_time': ('mysql.queries.lock_time', self.count),
-            'rows_affected': ('mysql.queries.rows_affected', self.count),
-            'rows_sent': ('mysql.queries.rows_sent', self.count),
-            'rows_examined': ('mysql.queries.rows_examined', self.count),
-        }
-
-        try:
-            with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
-                cursor.execute(sql_statement_summary)
-
-                rows = cursor.fetchall()
-        except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            self.warning("Statement summary metrics are unavailable at this time: %s", e)
-            return []
-
-        # # TODO: apply a limit
-        # In the event the row count exceeds the limit, select the most "interesting" statements
-        # which are slow, have errors, no good index, etc.
-        # - avg duration
-        # - high lock time
-
-        rows = rows[:self.max_query_metrics]
-
-
-        # Given the queried rows, each row must be checked against its previous result
-        # to derive the values in the elapsed period. Statements which appeared first this
-        # run will emit no metrics. If the table was truncated or cumulative counts were
-        # lost since the last run, this run will emit no metrics.
-
-        metrics = dict()
-
-        new_cache = {}
-        for row in rows:
-            key = (row['schema'], row['digest'])
-            new_cache[key] = row
-            if key not in self.statement_cache:
-                continue
-            prev = self.statement_cache[key]
-
-            # Table was truncated or no new queries; start tracking from this point
-            if row['count'] - prev['count'] <= 0:
-                continue
-
-            for col, (name, fn) in METRICS.items():
-                tags = []
-                if row['schema'] is not None:
-                    tags.append('schema:' + row['schema'])
-                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
-                query_signature = compute_sql_signature(obfuscated_statement)
-                tags.append('query_signature:' + query_signature)
-                if self.escape_query_commas_hack:
-                    obfuscated_statement = obfuscated_statement.replace(', ', '，').replace(',', '，')
-                tags.append('query:' + obfuscated_statement[:200])
-
-                # Merge metrics in cases where the query signature differs from the DB digest
-                key = '|'.join([name] + sorted(tags))
-                value = row[col] - prev[col]
-                if key in metrics:
-                    self.log.warning(f'Query Collision: {key}')
-                    _, prev_value, _, _ = metrics[key]
-                    value += prev_value
-                metrics[key] = (name, value, fn, tags)
-
-        self.statement_cache = new_cache
-        return list(metrics.values())
 
     def _query_size_per_schema(self, db):
         # Fetches the avg query execution time per schema and returns the
