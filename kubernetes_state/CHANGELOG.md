@@ -1,5 +1,21 @@
 # CHANGELOG - kubernetes_state
 
+## 5.5.0 / 2020-06-29
+
+* [Added] Refactor to use Agent 6+ signature. See [#6906](https://github.com/DataDog/integrations-core/pull/6906).
+* [Fixed] Fix debug log line for job metrics. See [#6700](https://github.com/DataDog/integrations-core/pull/6700).
+* [Fixed] Fix issue when the storage class of a persistent volume is empty and add test. See [#6615](https://github.com/DataDog/integrations-core/pull/6615).
+
+## 5.4.1 / 2020-05-21
+
+* [Fixed] Document join_standard_tags setting in conf.example.yaml. See [#6707](https://github.com/DataDog/integrations-core/pull/6707).
+
+## 5.4.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Introduce join_standard_tags setting. See [#6253](https://github.com/DataDog/integrations-core/pull/6253).
+* [Fixed] Remove use of `label_to_match` to prevent deprecation warnings. See [#6503](https://github.com/DataDog/integrations-core/pull/6503).
+
 ## 5.3.0 / 2020-04-04
 
 * [Added] Allow automatic joins to all kube_{object}_labels in KSM check. See [#5650](https://github.com/DataDog/integrations-core/pull/5650).

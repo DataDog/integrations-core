@@ -1,5 +1,14 @@
 # CHANGELOG - CoreDNS
 
+## 1.5.0 / 2020-07-16
+
+* [Added] Adding new metrics for version 1.7.0 of CoreDNS. See [#6973](https://github.com/DataDog/integrations-core/pull/6973).
+
+## 1.4.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Fixed] Agent 6 signature. See [#6444](https://github.com/DataDog/integrations-core/pull/6444).
+
 ## 1.3.1 / 2020-04-04
 
 * [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).

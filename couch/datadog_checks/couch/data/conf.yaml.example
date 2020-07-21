@@ -44,24 +44,24 @@ instances:
     #
     # password: <PASSWORD>
 
-    ## @param db_whitelist - list of strings - optional - default: all
-    ## The `db_whitelist` should contain the names of the databases meant to be checked.
-    ## If no whitelist is specified, all databases will be checked.
+    ## @param db_include - list of strings - optional - default: all
+    ## The `db_include` should contain the names of the databases meant to be checked.
+    ## If no include list is specified, all databases will be checked.
     ##
     ## Note that no more than 50 databases can be checked at the same time, if you have
-    ## whitelisted more than 50 or if you have more than 50 databases update the `max_dbs_per_check`
+    ## included more than 50 or if you have more than 50 databases update the `max_dbs_per_check`
     ## parameter accordingly.
     #
-    # db_whitelist:
+    # db_include:
     #   - <DATABASE_1>
     #   - <DATABASE_2>
 
-    ## @param db_blacklist - list of strings - optional - default: none
-    ## The `db_blacklist` should contain the names of any databases meant to be excluded
-    ## from being checked. If a database is listed in both the blacklist and whitelist,
-    ## the blacklist takes precedence.
+    ## @param db_exclude - list of strings - optional - default: none
+    ## The `db_exclude` should contain the names of any databases meant to be excluded
+    ## from being checked. If a database is listed both as included and excluded,
+    ## the exclusion takes precedence.
     #
-    # db_blacklist:
+    # db_exclude:
     #   - <DATABASE_1>
     #   - <DATABASE_2>
 
@@ -115,7 +115,7 @@ instances:
     ## If your services uses NTLM authentication, you can
     ## specify a domain that is used in the check. For NTLM Auth,
     ## append the username to domain, not as the `username` parameter.
-    ## Example: <NTLM_DOMAIN>/<USERNAME>
+    ## Example: <NTLM_DOMAIN>\<USERNAME>
     #
     # ntlm_domain: <DOMAIN>
 
@@ -175,6 +175,10 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
+    ##
+    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
+    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
+    ## to true.
     #
     # tls_ignore_warning: false
 

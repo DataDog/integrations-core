@@ -240,7 +240,7 @@ def instance():
 
 
 def _check(instance, mock_file="prometheus.txt"):
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file(mock_file), 'text/plain'))
     return check
 
@@ -336,6 +336,12 @@ def test_update_kube_state_metrics(aggregator, instance, check):
         NAMESPACE + '.persistentvolumes.by_phase',
         tags=['storageclass:local-data', 'phase:bound', 'optional:tag1'],
         value=2,
+    )
+    # No storage class
+    aggregator.assert_metric(
+        NAMESPACE + '.persistentvolumes.by_phase',
+        tags=['storageclass:unknown', 'phase:bound', 'optional:tag1'],
+        value=1,
     )
     aggregator.assert_metric(
         NAMESPACE + '.persistentvolumes.by_phase',
@@ -571,12 +577,12 @@ def test_join_custom_labels(aggregator, instance, check):
 
 def test_disabling_hostname_override(instance):
     endpoint = instance['kube_state_url']
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     scraper_config = check.config_map[endpoint]
     assert scraper_config['label_to_hostname'] == "node"
 
     instance["hostname_override"] = False
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     scraper_config = check.config_map[endpoint]
     assert scraper_config['label_to_hostname'] is None
 
@@ -609,7 +615,7 @@ def test_extract_timestamp(check):
 
 
 def test_job_counts(aggregator, instance):
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     payload = mock_from_file("prometheus.txt")
     check.poll = mock.MagicMock(return_value=MockResponse(payload, 'text/plain'))
 
@@ -731,7 +737,7 @@ def test_job_counts(aggregator, instance):
 
 def test_keep_ksm_labels_desactivated(aggregator, instance):
     instance['keep_ksm_labels'] = False
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
     check.check(instance)
     for _ in range(2):
@@ -742,7 +748,7 @@ def test_keep_ksm_labels_desactivated(aggregator, instance):
 
 
 def test_experimental_labels(aggregator, instance):
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
     for _ in range(2):
         check.check(instance)
@@ -750,7 +756,7 @@ def test_experimental_labels(aggregator, instance):
     assert aggregator.metrics(NAMESPACE + '.hpa.spec_target_metric') == []
 
     instance['experimental_metrics'] = True
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
     for _ in range(2):
         check.check(instance)
@@ -773,7 +779,7 @@ def test_telemetry(aggregator, instance):
     instance['telemetry'] = True
     instance['experimental_metrics'] = True
 
-    check = KubernetesState(CHECK_NAME, {}, {}, [instance])
+    check = KubernetesState(CHECK_NAME, {}, [instance])
     check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
 
     endpoint = instance['kube_state_url']
@@ -782,9 +788,9 @@ def test_telemetry(aggregator, instance):
 
     for _ in range(2):
         check.check(instance)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=90948.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=914.0)
-    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1288.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.payload.size', tags=['optional:tag1'], value=91486.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.processed.count', tags=['optional:tag1'], value=926.0)
+    aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.input.count', tags=['optional:tag1'], value=1300.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.blacklist.count', tags=['optional:tag1'], value=24.0)
     aggregator.assert_metric(NAMESPACE + '.telemetry.metrics.ignored.count', tags=['optional:tag1'], value=374.0)
     aggregator.assert_metric(

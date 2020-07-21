@@ -7,6 +7,7 @@ import json
 import os
 import re
 from ast import literal_eval
+from json.decoder import JSONDecodeError
 
 import requests
 import semver
@@ -18,6 +19,74 @@ from .git import get_latest_tag
 
 # match integration's version within the __about__.py module
 VERSION = re.compile(r'__version__ *= *(?:[\'"])(.+?)(?:[\'"])')
+DOGWEB_JSON_DASHBOARDS = (
+    'btrfs',
+    'cassandra',
+    'couchbase',
+    'elastic',
+    'fluentd',
+    'gearmand',
+    'iis',
+    'ibm_was',
+    'immunio',
+    'kong',
+    'kyoto_tycoon',
+    'marathon',
+    'mcached',
+    'mysql',
+    'nginx',
+    'pgbouncer',
+    'php_fpm',
+    'postfix',
+    'postgres',
+    'sqlserver',
+    'rabbitmq',
+    'riak',
+    'riakcs',
+    'solr',
+    'sqlserver',
+    'tokumx',
+    'tomcat',
+    'varnish',
+)
+DOGWEB_CODE_GENERATED_DASHBOARDS = (
+    'activemq',
+    'apache',
+    'ceph',
+    'cisco_aci',
+    'consul',
+    'couchdb',
+    'cri',
+    'crio',
+    'etcd',
+    'gunicorn',
+    'haproxy',
+    'hdfs_datanode',
+    'hdfs_namenode',
+    'hyperv',
+    'ibm_mq',
+    'kafka',
+    'kube_controller_manager',
+    'kube_scheduler',
+    'kubernetes',
+    'lighttpd',
+    'mapreduce',
+    'marathon',
+    'mesos',
+    'mongo',
+    'nginx',
+    'nginx_ingress_controller',
+    'openstack',
+    'powerdns_recursor',
+    'rabbitmq',
+    'redisdb',
+    'sigsci',
+    'spark',
+    'twistlock',
+    'wmi_check',
+    'yarn',
+    'zk',
+)
 
 
 def format_commit_id(commit_id):
@@ -92,10 +161,12 @@ def initialize_root(config, agent=False, core=False, extras=False, here=False):
 
     repo_choice = 'core' if core else 'extras' if extras else 'agent' if agent else config.get('repo', 'core')
     config['repo_choice'] = repo_choice
-    config['repo_name'] = REPO_CHOICES[repo_choice]
+    config['repo_name'] = REPO_CHOICES.get(repo_choice, repo_choice)
 
     message = None
-    root = os.path.expanduser(config.get(repo_choice) or config.get('repos', {}).get(repo_choice, ''))
+    # TODO: remove this legacy fallback lookup in any future major version bump
+    legacy_option = None if repo_choice == 'agent' else config.get(repo_choice)
+    root = os.path.expanduser(legacy_option or config.get('repos', {}).get(repo_choice, ''))
     if here or not dir_exists(root):
         if not here:
             repo = 'datadog-agent' if repo_choice == 'agent' else f'integrations-{repo_choice}'
@@ -139,6 +210,24 @@ def get_version_file(check_name):
         return os.path.join(get_root(), check_name, 'datadog_checks', check_name, '__about__.py')
 
 
+def is_agent_check(check_name):
+    package_root = os.path.join(get_root(), check_name, 'datadog_checks', check_name, '__init__.py')
+    if not file_exists(package_root):
+        return False
+
+    contents = read_file(package_root)
+
+    # Anything more than the version must be a subclass of the base class
+    return contents.count('import ') > 1
+
+
+def code_coverage_enabled(check_name):
+    if check_name in ('datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader'):
+        return True
+
+    return is_agent_check(check_name)
+
+
 def get_manifest_file(check_name):
     return os.path.join(get_root(), check_name, 'manifest.json')
 
@@ -149,6 +238,15 @@ def get_tox_file(check_name):
 
 def get_metadata_file(check_name):
     return os.path.join(get_root(), check_name, 'metadata.csv')
+
+
+def get_saved_views(check_name):
+    paths = load_manifest(check_name).get('assets', {}).get('saved_views', {})
+    views = []
+    for path in paths.values():
+        view = os.path.join(get_root(), check_name, *path.split('/'))
+        views.append(view)
+    return sorted(views)
 
 
 def get_config_file(check_name):
@@ -297,6 +395,15 @@ def load_manifest(check_name):
     return {}
 
 
+def load_saved_views(path):
+    """
+    Load the manifest file into a dictionary
+    """
+    if file_exists(path):
+        return json.loads(read_file(path).strip())
+    return {}
+
+
 def write_manifest(manifest, check_name):
     manifest_path = get_manifest_file(check_name)
     write_file(manifest_path, f'{json.dumps(manifest, indent=2)}\n')
@@ -352,6 +459,28 @@ def has_e2e(check):
                     if 'pytest.mark.e2e' in test_file.read():
                         return True
     return False
+
+
+def has_process_signature(check):
+    manifest_file = get_manifest_file(check)
+    try:
+        with open(manifest_file) as f:
+            manifest = json.loads(f.read())
+    except JSONDecodeError as e:
+        raise Exception("Cannot decode {}: {}".format(manifest_file, e))
+    return len(manifest.get('process_signatures', [])) > 0
+
+
+def is_tile_only(check):
+    config_file = get_config_file(check)
+    return not os.path.exists(config_file)
+
+
+def has_dashboard(check):
+    if check in DOGWEB_JSON_DASHBOARDS or check in DOGWEB_CODE_GENERATED_DASHBOARDS:
+        return True
+    dashboards_path = os.path.join(get_assets_directory(check), 'dashboards')
+    return os.path.isdir(dashboards_path) and len(os.listdir(dashboards_path)) > 0
 
 
 def find_legacy_signature(check):

@@ -1,0 +1,19 @@
+<script src="https://unpkg.com/mermaid@8.4.8/dist/mermaid.min.js"></script>
+<script>
+  var config = {
+    securityLevel: "loose",
+    startOnLoad: false,
+    theme: "dark",
+    flowchart: {
+      htmlLabels: false
+    },
+    sequence: {
+      useMaxWidth: false
+    },
+    class: {
+      textHeight: 16,
+      dividerMargin: 16
+    }
+  };
+  mermaid.initialize(config);
+</script>

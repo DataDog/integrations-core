@@ -50,6 +50,7 @@ pytestmark = pytest.mark.usefixtures('dd_environment')
     'instance_authdb',
     [
         pytest.param(common.INSTANCE_AUTHDB, id='standard'),
+        pytest.param(common.INSTANCE_AUTHDB_ALT, id='standard-alternative'),
         pytest.param(common.INSTANCE_AUTHDB_LEGACY_CONFIG, id='legacy'),
     ],
 )

@@ -2,29 +2,30 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
+import weakref
 from collections import defaultdict
+from logging import Logger, getLogger
 from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
-from .models import OID
-from .parsing import ParsedMetric, ParsedMetricTag, ParsedSymbolMetric, parse_metric_tags, parse_metrics
+from .mibs import MIBLoader
+from .models import OID, Device
+from .parsing import ParsedMetric, ParsedSymbolMetric, SymbolTag, parse_metrics, parse_symbol_metric_tags
 from .pysnmp_types import (
     CommunityData,
     ContextData,
-    DirMibSource,
-    MibViewController,
     OctetString,
-    SnmpEngine,
-    UdpTransportTarget,
     UsmUserData,
     hlapi,
-    lcd,
     usmDESPrivProtocol,
     usmHMACMD5AuthProtocol,
 )
 from .resolver import OIDResolver
 from .types import OIDMatch
+from .utils import register_device_target
+
+local_logger = getLogger(__name__)
 
 
 class InstanceConfig:
@@ -62,16 +63,21 @@ class InstanceConfig:
         mibs_path=None,  # type: str
         profiles=None,  # type: Dict[str, dict]
         profiles_by_oid=None,  # type: Dict[str, str]
+        loader=None,  # type: MIBLoader
+        logger=None,  # type: Logger
     ):
         # type: (...) -> None
         global_metrics = [] if global_metrics is None else global_metrics
         profiles = {} if profiles is None else profiles
         profiles_by_oid = {} if profiles_by_oid is None else profiles_by_oid
+        loader = MIBLoader() if loader is None else loader
 
         # Clean empty or null values. This will help templating.
         for key, value in list(instance.items()):
             if value in (None, ""):
                 instance.pop(key)
+
+        self.logger = weakref.ref(local_logger) if logger is None else weakref.ref(logger)
 
         self.instance = instance
         self.tags = instance.get('tags', [])
@@ -84,10 +90,11 @@ class InstanceConfig:
             self.metrics.extend(global_metrics)
 
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
-        self._snmp_engine, mib_view_controller = self.create_snmp_engine(mibs_path)
+        self._snmp_engine = loader.create_snmp_engine(mibs_path)
+        mib_view_controller = loader.get_mib_view_controller(mibs_path)
         self._resolver = OIDResolver(mib_view_controller, self.enforce_constraints)
 
-        self.ip_address = None
+        self.device = None  # type: Optional[Device]
         self.ip_network = None
 
         self.discovered_instances = {}  # type: Dict[str, InstanceConfig]
@@ -96,6 +103,9 @@ class InstanceConfig:
         self.workers = int(instance.get('workers', self.DEFAULT_WORKERS))
 
         self.bulk_threshold = int(instance.get('bulk_threshold', self.DEFAULT_BULK_THRESHOLD))
+
+        self._auth_data = self.get_auth_data(instance)
+        self._context_data = ContextData(*self.get_context_data(instance))
 
         timeout = int(instance.get('timeout', self.DEFAULT_TIMEOUT))
         retries = int(instance.get('retries', self.DEFAULT_RETRIES))
@@ -110,10 +120,19 @@ class InstanceConfig:
             raise ConfigurationError('Only one of IP address and network address must be specified')
 
         if ip_address:
-            self._transport = self.get_transport_target(instance, timeout, retries)
-
-            self.ip_address = ip_address
-            self.tags.append('snmp_device:{}'.format(self.ip_address))
+            port = int(instance.get('port', 161))
+            target = register_device_target(
+                ip_address,
+                port,
+                timeout=timeout,
+                retries=retries,
+                engine=self._snmp_engine,
+                auth_data=self._auth_data,
+                context_data=self._context_data,
+            )
+            device = Device(ip=ip_address, port=port, target=target)
+            self.device = device
+            self.tags.extend(device.tags)
 
         if network_address:
             if isinstance(network_address, bytes):
@@ -132,8 +151,6 @@ class InstanceConfig:
         if not self.metrics and not profiles_by_oid and not profile:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
-        self._auth_data = self.get_auth_data(instance)
-
         self.all_oids, self.next_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
@@ -145,14 +162,7 @@ class InstanceConfig:
             self.refresh_with_profile(profiles[profile])
             self.add_profile_tag(profile)
 
-        self._context_data = ContextData(*self.get_context_data(instance))
-
         self._uptime_metric_added = False
-
-        if ip_address:
-            self._addr_name, _ = lcd.configure(
-                self._snmp_engine, self._auth_data, self._transport, self._context_data.contextName
-            )
 
     def resolve_oid(self, oid):
         # type: (OID) -> OIDMatch
@@ -182,34 +192,6 @@ class InstanceConfig:
     def add_profile_tag(self, profile_name):
         # type: (str) -> None
         self.tags.append('snmp_profile:{}'.format(profile_name))
-
-    @staticmethod
-    def create_snmp_engine(mibs_path=None):
-        # type: (str) -> Tuple[SnmpEngine, MibViewController]
-        """
-        Create a command generator to perform all the snmp query.
-        If mibs_path is not None, load the mibs present in the custom mibs
-        folder. (Need to be in pysnmp format)
-        """
-        snmp_engine = SnmpEngine()
-        mib_builder = snmp_engine.getMibBuilder()
-
-        if mibs_path is not None:
-            mib_builder.addMibSources(DirMibSource(mibs_path))
-
-        mib_view_controller = MibViewController(mib_builder)
-
-        return snmp_engine, mib_view_controller
-
-    @staticmethod
-    def get_transport_target(instance, timeout, retries):
-        # type: (Dict[str, Any], float, int) -> Any
-        """
-        Generate a Transport target object based on the instance's configuration
-        """
-        ip_address = instance['ip_address']
-        port = int(instance.get('port', 161))  # Default SNMP port
-        return UdpTransportTarget((ip_address, port), timeout=timeout, retries=retries)
 
     @classmethod
     def get_auth_data(cls, instance):
@@ -300,14 +282,14 @@ class InstanceConfig:
         """Parse configuration and returns data to be used for SNMP queries."""
         # Use bulk for SNMP version > 1 only.
         bulk_threshold = self.bulk_threshold if self._auth_data.mpModel else 0
-        result = parse_metrics(metrics, resolver=self._resolver, bulk_threshold=bulk_threshold)
+        result = parse_metrics(metrics, resolver=self._resolver, logger=self.logger(), bulk_threshold=bulk_threshold)
         return result['oids'], result['next_oids'], result['bulk_oids'], result['parsed_metrics']
 
     def parse_metric_tags(self, metric_tags):
-        # type: (list) -> Tuple[List[OID], List[ParsedMetricTag]]
+        # type: (list) -> Tuple[List[OID], List[SymbolTag]]
         """Parse configuration for global metric_tags."""
-        result = parse_metric_tags(metric_tags, resolver=self._resolver)
-        return result['oids'], result['parsed_metric_tags']
+        result = parse_symbol_metric_tags(metric_tags, resolver=self._resolver)
+        return result['oids'], result['parsed_symbol_tags']
 
     def add_uptime_metric(self):
         # type: () -> None

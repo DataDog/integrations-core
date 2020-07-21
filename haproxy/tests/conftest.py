@@ -115,6 +115,15 @@ def haproxy_mock_evil():
     p.stop()
 
 
+@pytest.fixture(scope="module")
+def haproxy_mock_enterprise_version_info():
+    filepath = os.path.join(HERE, 'fixtures', 'enterprise_version_info.html')
+    with open(filepath, 'rb') as f:
+        data = f.read()
+    with mock.patch('requests.get', return_value=mock.Mock(content=data)) as p:
+        yield p
+
+
 @pytest.fixture(scope="session")
 def version_metadata():
     # some version has release info

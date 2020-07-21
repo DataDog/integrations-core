@@ -37,17 +37,13 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords='datadog agent presto check',
-
     # The project's main homepage.
     url='https://github.com/DataDog/integrations-core',
-
     # Author details
     author='Datadog',
     author_email='packages@datadoghq.com',
-
     # License
     license='BSD-3-Clause',
-
     # See https://pypi.org/classifiers
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -58,14 +54,11 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.8',
     ],
-
     # The package we're going to ship
     packages=['datadog_checks.presto'],
-
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
     extras_require={'deps': get_dependencies()},
-
     # Extra files to ship with the wheel package
     include_package_data=True,
 )

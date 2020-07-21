@@ -35,6 +35,9 @@
   "type": "check",
   "integration_id": "postgres",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "saved_views": {

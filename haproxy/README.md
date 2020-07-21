@@ -79,7 +79,7 @@ By default Haproxy sends logs over UDP to port 514. The Agent can listen for the
    logs:
      - type: udp
        port: 514
-       service: haproxy
+       service: <SERVICE_NAME>
        source: haproxy
    ```
 
@@ -161,7 +161,7 @@ Need help? Contact [Datadog support][11].
 - [HA Proxy Multi Process Configuration][15]
 - [How to collect HAProxy metrics][13]
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/39f2cb0977c0e0446a0e905d15d2e9a4349b3b5d/haproxy/images/haproxy-dash.png
+[1]: https://raw.githubusercontent.com/DataDog/integrations-core/master/haproxy/images/haproxy-dash.png
 [2]: https://app.datadoghq.com/account/settings#agent
 [3]: https://www.haproxy.org/download/1.7/doc/management.txt
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory

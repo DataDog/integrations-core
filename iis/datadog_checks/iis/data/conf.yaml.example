@@ -26,11 +26,21 @@ instances:
     ## The `sites` parameter allows you to specify a list of sites you want to
     ## read metrics from. With sites specified, metrics are tagged with the
     ## site name. If you don't define any sites, the check pulls all of the
-    ## sites, and tag each one with the site name
+    ## sites, and tags each one with the site name.
     #
     # sites:
     #   - <WEB_SITE_1>
     #   - <WEB_SITE_2>
+
+    ## @param app_pools - list of string - optional
+    ## The `app_pools` parameter allows you to specify a list of application pools you want to
+    ## read metrics from. With application pools specified, metrics are tagged with the
+    ## application pool name. If you don't define any application pools, the check pulls all of the
+    ## application pools, and tags each one with the application pool name.
+    #
+    # app_pools:
+    #   - <APP_POOL_1>
+    #   - <APP_POOL_2>
 
     ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.

@@ -12,8 +12,8 @@ rethinkdb.stats.server.query_engine.read_docs_per_sec,gauge,,document,second,Num
 rethinkdb.stats.server.query_engine.read_docs_total,count,,document,,Total number of documents read from a server.,0,rethinkdb,Server read docs total
 rethinkdb.stats.server.query_engine.written_docs_per_sec,gauge,,document,second,Number of documents written to a server per second.,0,rethinkdb,Server written docs per sec
 rethinkdb.stats.server.query_engine.written_docs_total,count,,document,,Total number of documents written to a server.,0,rethinkdb,Server written docs total
-rethinkdb.stats.server.query_engine.client_connections,gauge,,connection,,Current number of client connections to a server.,0,rethinkdb,Server client connections
-rethinkdb.stats.server.query_engine.clients_active,gauge,,host,,Current number of clients actively connected to a server.,0,rethinkdb,Server clients active
+rethinkdb.stats.server.query_engine.client_connections,gauge,,connection,,Current total number of connections to a server.,0,rethinkdb,Server client connections
+rethinkdb.stats.server.query_engine.clients_active,gauge,,host,,Current number of individual clients connected to a server (a client may hold multiple connections).,0,rethinkdb,Server clients active
 rethinkdb.stats.table.query_engine.read_docs_per_sec,gauge,,document,second,Number of documents read from a table per second.,0,rethinkdb,Table read docs per sec
 rethinkdb.stats.table.query_engine.written_docs_per_sec,gauge,,document,second,Number of documents written to a table per second.,0,rethinkdb,Table written docs per sec
 rethinkdb.stats.table_server.query_engine.read_docs_per_sec,gauge,,document,second,Number of documents read from a replica per second.,0,rethinkdb,Replica read docs per sec

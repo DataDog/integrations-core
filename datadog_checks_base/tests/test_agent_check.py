@@ -44,6 +44,16 @@ def test_load_config():
     assert AgentCheck.load_config("raw_foo: bar") == {'raw_foo': 'bar'}
 
 
+def test_persistent_cache(datadog_agent):
+    check = AgentCheck()
+    check.check_id = 'test'
+
+    check.write_persistent_cache('foo', 'bar')
+
+    assert datadog_agent.read_persistent_cache('test_foo') == 'bar'
+    assert check.read_persistent_cache('foo') == 'bar'
+
+
 @pytest.mark.parametrize(
     'enable_metadata_collection, expected_is_metadata_collection_enabled',
     [(None, False), ('true', True), ('false', False)],

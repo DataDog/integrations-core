@@ -718,6 +718,27 @@ def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
     aggregator.assert_all_metrics_covered()
 
 
+def test_static_pods(monkeypatch, aggregator, tagger):
+    tagger.reset()
+    tagger.set_tags(
+        {
+            "kubernetes_pod_uid://260c2b1d43b094af6d6b4ccba082c2db": [
+                'pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'
+            ]
+        }
+    )
+
+    check = mock_kubelet_check(monkeypatch, [{}])
+    check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
+
+    # Test that we get metrics for this static pod
+    aggregator.assert_metric(
+        'kubernetes.cpu.user.total',
+        109.76,
+        ['kube_container_name:kube-proxy', 'pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'],
+    )
+
+
 def test_pod_expiration(monkeypatch, aggregator, tagger):
     check = KubeletCheck('kubelet', {}, [{}])
     check.pod_list_url = "dummyurl"

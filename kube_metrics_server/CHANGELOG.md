@@ -1,5 +1,9 @@
 # CHANGELOG - Kube Metrics Server
 
+## 1.2.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 1.1.1 / 2020-02-22
 
 * [Fixed] Fix metric validation. See [#5581](https://github.com/DataDog/integrations-core/pull/5581).

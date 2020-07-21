@@ -46,7 +46,7 @@ No additional installation is needed on your server.
 
      **Note**: By default, any variables in metric names are sent as tags, so there is no need to add custom tags for `job_id`, `task_id`, etc.
 
-4. Restart Flink to start sending your Flink metrics to the Agent.
+4. Restart Flink to start sending your Flink metrics to Datadog.
 
 #### Log collection
 

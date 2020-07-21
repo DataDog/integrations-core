@@ -1,5 +1,13 @@
 # CHANGELOG - pdh_check
 
+## 1.11.0 / 2020-06-29
+
+* [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
+
+## 1.10.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 1.9.1 / 2020-04-04
 
 * [Fixed] PDH check to use new agent signature. See [#6159](https://github.com/DataDog/integrations-core/pull/6159).

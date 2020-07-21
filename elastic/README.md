@@ -12,7 +12,7 @@ The Datadog Agent's Elasticsearch check collects metrics for search and indexing
 
 ### Installation
 
-The Elasticsearch check is included in the [Datadog Agent][2] package, so you don't need to install anything else on your Elasticsearch nodes, or on some other server if you use a hosted Elasticsearch (e.g. Elastic Cloud).
+The Elasticsearch check is included in the [Datadog Agent][2] package. No additional installation is necessary.
 
 ### Configuration
 
@@ -37,8 +37,9 @@ Follow the instructions below to configure this check for an Agent running on a 
 
     **Notes**:
 
-      - If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster - e.g. if you use a hosted Elasticsearch - set `cluster_stats` to true.
+      - If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster, such as using a hosted Elasticsearch, set `cluster_stats` to true.
       - To use the Agent's Elasticsearch integration for the AWS Elasticsearch services, set the `url` parameter to point to your AWS Elasticsearch stats URL.
+      - All requests to the Amazon ES configuration API must be signed. See the [AWS documentation][19] for details.
 
 2. [Restart the Agent][5].
 
@@ -216,3 +217,4 @@ To get a better idea of how (or why) to integrate your Elasticsearch cluster wit
 [16]: https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-slowlog.html
 [17]: https://docs.datadoghq.com/agent/kubernetes/apm/?tab=java
 [18]: https://docs.datadoghq.com/agent/kubernetes/daemonset_setup/?tab=k8sfile#apm-and-distributed-tracing
+[19]: https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/es-ac.html#es-managedomains-signing-service-requests

@@ -229,7 +229,7 @@ def options_validator(options, loader, file_name, *sections):
         if not isinstance(description, str):
             loader.errors.append(
                 '{}, {}, {}{}: Attribute `description` must be a string'.format(
-                    loader.source, file_name, sections_display, option_name, description
+                    loader.source, file_name, sections_display, option_name
                 )
             )
 

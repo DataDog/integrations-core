@@ -153,16 +153,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INIT_CONFIG>`      | blank or `{}`                                                     |
 | `<INSTANCE_CONFIG>`  | `{"monitor_agent_url": "http://%%host%%:24220/api/plugins.json"}` |
 
-##### Log collection
-
-_Available for Agent versions >6.0_
-
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][18].
-
-| Parameter      | Value                                                |
-| -------------- | ---------------------------------------------------- |
-| `<LOG_CONFIG>` | `{"source": "fluentd", "service": "<SERVICE_NAME>"}` |
-
 ### Validation
 
 [Run the Agent's status subcommand][14] and look for `fluentd` under the Checks section.

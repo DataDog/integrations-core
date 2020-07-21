@@ -2,6 +2,7 @@
   "categories": [
     "security",
     "configuration & deployment",
+    "log collection",
     "autodiscovery"
   ],
   "creates_events": true,

@@ -22,7 +22,7 @@ from datadog_checks.vsphere.legacy.vsphere_legacy import (
     VSphereLegacyCheck,
 )
 
-from .utils import MockedMOR, assertMOR, disable_thread_pool, get_mocked_server
+from .utils import MockedMOR, assertMOR, disable_thread_pool, get_mocked_server, mock_alarm_event
 
 SERVICE_CHECK_TAGS = ["vcenter_server:vsphere_mock", "vcenter_host:None", "foo:bar"]
 
@@ -697,21 +697,6 @@ def test__should_cache(instance):
         assert not check._should_cache(instance, CacheConfig.Metadata)
 
 
-def alarm_event(from_status='green', to_status='red', message='Some error'):
-    now = datetime.utcnow()
-    vm = MockedMOR(spec='VirtualMachine')
-    dc = MockedMOR(spec="Datacenter")
-    dc_arg = vim.event.DatacenterEventArgument(datacenter=dc, name='dc1')
-    alarm = MockedMOR(spec="Alarm")
-    alarm_arg = vim.event.AlarmEventArgument(alarm=alarm, name='alarm1')
-    entity = vim.event.ManagedEntityEventArgument(entity=vm, name='vm1')
-    event = vim.event.AlarmStatusChangedEvent(
-        entity=entity, fullFormattedMessage=message, createdTime=now, to=to_status, datacenter=dc_arg, alarm=alarm_arg
-    )
-    setattr(event, 'from', from_status)  # noqa: B009
-    return event
-
-
 def migrated_event():
     now = datetime.utcnow()
     vm = MockedMOR(spec='VirtualMachine', name='vm1')
@@ -746,7 +731,7 @@ def migrated_event():
 def test_events(aggregator, vsphere, instance):
     with mock.patch('datadog_checks.vsphere.legacy.vsphere_legacy.vmodl'):
         server_instance = vsphere._get_server_instance(instance)
-        server_instance.content.eventManager.QueryEvents.return_value = [alarm_event()]
+        server_instance.content.eventManager.QueryEvents.return_value = [mock_alarm_event()]
         vsphere.event_config['vsphere_mock'] = {'collect_vcenter_alarms': True}
         vsphere.check(instance)
         aggregator.assert_event(
@@ -773,7 +758,7 @@ def test_events_tags(aggregator, vsphere, instance):
         )
 
         server_instance = vsphere._get_server_instance(instance)
-        server_instance.content.eventManager.QueryEvents.return_value = [alarm_event()]
+        server_instance.content.eventManager.QueryEvents.return_value = [mock_alarm_event()]
         vsphere.check(instance)
         aggregator.assert_event(
             "vCenter monitor status changed on this alarm, it was green and it's now red.", tags=['foo:bar']
@@ -783,7 +768,7 @@ def test_events_tags(aggregator, vsphere, instance):
 def test_events_gray_handled(aggregator, vsphere, instance):
     with mock.patch('datadog_checks.vsphere.legacy.vsphere_legacy.vmodl'):
         server_instance = vsphere._get_server_instance(instance)
-        event = alarm_event(from_status='gray', message='Went from Gray to Red')
+        event = mock_alarm_event(from_status='gray', message='Went from Gray to Red')
         server_instance.content.eventManager.QueryEvents.return_value = [event]
         vsphere.event_config['vsphere_mock'] = {'collect_vcenter_alarms': True}
         vsphere.check(instance)
@@ -791,7 +776,7 @@ def test_events_gray_handled(aggregator, vsphere, instance):
             "vCenter monitor status changed on this alarm, it was gray and it's now red.", tags=['foo:bar']
         )
 
-        event = alarm_event(from_status='yellow', to_status='gray', message='Went from Yellow to Gray')
+        event = mock_alarm_event(from_status='yellow', to_status='gray', message='Went from Yellow to Gray')
         server_instance.content.eventManager.QueryEvents.return_value = [event]
         vsphere.check(instance)
         aggregator.assert_event(
@@ -804,12 +789,12 @@ def test_events_gray_handled(aggregator, vsphere, instance):
 def test_events_gray_ignored(aggregator, vsphere, instance):
     with mock.patch('datadog_checks.vsphere.legacy.vsphere_legacy.vmodl'):
         server_instance = vsphere._get_server_instance(instance)
-        event = alarm_event(from_status='gray', to_status='green', message='Went from Gray to Green')
+        event = mock_alarm_event(from_status='gray', to_status='green', message='Went from Gray to Green')
         server_instance.content.eventManager.QueryEvents.return_value = [event]
         vsphere.event_config['vsphere_mock'] = {'collect_vcenter_alarms': True}
         vsphere.check(instance)
         assert not aggregator.events
-        event = alarm_event(from_status='green', to_status='gray', message='Went from Green to Gray')
+        event = mock_alarm_event(from_status='green', to_status='gray', message='Went from Green to Gray')
         server_instance.content.eventManager.QueryEvents.return_value = [event]
         vsphere.check(instance)
         assert not aggregator.events

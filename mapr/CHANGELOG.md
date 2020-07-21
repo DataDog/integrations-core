@@ -1,5 +1,9 @@
 # CHANGELOG - mapr
 
+## 1.3.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 1.2.0 / 2020-02-10
 
 * [Fixed] Fix service check "topic" tag. See [#5679](https://github.com/DataDog/integrations-core/pull/5679).

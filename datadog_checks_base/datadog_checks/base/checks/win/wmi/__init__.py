@@ -182,19 +182,31 @@ class WinWMICheck(AgentCheck):
             for wmi_property, wmi_value in iteritems(wmi_obj):
                 # skips any property not in arguments since SWbemServices.ExecQuery will return key prop properties
                 # https://msdn.microsoft.com/en-us/library/aa393866(v=vs.85).aspx
-                if wmi_property.lower() not in (s.lower() for s in wmi_sampler.property_names):
+
+                # skip wmi_property "foo,bar"; there will be a separate wmi_property for each "foo" and "bar"
+                if ',' in wmi_property:
+                    continue
+
+                normalized_wmi_property = wmi_property.lower()
+                for s in wmi_sampler.property_names:
+                    if normalized_wmi_property in s.lower():
+                        # wmi_property: "foo" should be found in property_names ["foo,bar", "name"]
+                        break
+                else:
                     continue
                 # Tag with `tag_by` parameter
-                if wmi_property == tag_by:
-                    tag_value = str(wmi_value).lower()
-                    if tag_queries and tag_value.find("#") > 0:
-                        tag_value = tag_value[: tag_value.find("#")]
+                for t in tag_by.split(','):
+                    t = t.strip()
+                    if wmi_property == t:
+                        tag_value = str(wmi_value).lower()
+                        if tag_queries and tag_value.find("#") > 0:
+                            tag_value = tag_value[: tag_value.find("#")]
 
-                    tags.append("{name}:{value}".format(name=tag_by, value=tag_value))
-                    continue
+                        tags.append("{name}:{value}".format(name=t, value=tag_value))
+                        continue
 
-                # No metric extraction on 'Name' property
-                if wmi_property == 'name':
+                # No metric extraction on 'Name' and properties in tag_by
+                if wmi_property == 'name' or normalized_wmi_property in tag_by.lower():
                     continue
 
                 try:
@@ -274,7 +286,7 @@ class WinWMICheck(AgentCheck):
 
         If no matching WMISampler is running yet, start one and cache it.
         """
-        if not self._wmi_sampler:
+        if self._wmi_sampler is None:
             property_list = list(properties) + [tag_by] if tag_by else list(properties)
             self._wmi_sampler = WMISampler(self.log, wmi_class, property_list, **kwargs)
             self._wmi_sampler.start()

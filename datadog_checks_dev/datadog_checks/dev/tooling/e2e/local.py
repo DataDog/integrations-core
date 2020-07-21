@@ -43,6 +43,7 @@ class LocalAgentInterface(object):
         log_url=None,
         python_version=DEFAULT_PYTHON_VERSION,
         default_agent=False,
+        dogstatsd=False,
     ):
         self.check = check
         self.env = env
@@ -56,6 +57,7 @@ class LocalAgentInterface(object):
         self.dd_url = dd_url
         self.log_url = log_url
         self.python_version = python_version or DEFAULT_PYTHON_VERSION
+        self.dogstatsd = dogstatsd
 
         self._agent_version = self.metadata.get('agent_version')
         self.config_dir = locate_config_dir(check, env)
@@ -179,9 +181,7 @@ class LocalAgentInterface(object):
     def update_check(self):
         command = get_pip_exe(self.python_version, self.platform)
         path = path_join(get_root(), self.check)
-        command.extend(('install', '-e', path))
-        if file_exists(path_join(path, REQUIREMENTS_IN)):
-            command.extend(('-r', path_join(path, REQUIREMENTS_IN)))
+        command.extend(('install', '-e', f'{path}[deps]'))
         return run_command(command, capture=True, check=True)
 
     def update_base_package(self):

@@ -34,5 +34,5 @@ def legacy_signature(check):
         if check:
             echo_success(f"Check `{check}` uses the new agent signature.")
         else:
-            echo_success(f'All checks use the new agent signature.')
+            echo_success('All checks use the new agent signature.')
     return

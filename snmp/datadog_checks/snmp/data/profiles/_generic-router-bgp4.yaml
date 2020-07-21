@@ -1,6 +1,3 @@
-extends:
-  - _base.yaml
-
 # Peer
 # This table contains one entry per neightbor (BGP peer) and information about the connections with BGP peers.
 metrics:

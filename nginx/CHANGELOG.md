@@ -1,5 +1,15 @@
 # CHANGELOG - nginx
 
+## 3.8.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Added] Add config specs. See [#6797](https://github.com/DataDog/integrations-core/pull/6797).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+
+## 3.7.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 3.6.1 / 2020-04-04
 
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).

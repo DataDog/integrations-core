@@ -151,8 +151,18 @@ def get_latest_tag(pattern=None, tag_prefix='v'):
     if not pattern:
         pattern = rf'^({tag_prefix})?\d+\.\d+\.\d+.*'
     all_tags = sorted((parse_version_info(t.replace(tag_prefix, '', 1)), t) for t in git_tag_list(pattern))
-    # reverse so we have descendant order
-    return list(reversed(all_tags))[0][1]
+    if not all_tags:
+        return
+    else:
+        # reverse so we have descending order
+        return list(reversed(all_tags))[0][1]
+
+
+def get_latest_commit_hash(root=None):
+    with chdir(root or get_root()):
+        result = run_command('git rev-parse HEAD', capture=True, check=True)
+
+    return result.stdout.strip()
 
 
 def tracked_by_git(filename):
@@ -172,3 +182,13 @@ def ignored_by_git(filename):
     with chdir(get_root()):
         result = run_command(f'git check-ignore -q {filename}', capture=True)
         return result.code == 0
+
+
+def get_git_user():
+    result = run_command('git config --get user.name', capture=True, check=True)
+    return result.stdout.strip()
+
+
+def get_git_email():
+    result = run_command('git config --get user.email', capture=True, check=True)
+    return result.stdout.strip()

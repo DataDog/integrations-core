@@ -8,6 +8,7 @@ import pytest
 from pyVmomi import vim
 from tests.mocked_api import MockedAPI
 
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.vsphere import VSphereCheck
 from datadog_checks.vsphere.resource_filters import make_inventory_path
 from datadog_checks.vsphere.utils import (
@@ -68,6 +69,7 @@ def test_is_realtime_resource_collected_by_filters(realtime_instance):
         {'resource': 'vm', 'property': 'tag', 'patterns': [r'env:production']},
         {'resource': 'host', 'property': 'name', 'patterns': [r'10\.0\.0\.103'], 'type': 'blacklist'},
     ]
+    realtime_instance['collect_tags'] = True
 
     collected_resources = [
         'VM2-1',
@@ -98,3 +100,19 @@ def test_is_realtime_resource_collected_by_filters(realtime_instance):
             )
             == is_collected
         )
+
+
+def test_error_disabled_tags(realtime_instance):
+    realtime_instance['collect_tags'] = False
+    realtime_instance['resource_filters'] = [
+        {'resource': 'vm', 'property': 'name', 'patterns': [r'^\$VM5$', r'^VM4-2\d$']},
+        {'resource': 'vm', 'property': 'tag', 'patterns': [r'env:production']},
+    ]
+
+    # This config should not be possible
+    with pytest.raises(ConfigurationError):
+        VSphereCheck('vsphere', {}, [realtime_instance])
+
+    # collecting tags should not raise a configuration error
+    realtime_instance['collect_tags'] = True
+    VSphereCheck('vsphere', {}, [realtime_instance])

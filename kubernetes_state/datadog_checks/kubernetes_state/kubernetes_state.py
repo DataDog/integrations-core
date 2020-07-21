@@ -70,7 +70,7 @@ class KubernetesState(OpenMetricsBaseCheck):
 
     DEFAULT_METRIC_LIMIT = 0
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         # We do not support more than one instance of kube-state-metrics
         instance = instances[0]
         kubernetes_state_instance = self._create_kubernetes_state_prometheus_instance(instance)
@@ -81,7 +81,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         self.keep_ksm_labels = is_affirmative(kubernetes_state_instance.get('keep_ksm_labels', True))
 
         generic_instances = [kubernetes_state_instance]
-        super(KubernetesState, self).__init__(name, init_config, agentConfig, instances=generic_instances)
+        super(KubernetesState, self).__init__(name, init_config, instances=generic_instances)
 
         self.condition_to_status_positive = {'true': self.OK, 'false': self.CRITICAL, 'unknown': self.UNKNOWN}
 
@@ -550,8 +550,7 @@ class KubernetesState(OpenMetricsBaseCheck):
         if ts.isdigit():
             return int(ts)
         else:
-            msg = 'Cannot extract ts from job name {}'
-            self.log.debug(msg, name)
+            self.log.debug("Cannot extract ts from job name %s", name)
             return None
 
     # Labels attached: namespace, pod
@@ -861,9 +860,13 @@ class KubernetesState(OpenMetricsBaseCheck):
         object_counter = Counter()
 
         for sample in metric.samples:
-            tags = [
-                self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config) for l in config['allowed_labels']
-            ] + scraper_config['custom_tags']
+            tags = []
+            for l in config['allowed_labels']:
+                tag = self._label_to_tag(l, sample[self.SAMPLE_LABELS], scraper_config)
+                if tag is None:
+                    tag = self._format_tag(l, "unknown", scraper_config)
+                tags.append(tag)
+            tags += scraper_config['custom_tags']
             object_counter[tuple(sorted(tags))] += sample[self.SAMPLE_VALUE]
 
         for tags, count in iteritems(object_counter):

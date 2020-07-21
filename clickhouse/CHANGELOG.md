@@ -1,5 +1,17 @@
 # CHANGELOG - ClickHouse
 
+## 1.3.2 / 2020-07-09
+
+* [Fixed] Update `can_connect` service check status on each check run. See [#7006](https://github.com/DataDog/integrations-core/pull/7006). Thanks [isaachui](https://github.com/isaachui).
+
+## 1.3.1 / 2020-06-19
+
+* [Fixed] Submit `can_connect` service check on each check run. See [#6926](https://github.com/DataDog/integrations-core/pull/6926).
+
+## 1.3.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 1.2.0 / 2020-04-04
 
 * [Added] Add `ddev test` option to verify support of new metrics. See [#6141](https://github.com/DataDog/integrations-core/pull/6141).
@@ -18,4 +30,3 @@
 ## 1.0.0 / 2019-12-18
 
 * [Added] Add ClickHouse integration. See [#4957](https://github.com/DataDog/integrations-core/pull/4957).
-

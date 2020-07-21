@@ -26,6 +26,14 @@ INSTANCE_AUTHDB = {
     'password': 'testPass',
     'options': {'authSource': 'authDB'},
 }
+INSTANCE_AUTHDB_ALT = {
+    # Include special cases, e.g. default port and special characters
+    'hosts': [HOST],
+    'database': 'test',
+    'username': 'special test user',
+    'password': 's3\\kr@t',
+    'options': {'authSource': 'authDB'},
+}
 INSTANCE_AUTHDB_LEGACY_CONFIG = {
     'server': 'mongodb://testUser:testPass@{}:{}/test?authSource=authDB'.format(HOST, PORT1)
 }

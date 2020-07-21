@@ -142,8 +142,8 @@ def test_check_adoprovider(aggregator, init_config, instance_sql2017, adoprovide
 
 
 @pytest.mark.e2e
-def test_check_docker_e2e(dd_agent_check, init_config, instance_docker):
-    aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_docker]}, rate=True)
+def test_check_docker_e2e(dd_agent_check, init_config, instance_e2e):
+    aggregator = dd_agent_check({'init_config': init_config, 'instances': [instance_e2e]}, rate=True)
 
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
 

@@ -1,5 +1,23 @@
 # CHANGELOG - postgres
 
+## 5.0.1 / 2020-07-16
+
+* [Fixed] Avoid aurora pg warnings. See [#7123](https://github.com/DataDog/integrations-core/pull/7123).
+
+## 5.0.0 / 2020-06-29
+
+* [Added] Add config specs. See [#6547](https://github.com/DataDog/integrations-core/pull/6547).
+* [Fixed] Remove references to `use_psycopg2`. See [#6975](https://github.com/DataDog/integrations-core/pull/6975).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+* [Fixed] Extract config to new class. See [#6500](https://github.com/DataDog/integrations-core/pull/6500).
+* [Changed] Add `max_relations` config. See [#6725](https://github.com/DataDog/integrations-core/pull/6725).
+
+## 4.0.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Refactor multiple instance to single instance. See [#6510](https://github.com/DataDog/integrations-core/pull/6510).
+* [Changed] Postgres lock metrics are relation metrics. See [#6498](https://github.com/DataDog/integrations-core/pull/6498).
+
 ## 3.5.4 / 2020-04-04
 
 * [Fixed] Fix service check on unexpected exception. See [#6196](https://github.com/DataDog/integrations-core/pull/6196).

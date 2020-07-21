@@ -120,13 +120,13 @@ class Fluentd(AgentCheck):
         try:
             out, _, _ = get_subprocess_output(version_command, self.log, raise_on_empty_output=False)
         except OSError as exc:
-            self.log.warning("Error collecting fluentd version: %s", exc)
+            self.log.debug("Error collecting fluentd version: %s", exc)
             return None
 
         match = re.match(self.VERSION_PATTERN, out)
 
         if match is None:
-            self.log.warning("fluentd version not found in stdout: `%s`", out)
+            self.log.debug("fluentd version not found in stdout: `%s`", out)
             return None
 
         return match.group('version')

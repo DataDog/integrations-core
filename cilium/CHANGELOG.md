@@ -1,5 +1,10 @@
 # CHANGELOG - Cilium
 
+## 1.2.0 / 2020-05-17
+
+* [Added] Add environment runner for Kubernetes' `kind`. See [#6522](https://github.com/DataDog/integrations-core/pull/6522).
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 1.1.0 / 2020-04-04
 
 * [Added] Add Cilium version metadata. See [#5408](https://github.com/DataDog/integrations-core/pull/5408).

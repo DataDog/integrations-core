@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import logging
 import subprocess
 from os import environ
 
@@ -11,6 +12,7 @@ import pytest
 from pkg_resources import parse_version
 
 from datadog_checks.base.utils.platform import Platform
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mysql import MySql
 
 from . import common, tags, variables
@@ -54,6 +56,7 @@ def test_e2e(dd_agent_check, instance_complex):
     aggregator = dd_agent_check(instance_complex)
 
     _assert_complex_config(aggregator)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=['alice.age', 'bob.age'])
 
 
 def _assert_complex_config(aggregator):
@@ -216,6 +219,26 @@ def _test_optional_metrics(aggregator, optional_metrics, at_least):
 
 
 @pytest.mark.unit
+def test_innodb_status_unicode_error(caplog):
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{}])
+
+    class MockCursor:
+        def execute(self, command):
+            raise UnicodeDecodeError('encoding', b'object', 0, 1, command)
+
+        def close(self):
+            return MockCursor()
+
+    class MockDatabase:
+        def cursor(self):
+            return MockCursor()
+
+    caplog.at_level(logging.WARNING)
+    assert mysql_check._get_stats_from_innodb_status(MockDatabase()) == {}
+    assert 'Unicode error while getting INNODB status' in caplog.text
+
+
+@pytest.mark.unit
 def test__get_server_pid():
     """
     Test the logic looping through the processes searching for `mysqld`
@@ -258,3 +281,13 @@ def test_version_metadata(instance_basic, datadog_agent, version_metadata):
     mysql_check.check(instance_basic)
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata))
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_custom_queries(aggregator, instance_custom_queries, dd_run_check):
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_custom_queries])
+    dd_run_check(mysql_check)
+
+    aggregator.assert_metric('alice.age', value=25, tags=tags.METRIC_TAGS)
+    aggregator.assert_metric('bob.age', value=20, tags=tags.METRIC_TAGS)

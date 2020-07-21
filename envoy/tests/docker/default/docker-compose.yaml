@@ -3,7 +3,7 @@ version: '3'
 services:
 
   front-envoy:
-    image: envoyproxy/envoy:${ENVOY_VERSION}
+    image: envoyproxy/envoy:v${ENVOY_VERSION}
     command: ["/usr/local/bin/envoy", "-c", "/etc/front-envoy.yaml", "--service-cluster", "front-proxy"]
     volumes:
       - ./front-envoy.yaml:/etc/front-envoy.yaml

@@ -47,8 +47,9 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 )
 @click.option('--org-name', '-o', help='The org to use for data submission.')
 @click.option('--profile-memory', '-pm', is_flag=True, help='Whether to collect metrics about memory usage')
+@click.option('--dogstatsd', is_flag=True, help='Enable dogstatsd port on agent')
 @click.pass_context
-def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile_memory):
+def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile_memory, dogstatsd):
     """Start an environment."""
     if not file_exists(get_tox_file(check)):
         abort(f'`{check}` is not a testable check.')
@@ -129,14 +130,23 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
 
     env_type = metadata['env_type']
 
-    agent_ver = agent or os.getenv('DDEV_E2E_AGENT', '6')
+    # TODO: remove this legacy fallback lookup in any future major version bump
+    legacy_fallback = os.path.expanduser(ctx.obj.get('agent', ''))
+    if os.path.isdir(legacy_fallback):
+        legacy_fallback = ''
+
+    agent_ver = agent or os.getenv('DDEV_E2E_AGENT', legacy_fallback)
     agent_build = ctx.obj.get('agents', {}).get(
         agent_ver,
-        # TODO: remove this legacy fallback lookup eventually
+        # TODO: remove this legacy fallback lookup in any future major version bump
         ctx.obj.get(f'agent{agent_ver}', agent_ver),
     )
     if isinstance(agent_build, dict):
         agent_build = agent_build.get(env_type, env_type)
+
+    if agent_build == 'datadog/agent:6':
+        echo_warning('The Docker image for Agent 6 only ships with Python 2, will use that instead.')
+        python = 2
 
     interface = derive_interface(env_type)
     if interface is None:
@@ -154,6 +164,10 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     env_vars = dict(ev.split('=', 1) for ev in env_vars)
     for key, value in metadata.get('env_vars', {}).items():
         env_vars.setdefault(key, value)
+
+    if dogstatsd:
+        env_vars['DD_DOGSTATSD_NON_LOCAL_TRAFFIC'] = 'true'
+        env_vars['DD_DOGSTATSD_METRICS_STATS_ENABLE'] = 'true'
 
     if profile_memory:
         plat = platform.system()
@@ -199,9 +213,10 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
         log_url,
         python,
         not bool(agent),
+        dogstatsd,
     )
 
-    echo_waiting(f'Updating `{agent_build}`... ', nl=False)
+    echo_waiting(f'Updating `{environment.agent_build}`... ', nl=False)
     environment.update_agent()
     echo_success('success!')
 
@@ -226,6 +241,13 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     echo_success('success!')
 
     start_commands = metadata.get('start_commands', [])
+
+    # for example, to install some tools inside container:
+    # export DDEV_AGENT_START_COMMAND="bash -c 'apt update && apt install -y vim less'"
+    extra_commands = os.getenv('DDEV_AGENT_START_COMMAND', None)
+    if extra_commands:
+        start_commands.append(extra_commands)
+
     if start_commands:
         echo_waiting('Running extra start-up commands... ', nl=False)
 
@@ -292,7 +314,7 @@ def start(ctx, check, env, agent, python, dev, base, env_vars, org_name, profile
     if profile_memory and on_ci:
         environment.metadata['sampling_start_time'] = time.time()
 
-        echo_waiting('Updating metadata... '.format(env), nl=False)
+        echo_waiting('Updating metadata... ', nl=False)
         environment.write_config()
         echo_success('success!')
 

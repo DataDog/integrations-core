@@ -33,6 +33,10 @@ DEFAULT_COUNTERS = [
     # Requests
     ["Web Service", None, "CGI Requests/sec", "iis.requests.cgi", "gauge"],
     ["Web Service", None, "ISAPI Extension Requests/sec", "iis.requests.isapi", "gauge"],
+    # Application Pools
+    ["APP_POOL_WAS", None, "Current Application Pool State", "iis.app_pool.state", "gauge"],
+    ["APP_POOL_WAS", None, "Current Application Pool Uptime", "iis.app_pool.uptime", "gauge"],
+    ["APP_POOL_WAS", None, "Total Application Pool Recycles", "iis.app_pool.recycle.count", "monotonic_count"],
 ]
 
 TOTAL_INSTANCE = '_Total'
@@ -40,12 +44,14 @@ TOTAL_INSTANCE = '_Total'
 
 class IIS(PDHBaseCheck):
     SITE = 'site'
+    APP_POOL = 'app_pool'
 
     def __init__(self, name, init_config, instances):
         super(IIS, self).__init__(name, init_config, instances, counter_list=DEFAULT_COUNTERS)
         self._sites = self.instance.get('sites', [])
+        self._app_pools = self.instance.get('app_pools', [])
 
-        self._expected_data = ((self.SITE, self._sites),)
+        self._expected_data = ((self.SITE, self._sites), (self.APP_POOL, self._app_pools))
         self._remaining_data = {namespace: set() for namespace, _ in self._expected_data}
 
     def check(self, _):
@@ -65,6 +71,8 @@ class IIS(PDHBaseCheck):
             try:
                 if counter._class_name == 'Web Service':
                     self.collect_sites(dd_name, metric_func, counter, counter_values)
+                elif counter._class_name == 'APP_POOL_WAS':
+                    self.collect_app_pools(dd_name, metric_func, counter, counter_values)
 
             except Exception as e:
                 # don't give up on all of the metrics because one failed
@@ -73,7 +81,8 @@ class IIS(PDHBaseCheck):
         self._report_unavailable_values()
 
     def collect_sites(self, dd_name, metric_func, counter, counter_values):
-        remaining_sites = self._remaining_data[self.SITE]
+        namespace = self.SITE
+        remaining_sites = self._remaining_data[namespace]
 
         for site_name, value in iteritems(counter_values):
             is_single_instance = counter.is_single_instance()
@@ -86,19 +95,48 @@ class IIS(PDHBaseCheck):
             ):
                 continue
 
-            tags = self._get_tags(self.SITE, site_name, is_single_instance)
+            tags = self._get_tags(namespace, site_name, is_single_instance)
             try:
                 metric_func(dd_name, value, tags)
             except Exception as e:
                 self.log.error('Error in metric_func: %s %s %s', dd_name, value, e)
 
             if dd_name == 'iis.uptime':
-                self._report_uptime(self.SITE, value, tags)
+                self._report_uptime(namespace, value, tags)
                 if site_name in remaining_sites:
                     self.log.debug('Removing %r from expected sites', site_name)
                     remaining_sites.remove(site_name)
                 else:
                     self.log.warning('Site %r not in expected sites', site_name)
+
+    def collect_app_pools(self, dd_name, metric_func, counter, counter_values):
+        namespace = self.APP_POOL
+        remaining_app_pools = self._remaining_data[namespace]
+
+        for app_pool_name, value in iteritems(counter_values):
+            is_single_instance = counter.is_single_instance()
+            if (
+                not is_single_instance
+                and app_pool_name != TOTAL_INSTANCE
+                and app_pool_name not in self._app_pools
+                # Collect all if not selected
+                and self._app_pools
+            ):
+                continue
+
+            tags = self._get_tags(namespace, app_pool_name, is_single_instance)
+            try:
+                metric_func(dd_name, value, tags)
+            except Exception as e:
+                self.log.error('Error in metric_func: %s %s %s', dd_name, value, e)
+
+            if dd_name == 'iis.app_pool.uptime':
+                self._report_uptime(namespace, value, tags)
+                if app_pool_name in remaining_app_pools:
+                    self.log.debug('Removing %r from expected app pools', app_pool_name)
+                    remaining_app_pools.remove(app_pool_name)
+                else:
+                    self.log.warning('App pool %r not in expected app pools', app_pool_name)
 
     def _report_uptime(self, namespace, uptime, tags):
         uptime = int(uptime)

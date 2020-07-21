@@ -1,5 +1,45 @@
 # CHANGELOG - datadog_checks_base
 
+## 11.12.0 / 2020-06-29
+
+* [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
+* [Added] Add MacOS Support. See [#6927](https://github.com/DataDog/integrations-core/pull/6927).
+
+## 11.11.1 / 2020-06-17
+
+* [Fixed] Gracefully skip quantile-less summary metrics. See [#6909](https://github.com/DataDog/integrations-core/pull/6909).
+
+## 11.11.0 / 2020-06-11
+
+* [Added] Document openmetrics interface and options. See [#6666](https://github.com/DataDog/integrations-core/pull/6666).
+* [Added] Add methods for the persistent cache Agent interface. See [#6819](https://github.com/DataDog/integrations-core/pull/6819).
+* [Added] Upgrade redis dependency to support `username` in connection strings. See [#6708](https://github.com/DataDog/integrations-core/pull/6708).
+* [Added] Support multiple properties in tag_by. See [#6614](https://github.com/DataDog/integrations-core/pull/6614).
+
+## 11.10.0 / 2020-05-25
+
+* [Added] Override CaseInsensitiveDict `copy()` function. See [#6715](https://github.com/DataDog/integrations-core/pull/6715).
+
+## 11.9.0 / 2020-05-20
+
+* [Added] Upgrade httplib2 to 0.18.1. See [#6702](https://github.com/DataDog/integrations-core/pull/6702).
+* [Fixed] Fix time utilities. See [#6692](https://github.com/DataDog/integrations-core/pull/6692).
+
+## 11.8.0 / 2020-05-17
+
+* [Added] Add utilities for working with time. See [#6663](https://github.com/DataDog/integrations-core/pull/6663).
+* [Added] Upgrade lxml to 4.5.0. See [#6661](https://github.com/DataDog/integrations-core/pull/6661).
+* [Added] Add send_monotonic_with_gauge config option and refactor test. See [#6618](https://github.com/DataDog/integrations-core/pull/6618).
+* [Added] Add developer docs. See [#6623](https://github.com/DataDog/integrations-core/pull/6623).
+* [Fixed] Update scraper config with instance. See [#6664](https://github.com/DataDog/integrations-core/pull/6664).
+* [Fixed] Fix thread leak in wmi checks. See [#6644](https://github.com/DataDog/integrations-core/pull/6644).
+
+## 11.7.0 / 2020-05-08
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Fixed] Fix a bug that caused win32_event_log integration to hang. See [#6576](https://github.com/DataDog/integrations-core/pull/6576).
+* [Fixed] Allow to verify that no special hostname was submitted with a metric. See [#6529](https://github.com/DataDog/integrations-core/pull/6529).
+
 ## 11.6.0 / 2020-04-29
 
 * [Added] Validate metrics using metadata.csv. See [#6027](https://github.com/DataDog/integrations-core/pull/6027).
@@ -7,6 +47,10 @@
 * [Fixed] WMI base typing and instance free API. See [#6329](https://github.com/DataDog/integrations-core/pull/6329).
 * [Fixed] Break reference cycle with log formatter. See [#6470](https://github.com/DataDog/integrations-core/pull/6470).
 * [Fixed] Mark `instance` as non-`Optional`. See [#6350](https://github.com/DataDog/integrations-core/pull/6350).
+
+## 11.5.1 / 2020-05-11
+
+* [Fixed] Fix a bug that caused win32_event_log integration to hang. See [#6576](https://github.com/DataDog/integrations-core/pull/6576).
 
 ## 11.5.0 / 2020-04-07
 

@@ -63,7 +63,7 @@ class TestKubeDNS:
         Testing kube_dns check.
         """
 
-        check = KubeDNSCheck('kube_dns', {}, {}, [instance])
+        check = KubeDNSCheck('kube_dns', {}, [instance])
         check.check(instance)
 
         # check that we then get the count metrics also

@@ -108,6 +108,13 @@ instances:
     #
     # auto_discover_queues: false
 
+    ## @param collect_statistics_metrics - boolean - optional - default: false
+    ## Collect metrics from Statistics Messages. Statistics collected are:
+    ##   - channel statistics (MQCMD_STATISTICS_CHANNEL)
+    ##   - queue statistics (MQCMD_STATISTICS_Q)
+    #
+    # collect_statistics_metrics: false
+
     ## @param mqcd_version - number - optional - default: 6
     ## Which channel definition version to use. Supported values are 1 to 9 including.
     ## If you're having connection issues make sure it matches your MQ version
@@ -175,10 +182,10 @@ instances:
 ## port / path / channel_path - required - Set port if type is tcp or udp.
 ##                                         Set path if type is file.
 ##                                         Set channel_path if type is windows_event.
-## source  - required - Attribute that defines which Integration sent the logs
+## source  - required - Attribute that defines which Integration sent the logs.
 ## service - required - The name of the service that generates the log.
 ##                      Overrides any `service` defined in the `init_config` section.
-## tags - optional - Add tags to the collected logs
+## tags - optional - Add tags to the collected logs.
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
 #

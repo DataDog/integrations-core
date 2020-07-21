@@ -50,6 +50,7 @@ QUEUE_ATTRIBUTES = [
     ('active_consumers', 'active_consumers', float),
     ('consumers', 'consumers', float),
     ('consumer_utilisation', 'consumer_utilisation', float),
+    ('head_message_timestamp', 'head_message_timestamp', int),
     ('memory', 'memory', float),
     ('messages', 'messages', float),
     ('messages_details/rate', 'messages.rate', float),
@@ -673,7 +674,12 @@ class RabbitMQ(AgentCheck):
             # We need to urlencode the vhost because it can be '/'.
             path = u'aliveness-test/{}'.format(quote_plus(vhost))
             aliveness_url = urljoin(base_url, path)
-            aliveness_response = self._get_data(aliveness_url)
+            aliveness_response = {}
+            try:
+                aliveness_response = self._get_data(aliveness_url)
+            except Exception as e:
+                self.log.debug("Couldn't get aliveness status from vhost, %s: %s", vhost, e)
+
             message = u"Response from aliveness API: {}".format(aliveness_response)
 
             if aliveness_response.get('status') == 'ok':

@@ -32,7 +32,7 @@ def dd_environment(e2e_instance):
 
 @pytest.fixture
 def check():
-    c = PostgreSql('postgres', {}, [{'dbname': 'dbname', 'host': 'localhost', 'port': '5432'}])
+    c = PostgreSql('postgres', {}, [{'dbname': 'dbname', 'host': 'localhost', 'port': '5432', 'username': USER}])
     c._version = VersionInfo(9, 2, 0)
     return c
 

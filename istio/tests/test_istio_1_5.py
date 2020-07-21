@@ -20,7 +20,7 @@ def test_istiod(aggregator, istiod_mixture_fixture):
     aggregator.assert_all_metrics_covered()
 
 
-def test_istio_proxy_mesh(aggregator, istio_proxy_mesh_fixture):
+def test_proxy_mesh(aggregator, istio_proxy_mesh_fixture):
     """
     Test proxy mesh check
     """

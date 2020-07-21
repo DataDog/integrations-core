@@ -62,6 +62,9 @@ See [metadata.csv][10] for a list of metrics provided by this check.
 
 All metrics are per `instance` configured in process.yaml, and are tagged `process_name:<instance_name>`.
 
+The `system.processes.cpu.pct` metric sent by this check is only accurate for processes that live for more 
+than 30 seconds. Do not expect its value to be accurate for shorter-lived processes.
+
 ### Events
 
 The Process Check does not include any events.

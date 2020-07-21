@@ -52,9 +52,10 @@ def dd_environment(get_instance):
     def condition():
         sys.stderr.write("Waiting for ZK to boot...\n")
         booted = False
+        dummy_instance = {'host': HOST, 'port': PORT, 'timeout': 500}
         for _ in range(10):
             try:
-                out = ZookeeperCheck._send_command('ruok', HOST, PORT, 500)
+                out = ZookeeperCheck('zk', {}, [dummy_instance])._send_command('ruok')
                 out.seek(0)
                 if out.readline() != 'imok':
                     raise ZKConnectionFailure()

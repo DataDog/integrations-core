@@ -5,10 +5,11 @@ import re
 from contextlib import contextmanager
 
 from ...subprocess import run_command
-from ...utils import file_exists, find_free_port, get_ip, path_join
+from ...utils import find_free_port, get_ip, path_join
 from ..constants import REQUIREMENTS_IN, get_root
 from .agent import (
     DEFAULT_AGENT_VERSION,
+    DEFAULT_DOGSTATSD_PORT,
     DEFAULT_PYTHON_VERSION,
     FAKE_API_KEY,
     MANIFEST_VERSION_PATTERN,
@@ -38,6 +39,7 @@ class DockerInterface(object):
         log_url=None,
         python_version=DEFAULT_PYTHON_VERSION,
         default_agent=False,
+        dogstatsd=False,
     ):
         self.check = check
         self.env = env
@@ -50,6 +52,7 @@ class DockerInterface(object):
         self.dd_url = dd_url
         self.log_url = log_url
         self.python_version = python_version or DEFAULT_PYTHON_VERSION
+        self.dogstatsd = dogstatsd
 
         self._agent_version = self.metadata.get('agent_version')
         self.container_name = f'dd_{self.check}_{self.env}'
@@ -59,7 +62,9 @@ class DockerInterface(object):
 
         # If we use a default build, and it's missing the py suffix, adds it
         if default_agent and self.agent_build and 'py' not in self.agent_build:
-            self.agent_build = f'{self.agent_build}-py{self.python_version}'
+            # Agent 6 image no longer supports -pyX
+            if self.agent_build != 'datadog/agent:6':
+                self.agent_build = f'{self.agent_build}-py{self.python_version}'
 
         if self.agent_build and self.metadata.get('use_jmx', False):
             self.agent_build = f'{self.agent_build}-jmx'
@@ -181,9 +186,7 @@ class DockerInterface(object):
     def update_check(self):
         command = ['docker', 'exec', self.container_name]
         command.extend(get_pip_exe(self.python_version))
-        command.extend(('install', '-e', self.check_mount_dir))
-        if file_exists(path_join(get_root(), self.check, REQUIREMENTS_IN)):
-            command.extend(('-r', f'{self.check_mount_dir}/{REQUIREMENTS_IN}'))
+        command.extend(('install', '-e', f'{self.check_mount_dir}[deps]'))
         run_command(command, capture=True, check=True)
 
     def update_base_package(self):
@@ -255,6 +258,9 @@ class DockerInterface(object):
         for key, value in sorted(env_vars.items()):
             command.extend(['-e', f'{key}={value}'])
 
+        if self.dogstatsd:
+            command.extend(['-p', f'{DEFAULT_DOGSTATSD_PORT}:{DEFAULT_DOGSTATSD_PORT}/udp'])
+
         if 'proxy' in self.metadata:
             if 'http' in self.metadata['proxy']:
                 command.extend(['-e', f"DD_PROXY_HTTP={self.metadata['proxy']['http']}"])
@@ -278,6 +284,9 @@ class DockerInterface(object):
 
     def restart_agent(self):
         return run_command(['docker', 'restart', self.container_name], capture=True)
+
+    def shell(self):
+        return self.exec_command('/bin/bash', interactive=True)
 
 
 def get_docker_networks():

@@ -1,5 +1,13 @@
 # CHANGELOG - Scylla
 
+## 1.2.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
+## 1.1.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 1.0.3 / 2020-04-04
 
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).

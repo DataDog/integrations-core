@@ -1,5 +1,22 @@
 # CHANGELOG - redisdb
 
+## 3.0.0 / 2020-06-29
+
+* [Added] Upgrade redis dependency to support `username` in connection strings. See [#6708](https://github.com/DataDog/integrations-core/pull/6708).
+* [Fixed] Add flag to enable CLIENT command metrics. See [#6877](https://github.com/DataDog/integrations-core/pull/6877).
+* [Changed] Collect port and host from same source in _generate_instance_key. See [#6680](https://github.com/DataDog/integrations-core/pull/6680).
+
+## 2.1.1 / 2020-06-11
+
+* [Fixed] Add flag to enable CLIENT command metrics. See [#6877](https://github.com/DataDog/integrations-core/pull/6877).
+
+## 2.1.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Add 'redis.net.connections' metric to count connections by client. See [#6495](https://github.com/DataDog/integrations-core/pull/6495). Thanks [remicalixte](https://github.com/remicalixte).
+* [Fixed] Reduce slow-log log message. See [#6631](https://github.com/DataDog/integrations-core/pull/6631).
+* [Fixed] Use agent 6 signature. See [#6424](https://github.com/DataDog/integrations-core/pull/6424).
+
 ## 2.0.2 / 2020-04-04
 
 * [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).

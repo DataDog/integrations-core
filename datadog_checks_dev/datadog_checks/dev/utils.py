@@ -28,6 +28,10 @@ ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
 
 
+def get_tox_env():
+    return os.environ['TOX_ENV_NAME']
+
+
 def get_ci_env_vars():
     return ('AGENT_OS', 'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI')
 
@@ -162,9 +166,9 @@ def download_file(url, fname):
 
 def copy_path(path, d):
     if dir_exists(path):
-        shutil.copytree(path, os.path.join(d, basepath(path)))
+        return shutil.copytree(path, os.path.join(d, basepath(path)))
     else:
-        shutil.copy(path, d)
+        return shutil.copy(path, d)
 
 
 def copy_dir_contents(path, d):
@@ -244,6 +248,13 @@ def find_check_root(depth=0):
         root = new_root
 
     return root
+
+
+def get_current_check_name(depth=0):
+    # Account for this call
+    depth += 1
+
+    return os.path.basename(find_check_root(depth))
 
 
 @contextmanager

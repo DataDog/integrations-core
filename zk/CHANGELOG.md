@@ -1,5 +1,13 @@
 # CHANGELOG - zk
 
+## 2.6.1 / 2020-06-29
+
+* [Fixed] Use Agent6 style init. See [#6949](https://github.com/DataDog/integrations-core/pull/6949).
+
+## 2.6.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
 ## 2.5.0 / 2020-05-04
 
 * [Added] Add new metrics for ZK version 3.6. See [#6421](https://github.com/DataDog/integrations-core/pull/6421).
