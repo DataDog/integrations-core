@@ -65,6 +65,34 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 | `<INIT_CONFIG>`      | blank or `{}`                                                                           |
 | `<INSTANCE_CONFIG>`  | `{"resourcemanager_uri": "http://%%host%%:%%port%%", "cluster_name": "<CLUSTER_NAME>"}` |
 
+##### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
+
+    ```yaml
+    logs_enabled: true
+  ```
+
+2. Uncomment and edit the logs configuration block in your `yarn.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample yarn.d/conf.yaml][5] for all available configuration options.
+
+    ```yaml
+    logs:
+      - type: file
+        path: <LOG_FILE_PATH>
+        source: yarn
+        service: <SERVICE_NAME>
+        # To handle multi line that starts with yyyy-mm-dd use the following pattern
+        # log_processing_rules:
+        #   - type: multi_line
+        #     pattern: \d{4}\-\d{2}\-\d{2} \d{2}:\d{2}:\d{2},\d{3}
+        #     name: new_log_start_with_date
+  ```
+
+3. [Restart the Agent][6].
+
+See [Datadog's documentation][14] for additional information on how to configure the Agent for log collection in Docker environments.
+
+
 ### Validation
 
 [Run the Agent's `status` subcommand][7] and look for `yarn` under the Checks section.
@@ -113,3 +141,4 @@ Need help? Contact [Datadog support][9].
 [11]: https://www.datadoghq.com/blog/monitor-hadoop-metrics
 [12]: https://www.datadoghq.com/blog/collecting-hadoop-metrics
 [13]: https://www.datadoghq.com/blog/monitor-hadoop-metrics-datadog
+[14]:  https://docs.datadoghq.com/agent/docker/log/
