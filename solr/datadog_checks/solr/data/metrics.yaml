@@ -3,6 +3,7 @@ jmx_metrics:
 
   # Solr versions >= 7.0
   - include:
+      domain: solr
       category: SEARCHER
       name:
         - numDocs
@@ -25,6 +26,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: solr
       category: SEARCHER
       name: warmupTime
       scope:
@@ -35,6 +37,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: solr
       category: CACHE
       name: documentCache
       scope:
@@ -54,6 +57,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: CACHE
       name: queryResultCache
       scope:
@@ -73,6 +77,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: CACHE
       name: filterCache
       scope:
@@ -92,6 +97,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: QUERY
       name: requests
       attribute:
@@ -100,6 +106,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: QUERY
       name: timeouts
       attribute:
@@ -117,6 +124,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: QUERY
       name: totalTime
       attribute:
@@ -125,6 +133,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: QUERY
       name: requestTimes
       attribute:
