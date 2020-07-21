@@ -4,6 +4,7 @@
 
 import os
 import shutil
+from copy import deepcopy
 
 import pytest
 import requests
@@ -39,7 +40,7 @@ E2E_METADATA = {
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    new_e2e_metadata = E2E_METADATA
+    new_e2e_metadata = deepcopy(E2E_METADATA)
     with TempDir('snmp') as tmp_dir:
         data_dir = os.path.join(tmp_dir, 'data')
         env = {'DATA_DIR': data_dir}
