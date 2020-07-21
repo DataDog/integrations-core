@@ -35,7 +35,7 @@ Follow the instructions below to configure this check for an Agent running on a 
        #   spark_url: http://<Mesos_master>:5050 # Mesos master web UI
        #   spark_url: http://<YARN_ResourceManager_address>:8088 # YARN ResourceManager address
 
-       spark_cluster_mode: spark_standalone_mode # default
+       spark_cluster_mode: spark_yarn_mode # default
        #   spark_cluster_mode: spark_mesos_mode
        #   spark_cluster_mode: spark_yarn_mode
        #   spark_cluster_mode: spark_driver_mode
