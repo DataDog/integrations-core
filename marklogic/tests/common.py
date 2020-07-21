@@ -17,8 +17,8 @@ PASSWORD = 'datadog'
 
 INSTANCE = {
     'url': API_URL,
-    'username': USERNAME,
-    'password': PASSWORD,
+    'username': ADMIN_USERNAME,
+    'password': ADMIN_PASSWORD,
     'auth_type': 'digest',
     'tags': ['foo:bar'],
 }
