@@ -69,7 +69,7 @@ instances:
     ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
     ##
-    ## The SOCKS protocol is also supported like so:
+    ## The SOCKS protocol is also supported, for example:
     ##
     ##   socks5://user:pass@host:port
     ##
