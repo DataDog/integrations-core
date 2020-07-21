@@ -132,4 +132,3 @@ Need help? Contact [Datadog support][1].
 [11]: https://github.com/mperham/sidekiq/wiki/Ent-Historical-Metrics#custom
 [12]: https://github.com/DataDog/integrations-core/blob/master/sidekiq/metadata.csv
 [13]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
-[14]: https://docs.datadoghq.com/integrations/ruby/
