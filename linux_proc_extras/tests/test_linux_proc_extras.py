@@ -38,8 +38,19 @@ def test_check(aggregator, check):
         ):
             check.get_process_states()
 
+    import pdb; pdb.set_trace()
+    with open(os.path.join(common.FIXTURE_DIR, "interrupts")) as f:
+        m = mock_open(read_data=f.read())
+        with patch('datadog_checks.linux_proc_extras.linux_proc_extras.open', m):
+            check.get_interrupts_info()
+
     # Assert metrics
     for metric in common.EXPECTED_METRICS:
         aggregator.assert_metric(metric)
+
+    for irq in common.INTERRUPTS_IDS:
+        for cpu_id in range(common.CPU_COUNT):
+            tags = ["irq:{}".format(irq), "cpu_id:{}".format(cpu_id)]
+            aggregator.assert_metric("system.linux.interrupts.stats", value=None, tags=tags)
 
     aggregator.assert_all_metrics_covered()
