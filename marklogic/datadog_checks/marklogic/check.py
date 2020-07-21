@@ -50,7 +50,7 @@ class MarklogicCheck(AgentCheck):
             try:
                 collector()
             except Exception as e:
-                self.log.error("Collector %s failed while collecting metrics: %s", collector, str(e)) 
+                self.log.exception("Collector %s failed while collecting metrics", collector.__name__) 
 
     def collect_summary_status_resource_metrics(self):
         # type: () -> None
