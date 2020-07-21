@@ -18,4 +18,3 @@ files:
     - type: file
       path: /var/solr/logs/solr.log
       source: solr
-      service: <SERVICE_NAME>

@@ -141,7 +141,6 @@ For containerized environments, see the [Autodiscovery with JMX][2] guide.
          - type: file
            path: /var/solr/logs/solr.log
            source: solr
-           service: <SERVICE_NAME>
            # To handle multi line that starts with yyyy-mm-dd use the following pattern
            # log_processing_rules:
            #   - type: multi_line
