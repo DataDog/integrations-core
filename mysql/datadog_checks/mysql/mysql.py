@@ -10,12 +10,12 @@ from collections import defaultdict, namedtuple
 from contextlib import closing, contextmanager
 
 import pymysql
-from .collection_utils import collect_scalar, collect_string, collect_all_scalars, collect_type
-from six import PY3, iteritems, itervalues, text_type
+from six import PY3, iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
+from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
 from .const import (
     BINLOG_VARS,
     BUILDS,
@@ -24,7 +24,6 @@ from .const import (
     GAUGE,
     INNODB_VARS,
     MONOTONIC,
-    OPTIONAL_INNODB_VARS,
     OPTIONAL_STATUS_VARS,
     OPTIONAL_STATUS_VARS_5_6_6,
     PERFORMANCE_VARS,
@@ -36,6 +35,7 @@ from .const import (
     SYNTHETIC_VARS,
     VARIABLES_VARS,
 )
+from .innodb_metrics import get_stats_from_innodb_status, process_innodb_stats
 
 try:
     import psutil
@@ -261,58 +261,8 @@ class MySql(AgentCheck):
         results.update(self._get_stats_from_variables(db))
 
         if not is_affirmative(options.get('disable_innodb_metrics', False)) and self._is_innodb_engine_enabled(db):
-            results.update(self._get_stats_from_innodb_status(db))
-
-            innodb_keys = [
-                'Innodb_page_size',
-                'Innodb_buffer_pool_pages_data',
-                'Innodb_buffer_pool_pages_dirty',
-                'Innodb_buffer_pool_pages_total',
-                'Innodb_buffer_pool_pages_free',
-            ]
-
-            for inno_k in innodb_keys:
-                results[inno_k] = collect_scalar(inno_k, results)
-
-            try:
-                innodb_page_size = results['Innodb_page_size']
-                innodb_buffer_pool_pages_used = (
-                    results['Innodb_buffer_pool_pages_total'] - results['Innodb_buffer_pool_pages_free']
-                )
-
-                if 'Innodb_buffer_pool_bytes_data' not in results:
-                    results['Innodb_buffer_pool_bytes_data'] = (
-                        results['Innodb_buffer_pool_pages_data'] * innodb_page_size
-                    )
-
-                if 'Innodb_buffer_pool_bytes_dirty' not in results:
-                    results['Innodb_buffer_pool_bytes_dirty'] = (
-                        results['Innodb_buffer_pool_pages_dirty'] * innodb_page_size
-                    )
-
-                if 'Innodb_buffer_pool_bytes_free' not in results:
-                    results['Innodb_buffer_pool_bytes_free'] = (
-                        results['Innodb_buffer_pool_pages_free'] * innodb_page_size
-                    )
-
-                if 'Innodb_buffer_pool_bytes_total' not in results:
-                    results['Innodb_buffer_pool_bytes_total'] = (
-                        results['Innodb_buffer_pool_pages_total'] * innodb_page_size
-                    )
-
-                if 'Innodb_buffer_pool_pages_utilization' not in results:
-                    results['Innodb_buffer_pool_pages_utilization'] = (
-                        innodb_buffer_pool_pages_used / results['Innodb_buffer_pool_pages_total']
-                    )
-
-                if 'Innodb_buffer_pool_bytes_used' not in results:
-                    results['Innodb_buffer_pool_bytes_used'] = innodb_buffer_pool_pages_used * innodb_page_size
-            except (KeyError, TypeError) as e:
-                self.log.error("Not all InnoDB buffer pool metrics are available, unable to compute: %s", e)
-
-            if is_affirmative(options.get('extra_innodb_metrics', False)):
-                self.log.debug("Collecting Extra Innodb Metrics")
-                metrics.update(OPTIONAL_INNODB_VARS)
+            results.update(get_stats_from_innodb_status(db))
+            process_innodb_stats(results, options, metrics)
 
         # Binary log statistics
         if self._get_variable_enabled(results, 'log_bin'):
