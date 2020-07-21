@@ -39,7 +39,7 @@ E2E_METADATA = {
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    e2e_metadata = E2E_METADATA
+    new_e2e_metadata = E2E_METADATA
     with TempDir('snmp') as tmp_dir:
         data_dir = os.path.join(tmp_dir, 'data')
         env = {'DATA_DIR': data_dir}
@@ -53,14 +53,14 @@ def dd_environment():
         with docker_run(os.path.join(COMPOSE_DIR, 'docker-compose.yaml'), env_vars=env, log_patterns="Listening at"):
             if AUTODISCOVERY_TYPE == 'agent':
                 instance_config = {}
-                e2e_metadata['docker_volumes'] = [
+                new_e2e_metadata['docker_volumes'] = [
                     '{}:/etc/datadog-agent/datadog.yaml'.format(create_datadog_conf_file(tmp_dir))
                 ]
             else:
                 instance_config = generate_container_instance_config(
                     SCALAR_OBJECTS + SCALAR_OBJECTS_WITH_TAGS + TABULAR_OBJECTS
                 )
-            yield instance_config, E2E_METADATA
+            yield instance_config, new_e2e_metadata
 
 
 @pytest.fixture
