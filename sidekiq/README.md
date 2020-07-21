@@ -45,7 +45,7 @@ No additional installation is needed on your server.
           end
    ```
 
-    See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information, and the [Datadog Ruby][7] documentation for further configuration options.
+    See the Sidekiq [Pro][6] and [Enterprise][7] documentation for more information, and the [Datadog Ruby][14] documentation for further configuration options.
 
 3. Update the [Datadog Agent main configuration file][13] `datadog.yaml` by adding the following configs:
 
@@ -132,3 +132,4 @@ Need help? Contact [Datadog support][1].
 [11]: https://github.com/mperham/sidekiq/wiki/Ent-Historical-Metrics#custom
 [12]: https://github.com/DataDog/integrations-core/blob/master/sidekiq/metadata.csv
 [13]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/
+[14]: https://docs.datadoghq.com/integrations/ruby/
