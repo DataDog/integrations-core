@@ -51,7 +51,7 @@ def create_codeowners_map():
 @click.command(
     context_settings=CONTEXT_SETTINGS, short_help='Validate `CODEOWNERS` file has an entry for each integration'
 )
-def codeowners(ctx):
+def codeowners():
     """Validate that every integration has an entry in the `CODEOWNERS` file."""
 
     has_failed = False
