@@ -24,6 +24,7 @@ class DbManager(object):
         }
         self.conn = None
 
+
     def initialize(self):
         with closing(self.conn) as conn:
             with closing(conn.cursor()) as cursor:
