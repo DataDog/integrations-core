@@ -4,11 +4,14 @@
 from pprint import pprint
 from typing import Any
 
+from requests.exceptions import HTTPError
+
 from datadog_checks.base import AgentCheck, ConfigurationError
 
 from .api import MarkLogicApi
 from .config import Config
 from .constants import RESOURCE_TYPES
+from .parsers.health import parse_summary_health
 from .parsers.status import parse_summary_status_base_metrics, parse_summary_status_resource_metrics
 from .parsers.storage import parse_summary_storage_base_metrics
 
@@ -50,7 +53,9 @@ class MarklogicCheck(AgentCheck):
             try:
                 collector()
             except Exception as e:
-                self.log.exception("Collector %s failed while collecting metrics", collector.__name__) 
+                self.log.exception("Collector %s failed while collecting metrics", collector.__name__)
+
+        self.submit_service_checks()
 
     def collect_summary_status_resource_metrics(self):
         # type: () -> None
@@ -107,6 +112,21 @@ class MarklogicCheck(AgentCheck):
     def submit_metrics(self, metrics):
         for metric_type, metric_name, value_data, tags in metrics:
             getattr(self, metric_type)(metric_name, value_data, tags=tags)
+
+    def submit_service_checks(self):
+        # type: () -> None
+        try:
+            data = self.api.get_health()
+            service_checks = parse_summary_health(data, self.config.tags)
+
+            for name, status, message, tags in service_checks:
+                self.service_checks(name, status, message=message, tags=tags)
+            self.service_checks('marklogic.can_connect', self.OK, self.config.tags)
+        except HTTPError:
+            # Couldn't access the health endpoint
+            self.service_checks('marklogic.can_connect', self.CRITICAL, self.config.tags)
+        except Exception:
+            self.log.exception('Failed to check resources health')
 
 
 """

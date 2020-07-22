@@ -1,0 +1,175 @@
+cluster-id: '374625997172080693'
+host-id: '15458144945349047879'
+timestamp: '2020-07-22T08:56:00.738887Z'
+cluster-health-report:
+- state: info
+  resource-type: database
+  resource-id: '3641498145714510882'
+  resource-name: Last-Login
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '7985435889352233303'
+    name: Security
+    roleref: security
+  - type: forest
+    id: '9090404256533513455'
+    name: Last-Login
+- state: info
+  resource-type: database
+  resource-id: '13958940579797304987'
+  resource-name: Modules
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '7985435889352233303'
+    name: Security
+    roleref: security
+  - type: forest
+    id: '18319980124919541424'
+    name: Modules
+  - type: server
+    id: '3479175261576459175'
+    name: App-Services
+- state: info
+  resource-type: database
+  resource-id: '7985435889352233303'
+  resource-name: Security
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '7985435889352233303'
+    name: Security
+    roleref: security
+  - type: forest
+    id: '16360181012271336231'
+    name: Security
+  - type: server
+    id: '7778354682884930084'
+    name: Admin
+- state: info
+  resource-type: database
+  resource-id: '10876930060008870676'
+  resource-name: Fab
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '17852093898795555646'
+    name: Schemas
+    roleref: schema
+  - type: database
+    id: '7985435889352233303'
+    name: Security
+    roleref: security
+  - type: database
+    id: '18442362473634000326'
+    name: Triggers
+    roleref: triggers
+  - type: forest
+    id: '16301240118200289573'
+    name: Fab
+- state: info
+  resource-type: database
+  resource-id: '803460299295963596'
+  resource-name: Documents
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '17852093898795555646'
+    name: Schemas
+    roleref: schema
+  - type: database
+    id: '7985435889352233303'
+    name: Security
+    roleref: security
+  - type: database
+    id: '18442362473634000326'
+    name: Triggers
+    roleref: triggers
+  - type: forest
+    id: '15074161533228623701'
+    name: Documents
+  - type: server
+    id: '3479175261576459175'
+    name: App-Services
+- state: info
+  resource-type: database
+  resource-id: '373165781728065152'
+  resource-name: Extensions
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '7985435889352233303'
+    name: Security
+    roleref: security
+  - type: forest
+    id: '17680414231220797906'
+    name: Extensions
+- state: info
+  resource-type: database
+  resource-id: '18442362473634000326'
+  resource-name: Triggers
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '7985435889352233303'
+    name: Security
+    roleref: security
+  - type: forest
+    id: '2723230127582439870'
+    name: Triggers
+- state: info
+  resource-type: database
+  resource-id: '877321481430013126'
+  resource-name: App-Services
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '7985435889352233303'
+    name: Security
+    roleref: security
+  - type: forest
+    id: '7053371808947583067'
+    name: App-Services
+  - type: server
+    id: '16263272797139020185'
+    name: HealthCheck
+  - type: server
+    id: '12815944280663422441'
+    name: Manage
+- state: info
+  resource-type: database
+  resource-id: '17852093898795555646'
+  resource-name: Schemas
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '7985435889352233303'
+    name: Security
+    roleref: security
+  - type: forest
+    id: '9654411399770644179'
+    name: Schemas
+- state: info
+  resource-type: database
+  resource-id: '5488259298707193507'
+  resource-name: Meters
+  code: HEALTH-DATABASE-NO-BACKUP
+  message: Database has never been backed up.
+  relation:
+  - type: database
+    id: '7985435889352233303'
+    name: Security
+    roleref: security
+  - type: forest
+    id: '1551667740957751051'
+    name: Meters

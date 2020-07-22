@@ -35,8 +35,6 @@ def parse_summary_status_base_metrics(data, tags):
 def _parse_status_metrics(metric_prefix, metrics, tags):
     #  type: (str, Dict[str, Any], List[str]) -> Generator[Tuple, None, None]
     for key, data in iteritems(metrics):
-        if data['fake-stuff'] == 3:
-            pass
         if key in ['rate-properties', 'load-properties']:
             prop_type = key[: key.index('-properties')]
             total_key = 'total-' + prop_type

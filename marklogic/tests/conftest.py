@@ -6,19 +6,21 @@ import os
 import pytest
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.conditions import CheckDockerLogs, run_command, WaitFor
+from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor, run_command
 
-from .common import ADMIN_PASSWORD, ADMIN_USERNAME, API_URL, CHECK_CONFIG, HERE, USERNAME, PASSWORD
+from .common import ADMIN_PASSWORD, ADMIN_USERNAME, API_URL, CHECK_CONFIG, HERE, PASSWORD, USERNAME
 
 
 @pytest.fixture(scope="session")
 def dd_environment():
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yml')
     with docker_run(
-        compose_file=compose_file, conditions=[CheckDockerLogs(compose_file, r'Detected quorum \(2 online'), WaitFor(setup_admin_user)],
+        compose_file=compose_file,
+        conditions=[CheckDockerLogs(compose_file, r'Detected quorum \(2 online'), WaitFor(setup_admin_user)],
     ):
         # setup_datadog_user()
         yield CHECK_CONFIG
+
 
 def setup_admin_user():
     # From https://docs.marklogic.com/10.0/guide/admin-api/cluster
@@ -59,8 +61,11 @@ def setup_datadog_user():
     #     "password": PASSWORD,
     #     "roles": { "role": "manage-user" },
     # }
-    body = '<root><password>datadog</password><roles><role>manage-user</role></roles><user-name>datadog</user-name></root>'
-    command = [
+    body = (
+        '<root><password>datadog</password><roles><role>manage-user</role></roles><user-name>datadog</user-name></root>'
+    )
+    command = (
+        [
             'curl',
             '-i',
             '-X',
@@ -74,9 +79,7 @@ def setup_datadog_user():
             '"{}"'.format(body),
             '{}/manage/v2/users?format=xml'.format(API_URL),
         ],
+    )
 
     # Create datadog user with the admin account
-    result = run_command(
-        command,
-        check=True,
-    )
+    result = run_command(command, check=True,)

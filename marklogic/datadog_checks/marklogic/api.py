@@ -105,3 +105,18 @@ class MarkLogicApi(object):
         resp = self._http.get(url, params=params)
         resp.raise_for_status()
         return resp.json()
+
+    def get_health(self):
+        # type: () -> Dict[str, Any]
+        """
+        Return the cluster health querying http://localhost:8002/manage/v2?view=health&format=json.
+        See https://docs.marklogic.com/REST/GET/manage/v2.
+        """
+        params = {
+            'view': 'health',
+            'format': 'json',
+        }
+        url = self._base_url
+        resp = self._http.get(url, params=params)
+        resp.raise_for_status()
+        return resp.json()

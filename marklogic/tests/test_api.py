@@ -127,3 +127,13 @@ def test_get_resources():
     }
     assert http.url == 'http://localhost:8000/manage/v2'
     assert http.params == {'view': 'query', 'format': 'json'}
+
+
+def test_get_health():
+    # type: () -> None
+    http = MockRequestsWrapper({'foo': 'bar'})
+    api = MarkLogicApi(http, 'http://localhost:8000')
+
+    assert api.get_forests_storage_data(name='forestname') == {'foo': 'bar'}
+    assert http.url == 'http://localhost:8000/manage/v2'
+    assert http.params == {'format': 'json', 'view': 'health'}
