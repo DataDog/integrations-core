@@ -98,6 +98,7 @@ class ExecutionPlansMixin(object):
             rows = cursor.fetchall()
 
         events = []
+        num_truncated = 0
         for row in rows:
             if not row or not all(row):
                 self.log.debug('Row was unexpectedly truncated or events_statements_history_long table is not enabled')
@@ -114,9 +115,7 @@ class ExecutionPlansMixin(object):
             # The SQL_TEXT column will store 1024 chars by default. Plans cannot be captured on truncated
             # queries, so the `performance_schema_max_sql_text_length` variable must be raised.
             if sql_text[-3:] == '...':
-                self.log.warning(
-                    'Unable to collect plan for query due to truncated SQL text. Consider raising the '
-                    '`performance_schema_max_sql_text_length` to capture this query.')
+                num_truncated += 1
                 continue
 
             with closing(db.cursor()) as cursor:
@@ -161,6 +160,13 @@ class ExecutionPlansMixin(object):
                     })
 
         self._submit_log_events(events)
+        if num_truncated > 0:
+            self.log.warning(
+                'Unable to collect %d/%d execution plans due to truncated SQL text. Consider raising '
+                '`performance_schema_max_sql_text_length` to capture these queries.',
+                num_truncated,
+                num_truncated + len(events)
+            )
 
     def _run_explain(self, cursor, statement, schema):
         # TODO: cleaner query cleaning to strip comments, etc.
