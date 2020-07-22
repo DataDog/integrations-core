@@ -544,7 +544,9 @@ class SnmpCheck(AgentCheck):
             try:
                 metric = as_metric_with_inferred_type(snmp_value)
             except Exception as e:
-                self.log.error('Unable to parse value `%s` for metric `%s`: %s', snmp_value, metric_name, e)
+                self.log.error(
+                    'Unable to parse value for inferred type `%s` for metric `%s`: %s', snmp_value, metric_name, e
+                )
                 return
 
         if metric is None:
