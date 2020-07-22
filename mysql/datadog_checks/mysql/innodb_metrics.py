@@ -24,7 +24,7 @@ def _are_values_numeric(array):
 
 class InnoDBMetrics(object):
     def __init__(self):
-        self.log = self.log = get_check_logger()
+        self.log = get_check_logger()
 
     def get_stats_from_innodb_status(self, db):
         # There are a number of important InnoDB metrics that are reported in
