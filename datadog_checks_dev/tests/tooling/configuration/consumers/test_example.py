@@ -840,6 +840,40 @@ def test_option_description_length_limit():
     assert 'Description line length of option `foo` was over the limit by 3 characters' in errors
 
 
+def test_option_description_length_limit_with_noqa():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - name: foo
+            description: {}
+            value:
+              type: string
+              example: something
+        """.format(
+            'a' * DESCRIPTION_LINE_LENGTH_LIMIT + ' /noqa'
+        )
+    )
+
+    files = consumer.render()
+    contents, errors = files['test.yaml.example']
+    assert not errors
+    assert contents == normalize_yaml(
+        """
+        ## @param foo - string - optional - default: something
+        ## {}
+        #
+        # foo: something
+        """.format(
+            'a' * DESCRIPTION_LINE_LENGTH_LIMIT
+        )
+    )
+
+
 @pytest.mark.skipif(PY2, reason='Dictionary key order is not guaranteed in Python 2')
 def test_deprecation():
     consumer = get_example_consumer(
