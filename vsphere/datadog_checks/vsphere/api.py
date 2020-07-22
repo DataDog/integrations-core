@@ -261,7 +261,7 @@ class VSphereAPI(object):
                         self.log.debug("Unable to resolve attribute key with ID: %s", attribute.key)
                         continue
                     attr_value = attribute.value
-                    mor_attributes.append("{}{}:{}".format(self.config.tags_prefix, attr_key, attr_value))
+                    mor_attributes.append("{}{}:{}".format(self.config.attr_prefix, attr_key, attr_value))
 
                 props['attributes'] = mor_attributes
         return cast(InfrastructureData, infrastructure_data)
