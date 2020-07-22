@@ -534,12 +534,18 @@ class SnmpCheck(AgentCheck):
             try:
                 metric = as_metric_with_forced_type(snmp_value, forced_type, options)
             except Exception as e:
-                self.log.error('Unable to coerce %s to %s: %s', name, forced_type, e)
+                self.log.error(
+                    'Unable to coerce `%s` to `%s` for metric `%s`: %s', snmp_value, forced_type, metric_name, e
+                )
                 return
             if metric is None:
                 raise ConfigurationError('Invalid forced-type {!r} for metric {!r}'.format(forced_type, name))
         else:
-            metric = as_metric_with_inferred_type(snmp_value)
+            try:
+                metric = as_metric_with_inferred_type(snmp_value)
+            except Exception as e:
+                self.log.error('Unable to parse value `%s` for metric `%s`: %s', snmp_value, metric_name, e)
+                return
 
         if metric is None:
             self.log.warning('Unsupported metric type %s for %s', snmp_value.__class__.__name__, metric_name)
