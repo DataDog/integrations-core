@@ -87,7 +87,7 @@ def get_manifest_schema():
                             "description": "Relative path to the json file containing service check metadata",
                         },
                     },
-                    "required": ["monitors", "dashboards", "service_checks"]
+                    "required": ["monitors", "dashboards", "service_checks"],
                 },
             },
             "allOf": [
@@ -105,9 +105,7 @@ def get_manifest_schema():
                     "then": {"properties": {"maintainer": {"pattern": ".*"}}},
                 },
                 {
-                    "if": {
-                        "properties": {"support": {"const": "partner"}}
-                    },
+                    "if": {"properties": {"support": {"const": "partner"}}},
                     "then": {
                         "properties": {
                             "maintainer": {"pattern": ".*"},
