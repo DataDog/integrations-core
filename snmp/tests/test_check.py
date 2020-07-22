@@ -501,7 +501,7 @@ def test_invalid_forcedtype_metric(aggregator, caplog):
     # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
-    assert "Unable to submit metricx" in caplog.text
+    assert "Unable to submit metric" in caplog.text
 
 
 def test_scalar_with_tags(aggregator):
