@@ -136,6 +136,11 @@ class VSphereConfig(object):
                     'Your configuration is incorrectly attempting to filter resources '
                     'by the `tag` property but `collect_tags` is disabled.'
                 )
+            if resource_filter['property'] == 'attribute' and not self.should_collect_attributes:
+                raise ConfigurationError(
+                    'Your configuration is incorrectly attempting to filter resources '
+                    'by the `attribute` property but `collect_attributes` is disabled.'
+                )
 
             # Check required fields and their types
             for (field, field_type) in iteritems(

@@ -249,12 +249,9 @@ class VSphereAPI(object):
         # Clean up attributes, at the moment they are custom pyvmomi objects and the attribute keys are not resolved.
         if self.config.should_collect_attributes:
             # Mapping of attribute key UID to the attribute key name.
-            import pdb
-
-            pdb.set_trace()
             attribute_keys = {x.key: x.name for x in self._conn.content.customFieldsManager.field}
             for props in itervalues(infrastructure_data):
-                mor_attributes = {}
+                mor_attributes = []
                 if 'customValue' not in props:
                     continue
                 for attribute in props.pop('customValue'):
@@ -264,7 +261,7 @@ class VSphereAPI(object):
                         self.log.debug("Unable to resolve attribute key with ID: %s", attribute.key)
                         continue
                     attr_value = attribute.value
-                    mor_attributes[attr_key] = attr_value
+                    mor_attributes.append("{}{}:{}".format(self.config.tags_prefix, attr_key, attr_value))
 
                 props['attributes'] = mor_attributes
         return cast(InfrastructureData, infrastructure_data)

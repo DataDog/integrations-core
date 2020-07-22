@@ -53,7 +53,7 @@ InfrastructureDataItem = TypedDict(
         'guest.hostName': str,
         'runtime.powerState': str,
         'parent': Optional[vim.ManagedEntity],
-        'attributes': Dict[str, str],
+        'attributes': List[str],
     },
     total=False,
 )

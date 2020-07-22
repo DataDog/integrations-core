@@ -237,8 +237,7 @@ class VSphereCheck(AgentCheck):
             tags.append('vsphere_type:{}'.format(mor_type_str))
 
             # Attach tags from fetched attributes.
-            for attr_key, attr_val in iteritems(properties.get('attributes', {})):
-                tags.append('{}{}:{}'.format(self.config.tags_prefix, attr_key, attr_val))
+            tags.extend(properties.get('attributes', []))
 
             mor_payload = {"tags": tags}  # type: Dict[str, Any]
 
