@@ -490,15 +490,14 @@ def test_forcedtype_metric(aggregator):
 
 def test_invalid_forcedtype_metric(aggregator, caplog):
     """
-    If a forced type is invalid a warning should be issued + a service check
-    should be available
+    If a forced type is invalid a warning should be issued
+    but the check should continue processing the remaining metrics.
     """
     instance = common.generate_instance_config(common.INVALID_FORCED_METRICS)
     check = common.create_check(instance)
 
     check.check(instance)
 
-    # Test service check
     aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
 
     assert "Unable to submit metric" in caplog.text
