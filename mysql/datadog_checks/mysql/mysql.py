@@ -35,7 +35,7 @@ from .const import (
     SYNTHETIC_VARS,
     VARIABLES_VARS,
 )
-from .innodb_metrics import get_stats_from_innodb_status, process_innodb_stats
+from .innodb_metrics import InnoDBMetrics
 from .queries import (
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
@@ -77,6 +77,7 @@ class MySql(AgentCheck):
 
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
+        self.innodb_stats = InnoDBMetrics()
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -269,8 +270,8 @@ class MySql(AgentCheck):
         results.update(self._get_stats_from_variables(db))
 
         if not is_affirmative(options.get('disable_innodb_metrics', False)) and self._is_innodb_engine_enabled(db):
-            results.update(get_stats_from_innodb_status(db))
-            process_innodb_stats(results, options, metrics)
+            results.update(self.innodb_stats.get_stats_from_innodb_status(db))
+            self.innodb_stats.process_innodb_stats(results, options, metrics)
 
         # Binary log statistics
         if self._get_variable_enabled(results, 'log_bin'):
