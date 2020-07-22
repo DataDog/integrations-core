@@ -521,7 +521,7 @@ class SnmpCheck(AgentCheck):
         report them to the aggregator.
         """
         try:
-            self.do_submit_metric(name, snmp_value, forced_type, tags, options)
+            self._do_submit_metric(name, snmp_value, forced_type, tags, options)
         except Exception as e:
             msg = (
                 'Unable to submit metric `{}` with '
@@ -532,7 +532,7 @@ class SnmpCheck(AgentCheck):
             self.log.warning(msg)
             self.log.debug(msg, exc_info=True)
 
-    def do_submit_metric(self, name, snmp_value, forced_type, tags, options):
+    def _do_submit_metric(self, name, snmp_value, forced_type, tags, options):
         # type: (str, Any, Optional[str], List[str], dict) -> None
 
         if reply_invalid(snmp_value):
