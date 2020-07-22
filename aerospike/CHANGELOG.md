@@ -1,5 +1,9 @@
 # CHANGELOG - Aerospike
 
+## 1.8.2 / 2020-07-22
+
+* [Fixed] Add debug log for get info calls. See [#7182](https://github.com/DataDog/integrations-core/pull/7182).
+
 ## 1.8.1 / 2020-07-10
 
 * [Fixed] Parse batch-index read latency metrics. See [#6991](https://github.com/DataDog/integrations-core/pull/6991).
