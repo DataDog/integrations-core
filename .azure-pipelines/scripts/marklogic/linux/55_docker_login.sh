@@ -3,6 +3,6 @@ set -euo pipefail
 
 set +x
 
-echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+echo "$DEV_DOCKER_PASSWORD" | docker login --username "$DEV_DOCKER_USERNAME" --password-stdin
 
 set -x
