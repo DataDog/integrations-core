@@ -520,6 +520,17 @@ class SnmpCheck(AgentCheck):
         Convert the values reported as pysnmp-Managed Objects to values and
         report them to the aggregator.
         """
+        try:
+            self.do_submit_metric(name, snmp_value, forced_type, tags, options)
+        except Exception as e:
+            value_class = 'None' if snmp_value is None else snmp_value.__class__.__name__
+            msg = 'Unable to submit metric=`{}`, value=`{}` ({}}, forced_type=`{}`, tags=`{}`, options=`{}`: {}'.format(name, snmp_value, value_class, forced_type, tags, options, e)
+            self.log.warning(msg)
+            self.log.debug(msg, exc_info=True)
+
+    def do_submit_metric(self, name, snmp_value, forced_type, tags, options):
+        # type: (str, Any, Optional[str], List[str], dict) -> None
+
         if reply_invalid(snmp_value):
             # Metrics not present in the queried object
             self.log.warning('No such Mib available: %s', name)
@@ -531,27 +542,12 @@ class SnmpCheck(AgentCheck):
             metric_name = self.normalize(name, prefix='snmp')
 
         if forced_type is not None:
-            try:
-                metric = as_metric_with_forced_type(snmp_value, forced_type, options)
-            except Exception as e:
-                self.log.error(
-                    'Unable to coerce `%s` to `%s` for metric `%s`: %s', snmp_value, forced_type, metric_name, e
-                )
-                return
-            if metric is None:
-                raise ConfigurationError('Invalid forced-type {!r} for metric {!r}'.format(forced_type, name))
+            metric = as_metric_with_forced_type(snmp_value, forced_type, options)
         else:
-            try:
-                metric = as_metric_with_inferred_type(snmp_value)
-            except Exception as e:
-                self.log.error(
-                    'Unable to parse value for inferred type `%s` for metric `%s`: %s', snmp_value, metric_name, e
-                )
-                return
+            metric = as_metric_with_inferred_type(snmp_value)
 
         if metric is None:
-            self.log.warning('Unsupported metric type %s for %s', snmp_value.__class__.__name__, metric_name)
-            return
+            raise RuntimeError('Unsupported metric type %s for %s'.format(snmp_value.__class__.__name__, metric_name))
 
         submit_func = getattr(self, metric['type'])
         submit_func(metric_name, metric['value'], tags=tags)
