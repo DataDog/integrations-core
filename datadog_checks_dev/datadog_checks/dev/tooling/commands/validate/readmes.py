@@ -60,6 +60,7 @@ def readmes(ctx, integration):
                             f"This image path must be in the form: "
                             f"https://raw.githubusercontent.com/DataDog/{repo}/master/{integration}/images/<IMAGE_NAME>"
                         )
+                        break
 
                     rel_path = match.groups()[0]
                     if rel_path:
@@ -67,7 +68,8 @@ def readmes(ctx, integration):
                         if not path.exists(file_path):
                             errors = True
                             echo_failure(f"{integration} image: {rel_path} is linked in its readme but does not exist")
-
+                            break
+                            
         if not (has_overview and has_setup):
             errors = True
             echo_failure(f"{integration} readme file does not have an overview and setup section")
