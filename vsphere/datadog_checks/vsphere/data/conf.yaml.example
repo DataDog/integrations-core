@@ -123,7 +123,7 @@ instances:
     ##          The value to match is the one composed by <TAG_PREFIX><TAG_CATEGORY>:<TAG_VALUE>
     ##    - attribute to filter only the resources with a given attribute. Datadog has stricter rules (i.e no space),
     ##          but the filter is applied on the value coming from vCenter directly.
-    ##          The value to match is the one composed by <ATTR_PREFIX><ATTR_KEY>:<TAG_VALUE>
+    ##          The value to match is the one composed by <ATTR_PREFIX><ATTR_KEY>:<ATTR_VALUE>
     ##    - hostname to filter on the ESXi Host name (only valid for if 'resource' equals 'vm')
     ##    - guest_hostname to filter on the VM hostname (only valid for if 'resource' equals 'vm' and
     ##      if VMware tools are installed)
