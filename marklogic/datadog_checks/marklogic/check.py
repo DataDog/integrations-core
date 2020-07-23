@@ -14,6 +14,7 @@ from .constants import RESOURCE_TYPES
 from .parsers.health import parse_summary_health
 from .parsers.status import parse_summary_status_base_metrics, parse_summary_status_resource_metrics
 from .parsers.storage import parse_summary_storage_base_metrics
+from .resource_filters import create_resource_filter
 
 
 class MarklogicCheck(AgentCheck):
@@ -30,6 +31,7 @@ class MarklogicCheck(AgentCheck):
         self.api = MarkLogicApi(self.http, url)
 
         self.config = Config(self.instance)
+        self.resource_filters = create_resource_filter(self.config.resource_filters)
 
         self.collectors = [
             self.collect_summary_status_base_metrics,

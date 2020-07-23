@@ -19,27 +19,20 @@ instances:
   - url: http://localhost:8002/
 
     ## @param resource_filters - list of mappings - optional
-    ## Each filter in the list is composed of three parameters.
-    ## 'resource' is one of cluster/forest/database/host/server on which to apply the filter
+    ## Each filter in the list is composed of two to four parameters.
+    ## 'resource' is one of cluster/forest/database/host/server on which to apply the filter (required)
+    ## 'pattern' is a pattern to match the resource name (required)
     ## 'type' is either included (default) or excluded. If a resource is both included and excluded it will be
     ##        considered excluded.
-    ## 'name' is a pattern to match the resource name
-    ## 'id' is the resource id to match
-    ## 'group' is the resource group to match
-    ## 'metric_groups' is a list of type of metric_groups to collect.
-    ##                 Possible values are: `requests`, `status` and `storage`.
-    ##                 If not set, all groups of metrics are collected.
+    ## 'group' is the resource group to match (optional)
     #
     # resource_filters:
     #   - resource: forest
-    #     name: Documents
+    #     pattern: Documents
     #   - resource: database
     #     type: excluded
-    #     name: Documents
+    #     pattern: Doc*
     #     group: Default
-    #     metric_groups:
-    #     - requests
-    #     - status
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
