@@ -16,6 +16,7 @@ from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryManager
 
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
+from .config import MySQLConfig
 from .const import (
     BINLOG_VARS,
     BUILDS,
@@ -69,15 +70,15 @@ class MySql(AgentCheck):
         super(MySql, self).__init__(name, init_config, instances)
         self.qcache_stats = {}
         self.metadata = None
-
-        self._tags = list(self.instance.get('tags', []))
+        self.config = MySQLConfig(self.instance)
 
         # Create a new connection on every check run
         self._conn = None
 
-        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self._tags)
+        self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self.config.tags)
         self.check_initializations.append(self._query_manager.compile_queries)
         self.innodb_stats = InnoDBMetrics()
+        self.check_initializations.append(self.config.configuration_checks)
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -118,28 +119,19 @@ class MySql(AgentCheck):
     def get_library_versions(cls):
         return {'pymysql': pymysql.__version__}
 
-    def check(self, instance):
-        (
-            host,
-            port,
-            user,
-            password,
-            mysql_sock,
-            defaults_file,
-            tags,
-            options,
-            queries,
-            ssl,
-            connect_timeout,
-            max_custom_queries,
-        ) = self._get_config(instance)
-
+    def check(self, _):
         self._set_qcache_stats()
-
-        if not (host and user) and not defaults_file:
-            raise Exception("Mysql host and user are needed.")
-
-        with self._connect(host, port, mysql_sock, user, password, defaults_file, ssl, connect_timeout, tags) as db:
+        with self._connect(
+            self.config.host,
+            self.config.port,
+            self.config.mysql_sock,
+            self.config.user,
+            self.config.password,
+            self.config.defaults_file,
+            self.config.ssl,
+            self.config.connect_timeout,
+            self.config.tags,
+        ) as db:
             try:
                 self._conn = db
 
@@ -148,8 +140,10 @@ class MySql(AgentCheck):
                 self._send_metadata()
 
                 # Metric collection
-                self._collect_metrics(db, tags, options, queries, max_custom_queries)
-                self._collect_system_metrics(host, db, tags)
+                self._collect_metrics(
+                    db, self.config.tags, self.config.options, self.config.queries, self.config.max_custom_queries
+                )
+                self._collect_system_metrics(self.config.host, db, self.config.tags)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -162,41 +156,6 @@ class MySql(AgentCheck):
                 raise e
             finally:
                 self._conn = None
-
-    def _get_config(self, instance):
-        self.host = instance.get('server', '')
-        self.port = int(instance.get('port', 0))
-        self.mysql_sock = instance.get('sock', '')
-        self.defaults_file = instance.get('defaults_file', '')
-        user = instance.get('user', '')
-        password = str(instance.get('pass', ''))
-        tags = instance.get('tags', [])
-        options = instance.get('options', {}) or {}  # options could be None if empty in the YAML
-        queries = instance.get('queries', [])
-        ssl = instance.get('ssl', {})
-        connect_timeout = instance.get('connect_timeout', 10)
-        max_custom_queries = instance.get('max_custom_queries', self.DEFAULT_MAX_CUSTOM_QUERIES)
-
-        if queries or 'max_custom_queries' in instance:
-            self.warning(
-                'The options `queries` and `max_custom_queries` are deprecated and will be '
-                'removed in a future release. Use the `custom_queries` option instead.'
-            )
-
-        return (
-            self.host,
-            self.port,
-            user,
-            password,
-            self.mysql_sock,
-            self.defaults_file,
-            tags,
-            options,
-            queries,
-            ssl,
-            connect_timeout,
-            max_custom_queries,
-        )
 
     def _set_qcache_stats(self):
         host_key = self._get_host_key()
@@ -211,14 +170,14 @@ class MySql(AgentCheck):
         self.qcache_stats[host_key] = (self._qcache_hits, self._qcache_inserts, self._qcache_not_cached)
 
     def _get_host_key(self):
-        if self.defaults_file:
-            return self.defaults_file
+        if self.config.defaults_file:
+            return self.config.defaults_file
 
-        hostkey = self.host
-        if self.mysql_sock:
-            hostkey = "{0}:{1}".format(hostkey, self.mysql_sock)
-        elif self.port:
-            hostkey = "{0}:{1}".format(hostkey, self.port)
+        hostkey = self.config.host
+        if self.config.mysql_sock:
+            hostkey = "{0}:{1}".format(hostkey, self.config.mysql_sock)
+        elif self.config.port:
+            hostkey = "{0}:{1}".format(hostkey, self.config.port)
 
         return hostkey
 

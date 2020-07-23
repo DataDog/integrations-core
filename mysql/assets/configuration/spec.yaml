@@ -24,11 +24,11 @@ files:
 
       - template: instances
         options:
-          - name: server
+          - name: host
             required: true
             description: |
-              MySQL server to connect to.
-              NOTE: Even if the server name is "localhost", the agent connects to MySQL using TCP/IP, unless you also
+              MySQL host to connect to.
+              NOTE: Even if the host is "localhost", the agent connects to MySQL using TCP/IP, unless you also
               provide a value for the sock key (below).
             value:
               type: string
