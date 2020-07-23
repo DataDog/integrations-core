@@ -44,6 +44,9 @@ INSTANCE = {
     'channels': [CHANNEL, BAD_CHANNEL],
     'tags': ['foo:bar'],
     'collect_statistics_metrics': True,
+    'ssl_auth': 'yes',
+    'ssl_cipher_spec': 'TLS_RSA_WITH_AES_256_CBC_SHA256',
+    'ssl_key_repository_location': '/opt/pki/keys/client',
 }
 
 INSTANCE_METADATA = {
@@ -114,7 +117,7 @@ INSTANCE_QUEUE_REGEX_TAG = {
 }
 
 E2E_METADATA = {
-    'docker_volumes': ['{}/scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE)],
+    'docker_volumes': ['{}/agent_scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE)],
     'start_commands': ['bash /tmp/start_commands.sh'],
     'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib', 'C_INCLUDE_PATH': '/opt/mqm/inc'},
 }

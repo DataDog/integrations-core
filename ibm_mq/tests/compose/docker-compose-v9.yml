@@ -11,3 +11,5 @@ services:
       - "11414:1414"
     volumes:
       - './config.mqsc:/etc/mqm/config.mqsc'
+      - './prepare_tls.sh:/opt/prepare_tls.sh'
+      - ${IBM_MQ_PKI_DIR}:/etc/mqm/pki
