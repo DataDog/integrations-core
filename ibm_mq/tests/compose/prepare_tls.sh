@@ -16,3 +16,6 @@ runmqakm -cert -extract -db ./keys/client.kdb -pw Secret13 \
 -label client -target ./keys/client.pem
 runmqakm -cert -add -db ./keys/qm1.kdb -pw Secret13 \
 -label client -file ./keys/client.pem
+
+cp -r /etc/mqm/pki/keys/* /var/mqm/qmgrs/QM1/ssl/
+chown -R mqm /var/mqm/qmgrs/QM1/ssl/

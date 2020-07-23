@@ -55,6 +55,7 @@ def get_ssl_connection(config):
 
     sco = pymqi.SCO()
     sco.KeyRepository = pymqi.ensure_bytes(config.ssl_key_repository_location)
+    sco.CertificateLabel = pymqi.ensure_bytes('client')
 
     queue_manager = pymqi.QueueManager(None)
     queue_manager.connect_with_options(config.queue_manager_name, cd, sco)
