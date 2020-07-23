@@ -79,4 +79,13 @@ files:
         value:
           type: string
           example: <OCSP_RESPONSE_CACHE_FILENAME>
-      - template: instances/default
+      - template: instances/tags
+      - template: instances/service
+      - template: instances/global
+        overrides:
+          min_collection_interval.description: |
+            This changes the collection interval of the check. For more information, see:
+            https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+
+            NOTE: The Snowflake ACCOUNT_USAGE schema views do not update in frequently.
+          min_collection_interval.default: 1800
