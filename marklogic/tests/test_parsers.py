@@ -427,24 +427,24 @@ def test_parse_summary_health():
 
     EXPECTED_RESULT = [
         (
-            'marklogic.resource.health',
+            'resource.health',
             AgentCheck.OK,
             'HEALTH-DATABASE-NO-BACKUP: Database has never been backed up.',
             ['foo:bar', 'resource:Last-Login'],
         ),
         (
-            'marklogic.resource.health',
+            'resource.health',
             AgentCheck.WARNING,
             'HEALTH-DATABASE-DISABLED: Database is intentionally disabled.',
             ['foo:bar', 'resource:Modules'],
         ),
         (
-            'marklogic.resource.health',
+            'resource.health',
             AgentCheck.CRITICAL,
             'HEALTH-DATABASE-ERROR: Database error.',
             ['foo:bar', 'resource:Security'],
         ),
-        ('marklogic.resource.health', AgentCheck.UNKNOWN, 'UNKNOWN: No message.', ['foo:bar', 'resource:Fab']),
+        ('resource.health', AgentCheck.UNKNOWN, 'UNKNOWN: No message.', ['foo:bar', 'resource:Fab']),
     ]
 
     result = list(parse_summary_health(summary_health, ['foo:bar']))

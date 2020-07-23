@@ -18,6 +18,7 @@ from .parsers.storage import parse_summary_storage_base_metrics
 
 class MarklogicCheck(AgentCheck):
     __NAMESPACE__ = 'marklogic'
+    SERVICE_CHECK_CONNECT = 'can_connect'
 
     def __init__(self, name, init_config, instances):
         super(MarklogicCheck, self).__init__(name, init_config, instances)
@@ -52,7 +53,7 @@ class MarklogicCheck(AgentCheck):
         for collector in self.collectors:
             try:
                 collector()
-            except Exception as e:
+            except Exception:
                 self.log.exception("Collector %s failed while collecting metrics", collector.__name__)
 
         self.submit_service_checks()
@@ -120,11 +121,11 @@ class MarklogicCheck(AgentCheck):
             service_checks = parse_summary_health(data, self.config.tags)
 
             for name, status, message, tags in service_checks:
-                self.service_checks(name, status, message=message, tags=tags)
-            self.service_checks('marklogic.can_connect', self.OK, self.config.tags)
+                self.service_check(name, status, tags=tags, message=message)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, self.config.tags)
         except HTTPError:
             # Couldn't access the health endpoint
-            self.service_checks('marklogic.can_connect', self.CRITICAL, self.config.tags)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, self.config.tags)
         except Exception:
             self.log.exception('Failed to check resources health')
 

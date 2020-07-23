@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor, run_command
 
-from .common import ADMIN_PASSWORD, ADMIN_USERNAME, API_URL, CHECK_CONFIG, HERE, PASSWORD, USERNAME
+from .common import ADMIN_PASSWORD, ADMIN_USERNAME, API_URL, CHECK_CONFIG, HERE
 
 
 @pytest.fixture(scope="session")
@@ -82,4 +82,4 @@ def setup_datadog_user():
     )
 
     # Create datadog user with the admin account
-    result = run_command(command, check=True,)
+    run_command(command, check=True)
