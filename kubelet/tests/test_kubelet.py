@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
@@ -8,10 +8,12 @@ from datetime import datetime
 
 import mock
 import pytest
+import requests
 from six import iteritems
+from urllib3.exceptions import InsecureRequestWarning
 
 from datadog_checks.base.utils.date import UTC, parse_rfc3339
-from datadog_checks.kubelet import KubeletCheck, KubeletCredentials
+from datadog_checks.kubelet import KubeletCheck, KubeletCredentials, PodListUtils
 
 # Skip the whole tests module on Windows
 pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux only')
@@ -19,6 +21,11 @@ pytestmark = pytest.mark.skipif(sys.platform == 'win32', reason='tests for linux
 # Constants
 HERE = os.path.abspath(os.path.dirname(__file__))
 QUANTITIES = {'12k': 12 * 1000, '12M': 12 * (1000 * 1000), '12Ki': 12.0 * 1024, '12K': 12.0, '12test': 12.0}
+
+# Kubernetes versions, used to differentiate cadvisor payloads after the label change
+KUBE_POST_1_16 = '1.16'
+KUBE_1_14 = '1.14'
+KUBE_PRE_1_14 = '1.13'
 
 NODE_SPEC = {
     u'cloud_provider': u'GCE',
@@ -54,12 +61,18 @@ EXPECTED_METRICS_COMMON = [
     'kubernetes.memory.swap',
     'kubernetes.network.rx_bytes',
     'kubernetes.network.tx_bytes',
+    'kubernetes.ephemeral_storage.usage',
+    'kubernetes.runtime.cpu.usage',
+    'kubernetes.runtime.memory.rss',
+    'kubernetes.kubelet.cpu.usage',
+    'kubernetes.kubelet.memory.rss',
 ]
 
 EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.cpu.load.10s.avg',
     'kubernetes.cpu.system.total',
     'kubernetes.cpu.user.total',
+    'kubernetes.cpu.cfs.periods',
     'kubernetes.cpu.cfs.throttled.periods',
     'kubernetes.cpu.cfs.throttled.seconds',
     'kubernetes.memory.usage_pct',
@@ -79,13 +92,21 @@ EXPECTED_METRICS_PROMETHEUS = [
     'kubernetes.kubelet.runtime.errors',
     'kubernetes.kubelet.network_plugin.latency.sum',
     'kubernetes.kubelet.network_plugin.latency.count',
-    'kubernetes.kubelet.network_plugin.latency.quantile',
     'kubernetes.kubelet.volume.stats.available_bytes',
     'kubernetes.kubelet.volume.stats.capacity_bytes',
     'kubernetes.kubelet.volume.stats.used_bytes',
     'kubernetes.kubelet.volume.stats.inodes',
     'kubernetes.kubelet.volume.stats.inodes_free',
     'kubernetes.kubelet.volume.stats.inodes_used',
+    'kubernetes.kubelet.evictions',
+]
+
+EXPECTED_METRICS_PROMETHEUS_1_14 = EXPECTED_METRICS_PROMETHEUS + [
+    'kubernetes.kubelet.container.log_filesystem.used_bytes'
+]
+
+EXPECTED_METRICS_PROMETHEUS_PRE_1_14 = EXPECTED_METRICS_PROMETHEUS + [
+    'kubernetes.kubelet.network_plugin.latency.quantile'
 ]
 
 COMMON_TAGS = {
@@ -118,6 +139,56 @@ COMMON_TAGS = {
     "container_id://f69aa93ce78ee11e78e7c75dc71f535567961740a308422dafebdb4030b04903": ['pod_name:pi-kff76'],
     "kubernetes_pod_uid://12ceeaa9-33ca-11e6-ac8f-42010af00003": ['pod_name:dd-agent-ntepl'],
     "container_id://32fc50ecfe24df055f6d56037acb966337eef7282ad5c203a1be58f2dd2fe743": ['pod_name:dd-agent-ntepl'],
+    "container_id://a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479": [
+        'kube_container_name:datadog-agent'
+    ],
+    "container_id://326b384481ca95204018e3e837c61e522b64a3b86c3804142a22b2d1db9dbd7b": [
+        'kube_container_name:datadog-agent'
+    ],
+    "container_id://6d8c6a05731b52195998c438fdca271b967b171f6c894f11ba59aa2f4deff10c": ['pod_name:cassandra-0'],
+    "kubernetes_pod_uid://639980e5-2e6c-11ea-8bb1-42010a800074": [
+        'kube_namespace:default',
+        'kube_service:nginx',
+        'kube_stateful_set:web',
+        'namespace:default',
+        'persistentvolumeclaim:www-web-2',
+        'pod_phase:running',
+    ],
+    "kubernetes_pod_uid://639980e5-2e6c-11ea-8bb1-42010a800075": [
+        'kube_namespace:default',
+        'kube_service:nginx',
+        'kube_stateful_set:web',
+        'namespace:default',
+        'persistentvolumeclaim:www-web-2',
+        'persistentvolumeclaim:www2-web-3',
+        'pod_phase:running',
+    ],
+}
+
+WINDOWS_TAGS = {
+    'kubernetes_pod_uid://4740a3ec-392f-435f-80a4-b407a37463db': [
+        'kube_namespace:default',
+        'pod_name:windows-server-iis-6c68545d57-gwtn9',
+    ],
+    'container_id://43dfa29d17d358cbdd0bfb290cf27ce82c4de0c88d22d7cac4b88c85de87efba': [
+        'kube_namespace:default',
+        'pod_name:windows-server-iis-6c68545d57-gwtn9',
+        'kube_container_name:windows-server-iis',
+    ],
+    'kubernetes_pod_uid://8ddf0e3f-ac6c-4d44-87d7-0bc41f6729ec': [
+        'kube_namespace:default',
+        'pod_name:dd-datadog-lbvkl',
+    ],
+    'container_id://a26b9c2c92e4ab03f34b84d03d91bed92259c859576535a3167aa32d39206dc2': [
+        'kube_namespace:default',
+        'pod_name:dd-datadog-lbvkl',
+        'kube_container_name:agent',
+    ],
+    'container_id://98fb504eb0fab22ce9089d8b1cc172ccb2095ee11a00bacd244419b5c02ee635': [
+        'kube_namespace:default',
+        'pod_name:dd-datadog-lbvkl',
+        'kube_container_name:process-agent',
+    ],
 }
 
 METRICS_WITH_DEVICE_TAG = {
@@ -168,34 +239,73 @@ def tagger():
     return tagger
 
 
-def mock_kubelet_check(monkeypatch, instances):
+def mock_kubelet_check(monkeypatch, instances, kube_version=KUBE_1_14, stats_summary_fail=False):
     """
     Returns a check that uses mocked data for responses from prometheus endpoints, pod list,
     and node spec.
     """
-    check = KubeletCheck('kubelet', None, {}, instances)
+    check = KubeletCheck('kubelet', {}, instances)
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
-    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=NODE_SPEC))
+    mock_resp = mock.Mock(status_code=200, raise_for_status=mock.Mock(), json=mock.Mock(return_value=NODE_SPEC))
+    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=mock_resp))
+    if stats_summary_fail:
+        monkeypatch.setattr(check, '_retrieve_stats', mock.Mock(return_value={}))
+    else:
+        monkeypatch.setattr(
+            check, '_retrieve_stats', mock.Mock(return_value=json.loads(mock_from_file('stats_summary.json')))
+        )
     monkeypatch.setattr(check, '_perform_kubelet_check', mock.Mock(return_value=None))
     monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
 
-    def mocked_poll(*args, **kwargs):
-        scraper_config = args[0]
-        prometheus_url = scraper_config['prometheus_url']
+    def mocked_poll(cadvisor_response, kubelet_response):
+        def _mocked_poll(*args, **kwargs):
+            scraper_config = args[0]
+            prometheus_url = scraper_config['prometheus_url']
 
-        if prometheus_url.endswith('/metrics/cadvisor'):
-            # Mock response for "/metrics/cadvisor"
-            content = mock_from_file('cadvisor_metrics.txt')
-        elif prometheus_url.endswith('/metrics'):
-            # Mock response for "/metrics"
-            content = mock_from_file('kubelet_metrics.txt')
-        else:
-            raise Exception("Must be a valid endpoint")
+            if prometheus_url.endswith('/metrics/cadvisor'):
+                # Mock response for "/metrics/cadvisor"
+                content = mock_from_file(cadvisor_response)
+            elif prometheus_url.endswith('/metrics'):
+                # Mock response for "/metrics"
+                content = mock_from_file(kubelet_response)
+            else:
+                raise Exception("Must be a valid endpoint")
 
-        attrs = {'close.return_value': True, 'iter_lines.return_value': content.split('\n'), 'content': content}
-        return mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
+            attrs = {'close.return_value': True, 'iter_lines.return_value': content.split('\n'), 'content': content}
+            return mock.Mock(headers={'Content-Type': 'text/plain'}, **attrs)
 
-    monkeypatch.setattr(check, 'poll', mock.Mock(side_effect=mocked_poll))
+        return _mocked_poll
+
+    if kube_version == KUBE_POST_1_16:
+        monkeypatch.setattr(
+            check,
+            'poll',
+            mock.Mock(
+                side_effect=mocked_poll(
+                    cadvisor_response='cadvisor_metrics_post_1_16.txt', kubelet_response='kubelet_metrics_1_14.txt'
+                )
+            ),
+        )
+    elif kube_version == KUBE_1_14:
+        monkeypatch.setattr(
+            check,
+            'poll',
+            mock.Mock(
+                side_effect=mocked_poll(
+                    cadvisor_response='cadvisor_metrics_pre_1_16.txt', kubelet_response='kubelet_metrics_1_14.txt',
+                )
+            ),
+        )
+    elif kube_version == KUBE_PRE_1_14:
+        monkeypatch.setattr(
+            check,
+            'poll',
+            mock.Mock(
+                side_effect=mocked_poll(
+                    cadvisor_response='cadvisor_metrics_pre_1_16.txt', kubelet_response='kubelet_metrics.txt'
+                )
+            ),
+        )
 
     return check
 
@@ -207,7 +317,7 @@ def mock_from_file(fname):
 
 def test_bad_config():
     with pytest.raises(Exception):
-        KubeletCheck('kubelet', None, {}, [{}, {}])
+        KubeletCheck('kubelet', {}, [{}, {}])
 
 
 def test_parse_quantity():
@@ -216,7 +326,7 @@ def test_parse_quantity():
 
 
 def test_kubelet_default_options():
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     assert check.cadvisor_scraper_config['namespace'] == 'kubernetes'
     assert check.kubelet_scraper_config['namespace'] == 'kubernetes'
 
@@ -225,25 +335,38 @@ def test_kubelet_default_options():
 
 
 def test_kubelet_check_prometheus_instance_tags(monkeypatch, aggregator, tagger):
-    _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, ["instance:tag"])
+    _test_kubelet_check_prometheus(
+        monkeypatch, aggregator, tagger, kube_version=KUBE_1_14, instance_tags=["instance:tag"]
+    )
 
 
 def test_kubelet_check_prometheus_no_instance_tags(monkeypatch, aggregator, tagger):
-    _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, None)
+    _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, kube_version=KUBE_1_14, instance_tags=None)
 
 
-def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, instance_tags):
+def test_kubelet_check_prometheus_instance_tags_pre_1_14(monkeypatch, aggregator, tagger):
+    _test_kubelet_check_prometheus(
+        monkeypatch, aggregator, tagger, kube_version=KUBE_PRE_1_14, instance_tags=["instance:tag"]
+    )
+
+
+def test_kubelet_check_prometheus_no_instance_tags_pre_1_14(monkeypatch, aggregator, tagger):
+    _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, kube_version=KUBE_PRE_1_14, instance_tags=None)
+
+
+def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, kube_version, instance_tags):
     instance = {}
     if instance_tags:
         instance["tags"] = instance_tags
 
-    check = mock_kubelet_check(monkeypatch, [instance])
+    check = mock_kubelet_check(monkeypatch, [instance], kube_version=kube_version)
     monkeypatch.setattr(check, 'process_cadvisor', mock.Mock(return_value=None))
 
     check.check(instance)
     assert check.cadvisor_legacy_url is None
     check.retrieve_pod_list.assert_called_once()
     check._retrieve_node_spec.assert_called_once()
+    check._retrieve_stats.assert_called_once()
     check._perform_kubelet_check.assert_called_once()
     check.process_cadvisor.assert_not_called()
 
@@ -254,13 +377,49 @@ def _test_kubelet_check_prometheus(monkeypatch, aggregator, tagger, instance_tag
         if instance_tags:
             for tag in instance_tags:
                 aggregator.assert_metric_has_tag(metric, tag)
-    for metric in EXPECTED_METRICS_PROMETHEUS:
+
+    if kube_version == KUBE_PRE_1_14:
+        prom_metrics = EXPECTED_METRICS_PROMETHEUS_PRE_1_14
+
+    if kube_version == KUBE_1_14:
+        prom_metrics = EXPECTED_METRICS_PROMETHEUS_1_14
+
+    for metric in prom_metrics:
         aggregator.assert_metric(metric)
         if instance_tags:
             for tag in instance_tags:
                 aggregator.assert_metric_has_tag(metric, tag)
 
     assert aggregator.metrics_asserted_pct == 100.0
+
+
+def test_kubelet_credentials_update(monkeypatch, aggregator):
+    instance = {
+        'kubelet_metrics_endpoint': 'http://10.8.0.1:10255/metrics',
+        'cadvisor_metrics_endpoint': 'http://10.8.0.1:10255/metrics/cadvisor',
+    }
+    check = mock_kubelet_check(monkeypatch, [instance], kube_version=None)
+
+    get = mock.MagicMock(
+        status_code=200, iter_lines=lambda **kwargs: mock_from_file('kubelet_metrics_1_14.txt').splitlines()
+    )
+    with mock.patch('requests.get', return_value=get):
+        check.check(instance)
+
+    assert check._http_handlers[instance['kubelet_metrics_endpoint']].options['verify'] is True
+    assert check._http_handlers[instance['cadvisor_metrics_endpoint']].options['verify'] is True
+
+    get = mock.MagicMock(
+        status_code=200, iter_lines=lambda **kwargs: mock_from_file('kubelet_metrics_1_14.txt').splitlines()
+    )
+    kubelet_conn_info = {'url': 'http://127.0.0.1:10255', 'ca_cert': False}
+    with mock.patch('requests.get', return_value=get), mock.patch(
+        'datadog_checks.kubelet.kubelet.get_connection_info', return_value=kubelet_conn_info
+    ):
+        check.check(instance)
+
+    assert check._http_handlers[instance['kubelet_metrics_endpoint']].options['verify'] is False
+    assert check._http_handlers[instance['cadvisor_metrics_endpoint']].options['verify'] is False
 
 
 def test_prometheus_cpu_summed(monkeypatch, aggregator, tagger):
@@ -337,20 +496,34 @@ def test_prometheus_net_summed(monkeypatch, aggregator, tagger):
 
 def test_prometheus_filtering(monkeypatch, aggregator):
     # Let's intercept the container_cpu_usage_seconds_total
-    # metric to make sure no sample with an empty pod_name
-    # goes through input filtering
-    # 12 out of the 45 samples should pass through the filter
+    # metric to make sure no sample with an empty pod (k8s >= 1.16)
+    # or pod_name (k8s < 1.16) label goes through input filtering
+    # 12 out of the 45 samples should pass through the filter for k8s < 1.16
+    # 27 out of 31 for k8s >= 1.16
     method_name = "datadog_checks.kubelet.prometheus.CadvisorPrometheusScraperMixin.container_cpu_usage_seconds_total"
     with mock.patch(method_name) as mock_method:
+        # k8s >= 1.16
+        check = mock_kubelet_check(monkeypatch, [{}], kube_version=KUBE_POST_1_16)
+        check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
+
+        mock_method.assert_called_once()
+        metric = mock_method.call_args[0][0]
+        assert len(metric.samples) == 27
+        for sample in metric.samples:
+            assert sample.name == "container_cpu_usage_seconds_total"
+            assert sample.labels["pod"] != ""
+
+    with mock.patch(method_name) as mock_method:
+        # k8s < 1.16
         check = mock_kubelet_check(monkeypatch, [{}])
         check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
 
         mock_method.assert_called_once()
         metric = mock_method.call_args[0][0]
         assert len(metric.samples) == 12
-        for name, labels, _ in metric.samples:
-            assert name == "container_cpu_usage_seconds_total"
-            assert labels["pod_name"] != ""
+        for sample in metric.samples:
+            assert sample.name == "container_cpu_usage_seconds_total"
+            assert sample.labels["pod_name"] != ""
 
 
 def test_kubelet_check_instance_config(monkeypatch):
@@ -376,7 +549,7 @@ def test_kubelet_check_instance_config(monkeypatch):
 
 
 def test_report_pods_running(monkeypatch, tagger):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
     pod_list = check.retrieve_pod_list()
@@ -415,7 +588,7 @@ def test_report_pods_running_none_ids(monkeypatch, tagger):
     podlist["items"][0]['metadata']['uid'] = None
     podlist["items"][1]['status']['containerStatuses'][0]['containerID'] = None
 
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=podlist))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
     pod_list = check.retrieve_pod_list()
@@ -434,7 +607,7 @@ def test_report_pods_running_none_ids(monkeypatch, tagger):
 
 
 def test_report_container_spec_metrics(monkeypatch, tagger):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
 
@@ -449,24 +622,24 @@ def test_report_container_spec_metrics(monkeypatch, tagger):
         mock.call(
             'kubernetes.cpu.requests',
             0.1,
-            instance_tags + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
         mock.call(
             'kubernetes.memory.requests',
             209715200.0,
-            instance_tags + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
         mock.call(
             'kubernetes.memory.limits',
             314572800.0,
-            instance_tags + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
-        mock.call('kubernetes.cpu.requests', 0.1, instance_tags),
-        mock.call('kubernetes.cpu.requests', 0.1, instance_tags),
-        mock.call('kubernetes.memory.requests', 134217728.0, instance_tags),
-        mock.call('kubernetes.cpu.limits', 0.25, instance_tags),
-        mock.call('kubernetes.memory.limits', 536870912.0, instance_tags),
-        mock.call('kubernetes.cpu.requests', 0.1, instance_tags + ["pod_name:demo-app-success-c485bc67b-klj45"]),
+        mock.call('kubernetes.cpu.requests', 0.1, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.memory.requests', 134217728.0, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.cpu.limits', 0.25, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.memory.limits', 536870912.0, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.cpu.requests', 0.1, ["pod_name:demo-app-success-c485bc67b-klj45"] + instance_tags),
     ]
     if any(map(lambda e: 'pod_name:pi-kff76' in e, [x[0][2] for x in check.gauge.call_args_list])):
         raise AssertionError("kubernetes.cpu.requests was submitted for a non-running pod")
@@ -474,7 +647,7 @@ def test_report_container_spec_metrics(monkeypatch, tagger):
 
 
 def test_report_container_state_metrics(monkeypatch, tagger):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     check.pod_list_url = "dummyurl"
     monkeypatch.setattr(check, 'perform_kubelet_query', mock.Mock(return_value=MockStreamResponse('pods_crashed.json')))
     monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
@@ -492,27 +665,29 @@ def test_report_container_state_metrics(monkeypatch, tagger):
         mock.call(
             'kubernetes.containers.last_state.terminated',
             1,
-            instance_tags
-            + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10']
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10']
+            + instance_tags
             + ['reason:OOMKilled'],
         ),
         mock.call(
             'kubernetes.containers.state.waiting',
             1,
-            instance_tags
-            + ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10']
+            ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10']
+            + instance_tags
             + ['reason:CrashLoopBackOff'],
         ),
         mock.call(
             'kubernetes.containers.restarts',
             1,
-            instance_tags + ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'],
+            ['kube_container_name:fluentd-gcp', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
         mock.call(
             'kubernetes.containers.restarts',
             0,
-            instance_tags + ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10'],
+            ['kube_container_name:prometheus-to-sd-exporter', 'kube_deployment:fluentd-gcp-v2.0.10'] + instance_tags,
         ),
+        mock.call('kubernetes.containers.restarts', 0, ['kube_container_name:datadog-agent'] + instance_tags),
+        mock.call('kubernetes.containers.restarts', 0, ['kube_container_name:datadog-agent'] + instance_tags),
     ]
     check.gauge.assert_has_calls(calls, any_order=True)
 
@@ -525,8 +700,47 @@ def test_report_container_state_metrics(monkeypatch, tagger):
         raise AssertionError('kubernetes.containers.state.* was submitted without a reason')
 
 
+def test_no_tags_no_metrics(monkeypatch, aggregator, tagger):
+    # Reset tagger without tags
+    tagger.reset()
+    tagger.set_tags({})
+
+    check = mock_kubelet_check(monkeypatch, [{}])
+    check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
+
+    # Test that we get only the node related metrics (no calls to the tagger for these ones)
+    aggregator.assert_metric('kubernetes.memory.capacity')
+    aggregator.assert_metric('kubernetes.cpu.capacity')
+    aggregator.assert_metric('kubernetes.runtime.cpu.usage')
+    aggregator.assert_metric('kubernetes.runtime.memory.rss')
+    aggregator.assert_metric('kubernetes.kubelet.cpu.usage')
+    aggregator.assert_metric('kubernetes.kubelet.memory.rss')
+    aggregator.assert_all_metrics_covered()
+
+
+def test_static_pods(monkeypatch, aggregator, tagger):
+    tagger.reset()
+    tagger.set_tags(
+        {
+            "kubernetes_pod_uid://260c2b1d43b094af6d6b4ccba082c2db": [
+                'pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'
+            ]
+        }
+    )
+
+    check = mock_kubelet_check(monkeypatch, [{}])
+    check.check({"cadvisor_metrics_endpoint": "http://dummy/metrics/cadvisor", "kubelet_metrics_endpoint": ""})
+
+    # Test that we get metrics for this static pod
+    aggregator.assert_metric(
+        'kubernetes.cpu.user.total',
+        109.76,
+        ['kube_container_name:kube-proxy', 'pod_name:kube-proxy-gke-haissam-default-pool-be5066f1-wnvn'],
+    )
+
+
 def test_pod_expiration(monkeypatch, aggregator, tagger):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     check.pod_list_url = "dummyurl"
 
     # Fixtures contains four pods:
@@ -566,7 +780,7 @@ class MockResponse(mock.Mock):
 
 
 def test_perform_kubelet_check(monkeypatch):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     check.kube_health_url = "http://127.0.0.1:10255/healthz"
     check.kubelet_credentials = KubeletCredentials({})
     monkeypatch.setattr(check, 'service_check', mock.Mock())
@@ -594,8 +808,10 @@ def test_perform_kubelet_check(monkeypatch):
 
 
 def test_report_node_metrics(monkeypatch):
-    check = KubeletCheck('kubelet', None, {}, [{}])
-    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value={'num_cores': 4, 'memory_capacity': 512}))
+    check = KubeletCheck('kubelet', {}, [{}])
+    mock_resp = mock.Mock(status_code=200, raise_for_status=mock.Mock())
+    mock_resp.json = mock.Mock(return_value={'num_cores': 4, 'memory_capacity': 512})
+    monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=mock_resp))
     monkeypatch.setattr(check, 'gauge', mock.Mock())
     check._report_node_metrics(['foo:bar'])
     calls = [
@@ -605,8 +821,20 @@ def test_report_node_metrics(monkeypatch):
     check.gauge.assert_has_calls(calls, any_order=False)
 
 
+def test_report_node_metrics_kubernetes1_18(monkeypatch, aggregator):
+    check = KubeletCheck('kubelet', {}, [{}])
+    check.kubelet_credentials = KubeletCredentials({'verify_tls': 'false'})
+    check.node_spec_url = "http://localhost:10255/spec"
+
+    get = mock.MagicMock(status_code=404, iter_lines=lambda **kwargs: "Error Code")
+    get.raise_for_status.side_effect = requests.HTTPError('error')
+    with mock.patch('requests.get', return_value=get):
+        check._report_node_metrics(['foo:bar'])
+        aggregator.assert_all_metrics_covered()
+
+
 def test_retrieve_pod_list_success(monkeypatch):
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     check.pod_list_url = "dummyurl"
     monkeypatch.setattr(check, 'perform_kubelet_query', mock.Mock(return_value=MockStreamResponse('pod_list_raw.dat')))
     monkeypatch.setattr(check, '_compute_pod_expiration_datetime', mock.Mock(return_value=None))
@@ -620,7 +848,7 @@ def test_retrieved_pod_list_failure(monkeypatch):
     def mock_perform_kubelet_query(s, stream=False):
         raise Exception("network error")
 
-    check = KubeletCheck('kubelet', None, {}, [{}])
+    check = KubeletCheck('kubelet', {}, [{}])
     check.pod_list_url = "dummyurl"
     monkeypatch.setattr(check, 'perform_kubelet_query', mock_perform_kubelet_query)
 
@@ -660,3 +888,226 @@ def test_add_labels_to_tags(monkeypatch, aggregator):
     for metric in METRICS_WITH_INTERFACE_TAG:
         tag = 'interface:%s' % METRICS_WITH_INTERFACE_TAG[metric]
         aggregator.assert_metric_has_tag(metric, tag)
+
+
+def test_report_container_requests_limits(monkeypatch, tagger):
+    check = KubeletCheck('kubelet', {}, [{}])
+    monkeypatch.setattr(
+        check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods_requests_limits.json')))
+    )
+    monkeypatch.setattr(check, 'gauge', mock.Mock())
+
+    attrs = {'is_excluded.return_value': False}
+    check.pod_list_utils = mock.Mock(**attrs)
+
+    pod_list = check.retrieve_pod_list()
+    tags = ['kube_container_name:cassandra']
+    check._report_container_spec_metrics(pod_list, tags)
+
+    calls = [
+        mock.call('kubernetes.cpu.requests', 0.5, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.memory.requests', 1073741824.0, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.ephemeral-storage.requests', 0.5, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.cpu.limits', 0.5, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.memory.limits', 1073741824.0, ['pod_name:cassandra-0'] + tags),
+        mock.call('kubernetes.ephemeral-storage.limits', 2147483648.0, ['pod_name:cassandra-0'] + tags),
+    ]
+    check.gauge.assert_has_calls(calls, any_order=True)
+
+
+def test_kubelet_stats_summary_not_available(monkeypatch, aggregator, tagger):
+    instance = {"tags": ["instance:tag"]}
+
+    check = mock_kubelet_check(monkeypatch, [instance], stats_summary_fail=True)
+
+    check.check(instance)
+    check._retrieve_stats.assert_called_once()
+
+
+def test_process_stats_summary_not_source_windows(monkeypatch, aggregator, tagger):
+    check = KubeletCheck('kubelet', {}, [{}])
+    pod_list_utils = PodListUtils(json.loads(mock_from_file('pods_windows.json')))
+    stats = json.loads(mock_from_file('stats_summary_windows.json'))
+
+    tagger.reset()
+    tagger.set_tags(WINDOWS_TAGS)
+
+    tags = ["instance:tag"]
+    check.process_stats_summary(pod_list_utils, stats, tags, False)
+
+    # As we did not activate `use_stats_summary_as_source`, we only have ephemeral storage metrics
+    # Kubelet stats not present as they are not returned on Windows
+    aggregator.assert_metric(
+        'kubernetes.ephemeral_storage.usage', 919980.0, tags + ['kube_namespace:default', 'pod_name:dd-datadog-lbvkl'],
+    )
+
+
+def test_process_stats_summary_not_source_linux(monkeypatch, aggregator, tagger):
+    check = KubeletCheck('kubelet', {}, [{}])
+    pod_list_utils = PodListUtils(json.loads(mock_from_file('pods.json')))
+    stats = json.loads(mock_from_file('stats_summary.json'))
+
+    tagger.reset()
+    tagger.set_tags(COMMON_TAGS)
+
+    tags = ["instance:tag"]
+    check.process_stats_summary(pod_list_utils, stats, tags, False)
+
+    # As we did not activate `use_stats_summary_as_source`,
+    # we only have ephemeral storage metrics and kubelet stats
+    aggregator.assert_metric(
+        'kubernetes.ephemeral_storage.usage', 69406720.0, ['instance:tag', 'pod_name:dd-agent-ntepl']
+    )
+    aggregator.assert_metric(
+        'kubernetes.ephemeral_storage.usage', 49152.0, ['instance:tag', 'pod_name:demo-app-success-c485bc67b-klj45']
+    )
+    aggregator.assert_metric('kubernetes.runtime.cpu.usage', 19442853.0, ['instance:tag'])
+    aggregator.assert_metric('kubernetes.kubelet.cpu.usage', 36755862.0, ['instance:tag'])
+    aggregator.assert_metric('kubernetes.runtime.memory.rss', 101273600.0, ['instance:tag'])
+    aggregator.assert_metric('kubernetes.kubelet.memory.rss', 88477696.0, ['instance:tag'])
+
+
+def test_process_stats_summary_as_source(monkeypatch, aggregator, tagger):
+    check = KubeletCheck('kubelet', {}, [{}])
+    pod_list_utils = PodListUtils(json.loads(mock_from_file('pods_windows.json')))
+    stats = json.loads(mock_from_file('stats_summary_windows.json'))
+
+    tagger.reset()
+    tagger.set_tags(WINDOWS_TAGS)
+
+    tags = ["instance:tag"]
+    check.process_stats_summary(pod_list_utils, stats, tags, True)
+
+    aggregator.assert_metric(
+        'kubernetes.ephemeral_storage.usage', 919980.0, tags + ['kube_namespace:default', 'pod_name:dd-datadog-lbvkl'],
+    )
+    aggregator.assert_metric(
+        'kubernetes.network.tx_bytes', 163670.0, tags + ['kube_namespace:default', 'pod_name:dd-datadog-lbvkl'],
+    )
+    aggregator.assert_metric(
+        'kubernetes.network.rx_bytes', 694636.0, tags + ['kube_namespace:default', 'pod_name:dd-datadog-lbvkl'],
+    )
+    aggregator.assert_metric(
+        'kubernetes.network.tx_bytes',
+        258157.0,
+        tags + ['kube_namespace:default', 'pod_name:windows-server-iis-6c68545d57-gwtn9'],
+    )
+    aggregator.assert_metric(
+        'kubernetes.network.rx_bytes',
+        509185.0,
+        tags + ['kube_namespace:default', 'pod_name:windows-server-iis-6c68545d57-gwtn9'],
+    )
+    aggregator.assert_metric(
+        'kubernetes.cpu.usage.total',
+        13796875000.0,
+        tags + ['kube_container_name:agent', 'kube_namespace:default', 'pod_name:dd-datadog-lbvkl'],
+    )
+    aggregator.assert_metric(
+        'kubernetes.cpu.usage.total',
+        9359375000.0,
+        tags + ['kube_container_name:process-agent', 'kube_namespace:default', 'pod_name:dd-datadog-lbvkl'],
+    )
+    aggregator.assert_metric(
+        'kubernetes.cpu.usage.total',
+        70140625000.0,
+        tags
+        + [
+            'kube_container_name:windows-server-iis',
+            'kube_namespace:default',
+            'pod_name:windows-server-iis-6c68545d57-gwtn9',
+        ],
+    )
+    aggregator.assert_metric(
+        'kubernetes.memory.working_set',
+        136089600.0,
+        tags + ['kube_container_name:agent', 'kube_namespace:default', 'pod_name:dd-datadog-lbvkl'],
+    )
+    aggregator.assert_metric(
+        'kubernetes.memory.working_set',
+        65474560.0,
+        tags + ['kube_container_name:process-agent', 'kube_namespace:default', 'pod_name:dd-datadog-lbvkl'],
+    )
+    aggregator.assert_metric(
+        'kubernetes.memory.working_set',
+        136814592.0,
+        tags
+        + [
+            'kube_container_name:windows-server-iis',
+            'kube_namespace:default',
+            'pod_name:windows-server-iis-6c68545d57-gwtn9',
+        ],
+    )
+    aggregator.assert_metric(
+        'kubernetes.filesystem.usage',
+        0.0,
+        tags + ['kube_container_name:agent', 'kube_namespace:default', 'pod_name:dd-datadog-lbvkl'],
+    )
+    aggregator.assert_metric(
+        'kubernetes.filesystem.usage',
+        0.0,
+        tags + ['kube_container_name:process-agent', 'kube_namespace:default', 'pod_name:dd-datadog-lbvkl'],
+    )
+    aggregator.assert_metric(
+        'kubernetes.filesystem.usage',
+        0.0,
+        tags
+        + [
+            'kube_container_name:windows-server-iis',
+            'kube_namespace:default',
+            'pod_name:windows-server-iis-6c68545d57-gwtn9',
+        ],
+    )
+    aggregator.assert_metric(
+        'kubernetes.filesystem.usage_pct',
+        0.0,
+        tags + ['kube_container_name:agent', 'kube_namespace:default', 'pod_name:dd-datadog-lbvkl'],
+    )
+    aggregator.assert_metric(
+        'kubernetes.filesystem.usage_pct',
+        0.0,
+        tags + ['kube_container_name:process-agent', 'kube_namespace:default', 'pod_name:dd-datadog-lbvkl'],
+    )
+    aggregator.assert_metric(
+        'kubernetes.filesystem.usage_pct',
+        0.0,
+        tags
+        + [
+            'kube_container_name:windows-server-iis',
+            'kube_namespace:default',
+            'pod_name:windows-server-iis-6c68545d57-gwtn9',
+        ],
+    )
+
+
+def test_silent_tls_warning(monkeypatch, aggregator):
+    check = KubeletCheck('kubelet', {}, [{}])
+    check.kube_health_url = "https://example.com/"
+    check.kubelet_credentials = KubeletCredentials({'verify_tls': 'false'})
+    with pytest.warns(None) as record:
+        check._perform_kubelet_check([])
+
+    assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+
+def test_create_pod_tags_by_pvc(monkeypatch, tagger):
+    check = KubeletCheck('kubelet', {}, [{}])
+    monkeypatch.setattr(check, 'retrieve_pod_list', mock.Mock(return_value=json.loads(mock_from_file('pods.json'))))
+    pod_list = check.retrieve_pod_list()
+
+    pod_tags_by_pvc = check._create_pod_tags_by_pvc(pod_list)
+
+    expected_result = {
+        'default/www-web-2': {
+            'kube_namespace:default',
+            'kube_service:nginx',
+            'kube_stateful_set:web',
+            'namespace:default',
+        },
+        'default/www2-web-3': {
+            'kube_namespace:default',
+            'kube_service:nginx',
+            'kube_stateful_set:web',
+            'namespace:default',
+        },
+    }
+    assert pod_tags_by_pvc == expected_result

@@ -1,5 +1,36 @@
 # CHANGELOG - kafka_consumer
 
+## 2.5.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 2.4.0 / 2020-02-22
+
+* [Added] Re-enable `kafka_client_api_version` option. See [#5726](https://github.com/DataDog/integrations-core/pull/5726).
+* [Added] Use top-level kafka imports to be more future-proof. See [#5702](https://github.com/DataDog/integrations-core/pull/5702).
+* [Added] Upgrade kafka-python to 2.0.0. See [#5696](https://github.com/DataDog/integrations-core/pull/5696).
+* [Fixed] Anticipate potential bug when instantiating the Kafka admin client. See [#5464](https://github.com/DataDog/integrations-core/pull/5464).
+
+## 2.3.0 / 2020-01-28
+
+* [Added] Update imports for newer versions of kafka-python. See [#5489](https://github.com/DataDog/integrations-core/pull/5489).
+
+## 2.2.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Fixed] Fix `kafka_client_api_version`. See [#5007](https://github.com/DataDog/integrations-core/pull/5007).
+
+## 2.1.1 / 2019-11-27
+
+* [Fixed] Handle missing partitions. See [#5035](https://github.com/DataDog/integrations-core/pull/5035).
+* [Fixed] Handle topics set to empty dict. See [#4974](https://github.com/DataDog/integrations-core/pull/4974).
+* [Fixed] Fix error on missing config. See [#4959](https://github.com/DataDog/integrations-core/pull/4959).
+
+## 2.1.0 / 2019-10-09
+
+* [Added] Add support for fetching consumer offsets stored in Kafka to `monitor_unlisted_consumer_groups`. See [#3957](https://github.com/DataDog/integrations-core/pull/3957). Thanks [jeffwidman](https://github.com/jeffwidman).
+
 ## 2.0.1 / 2019-08-27
 
 * [Fixed] Fix logger call during exceptions. See [#4440](https://github.com/DataDog/integrations-core/pull/4440).

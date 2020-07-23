@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 
-# (C) Datadog, Inc. 2018-2019
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from decimal import ROUND_HALF_DOWN
 
+import mock
 import pytest
 from six import PY3
 
-from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, pattern_filter, round_value
+from datadog_checks.base.utils.common import ensure_bytes, ensure_unicode, pattern_filter, round_value, to_native_string
 from datadog_checks.base.utils.containers import iter_unique
 from datadog_checks.base.utils.limiter import Limiter
+from datadog_checks.base.utils.secrets import SecretsSanitizer
 
 
 class Item:
@@ -66,8 +68,8 @@ class TestPatternFilter:
 
 class TestLimiter:
     def test_no_uid(self):
-        warnings = []
-        limiter = Limiter("my_check", "names", 10, warning_func=warnings.append)
+        warning = mock.MagicMock()
+        limiter = Limiter("my_check", "names", 10, warning_func=warning)
         for _ in range(0, 10):
             assert limiter.is_reached() is False
         assert limiter.get_status() == (10, 10, False)
@@ -75,15 +77,14 @@ class TestLimiter:
         # Reach limit
         assert limiter.is_reached() is True
         assert limiter.get_status() == (11, 10, True)
-        assert warnings == ["Check my_check exceeded limit of 10 names, ignoring next ones"]
 
         # Make sure warning is only sent once
         assert limiter.is_reached() is True
-        assert len(warnings) == 1
+        warning.assert_called_once_with("Check %s exceeded limit of %s %s, ignoring next ones", "my_check", 10, "names")
 
     def test_with_uid(self):
-        warnings = []
-        limiter = Limiter("my_check", "names", 10, warning_func=warnings.append)
+        warning = mock.MagicMock()
+        limiter = Limiter("my_check", "names", 10, warning_func=warning)
         for _ in range(0, 20):
             assert limiter.is_reached("dummy1") is False
         assert limiter.get_status() == (1, 10, False)
@@ -91,7 +92,7 @@ class TestLimiter:
         for _ in range(0, 20):
             assert limiter.is_reached("dummy2") is False
         assert limiter.get_status() == (2, 10, False)
-        assert len(warnings) == 0
+        warning.assert_not_called()
 
     def test_mixed(self):
         limiter = Limiter("my_check", "names", 10)
@@ -162,3 +163,39 @@ class TestBytesUnicode:
     def test_ensure_unicode(self):
         assert ensure_unicode('éâû') == u'éâû'
         assert ensure_unicode(u'éâû') == u'éâû'
+
+    def test_to_native_string(self):
+        # type: () -> None
+        text = u'éâû'
+        binary = text.encode('utf-8')
+        if PY3:
+            assert to_native_string(binary) == text
+        else:
+            assert to_native_string(binary) == binary
+
+
+class TestSecretsSanitizer:
+    def test_default(self):
+        # type: () -> None
+        secret = 's3kr3t'
+        sanitizer = SecretsSanitizer()
+        assert sanitizer.sanitize(secret) == secret
+
+    def test_sanitize(self):
+        # type: () -> None
+        secret = 's3kr3t'
+        sanitizer = SecretsSanitizer()
+        sanitizer.register(secret)
+        assert all(letter == '*' for letter in sanitizer.sanitize(secret))
+
+    def test_sanitize_multiple(self):
+        # type: () -> None
+        pwd1 = 's3kr3t'
+        pwd2 = 'admin123'
+        sanitizer = SecretsSanitizer()
+        sanitizer.register(pwd1)
+        sanitizer.register(pwd2)
+        message = 'Could not authenticate with password {}, did you try {}?'.format(pwd1, pwd2)
+        sanitized = sanitizer.sanitize(message)
+        assert pwd1 not in sanitized
+        assert pwd2 not in sanitized

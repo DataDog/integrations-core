@@ -1,5 +1,33 @@
 # CHANGELOG - nginx
 
+## 3.8.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Added] Add config specs. See [#6797](https://github.com/DataDog/integrations-core/pull/6797).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+
+## 3.7.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 3.6.1 / 2020-04-04
+
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
+## 3.6.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Fixed] Handle missing version. See [#5250](https://github.com/DataDog/integrations-core/pull/5250).
+
+## 3.5.0 / 2019-12-02
+
+* [Added] Submit version metadata. See [#4736](https://github.com/DataDog/integrations-core/pull/4736).
+
+## 3.4.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 3.3.0 / 2019-08-24
 
 * [Added] Add requests wrapper to Nginx. See [#4268](https://github.com/DataDog/integrations-core/pull/4268).

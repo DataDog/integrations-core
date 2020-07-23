@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
@@ -12,6 +12,8 @@ from datadog_checks.dev.tooling.git import (
     git_show_file,
     git_tag,
     git_tag_list,
+    ignored_by_git,
+    tracked_by_git,
 )
 
 
@@ -27,14 +29,57 @@ def test_get_current_branch():
 def test_files_changed():
     with mock.patch('datadog_checks.dev.tooling.git.chdir') as chdir:
         with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
-            run.return_value = mock.MagicMock()
-            expected = ['foo', 'bar', 'baz']
-            run.return_value.stdout = "\n".join(expected)
+            name_status_out = mock.MagicMock()
+            name_status_out.stdout = '''
+M	foo
+R100	bar	baz
+R100	foo2	foo3
+            '''
+            name_only_out = mock.MagicMock()
+            name_only_out.stdout = '''
+file1
+file2
+'''
+
+            run.side_effect = [name_status_out, name_only_out]
             set_root('/foo/')
             retval = files_changed()
+
+            chdir.assert_has_calls(
+                [
+                    # since chdir is a context manager, we need to also assert __enter__/__exit__
+                    mock.call('/foo/'),
+                    mock.call().__enter__(),
+                    mock.call().__exit__(None, None, None),
+                    mock.call('/foo/'),
+                    mock.call().__enter__(),
+                    mock.call().__exit__(None, None, None),
+                ]
+            )
+            calls = [
+                mock.call('git diff --name-status master...', capture='out'),
+                mock.call('git diff --name-only master', capture='out'),
+            ]
+            run.assert_has_calls(calls)
+            assert retval == ['bar', 'baz', 'file1', 'file2', 'foo', 'foo2', 'foo3']
+
+
+def test_files_changed_not_include_uncommitted():
+    with mock.patch('datadog_checks.dev.tooling.git.chdir') as chdir:
+        with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
+            name_status_out = mock.MagicMock()
+            name_status_out.stdout = '''
+M	foo
+R100	bar	baz
+R100	foo2	foo3
+            '''
+            run.side_effect = [name_status_out]
+            set_root('/foo/')
+            retval = files_changed(include_uncommitted=False)
+
             chdir.assert_called_once_with('/foo/')
-            run.assert_called_once_with('git diff --name-only master...', capture='out')
-            assert retval == expected
+            run.assert_called_once_with('git diff --name-status master...', capture='out')
+            assert retval == ['bar', 'baz', 'foo', 'foo2', 'foo3']
 
 
 def test_get_commits_since():
@@ -137,3 +182,21 @@ def test_git_tag_list():
             res = git_tag_list(r'^a')
             assert res == ['a']
             chdir.assert_called_once_with('/foo/')
+
+
+def test_ignored_by_git():
+    with mock.patch('datadog_checks.dev.tooling.git.chdir') as chdir:
+        with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
+            set_root('/foo/')
+            ignored_by_git('bar')
+            chdir.assert_called_once_with('/foo/')
+            run.assert_called_once_with('git check-ignore -q bar', capture=True)
+
+
+def test_tracked_by_git():
+    with mock.patch('datadog_checks.dev.tooling.git.chdir') as chdir:
+        with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
+            set_root('/foo/')
+            tracked_by_git('bar')
+            chdir.assert_called_once_with('/foo/')
+            run.assert_called_once_with('git ls-files --error-unmatch bar', capture=True)

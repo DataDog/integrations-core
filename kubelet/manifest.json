@@ -15,7 +15,9 @@
   "short_description": "Collects container stats from kubelet.",
   "support": "core",
   "supported_os": [
-    "linux"
+    "linux",
+    "mac_os",
+    "windows"
   ],
   "type": "check",
   "integration_id": "kubelet",

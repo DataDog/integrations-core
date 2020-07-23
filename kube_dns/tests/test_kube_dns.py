@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -32,7 +32,7 @@ def mock_get():
 
 @pytest.fixture
 def aggregator():
-    from datadog_checks.stubs import aggregator
+    from datadog_checks.base.stubs import aggregator
 
     aggregator.reset()
     return aggregator
@@ -63,7 +63,7 @@ class TestKubeDNS:
         Testing kube_dns check.
         """
 
-        check = KubeDNSCheck('kube_dns', {}, {}, [instance])
+        check = KubeDNSCheck('kube_dns', {}, [instance])
         check.check(instance)
 
         # check that we then get the count metrics also

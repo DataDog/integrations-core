@@ -47,11 +47,13 @@ instances:
     # kafka_client_api_version: "2.3.0"
 
     ## @param consumer_groups - object - optional
-    ## When using Kafka to store consumer offsets each level is mandatory.
-    ## When using zookeeper to store consumer offsets each level is optional.
-    ## Any empty values are fetched from Zookeeper. You can have empty partitions (example: <CONSUMER_NAME_2>),
-    ## topics (example: <CONSUMER_NAME_3>), and even consumer_groups. If you omit
-    ## consumer_groups, you must set 'monitor_unlisted_consumer_groups': true.
+    ## Each level is optional. Any empty values are fetched from the Kafka cluster.
+    ## You can have empty partitions (example: <CONSUMER_NAME_2>), topics (example: <CONSUMER_NAME_3>),
+    ## and even consumer_groups. If you omit consumer_groups, you must set `monitor_unlisted_consumer_groups` to true.
+    ##
+    ## Deprecation notice: Omitting various levels works for zookeeper-based consumers. However, all
+    ## functionality related to fetching offsets from Zookeeper is deprecated and will be removed from this
+    ## check in the future.
     #
     # consumer_groups:
     #   <CONSUMER_NAME_1>:
@@ -61,10 +63,17 @@ instances:
     #   <CONSUMER_NAME_3>: {}
 
     ## @param monitor_unlisted_consumer_groups - boolean - optional
-    ## Setting monitor_unlisted_consumer_groups to `true` tells the check to
-    ## discover and fetch all offsets for all consumer groups stored in zookeeper.
-    ## While this is convenient, it can also put a lot of load on zookeeper.
-    ## If this is not set to true, you must specify consumer_groups.
+    ## Setting monitor_unlisted_consumer_groups to `true` tells the check to discover all consumer groups
+    ## and fetch all their known offsets. If this is not set to true, you must specify consumer_groups.
+    ##
+    ## WARNING: This feature requires that your Kafka brokers be version >= 0.10.2. It is impossible to
+    ## support this feature on older brokers because they do not provide a way to determine the mapping
+    ## of consumer groups to topics. For details, see KIP-88. For older Kafka brokers, the consumer groups
+    ## must be specified. This requirement only applies to the brokers, not the consumers--they can be any version.
+    ##
+    ## Deprecation notice: This feature works for Zookeeper-based consumers. However, all
+    ## functionality related to fetching offsets from Zookeeper is deprecated and will be removed from this
+    ## check in the future.
     #
     # monitor_unlisted_consumer_groups: false
 
@@ -88,23 +97,24 @@ instances:
 
     ## @param security_protocol - string - optional
     ## Protocol used to communicate with brokers.
-    ## Valid values are: PLAINTEXT, SSL. Default: PLAINTEXT.
+    ## Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL.
+    ## Default: PLAINTEXT.
     #
     # security_protocol: PLAINTEXT
 
     ## @param sasl_mechanism - string - optional
     ## String picking sasl mechanism when security_protocol is SASL_PLAINTEXT or SASL_SSL.
-    ## Currently only PLAIN is supported.
+    ## Valid values are: PLAIN, GSSAPI, OAUTHBEARER, SCRAM-SHA-256, SCRAM-SHA-512.
     #
     # sasl_mechanism: PLAIN
 
     ## @param sasl_plain_username - string - optional
-    ## Username for sasl PLAIN authentication.
+    ## Username for sasl PLAIN or SCRAM authentication.
     #
     # sasl_plain_username: <USERNAME>
 
     ## @param sasl_plain_password - string - optional
-    ## Password for sasl PLAIN authentication.
+    ## Password for sasl PLAIN or SCRAM authentication.
     #
     # sasl_plain_password: <PASSWORD>
 
@@ -157,6 +167,13 @@ instances:
     ## will be checked against this CRL. The CRL can only be checked with Python 3.4+ or 2.7.9+.
     #
     # ssl_crlfile: <SSL_FILE_PATH>
+
+    ## @param broker_requests_batch_size - integer - optional - default: 30
+    ## The OffsetRequests sent to each broker are batched by the kafka_consumer check in groups of 30 by default.
+    ## If the batch size is too big, you may see KafkaTimeoutError exceptions in the logs while running the wakeup calls.
+    ## If the batch size is too small, the check will take longer to run.
+    #
+    # broker_requests_batch_size: 30
 
     ## DEPRECATED:
     ## The following settings are only used when fetching consumer offsets from Zookeeper.

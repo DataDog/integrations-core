@@ -4,235 +4,146 @@
 
 Simple Network Management Protocol (SNMP) is a standard for monitoring network-connected devices, such as routers, switches, servers, and firewalls. This check collects SNMP metrics from your network devices.
 
-SNMP uses OIDs, or Object Identifiers, to uniquely identify managed objects. OIDs follow a hierarchical tree pattern: under the root is ISO which is numbered 1, then next level is ORG and numbered 3 and so on, with each level being separated by a `..`
+SNMP uses sysObjectIDs (System Object Identifiers) to uniquely identify devices, and OIDs (Object Identifiers) to uniquely identify managed objects. OIDs follow a hierarchical tree pattern: under the root is ISO, which is numbered 1. The next level is ORG and numbered 3 and so on, with each level being separated by a `.`.
 
-A MIB, or Management Information Base, acts as a translator between OIDs and human readable names, and organizes a subset of the hierarchy. Because of the way the tree is structured, most SNMP values start with the same set of objects: 1.3.6.1.1 for MIB-2 which is a standard that holds system information like uptime, interfaces, network stack, and 1.3.6.1.4.1 which holds vendor specific information.
+A MIB (Management Information Base) acts as a translator between OIDs and human readable names, and organizes a subset of the hierarchy. Because of the way the tree is structured, most SNMP values start with the same set of objects:
+
+* `1.3.6.1.1`: (MIB-II) A standard that holds system information like uptime, interfaces, and network stack.
+* `1.3.6.1.4.1`: A standard that holds vendor specific information.
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][16] for guidance on applying these instructions.
-
 ### Installation
 
-The SNMP check is included in the [Datadog Agent][1] package. No additional installation is necessary to run the check.
+The SNMP check is included in the [Datadog Agent][1] package. No additional installation is necessary.
 
 ### Configuration
 
-The SNMP check doesn't collect anything by default. Specify metrics to collect by updating your `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample snmp.d/conf.yaml][3] for all available configuration options.
+Edit the configuration options in the `snmp.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][2]. See the [sample snmp.d/conf.yaml][3] for all available configuration options.
 
-#### SNMP v1-v2 configuration
+The Datadog SNMP check supports collecting metrics from individual devices, or auto-discovering devices (unique IP addresses) on entire subnets.
 
-```
+Which collection strategy to choose mainly depends on how many devices are present on your network, and how dynamic the network is (i.e. how frequently devices are added or removed):
+
+- For small and mostly static networks, see [Monitoring individual devices](#monitoring-individual-devices).
+- For larger and/or dynamic networks, see [Autodiscovery](#autodiscovery).
+
+Regardless of the collection strategy, you can leverage Datadog's [`sysObjectID` mapped device profiles](#sysobjectid-mapped-device-profiles) to automatically collect relevant metrics from your devices.
+
+#### Monitoring individual devices
+
+The easiest way to get started with the SNMP integration is to point it at the IP address of an SNMP device.
+
+For SNMPv2 devices:
+
+1. Configure an instance specifying i) the IP address of the device, ii) the `community` string of the device:
+
+    ```yaml
+    instances:
+      - ip_address: "<IP_ADDRESS>"
+        community: "<COMMUNITY>"
+    ```
+
+2. [Restart the Agent][31].
+
+For SNMPv3 devices:
+
+1. Configure an instance specifying i) the IP address of the device, ii) SNMPv3 credentials of the device, i.e. `user` and any of `auth_protocol`, `auth_key`, `priv_protocol`, and `priv_key` (as appropriate for your device):
+
+    ```yaml
+    instances:
+      - ip_address: "<IP_ADDRESS>"
+        user: "<USER>"
+        ## Configure these as appropriate
+        # authProtocol: SHA
+        # authKey: "<AUTH_KEY>"
+        # privProtocol: AES
+        # privKey: "<PRIV_KEY>"
+    ```
+
+2. [Restart the Agent][31].
+
+The Agent will then start collecting relevant metrics by matching your device against one of [Datadog's out-of-the-box device profiles](#metric-definition-by-profile).
+
+Once metrics are reporting, you can expand your setup in various ways:
+
+* Add more instances to collect metrics from more devices on your network.
+* Consider using [Autodiscovery](#autodiscovery) if you need to collect metrics from lots of devices across a dynamic network.
+
+#### Autodiscovery
+
+As an alternative to specifying individual devices, you can use autodiscovery to automatically discover all the devices on your network.
+
+Autodiscovery will poll each IP on the configured subnet, and check for a response from the SNMP device. The Datadog Agent will then lookup the `sysObjectID` of the discovered device, and map it to one of [Datadog's out-of-the-box device profiles](#metric-definition-by-profile), which consist of lists of predefined metrics to be collected for various types of devices.
+
+To use Autodiscovery with the SNMP check:
+
+1. Install or upgrade the Datadog Agent to v6.16+. For platform specific instructions, see the [Datadog Agent][4] documentation.
+
+2. Configure the SNMP check with [snmp.d/conf.yaml][3]. The following parameters are available. See the [sample config](#sample-config) for required parameters, default values, and examples.
+
+| Parameter                    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+|------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `profiles`                   | A list of profiles to use. A profile is a collection of OIDs the Datadog Agent collects metrics and associated tags from and a complete list of Datadog supported profiles can be found in [Github][5]. By default, all profiles shipped by the agent and in the configuration directory are loaded.  To customize the specific profiles for collection, they can be explicitly referenced by filename under `definition_file`, or written inline under `definition`. Any of the OOTB Datadog profiles can be listed by their name. Additional custom profiles can be referenced by the file path in the config, or simply dropped in the configuration directory. **Note**: The generic profile is `generic_router.yaml`, which should work for routers, switches, etc. |
+| `network_address`            | The subnet and mask written in IPv4 notation for the Agent to scan and discover devices on.                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `community_string`           | For use with SNMPv1 and SNMPv2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `snmp_version`               | The SNMP version you are using.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `port`                       | The port for the Datadog Agent to listen on.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `timeout`                    | The number of seconds before timing out.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `retries`                    | The number of retries before failure.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `discovery_interval`         | The interval between discovery scans.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `discovery_allowed_failures` | The number of times a discovered host can fail before being removed from the list of discovered devices.                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `bulk_threshold`             | The number of symbols in a table that triggers a BULK request. This parameter is only relevant for SNMPv > 1.                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `tags`                       | A list of global tags to add to all SNMP metrics. Read more about [tagging in Datadog][6].                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+
+##### Sample config
+
+```yaml
 init_config:
-  mibs_folder: <PATH_TO_ADDITIONAL_MIBS>
 
 instances:
-   - ip_address: localhost
-     port: 161
-     community_string: public
-  #  snmp_version: 2                # Only required for snmp v1, defaults to 2
-     timeout: 1
-     retries: 5
-  #  enforce_mib_constraints: true  # Use false to skip verification of returned
-  #                                 # values for MIB constraints (defaults to true).
+  -
+    ## @param network_address - string - optional
+    network_address: "<NETWORK_ADDRESS>"
 
-     metrics:
-       - MIB: UDP-MIB
-         symbol: udpInDatagrams
-       - MIB: TCP-MIB
-         symbol: tcpActiveOpens
-       - OID: 1.3.6.1.2.1.6.5
-         name: tcpPassiveOpens
-       - MIB: IF-MIB
-         table: ifTable
-         symbols:
-           - ifInOctets
-           - ifOutOctets
-         metric_tags:
-           - tag: interface
-             column: ifDescr
-       - MIB: IP-MIB
-          table: ipSystemStatsTable
-          symbols:
-            - ipSystemStatsInReceives
-          metric_tags:
-            - tag: ipversion
-              index: 1
+    ## @param port - integer - optional - default: 161
+    port: 161
+
+    ## @param community_string - string - optional
+    community_string: public
+
+    ## @param snmp_version - integer - optional - default: 2
+    snmp_version: 2
+
+    ## @param timeout - integer - optional - default: 1
+    timeout: 1
+
+    ## @param retries - integer - optional - default: 5
+    retries: 5
+
+    ## @param discovery_interval - integer - optional - default: 3600
+    discovery_interval: 3600
+
+    ## @param discovery_allowed_failures - integer - optional - default: 3
+    discovery_allowed_failures: 3
+
+    ## @param enforce_mib_constraints - boolean - optional - default: true
+    enforce_mib_constraints: true
+
+    ## @param bulk_threshold - integer - optional - default: 5
+    bulk_threshold: 5
+
+    ## @param tags - list of key:value element - optional
+    tags:
+       - "<KEY_1>:<VALUE_1>"
+       - "<KEY_2>:<VALUE_2>"
 ```
 
-#### SNMP v3 configuration
+##### sysObjectID mapped device profiles
 
-**Note**: See the [SNMP Library reference][4] for all configuration options.
+Profiles allow the SNMP check to reuse metric definitions across several device types or instances. Profiles define metrics the same way as instances, either inline in the configuration file or in separate files. Each instance can only match a single profile. For example, you can define a profile in the `init_config` section:
 
-```
-init_config:
-   - mibs_folder: <PATH_TO_ADDITIONAL_MIBS>
-
-instances:
-   - ip_address: 192.168.34.10
-     port: 161
-     user: <USERNAME>
-     authKey: <PASSWORD>
-     privKey: <PRIVACY_TYPE_KEY>
-     authProtocol: <AUTHENTICATION_PROTOCOL>
-     privProtocol: <PRIVACY_TYPE>
-     timeout: 1 # second, by default
-     retries: 5
-     metrics:
-       - MIB: UDP-MIB
-         symbol: udpInDatagrams
-       - MIB: TCP-MIB
-         symbol: tcpActiveOpens
-```
-
-* List each SNMP device as a distinct instance.
-* For each instance, list your choice of SNMP counters and gauges in the `metrics` option.
-
-There are a few ways to specify what metrics to collect:
-
-#### MIB and symbol
-
-```
-metrics:
-  - MIB: UDP-MIB
-    symbol: udpInDatagrams
-```
-
-#### OID and name
-
-```
-metrics:
-   - OID: 1.3.6.1.2.1.6.5
-     name: tcpActiveOpens # what to use in the metric name; can be anything
-```
-
-#### MIB and table
-
-The example below collects metrics on all rows in a table (`symbols`) and specifies how to tag each metric (`metric_tags`). The Agent gathers the rate of octets received on each interface and tag it with the interface name (found in the `ifDescr` column), resulting in a tag such as `interface:eth0`.
-
-```
-metrics:
-  - MIB: IF-MIB
-    table: ifTable
-    symbols:
-       - ifInOctets      # the row's value which becomes the metric value
-    metric_tags:
-       - tag: interface  # tag name
-         column: ifDescr # the column name to get the tag value from, OR
-         #index: 1       # the column index to get the tag value from
-```
-
-Tags can also be gathered based on the indices of your row. In this example, the first row index contains the IP version that the row describes (ipv4 vs. ipv6):
-
-```
-metrics:
-  - MIB: IP-MIB
-    table: ipSystemStatsTable
-    symbols:
-      - ipSystemStatsInReceives
-    metric_tags:
-      - tag: ipversion
-    index: 1
-```
-
-#### Use your own MIB
-
-To use your own MIB with the Datadog Agent, convert it to the [PySNMP][5] format. This can be done using the `build-pysnmp-mibs` script that ships with PySNMP < 4.3. `mibdump.py` replaces `build-pysnmp-mib` which was made obsolete in [PySNMP 4.3+][6].
-
-Since Datadog Agent version 5.14, the Agent's PySNMP dependency has been upgraded from version 4.25 to 4.3.5 (refer to the [changelog][7]). This means that the `build-pysnmp-mib` which shipped with the Agent from version 5.13.x and earlier has also been replaced with `mibdump.py`.
-
-In Linux, find the location of `mibdump.py`, run:
-
-```
-$ find /opt/datadog-agent/ -type f -name build-pysnmp-mib.py -o -name mibdump.py
-/opt/datadog-agent/embedded/bin/mibdump.py
-```
-
-Windows example:
-
-```
-C:\>dir mibdump.py /s
-
- Directory of C:\Program Files\Datadog\Datadog Agent\embedded\Scripts
-```
-
-In Linux, use this format for the script:
-
-```
-<PATH_TO_FILE>/mibdump.py \
-  --mib-source <PATH_TO_MIB_FILES> \
-  --mib-source http://mibs.snmplabs.com/asn1/@mib@ \
-  --destination-directory=<PATH_TO_CONVERTED_MIB_PYFILES> \
-  --destination-format=pysnmp <MIB_FILE_NAME>
-```
-
-Windows Powershell example:
-
-Agent versions <=6.11:
-```
-PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded\python.exe' '<PATH_TO_FILE>\mibdump.py' `
-  --mib-source <PATH_TO_MIB_SOURCE> `
-  --mib-source http://mibs.snmplabs.com/asn1/@mib@ `
-  --destination-directory=<PATH_TO_MIB_DESTINATION> `
-  --destination-format=pysnmp <MIB_FILE_NAME>
-```
-
-Agent versions >=6.12:
-```
-PS> & 'C:\Program Files\Datadog\Datadog Agent\embedded2\python.exe' '<PATH_TO_FILE>\mibdump.py' `
-  --mib-source <PATH_TO_MIB_SOURCE> `
-  --mib-source http://mibs.snmplabs.com/asn1/@mib@ `
-  --destination-directory=<PATH_TO_MIB_DESTINATION> `
-  --destination-format=pysnmp <MIB_FILE_NAME>
-```
-
-Example using the `CISCO-TCP-MIB.my`:
-
-```
- # /opt/datadog-agent/embedded/bin/mibdump.py --mib-source <PATH_TO_MIB_FILE>  --mib-source http://mibs.snmplabs.com/asn1/@mib@ --destination-directory=/opt/datadog-agent/pysnmp/custom_mibpy/ --destination-format=pysnmp CISCO-TCP-MIB
-
- Source MIB repositories: <PATH_TO_MIB_FILE>, http://mibs.snmplabs.com/asn1/@mib@
- Borrow missing/failed MIBs from: http://mibs.snmplabs.com/pysnmp/notexts/@mib@
- Existing/compiled MIB locations: pysnmp.smi.mibs, pysnmp_mibs
- Compiled MIBs destination directory: /opt/datadog-agent/pysnmp/custom_mibpy/
- MIBs excluded from code generation: INET-ADDRESS-MIB, PYSNMP-USM-MIB, RFC-1212, RFC-1215, RFC1065-SMI, RFC1155-SMI, RFC1158-MIB, RFC1213-MIB, SNMP-FRAMEWORK-MIB, SNMP-TARGET-MIB, SNMPv2-CONF, SNMPv2-SMI, SNMPv2-TC, SNMPv2-TM, TRANSPORT-ADDRESS-MIB
- MIBs to compile: CISCO-TCP
- Destination format: pysnmp
- Parser grammar cache directory: not used
- Also compile all relevant MIBs: yes
- Rebuild MIBs regardless of age: no
- Dry run mode: no Create/update MIBs: yes
- Byte-compile Python modules: yes (optimization level no)
- Ignore compilation errors: no
- Generate OID->MIB index: no
- Generate texts in MIBs: no
- Keep original texts layout: no
- Try various file names while searching for MIB module: yes
- Created/updated MIBs: CISCO-SMI, CISCO-TCP-MIB (CISCO-TCP)
- Pre-compiled MIBs borrowed:
- Up to date MIBs: INET-ADDRESS-MIB, SNMPv2-CONF, SNMPv2-SMI, SNMPv2-TC, TCP-MIB
- Missing source MIBs:
- Ignored MIBs:
- Failed MIBs:
-
- #ls /opt/datadog-agent/pysnmp/custom_mibpy/
-CISCO-SMI.py CISCO-SMI.pyc CISCO-TCP-MIB.py CISCO-TCP-MIB.pyc
-
-```
-
-The Agent looks for the converted MIB Python files by specifying the destination path with `mibs_folder` in the [SNMP YAML configuration][8].
-
-[Restart the Agent][9] to start sending SNMP metrics to Datadog.
-
-#### Profiles
-
-To group configuration, the check allows defining profiles to reusing metric
-definitions on several instances. Profiles defines metrics the same way as
-instances, either inline or in seperate files. Each instance can only match for
-a single profile. For example you can define a profile in the `init_config`
-section:
-
-```
+```yaml
 init_config:
   profiles:
     my-profile:
@@ -249,7 +160,7 @@ init_config:
 
 Then either reference it explicitly by name, or use sysObjectID detection:
 
-```
+```yaml
 instances:
    - ip_address: 192.168.34.10
      profile: my-profile
@@ -258,21 +169,43 @@ instances:
      # and use the profile if it matches.
 ```
 
-If necessary, additional metrics can also be defined in the instances, and will
-be collected alongside those in the profile.
+If necessary, additional metrics can be defined in the instances. These metrics are collected in addition to those in the profile.
 
+#### Metric definition by profile
 
-#### Metrics collection
-The SNMP check can potentially emit [custom metrics][10], which may impact your [billing][11].
+Profiles can be used interchangeably, such that devices that share MIB dependencies can reuse the same profiles. For example, the Cisco c3850 profile can be used across many Cisco switches.
+
+* [Generic router][7] _(Default profile in case no other profile matches)_
+* [Cisco ASA 5525][8]
+* [Cisco c3850][9]
+* [Cisco Nexus][10]
+* [Cisco Meraki][11]
+* [Cisco UC Virtual Machine][26]
+* [Cisco ICM][27]
+* [Cisco ISR 4431][28]
+* [Dell iDRAC][12]
+* [Dell Poweredge][13]
+* [F5 Big IP][14]
+* [Fortinet FortiGate][29]
+* [HP iLO4][15]
+* [HPE Proliant][16]
+* [NetApp][30]
+* [Palo Alto][17]
+* [Checkpoint Firewall][18]
+* [Isilon][24]
+* [APC UPS][25]
 
 ### Validation
 
-[Run the Agent's status subcommand][12] and look for `snmp` under the Checks section.
+[Run the Agent's status subcommand][19] and look for `snmp` under the Checks section.
 
 ## Data Collected
+
+The SNMP check submits specified metrics under the `snmp.*` namespace. **Metrics collected depends on the integration being configured with the corresponding profile**.
+
 ### Metrics
 
-The SNMP check submits specified metrics under the `snmp.*` namespace.
+See [metadata.csv][20] for a list of metrics provided by this check.
 
 ### Events
 
@@ -280,32 +213,48 @@ The SNMP check does not include any events.
 
 ### Service Checks
 
-**snmp.can_check**:  
+**snmp.can_check**:<br>
 Returns `CRITICAL` if the Agent cannot collect SNMP metrics, otherwise returns `OK`.
 
 ## Troubleshooting
-Need help? Contact [Datadog support][13].
+
+Need help? Contact [Datadog support][21].
 
 ## Further Reading
+
 Additional helpful documentation, links, and articles:
 
-* [For SNMP, does Datadog have a list of commonly used/compatible OIDs?][14]
-* [Monitoring Unifi devices using SNMP and Datadog][15]
-
+* [Does Datadog have a list of commonly used/compatible OIDs with SNMP?][22]
+* [Monitoring Unifi devices using SNMP and Datadog][23]
 
 [1]: https://app.datadoghq.com/account/settings#agent
-[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/?tab=agentv6#agent-configuration-directory
+[2]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
 [3]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example
-[4]: http://snmplabs.com/pysnmp/docs/api-reference.html#user-based
-[5]: http://snmplabs.com/pysnmp/index.html
-[6]: https://stackoverflow.com/questions/35204995/build-pysnmp-mib-convert-cisco-mib-files-to-a-python-fails-on-ubuntu-14-04
-[7]: https://github.com/DataDog/dd-agent/blob/master/CHANGELOG.md#dependency-changes-3
-[8]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/conf.yaml.example#L3
-[9]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#start-stop-and-restart-the-agent
-[10]: https://docs.datadoghq.com/developers/metrics/custom_metrics
-[11]: https://docs.datadoghq.com/account_management/billing/custom_metrics
-[12]: https://docs.datadoghq.com/agent/guide/agent-commands/?tab=agentv6#agent-status-and-information
-[13]: https://docs.datadoghq.com/help
-[14]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids
-[15]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
-[16]: https://docs.datadoghq.com/agent/autodiscovery/integrations
+[4]: https://docs.datadoghq.com/agent/
+[5]: https://github.com/DataDog/integrations-core/tree/master/snmp/datadog_checks/snmp/data/profiles
+[6]: https://docs.datadoghq.com/tagging/
+[7]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/generic-router.yaml
+[8]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco-asa-5525.yaml
+[9]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco-3850.yaml
+[10]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco-nexus.yaml
+[11]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/meraki-cloud-controller.yaml
+[12]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/idrac.yaml
+[13]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/dell-poweredge.yaml
+[14]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/f5-big-ip.yaml
+[15]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/hp-ilo4.yaml
+[16]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/hpe-proliant.yaml
+[17]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/palo-alto.yaml
+[18]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/checkpoint-firewall.yaml
+[19]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
+[20]: https://github.com/DataDog/integrations-core/blob/master/snmp/metadata.csv
+[21]: https://docs.datadoghq.com/help/
+[22]: https://docs.datadoghq.com/integrations/faq/for-snmp-does-datadog-have-a-list-of-commonly-used-compatible-oids/
+[23]: https://medium.com/server-guides/monitoring-unifi-devices-using-snmp-and-datadog-c8093a7d54ca
+[24]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/isilon.yaml
+[25]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/apc-ups.yaml
+[26]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco_uc_virtual_machine.yaml
+[27]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco_icm.yaml
+[28]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/cisco_isr_4431.yaml
+[29]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/fortinet-fortigate.yaml
+[30]: https://github.com/DataDog/integrations-core/blob/master/snmp/datadog_checks/snmp/data/profiles/netapp.yaml
+[31]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent

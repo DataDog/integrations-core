@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -55,6 +55,26 @@ def test_custom_query_validation(check):
             check = check(None)
             check.check(common.MALFORMED_CUSTOM_QUERY_INSTANCE)
             assert "missing required field" in str(e)
+
+
+def test_custom_query_unit(aggregator, instance, check):
+    instance['custom_queries'] = [{"stat": "xdProcessModule", "metric_prefix": "xdpm"}]
+    instance['custom_queries_units_gauge'] = ['unit.kbyte']
+    with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('server.xml')):
+        check = check(instance)
+        check.check(instance)
+
+    aggregator.assert_metric('ibm_was.xdpm.resident_memory', metric_type=aggregator.GAUGE)
+
+
+def test_custom_query_unit_casing(aggregator, instance, check):
+    instance['custom_queries'] = [{"stat": "xdProcessModule", "metric_prefix": "xdpm"}]
+    instance['custom_queries_units_gauge'] = ['unit.KByte']
+    with mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', return_value=mock_data('server.xml')):
+        check = check(instance)
+        check.check(instance)
+
+    aggregator.assert_metric('ibm_was.xdpm.total_memory', metric_type=aggregator.GAUGE)
 
 
 def test_config_validation(check):

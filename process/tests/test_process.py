@@ -1,6 +1,7 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 import os
 
 import psutil
@@ -28,6 +29,12 @@ except Exception:
     _PSUTIL_MEM_SHARED = False
 
 
+@pytest.fixture(autouse=True)
+def reset_process_list_cache():
+    # Force process list cache flush in the next test
+    ProcessCheck.process_list_cache.last_ts = -ProcessCheck.process_list_cache.cache_duration - 1
+
+
 class MockProcess(object):
     def __init__(self):
         self.pid = None
@@ -36,6 +43,18 @@ class MockProcess(object):
         return True
 
     def children(self, recursive=False):
+        return []
+
+
+class NamedMockProcess(object):
+    def __init__(self, name):
+        self.pid = None
+        self._name = name
+
+    def name(self):
+        return self._name
+
+    def cmdline(self):
         return []
 
 
@@ -78,9 +97,26 @@ def test_psutil_wrapper_accessors_fail(aggregator):
     assert 'vms' not in meminfo
 
 
+@patch('psutil.process_iter', side_effect=[[NamedMockProcess("Process 1")], [NamedMockProcess("Process 2")]])
+def test_process_list_cache(aggregator):
+    config = {
+        'instances': [{'name': 'python', 'search_string': ['python']}, {'name': 'python', 'search_string': ['python']}]
+    }
+    process1 = ProcessCheck(common.CHECK_NAME, {}, [config['instances'][0]])
+    process2 = ProcessCheck(common.CHECK_NAME, {}, [config['instances'][1]])
+
+    process1.check(config['instances'][0])
+    process2.check(config['instances'][1])
+
+    # Should always succeed
+    assert process1.process_list_cache.elements[0].name() == "Process 1"
+    # Fails with 'assert "Process 2" == "Process 1"' if process list cache is not shared
+    assert process2.process_list_cache.elements[0].name() == "Process 1"
+
+
 def test_ad_cache(aggregator):
     config = {'instances': [{'name': 'python', 'search_string': ['python'], 'ignore_denied_access': 'false'}]}
-    process = ProcessCheck(common.CHECK_NAME, {}, {}, config['instances'])
+    process = ProcessCheck(common.CHECK_NAME, {}, config['instances'])
 
     def deny_name(obj):
         raise psutil.AccessDenied()
@@ -131,7 +167,7 @@ def generate_expected_tags(instance):
 
 
 @patch('psutil.Process', return_value=MockProcess())
-def test_check(mock_process, aggregator):
+def test_check(mock_process, reset_process_list_cache, aggregator):
     (minflt, cminflt, majflt, cmajflt) = [1, 2, 3, 4]
 
     def mock_get_pagefault_stats(pid):
@@ -159,7 +195,7 @@ def test_check(mock_process, aggregator):
 
 
 @patch('psutil.Process', return_value=MockProcess())
-def test_check_collect_children(mock_process, aggregator):
+def test_check_collect_children(mock_process, reset_process_list_cache, aggregator):
     instance = {'name': 'foo', 'pid': 1, 'collect_children': True}
     process = ProcessCheck(common.CHECK_NAME, {}, {})
     process.check(instance)
@@ -167,7 +203,7 @@ def test_check_collect_children(mock_process, aggregator):
 
 
 @patch('psutil.Process', return_value=MockProcess())
-def test_check_filter_user(mock_process, aggregator):
+def test_check_filter_user(mock_process, reset_process_list_cache, aggregator):
     instance = {'name': 'foo', 'pid': 1, 'user': 'Bob'}
     process = ProcessCheck(common.CHECK_NAME, {}, {})
     with patch('datadog_checks.process.ProcessCheck._filter_by_user', return_value={1, 2}):
@@ -183,9 +219,18 @@ def test_check_missing_pid(aggregator):
     aggregator.assert_service_check('process.up', count=1, status=process.CRITICAL)
 
 
+def test_check_missing_process(aggregator, caplog):
+    caplog.set_level(logging.DEBUG)
+    instance = {'name': 'foo', 'search_string': ['fooprocess', '/usr/bin/foo'], 'exact_match': False}
+    process = ProcessCheck(common.CHECK_NAME, {}, {})
+    process.check(instance)
+    aggregator.assert_service_check('process.up', count=1, status=process.CRITICAL)
+    assert "Unable to find process named ['fooprocess', '/usr/bin/foo'] among processes" in caplog.text
+
+
 def test_check_real_process(aggregator):
     "Check that we detect python running (at least this process)"
-    from datadog_checks.utils.platform import Platform
+    from datadog_checks.base.utils.platform import Platform
 
     instance = {
         'name': 'py',
@@ -225,7 +270,7 @@ def test_check_real_process(aggregator):
 
 def test_check_real_process_regex(aggregator):
     "Check to specifically find this python pytest running process using regex."
-    from datadog_checks.utils.platform import Platform
+    from datadog_checks.base.utils.platform import Platform
 
     instance = {
         'name': 'py',
@@ -315,7 +360,7 @@ def test_relocated_procfs(aggregator):
             }
         ],
     }
-    process = ProcessCheck(common.CHECK_NAME, config['init_config'], {}, config['instances'])
+    process = ProcessCheck(common.CHECK_NAME, config['init_config'], config['instances'])
 
     try:
         with patch('socket.AF_PACKET', create=True), patch('sys.platform', 'linux'), patch(

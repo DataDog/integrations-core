@@ -2,7 +2,8 @@
   "categories": [
     "cloud",
     "web",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "Envoy",
@@ -11,7 +12,7 @@
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "envoy.",
-  "metric_to_check": "envoy.stats.overflow",
+  "metric_to_check": "envoy.server.uptime",
   "name": "envoy",
   "public_title": "Datadog-Envoy Integration",
   "short_description": "Envoy is an open source edge and service proxy",
@@ -24,8 +25,13 @@
   "type": "check",
   "integration_id": "envoy",
   "assets": {
+     "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Envoy - Overview": "assets/dashboards/envoy_overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

@@ -1,5 +1,34 @@
 # CHANGELOG - gitlab_runner
 
+## 2.9.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Added] Collect version metadata. See [#6894](https://github.com/DataDog/integrations-core/pull/6894).
+
+## 2.8.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 2.7.2 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
+## 2.7.1 / 2020-02-22
+
+* [Fixed] Fix metric validation. See [#5581](https://github.com/DataDog/integrations-core/pull/5581).
+
+## 2.7.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
+## 2.6.0 / 2019-11-06
+
+* [Added] update gitlab_runner metrics. See [#4799](https://github.com/DataDog/integrations-core/pull/4799).
+
+## 2.5.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 2.4.1 / 2019-08-30
 
 * [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).

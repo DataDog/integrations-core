@@ -1,0 +1,48 @@
+- name: is_jmx
+  required: true
+  description: Whether or not this file is a configuration for a JMX integration.
+  value:
+    example: true
+    type: boolean
+- name: collect_default_metrics
+  required: true
+  description: Whether or not the check should collect all default metrics.
+  value:
+    example: true
+    type: boolean
+- name: new_gc_metrics
+  description: |
+    Set to true to use better metric names for garbage collection metrics.
+    jvm.gc.cms.count   => jvm.gc.minor_collection_count
+                          jvm.gc.major_collection_count
+    jvm.gc.parnew.time => jvm.gc.minor_collection_time
+                          jvm.gc.major_collection_time
+    The default value is false to ensure backward compatibility.
+  value:
+    type: boolean
+    example: false
+    default: false
+- name: service_check_prefix
+  description: |
+    Custom service check prefix. e.g. `my_prefix` to get a service check called `my_prefix.can_connect`.
+    If not set, the default service check used is the integration name.
+  value:
+    type: string
+- name: conf
+  description: |
+    The list of metrics to be collected by the integration
+    Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
+    The default metrics to be collected are kept in metrics.yaml, but you can still
+    add your own metrics here.
+  value:
+    example:
+     - include:
+         bean: <BEAN_NAME>
+         attribute:
+           MyAttribute:
+             alias: my.metric.name
+             metric_type: gauge
+    type: array
+    items:
+      type: object
+- template: init_config/default

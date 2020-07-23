@@ -1,15 +1,13 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import csv
+import re
 from collections import defaultdict
-from io import open
 
 import click
-from six import PY2, iteritems
 
-from ...utils import get_metadata_file, get_metric_sources, load_manifest
-from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_warning
+from ...utils import complete_valid_checks, get_metadata_file, get_metric_sources, load_manifest, read_metadata_rows
+from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_success, echo_warning
 
 REQUIRED_HEADERS = {'metric_name', 'metric_type', 'orientation', 'integration'}
 
@@ -17,7 +15,7 @@ OPTIONAL_HEADERS = {'description', 'interval', 'unit_name', 'per_unit_name', 'sh
 
 ALL_HEADERS = REQUIRED_HEADERS | OPTIONAL_HEADERS
 
-VALID_METRIC_TYPE = {'count', 'counter', 'distribution', 'gauge', 'rate'}
+VALID_METRIC_TYPE = {'count', 'gauge', 'rate'}
 
 VALID_ORIENTATION = {'0', '1', '-1'}
 
@@ -166,10 +164,45 @@ PROVIDER_INTEGRATIONS = {'openmetrics', 'prometheus'}
 
 MAX_DESCRIPTION_LENGTH = 400
 
+METRIC_REPLACEMENT = re.compile(r"([^a-zA-Z0-9_.]+)|(^[^a-zA-Z]+)")
+METRIC_DOTUNDERSCORE_CLEANUP = re.compile(r"_*\._*")
+
+
+def normalize_metric_name(metric_name):
+    """Copy pasted from the backend normalization code.
+    Extracted from dogweb/datalayer/metrics/query/metadata.py:normalize_metric_name
+    Metrics in metadata.csv need to be formatted this way otherwise, syncing metadata will fail.
+    Function not exported as a util, as this is different than AgentCheck.normalize. This function just makes sure
+    that whatever is in the metadata.csv is understandable by the backend.
+    """
+    if not isinstance(metric_name, str):
+        metric_name = str(metric_name)
+    metric_name = METRIC_REPLACEMENT.sub("_", metric_name)
+    return METRIC_DOTUNDERSCORE_CLEANUP.sub(".", metric_name).strip("_")
+
+
+def check_duplicate_values(current_check, line, row, header_name, duplicates, fail=None):
+    """Check if the given column value has been seen before.
+    Output a warning and return True if so.
+    """
+    if row[header_name] and row[header_name] not in duplicates:
+        duplicates.add(row[header_name])
+    elif row[header_name] != '':
+        message = f"{current_check}:{line} `{row[header_name]}` is a duplicate {header_name}"
+        if fail:
+            echo_failure(message)
+            return True
+        else:
+            echo_warning(message)
+    return False
+
 
 @click.command(context_settings=CONTEXT_SETTINGS, short_help='Validate `metadata.csv` files')
-@click.argument('check', required=False)
-def metadata(check):
+@click.option(
+    '--check-duplicates', is_flag=True, help='Output warnings if there are duplicate short names and descriptions'
+)
+@click.argument('check', autocompletion=complete_valid_checks, required=False)
+def metadata(check, check_duplicates):
     """Validates metadata.csv files
 
     If `check` is specified, only the check will be validated,
@@ -179,7 +212,7 @@ def metadata(check):
 
     if check:
         if check not in metric_sources:
-            abort('Metadata file `{}` does not exist.'.format(get_metadata_file(check)))
+            abort(f'Metadata file `{get_metadata_file(check)}` does not exist.')
         metric_sources = [check]
     else:
         metric_sources = sorted(metric_sources)
@@ -203,121 +236,126 @@ def metadata(check):
         metric_prefix_count = defaultdict(int)
         empty_count = defaultdict(int)
         empty_warning_count = defaultdict(int)
-        duplicate_set = set()
+        duplicate_name_set = set()
+        duplicate_short_name_set = set()
+        duplicate_description_set = set()
+
         metric_prefix_error_shown = False
 
-        # Python 2 csv module does not support unicode
-        with open(metadata_file, 'rb' if PY2 else 'r', encoding=None if PY2 else 'utf-8') as f:
-            reader = csv.DictReader(f, delimiter=',')
+        for line, row in read_metadata_rows(metadata_file):
+            # determine if number of columns is complete by checking for None values (DictReader populates missing columns with None https://docs.python.org/3.8/library/csv.html#csv.DictReader) # noqa
+            if None in row.values():
+                errors = True
+                echo_failure(f"{current_check}:{line} {row['metric_name']} Has the wrong amount of columns")
+                continue
 
-            # Read header
-            if PY2:
-                reader._fieldnames = [key.decode('utf-8') for key in reader.fieldnames]
+            # all headers exist, no invalid headers
+            all_keys = set(row)
+            if all_keys != ALL_HEADERS:
+                invalid_headers = all_keys.difference(ALL_HEADERS)
+                if invalid_headers:
+                    errors = True
+                    echo_failure(f'{current_check}:{line} Invalid column {invalid_headers}')
+
+                missing_headers = ALL_HEADERS.difference(all_keys)
+                if missing_headers:
+                    errors = True
+                    echo_failure(f'{current_check}:{line} Missing columns {missing_headers}')
+
+                continue
+
+            errors = errors or check_duplicate_values(
+                current_check, line, row, 'metric_name', duplicate_name_set, fail=True
+            )
+
+            if check_duplicates:
+                check_duplicate_values(current_check, line, row, 'short_name', duplicate_short_name_set)
+                check_duplicate_values(current_check, line, row, 'description', duplicate_description_set)
+
+            normalized_metric_name = normalize_metric_name(row['metric_name'])
+            if row['metric_name'] != normalized_metric_name:
+                errors = True
+                echo_failure(
+                    f"{current_check}:{line} Metric name '{row['metric_name']}' is not valid, "
+                    f"it should be normalized as {normalized_metric_name}"
+                )
+
+            # metric_name header
+            if metric_prefix:
+                if not row['metric_name'].startswith(metric_prefix):
+                    prefix = row['metric_name'].split('.')[0]
+                    metric_prefix_count[prefix] += 1
             else:
-                reader._fieldnames = reader.fieldnames
+                errors = True
+                if not metric_prefix_error_shown and current_check not in PROVIDER_INTEGRATIONS:
+                    metric_prefix_error_shown = True
+                    echo_failure(f'{current_check}:{line} metric_prefix does not exist in manifest')
 
-            for line, row in enumerate(reader, 2):
-                # Number of rows is correct. Since metric is first in the list, should be safe to access
-                if len(row) != len(ALL_HEADERS):
-                    errors = True
-                    echo_failure(
-                        '{}:{} {} Has the wrong amount of columns'.format(current_check, line, row['metric_name'])
-                    )
-                    continue
+            # metric_type header
+            if row['metric_type'] and row['metric_type'] not in VALID_METRIC_TYPE:
+                errors = True
+                echo_failure(f"{current_check}:{line} `{row['metric_type']}` is an invalid metric_type.")
 
-                if PY2:
-                    for key, value in iteritems(row):
-                        if value is not None:
-                            row[key] = value.decode('utf-8')
+            # unit_name header
+            if row['unit_name'] and row['unit_name'] not in VALID_UNIT_NAMES:
+                errors = True
+                echo_failure(f"{current_check}:{line} `{row['unit_name']}` is an invalid unit_name.")
 
-                # all headers exist, no invalid headers
-                all_keys = set(row)
-                if all_keys != ALL_HEADERS:
-                    invalid_headers = all_keys.difference(ALL_HEADERS)
-                    if invalid_headers:
-                        errors = True
-                        echo_failure('{}:{} Invalid column {}'.format(current_check, line, invalid_headers))
+            # per_unit_name header
+            if row['per_unit_name'] and row['per_unit_name'] not in VALID_UNIT_NAMES:
+                errors = True
+                echo_failure(f"{current_check}:{line} `{row['per_unit_name']}` is an invalid per_unit_name.")
 
-                    missing_headers = ALL_HEADERS.difference(all_keys)
-                    if missing_headers:
-                        errors = True
-                        echo_failure('{}:{} Missing columns {}'.format(current_check, line, missing_headers))
+            # orientation header
+            if row['orientation'] and row['orientation'] not in VALID_ORIENTATION:
+                errors = True
+                echo_failure(f"{current_check}:{line} `{row['orientation']}` is an invalid orientation.")
 
-                    continue
+            # empty required fields
+            for header in REQUIRED_HEADERS:
+                if not row[header]:
+                    empty_count[header] += 1
 
-                # duplicate metric_name
-                if row['metric_name'] and row['metric_name'] not in duplicate_set:
-                    duplicate_set.add(row['metric_name'])
-                else:
-                    errors = True
-                    echo_failure(
-                        '{}:{} `{}` is a duplicate metric_name'.format(current_check, line, row['metric_name'])
-                    )
+            # empty description field, description is recommended
+            if not row['description']:
+                empty_warning_count['description'] += 1
 
-                # metric_name header
-                if metric_prefix:
-                    if not row['metric_name'].startswith(metric_prefix):
-                        prefix = row['metric_name'].split('.')[0]
-                        metric_prefix_count[prefix] += 1
-                else:
-                    errors = True
-                    if not metric_prefix_error_shown and current_check not in PROVIDER_INTEGRATIONS:
-                        metric_prefix_error_shown = True
-                        echo_failure('{}:{} metric_prefix does not exist in manifest'.format(current_check, line))
+            elif "|" in row['description']:
+                errors = True
+                echo_failure(f"{current_check}:{line} `{row['metric_name']}` contains a `|`.")
 
-                # metric_type header
-                if row['metric_type'] and row['metric_type'] not in VALID_METRIC_TYPE:
-                    errors = True
-                    echo_failure(
-                        '{}:{} `{}` is an invalid metric_type.'.format(current_check, line, row['metric_type'])
-                    )
+            # check if there is unicode
+            elif not (row['description'].isascii() and row['metric_name'].isascii() and row['metric_type'].isascii()):
+                errors = True
+                echo_failure(f"{current_check}:{line} `{row['metric_name']}` contains unicode characters.")
 
-                # unit_name header
-                if row['unit_name'] and row['unit_name'] not in VALID_UNIT_NAMES:
-                    errors = True
-                    echo_failure('{}:{} `{}` is an invalid unit_name.'.format(current_check, line, row['unit_name']))
+            # exceeds max allowed length of description
+            elif len(row['description']) > MAX_DESCRIPTION_LENGTH:
+                errors = True
+                echo_failure(
+                    f"{current_check}:{line} `{row['metric_name']}` exceeds the max length: "
+                    f"{MAX_DESCRIPTION_LENGTH} for descriptions."
+                )
+            if row['interval'] and not row['interval'].isdigit():
+                errors = True
+                echo_failure(f"{current_check}:{line} interval should be an int, found '{row['interval']}'.")
 
-                # orientation header
-                if row['orientation'] and row['orientation'] not in VALID_ORIENTATION:
-                    errors = True
-                    echo_failure(
-                        '{}:{} `{}` is an invalid orientation.'.format(current_check, line, row['orientation'])
-                    )
-
-                # empty required fields
-                for header in REQUIRED_HEADERS:
-                    if not row[header]:
-                        empty_count[header] += 1
-
-                # empty description field, description is recommended
-                if not row['description']:
-                    empty_warning_count['description'] += 1
-                # exceeds max allowed length of description
-                elif len(row['description']) > MAX_DESCRIPTION_LENGTH:
-                    errors = True
-                    echo_failure(
-                        '{}:{} `{}` exceeds the max length: {} for descriptions.'.format(
-                            current_check, line, row['metric_name'], MAX_DESCRIPTION_LENGTH
-                        )
-                    )
-                if row['interval'] and not row['interval'].isdigit():
-                    errors = True
-                    echo_failure('{}: interval should be an int, found "{}"'.format(current_check, row['interval']))
-
-        for header, count in iteritems(empty_count):
+        for header, count in empty_count.items():
             errors = True
-            echo_failure('{}: {} is empty in {} rows.'.format(current_check, header, count))
+            echo_failure(f'{current_check}: {header} is empty in {count} rows.')
 
-        for header, count in iteritems(empty_warning_count):
-            echo_warning('{}: {} is empty in {} rows.'.format(current_check, header, count))
+        for header, count in empty_warning_count.items():
+            echo_warning(f'{current_check}: {header} is empty in {count} rows.')
 
-        for prefix, count in iteritems(metric_prefix_count):
+        for prefix, count in metric_prefix_count.items():
             # Don't spam this warning when we're validating everything
             if check:
                 echo_warning(
-                    '{}: `{}` appears {} time(s) and does not match metric_prefix '
-                    'defined in the manifest.'.format(current_check, prefix, count)
+                    f"{current_check}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
+                    "defined in the manifest."
                 )
 
     if errors:
         abort()
+
+    echo_success('Validated!')

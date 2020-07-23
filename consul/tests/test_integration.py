@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
@@ -17,6 +17,7 @@ METRICS = [
     'consul.catalog.services_passing',
     'consul.catalog.services_warning',
     'consul.catalog.services_critical',
+    'consul.catalog.services_count',
     'consul.catalog.total_nodes',
     # Enable again when it's figured out why only followers submit these
     # 'consul.net.node.latency.p95',
@@ -70,9 +71,28 @@ def test_acl_forbidden(instance_bad_token, dd_environment):
 
     got_error_403 = False
     try:
-        consul_check.check(instance_bad_token)
+        consul_check.check(None)
     except HTTPError as e:
         if e.response.status_code == 403:
             got_error_403 = True
 
     assert got_error_403
+
+
+@pytest.mark.integration
+def test_version_metadata(aggregator, instance, dd_environment, datadog_agent):
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [instance])
+    consul_check.check_id = 'test:123'
+    consul_check.check(instance)
+
+    raw_version = common.CONSUL_VERSION.lstrip('v')  # some versions contain `v` prefix
+    major, minor, patch = raw_version.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': raw_version,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)

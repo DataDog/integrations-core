@@ -1,7 +1,9 @@
 {
   "categories": [
     "processing",
-    "os & system"
+    "os & system",
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "HDFS Datanode",
@@ -22,6 +24,9 @@
   "type": "check",
   "integration_id": "hdfs-datanode",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json"

@@ -1,0 +1,15 @@
+{
+    "clusterInfo": {
+        "id": 1581598068065,
+		"startedOn": 1581598068065,
+		"state": "STARTED",
+		"haState": "ACTIVE",
+		"rmStateStoreName": "org.apache.hadoop.yarn.server.resourcemanager.recovery.NullRMStateStore",
+		"resourceManagerVersion": "2.7.1",
+		"resourceManagerBuildVersion": "2.7.1 from 15ecc87ccf4a0228f35af08fc56de536e6ce657a by jenkins source checksum 1042198b3cfb903a5d8de2fdcd09218",
+		"resourceManagerVersionBuiltOn": "2015-06-29T06:12Z",
+		"hadoopVersion": "2.7.1",
+		"hadoopBuildVersion": "2.7.1 from 15ecc87ccf4a0228f35af08fc56de536e6ce657a by jenkins source checksum fc0a1a23fc1868e4d5ee7fa2b28a58a",
+		"hadoopVersionBuiltOn": "2015-06-29T06:04Z"
+	}
+}

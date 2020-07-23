@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -29,7 +29,7 @@ class Fabric:
     def collect(self):
         fabric_pods = self.api.get_fabric_pods()
         fabric_nodes = self.api.get_fabric_nodes()
-        self.log.info("{} pods and {} nodes computed".format(len(fabric_nodes), len(fabric_pods)))
+        self.log.info("%s pods and %s nodes computed", len(fabric_nodes), len(fabric_pods))
         pods = self.submit_pod_health(fabric_pods)
         self.submit_nodes_health(fabric_nodes, pods)
 
@@ -42,14 +42,14 @@ class Fabric:
             if not pod_id:
                 continue
             pods_dict[pod_id] = pod_attrs
-            self.log.info("processing pod {}".format(pod_id))
+            self.log.info("processing pod %s", pod_id)
             tags = self.tagger.get_fabric_tags(p, 'fabricPod')
             try:
                 stats = self.api.get_pod_stats(pod_id)
                 self.submit_fabric_metric(stats, tags, 'fabricPod')
             except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 pass
-            self.log.info("finished processing pod {}".format(pod_id))
+            self.log.info("finished processing pod %s", pod_id)
 
         return pods_dict
 
@@ -68,7 +68,7 @@ class Fabric:
             pod_id = helpers.get_pod_from_dn(node_attrs['dn'])
             if not node_id or not pod_id:
                 continue
-            self.log.info("processing node {} on pod {}".format(node_id, pod_id))
+            self.log.info("processing node %s on pod %s", node_id, pod_id)
             try:
                 self.submit_process_metric(n, tags + self.check_tags + user_tags, hostname=hostname)
             except (exceptions.APIConnectionException, exceptions.APIParsingException):
@@ -80,10 +80,10 @@ class Fabric:
                     self.process_eth(node_attrs)
                 except (exceptions.APIConnectionException, exceptions.APIParsingException):
                     pass
-            self.log.info("finished processing node {}".format(node_id))
+            self.log.info("finished processing node %s", node_id)
 
     def process_eth(self, node):
-        self.log.info("processing ethernet ports for {}".format(node.get('id')))
+        self.log.info("processing ethernet ports for %s", node.get('id'))
         hostname = helpers.get_fabric_hostname(node)
         pod_id = helpers.get_pod_from_dn(node['dn'])
         try:
@@ -99,7 +99,7 @@ class Fabric:
                 self.submit_fabric_metric(stats, tags, 'l1PhysIf', hostname=hostname)
             except (exceptions.APIConnectionException, exceptions.APIParsingException):
                 pass
-        self.log.info("finished processing ethernet ports for {}".format(node['id']))
+        self.log.info("finished processing ethernet ports for %s", node['id'])
 
     def submit_fabric_metric(self, stats, tags, obj_type, hostname=None):
         for s in stats:

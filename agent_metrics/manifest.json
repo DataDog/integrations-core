@@ -5,7 +5,7 @@
   "creates_events": false,
   "display_name": "Agent Metrics",
   "guid": "032333e3-5272-4044-90d5-a05997667513",
-  "is_public": false,
+  "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "metric_prefix": "datadog.agent.",

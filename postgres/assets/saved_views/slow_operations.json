@@ -1,0 +1,17 @@
+{ 
+  "name": "Postgres slow operations",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:postgresql @db.operation:* @duration:>1s",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": ["source", "host", "service", "status", "@db.instance", "@db.operation", "@db.user", "@postgres.session_id", "@duration"],
+  "options": {
+    "columns": ["status", "host", "@db.operation", "@db.instance"],
+    "show_date_column": true,
+    "show_message_column": true,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}

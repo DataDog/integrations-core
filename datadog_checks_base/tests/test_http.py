@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
@@ -10,6 +10,8 @@ import pytest
 import requests
 import requests_kerberos
 import requests_ntlm
+from aws_requests_auth import boto_utils as requests_aws
+from requests import auth as requests_auth
 from requests.exceptions import ConnectTimeout, ProxyError
 from six import iteritems
 from urllib3.exceptions import InsecureRequestWarning
@@ -21,12 +23,21 @@ from datadog_checks.dev.utils import running_on_windows_ci
 
 pytestmark = pytest.mark.http
 
+DEFAULT_OPTIONS = {
+    'auth': None,
+    'cert': None,
+    'headers': OrderedDict([('User-Agent', 'Datadog Agent/0.0.0')]),
+    'proxies': None,
+    'timeout': (10.0, 10.0),
+    'verify': True,
+}
+
 
 class TestAttribute:
     def test_default(self):
         check = AgentCheck('test', {}, [{}])
 
-        assert check._http is None
+        assert not hasattr(check, '_http')
 
     def test_activate(self):
         check = AgentCheck('test', {}, [{}])
@@ -108,6 +119,30 @@ class TestHeaders:
 
         assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
 
+    def test_extra_headers_on_http_method_call(self):
+        instance = {'extra_headers': {'answer': 42}}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        extra_headers = {"foo": "bar"}
+        with mock.patch("requests.get") as get:
+            http.get("http://example.com/hello", extra_headers=extra_headers)
+
+            expected_options = {'foo': 'bar', 'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
+            get.assert_called_with(
+                "http://example.com/hello",
+                headers=expected_options,
+                auth=None,
+                cert=None,
+                proxies=None,
+                timeout=(10.0, 10.0),
+                verify=True,
+            )
+
+        # make sure the original headers are not modified
+        assert http.options['headers'] == {'User-Agent': 'Datadog Agent/0.0.0', 'answer': '42'}
+        assert extra_headers == {"foo": "bar"}
+
 
 class TestVerify:
     def test_config_default(self):
@@ -177,6 +212,24 @@ class TestAuth:
 
         assert http.options['auth'] == ('user', 'pass')
 
+    def test_config_basic_authtype(self):
+        instance = {'username': 'user', 'password': 'pass', 'auth_type': 'basic'}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.options['auth'] == ('user', 'pass')
+
+    def test_config_digest_authtype(self):
+        instance = {'username': 'user', 'password': 'pass', 'auth_type': 'digest'}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        assert isinstance(http.options['auth'], requests_auth.HTTPDigestAuth)
+
+        with mock.patch('datadog_checks.base.utils.http.requests_auth.HTTPDigestAuth') as m:
+            RequestsWrapper(instance, init_config)
+
+            m.assert_called_once_with('user', 'pass')
+
     def test_config_basic_only_username(self):
         instance = {'username': 'user'}
         init_config = {}
@@ -191,7 +244,7 @@ class TestAuth:
 
         assert http.options['auth'] is None
 
-    def test_config_kerberos(self):
+    def test_config_kerberos_legacy(self):
         instance = {'kerberos_auth': 'required'}
         init_config = {}
 
@@ -210,8 +263,27 @@ class TestAuth:
                 principal=None,
             )
 
+    def test_config_kerberos(self):
+        instance = {'auth_type': 'kerberos', 'kerberos_auth': 'required'}
+        init_config = {}
+
+        # Trigger lazy import
+        http = RequestsWrapper(instance, init_config)
+        assert isinstance(http.options['auth'], requests_kerberos.HTTPKerberosAuth)
+
         with mock.patch('datadog_checks.base.utils.http.requests_kerberos.HTTPKerberosAuth') as m:
-            RequestsWrapper({'kerberos_auth': 'optional'}, init_config)
+            RequestsWrapper(instance, init_config)
+
+            m.assert_called_once_with(
+                mutual_authentication=requests_kerberos.REQUIRED,
+                delegate=False,
+                force_preemptive=False,
+                hostname_override=None,
+                principal=None,
+            )
+
+        with mock.patch('datadog_checks.base.utils.http.requests_kerberos.HTTPKerberosAuth') as m:
+            RequestsWrapper({'auth_type': 'kerberos', 'kerberos_auth': 'optional'}, init_config)
 
             m.assert_called_once_with(
                 mutual_authentication=requests_kerberos.OPTIONAL,
@@ -222,7 +294,7 @@ class TestAuth:
             )
 
         with mock.patch('datadog_checks.base.utils.http.requests_kerberos.HTTPKerberosAuth') as m:
-            RequestsWrapper({'kerberos_auth': 'disabled'}, init_config)
+            RequestsWrapper({'auth_type': 'kerberos', 'kerberos_auth': 'disabled'}, init_config)
 
             m.assert_called_once_with(
                 mutual_authentication=requests_kerberos.DISABLED,
@@ -233,7 +305,7 @@ class TestAuth:
             )
 
     def test_config_kerberos_shortcut(self):
-        instance = {'kerberos_auth': True}
+        instance = {'auth_type': 'kerberos', 'kerberos_auth': True}
         init_config = {}
 
         # Trigger lazy import
@@ -252,14 +324,14 @@ class TestAuth:
             )
 
     def test_config_kerberos_unknown(self):
-        instance = {'kerberos_auth': 'unknown'}
+        instance = {'auth_type': 'kerberos', 'kerberos_auth': 'unknown'}
         init_config = {}
 
         with pytest.raises(ConfigurationError):
             RequestsWrapper(instance, init_config)
 
     def test_config_kerberos_keytab_file(self):
-        instance = {'kerberos_keytab': '/test/file'}
+        instance = {'auth_type': 'kerberos', 'kerberos_keytab': '/test/file'}
         init_config = {}
 
         http = RequestsWrapper(instance, init_config)
@@ -271,8 +343,33 @@ class TestAuth:
 
         assert os.environ.get('KRB5_CLIENT_KTNAME') is None
 
+    def test_config_kerberos_cache(self):
+        instance = {'auth_type': 'kerberos', 'kerberos_cache': '/test/file'}
+        init_config = {}
+
+        http = RequestsWrapper(instance, init_config)
+
+        assert os.environ.get('KRB5CCNAME') is None
+
+        with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
+            assert http.get('https://www.google.com') == '/test/file'
+
+        assert os.environ.get('KRB5CCNAME') is None
+
+    def test_config_kerberos_cache_restores_rollback(self):
+        instance = {'auth_type': 'kerberos', 'kerberos_cache': '/test/file'}
+        init_config = {}
+
+        http = RequestsWrapper(instance, init_config)
+
+        with EnvVars({'KRB5CCNAME': 'old'}):
+            with mock.patch('requests.get', side_effect=lambda *args, **kwargs: os.environ.get('KRB5CCNAME')):
+                assert http.get('https://www.google.com') == '/test/file'
+
+            assert os.environ.get('KRB5CCNAME') == 'old'
+
     def test_config_kerberos_keytab_file_rollback(self):
-        instance = {'kerberos_keytab': '/test/file'}
+        instance = {'auth_type': 'kerberos', 'kerberos_keytab': '/test/file'}
         init_config = {}
 
         http = RequestsWrapper(instance, init_config)
@@ -286,7 +383,7 @@ class TestAuth:
             assert os.environ.get('KRB5_CLIENT_KTNAME') == 'old'
 
     def test_config_kerberos_legacy_remap(self):
-        instance = {'kerberos': True}
+        instance = {'auth_type': 'kerberos', 'kerberos': True}
         init_config = {}
 
         # Trigger lazy import
@@ -304,7 +401,79 @@ class TestAuth:
                 principal=None,
             )
 
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_kerberos_auth_noconf(self, kerberos):
+        instance = {}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        response = http.get(kerberos["url"])
+
+        assert response.status_code == 401
+
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_kerberos_auth_principal_inexistent(self, kerberos):
+        instance = {
+            'url': kerberos["url"],
+            'auth_type': 'kerberos',
+            'kerberos_auth': 'required',
+            'kerberos_hostname': kerberos["hostname"],
+            'kerberos_cache': "DIR:{}".format(kerberos["cache"]),
+            'kerberos_keytab': kerberos["keytab"],
+            'kerberos_principal': "user/doesnotexist@{}".format(kerberos["realm"]),
+            'kerberos_force_initiate': 'false',
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        response = http.get(instance["url"])
+        assert response.status_code == 401
+
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_kerberos_auth_principal_incache_nokeytab(self, kerberos):
+        instance = {
+            'url': kerberos["url"],
+            'auth_type': 'kerberos',
+            'kerberos_auth': 'required',
+            'kerberos_cache': "DIR:{}".format(kerberos["cache"]),
+            'kerberos_hostname': kerberos["hostname"],
+            'kerberos_principal': "user/nokeytab@{}".format(kerberos["realm"]),
+            'kerberos_force_initiate': 'true',
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        response = http.get(instance["url"])
+        assert response.status_code == 200
+
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_kerberos_auth_principal_inkeytab_nocache(self, kerberos):
+        instance = {
+            'url': kerberos["url"],
+            'auth_type': 'kerberos',
+            'kerberos_auth': 'required',
+            'kerberos_hostname': kerberos["hostname"],
+            'kerberos_cache': "DIR:{}".format(kerberos["tmp_dir"]),
+            'kerberos_keytab': kerberos["keytab"],
+            'kerberos_principal': "user/inkeytab@{}".format(kerberos["realm"]),
+            'kerberos_force_initiate': 'true',
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+        response = http.get(instance["url"])
+        assert response.status_code == 200
+
     def test_config_ntlm(self):
+        instance = {'auth_type': 'ntlm', 'ntlm_domain': 'domain\\user', 'password': 'pass'}
+        init_config = {}
+
+        # Trigger lazy import
+        http = RequestsWrapper(instance, init_config)
+        assert isinstance(http.options['auth'], requests_ntlm.HttpNtlmAuth)
+
+        with mock.patch('datadog_checks.base.utils.http.requests_ntlm.HttpNtlmAuth') as m:
+            RequestsWrapper(instance, init_config)
+
+            m.assert_called_once_with('domain\\user', 'pass')
+
+    def test_config_ntlm_legacy(self, caplog):
         instance = {'ntlm_domain': 'domain\\user', 'password': 'pass'}
         init_config = {}
 
@@ -316,6 +485,65 @@ class TestAuth:
             RequestsWrapper(instance, init_config)
 
             m.assert_called_once_with('domain\\user', 'pass')
+
+        assert (
+            'The ability to use NTLM auth without explicitly setting auth_type to '
+            '`ntlm` is deprecated and will be removed in Agent 8'
+        ) in caplog.text
+
+    def test_config_aws(self):
+        instance = {'auth_type': 'aws', 'aws_host': 'uri', 'aws_region': 'earth', 'aws_service': 'saas'}
+        init_config = {}
+
+        # Trigger lazy import
+        http = RequestsWrapper(instance, init_config)
+        assert isinstance(http.options['auth'], requests_aws.BotoAWSRequestsAuth)
+
+        with mock.patch('datadog_checks.base.utils.http.requests_aws.BotoAWSRequestsAuth') as m:
+            RequestsWrapper(instance, init_config)
+
+            m.assert_called_once_with(aws_host='uri', aws_region='earth', aws_service='saas')
+
+    def test_config_aws_service_remapper(self):
+        instance = {'auth_type': 'aws', 'aws_region': 'us-east-1'}
+        init_config = {}
+        remapper = {
+            'aws_service': {'name': 'aws_service', 'default': 'es'},
+            'aws_host': {'name': 'aws_host', 'default': 'uri'},
+        }
+
+        with mock.patch('datadog_checks.base.utils.http.requests_aws.BotoAWSRequestsAuth') as m:
+            RequestsWrapper(instance, init_config, remapper)
+
+            m.assert_called_once_with(aws_host='uri', aws_region='us-east-1', aws_service='es')
+
+    @pytest.mark.parametrize(
+        'case, instance, match',
+        [
+            ('no host', {'auth_type': 'aws'}, '^AWS auth requires the setting `aws_host`$'),
+            ('no region', {'auth_type': 'aws', 'aws_host': 'uri'}, '^AWS auth requires the setting `aws_region`$'),
+            (
+                'no service',
+                {'auth_type': 'aws', 'aws_host': 'uri', 'aws_region': 'us-east-1'},
+                '^AWS auth requires the setting `aws_service`$',
+            ),
+            ('empty host', {'auth_type': 'aws', 'aws_host': ''}, '^AWS auth requires the setting `aws_host`$'),
+            (
+                'empty region',
+                {'auth_type': 'aws', 'aws_host': 'uri', 'aws_region': ''},
+                '^AWS auth requires the setting `aws_region`$',
+            ),
+            (
+                'empty service',
+                {'auth_type': 'aws', 'aws_host': 'uri', 'aws_region': 'us-east-1', 'aws_service': ''},
+                '^AWS auth requires the setting `aws_service`$',
+            ),
+        ],
+    )
+    def test_config_aws_invalid_cases(self, case, instance, match):
+        init_config = {}
+        with pytest.raises(ConfigurationError, match=match):
+            RequestsWrapper(instance, init_config)
 
 
 class TestProxies:
@@ -463,6 +691,107 @@ class TestProxies:
         http.get('http://www.google.com')
         http.get('http://nginx')
 
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_no_proxy_domain(self, socks5_proxy):
+        instance = {'proxy': {'http': 'http://1.2.3.4:567', 'no_proxy': '.google.com,example.com,9'}}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        # no_proxy match: .google.com
+        http.get('http://www.google.com')
+
+        # no_proxy match: example.com
+        http.get('http://www.example.com')
+        http.get('http://example.com')
+
+        # no_proxy match: 9
+        http.get('http://127.0.0.9')
+
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_no_proxy_domain_fail(self, socks5_proxy):
+        instance = {'proxy': {'http': 'http://1.2.3.4:567', 'no_proxy': '.google.com,example.com,example,9'}}
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        # no_proxy not match: .google.com
+        # ".y.com" matches "x.y.com" but not "y.com"
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://google.com', timeout=1)
+
+        # no_proxy not match: example or example.com
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://notexample.com', timeout=1)
+
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://example.org', timeout=1)
+
+        # no_proxy not match: 9
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://127.0.0.99', timeout=1)
+
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_no_proxy_ip(self, socks5_proxy):
+        instance = {
+            'proxy': {
+                'http': 'http://1.2.3.4:567',
+                'no_proxy': '127.0.0.1,127.0.0.2/32,127.1.0.0/25,127.1.1.0/255.255.255.128,127.1.2.0/0.0.0.127',
+            }
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        # no_proxy match: 127.0.0.1
+        http.get('http://127.0.0.1', timeout=1)
+
+        # no_proxy match: 127.0.0.2/32
+        http.get('http://127.0.0.2', timeout=1)
+
+        # no_proxy match: IP within 127.1.0.0/25 subnet - cidr bits format
+        http.get('http://127.1.0.50', timeout=1)
+        http.get('http://127.1.0.100', timeout=1)
+
+        # no_proxy match: IP within 127.1.1.0/255.255.255.128 subnet - net mask format
+        http.get('http://127.1.1.50', timeout=1)
+        http.get('http://127.1.1.100', timeout=1)
+
+        # no_proxy match: IP within 127.1.2.0/0.0.0.127 subnet - host mask format
+        http.get('http://127.1.2.50', timeout=1)
+        http.get('http://127.1.2.100', timeout=1)
+
+    @pytest.mark.skipif(running_on_windows_ci(), reason='Test cannot be run on Windows CI')
+    def test_no_proxy_ip_fail(self, socks5_proxy):
+        instance = {
+            'proxy': {
+                'http': 'http://1.2.3.4:567',
+                'no_proxy': '127.0.0.1,127.0.0.2/32,127.1.0.0/25,127.1.1.0/255.255.255.128,127.1.2.0/0.0.0.127',
+            }
+        }
+        init_config = {}
+        http = RequestsWrapper(instance, init_config)
+
+        # no_proxy not match: 127.0.0.1
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://127.0.0.11', timeout=1)
+
+        # no_proxy not match: 127.0.0.2/32
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://127.0.0.22', timeout=1)
+
+        # no_proxy not match: IP outside 127.1.0.0/25 subnet - cidr bits format
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://127.1.0.150', timeout=1)
+            http.get('http://127.1.0.200', timeout=1)
+
+        # no_proxy not match: IP outside 127.1.1.0/255.255.255.128 subnet - net mask format
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://127.1.1.150', timeout=1)
+            http.get('http://127.1.1.200', timeout=1)
+
+        # no_proxy not match: IP outside 127.1.2.0/0.0.0.127 subnet - host mask format
+        with pytest.raises((ConnectTimeout, ProxyError)):
+            http.get('http://127.1.2.150', timeout=1)
+            http.get('http://127.1.2.200', timeout=1)
+
 
 class TestIgnoreTLSWarning:
     def test_config_default(self):
@@ -478,6 +807,22 @@ class TestIgnoreTLSWarning:
         http = RequestsWrapper(instance, init_config)
 
         assert http.ignore_tls_warning is True
+
+    def test_init_config_flag(self):
+        instance = {}
+        init_config = {'tls_ignore_warning': True}
+
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.ignore_tls_warning is True
+
+    def test_instance_and_init_flag(self):
+        instance = {'tls_ignore_warning': False}
+        init_config = {'tls_ignore_warning': True}
+
+        http = RequestsWrapper(instance, init_config)
+
+        assert http.ignore_tls_warning is False
 
     def test_default_no_ignore(self):
         instance = {}
@@ -514,6 +859,42 @@ class TestIgnoreTLSWarning:
             http.get('https://www.google.com', verify=False)
 
         assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+    def test_init_ignore(self):
+        instance = {}
+        init_config = {'tls_ignore_warning': True}
+        http = RequestsWrapper(instance, init_config)
+
+        with pytest.warns(None) as record:
+            http.get('https://www.google.com', verify=False)
+
+        assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+    def test_default_init_no_ignore(self):
+        instance = {}
+        init_config = {'tls_ignore_warning': False}
+        http = RequestsWrapper(instance, init_config)
+
+        with pytest.warns(InsecureRequestWarning):
+            http.get('https://www.google.com', verify=False)
+
+    def test_instance_ignore(self):
+        instance = {'tls_ignore_warning': True}
+        init_config = {'tls_ignore_warning': False}
+        http = RequestsWrapper(instance, init_config)
+
+        with pytest.warns(None) as record:
+            http.get('https://www.google.com', verify=False)
+
+        assert all(not issubclass(warning.category, InsecureRequestWarning) for warning in record)
+
+    def test_instance_no_ignore(self):
+        instance = {'tls_ignore_warning': False}
+        init_config = {'tls_ignore_warning': True}
+        http = RequestsWrapper(instance, init_config)
+
+        with pytest.warns(InsecureRequestWarning):
+            http.get('https://www.google.com', verify=False)
 
 
 class TestSession:
@@ -663,7 +1044,7 @@ class TestAPI:
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
             http.get('https://www.google.com')
-            http.session.get.assert_called_once_with('https://www.google.com')
+            http.session.get.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
 
     def test_get_option_override(self):
         http = RequestsWrapper({}, {})
@@ -676,7 +1057,8 @@ class TestAPI:
 
     def test_get_session_option_override(self):
         http = RequestsWrapper({}, {})
-        options = {'auth': ('user', 'pass')}
+        options = DEFAULT_OPTIONS.copy()
+        options.update({'auth': ('user', 'pass')})
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
             http.get('https://www.google.com', persist=True, auth=options['auth'])
@@ -694,7 +1076,7 @@ class TestAPI:
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
             http.post('https://www.google.com')
-            http.session.post.assert_called_once_with('https://www.google.com')
+            http.session.post.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
 
     def test_post_option_override(self):
         http = RequestsWrapper({}, {})
@@ -707,7 +1089,8 @@ class TestAPI:
 
     def test_post_session_option_override(self):
         http = RequestsWrapper({}, {})
-        options = {'auth': ('user', 'pass')}
+        options = DEFAULT_OPTIONS.copy()
+        options.update({'auth': ('user', 'pass')})
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
             http.post('https://www.google.com', persist=True, auth=options['auth'])
@@ -725,7 +1108,7 @@ class TestAPI:
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
             http.head('https://www.google.com')
-            http.session.head.assert_called_once_with('https://www.google.com')
+            http.session.head.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
 
     def test_head_option_override(self):
         http = RequestsWrapper({}, {})
@@ -738,7 +1121,8 @@ class TestAPI:
 
     def test_head_session_option_override(self):
         http = RequestsWrapper({}, {})
-        options = {'auth': ('user', 'pass')}
+        options = DEFAULT_OPTIONS.copy()
+        options.update({'auth': ('user', 'pass')})
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
             http.head('https://www.google.com', persist=True, auth=options['auth'])
@@ -756,7 +1140,7 @@ class TestAPI:
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
             http.put('https://www.google.com')
-            http.session.put.assert_called_once_with('https://www.google.com')
+            http.session.put.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
 
     def test_put_option_override(self):
         http = RequestsWrapper({}, {})
@@ -769,7 +1153,8 @@ class TestAPI:
 
     def test_put_session_option_override(self):
         http = RequestsWrapper({}, {})
-        options = {'auth': ('user', 'pass')}
+        options = DEFAULT_OPTIONS.copy()
+        options.update({'auth': ('user', 'pass')})
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
             http.put('https://www.google.com', persist=True, auth=options['auth'])
@@ -787,7 +1172,7 @@ class TestAPI:
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
             http.patch('https://www.google.com')
-            http.session.patch.assert_called_once_with('https://www.google.com')
+            http.session.patch.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
 
     def test_patch_option_override(self):
         http = RequestsWrapper({}, {})
@@ -800,7 +1185,8 @@ class TestAPI:
 
     def test_patch_session_option_override(self):
         http = RequestsWrapper({}, {})
-        options = {'auth': ('user', 'pass')}
+        options = DEFAULT_OPTIONS.copy()
+        options.update({'auth': ('user', 'pass')})
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
             http.patch('https://www.google.com', persist=True, auth=options['auth'])
@@ -818,7 +1204,7 @@ class TestAPI:
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
             http.delete('https://www.google.com')
-            http.session.delete.assert_called_once_with('https://www.google.com')
+            http.session.delete.assert_called_once_with('https://www.google.com', **DEFAULT_OPTIONS)
 
     def test_delete_option_override(self):
         http = RequestsWrapper({}, {})
@@ -831,8 +1217,16 @@ class TestAPI:
 
     def test_delete_session_option_override(self):
         http = RequestsWrapper({}, {})
-        options = {'auth': ('user', 'pass')}
+        options = DEFAULT_OPTIONS.copy()
+        options.update({'auth': ('user', 'pass')})
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.session'):
             http.delete('https://www.google.com', persist=True, auth=options['auth'])
             http.session.delete.assert_called_once_with('https://www.google.com', **options)
+
+
+class TestIntegration:
+    def test_session_timeout(self):
+        http = RequestsWrapper({'persist_connections': True}, {'timeout': 0.08})
+        with pytest.raises(requests.exceptions.Timeout):
+            http.get('https://httpbin.org/delay/0.10')

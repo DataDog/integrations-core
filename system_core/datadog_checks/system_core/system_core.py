@@ -1,10 +1,10 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import psutil
 from six import iteritems
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 
 class SystemCore(AgentCheck):

@@ -35,6 +35,12 @@ instances:
     #
   - url: http://localhost/admin?stats
 
+    ## @param auth_type - string - optional
+    ## The type of authentication to use.
+    ## The available values are "basic" and "digest".
+    #
+    # auth_type: <AUTH_TYPE>
+
     ## @param username - string - optional
     ## The username to use if services are behind basic auth.
     #
@@ -44,7 +50,7 @@ instances:
     ## If your services uses NTLM authentication, you can
     ## specify a domain that is used in the check. For NTLM Auth,
     ## append the username to domain, not as the `username` parameter.
-    ## Example: <NTLM_DOMAIN>/<USERNAME>
+    ## Example: <NTLM_DOMAIN>\<USERNAME>
     #
     # ntlm_domain: <DOMAIN>
 
@@ -115,6 +121,12 @@ instances:
     # services_exclude:
     #   - ".*"
 
+    ## @param disable_legacy_service_tag - boolean - optional - default: false
+    ## Whether or not to stop submitting the tag `service` that has been renamed
+    ## to `haproxy_service` and disable the associated deprecation warning.
+    #
+    # disable_legacy_service_tag: false
+
     ## @param active_tag - boolean - optional - default: false
     ## Includes the 'active' tag to metrics to denote whether a backend belongs to the
     ## "active" pool of connections normally used for servicing requests.
@@ -145,6 +157,19 @@ instances:
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
+
+    ## @param startup_grace_seconds - integer - optional
+    ## Time to wait on startup or reload of haproxy before sending metrics
+    ##
+    ## When haproxy reloads, if there is a `grace` period on some proxies, 2
+    ## haproxies will stay running for that period, possibly including the
+    ## stats endpoint. Stats returned by haproxy during this period will only
+    ## refer to one of the multiple instances of haproxy, and will not
+    ## accurately reflect the state of the system.
+    ## If this parameter is >0, no datapoints will be sent until the uptime of
+    ## haproxy reaches this many seconds.
+    #
+    # startup_grace_seconds: 0
 
     ## @param connect_timeout - integer - optional
     ## Overrides the default connection timeout value,
@@ -232,6 +257,12 @@ instances:
     #
     # kerberos_keytab: <KEYTAB_FILE_PATH>
 
+    ## @param kerberos_cache - string - optional
+    ## Sets the KRB5CCNAME environment variable.
+    ## It should point to a credential cache with a valid TGT.
+    #
+    # kerberos_cache: <KRB5CCNAME>
+
     ## @param tls_verify - boolean - optional - default: true
     ## Instructs the check to validate the TLS certificate of services.
     #
@@ -240,6 +271,10 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable these by setting `tls_ignore_warning` to true.
+    ##
+    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
+    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
+    ## to true.
     #
     # tls_ignore_warning: false
 
@@ -296,7 +331,6 @@ instances:
 ## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
 ## service - mandatory - Name of the service that generated the log
 ## source  - mandatory - Attribute that defines which Integration sent the logs
-## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
 ## tags: - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
@@ -306,4 +340,3 @@ instances:
 #     port: 514
 #     service: haproxy
 #     source: haproxy
-#     sourcecategory: http_web_access

@@ -1,5 +1,79 @@
 # CHANGELOG - vsphere
 
+## 5.3.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Added] Add collect events fallback. See [#6658](https://github.com/DataDog/integrations-core/pull/6658).
+* [Added] Filter by allowed events. See [#6659](https://github.com/DataDog/integrations-core/pull/6659).
+* [Fixed] Provide helpful error message when releasing a project with missing or improper tags. See [#6861](https://github.com/DataDog/integrations-core/pull/6861).
+* [Fixed] Move event to non legacy folder. See [#6751](https://github.com/DataDog/integrations-core/pull/6751).
+* [Fixed] Avoid calling get_latest_event_timestamp. See [#6656](https://github.com/DataDog/integrations-core/pull/6656).
+
+## 5.2.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Add version metadata. See [#6364](https://github.com/DataDog/integrations-core/pull/6364).
+* [Fixed] Properly error when filtering resources by the `tag` property but `collect_tags` is disabled. See [#6638](https://github.com/DataDog/integrations-core/pull/6638).
+
+## 5.1.2 / 2020-04-14
+
+* [Fixed] Renew REST API session on failure. See [#6330](https://github.com/DataDog/integrations-core/pull/6330).
+* [Fixed] Fix vsphere capitalization. See [#6278](https://github.com/DataDog/integrations-core/pull/6278).
+
+## 5.1.1 / 2020-04-10
+
+* [Fixed] Fix tags race conditions with filtering. See [#6297](https://github.com/DataDog/integrations-core/pull/6297).
+
+## 5.1.0 / 2020-04-04
+
+* [Added] resource filters: allow blacklist and tag filtering. See [#6194](https://github.com/DataDog/integrations-core/pull/6194).
+* [Added] Add type annotations. See [#6036](https://github.com/DataDog/integrations-core/pull/6036).
+* [Fixed] Limit tags collection logic to the monitored resources only. See [#6248](https://github.com/DataDog/integrations-core/pull/6248).
+* [Fixed] Revert `to_native_string` to `to_string` for integrations. See [#6238](https://github.com/DataDog/integrations-core/pull/6238).
+* [Fixed] Deprecating the legacy implementation. See [#6215](https://github.com/DataDog/integrations-core/pull/6215).
+* [Fixed] Fix hostname resolution. See [#6190](https://github.com/DataDog/integrations-core/pull/6190).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Fix ssl context. See [#6075](https://github.com/DataDog/integrations-core/pull/6075).
+* [Fixed] Rename `to_string()` utility to `to_native_string()`. See [#5996](https://github.com/DataDog/integrations-core/pull/5996).
+* [Fixed] Improve logging of the legacy implementation. See [#5993](https://github.com/DataDog/integrations-core/pull/5993).
+
+## 5.0.2 / 2020-02-29
+
+* [Fixed] Disconnect vSphere connection to the server on refresh. See [#5929](https://github.com/DataDog/integrations-core/pull/5929).
+
+## 5.0.1 / 2020-02-28
+
+* [Fixed] Remove some unnecessary warnings. See [#5916](https://github.com/DataDog/integrations-core/pull/5916).
+* [Fixed] Add tags section in conf.yaml. See [#5911](https://github.com/DataDog/integrations-core/pull/5911).
+
+## 5.0.0 / 2020-02-22
+
+* [Added] Add `tls_ignore_warning` option. See [#5777](https://github.com/DataDog/integrations-core/pull/5777).
+* [Fixed] Submit collected vsphere tags as host tags for realtime resources. See [#5776](https://github.com/DataDog/integrations-core/pull/5776).
+* [Fixed] Renaming vsphere_tags_prefix config to tags_prefix. See [#5771](https://github.com/DataDog/integrations-core/pull/5771).
+* [Added] Submit resource count metrics with their tags. See [#5681](https://github.com/DataDog/integrations-core/pull/5681).
+* [Added] Add tags support v2 using requests. See [#5729](https://github.com/DataDog/integrations-core/pull/5729).
+* [Fixed] Do not collect max, min and sum aggregates as they are the same as avg. See [#5638](https://github.com/DataDog/integrations-core/pull/5638).
+* [Added] Add per instance values as tag. See [#5584](https://github.com/DataDog/integrations-core/pull/5584).
+* [Changed] vSphere new implementation. See [#5251](https://github.com/DataDog/integrations-core/pull/5251).
+
+## 4.3.0 / 2019-12-13
+
+* [Added] Add ability to exclude specific host tags from host metadata. See [#5201](https://github.com/DataDog/integrations-core/pull/5201).
+
+## 4.2.2 / 2019-12-11
+
+* [Fixed] Creating container views using a context manager. See [#5187](https://github.com/DataDog/integrations-core/pull/5187).
+* [Fixed] Add warning log on historical metrics collection failure. See [#5161](https://github.com/DataDog/integrations-core/pull/5161).
+
+## 4.2.1 / 2019-11-15
+
+* [Fixed] Collect the latest non-negative value for historical metrics. See [#5026](https://github.com/DataDog/integrations-core/pull/5026).
+
+## 4.2.0 / 2019-10-28
+
+* [Added] Adds the ability to collect realtime and historical metrics in two different instances for better performance. See [#4337](https://github.com/DataDog/integrations-core/pull/4337).
+
 ## 4.1.3 / 2019-06-19
 
 * [Fixed] Filters VMs in excluded hosts. See [#3933](https://github.com/DataDog/integrations-core/pull/3933).

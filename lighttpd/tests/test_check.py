@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import unicode_literals
@@ -31,6 +31,26 @@ def test_lighttpd(aggregator, check, instance):
     for gauge in CHECK_GAUGES:
         aggregator.assert_metric(gauge, tags=['instance:first'], count=1)
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.usefixtures("dd_environment")
+def test_version_metadata(check, instance, datadog_agent):
+    check.check_id = 'test:123'
+
+    check.check(instance)
+
+    version = common.LIGHTTPD_VERSION
+    major, minor, patch = version.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': version,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
 
 
 def test_service_check_ko(aggregator, check, instance):

@@ -1,5 +1,47 @@
 # CHANGELOG - Envoy
 
+## 1.16.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
+## 1.15.2 / 2020-05-26
+
+* [Fixed] Handle server info for envoy <= 1.8. See [#6740](https://github.com/DataDog/integrations-core/pull/6740).
+
+## 1.15.1 / 2020-05-19
+
+* [Fixed] Safer metadata error handling. See [#6685](https://github.com/DataDog/integrations-core/pull/6685).
+
+## 1.15.0 / 2020-05-17
+
+* [Added] Collect version metadata. See [#6595](https://github.com/DataDog/integrations-core/pull/6595).
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Fixed] Fix style to account for new flake8 rules. See [#6620](https://github.com/DataDog/integrations-core/pull/6620).
+
+## 1.14.0 / 2020-04-04
+
+* [Added] Update doc about whitelist and blacklist. See [#5875](https://github.com/DataDog/integrations-core/pull/5875).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
+## 1.13.0 / 2020-02-22
+
+* [Added] Add support for more metrics in Envoy integration. See [#5537](https://github.com/DataDog/integrations-core/pull/5537). Thanks [csssuf](https://github.com/csssuf).
+
+## 1.12.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 1.11.0 / 2019-12-02
+
+* [Added] Add new metrics for Redis. See [#4946](https://github.com/DataDog/integrations-core/pull/4946). Thanks [tony612](https://github.com/tony612).
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
+## 1.10.0 / 2019-10-11
+
+* [Added] Add xDS-related metrics. See [#4634](https://github.com/DataDog/integrations-core/pull/4634). Thanks [csssuf](https://github.com/csssuf).
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 1.9.0 / 2019-08-24
 
 * [Added] Add RequestsWrapper to envoy. See [#4120](https://github.com/DataDog/integrations-core/pull/4120).

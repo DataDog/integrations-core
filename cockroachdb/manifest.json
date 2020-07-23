@@ -17,7 +17,8 @@
   "public_title": "Datadog-CockroachDB Integration",
   "categories": [
     "cloud",
-    "data store"
+    "data store",
+    "autodiscovery"
   ],
   "type": "check",
   "is_public": true,

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -41,7 +41,7 @@ def dd_environment():
 
 @pytest.fixture
 def check():
-    return Riak('riak', {}, {})
+    return Riak('riak', {}, [deepcopy(common.INSTANCE)])
 
 
 @pytest.fixture

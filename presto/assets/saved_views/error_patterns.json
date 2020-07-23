@@ -1,0 +1,9 @@
+{ 
+  "name": "Presto error patterns",
+  "type": "logs",
+  "page": "patterns",
+  "query": "source:presto status:error",
+  "timerange": {
+    "interval_ms": 3600000
+  }
+}

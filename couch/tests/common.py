@@ -1,13 +1,14 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
 import re
 
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 CHECK_NAME = "couch"
+CHECK_ID = 'test:123'
 
 PORT = "5984"
 HOST = get_docker_hostname()
@@ -17,7 +18,8 @@ PASSWORD = "pawprint"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-COUCH_MAJOR_VERSION = int(re.split(r'\D+', os.getenv('COUCH_VERSION'))[0])
+COUCH_RAW_VERSION = os.getenv('COUCH_VERSION')
+COUCH_MAJOR_VERSION = int(re.split(r'\D+', COUCH_RAW_VERSION)[0])
 
 # Publicly readable databases
 DB_NAMES = ["_replicator", "_users", "kennel"]
@@ -50,8 +52,10 @@ BAD_CONFIG = {"server": "http://localhost:11111"}
 
 BAD_CONFIG_TAGS = ["instance:http://localhost:11111"]
 
-NODE1 = {"server": URL, "user": USER, "password": PASSWORD, "name": "node1@127.0.0.1"}
+NODE1 = {"server": URL, "user": USER, "password": PASSWORD, "name": "couchdb@couchdb-1.example.com"}
 
-NODE2 = {"server": URL, "user": USER, "password": PASSWORD, "name": "node2@127.0.0.1"}
+NODE2 = {"server": URL, "user": USER, "password": PASSWORD, "name": "couchdb@couchdb-2.example.com"}
 
-NODE3 = {"server": URL, "user": USER, "password": PASSWORD, "name": "node3@127.0.0.1"}
+NODE3 = {"server": URL, "user": USER, "password": PASSWORD, "name": "couchdb@couchdb-3.example.com"}
+
+ALL_NODES = [NODE1, NODE2, NODE3]

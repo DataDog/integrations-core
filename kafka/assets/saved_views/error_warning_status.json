@@ -1,0 +1,17 @@
+{ 
+  "name": "Kafka error and warning",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:kafka status:(error OR warn) ",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": ["source", "host", "service", "status", "@logger.name", "@logger.thread_name", "@error.kind"],
+  "options": {
+    "columns": ["status", "host"],
+    "show_date_column": true,
+    "show_message_column": true,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}

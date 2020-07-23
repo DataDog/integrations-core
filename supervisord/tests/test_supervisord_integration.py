@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -6,7 +6,7 @@ from time import sleep
 
 import pytest
 
-from .common import PROCESSES, PROCESSES_BY_STATE_BY_ITERATION, STATUSES
+from .common import PROCESSES, PROCESSES_BY_STATE_BY_ITERATION, STATUSES, SUPERVISOR_VERSION
 
 # Mark all tests in this file as integration tests
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
@@ -53,3 +53,20 @@ def test_connection_failure(aggregator, check, bad_instance):
     with pytest.raises(Exception):
         check.check(bad_instance)
         aggregator.assert_service_check("supervisord.can_connect", status=check.CRITICAL, tags=instance_tags, count=1)
+
+
+def test_version_metadata(aggregator, check, instance, datadog_agent):
+    check.check_id = 'test:123'
+    check.check(instance)
+
+    raw_version = SUPERVISOR_VERSION.replace('_', '.')
+    major, minor, patch = raw_version.split('.')
+    version_metadata = {
+        'version.scheme': 'supervisord',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': raw_version,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from codecs import open  # To use a consistent encoding
@@ -18,8 +18,12 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     LONG_DESC = f.read()
 
 
-def get_requirements(fpath):
-    with open(path.join(HERE, fpath), encoding='utf-8') as f:
+def get_dependencies():
+    dep_file = path.join(HERE, 'requirements.in')
+    if not path.isfile(dep_file):
+        return []
+
+    with open(dep_file, encoding='utf-8') as f:
         return f.readlines()
 
 
@@ -44,10 +48,11 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
     packages=['datadog_checks.downloader'],
+    # Run-time dependencies
+    extras_require={'deps': get_dependencies()},
     # NOTE: Copy over TUF directories, and root metadata.
     package_data={
         'datadog_checks.downloader': [
@@ -58,5 +63,4 @@ setup(
         ]
     },
     include_package_data=True,
-    entry_points={'console_scripts': ['datadog-checks-downloader=datadog_checks.downloader.cli:download']},
 )

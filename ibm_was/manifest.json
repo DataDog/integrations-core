@@ -18,7 +18,8 @@
   "categories": [
     "web",
     "os & system",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "type": "check",
   "is_public": true,

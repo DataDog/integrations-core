@@ -16,7 +16,16 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base>=4.2.0'
+def get_dependencies():
+    dep_file = path.join(HERE, 'requirements.in')
+    if not path.isfile(dep_file):
+        return []
+
+    with open(dep_file, encoding='utf-8') as f:
+        return f.readlines()
+
+
+CHECKS_BASE_REQ = 'datadog_checks_base>=11.4.0'
 
 setup(
     name='datadog-dotnetclr',
@@ -46,6 +55,7 @@ setup(
     packages=['datadog_checks.dotnetclr'],
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
+    extras_require={'deps': get_dependencies()},
     # Extra files to ship with the wheel package
     include_package_data=True,
 )

@@ -1,5 +1,65 @@
 # CHANGELOG - http_check
 
+## 4.9.1 / 2020-07-09
+
+* [Fixed] Raise http service check message limit. See [#7008](https://github.com/DataDog/integrations-core/pull/7008).
+
+## 4.9.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
+## 4.8.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 4.7.1 / 2020-04-09
+
+* [Fixed] Fix new option name in config sample. See [#6296](https://github.com/DataDog/integrations-core/pull/6296).
+
+## 4.7.0 / 2020-04-04
+
+* [Added] Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Update reference to `disable_ssl_validation`. See [#5945](https://github.com/DataDog/integrations-core/pull/5945).
+
+## 4.6.4 / 2020-02-22
+
+* [Fixed] Apply strptime thread-safety fix only on Python 2. See [#5618](https://github.com/DataDog/integrations-core/pull/5618).
+
+## 4.6.3 / 2020-01-24
+
+* [Fixed] Document that tls_verify is False by default. See [#5547](https://github.com/DataDog/integrations-core/pull/5547).
+
+## 4.6.2 / 2020-01-21
+
+* [Fixed] Properly enable TLS/SSL verification when `tls_verify` is true. See [#5507](https://github.com/DataDog/integrations-core/pull/5507).
+
+## 4.6.1 / 2020-01-17
+
+* [Fixed] Avoid cross instance data sharing. See [#5499](https://github.com/DataDog/integrations-core/pull/5499).
+
+## 4.6.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 4.5.0 / 2019-12-02
+
+* [Added] Upgrade cryptography to 2.8. See [#5047](https://github.com/DataDog/integrations-core/pull/5047).
+
+## 4.4.0 / 2019-11-15
+
+* [Fixed] Update response_time metric source. See [#5025](https://github.com/DataDog/integrations-core/pull/5025).
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+* [Fixed] Improve config constructor syntax. See [#4841](https://github.com/DataDog/integrations-core/pull/4841).
+
+## 4.3.1 / 2019-10-18
+
+* [Fixed] Ensure the correct tls_ca_cert value is used. See [#4819](https://github.com/DataDog/integrations-core/pull/4819).
+
+## 4.3.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 4.2.0 / 2019-08-24
 
 * [Added] Add request wrapper to http_check. See [#4363](https://github.com/DataDog/integrations-core/pull/4363).

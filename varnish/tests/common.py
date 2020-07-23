@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -75,6 +75,8 @@ HERE = os.path.join(os.path.dirname(__file__))
 FIXTURE_DIR = os.path.join(HERE, "fixtures")
 
 CHECK_NAME = "varnish"
+
+VARNISH_VERSION = os.getenv('VARNISH_VERSION')
 
 
 def get_config_by_version(name=None):

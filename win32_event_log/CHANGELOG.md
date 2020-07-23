@@ -1,5 +1,46 @@
 # CHANGELOG - win32_event_log
 
+## 2.5.0 / 2020-06-29
+
+* [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
+* [Added] Override CaseInsensitiveDict `copy()` function. See [#6715](https://github.com/DataDog/integrations-core/pull/6715).
+
+## 2.4.0 / 2020-05-17
+
+* [Added] Refactor check to support new implementation. See [#6639](https://github.com/DataDog/integrations-core/pull/6639).
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Fixed] Add wmi integration test and fix filter sampler. See [#6576](https://github.com/DataDog/integrations-core/pull/6576).
+* [Fixed] WMI base typing and instance free API. See [#6329](https://github.com/DataDog/integrations-core/pull/6329).
+
+## 2.3.4 / 2020-04-16
+
+* [Fixed] Normalize integers. See [#6357](https://github.com/DataDog/integrations-core/pull/6357).
+
+## 2.3.3 / 2020-04-04
+
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
+## 2.3.2 / 2020-02-25
+
+* [Fixed] Bump minimum base check on wmi checks. See [#5860](https://github.com/DataDog/integrations-core/pull/5860).
+
+## 2.3.1 / 2020-02-22
+
+* [Fixed] Fix thread leak in WMI sampler. See [#5659](https://github.com/DataDog/integrations-core/pull/5659). Thanks [rlaveycal](https://github.com/rlaveycal).
+
+## 2.3.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 2.2.0 / 2019-12-02
+
+* [Added] Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).
+
+## 2.1.0 / 2019-10-11
+
+* [Added] Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
+
 ## 2.0.1 / 2019-08-24
 
 * [Fixed] Remove check for user filter. See [#4342](https://github.com/DataDog/integrations-core/pull/4342).

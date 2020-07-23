@@ -1,0 +1,9 @@
+{ 
+  "name": "Redis patterns",
+  "type": "logs",
+  "page": "patterns",
+  "query": "source:redis",
+  "timerange": {
+    "interval_ms": 3600000
+  }
+}

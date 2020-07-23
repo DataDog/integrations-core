@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from datadog_checks.dev import get_here
@@ -10,6 +10,10 @@ INSTANCE = {"collect_connection_state": True}
 
 INSTANCE_BLACKLIST = {"collect_connection_state": True, "blacklist_conntrack_metrics": ["count"]}
 
+
+# In order to collect connection state we need `ss` command included in `iproute2` package
+E2E_METADATA = {'start_commands': ['apt-get update', 'apt-get install iproute2 -y']}
+
 EXPECTED_METRICS = [
     'system.net.bytes_rcvd',
     'system.net.bytes_sent',
@@ -17,6 +21,21 @@ EXPECTED_METRICS = [
     'system.net.packets_in.error',
     'system.net.packets_out.count',
     'system.net.packets_out.error',
+]
+
+E2E_EXPECTED_METRICS = EXPECTED_METRICS + [
+    "system.net.tcp4.closing",
+    "system.net.tcp4.established",
+    "system.net.tcp4.listening",
+    "system.net.tcp4.opening",
+    "system.net.tcp4.time_wait",
+    "system.net.tcp6.closing",
+    "system.net.tcp6.established",
+    "system.net.tcp6.listening",
+    "system.net.tcp6.opening",
+    "system.net.tcp6.time_wait",
+    "system.net.udp4.connections",
+    "system.net.udp6.connections",
 ]
 
 CONNTRACK_METRICS = [

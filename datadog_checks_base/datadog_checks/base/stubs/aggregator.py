@@ -1,33 +1,36 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
 from collections import OrderedDict, defaultdict
 
-from six import binary_type, iteritems
+from six import iteritems
 
-from datadog_checks.base.stubs.common import HistogramBucketStub, MetricStub, ServiceCheckStub
-from datadog_checks.base.stubs.similar import build_similar_elements_msg
-
-from ..utils.common import ensure_unicode, to_string
+from ..utils.common import ensure_unicode, to_native_string
+from .common import HistogramBucketStub, MetricStub, ServiceCheckStub
+from .similar import build_similar_elements_msg
 
 
 def normalize_tags(tags, sort=False):
-    # The base class ensures the Agent receives bytes, so to avoid
-    # prefacing our asserted tags like b'foo:bar' we'll convert back.
+    # The base class ensures the Agent receives bytes in PY2 and unicode in PY3.
+    # This function makes sure strings are compared with the same type.
     if tags:
         if sort:
-            return sorted(ensure_unicode(tag) for tag in tags)
+            return sorted(to_native_string(tag) for tag in tags)
         else:
-            return [ensure_unicode(tag) for tag in tags]
+            return [to_native_string(tag) for tag in tags]
     return tags
 
 
 class AggregatorStub(object):
     """
-    Mainly used for unit testing checks, this stub makes possible to execute
-    a check without a running Agent.
+    This implements the methods defined by the Agent's
+    [C bindings](https://github.com/DataDog/datadog-agent/blob/master/rtloader/common/builtins/aggregator.c)
+    which in turn call the
+    [Go backend](https://github.com/DataDog/datadog-agent/blob/master/pkg/collector/python/aggregator.go).
+
+    It also provides utility methods for test assertions.
     """
 
     # Replicate the Enum we have on the Agent
@@ -42,8 +45,10 @@ class AggregatorStub(object):
             ('historate', 6),
         )
     )
+    METRIC_ENUM_MAP_REV = {v: k for k, v in iteritems(METRIC_ENUM_MAP)}
     GAUGE, RATE, COUNT, MONOTONIC_COUNT, COUNTER, HISTOGRAM, HISTORATE = list(METRIC_ENUM_MAP.values())
     AGGREGATE_TYPES = {COUNT, COUNTER}
+    IGNORED_METRICS = {'datadog.agent.profile.memory.check_run_alloc'}
 
     def __init__(self):
         self._metrics = defaultdict(list)
@@ -56,8 +61,18 @@ class AggregatorStub(object):
     def is_aggregate(cls, mtype):
         return mtype in cls.AGGREGATE_TYPES
 
+    @classmethod
+    def ignore_metric(cls, name):
+        return name in cls.IGNORED_METRICS
+
     def submit_metric(self, check, check_id, mtype, name, value, tags, hostname):
-        self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname))
+        if not self.ignore_metric(name):
+            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, None))
+
+    def submit_metric_e2e(self, check, check_id, mtype, name, value, tags, hostname, device=None):
+        # Device is only present in metrics read from the real agent in e2e tests. Normally it is submitted as a tag
+        if not self.ignore_metric(name):
+            self._metrics[name].append(MetricStub(name, mtype, value, tags, hostname, device))
 
     def submit_service_check(self, check, check_id, name, status, tags, hostname, message):
         self._service_checks[name].append(ServiceCheckStub(check_id, name, status, tags, hostname, message))
@@ -83,8 +98,9 @@ class AggregatorStub(object):
                 stub.value,
                 normalize_tags(stub.tags),
                 ensure_unicode(stub.hostname),
+                stub.device,
             )
-            for stub in self._metrics.get(to_string(name), [])
+            for stub in self._metrics.get(to_native_string(name), [])
         ]
 
     def service_checks(self, name):
@@ -100,7 +116,7 @@ class AggregatorStub(object):
                 ensure_unicode(stub.hostname),
                 ensure_unicode(stub.message),
             )
-            for stub in self._service_checks.get(to_string(name), [])
+            for stub in self._service_checks.get(to_native_string(name), [])
         ]
 
     @property
@@ -108,20 +124,7 @@ class AggregatorStub(object):
         """
         Return all events
         """
-        all_events = [{ensure_unicode(key): value for key, value in iteritems(ev)} for ev in self._events]
-
-        for ev in all_events:
-            to_decode = []
-            for key, value in iteritems(ev):
-                if isinstance(value, binary_type) and key != 'host':
-                    to_decode.append(key)
-            for key in to_decode:
-                ev[key] = ensure_unicode(ev[key])
-
-            if ev.get('tags'):
-                ev['tags'] = normalize_tags(ev['tags'])
-
-        return all_events
+        return self._events
 
     def histogram_bucket(self, name):
         """
@@ -137,7 +140,7 @@ class AggregatorStub(object):
                 ensure_unicode(stub.hostname),
                 normalize_tags(stub.tags),
             )
-            for stub in self._histogram_buckets.get(to_string(name), [])
+            for stub in self._histogram_buckets.get(to_native_string(name), [])
         ]
 
     def assert_metric_has_tag(self, metric_name, tag, count=None, at_least=1):
@@ -151,10 +154,11 @@ class AggregatorStub(object):
             if tag in metric.tags:
                 candidates.append(metric)
 
+        msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(metric_name, count, at_least)
         if count is not None:
-            assert len(candidates) == count
+            assert len(candidates) == count, msg
         else:
-            assert len(candidates) >= at_least
+            assert len(candidates) >= at_least, msg
 
     # Potential kwargs: aggregation_key, alert_type, event_type,
     # msg_title, source_type_name
@@ -171,9 +175,7 @@ class AggregatorStub(object):
             else:
                 candidates.append(e)
 
-        msg = ("Candidates size assertion for {0}, count: {1}, " "at_least: {2}) failed").format(
-            msg_text, count, at_least
-        )
+        msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(msg_text, count, at_least)
         if count is not None:
             assert len(candidates) == count, msg
         else:
@@ -207,31 +209,36 @@ class AggregatorStub(object):
             condition=condition, msg=msg, expected_stub=expected_bucket, submitted_elements=self._histogram_buckets
         )
 
-    def assert_metric(self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None):
+    def assert_metric(
+        self, name, value=None, tags=None, count=None, at_least=1, hostname=None, metric_type=None, device=None
+    ):
         """
         Assert a metric was processed by this stub
         """
 
         self._asserted.add(name)
-        tags = normalize_tags(tags, sort=True)
+        expected_tags = normalize_tags(tags, sort=True)
 
         candidates = []
         for metric in self.metrics(name):
             if value is not None and not self.is_aggregate(metric.type) and value != metric.value:
                 continue
 
-            if tags and tags != sorted(metric.tags):
+            if expected_tags and expected_tags != sorted(metric.tags):
                 continue
 
-            if hostname and hostname != metric.hostname:
+            if hostname is not None and hostname != metric.hostname:
                 continue
 
             if metric_type is not None and metric_type != metric.type:
                 continue
 
+            if device is not None and device != metric.device:
+                continue
+
             candidates.append(metric)
 
-        expected_metric = MetricStub(name, metric_type, value, tags, hostname)
+        expected_metric = MetricStub(name, metric_type, value, tags, hostname, device)
 
         if value is not None and candidates and all(self.is_aggregate(m.type) for m in candidates):
             got = sum(m.value for m in candidates)
@@ -288,10 +295,119 @@ class AggregatorStub(object):
         assert condition, new_msg
 
     def assert_all_metrics_covered(self):
-        missing_metrics = ''
-        if self.metrics_asserted_pct < 100.0:
-            missing_metrics = self.not_asserted()
-        assert self.metrics_asserted_pct >= 100.0, 'Missing metrics: {}'.format(missing_metrics)
+        # use `condition` to avoid building the `msg` if not needed
+        condition = self.metrics_asserted_pct >= 100.0
+        msg = ''
+        if not condition:
+            prefix = '\n\t- '
+            msg = 'Some metrics are missing:'
+            msg += '\nAsserted Metrics:{}{}'.format(prefix, prefix.join(sorted(self._asserted)))
+            msg += '\nMissing Metrics:{}{}'.format(prefix, prefix.join(sorted(self.not_asserted())))
+        assert condition, msg
+
+    def assert_metrics_using_metadata(self, metadata_metrics, check_metric_type=True, exclude=None):
+        """
+        Assert metrics using metadata.csv
+
+        Checking type: Since we are asserting the in-app metric type (NOT submission type),
+        asserting the type make sense only for e2e (metrics collected from agent).
+        For integration tests, set kwarg `check_metric_type=False`.
+
+        Usage:
+
+            from datadog_checks.dev.utils import get_metadata_metrics
+            aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+        """
+
+        exclude = exclude or []
+        errors = set()
+        for metric_name, metric_stubs in iteritems(self._metrics):
+            if metric_name in exclude:
+                continue
+            for metric_stub in metric_stubs:
+
+                if metric_stub.name not in metadata_metrics:
+                    errors.add("Expect `{}` to be in metadata.csv.".format(metric_stub.name))
+                    continue
+
+                if check_metric_type:
+                    expected_metric_type = metadata_metrics[metric_stub.name]['metric_type']
+                    actual_metric_type = AggregatorStub.METRIC_ENUM_MAP_REV[metric_stub.type]
+
+                    if expected_metric_type != actual_metric_type:
+                        errors.add(
+                            "Expect `{}` to have type `{}` but got `{}`.".format(
+                                metric_stub.name, expected_metric_type, actual_metric_type
+                            )
+                        )
+
+        assert not errors, "Metadata assertion errors using metadata.csv:" + "\n\t- ".join([''] + sorted(errors))
+
+    def assert_no_duplicate_all(self):
+        """
+        Assert no duplicate metrics and service checks have been submitted.
+        """
+        self.assert_no_duplicate_metrics()
+        self.assert_no_duplicate_service_checks()
+
+    def assert_no_duplicate_metrics(self):
+        """
+        Assert no duplicate metrics have been submitted.
+
+        Metrics are considered duplicate when all following fields match:
+
+        - metric name
+        - type (gauge, rate, etc)
+        - tags
+        - hostname
+        """
+        # metric types that intended to be called multiple times are ignored
+        ignored_types = [self.COUNT, self.MONOTONIC_COUNT, self.COUNTER]
+        metric_stubs = [m for metrics in self._metrics.values() for m in metrics if m.type not in ignored_types]
+
+        def stub_to_key_fn(stub):
+            return stub.name, stub.type, str(sorted(stub.tags)), stub.hostname
+
+        self._assert_no_duplicate_stub('metric', metric_stubs, stub_to_key_fn)
+
+    def assert_no_duplicate_service_checks(self):
+        """
+        Assert no duplicate service checks have been submitted.
+
+        Service checks are considered duplicate when all following fields match:
+            - metric name
+            - status
+            - tags
+            - hostname
+        """
+        service_check_stubs = [m for metrics in self._service_checks.values() for m in metrics]
+
+        def stub_to_key_fn(stub):
+            return stub.name, stub.status, str(sorted(stub.tags)), stub.hostname
+
+        self._assert_no_duplicate_stub('service_check', service_check_stubs, stub_to_key_fn)
+
+    @staticmethod
+    def _assert_no_duplicate_stub(stub_type, all_metrics, stub_to_key_fn):
+        all_contexts = defaultdict(list)
+        for metric in all_metrics:
+            context = stub_to_key_fn(metric)
+            all_contexts[context].append(metric)
+
+        dup_contexts = defaultdict(list)
+        for context, metrics in iteritems(all_contexts):
+            if len(metrics) > 1:
+                dup_contexts[context] = metrics
+
+        err_msg_lines = ["Duplicate {}s found:".format(stub_type)]
+        for key in sorted(dup_contexts):
+            contexts = dup_contexts[key]
+            err_msg_lines.append('- {}'.format(contexts[0].name))
+            for metric in contexts:
+                err_msg_lines.append('    ' + str(metric))
+
+        assert len(dup_contexts) == 0, "\n".join(err_msg_lines)
 
     def reset(self):
         """
@@ -319,10 +435,11 @@ class AggregatorStub(object):
             if len(gtags) > 0:
                 candidates.append(metric)
 
+        msg = "Candidates size assertion for `{}`, count: {}, at_least: {}) failed".format(metric_name, count, at_least)
         if count is not None:
-            assert len(candidates) == count
+            assert len(candidates) == count, msg
         else:
-            assert len(candidates) >= at_least
+            assert len(candidates) >= at_least, msg
 
     @property
     def metrics_asserted_pct(self):

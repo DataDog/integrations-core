@@ -1,5 +1,5 @@
 {
-  "display_name": "druid",
+  "display_name": "Druid",
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
   "name": "druid",
@@ -14,16 +14,22 @@
     "mac_os",
     "windows"
   ],
-  "public_title": "Datadog-druid Integration",
+  "public_title": "Datadog-Druid Integration",
   "categories": [
     "processing",
-    "data store"
+    "data store",
+    "log collection"
   ],
   "type": "check",
-  "is_public": false,
+  "is_public": true,
   "integration_id": "druid",
   "assets": {
-    "dashboards": {},
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
+    "dashboards": {
+      "Druid Overview": "assets/dashboards/overview.json"
+    },
     "monitors": {},
     "service_checks": "assets/service_checks.json"
   }

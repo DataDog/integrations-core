@@ -63,6 +63,18 @@ instances:
     #
     # recursive: false
 
+    ## @param follow_symlinks - boolean - optional - default: true
+    ## Follow symlinks when traversing directories.
+    ## When `recursive: true` is used, setting `follow_symlinks: false` helps avoid symlink loops.
+    #
+    # follow_symlinks: true
+
+    ## @param stat_follow_symlinks - boolean - optional - default: true
+    ## When `true`, the stats are gathered for the files the symlinks is pointing to.
+    ## When `false`, the stats are gathered for the symlinks themselves.
+    #
+    # stat_follow_symlinks: true
+
     ## @param countonly - boolean - optional - default: false
     ## When true the stats only count the number of files matching the pattern.
     #

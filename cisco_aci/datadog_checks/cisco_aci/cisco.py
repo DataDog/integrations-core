@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -6,9 +6,9 @@ import datetime
 
 from six import iteritems
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import _is_affirmative
-from datadog_checks.utils.containers import hash_mutable
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.config import _is_affirmative
+from datadog_checks.base.utils.containers import hash_mutable
 
 from . import aci_metrics
 from .api import Api
@@ -23,8 +23,11 @@ SERVICE_CHECK_NAME = 'cisco_aci.can_connect'
 
 
 class CiscoACICheck(AgentCheck):
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+
+    HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}, 'pwd': {'name': 'password'}}
+
+    def __init__(self, name, init_config, instances):
+        super(CiscoACICheck, self).__init__(name, init_config, instances)
         self.tenant_metrics = aci_metrics.make_tenant_metrics()
         self.last_events_ts = {}
         self.external_host_tags = {}
@@ -40,7 +43,7 @@ class CiscoACICheck(AgentCheck):
         if aci_url:
             aci_urls.append(aci_url)
 
-        if len(aci_urls) == 0:
+        if not aci_urls:
             raise Exception("The Cisco ACI check requires at least one url")
 
         username = instance['username']
@@ -60,20 +63,16 @@ class CiscoACICheck(AgentCheck):
 
         cert_key_password = instance.get('cert_key_password')
 
-        timeout = instance.get('timeout', 15)
-        ssl_verify = _is_affirmative(instance.get('ssl_verify', True))
-
         if instance_hash in self._api_cache:
             api = self._api_cache.get(instance_hash)
         else:
             api = Api(
                 aci_urls,
+                self.http,
                 username,
                 password=pwd,
                 cert_name=cert_name,
                 cert_key=cert_key,
-                verify=ssl_verify,
-                timeout=timeout,
                 log=self.log,
                 appcenter=appcenter,
                 cert_key_password=cert_key_password,
@@ -89,7 +88,7 @@ class CiscoACICheck(AgentCheck):
         try:
             api.login()
         except Exception as e:
-            self.log.error("Cannot login to the Cisco ACI: {}".format(e))
+            self.log.error("Cannot login to the Cisco ACI: %s", e)
             self.service_check(
                 SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -104,7 +103,7 @@ class CiscoACICheck(AgentCheck):
             tenant = Tenant(self, api, instance, instance_hash)
             tenant.collect()
         except Exception as e:
-            self.log.error('tenant collection failed: {}'.format(e))
+            self.log.error('tenant collection failed: %s', e)
             self.service_check(
                 SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -118,7 +117,7 @@ class CiscoACICheck(AgentCheck):
             fabric = Fabric(self, api, instance)
             fabric.collect()
         except Exception as e:
-            self.log.error('fabric collection failed: {}'.format(e))
+            self.log.error('fabric collection failed: %s', e)
             self.service_check(
                 SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -132,7 +131,7 @@ class CiscoACICheck(AgentCheck):
             capacity = Capacity(api, instance, check_tags=self.check_tags, gauge=self.gauge, log=self.log)
             capacity.collect()
         except Exception as e:
-            self.log.error('capacity collection failed: {}'.format(e))
+            self.log.error('capacity collection failed: %s', e)
             self.service_check(
                 SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -169,9 +168,8 @@ class CiscoACICheck(AgentCheck):
                 elif obj_type == "rate":
                     self.rate(mname, float(mval), tags=tags_to_send, hostname=hostname)
                 else:
-                    log_line = "Trying to submit metric: {} with unknown type: {}"
-                    log_line = log_line.format(mname, obj_type)
-                    self.log.debug(log_line)
+                    log_line = "Trying to submit metric: %s with unknown type: %s"
+                    self.log.debug(log_line, mname, obj_type)
 
     def get_external_host_tags(self):
         external_host_tags = []

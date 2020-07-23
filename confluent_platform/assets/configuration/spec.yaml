@@ -1,0 +1,40 @@
+name: Confluent Platform
+files:
+- name: confluent_platform.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/jmx
+      overrides:
+        service_check_prefix.required: true
+        service_check_prefix.value.example: confluent
+        service_check_prefix.description: |
+          Service check prefix to use.
+  - template: instances
+    overrides:
+      description: |
+        Every instance is scheduled independent of the others.
+
+        When `collect_default_metrics` is `true`, default metrics are collected for
+        most Kafka / Confluent Platform components:
+          - Broker
+          - Connect
+          - Replicator
+          - Schema Registry
+          - SQL Server
+          - Streams
+          - REST Proxy
+        For each component, you need to create a separate instance to collect its JMX metrics.
+        The list of metrics collected by default are listed in `metrics.yaml`.
+    options:
+    - template: instances/jmx
+  - template: logs
+    example:
+    - type: file
+      path: <CONFLUENT_COMPONENT_PATH>/logs/*.log
+      source: confluent_platform
+      service: <SERVICE_NAME>
+      log_processing_rules:
+      - type: multi_line
+        name: new_log_start_with_date
+        pattern: \[\d{4}\-\d{2}\-\d{2}

@@ -1,5 +1,22 @@
 # CHANGELOG - Kube_controller_manager
 
+## 1.7.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.6.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
+## 1.6.0 / 2020-02-22
+
+* [Added] Add auto_conf.yaml files. See [#5678](https://github.com/DataDog/integrations-core/pull/5678).
+
+## 1.5.0 / 2020-01-13
+
+* [Added] Make OpenMetrics use the RequestsWrapper. See [#5414](https://github.com/DataDog/integrations-core/pull/5414).
+* [Fixed] Fix logger method bug. See [#5395](https://github.com/DataDog/integrations-core/pull/5395).
+
 ## 1.4.0 / 2019-07-19
 
 * [Added] Add telemetry metrics counter by ksm collector. See [#4125](https://github.com/DataDog/integrations-core/pull/4125).

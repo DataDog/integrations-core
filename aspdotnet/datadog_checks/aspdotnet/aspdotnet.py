@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2013-2016
+# (C) Datadog, Inc. 2013-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 try:
@@ -47,5 +47,5 @@ DEFAULT_COUNTERS = [
 
 
 class AspdotnetCheck(PDHBaseCheck):
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        PDHBaseCheck.__init__(self, name, init_config, agentConfig, instances=instances, counter_list=DEFAULT_COUNTERS)
+    def __init__(self, name, init_config, instances=None):
+        super(AspdotnetCheck, self).__init__(name, init_config, instances=instances, counter_list=DEFAULT_COUNTERS)

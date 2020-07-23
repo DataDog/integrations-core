@@ -1,5 +1,34 @@
 # CHANGELOG - elastic
 
+## 1.18.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Added] Add config specs. See [#6773](https://github.com/DataDog/integrations-core/pull/6773).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+
+## 1.17.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.16.1 / 2020-04-04
+
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
+## 1.16.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Added] Add OOTB support for AWS Signature Version 4 Signing. See [#5289](https://github.com/DataDog/integrations-core/pull/5289).
+
+## 1.15.0 / 2019-12-02
+
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
+## 1.14.0 / 2019-10-11
+
+* [Added] Submit version metadata. See [#4724](https://github.com/DataDog/integrations-core/pull/4724).
+* [Added] Add external refresh metrics. See [#4554](https://github.com/DataDog/integrations-core/pull/4554). Thanks [clandry94](https://github.com/clandry94).
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 1.13.2 / 2019-08-30
 
 * [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).

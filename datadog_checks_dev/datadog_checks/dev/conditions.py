@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
@@ -45,7 +45,11 @@ class WaitFor(LazyFunction):
 
             time.sleep(self.wait)
         else:
-            raise RetryError('Result: {}\n' 'Error: {}'.format(repr(last_result), last_error))
+            raise RetryError(
+                'Result: {}\nError: {}\nFunction: {}, Args: {}, Kwargs: {}\n'.format(
+                    repr(last_result), last_error, self.func.__name__, self.args, self.kwargs
+                )
+            )
 
 
 class CheckEndpoints(LazyFunction):
@@ -128,8 +132,12 @@ class CheckCommandOutput(LazyFunction):
 
             time.sleep(self.wait)
         else:
+            patterns = '\t- '.join([''] + [str(p) for p in self.patterns])
             raise RetryError(
-                u'Command: {}\n' u'Exit code: {}\n' u'Captured Output: {}'.format(self.command, exit_code, log_output)
+                u'Command: {}\nFailed to match `{}` of following patterns:\n{}\n'
+                u'Exit code: {}\nCaptured Output: {}'.format(
+                    self.command, self.matches, patterns, exit_code, log_output
+                )
             )
 
 

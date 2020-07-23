@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
@@ -169,6 +169,55 @@ def test_health_event(dd_environment, aggregator, elastic_check):
         assert sorted(aggregator.events[0]['tags']) == sorted(set(['url:{}'.format(URL)] + dummy_tags + CLUSTER_TAG))
     else:
         aggregator.assert_service_check('elasticsearch.cluster_health')
+
+
+@pytest.mark.integration
+def test_metadata(dd_environment, aggregator, elastic_check, instance, version_metadata, datadog_agent):
+    elastic_check.check_id = 'test:123'
+    elastic_check.check(instance)
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'instance, expected_aws_host, expected_aws_service',
+    [
+        pytest.param({}, None, None, id='not aws auth'),
+        pytest.param(
+            {'auth_type': 'aws', 'aws_region': 'foo', 'url': 'http://example.com'},
+            'example.com',
+            'es',
+            id='aws_host_from_url',
+        ),
+        pytest.param(
+            {'auth_type': 'aws', 'aws_region': 'foo', 'aws_host': 'foo.com', 'url': 'http://example.com'},
+            'foo.com',
+            'es',
+            id='aws_host_custom_with_url',
+        ),
+        pytest.param(
+            {'auth_type': 'aws', 'aws_region': 'foo', 'aws_host': 'foo.com'},
+            'foo.com',
+            'es',
+            id='aws_host_custom_no_url',
+        ),
+        pytest.param(
+            {'auth_type': 'aws', 'aws_region': 'foo', 'aws_service': 'es-foo', 'url': 'http://example.com'},
+            'example.com',
+            'es-foo',
+            id='aws_service_custom',
+        ),
+    ],
+)
+def test_aws_auth(instance, expected_aws_host, expected_aws_service):
+    check = ESCheck('elastic', {}, instances=[instance])
+
+    assert getattr(check.http.options.get('auth'), 'aws_host', None) == expected_aws_host
+    assert getattr(check.http.options.get('auth'), 'service', None) == expected_aws_service
+
+    # make sure class attribute HTTP_CONFIG_REMAPPER is not modified
+    assert 'aws_host' not in ESCheck.HTTP_CONFIG_REMAPPER
 
 
 @pytest.mark.e2e

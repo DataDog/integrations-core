@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2018
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
@@ -107,7 +107,7 @@ class CadvisorScraper(object):
             try:
                 self._update_container_metrics(instance, subcontainer, pod_list, pod_list_utils)
             except Exception as e:
-                self.log.error("Unable to collect metrics for container: {0} ({1})".format(c_id, e))
+                self.log.error("Unable to collect metrics for container: %s (%s)", c_id, e)
 
     def _publish_raw_metrics(self, metric, dat, tags, is_pod, depth=0):
         """
@@ -121,7 +121,7 @@ class CadvisorScraper(object):
         :param: depth: current depth of recursion
         """
         if depth >= self.max_depth:
-            self.log.warning('Reached max depth on metric=%s' % metric)
+            self.log.warning('Reached max depth on metric=%s', metric)
             return
 
         if isinstance(dat, numbers.Number):
@@ -180,12 +180,12 @@ class CadvisorScraper(object):
                 )
             )
             if pod_list_utils.is_excluded(cid):
-                self.log.debug("Filtering out " + cid)
+                self.log.debug("Filtering out %s", cid)
                 return
             tags = tagger.tag(replace_container_rt_prefix(cid), tagger.HIGH) or []
 
         if not tags:
-            self.log.debug("Subcontainer {} doesn't have tags, skipping.".format(subcontainer_id))
+            self.log.debug("Subcontainer %s doesn't have tags, skipping.", subcontainer_id)
             return
         tags = list(set(tags + instance.get('tags', [])))
 

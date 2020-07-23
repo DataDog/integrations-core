@@ -1,5 +1,22 @@
 # CHANGELOG - pgbouncer
 
+## 1.10.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Fixed] Support more recent version in metadata. See [#6634](https://github.com/DataDog/integrations-core/pull/6634).
+
+## 1.9.0 / 2020-04-01
+
+* [Added] Adding maxwait_us, total_wait_time, and avg_wait_time metrics. See [#6180](https://github.com/DataDog/integrations-core/pull/6180). Thanks [blaines](https://github.com/blaines).
+* [Added] Add pgbouncer version metadata. See [#5761](https://github.com/DataDog/integrations-core/pull/5761).
+* [Added] Refactor check code. See [#5737](https://github.com/DataDog/integrations-core/pull/5737).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
+## 1.8.0 / 2019-12-02
+
+* [Added] Upgrade psycopg2-binary to 2.8.4. See [#4840](https://github.com/DataDog/integrations-core/pull/4840).
+
 ## 1.7.0 / 2019-07-04
 
 * [Added] Add logs section. See [#3961](https://github.com/DataDog/integrations-core/pull/3961).

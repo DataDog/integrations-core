@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -15,18 +15,17 @@ from .common import APISERVER_INSTANCE_BEARER_TOKEN
 
 customtag = "custom:tag"
 
-minimal_instance = {'prometheus_url': 'localhost:443/metrics'}
+minimal_instance = {'prometheus_url': 'https://localhost:443/metrics'}
+minimal_instance_legacy = {'prometheus_url': 'localhost:443/metrics'}
 
 instance = {
-    'prometheus_url': 'localhost:443/metrics',
+    'prometheus_url': 'https://localhost:443/metrics',
     'bearer_token_auth': 'false',
-    'scheme': 'https',
     'tags': [customtag],
 }
 
 instanceSecure = {
-    'prometheus_url': 'localhost:443/metrics',
-    'scheme': 'https',
+    'prometheus_url': 'https://localhost:443/metrics',
     'bearer_token_auth': 'true',
     'tags': [customtag],
 }
@@ -44,6 +43,14 @@ def mock_get():
             iter_lines=lambda **kwargs: text_data.split("\n"),
             headers={'Content-Type': "text/plain", 'Authorization': "Bearer XXX"},
         ),
+    ):
+        yield
+
+
+@pytest.fixture()
+def mock_read_bearer_token():
+    with mock.patch(
+        'datadog_checks.checks.openmetrics.OpenMetricsBaseCheck._get_bearer_token', return_value="XXX",
     ):
         yield
 
@@ -66,6 +73,15 @@ class TestKubeAPIServerMetrics:
         NAMESPACE + '.apiserver_dropped_requests_total',
         NAMESPACE + '.http_requests_total',
         NAMESPACE + '.authenticated_user_requests',
+        NAMESPACE + '.rest_client_request_latency_seconds.sum',
+        NAMESPACE + '.rest_client_request_latency_seconds.count',
+        NAMESPACE + '.admission_webhook_admission_latencies_seconds.sum',
+        NAMESPACE + '.admission_webhook_admission_latencies_seconds.count',
+        NAMESPACE + '.admission_step_admission_latencies_seconds.sum',
+        NAMESPACE + '.admission_step_admission_latencies_seconds.count',
+        NAMESPACE + '.admission_step_admission_latencies_seconds_summary.sum',
+        NAMESPACE + '.admission_step_admission_latencies_seconds_summary.count',
+        NAMESPACE + '.admission_step_admission_latencies_seconds_summary.quantile',
     ]
     COUNT_METRICS = [
         NAMESPACE + '.audit_event.count',
@@ -81,7 +97,7 @@ class TestKubeAPIServerMetrics:
         Testing kube_apiserver_metrics metrics collection.
         """
 
-        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [instance])
+        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [instance])
         check.check(instance)
 
         # check that we then get the count metrics also
@@ -102,19 +118,37 @@ class TestKubeAPIServerMetrics:
             f.write("XXX")
         instanceSecure["bearer_token_path"] = temp_bearer_file
 
-        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [instanceSecure])
+        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [instanceSecure])
         apiserver_instance = check._create_kube_apiserver_metrics_instance(instanceSecure)
         configured_instance = check.get_scraper_config(apiserver_instance)
 
         os.remove(temp_bearer_file)
         assert configured_instance["_bearer_token"] == APISERVER_INSTANCE_BEARER_TOKEN
 
-    def test_default_config(self, aggregator):
+    def test_default_config(self, aggregator, mock_read_bearer_token):
         """
         Testing the default configuration.
         """
-        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, {}, [minimal_instance])
-        apiserver_instance = check._create_kube_apiserver_metrics_instance(minimal_instance)
+        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [minimal_instance])
+
+        check.process = mock.MagicMock()
+        check.check(minimal_instance)
+
+        apiserver_instance = check.kube_apiserver_config
+
+        assert not apiserver_instance["ssl_verify"]
+        assert apiserver_instance["bearer_token_auth"]
+        assert apiserver_instance["prometheus_url"] == "https://localhost:443/metrics"
+
+    def test_default_config_legacy(self, aggregator, mock_read_bearer_token):
+        """
+        Testing the default legacy configuration.
+        """
+        check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [minimal_instance_legacy])
+        check.process = mock.MagicMock()
+        check.check(minimal_instance_legacy)
+
+        apiserver_instance = check.kube_apiserver_config
 
         assert not apiserver_instance["ssl_verify"]
         assert apiserver_instance["bearer_token_auth"]

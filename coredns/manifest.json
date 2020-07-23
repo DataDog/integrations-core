@@ -14,7 +14,9 @@
   "public_title": "Datadog-CoreDNS Integration",
   "categories": [
     "containers",
-    "network"
+    "network",
+    "autodiscovery",
+    "log collection"
   ],
   "type": "check",
   "aliases": [],

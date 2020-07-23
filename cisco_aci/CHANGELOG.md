@@ -1,5 +1,36 @@
 # CHANGELOG - cisco_aci
 
+## 1.10.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
+## 1.9.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Add config spec. See [#6314](https://github.com/DataDog/integrations-core/pull/6314).
+
+## 1.8.4 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
+## 1.8.3 / 2020-02-22
+
+* [Fixed] Update request wrapper with password and A6 signature. See [#5684](https://github.com/DataDog/integrations-core/pull/5684).
+
+## 1.8.2 / 2019-12-27
+
+* [Fixed] Ensure only one session object per url. See [#5334](https://github.com/DataDog/integrations-core/pull/5334).
+
+## 1.8.1 / 2019-12-02
+
+* [Fixed] Use RequestsWrapper. See [#5037](https://github.com/DataDog/integrations-core/pull/5037).
+
+## 1.8.0 / 2019-11-20
+
+* [Added] Upgrade cryptography to 2.8. See [#5047](https://github.com/DataDog/integrations-core/pull/5047).
+* [Fixed] Refresh auth token when it expires. See [#5039](https://github.com/DataDog/integrations-core/pull/5039).
+* [Added] Standardize logging format. See [#4902](https://github.com/DataDog/integrations-core/pull/4902).
+
 ## 1.7.2 / 2019-08-24
 
 * [Fixed] Use utcnow instead of now. See [#4192](https://github.com/DataDog/integrations-core/pull/4192).

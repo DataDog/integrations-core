@@ -4,7 +4,8 @@
     "orchestration",
     "configuration & deployment",
     "notification",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": true,
   "display_name": "Consul",
@@ -31,6 +32,9 @@
   "type": "check",
   "integration_id": "consul",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json"

@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   redis-standalone:
-    image: "tutum/riak"
+    image: "basho/riak-kv:ubuntu-2.2.0"
     volumes:
       - ${RIAK_CONFIG}/app.config:/etc/riak/app.config
       - ${RIAK_CONFIG}/riak.conf:/etc/riak/riak.conf

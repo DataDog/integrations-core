@@ -1,5 +1,46 @@
 # CHANGELOG - kubernetes_state
 
+## 5.5.0 / 2020-06-29
+
+* [Added] Refactor to use Agent 6+ signature. See [#6906](https://github.com/DataDog/integrations-core/pull/6906).
+* [Fixed] Fix debug log line for job metrics. See [#6700](https://github.com/DataDog/integrations-core/pull/6700).
+* [Fixed] Fix issue when the storage class of a persistent volume is empty and add test. See [#6615](https://github.com/DataDog/integrations-core/pull/6615).
+
+## 5.4.1 / 2020-05-21
+
+* [Fixed] Document join_standard_tags setting in conf.example.yaml. See [#6707](https://github.com/DataDog/integrations-core/pull/6707).
+
+## 5.4.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Introduce join_standard_tags setting. See [#6253](https://github.com/DataDog/integrations-core/pull/6253).
+* [Fixed] Remove use of `label_to_match` to prevent deprecation warnings. See [#6503](https://github.com/DataDog/integrations-core/pull/6503).
+
+## 5.3.0 / 2020-04-04
+
+* [Added] Allow automatic joins to all kube_{object}_labels in KSM check. See [#5650](https://github.com/DataDog/integrations-core/pull/5650).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Do not fail on octet stream content type for OpenMetrics. See [#5843](https://github.com/DataDog/integrations-core/pull/5843).
+
+## 5.2.1 / 2020-02-27
+
+* [Fixed] Fix type error. See [#5904](https://github.com/DataDog/integrations-core/pull/5904).
+
+## 5.2.0 / 2020-02-22
+
+* [Added] Add an option to enable KSM experimental metrics and add some new metrics from KSM 1.9. See [#5447](https://github.com/DataDog/integrations-core/pull/5447).
+* [Fixed] Fix metric validation. See [#5581](https://github.com/DataDog/integrations-core/pull/5581).
+
+## 5.1.0 / 2020-01-13
+
+* [Fixed] Fix logger method bug. See [#5395](https://github.com/DataDog/integrations-core/pull/5395).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 5.0.0 / 2019-12-02
+
+* [Changed] Improves tagging compliancy. See [#5105](https://github.com/DataDog/integrations-core/pull/5105).
+* [Fixed] Fix job metrics. See [#4943](https://github.com/DataDog/integrations-core/pull/4943).
+
 ## 4.7.1 / 2019-08-26
 
 * [Fixed] Properly ignore `kube_pod_created` and `kube_pod_container_info`. See [#4435](https://github.com/DataDog/integrations-core/pull/4435).
@@ -8,7 +49,7 @@
 
 * [Added] Grab kube_node_info as kubernetes_state.node.count. See [#4383](https://github.com/DataDog/integrations-core/pull/4383). Thanks [therc](https://github.com/therc).
 * [Added] Add VPA metrics to kubernetes_state integration. See [#4353](https://github.com/DataDog/integrations-core/pull/4353). Thanks [dturn](https://github.com/dturn).
-* [Fixed] Fix KSM job metrics. See [#4224](https://github.com/DataDog/integrations-core/pull/4224).
+* [Fixed] Fix job metrics. See [#4224](https://github.com/DataDog/integrations-core/pull/4224).
 
 ## 4.6.1 / 2019-07-19
 
@@ -21,7 +62,7 @@
 
 ## 4.5.0 / 2019-07-13
 
-* [Added] Telemetry check's metrics. See [#4025](https://github.com/DataDog/integrations-core/pull/4025). Thanks [clamoriniere](https://github.com/clamoriniere).
+* [Added] Telemetry check's metrics. See [#4025](https://github.com/DataDog/integrations-core/pull/4025).
 
 ## 4.4.1 / 2019-06-19
 
@@ -68,7 +109,7 @@
 * [Added] Add cluster-name suffix to node-names in kubernetes state. See [#2069][14].
 * [Added] Limit Prometheus/OpenMetrics checks to 2000 metrics per run by default. See [#2093][15].
 * [Added] Add `pod:` tags to kubernetes_state status reason metrics. See [#1884][16].
-* [Deprecated] [KSM] Deprecate sending pod phase service checks. See [#2029][17].
+* [Deprecated] Deprecate sending pod phase service checks. See [#2029][17].
 * [Added] Add kubernetes persistentvolume metrics. See [#1932][18]. Thanks [Devatoria][19].
 * [Added] Map kube_endpoint metrics. See [#2001][20]. Thanks [mariuscoto][21].
 * [Fixed] Lower case reasons before matching container.status_report.count.* metrics. See [#1949][22].
@@ -169,9 +210,9 @@
 [30]: https://github.com/DataDog/integrations-core/pull/1727
 [31]: https://github.com/DataDog/integrations-core/pull/1664
 [32]: https://github.com/DataDog/datadog-agent/issues/1523
-[33]: 
+[33]: https://github.com/DataDog/integrations-core/pull/1277
 [34]: https://github.com/DataDog/integrations-core/issues/1137
-[35]: 
+[35]: https://github.com/DataDog/integrations-core/issues/1195
 [36]: https://github.com/DataDog/integrations-core/issues/1040
 [37]: https://github.com/DataDog/integrations-core/issues/1000
 [38]: https://github.com/DataDog/integrations-core/issues/874

@@ -1,0 +1,24 @@
+# https://github.com/DataDog/slapr
+
+name: Slack emoji PR updates
+on:
+  pull_request_review:
+    types: [submitted]
+  pull_request:
+    types: [closed]
+
+jobs:
+  run_slapr:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: DataDog/slapr@master
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        SLACK_CHANNEL_ID: "${{ secrets.SLACK_CHANNEL_ID }}"
+        SLACK_API_TOKEN: "${{ secrets.SLACK_API_TOKEN }}"
+        SLAPR_BOT_USER_ID: "${{ secrets.SLAPR_BOT_USER_ID }}"
+        SLAPR_EMOJI_REVIEW_STARTED: "review_started"
+        SLAPR_EMOJI_APPROVED: "approved2"
+        SLAPR_EMOJI_CHANGES_REQUESTED: "changes_requested"
+        SLAPR_EMOJI_MERGED: "merged"
+        SLAPR_EMOJI_CLOSED: "closed"

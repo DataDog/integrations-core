@@ -1,7 +1,8 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+import sys
 
 from ..errors import ManifestError
 from ..subprocess import run_command
@@ -19,7 +20,10 @@ def get_release_tag_string(check_name, version_string):
     """
     Compose a string to use for release tags
     """
-    return '{}-{}'.format(check_name, version_string)
+    if check_name:
+        return f'{check_name}-{version_string}'
+    else:
+        return version_string
 
 
 def update_version_module(check_name, old_ver, new_ver):
@@ -44,7 +48,7 @@ def get_package_name(folder_name):
     elif folder_name == 'datadog_checks_downloader':
         return 'datadog-checks-downloader'
 
-    return '{}{}'.format(DATADOG_PACKAGE_PREFIX, folder_name.replace('_', '-'))
+    return f"{DATADOG_PACKAGE_PREFIX}{folder_name.replace('_', '-')}"
 
 
 def get_folder_name(package_name):
@@ -69,26 +73,26 @@ def get_agent_requirement_line(check, version):
 
     # no manifest
     if check in ('datadog_checks_base', 'datadog_checks_downloader'):
-        return '{}=={}'.format(package_name, version)
+        return f'{package_name}=={version}'
 
     m = load_manifest(check)
     platforms = sorted(m.get('supported_os', []))
 
     # all platforms
     if platforms == ALL_PLATFORMS:
-        return '{}=={}'.format(package_name, version)
+        return f'{package_name}=={version}'
     # one specific platform
     elif len(platforms) == 1:
-        return "{}=={}; sys_platform == '{}'".format(package_name, version, PLATFORMS_TO_PY.get(platforms[0]))
+        return f"{package_name}=={version}; sys_platform == '{PLATFORMS_TO_PY.get(platforms[0])}'"
     elif platforms:
         if 'windows' not in platforms:
-            return "{}=={}; sys_platform != 'win32'".format(package_name, version)
+            return f"{package_name}=={version}; sys_platform != 'win32'"
         elif 'mac_os' not in platforms:
-            return "{}=={}; sys_platform != 'darwin'".format(package_name, version)
+            return f"{package_name}=={version}; sys_platform != 'darwin'"
         elif 'linux' not in platforms:
-            return "{}=={}; sys_platform != 'linux2'".format(package_name, version)
+            return f"{package_name}=={version}; sys_platform != 'linux2'"
 
-    raise ManifestError("Can't parse the `supported_os` list for the check {}: {}".format(check, platforms))
+    raise ManifestError(f"Can't parse the `supported_os` list for the check {check}: {platforms}")
 
 
 def update_agent_requirements(req_file, check, newline):
@@ -102,7 +106,7 @@ def update_agent_requirements(req_file, check, newline):
         current_package_name = line.split('==')[0]
 
         if current_package_name == package_name:
-            lines[i] = '{}\n'.format(newline)
+            lines[i] = f'{newline}\n'
             break
 
     write_file_lines(req_file, sorted(lines))
@@ -110,12 +114,18 @@ def update_agent_requirements(req_file, check, newline):
 
 def build_package(package_path, sdist):
     with chdir(package_path):
-        result = run_command('python setup.py bdist_wheel --universal', capture='out')
+        # Clean up: Files built previously and now deleted might still persist in build directory
+        # and will be included in the final wheel. Cleaning up before avoids that.
+        result = run_command([sys.executable, 'setup.py', 'clean', '--all'], capture='out')
+        if result.code != 0:
+            return result
+
+        result = run_command([sys.executable, 'setup.py', 'bdist_wheel', '--universal'], capture='out')
         if result.code != 0:
             return result
 
         if sdist:
-            result = run_command('python setup.py sdist', capture='out')
+            result = run_command([sys.executable, 'setup.py', 'sdist'], capture='out')
             if result.code != 0:
                 return result
 

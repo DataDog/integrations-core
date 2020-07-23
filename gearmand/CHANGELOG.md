@@ -1,5 +1,22 @@
 # CHANGELOG - gearmand
 
+## 1.6.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.5.0 / 2020-04-04
+
+* [Added] Collect version metadata. See [#5927](https://github.com/DataDog/integrations-core/pull/5927).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
+## 1.4.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 1.3.1 / 2019-10-11
+
+* [Fixed] Fix misleading gearman.workers metric (#4515). See [#4520](https://github.com/DataDog/integrations-core/pull/4520). Thanks [orgito](https://github.com/orgito).
+
 ## 1.3.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3508](https://github.com/DataDog/integrations-core/pull/3508).

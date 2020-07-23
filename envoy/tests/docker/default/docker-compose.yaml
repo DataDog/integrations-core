@@ -3,7 +3,7 @@ version: '3'
 services:
 
   front-envoy:
-    image: envoyproxy/envoy:${ENVOY_VERSION}
+    image: envoyproxy/envoy:v${ENVOY_VERSION}
     command: ["/usr/local/bin/envoy", "-c", "/etc/front-envoy.yaml", "--service-cluster", "front-proxy"]
     volumes:
       - ./front-envoy.yaml:/etc/front-envoy.yaml
@@ -15,6 +15,17 @@ services:
     ports:
       - "8000:80"
       - "8001:8001"
+
+  xds:
+    build:
+      context: .
+      dockerfile: Dockerfile-xds
+    networks:
+      envoymesh:
+        aliases:
+          - xds
+    expose:
+      - "8080"
 
   service1:
     build:

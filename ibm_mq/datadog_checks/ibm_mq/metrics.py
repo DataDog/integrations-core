@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -8,6 +8,12 @@ try:
     import pymqi
 except ImportError:
     pymqi = None
+
+# Metric types
+GAUGE = 'gauge'
+COUNT = 'count'
+
+METRIC_PREFIX = 'ibm_mq'
 
 
 def queue_metrics():
@@ -45,7 +51,19 @@ def queue_metrics():
 
 
 def pcf_metrics():
-    return {'oldest_message_age': {'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE, 'failure': -1}}
+    return {
+        'oldest_message_age': {'pymqi_value': pymqi.CMQCFC.MQIACF_OLDEST_MSG_AGE, 'failure': -1},
+        'uncommitted_msgs': {'pymqi_value': pymqi.CMQCFC.MQIACF_UNCOMMITTED_MSGS, 'failure': -1},
+    }
+
+
+def pcf_status_reset_metrics():
+    return {
+        'high_q_depth': (pymqi.CMQC.MQIA_HIGH_Q_DEPTH, GAUGE),
+        'msg_deq_count': (pymqi.CMQC.MQIA_MSG_DEQ_COUNT, COUNT),
+        'msg_enq_count': (pymqi.CMQC.MQIA_MSG_ENQ_COUNT, COUNT),
+        'time_since_reset': (pymqi.CMQC.MQIA_TIME_SINCE_RESET, COUNT),
+    }
 
 
 def queue_manager_metrics():
@@ -56,10 +74,55 @@ def channel_metrics():
     return {
         'batch_size': pymqi.CMQCFC.MQIACH_BATCH_SIZE,
         'batch_interval': pymqi.CMQCFC.MQIACH_BATCH_INTERVAL,
-        'long_retry_count': pymqi.CMQCFC.MQIACH_LONG_RETRY,
-        'long_retry_interval': pymqi.CMQCFC.MQIACH_LONG_TIMER,
+        'long_retry': pymqi.CMQCFC.MQIACH_LONG_RETRY,
+        'long_timer': pymqi.CMQCFC.MQIACH_LONG_TIMER,
         'max_message_length': pymqi.CMQCFC.MQIACH_MAX_MSG_LENGTH,
-        'short_retry_count': pymqi.CMQCFC.MQIACH_SHORT_RETRY,
+        'short_retry': pymqi.CMQCFC.MQIACH_SHORT_RETRY,
+        'disc_interval': pymqi.CMQCFC.MQIACH_DISC_INTERVAL,
+        'hb_interval': pymqi.CMQCFC.MQIACH_HB_INTERVAL,
+        'keep_alive_interval': pymqi.CMQCFC.MQIACH_KEEP_ALIVE_INTERVAL,
+        'mr_count': pymqi.CMQCFC.MQIACH_MR_COUNT,
+        'mr_interval': pymqi.CMQCFC.MQIACH_MR_INTERVAL,
+        'network_priority': pymqi.CMQCFC.MQIACH_NETWORK_PRIORITY,
+        'npm_speed': pymqi.CMQCFC.MQIACH_NPM_SPEED,
+        'sharing_conversations': pymqi.CMQCFC.MQIACH_SHARING_CONVERSATIONS,
+        'short_timer': pymqi.CMQCFC.MQIACH_SHORT_TIMER,
+    }
+
+
+def channel_status_metrics():
+    return {
+        'buffers_rcvd': pymqi.CMQCFC.MQIACH_BUFFERS_RCVD,
+        'buffers_sent': pymqi.CMQCFC.MQIACH_BUFFERS_SENT,
+        'bytes_rcvd': pymqi.CMQCFC.MQIACH_BYTES_RCVD,
+        'bytes_sent': pymqi.CMQCFC.MQIACH_BYTES_SENT,
+        'channel_status': pymqi.CMQCFC.MQIACH_CHANNEL_STATUS,
+        'mca_status': pymqi.CMQCFC.MQIACH_MCA_STATUS,
+        'msgs': pymqi.CMQCFC.MQIACH_MSGS,
+        'ssl_key_resets': pymqi.CMQCFC.MQIACH_SSL_KEY_RESETS,
+        'batches': pymqi.CMQCFC.MQIACH_BATCHES,
+        'current_msgs': pymqi.CMQCFC.MQIACH_CURRENT_MSGS,
+        'indoubt_status': pymqi.CMQCFC.MQIACH_INDOUBT_STATUS,
+    }
+
+
+def channel_stats_metrics():
+    return {
+        # Most stats metrics are count since we want to add up the values
+        # if there are multiple messages of same type for a single check run.
+        'msgs': (pymqi.CMQCFC.MQIAMO_MSGS, COUNT),
+        'bytes': (pymqi.CMQCFC.MQIAMO64_BYTES, COUNT),
+        'put_retries': (pymqi.CMQCFC.MQIAMO_PUT_RETRIES, COUNT),
+        # Following metrics are currently not covered by e2e tests
+        'full_batches': (pymqi.CMQCFC.MQIAMO_FULL_BATCHES, COUNT),
+        'incomplete_batches': (pymqi.CMQCFC.MQIAMO_INCOMPLETE_BATCHES, COUNT),
+        'avg_batch_size': (pymqi.CMQCFC.MQIAMO_AVG_BATCH_SIZE, GAUGE),
+    }
+
+
+def queue_stats_metrics():
+    return {
+        'q_min_depth': (pymqi.CMQCFC.MQIAMO_Q_MIN_DEPTH, GAUGE),
     }
 
 
@@ -71,6 +134,6 @@ def depth_percent(queue_info):
     depth_max = queue_info[pymqi.CMQC.MQIA_MAX_Q_DEPTH]
 
     depth_fraction = depth_current / depth_max
-    depth_percent = depth_fraction * 100
+    depth_as_percent = depth_fraction * 100
 
-    return depth_percent
+    return depth_as_percent

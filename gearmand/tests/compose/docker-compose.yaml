@@ -1,6 +1,6 @@
 version: '2'
 services:
   gearman:
-    image: kendu/gearman
+    image: ${DOCKER_IMAGE}:${DOCKER_TAG}
     ports:
       - 15440:4730

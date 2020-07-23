@@ -117,6 +117,8 @@ elasticsearch.primaries.merges.total.size,gauge,,byte,,The total size of all mer
 elasticsearch.primaries.merges.total.time,gauge,,second,,The total time spent on segment merging on the primary shards.,0,elasticsearch,primary merge total time
 elasticsearch.primaries.refresh.total,gauge,,refresh,,The total number of index refreshes on the primary shards.,0,elasticsearch,primary refresh total
 elasticsearch.primaries.refresh.total.time,gauge,,second,,The total time spent on index refreshes on the primary shards.,0,elasticsearch,primary refresh total time
+elasticsearch.primaries.refresh.external_total,gauge,,refresh,,The total number of external index refreshes on the primary shards.,0,elasticsearch,primary refresh total
+elasticsearch.primaries.refresh.external_total.time,gauge,,second,,The total time spent on external index refreshes on the primary shards.,0,elasticsearch,primary refresh total time
 elasticsearch.primaries.search.fetch.current,gauge,,fetch,,The number of query fetches currently running on the primary shards.,0,elasticsearch,primary current fetches
 elasticsearch.primaries.search.fetch.time,gauge,,second,,The total time spent on query fetches on the primary shards.,0,elasticsearch,primary fetch total time
 elasticsearch.primaries.search.fetch.total,gauge,,fetch,,The total number of query fetches on the primary shards.,0,elasticsearch,primary fetch total
@@ -127,6 +129,8 @@ elasticsearch.primaries.store.size,gauge,,byte,,The total size of all the primar
 elasticsearch.process.open_fd,gauge,,file,,"The number of opened file descriptors associated with the current process, or -1 if not supported.",0,elasticsearch,open file descriptors
 elasticsearch.refresh.total,gauge,,refresh,,The total number of index refreshes.,0,elasticsearch,total refreshes
 elasticsearch.refresh.total.time,gauge,,second,,The total time spent on index refreshes.,0,elasticsearch,total refresh time
+elasticsearch.refresh.external_total,gauge,,refresh,,The total number of external index refreshes.,0,elasticsearch,total refreshes
+elasticsearch.refresh.external_total.time,gauge,,second,,The total time spent on external index refreshes.,0,elasticsearch,total refresh time
 elasticsearch.relocating_shards,gauge,,shard,,The number of shards that are relocating from one node to another.,0,elasticsearch,relocating shards
 elasticsearch.search.fetch.current,gauge,,fetch,,The number of search fetches currently running.,0,elasticsearch,current fetches
 elasticsearch.search.fetch.open_contexts,gauge,,query,,The number of active searches.,0,elasticsearch,active searches

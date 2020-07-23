@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -7,8 +7,7 @@ import socket
 
 from six import BytesIO
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.utils.common import ensure_bytes, ensure_unicode
+from datadog_checks.base import AgentCheck, ensure_bytes, ensure_unicode
 
 SERVICE_CHECK_NAME = "statsd.can_connect"
 SERVICE_CHECK_NAME_HEALTH = "statsd.is_up"

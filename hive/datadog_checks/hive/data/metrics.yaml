@@ -29,7 +29,7 @@ jmx_metrics:
         Value:
           alias: hive.server.session.open
           metric_type: gauge
-  
+
   - include:
       bean: metrics:name=hs2_avg_open_session_time
       attribute:
@@ -108,7 +108,7 @@ jmx_metrics:
         Count:
           alias: hive.server.api.queries.executing.active_call
           metric_type: gauge
-  
+
   - include:
       bean: metrics:name=hs2_executing_queries
       attribute:
@@ -210,7 +210,7 @@ jmx_metrics:
         MeanRate:
           alias: hive.server.api.sql_operation.running.meanrate
           metric_type: rate
-  
+
   # Completed
   - include:
       bean: metrics:name=hs2_completed_sql_operation_CLOSED
@@ -456,7 +456,7 @@ jmx_metrics:
         Count:
           alias: hive.metastore.db.deleted
           metric_type: monotonic_count
-    
+
   - include:
       bean: metrics:name=init_total_count_dbs
       attribute:
@@ -477,7 +477,7 @@ jmx_metrics:
         Count:
           alias: hive.metastore.table.deleted
           metric_type: monotonic_count
-  
+
   - include:
       bean: metrics:name=init_total_count_tables
       attribute:
@@ -498,7 +498,7 @@ jmx_metrics:
         Count:
           alias: hive.metastore.partition.deleted
           metric_type: monotonic_count
-  
+
   - include:
       bean: metrics:name=init_total_count_partitions
       attribute:
@@ -507,7 +507,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
-      bean: directsql_errors
+      bean: metrics:name=directsql_errors
       attribute:
         Count:
           alias: hive.metastore.directsql_errors

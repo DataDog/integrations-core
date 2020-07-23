@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import absolute_import
@@ -11,7 +11,11 @@ import tox.config
 STYLE_CHECK_ENV_NAME = 'style'
 STYLE_FORMATTER_ENV_NAME = 'format_style'
 STYLE_FLAG = 'dd_check_style'
+TYPES_FLAG = 'dd_check_types'
+MYPY_ARGS_OPTION = 'dd_mypy_args'
 E2E_READY_CONDITION = 'e2e ready if'
+FIX_DEFAULT_ENVDIR_FLAG = 'ensure_default_envdir'
+ISORT_DEP = 'isort[pyproject]==4.3.21'  # cap isort due to https://github.com/timothycrosley/isort/issues/1278
 
 
 @tox.hookimpl
@@ -21,11 +25,12 @@ def tox_configure(config):
     For an example, see: https://github.com/tox-dev/tox-travis
     """
     sections = config._cfg.sections
+    base_testenv = sections.get('testenv', {})
 
     # Default to false so:
     # 1. we don't affect other projects using tox
     # 2. check migrations can happen gradually
-    if str(sections.get('testenv', {}).get(STYLE_FLAG, 'false')).lower() == 'true':
+    if str(base_testenv.get(STYLE_FLAG, 'false')).lower() == 'true':
         # Disable flake8 since we already include that
         config.envlist[:] = [env for env in config.envlist if not env.endswith('flake8')]
 
@@ -35,8 +40,18 @@ def tox_configure(config):
         add_style_checker(config, sections, make_envconfig, reader)
         add_style_formatter(config, sections, make_envconfig, reader)
 
+    # Workaround for https://github.com/tox-dev/tox/issues/1593
+    #
+    # Do this only after all dynamic environments have been created
+    if str(base_testenv.get(FIX_DEFAULT_ENVDIR_FLAG, 'false')).lower() == 'true':
+        for env_name, env_config in config.envconfigs.items():
+            if env_config.envdir == config.toxinidir:
+                env_config.envdir = config.toxworkdir / env_name
+                env_config.envlogdir = env_config.envdir / 'log'
+                env_config.envtmpdir = env_config.envdir / 'tmp'
+
     # Conditionally set 'e2e ready' depending on env variables
-    description = sections.get('testenv', {}).get('description')
+    description = base_testenv.get('description')
     if description and E2E_READY_CONDITION in description:
         data, var = description.split(' if ')
         if var in os.environ:
@@ -51,14 +66,41 @@ def tox_configure(config):
 def add_style_checker(config, sections, make_envconfig, reader):
     # testenv:style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_CHECK_ENV_NAME)
+
+    dependencies = [
+        'flake8',
+        'flake8-bugbear',
+        'flake8-logging-format',
+        'black',
+        ISORT_DEP,
+    ]
+
+    commands = [
+        'flake8 --config=../.flake8 .',
+        'black --check --diff .',
+        'isort --check-only --diff --recursive .',
+    ]
+
+    if sections['testenv'].get(TYPES_FLAG, 'false').lower() == 'true':
+        # For command line options accepted by mypy, see: https://mypy.readthedocs.io/en/stable/command_line.html
+        # Each integration should explicitly specify its options and which files it'd like to type check, which is
+        # why we're defaulting to 'no arguments' by default.
+        mypy_args = sections['testenv'].get(MYPY_ARGS_OPTION, '')
+
+        # Allow using multiple lines for enhanced readability in case of large amount of options/files to check.
+        mypy_args = mypy_args.replace('\n', ' ')
+
+        dependencies.append('mypy==0.770')  # Use a pinned version to avoid large-scale CI breakage on new releases.
+        commands.append('mypy --config-file=../mypy.ini {}'.format(mypy_args))
+
     sections[section] = {
         'platform': 'linux|darwin|win32',
-        # These tools require Python 3.6+
+        # Tools used here require Python 3.6+
         # more info: https://github.com/ambv/black/issues/439#issuecomment-411429907
         'basepython': 'python3',
         'skip_install': 'true',
-        'deps': 'flake8\nflake8-bugbear\nblack\nisort[pyproject]>=4.3.15',
-        'commands': 'flake8 --config=../.flake8 .\nblack --check --diff .\nisort --check-only --diff --recursive .',
+        'deps': '\n'.join(dependencies),
+        'commands': '\n'.join(commands),
     }
 
     # Always add the environment configurations
@@ -74,15 +116,28 @@ def add_style_checker(config, sections, make_envconfig, reader):
 def add_style_formatter(config, sections, make_envconfig, reader):
     # testenv:format_style
     section = '{}{}'.format(tox.config.testenvprefix, STYLE_FORMATTER_ENV_NAME)
+    dependencies = [
+        'flake8',
+        'black',
+        ISORT_DEP,
+    ]
     sections[section] = {
         'platform': 'linux|darwin|win32',
         # These tools require Python 3.6+
         # more info: https://github.com/ambv/black/issues/439#issuecomment-411429907
         'basepython': 'python3',
         'skip_install': 'true',
-        'deps': 'black\nisort[pyproject]>=4.3.15',
+        'deps': '\n'.join(dependencies),
         # Run formatter AFTER sorting imports
-        'commands': 'isort --recursive .\nblack .',
+        'commands': '\n'.join(
+            [
+                'isort --recursive .',
+                'black .',
+                'python -c "print(\'\\n[NOTE] flake8 may still report style errors for things black cannot fix, '
+                'these will need to be fixed manually.\')"',
+                'flake8 --config=../.flake8 .',
+            ]
+        ),
     }
 
     # Always add the environment configurations

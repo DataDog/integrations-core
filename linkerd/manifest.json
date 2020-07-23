@@ -1,6 +1,7 @@
 {
   "categories": [
-    "web"
+    "web",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "Linkerd",
@@ -23,7 +24,9 @@
   "integration_id": "linkerd",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Linkerd - Overview": "assets/dashboards/overview.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

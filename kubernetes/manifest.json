@@ -10,7 +10,7 @@
   "is_public": true,
   "maintainer": "help@datadoghq.com",
   "manifest_version": "1.0.0",
-  "metric_prefix": "kubernetes.",
+  "metric_prefix": "kubernetes",
   "metric_to_check": "kubernetes.cpu.usage.total",
   "name": "kubernetes",
   "public_title": "Datadog-Kubernetes Integration",
@@ -24,7 +24,11 @@
   "integration_id": "kubernetes",
   "assets": {
     "monitors": {},
-    "dashboards": {},
+    "dashboards": {
+      "Kubernetes - Pods": "assets/dashboards/kubernetes_pods.json",
+      "Kubernetes Nodes Overview": "assets/dashboards/kubernetes_nodes.json",
+      "Kubernetes Deployments Overview": "assets/dashboards/kubernetes_deployments.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

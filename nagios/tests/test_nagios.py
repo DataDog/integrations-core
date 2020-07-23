@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
@@ -33,7 +33,7 @@ class TestEventLogTailer:
         )
 
         # Set up the check
-        nagios = NagiosCheck(CHECK_NAME, {}, {}, config['instances'])
+        nagios = NagiosCheck(CHECK_NAME, {}, config['instances'])
 
         # Run the check once
         nagios.check(config['instances'][0])
@@ -104,7 +104,7 @@ class TestEventLogTailer:
         config, nagios_cfg = get_config("log_file={}\n".format(log_file.name), events=True)
 
         # Set up the check
-        nagios = NagiosCheck(CHECK_NAME, {}, {}, config['instances'])
+        nagios = NagiosCheck(CHECK_NAME, {}, config['instances'])
 
         for _ in range(ITERATIONS):
             log_file.write(test_data)
@@ -190,7 +190,7 @@ class TestPerfDataTailer:
         )
 
         # Set up the check
-        nagios = NagiosCheck(CHECK_NAME, {}, {}, config['instances'])
+        nagios = NagiosCheck(CHECK_NAME, {}, config['instances'])
 
         # Run the check once
         nagios.check(config['instances'][0])
@@ -230,7 +230,7 @@ class TestPerfDataTailer:
         )
 
         # Set up the check
-        nagios = NagiosCheck(CHECK_NAME, {}, {}, config['instances'])
+        nagios = NagiosCheck(CHECK_NAME, {}, config['instances'])
 
         # Run the check once
         nagios.check(config['instances'][0])
@@ -270,7 +270,7 @@ class TestPerfDataTailer:
         )
 
         # Set up the check
-        nagios = NagiosCheck(CHECK_NAME, {}, {}, config['instances'])
+        nagios = NagiosCheck(CHECK_NAME, {}, config['instances'])
 
         # Run the check once
         nagios.check(config['instances'][0])
@@ -314,7 +314,7 @@ class TestPerfDataTailer:
         )
 
         # Set up the check
-        nagios = NagiosCheck(CHECK_NAME, {}, {}, config['instances'])
+        nagios = NagiosCheck(CHECK_NAME, {}, config['instances'])
 
         # Run the check once
         nagios.check(config['instances'][0])
@@ -379,7 +379,7 @@ class TestPerfDataTailer:
         )
 
         # Set up the check
-        nagios = NagiosCheck(CHECK_NAME, {}, {}, config['instances'])
+        nagios = NagiosCheck(CHECK_NAME, {}, config['instances'])
 
         # Run the check once
         nagios.check(config['instances'][0])

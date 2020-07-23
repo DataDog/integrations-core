@@ -1,5 +1,31 @@
 # CHANGELOG - postfix
 
+## 1.7.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.6.2 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
+## 1.6.1 / 2020-02-22
+
+* [Fixed] Fix possible IndexError. See [#5494](https://github.com/DataDog/integrations-core/pull/5494).
+
+## 1.6.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 1.5.1 / 2019-12-04
+
+* [Fixed] Properly collect metadata when `postqueue` is false. See [#5142](https://github.com/DataDog/integrations-core/pull/5142).
+
+## 1.5.0 / 2019-12-02
+
+* [Added] Add version metadata. See [#4949](https://github.com/DataDog/integrations-core/pull/4949).
+
 ## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3556](https://github.com/DataDog/integrations-core/pull/3556).

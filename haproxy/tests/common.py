@@ -2,15 +2,37 @@ import os
 
 import pytest
 
-from datadog_checks.dev.utils import ON_LINUX
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
+from datadog_checks.dev.utils import ON_LINUX, ON_MACOS
 
 AGG_STATUSES_BY_SERVICE = (
-    (['status:available', 'service:a'], 1),
-    (['status:available', 'service:b'], 4),
-    (['status:unavailable', 'service:b'], 2),
-    (['status:available', 'service:be_edge_http_sre-production_elk-kibana'], 1),
-    (['status:unavailable', 'service:be_edge_http_sre-production_elk-kibana'], 2),
+    (['status:available', 'service:a', 'haproxy_service:a'], 1),
+    (['status:available', 'service:b', 'haproxy_service:b'], 4),
+    (['status:unavailable', 'service:b', 'haproxy_service:b'], 2),
+    (
+        [
+            'status:available',
+            'service:be_edge_http_sre-production_elk-kibana',
+            'haproxy_service:be_edge_http_sre-production_elk-kibana',
+        ],
+        1,
+    ),
+    (
+        [
+            'status:unavailable',
+            'service:be_edge_http_sre-production_elk-kibana',
+            'haproxy_service:be_edge_http_sre-production_elk-kibana',
+        ],
+        2,
+    ),
+)
+
+AGG_STATUSES_BY_SERVICE_DISABLE_SERVICE_TAG = (
+    (['status:available', 'haproxy_service:a'], 1),
+    (['status:available', 'haproxy_service:b'], 4),
+    (['status:unavailable', 'haproxy_service:b'], 2),
+    (['status:available', 'haproxy_service:be_edge_http_sre-production_elk-kibana'], 1),
+    (['status:unavailable', 'haproxy_service:be_edge_http_sre-production_elk-kibana'], 2),
 )
 
 AGG_STATUSES = ((['status:available'], 6), (['status:unavailable'], 4))
@@ -29,10 +51,21 @@ STATS_URL_OPEN = "{0}/stats".format(BASE_URL_OPEN)
 STATS_SOCKET = "tcp://{0}:{1}".format(HOST, SOCKET_PORT)
 USERNAME = 'datadog'
 PASSWORD = 'isdevops'
+HAPROXY_VERSION = os.getenv('HAPROXY_VERSION')
 
-platform_supports_sockets = ON_LINUX
+platform_supports_sockets = ON_LINUX or ON_MACOS
+platform_supports_sharing_unix_sockets_through_docker = ON_LINUX
 requires_socket_support = pytest.mark.skipif(
     not platform_supports_sockets, reason='Windows sockets are not file handles'
+)
+requires_shareable_unix_socket = pytest.mark.skipif(
+    not platform_supports_sharing_unix_sockets_through_docker,
+    reason='AF_UNIX sockets cannot be bind-mounted between a macOS host and a linux guest in docker',
+)
+haproxy_less_than_1_6 = os.environ.get('HAPROXY_VERSION', '1.5.11').split('.')[:2] < ['1', '6']
+requires_haproxy_tcp_stats = pytest.mark.skipif(
+    haproxy_less_than_1_6 or not platform_supports_sockets,
+    reason="Multiple `stats socket` definitions aren't supported in 1.4",
 )
 
 CONFIG_UNIXSOCKET = {'collect_aggregates_only': False}
@@ -54,6 +87,7 @@ CHECK_CONFIG = {
 CHECK_CONFIG_OPEN = {'url': STATS_URL_OPEN, 'collect_aggregates_only': False, 'collect_status_metrics': True}
 
 BACKEND_SERVICES = ['anotherbackend', 'datadog']
+FRONTEND_SERVICES = ['public']
 
 BACKEND_LIST = ['singleton:8080', 'singleton:8081', 'otherserver']
 
@@ -61,6 +95,12 @@ BACKEND_TO_ADDR = {
     'singleton:8080': '127.0.0.1:8080',
     'singleton:8081': '127.0.0.1:8081',
     'otherserver': '127.0.0.1:1234',
+}
+
+STICKTABLE_TYPES = {
+    'anotherbackend': 'ip',
+    'datadog': 'integer',
+    'public': 'string',
 }
 
 

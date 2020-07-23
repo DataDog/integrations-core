@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # (C)  graemej <graeme.johnson@jadedpixel.com> 2014
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
@@ -7,7 +7,7 @@ import requests
 from six import iteritems
 from six.moves.urllib.parse import urljoin
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 
 class Marathon(AgentCheck):
@@ -50,13 +50,19 @@ class Marathon(AgentCheck):
 
     def __init__(self, name, init_config, instances):
         super(Marathon, self).__init__(name, init_config, instances)
+        timeout = (
+            self.instance.get('timeout')
+            or self.init_config.get('timeout')
+            or self.init_config.get('default_timeout')
+            or self.DEFAULT_TIMEOUT
+        )
         if not ('read_timeout' in self.instance or 'connect_timeout' in self.instance):
             # `default_timeout` config option will be removed with Agent 5
+            self.http.options['timeout'] = timeout
+        else:
             self.http.options['timeout'] = (
-                self.instance.get('timeout')
-                or self.init_config.get('timeout')
-                or self.init_config.get('default_timeout')
-                or self.DEFAULT_TIMEOUT
+                float(self.instance.get('read_timeout', timeout)),
+                float(self.instance.get('connect_timeout', timeout)),
             )
         self._auth_body = None
         if self.http.options['auth'] is not None:
@@ -229,7 +235,7 @@ class Marathon(AgentCheck):
                                 val = float(_attr)
                                 self.gauge(metric_name, val, tags=q_tags)
                         except (KeyError, TypeError):
-                            self.log.warn("Metric unavailable skipping: {}".format(metric_name))
+                            self.log.warning("Metric unavailable skipping: %s", metric_name)
 
                 else:
                     try:
@@ -239,7 +245,7 @@ class Marathon(AgentCheck):
                         val = float(_attr)
                         self.gauge(metric_name, val, tags=q_tags)
                     except (KeyError, TypeError):
-                        self.log.warn("Metric unavailable skipping: {}".format(metric_name))
+                        self.log.warning("Metric unavailable skipping: %s", metric_name)
 
         self.ensure_queue_count(queued, url, acs_url, tags, label_tags, group)
 

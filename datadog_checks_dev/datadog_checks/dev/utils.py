@@ -1,15 +1,17 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """
 Utilities functions abstracting common operations, specially designed to be used
 by Integrations within tests.
 """
+import csv
 import inspect
 import os
 import platform
 import shutil
-from contextlib import contextmanager
+import socket
+from contextlib import closing, contextmanager
 from io import open
 from tempfile import mkdtemp
 
@@ -24,6 +26,10 @@ __platform = platform.system()
 ON_MACOS = os.name == 'mac' or __platform == 'Darwin'
 ON_WINDOWS = NEED_SHELL = os.name == 'nt' or __platform == 'Windows'
 ON_LINUX = not (ON_MACOS or ON_WINDOWS)
+
+
+def get_tox_env():
+    return os.environ['TOX_ENV_NAME']
 
 
 def get_ci_env_vars():
@@ -111,6 +117,11 @@ def path_join(path, *paths):
     return os.path.join(path, *paths)
 
 
+def resolve_dir_contents(d):
+    for p in os.listdir(d):
+        yield path_join(d, p)
+
+
 def ensure_dir_exists(d):
     if not dir_exists(d):
         os.makedirs(d)
@@ -155,18 +166,27 @@ def download_file(url, fname):
 
 def copy_path(path, d):
     if dir_exists(path):
-        shutil.copytree(path, os.path.join(d, basepath(path)))
+        return shutil.copytree(path, os.path.join(d, basepath(path)))
     else:
-        shutil.copy(path, d)
+        return shutil.copy(path, d)
+
+
+def copy_dir_contents(path, d):
+    for p in os.listdir(path):
+        copy_path(os.path.join(path, p), d)
 
 
 def remove_path(path):
     try:
         shutil.rmtree(path, ignore_errors=False)
-    except (FileNotFoundError, OSError):
+    # TODO: Remove FileNotFoundError (and noqa: B014) when Python 2 is removed
+    # In Python 3, IOError have been merged into OSError
+    except (FileNotFoundError, OSError):  # noqa: B014
         try:
             os.remove(path)
-        except (FileNotFoundError, OSError, PermissionError):
+        # TODO: Remove FileNotFoundError (and noqa: B014) when Python 2 is removed
+        # In Python 3, IOError have been merged into OSError
+        except (FileNotFoundError, OSError, PermissionError):  # noqa: B014
             pass
 
 
@@ -191,7 +211,32 @@ def get_here():
 
 
 def load_jmx_config():
-    root = get_parent_dir(inspect.currentframe().f_back.f_code.co_filename)
+    # Only called in tests of a check, so just go back one frame
+    root = find_check_root(depth=1)
+
+    check = basepath(root)
+    example_config_path = path_join(root, 'datadog_checks', check, 'data', 'conf.yaml.example')
+    metrics_config_path = path_join(root, 'datadog_checks', check, 'data', 'metrics.yaml')
+
+    example_config = yaml.safe_load(read_file(example_config_path))
+    metrics_config = yaml.safe_load(read_file(metrics_config_path))
+
+    # Avoid having to potentially mount multiple files by putting the default metrics
+    # in the user-defined metric location.
+    example_config['init_config']['conf'] = metrics_config['jmx_metrics']
+
+    return example_config
+
+
+def find_check_root(depth=0):
+    # Account for this call
+    depth += 1
+
+    frame = inspect.currentframe()
+    for _ in range(depth):
+        frame = frame.f_back
+
+    root = get_parent_dir(frame.f_code.co_filename)
     while True:
         if file_exists(path_join(root, 'setup.py')):
             break
@@ -202,10 +247,14 @@ def load_jmx_config():
 
         root = new_root
 
-    check = basepath(root)
-    jmx_config = path_join(root, 'datadog_checks', check, 'data', 'conf.yaml.example')
+    return root
 
-    return yaml.safe_load(read_file(jmx_config))
+
+def get_current_check_name(depth=0):
+    # Account for this call
+    depth += 1
+
+    return os.path.basename(find_check_root(depth))
 
 
 @contextmanager
@@ -262,3 +311,30 @@ def temp_move_path(path, d):
 @contextmanager
 def mock_context_manager(obj=None):
     yield obj
+
+
+def find_free_port(ip):
+    """Return a port available for listening on the given `ip`."""
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind((ip, 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return s.getsockname()[1]
+
+
+def get_ip():
+    """Return the IP address used to connect to external networks."""
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as s:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        return s.getsockname()[0]
+
+
+def get_metadata_metrics():
+    # Only called in tests of a check, so just go back one frame
+    root = find_check_root(depth=1)
+    metadata_path = os.path.join(root, 'metadata.csv')
+    metrics = {}
+    with open(metadata_path) as f:
+        for row in csv.DictReader(f):
+            metrics[row['metric_name']] = row
+    return metrics

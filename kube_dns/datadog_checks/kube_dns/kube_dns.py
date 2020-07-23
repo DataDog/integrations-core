@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -6,7 +6,7 @@ from copy import deepcopy
 
 from six import iteritems
 
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 
 
 class KubeDNSCheck(OpenMetricsBaseCheck):
@@ -19,7 +19,7 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
     # Set up metric_transformers
     METRIC_TRANSFORMERS = {}
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         # Set up metric_transformers
         self.METRIC_TRANSFORMERS = {
             'kubedns_kubedns_dns_request_count_total': self.kubedns_kubedns_dns_request_count_total,
@@ -35,7 +35,7 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
         if instances is not None:
             generic_instances = self.create_generic_instances(instances)
 
-        super(KubeDNSCheck, self).__init__(name, init_config, agentConfig, instances=generic_instances)
+        super(KubeDNSCheck, self).__init__(name, init_config, instances=generic_instances)
 
     def check(self, instance):
         endpoint = instance.get('prometheus_endpoint')

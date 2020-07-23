@@ -22,15 +22,50 @@ init_config:
 
 instances:
 
-    ## @param use_preview - boolean - required - default: false
+  -  
+    ## @param use_preview - boolean - optional - default: true
     ## Whether or not to preview the new version of the check supporting only ETCD 3+
     #
-  - use_preview: false
+    # use_preview: true
 
     ## @param prometheus_url - string - required
     ## The URL where your application metrics are exposed by Prometheus.
     #
     # prometheus_url: http://localhost:2379/metrics
+
+    ## @param ssl_cert - string - optional
+    ## The certificate to use when connecting to the `prometheus_url`.
+    ## It may also contain an unencrypted private key to use.
+    ##
+    ## NOTE: Use only if `use_preview` is set to `true`.
+    ##       This option is used in place of `tls_cert`
+    #
+    # ssl_cert: <CERT_PATH>
+
+    ## @param ssl_private_key - string - optional
+    ## The unencrypted private key to use when connecting to the `prometheus_url`.
+    ## This is required if `ssl_cert` is set and it does not already contain a private key.
+    ##
+    ## NOTE: Use only if `use_preview` is set to `true`.
+    ##       This option is used in place of `tls_private_key`.
+    #
+    # ssl_private_key: <PRIVATE_KEY_PATH>
+
+    ## @param ssl_ca_cert - string - optional
+    ## The path to a CA_BUNDLE file or a directory with certificates of trusted CAs.
+    ##
+    ## NOTE: Use only if `use_preview` is set to `true`.
+    ##       This option is used in place of `tls_ca_cert`.
+    #
+    # ssl_ca_cert: <CA_CERT_PATH>
+
+    ## @param ssl_verify - boolean - optional - default: true
+    ## Instruct the check to validate SSL certificates when connecting to `prometheus_url` and GPRC gateway.
+    ##
+    ## NOTE: Use only if `use_preview` is set to `true`.
+    ##       This option is used in place of `tls_verify`.
+    #
+    # ssl_verify: true
 
     ## @param leader_tag - boolean - optional - default: true
     ## Whether or not to tag with `is_leader:true` or `is_leader:false`.
@@ -58,6 +93,12 @@ instances:
     #
     # url: "https://server:port"
 
+    ## @param auth_type - string - optional
+    ## The type of authentication to use.
+    ## The available values are "basic" and "digest".
+    #
+    # auth_type: <AUTH_TYPE>
+
     ## @param username - string - optional
     ## The username to use if services are behind basic auth.
     #
@@ -67,7 +108,7 @@ instances:
     ## If your services uses NTLM authentication, you can
     ## specify a domain that is used in the check. For NTLM auth,
     ## append the username to domain, not as the `username` parameter.
-    ## Example: <NTLM_DOMAIN>/<USERNAME>
+    ## Example: <NTLM_DOMAIN>\<USERNAME>
     #
     # ntlm_domain: <DOMAIN>
 
@@ -162,6 +203,12 @@ instances:
     #
     # kerberos_keytab: <KEYTAB_FILE_PATH>
 
+    ## @param kerberos_cache - string - optional
+    ## Sets the KRB5CCNAME environment variable.
+    ## It should point to a credential cache with a valid TGT.
+    #
+    # kerberos_cache: <KRB5CCNAME>
+
     ## @param tls_verify - boolean - optional - default: true
     ## Instructs the check to validate the TLS certificate of services.
     #
@@ -170,6 +217,10 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable these by setting `tls_ignore_warning` to true.
+    ##
+    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
+    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
+    ## to true.
     #
     # tls_ignore_warning: false
 

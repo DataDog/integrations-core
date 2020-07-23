@@ -1,5 +1,47 @@
 # CHANGELOG - network
 
+## 1.17.0 / 2020-06-29
+
+* [Added] Add network spec. See [#6889](https://github.com/DataDog/integrations-core/pull/6889).
+
+## 1.16.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.15.1 / 2020-04-08
+
+* [Fixed] Fix error message. See [#6285](https://github.com/DataDog/integrations-core/pull/6285).
+
+## 1.15.0 / 2020-04-04
+
+* [Added] Upgrade psutil to 5.7.0. See [#6243](https://github.com/DataDog/integrations-core/pull/6243).
+* [Fixed] Handle invalid type for excluded_interfaces. See [#5986](https://github.com/DataDog/integrations-core/pull/5986).
+
+## 1.14.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 1.13.0 / 2020-01-02
+
+* [Added] Gracefully handle /proc errors in network check. See [#5245](https://github.com/DataDog/integrations-core/pull/5245).
+
+## 1.12.2 / 2019-12-13
+
+* [Fixed] Bump psutil to 5.6.7. See [#5210](https://github.com/DataDog/integrations-core/pull/5210).
+
+## 1.12.1 / 2019-12-02
+
+* [Fixed] Upgrade psutil dependency to 5.6.5. See [#5059](https://github.com/DataDog/integrations-core/pull/5059).
+
+## 1.12.0 / 2019-10-30
+
+* [Added] Add use_sudo option for collecting conntrack metrics with containers. See [#4920](https://github.com/DataDog/integrations-core/pull/4920).
+* [Fixed] Fix examples in conf.yaml.default. See [#4887](https://github.com/DataDog/integrations-core/pull/4887). Thanks [q42jaap](https://github.com/q42jaap).
+
+## 1.11.5 / 2019-10-11
+
+* [Fixed] Upgrade psutil dependency to 5.6.3. See [#4442](https://github.com/DataDog/integrations-core/pull/4442).
+
 ## 1.11.4 / 2019-08-30
 
 * [Fixed] Fix metric submission for combined connection state. See [#4473](https://github.com/DataDog/integrations-core/pull/4473).

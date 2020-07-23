@@ -1,10 +1,15 @@
 [
     {
         "agent_version": "6.0.0",
-        "integration": "oracle database",
+        "integration": "Oracle Database",
         "check": "oracle.can_connect",
-        "statuses": ["ok", "critical"],
-        "groups": ["server"],
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "server"
+        ],
         "name": "Can Connect",
         "description": "Returns OK if the integration can connect to the oracle database, CRITICAL otherwise"
     }

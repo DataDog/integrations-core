@@ -1,5 +1,60 @@
 # CHANGELOG - postgres
 
+## 5.0.1 / 2020-07-16
+
+* [Fixed] Avoid aurora pg warnings. See [#7123](https://github.com/DataDog/integrations-core/pull/7123).
+
+## 5.0.0 / 2020-06-29
+
+* [Added] Add config specs. See [#6547](https://github.com/DataDog/integrations-core/pull/6547).
+* [Fixed] Remove references to `use_psycopg2`. See [#6975](https://github.com/DataDog/integrations-core/pull/6975).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+* [Fixed] Extract config to new class. See [#6500](https://github.com/DataDog/integrations-core/pull/6500).
+* [Changed] Add `max_relations` config. See [#6725](https://github.com/DataDog/integrations-core/pull/6725).
+
+## 4.0.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Refactor multiple instance to single instance. See [#6510](https://github.com/DataDog/integrations-core/pull/6510).
+* [Changed] Postgres lock metrics are relation metrics. See [#6498](https://github.com/DataDog/integrations-core/pull/6498).
+
+## 3.5.4 / 2020-04-04
+
+* [Fixed] Fix service check on unexpected exception. See [#6196](https://github.com/DataDog/integrations-core/pull/6196).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
+## 3.5.3 / 2020-02-26
+
+* [Fixed] Rollback db connection when we get a 'FeatureNotSupported' exception. See [#5882](https://github.com/DataDog/integrations-core/pull/5882).
+
+## 3.5.2 / 2020-02-22
+
+* [Fixed] Handle FeatureNotSupported errors in queries. See [#5749](https://github.com/DataDog/integrations-core/pull/5749).
+
+## 3.5.1 / 2020-02-13
+
+* [Fixed] Filter out schemas in the queries directly. See [#5710](https://github.com/DataDog/integrations-core/pull/5710).
+* [Fixed] Refactor query_scope utility method. See [#5433](https://github.com/DataDog/integrations-core/pull/5433).
+
+## 3.5.0 / 2019-12-30
+
+* [Fixed] Handle connection closed. See [#5350](https://github.com/DataDog/integrations-core/pull/5350).
+* [Added] Add version metadata. See [#4874](https://github.com/DataDog/integrations-core/pull/4874).
+
+## 3.4.0 / 2019-12-02
+
+* [Added] Add lock_type tag to lock metric. See [#5006](https://github.com/DataDog/integrations-core/pull/5006). Thanks [tjwp](https://github.com/tjwp).
+* [Added] Extract version utils and use semver for version comparison. See [#4844](https://github.com/DataDog/integrations-core/pull/4844).
+
+## 3.3.0 / 2019-10-30
+
+* [Fixed] Remove multi instance from code. See [#4831](https://github.com/DataDog/integrations-core/pull/4831).
+* [Added] Upgrade psycopg2-binary to 2.8.4. See [#4840](https://github.com/DataDog/integrations-core/pull/4840).
+
+## 3.2.1 / 2019-10-11
+
+* [Fixed] Add cache invalidation and better thread lock. See [#4723](https://github.com/DataDog/integrations-core/pull/4723).
+
 ## 3.2.0 / 2019-09-10
 
 * [Added] Add schema tag to Lock and Size metrics. See [#3721](https://github.com/DataDog/integrations-core/pull/3721). Thanks [fischaz](https://github.com/fischaz).

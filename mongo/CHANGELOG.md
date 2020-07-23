@@ -1,5 +1,37 @@
 # CHANGELOG - mongo
 
+## 1.16.2 / 2020-06-29
+
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+* [Fixed] Raise an error if only one of `username` or `password` is set. See [#6688](https://github.com/DataDog/integrations-core/pull/6688).
+
+## 1.16.1 / 2020-05-19
+
+* [Fixed] Fix encoding and parsing issues when processing connection configuration. See [#6686](https://github.com/DataDog/integrations-core/pull/6686).
+
+## 1.16.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.15.0 / 2020-05-05
+
+* [Deprecated] Refactor connection configuration. See [#6574](https://github.com/DataDog/integrations-core/pull/6574).
+
+## 1.14.0 / 2020-04-04
+
+* [Added] Add config specs. See [#6145](https://github.com/DataDog/integrations-core/pull/6145).
+* [Fixed] Use new agent signature. See [#6085](https://github.com/DataDog/integrations-core/pull/6085).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+* [Fixed] Replace deprecated method `database_names` by `list_database_names`. See [#5864](https://github.com/DataDog/integrations-core/pull/5864).
+
+## 1.13.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 1.12.0 / 2019-10-11
+
+* [Added] Submit version metadata. See [#4722](https://github.com/DataDog/integrations-core/pull/4722).
+
 ## 1.11.0 / 2019-07-13
 
 * [Added] Upgrade pymongo to 3.8. See [#4095](https://github.com/DataDog/integrations-core/pull/4095).

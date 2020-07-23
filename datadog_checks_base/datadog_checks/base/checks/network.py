@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from . import AgentCheck
@@ -24,6 +24,10 @@ class NetworkCheck(AgentCheck):
         Status.CRITICAL: AgentCheck.CRITICAL,
         Status.DOWN: AgentCheck.CRITICAL,
     }
+
+    def __init__(self, *args, **kwargs):
+        super(NetworkCheck, self).__init__(*args, **kwargs)
+        self.warning("NetworkCheck is deprecated. Please inherit from AgentCheck instead")
 
     def check(self, instance):
         try:

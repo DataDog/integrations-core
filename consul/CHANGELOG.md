@@ -1,5 +1,44 @@
 # CHANGELOG - consul
 
+## 1.15.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+
+## 1.14.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Add config spec. See [#6317](https://github.com/DataDog/integrations-core/pull/6317).
+
+## 1.13.0 / 2020-04-04
+
+* [Added] Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).
+* [Added] Add new metric to count services. See [#5992](https://github.com/DataDog/integrations-core/pull/5992).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
+## 1.12.2 / 2020-02-25
+
+* [Fixed] Change new added tag. See [#5856](https://github.com/DataDog/integrations-core/pull/5856).
+
+## 1.12.1 / 2020-02-25
+
+* [Fixed] Bump minimun agent version. See [#5834](https://github.com/DataDog/integrations-core/pull/5834).
+
+## 1.12.0 / 2020-02-22
+
+* [Added] Create `consul_service` tag. See [#5519](https://github.com/DataDog/integrations-core/pull/5519). Thanks [nicbono](https://github.com/nicbono).
+* [Deprecated] Deprecate `service` tag. See [#5540](https://github.com/DataDog/integrations-core/pull/5540).
+
+## 1.11.0 / 2019-12-02
+
+* [Added] Add version metadata. See [#4944](https://github.com/DataDog/integrations-core/pull/4944).
+* [Added] Standardize logging format. See [#4903](https://github.com/DataDog/integrations-core/pull/4903).
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
+## 1.10.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 1.9.1 / 2019-08-30
 
 * [Fixed] Fix RequestsWrapper options. See [#4476](https://github.com/DataDog/integrations-core/pull/4476).

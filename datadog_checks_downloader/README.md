@@ -35,13 +35,13 @@ To download a new or updated integration, you may specify a precise
 [version][7]:
 
 ```shell
-datadog-checks-downloader -vvvv datadog-$INTEGRATION --version X.Y.Z
+python -m datadog_checks.downloader -vvvv datadog-$INTEGRATION --version X.Y.Z
 ```
 
 Or you may leave the version unspecified to download the latest version:
 
 ```shell
-datadog-checks-downloader -vvvv datadog-$INTEGRATION
+python -m datadog_checks.downloader -vvvv datadog-$INTEGRATION
 ```
 
 To run the tests, [install tox][8] and just run:
@@ -62,4 +62,4 @@ Need help? Contact [Datadog support][9].
 [6]: https://github.com/DataDog/integrations-extras
 [7]: https://www.python.org/dev/peps/pep-0440/#version-scheme
 [8]: https://tox.readthedocs.io/en/latest/install.html
-[9]: https://docs.datadoghq.com/help
+[9]: https://docs.datadoghq.com/help/

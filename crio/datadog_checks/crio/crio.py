@@ -1,7 +1,7 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 
 
 class CrioCheck(OpenMetricsBaseCheck):
@@ -11,11 +11,10 @@ class CrioCheck(OpenMetricsBaseCheck):
 
     DEFAULT_METRIC_LIMIT = 0
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances):
         super(CrioCheck, self).__init__(
             name,
             init_config,
-            agentConfig,
             instances,
             default_instances={
                 "crio": {

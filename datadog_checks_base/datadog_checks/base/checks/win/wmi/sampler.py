@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -47,6 +47,12 @@ class CaseInsensitiveDict(dict):
 
     def get(self, key):
         return super(CaseInsensitiveDict, self).get(key.lower())
+
+    def copy(self):
+        """
+        Explicit copy to ensure we return an instance of `CaseInsensitiveDict`
+        """
+        return CaseInsensitiveDict(self)
 
 
 class ProviderArchitectureMeta(type):
@@ -105,6 +111,7 @@ class WMISampler(object):
 
         # Sampling state
         self._sampling = False
+        self._stopping = False
 
         self.logger = logger
 
@@ -145,20 +152,49 @@ class WMISampler(object):
 
         self._runSampleEvent = Event()
         self._sampleCompleteEvent = Event()
+        self._sampler_thread = None
 
-        thread = Thread(target=self._query_sample_loop, name=class_name)
-        thread.daemon = True
-        thread.start()
+    def start(self):
+        """
+        Start internal thread for sampling
+        """
+        self._sampler_thread = Thread(target=self._query_sample_loop, name=self.class_name)
+        self._sampler_thread.daemon = True  # Python 2 does not support daemon as Thread constructor parameter
+        self._sampler_thread.start()
+
+    def stop(self):
+        """
+        Dispose of the internal thread
+        """
+        self._stopping = True
+        self._runSampleEvent.set()
+        self._sampleCompleteEvent.wait()
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.stop()
 
     def _query_sample_loop(self):
         try:
+            # Initialize COM for the current (dedicated) thread
+            # WARNING: any python COM object (locator, connection, etc) created in a thread
+            # shouldn't be used in other threads (can lead to memory/handle leaks if done
+            # without a deep knowledge of COM's threading model).
             pythoncom.CoInitialize()
         except Exception as e:
-            self.logger.info("exception in CoInitialize {}".format(e))
+            self.logger.info("exception in CoInitialize: %s", e)
             raise
 
         while True:
             self._runSampleEvent.wait()
+            if self._stopping:
+                self.logger.debug("_query_sample_loop stopping")
+                self._sampleCompleteEvent.set()
+                return
+
             self._runSampleEvent.clear()
             if self.is_raw_perf_class and not self._previous_sample:
                 self._current_sample = self._query()
@@ -232,7 +268,9 @@ class WMISampler(object):
         """
         self._sampling = True
         self._runSampleEvent.set()
-        self._sampleCompleteEvent.wait()
+        while not self._sampleCompleteEvent.wait(timeout=float(self._timeout_duration)):
+            if not self._sampler_thread.is_alive():
+                raise Exception("The sampler thread terminated unexpectedly")
         self._sampleCompleteEvent.clear()
         self._sampling = False
 
@@ -298,8 +336,7 @@ class WMISampler(object):
             calculator = get_calculator(counter_type)
         except UndefinedCalculator:
             self.logger.warning(
-                u"Undefined WMI calculator for counter_type {counter_type}."
-                " Values are reported as RAW.".format(counter_type=counter_type)
+                u"Undefined WMI calculator for counter_type %s. Values are reported as RAW.", counter_type,
             )
 
         return calculator
@@ -329,17 +366,13 @@ class WMISampler(object):
         Create a new WMI connection
         """
         self.logger.debug(
-            u"Connecting to WMI server "
-            u"(host={host}, namespace={namespace}, provider={provider}, username={username}).".format(
-                host=self.host, namespace=self.namespace, provider=self.provider, username=self.username
-            )
+            u"Connecting to WMI server (host=%s, namespace=%s, provider=%s, username=%s).",
+            self.host,
+            self.namespace,
+            self.provider,
+            self.username,
         )
 
-        # Initialize COM for the current thread
-        # WARNING: any python COM object (locator, connection, etc) created in a thread
-        # shouldn't be used in other threads (can lead to memory/handle leaks if done
-        # without a deep knowledge of COM's threading model). Because of this and given
-        # that we run each query in its own thread, we don't cache connections
         additional_args = []
 
         if self.provider != ProviderArchitecture.DEFAULT:
@@ -357,13 +390,15 @@ class WMISampler(object):
         """
         Transform filters to a comprehensive WQL `WHERE` clause.
 
+        Specifying more than 1 filter defaults to an `OR` operator in the `WHERE` clause.
+
         Builds filter from a filter list.
         - filters: expects a list of dicts, typically:
                 - [{'Property': value},...] or
-                - [{'Property': (comparison_op, value)},...]
+                - [{'Property': [comparison_op, value]},...]
 
-                NOTE: If we just provide a value we defailt to '=' comparison operator.
-                Otherwise, specify the operator in a tuple as above: (comp_op, value)
+                NOTE: If we just provide a value we default to '=' comparison operator.
+                Otherwise, specify the operator in a list as above: [comp_op, value]
                 If we detect a wildcard character ('%') we will override the operator
                 to use LIKE
         """
@@ -374,7 +409,7 @@ class WMISampler(object):
             while f:
                 prop, value = f.popitem()
 
-                if isinstance(value, tuple):
+                if isinstance(value, (tuple, list)) and len(value) == 2 and isinstance(value[0], string_types):
                     oper = value[0]
                     value = value[1]
                 elif isinstance(value, string_types) and '%' in value:
@@ -382,13 +417,13 @@ class WMISampler(object):
                 else:
                     oper = '='
 
-                if isinstance(value, list):
+                if isinstance(value, (tuple, list)):
                     if not len(value):
                         continue
 
                     internal_filter = map(
                         lambda x: (prop, x)
-                        if isinstance(x, tuple)
+                        if isinstance(x, (tuple, list))
                         else (prop, ('LIKE', x))
                         if '%' in x
                         else (prop, (oper, x)),
@@ -404,7 +439,7 @@ class WMISampler(object):
                     clause = bool_op.join(
                         [
                             '{0} {1} \'{2}\''.format(k, v[0], v[1])
-                            if isinstance(v, tuple)
+                            if isinstance(v, (list, tuple))
                             else '{0} = \'{1}\''.format(k, v)
                             for k, v in internal_filter
                         ]
@@ -440,11 +475,15 @@ class WMISampler(object):
 
         Returns: List of WMI objects or `TimeoutException`.
         """
-        formated_property_names = ",".join(self.property_names)
-        wql = "Select {property_names} from {class_name}{filters}".format(
-            property_names=formated_property_names, class_name=self.class_name, filters=self.formatted_filters
-        )
-        self.logger.debug(u"Querying WMI: {0}".format(wql))
+        try:
+            formated_property_names = ",".join(self.property_names)
+            wql = "Select {property_names} from {class_name}{filters}".format(
+                property_names=formated_property_names, class_name=self.class_name, filters=self.formatted_filters
+            )
+            self.logger.debug(u"Querying WMI: %s", wql)
+        except Exception as e:
+            self.logger.error(str(e))
+            return []
 
         try:
             # From: https://msdn.microsoft.com/en-us/library/aa393866(v=vs.85).aspx
@@ -519,16 +558,14 @@ class WMISampler(object):
                         self._property_counter_types[wmi_property.Name] = counter_type
 
                         self.logger.debug(
-                            u"Caching property qualifier CounterType: "
-                            "{class_name}.{property_names} = {counter_type}".format(
-                                class_name=self.class_name, property_names=wmi_property.Name, counter_type=counter_type
-                            )
+                            u"Caching property qualifier CounterType: %s.%s = %s",
+                            self.class_name,
+                            wmi_property.Name,
+                            counter_type,
                         )
                     else:
                         self.logger.debug(
-                            u"CounterType qualifier not found for {class_name}.{property_names}".format(
-                                class_name=self.class_name, property_names=wmi_property.Name
-                            )
+                            u"CounterType qualifier not found for %s.%s", self.class_name, wmi_property.Name,
                         )
 
                 try:

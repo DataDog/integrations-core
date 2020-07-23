@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import requests
@@ -63,26 +63,25 @@ class Etcd(OpenMetricsBaseCheck):
 
     def __init__(self, name, init_config, instances):
 
-        if instances is not None:
-            for instance in instances:
-                # For legacy check ensure prometheus_url is set so
-                # OpenMetricsBaseCheck instantiation succeeds
-                if not is_affirmative(instance.get('use_preview', False)):
-                    instance.setdefault('prometheus_url', '')
-                    self.HTTP_CONFIG_REMAPPER = {
-                        'ssl_keyfile': {'name': 'tls_private_key'},
-                        'ssl_certfile': {'name': 'tls_cert'},
-                        'ssl_cert_validation': {'name': 'tls_verify'},
-                        'ssl_ca_certs': {'name': 'tls_ca_cert'},
-                    }
-                else:
-                    self.HTTP_CONFIG_REMAPPER = {
-                        'ssl_cert': {'name': 'tls_cert'},
-                        'ssl_private_key': {'name': 'tls_private_key'},
-                        'ssl_ca_cert': {'name': 'tls_ca_cert'},
-                        'ssl_verify': {'name': 'tls_verify'},
-                        'prometheus_timeout': {'name': 'timeout'},
-                    }
+        instance = instances[0]
+        if is_affirmative(instance.get('use_preview', True)):
+            self.HTTP_CONFIG_REMAPPER = {
+                'ssl_cert': {'name': 'tls_cert'},
+                'ssl_private_key': {'name': 'tls_private_key'},
+                'ssl_ca_cert': {'name': 'tls_ca_cert'},
+                'ssl_verify': {'name': 'tls_verify'},
+                'prometheus_timeout': {'name': 'timeout'},
+            }
+        else:
+            # For legacy check ensure prometheus_url is set so
+            # OpenMetricsBaseCheck instantiation succeeds
+            instance.setdefault('prometheus_url', '')
+            self.HTTP_CONFIG_REMAPPER = {
+                'ssl_keyfile': {'name': 'tls_private_key'},
+                'ssl_certfile': {'name': 'tls_cert'},
+                'ssl_cert_validation': {'name': 'tls_verify'},
+                'ssl_ca_certs': {'name': 'tls_ca_cert'},
+            }
 
         super(Etcd, self).__init__(
             name,
@@ -94,19 +93,18 @@ class Etcd(OpenMetricsBaseCheck):
                     'namespace': 'etcd',
                     'metrics': [METRIC_MAP],
                     'send_histograms_buckets': True,
+                    'metadata_metric_name': 'etcd_server_version',
+                    'metadata_label_map': {'version': 'server_version'},
                 }
             },
             default_namespace='etcd',
         )
 
     def check(self, instance):
-        if is_affirmative(instance.get('use_preview', False)):
+        if is_affirmative(instance.get('use_preview', True)):
             self.check_post_v3(instance)
         else:
-            self.warning(
-                'In Agent 6.11 this check will only support ETCD v3+. If you '
-                'wish to preview the new version, set `use_preview` to `true`.'
-            )
+            self.warning('In the future etcd check will only support ETCD v3+.')
             self.check_pre_v3(instance)
 
     def access_api(self, scraper_config, path, data='{}'):
@@ -118,7 +116,7 @@ class Etcd(OpenMetricsBaseCheck):
             r = self.http.post(endpoint, data=data)
             response.update(r.json())
         except Exception as e:
-            self.log.debug('Error accessing GRPC gateway: {}'.format(e))
+            self.log.debug('Error accessing GRPC gateway: %s', e)
 
         return response
 
@@ -160,6 +158,12 @@ class Etcd(OpenMetricsBaseCheck):
 
         self.process(scraper_config)
 
+    def transform_metadata(self, metric, scraper_config):
+        super(Etcd, self).transform_metadata(metric, scraper_config)
+
+        # Needed for backward compatibility, we continue to submit `etcd.server.version` metric
+        self.submit_openmetric('server.version', metric, scraper_config)
+
     def check_pre_v3(self, instance):
         if 'url' not in instance:
             raise Exception('etcd instance missing "url" value.')
@@ -199,13 +203,13 @@ class Etcd(OpenMetricsBaseCheck):
                 if key in self_response:
                     self.rate(self.SELF_RATES[key], self_response[key], tags=instance_tags)
                 else:
-                    self.log.warn('Missing key {} in stats.'.format(key))
+                    self.log.warning('Missing key %s in stats.', key)
 
             for key in gauges:
                 if key in self_response:
                     self.gauge(gauges[key], self_response[key], tags=instance_tags)
                 else:
-                    self.log.warn('Missing key {} in stats.'.format(key))
+                    self.log.warning('Missing key %s in stats.', key)
 
         # Gather store metrics
         store_response = self._get_store_metrics(url, critical_tags)
@@ -214,13 +218,13 @@ class Etcd(OpenMetricsBaseCheck):
                 if key in store_response:
                     self.rate(self.STORE_RATES[key], store_response[key], tags=instance_tags)
                 else:
-                    self.log.warn('Missing key {} in stats.'.format(key))
+                    self.log.warning('Missing key %s in stats.', key)
 
             for key in self.STORE_GAUGES:
                 if key in store_response:
                     self.gauge(self.STORE_GAUGES[key], store_response[key], tags=instance_tags)
                 else:
-                    self.log.warn('Missing key {} in stats.'.format(key))
+                    self.log.warning('Missing key %s in stats.', key)
 
         # Gather leader metrics
         if is_leader:
@@ -248,6 +252,8 @@ class Etcd(OpenMetricsBaseCheck):
         if self_response is not None and store_response is not None:
             self.service_check(self.SERVICE_CHECK_NAME, self.OK, tags=instance_tags)
 
+        self._collect_metadata(url, critical_tags)
+
     def _get_health_status(self, url, timeout):
         """
         Don't send the "can connect" service check if we have troubles getting
@@ -258,7 +264,7 @@ class Etcd(OpenMetricsBaseCheck):
             # we don't use get() here so we can report a KeyError
             return r.json()[self.HEALTH_KEY]
         except Exception as e:
-            self.log.debug("Can't determine health status: {}".format(e))
+            self.log.debug("Can't determine health status: %s", e)
 
     def _get_self_metrics(self, url, tags):
         return self._get_json(url, "/v2/stats/self", tags)
@@ -318,3 +324,10 @@ class Etcd(OpenMetricsBaseCheck):
             return status
 
         return status == "true"
+
+    def _collect_metadata(self, url, tags):
+        resp = self._get_json(url, "/version", tags)
+        server_version = resp.get('etcdserver')
+        self.log.debug("Agent version is `%s`", server_version)
+        if server_version:
+            self.set_metadata('version', server_version)

@@ -148,6 +148,40 @@ coredns_health_request_duration_seconds_count 1.32441e+06
 # HELP coredns_panic_count_total A metrics that counts the number of panics.
 # TYPE coredns_panic_count_total counter
 coredns_panic_count_total 0
+# HELP coredns_forward_max_concurrent_rejects_total Counter of the number of queries rejected because the concurrent queries were at maximum.
+# TYPE coredns_forward_max_concurrent_rejects_total counter
+coredns_forward_max_concurrent_rejects_total 0
+# HELP coredns_forward_request_count_total Counter of requests made per upstream.
+# TYPE coredns_forward_request_count_total counter
+coredns_forward_request_count_total{to="10.0.0.2:53"} 22000
+# HELP coredns_forward_request_duration_seconds Histogram of the time each request took.
+# TYPE coredns_forward_request_duration_seconds histogram
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.00025"} 6163
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.0005"} 6548
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.001"} 14705
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.002"} 20805
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.004"} 21318
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.008"} 21698
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.016"} 21874
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.032"} 21957
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.064"} 21982
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.128"} 21996
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.256"} 21999
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="0.512"} 21999
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="1.024"} 21999
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="2.048"} 22000
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="4.096"} 22000
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="8.192"} 22000
+coredns_forward_request_duration_seconds_bucket{to="10.0.0.2:53",le="+Inf"} 22000
+coredns_forward_request_duration_seconds_sum{to="10.0.0.2:53"} 27.835685092999963
+coredns_forward_request_duration_seconds_count{to="10.0.0.2:53"} 22000
+# HELP coredns_forward_response_rcode_count_total Counter of requests made per upstream.
+# TYPE coredns_forward_response_rcode_count_total counter
+coredns_forward_response_rcode_count_total{rcode="NOERROR",to="10.0.0.2:53"} 1518
+coredns_forward_response_rcode_count_total{rcode="NXDOMAIN",to="10.0.0.2:53"} 20482
+# HELP coredns_forward_sockets_open Gauge of open sockets per upstream.
+# TYPE coredns_forward_sockets_open gauge
+coredns_forward_sockets_open{to="10.0.0.2:53"} 2
 # HELP coredns_proxy_request_count_total Counter of requests made per protocol, proxy protocol, family and upstream.
 # TYPE coredns_proxy_request_count_total counter
 coredns_proxy_request_count_total{family="1",proto="udp",proxy_proto="dns",to="10.205.0.2:53"} 2031
@@ -214,6 +248,9 @@ go_memstats_heap_objects 189233
 # HELP go_memstats_heap_released_bytes_total Total number of heap bytes released to OS.
 # TYPE go_memstats_heap_released_bytes_total counter
 go_memstats_heap_released_bytes_total 0
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 5.9359232e+07
 # HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
 # TYPE go_memstats_heap_sys_bytes gauge
 go_memstats_heap_sys_bytes 3.8076416e+07
@@ -271,3 +308,16 @@ process_start_time_seconds 1.53315401874e+09
 # HELP process_virtual_memory_bytes Virtual memory size in bytes.
 # TYPE process_virtual_memory_bytes gauge
 process_virtual_memory_bytes 7.8966784e+07
+
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.14.4"} 1
+# HELP go_memstats_gc_cpu_fraction The fraction of this program's available CPU time used by the GC since the program started.
+# TYPE go_memstats_gc_cpu_fraction gauge
+go_memstats_gc_cpu_fraction 0.026803372433412194
+# HELP coredns_plugin_enabled A metric that indicates whether a plugin is enabled on per server and zone basis.
+# TYPE coredns_plugin_enabled gauge
+coredns_plugin_enabled{name="cache",server="dns://:53",zone="."} 1
+coredns_plugin_enabled{name="errors",server="dns://:53",zone="."} 1
+coredns_plugin_enabled{name="forward",server="dns://:53",zone="."} 1
+coredns_plugin_enabled{name="prometheus",server="dns://:53",zone="."} 1

@@ -27,12 +27,12 @@ instances:
     #     labels_to_get:
     #       - label_addonmanager_kubernetes_io_mode
 
-    ## @param hostname_override - boolean - optional - default: false
+    ## @param hostname_override - boolean - optional - default: true
     ## By default the hostname for metrics containing the node label is
     ## overriden by the value of the label, this can be deactivated (all metrics
     ## will be attached to the host running KSM)
     #
-    # hostname_override: false
+    # hostname_override: true
 
     ## @param tags - list of key:value element - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
@@ -55,3 +55,16 @@ instances:
     ## Metrics can be found under `kubernetes_state.telemetry`
     #
     # telemetry: false
+
+    ## @param join_standard_tags - boolean - optional - default: false
+    ## To enable joining standard tags from labels, you must set this parameter to true.
+    ## It will join standard tags found in these labels coming from info Kube State metrics (*_labels).
+    ##   tags.datadoghq.com/env     => env
+    ##   tags.datadoghq.com/service => service
+    ##   tags.datadoghq.com/version => version
+    ##
+    ## Resources enabled for join_standard_tags include:
+    ## Pod, Deployment, ReplicaSet, DaemonSet, StatefulSet, Job, CronJob
+    ##
+    #
+    # join_standard_tags: false

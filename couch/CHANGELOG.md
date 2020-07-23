@@ -1,5 +1,34 @@
 # CHANGELOG - couch
 
+## 3.10.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
+## 3.9.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 3.8.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
+## 3.8.0 / 2020-02-22
+
+* [Added] Add version metadata. See [#5615](https://github.com/DataDog/integrations-core/pull/5615).
+
+## 3.7.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
+## 3.6.0 / 2019-12-02
+
+* [Added] Standardize logging format. See [#4904](https://github.com/DataDog/integrations-core/pull/4904).
+
+## 3.5.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 3.4.1 / 2019-08-30
 
 * [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).

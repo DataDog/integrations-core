@@ -1,5 +1,34 @@
 # CHANGELOG - directory
 
+## 1.8.0 / 2020-06-24
+
+* [Added] Add option to not follow symlinks for stat. See [#6960](https://github.com/DataDog/integrations-core/pull/6960).
+* [Added] Make max file count configurable in the directory check. See [#6847](https://github.com/DataDog/integrations-core/pull/6847).
+* [Fixed] Simplify walker recursive condition. See [#6965](https://github.com/DataDog/integrations-core/pull/6965).
+* [Fixed] Refactor config. See [#6961](https://github.com/DataDog/integrations-core/pull/6961).
+
+## 1.7.0 / 2020-06-03
+
+* [Added] Add `follow_symlinks` config option. See [#6800](https://github.com/DataDog/integrations-core/pull/6800).
+
+## 1.6.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Fixed] Skip matched_files loop if countonly is set. See [#6477](https://github.com/DataDog/integrations-core/pull/6477).
+
+## 1.5.1 / 2020-04-04
+
+* [Fixed] Fix filegauge inconsistencies. See [#6060](https://github.com/DataDog/integrations-core/pull/6060).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
+## 1.5.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
+## 1.4.1 / 2019-10-09
+
+* [Fixed] Explain filetagname logic in the example config file. See [#4524](https://github.com/DataDog/integrations-core/pull/4524).
+
 ## 1.4.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3499](https://github.com/DataDog/integrations-core/pull/3499).

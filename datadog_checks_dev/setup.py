@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from io import open
@@ -22,10 +22,11 @@ with open(path.join(HERE, 'README.md'), 'r', encoding='utf-8') as f:
 
 
 REQUIRES = [
-    'coverage>=4.5.1',
+    "contextlib2; python_version < '3.0'",
+    'coverage>=5.0.3',
     'mock',
     'psutil',
-    'PyYAML>=5.1',
+    'PyYAML>=5.3',
     'pytest',
     'pytest-benchmark>=3.2.1',
     'pytest-cov>=2.6.1',
@@ -34,6 +35,7 @@ REQUIRES = [
     'six',
     "shutilwhich==1.1.0; python_version < '3.0'",
     "subprocess32==3.5.4; python_version < '3.0'",
+    'tenacity',
 ]
 
 
@@ -56,31 +58,32 @@ setup(
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
     packages=['datadog_checks', 'datadog_checks.dev'],
     install_requires=REQUIRES,
+    # TODO: Uncomment when we fully drop Python 2
+    # python_requires='>=3.7',
     include_package_data=True,
     extras_require={
         'cli': [
-            'appdirs',
+            'appdirs>=1.4.4',
             'atomicwrites',
-            'click',
+            'click>7',
             'colorama',
-            'datadog-a7',
-            'docker-compose>=1.23.1,<1.24.0',
-            'in-toto==0.3.0',
+            'docker-compose>=1.25',
+            'in-toto>=0.4.2',
+            'jsonschema',
             'pip-tools',
-            'pylint',
-            'Pillow',
             'pyperclip>=1.7.0',
             'semver',
             'setuptools>=38.6.0',
             'toml>=0.9.4, <1.0.0',
             'tox>=3.12.1',
             'twine>=1.11.0',
+            'virtualenv>=20.0.8',
             'wheel>=0.31.0',
         ]
     },

@@ -1,7 +1,8 @@
 {
   "categories": [
     "processing",
-    "messaging"
+    "messaging",
+    "autodiscovery"
   ],
   "creates_events": true,
   "display_name": "Kafka Consumer",

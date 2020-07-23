@@ -1,6 +1,7 @@
 {
   "categories": [
-    "processing"
+    "processing",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "MapReduce",

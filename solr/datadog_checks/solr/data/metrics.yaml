@@ -3,6 +3,7 @@ jmx_metrics:
 
   # Solr versions >= 7.0
   - include:
+      domain: solr
       category: SEARCHER
       name:
         - numDocs
@@ -14,6 +15,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: solr
       category: SEARCHER
       name: maxDoc
       scope:
@@ -24,6 +26,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: solr
       category: SEARCHER
       name: warmupTime
       scope:
@@ -34,6 +37,7 @@ jmx_metrics:
           metric_type: gauge
 
   - include:
+      domain: solr
       category: CACHE
       name: documentCache
       scope:
@@ -53,6 +57,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: CACHE
       name: queryResultCache
       scope:
@@ -72,6 +77,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: CACHE
       name: filterCache
       scope:
@@ -91,6 +97,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: QUERY
       name: requests
       attribute:
@@ -99,6 +106,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: QUERY
       name: timeouts
       attribute:
@@ -107,6 +115,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: QUERY
       name: errors
       attribute:
@@ -115,6 +124,7 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: QUERY
       name: totalTime
       attribute:
@@ -123,19 +133,42 @@ jmx_metrics:
           metric_type: counter
 
   - include:
+      domain: solr
       category: QUERY
       name: requestTimes
       attribute:
-        avgRequestsPerSecond:
-          alias: solr.search_handler.avg_requests_per_sec
+        Mean:
+          alias: solr.search_handler.request_times.mean
           metric_type: gauge
-        avgTimePerRequest:
-          alias: solr.search_handler.avg_time_per_req
+        MeanRate:
+          alias: solr.search_handler.request_times.mean_rate
+          metric_type: gauge
+        50thPercentile:
+          alias: solr.search_handler.request_times.50percentile
+          metric_type: gauge
+        75thPercentile:
+          alias: solr.search_handler.request_times.75percentile
+          metric_type: gauge
+        95thPercentile:
+          alias: solr.search_handler.request_times.95percentile
+          metric_type: gauge
+        98thPercentile:
+          alias: solr.search_handler.request_times.98percentile
+          metric_type: gauge
+        99thPercentile:
+          alias: solr.search_handler.request_times.99percentile
+          metric_type: gauge
+        999thPercentile:
+          alias: solr.search_handler.request_times.999percentile
+          metric_type: gauge
+        OneMinuteRate:
+          alias: solr.search_handler.request_times.one_minute_rate
           metric_type: gauge
 
 
   # Solr versions < 7.0
   - include:
+      domain: solr/gettingstarted
       type: searcher
       attribute:
         maxDoc:
@@ -148,6 +181,7 @@ jmx_metrics:
           alias: solr.searcher.warmup
           metric_type: gauge
   - include:
+      domain: solr/gettingstarted
       id: org.apache.solr.search.FastLRUCache
       attribute:
         cumulative_lookups:
@@ -163,6 +197,7 @@ jmx_metrics:
           alias: solr.cache.evictions
           metric_type: counter
   - include:
+      domain: solr/gettingstarted
       id: org.apache.solr.search.LRUCache
       attribute:
         cumulative_lookups:
@@ -178,6 +213,7 @@ jmx_metrics:
           alias: solr.cache.evictions
           metric_type: counter
   - include:
+      domain: solr/gettingstarted
       id: org.apache.solr.handler.component.SearchHandler
       attribute:
         errors:

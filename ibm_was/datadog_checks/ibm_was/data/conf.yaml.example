@@ -8,6 +8,12 @@ instances:
     #
   - servlet_url: http://localhost:<PORT>/wasPerfTool/servlet/perfservlet
 
+    ## @param auth_type - string - optional
+    ## The type of authentication to use.
+    ## The available values are "basic" and "digest".
+    #
+    # auth_type: <AUTH_TYPE>
+
     ## @param username - string - optional
     ## The username to use for authentication againse the servlet
     #
@@ -51,7 +57,12 @@ instances:
     # tls_private_key: <private_key>
 
     ## @param tls_ignore_warning - boolean - optional - default: false
-    ## Whether or not to suppress insecure request warnings when tls_verify is false
+    ## If `tls_verify` is disabled, security warnings are logged by the check.
+    ## Disable those by setting `tls_ignore_warning` to true.
+    ##
+    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
+    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
+    ## to true.
     #
     # tls_ignore_warning: false
 
@@ -123,6 +134,24 @@ instances:
     #     tag_keys:
     #       - "threadKey"
 
+    ## @param custom_queries_units_gauge - list - optional - default: []
+    ## List of unit names used to map CountStatistic to gauge in custom queries.
+    ## By default CountStatistic stats are submitted as monotonic count, but some of them actually contain
+    ## data which are gauge, as they have data with a unit. To get that behavior, the unit can be added here
+    ## and the check will translate the metric type.
+    ##
+    ## For example:
+    ## <Stat name="xdProcessModule">
+    ##   <CountStatistic ID="4" count="11779168" name="totalMemory" unit="unit.kbyte" ... />
+    ## </Stat>
+    ##
+    ## would be submitted as a count, but will be as a gauge if `unit.kbyte` is present in `custom_queries_units_gauge`.
+    #
+    # custom_queries_units_gauge:
+    #   - unit.kbyte
+    #   - kilobyte
+    #   - second
+
     ## @param tags - list of key:value elements - optional
     ## List of tags to attach to every metric, event and service check emitted by this integration.
     ##
@@ -138,7 +167,6 @@ instances:
 ## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
 ## service - mandatory - Name of the service that generated the log
 ## source  - mandatory - Attribute that defines which Integration sent the logs
-## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
 ## tags: - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/

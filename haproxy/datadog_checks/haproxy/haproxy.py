@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2012-2017
+# (C) Datadog, Inc. 2012-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -8,16 +8,18 @@ import copy
 import re
 import socket
 import time
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 
 from six import PY2, iteritems
 from six.moves.urllib.parse import urlparse
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
+from datadog_checks.base.errors import CheckException
 
 STATS_URL = "/;csv;norefresh"
 EVENT_TYPE = SOURCE_TYPE_NAME = 'haproxy'
 BUFSIZE = 8192
+VERSION_PATTERN = re.compile(r"(?:HAProxy|hapee-lb) version ([^,]+)")
 
 
 class Services(object):
@@ -49,6 +51,25 @@ class Services(object):
         'no_check': AgentCheck.UNKNOWN,
         'maint': AgentCheck.OK,
     }
+
+
+class StickTable(namedtuple("StickTable", ["name", "type", "size", "used"])):
+
+    SHOWTABLE_RE = re.compile(
+        r"# table: (?P<name>[^ ,]+), type: (?P<type>[^ ,]+), size:(?P<size>[0-9]+), used:(?P<used>[0-9]+)$"
+    )
+
+    @classmethod
+    def parse(cls, line):
+        items = cls.SHOWTABLE_RE.match(line)
+        if not items:
+            return None
+        return StickTable(
+            name=items.group('name'),
+            type=items.group('type'),
+            size=int(items.group('size')),
+            used=int(items.group('used')),
+        )
 
 
 class HAProxy(AgentCheck):
@@ -100,14 +121,20 @@ class HAProxy(AgentCheck):
 
     def check(self, instance):
         url = instance.get('url')
-        self.log.debug('Processing HAProxy data for %s' % url)
-
+        self.log.debug('Processing HAProxy data for %s', url)
         parsed_url = urlparse(url)
+        tables = None
 
         if parsed_url.scheme == 'unix' or parsed_url.scheme == 'tcp':
-            data = self._fetch_socket_data(parsed_url)
-
+            info, data, tables = self._fetch_socket_data(parsed_url)
+            self._set_version_metadata(self._collect_version_from_socket(info))
+            uptime = self._collect_uptime_from_socket(info)
         else:
+            try:
+                uptime = self._collect_info_from_http(url)
+            except Exception as e:
+                self.log.warning("Couldn't collect version or uptime information: %s", e)
+                uptime = None
             data = self._fetch_url_data(url)
 
         collect_aggregates_only = instance.get('collect_aggregates_only', True)
@@ -123,6 +150,8 @@ class HAProxy(AgentCheck):
 
         enable_service_check = is_affirmative(instance.get('enable_service_check', False))
 
+        startup_grace_period = float(instance.get('startup_grace_seconds', 0))
+
         services_incl_filter = instance.get('services_include', [])
         services_excl_filter = instance.get('services_exclude', [])
 
@@ -135,6 +164,17 @@ class HAProxy(AgentCheck):
             active_tag.append("active:%s" % ('true' if 'act' in data else 'false'))
 
         process_events = instance.get('status_check', self.init_config.get('status_check', False))
+
+        if uptime is not None and uptime < startup_grace_period:
+            return
+
+        if tables:
+            self._process_stick_table_metrics(
+                tables,
+                services_incl_filter=services_incl_filter,
+                services_excl_filter=services_excl_filter,
+                custom_tags=custom_tags,
+            )
 
         self._process_data(
             data,
@@ -159,11 +199,13 @@ class HAProxy(AgentCheck):
         # Try to fetch data from the stats URL
         url = "%s%s" % (url, STATS_URL)
 
-        self.log.debug("Fetching haproxy stats from url: %s" % url)
+        self.log.debug("Fetching haproxy stats from url: %s", url)
 
         response = self.http.get(url)
         response.raise_for_status()
+        return self._decode_response(response)
 
+    def _decode_response(self, response):
         # it only needs additional decoding in py3, so skip it if it's py2
         if PY2:
             return response.content.splitlines()
@@ -179,11 +221,55 @@ class HAProxy(AgentCheck):
 
             return content.splitlines()
 
-    def _fetch_socket_data(self, parsed_url):
-        ''' Hit a given stats socket and return the stats lines '''
+    UPTIME_PARSER = re.compile(r"(?P<days>\d+)d (?P<hours>\d+)h(?P<minutes>\d+)m(?P<seconds>\d+)s")
 
-        self.log.debug("Fetching haproxy stats from socket: %s" % parsed_url.geturl())
+    @classmethod
+    def _parse_uptime(cls, uptime):
+        matched_uptime = re.search(cls.UPTIME_PARSER, uptime)
+        return (
+            int(matched_uptime.group('days')) * 86400
+            + int(matched_uptime.group('hours')) * 3600
+            + int(matched_uptime.group('minutes')) * 60
+            + int(matched_uptime.group('seconds'))
+        )
 
+    def _collect_info_from_http(self, url):
+        # the csv format does not offer version info, therefore we need to get the HTML page
+        self.log.debug("collecting version info for HAProxy from %s", url)
+
+        r = self.http.get(url)
+        r.raise_for_status()
+        raw_version = ""
+        raw_uptime = ""
+        uptime = None
+        for line in self._decode_response(r):
+            if "HAProxy version" in line:
+                raw_version = line
+            if "hapee-lb version" in line:
+                # HAProxy enterprise edition
+                raw_version = line
+            if "uptime = " in line:
+                raw_uptime = line
+            if raw_uptime and raw_version:
+                break
+
+        if raw_version == "":
+            self.log.debug("unable to find HAProxy version info")
+        else:
+            version = VERSION_PATTERN.search(raw_version).group(1)
+            self.log.debug("HAProxy version is %s", version)
+            self.set_metadata('version', version)
+        if raw_uptime == "":
+            self.log.debug("unable to find HAProxy uptime")
+        else:
+            # It is not documented whether this output format is under any
+            # compatibility guarantee, but it hasn't yet changed since it was
+            # introduced
+            uptime = self._parse_uptime(raw_uptime)
+
+        return uptime
+
+    def _run_socket_commands(self, parsed_url, commands):
         if parsed_url.scheme == 'tcp':
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             splitted_loc = parsed_url.netloc.split(':')
@@ -193,17 +279,66 @@ class HAProxy(AgentCheck):
         else:
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.connect(parsed_url.path)
-        sock.send(b"show stat\r\n")
+
+        sock.send(b';'.join(commands) + b"\r\n")
 
         response = ""
         output = sock.recv(BUFSIZE)
         while output:
             response += output.decode("ASCII")
             output = sock.recv(BUFSIZE)
-
         sock.close()
 
-        return response.splitlines()
+        responses = response.split('\n\n')
+        if len(responses) != len(commands) + 1 or responses[len(responses) - 1] != '':
+            raise CheckException("Got a different number of responses than expected")
+
+        return tuple(r.splitlines() for r in responses[: len(commands)])
+
+    def _fetch_socket_data(self, parsed_url):
+        ''' Hit a given stats socket and return the stats lines '''
+
+        self.log.debug("Fetching haproxy stats from socket: %s", parsed_url.geturl())
+        info, stat = self._run_socket_commands(parsed_url, (b"show info", b"show stat"))
+
+        # the "show table" command was introduced in 1.5. Sending "show table"
+        # to a haproxy <1.5 results in no output at all even when multiple
+        # commands were sent, so we have to check the version and only send the
+        # command when supported
+        tables = []
+        try:
+            raw_version = self._collect_version_from_socket(info)
+            haproxy_major_version = tuple(int(vernum) for vernum in raw_version.split('.')[:2])
+
+            if len(haproxy_major_version) == 2 and haproxy_major_version >= (1, 5):
+                (tables,) = self._run_socket_commands(parsed_url, (b"show table",))
+        except (IndexError, ValueError) as e:
+            self.log.error("Could not parse version number '%s': %s", raw_version, e)
+        except CheckException:
+            # We got an empty response, which made _run_socket_commands raise an error
+            self.log.debug("No tables returned")
+
+        return info, stat, tables
+
+    def _collect_version_from_socket(self, info):
+        for line in info:
+            key, value = line.split(':')
+            if key == 'Version':
+                return value
+        return ''
+
+    def _set_version_metadata(self, version):
+        if not version:
+            self.log.debug("unable to collect version info from socket")
+        else:
+            self.log.debug("HAProxy version is %s", version)
+            self.set_metadata('version', version)
+
+    def _collect_uptime_from_socket(self, info):
+        for line in info:
+            key, value = line.split(':')
+            if key == 'Uptime_sec':
+                return int(value)
 
     def _process_data(
         self,
@@ -498,9 +633,11 @@ class HAProxy(AgentCheck):
                 agg_statuses[service]
 
         for service in agg_statuses:
-            tags = ['service:%s' % service]
+            tags = ['haproxy_service:%s' % service]
             tags.extend(custom_tags)
             tags.extend(active_tag)
+            self._handle_legacy_service_tag(tags, service)
+
             self.gauge(
                 'haproxy.backend_hosts', agg_statuses[service][Services.AVAILABLE], tags=tags + ['available:true']
             )
@@ -538,21 +675,21 @@ class HAProxy(AgentCheck):
             try:
                 service, _, hostname, status = host_status
             except Exception:
+                service, _, status = host_status
                 if collect_status_metrics_by_host:
                     self.warning(
-                        '`collect_status_metrics_by_host` is enabled but no host info\
-                                 could be extracted from HAProxy stats endpoint for {0}'.format(
-                            service
-                        )
+                        '`collect_status_metrics_by_host` is enabled but no host info could be extracted from HAProxy '
+                        'stats endpoint for %s',
+                        service,
                     )
-                service, _, status = host_status
 
             if self._is_service_excl_filtered(service, services_incl_filter, services_excl_filter):
                 continue
 
             tags = []
             if count_status_by_service:
-                tags.append('service:%s' % service)
+                tags.append('haproxy_service:%s' % service)
+                self._handle_legacy_service_tag(tags, service)
             if hostname:
                 tags.append('backend:%s' % hostname)
 
@@ -570,7 +707,8 @@ class HAProxy(AgentCheck):
             if not collate_status_tags_per_host:
                 agg_tags = []
                 if count_status_by_service:
-                    agg_tags.append('service:%s' % service)
+                    agg_tags.append('haproxy_service:%s' % service)
+                    self._handle_legacy_service_tag(agg_tags, service)
                 # An unknown status will be sent as UNAVAILABLE
                 status_key = Services.STATUS_TO_COLLATED.get(status, Services.UNAVAILABLE)
                 agg_statuses_counter[tuple(agg_tags)][status_key] += count
@@ -598,9 +736,10 @@ class HAProxy(AgentCheck):
         back_or_front = data['back_or_front']
         custom_tags = [] if custom_tags is None else custom_tags
         active_tag = [] if active_tag is None else active_tag
-        tags = ["type:%s" % back_or_front, "instance_url:%s" % url, "service:%s" % service_name]
+        tags = ["type:%s" % back_or_front, "instance_url:%s" % url, "haproxy_service:%s" % service_name]
         tags.extend(custom_tags)
         tags.extend(active_tag)
+        self._handle_legacy_service_tag(tags, service_name)
 
         if self._is_service_excl_filtered(service_name, services_incl_filter, services_excl_filter):
             return
@@ -621,6 +760,26 @@ class HAProxy(AgentCheck):
                         self.gauge(name, float(value), tags=tags)
                 except ValueError:
                     pass
+
+    def _process_stick_table_metrics(
+        self, data, services_incl_filter=None, services_excl_filter=None, custom_tags=None
+    ):
+        """
+        Stick table metrics processing. Two metrics will be created for each stick table (current and max size)
+        """
+
+        custom_tags = [] if not custom_tags else custom_tags
+
+        for line in data:
+            table = StickTable.parse(line)
+            if table is None:
+                continue
+            if self._is_service_excl_filtered(table.name, services_incl_filter, services_excl_filter):
+                continue
+
+            tags = ["haproxy_service:%s" % table.name, "stick_type:%s" % table.type] + custom_tags
+            self.gauge("haproxy.sticktable.size", float(table.size), tags=tags)
+            self.gauge("haproxy.sticktable.used", float(table.used), tags=tags)
 
     def _process_event(self, data, url, services_incl_filter=None, services_excl_filter=None, custom_tags=None):
         '''
@@ -659,26 +818,27 @@ class HAProxy(AgentCheck):
             self.host_status[url][key] = data_status
 
     def _create_event(self, status, hostname, lastchg, service_name, back_or_front, custom_tags=None):
-        HAProxy_agent = self.hostname.decode('utf-8')
         custom_tags = [] if custom_tags is None else custom_tags
         if status == 'down':
             alert_type = "error"
-            title = "%s reported %s:%s %s" % (HAProxy_agent, service_name, hostname, status.upper())
+            title = "%s reported %s:%s %s" % (self.hostname, service_name, hostname, status.upper())
         else:
             if status == "up":
                 alert_type = "success"
             else:
                 alert_type = "info"
-            title = "%s reported %s:%s back and %s" % (HAProxy_agent, service_name, hostname, status.upper())
+            title = "%s reported %s:%s back and %s" % (self.hostname, service_name, hostname, status.upper())
 
-        tags = ["service:%s" % service_name]
+        tags = ["haproxy_service:%s" % service_name]
         if back_or_front == Services.BACKEND:
             tags.append('backend:%s' % hostname)
         tags.extend(custom_tags)
+        self._handle_legacy_service_tag(tags, service_name)
+
         return {
             'timestamp': int(time.time() - lastchg),
             'event_type': EVENT_TYPE,
-            'host': HAProxy_agent,
+            'host': self.hostname,
             'msg_title': title,
             'alert_type': alert_type,
             "source_type_name": SOURCE_TYPE_NAME,
@@ -702,8 +862,10 @@ class HAProxy(AgentCheck):
             return
 
         if status in Services.STATUS_TO_SERVICE_CHECK:
-            service_check_tags = ["service:%s" % service_name]
+            service_check_tags = ["haproxy_service:%s" % service_name]
             service_check_tags.extend(custom_tags)
+            self._handle_legacy_service_tag(service_check_tags, service_name)
+
             hostname = data['svname']
             if data['back_or_front'] == Services.BACKEND:
                 service_check_tags.append('backend:%s' % hostname)
@@ -713,3 +875,8 @@ class HAProxy(AgentCheck):
             self.service_check(
                 self.SERVICE_CHECK_NAME, status, message=message, hostname=check_hostname, tags=service_check_tags
             )
+
+    def _handle_legacy_service_tag(self, tags, service):
+        if not self.instance.get('disable_legacy_service_tag', False):
+            self._log_deprecation('service_tag', 'haproxy_service')
+            tags.append('service:{}'.format(service))

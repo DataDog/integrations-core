@@ -1,5 +1,43 @@
 # CHANGELOG - mysql
 
+## 1.15.0 / 2020-06-29
+
+* [Added] Catch unicode error. See [#6947](https://github.com/DataDog/integrations-core/pull/6947).
+* [Fixed] Add config spec. See [#6908](https://github.com/DataDog/integrations-core/pull/6908).
+
+## 1.14.0 / 2020-06-03
+
+* [Added] Add custom queries. See [#6776](https://github.com/DataDog/integrations-core/pull/6776).
+
+## 1.13.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.12.1 / 2020-04-04
+
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
+## 1.12.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 1.11.0 / 2019-12-20
+
+* [Added] Document log_processing_rules for MySQL slow query logs. See [#5237](https://github.com/DataDog/integrations-core/pull/5237).
+* [Fixed] Fix formatting and typos in the MySQL documentation. See [#5238](https://github.com/DataDog/integrations-core/pull/5238).
+* [Fixed] Improve perf (minor) by only defining metadata namedtuple once. See [#5138](https://github.com/DataDog/integrations-core/pull/5138).
+
+## 1.10.0 / 2019-12-02
+
+* [Added] Upgrade cryptography to 2.8. See [#5047](https://github.com/DataDog/integrations-core/pull/5047).
+* [Fixed] Fix TypeError in schema size check. See [#5043](https://github.com/DataDog/integrations-core/pull/5043). Thanks [rayatbuzzfeed](https://github.com/rayatbuzzfeed).
+* [Added] Submit version metadata. See [#4814](https://github.com/DataDog/integrations-core/pull/4814).
+
+## 1.9.1 / 2019-10-11
+
+* [Fixed] Fix typo in logs (Instace -> Instance). See [#4715](https://github.com/DataDog/integrations-core/pull/4715). Thanks [ajacoutot](https://github.com/ajacoutot).
+
 ## 1.9.0 / 2019-07-04
 
 * [Added] Update cryptography version. See [#4000](https://github.com/DataDog/integrations-core/pull/4000).

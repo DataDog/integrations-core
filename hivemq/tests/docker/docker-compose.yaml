@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  hivemq1:
+    image: hivemq/hivemq4:${HIVEMQ_VERSION}
+    container_name: hivemq1
+    ulimits:
+      nofile:
+        soft: 500000
+        hard: 500000
+    environment:
+      JAVA_OPTS: >-
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.port=9010
+        -Dcom.sun.management.jmxremote.rmi.port=9010
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Djava.rmi.server.hostname=localhost
+        -Dhivemq.log.folder=/var/log
+    ports:
+      - "9010:9010"
+    volumes:
+      - ${DD_LOG_1}:/var/log/hivemq.log
+    networks:
+      - dd_hivemq
+
+networks:
+  dd_hivemq:

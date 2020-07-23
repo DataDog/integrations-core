@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -10,15 +10,11 @@ import requests
 
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.utils import ON_WINDOWS
-from datadog_checks.utils.common import get_docker_hostname
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FOLDER = os.path.join(HERE, 'docker', 'coredns')
-HOST = get_docker_hostname()
-PORT = '9153'
-URL = "http://{}:{}/metrics".format(HOST, PORT)
+from .common import ATHOST, CONFIG_FILE, HERE, URL
 
-DIG_ARGS = ["dig", "google.com", "@127.0.0.1", "-p", "54"]
+# One lookup each for the forward and proxy plugins
+DIG_ARGS = ["dig", "google.com", ATHOST, "example.com", ATHOST, "-p", "54"]
 
 
 def init_coredns():
@@ -32,7 +28,7 @@ def init_coredns():
 @pytest.fixture(scope="session")
 def dd_environment(instance):
     compose_file = os.path.join(HERE, 'docker', 'docker-compose.yml')
-    env = {'COREDNS_CONFIG_FOLDER': CONFIG_FOLDER}
+    env = {'COREDNS_CONFIG_FILE': CONFIG_FILE}
 
     with docker_run(compose_file, conditions=[WaitFor(init_coredns)], env_vars=env):
         yield instance
@@ -65,6 +61,7 @@ class MockResponse:
     def __init__(self, content, content_type):
         self.content = content
         self.headers = {'Content-Type': content_type}
+        self.encoding = 'utf-8'
 
     def iter_lines(self, **_):
         for elt in self.content.split("\n"):

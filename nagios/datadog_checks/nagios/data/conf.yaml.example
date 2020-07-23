@@ -1,10 +1,5 @@
 init_config:
 
-  ## @param check_freq - integer - optional - default: 15
-  ## This parameter defines the check execution frequency.
-  #
-  # check_freq: 15
-
 instances:
 
     ## @param nagios_conf - string - required

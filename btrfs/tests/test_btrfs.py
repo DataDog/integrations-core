@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -9,7 +9,7 @@ import mock
 # project
 from datadog_checks.btrfs import BTRFS
 
-btrfs_check = BTRFS('btrfs', {}, {})
+btrfs_check = BTRFS('btrfs', {}, [{}])
 
 
 def mock_get_usage():

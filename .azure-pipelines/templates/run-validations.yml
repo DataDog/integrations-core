@@ -1,21 +1,39 @@
+parameters:
+  repo: 'core'
+
 steps:
-- script: ddev validate agent-reqs
-  displayName: 'Validate Agent requirements'
+- script: ddev validate ci
+  displayName: 'Validate CI configuration'
+
+- ${{ if eq(parameters.repo, 'core') }}:
+  - script: ddev validate agent-reqs
+    displayName: 'Validate Agent requirements'
+
+- ${{ if eq(parameters.repo, 'extras') }}:
+  - script: ddev validate codeowners
+    displayName: 'Validate codeowners'
 
 - script: ddev validate config
   displayName: 'Validate default configuration files'
 
-- script: ddev validate dep
-  displayName: 'Validate dependencies'
+- script: ddev validate dashboards
+  displayName: 'Validate dashboard definition files'
 
-- script: ddev validate logos
-  displayName: 'Validate logos'
+- ${{ if eq(parameters.repo, 'core') }}:
+  - script: ddev validate dep
+    displayName: 'Validate dependencies'
 
-- script: ddev validate manifest --include-extras
+- script: ddev validate manifest -i
   displayName: 'Validate manifest files'
 
 - script: ddev validate metadata
   displayName: 'Validate metric data'
 
+- script: ddev validate saved-views
+  displayName: 'Validate saved views data'
+
 - script: ddev validate service-checks
   displayName: 'Validate service check data'
+
+- script: ddev validate imports
+  displayName: 'Validate imports'

@@ -1,5 +1,31 @@
 # CHANGELOG - mesos_master
 
+## 1.9.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
+## 1.8.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.7.2 / 2020-04-24
+
+* [Fixed] Handle missing role metrics for mesos_master. See [#6422](https://github.com/DataDog/integrations-core/pull/6422).
+
+## 1.7.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
+## 1.7.0 / 2020-01-13
+
+* [Added] Submit version metadata. See [#5216](https://github.com/DataDog/integrations-core/pull/5216).
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 1.6.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 1.5.1 / 2019-08-28
 
 * [Fixed] Fix mesos_master service check. See [#4452](https://github.com/DataDog/integrations-core/pull/4452).

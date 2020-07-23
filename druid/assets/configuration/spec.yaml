@@ -1,0 +1,28 @@
+name: Druid
+files:
+- name: druid.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/http
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: url
+      description: url used to connect to the Druid instance.
+      required: true
+      value:
+        type: string
+        example: <DRUID_INSTANCE_URL>
+    - template: instances/http
+    - template: instances/default
+  - template: logs
+    example:
+    - type: file
+      path: <PATH_TO_DRUID_DIR>/var/sv/*.log
+      source: druid
+      service: <SERVICE_NAME>
+      log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_date
+          pattern: \d{4}\-\d{2}\-\d{2}

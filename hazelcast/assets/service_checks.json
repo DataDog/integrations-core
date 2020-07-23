@@ -1,0 +1,33 @@
+[
+    {
+        "agent_version": "6.20.0",
+        "integration": "Hazelcast",
+        "groups": [
+            "host",
+            "instance"
+        ],
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "check": "hazelcast.can_connect",
+        "name": "Can Connect",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to Hazelcast, otherwise returns `OK`."
+    },
+    {
+        "agent_version": "6.20.0",
+        "integration": "Hazelcast",
+        "groups": [
+            "host",
+            "endpoint"
+        ],
+        "statuses": [
+            "ok",
+            "warning",
+            "critical"
+        ],
+        "check": "hazelcast.mc_cluster_state",
+        "name": "Management Center cluster state",
+        "description": "Represents the state of the Hazelcast Management Center as indicated by its health check."
+    }
+]

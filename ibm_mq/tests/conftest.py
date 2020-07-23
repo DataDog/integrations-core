@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
@@ -25,6 +25,12 @@ def check():
 @pytest.fixture
 def instance():
     inst = copy.deepcopy(common.INSTANCE)
+    return inst
+
+
+@pytest.fixture
+def instance_with_connection_name():
+    inst = copy.deepcopy(common.INSTANCE_WITH_CONNECTION_NAME)
     return inst
 
 
@@ -71,10 +77,10 @@ def publish():
     for i in range(10):
         try:
             message = 'Hello from Python! Message {}'.format(i)
-            log.info("sending message: {}".format(message))
+            log.info("sending message: %s", message)
             queue.put(message.encode())
         except Exception as e:
-            log.info("exception publishing: {}".format(e))
+            log.info("exception publishing: %s", e)
             queue.close()
             qmgr.disconnect()
             return
@@ -116,11 +122,13 @@ def dd_environment():
     if common.MQ_VERSION == '9':
         log_pattern = "AMQ5026I: The listener 'DEV.LISTENER.TCP' has started. ProcessId"
     elif common.MQ_VERSION == '8':
-        log_pattern = r".*QMNAME\(datadog\)\s*STATUS\(Running\).*"
+        log_pattern = r".*QMNAME\({}\)\s*STATUS\(Running\).*".format(common.QUEUE_MANAGER)
+    else:
+        raise RuntimeError('Invalid version: {}'.format(common.MQ_VERSION))
 
     env = {'COMPOSE_DIR': common.COMPOSE_DIR}
 
     with docker_run(
-        common.COMPOSE_FILE_PATH, env_vars=env, conditions=[CheckDockerLogs('ibm_mq', log_pattern)], sleep=10
+        common.COMPOSE_FILE_PATH, env_vars=env, conditions=[CheckDockerLogs('ibm_mq1', log_pattern)], sleep=10,
     ):
         yield common.INSTANCE, common.E2E_METADATA

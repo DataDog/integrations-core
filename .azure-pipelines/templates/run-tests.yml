@@ -1,0 +1,41 @@
+parameters:
+  test_run: ''
+  check: ''
+  test: false
+  test_e2e: false
+  benchmark: false
+  latest_metrics: false
+  repo: ''
+
+steps:
+- ${{ if eq(parameters.test, 'true') }}:
+  - script: ddev test --cov --junit ${{ parameters.check }}
+    displayName: 'Run Unit/Integration tests'
+    env:
+      CODECOV_TOKEN: $(CODECOV_TOKEN)
+
+- ${{ if eq(parameters.test_e2e, 'true') }}:
+  - script: |
+      ENV_TEST_OPTS=''
+      if [ "${{ parameters.repo }}" == "core" ]; then
+          ENV_TEST_OPTS='--base'
+      fi
+      ddev env test $ENV_TEST_OPTS --new-env --junit ${{ parameters.check }}
+    displayName: 'Run E2E tests'
+    env:
+      DD_API_KEY: $(DD_API_KEY)
+
+- ${{ if eq(parameters.benchmark, 'true') }}:
+  - script: ddev test --bench --junit ${{ parameters.check }}
+    displayName: 'Run benchmarks'
+
+- ${{ if eq(parameters.latest_metrics, 'true') }}:
+    - script: ddev test --latest-metrics --junit ${{ parameters.check }}
+      displayName: 'Verify latest metrics supported'
+
+- task: PublishTestResults@2 # Task info: https://docs.microsoft.com/en-gb/azure/devops/pipelines/tasks/test/publish-test-results
+  condition: succeededOrFailed()
+  inputs:
+    testResultsFiles: '**/test-*.xml'
+    testRunTitle: '${{ parameters.test_run }}'
+    mergeTestResults: true

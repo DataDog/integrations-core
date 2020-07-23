@@ -1,5 +1,27 @@
 # CHANGELOG - ssh_check
 
+## 1.11.1 / 2020-06-29
+
+* [Fixed] Add config specs. See [#6923](https://github.com/DataDog/integrations-core/pull/6923).
+* [Fixed] Agent6 style init. See [#6924](https://github.com/DataDog/integrations-core/pull/6924).
+
+## 1.11.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.10.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
+## 1.10.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Added] Add version metadata. See [#5016](https://github.com/DataDog/integrations-core/pull/5016).
+
+## 1.9.0 / 2019-10-09
+
+* [Added] Upgrade Paramiko to version 2.6.0. See [#4685](https://github.com/DataDog/integrations-core/pull/4685). Thanks [daniel-savo](https://github.com/daniel-savo).
+
 ## 1.8.0 / 2019-08-24
 
 * [Fixed] Remove unused dependencies. See [#4405](https://github.com/DataDog/integrations-core/pull/4405).

@@ -1,5 +1,49 @@
 # CHANGELOG - IBM MQ
 
+## 3.7.0 / 2020-06-29
+
+* [Added] Add MacOS Support. See [#6927](https://github.com/DataDog/integrations-core/pull/6927).
+* [Fixed] Refactor to make encoding more consistent. See [#6995](https://github.com/DataDog/integrations-core/pull/6995).
+* [Fixed] Ensure bytes for ssl connection. See [#6913](https://github.com/DataDog/integrations-core/pull/6913).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+* [Fixed] Move metrics collection logic to separate files. See [#6752](https://github.com/DataDog/integrations-core/pull/6752).
+
+## 3.6.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 3.5.1 / 2020-04-08
+
+* [Fixed] Don't import pymqi unconditionally. See [#6286](https://github.com/DataDog/integrations-core/pull/6286).
+
+## 3.5.0 / 2020-04-04
+
+* [Added] Apply config specs to IBM MQ. See [#5903](https://github.com/DataDog/integrations-core/pull/5903).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
+## 3.4.0 / 2020-03-11
+
+* [Added] Add `connection_name` configuration. See [#6015](https://github.com/DataDog/integrations-core/pull/6015).
+* [Added] Add configuration option for the Channel Definition API version. See [#5905](https://github.com/DataDog/integrations-core/pull/5905).
+* [Added] Upgrade pymqi to 1.10.1. See [#5955](https://github.com/DataDog/integrations-core/pull/5955).
+* [Fixed] IBM MQ refactor. See [#5902](https://github.com/DataDog/integrations-core/pull/5902).
+
+## 3.3.1 / 2020-01-17
+
+* [Fixed] Fix metric type and missing metrics in metadata.csv. See [#5470](https://github.com/DataDog/integrations-core/pull/5470).
+
+## 3.3.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Added] Add channel metrics. See [#5116](https://github.com/DataDog/integrations-core/pull/5116).
+
+## 3.2.1 / 2019-09-18
+
+* [Fixed] Improve IBM MQ docs and logging. See [#4540](https://github.com/DataDog/integrations-core/pull/4540).
+* [Fixed] Fix duplicate service checks. See [#4525](https://github.com/DataDog/integrations-core/pull/4525).
+
 ## 3.2.0 / 2019-08-21
 
 * [Added] Add channel_status_mapping config. See [#4395](https://github.com/DataDog/integrations-core/pull/4395).

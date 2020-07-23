@@ -1,11 +1,10 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 METRIC_MAP = {
     'addsstable_applications': 'addsstable.applications',
     'addsstable_copies': 'addsstable.copies',
     'addsstable_proposals': 'addsstable.proposals',
-    'build_timestamp': 'build.timestamp',
     'capacity': 'capacity.total',
     'capacity_available': 'capacity.available',
     'capacity_reserved': 'capacity.reserved',

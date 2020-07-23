@@ -1,10 +1,10 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
 
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 CHECK_NAME = 'activemq_xml'
 

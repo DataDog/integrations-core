@@ -7,6 +7,12 @@ instances:
     #
   - url: http://<HARBOR_URL>
 
+    ## @param auth_type - string - optional
+    ## The type of authentication to use.
+    ## The available values are "basic" and "digest".
+    #
+    # auth_type: <AUTH_TYPE>
+
     ## @param username - string - required
     ## The username to use for authentication against the Harbor API.
     ## Note: Some metrics and service checks requires an admin account to be collected.
@@ -61,7 +67,12 @@ instances:
     # tls_private_key: <private_key>
 
     ## @param tls_ignore_warning - boolean - optional - default: false
-    ## Whether or not to suppress insecure request warnings when tls_verify is false
+    ## If `tls_verify` is disabled, security warnings are logged by the check.
+    ## Disable those by setting `tls_ignore_warning` to true.
+    ##
+    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
+    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
+    ## to true.
     #
     # tls_ignore_warning: false
 

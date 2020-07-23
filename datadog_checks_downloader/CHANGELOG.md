@@ -1,5 +1,48 @@
 # CHANGELOG - Datadog Checks Downloader
 
+## 3.1.0 / 2020-07-14
+
+* [Added] Update to v6 root from @FlorianVeaux. See [#7115](https://github.com/DataDog/integrations-core/pull/7115).
+* [Added] Add warning when selecting an extras integration that resides in core. See [#7079](https://github.com/DataDog/integrations-core/pull/7079).
+* [Added] Add dependencies to setup.py. See [#7030](https://github.com/DataDog/integrations-core/pull/7030).
+
+## 3.0.0 / 2020-06-18
+
+* [Added] Support multiple root layouts. See [#6856](https://github.com/DataDog/integrations-core/pull/6856).
+
+## 2.5.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 2.4.0 / 2020-02-26
+
+* [Added] Bump securesystemslib to 0.14.2. See [#5890](https://github.com/DataDog/integrations-core/pull/5890).
+
+## 2.3.1 / 2020-02-24
+
+* [Fixed] Hide internal logging exceptions. See [#5848](https://github.com/DataDog/integrations-core/pull/5848).
+
+## 2.3.0 / 2020-02-22
+
+* [Added] Update in-toto and its deps. See [#5599](https://github.com/DataDog/integrations-core/pull/5599).
+
+## 2.2.0 / 2020-01-10
+
+* [Added] Update TUF dependency. See [#5441](https://github.com/DataDog/integrations-core/pull/5441).
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
+## 2.1.0 / 2020-01-02
+
+* [Changed] Don't provide a CLI entry point. See [#5374](https://github.com/DataDog/integrations-core/pull/5374).
+
+## 2.0.0 / 2019-12-05
+
+* [Fixed] Clean up test artifacts. See [#5129](https://github.com/DataDog/integrations-core/pull/5129).
+
+## 0.7.0 / 2019-12-02
+
+* [Added] Support downloading universal and pure Python wheels. See [#4981](https://github.com/DataDog/integrations-core/pull/4981).
+
 ## 0.6.0 / 2019-06-01
 
 * [Added] Update downloader to new TUF root v4. See [#3811](https://github.com/DataDog/integrations-core/pull/3811).

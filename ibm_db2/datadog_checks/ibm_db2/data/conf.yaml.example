@@ -37,6 +37,12 @@ instances:
     #
     # port: 50000
 
+    ## @param tls_cert - string - optional
+    ## The path to a SSL certicate to use, when connecting to a database in a secure fashion. It
+    ## has to be accessible and readable by the agent user.
+    #
+    # tls_cert: <PATH>
+
     ## @param tags - list of key:value strings - optional
     ## List of tags to attach to every metric and service check emitted by this instance.
     ##
@@ -98,7 +104,6 @@ instances:
 ## port / path / channel_path - mandatory - Set port if type is tcp or udp. Set path if type is file. Set channel_path if type is windows_event
 ## service - mandatory - Name of the service that generated the log
 ## source  - mandatory - Attribute that defines which Integration sent the logs
-## sourcecategory - optional - Multiple value attribute. Used to refine the source attribute
 ## tags: - optional - Add tags to the collected logs
 ##
 ## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/

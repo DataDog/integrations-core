@@ -1,5 +1,46 @@
 # CHANGELOG - rabbitmq
 
+## 1.15.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Added] Add head_message_timestamp metric. See [#6809](https://github.com/DataDog/integrations-core/pull/6809).
+* [Fixed] Continue check execution when only a few vhosts are unhealthy. See [#6954](https://github.com/DataDog/integrations-core/pull/6954).
+
+## 1.14.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.13.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
+## 1.13.0 / 2020-02-22
+
+* [Added] Add option to disable node metrics in rabbitmq. See [#5750](https://github.com/DataDog/integrations-core/pull/5750).
+
+## 1.12.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 1.11.0 / 2019-12-02
+
+* [Added] Add version metadata to RabbitMQ check. See [#4918](https://github.com/DataDog/integrations-core/pull/4918).
+
+## 1.10.1 / 2019-10-18
+
+* [Fixed] Fix for rabbit 3.1 queue_totals introduced in #4668. See [#4805](https://github.com/DataDog/integrations-core/pull/4805).
+
+## 1.10.0 / 2019-10-11
+
+* [Added] verifies if `root` is dict before doing `.get`. See [#4668](https://github.com/DataDog/integrations-core/pull/4668).
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
+## 1.9.2 / 2019-09-18
+
+* [Fixed] Ignore empty data for metrics limit. See [#4544](https://github.com/DataDog/integrations-core/pull/4544).
+
 ## 1.9.1 / 2019-08-29
 
 * [Fixed] Revert "Fix queue, node and echange limit". See [#4467](https://github.com/DataDog/integrations-core/pull/4467).

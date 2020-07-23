@@ -1,41 +1,44 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import unicode_literals
 
+import copy
 import re
 import socket
 import ssl
 import time
 from datetime import datetime
 
-import _strptime  # noqa
 import requests
-from six import string_types
+from six import PY2, string_types
 from six.moves.urllib.parse import urlparse
 
-from datadog_checks.base import ensure_unicode, is_affirmative
-from datadog_checks.base.checks import NetworkCheck, Status
+from datadog_checks.base import AgentCheck, ensure_unicode
 
 from .adapters import WeakCiphersAdapter, WeakCiphersHTTPSConnection
 from .config import DEFAULT_EXPECTED_CODE, from_instance
 from .utils import get_ca_certs_path
 
+# Apply thread-safety fix, see https://bugs.python.org/issue7980
+if PY2:
+    import _strptime  # noqa
+
 DEFAULT_EXPIRE_DAYS_WARNING = 14
 DEFAULT_EXPIRE_DAYS_CRITICAL = 7
 DEFAULT_EXPIRE_WARNING = DEFAULT_EXPIRE_DAYS_WARNING * 24 * 3600
 DEFAULT_EXPIRE_CRITICAL = DEFAULT_EXPIRE_DAYS_CRITICAL * 24 * 3600
-CONTENT_LENGTH = 200
+MESSAGE_LENGTH = 2500  # https://docs.datadoghq.com/api/v1/service-checks/
 
 DATA_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH']
 
 
-class HTTPCheck(NetworkCheck):
+class HTTPCheck(AgentCheck):
     SOURCE_TYPE_NAME = 'system'
     SC_STATUS = 'http.can_connect'
     SC_SSL_CERT = 'http.ssl_cert'
 
-    HTTP_CONFIG_REMAPPER = {
+    DEFAULT_HTTP_CONFIG_REMAPPER = {
         'client_cert': {'name': 'tls_cert'},
         'client_key': {'name': 'tls_private_key'},
         'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': True},
@@ -46,17 +49,13 @@ class HTTPCheck(NetworkCheck):
     def __init__(self, name, init_config, instances):
         super(HTTPCheck, self).__init__(name, init_config, instances)
 
+        self.HTTP_CONFIG_REMAPPER = copy.deepcopy(self.DEFAULT_HTTP_CONFIG_REMAPPER)
+
         self.ca_certs = init_config.get('ca_certs')
         if not self.ca_certs:
             self.ca_certs = get_ca_certs_path()
 
-        self.HTTP_CONFIG_REMAPPER['ca_certs']['default'] = self.ca_certs
-
-        if is_affirmative(self.instance.get('disable_ssl_validation', True)):
-            # overrides configured `tls_ca_cert` value if `disable_ssl_validation` is enabled
-            self.http.options['verify'] = False
-
-    def _check(self, instance):
+    def check(self, instance):
         (
             addr,
             client_cert,
@@ -85,33 +84,33 @@ class HTTPCheck(NetworkCheck):
         def send_status_up(logMsg):
             # TODO: A6 log needs bytes and cannot handle unicode
             self.log.debug(logMsg)
-            service_checks.append((self.SC_STATUS, Status.UP, "UP"))
+            service_checks.append((self.SC_STATUS, AgentCheck.OK, "UP"))
 
         def send_status_down(loginfo, down_msg):
             # TODO: A6 log needs bytes and cannot handle unicode
             self.log.info(loginfo)
-            if include_content:
-                down_msg += '\nContent: {}'.format(content[:CONTENT_LENGTH])
-            service_checks.append((self.SC_STATUS, Status.DOWN, down_msg))
+            down_msg = self._include_content(include_content, down_msg, content)
+            service_checks.append((self.SC_STATUS, AgentCheck.CRITICAL, down_msg))
 
         # Store tags in a temporary list so that we don't modify the global tags data structure
         tags_list = list(tags)
         tags_list.append('url:{}'.format(addr))
-        instance_name = self.normalize(instance['name'])
+        instance_name = self.normalize_tag(instance['name'])
         tags_list.append("instance:{}".format(instance_name))
         service_checks = []
+        service_checks_tags = self._get_service_checks_tags(instance)
         r = None
         try:
             parsed_uri = urlparse(addr)
-            self.log.debug("Connecting to {}".format(addr))
+            self.log.debug("Connecting to %s", addr)
             self.http.session.trust_env = False
             if weakcipher:
                 base_addr = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
                 self.http.session.mount(base_addr, WeakCiphersAdapter())
                 self.log.debug(
-                    "Weak Ciphers will be used for {}. Supported Cipherlist: {}".format(
-                        base_addr, WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS
-                    )
+                    "Weak Ciphers will be used for %s. Supported Cipherlist: %s",
+                    base_addr,
+                    WeakCiphersHTTPSConnection.SUPPORTED_CIPHERS,
                 )
 
             # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
@@ -128,21 +127,34 @@ class HTTPCheck(NetworkCheck):
             )
         except (socket.timeout, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             length = int((time.time() - start) * 1000)
-            self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, str(e), length))
+            self.log.info("%s is DOWN, error: %s. Connection failed after %s ms", addr, e, length)
             service_checks.append(
-                (self.SC_STATUS, Status.DOWN, "{}. Connection failed after {} ms".format(str(e), length))
+                (self.SC_STATUS, AgentCheck.CRITICAL, "{}. Connection failed after {} ms".format(str(e), length))
             )
 
         except socket.error as e:
             length = int((time.time() - start) * 1000)
-            self.log.info("{} is DOWN, error: {}. Connection failed after {} ms".format(addr, repr(e), length))
+            self.log.info("%s is DOWN, error: %s. Connection failed after %s ms", addr, repr(e), length)
             service_checks.append(
-                (self.SC_STATUS, Status.DOWN, "Socket error: {}. Connection failed after {} ms".format(repr(e), length))
+                (
+                    self.SC_STATUS,
+                    AgentCheck.CRITICAL,
+                    "Socket error: {}. Connection failed after {} ms".format(repr(e), length),
+                )
             )
-
+        except IOError as e:  # Py2 throws IOError on invalid cert path while py3 throws a socket.error
+            length = int((time.time() - start) * 1000)
+            self.log.info("Host %s could not be reached: %s. Connection failed after %s ms", addr, repr(e), length)
+            service_checks.append(
+                (
+                    self.SC_STATUS,
+                    AgentCheck.CRITICAL,
+                    "Socket error: {}. Connection failed after {} ms".format(repr(e), length),
+                )
+            )
         except Exception as e:
             length = int((time.time() - start) * 1000)
-            self.log.error("Unhandled exception {}. Connection failed after {} ms".format(str(e), length))
+            self.log.error("Unhandled exception %s. Connection failed after %s ms", e, length)
             raise
 
         else:
@@ -152,9 +164,7 @@ class HTTPCheck(NetworkCheck):
 
             # Only report this metric if the site is not down
             if response_time and not service_checks:
-                # Stop the timer as early as possible
-                running_time = time.time() - start
-                self.gauge('network.http.response_time', running_time, tags=tags_list)
+                self.gauge('network.http.response_time', r.elapsed.total_seconds(), tags=tags_list)
 
             content = r.text
 
@@ -168,13 +178,11 @@ class HTTPCheck(NetworkCheck):
                 message = "Incorrect HTTP return code for url {}. Expected {}, got {}.".format(
                     addr, expected_code, str(r.status_code)
                 )
-
-                if include_content:
-                    message += '\nContent: {}'.format(content[:CONTENT_LENGTH])
+                message = self._include_content(include_content, message, content)
 
                 self.log.info(message)
 
-                service_checks.append((self.SC_STATUS, Status.DOWN, message))
+                service_checks.append((self.SC_STATUS, AgentCheck.CRITICAL, message))
 
             if not service_checks:
                 # Host is UP
@@ -212,15 +220,16 @@ class HTTPCheck(NetworkCheck):
             if r is not None:
                 r.close()
             # resets the wrapper Session object
+            self.http._session.close()
             self.http._session = None
 
         # Report status metrics as well
         if service_checks:
-            can_status = 1 if service_checks[0][1] == "UP" else 0
+            can_status = 1 if service_checks[0][1] == AgentCheck.OK else 0
             self.gauge('network.http.can_connect', can_status, tags=tags_list)
 
             # cant_connect is useful for top lists
-            cant_status = 0 if service_checks[0][1] == "UP" else 1
+            cant_status = 0 if service_checks[0][1] == AgentCheck.OK else 1
             self.gauge('network.http.cant_connect', cant_status, tags=tags_list)
 
         if ssl_expire and parsed_uri.scheme == "https":
@@ -235,10 +244,12 @@ class HTTPCheck(NetworkCheck):
 
             service_checks.append((self.SC_SSL_CERT, status, msg))
 
-        return service_checks
+        for status in service_checks:
+            sc_name, status, msg = status
+            self.report_as_service_check(sc_name, status, service_checks_tags, msg)
 
-    def report_as_service_check(self, sc_name, status, instance, msg=None):
-        instance_name = self.normalize(instance['name'])
+    def _get_service_checks_tags(self, instance):
+        instance_name = self.normalize_tag(instance['name'])
         url = instance.get('url', None)
         if url is not None:
             url = ensure_unicode(url)
@@ -248,7 +259,9 @@ class HTTPCheck(NetworkCheck):
         # Only add the URL tag if it's not already present
         if not any(filter(re.compile('^url:').match, tags)):
             tags.append('url:{}'.format(url))
+        return tags
 
+    def report_as_service_check(self, sc_name, status, tags, msg=None):
         if sc_name == self.SC_STATUS:
             # format the HTTP response body into the event
             if isinstance(msg, tuple):
@@ -261,7 +274,7 @@ class HTTPCheck(NetworkCheck):
                 msg = '{} {}\n\n{}'.format(code, reason, content)
                 msg = msg.rstrip()
 
-        self.service_check(sc_name, NetworkCheck.STATUS_TO_SERVICE_CHECK[status], tags=tags, message=msg)
+        self.service_check(sc_name, status, tags=tags, message=msg)
 
     def check_cert_expiration(
         self, instance, timeout, instance_ca_certs, check_hostname, client_cert=None, client_key=None
@@ -302,26 +315,26 @@ class HTTPCheck(NetworkCheck):
         except Exception as e:
             msg = str(e)
             if 'expiration' in msg:
-                self.log.debug("error: {}. Cert might be expired.".format(e))
-                return Status.DOWN, 0, 0, msg
+                self.log.debug("error: %s. Cert might be expired.", e)
+                return AgentCheck.CRITICAL, 0, 0, msg
             elif 'Hostname mismatch' in msg or "doesn't match" in msg:
-                self.log.debug("The hostname on the SSL certificate does not match the given host: {}".format(e))
-                return Status.CRITICAL, 0, 0, msg
+                self.log.debug("The hostname on the SSL certificate does not match the given host: %s", e)
+                return AgentCheck.CRITICAL, 0, 0, msg
             else:
-                self.log.debug("Site is down, unable to connect to get cert expiration: {}".format(e))
-                return Status.DOWN, 0, 0, msg
+                self.log.debug("Site is down, unable to connect to get cert expiration: %s", e)
+                return AgentCheck.CRITICAL, 0, 0, msg
 
         exp_date = datetime.strptime(cert['notAfter'], "%b %d %H:%M:%S %Y %Z")
         time_left = exp_date - datetime.utcnow()
         days_left = time_left.days
         seconds_left = time_left.total_seconds()
 
-        self.log.debug("Exp_date: {}".format(exp_date))
-        self.log.debug("seconds_left: {}".format(seconds_left))
+        self.log.debug("Exp_date: %s", exp_date)
+        self.log.debug("seconds_left: %s", seconds_left)
 
         if seconds_left < seconds_critical:
             return (
-                Status.CRITICAL,
+                AgentCheck.CRITICAL,
                 days_left,
                 seconds_left,
                 "This cert TTL is critical: only {} days before it expires".format(days_left),
@@ -329,11 +342,18 @@ class HTTPCheck(NetworkCheck):
 
         elif seconds_left < seconds_warning:
             return (
-                Status.WARNING,
+                AgentCheck.WARNING,
                 days_left,
                 seconds_left,
                 "This cert is almost expired, only {} days left".format(days_left),
             )
 
         else:
-            return Status.UP, days_left, seconds_left, "Days left: {}".format(days_left)
+            return AgentCheck.OK, days_left, seconds_left, "Days left: {}".format(days_left)
+
+    @staticmethod
+    def _include_content(include_content, message, content):
+        if include_content:
+            message += '\nContent: {}'.format(content[:MESSAGE_LENGTH])
+            message = message[:MESSAGE_LENGTH]
+        return message

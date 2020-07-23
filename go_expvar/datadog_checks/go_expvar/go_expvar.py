@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2014-2017
+# (C) Datadog, Inc. 2014-present
 # (C) Cory Watson <cory@stripe.com> 2015-2016
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -19,7 +19,8 @@ TAGS = "tags"
 
 GAUGE = "gauge"
 RATE = "rate"
-COUNTER = "counter"
+COUNT = "count"
+COUNTER = "counter"  # Deprecated
 MONOTONIC_COUNTER = "monotonic_counter"
 DEFAULT_TYPE = GAUGE
 
@@ -27,7 +28,8 @@ DEFAULT_TYPE = GAUGE
 SUPPORTED_TYPES = {
     GAUGE: AgentCheck.gauge,
     RATE: AgentCheck.rate,
-    COUNTER: AgentCheck.increment,
+    COUNT: AgentCheck.count,
+    COUNTER: AgentCheck.increment,  # Deprecated
     MONOTONIC_COUNTER: AgentCheck.monotonic_count,
 }
 
@@ -38,7 +40,6 @@ DEFAULT_METRIC_NAMESPACE = "go_expvar"
 DEFAULT_GAUGE_MEMSTAT_METRICS = [
     # General statistics
     "Alloc",
-    "TotalAlloc",
     # Main allocation heap statistics
     "HeapAlloc",
     "HeapSys",
@@ -46,6 +47,7 @@ DEFAULT_GAUGE_MEMSTAT_METRICS = [
     "HeapInuse",
     "HeapReleased",
     "HeapObjects",
+    "TotalAlloc",
 ]
 
 DEFAULT_RATE_MEMSTAT_METRICS = [
@@ -142,19 +144,20 @@ class GoExpvar(AgentCheck):
             alias = metric.get(ALIAS)
 
             if not path:
-                self.warning("Metric %s has no path" % metric)
+                self.warning("Metric %s has no path", metric)
                 continue
 
             if metric_type not in SUPPORTED_TYPES:
-                self.warning("Metric type %s not supported for this check" % metric_type)
+                self.warning("Metric type %s not supported for this check", metric_type)
                 continue
 
             keys = path.split("/")
             values = self.deep_get(data, keys)
 
             if len(values) == 0:
-                self.warning("No results matching path %s" % path)
+                self.warning("No results matching path %s", path)
                 continue
+            self.log.debug("%s result(s) matching path %s", len(values), path)
 
             tag_by_path = alias is not None
 
@@ -167,10 +170,13 @@ class GoExpvar(AgentCheck):
                 try:
                     float(value)
                 except (TypeError, ValueError):
-                    self.log.warning("Unreportable value for path %s: %s" % (path, value))
+                    self.log.warning("Unreportable value for path %s: %s", actual_path, value)
                     continue
 
                 if count >= max_metrics:
+                    self.log.debug(
+                        "Exceeded maximum allowed metrics (%s) while processing: %s", max_metrics, metric_name
+                    )
                     self.warning(
                         "Reporting more metrics than the allowed maximum. "
                         "Please contact support@datadoghq.com for more information."
@@ -178,6 +184,12 @@ class GoExpvar(AgentCheck):
                     return
 
                 SUPPORTED_TYPES[metric_type](self, metric_name, value, metric_tags + path_tag)
+
+                # Submit 'go_expvar.memstats.total_alloc' as a monotonic count
+                if 'memstats.total_alloc' in metric_name:
+                    self.monotonic_count(metric_name + '.count', value, metric_tags + path_tag)
+                    count += 1
+
                 count += 1
 
     def deep_get(self, content, keys, traversed_path=None):
@@ -228,7 +240,7 @@ class GoExpvar(AgentCheck):
                 try:
                     key_regex = re.compile(regex)
                 except Exception:
-                    self.warning("Cannot compile regex: %s" % regex)
+                    self.warning("Cannot compile regex: %s", regex)
                     return []
                 self._regexes[key] = key_regex
             matcher = key_regex.match

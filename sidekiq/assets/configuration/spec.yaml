@@ -1,0 +1,10 @@
+name: Sidekiq
+files:
+- name: sidekiq.yaml
+  options:
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/sidekiq.log
+      source: sidekiq
+      service: <SERVICE>

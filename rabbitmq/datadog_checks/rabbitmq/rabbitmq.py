@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2013-2017
+# (C) Datadog, Inc. 2013-present
 # (C) Brett Langdon <brett@blangdon.com> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -50,6 +50,7 @@ QUEUE_ATTRIBUTES = [
     ('active_consumers', 'active_consumers', float),
     ('consumers', 'consumers', float),
     ('consumer_utilisation', 'consumer_utilisation', float),
+    ('head_message_timestamp', 'head_message_timestamp', int),
     ('memory', 'memory', float),
     ('messages', 'messages', float),
     ('messages_details/rate', 'messages.rate', float),
@@ -158,6 +159,8 @@ class RabbitMQ(AgentCheck):
             raise Exception('Missing "rabbitmq_api_url" in RabbitMQ config.')
         if not base_url.endswith('/'):
             base_url += '/'
+
+        collect_nodes = is_affirmative(instance.get('collect_node_metrics', True))
         custom_tags = instance.get('tags', [])
         parsed_url = urlparse(base_url)
         if not parsed_url.scheme or "://" not in parsed_url.geturl():
@@ -174,7 +177,7 @@ class RabbitMQ(AgentCheck):
         if not self.http.options['verify'] and parsed_url.scheme == 'https':
             # Only allow suppressing the warning if not ssl_verify
             suppress_warning = self.http.ignore_tls_warning
-            self.log.warning('Skipping TLS cert validation for %s based on configuration.' % (base_url))
+            self.log.warning('Skipping TLS cert validation for %s based on configuration.', base_url)
 
         # Limit of queues/nodes to collect metrics from
         max_detailed = {
@@ -198,7 +201,21 @@ class RabbitMQ(AgentCheck):
                 if type(filter_objects) != list:
                     raise TypeError("{0} / {0}_regexes parameter must be a list".format(object_type))
 
-        return base_url, max_detailed, specified, custom_tags, suppress_warning
+        return base_url, max_detailed, specified, custom_tags, suppress_warning, collect_nodes
+
+    def _collect_metadata(self, base_url):
+        # Rabbit versions follow semantic versioning https://www.rabbitmq.com/changelog.html
+        # overview endpoint returns a json with rabbit version in rabbitmq_version field.
+        overview_url = urljoin(base_url, 'overview')
+        overview_response = self._get_data(overview_url)
+
+        # the response is has unicode in it so converting to a string below
+        version = str(overview_response['rabbitmq_version'])
+        if version:
+            self.set_metadata('version', version)
+            self.log.debug("found rabbitmq version %s", version)
+        else:
+            self.log.warning("could not retrieve rabbitmq version information")
 
     def _get_vhosts(self, instance, base_url):
         vhosts = instance.get('vhosts')
@@ -212,12 +229,15 @@ class RabbitMQ(AgentCheck):
         return vhosts
 
     def check(self, instance):
-        base_url, max_detailed, specified, custom_tags, suppress_warning = self._get_config(instance)
+        base_url, max_detailed, specified, custom_tags, suppress_warning, collect_node_metrics = self._get_config(
+            instance
+        )
         try:
             with warnings.catch_warnings():
                 vhosts = self._get_vhosts(instance, base_url)
                 self.cached_vhosts[base_url] = vhosts
-
+                # this collects and sets versioning metadata
+                self._collect_metadata(base_url)
                 limit_vhosts = []
                 if self._limit_vhosts(instance):
                     limit_vhosts = vhosts
@@ -245,15 +265,16 @@ class RabbitMQ(AgentCheck):
                     limit_vhosts,
                     custom_tags,
                 )
-                self.get_stats(
-                    instance,
-                    base_url,
-                    NODE_TYPE,
-                    max_detailed[NODE_TYPE],
-                    specified[NODE_TYPE],
-                    limit_vhosts,
-                    custom_tags,
-                )
+                if collect_node_metrics:
+                    self.get_stats(
+                        instance,
+                        base_url,
+                        NODE_TYPE,
+                        max_detailed[NODE_TYPE],
+                        specified[NODE_TYPE],
+                        limit_vhosts,
+                        custom_tags,
+                    )
                 self.get_overview_stats(base_url, custom_tags)
 
                 self.get_connections_stat(instance, base_url, CONNECTION_TYPE, vhosts, limit_vhosts, custom_tags)
@@ -354,19 +375,107 @@ class RabbitMQ(AgentCheck):
                 tags.append('{}_{}:{}'.format(TAG_PREFIX, tag_list[t], tag))
         return tags + custom_tags
 
-    def get_stats(self, instance, base_url, object_type, max_detailed, filters, limit_vhosts, custom_tags):
+    def _get_object_data(self, instance, base_url, object_type, limit_vhosts):
+        """ data is a list of nodes or queues:
+                data = [
+                    {
+                        'status': 'running',
+                        'node': 'rabbit@host',
+                        'name': 'queue1',
+                        'consumers': 0,
+                        'vhost': '/',
+                        'backing_queue_status': {
+                            'q1': 0,
+                            'q3': 0,
+                            'q2': 0,
+                            'q4': 0,
+                            'avg_ack_egress_rate': 0.0,
+                            'ram_msg_count': 0,
+                            'ram_ack_count': 0,
+                            'len': 0,
+                            'persistent_count': 0,
+                            'target_ram_count': 'infinity',
+                            'next_seq_id': 0,
+                            'delta': ['delta', 'undefined', 0, 'undefined'],
+                            'pending_acks': 0,
+                            'avg_ack_ingress_rate': 0.0,
+                            'avg_egress_rate': 0.0,
+                            'avg_ingress_rate': 0.0
+                        },
+                        'durable': True,
+                        'idle_since': '2013-10-03 13:38:18',
+                        'exclusive_consumer_tag': '',
+                        'arguments': {},
+                        'memory': 10956,
+                        'policy': '',
+                        'auto_delete': False
+                    },
+                    {
+                        'status': 'running',
+                        'node': 'rabbit@host,
+                        'name': 'queue10',
+                        'consumers': 0,
+                        'vhost': '/',
+                        'backing_queue_status': {
+                            'q1': 0,
+                            'q3': 0,
+                            'q2': 0,
+                            'q4': 0,
+                            'avg_ack_egress_rate': 0.0,
+                            'ram_msg_count': 0,
+                            'ram_ack_count': 0,
+                            'len': 0,
+                            'persistent_count': 0,
+                            'target_ram_count': 'infinity',
+                            'next_seq_id': 0,
+                            'delta': ['delta', 'undefined', 0, 'undefined'],
+                            'pending_acks': 0,
+                            'avg_ack_ingress_rate': 0.0,
+                            'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0
+                        },
+                        'durable': True,
+                        'idle_since': '2013-10-03 13:38:18',
+                        'exclusive_consumer_tag': '',
+                        'arguments': {},
+                        'memory': 10956,
+                        'policy': '',
+                        'auto_delete': False
+                    },
+                    {
+                        'status': 'running',
+                        'node': 'rabbit@host',
+                        'name': 'queue11',
+                        'consumers': 0,
+                        'vhost': '/',
+                        'backing_queue_status': {
+                            'q1': 0,
+                            'q3': 0,
+                            'q2': 0,
+                            'q4': 0,
+                            'avg_ack_egress_rate': 0.0,
+                            'ram_msg_count': 0,
+                            'ram_ack_count': 0,
+                            'len': 0,
+                            'persistent_count': 0,
+                            'target_ram_count': 'infinity',
+                            'next_seq_id': 0,
+                            'delta': ['delta', 'undefined', 0, 'undefined'],
+                            'pending_acks': 0,
+                            'avg_ack_ingress_rate': 0.0,
+                            'avg_egress_rate': 0.0,
+                            'avg_ingress_rate': 0.0
+                        },
+                        'durable': True,
+                        'idle_since': '2013-10-03 13:38:18',
+                        'exclusive_consumer_tag': '',
+                        'arguments': {},
+                        'memory': 10956,
+                        'policy': '',
+                        'auto_delete': False
+                    },
+                    ...
+                ]
         """
-        instance: the check instance
-        base_url: the url of the rabbitmq management api (e.g. http://localhost:15672/api)
-        object_type: either QUEUE_TYPE or NODE_TYPE or EXCHANGE_TYPE
-        max_detailed: the limit of objects to collect for this type
-        filters: explicit or regexes filters of specified queues or nodes (specified in the yaml file)
-        """
-        # Make a copy of this list as we will remove items from it at each
-        # iteration
-        explicit_filters = list(filters['explicit'])
-        regex_filters = filters['regexes']
-
         data = []
 
         # only do this if vhosts were specified,
@@ -377,110 +486,27 @@ class RabbitMQ(AgentCheck):
                 try:
                     data += self._get_data(urljoin(base_url, url))
                 except Exception as e:
-                    self.log.debug("Couldn't grab queue data from vhost, {}: {}".format(vhost, e))
+                    self.log.debug("Couldn't grab queue data from vhost, %s: %s", vhost, e)
         else:
             data = self._get_data(urljoin(base_url, object_type))
+        return data
 
-        """ data is a list of nodes or queues:
-        data = [
-            {
-                'status': 'running',
-                'node': 'rabbit@host',
-                'name': 'queue1',
-                'consumers': 0,
-                'vhost': '/',
-                'backing_queue_status': {
-                    'q1': 0,
-                    'q3': 0,
-                    'q2': 0,
-                    'q4': 0,
-                    'avg_ack_egress_rate': 0.0,
-                    'ram_msg_count': 0,
-                    'ram_ack_count': 0,
-                    'len': 0,
-                    'persistent_count': 0,
-                    'target_ram_count': 'infinity',
-                    'next_seq_id': 0,
-                    'delta': ['delta', 'undefined', 0, 'undefined'],
-                    'pending_acks': 0,
-                    'avg_ack_ingress_rate': 0.0,
-                    'avg_egress_rate': 0.0,
-                    'avg_ingress_rate': 0.0
-                },
-                'durable': True,
-                'idle_since': '2013-10-03 13:38:18',
-                'exclusive_consumer_tag': '',
-                'arguments': {},
-                'memory': 10956,
-                'policy': '',
-                'auto_delete': False
-            },
-            {
-                'status': 'running',
-                'node': 'rabbit@host,
-                'name': 'queue10',
-                'consumers': 0,
-                'vhost': '/',
-                'backing_queue_status': {
-                    'q1': 0,
-                    'q3': 0,
-                    'q2': 0,
-                    'q4': 0,
-                    'avg_ack_egress_rate': 0.0,
-                    'ram_msg_count': 0,
-                    'ram_ack_count': 0,
-                    'len': 0,
-                    'persistent_count': 0,
-                    'target_ram_count': 'infinity',
-                    'next_seq_id': 0,
-                    'delta': ['delta', 'undefined', 0, 'undefined'],
-                    'pending_acks': 0,
-                    'avg_ack_ingress_rate': 0.0,
-                    'avg_egress_rate': 0.0, 'avg_ingress_rate': 0.0
-                },
-                'durable': True,
-                'idle_since': '2013-10-03 13:38:18',
-                'exclusive_consumer_tag': '',
-                'arguments': {},
-                'memory': 10956,
-                'policy': '',
-                'auto_delete': False
-            },
-            {
-                'status': 'running',
-                'node': 'rabbit@host',
-                'name': 'queue11',
-                'consumers': 0,
-                'vhost': '/',
-                'backing_queue_status': {
-                    'q1': 0,
-                    'q3': 0,
-                    'q2': 0,
-                    'q4': 0,
-                    'avg_ack_egress_rate': 0.0,
-                    'ram_msg_count': 0,
-                    'ram_ack_count': 0,
-                    'len': 0,
-                    'persistent_count': 0,
-                    'target_ram_count': 'infinity',
-                    'next_seq_id': 0,
-                    'delta': ['delta', 'undefined', 0, 'undefined'],
-                    'pending_acks': 0,
-                    'avg_ack_ingress_rate': 0.0,
-                    'avg_egress_rate': 0.0,
-                    'avg_ingress_rate': 0.0
-                },
-                'durable': True,
-                'idle_since': '2013-10-03 13:38:18',
-                'exclusive_consumer_tag': '',
-                'arguments': {},
-                'memory': 10956,
-                'policy': '',
-                'auto_delete': False
-            },
-            ...
-        ]
+    def get_stats(self, instance, base_url, object_type, max_detailed, filters, limit_vhosts, custom_tags):
         """
+        instance: the check instance
+        base_url: the url of the rabbitmq management api (e.g. http://localhost:15672/api)
+        object_type: either QUEUE_TYPE or NODE_TYPE or EXCHANGE_TYPE
+        max_detailed: the limit of objects to collect for this type
+        filters: explicit or regexes filters of specified queues or nodes (specified in the yaml file)
+        limit_vhosts: collection of vhosts to limit to
+        custom_tags: Custom tags to get applied to all metrics
+        """
+        # Make a copy of this list as we will remove items from it at each
+        # iteration
+        explicit_filters = list(filters['explicit'])
+        regex_filters = filters['regexes']
+        data = self._get_object_data(instance, base_url, object_type, limit_vhosts)
+
         if len(explicit_filters) > max_detailed:
             raise Exception("The maximum number of {} you can specify is {}.".format(object_type, max_detailed))
 
@@ -494,18 +520,21 @@ class RabbitMQ(AgentCheck):
             # Post a message on the dogweb stream to warn
             self.alert(base_url, max_detailed, len(data), object_type, custom_tags)
 
-        if len(data) > max_detailed:
-            # Display a warning in the info page
-            msg = (
-                "Too many items to fetch. "
-                "You must choose the {} you are interested in by editing the rabbitmq.yaml configuration file"
-                "or get in touch with Datadog support"
-            ).format(object_type)
-            self.warning(msg)
-
-        for data_line in data[:max_detailed]:
+        data_lines_sent = 0
+        for data_line in data:
+            if data_lines_sent >= max_detailed:
+                # Display a warning in the info page
+                msg = (
+                    "Too many items to fetch. "
+                    "You must choose the {} you are interested in by editing the rabbitmq.d/conf.yaml configuration "
+                    "file or get in touch with Datadog support"
+                ).format(object_type)
+                self.warning(msg)
+                break
             # We truncate the list if it's above the limit
-            self._get_metrics(data_line, object_type, custom_tags)
+            metrics_sent = self._get_metrics(data_line, object_type, custom_tags)
+            if metrics_sent >= 1:
+                data_lines_sent += 1
 
         # get a list of the number of bindings on a given queue
         # /api/queues/vhost/name/bindings
@@ -518,25 +547,34 @@ class RabbitMQ(AgentCheck):
 
     def _get_metrics(self, data, object_type, custom_tags):
         tags = self._get_tags(data, object_type, custom_tags)
+        metrics_sent = 0
         for attribute, metric_name, operation in ATTRIBUTES[object_type]:
             # Walk down through the data path, e.g. foo/bar => d['foo']['bar']
             root = data
             keys = attribute.split('/')
-            for path in keys[:-1]:
-                root = root.get(path, {})
 
-            value = root.get(keys[-1], None)
+            # In RabbitMQ 3.1.x queue_totals is an empty list instead of a dict when initialising
+            for path in keys[:-1]:
+                if not isinstance(root, dict):
+                    break
+                root = root.get(path, {})
+            value = root.get(keys[-1], None) if isinstance(root, dict) else None
+
             if value is not None:
                 try:
                     self.gauge(
                         'rabbitmq.{}.{}'.format(METRIC_SUFFIX[object_type], metric_name), operation(value), tags=tags
                     )
+                    metrics_sent += 1
                 except ValueError:
                     self.log.debug(
-                        "Caught ValueError for {} {} = {}  with tags: {}".format(
-                            METRIC_SUFFIX[object_type], attribute, value, tags
-                        )
+                        "Caught ValueError for %s %s = %s  with tags: %s",
+                        METRIC_SUFFIX[object_type],
+                        attribute,
+                        value,
+                        tags,
                     )
+        return metrics_sent
 
     def _get_queue_bindings_metrics(self, base_url, custom_tags, data, object_type):
         for item in data:
@@ -562,7 +600,7 @@ class RabbitMQ(AgentCheck):
                     data += self._get_data(urljoin(base_url, url))
                 except Exception as e:
                     # This will happen if there is no connection data to grab
-                    self.log.debug("Couldn't grab connection data from vhost, {}: {}".format(vhost, e))
+                    self.log.debug("Couldn't grab connection data from vhost, %s: %s", vhost, e)
 
         # sometimes it seems to need to fall back to this
         if grab_all_data or not len(data):
@@ -636,7 +674,12 @@ class RabbitMQ(AgentCheck):
             # We need to urlencode the vhost because it can be '/'.
             path = u'aliveness-test/{}'.format(quote_plus(vhost))
             aliveness_url = urljoin(base_url, path)
-            aliveness_response = self._get_data(aliveness_url)
+            aliveness_response = {}
+            try:
+                aliveness_response = self._get_data(aliveness_url)
+            except Exception as e:
+                self.log.debug("Couldn't get aliveness status from vhost, %s: %s", vhost, e)
+
             message = u"Response from aliveness API: {}".format(aliveness_response)
 
             if aliveness_response.get('status') == 'ok':

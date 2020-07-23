@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2018
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -6,7 +6,7 @@
 import psutil
 
 # project
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 
 class SystemSwap(AgentCheck):

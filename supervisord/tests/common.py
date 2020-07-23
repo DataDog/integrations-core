@@ -1,10 +1,10 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
 
-from datadog_checks.checks.base import ServiceCheck
+from datadog_checks.base.checks.base import ServiceCheck
 from datadog_checks.dev import get_docker_hostname
 
 PROCESSES = ["program_0", "program_1", "program_2"]
@@ -14,6 +14,8 @@ HOST = get_docker_hostname()
 PORT = 19001
 HERE = os.path.dirname(os.path.abspath(__file__))
 URL = "http://{}:{}".format(HOST, PORT)
+
+SUPERVISOR_VERSION = os.getenv('SUPERVISOR_VERSION')
 
 # Supervisord should run 3 programs for 10, 20 and 30 seconds
 # respectively.
@@ -179,6 +181,21 @@ TEST_CASES = [
             {'name': 'server0', 'host': 'localhost', 'port': 9010, 'user': 'invalid_user', 'pass': 'invalid_pass'}
         ],
         'error_message': """Username or password to server0 are incorrect.""",
+    },
+    {
+        'instances': [
+            {
+                'name': 'server0',
+                'socket': 'unix:///correct/path/supervisor.sock',
+                'user': 'invalid_user',
+                'pass': 'invalid_pass',
+            }
+        ],
+        'error_message': """Username or password to server0 are incorrect.""",
+    },
+    {
+        'instances': [{'name': 'server0', 'socket': 'unix:///invalid_socket'}],
+        'error_message': """Cannot connect to unix:///invalid_socket. Make sure supervisor is running and socket is enabled and socket file has the right permissions.""",  # noqa E501
     },
     {
         'instances': [

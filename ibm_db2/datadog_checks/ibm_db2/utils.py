@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
@@ -24,7 +24,7 @@ def status_to_service_check(db_status):
     return DB_STATUS_MAP.get(db_status, ServiceCheck.UNKNOWN)
 
 
-def get_version(connection):  # no cov
+def get_version(connection):
     return ibm_db.get_db_info(connection, ibm_db.SQL_DBMS_VER)
 
 

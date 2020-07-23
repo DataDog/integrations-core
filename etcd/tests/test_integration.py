@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
@@ -10,7 +10,7 @@ import requests
 from datadog_checks.dev import run_command
 from datadog_checks.etcd import Etcd
 
-from .common import COMPOSE_FILE, HOST, STORE_METRICS, URL
+from .common import COMPOSE_FILE, ETCD_VERSION, HOST, STORE_METRICS, URL
 from .utils import is_leader, legacy, preview
 
 CHECK_NAME = 'etcd'
@@ -58,7 +58,7 @@ def test_service_check(aggregator, instance):
 @legacy
 def test_bad_config(aggregator):
     bad_url = '{}/test'.format(URL)
-    instance = {'url': bad_url}
+    instance = {'url': bad_url, 'use_preview': False}
     check = Etcd(CHECK_NAME, {}, [instance])
 
     with pytest.raises(Exception):
@@ -69,9 +69,9 @@ def test_bad_config(aggregator):
 
 
 @legacy
-def test_metrics(instance, aggregator):
-    check = Etcd(CHECK_NAME, {}, [instance])
-    check.check(instance)
+def test_legacy_metrics(legacy_instance, aggregator):
+    check = Etcd(CHECK_NAME, {}, [legacy_instance])
+    check.check(legacy_instance)
 
     tags = ['url:{}'.format(URL), 'etcd_state:{}'.format('leader' if is_leader(URL) else 'follower')]
 
@@ -83,9 +83,9 @@ def test_metrics(instance, aggregator):
 
 
 @legacy
-def test_service_checks(instance, aggregator):
-    check = Etcd(CHECK_NAME, {}, [instance])
-    check.check(instance)
+def test_legacy_service_checks(legacy_instance, aggregator):
+    check = Etcd(CHECK_NAME, {}, [legacy_instance])
+    check.check(legacy_instance)
 
     tags = ['url:{}'.format(URL), 'etcd_state:{}'.format('leader' if is_leader(URL) else 'follower')]
 
@@ -113,7 +113,7 @@ def test_followers(aggregator):
     response = requests.get('{}/v2/stats/leader'.format(url))
     followers = list(response.json().get('followers', {}).keys())
 
-    instance = {'url': url}
+    instance = {'url': url, 'use_preview': False}
     check = Etcd(CHECK_NAME, {}, [instance])
     check.check(instance)
 
@@ -143,20 +143,20 @@ def test_followers(aggregator):
         ("legacy ssl config unset", {}, {'verify': False}),
     ],
 )
-def test_config_legacy(instance, test_case, extra_config, expected_http_kwargs):
-    instance.update(extra_config)
-    check = Etcd(CHECK_NAME, {}, [instance])
+def test_config_legacy(legacy_instance, test_case, extra_config, expected_http_kwargs):
+    legacy_instance.update(extra_config)
+    check = Etcd(CHECK_NAME, {}, [legacy_instance])
 
     with mock.patch('datadog_checks.base.utils.http.requests') as r:
         r.get.return_value = mock.MagicMock(status_code=200)
 
-        check.check(instance)
+        check.check(legacy_instance)
 
         http_kwargs = dict(
             auth=mock.ANY, cert=mock.ANY, headers=mock.ANY, proxies=mock.ANY, timeout=mock.ANY, verify=mock.ANY
         )
         http_kwargs.update(expected_http_kwargs)
-        r.get.assert_called_with(URL + '/v2/stats/store', **http_kwargs)
+        r.get.assert_has_calls([mock.call(URL + '/v2/stats/store', **http_kwargs)])
 
 
 @preview
@@ -170,7 +170,7 @@ def test_config_legacy(instance, test_case, extra_config, expected_http_kwargs):
         ("timeout", {'prometheus_timeout': 100}, {'timeout': (100.0, 100.0)}),
     ],
 )
-def test_config_preview(instance, test_case, extra_config, expected_http_kwargs):
+def test_config(instance, test_case, extra_config, expected_http_kwargs):
     instance.update(extra_config)
     check = Etcd(CHECK_NAME, {}, [instance])
 
@@ -190,3 +190,22 @@ def test_config_preview(instance, test_case, extra_config, expected_http_kwargs)
         )
         http_kwargs.update(expected_http_kwargs)
         r.post.assert_called_with(URL + '/v3alpha/maintenance/status', **http_kwargs)
+
+
+@pytest.mark.integration
+def test_version_metadata(aggregator, instance, dd_environment, datadog_agent):
+    check_instance = Etcd(CHECK_NAME, {}, [instance])
+    check_instance.check_id = 'test:123'
+    check_instance.check(instance)
+
+    raw_version = ETCD_VERSION.lstrip('v')  # version contain `v` prefix
+    major, minor, patch = raw_version.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': raw_version,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)

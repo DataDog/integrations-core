@@ -1,5 +1,43 @@
 # CHANGELOG - sqlserver
 
+## 1.18.0 / 2020-06-29
+
+* [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
+* [Added] Add default `freetds` driver for Docker Agent. See [#6636](https://github.com/DataDog/integrations-core/pull/6636).
+* [Added] Add log support. See [#6625](https://github.com/DataDog/integrations-core/pull/6625).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+
+## 1.17.0 / 2020-05-17
+
+* [Added] Install `pyodbc` for MacOS and fix local test setup. See [#6633](https://github.com/DataDog/integrations-core/pull/6633).
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Fixed] Use agent 6 signature. See [#6447](https://github.com/DataDog/integrations-core/pull/6447).
+
+## 1.16.3 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
+## 1.16.2 / 2020-03-10
+
+* [Fixed] Streamline exception handling. See [#6003](https://github.com/DataDog/integrations-core/pull/6003).
+
+## 1.16.1 / 2020-02-22
+
+* [Fixed] Fix small capitalization error in log. See [#5509](https://github.com/DataDog/integrations-core/pull/5509).
+
+## 1.16.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 1.15.0 / 2019-12-02
+
+* [Added] Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).
+
+## 1.14.0 / 2019-10-11
+
+* [Added] Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
+
 ## 1.13.0 / 2019-07-13
 
 * [Added] Allow SQLNCLI11 provider in SQL server. See [#4097](https://github.com/DataDog/integrations-core/pull/4097).

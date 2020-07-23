@@ -1,10 +1,10 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
 
-from datadog_checks.utils.common import get_docker_hostname
+from datadog_checks.base.utils.common import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -19,6 +19,8 @@ GITLAB_MASTER_URL = "http://{}:{}".format(HOST, GITLAB_LOCAL_MASTER_PORT)
 GITLAB_RUNNER_URL = "http://{}:{}/metrics".format(HOST, GITLAB_LOCAL_RUNNER_PORT)
 
 GITLAB_RUNNER_TAGS = ['gitlab_host:{}'.format(HOST), 'gitlab_port:{}'.format(GITLAB_LOCAL_MASTER_PORT)]
+
+GITLAB_RUNNER_VERSION = os.environ['GITLAB_RUNNER_VERSION']
 
 CUSTOM_TAGS = ['optional:tag1']
 
@@ -41,6 +43,7 @@ CONFIG = {
         {
             'prometheus_endpoint': GITLAB_RUNNER_URL,
             'gitlab_url': '{}/ci'.format(GITLAB_MASTER_URL),
+            'send_monotonic_counter': True,
             'disable_ssl_validation': True,
             'tags': list(CUSTOM_TAGS),
         }

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # (C) 2018 Aerospike, Inc.
 # (C) 2017 Red Sift
 # (C) 2015 Pippio, Inc. All rights reserved.
@@ -7,18 +7,29 @@
 from __future__ import absolute_import
 
 import re
+from collections import defaultdict
 
-import aerospike
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.errors import CheckException
+
+try:
+    import aerospike
+except ImportError as e:
+    aerospike = None
+    aerospike_exception = e
+
 
 SOURCE_TYPE_NAME = 'aerospike'
 SERVICE_CHECK_UP = '%s.cluster_up' % SOURCE_TYPE_NAME
 SERVICE_CHECK_CONNECT = '%s.can_connect' % SOURCE_TYPE_NAME
+DATACENTER_SERVICE_CHECK_CONNECT = '%s.datacenter.can_connect' % SOURCE_TYPE_NAME
 CLUSTER_METRIC_TYPE = SOURCE_TYPE_NAME
+DATACENTER_METRIC_TYPE = '%s.datacenter' % SOURCE_TYPE_NAME
 NAMESPACE_METRIC_TYPE = '%s.namespace' % SOURCE_TYPE_NAME
 NAMESPACE_TPS_METRIC_TYPE = '%s.namespace.tps' % SOURCE_TYPE_NAME
+NAMESPACE_LATENCY_METRIC_TYPE = '%s.namespace.latency' % SOURCE_TYPE_NAME
 SINDEX_METRIC_TYPE = '%s.sindex' % SOURCE_TYPE_NAME
 SET_METRIC_TYPE = '%s.set' % SOURCE_TYPE_NAME
 MAX_AEROSPIKE_SETS = 200
@@ -57,11 +68,19 @@ class AerospikeCheck(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(AerospikeCheck, self).__init__(name, init_config, instances)
 
+        if not aerospike:
+            msg = 'The `aerospike` client is not installed: {}'.format(aerospike_exception)
+            self.log.error(msg)
+            raise CheckException(msg)
+
         # https://www.aerospike.com/apidocs/python/aerospike.html#aerospike.client
         host = self.instance.get('host', 'localhost')
         port = int(self.instance.get('port', 3000))
         tls_name = self.instance.get('tls_name')
         self._host = (host, port, tls_name) if tls_name else (host, port)
+        self._tls_config = self.instance.get('tls_config')
+        if self._tls_config:
+            self._tls_config['enable'] = True
 
         # https://www.aerospike.com/apidocs/python/client.html#aerospike.Client.connect
         self._username = self.instance.get('username')
@@ -74,6 +93,8 @@ class AerospikeCheck(AgentCheck):
         self._metrics = set(self.instance.get('metrics', []))
         self._namespace_metrics = set(self.instance.get('namespace_metrics', []))
         self._required_namespaces = self.instance.get('namespaces')
+        self._datacenter_metrics = set(self.instance.get('datacenter_metrics', []))
+        self._required_datacenters = self.instance.get('datacenters')
         self._rate_metrics = set(self.init_config.get('mappings', []))
         self._tags = self.instance.get('tags', [])
 
@@ -120,10 +141,28 @@ class AerospikeCheck(AgentCheck):
                 set_tags.extend(namespace_tags)
                 self.collect_info('sets/{}/{}'.format(ns, s), SET_METRIC_TYPE, separator=':', tags=set_tags)
 
+        # https://www.aerospike.com/docs/reference/info/#dcs
+        try:
+            datacenters = self.get_datacenters()
+
+            for dc in datacenters:
+                self.collect_datacenter(dc)
+
+        except Exception as e:
+            self.log.debug("There were no datacenters found: %s", e)
+
         # https://www.aerospike.com/docs/reference/info/#throughput
         self.collect_throughput(namespaces)
 
+        # https://www.aerospike.com/docs/reference/info/#latency
+        self.collect_latency(namespaces)
+        self.collect_version()
+
         self.service_check(SERVICE_CHECK_UP, self.OK, tags=self._tags)
+
+    def collect_version(self):
+        version = self.get_info("build")[0]
+        self.set_metadata('version', version)
 
     def collect_info(self, command, metric_type, separator=';', required_keys=None, tags=None):
         entries = self.get_info(command, separator=separator)
@@ -140,9 +179,7 @@ class AerospikeCheck(AgentCheck):
         if metric_type in AEROSPIKE_CAP_MAP:
             cap = self.instance.get(AEROSPIKE_CAP_CONFIG_KEY_MAP[metric_type], AEROSPIKE_CAP_MAP[metric_type])
             if len(required_data) > cap:
-                self.log.warn(
-                    'Exceeded cap `{}` for metric type `{}` - please contact support'.format(cap, metric_type)
-                )
+                self.log.warning('Exceeded cap `%s` for metric type `%s` - please contact support', cap, metric_type)
                 return
 
         for key, value in iteritems(required_data):
@@ -156,11 +193,22 @@ class AerospikeCheck(AgentCheck):
 
         return namespaces
 
+    def get_datacenters(self):
+        datacenters = self.get_info('dcs')
+
+        if self._required_datacenters:
+            return [dc for dc in datacenters if dc in self._required_datacenters]
+
+        return datacenters
+
     def get_client(self):
+        client_config = {'hosts': [self._host]}
+        if self._tls_config:
+            client_config['tls'] = self._tls_config
         try:
-            client = aerospike.client({'hosts': [self._host]}).connect(self._username, self._password)
+            client = aerospike.client(client_config).connect(self._username, self._password)
         except Exception as e:
-            self.log.error('Unable to connect to database: {}'.format(e))
+            self.log.error('Unable to connect to database: %s', e)
             self.service_check(SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
         else:
             self.service_check(SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
@@ -170,14 +218,109 @@ class AerospikeCheck(AgentCheck):
         # See https://www.aerospike.com/docs/reference/info/
         # Example output: command\tKEY=VALUE;KEY=VALUE;...
         data = self._client.info_node(command, self._host, self._info_policies)
+        self.log.debug(
+            "Get info results for command=`%s`, host=`%s`, policies=`%s`: %s",
+            command,
+            self._host,
+            self._info_policies,
+            data,
+        )
 
         # Get rid of command and whitespace
         data = data[len(command) :].strip()
 
         if not separator:
             return data
+        if not data:
+            return []
 
         return data.split(separator)
+
+    def collect_datacenter(self, datacenter):
+        # returned information from dc/<DATACENTER> endpoint includes a service check:
+        # dc_state=CLUSTER_UP
+
+        datacenter_tags = ['datacenter:{}'.format(datacenter)]
+        datacenter_tags.extend(self._tags)
+
+        # https://www.aerospike.com/docs/reference/info/#dc/DC_NAME
+        data = self.get_info('dc/{}'.format(datacenter))
+
+        for item in data:
+            metric = item.split("=")
+            key = metric[0]
+            value = metric[1]
+            if key == 'dc_state':
+                if value == 'CLUSTER_UP':
+                    self.service_check(DATACENTER_SERVICE_CHECK_CONNECT, self.OK, tags=self._tags)
+                    continue
+                else:
+                    self.service_check(DATACENTER_SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags)
+                    continue
+            self.send(DATACENTER_METRIC_TYPE, key, value, datacenter_tags)
+
+    def collect_latency(self, namespaces):
+        data = self.get_info('latency:')
+
+        ns = None
+
+        ns_latencies = defaultdict(dict)
+
+        while data:
+            line = data.pop(0)
+            metric_names = []
+
+            if line.startswith("error-"):
+                continue
+
+            if not data:
+                break
+
+            timestamp = re.match(r'(\d+:\d+:\d+)', line)
+            if timestamp:
+                metric_values = line.split(",")[1:]
+                ns_latencies[ns].setdefault("metric_values", []).extend(metric_values)
+                continue
+
+            # match only works at the beginning
+            # ':' or ';' are not allowed in namespace-name: https://www.aerospike.com/docs/guide/limitations.html
+            ns_metric_name_match = re.match(r'{([^\}:;]+)}-(\w+):', line)
+            if ns_metric_name_match:
+                ns = ns_metric_name_match.groups()[0]
+                metric_name = ns_metric_name_match.groups()[1]
+            elif line.startswith("batch-index"):
+                # https://www.aerospike.com/docs/operations/monitor/latency/#batch-index
+                ns = None
+                metric_name = "batch-index"
+            else:
+                self.log.warning("Invalid data. Namespace and/or metric name not found in line: `%s`", line)
+                # Since the data come by pair and the order matters it's safer to return right away than submitting
+                # possibly wrong metrics.
+                return
+
+            # need search because this isn't at the beginning
+            ops_per_sec = re.search(r'(\w+\/\w+)', line)
+            if ops_per_sec:
+                ops_per_sec_name = ops_per_sec.groups()[0].replace("/", "_")
+                metric_names.append(metric_name + "_" + ops_per_sec_name)
+
+            # findall will grab everything instead of first match
+            latencies = re.findall(r'>(\d+ms)', line)
+            if latencies:
+                for latency in latencies:
+                    latency = metric_name + '_over_' + latency
+                    metric_names.append(latency)
+
+            ns_latencies[ns].setdefault("metric_names", []).extend(metric_names)
+
+        for ns, v in iteritems(ns_latencies):
+            metric_names = v.get("metric_names", [])
+            metric_values = v.get("metric_values", [])
+            namespace_tags = ['namespace:{}'.format(ns)] if ns else []
+            namespace_tags.extend(self._tags)
+            if len(metric_names) == len(metric_values):
+                for i in range(len(metric_names)):
+                    self.send(NAMESPACE_LATENCY_METRIC_TYPE, metric_names[i], metric_values[i], namespace_tags)
 
     def collect_throughput(self, namespaces):
         data = self.get_info('throughput:')

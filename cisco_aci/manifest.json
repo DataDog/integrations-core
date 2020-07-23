@@ -1,6 +1,7 @@
 {
   "categories": [
-    "network"
+    "network",
+    "autodiscovery"
   ],
   "creates_events": true,
   "display_name": "Cisco ACI",
@@ -22,6 +23,9 @@
   "type": "check",
   "integration_id": "cisco-aci",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json"

@@ -1,0 +1,767 @@
+{
+  "kind": "PodList",
+  "apiVersion": "v1",
+  "metadata": {},
+  "items": [
+    {
+      "metadata": {
+        "name": "windows-server-iis-6c68545d57-gwtn9",
+        "generateName": "windows-server-iis-6c68545d57-",
+        "namespace": "default",
+        "selfLink": "/api/v1/namespaces/default/pods/windows-server-iis-6c68545d57-gwtn9",
+        "uid": "4740a3ec-392f-435f-80a4-b407a37463db",
+        "resourceVersion": "221969",
+        "creationTimestamp": "2020-04-24T15:39:40Z",
+        "labels": {
+          "app": "windows-server-iis",
+          "pod-template-hash": "6c68545d57",
+          "tier": "backend",
+          "track": "stable"
+        },
+        "annotations": {
+          "kubernetes.io/config.seen": "2020-04-24T15:48:03.7734424Z",
+          "kubernetes.io/config.source": "api",
+          "kubernetes.io/psp": "eks.privileged",
+          "vpc.amazonaws.com/PrivateIPv4Address": "172.29.134.211/18"
+        },
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "kind": "ReplicaSet",
+            "name": "windows-server-iis-6c68545d57",
+            "uid": "ba98f494-6862-46c9-ac67-fbb00a6b882a",
+            "controller": true,
+            "blockOwnerDeletion": true
+          }
+        ]
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "default-token-424zl",
+            "secret": {
+              "secretName": "default-token-424zl",
+              "defaultMode": 420
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "windows-server-iis",
+            "image": "mcr.microsoft.com/windows/servercore:1809",
+            "command": [
+              "powershell.exe",
+              "-command",
+              "Add-WindowsFeature Web-Server; Invoke-WebRequest -UseBasicParsing -Uri 'https://dotnetbinaries.blob.core.windows.net/servicemonitor/2.0.1.6/ServiceMonitor.exe' -OutFile 'C:\\ServiceMonitor.exe'; echo '<html><body><br/><br/><marquee><H1>Hello EKS!!!<H1><marquee></body><html>' > C:\\inetpub\\wwwroot\\default.html; C:\\ServiceMonitor.exe 'w3svc'; "
+            ],
+            "ports": [
+              {
+                "name": "http",
+                "containerPort": 80,
+                "protocol": "TCP"
+              }
+            ],
+            "resources": {
+              "limits": {
+                "vpc.amazonaws.com/PrivateIPv4Address": "1"
+              },
+              "requests": {
+                "vpc.amazonaws.com/PrivateIPv4Address": "1"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "default-token-424zl",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "IfNotPresent"
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "nodeSelector": {
+          "beta.kubernetes.io/os": "windows"
+        },
+        "serviceAccountName": "default",
+        "serviceAccount": "default",
+        "nodeName": "ip-172-29-160-189.ec2.internal",
+        "securityContext": {},
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+          {
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          },
+          {
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          }
+        ],
+        "priority": 0,
+        "enableServiceLinks": true
+      },
+      "status": {
+        "phase": "Running",
+        "conditions": [
+          {
+            "type": "Initialized",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-04-24T15:48:03Z"
+          },
+          {
+            "type": "Ready",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-04-24T15:49:04Z"
+          },
+          {
+            "type": "ContainersReady",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-04-24T15:49:04Z"
+          },
+          {
+            "type": "PodScheduled",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-04-24T15:48:03Z"
+          }
+        ],
+        "hostIP": "172.29.160.189",
+        "podIP": "172.29.134.211",
+        "startTime": "2020-04-24T15:48:03Z",
+        "containerStatuses": [
+          {
+            "name": "windows-server-iis",
+            "state": {
+              "running": {
+                "startedAt": "2020-04-24T15:49:02Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "mcr.microsoft.com/windows/servercore:1809",
+            "imageID": "docker-pullable://mcr.microsoft.com/windows/servercore@sha256:f4fb84430141b363d2c988ca90a03a958108d8a4d4bf74c1e4ca443b40ca5386",
+            "containerID": "docker://43dfa29d17d358cbdd0bfb290cf27ce82c4de0c88d22d7cac4b88c85de87efba"
+          }
+        ],
+        "qosClass": "BestEffort"
+      }
+    },
+    {
+      "metadata": {
+        "name": "dd-datadog-lbvkl",
+        "generateName": "dd-datadog-",
+        "namespace": "default",
+        "selfLink": "/api/v1/namespaces/default/pods/dd-datadog-lbvkl",
+        "uid": "8ddf0e3f-ac6c-4d44-87d7-0bc41f6729ec",
+        "resourceVersion": "221968",
+        "creationTimestamp": "2020-04-24T15:47:53Z",
+        "labels": {
+          "app": "dd-datadog",
+          "controller-revision-hash": "5f99b4f849",
+          "pod-template-generation": "1"
+        },
+        "annotations": {
+          "checksum/autoconf-config": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+          "checksum/checksd-config": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+          "checksum/confd-config": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+          "kubernetes.io/config.seen": "2020-04-24T15:48:03.7734424Z",
+          "kubernetes.io/config.source": "api",
+          "kubernetes.io/psp": "eks.privileged",
+          "vpc.amazonaws.com/PrivateIPv4Address": "172.29.172.70/18"
+        },
+        "ownerReferences": [
+          {
+            "apiVersion": "apps/v1",
+            "kind": "DaemonSet",
+            "name": "dd-datadog",
+            "uid": "7572aac0-75ec-4aa2-8634-6637c0187ca8",
+            "controller": true,
+            "blockOwnerDeletion": true
+          }
+        ]
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "config",
+            "emptyDir": {}
+          },
+          {
+            "name": "runtimesocket",
+            "hostPath": {
+              "path": "\\\\.\\pipe\\docker_engine",
+              "type": ""
+            }
+          },
+          {
+            "name": "pointerdir",
+            "hostPath": {
+              "path": "C:/var/log",
+              "type": ""
+            }
+          },
+          {
+            "name": "logpodpath",
+            "hostPath": {
+              "path": "C:/var/log/pods",
+              "type": ""
+            }
+          },
+          {
+            "name": "logdockercontainerpath",
+            "hostPath": {
+              "path": "C:/ProgramData/docker/containers",
+              "type": ""
+            }
+          },
+          {
+            "name": "dd-datadog-token-8lqzd",
+            "secret": {
+              "secretName": "dd-datadog-token-8lqzd",
+              "defaultMode": 420
+            }
+          }
+        ],
+        "initContainers": [
+          {
+            "name": "init-volume",
+            "image": "datadog/agent:7.19.0-rc.7",
+            "command": [
+              "pwsh",
+              "-Command"
+            ],
+            "args": [
+              "Copy-Item -Recurse -Force C:/ProgramData/Datadog C:/Temp"
+            ],
+            "resources": {},
+            "volumeMounts": [
+              {
+                "name": "config",
+                "mountPath": "C:/Temp/Datadog"
+              },
+              {
+                "name": "dd-datadog-token-8lqzd",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "Always"
+          },
+          {
+            "name": "init-config",
+            "image": "datadog/agent:7.19.0-rc.7",
+            "command": [
+              "pwsh",
+              "-Command"
+            ],
+            "args": [
+              "Get-ChildItem 'entrypoint-ps1' | ForEach-Object { & $_.FullName if (-Not $?) { exit 1 } }"
+            ],
+            "env": [
+              {
+                "name": "DD_API_KEY",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "name": "dd-datadog",
+                    "key": "api-key"
+                  }
+                }
+              },
+              {
+                "name": "DD_KUBERNETES_KUBELET_HOST",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.hostIP"
+                  }
+                }
+              },
+              {
+                "name": "KUBERNETES",
+                "value": "yes"
+              }
+            ],
+            "resources": {},
+            "volumeMounts": [
+              {
+                "name": "config",
+                "mountPath": "C:/ProgramData/Datadog"
+              },
+              {
+                "name": "runtimesocket",
+                "mountPath": "\\\\.\\pipe\\docker_engine"
+              },
+              {
+                "name": "dd-datadog-token-8lqzd",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "Always"
+          }
+        ],
+        "containers": [
+          {
+            "name": "agent",
+            "image": "datadog/agent:7.19.0-rc.7",
+            "command": [
+              "agent",
+              "start"
+            ],
+            "ports": [
+              {
+                "name": "dogstatsdport",
+                "containerPort": 8125,
+                "protocol": "UDP"
+              }
+            ],
+            "env": [
+              {
+                "name": "DD_API_KEY",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "name": "dd-datadog",
+                    "key": "api-key"
+                  }
+                }
+              },
+              {
+                "name": "DD_KUBERNETES_KUBELET_HOST",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.hostIP"
+                  }
+                }
+              },
+              {
+                "name": "KUBERNETES",
+                "value": "yes"
+              },
+              {
+                "name": "DD_LOG_LEVEL",
+                "value": "INFO"
+              },
+              {
+                "name": "DD_DOGSTATSD_PORT",
+                "value": "8125"
+              },
+              {
+                "name": "DD_APM_ENABLED",
+                "value": "false"
+              },
+              {
+                "name": "DD_LOGS_ENABLED",
+                "value": "true"
+              },
+              {
+                "name": "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL",
+                "value": "true"
+              },
+              {
+                "name": "DD_LOGS_CONFIG_K8S_CONTAINER_USE_FILE",
+                "value": "true"
+              },
+              {
+                "name": "DD_HEALTH_PORT",
+                "value": "5555"
+              }
+            ],
+            "resources": {
+              "limits": {
+                "vpc.amazonaws.com/PrivateIPv4Address": "1"
+              },
+              "requests": {
+                "vpc.amazonaws.com/PrivateIPv4Address": "1"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "config",
+                "mountPath": "C:/ProgramData/Datadog"
+              },
+              {
+                "name": "runtimesocket",
+                "mountPath": "\\\\.\\pipe\\docker_engine"
+              },
+              {
+                "name": "pointerdir",
+                "mountPath": "C:/var/log"
+              },
+              {
+                "name": "logpodpath",
+                "readOnly": true,
+                "mountPath": "C:/var/log/pods"
+              },
+              {
+                "name": "logdockercontainerpath",
+                "readOnly": true,
+                "mountPath": "C:/ProgramData/docker/containers"
+              },
+              {
+                "name": "dd-datadog-token-8lqzd",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "livenessProbe": {
+              "httpGet": {
+                "path": "/health",
+                "port": 5555,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 15,
+              "timeoutSeconds": 5,
+              "periodSeconds": 15,
+              "successThreshold": 1,
+              "failureThreshold": 6
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "Always"
+          },
+          {
+            "name": "trace-agent",
+            "image": "datadog/agent:7.19.0-rc.7",
+            "command": [
+              "trace-agent",
+              "-foreground",
+              "-config=C:/ProgramData/Datadog/datadog.yaml"
+            ],
+            "ports": [
+              {
+                "name": "traceport",
+                "hostPort": 8126,
+                "containerPort": 8126,
+                "protocol": "TCP"
+              }
+            ],
+            "env": [
+              {
+                "name": "DD_API_KEY",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "name": "dd-datadog",
+                    "key": "api-key"
+                  }
+                }
+              },
+              {
+                "name": "DD_KUBERNETES_KUBELET_HOST",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.hostIP"
+                  }
+                }
+              },
+              {
+                "name": "KUBERNETES",
+                "value": "yes"
+              },
+              {
+                "name": "DD_LOG_LEVEL",
+                "value": "INFO"
+              },
+              {
+                "name": "DD_APM_ENABLED",
+                "value": "true"
+              },
+              {
+                "name": "DD_APM_NON_LOCAL_TRAFFIC",
+                "value": "true"
+              },
+              {
+                "name": "DD_APM_RECEIVER_PORT",
+                "value": "8126"
+              }
+            ],
+            "resources": {},
+            "volumeMounts": [
+              {
+                "name": "config",
+                "mountPath": "C:/ProgramData/Datadog"
+              },
+              {
+                "name": "dd-datadog-token-8lqzd",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "livenessProbe": {
+              "tcpSocket": {
+                "port": 8126
+              },
+              "initialDelaySeconds": 15,
+              "timeoutSeconds": 5,
+              "periodSeconds": 15,
+              "successThreshold": 1,
+              "failureThreshold": 3
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "Always"
+          },
+          {
+            "name": "process-agent",
+            "image": "datadog/agent:7.19.0-rc.7",
+            "command": [
+              "process-agent",
+              "-foreground",
+              "-config=C:/ProgramData/Datadog/datadog.yaml"
+            ],
+            "env": [
+              {
+                "name": "DD_API_KEY",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "name": "dd-datadog",
+                    "key": "api-key"
+                  }
+                }
+              },
+              {
+                "name": "DD_KUBERNETES_KUBELET_HOST",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "status.hostIP"
+                  }
+                }
+              },
+              {
+                "name": "KUBERNETES",
+                "value": "yes"
+              },
+              {
+                "name": "DD_LOG_LEVEL",
+                "value": "INFO"
+              }
+            ],
+            "resources": {},
+            "volumeMounts": [
+              {
+                "name": "config",
+                "mountPath": "C:/ProgramData/Datadog"
+              },
+              {
+                "name": "runtimesocket",
+                "mountPath": "\\\\.\\pipe\\docker_engine"
+              },
+              {
+                "name": "dd-datadog-token-8lqzd",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "Always"
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "nodeSelector": {
+          "kubernetes.io/os": "windows"
+        },
+        "serviceAccountName": "dd-datadog",
+        "serviceAccount": "dd-datadog",
+        "nodeName": "ip-172-29-160-189.ec2.internal",
+        "securityContext": {},
+        "affinity": {
+          "nodeAffinity": {
+            "requiredDuringSchedulingIgnoredDuringExecution": {
+              "nodeSelectorTerms": [
+                {
+                  "matchFields": [
+                    {
+                      "key": "metadata.name",
+                      "operator": "In",
+                      "values": [
+                        "ip-172-29-160-189.ec2.internal"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+          {
+            "key": "node.kubernetes.io/os",
+            "operator": "Equal",
+            "value": "windows",
+            "effect": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "effect": "NoExecute"
+          },
+          {
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "effect": "NoExecute"
+          },
+          {
+            "key": "node.kubernetes.io/disk-pressure",
+            "operator": "Exists",
+            "effect": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/memory-pressure",
+            "operator": "Exists",
+            "effect": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/pid-pressure",
+            "operator": "Exists",
+            "effect": "NoSchedule"
+          },
+          {
+            "key": "node.kubernetes.io/unschedulable",
+            "operator": "Exists",
+            "effect": "NoSchedule"
+          }
+        ],
+        "priority": 0,
+        "enableServiceLinks": true
+      },
+      "status": {
+        "phase": "Running",
+        "conditions": [
+          {
+            "type": "Initialized",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-04-24T15:53:36Z"
+          },
+          {
+            "type": "Ready",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-04-24T15:53:44Z"
+          },
+          {
+            "type": "ContainersReady",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-04-24T15:53:44Z"
+          },
+          {
+            "type": "PodScheduled",
+            "status": "True",
+            "lastProbeTime": null,
+            "lastTransitionTime": "2020-04-24T15:48:03Z"
+          }
+        ],
+        "hostIP": "172.29.160.189",
+        "podIP": "172.29.172.70",
+        "startTime": "2020-04-24T15:48:03Z",
+        "initContainerStatuses": [
+          {
+            "name": "init-volume",
+            "state": {
+              "terminated": {
+                "exitCode": 0,
+                "reason": "Completed",
+                "startedAt": "2020-04-24T15:53:03Z",
+                "finishedAt": "2020-04-24T15:53:07Z",
+                "containerID": "docker://8b77800949d523c1faa135731ffb2f19eee4ee954c8d5eb0548562b82d5616a8"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "datadog/agent:7.19.0-rc.7",
+            "imageID": "docker-pullable://datadog/agent@sha256:61af60c157ad8a42b333a2be5efcd68c5c09de6fe4d0b27853d2e6636ec6cf2b",
+            "containerID": "docker://8b77800949d523c1faa135731ffb2f19eee4ee954c8d5eb0548562b82d5616a8"
+          },
+          {
+            "name": "init-config",
+            "state": {
+              "terminated": {
+                "exitCode": 0,
+                "reason": "Completed",
+                "startedAt": "2020-04-24T15:53:21Z",
+                "finishedAt": "2020-04-24T15:53:23Z",
+                "containerID": "docker://e81f832ebbb0c132ce51c2c6b199d47b7ae4df734fd31aee288d8447826824f2"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "datadog/agent:7.19.0-rc.7",
+            "imageID": "docker-pullable://datadog/agent@sha256:61af60c157ad8a42b333a2be5efcd68c5c09de6fe4d0b27853d2e6636ec6cf2b",
+            "containerID": "docker://e81f832ebbb0c132ce51c2c6b199d47b7ae4df734fd31aee288d8447826824f2"
+          }
+        ],
+        "containerStatuses": [
+          {
+            "name": "agent",
+            "state": {
+              "running": {
+                "startedAt": "2020-04-24T15:53:38Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "datadog/agent:7.19.0-rc.7",
+            "imageID": "docker-pullable://datadog/agent@sha256:61af60c157ad8a42b333a2be5efcd68c5c09de6fe4d0b27853d2e6636ec6cf2b",
+            "containerID": "docker://a26b9c2c92e4ab03f34b84d03d91bed92259c859576535a3167aa32d39206dc2"
+          },
+          {
+            "name": "process-agent",
+            "state": {
+              "running": {
+                "startedAt": "2020-04-24T15:53:41Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "datadog/agent:7.19.0-rc.7",
+            "imageID": "docker-pullable://datadog/agent@sha256:61af60c157ad8a42b333a2be5efcd68c5c09de6fe4d0b27853d2e6636ec6cf2b",
+            "containerID": "docker://98fb504eb0fab22ce9089d8b1cc172ccb2095ee11a00bacd244419b5c02ee635"
+          },
+          {
+            "name": "trace-agent",
+            "state": {
+              "running": {
+                "startedAt": "2020-04-24T15:53:39Z"
+              }
+            },
+            "lastState": {},
+            "ready": true,
+            "restartCount": 0,
+            "image": "datadog/agent:7.19.0-rc.7",
+            "imageID": "docker-pullable://datadog/agent@sha256:61af60c157ad8a42b333a2be5efcd68c5c09de6fe4d0b27853d2e6636ec6cf2b",
+            "containerID": "docker://d46a7d51f7b1e2a186a101ef3f0f4834423245b3299d9f4a4796a7c1efcc2ad4"
+          }
+        ],
+        "qosClass": "BestEffort"
+      }
+    }
+  ]
+}

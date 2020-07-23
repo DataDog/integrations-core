@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -91,6 +91,19 @@ def test_tagged_metrics(_, aggregator):
         expected_tags = EXPECTED_TAGS + ['ceph_pool:%s' % pool]
 
         for metric in ['ceph.read_bytes', 'ceph.write_bytes', 'ceph.pct_used', 'ceph.num_objects']:
+            aggregator.assert_metric(metric, count=1, tags=expected_tags)
+
+
+@mock.patch("datadog_checks.ceph.Ceph._collect_raw", return_value=mock_data("raw2.json"))
+def test_osd_perf_with_osdstats(_, aggregator):
+
+    ceph_check = Ceph(CHECK_NAME, {}, {})
+    ceph_check.check(copy.deepcopy(BASIC_CONFIG))
+
+    for osd in ['osd0', 'osd1', 'osd2']:
+        expected_tags = EXPECTED_TAGS + ['ceph_osd:%s' % osd]
+
+        for metric in ['ceph.commit_latency_ms', 'ceph.apply_latency_ms']:
             aggregator.assert_metric(metric, count=1, tags=expected_tags)
 
 

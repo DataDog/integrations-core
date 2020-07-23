@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -17,12 +17,6 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 
-# Parse requirements
-def get_requirements(fpath):
-    with open(path.join(HERE, fpath), encoding='utf-8') as f:
-        return f.readlines()
-
-
 def read(*parts):
     with open(path.join(HERE, *parts), 'r') as fp:
         return fp.read()
@@ -34,7 +28,16 @@ with open(path.join(HERE, "datadog_checks", "apache", "__about__.py")) as f:
     exec(f.read(), ABOUT)
 
 
-CHECKS_BASE_REQ = 'datadog_checks_base'
+def get_dependencies():
+    dep_file = path.join(HERE, 'requirements.in')
+    if not path.isfile(dep_file):
+        return []
+
+    with open(dep_file, encoding='utf-8') as f:
+        return f.readlines()
+
+
+CHECKS_BASE_REQ = 'datadog_checks_base>=11.0.0'
 
 setup(
     name='datadog-apache',
@@ -64,6 +67,7 @@ setup(
     packages=['datadog_checks.apache'],
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
+    extras_require={'deps': get_dependencies()},
     # Extra files to ship with the wheel package
     include_package_data=True,
 )

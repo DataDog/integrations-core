@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
@@ -12,6 +12,7 @@ from six import iteritems, itervalues
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
+from datadog_checks.base.utils.tracing import traced
 
 from .api import ApiFactory
 from .exceptions import (
@@ -24,7 +25,6 @@ from .exceptions import (
     MissingNovaEndpoint,
 )
 from .retry import BackOffRetry
-from .utils import traced
 
 SOURCE_TYPE = 'openstack'
 
@@ -191,7 +191,7 @@ class OpenStackControllerCheck(AgentCheck):
                     }
 
         except Exception as e:
-            self.warning('Unable to get the list of aggregates: {}'.format(e))
+            self.warning('Unable to get the list of aggregates: %s', e)
             raise e
 
         return hypervisor_aggregate_map
@@ -289,13 +289,13 @@ class OpenStackControllerCheck(AgentCheck):
             try:
                 load_averages = self.get_loads_for_single_hypervisor(hyp['id'])
             except Exception as e:
-                self.warning('Unable to get loads averages for hypervisor {}: {}'.format(hyp['id'], e))
+                self.warning('Unable to get loads averages for hypervisor %s: %s', hyp['id'], e)
                 load_averages = []
             if load_averages and len(load_averages) == 3:
                 for i, avg in enumerate([1, 5, 15]):
                     self.gauge('openstack.nova.hypervisor_load.{}'.format(avg), load_averages[i], tags=tags)
             else:
-                self.warning("Load Averages didn't return expected values: {}".format(load_averages))
+                self.warning("Load Averages didn't return expected values: %s", load_averages)
 
     def get_active_servers(self, tenant_to_name):
         query_params = {"all_tenants": True, 'status': 'ACTIVE'}
@@ -351,9 +351,7 @@ class OpenStackControllerCheck(AgentCheck):
             # New in version 2.47
             result['flavor'] = self.create_flavor_object(flavor)
         if not all(key in result for key in SERVER_FIELDS_REQ):
-            self.warning(
-                "Server {} is missing a required field. Unable to collect all metrics for this server".format(result)
-            )
+            self.warning("Server %s is missing a required field. Unable to collect all metrics for this server", result)
         return result
 
     # Get all of the server IDs and their metadata and cache them
@@ -420,13 +418,11 @@ class OpenStackControllerCheck(AgentCheck):
                 self.log.debug("Server %s is not in an ACTIVE state and cannot be monitored, %s", server_id, e)
             else:
                 self.warning(
-                    "Received HTTP Error when reaching the Diagnostics endpoint for server:{}, {}".format(
-                        e, server_name
-                    )
+                    "Received HTTP Error when reaching the Diagnostics endpoint for server:%s, %s", e, server_name
                 )
             return
         except Exception as e:
-            self.warning("Unknown error when monitoring %s : %s" % (server_id, e))
+            self.warning("Unknown error when monitoring %s : %s", server_id, e)
             return
 
         if server_stats:
@@ -470,7 +466,7 @@ class OpenStackControllerCheck(AgentCheck):
         project_name = project.get('name')
         project_id = project.get('id')
 
-        self.log.debug("Collecting metrics for project. name: {} id: {}".format(project_name, project['id']))
+        self.log.debug("Collecting metrics for project. name: %s id: %s", project_name, project['id'])
         server_stats = self.get_project_limits(project['id'])
         server_tags.append('tenant_id:{}'.format(project_id))
 
@@ -483,7 +479,7 @@ class OpenStackControllerCheck(AgentCheck):
                     metric_key = PROJECT_METRICS[st]
                     self.gauge("openstack.nova.limits.{}".format(metric_key), server_stats[st], tags=server_tags)
         except KeyError:
-            self.warning("Unexpected response, not submitting limits metrics for project id {}".format(project['id']))
+            self.warning("Unexpected response, not submitting limits metrics for project id %s", project['id'])
 
     def get_flavors(self):
         query_params = {}
@@ -556,7 +552,7 @@ class OpenStackControllerCheck(AgentCheck):
                 if aggregate_list[hyp_hostname].get('availability_zone'):
                     tags.append('availability_zone:{}'.format(aggregate_list[hyp_hostname]['availability_zone']))
             except KeyError:
-                self.log.debug('Unable to get the availability_zone for hypervisor: {}'.format(hyp_hostname))
+                self.log.debug('Unable to get the availability_zone for hypervisor: %s', hyp_hostname)
         else:
             self.log.info(
                 'Unable to find hostname %s in aggregate list. Assuming this host is unaggregated', hyp_hostname
@@ -606,7 +602,7 @@ class OpenStackControllerCheck(AgentCheck):
             # authentication previously failed and got removed from the cache
             # Let's populate it now
             try:
-                self.log.debug("Fetch scope for instance {}".format(self.instance_name))
+                self.log.debug("Fetch scope for instance %s", self.instance_name)
                 # Set keystone api with proper token
                 self._api = ApiFactory.create(self.log, instance_config, self.http)
                 self.service_check(
@@ -616,8 +612,9 @@ class OpenStackControllerCheck(AgentCheck):
                 )
             except KeystoneUnreachable as e:
                 self.warning(
-                    "The agent could not contact the specified identity server at {} . "
-                    "Are you sure it is up at that address?".format(keystone_server_url)
+                    "The agent could not contact the specified identity server at `%s`. "
+                    "Are you sure it is up at that address?",
+                    keystone_server_url,
                 )
                 self.log.debug("Problem grabbing auth token: %s", e)
                 self.service_check(
@@ -728,7 +725,7 @@ class OpenStackControllerCheck(AgentCheck):
 
             if collect_server_diagnostic_metrics or collect_server_flavor_metrics:
                 if collect_server_diagnostic_metrics:
-                    self.log.debug("Fetch stats from %s server(s)" % len(servers))
+                    self.log.debug("Fetch stats from %s server(s)", len(servers))
                     for server in itervalues(servers):
                         self.collect_server_diagnostic_metrics(server, tags=custom_tags, use_shortname=use_shortname)
                 if collect_server_flavor_metrics:
@@ -752,18 +749,18 @@ class OpenStackControllerCheck(AgentCheck):
             if isinstance(e, IncompleteIdentity):
                 self.warning(
                     "Please specify the user via the `user` variable in your init_config.\n"
-                    + "This is the user you would use to authenticate with Keystone v3 via password auth.\n"
-                    + "The user should look like:"
-                    + "{'password': 'my_password', 'name': 'my_name', 'domain': {'id': 'my_domain_id'}}"
+                    "This is the user you would use to authenticate with Keystone v3 via password auth.\n"
+                    "The user should look like: "
+                    "{'password': 'my_password', 'name': 'my_name', 'domain': {'id': 'my_domain_id'}}"
                 )
             else:
-                self.warning("Configuration Incomplete: {}! Check your openstack.yaml file".format(e))
+                self.warning("Configuration Incomplete: %s! Check your openstack.yaml file", e)
         except AuthenticationNeeded:
             # Delete the scope, we'll populate a new one on the next run for this instance
             self.delete_api_cache()
         except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             if isinstance(e, requests.exceptions.HTTPError) and e.response.status_code < 500:
-                self.warning("Error reaching nova API: %s" % e)
+                self.warning("Error reaching nova API: %s", e)
             else:
                 # exponential backoff
                 self.do_backoff(custom_tags)

@@ -1,5 +1,35 @@
 # CHANGELOG - hdfs_namenode
 
+## 1.13.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Added] Add config specs. See [#6904](https://github.com/DataDog/integrations-core/pull/6904).
+
+## 1.12.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.11.1 / 2020-04-04
+
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
+## 1.11.0 / 2020-02-22
+
+* [Added] Add log section to hdfs integrations. See [#4632](https://github.com/DataDog/integrations-core/pull/4632).
+
+## 1.10.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Added] Collect version metadata for hdfs_namenode. See [#5103](https://github.com/DataDog/integrations-core/pull/5103).
+
+## 1.9.0 / 2019-12-02
+
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
+## 1.8.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 1.7.0 / 2019-07-09
 
 * [Added] Use the new RequestsWrapper for connecting to services. See [#4057](https://github.com/DataDog/integrations-core/pull/4057).

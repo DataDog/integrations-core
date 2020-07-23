@@ -1,5 +1,32 @@
 # CHANGELOG - ECS Fargate
 
+## 2.9.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
+## 2.8.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 2.7.0 / 2020-04-04
+
+* [Added] Collect network metrics for ECS Fargate. See [#6216](https://github.com/DataDog/integrations-core/pull/6216).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
+## 2.6.0 / 2020-01-13
+
+* [Fixed] Fix CPU metrics. See [#5404](https://github.com/DataDog/integrations-core/pull/5404).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 2.5.0 / 2019-12-02
+
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
+## 2.4.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+* [Fixed] Fix ecs_fargate timeout. See [#4518](https://github.com/DataDog/integrations-core/pull/4518).
+
 ## 2.3.0 / 2019-08-24
 
 * [Added] Update with proxy settings and request wrapper. See [#3477](https://github.com/DataDog/integrations-core/pull/3477).

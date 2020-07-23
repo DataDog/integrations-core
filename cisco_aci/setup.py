@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from codecs import open
@@ -16,6 +16,15 @@ with open(path.join(HERE, "datadog_checks", "cisco_aci", "__about__.py")) as f:
 # Get the long description from the README file
 with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
+
+
+def get_dependencies():
+    dep_file = path.join(HERE, 'requirements.in')
+    if not path.isfile(dep_file):
+        return []
+
+    with open(dep_file, encoding='utf-8') as f:
+        return f.readlines()
 
 
 CHECKS_BASE_REQ = 'datadog_checks_base'
@@ -44,6 +53,7 @@ setup(
     packages=['datadog_checks.cisco_aci'],
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
+    extras_require={'deps': get_dependencies()},
     # Extra files to ship with the wheel package
     include_package_data=True,
 )

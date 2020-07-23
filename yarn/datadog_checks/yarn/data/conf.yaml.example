@@ -59,6 +59,28 @@ instances:
     #   <TAG_KEY1>: <YARN_KEY>
     #   <TAG_KEY2>: <YARN_KEY>
 
+    ## @param application_status_mapping - list of key:value elements - optional
+    ##
+    ## Custom application status mapping for service check `yarn.application.status`.
+    ##
+    ## The key is the Yarn application channel status. Valid keys are: `ALL`, `NEW`,
+    ## `NEW_SAVING`, `SUBMITTED`, `ACCEPTED`, `RUNNING`, `FINISHED`, `FAILED` and `KILLED`.
+    ## The value is the Datadog service check level. Valid values are: `ok`, `warning`, `critical`, and `unknown`.
+    ## If a channel status is not mapped, it is mapped to `unknown`.
+    ##
+    ## Find below the default mapping configuration.
+    #
+    # application_status_mapping:
+    #     ALL: unknown
+    #     NEW: ok
+    #     NEW_SAVING: ok
+    #     SUBMITTED: ok
+    #     ACCEPTED: ok
+    #     RUNNING: ok
+    #     FINISHED: ok
+    #     FAILED: critical
+    #     KILLED: critical
+
     ## @param collect_app_metrics - boolean - optional - default: true
     ## Set this parameter to false to remove yarn.app metrics from metric collection.
     #
@@ -82,6 +104,13 @@ instances:
     # tags:
     #   - <KEY_1>:<VALUE_1>
     #   - <KEY_2>:<VALUE_2>
+
+    ## @param split_yarn_application_tags - boolean - optional - default: false
+    ## Set this parameter to true to split YARN application tags string formatted as
+    ## `key1:value1,key2:value2,...` into Datadog application tags as such:
+    ## `app_key1: value1`, `app_key2: value2`, etc.
+    #
+    # split_yarn_application_tags: false
 
     ## @param proxy - object - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -174,6 +203,12 @@ instances:
     #
     # kerberos_keytab: <KEYTAB_FILE_PATH>
 
+    ## @param kerberos_cache - string - optional
+    ## Sets the KRB5CCNAME environment variable.
+    ## It should point to a credential cache with a valid TGT.
+    #
+    # kerberos_cache: <KRB5CCNAME>
+
     ## @param tls_verify - boolean - optional - default: true
     ## Instructs the check to validate the TLS certificate of services.
     #
@@ -182,6 +217,10 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If you disable `tls_verify` you will receive security warnings in logs.
     ## Disable those by setting `tls_ignore_warning` to true.
+    ##
+    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
+    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
+    ## to true.
     #
     # tls_ignore_warning: false
 

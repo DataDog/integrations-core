@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2013-2016
+# (C) Datadog, Inc. 2013-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 DATA_TYPE_INT = 0

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -35,3 +35,21 @@ def test_exclusion_filter(aggregator, check, instance):
             aggregator.assert_metric(mname, count=0, tags=['cluster:webs', 'varnish_name:default'])
         elif 'varnish.uptime' not in mname:
             aggregator.assert_metric(mname, count=1, tags=['cluster:webs', 'varnish_name:default'])
+
+
+def test_version_metadata(aggregator, check, instance, datadog_agent):
+
+    check.check_id = 'test:123'
+    check.check(instance)
+
+    raw_version = common.VARNISH_VERSION.replace('_', '.')
+    major, minor, patch = raw_version.split('.')
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': major,
+        'version.minor': minor,
+        'version.patch': patch,
+        'version.raw': raw_version,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)

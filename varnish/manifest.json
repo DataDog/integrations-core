@@ -14,7 +14,8 @@
   "metric_to_check": "varnish.n_backend",
   "name": "varnish",
   "process_signatures": [
-    "service varnish start"
+    "service varnish start",
+    "varnishd"
   ],
   "public_title": "Datadog-Varnish Integration",
   "short_description": "Track client and backend connections, cache misses and evictions, and more.",
@@ -29,6 +30,12 @@
   "assets": {
     "monitors": {},
     "dashboards": {},
+    "saved_views": {
+      "4xx_errors": "assets/saved_views/4xx_errors.json",
+      "5xx_errors": "assets/saved_views/5xx_errors.json",
+      "status_code_overview": "assets/saved_views/status_code_overview.json",
+      "bot_errors": "assets/saved_views/bot_errors.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

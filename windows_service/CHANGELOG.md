@@ -1,5 +1,38 @@
 # CHANGELOG - windows_service
 
+## 2.7.0 / 2020-06-29
+
+* [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
+
+## 2.6.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 2.5.2 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
+## 2.5.1 / 2020-02-25
+
+* [Fixed] Bump minimun agent version. See [#5834](https://github.com/DataDog/integrations-core/pull/5834).
+
+## 2.5.0 / 2020-02-22
+
+* [Deprecated] Deprecate `service` tag. See [#5545](https://github.com/DataDog/integrations-core/pull/5545).
+
+## 2.4.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 2.3.0 / 2019-12-02
+
+* [Added] Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).
+
+## 2.2.0 / 2019-10-11
+
+* [Added] Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
+* [Fixed] Search patterns in reverse sort order. See [#4503](https://github.com/DataDog/integrations-core/pull/4503).
+
 ## 2.1.0 / 2019-05-14
 
 * [Fixed] Add debug to compare short names, service names and patterns. See [#3427](https://github.com/DataDog/integrations-core/pull/3427).

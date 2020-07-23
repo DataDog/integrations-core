@@ -1,5 +1,38 @@
 # CHANGELOG - couchbase
 
+## 1.14.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
+## 1.13.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.12.2 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+* [Fixed] Update `conf.yaml.example` log collection section. See [#5977](https://github.com/DataDog/integrations-core/pull/5977).
+
+## 1.12.1 / 2019-12-06
+
+* [Fixed] Fix version metadata parsing. See [#5148](https://github.com/DataDog/integrations-core/pull/5148).
+
+## 1.12.0 / 2019-12-02
+
+* [Added] add version metadata. See [#4985](https://github.com/DataDog/integrations-core/pull/4985).
+* [Added] Standardize logging format. See [#4905](https://github.com/DataDog/integrations-core/pull/4905).
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
+## 1.11.0 / 2019-09-23
+
+* [Fixed] Fix typo for couchbase.by_node.cluster_membership service check. See [#4565](https://github.com/DataDog/integrations-core/pull/4565).
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
+## 1.10.0 / 2019-09-16
+
+* [Added] Add log documentation in the example configuration file. See [#4537](https://github.com/DataDog/integrations-core/pull/4537).
+
 ## 1.9.1 / 2019-08-30
 
 * [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).

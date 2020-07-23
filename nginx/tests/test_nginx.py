@@ -1,10 +1,10 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 import requests
 
-from .common import HOST, PORT, TAGS, USING_VTS
+from .common import HOST, NGINX_VERSION, PORT, TAGS, USING_VTS
 
 pytestmark = pytest.mark.skipif(USING_VTS, reason='Using VTS')
 
@@ -36,3 +36,23 @@ def test_connect_ssl(check, instance_ssl, aggregator):
         instance_ssl['ssl_validation'] = True
         check_ssl = check(instance_ssl)
         check_ssl.check(instance_ssl)
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_metadata(check, instance, datadog_agent):
+    nginx_check = check(instance)
+    nginx_check.check_id = 'test:123'
+
+    if USING_VTS:
+        # vts currently defaults to using version 1.13
+        version = '1.13'
+    else:
+        version = NGINX_VERSION.split(':')[1]
+
+    major, minor = version.split('.')
+
+    version_metadata = {'version.scheme': 'semver', 'version.major': major, 'version.minor': minor}
+
+    nginx_check.check(instance)
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata) + 2)

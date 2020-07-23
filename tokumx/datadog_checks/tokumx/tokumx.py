@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2014-2017
+# (C) Datadog, Inc. 2014-present
 # (C) Leif Walsh <leif.walsh@gmail.com> 2014
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -8,7 +8,7 @@ import time
 
 from six import PY3, iteritems
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 from datadog_checks.tokumx.vendor import bson
 from datadog_checks.tokumx.vendor.pymongo import MongoClient, ReadPreference, errors, uri_parser
 from datadog_checks.tokumx.vendor.pymongo import version as py_version
@@ -194,20 +194,20 @@ class TokuMX(AgentCheck):
 
     METRICS = GAUGES + RATES
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
-        AgentCheck.__init__(self, name, init_config, agentConfig, instances)
+    def __init__(self, name, init_config, instances=None):
+        AgentCheck.__init__(self, name, init_config, instances)
         self._last_state_by_server = {}
         self.idx_rates = {}
 
     def get_library_versions(self):
         return {"pymongo": py_version}
 
-    def check_last_state(self, state, server, agentConfig):
+    def check_last_state(self, state, server):
         if self._last_state_by_server.get(server, -1) != state:
             self._last_state_by_server[server] = state
-            return self.create_event(state, server, agentConfig)
+            return self.create_event(state, server)
 
-    def create_event(self, state, server, agentConfig):
+    def create_event(self, state, server):
         """Create an event with a message describing the replication
             state of a mongo node"""
 
@@ -297,7 +297,7 @@ class TokuMX(AgentCheck):
 
         do_auth = True
         if username is None or password is None:
-            self.log.debug("TokuMX: cannot extract username and password from config %s" % server)
+            self.log.debug("TokuMX: cannot extract username and password from config %s", server)
             do_auth = False
         try:
             if read_preference:
@@ -370,7 +370,7 @@ class TokuMX(AgentCheck):
                     server, conn, db, _ = self._get_connection(instance, read_preference=ReadPreference.SECONDARY)
 
                 data['state'] = replSet['myState']
-                self.check_last_state(data['state'], server, self.agentConfig)
+                self.check_last_state(data['state'], server)
                 status['replSet'] = data
         except Exception as e:
             if "OperationFailure" in repr(e) and (
@@ -424,7 +424,7 @@ class TokuMX(AgentCheck):
             try:
                 stats = db.command('dbstats')
             except errors.OperationFailure:
-                self.log.warning("Cannot access dbstats on database %s" % dbname)
+                self.log.warning("Cannot access dbstats on database %s", dbname)
                 continue
             for m, v in stats.items():
                 if m in ['db', 'ok']:

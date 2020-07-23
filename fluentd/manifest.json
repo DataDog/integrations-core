@@ -3,7 +3,8 @@
     "/logs/log_collection/fluentd"
   ],
   "categories": [
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "fluentd",
@@ -30,6 +31,9 @@
   "type": "check",
   "integration_id": "fluentd",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json"

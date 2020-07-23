@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -14,3 +14,5 @@ URL = 'http://{}:{}'.format(HOST, PORT)
 CHECK_NAME = 'consul'
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+CONSUL_VERSION = os.getenv('CONSUL_VERSION')

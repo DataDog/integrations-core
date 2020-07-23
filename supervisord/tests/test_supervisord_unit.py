@@ -1,9 +1,10 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from socket import socket
 
+import mock
 import pytest
 from mock import patch
 from six.moves import xmlrpc_client as xmlrpclib
@@ -16,14 +17,16 @@ from .common import TEST_CASES
 pytestmark = pytest.mark.unit
 
 
-def mock_server(url):
-    return MockXmlRcpServer(url)
+def mock_server(url, transport=None):
+    return MockXmlRcpServer(url, transport)
 
 
 def test_check(aggregator, check):
     """Integration test for supervisord check. Using a mocked supervisord."""
 
-    with patch.object(xmlrpclib, 'Server', side_effect=mock_server):
+    with patch.object(xmlrpclib, 'Server', side_effect=mock_server), patch.object(
+        xmlrpclib, 'ServerProxy', side_effect=mock_server
+    ):
         for tc in TEST_CASES:
             for instance in tc['instances']:
                 name = instance['name']
@@ -100,8 +103,8 @@ class MockXmlRcpServer:
      server.
      """
 
-    def __init__(self, url):
-        self.supervisor = MockSupervisor(url)
+    def __init__(self, url, transport):
+        self.supervisor = MockSupervisor(url, transport)
 
 
 class MockSupervisor:
@@ -215,8 +218,9 @@ class MockSupervisor:
         ],
     }
 
-    def __init__(self, url):
+    def __init__(self, url, transport):
         self.url = url
+        self.transport = transport
 
     def getAllProcessInfo(self):
         self._validate_request()
@@ -231,13 +235,70 @@ class MockSupervisor:
 
     def _validate_request(self, proc=None):
         '''Validates request and simulates errors when not valid'''
-        if 'invalid_host' in self.url:
+
+        # Password not part of URL if connecting via socket
+        transport_password = self.transport.password if self.transport else ""
+
+        # `host` is optional connecting via socket
+        transport_socket = self.transport.serverurl if self.transport else ""
+
+        # if 'socket_file' in self.url:
+        if 'invalid_host' in self.url or 'invalid_socket' in transport_socket:
             # Simulate connecting to an invalid host/port in order to
             # raise `socket.error: [Errno 111] Connection refused`
             socket().connect(('localhost', 38837))
-        elif 'invalid_pass' in self.url:
+        elif 'invalid_pass' in self.url or 'invalid_pass' in transport_password:
             # Simulate xmlrpc exception for invalid credentials
             raise xmlrpclib.ProtocolError(self.url[7:], 401, 'Unauthorized', None)
         elif proc is not None and 'invalid' in proc:
             # Simulate xmlrpc exception for process not found
             raise xmlrpclib.Fault(10, 'BAD_NAME')
+
+
+@pytest.mark.parametrize(
+    'raw_version, expected_metadata, expected_count',
+    [
+        ('3.0', {'version.scheme': 'supervisord', 'version.major': '3', 'version.minor': '0', 'version.raw': '3.0'}, 4),
+        (
+            '3.0b2',
+            {
+                'version.scheme': 'supervisord',
+                'version.major': '3',
+                'version.minor': '0',
+                'version.release': 'b2',
+                'version.raw': '3.0b2',
+            },
+            5,
+        ),
+        (
+            '3.0a12',
+            {
+                'version.scheme': 'supervisord',
+                'version.major': '3',
+                'version.minor': '0',
+                'version.release': 'a12',
+                'version.raw': '3.0a12',
+            },
+            5,
+        ),
+        (
+            '4.1.2',
+            {
+                'version.scheme': 'supervisord',
+                'version.major': '4',
+                'version.minor': '1',
+                'version.patch': '2',
+                'version.raw': '4.1.2',
+            },
+            5,
+        ),
+    ],
+)
+def test_version_metadata_pattern(check, datadog_agent, raw_version, expected_metadata, expected_count):
+    check.check_id = 'test:123'
+    supe = mock.MagicMock()
+    supe.getSupervisorVersion.return_value = raw_version
+    check._collect_metadata(supe)
+
+    datadog_agent.assert_metadata('test:123', expected_metadata)
+    datadog_agent.assert_metadata_count(expected_count)

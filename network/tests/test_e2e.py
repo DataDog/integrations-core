@@ -7,5 +7,5 @@ from . import common
 def test_check_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
 
-    for metric in common.EXPECTED_METRICS:
+    for metric in common.E2E_EXPECTED_METRICS:
         aggregator.assert_metric(metric)

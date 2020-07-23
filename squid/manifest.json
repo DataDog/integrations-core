@@ -1,7 +1,9 @@
 {
   "categories": [
     "web",
-    "caching"
+    "caching",
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "Squid",

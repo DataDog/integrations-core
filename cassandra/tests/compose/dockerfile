@@ -1,0 +1,9 @@
+FROM cassandra
+
+EXPOSE 9042
+
+COPY /resources/cassandra-init.sh /cassandra-init.sh
+
+RUN sed -i 's/JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.authenticate=true"/JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.authenticate=false"/g' /etc/cassandra/cassandra-env.sh
+
+RUN sed -i '/password/d' /etc/cassandra/cassandra-env.sh

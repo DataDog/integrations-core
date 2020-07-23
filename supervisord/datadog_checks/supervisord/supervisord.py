@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -39,6 +39,26 @@ FORMAT_TIME = lambda x: time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(x))  #
 SERVER_SERVICE_CHECK = 'supervisord.can_connect'
 PROCESS_SERVICE_CHECK = 'supervisord.process.status'
 
+# Example supervisord versions: http://supervisord.org/changes.html
+#   - 4.0.0
+#   - 3.0
+#   - 3.0b2
+#   - 3.0a12
+SUPERVISORD_VERSION_PATTERN = re.compile(
+    r"""
+    (?P<major>0|[1-9]\d*)
+    \.
+    (?P<minor>0|[1-9]\d*)
+    (\.
+        (?P<patch>0|[1-9]\d*)
+    )?
+    (?:(?P<release>
+        [a-zA-Z][0-9]*
+    ))?
+    """,
+    re.VERBOSE,
+)
+
 
 class SupervisordCheck(AgentCheck):
     def check(self, instance):
@@ -71,7 +91,7 @@ class SupervisordCheck(AgentCheck):
                 )
             else:
                 msg = (
-                    'Cannot connect to {}. Make sure sure supervisor '
+                    'Cannot connect to {}. Make sure supervisor '
                     'is running and socket is enabled and socket file'
                     ' has the right permissions.'.format(sock)
                 )
@@ -95,11 +115,11 @@ class SupervisordCheck(AgentCheck):
         # Filter monitored processes on configuration directives
         proc_regex = instance.get('proc_regex', [])
         if not isinstance(proc_regex, list):
-            raise Exception("Empty or invalid proc_regex.")
+            raise Exception("'proc_regex' should be a list of strings. e.g. %s" % [proc_regex])
 
         proc_names = instance.get('proc_names', [])
         if not isinstance(proc_names, list):
-            raise Exception("Empty or invalid proc_names.")
+            raise Exception("'proc_names' should be a list of strings. e.g. %s" % [proc_names])
 
         # Collect information on each monitored process
         monitored_processes = []
@@ -138,18 +158,20 @@ class SupervisordCheck(AgentCheck):
                 tags=instance_tags + ['status:{}'.format(PROCESS_STATUS[status])],
             )
 
+        self._collect_metadata(supe)
+
     @staticmethod
     def _connect(instance):
         sock = instance.get('socket')
+        user = instance.get('user')
+        password = instance.get('pass')
         if sock is not None:
             host = instance.get('host', DEFAULT_SOCKET_IP)
-            transport = supervisor.xmlrpc.SupervisorTransport(None, None, sock)
+            transport = supervisor.xmlrpc.SupervisorTransport(user, password, sock)
             server = xmlrpclib.ServerProxy(host, transport=transport)
         else:
             host = instance.get('host', DEFAULT_HOST)
             port = instance.get('port', DEFAULT_PORT)
-            user = instance.get('user')
-            password = instance.get('pass')
             auth = '{}:{}@'.format(user, password) if user and password else ''
             server = xmlrpclib.Server('http://{}{}:{}/RPC2'.format(auth, host, port))
         return server.supervisor
@@ -182,3 +204,13 @@ Stop time: %(stop_str)s
 Exit Status: %(exitstatus)s"""
             % proc
         )
+
+    def _collect_metadata(self, supe):
+        try:
+            version = supe.getSupervisorVersion()
+        except Exception as e:
+            self.log.warning("Error collecting version: %s", e)
+            return
+
+        self.log.debug('Version collected: %s', version)
+        self.set_metadata('version', version, scheme='regex', pattern=SUPERVISORD_VERSION_PATTERN)

@@ -1,9 +1,8 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
 from bs4 import BeautifulSoup
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
+from requests.exceptions import ConnectionError, HTTPError, InvalidURL, RequestException, Timeout
 from simplejson import JSONDecodeError
 from six import iteritems
 from six.moves.urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
@@ -17,6 +16,7 @@ DEPRECATED_MASTER_ADDRESS = 'resourcemanager_uri'
 # Switch that determines the mode Spark is running in. Can be either
 # 'yarn' or 'standalone'
 SPARK_CLUSTER_MODE = 'spark_cluster_mode'
+SPARK_DRIVER_MODE = 'spark_driver_mode'
 SPARK_YARN_MODE = 'spark_yarn_mode'
 SPARK_STANDALONE_MODE = 'spark_standalone_mode'
 SPARK_MESOS_MODE = 'spark_mesos_mode'
@@ -26,6 +26,7 @@ SPARK_PRE_20_MODE = 'spark_pre_20_mode'
 
 # Service Checks
 SPARK_STANDALONE_SERVICE_CHECK = 'spark.standalone_master.can_connect'
+SPARK_DRIVER_SERVICE_CHECK = 'spark.driver.can_connect'
 YARN_SERVICE_CHECK = 'spark.resource_manager.can_connect'
 SPARK_SERVICE_CHECK = 'spark.application_master.can_connect'
 MESOS_SERVICE_CHECK = 'spark.mesos_master.can_connect'
@@ -33,6 +34,7 @@ MESOS_SERVICE_CHECK = 'spark.mesos_master.can_connect'
 # URL Paths
 YARN_APPS_PATH = 'ws/v1/cluster/apps'
 SPARK_APPS_PATH = 'api/v1/applications'
+SPARK_VERSION_PATH = 'api/v1/version'
 SPARK_MASTER_STATE_PATH = '/json/'
 SPARK_MASTER_APP_PATH = '/app/'
 MESOS_MASTER_APP_PATH = '/frameworks'
@@ -148,6 +150,14 @@ class SparkCheck(AgentCheck):
         'ssl_key': {'name': 'tls_private_key'},
     }
 
+    def __init__(self, name, init_config, instances):
+        super(SparkCheck, self).__init__(name, init_config, instances)
+
+        # Spark proxy may display an html warning page, which redirects to the same url with the additional
+        # `proxyapproved=true` GET param.
+        # The page also sets a cookie that needs to be stored (no need to set persist_connections in the config)
+        self.proxy_redirect_cookies = None
+
     def check(self, instance):
         # Get additional tags from the conf file
         tags = instance.get('tags', [])
@@ -181,7 +191,7 @@ class SparkCheck(AgentCheck):
 
         # Report success after gathering all metrics from the ApplicationMaster
         if spark_apps:
-            app_id, (app_name, tracking_url) = next(iteritems(spark_apps))
+            _, (_, tracking_url) = next(iteritems(spark_apps))
             base_url = self._get_request_url(instance, tracking_url)
             am_address = self._get_url_base(base_url)
 
@@ -203,8 +213,7 @@ class SparkCheck(AgentCheck):
 
             if master_address:
                 self.log.warning(
-                    'The use of `%s` is deprecated. Please use `%s` instead.'
-                    % (DEPRECATED_MASTER_ADDRESS, MASTER_ADDRESS)
+                    'The use of `%s` is deprecated. Please use `%s` instead.', DEPRECATED_MASTER_ADDRESS, MASTER_ADDRESS
                 )
             else:
                 raise Exception('URL for `%s` must be specified in the instance configuration' % MASTER_ADDRESS)
@@ -243,8 +252,8 @@ class SparkCheck(AgentCheck):
         cluster_mode = instance.get(SPARK_CLUSTER_MODE)
         if cluster_mode is None:
             self.log.warning(
-                'The value for `spark_cluster_mode` was not set in the configuration. '
-                'Defaulting to "%s"' % SPARK_YARN_MODE
+                'The value for `spark_cluster_mode` was not set in the configuration. Defaulting to "%s"',
+                SPARK_YARN_MODE,
             )
             cluster_mode = SPARK_YARN_MODE
 
@@ -261,8 +270,46 @@ class SparkCheck(AgentCheck):
             running_apps = self._yarn_init(master_address, tags)
             return self._get_spark_app_ids(running_apps, tags)
 
+        elif cluster_mode == SPARK_DRIVER_MODE:
+            return self._driver_init(master_address, tags)
+
         else:
             raise Exception('Invalid setting for %s. Received %s.' % (SPARK_CLUSTER_MODE, cluster_mode))
+
+    def _collect_version(self, base_url, tags):
+        try:
+            version_json = self._rest_request_to_json(base_url, SPARK_VERSION_PATH, SPARK_SERVICE_CHECK, tags)
+            version = version_json['spark']
+        except Exception as e:
+            self.log.debug("Failed to collect version information: %s", e)
+            return False
+        else:
+            self.set_metadata('version', version)
+            return True
+
+    def _driver_init(self, spark_driver_address, tags):
+        """
+        Return a dictionary of {app_id: (app_name, tracking_url)} for the running Spark applications
+        """
+        self._collect_version(spark_driver_address, tags)
+        running_apps = {}
+        metrics_json = self._rest_request_to_json(
+            spark_driver_address, SPARK_APPS_PATH, SPARK_DRIVER_SERVICE_CHECK, tags
+        )
+
+        for app_json in metrics_json:
+            app_id = app_json.get('id')
+            app_name = app_json.get('name')
+            running_apps[app_id] = (app_name, spark_driver_address)
+
+        self.service_check(
+            SPARK_DRIVER_SERVICE_CHECK,
+            AgentCheck.OK,
+            tags=['url:%s' % spark_driver_address] + tags,
+            message='Connection to Spark driver "%s" was successful' % spark_driver_address,
+        )
+        self.log.info("Returning running apps %s", running_apps)
+        return running_apps
 
     def _standalone_init(self, spark_master_address, pre_20_mode, tags):
         """
@@ -273,6 +320,7 @@ class SparkCheck(AgentCheck):
         )
 
         running_apps = {}
+        version_set = False
 
         if metrics_json.get('activeapps'):
             for app in metrics_json['activeapps']:
@@ -284,6 +332,8 @@ class SparkCheck(AgentCheck):
                     app_url = self._get_standalone_app_url(app_id, spark_master_address, tags)
 
                     if app_id and app_name and app_url:
+                        if not version_set:
+                            version_set = self._collect_version(app_url, tags)
                         if pre_20_mode:
                             self.log.debug('Getting application list in pre-20 mode')
                             applist = self._rest_request_to_json(
@@ -307,7 +357,7 @@ class SparkCheck(AgentCheck):
             tags=['url:%s' % spark_master_address] + tags,
             message='Connection to Spark master "%s" was successful' % spark_master_address,
         )
-        self.log.info("Returning running apps %s" % running_apps)
+        self.log.info("Returning running apps %s", running_apps)
         return running_apps
 
     def _mesos_init(self, instance, master_address, tags):
@@ -415,8 +465,15 @@ class SparkCheck(AgentCheck):
         Return a dictionary of {app_id: (app_name, tracking_url)} for Spark applications
         """
         spark_apps = {}
+        version_set = False
         for app_id, (app_name, tracking_url) in iteritems(running_apps):
-            response = self._rest_request_to_json(tracking_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, tags)
+            try:
+                if not version_set:
+                    version_set = self._collect_version(tracking_url, tags)
+                response = self._rest_request_to_json(tracking_url, SPARK_APPS_PATH, SPARK_SERVICE_CHECK, tags)
+            except RequestException as e:
+                self.log.warning("Exception happened when fetching app ids for %s: %s", tracking_url, e)
+                continue
 
             for app in response:
                 app_id = app.get('id')
@@ -562,7 +619,7 @@ class SparkCheck(AgentCheck):
         elif metric_type == MONOTONIC_COUNT:
             self.monotonic_count(metric_name, value, tags=tags)
         else:
-            self.log.error('Metric type "{}" unknown'.format(metric_type))
+            self.log.error('Metric type "%s" unknown', metric_type)
 
     def _rest_request(self, url, object_path, service_name, tags, *args, **kwargs):
         """
@@ -578,16 +635,30 @@ class SparkCheck(AgentCheck):
             for directory in args:
                 url = self._join_url_dir(url, directory)
 
+        # Add proxyapproved=True if we already have the proxy cookie
+        if self.proxy_redirect_cookies:
+            kwargs["proxyapproved"] = 'true'
+
         # Add kwargs as arguments
         if kwargs:
             query = '&'.join(['{0}={1}'.format(key, value) for key, value in iteritems(kwargs)])
             url = urljoin(url, '?' + query)
 
         try:
-            self.log.debug('Spark check URL: %s' % url)
-            response = self.http.get(url)
-
+            self.log.debug('Spark check URL: %s', url)
+            response = self.http.get(url, cookies=self.proxy_redirect_cookies)
             response.raise_for_status()
+            content = response.text
+            proxy_redirect_url = self._parse_proxy_redirect_url(content)
+            if proxy_redirect_url:
+                self.proxy_redirect_cookies = response.cookies
+                # When using a proxy and the remote user is different that the current user
+                # spark will display an html warning page.
+                # This page displays a redirect link (which appends `proxyapproved=true`) and also
+                # sets a cookie to the current http session. Let's follow the link.
+                # https://github.com/apache/hadoop/blob/2064ca015d1584263aac0cc20c60b925a3aff612/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-web-proxy/src/main/java/org/apache/hadoop/yarn/server/webproxy/WebAppProxyServlet.java#L368
+                response = self.http.get(proxy_redirect_url, cookies=self.proxy_redirect_cookies)
+                response.raise_for_status()
 
         except Timeout as e:
             self.service_check(
@@ -652,3 +723,20 @@ class SparkCheck(AgentCheck):
         """
         s = urlsplit(url)
         return urlunsplit([s.scheme, s.netloc, '', '', ''])
+
+    @staticmethod
+    def _parse_proxy_redirect_url(html_content):
+        """When the spark proxy returns a warning page with a redirect link, this link has to be parsed
+        from the html content."""
+        if not html_content[:6] == "<html>":  # Prevent html parsing of non-html content.
+            return None
+
+        soup = BeautifulSoup(html_content, 'html.parser')
+        redirect_link = None
+        for link in soup.findAll('a'):
+            href = link.get('href')
+            if 'proxyapproved' in href:
+                redirect_link = href
+                break
+
+        return redirect_link

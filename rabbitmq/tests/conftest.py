@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -25,8 +25,8 @@ def dd_environment():
 
     env = {}
 
-    if not os.environ.get('RABBITMQ_VERSION'):
-        env['RABBITMQ_VERSION'] = '3.6.0'
+    if 'RABBITMQ_VERSION' not in os.environ:
+        pytest.exit('RABBITMQ_VERSION not available')
 
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yaml')
 
@@ -110,6 +110,7 @@ def setup_more(rabbitmq_admin_script):
             'exchange={}'.format(name),
             'routing_key={}'.format(name),
             'payload="hello, world"',
+            'properties={"timestamp": 1500000}',
         ]
         subprocess.check_call(cmd)
 
@@ -122,6 +123,7 @@ def setup_more(rabbitmq_admin_script):
             'exchange={}'.format(name),
             'routing_key=bad_key',
             'payload="unroutable"',
+            'properties={"timestamp": 1500000}',
         ]
         subprocess.check_call(cmd)
 
@@ -151,6 +153,7 @@ def setup_more_with_vhosts(rabbitmq_admin_script):
                 'exchange=amq.default',
                 'routing_key={}'.format(name),
                 'payload="hello, world"',
+                'properties={"timestamp": 1500000}',
             ]
             subprocess.check_call(cmd)
 
@@ -158,3 +161,8 @@ def setup_more_with_vhosts(rabbitmq_admin_script):
 @pytest.fixture
 def check():
     return RabbitMQ(CHECK_NAME, {}, [CONFIG])
+
+
+@pytest.fixture
+def instance():
+    return CONFIG

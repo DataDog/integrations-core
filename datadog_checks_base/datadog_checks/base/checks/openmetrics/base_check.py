@@ -1,17 +1,41 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from six import PY2
+
 from ...errors import CheckException
 from .. import AgentCheck
 from .mixins import OpenMetricsScraperMixin
 
+STANDARD_FIELDS = [
+    'prometheus_url',
+    'namespace',
+    'metrics',
+    'prometheus_metrics_prefix',
+    'health_service_check',
+    'label_to_hostname',
+    'label_joins',
+    'labels_mapper',
+    'type_overrides',
+    'send_histograms_buckets',
+    'send_distribution_buckets',
+    'send_monotonic_counter',
+    'send_monotonic_with_gauge',
+    'send_distribution_counts_as_monotonic',
+    'send_distribution_sums_as_monotonic',
+    'exclude_labels',
+    'bearer_token_auth',
+    'bearer_token_path',
+    'ignore_metrics',
+]
+
 
 class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
     """
-    OpenMetricsBaseCheck is a class that helps instantiating PrometheusCheck only
-    with YAML configurations. As each check has it own states it maintains a map
-    of all checks so that the one corresponding to the instance is executed.
-    Minimal example configuration::
+    OpenMetricsBaseCheck is a class that helps scrape endpoints that emit Prometheus metrics only
+    with YAML configurations.
+
+    Minimal example configuration:
 
         instances:
         - prometheus_url: http://example.com/endpoint
@@ -19,11 +43,27 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
             metrics:
             - bar
             - foo
+
+    Agent 6 signature:
+
+        OpenMetricsBaseCheck(name, init_config, instances, default_instances=None, default_namespace=None)
+
     """
 
     DEFAULT_METRIC_LIMIT = 2000
 
+    HTTP_CONFIG_REMAPPER = {
+        'ssl_verify': {'name': 'tls_verify'},
+        'ssl_cert': {'name': 'tls_cert'},
+        'ssl_private_key': {'name': 'tls_private_key'},
+        'ssl_ca_cert': {'name': 'tls_ca_cert'},
+        'prometheus_timeout': {'name': 'timeout'},
+    }
+
     def __init__(self, *args, **kwargs):
+        """
+        The base class for any Prometheus-based integration.
+        """
         args = list(args)
         default_instances = kwargs.pop('default_instances', None) or {}
         default_namespace = kwargs.pop('default_namespace', None)
@@ -38,16 +78,22 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
 
         super(OpenMetricsBaseCheck, self).__init__(*args, **kwargs)
         self.config_map = {}
+        self._http_handlers = {}
         self.default_instances = default_instances
         self.default_namespace = default_namespace
 
         # pre-generate the scraper configurations
+
         if 'instances' in kwargs:
             instances = kwargs['instances']
         elif len(args) == 4:
+            # instances from agent 5 signature
             instances = args[3]
-        else:
+        elif isinstance(args[2], (tuple, list)):
+            # instances from agent 6 signature
             instances = args[2]
+        else:
+            instances = None
 
         if instances is not None:
             for instance in instances:
@@ -66,6 +112,10 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         self.process(scraper_config)
 
     def get_scraper_config(self, instance):
+        """
+        Validates the instance configuration and creates a scraper configuration for a new instance.
+        If the endpoint already has a corresponding configuration, return the cached configuration.
+        """
         endpoint = instance.get('prometheus_url')
 
         if endpoint is None:
@@ -95,3 +145,13 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
         Used to filter metrics at the begining of the processing, by default no metric is filtered
         """
         return False
+
+
+# For documentation generation
+# TODO: use an enum and remove STANDARD_FIELDS when mkdocstrings supports it
+class StandardFields(object):
+    pass
+
+
+if not PY2:
+    StandardFields.__doc__ = '\n'.join('- `{}`'.format(field) for field in STANDARD_FIELDS)

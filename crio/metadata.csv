@@ -1,5 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name
-crio.operations.count,counter,,,,Counter of CRI-O operations ,0,cri-o,ops count
+crio.operations.count,count,,,,Counter of CRI-O operations ,0,cri-o,ops count
 crio.operations.latency.sum,gauge,,microsecond,,Sum of CRI-O operations latency,0,cri-o,ops time sum
 crio.operations.latency.count,gauge,,,,Count of CRI-O operations latency,0,cri-o,ops time count
 crio.operations.latency.quantile,gauge,,,,Quantiles of CRI-O operations latency,0,cri-o,ops time quantile

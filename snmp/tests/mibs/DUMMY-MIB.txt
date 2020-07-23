@@ -6,6 +6,9 @@ DUMMY-MIB DEFINITIONS ::= BEGIN
 
     dummy OBJECT IDENTIFIER ::= { enterprises 123456789 }
 
+    CounterBasedGauge64 ::= OCTET STRING
+    ZeroBasedCounter64 ::= OCTET STRING
+
     scalar OBJECT-TYPE
         SYNTAX INTEGER (1..65535)
         ACCESS read-only
@@ -13,5 +16,19 @@ DUMMY-MIB DEFINITIONS ::= BEGIN
         DESCRIPTION
             "dummy scalar"
         ::= { dummy 1 }
+
+    dummyCounterGauge OBJECT-TYPE
+        SYNTAX CounterBasedGauge64
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION "Dummy OID of type CounterBasedGauge64."
+        ::= { dummy 2 }
+
+    dummyZeroCounter OBJECT-TYPE
+        SYNTAX ZeroBasedCounter64
+        ACCESS read-only
+        STATUS mandatory
+        DESCRIPTION "Dummy OID of type ZeroBasedCounter64."
+        ::= { dummy 3 }
 
 END

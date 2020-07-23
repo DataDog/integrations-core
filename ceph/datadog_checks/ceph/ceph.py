@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
@@ -9,9 +9,9 @@ import re
 import simplejson as json
 from six import iteritems
 
-from datadog_checks.checks import AgentCheck
-from datadog_checks.config import _is_affirmative
-from datadog_checks.utils.subprocess_output import get_subprocess_output
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.config import _is_affirmative
+from datadog_checks.base.utils.subprocess_output import get_subprocess_output
 
 
 class Ceph(AgentCheck):
@@ -61,7 +61,7 @@ class Ceph(AgentCheck):
                 output, _, _ = get_subprocess_output(args.split(), self.log)
                 res = json.loads(output)
             except Exception as e:
-                self.log.warning('Unable to parse data from cmd=%s: %s' % (cmd, str(e)))
+                self.log.warning('Unable to parse data from cmd=%s: %s', cmd, e)
                 continue
 
             name = cmd.replace(' ', '_')
@@ -88,12 +88,14 @@ class Ceph(AgentCheck):
 
     def _extract_metrics(self, raw, tags):
         try:
-            for osdperf in raw['osd_perf']['osd_perf_infos']:
+            raw_osd_perf = raw.get('osd_perf', {}).get('osdstats', raw.get('osd_perf'))
+
+            for osdperf in raw_osd_perf['osd_perf_infos']:
                 local_tags = tags + ['ceph_osd:osd%s' % osdperf['id']]
                 self._publish(osdperf, self.gauge, ['perf_stats', 'apply_latency_ms'], local_tags)
                 self._publish(osdperf, self.gauge, ['perf_stats', 'commit_latency_ms'], local_tags)
-        except KeyError:
-            self.log.debug('Error retrieving osdperf metrics')
+        except (KeyError, TypeError):
+            self.log.debug('Error retrieving osdperf metrics. Received {}', raw.get('osd_perf', {}))
 
         try:
             health = {'num_near_full_osds': 0, 'num_full_osds': 0}

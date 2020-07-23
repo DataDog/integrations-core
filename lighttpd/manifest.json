@@ -1,6 +1,7 @@
 {
   "categories": [
-    "web"
+    "web",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "Lighttpd",
@@ -25,6 +26,9 @@
   "type": "check",
   "integration_id": "lighttpd",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json"

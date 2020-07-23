@@ -10,7 +10,7 @@ instances:
     ## that is backed by more than one pod could lead to inaccurate metrics
     ## because of to the load balancing. In this case, it is recommended to
     ## enable endpoint checks alongside the service check and use autodiscovery
-    ## to get pod IP by setting up `prometheus_url` to https://%%host%%/metrics
+    ## to get pod IP by setting up `prometheus_url` to https://%%host%%:443/metrics
     #
   - prometheus_url: https://localhost:443/metrics
 

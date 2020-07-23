@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import abc
@@ -45,7 +45,7 @@ class EnvVars(dict):
 class TempDir(object):
     all_names = set()
 
-    def __init__(self, name='default'):
+    def __init__(self, name='default', base_directory=None):
         key = None
         directory = None
 
@@ -64,12 +64,12 @@ class TempDir(object):
             if key in env_vars:
                 directory = env_vars[key]
             else:
-                directory = mkdtemp()
+                directory = mkdtemp(dir=base_directory)
                 set_env_vars({key: directory})
 
         self.name = name
         self.key = key
-        self.directory = os.path.realpath(directory or mkdtemp())
+        self.directory = os.path.realpath(directory or mkdtemp(dir=base_directory))
 
     @classmethod
     def _cleanup(cls, directory):

@@ -1,5 +1,30 @@
 # CHANGELOG - mapreduce
 
+## 1.11.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
+## 1.10.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.9.0 / 2020-04-04
+
+* [Added] Version metadata. See [#5448](https://github.com/DataDog/integrations-core/pull/5448).
+
+## 1.8.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 1.7.0 / 2019-12-02
+
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
+## 1.6.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 1.5.0 / 2019-07-12
 
 * [Added] Use the new RequestsWrapper for connecting to services. See [#4094](https://github.com/DataDog/integrations-core/pull/4094).

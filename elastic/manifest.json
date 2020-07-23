@@ -4,7 +4,8 @@
   ],
   "categories": [
     "data store",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": true,
   "display_name": "Elasticsearch",
@@ -29,6 +30,9 @@
   "type": "check",
   "integration_id": "elasticsearch",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json"

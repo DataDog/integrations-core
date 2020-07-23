@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -35,7 +35,7 @@ def mock_metrics():
 
 
 def test_check_metrics(aggregator, mock_metrics):
-    c = KubeMetricsServerCheck(CHECK_NAME, None, {}, [instance])
+    c = KubeMetricsServerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
     def assert_metric(name, **kwargs):

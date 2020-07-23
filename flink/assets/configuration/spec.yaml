@@ -1,0 +1,10 @@
+name: flink
+files:
+- name: flink.yaml
+  options:
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/flink.log
+      source: flink
+      service: <SERVICE>

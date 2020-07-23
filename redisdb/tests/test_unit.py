@@ -1,16 +1,13 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
-import pytest
 from six import iteritems
-
-pytestmark = pytest.mark.unit
 
 
 def test_init(check):
     assert check.connections == {}
-    assert len(check.last_timestamp_seen) == 0
+    assert check.last_timestamp_seen == 0
 
 
 def test__get_conn(check):

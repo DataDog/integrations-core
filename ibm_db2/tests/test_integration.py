@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
@@ -6,6 +6,9 @@ import pytest
 from datadog_checks.ibm_db2 import IbmDb2Check
 
 from . import metrics
+from .common import DB2_VERSION
+
+CHECK_ID = 'test:123'
 
 pytestmark = pytest.mark.integration
 
@@ -102,3 +105,22 @@ def test_custom_queries_init_config(aggregator, instance):
             metric_type=3,
             tags=['db:datadog', 'foo:bar', 'test:ibm_db2', 'tablespace:{}'.format(table_space)],
         )
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_metadata(instance, datadog_agent):
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    check.check_id = CHECK_ID
+
+    check.check(instance)
+
+    # only major and minor are consistent values
+    major, minor = DB2_VERSION.split('.')
+
+    version_metadata = {
+        'version.scheme': 'ibm_db2',
+        'version.major': major,
+        'version.minor': minor,
+    }
+
+    datadog_agent.assert_metadata(CHECK_ID, version_metadata)

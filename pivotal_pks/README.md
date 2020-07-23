@@ -14,7 +14,7 @@ Monitoring PKS requires that you set up the Datadog integration for [Kubernetes]
 
 ### Log collection
 
-**Available for Agent >6.0**
+_Available for Agent versions >6.0_
 
 The setup is exactly the same as for Kubernetes.
 To start collecting logs from all your containers, use your Datadog Agent [environment variables][3].
@@ -27,10 +27,9 @@ Follow the [container log collection steps][5] to learn more about those environ
 
 Need help? Contact [Datadog support][6].
 
-
 [1]: https://pivotal.io/platform/pivotal-container-service
-[2]: https://docs.datadoghq.com/integrations/kubernetes
+[2]: https://docs.datadoghq.com/integrations/kubernetes/
 [3]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#log-collection-setup
 [4]: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#container-installation
 [5]: https://docs.datadoghq.com/logs/log_collection/docker/#option-2-container-installation
-[6]: https://docs.datadoghq.com/help
+[6]: https://docs.datadoghq.com/help/

@@ -1,7 +1,8 @@
 {
   "categories": [
     "web",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "Tomcat",
@@ -26,6 +27,9 @@
   "type": "check",
   "integration_id": "tomcat",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json"

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
@@ -13,7 +13,7 @@ import pytest
 
 from datadog_checks.dev import docker_run, temp_dir
 
-from .common import COMPOSE, INSTANCE, PROC_NAME
+from .common import COMPOSE, GUNICORN_VERSION, INSTANCE, PROC_NAME
 
 log = logging.getLogger('test_gunicorn')
 
@@ -21,6 +21,7 @@ log = logging.getLogger('test_gunicorn')
 @pytest.fixture(scope='session')
 def dd_environment():
     os.environ['PROC_NAME'] = PROC_NAME
+    os.environ['GUNICORN_VERSION'] = GUNICORN_VERSION
     compose_file = os.path.join(COMPOSE, 'docker-compose.yaml')
     with docker_run(compose_file, log_patterns=['Booting worker with pid'], build=True):
         yield INSTANCE
@@ -40,7 +41,9 @@ def setup_gunicorn(request):
         conf_file = os.path.join(tmpdir, 'conf.py')
         copy_config_files(conf_file, app_dir)
 
-        proc = start_gunicorn(venv_bin_path, conf_file)
+        gunicorn_bin_path = os.path.join(venv_bin_path, 'gunicorn')
+
+        proc = start_gunicorn(gunicorn_bin_path, conf_file)
 
         def fin():
             proc.terminate()
@@ -49,7 +52,7 @@ def setup_gunicorn(request):
 
         time.sleep(15)
 
-        yield
+        yield {'gunicorn_bin_path': gunicorn_bin_path}
 
 
 def create_dirs(tmpdir):
@@ -71,12 +74,10 @@ def get_venv_bin_path(venv_dir):
 
 
 def install_pip_packages(venv_bin_path):
-    gunicorn_version = os.environ.get('GUNICORN_VERSION')
-
     venv_pip_path = os.path.join(venv_bin_path, 'pip')
 
-    if gunicorn_version:
-        gunicorn_install = 'gunicorn=={}'.format(gunicorn_version)
+    if GUNICORN_VERSION:
+        gunicorn_install = 'gunicorn=={}'.format(GUNICORN_VERSION)
     else:
         gunicorn_install = 'gunicorn'
 
@@ -95,8 +96,7 @@ def copy_config_files(conf_file, app_dir):
     shutil.copyfile(os.path.join(COMPOSE, 'app.py'), app_file)
 
 
-def start_gunicorn(venv_bin_path, conf_file):
-    gunicorn_file_path = os.path.join(venv_bin_path, 'gunicorn')
-    args = [gunicorn_file_path, '--config={}'.format(conf_file), '--name={}'.format(PROC_NAME), 'app:app']
+def start_gunicorn(gunicorn_bin_path, conf_file):
+    args = [gunicorn_bin_path, '--config={}'.format(conf_file), '--name={}'.format(PROC_NAME), 'app:app']
 
     return subprocess.Popen(args)

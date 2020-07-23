@@ -1,5 +1,26 @@
 # CHANGELOG - ceph
 
+## 2.1.1 / 2020-06-29
+
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+
+## 2.1.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Add ceph config spec. See [#6563](https://github.com/DataDog/integrations-core/pull/6563).
+* [Fixed] Capture type errors as well as key errors for osd perf metrics. See [#6381](https://github.com/DataDog/integrations-core/pull/6381).
+
+## 2.0.0 / 2020-04-04
+
+* [Fixed] Fix response handling. See [#6152](https://github.com/DataDog/integrations-core/pull/6152).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+* [Changed] Account for "osdstats" key in newer versions. See [#5855](https://github.com/DataDog/integrations-core/pull/5855).
+
+## 1.8.0 / 2019-10-11
+
+* [Added] Adhere to logging call convention. See [#4738](https://github.com/DataDog/integrations-core/pull/4738).
+
 ## 1.7.0 / 2019-08-24
 
 * [Added] Remove unused version command. See [#4249](https://github.com/DataDog/integrations-core/pull/4249).

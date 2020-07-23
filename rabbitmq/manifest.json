@@ -1,7 +1,8 @@
 {
   "categories": [
     "processing",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "creates_events": true,
   "display_name": "RabbitMQ",
@@ -28,6 +29,10 @@
   "assets": {
     "monitors": {},
     "dashboards": {},
+    "saved_views": {
+      "pid_overview": "assets/saved_views/status_overview.json",
+      "rabbitmq_pattern": "assets/saved_views/rabbitmq_pattern.json"
+    },
     "service_checks": "assets/service_checks.json"
   }
 }

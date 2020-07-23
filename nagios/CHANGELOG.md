@@ -1,5 +1,18 @@
 # CHANGELOG - nagios
 
+## 1.6.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.5.1 / 2019-11-07
+
+* [Fixed] Fix use of format in logging. See [#4973](https://github.com/DataDog/integrations-core/pull/4973).
+
+## 1.5.0 / 2019-11-06
+
+* [Fixed] Refactor tailers logic. See [#4942](https://github.com/DataDog/integrations-core/pull/4942).
+* [Added] Support centreon additional field in event logs. See [#4941](https://github.com/DataDog/integrations-core/pull/4941).
+
 ## 1.4.1 / 2019-07-04
 
 * [Fixed] Fix event payload so the check name is parsed correctly. See [#3979](https://github.com/DataDog/integrations-core/pull/3979).

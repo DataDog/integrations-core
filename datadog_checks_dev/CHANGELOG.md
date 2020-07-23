@@ -1,5 +1,361 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.15.0 / 2020-07-22
+
+* [Added] Add validation script for codeowners. See [#6071](https://github.com/DataDog/integrations-core/pull/6071).
+* [Added] Allow "noqa" for long spec descriptions. See [#7177](https://github.com/DataDog/integrations-core/pull/7177).
+* [Added] Support "*" wildcard in type_overrides configuration. See [#7071](https://github.com/DataDog/integrations-core/pull/7071).
+* [Added] Skip PRs tagged with skip-qa. See [#7147](https://github.com/DataDog/integrations-core/pull/7147).
+* [Added] Report process signatures status. See [#7148](https://github.com/DataDog/integrations-core/pull/7148).
+* [Fixed] DOCS-838 Template wording. See [#7038](https://github.com/DataDog/integrations-core/pull/7038).
+
+## 3.14.2 / 2020-07-14
+
+* [Fixed] Allow ddev release to commit directly to master for extras integrations. See [#7127](https://github.com/DataDog/integrations-core/pull/7127).
+
+## 3.14.1 / 2020-07-14
+
+* [Fixed] Fix ddev release extras. See [#7124](https://github.com/DataDog/integrations-core/pull/7124).
+
+## 3.14.0 / 2020-07-14
+
+* [Added] Add ddev release-stats tool for agent's release. See [#6850](https://github.com/DataDog/integrations-core/pull/6850).
+* [Added] Add shell subcommand to ddev env. See [#7067](https://github.com/DataDog/integrations-core/pull/7067).
+* [Added] Add `Inbox` column to `ddev release trello status` output. See [#7033](https://github.com/DataDog/integrations-core/pull/7033).
+* [Fixed] Fix ddev release tag dryrun. See [#7121](https://github.com/DataDog/integrations-core/pull/7121).
+* [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
+* [Fixed] Remove validation on formatting of public title. See [#7107](https://github.com/DataDog/integrations-core/pull/7107).
+* [Fixed] Add empty example dashboards and images to ddev create templates. See [#7039](https://github.com/DataDog/integrations-core/pull/7039).
+* [Fixed] Add new_gc_metrics to all jmx integrations. See [#7073](https://github.com/DataDog/integrations-core/pull/7073).
+* [Fixed] Update docstring to use trello subcommand . See [#7009](https://github.com/DataDog/integrations-core/pull/7009).
+* [Fixed] Add assert_metrics_using_metadata to template. See [#7081](https://github.com/DataDog/integrations-core/pull/7081).
+* [Fixed] Remove deprecated isort recursive option. See [#7060](https://github.com/DataDog/integrations-core/pull/7060).
+* [Fixed] Clean before building wheel. See [#7052](https://github.com/DataDog/integrations-core/pull/7052).
+* [Fixed] Sync example config with JMX template. See [#7014](https://github.com/DataDog/integrations-core/pull/7014).
+* [Fixed] Run manifest validations again. See [#7015](https://github.com/DataDog/integrations-core/pull/7015).
+
+## 3.13.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Added] Add tools and libraries team to trello. See [#6968](https://github.com/DataDog/integrations-core/pull/6968).
+* [Fixed] Assert new jvm metrics. See [#6996](https://github.com/DataDog/integrations-core/pull/6996).
+* [Fixed] Fix elastic and redis dashboards name. See [#6962](https://github.com/DataDog/integrations-core/pull/6962).
+* [Fixed] More accurately determine if an integration has a dashboard. See [#6946](https://github.com/DataDog/integrations-core/pull/6946).
+
+## 3.12.0 / 2020-06-23
+
+* [Added] Add `--dirty` option to speed up docs dev reloads. See [#6939](https://github.com/DataDog/integrations-core/pull/6939).
+* [Fixed] Expand user paths correctly for legacy E2E config. See [#6940](https://github.com/DataDog/integrations-core/pull/6940).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+
+## 3.11.0 / 2020-06-11
+
+* [Added] Add automated signing workflow for non-core integrations. See [#6868](https://github.com/DataDog/integrations-core/pull/6868).
+* [Added] Allow ddev release command to work for different organizations. See [#6855](https://github.com/DataDog/integrations-core/pull/6855).
+* [Added] Add extra validation to manifest files for fields that cannot change. See [#6848](https://github.com/DataDog/integrations-core/pull/6848).
+* [Added] Validate that dashboards have required fields. See [#6833](https://github.com/DataDog/integrations-core/pull/6833).
+* [Fixed] Provide helpful error message when releasing a project with missing or improper tags. See [#6861](https://github.com/DataDog/integrations-core/pull/6861).
+* [Fixed] Adjust jmxfetch config. See [#6864](https://github.com/DataDog/integrations-core/pull/6864).
+* [Fixed] Remove unused dashboard fields in export. See [#6787](https://github.com/DataDog/integrations-core/pull/6787).
+
+## 3.10.0 / 2020-06-08
+
+* [Added] Add option to open DogStatsD port on agent. See [#6777](https://github.com/DataDog/integrations-core/pull/6777).
+* [Added] Support releasing non-core checks. See [#6805](https://github.com/DataDog/integrations-core/pull/6805).
+* [Fixed] Don't error when setting an invalid repo in config. See [#6786](https://github.com/DataDog/integrations-core/pull/6786).
+* [Fixed] Fix `ensure_default_envdir` tox plugin flag. See [#6817](https://github.com/DataDog/integrations-core/pull/6817).
+
+## 3.9.1 / 2020-06-03
+
+* [Fixed] Fix new Check template. See [#6811](https://github.com/DataDog/integrations-core/pull/6811).
+
+## 3.9.0 / 2020-06-03
+
+* [Added] Speed up test suites by using a single virtual environment per Python version. See [#6789](https://github.com/DataDog/integrations-core/pull/6789).
+* [Added] Add validation for saved views. See [#6783](https://github.com/DataDog/integrations-core/pull/6783).
+
+## 3.8.0 / 2020-06-01
+
+* [Added] Update CLI dependencies. See [#6784](https://github.com/DataDog/integrations-core/pull/6784).
+* [Added] Update default E2E Agent configuration. See [#6771](https://github.com/DataDog/integrations-core/pull/6771).
+* [Added] Condense output of Trello release status command. See [#6755](https://github.com/DataDog/integrations-core/pull/6755).
+* [Added] Add Codecov config validation. See [#6749](https://github.com/DataDog/integrations-core/pull/6749).
+* [Added] Add ability to generate docs site as a PDF. See [#6719](https://github.com/DataDog/integrations-core/pull/6719).
+* [Added] Remove instance argument from new Check template. See [#6673](https://github.com/DataDog/integrations-core/pull/6673).
+* [Added] Add author and labels to Trello release cards. See [#6694](https://github.com/DataDog/integrations-core/pull/6694).
+* [Added] Better error output when CheckCommandOutput fails. See [#6674](https://github.com/DataDog/integrations-core/pull/6674).
+* [Fixed] Build packages with the current Python. See [#6770](https://github.com/DataDog/integrations-core/pull/6770).
+
+## 3.7.1 / 2020-05-18
+
+* [Fixed] Sync JMX template example config. See [#6676](https://github.com/DataDog/integrations-core/pull/6676).
+
+## 3.7.0 / 2020-05-17
+
+* [Added] Add send_monotonic_with_gauge config option and refactor test. See [#6618](https://github.com/DataDog/integrations-core/pull/6618).
+* [Added] Add developer docs. See [#6623](https://github.com/DataDog/integrations-core/pull/6623).
+
+## 3.6.0 / 2020-05-14
+
+* [Added] Add Trello release status subcommand. See [#6628](https://github.com/DataDog/integrations-core/pull/6628).
+* [Added] Add environment runner for Kubernetes' `kind`. See [#6522](https://github.com/DataDog/integrations-core/pull/6522).
+* [Added] Update JMX template to use JMX config spec. See [#6611](https://github.com/DataDog/integrations-core/pull/6611).
+* [Added] Install checks' dependencies for E2E using `deps` extra feature. See [#6599](https://github.com/DataDog/integrations-core/pull/6599).
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Support more tag formats when generating changelogs. See [#6584](https://github.com/DataDog/integrations-core/pull/6584).
+* [Added] Add dedicated config section for E2E agent selection. See [#6558](https://github.com/DataDog/integrations-core/pull/6558).
+* [Added] Provide a good default for `service` field of E2E logs config. See [#6557](https://github.com/DataDog/integrations-core/pull/6557).
+* [Added] Add retry to docker_run. See [#6514](https://github.com/DataDog/integrations-core/pull/6514).
+* [Added] Include uncommitted git files to files_changed. See [#6480](https://github.com/DataDog/integrations-core/pull/6480).
+* [Added] Add constant for jmx default metrics. See [#6507](https://github.com/DataDog/integrations-core/pull/6507).
+* [Added] Make integration template adhere to file name conventions. See [#6493](https://github.com/DataDog/integrations-core/pull/6493).
+* [Added] Add rmi_connection_timeout & rmi_client_timeout to config spec. See [#6459](https://github.com/DataDog/integrations-core/pull/6459).
+* [Added] Update `release make` to avoid committing new files. See [#6263](https://github.com/DataDog/integrations-core/pull/6263).
+* [Added] Add validation for per_unit_name and line numbers for all errors. See [#6394](https://github.com/DataDog/integrations-core/pull/6394).
+* [Added] Validate metrics using metadata.csv. See [#6027](https://github.com/DataDog/integrations-core/pull/6027).
+* [Added] Add verbose mode to validate config. See [#6302](https://github.com/DataDog/integrations-core/pull/6302).
+* [Added] Validate metadata doesn't contain `|`. See [#6333](https://github.com/DataDog/integrations-core/pull/6333).
+* [Fixed] Fix style to account for new flake8 rules. See [#6620](https://github.com/DataDog/integrations-core/pull/6620).
+* [Fixed] Fix typo in README template for new community integrations. See [#6585](https://github.com/DataDog/integrations-core/pull/6585).
+* [Fixed] Remove metrics file from JMX template's config spec. See [#6559](https://github.com/DataDog/integrations-core/pull/6559).
+* [Fixed] Remove `dd_check_types` from check template. See [#6460](https://github.com/DataDog/integrations-core/pull/6460).
+* [Fixed] Remove `metrics.yaml` from non testable files. See [#6280](https://github.com/DataDog/integrations-core/pull/6280).
+* [Fixed] Hide openmetrics template options that are typically overridden. See [#6338](https://github.com/DataDog/integrations-core/pull/6338).
+
+## 3.5.0 / 2020-04-14
+
+* [Added] Update documentation links in new integration templates. See [#6294](https://github.com/DataDog/integrations-core/pull/6294).
+* [Added] Add validation for Unicode characters in metric metadata. See [#6318](https://github.com/DataDog/integrations-core/pull/6318).
+* [Added] Add default template to openmetrics & jmx config. See [#6328](https://github.com/DataDog/integrations-core/pull/6328).
+* [Added] Add config spec ability to control whether options are enabled by default. See [#6322](https://github.com/DataDog/integrations-core/pull/6322).
+* [Added] Allow `dd_environment` fixtures to accept arbitrary arguments. See [#6306](https://github.com/DataDog/integrations-core/pull/6306).
+
+## 3.4.0 / 2020-04-08
+
+* [Added] Add Container App team to ddev trello tool. See [#6268](https://github.com/DataDog/integrations-core/pull/6268).
+* [Fixed] Add `kerberos_cache` to HTTP config options. See [#6279](https://github.com/DataDog/integrations-core/pull/6279).
+
+## 3.3.1 / 2020-04-05
+
+* [Fixed] Fix e2e config. See [#6261](https://github.com/DataDog/integrations-core/pull/6261).
+
+## 3.3.0 / 2020-04-04
+
+* [Added] Allow arbitrary repos in CLI config. See [#6254](https://github.com/DataDog/integrations-core/pull/6254).
+* [Added] Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).
+* [Added] Add OpenMetrics config spec template. See [#6142](https://github.com/DataDog/integrations-core/pull/6142).
+* [Added] Add validation for checks to not use the legacy agent signature. See [#6086](https://github.com/DataDog/integrations-core/pull/6086).
+* [Added] Validate `metric_to_check` is listed in `metadata.csv`. See [#6170](https://github.com/DataDog/integrations-core/pull/6170).
+* [Added] Add `display_priority` to config spec. See [#6229](https://github.com/DataDog/integrations-core/pull/6229).
+* [Added] Add `jmx_url` to JMX config spec template. See [#6230](https://github.com/DataDog/integrations-core/pull/6230).
+* [Added] Trigger CI if contents of `tests/` changes. See [#6223](https://github.com/DataDog/integrations-core/pull/6223).
+* [Added] Add `service_check_prefix` config to jmx. See [#6163](https://github.com/DataDog/integrations-core/pull/6163).
+* [Added] Consider log collection for `meta catalog`. See [#6191](https://github.com/DataDog/integrations-core/pull/6191).
+* [Added] Add metadata to integrations catalog. See [#6169](https://github.com/DataDog/integrations-core/pull/6169).
+* [Added] Add `default` value field for config specs. See [#6178](https://github.com/DataDog/integrations-core/pull/6178).
+* [Added] Add utility for temporarily stopping Docker services. See [#5715](https://github.com/DataDog/integrations-core/pull/5715).
+* [Added] Add `ddev test` option to verify support of new metrics. See [#6141](https://github.com/DataDog/integrations-core/pull/6141).
+* [Fixed] Add `send_distribution_sums_as_monotonic` to openmetrics config spec. See [#6247](https://github.com/DataDog/integrations-core/pull/6247).
+* [Fixed] Include moved files to changed files for testing purposes. See [#6174](https://github.com/DataDog/integrations-core/pull/6174).
+
+## 3.2.0 / 2020-03-24
+
+* [Added] Use Trello for QA release script. See [#6125](https://github.com/DataDog/integrations-core/pull/6125).
+* [Added] Add script to resolve username from email. See [#6099](https://github.com/DataDog/integrations-core/pull/6099).
+* [Added] Add validation to catch legacy imports. See [#6081](https://github.com/DataDog/integrations-core/pull/6081).
+* [Added] Upgrade and pin mypy to 0.770. See [#6090](https://github.com/DataDog/integrations-core/pull/6090).
+* [Added] Add config spec option for compact YAML representations of nested arrays. See [#6082](https://github.com/DataDog/integrations-core/pull/6082).
+* [Added] Order changelog entries by type. See [#5995](https://github.com/DataDog/integrations-core/pull/5995).
+* [Added] Upgrade virtualenv to 20.0.8. See [#5980](https://github.com/DataDog/integrations-core/pull/5980).
+* [Added] Add config spec templates for JMX integrations. See [#5978](https://github.com/DataDog/integrations-core/pull/5978).
+* [Added] Add meta command to fetch JMX info. See [#5652](https://github.com/DataDog/integrations-core/pull/5652).
+* [Added] Add `validate metadata` option to check for more duplicates. See [#5803](https://github.com/DataDog/integrations-core/pull/5803).
+* [Added] Add markdown output support to catalog tool. See [#5946](https://github.com/DataDog/integrations-core/pull/5946).
+* [Added] Bump `datadog-checks-base` version in new integration template. See [#5858](https://github.com/DataDog/integrations-core/pull/5858).
+* [Added] Add config spec support for logs-only integrations. See [#5932](https://github.com/DataDog/integrations-core/pull/5932).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+* [Fixed] Remove reference to check in logs-only template. See [#6106](https://github.com/DataDog/integrations-core/pull/6106).
+* [Fixed] Fix pathing issues with CI setup script. See [#6100](https://github.com/DataDog/integrations-core/pull/6100).
+* [Fixed] Bump classifiers. See [#6083](https://github.com/DataDog/integrations-core/pull/6083).
+* [Fixed] Make aggregator stub support multiple jmx instances. See [#5966](https://github.com/DataDog/integrations-core/pull/5966).
+
+## 3.1.0 / 2020-03-02
+
+* [Added] Handle logs only integrations for legacy config validator. See [#5900](https://github.com/DataDog/integrations-core/pull/5900).
+* [Fixed] Pin virtualenv to 20.0.5. See [#5891](https://github.com/DataDog/integrations-core/pull/5891).
+* [Added] Allow excluding specific checks when performing bulk releases. See [#5878](https://github.com/DataDog/integrations-core/pull/5878).
+* [Fixed] Fix E2E parsing of JMX collector output. See [#5849](https://github.com/DataDog/integrations-core/pull/5849).
+
+## 3.0.0 / 2020-02-22
+
+* [Fixed] Fix error when scrubbing non-org secrets. See [#5827](https://github.com/DataDog/integrations-core/pull/5827).
+* [Changed] Switch to comparing between arbitrary tags/release branches to `ddev release testable`. See [#5556](https://github.com/DataDog/integrations-core/pull/5556).
+* [Added] Add `service` option to default configuration. See [#5805](https://github.com/DataDog/integrations-core/pull/5805).
+* [Added] Add ability for config templates to reference other templates. See [#5804](https://github.com/DataDog/integrations-core/pull/5804).
+* [Added] Better error messages on config specs errors. See [#5763](https://github.com/DataDog/integrations-core/pull/5763).
+* [Added] Add an option to skip environment creation for tests. See [#5760](https://github.com/DataDog/integrations-core/pull/5760).
+* [Added] Create an integration catalog command in ddev. See [#5660](https://github.com/DataDog/integrations-core/pull/5660).
+* [Added] Add tag_prefix argument to the changelog command. See [#5741](https://github.com/DataDog/integrations-core/pull/5741).
+* [Fixed] Switch to Python 3.8 in check integration template. See [#5717](https://github.com/DataDog/integrations-core/pull/5717).
+* [Fixed] Switch to Agent 6+ signature in check integration test. See [#5718](https://github.com/DataDog/integrations-core/pull/5718).
+* [Added] Add type checking to integration check template. See [#5711](https://github.com/DataDog/integrations-core/pull/5711).
+* [Added] Refactor root initialization to common utils. See [#5705](https://github.com/DataDog/integrations-core/pull/5705).
+* [Added] Add `agent_requirements.in` to non testable files. See [#5693](https://github.com/DataDog/integrations-core/pull/5693).
+* [Added] Add git dep support to dep validation cmd. See [#5692](https://github.com/DataDog/integrations-core/pull/5692).
+* [Added] Add support for tab completion to CLI. See [#5674](https://github.com/DataDog/integrations-core/pull/5674).
+* [Added] Upgrade virtualenv dependency to 20.x. See [#5680](https://github.com/DataDog/integrations-core/pull/5680).
+
+## 2.4.0 / 2020-02-05
+
+* [Added] Upgrade coverage dependency. See [#5647](https://github.com/DataDog/integrations-core/pull/5647).
+
+## 2.3.0 / 2020-02-05
+
+* [Added] Move CI setup script to ddev. See [#5651](https://github.com/DataDog/integrations-core/pull/5651).
+* [Added] Add `internal` to repo choices. See [#5649](https://github.com/DataDog/integrations-core/pull/5649).
+* [Added] Move remaining flake8 config to .flake8. See [#5635](https://github.com/DataDog/integrations-core/pull/5635).
+
+## 2.2.0 / 2020-02-04
+
+* [Added] Ignore `__path__` for type hinting of all integrations. See [#5639](https://github.com/DataDog/integrations-core/pull/5639).
+* [Added] Modify QA release script to create Jira issues instead of Trello cards. See [#5457](https://github.com/DataDog/integrations-core/pull/5457).
+* [Added] Add script to remove all labels from an issue or pull request. See [#5636](https://github.com/DataDog/integrations-core/pull/5636).
+* [Added] Always pass PROGRAM* to tox. See [#5631](https://github.com/DataDog/integrations-core/pull/5631).
+* [Added] Add meta command to upgrade the Python version of all test environments. See [#5616](https://github.com/DataDog/integrations-core/pull/5616).
+* [Added] Use the latest beta release of virtualenv for performance improvements. See [#5617](https://github.com/DataDog/integrations-core/pull/5617).
+* [Added] Add type checking support to Tox plugin. See [#5595](https://github.com/DataDog/integrations-core/pull/5595).
+* [Added] Update `validate agent-reqs` cmd to list unreleased checks. See [#5610](https://github.com/DataDog/integrations-core/pull/5610).
+* [Added] Allow specifying `release changelog` output file. See [#5608](https://github.com/DataDog/integrations-core/pull/5608).
+* [Added] Allow --help for `run` command. See [#5602](https://github.com/DataDog/integrations-core/pull/5602).
+* [Fixed] Stop mounting the docker socket to allow jmx tests to pass. See [#5601](https://github.com/DataDog/integrations-core/pull/5601).
+* [Added] Update in-toto and its deps. See [#5599](https://github.com/DataDog/integrations-core/pull/5599).
+
+## 2.1.0 / 2020-01-30
+
+* [Added] Support CI validation for internal repo. See [#5567](https://github.com/DataDog/integrations-core/pull/5567).
+* [Fixed] Fix metric validation. See [#5581](https://github.com/DataDog/integrations-core/pull/5581).
+* [Added] Make new integrations use config specs. See [#5580](https://github.com/DataDog/integrations-core/pull/5580).
+* [Added] Add --org-name/-o to `env start`. See [#5458](https://github.com/DataDog/integrations-core/pull/5458).
+* [Added] Add some helpful output to ddev env ls command. See [#5576](https://github.com/DataDog/integrations-core/pull/5576).
+* [Fixed] Avoid long break in error message. See [#5575](https://github.com/DataDog/integrations-core/pull/5575).
+* [Added] Add Networks and Processes teams in ddev trello tool. See [#5560](https://github.com/DataDog/integrations-core/pull/5560).
+
+## 2.0.0 / 2020-01-27
+
+* [Added] Add validation for CI infrastructure configuration. See [#5479](https://github.com/DataDog/integrations-core/pull/5479).
+* [Fixed] Add support for in-toto >= 0.4.2. See [#5497](https://github.com/DataDog/integrations-core/pull/5497).
+* [Added] Upgrade dependencies. See [#5528](https://github.com/DataDog/integrations-core/pull/5528).
+* [Added] Add service check name validator and sync. See [#5501](https://github.com/DataDog/integrations-core/pull/5501).
+* [Changed] Remove Python 2 support from CLI. See [#5512](https://github.com/DataDog/integrations-core/pull/5512).
+* [Added] Run flake8 after formatting fixes. See [#5492](https://github.com/DataDog/integrations-core/pull/5492).
+* [Added] Add meta command to convert metadata.csv files to Markdown tables. See [#5461](https://github.com/DataDog/integrations-core/pull/5461).
+
+## 1.4.0 / 2020-01-13
+
+* [Added] Validate metric names normalization in metadata.csv. See [#5437](https://github.com/DataDog/integrations-core/pull/5437).
+* [Fixed] Fix function call for `release testable`. See [#5432](https://github.com/DataDog/integrations-core/pull/5432).
+
+## 1.3.0 / 2020-01-09
+
+* [Added] Add debug option to base ddev command. See [#5386](https://github.com/DataDog/integrations-core/pull/5386).
+* [Added] Add meta command to translate MIB names to OIDs in SNMP profiles. See [#5397](https://github.com/DataDog/integrations-core/pull/5397).
+* [Added] Update license years in integration templates. See [#5384](https://github.com/DataDog/integrations-core/pull/5384).
+* [Fixed] Fix a few style lints to handle Python 2. See [#5389](https://github.com/DataDog/integrations-core/pull/5389).
+
+## 1.2.0 / 2019-12-31
+
+* [Changed] Change `wrapper` arg for environment runners to `wrappers`. See [#5361](https://github.com/DataDog/integrations-core/pull/5361).
+* [Added] Add mechanism to cross-mount temporary log files between containers. See [#5346](https://github.com/DataDog/integrations-core/pull/5346).
+
+## 1.1.0 / 2019-12-27
+
+* [Added] Refactor terraform configs. See [#5339](https://github.com/DataDog/integrations-core/pull/5339).
+* [Added] Make configuration specs an asset. See [#5337](https://github.com/DataDog/integrations-core/pull/5337).
+* [Fixed] Always pass USERNAME to tox. See [#5335](https://github.com/DataDog/integrations-core/pull/5335).
+* [Added] Add meta command to export dashboards. See [#5332](https://github.com/DataDog/integrations-core/pull/5332).
+* [Added] Make changes and changelog command work with other repos. See [#5331](https://github.com/DataDog/integrations-core/pull/5331).
+* [Fixed] Fix agent status with ddev. See [#5293](https://github.com/DataDog/integrations-core/pull/5293).
+* [Added] Decrease default verbosity of tracebacks in pytest. See [#5291](https://github.com/DataDog/integrations-core/pull/5291).
+* [Added] Add more global utilities the pytest plugin. See [#5283](https://github.com/DataDog/integrations-core/pull/5283).
+* [Added] Display Docker Compose logs when test environment fails to start. See [#5258](https://github.com/DataDog/integrations-core/pull/5258).
+* [Fixed] Remove command to validate Python 3 compatibility. See [#5246](https://github.com/DataDog/integrations-core/pull/5246).
+* [Added] Implement configuration specifications. See [#5072](https://github.com/DataDog/integrations-core/pull/5072).
+* [Fixed] Pin coverage to 4.5.4. See [#5224](https://github.com/DataDog/integrations-core/pull/5224).
+* [Added] Add support for switching between multiple orgs' API/APP keys. See [#5197](https://github.com/DataDog/integrations-core/pull/5197).
+
+## 1.0.1 / 2019-12-06
+
+* [Fixed] Fix a bug where we accidentally recorded git-ignored files in in-toto. See [#5129](https://github.com/DataDog/integrations-core/pull/5129).
+
+## 1.0.0 / 2019-12-02
+
+* [Added] Support downloading universal and pure Python wheels. See [#4981](https://github.com/DataDog/integrations-core/pull/4981).
+* [Added] Support more metric types for `ddev meta prom`. See [#5071](https://github.com/DataDog/integrations-core/pull/5071).
+* [Added] Improve prompts in `ddev clean`. See [#5061](https://github.com/DataDog/integrations-core/pull/5061).
+* [Added] Add command to navigate to config directory. See [#5054](https://github.com/DataDog/integrations-core/pull/5054).
+* [Changed] Remove logos folder from template. See [#4988](https://github.com/DataDog/integrations-core/pull/4988).
+* [Fixed] Handle formatting edge cases for `meta changes`. See [#4970](https://github.com/DataDog/integrations-core/pull/4970).
+* [Changed] Remove logo validation. See [#4964](https://github.com/DataDog/integrations-core/pull/4964).
+* [Added] Use a stub class for metadata testing. See [#4919](https://github.com/DataDog/integrations-core/pull/4919).
+* [Fixed] Never sign an empty release. See [#4933](https://github.com/DataDog/integrations-core/pull/4933).
+* [Fixed] Update requirements when updating check. See [#4895](https://github.com/DataDog/integrations-core/pull/4895).
+* [Added] Add saved_views metadata field to integration templates. See [#4584](https://github.com/DataDog/integrations-core/pull/4584).
+
+## 0.39.0 / 2019-10-25
+
+* [Added] Add junit option to `ddev env e2e` command. See [#4879](https://github.com/DataDog/integrations-core/pull/4879).
+* [Fixed] Change the team label map for Trello card creation. See [#4852](https://github.com/DataDog/integrations-core/pull/4852).
+* [Fixed] Update metadata link in template. See [#4869](https://github.com/DataDog/integrations-core/pull/4869).
+
+## 0.38.3 / 2019-10-17
+
+* [Fixed] Fix CHANGELOG.md template to make it work with `ddev release changelog`. See [#4808](https://github.com/DataDog/integrations-core/pull/4808).
+
+## 0.38.2 / 2019-10-17
+
+* [Fixed] Handle the case of pylint returning empty output. See [#4801](https://github.com/DataDog/integrations-core/pull/4801).
+
+## 0.38.1 / 2019-10-15
+
+* [Fixed] Fix ddev testable command to properly use the tag, fallback on the branch if absent. See [#4775](https://github.com/DataDog/integrations-core/pull/4775).
+
+## 0.38.0 / 2019-10-11
+
+* [Added] Add option for device testing in e2e. See [#4693](https://github.com/DataDog/integrations-core/pull/4693).
+* [Fixed] Fix lint flake8-logging-format command. See [#4728](https://github.com/DataDog/integrations-core/pull/4728).
+* [Added] Add flake8-logging-format. See [#4711](https://github.com/DataDog/integrations-core/pull/4711).
+
+## 0.37.0 / 2019-10-09
+
+* [Added] Increase default Agent flush timeout. See [#4714](https://github.com/DataDog/integrations-core/pull/4714).
+* [Fixed] Remove default version from env test. See [#4718](https://github.com/DataDog/integrations-core/pull/4718).
+* [Fixed] Handle other Agent images in E2E. See [#4710](https://github.com/DataDog/integrations-core/pull/4710).
+
+## 0.36.0 / 2019-10-07
+
+* [Added] Update teams in ddev trello tool. See [#4702](https://github.com/DataDog/integrations-core/pull/4702).
+* [Added] Add dashboard validation. See [#4694](https://github.com/DataDog/integrations-core/pull/4694).
+* [Fixed] Don't use a7. See [#4680](https://github.com/DataDog/integrations-core/pull/4680).
+
+## 0.35.1 / 2019-09-30
+
+* [Fixed] Auto detect changes and run tests when yaml files change. See [#4657](https://github.com/DataDog/integrations-core/pull/4657).
+
+## 0.35.0 / 2019-09-30
+
+* [Added] Support submitting memory profiling metrics during E2E. See [#4635](https://github.com/DataDog/integrations-core/pull/4635).
+
+## 0.34.0 / 2019-09-24
+
+* [Added] Improve RetryError message. See [#4619](https://github.com/DataDog/integrations-core/pull/4619).
+* [Added] Reload environments if there are extra startup commands. See [#4614](https://github.com/DataDog/integrations-core/pull/4614).
+* [Added] Add warning to create command if name is lowercase. See [#4564](https://github.com/DataDog/integrations-core/pull/4564).
+
+## 0.33.0 / 2019-09-19
+
+* [Fixed] Stop identifying core vs extras from the working directory name. See [#4583](https://github.com/DataDog/integrations-core/pull/4583).
+* [Added] Update tooling for Azure Pipelines. See [#4536](https://github.com/DataDog/integrations-core/pull/4536).
+
 ## 0.32.0 / 2019-08-24
 
 * [Added] Don't fail e2e on unsupported platforms. See [#4398](https://github.com/DataDog/integrations-core/pull/4398).

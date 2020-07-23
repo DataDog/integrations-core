@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -57,14 +57,14 @@ def mock_leader():
 
 
 def test_check_metrics_with_deprecated(aggregator, mock_metrics, mock_leader):
-    c = KubeControllerManagerCheck(CHECK_NAME, None, {}, [instance])
+    c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
     generic_check_metrics(aggregator, True)
 
 
 def test_check_metrics_without_deprecated(aggregator, mock_metrics, mock_leader):
-    c = KubeControllerManagerCheck(CHECK_NAME, None, {}, [instance])
+    c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
     c.check(instance2)
 
     generic_check_metrics(aggregator, False)

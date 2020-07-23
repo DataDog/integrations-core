@@ -1,5 +1,233 @@
 # CHANGELOG - datadog_checks_base
 
+## 11.12.0 / 2020-06-29
+
+* [Added] Upgrade pywin32 to 228. See [#6980](https://github.com/DataDog/integrations-core/pull/6980).
+* [Added] Add MacOS Support. See [#6927](https://github.com/DataDog/integrations-core/pull/6927).
+
+## 11.11.1 / 2020-06-17
+
+* [Fixed] Gracefully skip quantile-less summary metrics. See [#6909](https://github.com/DataDog/integrations-core/pull/6909).
+
+## 11.11.0 / 2020-06-11
+
+* [Added] Document openmetrics interface and options. See [#6666](https://github.com/DataDog/integrations-core/pull/6666).
+* [Added] Add methods for the persistent cache Agent interface. See [#6819](https://github.com/DataDog/integrations-core/pull/6819).
+* [Added] Upgrade redis dependency to support `username` in connection strings. See [#6708](https://github.com/DataDog/integrations-core/pull/6708).
+* [Added] Support multiple properties in tag_by. See [#6614](https://github.com/DataDog/integrations-core/pull/6614).
+
+## 11.10.0 / 2020-05-25
+
+* [Added] Override CaseInsensitiveDict `copy()` function. See [#6715](https://github.com/DataDog/integrations-core/pull/6715).
+
+## 11.9.0 / 2020-05-20
+
+* [Added] Upgrade httplib2 to 0.18.1. See [#6702](https://github.com/DataDog/integrations-core/pull/6702).
+* [Fixed] Fix time utilities. See [#6692](https://github.com/DataDog/integrations-core/pull/6692).
+
+## 11.8.0 / 2020-05-17
+
+* [Added] Add utilities for working with time. See [#6663](https://github.com/DataDog/integrations-core/pull/6663).
+* [Added] Upgrade lxml to 4.5.0. See [#6661](https://github.com/DataDog/integrations-core/pull/6661).
+* [Added] Add send_monotonic_with_gauge config option and refactor test. See [#6618](https://github.com/DataDog/integrations-core/pull/6618).
+* [Added] Add developer docs. See [#6623](https://github.com/DataDog/integrations-core/pull/6623).
+* [Fixed] Update scraper config with instance. See [#6664](https://github.com/DataDog/integrations-core/pull/6664).
+* [Fixed] Fix thread leak in wmi checks. See [#6644](https://github.com/DataDog/integrations-core/pull/6644).
+
+## 11.7.0 / 2020-05-08
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Fixed] Fix a bug that caused win32_event_log integration to hang. See [#6576](https://github.com/DataDog/integrations-core/pull/6576).
+* [Fixed] Allow to verify that no special hostname was submitted with a metric. See [#6529](https://github.com/DataDog/integrations-core/pull/6529).
+
+## 11.6.0 / 2020-04-29
+
+* [Added] Validate metrics using metadata.csv. See [#6027](https://github.com/DataDog/integrations-core/pull/6027).
+* [Added] [WinWMICheck] Support latest Agent signature. See [#6324](https://github.com/DataDog/integrations-core/pull/6324).
+* [Fixed] WMI base typing and instance free API. See [#6329](https://github.com/DataDog/integrations-core/pull/6329).
+* [Fixed] Break reference cycle with log formatter. See [#6470](https://github.com/DataDog/integrations-core/pull/6470).
+* [Fixed] Mark `instance` as non-`Optional`. See [#6350](https://github.com/DataDog/integrations-core/pull/6350).
+
+## 11.5.1 / 2020-05-11
+
+* [Fixed] Fix a bug that caused win32_event_log integration to hang. See [#6576](https://github.com/DataDog/integrations-core/pull/6576).
+
+## 11.5.0 / 2020-04-07
+
+* [Added] Update PyYAML to 5.3.1. See [#6276](https://github.com/DataDog/integrations-core/pull/6276).
+
+## 11.4.0 / 2020-04-04
+
+* [Added] Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).
+* [Added] Upgrade psutil to 5.7.0. See [#6243](https://github.com/DataDog/integrations-core/pull/6243).
+* [Added] Allow automatic joins to all kube_{object}_labels in KSM check. See [#5650](https://github.com/DataDog/integrations-core/pull/5650).
+* [Added] Allow option to submit histogram/summary sum metric as monotonic count. See [#6127](https://github.com/DataDog/integrations-core/pull/6127).
+* [Added] Add `@metadata_entrypoint` decorator. See [#6084](https://github.com/DataDog/integrations-core/pull/6084).
+* [Added] Add RethinkDB integration. See [#5715](https://github.com/DataDog/integrations-core/pull/5715).
+* [Fixed] Revert `to_native_string` to `to_string` for integrations. See [#6238](https://github.com/DataDog/integrations-core/pull/6238).
+* [Fixed] Update prometheus_client. See [#6200](https://github.com/DataDog/integrations-core/pull/6200).
+* [Fixed] Fix failing style checks. See [#6207](https://github.com/DataDog/integrations-core/pull/6207).
+* [Fixed] Prevent out of bounds on systems with an odd number of counter strings. See [#6052](https://github.com/DataDog/integrations-core/pull/6052). Thanks [AdrianFletcher](https://github.com/AdrianFletcher).
+* [Fixed] Update pdh agent signature. See [#6162](https://github.com/DataDog/integrations-core/pull/6162).
+
+## 11.3.1 / 2020-03-26
+
+* [Fixed] Cast to float before computing temporal percent. See [#6146](https://github.com/DataDog/integrations-core/pull/6146).
+
+## 11.3.0 / 2020-03-26
+
+* [Added] Use a faster JSON library. See [#6143](https://github.com/DataDog/integrations-core/pull/6143).
+* [Added] Add secrets sanitization helpers. See [#6107](https://github.com/DataDog/integrations-core/pull/6107).
+
+## 11.2.0 / 2020-03-24
+
+* [Added] Add secrets sanitization helpers. See [#6107](https://github.com/DataDog/integrations-core/pull/6107).
+* [Added] Upgrade `contextlib2` to 0.6.0. See [#6131](https://github.com/DataDog/integrations-core/pull/6131).
+* [Added] PDH to be able to use new agent signature. See [#5936](https://github.com/DataDog/integrations-core/pull/5936).
+* [Added] Upgrade pyyaml to 5.3. See [#6043](https://github.com/DataDog/integrations-core/pull/6043).
+* [Added] Upgrade six to 1.14.0. See [#6040](https://github.com/DataDog/integrations-core/pull/6040).
+* [Added] Expand tracing options and support threads. See [#5960](https://github.com/DataDog/integrations-core/pull/5960).
+* [Added] Add and ship type annotations for base `AgentCheck` class. See [#5965](https://github.com/DataDog/integrations-core/pull/5965).
+* [Added] Make `is_metadata_collection_enabled` static. See [#5863](https://github.com/DataDog/integrations-core/pull/5863).
+* [Added] Improve assertion messages of aggregator stub. See [#5975](https://github.com/DataDog/integrations-core/pull/5975).
+* [Added] Improve aggregator stub's `assert_all_metrics_covered` error message. See [#5970](https://github.com/DataDog/integrations-core/pull/5970).
+* [Added] Mirror Agent's default behavior of `enable_metadata_collection` for `datadog_agent` stub. See [#5967](https://github.com/DataDog/integrations-core/pull/5967).
+* [Added] Upgrade pymqi to 1.10.1. See [#5955](https://github.com/DataDog/integrations-core/pull/5955).
+* [Fixed] Fix type hints for list-like parameters on `AgentCheck`. See [#6105](https://github.com/DataDog/integrations-core/pull/6105).
+* [Fixed] Relax type of `ServiceCheck` enum items. See [#6064](https://github.com/DataDog/integrations-core/pull/6064).
+* [Fixed] Fix type hint on `prefix` argument to `AgentCheck.normalize()`. See [#6008](https://github.com/DataDog/integrations-core/pull/6008).
+* [Fixed] Explicitly check for event value type before coercing to text. See [#5997](https://github.com/DataDog/integrations-core/pull/5997).
+* [Fixed] Rename `to_string()` utility to `to_native_string()`. See [#5996](https://github.com/DataDog/integrations-core/pull/5996).
+* [Fixed] Do not fail on octet stream content type for OpenMetrics. See [#5843](https://github.com/DataDog/integrations-core/pull/5843).
+
+## 11.1.0 / 2020-02-26
+
+* [Added] Bump securesystemslib to 0.14.2. See [#5890](https://github.com/DataDog/integrations-core/pull/5890).
+
+## 11.0.0 / 2020-02-22
+
+* [Fixed] Pin enum34 to 1.1.6. See [#5829](https://github.com/DataDog/integrations-core/pull/5829).
+* [Fixed] Fix thread leak in WMI sampler. See [#5659](https://github.com/DataDog/integrations-core/pull/5659). Thanks [rlaveycal](https://github.com/rlaveycal).
+* [Added] Improve performance of pattern matching in OpenMetrics. See [#5764](https://github.com/DataDog/integrations-core/pull/5764).
+* [Added] Add a utility method to check if metadata collection is enabled. See [#5748](https://github.com/DataDog/integrations-core/pull/5748).
+* [Added] Upgrade `aerospike` dependency. See [#5779](https://github.com/DataDog/integrations-core/pull/5779).
+* [Added] Capture python warnings as logs. See [#5730](https://github.com/DataDog/integrations-core/pull/5730).
+* [Added] Make `ignore_metrics` support `*` wildcard for OpenMetrics. See [#5759](https://github.com/DataDog/integrations-core/pull/5759).
+* [Added] Add extra_headers option to http method call. See [#5753](https://github.com/DataDog/integrations-core/pull/5753).
+* [Added] Upgrade kafka-python to 2.0.0. See [#5696](https://github.com/DataDog/integrations-core/pull/5696).
+* [Fixed] Refactor initialization of metric limits. See [#5566](https://github.com/DataDog/integrations-core/pull/5566).
+* [Added] Support `tls_ignore_warning` at init_config level. See [#5657](https://github.com/DataDog/integrations-core/pull/5657).
+* [Changed] vSphere new implementation. See [#5251](https://github.com/DataDog/integrations-core/pull/5251).
+* [Added] Upgrade supervisor dependency. See [#5627](https://github.com/DataDog/integrations-core/pull/5627).
+* [Added] Update in-toto and its deps. See [#5599](https://github.com/DataDog/integrations-core/pull/5599).
+* [Added] Refactor traced decorator and remove wrapt import. See [#5586](https://github.com/DataDog/integrations-core/pull/5586).
+* [Fixed] Change wmi_check to use lists instead of tuples for filters. See [#5510](https://github.com/DataDog/integrations-core/pull/5510).
+* [Added] Upgrade ddtrace to 0.32.2. See [#5491](https://github.com/DataDog/integrations-core/pull/5491).
+* [Fixed] Enforce lazy logging. See [#5554](https://github.com/DataDog/integrations-core/pull/5554).
+* [Fixed] Properly cast `max_returned_metrics` option to an integer. See [#5536](https://github.com/DataDog/integrations-core/pull/5536).
+* [Fixed] Install typing dep only for Python 2. See [#5543](https://github.com/DataDog/integrations-core/pull/5543).
+* [Added] Add new deprecation. See [#5539](https://github.com/DataDog/integrations-core/pull/5539).
+* [Added] Allow deprecation notice strings to be formatted. See [#5533](https://github.com/DataDog/integrations-core/pull/5533).
+* [Changed] Make deprecations apparent in UI. See [#5530](https://github.com/DataDog/integrations-core/pull/5530).
+* [Added] Add ability to submit time deltas to database query utility. See [#5524](https://github.com/DataDog/integrations-core/pull/5524).
+
+## 10.3.0 / 2020-01-21
+
+* [Added] [pdh] Make the admin share configurable. See [#5485](https://github.com/DataDog/integrations-core/pull/5485).
+
+## 10.2.1 / 2020-01-15
+
+* [Fixed] Fix Kubelet credentials handling. See [#5455](https://github.com/DataDog/integrations-core/pull/5455).
+* [Fixed] Re-introduce legacy cert option handling. See [#5443](https://github.com/DataDog/integrations-core/pull/5443).
+
+## 10.2.0 / 2020-01-13
+
+* [Added] Update TUF dependency. See [#5441](https://github.com/DataDog/integrations-core/pull/5441).
+* [Fixed] Fix http handler. See [#5434](https://github.com/DataDog/integrations-core/pull/5434).
+* [Added] Make OpenMetrics use the RequestsWrapper. See [#5414](https://github.com/DataDog/integrations-core/pull/5414).
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+* [Fixed] Upgrade vertica to stop logging to /dev/null. See [#5352](https://github.com/DataDog/integrations-core/pull/5352).
+
+## 10.1.0 / 2020-01-03
+
+* [Fixed] Ensure logs are lazily formatted. See [#5378](https://github.com/DataDog/integrations-core/pull/5378).
+* [Fixed] Remove Agent 5 conditional imports. See [#5322](https://github.com/DataDog/integrations-core/pull/5322).
+* [Added] Move unit conversion helpers to openmetrics mixin. See [#5364](https://github.com/DataDog/integrations-core/pull/5364).
+* [Fixed] Only ship `contextlib2` on Python 2. See [#5348](https://github.com/DataDog/integrations-core/pull/5348).
+* [Added] Support metadata and service checks for DB utility. See [#5317](https://github.com/DataDog/integrations-core/pull/5317).
+* [Added] Add and prefer configuring an `auth_type` explicitly on RequestsWrapper. See [#5263](https://github.com/DataDog/integrations-core/pull/5263).
+* [Fixed] Lower metadata transformer log level. See [#5282](https://github.com/DataDog/integrations-core/pull/5282).
+* [Added] Add support for AWS Signature Version 4 Signing to the RequestsWrapper. See [#5249](https://github.com/DataDog/integrations-core/pull/5249).
+* [Added] Add extra metrics to DB utility. See [#5225](https://github.com/DataDog/integrations-core/pull/5225).
+* [Added] Upgrade `redis` to 3.3.11. See [#5150](https://github.com/DataDog/integrations-core/pull/5150).
+* [Fixed] Update SNMP requirements. See [#5234](https://github.com/DataDog/integrations-core/pull/5234).
+* [Fixed] Bump psutil to 5.6.7. See [#5210](https://github.com/DataDog/integrations-core/pull/5210).
+
+## 10.0.2 / 2019-12-09
+
+* [Fixed] Fix normalize for invalid chars and underscore. See [#5172](https://github.com/DataDog/integrations-core/pull/5172).
+
+## 10.0.1 / 2019-12-04
+
+* [Fixed] Ensure metadata is submitted as strings. See [#5139](https://github.com/DataDog/integrations-core/pull/5139).
+
+## 10.0.0 / 2019-12-02
+
+* [Changed] Aligns `no_proxy` behavior to general convention. See [#5081](https://github.com/DataDog/integrations-core/pull/5081).
+
+## 9.6.0 / 2019-11-28
+
+* [Added] Support downloading universal and pure Python wheels. See [#4981](https://github.com/DataDog/integrations-core/pull/4981).
+* [Added] Require boto3. See [#5101](https://github.com/DataDog/integrations-core/pull/5101).
+* [Fixed] Fix warnings usage related to RequestsWrapper, Openmetrics and Prometheus. See [#5080](https://github.com/DataDog/integrations-core/pull/5080).
+* [Fixed] Upgrade psutil dependency to 5.6.5. See [#5059](https://github.com/DataDog/integrations-core/pull/5059).
+* [Added] Add ClickHouse integration. See [#4957](https://github.com/DataDog/integrations-core/pull/4957).
+* [Added] Add database query utilities. See [#5045](https://github.com/DataDog/integrations-core/pull/5045).
+* [Added] Upgrade cryptography to 2.8. See [#5047](https://github.com/DataDog/integrations-core/pull/5047).
+* [Added] Upgrade pywin32 to 227. See [#5036](https://github.com/DataDog/integrations-core/pull/5036).
+* [Added] Add SAP HANA integration. See [#4502](https://github.com/DataDog/integrations-core/pull/4502).
+* [Added] Better metadata assertion output. See [#4953](https://github.com/DataDog/integrations-core/pull/4953).
+* [Added] Use a stub class for metadata testing. See [#4919](https://github.com/DataDog/integrations-core/pull/4919).
+* [Added] Extract version utils and use semver for version comparison. See [#4844](https://github.com/DataDog/integrations-core/pull/4844).
+* [Added] Add new version metadata scheme. See [#4929](https://github.com/DataDog/integrations-core/pull/4929).
+* [Added] Add total_time_to_temporal_percent utility. See [#4924](https://github.com/DataDog/integrations-core/pull/4924).
+* [Added] Standardize logging format. See [#4906](https://github.com/DataDog/integrations-core/pull/4906).
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+* [Fixed] Fix no instances case for AgentCheck signature and add more tests. See [#4784](https://github.com/DataDog/integrations-core/pull/4784).
+
+## 9.5.0 / 2019-10-22
+
+* [Added] Upgrade psycopg2-binary to 2.8.4. See [#4840](https://github.com/DataDog/integrations-core/pull/4840).
+* [Added] Add mechanism to submit metadata from OpenMetrics checks. See [#4757](https://github.com/DataDog/integrations-core/pull/4757).
+* [Added] Properly fall back to wildcards when defined OpenMetrics transformers do not get a match. See [#4757](https://github.com/DataDog/integrations-core/pull/4757).
+
+## 9.4.2 / 2019-10-17
+
+* [Fixed] Fix RequestsWrapper session `timeout`. See [#4811](https://github.com/DataDog/integrations-core/pull/4811).
+
+## 9.4.1 / 2019-10-17
+
+* [Fixed] Avoid sending additional gauges for openmetrics histograms if using distribution metrics. See [#4780](https://github.com/DataDog/integrations-core/pull/4780).
+
+## 9.4.0 / 2019-10-11
+
+* [Added] Add an option to send histograms/summary counts as monotonic counters. See [#4629](https://github.com/DataDog/integrations-core/pull/4629).
+* [Added] Add option for device testing in e2e. See [#4693](https://github.com/DataDog/integrations-core/pull/4693).
+* [Added] Update self.warning to accept `*args`. See [#4731](https://github.com/DataDog/integrations-core/pull/4731).
+* [Added] Send configuration metadata by default. See [#4730](https://github.com/DataDog/integrations-core/pull/4730).
+* [Added] Add mechanism to execute setup steps before the first check run. See [#4713](https://github.com/DataDog/integrations-core/pull/4713).
+* [Added] Implement Python API for setting check metadata. See [#4686](https://github.com/DataDog/integrations-core/pull/4686).
+* [Added] Upgrade Paramiko to version 2.6.0. See [#4685](https://github.com/DataDog/integrations-core/pull/4685). Thanks [daniel-savo](https://github.com/daniel-savo).
+* [Added] Add support for fetching consumer offsets stored in Kafka to `monitor_unlisted_consumer_groups`. See [#3957](https://github.com/DataDog/integrations-core/pull/3957). Thanks [jeffwidman](https://github.com/jeffwidman).
+* [Added] Support submitting memory profiling metrics during E2E. See [#4635](https://github.com/DataDog/integrations-core/pull/4635).
+* [Added] Add a way to submit non-namespaced metrics and service checks. See [#4637](https://github.com/DataDog/integrations-core/pull/4637).
+* [Added] Add duplication assertion methods to aggregator stub. See [#4521](https://github.com/DataDog/integrations-core/pull/4521).
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+* [Deprecated] Add a deprecated warning message to NetworkCheck. See [#4560](https://github.com/DataDog/integrations-core/pull/4560).
+* [Added] Upgrade pywin32 to 225. See [#4563](https://github.com/DataDog/integrations-core/pull/4563).
+* [Fixed] Upgrade psutil dependency to 5.6.3. See [#4442](https://github.com/DataDog/integrations-core/pull/4442).
+
 ## 9.3.2 / 2019-08-30
 
 * [Fixed] Update class signature to support the RequestsWrapper. See [#4469](https://github.com/DataDog/integrations-core/pull/4469).

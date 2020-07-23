@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
@@ -8,8 +8,8 @@ import sys
 import mock
 import pytest
 
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.kubelet import KubeletCredentials, PodListUtils, get_pod_by_uid, is_static_pending_pod
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.kubelet import KubeletCredentials, PodListUtils, get_pod_by_uid, is_static_pending_pod, urljoin
 
 from .test_kubelet import mock_from_file
 
@@ -21,63 +21,64 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 
 
 def test_container_filter(monkeypatch):
-    is_excluded = mock.Mock(return_value=False)
-    monkeypatch.setattr('datadog_checks.kubelet.common.is_excluded', is_excluded)
+    c_is_excluded = mock.Mock(return_value=False)
+    monkeypatch.setattr('datadog_checks.kubelet.common.c_is_excluded', c_is_excluded)
 
     long_cid = "docker://a335589109ce5506aa69ba7481fc3e6c943abd23c5277016c92dac15d0f40479"
     ctr_name = "datadog-agent"
     ctr_image = "datadog/agent-dev:haissam-tagger-pod-entity"
+    namespace = "default"
 
     pods = json.loads(mock_from_file('pods.json'))
     pod_list_utils = PodListUtils(pods)
 
     assert pod_list_utils is not None
-    assert len(pod_list_utils.containers) == 8
+    assert len(pod_list_utils.containers) == 10
     assert long_cid in pod_list_utils.containers
-    is_excluded.assert_not_called()
+    c_is_excluded.assert_not_called()
 
     # Test cid == None
-    is_excluded.reset_mock()
+    c_is_excluded.reset_mock()
     assert pod_list_utils.is_excluded(None) is True
-    is_excluded.assert_not_called()
+    c_is_excluded.assert_not_called()
 
     # Test cid == ""
-    is_excluded.reset_mock()
+    c_is_excluded.reset_mock()
     assert pod_list_utils.is_excluded("") is True
-    is_excluded.assert_not_called()
+    c_is_excluded.assert_not_called()
 
     # Test non-existing container
-    is_excluded.reset_mock()
+    c_is_excluded.reset_mock()
     assert pod_list_utils.is_excluded("invalid") is True
-    is_excluded.assert_not_called()
+    c_is_excluded.assert_not_called()
 
     # Test existing unfiltered container
-    is_excluded.reset_mock()
+    c_is_excluded.reset_mock()
     assert pod_list_utils.is_excluded(long_cid) is False
-    is_excluded.assert_called_once()
-    is_excluded.assert_called_with(ctr_name, ctr_image)
+    c_is_excluded.assert_called_once()
+    c_is_excluded.assert_called_with(ctr_name, ctr_image, namespace)
 
     # Clear exclusion cache
     pod_list_utils.cache = {}
 
     # Test existing filtered container
-    is_excluded.reset_mock()
-    is_excluded.return_value = True
+    c_is_excluded.reset_mock()
+    c_is_excluded.return_value = True
     assert pod_list_utils.is_excluded(long_cid) is True
-    is_excluded.assert_called_once()
-    is_excluded.assert_called_with(ctr_name, ctr_image)
+    c_is_excluded.assert_called_once()
+    c_is_excluded.assert_called_with(ctr_name, ctr_image, namespace)
 
 
 def test_filter_staticpods(monkeypatch):
-    is_excluded = mock.Mock(return_value=True)
-    monkeypatch.setattr('datadog_checks.kubelet.common.is_excluded', is_excluded)
+    c_is_excluded = mock.Mock(return_value=True)
+    monkeypatch.setattr('datadog_checks.kubelet.common.c_is_excluded', c_is_excluded)
 
     pods = json.loads(mock_from_file('pods.json'))
     pod_list_utils = PodListUtils(pods)
 
     # kube-proxy-gke-haissam-default-pool-be5066f1-wnvn is static
     assert pod_list_utils.is_excluded("cid", "260c2b1d43b094af6d6b4ccba082c2db") is False
-    is_excluded.assert_not_called()
+    c_is_excluded.assert_not_called()
 
     # fluentd-gcp-v2.0.10-9q9t4 is not static
     assert (
@@ -100,6 +101,17 @@ def test_pod_by_uid():
     assert pod is None
 
 
+def test_url_join():
+    res = urljoin("https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy", "/pods")
+    assert res == 'https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/pods'
+    res = urljoin("https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy", "pods")
+    assert res == 'https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/pods'
+    res = urljoin("https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/", "pods")
+    assert res == 'https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/pods'
+    res = urljoin("https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/", "/pods")
+    assert res == 'https://10.100.0.1:443/api/fargate-XX.us-east-2.compute.internal/proxy/pods'
+
+
 def test_is_static_pod():
     podlist = json.loads(mock_from_file('pods.json'))
 
@@ -120,9 +132,9 @@ def test_credentials_empty():
     assert creds.cert_pair() is None
     assert creds.headers("https://dummy") is None
 
-    scraper = OpenMetricsBaseCheck('prometheus', {}, {})
-    scraper_config = scraper.create_scraper_configuration()
-    scraper_config['prometheus_url'] = "https://dummy"
+    instance = {'prometheus_url': 'https://dummy', 'namespace': 'foo'}
+    scraper = OpenMetricsBaseCheck('prometheus', {}, [instance])
+    scraper_config = scraper.create_scraper_configuration(instance)
     creds.configure_scraper(scraper_config)
     assert scraper_config['ssl_ca_cert'] is None
     assert scraper_config['ssl_cert'] is None
@@ -138,9 +150,9 @@ def test_credentials_certificates():
     assert creds.cert_pair() == ("crt", "key")
     assert creds.headers("https://dummy") is None
 
-    scraper = OpenMetricsBaseCheck('prometheus', {}, {})
-    scraper_config = scraper.create_scraper_configuration({})
-    scraper_config['prometheus_url'] = "https://dummy"
+    instance = {'prometheus_url': 'https://dummy', 'namespace': 'foo'}
+    scraper = OpenMetricsBaseCheck('prometheus', {}, [instance])
+    scraper_config = scraper.create_scraper_configuration(instance)
     creds.configure_scraper(scraper_config)
     assert scraper_config['ssl_ca_cert'] == "ca_cert"
     assert scraper_config['ssl_cert'] == "crt"
@@ -159,9 +171,9 @@ def test_credentials_token_noverify():
     # Make sure we don't leak the token over http
     assert creds.headers("http://dummy") is None
 
-    scraper = OpenMetricsBaseCheck('prometheus', {}, {})
-    scraper_config = scraper.create_scraper_configuration()
-    scraper_config['prometheus_url'] = 'https://dummy'
+    instance = {'prometheus_url': 'https://dummy', 'namespace': 'foo'}
+    scraper = OpenMetricsBaseCheck('prometheus', {}, [instance])
+    scraper_config = scraper.create_scraper_configuration(instance)
     creds.configure_scraper(scraper_config)
     assert scraper_config['ssl_ca_cert'] is False
     assert scraper_config['ssl_cert'] is None

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -12,3 +12,4 @@ HOST = get_docker_hostname()
 PORT = '9200'
 CLUSTER_TAG = ["cluster_name:test-cluster"]
 URL = 'http://{}:{}'.format(HOST, PORT)
+ELASTIC_VERSION = os.getenv('ELASTIC_VERSION', os.environ['ELASTIC_IMAGE'])

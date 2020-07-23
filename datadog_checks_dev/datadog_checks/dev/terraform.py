@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import getpass
@@ -13,12 +13,14 @@ from six import PY3
 from .env import environment_run
 from .structures import LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import chdir
+from .utils import chdir, copy_dir_contents, copy_path, get_here, path_join
 
 if PY3:
     from shutil import which
 else:
     from shutilwhich import which
+
+TEMPLATES_DIR = path_join(get_here(), 'tooling', 'templates', 'terraform')
 
 
 def construct_env_vars():
@@ -35,21 +37,18 @@ def construct_env_vars():
 
 
 @contextmanager
-def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_vars=None, wrapper=None):
-    """This utility provides a convenient way to safely set up and tear down Terraform environments.
+def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_vars=None, wrappers=None):
+    """
+    A convenient context manager for safely setting up and tearing down Terraform environments.
 
-    :param directory: A path containing Terraform files.
-    :type directory: ``str``
-    :param sleep: Number of seconds to wait before yielding.
-    :type sleep: ``float``
-    :param endpoints: Endpoints to verify access for before yielding. Shorthand for adding
-                      ``conditions.CheckEndpoints(endpoints)`` to the ``conditions`` argument.
-    :type endpoints: ``list`` of ``str``, or a single ``str``
-    :param conditions: A list of callable objects that will be executed before yielding to check for errors.
-    :type conditions: ``callable``
-    :param env_vars: A dictionary to update ``os.environ`` with during execution.
-    :type env_vars: ``dict``
-    :param wrapper: A context manager to use during execution.
+    - **directory** (_str_) - A path containing Terraform files
+    - **sleep** (_float_) - Number of seconds to wait before yielding. This occurs after all conditions are successful.
+    - **endpoints** (_List[str]_) - Endpoints to verify access for before yielding. Shorthand for adding
+      `CheckEndpoints(endpoints)` to the `conditions` argument.
+    - **conditions** (_callable_) - A list of callable objects that will be executed before yielding to
+      check for errors
+    - **env_vars** (_dict_) - A dictionary to update `os.environ` with during execution
+    - **wrappers** (_List[callable]_) - A list of context managers to use during execution
     """
     if not which('terraform'):
         pytest.skip('Terraform not available')
@@ -64,7 +63,7 @@ def terraform_run(directory, sleep=None, endpoints=None, conditions=None, env_va
         endpoints=endpoints,
         conditions=conditions,
         env_vars=env_vars,
-        wrapper=wrapper,
+        wrappers=wrappers,
     ) as result:
         yield result
 
@@ -75,13 +74,22 @@ class TerraformUp(LazyFunction):
     It also returns the outputs as a `dict`.
     """
 
-    def __init__(self, directory):
+    def __init__(self, directory, template_files=None):
         self.directory = directory
+        # Must be the full path to the template file/directory
+        # Must be an exhaustive list of templates to include
+        self.template_files = template_files or []
 
     def __call__(self):
         with TempDir('terraform') as temp_dir:
             terraform_dir = os.path.join(temp_dir, 'terraform')
             shutil.copytree(self.directory, terraform_dir)
+            if not self.template_files:
+                copy_dir_contents(TEMPLATES_DIR, terraform_dir)
+            else:
+                for file in self.template_files:
+                    copy_path(file, terraform_dir)
+
             with chdir(terraform_dir):
                 env = construct_env_vars()
                 env['TF_VAR_user'] = getpass.getuser()

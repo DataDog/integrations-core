@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
@@ -6,8 +6,8 @@ from __future__ import division
 import requests
 from six import iteritems
 
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import round_value
-from datadog_checks.checks import AgentCheck
 
 try:
     from tagger import get_tags
@@ -44,6 +44,13 @@ MEMORY_GAUGE_METRICS = [
 ]
 MEMORY_RATE_METRICS = ['pgpgin', 'pgpgout', 'pgmajfault', 'pgfault']
 IO_METRICS = {'io_service_bytes_recursive': 'ecs.fargate.io.bytes.', 'io_serviced_recursive': 'ecs.fargate.io.ops.'}
+NETWORK_GAUGE_METRICS = {
+    'rx_errors': 'ecs.fargate.net.rcvd_errors',
+    'tx_errors': 'ecs.fargate.net.sent_errors',
+    'rx_dropped': 'ecs.fargate.net.packet.in_dropped',
+    'tx_dropped': 'ecs.fargate.net.packet.out_dropped',
+}
+NETWORK_RATE_METRICS = {'rx_bytes': 'ecs.fargate.net.bytes_rcvd', 'tx_bytes': 'ecs.fargate.net.bytes_sent'}
 
 
 class FargateCheck(AgentCheck):
@@ -146,7 +153,7 @@ class FargateCheck(AgentCheck):
     def submit_perf_metrics(self, instance, container_tags, container_id, container_stats):
         try:
             if container_stats is None:
-                self.log.debug("Empty stats for container {}".format(container_id))
+                self.log.debug("Empty stats for container %s", container_id)
                 return
 
             tags = container_tags[container_id]
@@ -157,11 +164,11 @@ class FargateCheck(AgentCheck):
 
             value_system = cpu_stats.get('system_cpu_usage')
             if value_system is not None:
-                self.rate('ecs.fargate.cpu.system', value_system, tags)
+                self.gauge('ecs.fargate.cpu.system', value_system, tags)
 
             value_total = cpu_stats.get('cpu_usage', {}).get('total_usage')
             if value_total is not None:
-                self.rate('ecs.fargate.cpu.user', value_total, tags)
+                self.gauge('ecs.fargate.cpu.user', value_total, tags)
 
             prevalue_total = prev_cpu_stats.get('cpu_usage', {}).get('total_usage')
             prevalue_system = prev_cpu_stats.get('system_cpu_usage')
@@ -216,5 +223,18 @@ class FargateCheck(AgentCheck):
                 self.rate(metric_name + 'read', read_counter, tags)
                 self.rate(metric_name + 'write', write_counter, tags)
 
+            # Network metrics
+            networks = container_stats.get('networks', {})
+            for network_interface, network_stats in iteritems(networks):
+                network_tags = tags + ["interface:{}".format(network_interface)]
+                for field_name, metric_name in iteritems(NETWORK_GAUGE_METRICS):
+                    metric_value = network_stats.get(field_name)
+                    if metric_value is not None:
+                        self.gauge(metric_name, metric_value, network_tags)
+                for field_name, metric_name in iteritems(NETWORK_RATE_METRICS):
+                    metric_value = network_stats.get(field_name)
+                    if metric_value is not None:
+                        self.rate(metric_name, metric_value, network_tags)
+
         except Exception as e:
-            self.warning("Cannot retrieve metrics for {}: {}".format(container_id, e))
+            self.warning("Cannot retrieve metrics for %s: %s", container_id, e)

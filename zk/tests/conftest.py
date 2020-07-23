@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2010-2017
+# (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import os
@@ -7,8 +7,8 @@ import time
 
 import pytest
 
+from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.dev import RetryError, docker_run
-from datadog_checks.utils.common import get_docker_hostname
 from datadog_checks.zk import ZookeeperCheck
 from datadog_checks.zk.zk import ZKConnectionFailure
 
@@ -18,29 +18,15 @@ PORT = 12181
 HERE = os.path.dirname(os.path.abspath(__file__))
 URL = "http://{}:{}".format(HOST, PORT)
 
-STAT_METRICS = [
-    'zookeeper.latency.min',
-    'zookeeper.latency.avg',
-    'zookeeper.latency.max',
-    'zookeeper.bytes_received',
-    'zookeeper.bytes_sent',
-    'zookeeper.connections',
-    'zookeeper.connections',
-    'zookeeper.outstanding_requests',
-    'zookeeper.zxid.epoch',
-    'zookeeper.zxid.count',
-    'zookeeper.nodes',
-    'zookeeper.instances',
-    'zookeeper.packets.received',
-    'zookeeper.packets.sent',
-]
+
+VALID_CONFIG = {'host': HOST, 'port': PORT, 'expected_mode': "standalone", 'tags': ["mytag"]}
 
 STATUS_TYPES = ['leader', 'follower', 'observer', 'standalone', 'down', 'inactive', 'unknown']
 
 
 @pytest.fixture(scope="session")
 def get_instance():
-    return {'host': HOST, 'port': PORT, 'expected_mode': "standalone", 'tags': ["mytag"]}
+    return VALID_CONFIG
 
 
 @pytest.fixture
@@ -66,9 +52,10 @@ def dd_environment(get_instance):
     def condition():
         sys.stderr.write("Waiting for ZK to boot...\n")
         booted = False
+        dummy_instance = {'host': HOST, 'port': PORT, 'timeout': 500}
         for _ in range(10):
             try:
-                out = ZookeeperCheck._send_command('ruok', HOST, PORT, 500)
+                out = ZookeeperCheck('zk', {}, [dummy_instance])._send_command('ruok')
                 out.seek(0)
                 if out.readline() != 'imok':
                     raise ZKConnectionFailure()
@@ -82,8 +69,10 @@ def dd_environment(get_instance):
         sys.stderr.write("ZK boot complete.\n")
 
     compose_file = os.path.join(HERE, 'compose', 'zk.yaml')
-    if get_version() >= [3, 5, 0]:
-        compose_file = os.path.join(HERE, 'compose', 'zk35plus.yaml')
+    if [3, 5, 0] <= get_version() < [3, 6, 0]:
+        compose_file = os.path.join(HERE, 'compose', 'zk35.yaml')
+    elif get_version() >= [3, 6, 0]:
+        compose_file = os.path.join(HERE, 'compose', 'zk36plus.yaml')
 
     with docker_run(compose_file, conditions=[condition]):
         yield get_instance

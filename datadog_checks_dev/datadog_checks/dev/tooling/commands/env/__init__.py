@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import click
@@ -8,11 +8,12 @@ from .check import check_run
 from .ls import ls
 from .prune import prune
 from .reload import reload_env
+from .shell import shell
 from .start import start
 from .stop import stop
 from .test import test
 
-ALL_COMMANDS = (check_run, ls, prune, reload_env, start, stop, test)
+ALL_COMMANDS = (check_run, ls, prune, reload_env, shell, start, stop, test)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage environments')

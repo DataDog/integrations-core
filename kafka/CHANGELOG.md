@@ -1,5 +1,22 @@
 # CHANGELOG - kafka
 
+## 2.1.1 / 2020-06-29
+
+* [Fixed] Assert new jvm metrics. See [#6996](https://github.com/DataDog/integrations-core/pull/6996).
+
+## 2.1.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 2.0.3 / 2020-04-04
+
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+* [Fixed] Fix metric name for e2e test. See [#5985](https://github.com/DataDog/integrations-core/pull/5985).
+
+## 2.0.2 / 2019-10-11
+
+* [Fixed] Fix the missing Kafka producer metrics. See [#4737](https://github.com/DataDog/integrations-core/pull/4737). Thanks [Epokhe](https://github.com/Epokhe).
+
 ## 2.0.1 / 2019-08-24
 
 * [Fixed] Treat `kafka.producer.compression_rate` as a ratio. See [#4293](https://github.com/DataDog/integrations-core/pull/4293).

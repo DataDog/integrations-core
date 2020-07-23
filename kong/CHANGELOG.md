@@ -1,5 +1,37 @@
 # CHANGELOG - kong
 
+## 1.10.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Fixed] Fix template specs typos. See [#6912](https://github.com/DataDog/integrations-core/pull/6912).
+
+## 1.9.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.8.1 / 2020-04-07
+
+* [Fixed] Add `kerberos_cache` to HTTP config options. See [#6279](https://github.com/DataDog/integrations-core/pull/6279).
+
+## 1.8.0 / 2020-04-04
+
+* [Added] Add option to set SNI hostname via the `Host` header for RequestsWrapper. See [#5833](https://github.com/DataDog/integrations-core/pull/5833).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+
+## 1.7.1 / 2020-02-25
+
+* [Fixed] Update datadog_checks_base dependencies. See [#5846](https://github.com/DataDog/integrations-core/pull/5846).
+
+## 1.7.0 / 2020-02-22
+
+* [Added] Add `service` option to default configuration. See [#5805](https://github.com/DataDog/integrations-core/pull/5805).
+* [Added] Adds RequestsWrapper to Kong. See [#5807](https://github.com/DataDog/integrations-core/pull/5807).
+
+## 1.6.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
 ## 1.5.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3524](https://github.com/DataDog/integrations-core/pull/3524).

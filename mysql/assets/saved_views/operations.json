@@ -1,0 +1,17 @@
+{ 
+  "name": "MySQL operations",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:mysql @db.operation:*",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": ["source", "host", "service", "status", "@db.operation","@duration"],
+  "options": {
+    "columns": ["status", "host", "@db.operation"],
+    "show_date_column": true,
+    "show_message_column": true,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}

@@ -1,15 +1,17 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import mock
 import pytest
 import requests
+from tests.common import EXCHANGE_MESSAGE_STATS
 
+import datadog_checks.base
 from datadog_checks.rabbitmq import RabbitMQ
-from datadog_checks.rabbitmq.rabbitmq import RabbitMQException
+from datadog_checks.rabbitmq.rabbitmq import EXCHANGE_TYPE, NODE_TYPE, OVERVIEW_TYPE, RabbitMQException
 
-from . import common
+from . import common, metrics
 
 pytestmark = pytest.mark.unit
 
@@ -70,18 +72,50 @@ def test__check_aliveness(check, aggregator):
     check._get_data = mock.MagicMock()
 
     # only one vhost should be OK
-    check._get_data.side_effect = [{"status": "ok"}, {}]
-    check._check_aliveness('', vhosts=['foo', 'bar'], custom_tags=[])
+    check._get_data.side_effect = [{"status": "ok"}, {}, {"status": "not_ok"}, Exception("foo")]
+    check._check_aliveness('', vhosts=['foo', 'bar', 'baz', 'xyz'], custom_tags=[])
     sc = aggregator.service_checks('rabbitmq.aliveness')
-    assert len(sc) == 2
+    assert len(sc) == 4
     aggregator.assert_service_check('rabbitmq.aliveness', status=RabbitMQ.OK)
-    aggregator.assert_service_check('rabbitmq.aliveness', status=RabbitMQ.CRITICAL)
+    aggregator.assert_service_check('rabbitmq.aliveness', status=RabbitMQ.CRITICAL, count=3)
 
     # in case of connection errors, this check should stay silent
     check._get_data.side_effect = RabbitMQException
     with pytest.raises(RabbitMQException) as e:
         check._get_vhosts(instance, '')
         assert isinstance(e, RabbitMQException)
+
+
+@pytest.mark.unit
+def test__get_metrics(check, aggregator):
+    data = {'fd_used': 3.14, 'disk_free': 4242, 'mem_used': 9000}
+
+    assert check._get_metrics(data, NODE_TYPE, []) == 3
+    assert check._get_metrics({}, NODE_TYPE, []) == 0
+
+
+@pytest.mark.unit
+def test__get_metrics_3_1(check, aggregator):
+    data = {'queue_totals': []}
+
+    metrics = check._get_metrics(data, OVERVIEW_TYPE, [])
+    assert metrics == 0
+
+
+@pytest.mark.unit
+@mock.patch.object(datadog_checks.rabbitmq.RabbitMQ, '_get_object_data')
+def test_get_stats_empty_exchanges(mock__get_object_data, instance, check, aggregator):
+    data = [
+        {'name': 'ex1', 'message_stats': EXCHANGE_MESSAGE_STATS},
+        {'name': 'ex2', 'message_stats': EXCHANGE_MESSAGE_STATS},
+        {'name': 'ex3', 'message_stats': {}},
+        {'name': 'ex4', 'message_stats': EXCHANGE_MESSAGE_STATS},
+    ]
+    mock__get_object_data.return_value = data
+    check.get_stats(instance, 'base_url', EXCHANGE_TYPE, 3, {'explicit': [], 'regexes': ['ex.*']}, [], [])
+    aggregator.assert_metric('rabbitmq.exchange.messages.ack.count', tags=['rabbitmq_exchange:ex1'])
+    aggregator.assert_metric('rabbitmq.exchange.messages.ack.count', tags=['rabbitmq_exchange:ex2'])
+    aggregator.assert_metric('rabbitmq.exchange.messages.ack.count', tags=['rabbitmq_exchange:ex4'])
 
 
 @pytest.mark.parametrize(
@@ -113,3 +147,31 @@ def test_config(check, test_case, extra_config, expected_http_kwargs):
         http_wargs.update(expected_http_kwargs)
 
         r.get.assert_called_with('http://localhost:15672/api/connections', **http_wargs)
+
+
+@pytest.mark.unit
+def test_nodes(aggregator, check):
+
+    # default, node metrics are collected
+    check = RabbitMQ('rabbitmq', {}, instances=[common.CONFIG])
+    check.check(common.CONFIG)
+
+    for m in metrics.COMMON_METRICS:
+        aggregator.assert_metric(m, count=1)
+
+    aggregator.reset()
+
+
+@pytest.mark.unit
+def test_disable_nodes(aggregator, check):
+
+    # node metrics collection disabled in config, node metrics should not appear
+    check = RabbitMQ('rabbitmq', {}, instances=[common.CONFIG_NO_NODES])
+    check.check(common.CONFIG_NO_NODES)
+
+    for m in metrics.COMMON_METRICS:
+        aggregator.assert_metric(m, count=0)
+
+    # check to ensure other metrics are being collected
+    for m in metrics.Q_METRICS:
+        aggregator.assert_metric(m, count=1)

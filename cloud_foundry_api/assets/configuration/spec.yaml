@@ -1,0 +1,68 @@
+name: Cloud Foundry API
+files:
+- name: cloud_foundry_api.yaml
+  options:
+  - template: instances
+    options:
+    - name: api_url
+      description: URL of the Cloud Controller API.
+      required: true
+      value:
+        type: string
+    - name: client_id
+      description: |
+        `client_id` used to authenticate with UAA and obtain an oauth token
+        for communication with the Cloud Controller API.
+      required: true
+      value:
+        type: string
+    - name: client_secret
+      description: |
+        `client_secret` used to authenticate with UAA and obtain an oauth token
+        for communication with the Cloud Controller API.
+      required: true
+      value:
+        type: string
+      secret: true
+    - name: event_filter
+      description: |
+        A list of the types of audit events to fetch.
+        See https://docs.cloudfoundry.org/running/managing-cf/audit-events.html#types for detailed information.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+        - audit.app.restage
+        - audit.app.update
+        - audit.app.create
+        - app.crash
+    - name: results_per_page
+      description: |
+        Maximum number of event results per request to the API. Maximum is 5000 for v3, and 100 for v2.
+      value:
+        type: integer
+        maximum: 5000
+        default: 100
+    - template: instances/default
+    - template: instances/http
+      overrides:
+        username.hidden: true
+        auth_type.hidden: true
+        password.hidden: true
+        ntlm_domain.hidden: true
+        kerberos_auth.hidden: true
+        kerberos_cache.hidden: true
+        kerberos_delegate.hidden: true
+        kerberos_force_initiate.hidden: true
+        kerberos_hostname.hidden: true
+        kerberos_keytab.hidden: true
+        kerberos_principal.hidden: true
+        aws_region.hidden: true
+        aws_host.hidden: true
+        aws_service.hidden: true
+  - template: init_config
+    options:
+    - template: init_config/default
+    - template: init_config/http
+

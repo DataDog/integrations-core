@@ -16,12 +16,16 @@
   "public_title": "Datadog-Ambari Integration",
   "categories": [
     "processing",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "type": "check",
   "is_public": true,
   "integration_id": "ambari",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {
       "Ambari base dashboard": "assets/dashboards/base_dashboard.json"

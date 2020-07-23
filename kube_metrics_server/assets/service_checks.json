@@ -1,10 +1,16 @@
 [
     {
         "agent_version": "6.0.0",
-        "integration":"kube_metrics_server",
+        "integration": "Kube metrics server",
         "check": "kube_metrics_server.prometheus.health",
-        "statuses": ["ok", "critical"],
-        "groups": ["host", "endpoint"],
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "host",
+            "endpoint"
+        ],
         "name": "Kubernetes Metrics Server prometheus health",
         "description": "Returns `CRITICAL` if the check cannot access the metrics endpoint."
     }

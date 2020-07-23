@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # (C) Dan Crosta <dcrosta@late.am> 2018
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
@@ -7,7 +7,7 @@ from collections import defaultdict
 
 import requests
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 db_stats = re.compile(r'^db_(\d)+$')
 whitespace = re.compile(r'\s')

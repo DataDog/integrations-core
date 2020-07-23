@@ -1,0 +1,586 @@
+{
+    "author_info": {
+        "author_name": "Datadog"
+    },
+    "board_title": "SAP HANA Overview",
+    "created": "2019-10-23T22:03:16.131906+00:00",
+    "created_by": {
+        "access_role": "st",
+        "disabled": false,
+        "email": "support@datadoghq.com",
+        "handle": "support@datadoghq.com",
+        "is_admin": false,
+        "name": "Datadog",
+        "role": null,
+        "verified": true
+    },
+    "description": "## SAP HANA Dashboard\n\nThis is an example SAP HANA dashboard demonstrating the metrics that the integration collects.",
+    "disableCog": false,
+    "disableEditing": false,
+    "id": 872366,
+    "isIntegration": false,
+    "isShared": false,
+    "modified": "2019-12-05T23:33:09.386413+00:00",
+    "new_id": "aiq-tfk-a4n",
+    "originalHeight": 80,
+    "originalWidth": "calc(100% - 32px)",
+    "read_only": false,
+    "template_variables": [],
+    "widgets": [
+        {
+            "add_timeframe": true,
+            "auto_refresh": false,
+            "bgcolor": "gray",
+            "board_id": "aiq-tfk-a4n",
+            "font_size": "18",
+            "height": 5,
+            "html": "Memory",
+            "isShared": false,
+            "refresh_every": 30000,
+            "scaleFactor": 1,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "title": false,
+            "type": "note",
+            "width": 47,
+            "x": 20,
+            "y": 1
+        },
+        {
+            "add_timeframe": true,
+            "board_id": "aiq-tfk-a4n",
+            "height": 12,
+            "isShared": false,
+            "margin": "",
+            "scaleFactor": 1,
+            "sizing": "fit",
+            "title": false,
+            "type": "image",
+            "url": "/static/images/saas_logos/bot/sap_hana.png",
+            "width": 18,
+            "x": 1,
+            "y": 1
+        },
+        {
+            "add_timeframe": true,
+            "error": null,
+            "height": 13,
+            "isShared": false,
+            "legend": false,
+            "legend_size": "0",
+            "scaleFactor": 1,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "tile_def": {
+                "autoscale": true,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [],
+                        "q": "avg:sap_hana.memory.service.overall.utilized{service_name:compileserver}, avg:sap_hana.memory.service.overall.utilized{service_name:nameserver}, avg:sap_hana.memory.service.overall.utilized{service_name:indexserver}, avg:sap_hana.memory.service.overall.utilized{service_name:preprocessor}, avg:sap_hana.memory.service.overall.utilized{service_name:webdispatcher}",
+                        "style": {
+                            "palette": "cool",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Average memory utilization by service (%)",
+            "type": "timeseries",
+            "width": 47,
+            "x": 20,
+            "y": 7
+        },
+        {
+            "add_timeframe": true,
+            "error": null,
+            "height": 15,
+            "isShared": false,
+            "legend": false,
+            "legend_size": "0",
+            "scaleFactor": 1,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "tile_def": {
+                "autoscale": true,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [],
+                        "q": "avg:sap_hana.cpu.service.utilized{*} by {hana_host}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "CPU utilization",
+            "type": "timeseries",
+            "width": 47,
+            "x": 20,
+            "y": 69
+        },
+        {
+            "add_timeframe": true,
+            "error": null,
+            "height": 15,
+            "isShared": false,
+            "legend": false,
+            "legend_size": "0",
+            "scaleFactor": 1,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "tile_def": {
+                "autoscale": true,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [],
+                        "q": "avg:sap_hana.connection.idle{*}, avg:sap_hana.connection.running{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Average connections (idle and running)",
+            "type": "timeseries",
+            "width": 47,
+            "x": 69,
+            "y": 69
+        },
+        {
+            "add_timeframe": true,
+            "error": null,
+            "height": 13,
+            "isShared": false,
+            "legend": false,
+            "legend_size": "0",
+            "scaleFactor": 1,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "tile_def": {
+                "autoscale": true,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [],
+                        "q": "avg:sap_hana.disk.free{*}, avg:sap_hana.disk.used{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Average disk free and disk used",
+            "type": "timeseries",
+            "width": 47,
+            "x": 20,
+            "y": 45
+        },
+        {
+            "add_timeframe": true,
+            "autoscale": true,
+            "error": null,
+            "height": 13,
+            "isShared": false,
+            "legend": false,
+            "legend_size": "0",
+            "scaleFactor": 1,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "tile_def": {
+                "autoscale": true,
+                "custom_unit": "%",
+                "precision": "2",
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [
+                            {
+                                "comparator": "<",
+                                "palette": "white_on_green",
+                                "value": "70"
+                            },
+                            {
+                                "comparator": ">=",
+                                "palette": "white_on_yellow",
+                                "value": "70"
+                            },
+                            {
+                                "comparator": ">=",
+                                "palette": "white_on_red",
+                                "value": "80"
+                            }
+                        ],
+                        "q": "avg:sap_hana.disk.utilized{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": null
+                    }
+                ],
+                "viz": "query_value"
+            },
+            "time": {
+                "live_span": "15m"
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Disk utilization",
+            "type": "query_value",
+            "width": 18,
+            "x": 1,
+            "y": 14
+        },
+        {
+            "add_timeframe": true,
+            "error": null,
+            "height": 13,
+            "isShared": false,
+            "legend": false,
+            "legend_size": "0",
+            "scaleFactor": 1,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "tile_def": {
+                "autoscale": true,
+                "custom_unit": "%",
+                "precision": "2",
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [],
+                        "q": "avg:sap_hana.memory.row_store.utilized{*}",
+                        "style": {
+                            "palette": "cool",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Average row store memory utilization (%)",
+            "type": "timeseries",
+            "width": 47,
+            "x": 20,
+            "y": 23
+        },
+        {
+            "add_timeframe": true,
+            "error": null,
+            "height": 13,
+            "isShared": false,
+            "legend": false,
+            "legend_size": "0",
+            "scaleFactor": 1,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "tile_def": {
+                "autoscale": true,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [],
+                        "q": "avg:sap_hana.thread.service.active{*}, avg:sap_hana.thread.service.inactive{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "area"
+                    }
+                ],
+                "viz": "timeseries"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Count of active and inactive threads",
+            "type": "timeseries",
+            "width": 47,
+            "x": 20,
+            "y": 87
+        },
+        {
+            "add_timeframe": true,
+            "autoscale": true,
+            "error": null,
+            "height": 13,
+            "isShared": false,
+            "legend": false,
+            "legend_size": "0",
+            "scaleFactor": 1,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "tile_def": {
+                "autoscale": true,
+                "custom_unit": "min",
+                "precision": "0",
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [],
+                        "q": "avg:sap_hana.backup.latest{*}/60",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": null
+                    }
+                ],
+                "viz": "query_value"
+            },
+            "time": {
+                "live_span": "15m"
+            },
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Time since last backup",
+            "type": "query_value",
+            "width": 18,
+            "x": 1,
+            "y": 30
+        },
+        {
+            "add_timeframe": true,
+            "error": null,
+            "height": 15,
+            "isShared": false,
+            "legend": false,
+            "legend_size": "0",
+            "scaleFactor": 1,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "tile_def": {
+                "autoscale": true,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [],
+                        "q": "avg:sap_hana.volume.io.throughput{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Average throughput",
+            "type": "timeseries",
+            "width": 47,
+            "x": 69,
+            "y": 25
+        },
+        {
+            "add_timeframe": true,
+            "error": null,
+            "height": 15,
+            "isShared": false,
+            "legend": false,
+            "legend_size": "0",
+            "scaleFactor": 1,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "tile_def": {
+                "autoscale": true,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [],
+                        "q": "avg:sap_hana.volume.io.utilized{*}, avg:sap_hana.volume.io.read.utilized{*}, avg:sap_hana.volume.io.write.utilized{*}",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "line"
+                    }
+                ],
+                "viz": "timeseries"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Average read, write, and total I/O time (%)",
+            "type": "timeseries",
+            "width": 47,
+            "x": 69,
+            "y": 7
+        },
+        {
+            "add_timeframe": true,
+            "auto_refresh": false,
+            "background_color": "gray",
+            "bgcolor": "gray",
+            "content": "Memory",
+            "font_size": "18",
+            "height": 5,
+            "html": "Storage",
+            "isShared": false,
+            "legend": false,
+            "legend_size": "0",
+            "refresh_every": 30000,
+            "scaleFactor": 1,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "title": false,
+            "type": "note",
+            "viz": "note",
+            "width": 47,
+            "x": 20,
+            "y": 39
+        },
+        {
+            "add_timeframe": true,
+            "auto_refresh": false,
+            "background_color": "gray",
+            "bgcolor": "gray",
+            "content": "Memory",
+            "font_size": "18",
+            "height": 5,
+            "html": "Throughput",
+            "isShared": false,
+            "legend": false,
+            "legend_size": "0",
+            "refresh_every": 30000,
+            "scaleFactor": 1,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "title": false,
+            "type": "note",
+            "viz": "note",
+            "width": 47,
+            "x": 69,
+            "y": 1
+        },
+        {
+            "add_timeframe": true,
+            "auto_refresh": false,
+            "bgcolor": "gray",
+            "board_id": "aiq-tfk-a4n",
+            "font_size": "18",
+            "height": 6,
+            "html": "Processor and network",
+            "isShared": false,
+            "refresh_every": 30000,
+            "scaleFactor": 1,
+            "text_align": "center",
+            "tick": true,
+            "tick_edge": "bottom",
+            "tick_pos": "50%",
+            "title": false,
+            "type": "note",
+            "width": 96,
+            "x": 20,
+            "y": 62
+        },
+        {
+            "add_timeframe": true,
+            "error": null,
+            "height": 15,
+            "isShared": false,
+            "legend": false,
+            "legend_size": "0",
+            "scaleFactor": 1,
+            "sharedGlobalTime": {
+                "live_span": "1h"
+            },
+            "tile_def": {
+                "autoscale": true,
+                "requests": [
+                    {
+                        "aggregator": "avg",
+                        "conditional_formats": [],
+                        "q": "avg:sap_hana.volume.io.read.count{*} by {hana_host}.as_count(), avg:sap_hana.volume.io.write.count{*} by {hana_host}.as_count()",
+                        "style": {
+                            "palette": "dog_classic",
+                            "type": "solid",
+                            "width": "normal"
+                        },
+                        "type": "bars"
+                    }
+                ],
+                "title_align": "left",
+                "title_size": "16",
+                "viz": "timeseries"
+            },
+            "time": {},
+            "title": true,
+            "title_align": "left",
+            "title_size": 16,
+            "title_text": "Average read and write I/O count",
+            "type": "timeseries",
+            "width": 47,
+            "x": 69,
+            "y": 43
+        }
+    ]
+}

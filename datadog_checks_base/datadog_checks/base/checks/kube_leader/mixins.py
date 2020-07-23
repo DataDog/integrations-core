@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -48,7 +48,7 @@ class KubeLeaderElectionMixin(object):
             )
             self._report_status(config, record)
         except Exception as e:
-            self.warning("Cannot retrieve leader election record {}: {}".format(config.get("record_name", ""), e))
+            self.warning("Cannot retrieve leader election record %s: %s", config.get("record_name", ""), e)
 
     @staticmethod
     def _get_record(kind, name, namespace):

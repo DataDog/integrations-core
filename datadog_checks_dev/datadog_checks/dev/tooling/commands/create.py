@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
@@ -10,7 +10,7 @@ from ...utils import resolve_path
 from ..constants import get_root
 from ..create import construct_template_fields, create_template_files, get_valid_templates
 from ..utils import normalize_package_name
-from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success
+from .console import CONTEXT_SETTINGS, abort, echo_info, echo_success, echo_warning
 
 HYPHEN = b'\xe2\x94\x80\xe2\x94\x80'.decode('utf-8')
 PIPE = b'\xe2\x94\x82'.decode('utf-8')
@@ -24,15 +24,13 @@ def tree():
 
 def construct_output_info(path, depth, last, is_dir=False):
     if depth == 0:
-        return u'', path, is_dir
+        return '', path, is_dir
     else:
         if depth == 1:
-            return (u'{}{} '.format(PIPE_END if last else PIPE_MIDDLE, HYPHEN), path, is_dir)
+            return (f'{PIPE_END if last else PIPE_MIDDLE}{HYPHEN} ', path, is_dir)
         else:
             return (
-                u'{}   {}{}'.format(
-                    PIPE, u' ' * 4 * (depth - 2), u'{}{} '.format(PIPE_END if last or is_dir else PIPE_MIDDLE, HYPHEN)
-                ),
+                f"{PIPE}   {' ' * 4 * (depth - 2)}{PIPE_END if last or is_dir else PIPE_MIDDLE}{HYPHEN} ",
                 path,
                 is_dir,
             )
@@ -93,14 +91,22 @@ def display_path_tree(path_tree):
 @click.option('--dry-run', '-n', is_flag=True, help='Only show what would be created')
 @click.pass_context
 def create(ctx, name, integration_type, location, non_interactive, quiet, dry_run):
-    """Create scaffolding for a new integration."""
+    """
+        Create scaffolding for a new integration.
+
+        NAME: The display name of the integration that will appear in documentation.
+    """
+
+    if name.islower():
+        echo_warning('Make sure to use the display name. e.g. MapR, Ambari, IBM MQ, vSphere, ...')
+
     repo_choice = ctx.obj['repo_choice']
     root = resolve_path(location) if location else get_root()
     path_sep = os.path.sep
 
     integration_dir = os.path.join(root, normalize_package_name(name))
     if os.path.exists(integration_dir):
-        abort('Path `{}` already exists!'.format(integration_dir))
+        abort(f'Path `{integration_dir}` already exists!')
 
     template_fields = {}
     if repo_choice != 'core' and not non_interactive and not dry_run:
@@ -112,7 +118,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
     config = construct_template_fields(name, repo_choice, **template_fields)
 
     files = create_template_files(integration_type, root, config, read=not dry_run)
-    file_paths = [file.file_path.replace('{}{}'.format(root, path_sep), '', 1) for file in files]
+    file_paths = [file.file_path.replace(f'{root}{path_sep}', '', 1) for file in files]
 
     path_tree = tree()
     for file_path in file_paths:
@@ -123,9 +129,9 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
 
     if dry_run:
         if quiet:
-            echo_info('Will create `{}`'.format(integration_dir))
+            echo_info(f'Will create `{integration_dir}`')
         else:
-            echo_info('Will create in `{}`:'.format(root))
+            echo_info(f'Will create in `{root}`:')
             display_path_tree(path_tree)
         return
 
@@ -133,7 +139,7 @@ def create(ctx, name, integration_type, location, non_interactive, quiet, dry_ru
         file.write()
 
     if quiet:
-        echo_info('Created `{}`'.format(integration_dir))
+        echo_info(f'Created `{integration_dir}`')
     else:
-        echo_info('Created in `{}`:'.format(root))
+        echo_info(f'Created in `{root}`:')
         display_path_tree(path_tree)

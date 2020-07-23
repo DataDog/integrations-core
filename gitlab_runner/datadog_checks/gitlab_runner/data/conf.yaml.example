@@ -9,9 +9,13 @@ init_config:
     - ci_docker_machines_provider_machine_states
     - ci_runner_builds
     - ci_runner_errors
-    - ci_runner_version_info
     - ci_ssh_docker_machines_provider_machine_creation_duration_seconds
     - ci_ssh_docker_machines_provider_machine_states
+    - gitlab_runner_autoscaling_machine_creation_duration_seconds
+    - gitlab_runner_autoscaling_machine_states
+    - gitlab_runner_errors_total
+    - gitlab_runner_jobs
+    - gitlab_runner_version_info
     - go_gc_duration_seconds
     - go_goroutines
     - go_memstats_alloc_bytes
@@ -109,7 +113,7 @@ instances:
     ## If your services uses NTLM authentication, you can
     ## specify a domain that is used in the check. For NTLM Auth,
     ## append the username to domain, not as the `username` parameter.
-    ## Example: <NTLM_DOMAIN>/<USERNAME>
+    ## Example: <NTLM_DOMAIN>\<USERNAME>
     #
     # ntlm_domain: <DOMAIN>
 
@@ -204,6 +208,12 @@ instances:
     #
     # kerberos_keytab: <KEYTAB_FILE_PATH>
 
+    ## @param kerberos_cache - string - optional
+    ## Sets the KRB5CCNAME environment variable.
+    ## It should point to a credential cache with a valid TGT.
+    #
+    # kerberos_cache: <KRB5CCNAME>
+
     ## @param tls_verify - boolean - optional - default: true
     ## Instructs the check to validate the TLS certificate of services.
     #
@@ -212,6 +222,10 @@ instances:
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable these by setting `tls_ignore_warning` to true.
+    ##
+    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
+    ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
+    ## to true.
     #
     # tls_ignore_warning: false
 

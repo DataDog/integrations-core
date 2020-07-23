@@ -1,11 +1,11 @@
-# (C) Datadog, Inc. 2013-2017
+# (C) Datadog, Inc. 2013-present
 # (C) Patrick Galbraith <patg@patg.net> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
 from six import PY2
 
-from datadog_checks.checks import AgentCheck
+from datadog_checks.base import AgentCheck
 
 # Python 3 compatibility is a different library
 # It's a drop in replacement but has a different name
@@ -27,7 +27,7 @@ class Gearman(AgentCheck):
 
     def _get_client(self, host, port):
         if not (host, port) in self.gearman_clients:
-            self.log.debug("Connecting to gearman at address %s:%s" % (host, port))
+            self.log.debug("Connecting to gearman at address %s:%s", host, port)
             self.gearman_clients[(host, port)] = gearman.GearmanAdminClient(["%s:%s" % (host, port)])
 
         return self.gearman_clients[(host, port)]
@@ -47,11 +47,11 @@ class Gearman(AgentCheck):
         self.gauge("gearman.queued", queued, tags=tags)
         self.gauge("gearman.workers", workers, tags=tags)
 
-        self.log.debug("running %d, queued %d, unique tasks %d, workers: %d" % (running, queued, unique_tasks, workers))
+        self.log.debug("running %d, queued %d, unique tasks %d, workers: %d", running, queued, unique_tasks, workers)
 
     def _get_per_task_metrics(self, tasks, task_filter, tags):
         if len(task_filter) > MAX_NUM_TASKS:
-            self.warning("The maximum number of tasks you can specify is {}.".format(MAX_NUM_TASKS))
+            self.warning("The maximum number of tasks you can specify is %s.", MAX_NUM_TASKS)
 
         if not len(task_filter) == 0:
             tasks = [t for t in tasks if t['task'] in task_filter]
@@ -118,3 +118,22 @@ class Gearman(AgentCheck):
         except Exception as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=str(e), tags=tags)
             raise
+
+        if self.is_metadata_collection_enabled():
+            self._collect_metadata(client)
+
+    def _collect_metadata(self, client):
+        try:
+            resp = client.get_version()
+        except Exception as e:
+            self.log.warning('Error retrieving version information: %s', e)
+            return
+
+        if not resp.startswith('OK '):
+            self.log.warning('Error retrieving version information from server, response: %s', resp)
+            return
+
+        # strip off the 'OK ' text
+        server_version = resp[3:]
+        if server_version:
+            self.set_metadata('version', server_version)

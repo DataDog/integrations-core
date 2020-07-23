@@ -1,5 +1,57 @@
 # CHANGELOG - haproxy
 
+## 2.10.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+* [Fixed] Fix version parsing with haproxy enterprise version. See [#6774](https://github.com/DataDog/integrations-core/pull/6774).
+
+## 2.9.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 2.8.1 / 2020-05-05
+
+* [Fixed] Handle empty response from show table. See [#6579](https://github.com/DataDog/integrations-core/pull/6579).
+
+## 2.8.0 / 2020-04-04
+
+* [Added] Gather stick-table metrics. See [#6158](https://github.com/DataDog/integrations-core/pull/6158).
+* [Fixed] Revert `to_native_string` to `to_string` for integrations. See [#6238](https://github.com/DataDog/integrations-core/pull/6238).
+
+## 2.7.2 / 2020-03-24
+
+* [Fixed] Fix event submission on Python 3. See [#6138](https://github.com/DataDog/integrations-core/pull/6138).
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+* [Fixed] Remove logs sourcecategory. See [#6121](https://github.com/DataDog/integrations-core/pull/6121).
+* [Fixed] Rename `to_string()` utility to `to_native_string()`. See [#5996](https://github.com/DataDog/integrations-core/pull/5996).
+
+## 2.7.1 / 2020-02-25
+
+* [Fixed] Document disable_legacy_service_tag and bump checks_base requirement. See [#5835](https://github.com/DataDog/integrations-core/pull/5835).
+
+## 2.7.0 / 2020-02-22
+
+* [Added] Add an option to skip reporting during restarts. See [#5571](https://github.com/DataDog/integrations-core/pull/5571). Thanks [dd-adn](https://github.com/dd-adn).
+* [Deprecated] Deprecate `service` tag. See [#5550](https://github.com/DataDog/integrations-core/pull/5550).
+
+## 2.6.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+* [Added] Use lazy logging format. See [#5377](https://github.com/DataDog/integrations-core/pull/5377).
+
+## 2.5.1 / 2019-12-13
+
+* [Fixed] Handle failure on version endpoint. See [#5208](https://github.com/DataDog/integrations-core/pull/5208).
+
+## 2.5.0 / 2019-12-02
+
+* [Added] Submit version metadata. See [#4851](https://github.com/DataDog/integrations-core/pull/4851).
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
+## 2.4.0 / 2019-10-11
+
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 2.3.0 / 2019-08-24
 
 * [Added] Add requests wrapper to haproxy. See [#4219](https://github.com/DataDog/integrations-core/pull/4219).

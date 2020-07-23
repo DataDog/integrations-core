@@ -1,12 +1,30 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
+from re import match
 
 from six import iteritems
 
-from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.errors import CheckException
+from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
+from datadog_checks.base.errors import CheckException
+
+METRICS = {
+    'apiserver_current_inflight_requests': 'current_inflight_requests',
+    'apiserver_longrunning_gauge': 'longrunning_gauge',
+    'go_threads': 'go_threads',
+    'go_goroutines': 'go_goroutines',
+    'APIServiceRegistrationController_depth': 'APIServiceRegistrationController_depth',
+    'etcd_object_counts': 'etcd_object_counts',
+    'rest_client_request_latency_seconds': 'rest_client_request_latency_seconds',
+    'apiserver_admission_webhook_admission_latencies_seconds': 'admission_webhook_admission_latencies_seconds',
+    'apiserver_admission_step_admission_latencies_seconds': 'admission_step_admission_latencies_seconds',
+    'apiserver_admission_controller_admission_duration_seconds': 'admission_controller_admission_duration_seconds',
+    # fmt: off
+    'apiserver_admission_step_admission_latencies_seconds_summary':
+        'admission_step_admission_latencies_seconds_summary',
+    # fmt: on
+}
 
 
 class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
@@ -22,7 +40,7 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
     DEFAULT_SSL_VERIFY = False
     DEFAULT_BEARER_TOKEN_AUTH = True
 
-    def __init__(self, name, init_config, agentConfig, instances=None):
+    def __init__(self, name, init_config, instances=None):
         # Set up metrics_transformers
         self.metric_transformers = {
             'apiserver_audit_event_total': self.apiserver_audit_event_total,
@@ -31,41 +49,32 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
             'apiserver_dropped_requests_total': self.apiserver_dropped_requests_total,
             'http_requests_total': self.http_requests_total,
             'authenticated_user_requests': self.authenticated_user_requests,
+            # metric added in kubernetes 1.15
+            'apiserver_request_total': self.apiserver_request_total,
         }
         self.kube_apiserver_config = None
 
         super(KubeAPIServerMetricsCheck, self).__init__(
             name,
             init_config,
-            agentConfig,
             instances=instances,
-            default_instances={
-                "kube_apiserver": {
-                    'namespace': 'kube_apiserver',
-                    'metrics': [
-                        {
-                            'apiserver_current_inflight_requests': 'current_inflight_requests',
-                            'apiserver_longrunning_gauge': 'longrunning_gauge',
-                            'go_threads': 'go_threads',
-                            'go_goroutines': 'go_goroutines',
-                            'APIServiceRegistrationController_depth': 'APIServiceRegistrationController_depth',
-                            'etcd_object_counts': 'etcd_object_counts',
-                        }
-                    ],
-                }
-            },
+            default_instances={"kube_apiserver": {'namespace': 'kube_apiserver', 'metrics': [METRICS]}},
             default_namespace="kube_apiserver",
         )
 
     def check(self, instance):
         if self.kube_apiserver_config is None:
-            kube_apiserver_config = self._create_kube_apiserver_metrics_instance(instance)
-            self.kube_apiserver_config = self.get_scraper_config(kube_apiserver_config)
+            self.kube_apiserver_config = self.get_scraper_config(instance)
 
         if not self.kube_apiserver_config['metrics_mapper']:
             url = self.kube_apiserver_config['prometheus_url']
             raise CheckException("You have to collect at least one metric from the endpoint: {}".format(url))
         self.process(self.kube_apiserver_config, metric_transformers=self.metric_transformers)
+
+    def get_scraper_config(self, instance):
+        # Change config before it's cached by parent get_scraper_config
+        config = self._create_kube_apiserver_metrics_instance(instance)
+        return super(KubeAPIServerMetricsCheck, self).get_scraper_config(config)
 
     def _create_kube_apiserver_metrics_instance(self, instance):
         """
@@ -73,8 +82,15 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
         """
         kube_apiserver_metrics_instance = deepcopy(instance)
         endpoint = instance.get('prometheus_url')
-        scheme = instance.get('scheme', self.DEFAULT_SCHEME)
-        kube_apiserver_metrics_instance['prometheus_url'] = "{0}://{1}".format(scheme, endpoint)
+        prometheus_url = endpoint
+
+        # Allow using a proper URL without introducing a breaking change since
+        # the scheme option is deprecated.
+        if not match('^https?://.*$', endpoint):
+            scheme = instance.get('scheme', self.DEFAULT_SCHEME)
+            prometheus_url = "{0}://{1}".format(scheme, endpoint)
+
+        kube_apiserver_metrics_instance['prometheus_url'] = prometheus_url
 
         # Most set ups are using self signed certificates as the APIServer can be used as a CA.
         ssl_verify = instance.get('ssl_verify', self.DEFAULT_SSL_VERIFY)
@@ -119,3 +135,6 @@ class KubeAPIServerMetricsCheck(OpenMetricsBaseCheck):
 
     def authenticated_user_requests(self, metric, scraper_config):
         self.submit_as_gauge_and_monotonic_count('.authenticated_user_requests', metric, scraper_config)
+
+    def apiserver_request_total(self, metric, scraper_config):
+        self.submit_as_gauge_and_monotonic_count('.apiserver_request_total', metric, scraper_config)

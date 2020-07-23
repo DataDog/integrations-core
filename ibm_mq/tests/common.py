@@ -1,10 +1,11 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
 
 from datadog_checks.dev import get_docker_hostname
+from datadog_checks.ibm_mq.metrics import COUNT, GAUGE
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')
@@ -15,7 +16,7 @@ PORT = '11414'
 USERNAME = 'admin'
 PASSWORD = 'passw0rd'
 
-QUEUE_MANAGER = 'datadog'
+QUEUE_MANAGER = 'QM1'
 CHANNEL = 'DEV.ADMIN.SVRCONN'
 
 QUEUE = 'DEV.QUEUE.1'
@@ -23,8 +24,12 @@ QUEUE = 'DEV.QUEUE.1'
 BAD_CHANNEL = 'DEV.NOTHERE.SVRCONN'
 
 MQ_VERSION = os.environ.get('IBM_MQ_VERSION', '9')
+MQ_COMPOSE_VERSION = os.environ['IBM_MQ_COMPOSE_VERSION']
+MQ_VERSION_RAW = os.environ.get('IBM_MQ_VERSION_RAW', '9.1.1.0')
 
-COMPOSE_FILE_NAME = 'docker-compose-v{}.yml'.format(MQ_VERSION)
+IS_CLUSTER = 'cluster' in MQ_COMPOSE_VERSION
+
+COMPOSE_FILE_NAME = 'docker-compose-v{}.yml'.format(MQ_COMPOSE_VERSION)
 
 COMPOSE_FILE_PATH = os.path.join(COMPOSE_DIR, COMPOSE_FILE_NAME)
 
@@ -33,6 +38,30 @@ INSTANCE = {
     'queue_manager': QUEUE_MANAGER,
     'host': HOST,
     'port': PORT,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'queues': [QUEUE],
+    'channels': [CHANNEL, BAD_CHANNEL],
+    'tags': ['foo:bar'],
+    'collect_statistics_metrics': True,
+}
+
+INSTANCE_METADATA = {
+    'channel': CHANNEL,
+    'queue_manager': QUEUE_MANAGER,
+    'host': HOST,
+    'port': PORT,
+    'username': USERNAME,
+    'password': PASSWORD,
+    'queues': [QUEUE],
+    'channels': [CHANNEL, BAD_CHANNEL],
+    'tags': ['foo:bar'],
+}
+
+INSTANCE_WITH_CONNECTION_NAME = {
+    'channel': CHANNEL,
+    'queue_manager': QUEUE_MANAGER,
+    'connection_name': "{}({})".format(HOST, PORT),
     'username': USERNAME,
     'password': PASSWORD,
     'queues': [QUEUE],
@@ -69,6 +98,7 @@ INSTANCE_COLLECT_ALL = {
     'username': USERNAME,
     'password': PASSWORD,
     'auto_discover_queues': True,
+    'collect_statistics_metrics': True,
     'channels': [CHANNEL, BAD_CHANNEL],
 }
 
@@ -84,61 +114,129 @@ INSTANCE_QUEUE_REGEX_TAG = {
 }
 
 E2E_METADATA = {
-    'start_commands': [
-        'mkdir /opt/mqm',
-        'curl -o /opt/mqm/mq-client.tar.gz '
-        'https://dd-agent-tarball-mirror.s3.amazonaws.com/9.0.0.6-IBM-MQC-Redist-LinuxX64.tar.gz',
-        'tar -C /opt/mqm -xf /opt/mqm/mq-client.tar.gz',
-    ],
-    'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib'},
+    'docker_volumes': ['{}/scripts/start_commands.sh:/tmp/start_commands.sh'.format(HERE)],
+    'start_commands': ['bash /tmp/start_commands.sh'],
+    'env_vars': {'LD_LIBRARY_PATH': '/opt/mqm/lib64:/opt/mqm/lib', 'C_INCLUDE_PATH': '/opt/mqm/inc'},
 }
 
-
 QUEUE_METRICS = [
-    'ibm_mq.queue.service_interval',
-    'ibm_mq.queue.inhibit_put',
-    'ibm_mq.queue.depth_low_limit',
-    'ibm_mq.queue.inhibit_get',
-    'ibm_mq.queue.harden_get_backout',
-    'ibm_mq.queue.service_interval_event',
-    'ibm_mq.queue.trigger_control',
-    'ibm_mq.queue.usage',
-    'ibm_mq.queue.scope',
-    'ibm_mq.queue.type',
-    'ibm_mq.queue.depth_max',
-    'ibm_mq.queue.backout_threshold',
-    'ibm_mq.queue.depth_high_event',
-    'ibm_mq.queue.depth_low_event',
-    'ibm_mq.queue.trigger_message_priority',
-    'ibm_mq.queue.depth_current',
-    'ibm_mq.queue.depth_max_event',
-    'ibm_mq.queue.open_input_count',
-    'ibm_mq.queue.persistence',
-    'ibm_mq.queue.trigger_depth',
-    'ibm_mq.queue.max_message_length',
-    'ibm_mq.queue.depth_high_limit',
-    'ibm_mq.queue.priority',
-    'ibm_mq.queue.input_open_option',
-    'ibm_mq.queue.message_delivery_sequence',
-    'ibm_mq.queue.retention_interval',
-    'ibm_mq.queue.open_output_count',
-    'ibm_mq.queue.trigger_type',
-    'ibm_mq.queue.depth_percent',
+    ('ibm_mq.queue.service_interval', GAUGE),
+    ('ibm_mq.queue.inhibit_put', GAUGE),
+    ('ibm_mq.queue.depth_low_limit', GAUGE),
+    ('ibm_mq.queue.inhibit_get', GAUGE),
+    ('ibm_mq.queue.harden_get_backout', GAUGE),
+    ('ibm_mq.queue.service_interval_event', GAUGE),
+    ('ibm_mq.queue.trigger_control', GAUGE),
+    ('ibm_mq.queue.usage', GAUGE),
+    ('ibm_mq.queue.scope', GAUGE),
+    ('ibm_mq.queue.type', GAUGE),
+    ('ibm_mq.queue.depth_max', GAUGE),
+    ('ibm_mq.queue.backout_threshold', GAUGE),
+    ('ibm_mq.queue.depth_high_event', GAUGE),
+    ('ibm_mq.queue.depth_low_event', GAUGE),
+    ('ibm_mq.queue.trigger_message_priority', GAUGE),
+    ('ibm_mq.queue.depth_current', GAUGE),
+    ('ibm_mq.queue.depth_max_event', GAUGE),
+    ('ibm_mq.queue.open_input_count', GAUGE),
+    ('ibm_mq.queue.persistence', GAUGE),
+    ('ibm_mq.queue.trigger_depth', GAUGE),
+    ('ibm_mq.queue.max_message_length', GAUGE),
+    ('ibm_mq.queue.depth_high_limit', GAUGE),
+    ('ibm_mq.queue.priority', GAUGE),
+    ('ibm_mq.queue.input_open_option', GAUGE),
+    ('ibm_mq.queue.message_delivery_sequence', GAUGE),
+    ('ibm_mq.queue.retention_interval', GAUGE),
+    ('ibm_mq.queue.open_output_count', GAUGE),
+    ('ibm_mq.queue.trigger_type', GAUGE),
+    ('ibm_mq.queue.depth_percent', GAUGE),
+    ('ibm_mq.queue.high_q_depth', GAUGE),
+    ('ibm_mq.queue.msg_deq_count', COUNT),
+    ('ibm_mq.queue.msg_enq_count', COUNT),
+    ('ibm_mq.queue.time_since_reset', COUNT),
 ]
 
-METRICS = [
-    'ibm_mq.queue_manager.dist_lists',
-    'ibm_mq.queue_manager.max_msg_list',
-    'ibm_mq.channel.channels',
-    'ibm_mq.channel.count',
-] + QUEUE_METRICS
+QUEUE_STATUS_METRICS = [
+    ('ibm_mq.queue.uncommitted_msgs', GAUGE),
+]
+
+CHANNEL_METRICS = [
+    ('ibm_mq.channel.batch_size', GAUGE),
+    ('ibm_mq.channel.batch_interval', GAUGE),
+    ('ibm_mq.channel.long_retry', GAUGE),
+    ('ibm_mq.channel.long_timer', GAUGE),
+    ('ibm_mq.channel.max_message_length', GAUGE),
+    ('ibm_mq.channel.short_retry', GAUGE),
+    ('ibm_mq.channel.disc_interval', GAUGE),
+    ('ibm_mq.channel.hb_interval', GAUGE),
+    ('ibm_mq.channel.keep_alive_interval', GAUGE),
+    ('ibm_mq.channel.mr_count', GAUGE),
+    ('ibm_mq.channel.mr_interval', GAUGE),
+    ('ibm_mq.channel.network_priority', GAUGE),
+    ('ibm_mq.channel.npm_speed', GAUGE),
+    ('ibm_mq.channel.sharing_conversations', GAUGE),
+    ('ibm_mq.channel.short_timer', GAUGE),
+]
+
+CHANNEL_STATUS_METRICS = [
+    ('ibm_mq.channel.buffers_rcvd', GAUGE),
+    ('ibm_mq.channel.buffers_sent', GAUGE),
+    ('ibm_mq.channel.bytes_rcvd', GAUGE),
+    ('ibm_mq.channel.bytes_sent', GAUGE),
+    ('ibm_mq.channel.channel_status', GAUGE),
+    ('ibm_mq.channel.mca_status', GAUGE),
+    ('ibm_mq.channel.msgs', GAUGE),
+    ('ibm_mq.channel.ssl_key_resets', GAUGE),
+]
+
+CHANNEL_STATS_METRICS = [
+    ('ibm_mq.stats.channel.msgs', COUNT),
+    ('ibm_mq.stats.channel.bytes', COUNT),
+    ('ibm_mq.stats.channel.put_retries', COUNT),
+]
+
+QUEUE_STATS_METRICS = [
+    ('ibm_mq.stats.queue.q_min_depth', GAUGE),
+]
+
+if IS_CLUSTER:
+    CHANNEL_STATUS_METRICS.extend(
+        [
+            ('ibm_mq.channel.batches', GAUGE),
+            ('ibm_mq.channel.current_msgs', GAUGE),
+            ('ibm_mq.channel.indoubt_status', GAUGE),
+        ]
+    )
+
+METRICS = (
+    [
+        ('ibm_mq.queue_manager.dist_lists', GAUGE),
+        ('ibm_mq.queue_manager.max_msg_list', GAUGE),
+        ('ibm_mq.channel.channels', GAUGE),
+        ('ibm_mq.channel.count', GAUGE),
+    ]
+    + QUEUE_METRICS
+    + QUEUE_STATUS_METRICS
+    + CHANNEL_METRICS
+    + CHANNEL_STATUS_METRICS
+)
 
 OPTIONAL_METRICS = [
-    'ibm_mq.queue.max_channels',
-    'ibm_mq.channel.batch_size',
-    'ibm_mq.channel.batch_interval',
-    'ibm_mq.channel.long_retry_count',
-    'ibm_mq.channel.long_retry_interval',
-    'ibm_mq.channel.max_message_length',
-    'ibm_mq.channel.short_retry_count',
+    ('ibm_mq.queue.max_channels', GAUGE),
+    ('ibm_mq.stats.channel.full_batches', COUNT),
+    ('ibm_mq.stats.channel.incomplete_batches', COUNT),
+    ('ibm_mq.stats.channel.avg_batch_size', GAUGE),
 ]
+
+# stats metrics are not always present at each check run
+OPTIONAL_METRICS.extend(CHANNEL_STATS_METRICS)
+OPTIONAL_METRICS.extend(QUEUE_STATS_METRICS)
+
+
+def assert_all_metrics(aggregator):
+    for metric, metric_type in METRICS:
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()))
+
+    for metric, metric_type in OPTIONAL_METRICS:
+        aggregator.assert_metric(metric, metric_type=getattr(aggregator, metric_type.upper()), at_least=0)
+
+    aggregator.assert_all_metrics_covered()

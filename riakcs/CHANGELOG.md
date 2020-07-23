@@ -1,5 +1,17 @@
 # CHANGELOG - riakcs
 
+## 2.3.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 2.2.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
+## 2.2.0 / 2020-01-13
+
+* [Added] Use lazy logging format. See [#5398](https://github.com/DataDog/integrations-core/pull/5398).
+
 ## 2.1.0 / 2019-05-14
 
 * [Added] Adhere to code style. See [#3564](https://github.com/DataDog/integrations-core/pull/3564).

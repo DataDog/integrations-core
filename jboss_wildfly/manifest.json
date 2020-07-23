@@ -17,12 +17,16 @@
   "public_title": "Datadog-JBoss/WildFly Integration",
   "categories": [
     "web",
-    "log collection"
+    "log collection",
+    "autodiscovery"
   ],
   "type": "check",
   "integration_id": "jboss-wildfly",
   "is_public": true,
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json"

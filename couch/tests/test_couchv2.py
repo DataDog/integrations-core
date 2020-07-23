@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2018
+# (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import csv
@@ -93,12 +93,12 @@ def _assert_check(aggregator, gauges):
         for gauge in gauges["erlang_gauges"]:
             aggregator.assert_metric(gauge)
 
-    for db, dd in {"kennel": "dummy", "_replicator": "_replicator", "_users": "_auth"}.items():
+    for db, dd in {"kennel": "dummy"}.items():
         for gauge in gauges["by_dd_gauges"]:
             expected_tags = ["design_document:{}".format(dd), "language:javascript", "db:{}".format(db)]
             aggregator.assert_metric(gauge, tags=expected_tags)
 
-    for db in ["_users", "_global_changes", "_replicator", "kennel"]:
+    for db in ["kennel", "db1"]:
         for gauge in gauges["by_db_gauges"]:
             expected_tags = ["db:{}".format(db)]
             aggregator.assert_metric(gauge, tags=expected_tags)
@@ -112,17 +112,22 @@ def _assert_check(aggregator, gauges):
         # One for the server stats, the version is already loaded
         aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=2)
 
+    # Assert replication task metrics
+    for gauge in gauges["replication_tasks_gauges"]:
+        aggregator.assert_metric(gauge)
+
     aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_db_whitelisting(aggregator, gauges):
+@pytest.mark.parametrize('param_name', ["db_whitelist", "db_include"])
+def test_db_inclusion(aggregator, gauges, param_name):
     configs = []
 
     for n in [common.NODE1, common.NODE2, common.NODE3]:
         node = deepcopy(n)
-        node['db_whitelist'] = ['kennel']
+        node[param_name] = ['db0']
         configs.append(node)
 
     for config in configs:
@@ -130,24 +135,26 @@ def test_db_whitelisting(aggregator, gauges):
         check.check(config)
 
     for _ in configs:
-        for db in ['_users', '_global_changes', '_replicator']:
+        for db in ['db0']:
+            expected_tags = ["db:{}".format(db)]
+            for gauge in gauges["by_db_gauges"]:
+                aggregator.assert_metric(gauge, tags=expected_tags)
+
+        for db in ['db1']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
-        for gauge in gauges["by_db_gauges"]:
-            expected_tags = ["db:kennel"]
-            aggregator.assert_metric(gauge, tags=expected_tags)
-
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_db_blacklisting(aggregator, gauges):
+@pytest.mark.parametrize('param_name', ["db_blacklist", "db_exclude"])
+def test_db_exclusion(aggregator, gauges, param_name):
     configs = []
 
     for node in [common.NODE1, common.NODE2, common.NODE3]:
         config = deepcopy(node)
-        config['db_blacklist'] = ['kennel']
+        config[param_name] = ['db0']
         configs.append(config)
 
     for config in configs:
@@ -155,14 +162,15 @@ def test_db_blacklisting(aggregator, gauges):
         check.check(config)
 
     for _ in configs:
-        for db in ['_users', '_global_changes', '_replicator']:
+        for db in ['db1']:
             expected_tags = ["db:{}".format(db)]
             for gauge in gauges["by_db_gauges"]:
                 aggregator.assert_metric(gauge, tags=expected_tags)
 
-        for gauge in gauges["by_db_gauges"]:
-            expected_tags = ["db:kennel"]
-            aggregator.assert_metric(gauge, tags=expected_tags, count=0)
+        for db in ['db0']:
+            expected_tags = ["db:{}".format(db)]
+            for gauge in gauges["by_db_gauges"]:
+                aggregator.assert_metric(gauge, tags=expected_tags, count=0)
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -183,12 +191,15 @@ def test_check_without_names(aggregator, gauges):
         for gauge in gauges["erlang_gauges"]:
             aggregator.assert_metric(gauge)
 
-    for db, dd in {"kennel": "dummy", "_replicator": "_replicator", "_users": "_auth"}.items():
+        for gauge in gauges["replication_tasks_gauges"]:
+            aggregator.assert_metric(gauge)
+
+    for db, dd in {"kennel": "dummy"}.items():
         expected_tags = ["design_document:{}".format(dd), "language:javascript", "db:{}".format(db)]
         for gauge in gauges["by_dd_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
 
-    for db in ["_users", "_global_changes", "_replicator", "kennel"]:
+    for db in ["kennel"]:
         expected_tags = ["db:{}".format(db)]
         for gauge in gauges["by_db_gauges"]:
             aggregator.assert_metric(gauge, tags=expected_tags)
@@ -207,109 +218,54 @@ def test_check_without_names(aggregator, gauges):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_only_max_nodes_are_scanned(aggregator, gauges):
+@pytest.mark.parametrize('number_nodes', [1, 2, 3])
+def test_only_max_nodes_are_scanned(aggregator, gauges, number_nodes):
     config = deepcopy(common.NODE1)
     config.pop("name")
-    config['max_nodes_per_check'] = 2
+    config['max_nodes_per_check'] = number_nodes
 
     check = CouchDb(common.CHECK_NAME, {}, [config])
     check.check(config)
 
-    for gauge in gauges["erlang_gauges"]:
-        aggregator.assert_metric(gauge)
+    metrics = []
+    for metric_list in aggregator._metrics.values():
+        metrics.extend(metric_list)
 
-    for config in [common.NODE1, common.NODE2]:
-        expected_tags = ["instance:{}".format(config["name"])]
-        for gauge in gauges["cluster_gauges"]:
-            aggregator.assert_metric(gauge, tags=expected_tags)
+    instance_tags = set()
+    for m in metrics:
+        for tag in m.tags:
+            if tag.startswith('instance:'):
+                instance_tags.add(tag)
 
-    for db in ["_users", "_global_changes", "_replicator"]:
-        expected_tags = ["db:{}".format(db)]
-        for gauge in gauges["by_db_gauges"]:
-            aggregator.assert_metric(gauge, tags=expected_tags)
-
-    for db, dd in {"_replicator": "_replicator", "_users": "_auth"}.items():
-        expected_tags = ["design_document:{}".format(dd), "language:javascript", "db:{}".format(db)]
-        for gauge in gauges["by_dd_gauges"]:
-            aggregator.assert_metric(gauge, tags=expected_tags)
-
-    expected_tags = ["instance:{}".format(config["server"])]
-    # One for the version as we don't have any names to begin with
-    aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=1)
-
-    for node in [common.NODE1, common.NODE2]:
-        expected_tags = ["instance:{}".format(node["name"])]
-        # One for the server stats, the version is already loaded
-        aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=1)
-
-    expected_tags = ["instance:{}".format(common.NODE3["name"])]
-    for gauge in gauges["cluster_gauges"]:
-        aggregator.assert_metric(gauge, tags=expected_tags, count=0)
-
-    for db in ['_users', '_global_changes', '_replicator', 'kennel']:
-        expected_tags = [expected_tags[0], "db:{}".format(db)]
-        for gauge in gauges["by_db_gauges"]:
-            aggregator.assert_metric(gauge, tags=expected_tags, count=0)
-
-    expected_tags = ["instance:{}".format(common.NODE3["name"])]
-    aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, status=CouchDb.OK, tags=expected_tags, count=0)
-
-    aggregator.assert_all_metrics_covered()
+    assert len(instance_tags) == number_nodes
 
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_only_max_dbs_are_scanned(aggregator, gauges):
-    configs = []
-    for node in [common.NODE1, common.NODE2, common.NODE3]:
-        config = deepcopy(node)
-        config["max_dbs_per_check"] = 1
-        configs.append(config)
+@pytest.mark.parametrize('number_db', [1, 2, 3])
+def test_only_max_dbs_are_scanned(aggregator, gauges, number_db):
+    config = deepcopy(common.NODE1)
+    config["max_dbs_per_check"] = number_db
 
-    for config in configs:
-        check = CouchDb(common.CHECK_NAME, {}, [config])
-        check.check(config)
+    check = CouchDb(common.CHECK_NAME, {}, [config])
+    check.check(config)
 
-    for db in ['kennel', '_replicator']:
-        expected_tags = ["db:{}".format(db)]
-        for gauge in gauges["by_db_gauges"]:
-            aggregator.assert_metric(gauge, tags=expected_tags, count=0)
+    metrics = []
+    for metric_list in aggregator._metrics.values():
+        metrics.extend(metric_list)
 
-    for db in ['_global_changes', '_users']:
-        expected_tags = ["db:{}".format(db)]
-        for gauge in gauges["by_db_gauges"]:
-            aggregator.assert_metric(gauge, tags=expected_tags, count=1)
+    db_tags = set()
+    for m in metrics:
+        for tag in m.tags:
+            if tag.startswith('db:'):
+                db_tags.add(tag)
+
+    assert len(db_tags) == number_db
 
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
 def test_replication_metrics(aggregator, gauges):
-    url = "{}/_replicator".format(common.NODE1['server'])
-    replication_body = {
-        '_id': 'my_replication_id',
-        'source': 'http://dduser:pawprint@127.0.0.1:5984/kennel',
-        'target': 'http://dduser:pawprint@127.0.0.1:5984/kennel_replica',
-        'create_target': True,
-        'continuous': True,
-    }
-    r = requests.post(
-        url,
-        auth=(common.NODE1['user'], common.NODE1['password']),
-        headers={'Content-Type': 'application/json'},
-        json=replication_body,
-    )
-    r.raise_for_status()
-
-    count = 0
-    attempts = 0
-    url = "{}/_active_tasks".format(common.NODE1['server'])
-    while count != 1 and attempts < 20:
-        attempts += 1
-        time.sleep(1)
-        r = requests.get(url, auth=(common.NODE1['user'], common.NODE1['password']))
-        r.raise_for_status()
-        count = len(r.json())
-
     for config in [common.NODE1, common.NODE2, common.NODE3]:
         check = CouchDb(common.CHECK_NAME, {}, [config])
         check.check(config)
@@ -320,54 +276,20 @@ def test_replication_metrics(aggregator, gauges):
 
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.integration
-def test_compaction_metrics(aggregator, gauges):
-    url = "{}/kennel".format(common.NODE1['server'])
-    body = {'_id': 'fsdr2345fgwert249i9fg9drgsf4SDFGWE', 'data': str(time.time())}
-    r = requests.post(
-        url,
-        auth=(common.NODE1['user'], common.NODE1['password']),
-        headers={'Content-Type': 'application/json'},
-        json=body,
-    )
-    r.raise_for_status()
+def test_compaction_metrics(aggregator, gauges, active_tasks):
+    """
+    Database compaction tasks are super quick to run on small amounts of data, leading to the task sometimes
+    being complete before the check queries for active tasks. This can lead to flaky results, so let's mock.
+    """
+    from datadog_checks.couch import couch
 
-    update_url = '{}/{}'.format(url, body['_id'])
+    def _get_active_tasks(server, name, tags):
+        return active_tasks
 
-    for _ in range(100):
-        rev = r.json()['rev']
-        body['data'] = str(time.time())
-        body['_rev'] = rev
-        r = requests.put(
-            update_url,
-            auth=(common.NODE1['user'], common.NODE1['password']),
-            headers={'Content-Type': 'application/json'},
-            json=body,
-        )
-        r.raise_for_status()
-
-        r2 = requests.post(
-            url,
-            auth=(common.NODE1['user'], common.NODE1['password']),
-            headers={'Content-Type': 'application/json'},
-            json={"_id": str(time.time())},
-        )
-        r2.raise_for_status()
-
-    url = '{}/kennel/_compact'.format(common.NODE1['server'])
-    r = requests.post(
-        url, auth=(common.NODE1['user'], common.NODE1['password']), headers={'Content-Type': 'application/json'}
-    )
-    r.raise_for_status()
-
-    url = '{}/_global_changes/_compact'.format(common.NODE1['server'])
-    r = requests.post(
-        url, auth=(common.NODE1['user'], common.NODE1['password']), headers={'Content-Type': 'application/json'}
-    )
-    r.raise_for_status()
-
-    for config in [common.NODE1, common.NODE2, common.NODE3]:
-        check = CouchDb(common.CHECK_NAME, {}, [config])
-        check.check(config)
+    check = CouchDb(common.CHECK_NAME, {}, [common.NODE1])
+    check.checker = couch.CouchDB2(check)
+    check.checker._get_active_tasks = _get_active_tasks
+    check.check(common.NODE1)
 
     for gauge in gauges["compaction_tasks_gauges"]:
         aggregator.assert_metric(gauge)

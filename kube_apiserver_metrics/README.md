@@ -15,23 +15,16 @@ The Kube_apiserver_metrics check is included in the [Datadog Agent][2] package, 
 The main use case to run the kube_apiserver_metrics check is as a Cluster Level Check.
 Refer to the dedicated documentation for [Cluster Level Checks][3].
 You can annotate the service of your apiserver with the following:
-```
-Annotations:       ad.datadoghq.com/endpoint.check_names: ["kube_apiserver_metrics"]
-                   ad.datadoghq.com/endpoint.init_configs: [{}]
-                   ad.datadoghq.com/endpoint.instances:
-                     [
-                       {
-                         "prometheus_url": "%%host%%:%%port%%/metrics",
-                         "bearer_token_auth": "true"
-                       }
-                     ]
-                   ad.datadoghq.com/service.check_names: [""]
-                   ad.datadoghq.com/service.init_configs: [{}]
-                   ad.datadoghq.com/service.instances: [{}]
-```
-Then the Datadog Cluster Agent schedules the check(s) for each endpoint onto Datadog Agent(s).
 
-Disclaimer: Your apiserver(s) need to run as pods, other methods (e.g. systemd unit) are not supported at the moment.
+```yaml
+annotations:
+  ad.datadoghq.com/endpoints.check_names: '["kube_apiserver_metrics"]'
+  ad.datadoghq.com/endpoints.init_configs: '[{}]'
+  ad.datadoghq.com/endpoints.instances:
+    '[{ "prometheus_url": "https://%%host%%:%%port%%/metrics", "bearer_token_auth": "true" }]'
+```
+
+Then the Datadog Cluster Agent schedules the check(s) for each endpoint onto Datadog Agent(s).
 
 You can also run the check by configuring the endpoints directly in the `kube_apiserver_metrics.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent’s configuration directory][4].
 See the [sample kube_apiserver_metrics.d/conf.yaml][2] for all available configuration options.
@@ -64,9 +57,9 @@ Need help? Contact [Datadog support][8].
 
 [1]: https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver
 [2]: https://github.com/DataDog/integrations-core/blob/master/kube_apiserver_metrics/datadog_checks/kube_apiserver_metrics/data/conf.yaml.example
-[3]: https://docs.datadoghq.com/agent/autodiscovery/clusterchecks
+[3]: https://docs.datadoghq.com/agent/cluster_agent/clusterchecks/
 [4]: https://docs.datadoghq.com/agent/guide/agent-configuration-files/#agent-configuration-directory
-[5]: https://docs.datadoghq.com/agent/autodiscovery/?tab=kubernetes
+[5]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [6]: https://docs.datadoghq.com/agent/faq/agent-commands/#agent-status-and-information
 [7]: https://github.com/DataDog/integrations-core/blob/master/kube_apiserver_metrics/metadata.csv
-[8]: https://docs.datadoghq.com/help
+[8]: https://docs.datadoghq.com/help/

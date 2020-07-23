@@ -1,5 +1,22 @@
 # CHANGELOG - cacti
 
+## 1.7.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+* [Added] Add config spec. See [#6551](https://github.com/DataDog/integrations-core/pull/6551).
+
+## 1.6.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
+## 1.6.0 / 2019-12-02
+
+* [Added] Standardize logging format. See [#4901](https://github.com/DataDog/integrations-core/pull/4901).
+
+## 1.5.0 / 2019-10-11
+
+* [Added] Allow custom port for mysql access. See [#4654](https://github.com/DataDog/integrations-core/pull/4654).
+
 ## 1.4.0 / 2019-03-29
 
 * [Added] Adhere to code style. See [#3325](https://github.com/DataDog/integrations-core/pull/3325).

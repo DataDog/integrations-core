@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 DEFAULT_KAFKA_TIMEOUT = 5
@@ -11,3 +11,5 @@ KAFKA_INTERNAL_TOPICS = {
     '__transaction_state',
     '_schema',  # _schema is a topic used by the Confluent registry
 }
+
+BROKER_REQUESTS_BATCH_SIZE = 30

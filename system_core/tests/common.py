@@ -1,10 +1,10 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import psutil
 
+from datadog_checks.base.utils.platform import Platform
 from datadog_checks.dev import get_here
-from datadog_checks.utils.platform import Platform
 
 HERE = get_here()
 CHECK_NAME = "system_core"

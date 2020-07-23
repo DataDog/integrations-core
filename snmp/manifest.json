@@ -2,7 +2,8 @@
   "categories": [
     "monitoring",
     "notification",
-    "network"
+    "network",
+    "autodiscovery"
   ],
   "creates_events": false,
   "display_name": "SNMP",

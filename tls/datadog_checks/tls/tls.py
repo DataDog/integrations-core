@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import socket
@@ -118,7 +118,6 @@ class TLSCheck(AgentCheck):
 
         # Assign lazily since these aren't used by both collection methods
         self._validation_data = None
-        self._local_cert_loader = None
         self._tls_context = None
 
     def check_remote(self, instance):
@@ -292,11 +291,11 @@ class TLSCheck(AgentCheck):
             if err is not None:
                 raise err
             else:
-                raise socket.error('No valid addresses found, try checking your IPv6 connectivity')
+                raise socket.error('No valid addresses found, try checking your IPv6 connectivity')  # noqa: G
         except socket.gaierror as e:
             err_code, message = e.args
             if err_code == socket.EAI_NODATA or err_code == socket.EAI_NONAME:
-                raise socket.error('Unable to resolve host, check your DNS: {}'.format(message))
+                raise socket.error('Unable to resolve host, check your DNS: {}'.format(message))  # noqa: G
 
             raise
 
@@ -310,17 +309,11 @@ class TLSCheck(AgentCheck):
 
         return self._validation_data
 
-    @property
-    def local_cert_loader(self):
-        if self._local_cert_loader is None:
-            loader = (
-                load_der_x509_certificate
-                if self._local_cert_path.endswith(('.cer', '.crt', '.der'))
-                else load_pem_x509_certificate
-            )
-            self._local_cert_loader = lambda cert: loader(cert, default_backend())
-
-        return self._local_cert_loader
+    def local_cert_loader(self, cert):
+        backend = default_backend()
+        if b'-----BEGIN CERTIFICATE-----' in cert:
+            return load_pem_x509_certificate(cert, backend)
+        return load_der_x509_certificate(cert, backend)
 
     @property
     def tls_context(self):

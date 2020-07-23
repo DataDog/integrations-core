@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
@@ -6,8 +6,11 @@ import json
 import os
 
 import mock
+import pytest
 
+from datadog_checks.base import ensure_bytes
 from datadog_checks.dev import get_here
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.twistlock import TwistlockCheck
 
 customtag = "custom:tag"
@@ -46,24 +49,32 @@ class MockResponse:
         self._json = j
         self.status_code = 200
 
+    @property
+    def content(self):
+        return ensure_bytes(self._json)
+
     def json(self):
         return json.loads(self._json)
 
 
-def mock_get(url, *args, **kwargs):
-    split_url = url.split('/')
-    path = split_url[-1]
-    f_name = os.path.join(HERE, 'fixtures', path)
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-        return MockResponse(text_data)
+def mock_get_factory(fixture_group):
+    def mock_get(url, *args, **kwargs):
+        split_url = url.split('/')
+        path = split_url[-1]
+        f_name = os.path.join(HERE, 'fixtures', fixture_group, "{}.json".format(path))
+        with open(f_name, 'r') as f:
+            text_data = f.read()
+            return MockResponse(text_data)
+
+    return mock_get
 
 
-def test_check(aggregator):
+@pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
+def test_check(aggregator, fixture_group):
 
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    with mock.patch('requests.get', side_effect=mock_get, autospec=True):
+    with mock.patch('requests.get', side_effect=mock_get_factory(fixture_group), autospec=True):
         check.check(instance)
         check.check(instance)
 
@@ -72,3 +83,42 @@ def test_check(aggregator):
         aggregator.assert_metric_has_tag(metric, customtag)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
+def test_config_project(aggregator, fixture_group):
+
+    project = 'foo'
+    project_tag = 'project:{}'.format(project)
+    qparams = {'project': project}
+
+    instance['project'] = project
+    check = TwistlockCheck('twistlock', {}, [instance])
+
+    with mock.patch('requests.get', side_effect=mock_get_factory(fixture_group), autospec=True) as r:
+        check.check(instance)
+
+        r.assert_called_with(
+            mock.ANY,
+            params=qparams,
+            auth=mock.ANY,
+            cert=mock.ANY,
+            headers=mock.ANY,
+            proxies=mock.ANY,
+            timeout=mock.ANY,
+            verify=mock.ANY,
+        )
+    # Check if metrics are tagged with the project.
+    for metric in METRICS:
+        aggregator.assert_metric_has_tag(metric, project_tag)
+
+
+def test_err_response(aggregator):
+
+    check = TwistlockCheck('twistlock', {}, [instance])
+
+    with pytest.raises(Exception, match='^Error in response'):
+        with mock.patch('requests.get', return_value=MockResponse('{"err": "invalid credentials"}'), autospec=True):
+
+            check.check(instance)

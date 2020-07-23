@@ -1,5 +1,31 @@
 # CHANGELOG - lighttpd
 
+## 1.10.0 / 2020-06-29
+
+* [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
+
+## 1.9.0 / 2020-05-17
+
+* [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
+
+## 1.8.1 / 2020-04-04
+
+* [Fixed] Update deprecated imports. See [#6088](https://github.com/DataDog/integrations-core/pull/6088).
+
+## 1.8.0 / 2020-02-22
+
+* [Added] Add version metadata. See [#5600](https://github.com/DataDog/integrations-core/pull/5600).
+
+## 1.7.0 / 2019-12-02
+
+* [Added] Add auth type to RequestsWrapper. See [#4708](https://github.com/DataDog/integrations-core/pull/4708).
+
+## 1.6.0 / 2019-10-11
+
+* [Fixed] Fix lighttpd logging format. See [#4716](https://github.com/DataDog/integrations-core/pull/4716).
+* [Fixed] Fix support for no authentication. See [#4689](https://github.com/DataDog/integrations-core/pull/4689).
+* [Added] Add option to override KRB5CCNAME env var. See [#4578](https://github.com/DataDog/integrations-core/pull/4578).
+
 ## 1.5.0 / 2019-08-24
 
 * [Fixed] Update __init__ method params. See [#4243](https://github.com/DataDog/integrations-core/pull/4243).

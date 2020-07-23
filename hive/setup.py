@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2019
+# (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from codecs import open  # To use a consistent encoding
@@ -18,6 +18,15 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 
+def get_dependencies():
+    dep_file = path.join(HERE, 'requirements.in')
+    if not path.isfile(dep_file):
+        return []
+
+    with open(dep_file, encoding='utf-8') as f:
+        return f.readlines()
+
+
 CHECKS_BASE_REQ = 'datadog-checks-base'
 
 
@@ -28,17 +37,13 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords='datadog agent hive check',
-
     # The project's main homepage.
     url='https://github.com/DataDog/integrations-core',
-
     # Author details
     author='Datadog',
     author_email='packages@datadoghq.com',
-
     # License
     license='BSD-3-Clause',
-
     # See https://pypi.org/classifiers
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -47,15 +52,13 @@ setup(
         'Topic :: System :: Monitoring',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
-
     # The package we're going to ship
     packages=['datadog_checks.hive'],
-
     # Run-time dependencies
     install_requires=[CHECKS_BASE_REQ],
-
+    extras_require={'deps': get_dependencies()},
     # Extra files to ship with the wheel package
     include_package_data=True,
 )
