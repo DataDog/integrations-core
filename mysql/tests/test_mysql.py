@@ -137,9 +137,10 @@ def test_connection_failure(aggregator, instance_error):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_complex_config_replica(aggregator, instance_complex):
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_complex])
     config = copy.deepcopy(instance_complex)
     config['port'] = common.SLAVE_PORT
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[config])
+
     mysql_check.check(config)
 
     # self.assertMetricTag('mysql.replication.seconds_behind_master', 'channel:default')

@@ -119,7 +119,7 @@ class MySql(AgentCheck):
     def get_library_versions(cls):
         return {'pymysql': pymysql.__version__}
 
-    def check(self, instance):
+    def check(self, _):
         self._set_qcache_stats()
         with self._connect(
             self.config.host,
