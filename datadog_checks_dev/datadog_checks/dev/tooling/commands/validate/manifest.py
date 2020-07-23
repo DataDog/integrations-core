@@ -93,7 +93,7 @@ def get_manifest_schema():
                                     "type": "string",
                                     "description": "The log pipeline identifier corresponding to this integration",
                                 }
-                            }
+                            },
                         },
                     },
                     "required": ["monitors", "dashboards", "service_checks", "logs"],
