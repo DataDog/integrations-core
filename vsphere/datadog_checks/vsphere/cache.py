@@ -97,11 +97,6 @@ class InfrastructureCache(VSphereCache):
     }
     """
 
-    def __init__(self, interval_sec):
-        # type: (int) -> None
-        super(InfrastructureCache, self).__init__(interval_sec)
-        self._tags = {}
-
     @property
     def _mors(self):
         # type: () -> Dict[Type[vim.ManagedEntity], Dict[vim.ManagedEntity, Any]]
