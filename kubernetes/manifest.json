@@ -29,6 +29,9 @@
       "Kubernetes Nodes Overview": "assets/dashboards/kubernetes_nodes.json",
       "Kubernetes Deployments Overview": "assets/dashboards/kubernetes_deployments.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": ""
+    }
   }
 }

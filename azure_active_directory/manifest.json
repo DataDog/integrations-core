@@ -27,6 +27,9 @@
     "dashboards": {},
     "saved_views": {},
     "monitors": {},
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": ""
+    }
   }
 }

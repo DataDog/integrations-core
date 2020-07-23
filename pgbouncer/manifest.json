@@ -33,6 +33,9 @@
       "instance_overview": "assets/saved_views/instance_overview.json",
       "user_overview": "assets/saved_views/user_overview.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {
+      "source": ""
+    }
   }
 }
