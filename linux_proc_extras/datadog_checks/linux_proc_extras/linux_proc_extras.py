@@ -48,7 +48,7 @@ class MoreUnixCheck(AgentCheck):
             "inode_info": "sys/fs/inode-nr",
             "stat_info": "stat",
             "entropy_info": "sys/kernel/random/entropy_avail",
-            "interrupts_info": "interrupts"
+            "interrupts_info": "interrupts",
         }
 
         for key, path in iteritems(self.proc_path_map):
@@ -110,10 +110,7 @@ class MoreUnixCheck(AgentCheck):
             for line in lines[1:]:
                 parts = line.split()
                 irq_id = parts[0].replace(":", "")
-                for cpu_id, part in enumerate(parts[1:cpu_count+1]):
+                for cpu_id, part in enumerate(parts[1 : cpu_count + 1]):
                     irq_count = int(part)
                     tags = self.tags + ['irq:{}'.format(irq_id), 'cpu_id:{}'.format(cpu_id)]
                     self.monotonic_count("system.linux.interrupts.stats", irq_count, tags=tags)
-
-
-

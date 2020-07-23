@@ -38,7 +38,6 @@ def test_check(aggregator, check):
         ):
             check.get_process_states()
 
-    import pdb; pdb.set_trace()
     with open(os.path.join(common.FIXTURE_DIR, "interrupts")) as f:
         m = mock_open(read_data=f.read())
         with patch('datadog_checks.linux_proc_extras.linux_proc_extras.open', m):

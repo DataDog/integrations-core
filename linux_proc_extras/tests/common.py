@@ -63,5 +63,5 @@ INTERRUPTS_IDS = [
     "MCE",
     "MCP",
     "PIN",
-    "PIW"
+    "PIW",
 ]
