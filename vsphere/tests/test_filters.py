@@ -116,3 +116,19 @@ def test_error_disabled_tags(realtime_instance):
     # collecting tags should not raise a configuration error
     realtime_instance['collect_tags'] = True
     VSphereCheck('vsphere', {}, [realtime_instance])
+
+
+def test_error_disabled_attributes(realtime_instance):
+    realtime_instance['collect_attributes'] = False
+    realtime_instance['resource_filters'] = [
+        {'resource': 'vm', 'property': 'name', 'patterns': [r'^\$VM5$', r'^VM4-2\d$']},
+        {'resource': 'vm', 'property': 'attribute', 'patterns': [r'env:production']},
+    ]
+
+    # Filtering on attributes without collecting them should not be possible
+    with pytest.raises(ConfigurationError):
+        VSphereCheck('vsphere', {}, [realtime_instance])
+
+    # Now that attributes are enabled, no configuration error should be raised.
+    realtime_instance['collect_attributes'] = True
+    VSphereCheck('vsphere', {}, [realtime_instance])
