@@ -72,7 +72,7 @@ def readmes(ctx, integration):
                             
         if not (has_overview and has_setup):
             errors = True
-            echo_failure(f"{integration} readme file does not have an overview and setup section")
+            echo_failure(f"{integration} readme file does not contain both an Overview and Setup H2 section")
 
     if errors:
         abort()
