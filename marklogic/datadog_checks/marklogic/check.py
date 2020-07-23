@@ -44,7 +44,7 @@ class MarklogicCheck(AgentCheck):
         # type: (Any) -> None
         # TODO: Handle errors:
         #       - X Continue if one of the processor fail
-        #       - Add service check (can connect, status service check)
+        #       - X Add service check (can connect, status service check)
         # No need to query base requests metrics, they are already collect in by process_base_status
         # self.process_requests_metrics_by_resource()
 

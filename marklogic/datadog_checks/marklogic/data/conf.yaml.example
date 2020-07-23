@@ -21,8 +21,8 @@ instances:
     ## @param resource_filters - list of mappings - optional
     ## Each filter in the list is composed of three parameters.
     ## 'resource' is one of cluster/forest/database/host/server on which to apply the filter
-    ## 'type' is either whitelist (default) or blacklist. If a resource is both whitelisted and blacklisted it will be
-    ##        considered blacklisted.
+    ## 'type' is either included (default) or excluded. If a resource is both included and excluded it will be
+    ##        considered excluded.
     ## 'name' is a pattern to match the resource name
     ## 'id' is the resource id to match
     ## 'group' is the resource group to match
@@ -34,7 +34,7 @@ instances:
     #   - resource: forest
     #     name: Documents
     #   - resource: database
-    #     type: blacklist
+    #     type: excluded
     #     name: Documents
     #     group: Default
     #     metric_groups:

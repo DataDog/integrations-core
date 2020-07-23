@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor, run_command
 
-from .common import ADMIN_PASSWORD, ADMIN_USERNAME, API_URL, CHECK_CONFIG, HERE, USERNAME, PASSWORD
+from .common import ADMIN_PASSWORD, ADMIN_USERNAME, API_URL, CHECK_CONFIG, HERE, PASSWORD, USERNAME
 
 
 @pytest.fixture(scope="session")
@@ -16,10 +16,7 @@ def dd_environment():
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yml')
     with docker_run(
         compose_file=compose_file,
-        conditions=[
-            CheckDockerLogs(compose_file, r'Deleted', attempts=120),
-            WaitFor(setup_admin_user),
-        ],
+        conditions=[CheckDockerLogs(compose_file, r'Deleted', attempts=60), WaitFor(setup_admin_user)],
     ):
         setup_datadog_user()
         yield CHECK_CONFIG
@@ -65,7 +62,10 @@ def setup_datadog_user():
     #     "roles": { "role": "manage-user" },
     # }
     body = (
-        '<root><password>{}</password><roles><role>manage-user</role></roles><user-name>{}</user-name></root>'.format(PASSWORD, USERNAME)
+        '<root>'
+        + '<password>{}</password><user-name>{}</user-name>'.format(PASSWORD, USERNAME)
+        + '<roles><role>manage-user</role></roles>'
+        + '</root>'
     )
     command = [
         'curl',

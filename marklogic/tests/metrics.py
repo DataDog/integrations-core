@@ -48,18 +48,32 @@ FOREST_STATUS_SUMMARY_METRICS = [
     'marklogic.forests.write-lock-hold-load',
     'marklogic.forests.write-lock-rate',
     'marklogic.forests.write-lock-wait-load',
+    # Cached
+    'marklogic.forests.compressed-tree-cache-hit-rate',
+    'marklogic.forests.compressed-tree-cache-miss-rate',
+    'marklogic.forests.compressed-tree-cache-ratio',
+    'marklogic.forests.large-binary-cache-hit-rate',
+    'marklogic.forests.large-binary-cache-miss-rate',
+    'marklogic.forests.list-cache-hit-rate',
+    'marklogic.forests.list-cache-miss-rate',
+    'marklogic.forests.list-cache-ratio',
+    'marklogic.forests.triple-cache-hit-rate',
+    'marklogic.forests.triple-cache-miss-rate',
+    'marklogic.forests.triple-value-cache-hit-rate',
+    'marklogic.forests.triple-value-cache-miss-rate',
 ]
 
 
 HOST_STATUS_METRICS = [
     # Part 1
-    'marklogic.hosts.memory-process-huge-pages-size',
-    'marklogic.hosts.memory-process-rss',
+    # Cluster testing environment only
+    # 'marklogic.hosts.memory-process-huge-pages-size',
+    # 'marklogic.hosts.memory-process-rss',
     'marklogic.hosts.memory-size',
-    'marklogic.hosts.memory-system-free',
-    'marklogic.hosts.memory-system-total',
-    'marklogic.hosts.total-cpu-stat-system',
-    'marklogic.hosts.total-cpu-stat-user',
+    # 'marklogic.hosts.memory-system-free',
+    # 'marklogic.hosts.memory-system-total',
+    # 'marklogic.hosts.total-cpu-stat-system',
+    # 'marklogic.hosts.total-cpu-stat-user',
     'marklogic.hosts.total-hosts',
     'marklogic.hosts.total-hosts-offline',
     # Part 2
