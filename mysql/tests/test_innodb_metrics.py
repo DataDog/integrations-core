@@ -5,7 +5,7 @@ import logging
 
 import pytest
 
-from datadog_checks.mysql.innodb_metrics import get_stats_from_innodb_status
+from datadog_checks.mysql.innodb_metrics import InnoDBMetrics
 
 
 @pytest.mark.unit
@@ -22,5 +22,6 @@ def test_innodb_status_unicode_error(caplog):
             return MockCursor()
 
     caplog.at_level(logging.WARNING)
-    assert get_stats_from_innodb_status(MockDatabase()) == {}
+    idb = InnoDBMetrics()
+    assert idb.get_stats_from_innodb_status(MockDatabase()) == {}
     assert 'Unicode error while getting INNODB status' in caplog.text

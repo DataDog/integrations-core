@@ -12,13 +12,12 @@ WHERE q.`ro` > ROUND(.95*@rownum)
 ORDER BY `percentile` ASC
 LIMIT 1"""
 
-SQL_QUERY_SCHEMA_SIZE = """
+SQL_QUERY_SCHEMA_SIZE = """\
 SELECT   table_schema, IFNULL(SUM(data_length+index_length)/1024/1024,0) AS total_mb
 FROM     information_schema.tables
-GROUP BY table_schema;
-"""
+GROUP BY table_schema"""
 
-SAL_AVG_QUERY_RUN_TIME = """\
+SQL_AVG_QUERY_RUN_TIME = """\
 SELECT schema_name, ROUND((SUM(sum_timer_wait) / SUM(count_star)) / 1000000) AS avg_us
 FROM performance_schema.events_statements_summary_by_digest
 WHERE schema_name IS NOT NULL
@@ -28,6 +27,7 @@ SQL_WORKER_THREADS = "SELECT THREAD_ID, NAME FROM performance_schema.threads WHE
 
 SQL_PROCESS_LIST = "SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST WHERE COMMAND LIKE '%Binlog dump%'"
 
-SQL_INNODB_ENGINES = (
-    "select engine from information_schema.ENGINES where engine='InnoDB' and support != 'no' and support != 'disabled'"
-)
+SQL_INNODB_ENGINES = """\
+SELECT engine
+FROM information_schema.ENGINES
+WHERE engine='InnoDB' and support != 'no' and support != 'disabled'"""

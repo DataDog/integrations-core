@@ -144,7 +144,7 @@ instances:
     ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
     ##
-    ## The SOCKS protocol is also supported like so:
+    ## The SOCKS protocol is also supported, for example:
     ##
     ##   socks5://user:pass@host:port
     ##
@@ -280,7 +280,7 @@ instances:
     ## @param aws_host - string - optional
     ## If your services require AWS Signature Version 4 signing, set the host.
     ##
-    ## Note that this setting is not necessary for official integrations.
+    ## Note: This setting is not necessary for official integrations.
     ##
     ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
     #
@@ -290,7 +290,7 @@ instances:
     ## If your services require AWS Signature Version 4 signing, set the service code. For a list
     ## of available service codes, see https://docs.aws.amazon.com/general/latest/gr/rande.html
     ##
-    ## Note that this setting is not necessary for official integrations.
+    ## Note: This setting is not necessary for official integrations.
     ##
     ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
     #
@@ -310,7 +310,7 @@ instances:
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
     ##
-    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
+    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
     ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
     ## to true.
     #
@@ -381,3 +381,22 @@ instances:
     ## Whether or not to persist cookies and use connection pooling for increased performance.
     #
     # persist_connections: false
+
+## Log Section
+##
+## type - required - Type of log input source (tcp / udp / file / windows_event)
+## port / path / channel_path - required - Set port if type is tcp or udp.
+##                                         Set path if type is file.
+##                                         Set channel_path if type is windows_event.
+## source  - required - Attribute that defines which Integration sent the logs.
+## service - required - The name of the service that generates the log.
+##                      Overrides any `service` defined in the `init_config` section.
+## tags - optional - Add tags to the collected logs.
+##
+## Discover Datadog log collection: https://docs.datadoghq.com/logs/log_collection/
+#
+# logs:
+#   - type: file
+#     path: /var/log/spark/*.log
+#     source: spark
+#     service: <SERVICE_NAME>

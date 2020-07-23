@@ -59,7 +59,8 @@ nav:
     - Config specs: meta/config-specs.md
     - Status: meta/status.md
   - Tutorials:
-    - JMX: tutorials/jmx.md
+    - JMX:
+      - tutorials/jmx/tools.md
     - SNMP:
       - tutorials/snmp/introduction.md
       - tutorials/snmp/profiles.md

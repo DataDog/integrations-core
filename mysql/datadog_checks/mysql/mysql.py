@@ -34,7 +34,7 @@ from .const import (
     SYNTHETIC_VARS,
     VARIABLES_VARS,
 )
-from .innodb_metrics import get_stats_from_innodb_status, process_innodb_stats
+from .innodb_metrics import InnoDBMetrics
 from .queries import (
     SAL_AVG_QUERY_RUN_TIME,
     SQL_95TH_PERCENTILE,
@@ -73,6 +73,7 @@ class MySql(AgentCheck):
 
         self._query_manager = QueryManager(self, self.execute_query_raw, queries=[], tags=self._tags)
         self.check_initializations.append(self._query_manager.compile_queries)
+        self.innodb_stats = InnoDBMetrics()
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor(pymysql.cursors.SSCursor)) as cursor:
@@ -247,8 +248,8 @@ class MySql(AgentCheck):
         results.update(self._get_stats_from_variables(db))
 
         if not is_affirmative(options.get('disable_innodb_metrics', False)) and self._is_innodb_engine_enabled(db):
-            results.update(get_stats_from_innodb_status(db))
-            process_innodb_stats(results, options, metrics)
+            results.update(self.innodb_stats.get_stats_from_innodb_status(db))
+            self.innodb_stats.process_innodb_stats(results, options, metrics)
 
         # Binary log statistics
         if self._get_variable_enabled(results, 'log_bin'):
@@ -266,7 +267,7 @@ class MySql(AgentCheck):
                 key_cache_utilization = 1 - ((key_blocks_unused * key_cache_block_size) / key_buffer_size)
                 results['Key_cache_utilization'] = key_cache_utilization
 
-            results['Key_buffer_bytes_used'] = self._collect_scalar('Key_blocks_used', results) * key_cache_block_size
+            results['Key_buffer_bytes_used'] = collect_scalar('Key_blocks_used', results) * key_cache_block_size
             results['Key_buffer_bytes_unflushed'] = (
                 collect_scalar('Key_blocks_not_flushed', results) * key_cache_block_size
             )
@@ -624,7 +625,6 @@ class MySql(AgentCheck):
     def _query_exec_time_per_schema(self, db):
         # Fetches the avg query execution time per schema and returns the
         # value in microseconds
-
         try:
             with closing(db.cursor()) as cursor:
                 cursor.execute(SAL_AVG_QUERY_RUN_TIME)
