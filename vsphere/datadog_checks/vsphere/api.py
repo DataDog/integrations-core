@@ -256,12 +256,12 @@ class VSphereAPI(object):
                     continue
                 for attribute in props.pop('customValue'):
                     # The attribute key is always unique
-                    attr_key = attribute_keys.get(attribute.key)
-                    if attr_key is None:
+                    attr_key_name = attribute_keys.get(attribute.key)
+                    if attr_key_name is None:
                         self.log.debug("Unable to resolve attribute key with ID: %s", attribute.key)
                         continue
                     attr_value = attribute.value
-                    mor_attributes.append("{}{}:{}".format(self.config.attr_prefix, attr_key, attr_value))
+                    mor_attributes.append("{}{}:{}".format(self.config.attr_prefix, attr_key_name, attr_value))
 
                 props['attributes'] = mor_attributes
         return cast(InfrastructureData, infrastructure_data)
