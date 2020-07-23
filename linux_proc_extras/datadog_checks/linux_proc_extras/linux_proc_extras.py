@@ -40,6 +40,7 @@ class MoreUnixCheck(AgentCheck):
         self.get_stat_info()
         self.get_entropy_info()
         self.get_process_states()
+        self.get_interrupts_info()
 
     def set_paths(self):
         proc_location = (datadog_agent.get_config('procfs_path') or '/proc').rstrip('/')
@@ -72,8 +73,6 @@ class MoreUnixCheck(AgentCheck):
                     self.monotonic_count('system.linux.processes_created', process_count, tags=self.tags)
                 elif line.startswith('intr'):
                     interrupts = int(line.split(' ')[1])
-                    self.monotonic_count('system.linux.interrupts.rate', interrupts, tags=self.tags)
-                    # Deprecated: Name is too generic, renamed to
                     self.monotonic_count('system.linux.interrupts', interrupts, tags=self.tags)
 
     def get_entropy_info(self):
