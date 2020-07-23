@@ -10,7 +10,7 @@ DEFAULT_MAX_CUSTOM_QUERIES = 20
 class MySQLConfig(object):
     def __init__(self, instance):
         self.log = get_check_logger()
-        self.host = instance.get('server', '')
+        self.host = instance.get('host', instance.get('server', ''))
         self.port = int(instance.get('port', 0))
         self.tags = list(instance.get('tags', []))
         self.mysql_sock = instance.get('sock', '')

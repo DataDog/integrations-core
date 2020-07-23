@@ -222,7 +222,7 @@ def test__get_server_pid():
     """
     Test the logic looping through the processes searching for `mysqld`
     """
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{}])
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     mysql_check._get_pid_file_variable = mock.MagicMock(return_value=None)
     mysql_check.log = mock.MagicMock()
     dummy_proc = subprocess.Popen(["python"])
