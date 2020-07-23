@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor, run_command
 
-from .common import ADMIN_PASSWORD, ADMIN_USERNAME, API_URL, CHECK_CONFIG, HERE
+from .common import ADMIN_PASSWORD, ADMIN_USERNAME, API_URL, CHECK_CONFIG, HERE, USERNAME, PASSWORD
 
 
 @pytest.fixture(scope="session")
@@ -16,15 +16,18 @@ def dd_environment():
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yml')
     with docker_run(
         compose_file=compose_file,
-        conditions=[CheckDockerLogs(compose_file, r'Detected quorum \(2 online'), WaitFor(setup_admin_user)],
+        conditions=[
+            CheckDockerLogs(compose_file, r'Deleted', attempts=120),
+            WaitFor(setup_admin_user),
+        ],
     ):
-        # setup_datadog_user()
+        setup_datadog_user()
         yield CHECK_CONFIG
 
 
 def setup_admin_user():
     # From https://docs.marklogic.com/10.0/guide/admin-api/cluster
-    # Set admin user password
+    # Set admin user password (usefull for cluster setup)
     run_command(
         [
             'curl',
@@ -62,24 +65,22 @@ def setup_datadog_user():
     #     "roles": { "role": "manage-user" },
     # }
     body = (
-        '<root><password>datadog</password><roles><role>manage-user</role></roles><user-name>datadog</user-name></root>'
+        '<root><password>{}</password><roles><role>manage-user</role></roles><user-name>{}</user-name></root>'.format(PASSWORD, USERNAME)
     )
-    command = (
-        [
-            'curl',
-            '-i',
-            '-X',
-            'POST',
-            '--anyauth',
-            '--user',
-            '{}:{}'.format(ADMIN_USERNAME, ADMIN_PASSWORD),
-            '-H',
-            '"Content-Type: application/xml"',
-            '-d',
-            '"{}"'.format(body),
-            '{}/manage/v2/users?format=xml'.format(API_URL),
-        ],
-    )
+    command = [
+        'curl',
+        '-i',
+        '-X',
+        'POST',
+        '--anyauth',
+        '--user',
+        '{}:{}'.format(ADMIN_USERNAME, ADMIN_PASSWORD),
+        '-H',
+        '"Content-Type: application/xml"',
+        '-d',
+        '"{}"'.format(body),
+        '{}/manage/v2/users?format=xml'.format(API_URL),
+    ]
 
     # Create datadog user with the admin account
     run_command(command, check=True)

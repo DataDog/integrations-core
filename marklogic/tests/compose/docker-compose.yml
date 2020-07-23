@@ -26,19 +26,19 @@ services:
         - 8000:8000
         - 8001:8001
         - 8002:8002
-    dnode:
-      image: store/marklogicdb/marklogic-server:${MARKLOGIC_IMAGE}
-      environment:
-        - MARKLOGIC_INIT=true
-        - MARKLOGIC_ADMIN_USERNAME=admin
-        - MARKLOGIC_ADMIN_PASSWORD=admin
-        - MARKLOGIC_JOIN_CLUSTER=true
-      ports:
-        - 18000:8000
-        - 18001:8001
-        - 18002:8002
-      depends_on:
-      - bootstrap
+    # dnode:
+    #   image: store/marklogicdb/marklogic-server:${MARKLOGIC_IMAGE}
+    #   environment:
+    #     - MARKLOGIC_INIT=true
+    #     - MARKLOGIC_ADMIN_USERNAME=admin
+    #     - MARKLOGIC_ADMIN_PASSWORD=admin
+    #     - MARKLOGIC_JOIN_CLUSTER=true
+    #   ports:
+    #     - 18000:8000
+    #     - 18001:8001
+    #     - 18002:8002
+    #   depends_on:
+    #   - bootstrap
 
 #
 #

@@ -127,7 +127,8 @@ class MarklogicCheck(AgentCheck):
             # Couldn't access the health endpoint
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, self.config.tags)
         except Exception:
-            self.log.exception('Failed to check resources health')
+            # Couldn't parse the resource health
+            self.log.exception('Failed to parse the resources health')
 
 
 """

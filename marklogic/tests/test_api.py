@@ -134,6 +134,6 @@ def test_get_health():
     http = MockRequestsWrapper({'foo': 'bar'})
     api = MarkLogicApi(http, 'http://localhost:8000')
 
-    assert api.get_forests_storage_data(name='forestname') == {'foo': 'bar'}
+    assert api.get_health() == {'foo': 'bar'}
     assert http.url == 'http://localhost:8000/manage/v2'
     assert http.params == {'format': 'json', 'view': 'health'}
