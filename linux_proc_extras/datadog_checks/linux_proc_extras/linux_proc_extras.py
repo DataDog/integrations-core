@@ -112,4 +112,4 @@ class MoreUnixCheck(AgentCheck):
                 for cpu_id, part in enumerate(parts[1 : cpu_count + 1]):
                     irq_count = int(part)
                     tags = self.tags + ['irq:{}'.format(irq_id), 'cpu_id:{}'.format(cpu_id)]
-                    self.monotonic_count("system.linux.interrupts.stats", irq_count, tags=tags)
+                    self.monotonic_count("system.linux.irq", irq_count, tags=tags)

@@ -50,6 +50,6 @@ def test_check(aggregator, check):
     for irq in common.INTERRUPTS_IDS:
         for cpu_id in range(common.CPU_COUNT):
             tags = ["irq:{}".format(irq), "cpu_id:{}".format(cpu_id)]
-            aggregator.assert_metric("system.linux.interrupts.stats", value=None, tags=tags)
+            aggregator.assert_metric("system.linux.irq", value=None, tags=tags)
 
     aggregator.assert_all_metrics_covered()

@@ -20,7 +20,7 @@ EXPECTED_METRICS = [
     'system.linux.context_switches',
     'system.linux.processes_created',
     'system.linux.interrupts',
-    'system.linux.interrupts.stats',
+    'system.linux.irq',
     'system.entropy.available',
     'system.processes.states',
     'system.processes.priorities',
