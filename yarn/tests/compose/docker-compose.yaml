@@ -6,6 +6,7 @@ services:
     hostname: yarn-container
     environment:
       - CLUSTER_NAME=SparkCluster
+      - TZ=UTC
     ports:
       - "8088:8088"
     volumes:
