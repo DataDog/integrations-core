@@ -23,8 +23,10 @@ class MySQLConfig(object):
         self.ssl = instance.get('ssl', {})
         self.connect_timeout = instance.get('connect_timeout', 10)
         self.max_custom_queries = instance.get('max_custom_queries', DEFAULT_MAX_CUSTOM_QUERIES)
+        self.configuration_checks()
 
-        if self.queries or 'max_custom_queries' in instance:
+    def configuration_checks(self):
+        if self.queries or self.max_custom_queries != DEFAULT_MAX_CUSTOM_QUERIES:
             self.log.warning(
                 'The options `queries` and `max_custom_queries` are deprecated and will be '
                 'removed in a future release. Use the `custom_queries` option instead.'
