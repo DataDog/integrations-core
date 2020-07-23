@@ -6,6 +6,10 @@ from datadog_checks.snmp.exceptions import CouldNotDecodeOID, UnresolvedOID
 from datadog_checks.snmp.models import OID
 from datadog_checks.snmp.pysnmp_types import MibViewController, ObjectIdentity, ObjectName, ObjectType, SnmpEngine
 
+from . import common
+
+pytestmark = common.python_autodiscovery_only
+
 
 @pytest.mark.unit
 def test_oid():
