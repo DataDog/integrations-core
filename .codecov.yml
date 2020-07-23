@@ -7,6 +7,8 @@ coverage:
   round: down
   precision: 2
   status:
+    default_rules:
+      carryforward_behavior: exclude
     project:
       default:
         target: 75
@@ -83,7 +85,7 @@ coverage:
         target: 75
         flags:
         - clickhouse
-      Cloud Foundry API:
+      Cloud_Foundry_API:
         target: 75
         flags:
         - cloud_foundry_api
