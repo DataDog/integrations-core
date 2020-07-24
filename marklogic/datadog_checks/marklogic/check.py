@@ -1,10 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from pprint import pprint
+from itertools import chain
 from typing import Any
 
-from itertools import chain
 from requests.exceptions import HTTPError
 
 from datadog_checks.base import AgentCheck, ConfigurationError
@@ -13,7 +12,11 @@ from .api import MarkLogicApi
 from .config import Config
 from .constants import RESOURCE_TYPES
 from .parsers.health import parse_summary_health
-from .parsers.status import parse_per_resource_status_metrics,  parse_summary_status_base_metrics, parse_summary_status_resource_metrics
+from .parsers.status import (
+    parse_per_resource_status_metrics,
+    parse_summary_status_base_metrics,
+    parse_summary_status_resource_metrics,
+)
 from .parsers.storage import parse_summary_storage_base_metrics
 
 
@@ -134,8 +137,8 @@ class MarklogicCheck(AgentCheck):
         }
 
         for res in resources:
-             if self._is_resource_included(res):
-                 filtered_resources[res['type']].append(res)
+            if self._is_resource_included(res):
+                filtered_resources[res['type']].append(res)
 
         self.log.warning(filtered_resources)
 

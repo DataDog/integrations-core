@@ -57,14 +57,14 @@ def test_get_requests_data():
     # assert api.get_requests_data(group='mygroup') == {'foo': 'bar'}
 
 
-def test_get_forests_storage_data():
+def test_get_storage_data():
     # type: () -> None
     http = MockRequestsWrapper({'foo': 'bar'})
     api = MarkLogicApi(http, 'http://localhost:8000')
 
-    assert api.get_forests_storage_data(name='forestname') == {'foo': 'bar'}
-    assert http.url == 'http://localhost:8000/manage/v2/forests/forestname'
-    assert http.params == {'format': 'json', 'view': 'storage'}
+    assert api.get_storage_data(resource='database', name='Documents') == {'foo': 'bar'}
+    assert http.url == 'http://localhost:8000/manage/v2/forests'
+    assert http.params == {'format': 'json', 'view': 'storage', 'database-id': 'Documents'}
 
     # TODO: when get_forests_storage_data will support it
     # assert api.get_forests_storage_data(group='groupname') == {'foo': 'bar'}
@@ -116,10 +116,10 @@ def test_get_resources():
     api = MarkLogicApi(http, 'http://localhost:8000')
 
     assert api.get_resources() == [
-            {'id': '255818103205892753', 'type': 'databases', 'name': 'App-Services', 'uri': "/manage/v2/databases/App-Services"},
-            {'id': '5004266825873163057', 'type': 'databases', 'name': 'Documents', 'uri': "/manage/v2/databases/Documents"},
-            {'id': '16024526243775340149', 'type': 'forests', 'name': 'Modules', 'uri': "/manage/v2/forests/Modules"},
-            {'id': '17254568917360711355', 'type': 'forests', 'name': 'Extensions', 'uri': "/manage/v2/forests/Extensions"},
+        {'id': '255818103205892753', 'type': 'databases', 'name': 'App-Services', 'uri': "/databases/App-Services"},
+        {'id': '5004266825873163057', 'type': 'databases', 'name': 'Documents', 'uri': "/databases/Documents"},
+        {'id': '16024526243775340149', 'type': 'forests', 'name': 'Modules', 'uri': "/forests/Modules"},
+        {'id': '17254568917360711355', 'type': 'forests', 'name': 'Extensions', 'uri': "/forests/Extensions"},
     ]
     assert http.url == 'http://localhost:8000/manage/v2'
     assert http.params == {'view': 'query', 'format': 'json'}

@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from datadog_checks.base.utils.http import RequestsWrapper
 
@@ -12,9 +12,11 @@ class MarkLogicApi(object):
         self._http = http
         self._base_url = api_url + '/manage/v2'
 
-    def http_get(self, route="", params={}):
+    def http_get(self, route="", params=None):
         # type: (str, Dict[str, str]) -> Dict[str, Any]
-        params['format'] = 'json' # Always in json
+        if params is None:
+            params = {}
+        params['format'] = 'json'  # Always in json
 
         url = self._base_url + route
         resp = self._http.get(url, params=params)
@@ -63,7 +65,7 @@ class MarkLogicApi(object):
             params['{}-id'.format(resource)] = name
         if group:
             params['group-id'] = group
-        
+
         return self.http_get(route, params)
 
     def get_storage_data(self, resource=None, name=None, group=None):
@@ -83,11 +85,11 @@ class MarkLogicApi(object):
             params['{}-id'.format(resource)] = name
         if group:
             params['group-id'] = group
-        
+
         return self.http_get(route, params)
 
     def get_resources(self):
-        # type: () -> Dict[str, Any]
+        # type: () -> List[Dict[str, str]]
         # TODO: How useful is it
         data = self._get_raw_resources()
         resources = []  # type: List[Dict[str, str]]
@@ -95,7 +97,14 @@ class MarkLogicApi(object):
         for group in data['cluster-query']['relations']['relation-group']:
             resource_type = group['typeref']
             for rel in group['relation']:
-                resources.append({'id': rel['idref'], 'type': resource_type, 'name': rel['nameref'], 'uri': rel['uriref'][len('/manage/v2'):]})
+                resources.append(
+                    {
+                        'id': rel['idref'],
+                        'type': resource_type,
+                        'name': rel['nameref'],
+                        'uri': rel['uriref'][len('/manage/v2') :],
+                    }
+                )
         return resources
 
     def _get_raw_resources(self):
@@ -116,5 +125,5 @@ class MarkLogicApi(object):
         See https://docs.marklogic.com/REST/GET/manage/v2.
         """
         params = {'view': 'health'}
-        
+
         return self.http_get(params=params)

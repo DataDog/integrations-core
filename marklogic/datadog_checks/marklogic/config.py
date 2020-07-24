@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional, Pattern
 
 from .constants import RESOURCE_TYPES
 
@@ -14,18 +14,15 @@ class Config:
 
     @staticmethod
     def build_resource_filters(raw_filters):
+        # type: (List[Dict[str, Any]]) -> Dict[str, Dict[str, str]]
         created_filters = {'included': [], 'excluded': []}
         for f in raw_filters:
             included = f.get('type', 'included') == 'included'
             regex = re.compile(f['pattern'])
             if included:
-                created_filters['included'].append(
-                    ResourceFilter(f['resource'], regex, True, f.get('group'))
-                )
+                created_filters['included'].append(ResourceFilter(f['resource'], regex, True, f.get('group')))
             else:
-                created_filters['excluded'].append(
-                    ResourceFilter(f['resource'], regex, False, f.get('group'))
-                )
+                created_filters['excluded'].append(ResourceFilter(f['resource'], regex, False, f.get('group')))
 
         return created_filters
 
@@ -42,7 +39,7 @@ class ResourceFilter:
 
     def match(self, resource, name, id, group=None):
         # type: (str, str, str, Optional[str]) -> bool
-        return (self.resource == resource and self.regex.match(name) and self.group == group)
+        return self.resource == resource and self.regex.match(name) and self.group == group
 
     def __str__(self):
         return "{} | {} | {} | {}".format(self.resource, self.regex, self.is_included, self.group)
