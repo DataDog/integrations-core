@@ -4,9 +4,8 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from __future__ import division
 
-import re
 import traceback
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from contextlib import closing, contextmanager
 
 import pymysql
@@ -19,7 +18,6 @@ from .collection_utils import collect_all_scalars, collect_scalar, collect_strin
 from .config import MySQLConfig
 from .const import (
     BINLOG_VARS,
-    BUILDS,
     COUNT,
     GALERA_VARS,
     GAUGE,
@@ -45,6 +43,7 @@ from .queries import (
     SQL_QUERY_SCHEMA_SIZE,
     SQL_WORKER_THREADS,
 )
+from .version_utils import get_version
 
 try:
     import psutil
@@ -58,9 +57,6 @@ if PY3:
     long = int
 
 
-MySQLMetadata = namedtuple('MySQLMetadata', ['version', 'flavor', 'build'])
-
-
 class MySql(AgentCheck):
     SERVICE_CHECK_NAME = 'mysql.can_connect'
     SLAVE_SERVICE_CHECK_NAME = 'mysql.replication.slave_running'
@@ -69,7 +65,7 @@ class MySql(AgentCheck):
     def __init__(self, name, init_config, instances):
         super(MySql, self).__init__(name, init_config, instances)
         self.qcache_stats = {}
-        self.metadata = None
+        self.version = None
         self.config = MySQLConfig(self.instance)
 
         # Create a new connection on every check run
@@ -86,34 +82,10 @@ class MySql(AgentCheck):
             for row in cursor.fetchall_unbuffered():
                 yield row
 
-    def _get_metadata(self, db):
-        with closing(db.cursor()) as cursor:
-            cursor.execute('SELECT VERSION()')
-            result = cursor.fetchone()
-
-            # Version might include a build, a flavor, or both
-            # e.g. 4.1.26-log, 4.1.26-MariaDB, 10.0.1-MariaDB-mariadb1precise-log
-            # See http://dev.mysql.com/doc/refman/4.1/en/information-functions.html#function_version
-            # https://mariadb.com/kb/en/library/version/
-            # and https://mariadb.com/kb/en/library/server-system-variables/#version
-            parts = result[0].split('-')
-            version, flavor, build = [parts[0], '', '']
-
-            for data in parts:
-                if data == "MariaDB":
-                    flavor = "MariaDB"
-                if data != "MariaDB" and flavor == '':
-                    flavor = "MySQL"
-                if data in BUILDS:
-                    build = data
-            if build == '':
-                build = 'unspecified'
-
-            return MySQLMetadata(version, flavor, build)
-
+    @AgentCheck.metadata_entrypoint
     def _send_metadata(self):
-        self.set_metadata('version', self.metadata.version + '+' + self.metadata.build)
-        self.set_metadata('flavor', self.metadata.flavor)
+        self.set_metadata('version', self.version.version + '+' + self.version.build)
+        self.set_metadata('flavor', self.version.flavor)
 
     @classmethod
     def get_library_versions(cls):
@@ -135,8 +107,8 @@ class MySql(AgentCheck):
             try:
                 self._conn = db
 
-                # metadata collection
-                self.metadata = self._get_metadata(db)
+                # version collection
+                self.version = get_version(db)
                 self._send_metadata()
 
                 # Metric collection
@@ -263,7 +235,7 @@ class MySql(AgentCheck):
             self.log.debug("Collecting Extra Status Metrics")
             metrics.update(OPTIONAL_STATUS_VARS)
 
-            if self._version_compatible(db, (5, 6, 6)):
+            if self.version.version_compatible((5, 6, 6)):
                 metrics.update(OPTIONAL_STATUS_VARS_5_6_6)
 
         if is_affirmative(options.get('galera_cluster', False)):
@@ -272,7 +244,7 @@ class MySql(AgentCheck):
             metrics.update(GALERA_VARS)
 
         performance_schema_enabled = self._get_variable_enabled(results, 'performance_schema')
-        above_560 = self._version_compatible(db, (5, 6, 0))
+        above_560 = self.version.version_compatible((5, 6, 0))
         if is_affirmative(options.get('extra_performance_metrics', False)) and above_560 and performance_schema_enabled:
             # report avg query response time per schema to Datadog
             results['perf_digest_95th_percentile_avg_us'] = self._get_query_exec_time_95th_us(db)
@@ -286,7 +258,7 @@ class MySql(AgentCheck):
 
         if is_affirmative(options.get('replication', False)):
             # Get replica stats
-            is_mariadb = self.metadata.flavor == "MariaDB"
+            is_mariadb = self.version.flavor == "MariaDB"
             replication_channel = options.get('replication_channel')
             if replication_channel:
                 self.service_check_tags.append("channel:{0}".format(replication_channel))
@@ -311,7 +283,7 @@ class MySql(AgentCheck):
 
             # MySQL 5.7.x might not have 'Slave_running'. See: https://bugs.mysql.com/bug.php?id=78544
             # look at replica vars collected at the top of if-block
-            if self._version_compatible(db, (5, 7, 0)):
+            if self.version.version_compatible((5, 7, 0)):
                 if not (slave_io_running is None and slave_sql_running is None):
                     if slave_io_running and slave_sql_running:
                         slave_running_status = AgentCheck.OK
@@ -398,22 +370,6 @@ class MySql(AgentCheck):
                         self.count(metric_name, value, tags=metric_tags)
                     elif metric_type == MONOTONIC:
                         self.monotonic_count(metric_name, value, tags=metric_tags)
-
-    def _version_compatible(self, db, compat_version):
-        # some patch version numbers contain letters (e.g. 5.0.51a)
-        # so let's be careful when we compute the version number
-
-        try:
-            mysql_version = self.metadata.version.split('.')
-        except Exception as e:
-            self.warning("Cannot compute mysql version, assuming it's older.: %s", e)
-            return False
-        self.log.debug("MySQL version %s", mysql_version)
-
-        patchlevel = int(re.match(r"([0-9]+)", mysql_version[2]).group(1))
-        version = (int(mysql_version[0]), int(mysql_version[1]), patchlevel)
-
-        return version >= compat_version
 
     def _collect_dict(self, metric_type, field_metric_map, query, db, tags):
         """
