@@ -181,7 +181,7 @@ class PgStatementsMixin(object):
         if not rows:
             return
         rows = rows[:self.config.max_query_metrics]
-        row_keyfunc = lambda row: (row['queryid'], row['query'])
+        row_keyfunc = lambda row: (row['queryid'], row['datname'], row['rolname'])
         rows = self._state.compute_derivative_rows(rows, PG_STAT_STATEMENTS_METRIC_COLUMNS.keys(), key=row_keyfunc)
         metric_limits = self.config.query_metric_limits if self.config.query_metric_limits else DEFAULT_METRIC_LIMITS
         rows = apply_row_limits(rows, metric_limits, 'calls', True, key=row_keyfunc)
