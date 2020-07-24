@@ -69,7 +69,7 @@ def readmes(ctx, integration):
                             errors = True
                             echo_failure(f"{integration} image: {rel_path} is linked in its readme but does not exist")
                             break
-                            
+
         if not (has_overview and has_setup):
             errors = True
             echo_failure(f"{integration} readme file does not contain both an Overview and Setup H2 section")
