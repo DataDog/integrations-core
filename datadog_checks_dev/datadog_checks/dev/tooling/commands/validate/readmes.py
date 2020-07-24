@@ -57,10 +57,12 @@ def readmes(ctx, integration):
                     if not match:
                         errors = True
                         display_queue.append((echo_failure, f"     No valid image file on line {line_no}"))
-                        display_queue.append((
-                            echo_info,
-                            f"     This image path must be in the form: "
-                            f"https://raw.githubusercontent.com/DataDog/{repo}/master/{integration}/images/<IMAGE_NAME>")  # noqa
+                        display_queue.append(
+                            (
+                                echo_info,
+                                f"     This image path must be in the form: "
+                                f"https://raw.githubusercontent.com/DataDog/{repo}/master/{integration}/images/<IMAGE_NAME>",  # noqa
+                            )
                         )
                         break
 
@@ -69,9 +71,9 @@ def readmes(ctx, integration):
                         file_path = path.join(get_root(), rel_path)
                         if not path.exists(file_path):
                             errors = True
-                            display_queue.append((
-                                echo_failure, f"     image: {rel_path} is linked in its readme but does not exist"
-                            ))
+                            display_queue.append(
+                                (echo_failure, f"     image: {rel_path} is linked in its readme but does not exist")
+                            )
 
         if not (has_overview and has_setup):
             errors = True
