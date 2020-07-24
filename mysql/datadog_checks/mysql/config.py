@@ -33,4 +33,12 @@ class MySQLConfig(object):
             )
 
         if not (self.host and self.user) and not self.defaults_file:
-            raise ConfigurationError("Mysql host and user are needed.")
+            raise ConfigurationError("Mysql host and user or a defaults_file are needed.")
+
+        if (self.host or self.user or self.port or self.mysql_sock) and self.defaults_file:
+            self.log.warning(
+                "Both connection details and defaults file have been specified, connection details will be ignored"
+            )
+
+        if self.mysql_sock and self.host:
+            self.log.warning("Both socket and host have been specified, socket will be used")
