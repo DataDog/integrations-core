@@ -23,9 +23,8 @@ def readmes(ctx, integration):
     """
 
     repo = ctx.obj['repo_name']
-
-    errors = False
     integrations = []
+    failed_checks = 0
 
     if integration:
         integrations = [integration]
@@ -35,6 +34,8 @@ def readmes(ctx, integration):
     for integration in integrations:
         has_overview = False
         has_setup = False
+        errors = False
+        display_queue = []
 
         lines = read_readme_file(integration)
         for line_no, line in lines:
@@ -55,10 +56,11 @@ def readmes(ctx, integration):
                     match = re.match(IMAGE_REGEX, line)
                     if not match:
                         errors = True
-                        echo_failure(f"{integration} readme file does not have a valid image file on line {line_no}")
-                        echo_info(
-                            f"This image path must be in the form: "
-                            f"https://raw.githubusercontent.com/DataDog/{repo}/master/{integration}/images/<IMAGE_NAME>"
+                        display_queue.append((echo_failure, f"     No valid image file on line {line_no}"))
+                        display_queue.append((
+                            echo_info,
+                            f"     This image path must be in the form: "
+                            f"https://raw.githubusercontent.com/DataDog/{repo}/master/{integration}/images/<IMAGE_NAME>")  # noqa
                         )
                         break
 
@@ -67,14 +69,23 @@ def readmes(ctx, integration):
                         file_path = path.join(get_root(), rel_path)
                         if not path.exists(file_path):
                             errors = True
-                            echo_failure(f"{integration} image: {rel_path} is linked in its readme but does not exist")
-                            break
+                            display_queue.append((
+                                echo_failure, f"     image: {rel_path} is linked in its readme but does not exist"
+                            ))
 
         if not (has_overview and has_setup):
             errors = True
-            echo_failure(f"{integration} readme file does not contain both an Overview and Setup H2 section")
+            display_queue.append((echo_failure, "     readme does not contain both an Overview and Setup H2 section"))
 
-    if errors:
+        if errors:
+            failed_checks += 1
+            echo_info(f"{integration}/README.md... ", nl=False)
+            echo_failure("FAILED")
+            for display_func, message in display_queue:
+                display_func(message)
+
+    if failed_checks:
+        echo_failure(f"{failed_checks} invalid files")
         abort()
-
-    echo_success("All READMEs are valid!")
+    else:
+        echo_success("All READMEs are valid!")
