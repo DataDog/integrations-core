@@ -181,7 +181,6 @@ class PgStatementsMixin(object):
         statsd.gauge("dd.postgres.collect_statement_metrics.rows", len(rows), tags=instance_tags)
         if not rows:
             return
-        rows = rows[:self.config.max_query_metrics]
         row_keyfunc = lambda row: (row['queryid'], row['datname'], row['rolname'])
         rows = self._state.compute_derivative_rows(rows, PG_STAT_STATEMENTS_METRIC_COLUMNS.keys(), key=row_keyfunc)
         metric_limits = self.config.query_metric_limits if self.config.query_metric_limits else DEFAULT_METRIC_LIMITS

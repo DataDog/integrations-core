@@ -64,7 +64,6 @@ class PostgresConfig:
         self.service_check_tags = self._get_service_check_tags()
         self.custom_metrics = self._get_custom_metrics(instance.get('custom_metrics', []))
         self.max_relations = int(instance.get('max_relations', 300))
-        self.max_query_metrics = int(instance.get('max_query_metrics', 100000))
         self.escape_query_commas_hack = instance.get('escape_query_commas_hack', False)
         self.query_metric_limits = instance.get('options', {}).get('query_metric_limits', None)
 
