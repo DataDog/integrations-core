@@ -6,7 +6,7 @@ import re
 import click
 
 from ...utils import get_codeowners, get_valid_integrations
-from ..console import CONTEXT_SETTINGS, echo_failure, echo_success
+from ..console import CONTEXT_SETTINGS, echo_failure, echo_success, abort
 
 DIRECTORY_REGEX = re.compile(r"\/(.*)\/$")
 
