@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+
 from datadog_checks.base import is_affirmative
 
 try:
@@ -49,16 +50,17 @@ class StatementMetrics:
             prev = self.previous_statements.get(row_key)
             if prev is None:
                 continue
+
             metric_columns = metrics & set(row.keys())
             dropped_metrics.update(metrics - metric_columns)
+
             if any([row[k] - prev[k] < 0 for k in metric_columns]):
                 # The table was truncated or stats reset; begin tracking again from this point
                 continue
             if all([row[k] - prev[k] == 0 for k in metric_columns]):
                 # No metrics to report; query did not run
                 continue
-            result.append({k: row[k] - prev[k] if k in metric_columns else row[k]
-                           for k in row})
+            result.append({k: row[k] - prev[k] if k in metric_columns else row[k] for k in row.keys()})
 
         self.previous_statements = new_cache
         if dropped_metrics:

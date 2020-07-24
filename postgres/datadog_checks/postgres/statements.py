@@ -6,6 +6,7 @@ import json
 from collections import defaultdict
 
 import mmh3
+import itertools
 import psycopg2
 import psycopg2.extras
 import time
@@ -13,6 +14,7 @@ from datadog import statsd
 from datadog_checks.base import AgentCheck
 import socket
 from datadog_checks.base.utils.db.sql import compute_sql_signature, compute_exec_plan_signature
+from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits, is_dbm_enabled
 
 from contextlib import closing
 
@@ -50,41 +52,38 @@ ORDER BY (pg_stat_statements.total_time / NULLIF(pg_stat_statements.calls, 0)) D
 PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({
     'calls',
     'query',
+    'queryid',
     'total_time',
     'rows',
 })
 
 
-# Count columns to be converted to metrics
+# Monotonically increasing count columns to be converted to metrics
 PG_STAT_STATEMENTS_METRIC_COLUMNS = {
-    'calls': ('pg_stat_statements.calls', 'postgresql.queries.count', AgentCheck.count),
-    'total_time': ('pg_stat_statements.total_time * 1000000', 'postgresql.queries.time', AgentCheck.count),
-    'rows': ('pg_stat_statements.rows', 'postgresql.queries.rows', AgentCheck.count),
-    'shared_blks_hit': ('pg_stat_statements.shared_blks_hit', 'postgresql.queries.shared_blks_hit', AgentCheck.count),
-    'shared_blks_read': ('pg_stat_statements.shared_blks_read', 'postgresql.queries.shared_blks_read', AgentCheck.count),
-    'shared_blks_dirtied': ('pg_stat_statements.shared_blks_dirtied', 'postgresql.queries.shared_blks_dirtied', AgentCheck.count),
-    'shared_blks_written': ('pg_stat_statements.shared_blks_written', 'postgresql.queries.shared_blks_written', AgentCheck.count),
-    'local_blks_hit': ('pg_stat_statements.local_blks_hit', 'postgresql.queries.local_blks_hit', AgentCheck.count),
-    'local_blks_read': ('pg_stat_statements.local_blks_read', 'postgresql.queries.local_blks_read', AgentCheck.count),
-    'local_blks_dirtied': ('pg_stat_statements.local_blks_dirtied', 'postgresql.queries.local_blks_dirtied', AgentCheck.count),
-    'local_blks_written': ('pg_stat_statements.local_blks_written', 'postgresql.queries.local_blks_written', AgentCheck.count),
-    'temp_blks_read': ('pg_stat_statements.temp_blks_read', 'postgresql.queries.temp_blks_read', AgentCheck.count),
-    'temp_blks_written': ('pg_stat_statements.temp_blks_written', 'postgresql.queries.temp_blks_written', AgentCheck.count),
+    'calls': ('pg_stat_statements.calls', 'postgresql.queries.count'),
+    'total_time': ('pg_stat_statements.total_time * 1000000', 'postgresql.queries.time'),
+    'rows': ('pg_stat_statements.rows', 'postgresql.queries.rows'),
+    'shared_blks_hit': ('pg_stat_statements.shared_blks_hit', 'postgresql.queries.shared_blks_hit'),
+    'shared_blks_read': ('pg_stat_statements.shared_blks_read', 'postgresql.queries.shared_blks_read'),
+    'shared_blks_dirtied': ('pg_stat_statements.shared_blks_dirtied', 'postgresql.queries.shared_blks_dirtied'),
+    'shared_blks_written': ('pg_stat_statements.shared_blks_written', 'postgresql.queries.shared_blks_written'),
+    'local_blks_hit': ('pg_stat_statements.local_blks_hit', 'postgresql.queries.local_blks_hit'),
+    'local_blks_read': ('pg_stat_statements.local_blks_read', 'postgresql.queries.local_blks_read'),
+    'local_blks_dirtied': ('pg_stat_statements.local_blks_dirtied', 'postgresql.queries.local_blks_dirtied'),
+    'local_blks_written': ('pg_stat_statements.local_blks_written', 'postgresql.queries.local_blks_written'),
+    'temp_blks_read': ('pg_stat_statements.temp_blks_read', 'postgresql.queries.temp_blks_read'),
+    'temp_blks_written': ('pg_stat_statements.temp_blks_written', 'postgresql.queries.temp_blks_written'),
 }
 
+DEFAULT_METRIC_LIMITS = {k: (100000, 100000) for k in PG_STAT_STATEMENTS_METRIC_COLUMNS.keys()}
 
 # Columns to apply as tags
 PG_STAT_STATEMENTS_TAG_COLUMNS = {
     'datname': ('pg_database.datname', 'db'),
     'rolname': ('pg_roles.rolname', 'user'),
     'query': ('pg_stat_statements.query', 'query'),
-}
-
-
-# Transformation functions to apply to each column before submission
-PG_STAT_STATEMENTS_TRANSFORM = {
-    # obfuscate then truncate the query to 200 chars
-    'query': lambda q: datadog_agent.obfuscate_sql(q)[:200],
+    # we don't need the queryid as a tag
+    'queryid': ('pg_stat_statements.queryid', None),
 }
 
 VALID_EXPLAIN_STATEMENTS = frozenset({
@@ -117,10 +116,11 @@ class PgStatementsMixin(object):
 
     def __init__(self, *args, **kwargs):
         # Cache results of monotonic pg_stat_statements to compare to previous collection
-        self._statements_cache = {}
+        self._state = StatementMetrics(self.log)
 
         # Available columns will be queried once and cached as the source of truth.
         self.__pg_stat_statements_columns = None
+        self.__pg_stat_statements_query_columns = None
         self._activity_last_query_start = None
 
     def _execute_query(self, cursor, query, params=None, log_func=None):
@@ -149,6 +149,23 @@ class PgStatementsMixin(object):
         self.__pg_stat_statements_columns = frozenset(column[0] for column in columns)
         return self.__pg_stat_statements_columns
 
+    @property
+    def _pg_stat_statements_query_columns(self):
+        """
+        Columns to query for with aliases
+        Only includes columns that actually exist in the table
+        """
+        if self.__pg_stat_statements_query_columns is not None:
+            return self.__pg_stat_statements_query_columns
+        self.__pg_stat_statements_query_columns = []
+        for alias, (column, *_) in itertools.chain(PG_STAT_STATEMENTS_METRIC_COLUMNS.items(),
+                                                   PG_STAT_STATEMENTS_TAG_COLUMNS.items()):
+            if alias in self._pg_stat_statements_columns or alias in PG_STAT_STATEMENTS_TAG_COLUMNS:
+                self.__pg_stat_statements_query_columns.append(
+                    '{column} AS {alias}'.format(column=column, alias=alias)
+                )
+        return self.__pg_stat_statements_query_columns
+
     def _collect_statement_metrics(self, instance_tags):
         # Sanity checks
         missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - self._pg_stat_statements_columns
@@ -157,33 +174,20 @@ class PgStatementsMixin(object):
             return
 
         cursor = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        columns = []
-        for entry in (PG_STAT_STATEMENTS_METRIC_COLUMNS, PG_STAT_STATEMENTS_TAG_COLUMNS):
-            for alias, (column, *_) in entry.items():
-                # Only include columns which are available on the table
-                if alias in self._pg_stat_statements_columns or alias in PG_STAT_STATEMENTS_TAG_COLUMNS:
-                    columns.append('{column} AS {alias}'.format(column=column, alias=alias))
-
         rows = self._execute_query(cursor, STATEMENTS_QUERY.format(
-            cols=', '.join(columns),
+            cols=', '.join(self._pg_stat_statements_query_columns),
             pg_stat_statements_function=self.config.pg_stat_statements_function
         ), params=(self.config.dbname,))
+        statsd.gauge("dd.postgres.collect_statement_metrics.rows", len(rows), tags=instance_tags)
         if not rows:
             return
         rows = rows[:self.config.max_query_metrics]
+        row_keyfunc = lambda row: (row['queryid'], row['query'])
+        rows = self._state.compute_derivative_rows(rows, PG_STAT_STATEMENTS_METRIC_COLUMNS.keys(), key=row_keyfunc)
+        metric_limits = self.config.query_metric_limits if self.config.query_metric_limits else DEFAULT_METRIC_LIMITS
+        rows = apply_row_limits(rows, metric_limits, 'calls', True, key=row_keyfunc)
 
-        new_cache = {}
         for row in rows:
-            key = (row['rolname'], row['datname'], row['query'])
-            new_cache[key] = row
-            if key not in self.statement_cache:
-                continue
-            prev = self.statement_cache[key]
-
-            # pg_stats reset will cause this
-            if row['calls'] - prev['calls'] <= 0:
-                continue
-
             try:
                 obfuscated_query = datadog_agent.obfuscate_sql(row['query'])
             except Exception as e:
@@ -192,22 +196,21 @@ class PgStatementsMixin(object):
 
             tags = ['query_signature:' + compute_sql_signature(obfuscated_query)] + instance_tags
             for tag_column, (_, alias) in PG_STAT_STATEMENTS_TAG_COLUMNS.items():
-                if tag_column not in self._pg_stat_statements_columns:
+                if tag_column not in row or alias is None:
                     continue
-                value = PG_STAT_STATEMENTS_TRANSFORM.get(tag_column, lambda x: x)(row[tag_column])
-                if self.config.escape_query_commas_hack and tag_column == 'query':
-                    value = value.replace(', ', '，').replace(',', '，')
+                value = row[tag_column]
+                if tag_column == 'query':
+                    # truncate to metrics tag limit
+                    obfuscated_query = obfuscated_query[:200]
+                    if self.config.escape_query_commas_hack and tag_column == 'query':
+                        value = value.replace(', ', '，').replace(',', '，')
                 tags.append('{alias}:{value}'.format(alias=alias, value=value))
 
-            for alias, (_, name, fn) in PG_STAT_STATEMENTS_METRIC_COLUMNS.items():
-                if alias not in self._pg_stat_statements_columns:
+            for alias, (_, name) in PG_STAT_STATEMENTS_METRIC_COLUMNS.items():
+                if alias not in row:
                     continue
-
-                val = row[alias] - prev[alias]
-
-                fn(self, name, val, tags=tags)
-
-        self.statement_cache = new_cache
+                self.log.debug("statsd.increment(%s, %s, tags=%s)", name, row[alias], tags)
+                statsd.increment(name, row[alias], tags=tags)
 
     def _get_new_pg_stat_activity(self, instance_tags=None):
         start_time = time.time()
@@ -342,8 +345,8 @@ class PgStatementsMixin(object):
                 self._submit_log_events(events)
             time.sleep(self.config.collect_exec_plan_sample_sleep)
 
-        self.gauge("dd.postgres.collect_execution_plans.total.time", (time.time() - start_time) * 1000,
-                   tags=instance_tags)
-        self.gauge("dd.postgres.collect_execution_plans.seen_statements", len(seen_statements), tags=instance_tags)
-        self.gauge("dd.postgres.collect_execution_plans.seen_statement_plan_sigs", len(seen_statement_plan_sigs),
-                   tags=instance_tags)
+        statsd.gauge("dd.postgres.collect_execution_plans.total.time", (time.time() - start_time) * 1000,
+                     tags=instance_tags)
+        statsd.gauge("dd.postgres.collect_execution_plans.seen_statements", len(seen_statements), tags=instance_tags)
+        statsd.gauge("dd.postgres.collect_execution_plans.seen_statement_plan_sigs", len(seen_statement_plan_sigs),
+                     tags=instance_tags)
