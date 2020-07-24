@@ -72,3 +72,5 @@ def codeowners():
 
     if not has_failed:
         echo_success("All integrations have valid codeowners.")
+    else:
+        abort()
