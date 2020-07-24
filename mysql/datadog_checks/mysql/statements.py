@@ -59,7 +59,7 @@ class MySQLStatementMetrics:
         self.query_metric_limits = instance.get('options', {}).get('query_metric_limits', DEFAULT_METRIC_LIMITS)
         self.escape_query_commas_hack = instance.get('options', {}).get('escape_query_commas_hack', False)
     
-    def get_per_statement_metrics(self, db, instance_tags):
+    def collect_per_statement_metrics(self, db, instance_tags):
         if self.is_disabled or not is_dbm_enabled():
             return []
 

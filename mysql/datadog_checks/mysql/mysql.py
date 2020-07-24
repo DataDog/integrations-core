@@ -391,7 +391,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
                 # Metric collection
                 self._collect_metrics(db, tags, options, queries, max_custom_queries)
                 self._collect_system_metrics(host, db, tags)
-                self._collect_statement_metrics(db, tags, options)
+                self._collect_statement_metrics(db, tags)
                 self._collect_execution_plans(db, tags, options)
 
                 # keeping track of these:
@@ -708,9 +708,9 @@ class MySql(ExecutionPlansMixin, AgentCheck):
             if len(queries) > max_custom_queries:
                 self.warning("Maximum number (%s) of custom queries reached.  Skipping the rest.", max_custom_queries)
 
-    def _collect_statement_metrics(self, db, tags, _):
+    def _collect_statement_metrics(self, db, tags):
         tags = list(set(self.service_check_tags + tags))
-        self._statement_metrics.get_per_statement_metrics(db, tags)
+        self._statement_metrics.collect_per_statement_metrics(db, tags)
 
     def _is_master(self, slaves, results):
         # master uuid only collected in slaves
