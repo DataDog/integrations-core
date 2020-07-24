@@ -13,7 +13,7 @@ from requests import HTTPError
 from six import iteritems, iterkeys, itervalues
 from six.moves.urllib.parse import urljoin
 
-from datadog_checks.base import OpenMetricsBaseCheck, is_affirmative
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
 from datadog_checks.consul.common import (
     CONSUL_CAN_CONNECT,
     CONSUL_CATALOG_CHECK,
@@ -30,6 +30,12 @@ from datadog_checks.consul.common import (
 
 from .metrics import METRIC_MAP
 
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
+
 NodeStatus = namedtuple('NodeStatus', ['node_id', 'service_name', 'service_tags_set', 'status'])
 
 
@@ -37,11 +43,19 @@ class ConsulCheck(OpenMetricsBaseCheck):
     def __init__(self, name, init_config, instances):
         instance = instances[0]
         self.url = instance.get('url')
+        if self.url is None:
+            raise ConfigurationError("`url` parameter is required.")
 
         # Set the prometheus endpoint configuration
         self.use_prometheus_endpoint = is_affirmative(instance.get('use_prometheus_endpoint', False))
         instance.setdefault('prometheus_url', '')
         if self.use_prometheus_endpoint:
+            # Check that the prometheus and the dogstatsd method are not both configured
+            if self._is_dogstatsd_configured():
+                raise ConfigurationError(
+                    'The DogStatsD method and the Prometheus method are both enabled. Please choose only one.'
+                )
+
             instance['prometheus_url'] = '{}/v1/agent/metrics?format=prometheus'.format(self.url)
 
             if 'headers' not in instance:
@@ -97,6 +111,13 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
         if 'acl_token' in self.instance:
             self.http.options['headers']['X-Consul-Token'] = self.instance['acl_token']
+
+    def _is_dogstatsd_configured(self):
+        """ Check if the agent has a consul dogstatsd profile configured """
+        for profile in datadog_agent.get_config('dogstatsd_mapper_profiles'):
+            if profile.get('name') == 'consul':
+                return True
+        return False
 
     def consul_request(self, endpoint):
         url = urljoin(self.url, endpoint)
