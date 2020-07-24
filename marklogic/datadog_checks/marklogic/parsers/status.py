@@ -17,6 +17,13 @@ def parse_summary_status_resource_metrics(resource_type, data, tags):
     return _parse_status_metrics(res_meta['plural'], metrics, tags)
 
 
+def parse_per_resource_status_metrics(resource_type, data, tags):
+    #  type: (str, Dict[str, Any], List[str]) -> Generator[Tuple, None, None]
+    res_meta = RESOURCE_TYPES[resource_type]
+    metrics = data['{}-status'.format(resource_type)]['status-properties']
+    return _parse_status_metrics(res_meta['plural'], metrics, tags)
+
+
 def parse_summary_status_base_metrics(data, tags):
     #  type: (Dict[str, Any], List[str]) -> Generator[Tuple, None, None]
     relations = data['local-cluster-status']['status-relations']
@@ -45,4 +52,6 @@ def _parse_status_metrics(metric_prefix, metrics, tags):
             for metric in _parse_status_metrics(metric_prefix, data, tags):
                 yield metric
         elif is_metric(data):
-            yield build_metric_to_submit("{}.{}".format(metric_prefix, key), data, tags)
+            metric = build_metric_to_submit("{}.{}".format(metric_prefix, key), data, tags)
+            if metric is not None:
+                yield metric

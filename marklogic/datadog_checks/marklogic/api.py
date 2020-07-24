@@ -12,6 +12,15 @@ class MarkLogicApi(object):
         self._http = http
         self._base_url = api_url + '/manage/v2'
 
+    def http_get(self, route="", params={}):
+        # type: (str, Dict[str, str]) -> Dict[str, Any]
+        params['format'] = 'json' # Always in json
+
+        url = self._base_url + route
+        resp = self._http.get(url, params=params)
+        resp.raise_for_status()
+        return resp.json()
+
     def get_status_data(self, resource=None, name=None, group=None):
         # type: (str, str, str) -> Dict[str, Any]
         """
@@ -26,17 +35,16 @@ class MarkLogicApi(object):
             - http://localhost:8002/manage/v2/servers?view=status&format=json
                 (already in http://localhost:8002/manage/v2/hosts?view=status)
         """
-        params = {
-            'view': 'status',
-            'format': 'json',
-        }
-        url = self._base_url
-
+        params = {'view': 'status'}
+        route = ""
         if resource:
-            url = "{}/{}".format(url, resource)
-        resp = self._http.get(url, params=params)
-        resp.raise_for_status()
-        return resp.json()
+            route = "/" + resource
+        if name:
+            route += "/" + name
+        if group:
+            params['group-id'] = group
+
+        return self.http_get(route, params)
 
     def get_requests_data(self, resource=None, name=None, group=None):
         # type: (str, str, str) -> Dict[str, Any]
@@ -49,18 +57,17 @@ class MarkLogicApi(object):
             - http://localhost:8002/manage/v2/requests?format=json&group-id=Default
             - http://localhost:8002/manage/v2/requests?format=json&host-id=2871b05b4bdc
         """
-        params = {
-            'format': 'json',
-        }
-        url = "{}/requests".format(self._base_url)
-        if resource:
+        params = {}
+        route = "/requests"
+        if resource and name:
             params['{}-id'.format(resource)] = name
-        resp = self._http.get(url, params=params)
-        resp.raise_for_status()
-        return resp.json()
+        if group:
+            params['group-id'] = group
+        
+        return self.http_get(route, params)
 
-    def get_forests_storage_data(self, name=None, group=None):
-        # type: (str, str) -> Dict[str, Any]
+    def get_storage_data(self, resource=None, name=None, group=None):
+        # type: (str, str, str) -> Dict[str, Any]
         """
         Example url:
             - http://localhost:8002/manage/v2/forests?format=json&view=storage
@@ -69,27 +76,26 @@ class MarkLogicApi(object):
             - http://localhost:8002/manage/v2/forests?format=json&view=storage&database-id=Security
         """
         params = {
-            'format': 'json',
             'view': 'storage',
         }
-        url = "{}/forests".format(self._base_url)
-        if name:
-            url = "{}/{}".format(url, name)
-        resp = self._http.get(url, params=params)
-        resp.raise_for_status()
-        return resp.json()
+        route = "/forests"
+        if resource and name:
+            params['{}-id'.format(resource)] = name
+        if group:
+            params['group-id'] = group
+        
+        return self.http_get(route, params)
 
     def get_resources(self):
         # type: () -> Dict[str, Any]
         # TODO: How useful is it
         data = self._get_raw_resources()
-        resources = {}  # type: Dict[str, Any]
+        resources = []  # type: List[Dict[str, str]]
 
         for group in data['cluster-query']['relations']['relation-group']:
             resource_type = group['typeref']
-            resources[resource_type] = []
             for rel in group['relation']:
-                resources[resource_type].append({'id': rel['idref'], 'name': rel['nameref']})
+                resources.append({'id': rel['idref'], 'type': resource_type, 'name': rel['nameref'], 'uri': rel['uriref'][len('/manage/v2'):]})
         return resources
 
     def _get_raw_resources(self):
@@ -99,12 +105,9 @@ class MarkLogicApi(object):
         # http://localhost:8002/manage/v2?view=query&format=json
         params = {
             'view': 'query',
-            'format': 'json',
         }
-        url = self._base_url
-        resp = self._http.get(url, params=params)
-        resp.raise_for_status()
-        return resp.json()
+
+        return self.http_get(params=params)
 
     def get_health(self):
         # type: () -> Dict[str, Any]
@@ -112,11 +115,6 @@ class MarkLogicApi(object):
         Return the cluster health querying http://localhost:8002/manage/v2?view=health&format=json.
         See https://docs.marklogic.com/REST/GET/manage/v2.
         """
-        params = {
-            'view': 'health',
-            'format': 'json',
-        }
-        url = self._base_url
-        resp = self._http.get(url, params=params)
-        resp.raise_for_status()
-        return resp.json()
+        params = {'view': 'health'}
+        
+        return self.http_get(params=params)

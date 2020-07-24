@@ -115,16 +115,12 @@ def test_get_resources():
     http = MockRequestsWrapper(cluster_query_resp)
     api = MarkLogicApi(http, 'http://localhost:8000')
 
-    assert api.get_resources() == {
-        'databases': [
-            {'id': '255818103205892753', 'name': 'App-Services'},
-            {'id': '5004266825873163057', 'name': 'Documents'},
-        ],
-        'forests': [
-            {'id': '16024526243775340149', 'name': 'Modules'},
-            {'id': '17254568917360711355', 'name': 'Extensions'},
-        ],
-    }
+    assert api.get_resources() == [
+            {'id': '255818103205892753', 'type': 'databases', 'name': 'App-Services', 'uri': "/manage/v2/databases/App-Services"},
+            {'id': '5004266825873163057', 'type': 'databases', 'name': 'Documents', 'uri': "/manage/v2/databases/Documents"},
+            {'id': '16024526243775340149', 'type': 'forests', 'name': 'Modules', 'uri': "/manage/v2/forests/Modules"},
+            {'id': '17254568917360711355', 'type': 'forests', 'name': 'Extensions', 'uri': "/manage/v2/forests/Extensions"},
+    ]
     assert http.url == 'http://localhost:8000/manage/v2'
     assert http.params == {'view': 'query', 'format': 'json'}
 

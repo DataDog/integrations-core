@@ -4,6 +4,7 @@
 from pprint import pprint
 from typing import Any
 
+from itertools import chain
 from requests.exceptions import HTTPError
 
 from datadog_checks.base import AgentCheck, ConfigurationError
@@ -12,9 +13,8 @@ from .api import MarkLogicApi
 from .config import Config
 from .constants import RESOURCE_TYPES
 from .parsers.health import parse_summary_health
-from .parsers.status import parse_summary_status_base_metrics, parse_summary_status_resource_metrics
+from .parsers.status import parse_per_resource_status_metrics,  parse_summary_status_base_metrics, parse_summary_status_resource_metrics
 from .parsers.storage import parse_summary_storage_base_metrics
-from .resource_filters import create_resource_filter
 
 
 class MarklogicCheck(AgentCheck):
@@ -31,7 +31,6 @@ class MarklogicCheck(AgentCheck):
         self.api = MarkLogicApi(self.http, url)
 
         self.config = Config(self.instance)
-        self.resource_filters = create_resource_filter(self.config.resource_filters)
 
         self.collectors = [
             self.collect_summary_status_base_metrics,
@@ -51,6 +50,7 @@ class MarklogicCheck(AgentCheck):
         # self.process_requests_metrics_by_resource()
 
         self.resources_to_monitor = self.get_resources_to_monitor()
+        self.collect_per_resource_status_metrics()
 
         for collector in self.collectors:
             try:
@@ -94,7 +94,7 @@ class MarklogicCheck(AgentCheck):
         """
         Collect Base Storage Metrics
         """
-        data = self.api.get_forests_storage_data()
+        data = self.api.get_storage_data()
         metrics = parse_summary_storage_base_metrics(data, self.config.tags)
         self.submit_metrics(metrics)
 
@@ -103,14 +103,43 @@ class MarklogicCheck(AgentCheck):
         """
         Collect Per Resource Status Metrics.
         """
-        pprint(self.resources_to_monitor)
+        # TODO: refactor
+        for res in self.resources_to_monitor['forests']:
+            tags = ['forest_name:{}'.format(res['name'])]
+            if res.get('group'):
+                tags.append('group_name:{}'.format(res['group']))
+            status_data = self.api.http_get(res['uri'], {'view': 'status'})
+            storage_data = self.api.get_storage_data(resource='forest', name=res['name'], group=res.get('group'))
+
+            status_metrics = parse_per_resource_status_metrics('forest', status_data, tags)
+            storage_metrics = parse_summary_storage_base_metrics(storage_data, tags)
+
+            # TODO: requests metrics
+            self.submit_metrics(chain(status_metrics, storage_metrics))
+        for res in self.resources_to_monitor['databases']:
+            status_data = self.api.http_get(res['uri'], {'view': 'status'})
+            storage_metrics = self.api.get_storage_data(resource='database', name=res['name'], group=res.get('group'))
 
     def get_resources_to_monitor(self):
         # type: () -> None
         resources = self.api.get_resources()
-        pprint(self.config.resource_filters)
-        pprint(resources)
-        return []
+
+        self.log.warning(resources)
+
+        filtered_resources = {
+            'forests': [],
+            'databases': [],
+            'hosts': [],
+            'servers': [],
+        }
+
+        for res in resources:
+             if self._is_resource_included(res):
+                 filtered_resources[res['type']].append(res)
+
+        self.log.warning(filtered_resources)
+
+        return filtered_resources
 
     def submit_metrics(self, metrics):
         for metric_type, metric_name, value_data, tags in metrics:
@@ -131,6 +160,16 @@ class MarklogicCheck(AgentCheck):
         except Exception:
             # Couldn't parse the resource health
             self.log.exception('Failed to parse the resources health')
+
+    def _is_resource_included(self, resource):
+        for include_filter in self.config.resource_filters['included']:
+            if include_filter.match(resource['type'], resource['name'], resource['id'], resource.get('group')):
+                for exclude_filter in self.config.resource_filters['excluded']:
+                    if exclude_filter.match(resource['type'], resource['name'], resource['id'], resource.get('group')):
+                        return False
+                return True
+
+        return False
 
 
 """

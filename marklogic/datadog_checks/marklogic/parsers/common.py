@@ -23,7 +23,6 @@ def build_metric_to_submit(metric_name, value_data, tags=None):
         raise MarkLogicParserException(
             "Invalid metric: metric_suffix={}, metric_data={}, tags={}".format(metric_name, value_data, tags)
         )
-    return None
 
 
 def is_metric(data):

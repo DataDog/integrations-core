@@ -18,7 +18,7 @@ files:
       # TODO: maybe add the `metric_groups` option (storage, status, query)
       description: |
         Each filter in the list is composed of two to four parameters.
-        'resource' is one of cluster/forest/database/host/server on which to apply the filter (required)
+        'resource' is one of forest/database/host/server on which to apply the filter (required)
         'pattern' is a pattern to match the resource name (required)
         'type' is either included (default) or excluded. If a resource is both included and excluded it will be
                considered excluded.
