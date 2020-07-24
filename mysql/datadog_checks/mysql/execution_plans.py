@@ -28,6 +28,7 @@ class ExecutionPlansMixin(object):
         # TODO: Make this a configurable limit
         self.query_limit = 500
         self._checkpoint = None
+        self._auto_enable_eshl = None
     
     def _submit_log_events(self, *args, **kwargs):
         raise NotImplementedError('Must implement method _submit_log_events')
@@ -40,13 +41,17 @@ class ExecutionPlansMixin(object):
             except pymysql.err.OperationalError as e:
                 if e.args[0] == 1142:
                     self.log.error('Unable to create performance_schema consumers: %s', e.args[1])
+                elif e.args[1] == 1290:
+                    self.log.error('Unable to create performance_schema consumers because the instance is read-only')
+                    self._auto_enable_eshl = False
                 else:
                     raise
             else:
                 self.log.info('Successfully enabled events_statements_history_long consumers')
 
     def _collect_execution_plans(self, db, tags, options):
-        auto_enable_eshl = is_affirmative(options.get('auto_enable_events_statements_history_long', False))
+        if self._auto_enable_eshl is None:
+            self._auto_enable_eshl = is_affirmative(options.get('auto_enable_events_statements_history_long', False))
         if not is_affirmative(options.get('collect_execution_plans', False)):
             return False
 
@@ -57,7 +62,7 @@ class ExecutionPlansMixin(object):
                 result = cursor.fetchone()
             if not result or not all(result):
                 self.log.warn('Unable to fetch from performance_schema.events_statements_history_long')
-                if auto_enable_eshl:
+                if self._auto_enable_eshl:
                     self._enable_performance_schema_consumers(db)
                 return False
             self._checkpoint = result[0]
