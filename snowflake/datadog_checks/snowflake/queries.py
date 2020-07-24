@@ -4,7 +4,6 @@
 
 from datadog_checks.base.utils.db import Query
 
-
 # https://docs.snowflake.com/en/sql-reference/account-usage/storage_usage.html
 StorageUsageMetrics = Query(
     {
@@ -19,20 +18,26 @@ StorageUsageMetrics = Query(
 )
 
 # https://docs.snowflake.com/en/sql-reference/account-usage/database_storage_usage_history.html
-# DatabaseStorageMetrics = Query(
-#     {
-#         'name': 'database_storage.metrics',
-#         'query': 'SELECT DATABASE_NAME, AVERAGE_DATABASE_BYTES, AVERAGE_FAILSAFE_BYTES from DATABASE_STORAGE_USAGE_HISTORY '
-#     }
-#
-# )
+DatabaseStorageMetrics = Query(
+    {
+        'name': 'database_storage.metrics',
+        'query': 'SELECT DATABASE_NAME, AVERAGE_DATABASE_BYTES, '
+        'AVERAGE_FAILSAFE_BYTES from DATABASE_STORAGE_USAGE_HISTORY ORDER BY USAGE_DATE DESC LIMIT 1;',
+        'columns': [
+            {'name': 'database', 'type': 'tag'},
+            {'name': 'storage.database.storage_bytes', 'type': 'gauge'},
+            {'name': 'storage.database.failsafe_bytes', 'type': 'gauge'},
+        ],
+    }
+)
 
 # https://docs.snowflake.com/en/sql-reference/account-usage/metering_history.html
 # TODO: Update start time value with last_ts
 CreditUsage = Query(
     {
         'name': 'billing.metrics',
-        'query': "select SERVICE_TYPE, NAME, CREDITS_USED_COMPUTE, CREDITS_USED_CLOUD_SERVICES, CREDITS_USED from METERING_HISTORY where start_time >= to_timestamp_ltz('2020-06-30 08:00:00.000 -0700');",
+        'query': "select SERVICE_TYPE, NAME, CREDITS_USED_COMPUTE, CREDITS_USED_CLOUD_SERVICES, "
+        "CREDITS_USED from METERING_HISTORY where start_time >= to_timestamp_ltz('2020-06-30 08:00:00.000 -0700');",
         'columns': [
             {'name': 'service_type', 'type': 'tag'},
             {'name': 'service', 'type': 'tag'},
@@ -47,7 +52,8 @@ CreditUsage = Query(
 WarehouseCreditUsage = Query(
     {
         'name': 'billings.warehouse.metrics',
-        'query': "select WAREHOUSE_NAME, CREDITS_USED_COMPUTE, CREDITS_USED_CLOUD_SERVICES, CREDITS_USED from WAREHOUSE_METERING_HISTORY where start_time >= to_timestamp_ltz('2020-06-30 08:00:00.000 -0700');",
+        'query': "select WAREHOUSE_NAME, CREDITS_USED_COMPUTE, CREDITS_USED_CLOUD_SERVICES, "
+        "CREDITS_USED from WAREHOUSE_METERING_HISTORY where start_time >= to_timestamp_ltz('2020-06-30 08:00:00.000 -0700');",
         'columns': [
             {'name': 'warehouse', 'type': 'tag'},
             {'name': 'billing.virtual_warehouse', 'type': 'gauge'},
@@ -56,4 +62,3 @@ WarehouseCreditUsage = Query(
         ],
     }
 )
-
