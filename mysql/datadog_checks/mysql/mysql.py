@@ -708,12 +708,9 @@ class MySql(ExecutionPlansMixin, AgentCheck):
             if len(queries) > max_custom_queries:
                 self.warning("Maximum number (%s) of custom queries reached.  Skipping the rest.", max_custom_queries)
 
-    def _collect_statement_metrics(self, db, tags, options):
+    def _collect_statement_metrics(self, db, tags, _):
         tags = list(set(self.service_check_tags + tags))
-        summary_metrics = self._statement_metrics.get_per_statement_metrics(db)
-
-        for metric_name, value, fn, metric_tags in summary_metrics:
-            fn(self, metric_name, value, tags=metric_tags + tags)
+        self._statement_metrics.get_per_statement_metrics(db, tags)
 
     def _is_master(self, slaves, results):
         # master uuid only collected in slaves
