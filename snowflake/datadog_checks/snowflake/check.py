@@ -6,6 +6,8 @@ import snowflake.connector as sf
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.platform import Platform
+from datadog_checks.base.utils.time import EPOCH, UTC, ensure_aware_datetime, get_current_datetime, get_timestamp
 
 from . import queries
 from .config import Config
@@ -29,7 +31,7 @@ class SnowflakeCheck(AgentCheck):
         self._last_ts = None
 
         # Add default tags like account to all metrics
-        self._tags = self.config.tags + ['account:%s'.format(self.config.account)]
+        self._tags = self.config.tags + ['account:{}'.format(self.config.account)]
 
         if self.config.password:
             self.register_secret(self.config.password)
@@ -39,8 +41,9 @@ class SnowflakeCheck(AgentCheck):
             self.execute_query_raw,
             queries=[
                 queries.StorageUsageMetrics,
+                queries.DatabaseStorageMetrics,
                 queries.CreditUsage,
-                queries.WarehouseCreditUsage,
+                # queries.WarehouseCreditUsage,
             ],
             tags=self._tags,
         )
@@ -49,16 +52,38 @@ class SnowflakeCheck(AgentCheck):
 
     def check(self, _):
         self.connect(self.config)
-        self._query_manager.execute()
+
+        if self._last_ts is None:
+            self._last_ts = time_func()
+
+        raise Exception(self._last_ts)
+
+        # q = "select SERVICE_TYPE, NAME, CREDITS_USED_COMPUTE, CREDITS_USED_CLOUD_SERVICES, CREDITS_USED from METERING_HISTORY where start_time >= to_timestamp_ltz('2020-07-15 08:00:00.000 -0700');"
+        # cur = self._conn.cursor()
+        # cur.execute(q)
+        # raise Exception(cur.fetchall())
+
+        self._update_queries()
+
         self._collect_version()
-        #val = self.execute_query_raw("select SERVICE_TYPE, NAME, CREDITS_USED_COMPUTE, CREDITS_USED_CLOUD_SERVICES, CREDITS_USED from METERING_HISTORY where start_time >= to_timestamp_ltz('2020-06-30 08:00:00.000 -0700');")
-        #raise Exception(val)
+
+    def _update_queries(self):
+        """
+        Update queries with last timestamp
+        """
+        if self._last_ts is None:
+            # Format queries with where clause
+            pass
+        self._query_manager.execute()
+
+        # TODO: Update with latest timestamp
+        self._last_ts = None
 
     def execute_query_raw(self, query):
         with closing(self._conn.cursor()) as cursor:
             cursor.execute(query)
             if cursor.rowcount is None or cursor.rowcount < 1:
-                self.log.warning("Failed to fetch records from query: `%s`.", query)
+                self.log.debug("Failed to fetch records from query: `%s`.", query)
                 return []
             return cursor.fetchall()
 
@@ -71,7 +96,7 @@ class SnowflakeCheck(AgentCheck):
                 user=self.config.user,
                 password=self.config.password,
                 account=self.config.account,
-                database="SNOWFLAKE", # This integration only queries SNOWFLAKE DB and ACCOUNT_USAGE schema
+                database="SNOWFLAKE",  # This integration only queries SNOWFLAKE DB and ACCOUNT_USAGE schema
                 schema="ACCOUNT_USAGE",
                 warehouse=self.config.warehouse,
                 role=self.config.role,
