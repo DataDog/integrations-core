@@ -14,6 +14,7 @@ from .dep import dep
 from .imports import imports
 from .manifest import manifest
 from .metadata import metadata
+from .readmes import readmes
 from .saved_views import saved_views
 from .service_checks import service_checks
 
@@ -28,6 +29,7 @@ ALL_COMMANDS = (
     imports,
     manifest,
     metadata,
+    readmes,
     saved_views,
     service_checks,
 )
