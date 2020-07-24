@@ -306,7 +306,7 @@ instances:
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable these by setting `tls_ignore_warning` to true.
     ##
-    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
+    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
     ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
     ## to true.
     #
@@ -358,3 +358,9 @@ instances:
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #
     # log_requests: false
+
+    ## @param min_collection_interval - integer - optional
+    ## Specifies the minimum time elapsed between http calls from this instance, in seconds
+    ## See https://docs.datadoghq.com/developers/write_agent_check/?tab=agentv6v7#collection-interval for more details
+
+    # min_collection_interval: 30
