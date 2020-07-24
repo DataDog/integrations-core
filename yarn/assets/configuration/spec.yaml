@@ -42,7 +42,7 @@ files:
                 "<TAG_KEY1>": "<YARN_KEY>"
                 "<TAG_KEY2>": "<YARN_KEY>"
               type: object
-          - name: applicatiion_status_mapping
+          - name: application_status_mapping
             description: |
               Custom application status mapping for service check `yarn.application.status`.
 

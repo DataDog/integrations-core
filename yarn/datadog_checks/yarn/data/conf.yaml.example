@@ -86,7 +86,7 @@ instances:
     ##
     ## Find below the default mapping configuration.
     #
-    # applicatiion_status_mapping:
+    # application_status_mapping:
     #   ALL: unknown
     #   NEW: ok
     #   NEW_SAVING: ok
