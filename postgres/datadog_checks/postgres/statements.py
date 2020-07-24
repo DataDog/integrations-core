@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import decimal
+import json
 from collections import defaultdict
 
 import mmh3
