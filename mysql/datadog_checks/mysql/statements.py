@@ -4,6 +4,7 @@
 from contextlib import closing
 
 import pymysql
+from datadog import statsd
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db.sql import compute_sql_signature
@@ -14,19 +15,19 @@ try:
 except ImportError:
     from ..stubs import datadog_agent
 
-
+# monotonically increasing count metrics
 METRICS = {
-    'count': ('mysql.queries.count', AgentCheck.count),
-    'errors': ('mysql.queries.errors', AgentCheck.count),
-    'time': ('mysql.queries.time', AgentCheck.count),
-    'select_scan': ('mysql.queries.select_scan', AgentCheck.count),
-    'select_full_join': ('mysql.queries.select_full_join', AgentCheck.count),
-    'no_index_used': ('mysql.queries.no_index_used', AgentCheck.count),
-    'no_good_index_used': ('mysql.queries.no_good_index_used', AgentCheck.count),
-    'lock_time': ('mysql.queries.lock_time', AgentCheck.count),
-    'rows_affected': ('mysql.queries.rows_affected', AgentCheck.count),
-    'rows_sent': ('mysql.queries.rows_sent', AgentCheck.count),
-    'rows_examined': ('mysql.queries.rows_examined', AgentCheck.count),
+    'count': 'mysql.queries.count',
+    'errors': 'mysql.queries.errors',
+    'time': 'mysql.queries.time',
+    'select_scan': 'mysql.queries.select_scan',
+    'select_full_join': 'mysql.queries.select_full_join',
+    'no_index_used': 'mysql.queries.no_index_used',
+    'no_good_index_used': 'mysql.queries.no_good_index_used',
+    'lock_time': 'mysql.queries.lock_time',
+    'rows_affected': 'mysql.queries.rows_affected',
+    'rows_sent': 'mysql.queries.rows_sent',
+    'rows_examined': 'mysql.queries.rows_examined',
 }
 
 
@@ -58,7 +59,7 @@ class MySQLStatementMetrics:
         self.query_metric_limits = instance.get('options', {}).get('query_metric_limits', DEFAULT_METRIC_LIMITS)
         self.escape_query_commas_hack = instance.get('options', {}).get('escape_query_commas_hack', False)
     
-    def get_per_statement_metrics(self, db):
+    def collect_per_statement_metrics(self, db, instance_tags):
         if self.is_disabled or not is_dbm_enabled():
             return []
 
@@ -66,27 +67,27 @@ class MySQLStatementMetrics:
         rows = self._state.compute_derivative_rows(rows, METRICS.keys(), key=lambda row: (row['schema'], row['digest']))
         rows = apply_row_limits(rows, self.query_metric_limits, 'count', True, key=lambda row: (row['schema'], row['digest']))
 
-        metrics = dict()
-
         for row in rows:
             tags = []
             if row['schema'] is not None:
                 tags.append('schema:' + row['schema'])
-            obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
+
+            try:
+                obfuscated_statement = datadog_agent.obfuscate_sql(row['query'])
+            except Exception as e:
+                self.log.warn("failed to obfuscate query '%s': %s", row['query'], e)
+                continue
+
             if self.escape_query_commas_hack:
                 obfuscated_statement = obfuscated_statement.replace(', ', '，').replace(',', '，')
             tags.append('query:' + obfuscated_statement[:200])
             tags.append('query_signature:' + compute_sql_signature(obfuscated_statement))
 
-            for col, (name, metric_type) in METRICS.items():
-                # Merge metrics in cases where the query signature differs from the DB digest
+            for col, name in METRICS.items():
                 value = row[col]
-                key = '|'.join([name] + sorted(tags))
-                if key in metrics:
-                    _, prev_value, _, _ = metrics[key]
-                    value += prev_value
-                metrics[key] = (name, value, metric_type, tags)
-        return list(metrics.values())
+                self.log.debug("statsd.increment(%s, %s, tags=%s)", name, value, tags + instance_tags)
+                # if two rows end up having the same (name, tags) dogstatsd will still aggregate the counts correctly
+                statsd.increment(name, value, tags=tags)
 
     def _query_summary_per_statement(self, db):
         """
