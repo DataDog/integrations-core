@@ -93,17 +93,7 @@ class MySql(AgentCheck):
 
     def check(self, _):
         self._set_qcache_stats()
-        with self._connect(
-            self.config.host,
-            self.config.port,
-            self.config.mysql_sock,
-            self.config.user,
-            self.config.password,
-            self.config.defaults_file,
-            self.config.ssl,
-            self.config.connect_timeout,
-            self.config.tags,
-        ) as db:
+        with self._connect() as db:
             try:
                 self._conn = db
 
@@ -153,39 +143,47 @@ class MySql(AgentCheck):
 
         return hostkey
 
+    def _get_connection_args(self):
+        ssl = dict(self.config.ssl) if self.config.ssl else None
+        connection_args = {
+            'ssl': ssl,
+            'connect_timeout': self.config.connect_timeout,
+        }
+
+        if self.config.defaults_file != '':
+            connection_args['read_default_file'] = self.config.defaults_file
+            return connection_args
+
+        connection_args.update({'user': self.config.user, 'passwd': self.config.password})
+        if self.config.mysql_sock != '':
+            self.service_check_tags = [
+                'server:{0}'.format(self.config.mysql_sock),
+                'port:unix_socket',
+            ] + self.config.tags
+            connection_args.update({'unix_socket': self.config.mysql_sock})
+        else:
+            connection_args.update({'host': self.config.host})
+
+        if self.config.port:
+            connection_args.update({'port': self.config.port})
+        return connection_args
+
     @contextmanager
-    def _connect(self, host, port, mysql_sock, user, password, defaults_file, ssl, connect_timeout, tags):
-        self.service_check_tags = [
-            'server:%s' % (mysql_sock if mysql_sock != '' else host),
-            'port:%s' % ('unix_socket' if port == 0 else port),
-        ]
-
-        if tags is not None:
-            self.service_check_tags.extend(tags)
-
+    def _connect(self):
+        service_check_tags = [
+            'server:{0}'.format((self.config.mysql_sock if self.config.mysql_sock != '' else self.config.host)),
+            'port:{}'.format(self.config.port if self.config.port else 'unix_socket'),
+        ] + self.config.tags
         db = None
         try:
-            ssl = dict(ssl) if ssl else None
-
-            if defaults_file != '':
-                db = pymysql.connect(read_default_file=defaults_file, ssl=ssl, connect_timeout=connect_timeout)
-            elif mysql_sock != '':
-                self.service_check_tags = ['server:{0}'.format(mysql_sock), 'port:unix_socket'] + tags
-                db = pymysql.connect(
-                    unix_socket=mysql_sock, user=user, passwd=password, connect_timeout=connect_timeout
-                )
-            elif port:
-                db = pymysql.connect(
-                    host=host, port=port, user=user, passwd=password, ssl=ssl, connect_timeout=connect_timeout
-                )
-            else:
-                db = pymysql.connect(host=host, user=user, passwd=password, ssl=ssl, connect_timeout=connect_timeout)
+            connect_args = self._get_connection_args()
+            db = pymysql.connect(**connect_args)
             self.log.debug("Connected to MySQL")
-            self.service_check_tags = list(set(self.service_check_tags))
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.service_check_tags)
+            self.service_check_tags = list(set(service_check_tags))
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
             yield db
         except Exception:
-            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self.service_check_tags)
+            self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
             raise
         finally:
             if db:
