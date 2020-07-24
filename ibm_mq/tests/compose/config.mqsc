@@ -3,3 +3,26 @@ ALTER QMGR ACCTINT(1) ACCTMQI(ON) ACCTQ(ON)
 ALTER QMGR STATINT(1) STATMQI(ON) STATQ(ON) STATCHL(HIGH) STATACLS(MEDIUM)
 
 alter qmgr SSLKEYR ('/var/mqm/qmgrs/QM1/ssl/qm1')
+alter channel(DEV.ADMIN.SVRCONN) CHLTYPE(SVRCONN) SSLCIPH(TLS_RSA_WITH_AES_256_CBC_SHA256)
+alter channel(DEV.ADMIN.SVRCONN) CHLTYPE(SVRCONN) SSLPEER('CN=client')
+alter channel(DEV.ADMIN.SVRCONN) CHLTYPE(SVRCONN) SSLCAUTH(OPTIONAL)
+alter channel(DEV.ADMIN.SVRCONN) CHLTYPE(SVRCONN) CERTLABL('qm1')
+
+
+SET CHLAUTH(DEV.ADMIN.SVRCONN) TYPE(USERMAP) ACTION(REPLACE) MCAUSER(admin) CHCKCLNT(REQUIRED) USERSRC(MAP) CLNTUSER(mqm)
+
+
+*        attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CHANNEL_NAME,
+*                                String=utils.py3str2bytes(self.tls_channel_name)))
+*        attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_CHLAUTH_TYPE,
+*                                Value=pymqi.CMQCFC.MQCAUT_USERMAP))
+*        attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACF_ACTION,
+*                                Value=pymqi.CMQCFC.MQACT_REPLACE))
+*        attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_CLIENT_USER_ID,
+*                                String=utils.py3str2bytes(self.user)))
+*        attrs.append(pymqi.CFIN(Parameter=pymqi.CMQC.MQIA_CHECK_CLIENT_BINDING,
+*                                Value=pymqi.CMQCFC.MQCHK_REQUIRED_ADMIN))
+*        attrs.append(pymqi.CFIN(Parameter=pymqi.CMQCFC.MQIACH_USER_SOURCE,
+*                                Value=pymqi.CMQC.MQUSRC_MAP))
+*        attrs.append(pymqi.CFST(Parameter=pymqi.CMQCFC.MQCACH_MCA_USER_ID,
+*                                String=b'mqm'))
