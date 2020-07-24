@@ -157,10 +157,10 @@ Optionally, you can configure Consul to also send data to the Agent through [Dog
 
 #### OpenMetrics
 
-Instead of using DogStatsD, you can use the `use_prometheus_endpoint` to get the same metrics. 
+Instead of using DogStatsD, you can enable the `use_prometheus_endpoint` configuration option to get the same metrics from the Prometheus endpoint. 
 
 
-**Note**: Use either the DogStatsD method or the OpenMetrics method, do not enable both for the same instance or there will be duplicated metrics.
+**Note**: Use either the DogStatsD method or the Prometheus method, do not enable both for the same instance or there will be duplicated metrics.
 
 1. Configure Consul to expose metrics to the Prometheus endpoint. Set the [`prometheus_retention_time`][17] nested under the top-level `telemetry` key of the main Consul configuration file:
 
