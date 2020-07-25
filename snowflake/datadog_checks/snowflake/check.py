@@ -3,11 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from contextlib import closing
 import snowflake.connector as sf
+import time
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.base.utils.platform import Platform
-from datadog_checks.base.utils.time import EPOCH, UTC, ensure_aware_datetime, get_current_datetime, get_timestamp
+from datadog_checks.base.utils.time import get_timestamp
 
 from . import queries
 from .config import Config
@@ -54,26 +54,24 @@ class SnowflakeCheck(AgentCheck):
         self.connect(self.config)
 
         if self._last_ts is None:
-            self._last_ts = time_func()
+            self._last_ts = get_timestamp()
+            raise Exception(time.gmtime(self._last_ts))
+            #TIMESTAMP_FROM_PARTS(2020,7,15,21,3,41);
 
-        raise Exception(self._last_ts)
 
         # q = "select SERVICE_TYPE, NAME, CREDITS_USED_COMPUTE, CREDITS_USED_CLOUD_SERVICES, CREDITS_USED from METERING_HISTORY where start_time >= to_timestamp_ltz('2020-07-15 08:00:00.000 -0700');"
         # cur = self._conn.cursor()
         # cur.execute(q)
         # raise Exception(cur.fetchall())
-
         self._update_queries()
 
         self._collect_version()
+        self._last_ts = get_timestamp()
 
     def _update_queries(self):
         """
         Update queries with last timestamp
         """
-        if self._last_ts is None:
-            # Format queries with where clause
-            pass
         self._query_manager.execute()
 
         # TODO: Update with latest timestamp
