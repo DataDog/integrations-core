@@ -30,21 +30,8 @@ METRICS = {
     'rows_examined': 'mysql.queries.rows_examined',
 }
 
+DEFAULT_METRIC_LIMITS = {k: (100000, 100000) for k in METRICS.keys()}
 
-DEFAULT_METRIC_LIMITS = {
-    # TODO: Reduce limits after usage patterns are better understood
-    'count': (10000, 10000),
-    'errors': (10000, 10000),
-    'time': (10000, 10000),
-    'select_scan': (200, 200),
-    'select_full_join': (200, 200),
-    'no_index_used': (200, 200),
-    'no_good_index_used': (200, 200),
-    'lock_time': (200, 200),
-    'rows_affected': (500, 500),
-    'rows_sent': (500, 500),
-    'rows_examined': (500, 500),
-}
 
 class MySQLStatementMetrics:
     """
@@ -58,14 +45,15 @@ class MySQLStatementMetrics:
         self.is_disabled = instance.get('options', {}).get('disable_query_metrics', False)
         self.query_metric_limits = instance.get('options', {}).get('query_metric_limits', DEFAULT_METRIC_LIMITS)
         self.escape_query_commas_hack = instance.get('options', {}).get('escape_query_commas_hack', False)
-    
+
     def collect_per_statement_metrics(self, db, instance_tags):
         if self.is_disabled or not is_dbm_enabled():
             return []
 
         rows = self._query_summary_per_statement(db)
-        rows = self._state.compute_derivative_rows(rows, METRICS.keys(), key=lambda row: (row['schema'], row['digest']))
-        rows = apply_row_limits(rows, self.query_metric_limits, 'count', True, key=lambda row: (row['schema'], row['digest']))
+        keyfunc = lambda row: (row['schema'], row['digest'])
+        rows = self._state.compute_derivative_rows(rows, METRICS.keys(), key=keyfunc)
+        rows = apply_row_limits(rows, self.query_metric_limits, 'count', True, key=keyfunc)
 
         for row in rows:
             tags = list(instance_tags)
@@ -85,8 +73,6 @@ class MySQLStatementMetrics:
 
             for col, name in METRICS.items():
                 value = row[col]
-                if value <= 0:
-                    continue
                 self.log.debug("statsd.increment(%s, %s, tags=%s)", name, value, tags)
                 # if two rows end up having the same (name, tags) dogstatsd will still aggregate the counts correctly
                 statsd.increment(name, value, tags=tags)
@@ -127,5 +113,5 @@ class MySQLStatementMetrics:
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
             self.warning("Statement summary metrics are unavailable at this time: %s", e)
             return []
-        
+
         return rows
