@@ -39,6 +39,7 @@
       "bot_errors": "assets/saved_views/bot_errors.json",
       "response_time_overview": "assets/saved_views/response_time.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
   }
 }
