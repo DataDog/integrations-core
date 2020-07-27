@@ -6,7 +6,7 @@ ibm_mq.channel.batch_size,gauge,,resource,,The batch size,0,ibm_mq,batch size
 ibm_mq.channel.disc_interval,gauge,,second,,The disconnection interval in seconds,0,ibm_mq,disc interval
 ibm_mq.channel.hb_interval,gauge,,second,,Heartbeat interval in seconds,0,ibm_mq,hb interval
 ibm_mq.channel.keep_alive_interval,gauge,,second,,KeepAlive interval in seconds,0,ibm_mq,keep alive interval
-ibm_mq.channel.long_retry,gauge,,time,,Long retry count,0,ibm_mq,long retry
+ibm_mq.channel.long_retry,gauge,,time,,"Long retry count (parameter identifier: MQIACH_LONG_RETRY). When a sender or server channel is attempting to connect to the remote machine, and the count specified by ShortRetryCount has been exhausted, this specifies the maximum number of further attempts that are made to connect to the remote machine, at intervals specified by LongRetryInterval.",0,ibm_mq,long retry
 ibm_mq.channel.long_timer,gauge,,second,,Long timer,0,ibm_mq,long timer
 ibm_mq.channel.max_message_length,gauge,,byte,,Maximum message length,0,ibm_mq,max msg length
 ibm_mq.channel.mr_count,gauge,,,,Message retry count,0,ibm_mq,mr count
@@ -14,7 +14,7 @@ ibm_mq.channel.mr_interval,gauge,,second,,Message retry interval in seconds,0,ib
 ibm_mq.channel.network_priority,gauge,,,,Network priority,0,ibm_mq,network priority
 ibm_mq.channel.npm_speed,gauge,,,,Speed at which non-persistent messages are to be sent,0,ibm_mq,npm speed
 ibm_mq.channel.sharing_conversations,gauge,,,,Number of sharing conversations,0,ibm_mq,sharing conversations
-ibm_mq.channel.short_retry,gauge,,,,Short retry count,0,ibm_mq,short retry
+ibm_mq.channel.short_retry,gauge,,,,"The maximum number of attempts that are made by a sender or server channel to establish a connection to the remote machine, at intervals specified by ShortRetryInterval before the (normally longer) LongRetryCount and LongRetryInterval are used.",0,ibm_mq,short retry
 ibm_mq.channel.short_timer,gauge,,second,,Short timer,0,ibm_mq,short timer
 ibm_mq.channel.buffers_rcvd,gauge,,buffer,,Number of buffers received,0,ibm_mq,buffers rcvd
 ibm_mq.channel.buffers_sent,gauge,,buffer,,Number of buffers sent,0,ibm_mq,buffers sent
@@ -33,7 +33,7 @@ ibm_mq.queue.msg_enq_count,count,,message,,Number of messages enqueued,0,ibm_mq,
 ibm_mq.queue.time_since_reset,count,,second,,Time since statistics reset in seconds,0,ibm_mq,time since reset
 ibm_mq.queue.service_interval,gauge,,millisecond,,the time since last serviced,0,ibm_mq,service interval
 ibm_mq.queue.inhibit_put,gauge,,occurrence,,puts are inhibited,0,ibm_mq,puts inhibited
-ibm_mq.queue.depth_low_limit,gauge,,item,,the low limit on the depth to create an alert,0,ibm_mq,depth low limit
+ibm_mq.queue.depth_low_limit,gauge,,item,,"Low limit for queue depth (parameter identifier: MQIA_Q_DEPTH_LOW_LIMIT). The threshold against which the queue depth is compared to generate a Queue Depth Low event.",0,ibm_mq,depth low limit
 ibm_mq.queue.inhibit_get,gauge,,occurrence,,gets are inhibited,0,ibm_mq,gets inhibited
 ibm_mq.queue.harden_get_backout,gauge,,request,,number of times a message is retrieved,0,ibm_mq,times messages retrieved
 ibm_mq.queue.service_interval_event,gauge,,occurrence,,is service necessary,0,ibm_mq,service needed
