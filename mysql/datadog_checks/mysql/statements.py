@@ -85,6 +85,8 @@ class MySQLStatementMetrics:
 
             for col, name in METRICS.items():
                 value = row[col]
+                if value <= 0:
+                    continue
                 self.log.debug("statsd.increment(%s, %s, tags=%s)", name, value, tags + instance_tags)
                 # if two rows end up having the same (name, tags) dogstatsd will still aggregate the counts correctly
                 statsd.increment(name, value, tags=tags)
