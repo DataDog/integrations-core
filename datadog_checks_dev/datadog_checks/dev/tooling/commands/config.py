@@ -19,8 +19,7 @@ from ..config import (
     update_config,
 )
 from ..utils import string_to_toml_type
-from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
-from ...subprocess import run_command
+from .console import CONTEXT_SETTINGS, echo_info, echo_success
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage the config file')
