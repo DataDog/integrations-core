@@ -24,6 +24,6 @@
     },
     "recommended_monitor_metadata": {
         "description": "Notify your team the replication is high per host for your MySQL integration."
-    { 
+    }
 
 }
