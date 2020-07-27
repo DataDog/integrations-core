@@ -170,18 +170,10 @@ class VSphereAPI(object):
         return self._conn.content.perfManager.QueryPerfCounterByLevel(collection_level)
 
     @smart_retry
-    def get_infrastructure(self):
-        # type: () -> InfrastructureData
-        """Traverse the whole vSphere infrastructure and outputs a dict mapping the mors to their properties.
-
-        :return: {
-            'vim.VirtualMachine-VM0': {
-              'name': 'VM-0',
-              ...
-            }
-            ...
-        }
-        """
+    def _get_raw_infrastructure(self):
+        # type: () -> List[vmodl.query.PropertyCollector.ObjectContent]
+        """Traverse the whole vSphere infrastructure and returns the list of raw pyvmomi MOR objects with
+        the required pre-fetched attributes."""
         content = self._conn.content  # vim.ServiceInstanceContent reference from the connection
 
         property_specs = []
@@ -233,6 +225,30 @@ class VSphereAPI(object):
         finally:
             view_ref.Destroy()
 
+        return obj_content_list
+
+    @smart_retry
+    def _fetch_all_attributes(self):
+        # type: () -> List[vim.CustomFieldsManager.FieldDef]
+        """Retrieves all attributes for every single resource in vSphere. It is not possible to fetch
+        only the one we needs.
+        Note: Code is in a separate method so that it can be 'smart_retried' if the API call fails."""
+        return self._conn.content.customFieldsManager.field
+
+    def get_infrastructure(self):
+        # type: () -> InfrastructureData
+        """Traverse the whole vSphere infrastructure and outputs a dict mapping the mors to their properties.
+
+        :return: {
+            'vim.VirtualMachine-VM0': {
+              'name': 'VM-0',
+              ...
+            }
+            ...
+        }
+        """
+
+        obj_content_list = self._get_raw_infrastructure()
         # Build infrastructure data
         # Each `obj_content` contains the fields:
         #   - `obj`: `ManagedEntity` aka `mor`
@@ -243,13 +259,15 @@ class VSphereAPI(object):
             if obj_content.propSet
         }
 
+        # Add the root folder entity as it can't be fetched from the previous api calls.
         root_folder = self._conn.content.rootFolder
         infrastructure_data[root_folder] = {"name": root_folder.name, "parent": None}
 
-        # Clean up attributes, at the moment they are custom pyvmomi objects and the attribute keys are not resolved.
         if self.config.should_collect_attributes:
-            # Mapping of attribute key UID to the attribute key name.
-            attribute_keys = {x.key: x.name for x in self._conn.content.customFieldsManager.field}
+            # Clean up attributes in infrastructure_data,
+            # at this point they are custom pyvmomi objects and the attribute keys are not resolved.
+
+            attribute_keys = {x.key: x.name for x in self._fetch_all_attributes()}
             for props in itervalues(infrastructure_data):
                 mor_attributes = []
                 if 'customValue' not in props:
