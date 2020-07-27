@@ -149,6 +149,8 @@ class MySql(AgentCheck):
             'ssl': ssl,
             'connect_timeout': self.config.connect_timeout,
         }
+        if self.config.charset:
+            connection_args['charset'] = self.config.charset
 
         if self.config.defaults_file != '':
             connection_args['read_default_file'] = self.config.defaults_file

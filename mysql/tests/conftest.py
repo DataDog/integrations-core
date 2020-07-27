@@ -173,16 +173,16 @@ def _add_dog_user(conn):
 
 def populate_database():
     conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root')
-
     cur = conn.cursor()
     cur.execute("USE mysql;")
-    cur.execute("CREATE DATABASE testdb;")
+    cur.execute("CREATE DATABASE testdb CHARACTER SET = utf8mb4;")
     cur.execute("USE testdb;")
     cur.execute("CREATE TABLE testdb.users (name VARCHAR(20), age INT);")
     cur.execute("INSERT INTO testdb.users (name,age) VALUES('Alice',25);")
     cur.execute("INSERT INTO testdb.users (name,age) VALUES('Bob',20);")
     cur.execute("GRANT SELECT ON testdb.users TO 'dog'@'%';")
     cur.close()
+    conn.close()
 
 
 def _wait_for_it_script():

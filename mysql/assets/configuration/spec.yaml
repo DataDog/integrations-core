@@ -66,7 +66,12 @@ files:
               If you specify a socket you dont need to specify a host.
             value:
               type: string
-
+          - name: charset
+            description: Charset you want to use.
+            value:
+              type: string
+              example: utf8
+              default: None
           - name: defaults_file
             description: |
               Path to an alternative configuration mechanism file.

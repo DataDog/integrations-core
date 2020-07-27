@@ -23,6 +23,7 @@ class MySQLConfig(object):
         self.ssl = instance.get('ssl', {})
         self.connect_timeout = instance.get('connect_timeout', 10)
         self.max_custom_queries = instance.get('max_custom_queries', DEFAULT_MAX_CUSTOM_QUERIES)
+        self.charset = instance.get('charset')
         self.configuration_checks()
 
     def configuration_checks(self):
