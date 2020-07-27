@@ -68,7 +68,7 @@ class MySQLStatementMetrics:
         rows = apply_row_limits(rows, self.query_metric_limits, 'count', True, key=lambda row: (row['schema'], row['digest']))
 
         for row in rows:
-            tags = []
+            tags = list(instance_tags)
             if row['schema'] is not None:
                 tags.append('schema:' + row['schema'])
 
@@ -87,7 +87,7 @@ class MySQLStatementMetrics:
                 value = row[col]
                 if value <= 0:
                     continue
-                self.log.debug("statsd.increment(%s, %s, tags=%s)", name, value, tags + instance_tags)
+                self.log.debug("statsd.increment(%s, %s, tags=%s)", name, value, tags)
                 # if two rows end up having the same (name, tags) dogstatsd will still aggregate the counts correctly
                 statsd.increment(name, value, tags=tags)
 
