@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from itertools import chain
 from typing import Any
 
 from requests.exceptions import HTTPError
@@ -40,7 +39,7 @@ class MarklogicCheck(AgentCheck):
             self.collect_summary_status_base_metrics,
             self.collect_summary_status_resource_metrics,
             self.collect_summary_storage_base_metrics,
-            self.collect_per_resource_status_metrics,
+            self.collect_per_resource_metrics,
         ]
 
         self.resources_to_monitor = None  # Refreshed at each check
@@ -54,7 +53,6 @@ class MarklogicCheck(AgentCheck):
         # self.process_requests_metrics_by_resource()
 
         self.resources_to_monitor = self.get_resources_to_monitor()
-        self.collect_per_resource_status_metrics()
 
         for collector in self.collectors:
             try:
@@ -102,48 +100,9 @@ class MarklogicCheck(AgentCheck):
         metrics = parse_summary_storage_base_metrics(data, self.config.tags)
         self.submit_metrics(metrics)
 
-    def collect_per_resource_status_metrics(self):
-        # type: () -> None
-        """
-        Collect Per Resource Status Metrics.
-        """
-        for res_type in self.resources_to_monitor.keys():
-            for res in self.resources_to_monitor[res_type]:
-                res_type_singular = RESOURCE_SINGULARS[res_type]
-                tags = ['{}_name:{}'.format(res_type[:-1], res['name'])]
-                if res.get('group'):
-                    tags.append('group_name:{}'.format(res['group']))
-
-                status_metrics = iter(())
-                storage_metrics = iter(())
-                request_metrics = iter(())
-
-                if RESOURCE_AVAILABLE_METRICS[res_type]['status']:
-                    self.log.warning('Status request for a {} named {}'.format(res_type_singular, res['name']))
-                    status_data = self.api.http_get(res['uri'], {'view': 'status'})
-                    status_metrics = parse_per_resource_status_metrics(res_type_singular, status_data, tags)
-
-                if RESOURCE_AVAILABLE_METRICS[res_type]['storage']:
-                    self.log.warning('Storage request for a {} named {}'.format(res_type_singular, res['name']))
-                    storage_data = self.api.get_storage_data(
-                        resource=res_type_singular, name=res['name'], group=res.get('group')
-                    )
-                    storage_metrics = parse_summary_storage_base_metrics(storage_data, tags)
-
-                if RESOURCE_AVAILABLE_METRICS[res_type]['requests']:
-                    self.log.warning('Requests request for a {} named {}'.format(res_type_singular, res['name']))
-                    request_data = self.api.get_requests_data(
-                        resource=res_type_singular, name=res['name'], group=res.get('group')
-                    )
-                    request_metrics = parse_summary_request_resource_metrics(request_data, tags)
-
-                self.submit_metrics(chain(status_metrics, storage_metrics, request_metrics))
-
     def get_resources_to_monitor(self):
         # type: () -> None
         resources = self.api.get_resources()
-
-        self.log.warning(resources)
 
         filtered_resources = {
             'forests': [],
@@ -156,9 +115,48 @@ class MarklogicCheck(AgentCheck):
             if self._is_resource_included(res):
                 filtered_resources[res['type']].append(res)
 
-        self.log.warning(filtered_resources)
+        self.log.debug('Filtered resources to monitor: {}'.format(filtered_resources))
 
         return filtered_resources
+
+    def collect_per_resource_metrics(self):
+        # type: () -> None
+        """
+        Collect Per Resource Metrics.
+        """
+        for res_type in self.resources_to_monitor.keys():
+            for res in self.resources_to_monitor[res_type]:
+                res_type_singular = RESOURCE_SINGULARS[res_type]
+                tags = ['{}_name:{}'.format(res_type[:-1], res['name'])]
+                if res.get('group'):
+                    tags.append('group_name:{}'.format(res['group']))
+
+                if RESOURCE_AVAILABLE_METRICS[res_type]['status']:
+                    self._collect_resource_status_metrics(res_type_singular, res['uri'], tags)
+
+                if RESOURCE_AVAILABLE_METRICS[res_type]['storage']:
+                    self._collect_resource_storage_metrics(res_type_singular, res['name'], res.get('group'), tags)
+
+                if RESOURCE_AVAILABLE_METRICS[res_type]['requests']:
+                    self._collect_resource_request_metrics(res_type_singular, res['name'], res.get('group'), tags)
+
+    def _collect_resource_status_metrics(self, resource_type, uri, tags):
+        """ Collect status metrics of a specific resource """
+        data = self.api.http_get(uri, {'view': 'status'})
+        metrics = parse_per_resource_status_metrics(resource_type, data, tags)
+        self.submit_metrics(metrics)
+
+    def _collect_resource_storage_metrics(self, resource_type, name, group, tags):
+        """ Collect storage metrics of a specific resource """
+        data = self.api.get_storage_data(resource=resource_type, name=name, group=group)
+        metrics = parse_summary_storage_base_metrics(data, tags)
+        self.submit_metrics(metrics)
+
+    def _collect_resource_request_metrics(self, resource_type, name, group, tags):
+        """ Collect request metrics of a specific resource """
+        data = self.api.get_requests_data(resource=resource_type, name=name, group=group)
+        metrics = parse_summary_request_resource_metrics(data, tags)
+        self.submit_metrics(metrics)
 
     def submit_metrics(self, metrics):
         for metric_type, metric_name, value_data, tags in metrics:

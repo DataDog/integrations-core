@@ -108,6 +108,18 @@ def test_get_resources():
                             },
                         ],
                     },
+                    {
+                        'typeref': 'servers',
+                        'relation-count': {'units': 'quantity', 'value': 1},
+                        'relation': [
+                            {
+                                'qualifiers': {'qualifier': [{'uriref': 'uri', 'nameref': 'Default'}]},
+                                'uriref': "/manage/v2/servers/Admin?group-id=Default",
+                                'idref': '9403936238896063877',
+                                'nameref': 'Admin',
+                            }
+                        ],
+                    },
                 ]
             }
         }
@@ -120,6 +132,13 @@ def test_get_resources():
         {'id': '5004266825873163057', 'type': 'databases', 'name': 'Documents', 'uri': "/databases/Documents"},
         {'id': '16024526243775340149', 'type': 'forests', 'name': 'Modules', 'uri': "/forests/Modules"},
         {'id': '17254568917360711355', 'type': 'forests', 'name': 'Extensions', 'uri': "/forests/Extensions"},
+        {
+            'id': '9403936238896063877',
+            'type': 'servers',
+            'name': 'Admin',
+            'uri': '/servers/Admin?group-id=Default',
+            'group': 'Default',
+        },
     ]
     assert http.url == 'http://localhost:8000/manage/v2'
     assert http.params == {'view': 'query', 'format': 'json'}

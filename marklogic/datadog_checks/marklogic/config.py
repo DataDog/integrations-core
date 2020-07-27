@@ -21,9 +21,13 @@ class Config:
         created_filters = {'included': [], 'excluded': []}
         for f in raw_filters:
             included = _is_affirmative(f.get('include', True))
-            regex = re.compile(f['pattern'])
+
+            if f.get('pattern') is None or f.get('resource_type') is None:
+                raise ConfigurationError('A resource filter requires at least a pattern and a resource_type')
             if f['resource_type'] not in ['database', 'forest', 'host', 'server']:
-                raise ConfigurationError('Unknown resource type: {}'.format(f['resource']))
+                raise ConfigurationError('Unknown resource_type: {}'.format(f['resource_type']))
+
+            regex = re.compile(f['pattern'])
             if included:
                 created_filters['included'].append(ResourceFilter(f['resource_type'], regex, True, f.get('group')))
             else:

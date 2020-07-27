@@ -8,7 +8,7 @@ from requests.exceptions import HTTPError
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.marklogic import MarklogicCheck
 
-from .common import INSTANCE
+from .common import INSTANCE, INSTANCE_FILTERS
 from .metrics import GLOBAL_METRICS, STORAGE_FOREST_METRICS, STORAGE_HOST_METRICS
 
 
@@ -36,6 +36,25 @@ def test_check(aggregator):
             aggregator.assert_metric_has_tag(metric, tag)
         for prefix in storage_tag_prefixes + ['forest_id', 'forest_name']:
             aggregator.assert_metric_has_tag_prefix(metric, prefix)
+
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures("dd_environment")
+def test_check_with_filters(aggregator):
+    # type: (AggregatorStub) -> None
+    check = MarklogicCheck('marklogic', {}, [INSTANCE_FILTERS])
+
+    check.check(INSTANCE_FILTERS)
+
+    # Not resource filters-related
+    for metric in GLOBAL_METRICS + STORAGE_HOST_METRICS:
+        aggregator.assert_metric(metric, count=1, tags=[])
+    for metric in STORAGE_FOREST_METRICS:
+        aggregator.assert_metric(metric, count=10)
+
+    # Metrics from resource filters
 
     aggregator.assert_all_metrics_covered()
 

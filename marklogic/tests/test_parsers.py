@@ -3,11 +3,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
-from typing import Any, Dict
-
 import pytest
-import yaml
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.marklogic.parsers.common import MarkLogicParserException, build_metric_to_submit
@@ -19,13 +15,7 @@ from datadog_checks.marklogic.parsers.status import (
 )
 from datadog_checks.marklogic.parsers.storage import parse_summary_storage_base_metrics
 
-from .common import HERE
-
-
-def read_fixture_file(fname):
-    # type: (str) -> Dict[str, Any]
-    with open(os.path.join(HERE, 'fixtures', fname)) as f:
-        return yaml.safe_load(f.read())
+from .common import read_fixture_file
 
 
 def test_build_metric_to_submit():
@@ -401,7 +391,17 @@ def test_parse_summary_status_resource_metrics():
 
 
 def test_parse_summary_request_resource_metrics():
-    pass
+    summary_request_data = read_fixture_file('requests/server_Admin_requests.yaml')
+
+    EXPECTED_RESULT = [
+        ('gauge', 'request.query-count', 0, ['foo:bar']),
+        ('gauge', 'request.total-requests', 0, ['foo:bar']),
+        ('gauge', 'request.update-count', 0, ['foo:bar']),
+    ]
+
+    result = list(parse_summary_request_resource_metrics(summary_request_data, ['foo:bar']))
+
+    assert sorted(result) == sorted(EXPECTED_RESULT)
 
 
 def test_parse_summary_health():
