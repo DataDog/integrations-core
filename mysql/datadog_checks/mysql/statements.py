@@ -68,10 +68,12 @@ class MySQLStatementMetrics:
                 self.log.warn("failed to obfuscate query '%s': %s", row['query'], e)
                 continue
 
+            tags.append('query_signature:' + compute_sql_signature(obfuscated_statement))
+
             if self.escape_query_commas_hack:
                 obfuscated_statement = obfuscated_statement.replace(', ', '，').replace(',', '，')
+
             tags.append('query:' + obfuscated_statement[:200])
-            tags.append('query_signature:' + compute_sql_signature(obfuscated_statement))
 
             for col, name in METRICS.items():
                 value = row[col]
