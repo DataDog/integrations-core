@@ -18,20 +18,21 @@ files:
       # TODO: maybe add the `metric_groups` option (storage, status, query)
       description: |
         Each filter in the list is composed of two to four parameters.
-        'resource' is one of forest/database/host/server on which to apply the filter (required)
+        'resource_type' is one of forest/database/host/server on which to apply the filter (required)
         'pattern' is a pattern to match the resource name (required)
-        'type' is either included (default) or excluded. If a resource is both included and excluded it will be
-               considered excluded.
+        'include' is whether or not the filter include (default) or exclude the specified resources.
+              `True` (default) include the matching resources, and `False` exclude them.
+              If a resource match both an exclude filter and an include filter, it will be considered excluded.
         'group' is the resource group to match (optional)
       value:
         type: array
         items:
           type: object
         example:
-        - resource: forest
+        - resource_type: forest
           pattern: Documents
-        - resource: database
-          type: excluded
+        - resource_type: database
+          include: false
           pattern: Doc*
           group: Default
 
