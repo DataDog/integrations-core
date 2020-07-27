@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import time
 from contextlib import closing
 
 import pymysql
@@ -47,6 +48,7 @@ class MySQLStatementMetrics:
         self.escape_query_commas_hack = instance.get('options', {}).get('escape_query_commas_hack', False)
 
     def collect_per_statement_metrics(self, db, instance_tags):
+        start_time = time.time()
         if self.is_disabled or not is_dbm_enabled():
             return []
 
@@ -76,6 +78,9 @@ class MySQLStatementMetrics:
                 self.log.debug("statsd.increment(%s, %s, tags=%s)", name, value, tags)
                 # if two rows end up having the same (name, tags) dogstatsd will still aggregate the counts correctly
                 statsd.increment(name, value, tags=tags)
+
+        statsd.timing("dd.mysql.collect_per_statement_metrics.time", (time.time() - start_time) * 1000,
+                      tags=instance_tags)
 
     def _query_summary_per_statement(self, db):
         """
