@@ -359,8 +359,8 @@ instances:
     #
     # log_requests: false
 
-    ## @param min_collection_interval - integer - optional
-    ## Specifies the minimum time elapsed between http calls from this instance, in seconds
-    ## See https://docs.datadoghq.com/developers/write_agent_check/?tab=agentv6v7#collection-interval for more details
-
-    # min_collection_interval: 30
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
