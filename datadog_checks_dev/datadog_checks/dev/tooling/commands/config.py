@@ -19,12 +19,22 @@ from ..config import (
     update_config,
 )
 from ..utils import string_to_toml_type
-from .console import CONTEXT_SETTINGS, echo_info, echo_success
+from .console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
+from ...subprocess import run_command
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Manage the config file')
 def config():
     pass
+
+
+@config.command(context_settings=CONTEXT_SETTINGS, short_help='Edit the config file with your default EDITOR')
+def edit():
+    """Edit the config file with your default EDITOR."""
+    if not os.getenv('EDITOR', None):
+        echo_failure('Please set `EDITOR` environment variable and re-run the command')
+        abort()
+    run_command([os.getenv('EDITOR'), CONFIG_FILE])
 
 
 @config.command(context_settings=CONTEXT_SETTINGS, short_help='Open the config location in your file manager')
