@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from six import iteritems
+
 from datadog_checks.base import AgentCheck
 
 RESOURCE_TYPES = {
@@ -9,6 +11,16 @@ RESOURCE_TYPES = {
     'database': {'plural': 'databases'},
     'host': {'plural': 'hosts'},
     'server': {'plural': 'servers'},
+}
+
+RESOURCE_SINGULARS = {plural['plural']: key for key, plural in iteritems(RESOURCE_TYPES) if plural['plural']}
+
+# TODO: check again
+RESOURCE_AVAILABLE_METRICS = {
+    'forests': {'status': True, 'storage': True, 'requests': False},
+    'databases': {'status': True, 'storage': True, 'requests': False},
+    'hosts': {'status': True, 'storage': True, 'requests': True},
+    'servers': {'status': False, 'storage': False, 'requests': True},
 }
 
 GAUGE_UNITS = [

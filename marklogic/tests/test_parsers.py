@@ -12,6 +12,7 @@ import yaml
 from datadog_checks.base import AgentCheck
 from datadog_checks.marklogic.parsers.common import MarkLogicParserException, build_metric_to_submit
 from datadog_checks.marklogic.parsers.health import parse_summary_health
+from datadog_checks.marklogic.parsers.request import parse_summary_request_resource_metrics
 from datadog_checks.marklogic.parsers.status import (
     parse_summary_status_base_metrics,
     parse_summary_status_resource_metrics,
@@ -397,6 +398,10 @@ def test_parse_summary_status_resource_metrics():
     result = list(parse_summary_status_resource_metrics('forest', status_resource_data, ['foo:bar']))
 
     assert sorted(result) == sorted(EXPECTED_RESULT)
+
+
+def test_parse_summary_request_resource_metrics():
+    pass
 
 
 def test_parse_summary_health():

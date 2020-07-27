@@ -4,6 +4,8 @@
 import re
 from typing import Any, Dict, List, Optional, Pattern
 
+from datadog_checks.base import ConfigurationError
+
 from .constants import RESOURCE_TYPES
 
 
@@ -19,6 +21,8 @@ class Config:
         for f in raw_filters:
             included = f.get('type', 'included') == 'included'
             regex = re.compile(f['pattern'])
+            if f['resource'] not in ['database', 'forest', 'host', 'server']:
+                raise ConfigurationError('Unknown resource type: {}'.format(f['resource']))
             if included:
                 created_filters['included'].append(ResourceFilter(f['resource'], regex, True, f.get('group')))
             else:

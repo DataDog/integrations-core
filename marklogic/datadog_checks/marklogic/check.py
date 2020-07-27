@@ -10,8 +10,9 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 
 from .api import MarkLogicApi
 from .config import Config
-from .constants import RESOURCE_TYPES
+from .constants import RESOURCE_AVAILABLE_METRICS, RESOURCE_SINGULARS, RESOURCE_TYPES
 from .parsers.health import parse_summary_health
+from .parsers.request import parse_summary_request_resource_metrics
 from .parsers.status import (
     parse_per_resource_status_metrics,
     parse_summary_status_base_metrics,
@@ -106,22 +107,37 @@ class MarklogicCheck(AgentCheck):
         """
         Collect Per Resource Status Metrics.
         """
-        # TODO: refactor
-        for res in self.resources_to_monitor['forests']:
-            tags = ['forest_name:{}'.format(res['name'])]
-            if res.get('group'):
-                tags.append('group_name:{}'.format(res['group']))
-            status_data = self.api.http_get(res['uri'], {'view': 'status'})
-            storage_data = self.api.get_storage_data(resource='forest', name=res['name'], group=res.get('group'))
+        for res_type in self.resources_to_monitor.keys():
+            for res in self.resources_to_monitor[res_type]:
+                res_type_singular = RESOURCE_SINGULARS[res_type]
+                tags = ['{}_name:{}'.format(res_type[:-1], res['name'])]
+                if res.get('group'):
+                    tags.append('group_name:{}'.format(res['group']))
 
-            status_metrics = parse_per_resource_status_metrics('forest', status_data, tags)
-            storage_metrics = parse_summary_storage_base_metrics(storage_data, tags)
+                status_metrics = iter(())
+                storage_metrics = iter(())
+                request_metrics = iter(())
 
-            # TODO: requests metrics
-            self.submit_metrics(chain(status_metrics, storage_metrics))
-        for res in self.resources_to_monitor['databases']:
-            status_data = self.api.http_get(res['uri'], {'view': 'status'})
-            storage_metrics = self.api.get_storage_data(resource='database', name=res['name'], group=res.get('group'))
+                if RESOURCE_AVAILABLE_METRICS[res_type]['status']:
+                    self.log.warning('Status request for a {} named {}'.format(res_type_singular, res['name']))
+                    status_data = self.api.http_get(res['uri'], {'view': 'status'})
+                    status_metrics = parse_per_resource_status_metrics(res_type_singular, status_data, tags)
+
+                if RESOURCE_AVAILABLE_METRICS[res_type]['storage']:
+                    self.log.warning('Storage request for a {} named {}'.format(res_type_singular, res['name']))
+                    storage_data = self.api.get_storage_data(
+                        resource=res_type_singular, name=res['name'], group=res.get('group')
+                    )
+                    storage_metrics = parse_summary_storage_base_metrics(storage_data, tags)
+
+                if RESOURCE_AVAILABLE_METRICS[res_type]['requests']:
+                    self.log.warning('Requests request for a {} named {}'.format(res_type_singular, res['name']))
+                    request_data = self.api.get_requests_data(
+                        resource=res_type_singular, name=res['name'], group=res.get('group')
+                    )
+                    request_metrics = parse_summary_request_resource_metrics(request_data, tags)
+
+                self.submit_metrics(chain(status_metrics, storage_metrics, request_metrics))
 
     def get_resources_to_monitor(self):
         # type: () -> None
