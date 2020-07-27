@@ -31,10 +31,7 @@ def config():
 @config.command(context_settings=CONTEXT_SETTINGS, short_help='Edit the config file with your default EDITOR')
 def edit():
     """Edit the config file with your default EDITOR."""
-    if not os.getenv('EDITOR', None):
-        echo_failure('Please set `EDITOR` environment variable and re-run the command')
-        abort()
-    run_command([os.getenv('EDITOR'), CONFIG_FILE])
+    click.edit(filename=CONFIG_FILE)
 
 
 @config.command(context_settings=CONTEXT_SETTINGS, short_help='Open the config location in your file manager')
