@@ -30,8 +30,6 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "logs": {
-      "source": ""
-    }
+    "logs": {}
   }
 }

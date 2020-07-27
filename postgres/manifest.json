@@ -47,8 +47,6 @@
       "sessions_by_host": "assets/saved_views/sessions_by_host.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": ""
-    }
+    "logs": {}
   }
 }

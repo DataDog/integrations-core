@@ -34,8 +34,6 @@
       "user_overview": "assets/saved_views/user_overview.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": ""
-    }
+    "logs": {}
   }
 }

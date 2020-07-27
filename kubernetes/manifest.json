@@ -30,8 +30,6 @@
       "Kubernetes Deployments Overview": "assets/dashboards/kubernetes_deployments.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": ""
-    }
+    "logs": {}
   }
 }

@@ -33,8 +33,6 @@
       "Envoy - Overview": "assets/dashboards/envoy_overview.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {
-      "source": ""
-    }
+    "logs": {}
   }
 }
