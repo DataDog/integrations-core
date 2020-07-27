@@ -382,6 +382,10 @@ instances:
     ## The caching is disabled if the interval is set to `0` (default).
     ##
     ## Using scalar instance oids to fetch metrics data is more efficient than using GETNEXT and GETBULK.
-    ## Caveat: if some tables rows are dynamic, new rows will only be fetched at every refresh interval.
+    ## Caveat: If some tables rows are dynamic, new rows will only be fetched at every refresh interval.
+    ##         - This means if there are changes in a device OIDs, they will only be picked up when oids are refreshed
+    ##         according to the refresh interval.
+    ##         - With auto discovery, if the same IP is assigned to a different device with different OIDs,
+    ##         the OIDs will be refreshed only according to the refresh interval.
     #
     # refresh_oids_cache_interval: 3600
