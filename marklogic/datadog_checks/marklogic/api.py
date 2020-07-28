@@ -51,7 +51,6 @@ class MarkLogicApi(object):
     def get_requests_data(self, resource=None, name=None, group=None):
         # type: (str, str, str) -> Dict[str, Any]
         """
-        TODO: may be removed
         https://docs.marklogic.com/REST/GET/manage/v2/requests
         Example url:
             - http://localhost:8002/manage/v2/requests?format=json (cluster level)
@@ -90,7 +89,6 @@ class MarkLogicApi(object):
 
     def get_resources(self):
         # type: () -> List[Dict[str, str]]
-        # TODO: How useful is it
         data = self._get_raw_resources()
         resources = []  # type: List[Dict[str, str]]
 

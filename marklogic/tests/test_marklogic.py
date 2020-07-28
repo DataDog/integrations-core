@@ -78,6 +78,10 @@ def test_e2e(dd_agent_check):
 
     for metric in GLOBAL_METRICS:
         aggregator.assert_metric(metric)
+    for metric in STORAGE_HOST_METRICS:
+        aggregator.assert_metric(metric, count=2)  # TODO: remove duplication with filters
+    for metric in STORAGE_FOREST_METRICS:
+        aggregator.assert_metric(metric, count=20)  # TODO: remove duplication with filters
 
     aggregator.assert_all_metrics_covered()
 

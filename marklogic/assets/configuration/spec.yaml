@@ -14,8 +14,8 @@ files:
         example: http://localhost:8002/
         type: string
     - name: resource_filters
-      # TOOD: maybe add the ""'id' is the resource id to match" option
-      # TODO: maybe add the `metric_groups` option (storage, status, query)
+      # TOOD: Add the ""'id' is the resource id to match" option
+      # TODO: Add the `metric_groups` option (storage, status, query)
       description: |
         Each filter in the list is composed of two to four parameters.
         'resource_type' is one of forest/database/host/server on which to apply the filter (required)
