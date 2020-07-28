@@ -23,6 +23,6 @@
 		}
 	},
 	"recommended_monitor_metadata": {
-		"description": "Get notified when the memotry limit for a pod is reached for your Kubernetes integration."
+		"description": "Get notified when the memory limit for a pod is reached for your Kubernetes integration."
 	}
 }
