@@ -28,6 +28,7 @@
     "dashboards": {
       "IBM Db2 Overview": "assets/dashboards/overview.json"
     },
-    "service_checks": "assets/service_checks.json"
+    "service_checks": "assets/service_checks.json",
+    "logs": {}
   }
 }

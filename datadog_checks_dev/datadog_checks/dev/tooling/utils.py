@@ -373,6 +373,11 @@ def read_metadata_rows(metadata_file):
             yield line_no, row
 
 
+def read_readme_file(check_name):
+    for line_no, line in enumerate(read_file_lines(get_readme_file(check_name))):
+        yield line_no, line
+
+
 def read_version_file(check_name):
     return read_file(get_version_file(check_name))
 
@@ -403,7 +408,7 @@ def load_manifest(check_name):
 
 def load_saved_views(path):
     """
-    Load the manifest file into a dictionary
+    Load the saved view file into a dictionary
     """
     if file_exists(path):
         return json.loads(read_file(path).strip())

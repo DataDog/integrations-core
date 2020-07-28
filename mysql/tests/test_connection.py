@@ -9,7 +9,7 @@ from datadog_checks.mysql import MySql
 
 from . import common
 
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 def test_connection_with_defaults_file():

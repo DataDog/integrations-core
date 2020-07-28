@@ -86,8 +86,17 @@ def get_manifest_schema():
                             "type": "string",
                             "description": "Relative path to the json file containing service check metadata",
                         },
+                        "logs": {
+                            "type": "object",
+                            "properties": {
+                                "source": {
+                                    "type": "string",
+                                    "description": "The log pipeline identifier corresponding to this integration",
+                                }
+                            },
+                        },
                     },
-                    "required": ["monitors", "dashboards", "service_checks"],
+                    "required": ["monitors", "dashboards", "service_checks", "logs"],
                 },
             },
             "allOf": [

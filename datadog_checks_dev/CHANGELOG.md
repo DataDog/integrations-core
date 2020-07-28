@@ -1,5 +1,12 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.16.0 / 2020-07-24
+
+* [Added] Add validation for readmes. See [#7088](https://github.com/DataDog/integrations-core/pull/7088).
+* [Added] Option to skip semver version validation in changelog command when specifying old version. See [#7200](https://github.com/DataDog/integrations-core/pull/7200).
+* [Added] Add more manifest validations for ddev. See [#7142](https://github.com/DataDog/integrations-core/pull/7142).
+* [Fixed] Allow codeowner validation to fail on CI . See [#7207](https://github.com/DataDog/integrations-core/pull/7207).
+
 ## 3.15.0 / 2020-07-22
 
 * [Added] Add validation script for codeowners. See [#6071](https://github.com/DataDog/integrations-core/pull/6071).

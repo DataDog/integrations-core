@@ -30,6 +30,8 @@ InstanceConfig = TypedDict(
         'collect_events_only': bool,
         'collect_tags': bool,
         'tags_prefix': str,
+        'collect_attributes': bool,
+        'attributes_prefix': bool,
         'excluded_host_tags': List[str],
         'tags': List[str],
         'refresh_infrastructure_cache_interval': int,
@@ -52,6 +54,7 @@ InfrastructureDataItem = TypedDict(
         'guest.hostName': str,
         'runtime.powerState': str,
         'parent': Optional[vim.ManagedEntity],
+        'attributes': List[str],
     },
     total=False,
 )

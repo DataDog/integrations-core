@@ -329,6 +329,24 @@ def test_tags_filters_with_prefix_when_tags_are_not_yet_collected(aggregator, dd
     aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-4')
 
 
+@pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api')
+def test_attributes_filters(aggregator, dd_run_check, realtime_instance):
+    realtime_instance['collect_attributes'] = True
+    realtime_instance['attributes_prefix'] = 'vattr_'
+    realtime_instance['resource_filters'] = [
+        {'resource': 'vm', 'property': 'attribute', 'patterns': [r'vattr_foo:bar\d']},
+        {'resource': 'host', 'property': 'name', 'type': 'blacklist', 'patterns': [r'.*']},
+    ]
+    check = VSphereCheck('vsphere', {}, [realtime_instance])
+    dd_run_check(check)
+    # Assert that only a single resource was collected
+    aggregator.assert_metric('vsphere.cpu.usage.avg', count=2)
+    # Assert that the resource that was collected is the one with the correct tag
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-15')
+    # Assert that the resource that was collected is the one with the correct tag
+    aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='VM4-9')
+
+
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api', 'mock_rest_api')
 def test_version_metadata(aggregator, dd_run_check, realtime_instance, datadog_agent):
     check = VSphereCheck('vsphere', {}, [realtime_instance])
