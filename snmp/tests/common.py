@@ -74,6 +74,7 @@ DUMMY_MIB_OID = [
 FORCED_METRICS = [
     {'OID': "1.3.6.1.2.1.4.24.6.0", 'name': "IAmAGauge32", 'forced_type': 'counter'},  # Gauge32
     {'OID': "1.3.6.1.2.1.4.31.1.1.6.1", 'name': "IAmACounter64", 'forced_type': 'gauge'},  # Counter32
+    {'OID': "1.3.6.1.4.1.123456789.1.0", 'name': "IAmAOctetStringFloat", 'forced_type': 'gauge'},  # OctetString float
 ]
 INVALID_FORCED_METRICS = [
     {'OID': "1.3.6.1.2.1.4.24.6.0", 'name': "IAmAGauge32", 'forced_type': 'counter'},  # Gauge32

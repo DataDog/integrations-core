@@ -1,12 +1,18 @@
 from typing import Any, Tuple
 
 import pytest
-from datadog_checks.snmp.pysnmp_types import OctetString
 
 from datadog_checks.snmp.exceptions import CouldNotDecodeOID, UnresolvedOID
 from datadog_checks.snmp.metrics import as_metric_with_forced_type
 from datadog_checks.snmp.models import OID
-from datadog_checks.snmp.pysnmp_types import MibViewController, ObjectIdentity, ObjectName, ObjectType, SnmpEngine
+from datadog_checks.snmp.pysnmp_types import (
+    MibViewController,
+    ObjectIdentity,
+    ObjectName,
+    ObjectType,
+    OctetString,
+    SnmpEngine,
+)
 
 from . import common
 

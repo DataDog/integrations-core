@@ -8,12 +8,10 @@ Helpers for deriving metrics from SNMP values.
 from typing import Any, Optional
 
 from pyasn1.codec.ber.decoder import decode as pyasn1_decode
-from .pysnmp_types import OctetString
-
-from datadog_checks.base import to_native_string
 
 from .compat import total_time_to_temporal_percent
 from .pysnmp_inspect import is_counter, is_gauge, is_opaque
+from .pysnmp_types import OctetString
 from .types import MetricDefinition
 
 
@@ -77,8 +75,7 @@ def _varbind_value_to_float(s):
     # type: (Any) -> float
     if not isinstance(s, OctetString):
         return float(s)
-    s = s.asOctets()
-    s = to_native_string(s)
+    s = str(s)  # convert OctetString to native string
     found = s.find('\x00')
     if found >= 0:
         s = s[:found]

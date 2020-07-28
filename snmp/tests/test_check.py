@@ -472,13 +472,12 @@ def test_forcedtype_metric(aggregator):
     check = common.create_check(instance)
     check.check(instance)
 
-    for metric in common.FORCED_METRICS:
-        metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
-        if metric.get('forced_type') == 'counter':
-            # rate will be flushed as a gauge, so count should be 0.
-            aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=0, metric_type=aggregator.GAUGE)
-        elif metric.get('forced_type') == 'gauge':
-            aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, at_least=1, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('snmp.IAmAGauge32', tags=common.CHECK_TAGS, count=1, metric_type=aggregator.RATE)
+    aggregator.assert_metric('snmp.IAmACounter64', tags=common.CHECK_TAGS, at_least=1, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(
+        'snmp.IAmAOctetStringFloat', tags=common.CHECK_TAGS, at_least=1, metric_type=aggregator.GAUGE
+    )
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     # Test service check
