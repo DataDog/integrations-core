@@ -1,0 +1,28 @@
+name: release-hash-check
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - .in-toto/*.link
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+
+    - id: files
+      uses: jitterbit/get-changed-files@v1
+      with:
+        format: 'json'
+
+    - run: |
+        python .github/workflows/release-hash-check.py ${{ steps.files.outputs.all }}
