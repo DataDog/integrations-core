@@ -22,6 +22,7 @@ class MockResponseWrapper:
 
 class MockRequestsWrapper:
     def __init__(self, return_value):
+        # type: (Dict[str, Any]) -> None
         self.ret = MockResponseWrapper(return_value)
 
     def get(self, url, params):

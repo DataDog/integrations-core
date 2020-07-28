@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from typing import Any
+
 import mock
 import pytest
 from requests.exceptions import HTTPError
@@ -9,7 +11,7 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.marklogic import MarklogicCheck
 
 from .common import INSTANCE, INSTANCE_FILTERS
-from .metrics import GLOBAL_METRICS, STORAGE_FOREST_METRICS, STORAGE_HOST_METRICS
+from .metrics import GLOBAL_METRICS, RESOURCE_STORAGE_FOREST_METRICS, STORAGE_FOREST_METRICS, STORAGE_HOST_METRICS
 
 
 @pytest.mark.integration
@@ -49,19 +51,29 @@ def test_check_with_filters(aggregator):
     check.check(INSTANCE_FILTERS)
 
     # Not resource filters-related
-    for metric in GLOBAL_METRICS + STORAGE_HOST_METRICS:
-        aggregator.assert_metric(metric, count=1, tags=[])
+    for metric in GLOBAL_METRICS:
+        aggregator.assert_metric(metric, at_least=1)  # TODO: remove duplication with filters
+    for metric in STORAGE_HOST_METRICS:
+        aggregator.assert_metric(metric, count=2)
     for metric in STORAGE_FOREST_METRICS:
-        aggregator.assert_metric(metric, count=10)
+        aggregator.assert_metric(metric, at_least=10)  # TODO: remove duplication with filters
 
     # Metrics from resource filters
+    for metric in RESOURCE_STORAGE_FOREST_METRICS:
+        aggregator.assert_metric(metric, tags=['forest_name:Security'], count=1)
+    for metric in [
+        'marklogic.requests.query-count',
+        'marklogic.requests.total-requests',
+        'marklogic.requests.update-count',
+    ]:
+        aggregator.assert_metric(metric, tags=['server_name:Admin', 'group_name:Default'], count=1)
 
     aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
-    # type (Any) -> None
+    # type: (Any) -> None
     aggregator = dd_agent_check(INSTANCE, rate=True)
 
     for metric in GLOBAL_METRICS:
@@ -71,7 +83,7 @@ def test_e2e(dd_agent_check):
 
 
 def test_submit_service_checks(aggregator, caplog):
-    # type: (AggregatorStub) -> None
+    # type: (AggregatorStub, Any) -> None
     check = MarklogicCheck('marklogic', {}, [INSTANCE])
 
     health_mocked_data = {

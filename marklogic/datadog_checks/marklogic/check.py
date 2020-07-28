@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any
+from typing import Any, Dict, Generator, List, Tuple
 
 from requests.exceptions import HTTPError
 
@@ -24,8 +24,9 @@ class MarklogicCheck(AgentCheck):
     __NAMESPACE__ = 'marklogic'
     SERVICE_CHECK_CONNECT = 'can_connect'
 
-    def __init__(self, name, init_config, instances):
-        super(MarklogicCheck, self).__init__(name, init_config, instances)
+    def __init__(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
+        super(MarklogicCheck, self).__init__(*args, **kwargs)
 
         url = self.instance.get('url')
         if not url:
@@ -42,7 +43,13 @@ class MarklogicCheck(AgentCheck):
             self.collect_per_resource_metrics,
         ]
 
-        self.resources_to_monitor = None  # Refreshed at each check
+        # Refreshed at each check
+        self.resources_to_monitor = {
+            'forests': [],
+            'databases': [],
+            'hosts': [],
+            'servers': [],
+        }  # type: Dict[str, List[Any]]
 
     def check(self, _):
         # type: (Any) -> None
@@ -101,7 +108,7 @@ class MarklogicCheck(AgentCheck):
         self.submit_metrics(metrics)
 
     def get_resources_to_monitor(self):
-        # type: () -> None
+        # type: () -> Dict[str, List[Any]]
         resources = self.api.get_resources()
 
         filtered_resources = {
@@ -109,13 +116,13 @@ class MarklogicCheck(AgentCheck):
             'databases': [],
             'hosts': [],
             'servers': [],
-        }
+        }  # type: Dict[str, List[Any]]
 
         for res in resources:
             if self._is_resource_included(res):
                 filtered_resources[res['type']].append(res)
 
-        self.log.debug('Filtered resources to monitor: {}'.format(filtered_resources))
+        self.log.debug('Filtered resources to monitor: %s', filtered_resources)
 
         return filtered_resources
 
@@ -127,7 +134,7 @@ class MarklogicCheck(AgentCheck):
         for res_type in self.resources_to_monitor.keys():
             for res in self.resources_to_monitor[res_type]:
                 res_type_singular = RESOURCE_SINGULARS[res_type]
-                tags = ['{}_name:{}'.format(res_type[:-1], res['name'])]
+                tags = ['{}_name:{}'.format(res_type[:-1], res['name'])] + self.config.tags
                 if res.get('group'):
                     tags.append('group_name:{}'.format(res['group']))
 
@@ -141,24 +148,30 @@ class MarklogicCheck(AgentCheck):
                     self._collect_resource_request_metrics(res_type_singular, res['name'], res.get('group'), tags)
 
     def _collect_resource_status_metrics(self, resource_type, uri, tags):
+        # type: (str, str, List[str]) -> None
         """ Collect status metrics of a specific resource """
+        # TODO: remove duplication
         data = self.api.http_get(uri, {'view': 'status'})
         metrics = parse_per_resource_status_metrics(resource_type, data, tags)
         self.submit_metrics(metrics)
 
     def _collect_resource_storage_metrics(self, resource_type, name, group, tags):
+        # type: (str, str, str, List[str]) -> None
+        # TODO: remove duplication
         """ Collect storage metrics of a specific resource """
         data = self.api.get_storage_data(resource=resource_type, name=name, group=group)
         metrics = parse_summary_storage_base_metrics(data, tags)
         self.submit_metrics(metrics)
 
     def _collect_resource_request_metrics(self, resource_type, name, group, tags):
+        # type: (str, str, str, List[str]) -> None
         """ Collect request metrics of a specific resource """
         data = self.api.get_requests_data(resource=resource_type, name=name, group=group)
         metrics = parse_summary_request_resource_metrics(data, tags)
         self.submit_metrics(metrics)
 
     def submit_metrics(self, metrics):
+        # type: (Generator[Tuple, None, None]) -> None
         for metric_type, metric_name, value_data, tags in metrics:
             getattr(self, metric_type)(metric_name, value_data, tags=tags)
 
@@ -179,6 +192,7 @@ class MarklogicCheck(AgentCheck):
             self.log.exception('Failed to parse the resources health')
 
     def _is_resource_included(self, resource):
+        # type: (Dict[str, str]) -> bool
         for include_filter in self.config.resource_filters['included']:
             if include_filter.match(resource['type'], resource['name'], resource['id'], resource.get('group')):
                 for exclude_filter in self.config.resource_filters['excluded']:

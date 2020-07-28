@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from typing import Any, Dict, List
+
 import mock
 import pytest
 
@@ -67,7 +69,7 @@ def test_get_resources_to_monitor():
                 'group': 'Default',
             }
         ],
-    }
+    }  # type: Dict[str, List[Any]]
 
     with mock.patch('datadog_checks.marklogic.api.MarkLogicApi._get_raw_resources', return_value=return_value):
         # Include list + exclude list

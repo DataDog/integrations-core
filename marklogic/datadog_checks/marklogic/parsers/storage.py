@@ -39,10 +39,14 @@ def parse_summary_storage_base_metrics(data, tags):
                         ]
                         for forest_key, forest_value in iteritems(forest_data):
                             if forest_key == 'disk-size':
-                                yield build_metric_to_submit(
+                                metric = build_metric_to_submit(
                                     "forests.storage.forest.{}".format(forest_key), forest_value, tags=forest_tags
                                 )
+                                if metric is not None:
+                                    yield metric
                 elif is_metric(host_value):
-                    yield build_metric_to_submit(
+                    metric = build_metric_to_submit(
                         "forests.storage.host.{}".format(host_key), host_value, tags=location_tags
                     )
+                    if metric is not None:
+                        yield metric

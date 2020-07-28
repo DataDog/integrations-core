@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from typing import Any, Dict
+
 import yaml
 
 from datadog_checks.base.utils.common import get_docker_hostname

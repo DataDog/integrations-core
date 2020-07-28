@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from typing import Any, Dict, Generator
 
 import pytest
 
@@ -13,6 +14,7 @@ from .common import ADMIN_PASSWORD, ADMIN_USERNAME, API_URL, CHECK_CONFIG, HERE,
 
 @pytest.fixture(scope="session")
 def dd_environment():
+    # type: () -> Generator[Dict[str, Any], None, None]
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yml')
     with docker_run(
         compose_file=compose_file,
@@ -23,6 +25,7 @@ def dd_environment():
 
 
 def setup_admin_user():
+    # type: () -> bool
     # From https://docs.marklogic.com/10.0/guide/admin-api/cluster
     # Set admin user password (usefull for cluster setup)
     run_command(
@@ -56,6 +59,7 @@ def setup_admin_user():
 
 
 def setup_datadog_user():
+    # type: () -> None
     # body = {
     #     "user-name": USERNAME,
     #     "password": PASSWORD,

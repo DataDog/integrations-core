@@ -15,6 +15,6 @@ def parse_summary_request_resource_metrics(data, tags):
 
     for key, value in iteritems(list_summary):
         if is_metric(value):
-            metric = build_metric_to_submit("request.{}".format(key), value, tags)
+            metric = build_metric_to_submit("requests.{}".format(key), value, tags)
             if metric is not None:
                 yield metric

@@ -391,12 +391,13 @@ def test_parse_summary_status_resource_metrics():
 
 
 def test_parse_summary_request_resource_metrics():
+    # type: () -> None
     summary_request_data = read_fixture_file('requests/server_Admin_requests.yaml')
 
     EXPECTED_RESULT = [
-        ('gauge', 'request.query-count', 0, ['foo:bar']),
-        ('gauge', 'request.total-requests', 0, ['foo:bar']),
-        ('gauge', 'request.update-count', 0, ['foo:bar']),
+        ('gauge', 'requests.query-count', 0, ['foo:bar']),
+        ('gauge', 'requests.total-requests', 0, ['foo:bar']),
+        ('gauge', 'requests.update-count', 0, ['foo:bar']),
     ]
 
     result = list(parse_summary_request_resource_metrics(summary_request_data, ['foo:bar']))

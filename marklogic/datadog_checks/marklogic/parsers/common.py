@@ -11,7 +11,7 @@ class MarkLogicParserException(RuntimeError):
 
 
 def build_metric_to_submit(metric_name, value_data, tags=None):
-    #  type: (str, Any, Optional[List[str]]) -> Tuple
+    #  type: (str, Any, Optional[List[str]]) -> Optional[Tuple]
     if isinstance(value_data, (int, float)):
         return 'gauge', metric_name, value_data, tags
     elif 'units' in value_data and 'value' in value_data:
@@ -23,8 +23,9 @@ def build_metric_to_submit(metric_name, value_data, tags=None):
         raise MarkLogicParserException(
             "Invalid metric: metric_suffix={}, metric_data={}, tags={}".format(metric_name, value_data, tags)
         )
+    return None
 
 
 def is_metric(data):
-    # type (Any) -> bool
+    # type: (Any) -> bool
     return (isinstance(data, (int, float))) or ('units' in data and 'value' in data)

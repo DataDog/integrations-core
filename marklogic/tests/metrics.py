@@ -183,6 +183,21 @@ STORAGE_FOREST_METRICS = [
     'marklogic.forests.storage.forest.disk-size',
 ]
 
+RESOURCE_STORAGE_FOREST_METRICS = [
+    'marklogic.forests.current-foreign-master-cluster',
+    'marklogic.forests.current-foreign-master-fsn',
+    'marklogic.forests.current-master-fsn',
+    'marklogic.forests.device-space',
+    'marklogic.forests.forest-reserve',
+    'marklogic.forests.journals-size',
+    'marklogic.forests.large-binary-cache-hits',
+    'marklogic.forests.large-binary-cache-misses',
+    'marklogic.forests.large-data-size',
+    'marklogic.forests.max-query-timestamp',
+    'marklogic.forests.nonblocking-timestamp',
+    'marklogic.forests.orphaned-binaries',
+]
+
 
 GLOBAL_METRICS = (
     FOREST_STATUS_SUMMARY_METRICS

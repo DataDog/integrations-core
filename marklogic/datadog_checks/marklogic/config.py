@@ -12,13 +12,14 @@ from .constants import RESOURCE_TYPES
 
 class Config:
     def __init__(self, instance):
+        # type: (Dict[str, Any]) -> None
         self.tags = instance.get('tags', [])
         self.resource_filters = self.build_resource_filters(instance.get('resource_filters', []))
 
     @staticmethod
     def build_resource_filters(raw_filters):
-        # type: (List[Dict[str, Any]]) -> Dict[str, Dict[str, str]]
-        created_filters = {'included': [], 'excluded': []}
+        # type: (List[Dict[str, Any]]) -> Dict[str, List[ResourceFilter]]
+        created_filters = {'included': [], 'excluded': []}  # type: Dict[str, List[ResourceFilter]]
         for f in raw_filters:
             included = _is_affirmative(f.get('include', True))
 
@@ -50,8 +51,11 @@ class ResourceFilter:
 
     def match(self, resource_type, name, id, group=None):
         # type: (str, str, str, Optional[str]) -> bool
-        return self.resource_type == resource_type and self.regex.match(name) and self.group == group
+        if self.resource_type == resource_type and self.regex.match(name) and self.group == group:
+            return True
+        return False
 
     def __str__(self):
+        # type: () -> str
         # TODO: remove
         return "{} | {} | {} | {}".format(self.resource_type, self.regex, self.is_included, self.group)

@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from typing import Dict
+
 from six import iteritems
 
 from datadog_checks.base import AgentCheck
@@ -11,7 +13,7 @@ RESOURCE_TYPES = {
     'database': {'plural': 'databases'},
     'host': {'plural': 'hosts'},
     'server': {'plural': 'servers'},
-}
+}  # type: Dict[str, Dict]
 
 RESOURCE_SINGULARS = {plural['plural']: key for key, plural in iteritems(RESOURCE_TYPES) if plural['plural']}
 
