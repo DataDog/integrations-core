@@ -13,7 +13,8 @@ def parse_summary_health(data, tags):
     health_report = data['cluster-health-report']
 
     for resource in health_report:
-        status_code = STATUS_CODE_HEALTH.get(resource['code'], AgentCheck.UNKNOWN)
-        resource_tags = tags + ['resource:{}'.format(resource['resource-name'])]
-        message = '{}: {}'.format(resource['code'], resource.get('message', 'No message.'))
-        yield ('resource.health', status_code, message, resource_tags)
+        if resource['resource-type'] == 'database':
+            status_code = STATUS_CODE_HEALTH.get(resource['code'], AgentCheck.UNKNOWN)
+            resource_tags = tags + ['database_name:{}'.format(resource['resource-name'])]
+            message = '{}: {}'.format(resource['code'], resource.get('message', 'No message.'))
+            yield ('database.health', status_code, message, resource_tags)

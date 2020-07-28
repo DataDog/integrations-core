@@ -11,7 +11,17 @@ from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.marklogic import MarklogicCheck
 
 from .common import INSTANCE, INSTANCE_FILTERS
-from .metrics import GLOBAL_METRICS, RESOURCE_STORAGE_FOREST_METRICS, STORAGE_FOREST_METRICS, STORAGE_HOST_METRICS
+from .metrics import (
+    FOREST_STATUS_SUMMARY_METRICS,
+    GLOBAL_METRICS,
+    HOST_STATUS_METRICS,
+    REQUESTS_STATUS_METRICS,
+    RESOURCE_STORAGE_FOREST_METRICS,
+    SERVER_STATUS_METRICS,
+    STORAGE_FOREST_METRICS,
+    STORAGE_HOST_METRICS,
+    TRANSACTION_STATUS_METRICS,
+)
 
 
 @pytest.mark.integration
@@ -50,15 +60,19 @@ def test_check_with_filters(aggregator):
 
     check.check(INSTANCE_FILTERS)
 
-    # Not resource filters-related
-    for metric in GLOBAL_METRICS:
-        aggregator.assert_metric(metric, at_least=1)  # TODO: remove duplication with filters
+    for metric in HOST_STATUS_METRICS + SERVER_STATUS_METRICS + TRANSACTION_STATUS_METRICS:
+        aggregator.assert_metric(metric, count=1)
+    for metric in FOREST_STATUS_SUMMARY_METRICS + REQUESTS_STATUS_METRICS:
+        aggregator.assert_metric(metric, at_least=1)
     for metric in STORAGE_HOST_METRICS:
         aggregator.assert_metric(metric, count=2)
+        aggregator.assert_metric_has_tag(metric, 'forest_name:Security', count=1)
     for metric in STORAGE_FOREST_METRICS:
-        aggregator.assert_metric(metric, at_least=10)  # TODO: remove duplication with filters
+        # TODO: remove duplication with filters
+        # forests.storage.forest.disk-size is sent twice when using a resource filter.
+        aggregator.assert_metric(metric, count=11)
 
-    # Metrics from resource filters
+    # Resource filter only
     for metric in RESOURCE_STORAGE_FOREST_METRICS:
         aggregator.assert_metric(metric, tags=['forest_name:Security'], count=1)
     for metric in [
@@ -77,11 +91,11 @@ def test_e2e(dd_agent_check):
     aggregator = dd_agent_check(INSTANCE, rate=True)
 
     for metric in GLOBAL_METRICS:
-        aggregator.assert_metric(metric)
+        aggregator.assert_metric(metric, count=2)
     for metric in STORAGE_HOST_METRICS:
-        aggregator.assert_metric(metric, count=2)  # TODO: remove duplication with filters
+        aggregator.assert_metric(metric, count=2)
     for metric in STORAGE_FOREST_METRICS:
-        aggregator.assert_metric(metric, count=20)  # TODO: remove duplication with filters
+        aggregator.assert_metric(metric, count=20)
 
     aggregator.assert_all_metrics_covered()
 
@@ -106,16 +120,16 @@ def test_submit_service_checks(aggregator, caplog):
         check.submit_service_checks()
 
         aggregator.assert_service_check(
-            'marklogic.resource.health',
+            'marklogic.database.health',
             MarklogicCheck.OK,
-            tags=['foo:bar', 'resource:Last-Login'],
+            tags=['foo:bar', 'database_name:Last-Login'],
             message='HEALTH-DATABASE-NO-BACKUP: Database has never been backed up.',
             count=1,
         )
         aggregator.assert_service_check(
-            'marklogic.resource.health',
+            'marklogic.database.health',
             MarklogicCheck.UNKNOWN,
-            tags=['foo:bar', 'resource:Fab'],
+            tags=['foo:bar', 'database_name:Fab'],
             message='UNKNOWN: No message.',
             count=1,
         )

@@ -433,24 +433,24 @@ def test_parse_summary_health():
 
     EXPECTED_RESULT = [
         (
-            'resource.health',
+            'database.health',
             AgentCheck.OK,
             'HEALTH-DATABASE-NO-BACKUP: Database has never been backed up.',
-            ['foo:bar', 'resource:Last-Login'],
+            ['foo:bar', 'database_name:Last-Login'],
         ),
         (
-            'resource.health',
+            'database.health',
             AgentCheck.WARNING,
             'HEALTH-DATABASE-DISABLED: Database is intentionally disabled.',
-            ['foo:bar', 'resource:Modules'],
+            ['foo:bar', 'database_name:Modules'],
         ),
         (
-            'resource.health',
+            'database.health',
             AgentCheck.CRITICAL,
             'HEALTH-DATABASE-ERROR: Database error.',
-            ['foo:bar', 'resource:Security'],
+            ['foo:bar', 'database_name:Security'],
         ),
-        ('resource.health', AgentCheck.UNKNOWN, 'UNKNOWN: No message.', ['foo:bar', 'resource:Fab']),
+        ('database.health', AgentCheck.UNKNOWN, 'UNKNOWN: No message.', ['foo:bar', 'database_name:Fab']),
     ]
 
     result = list(parse_summary_health(summary_health, ['foo:bar']))
