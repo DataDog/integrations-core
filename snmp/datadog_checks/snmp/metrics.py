@@ -80,7 +80,7 @@ def _varbind_value_to_float(s):
     """
     if not isinstance(s, OctetString):
         return s
-    s = str(s)
+    s = s.asOctets()
     s = to_native_string(s)
     found = s.find('\x00')
     if found >= 0:
