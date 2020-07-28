@@ -6,6 +6,7 @@ from typing import Any, Dict, Iterator, List, Mapping, Sequence, Tuple, Union
 
 import six
 import yaml
+from pyasn1.type.univ import OctetString
 
 from datadog_checks.base import to_native_string
 
@@ -348,7 +349,9 @@ def sanitize_varbind_value(s):
     """
     Sanitize varbind values
     """
-    if not (isinstance(s, six.string_types) or isinstance(s, six.binary_type)):
+    if isinstance(s, OctetString):
+        s = str(s)
+    elif not (isinstance(s, six.string_types) or isinstance(s, six.binary_type)):
         return s
     s = to_native_string(s)
     found = s.find('\x00')

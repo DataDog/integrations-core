@@ -1,6 +1,7 @@
 from typing import Any, Tuple
 
 import pytest
+from pyasn1.type.univ import OctetString
 
 from datadog_checks.snmp.exceptions import CouldNotDecodeOID, UnresolvedOID
 from datadog_checks.snmp.metrics import as_metric_with_forced_type
@@ -147,6 +148,7 @@ def test_sanitize_varbind_value(input_string, expected):
             {'type': 'monotonic_count_and_rate', 'value': 3.14},
             id='monotonic_count_and_rate_float',
         ),
+        pytest.param(OctetString(b'1.00\x00'), 'gauge', {'type': 'gauge', 'value': 1.0}, id='gauge_octetstring_float'),
     ],
 )
 def test_as_metric_with_forced_type(input_string, forced_type, expected):
