@@ -19,5 +19,10 @@ jobs:
       with:
         python-version: '3.8'
 
-    - name: Upgrade Python packaging tools
-      run: git status
+    - id: files
+      uses: jitterbit/get-changed-files@v1
+      with:
+        format: 'json'
+
+    - run: |
+        python .github/workflows/release-hash-check.py ${{ steps.files.outputs.all }}
