@@ -1,7 +1,7 @@
 from typing import Any, Tuple
 
 import pytest
-from pyasn1.type.univ import OctetString
+from datadog_checks.snmp.pysnmp_types import OctetString
 
 from datadog_checks.snmp.exceptions import CouldNotDecodeOID, UnresolvedOID
 from datadog_checks.snmp.metrics import as_metric_with_forced_type
