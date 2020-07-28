@@ -1,5 +1,5 @@
 {
-	"name": "Pod {{pod_name.name}} is CrashloopBackOff on namespace {{kube_namespace.name}}",
+	"name": "[kubernetes] Pod {{pod_name.name}} is CrashloopBackOff on namespace {{kube_namespace.name}}",
 	"type": "query alert",
 	"query": "avg(last_30m):default(avg:kubernetes.containers.state.waiting{reason:crashloopbackoff} by {kube_namespace,pod_name}, 0) >= 1",
 	"message": "pod {{pod_name.name}} is CrashloopBackOff on {{kube_namespace.name}}",
