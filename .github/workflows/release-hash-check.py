@@ -28,7 +28,7 @@ link_file = updated_link_files[0]
 with open(link_file, 'r') as f:
     content = json.load(f)
 
-products = link_file['signed']['products']
+products = content['signed']['products']
 
 for product, signatures in products.items():
     expected_sha = signatures['sha256']
