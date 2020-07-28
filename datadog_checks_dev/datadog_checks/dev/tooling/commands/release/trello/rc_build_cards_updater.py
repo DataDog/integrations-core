@@ -17,7 +17,10 @@ class RCBuildCardsUpdater:
         match = re.fullmatch(self.version_regex, release_version)
         if not match:
             abort(
-                f'{release_version} is an invalid release version. A valid release version is for example 7.21.0-rc.3'
+                f'Cannot update cards in RC builds columnn. '
+                f'`{release_version}` is an invalid release candidate version. '
+                f'A valid version is for example `7.21.0-rc.3`. '
+                f'You can disable the update of cards in RC builds column by removing --update-rc-builds-cards'
             )
 
         groups = match.groups()

@@ -146,12 +146,11 @@ def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
 @click.option('--milestone', help='The PR milestone to filter by')
 @click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
 @click.option(
-    '--release-version',
-    help='If specified, cards in RC builds column will be updated with this' 'release version. For example 7.21.0-rc.3',
+    '--update-rc-builds-cards', is_flag=True, help='Update cards in RC builds column with `target_ref` version',
 )
 @click.pass_context
 def testable(
-    ctx: click.Context, base_ref: str, target_ref: str, milestone: str, dry_run: bool, release_version: str
+    ctx: click.Context, base_ref: str, target_ref: str, milestone: str, dry_run: bool, update_rc_builds_cards: bool
 ) -> None:
     """
     Create a Trello card for changes since a previous release (referenced by `BASE_REF`)
@@ -242,8 +241,8 @@ def testable(
     user_config = ctx.obj
     trello = TrelloClient(user_config)
     rc_build_cards_updater = None
-    if release_version:
-        rc_build_cards_updater = RCBuildCardsUpdater(trello, release_version)
+    if update_rc_builds_cards:
+        rc_build_cards_updater = RCBuildCardsUpdater(trello, target_ref)
 
     for i, (commit_hash, commit_subject) in enumerate(commits, 1):
         commit_id = parse_pr_number(commit_subject)
