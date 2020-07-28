@@ -1,5 +1,5 @@
 {
-	"name": "Monitor Unavailable Kubernetes Nodes",
+	"name": "[kubernetes] Monitor Unavailable Kubernetes Nodes",
 	"type": "query alert",
 	"query": "max(last_15m):sum:kubernetes_state.node.status{status:schedulable} by {kubernetes_cluster} * 100 / sum:kubernetes_state.node.status{*} by {kubernetes_cluster} < 80",
 	"message": "Nodes are unavailable on ({{kubernetes_cluster.name}} cluster)",
