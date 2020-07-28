@@ -475,7 +475,7 @@ def test_forcedtype_metric(aggregator):
     aggregator.assert_metric('snmp.IAmAGauge32', tags=common.CHECK_TAGS, count=1, metric_type=aggregator.RATE)
     aggregator.assert_metric('snmp.IAmACounter64', tags=common.CHECK_TAGS, at_least=1, metric_type=aggregator.GAUGE)
     aggregator.assert_metric(
-        'snmp.IAmAOctetStringFloat', tags=common.CHECK_TAGS, at_least=1, metric_type=aggregator.GAUGE
+        'snmp.IAmAOctetStringFloat', tags=common.CHECK_TAGS, value=3.1415, at_least=1, metric_type=aggregator.GAUGE
     )
 
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
