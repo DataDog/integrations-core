@@ -1,6 +1,6 @@
 {
   "maintainer": "help@datadoghq.com",
-  "manifest_version": "0.0.1",
+  "manifest_version": "1.0.0",
   "metric_prefix": "tcp_queue.",
   "metric_to_check": "tcp_queue.rqueue.size",
   "name": "tcp_queue_length",
@@ -18,7 +18,7 @@
   "is_public": true,
   "display_name": "TCP Queue Length",
   "creates_events": false,
-  "integration_id": "tcp_queue_length",
+  "integration_id": "tcp-queue-length",
   "assets": {
     "monitors": {},
     "dashboards": {},
