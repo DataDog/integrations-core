@@ -208,8 +208,8 @@ class PgStatementsMixin(object):
             for alias, (_, name) in PG_STAT_STATEMENTS_METRIC_COLUMNS.items():
                 if alias not in row:
                     continue
-                self.log.debug("statsd.increment(%s, %s, tags=%s)", name, row[alias], tags)
-                statsd.increment(name, row[alias], tags=tags)
+                self.log.debug("AgentCheck.count(%s, %s, tags=%s)", name, row[alias], tags)
+                self.count(name, row[alias], tags=tags)
 
     def _get_new_pg_stat_activity(self, instance_tags=None):
         start_time = time.time()

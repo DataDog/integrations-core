@@ -710,7 +710,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
 
     def _collect_statement_metrics(self, db, tags):
         tags = list(set(self.service_check_tags + tags))
-        self._statement_metrics.collect_per_statement_metrics(db, tags)
+        self._statement_metrics.collect_per_statement_metrics(self, db, tags)
 
     def _is_master(self, slaves, results):
         # master uuid only collected in slaves

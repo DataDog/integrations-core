@@ -47,7 +47,7 @@ class MySQLStatementMetrics:
         self.query_metric_limits = instance.get('options', {}).get('query_metric_limits', DEFAULT_METRIC_LIMITS)
         self.escape_query_commas_hack = instance.get('options', {}).get('escape_query_commas_hack', False)
 
-    def collect_per_statement_metrics(self, db, instance_tags):
+    def collect_per_statement_metrics(self, instance, db, instance_tags):
         start_time = time.time()
         if self.is_disabled or not is_dbm_enabled():
             return []
@@ -77,9 +77,8 @@ class MySQLStatementMetrics:
 
             for col, name in METRICS.items():
                 value = row[col]
-                self.log.debug("statsd.increment(%s, %s, tags=%s)", name, value, tags)
-                # if two rows end up having the same (name, tags) dogstatsd will still aggregate the counts correctly
-                statsd.increment(name, value, tags=tags)
+                self.log.debug("AgentCheck.count(%s, %s, tags=%s)", name, value, tags)
+                instance.count(name, value, tags=tags)
 
         statsd.timing("dd.mysql.collect_per_statement_metrics.time", (time.time() - start_time) * 1000,
                       tags=instance_tags)
