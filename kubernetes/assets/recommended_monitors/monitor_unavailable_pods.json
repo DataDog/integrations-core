@@ -1,5 +1,5 @@
 {
-	"name": "Monitor Kubernetes Unavailable Pods in Deployments",
+	"name": "[kubernetes] Monitor Kubernetes Unavailable Pods in Deployments",
 	"type": "query alert",
 	"query": "min(last_15m):avg:kubernetes_state.deployment.replicas_unavailable{*} by {kubernetes_cluster,deployment} >= 2",
 	"message": "At least one pod from {{deployment.name}} was unavailable for over 30mn on {{kubernetes_cluster.name}}.",
