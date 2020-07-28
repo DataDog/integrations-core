@@ -6,6 +6,7 @@ import pymysql
 import datadog_agent
 from datadog_checks.base import is_affirmative
 
+from datadog_checks.base.utils.db.statement_metrics import is_dbm_enabled
 from datadog_checks.base.utils.db.sql import compute_sql_signature, compute_exec_plan_signature
 
 
@@ -52,7 +53,7 @@ class ExecutionPlansMixin(object):
     def _collect_execution_plans(self, db, tags, options):
         if self._auto_enable_eshl is None:
             self._auto_enable_eshl = is_affirmative(options.get('auto_enable_events_statements_history_long', False))
-        if not is_affirmative(options.get('collect_execution_plans', False)):
+        if not (is_dbm_enabled() and is_affirmative(options.get('collect_execution_plans', True))):
             return False
 
         tags = list(set(self.service_check_tags + tags))

@@ -43,13 +43,13 @@ class MySQLStatementMetrics:
         super(MySQLStatementMetrics, self).__init__()
         self.log = log
         self._state = StatementMetrics(self.log)
-        self.is_disabled = instance.get('options', {}).get('disable_query_metrics', False)
+        self.is_enabled = instance.get('options', {}).get('collect_query_metrics', True)
         self.query_metric_limits = instance.get('options', {}).get('query_metric_limits', DEFAULT_METRIC_LIMITS)
-        self.escape_query_commas_hack = instance.get('options', {}).get('escape_query_commas_hack', False)
+        self.escape_query_commas_hack = instance.get('options', {}).get('escape_query_commas_hack', True)
 
     def collect_per_statement_metrics(self, instance, db, instance_tags):
         start_time = time.time()
-        if self.is_disabled or not is_dbm_enabled():
+        if not (is_dbm_enabled() and self.is_enabled):
             return []
 
         rows = self._query_summary_per_statement(db)

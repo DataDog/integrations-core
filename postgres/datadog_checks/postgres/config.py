@@ -5,6 +5,8 @@
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.db.statement_metrics import is_dbm_enabled
+
 
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
@@ -44,8 +46,8 @@ class PostgresConfig:
         self.collect_activity_metrics = is_affirmative(instance.get('collect_activity_metrics', False))
         self.collect_database_size_metrics = is_affirmative(instance.get('collect_database_size_metrics', True))
         self.collect_default_db = is_affirmative(instance.get('collect_default_database', False))
-        self.collect_statement_metrics = is_affirmative(instance.get('collect_statement_metrics', False))
-        self.collect_execution_plans = is_affirmative(instance.get('collect_execution_plans', False))
+        self.collect_statement_metrics = is_dbm_enabled() and is_affirmative(instance.get('collect_query_metrics', True))
+        self.collect_execution_plans = is_dbm_enabled() and is_affirmative(instance.get('collect_execution_plans', True))
         self.collect_exec_plan_sample_sleep = instance.get('collect_exec_plan_sample_sleep', 0)
         self.collect_exec_plan_time_limit = instance.get('collect_exec_plan_time_limit', 5)
         self.collect_exec_plan_event_limit = instance.get('collect_exec_plan_event_limit', 1000)
