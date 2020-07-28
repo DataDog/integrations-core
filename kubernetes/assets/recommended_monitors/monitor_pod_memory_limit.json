@@ -1,5 +1,5 @@
 {
-	"name": "Monitor Kubernetes Pod Memory Limit Reached",
+	"name": "[kubernetes] Monitor Kubernetes Pod Memory Limit Reached",
 	"type": "query alert",
 	"query": "avg(last_5m):exclude_null(avg:kubernetes.memory.rss{*} by {pod_name,kube_service}) / avg:kubernetes.memory.limits{*} by {pod_name,kube_service} * 100 > 95",
 	"message": "{{#is_alert}}\n\n{{pod_name.name}} is using this percentage of its memory limit: {{value}}.\n\nInspect: [Live Containers View](https://app.datadoghq.com/containers?columns=container_name,container_cpu,container_memory,container_net_sent_bps,container_net_rcvd_bps,container_status,container_started&options=normalizeCPU&sort=container_memory,DESC&tags=pod_name%3A{{pod_name.name}})\n\n{{/is_alert}}",
