@@ -4,11 +4,7 @@
 import os
 from typing import Any, Dict, Iterator, List, Mapping, Sequence, Tuple, Union
 
-import six
 import yaml
-from pyasn1.type.univ import OctetString
-
-from datadog_checks.base import to_native_string
 
 from .compat import get_config
 from .exceptions import CouldNotDecodeOID, SmiError, UnresolvedOID
@@ -342,19 +338,3 @@ def batches(lst, size):
 
     for index in range(0, len(lst), size):
         yield lst[index : index + size]
-
-
-def sanitize_varbind_value(s):
-    # type: (Any) -> str
-    """
-    Sanitize varbind values
-    """
-    if isinstance(s, OctetString):
-        s = str(s)
-    elif not (isinstance(s, six.string_types) or isinstance(s, six.binary_type)):
-        return s
-    s = to_native_string(s)
-    found = s.find('\x00')
-    if found >= 0:
-        s = s[:found]
-    return s.strip()

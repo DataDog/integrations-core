@@ -8,8 +8,9 @@ Helpers for deriving metrics from SNMP values.
 from typing import Any, Optional
 
 from pyasn1.codec.ber.decoder import decode as pyasn1_decode
+from pyasn1.type.univ import OctetString
 
-from datadog_checks.snmp.utils import sanitize_varbind_value
+from datadog_checks.base import to_native_string
 
 from .compat import total_time_to_temporal_percent
 from .pysnmp_inspect import is_counter, is_gauge, is_opaque
@@ -52,7 +53,7 @@ def as_metric_with_forced_type(value, forced_type, options):
         return {'type': 'gauge', 'value': int(str(value)[index])}
 
     # Use float for following types
-    float_value = float(sanitize_varbind_value(value))
+    float_value = _varbind_value_to_float(value)
 
     if forced_type == 'gauge':
         return {'type': 'gauge', 'value': float_value}
@@ -70,3 +71,18 @@ def as_metric_with_forced_type(value, forced_type, options):
         return {'type': 'monotonic_count_and_rate', 'value': float_value}
 
     return None
+
+
+def _varbind_value_to_float(s):
+    # type: (Any) -> float
+    """
+    Sanitize varbind values
+    """
+    if not isinstance(s, OctetString):
+        return s
+    s = str(s)
+    s = to_native_string(s)
+    found = s.find('\x00')
+    if found >= 0:
+        s = s[:found]
+    return float(s.strip())
