@@ -37,7 +37,7 @@ class MySQLConfig(object):
 
         if (self.host or self.user or self.port or self.mysql_sock) and self.defaults_file:
             self.log.warning(
-                "Both connection details and defaults file have been specified, connection details will be ignored"
+                "Both connection details and defaults_file have been specified, connection details will be ignored"
             )
 
         if self.mysql_sock and self.host:
