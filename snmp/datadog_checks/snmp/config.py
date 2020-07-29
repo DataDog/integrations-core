@@ -356,7 +356,7 @@ class OIDConfig(object):
     def has_oids(self):
         # type: () -> bool
         """
-        Check weather some scalar/next/bulk oids are present.
+        Return whether there are OIDs to fetch.
         """
         return bool(self.scalar_oids or self.next_oids or self.bulk_oids)
 
