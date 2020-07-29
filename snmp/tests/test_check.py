@@ -1139,15 +1139,15 @@ def test_oids_cache_config_update(configs, has_next_bulk_oids):
     instance.update(configs)
     check = common.create_check(instance)
 
-    assert bool(check._config.oids_config.scalar_oids) is False
-    assert bool(check._config.oids_config.next_oids) is True
-    assert bool(check._config.oids_config.bulk_oids) is True
+    assert bool(check._config.oid_config.scalar_oids) is False
+    assert bool(check._config.oid_config.next_oids) is True
+    assert bool(check._config.oid_config.bulk_oids) is True
 
     for _ in range(3):
         check.check(instance)
-        assert bool(check._config.oids_config.scalar_oids) is True
-        assert bool(check._config.oids_config.next_oids) is has_next_bulk_oids
-        assert bool(check._config.oids_config.bulk_oids) is has_next_bulk_oids
+        assert bool(check._config.oid_config.scalar_oids) is True
+        assert bool(check._config.oid_config.next_oids) is has_next_bulk_oids
+        assert bool(check._config.oid_config.bulk_oids) is has_next_bulk_oids
 
 
 GETNEXT_CALL_COUNT_PER_CHECK_RUN = 5
@@ -1192,6 +1192,6 @@ def test_oids_cache_command_calls(refresh_interval, getnext_call_counts, getnext
             check.check(instance)
             assert snmp_getnext.call_count == call_count
 
-        check._config.oids_config._last_ts = 0
+        check._config.oid_config._last_ts = 0
         check.check(instance)
         assert snmp_getnext.call_count == getnext_call_count_after_reset
