@@ -165,11 +165,7 @@ class SnmpCheck(AgentCheck):
             return None
 
     def fetch_results(
-        self,
-        config,  # type: InstanceConfig
-        scalar_oids,  # type: List[OID]
-        next_oids,  # type: List[OID]
-        bulk_oids,  # type: List[OID]
+        self, config,  # type: InstanceConfig
     ):
         # type: (...) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], Optional[str]]
         """
@@ -183,9 +179,13 @@ class SnmpCheck(AgentCheck):
         results = defaultdict(dict)  # type: DefaultDict[str, Dict[Tuple[str, ...], Any]]
         enforce_constraints = config.enforce_constraints
 
-        all_binds, error = self.fetch_oids(config, scalar_oids, next_oids, enforce_constraints=enforce_constraints)
-
-        for oid in bulk_oids:
+        all_binds, error = self.fetch_oids(
+            config,
+            config.oids_config.scalar_oids,
+            config.oids_config.next_oids,
+            enforce_constraints=enforce_constraints,
+        )
+        for oid in config.oids_config.bulk_oids:
             try:
                 self.log.debug('Running SNMP command getBulk on OID %s', oid)
                 binds = snmp_bulk(
@@ -375,13 +375,13 @@ class SnmpCheck(AgentCheck):
         error = results = None
         tags = config.tags
         try:
-            if not (config.scalar_oids or config.next_oids or config.bulk_oids):
+            if not (config.oids_config.has_oids()):
                 sys_object_oid = self.fetch_sysobject_oid(config)
                 profile = self._profile_for_sysobject_oid(sys_object_oid)
                 config.refresh_with_profile(self.profiles[profile])
                 config.add_profile_tag(profile)
 
-            if config.scalar_oids or config.next_oids or config.bulk_oids:
+            if config.oids_config.has_oids():
                 self.log.debug('Querying %s', config.device)
                 config.add_uptime_metric()
                 results, error = self.fetch_results(config, config.scalar_oids, config.next_oids, config.bulk_oids)

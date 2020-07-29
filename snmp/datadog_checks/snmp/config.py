@@ -151,10 +151,13 @@ class InstanceConfig:
         if not self.metrics and not profiles_by_oid and not profile:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
-        self.scalar_oids, self.next_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
+        parsed_scalar_oids, parsed_next_oids, parsed_bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
-            self.scalar_oids.extend(tag_oids)
+            parsed_scalar_oids.extend(tag_oids)
+
+        self.oids_config = OidsConfig()
+        self.oids_config.add_parsed_oids(parsed_scalar_oids, parsed_next_oids, parsed_bulk_oids)
 
         if profile:
             if profile not in profiles:
@@ -171,7 +174,7 @@ class InstanceConfig:
     def refresh_with_profile(self, profile):
         # type: (Dict[str, Any]) -> None
         metrics = profile['definition'].get('metrics', [])
-        scalar_oids, next_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics)
+        parsed_scalar_oids, parsed_next_oids, parsed_bulk_oids, parsed_metrics = self.parse_metrics(metrics)
 
         metric_tags = profile['definition'].get('metric_tags', [])
         tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
@@ -182,12 +185,9 @@ class InstanceConfig:
         # In the future we'll probably want to implement de-duplication.
 
         self.metrics.extend(metrics)
-        self.scalar_oids.extend(scalar_oids)
-        self.next_oids.extend(next_oids)
-        self.bulk_oids.extend(bulk_oids)
+        self.oids_config.add_parsed_oids(parsed_scalar_oids + tag_oids, parsed_next_oids, parsed_bulk_oids)
         self.parsed_metrics.extend(parsed_metrics)
         self.parsed_metric_tags.extend(parsed_metric_tags)
-        self.scalar_oids.extend(tag_oids)
 
     def add_profile_tag(self, profile_name):
         # type: (str) -> None
@@ -297,9 +297,49 @@ class InstanceConfig:
             return
         # Reference sysUpTimeInstance directly, see http://oidref.com/1.3.6.1.2.1.1.3.0
         uptime_oid = OID('1.3.6.1.2.1.1.3.0')
-        self.scalar_oids.append(uptime_oid)
+        self.oids_config.add_parsed_oids([uptime_oid], [], [])
         self._resolver.register(uptime_oid, 'sysUpTimeInstance')
 
         parsed_metric = ParsedSymbolMetric('sysUpTimeInstance', forced_type='gauge')
         self.parsed_metrics.append(parsed_metric)
         self._uptime_metric_added = True
+
+
+class OidsConfig(object):
+    """
+    Manages scalar/next/bulk oids.
+    """
+
+    def __init__(self):
+        # type: () -> None
+        self._parsed_scalar_oids = []  # type: List[OID]
+        self._parsed_next_oids = []  # type: List[OID]
+        self._parsed_bulk_oids = []  # type: List[OID]
+
+    @property
+    def scalar_oids(self):
+        # type: () -> List[OID]
+        return self._parsed_scalar_oids
+
+    @property
+    def next_oids(self):
+        # type: () -> List[OID]
+        return self._parsed_next_oids
+
+    @property
+    def bulk_oids(self):
+        # type: () -> List[OID]
+        return self._parsed_bulk_oids
+
+    def add_parsed_oids(self, parsed_scalar_oids, parsed_next_oids, parsed_bulk_oids):
+        # type: (List[OID], List[OID], List[OID]) -> None
+        self._parsed_scalar_oids.extend(parsed_scalar_oids)
+        self._parsed_next_oids.extend(parsed_next_oids)
+        self._parsed_bulk_oids.extend(parsed_bulk_oids)
+
+    def has_oids(self):
+        # type: () -> bool
+        """
+        Check weather some scalar/next/bulk oids are present.
+        """
+        return bool(self.scalar_oids or self.next_oids or self.bulk_oids)
