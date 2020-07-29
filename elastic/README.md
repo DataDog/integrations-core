@@ -40,7 +40,7 @@ Follow the instructions below to configure this check for an Agent running on a 
       - If you're collecting Elasticsearch metrics from just one Datadog Agent running outside the cluster, such as using a hosted Elasticsearch, set `cluster_stats` to true.
       - To use the Agent's Elasticsearch integration for the AWS Elasticsearch services, set the `url` parameter to point to your AWS Elasticsearch stats URL.
       - All requests to the Amazon ES configuration API must be signed. See the [AWS documentation][19] for details.
-      - The `aws` auth type relies on [boto3][20] to automatically gather AWS credentials (e.g. from `.aws/credentials`). Use `auth_type: basic` `in the conf.yaml`         and define the credentials with `username: <USERNAME>` and `password: <PASSWORD>`.
+      - The `aws` auth type relies on [boto3][20] to automatically gather AWS credentials from `.aws/credentials`. Use `auth_type: basic` in the `conf.yaml` and define the credentials with `username: <USERNAME>` and `password: <PASSWORD>`.
 
 2. [Restart the Agent][5].
 
