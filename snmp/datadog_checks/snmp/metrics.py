@@ -71,12 +71,14 @@ def as_metric_with_forced_type(value, forced_type, options):
     return None
 
 
-def _varbind_value_to_float(s):
+def _varbind_value_to_float(value):
     # type: (Any) -> float
-    if not isinstance(s, OctetString):
-        return float(s)
-    s = str(s)  # convert OctetString to native string
-    found = s.find('\x00')
-    if found >= 0:
-        s = s[:found]
-    return float(s.strip())
+
+    # Floats might be represented as OctetString
+    if isinstance(value, OctetString):
+        value = str(value)  # convert OctetString to native string
+        found = value.find('\x00')
+        if found >= 0:
+            value = value[:found]
+        value = value.strip()
+    return float(value)
