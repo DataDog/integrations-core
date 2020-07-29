@@ -7,7 +7,7 @@ import datadog_agent
 from datadog_checks.base import is_affirmative
 
 from datadog_checks.base.utils.db.statement_metrics import is_dbm_enabled
-from datadog_checks.base.utils.db.sql import compute_sql_signature, compute_exec_plan_signature
+from datadog_checks.base.utils.db.sql import compute_sql_signature, compute_exec_plan_signature, submit_exec_plan_events
 
 
 VALID_EXPLAIN_STATEMENTS = frozenset({
@@ -31,9 +31,6 @@ class ExecutionPlansMixin(object):
         self._checkpoint = None
         self._auto_enable_eshl = None
     
-    def _submit_log_events(self, *args, **kwargs):
-        raise NotImplementedError('Must implement method _submit_log_events')
-
     def _enable_performance_schema_consumers(self, db):
         query = """UPDATE performance_schema.setup_consumers SET enabled = 'YES' WHERE name = 'events_statements_history_long'"""
         with closing(db.cursor()) as cursor:
@@ -165,7 +162,7 @@ class ExecutionPlansMixin(object):
                         }
                     })
 
-        self._submit_log_events(events)
+        submit_exec_plan_events(events, tags, "mysql")
         if num_truncated > 0:
             self.log.warning(
                 'Unable to collect %d/%d execution plans due to truncated SQL text. Consider raising '
