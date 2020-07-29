@@ -737,18 +737,6 @@ class MySql(ExecutionPlansMixin, AgentCheck):
                     elif metric_type == MONOTONIC:
                         self.monotonic_count(metric_name, value, tags=metric_tags)
 
-    def _submit_log_events(self, events):
-        # TODO: This is a temporary hack to send logs via the Python integrations and requires customers
-        # to configure a TCP log on port 10518. THIS CODE SHOULD NOT BE MERGED TO MASTER
-        try:
-            with closing(socket.create_connection(('localhost', 10518))) as c:
-                for e in events:
-                    c.sendall((json.dumps(e, cls=EventEncoder) + '\n').encode())
-        except ConnectionRefusedError:
-            self.warning('Unable to connect to the logs agent; please see the '
-                'documentation on configuring the logs agent.')
-            return
-
     def _version_compatible(self, db, compat_version):
         # some patch version numbers contain letters (e.g. 5.0.51a)
         # so let's be careful when we compute the version number
