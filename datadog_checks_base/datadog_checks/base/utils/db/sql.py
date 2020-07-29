@@ -72,7 +72,7 @@ def submit_exec_plan_events(events, tags, source):
         try:
             r = requests.post(f"https://http-intake.logs.datadoghq.com/v1/input",
                               json=[_to_log_event(e) for e in chunk],
-                              timeout=60,
+                              timeout=5,
                               headers={
                                   'DD-API-KEY': datadog_agent.get_config('api_key')
                               })
