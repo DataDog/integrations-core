@@ -413,6 +413,35 @@ def test_network_latency_checks(aggregator):
     assert 0.26577747932995816 == node[0][2]
 
 
+def test_network_latency_hostnames(aggregator):
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_NETWORK_LATENCY_CHECKS])
+    my_mocks = consul_mocks._get_consul_mocks()
+    consul_mocks.mock_check(consul_check, my_mocks)
+
+    # We start out as the leader, and stay that way
+    consul_check._last_known_leader = consul_mocks.mock_get_cluster_leader_A()
+
+    # use an instance_id as the hostname instead
+    instance_id = 'i-435345345'
+    consul_check.hostname = instance_id
+
+    with mock.patch('socket.gethostname') as mock_hostname:
+        mock_hostname.return_value = 'host-1'
+        consul_check.check(None)
+
+    latency = []
+    for m_name, metrics in aggregator._metrics.items():
+        if m_name.startswith('consul.net.'):
+            latency.extend(metrics)
+    latency.sort()
+
+    # 16 latency metrics, 2 nodes * 8 metrics each
+    node = [m for m in latency if '.node.latency.' in m[0]]
+    assert 16 == len(node)
+    assert 0.26577747932995816 == node[0][2]
+    assert node[0].hostname == instance_id
+
+
 @pytest.mark.parametrize(
     'test_case, extra_config, expected_http_kwargs',
     [
