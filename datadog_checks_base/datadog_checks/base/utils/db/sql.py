@@ -8,6 +8,8 @@ import logging
 import mmh3
 import requests
 import time
+from requests.adapters import HTTPAdapter
+from urllib3 import Retry
 
 LOGGER = logging.getLogger(__file__)
 
@@ -36,16 +38,29 @@ def compute_exec_plan_signature(normalized_json_plan):
     return format(mmh3.hash64(with_sorted_keys, signed=False)[0], 'x')
 
 
-class eventEncoder(json.JSONEncoder):
+class EventEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, decimal.Decimal):
             return float(o)
-        return super(eventEncoder, self).default(o)
+        return super(EventEncoder, self).default(o)
 
 
 def chunks(items, n):
     for i in range(0, len(items), n):
         yield items[i:i + n]
+
+
+LOGS_HTTP_INTAKE_ENDPOINT = "https://http-intake.logs.datadoghq.com/v1/input"
+
+
+def init_http():
+    adapter = HTTPAdapter(max_retries=Retry(connect=2, read=2, redirect=2, status=2, method_whitelist=['POST']))
+    http = requests.Session()
+    http.mount("https://", adapter)
+    return http
+
+
+http = init_http()
 
 
 def submit_exec_plan_events(events, tags, source):
@@ -62,7 +77,7 @@ def submit_exec_plan_events(events, tags, source):
         return {
             'ddtags': ddtags,
             'hostname': hostname,
-            'message': json.dumps(e, cls=eventEncoder),
+            'message': json.dumps(e, cls=EventEncoder),
             'service': service,
             'ddsource': source,
             'timestamp': timestamp
@@ -70,12 +85,13 @@ def submit_exec_plan_events(events, tags, source):
 
     for chunk in chunks(events, 100):
         try:
-            r = requests.post(f"https://http-intake.logs.datadoghq.com/v1/input",
-                              json=[_to_log_event(e) for e in chunk],
-                              timeout=5,
-                              headers={
-                                  'DD-API-KEY': datadog_agent.get_config('api_key')
-                              })
+            r = http.request('post', LOGS_HTTP_INTAKE_ENDPOINT,
+                             data=json.dumps([_to_log_event(e) for e in chunk]),
+                             timeout=5,
+                             headers={
+                                 'DD-API-KEY': datadog_agent.get_config('api_key'),
+                                 'Content-Type': 'application/json'
+                             })
             r.raise_for_status()
             LOGGER.debug("submitted %s exec plan events", len(chunk))
         except requests.HTTPError:
