@@ -61,7 +61,7 @@ Example:
 ```yaml
 extends:
   - _base.yaml
-  - _generic-router-if.yaml  # Include basic metrics from IF-MIB.
+  - _generic-if.yaml  # Include basic metrics from IF-MIB.
 ```
 
 ### `metrics`

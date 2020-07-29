@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import logging
 import os
 from typing import Any, Dict, Iterator, List, Mapping, Sequence, Tuple, Union
 
@@ -23,6 +24,8 @@ from .pysnmp_types import (
     noSuchInstance,
 )
 from .types import T
+
+logger = logging.getLogger(__name__)
 
 
 def get_profile_definition(profile):
@@ -125,7 +128,11 @@ def _load_default_profiles():
                 continue
 
             definition = _read_profile_definition(os.path.join(path, filename))
-            recursively_expand_base_profiles(definition)
+            try:
+                recursively_expand_base_profiles(definition)
+            except Exception:
+                logger.error("Could not expand base profile %s", filename)
+                raise
             profiles[base] = {'definition': definition}
 
     return profiles
