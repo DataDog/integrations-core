@@ -520,6 +520,21 @@ class SnmpCheck(AgentCheck):
         Convert the values reported as pysnmp-Managed Objects to values and
         report them to the aggregator.
         """
+        try:
+            self._do_submit_metric(name, snmp_value, forced_type, tags, options)
+        except Exception as e:
+            msg = (
+                'Unable to submit metric `{}` with '
+                'value=`{}` ({}), forced_type=`{}`, tags=`{}`, options=`{}`: {}'.format(
+                    name, snmp_value, type(snmp_value), forced_type, tags, options, e
+                )
+            )
+            self.log.warning(msg)
+            self.log.debug(msg, exc_info=True)
+
+    def _do_submit_metric(self, name, snmp_value, forced_type, tags, options):
+        # type: (str, Any, Optional[str], List[str], dict) -> None
+
         if reply_invalid(snmp_value):
             # Metrics not present in the queried object
             self.log.warning('No such Mib available: %s', name)
@@ -531,19 +546,12 @@ class SnmpCheck(AgentCheck):
             metric_name = self.normalize(name, prefix='snmp')
 
         if forced_type is not None:
-            try:
-                metric = as_metric_with_forced_type(snmp_value, forced_type, options)
-            except Exception as e:
-                self.log.error('Unable to coerce %s to %s: %s', name, forced_type, e)
-                return
-            if metric is None:
-                raise ConfigurationError('Invalid forced-type {!r} for metric {!r}'.format(forced_type, name))
+            metric = as_metric_with_forced_type(snmp_value, forced_type, options)
         else:
             metric = as_metric_with_inferred_type(snmp_value)
 
         if metric is None:
-            self.log.warning('Unsupported metric type %s for %s', snmp_value.__class__.__name__, metric_name)
-            return
+            raise RuntimeError('Unsupported metric type {} for {}'.format(type(snmp_value), metric_name))
 
         submit_func = getattr(self, metric['type'])
         submit_func(metric_name, metric['value'], tags=tags)
