@@ -14,6 +14,7 @@ from ....github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone
 from ....trello import TrelloClient
 from ....utils import format_commit_id
 from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
+from .rc_build_cards_updater import RCBuildCardsUpdater
 
 
 def create_trello_card(
@@ -144,8 +145,13 @@ def pick_card_member(config: dict, author: str, team: str) -> Optional[str]:
 @click.argument('target_ref')
 @click.option('--milestone', help='The PR milestone to filter by')
 @click.option('--dry-run', '-n', is_flag=True, help='Only show the changes')
+@click.option(
+    '--update-rc-builds-cards', is_flag=True, help='Update cards in RC builds column with `target_ref` version',
+)
 @click.pass_context
-def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str, dry_run: bool) -> None:
+def testable(
+    ctx: click.Context, base_ref: str, target_ref: str, milestone: str, dry_run: bool, update_rc_builds_cards: bool
+) -> None:
     """
     Create a Trello card for changes since a previous release (referenced by `BASE_REF`)
     that need to be tested for the next release (referenced by `TARGET_REF`).
@@ -234,6 +240,9 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
     commit_ids: Set[str] = set()
     user_config = ctx.obj
     trello = TrelloClient(user_config)
+    rc_build_cards_updater = None
+    if update_rc_builds_cards:
+        rc_build_cards_updater = RCBuildCardsUpdater(trello, target_ref)
 
     for i, (commit_hash, commit_subject) in enumerate(commits, 1):
         commit_id = parse_pr_number(commit_subject)
@@ -381,3 +390,5 @@ def testable(ctx: click.Context, base_ref: str, target_ref: str, milestone: str,
                 )
 
             finished = True
+    if rc_build_cards_updater and not dry_run:
+        rc_build_cards_updater.update_cards()
