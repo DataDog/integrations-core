@@ -11,6 +11,7 @@ class TrelloClient:
     BOARD_ENDPOINT = API_URL + '/1/boards/ICjijxr4/cards'
     LISTS_ENDPOINT = API_URL + '/1/boards/ICjijxr4/lists'
     LABELS_ENDPOINT = API_URL + '/1/boards/ICjijxr4/labels'
+    CARDS_ENDPOINT = API_URL + '/1/cards'
 
     def __init__(self, config):
         self.auth = {'key': config['trello']['key'] or None, 'token': config['trello']['token'] or None}
@@ -120,3 +121,14 @@ class TrelloClient:
                         counts[team][self.progress_columns[id_list]] += 1
 
         return counts
+
+    def get_card(self, card_id):
+        response = requests.get(f'{self.CARDS_ENDPOINT}/{card_id}', params=self.auth)
+        response.raise_for_status()
+        return response.json()
+
+    def update_card(self, card_id, data):
+        headers = {'Content-Type': 'application/json'}
+        response = requests.put(f'{self.CARDS_ENDPOINT}/{card_id}', headers=headers, data=data, params=self.auth)
+        response.raise_for_status()
+        return response.json()
