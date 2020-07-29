@@ -3,13 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import decimal
 import json
-
-import requests
-import time
+import logging
 
 import mmh3
-
-import logging
+import requests
+import time
 
 LOGGER = logging.getLogger(__file__)
 
