@@ -53,6 +53,11 @@ instances:
     #
     # sock: <SOCK>
 
+    ## @param charset - string - optional - default: None
+    ## Charset you want to use.
+    #
+    # charset: utf8
+
     ## @param defaults_file - string - optional
     ## Path to an alternative configuration mechanism file.
     ## If providing this then there is no need to specify host, port, user, pass or socket.
