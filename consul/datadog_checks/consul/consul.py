@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import socket
 from collections import defaultdict, namedtuple
 from datetime import datetime, timedelta
 from itertools import islice
@@ -483,6 +484,14 @@ class ConsulCheck(AgentCheck):
         if len(nodes) == 1:
             self.log.debug("Only 1 node in cluster, skipping network latency metrics.")
         else:
+            socket_hostname = socket.gethostname()
+            if self.hostname != socket_hostname:
+                # Replace hostname references to use the agent determined hostname
+                # In EC2 environments, this will be `instance_id` instead, for example
+                for node in nodes:
+                    if node['Node'] == socket_hostname:
+                        node['Node'] = self.hostname
+
             for node in nodes:
                 node_name = node['Node']
                 latencies = []
