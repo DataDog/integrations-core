@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
+import time
 import weakref
 from collections import defaultdict
 from logging import Logger, getLogger
@@ -36,6 +37,7 @@ class InstanceConfig:
     DEFAULT_ALLOWED_FAILURES = 3
     DEFAULT_BULK_THRESHOLD = 0
     DEFAULT_WORKERS = 5
+    DEFAULT_REFRESH_OIDS_CACHE_INTERVAL = 0  # `0` means disabled
 
     AUTH_PROTOCOL_MAPPING = {
         'md5': 'usmHMACMD5AuthProtocol',
@@ -156,7 +158,8 @@ class InstanceConfig:
         if tag_oids:
             parsed_scalar_oids.extend(tag_oids)
 
-        self.oid_config = OIDConfig()
+        refresh_interval_sec = instance.get('refresh_oids_cache_interval', self.DEFAULT_REFRESH_OIDS_CACHE_INTERVAL)
+        self.oid_config = OIDConfig(refresh_interval_sec)
         self.oid_config.add_parsed_oids(parsed_scalar_oids, parsed_next_oids, parsed_bulk_oids)
 
         if profile:
@@ -307,28 +310,40 @@ class InstanceConfig:
 
 class OIDConfig(object):
     """
-    Manages scalar/next/bulk oids.
+    Manages scalar/next/bulk oids to be used for snmp PDU calls.
     """
 
-    def __init__(self):
-        # type: () -> None
+    def __init__(self, refresh_interval_sec):
+        # type: (bool) -> None
+        self._refresh_interval_sec = refresh_interval_sec
+        self._last_ts = 0  # type: float
+
         self._parsed_scalar_oids = []  # type: List[OID]
         self._parsed_next_oids = []  # type: List[OID]
         self._parsed_bulk_oids = []  # type: List[OID]
 
+        self._all_scalar_oids = []  # type: List[OID]
+        self._use_scalar_oids_cache = False
+
     @property
     def scalar_oids(self):
         # type: () -> List[OID]
+        if self._use_scalar_oids_cache:
+            return self._all_scalar_oids
         return self._parsed_scalar_oids
 
     @property
     def next_oids(self):
         # type: () -> List[OID]
+        if self._use_scalar_oids_cache:
+            return []
         return self._parsed_next_oids
 
     @property
     def bulk_oids(self):
         # type: () -> List[OID]
+        if self._use_scalar_oids_cache:
+            return []
         return self._parsed_bulk_oids
 
     def add_parsed_oids(self, parsed_scalar_oids, parsed_next_oids, parsed_bulk_oids):
@@ -336,6 +351,7 @@ class OIDConfig(object):
         self._parsed_scalar_oids.extend(parsed_scalar_oids)
         self._parsed_next_oids.extend(parsed_next_oids)
         self._parsed_bulk_oids.extend(parsed_bulk_oids)
+        self.reset()
 
     def has_oids(self):
         # type: () -> bool
@@ -343,3 +359,39 @@ class OIDConfig(object):
         Check weather some scalar/next/bulk oids are present.
         """
         return bool(self.scalar_oids or self.next_oids or self.bulk_oids)
+
+    def _is_cache_enabled(self):
+        # type: () -> bool
+        return self._refresh_interval_sec > 0
+
+    def update_scalar_oids(self, new_scalar_oids):
+        # type: (List[OID]) -> None
+        """
+        Use only scalar oids for following snmp calls.
+        """
+        if not self._is_cache_enabled():
+            return
+        # Do not update if we are already using scalar oids cache.
+        if self._use_scalar_oids_cache:
+            return
+        self._all_scalar_oids = new_scalar_oids
+        self._use_scalar_oids_cache = True
+        self._last_ts = time.time()
+
+    def should_reset(self):
+        # type: () -> bool
+        """
+        Weather we should reset oids to initial parsed oids.
+        """
+        if not self._is_cache_enabled():
+            return False
+        elapsed = time.time() - self._last_ts
+        return elapsed > self._refresh_interval_sec
+
+    def reset(self):
+        # type: () -> None
+        """
+        Reset scalar oids cache.
+        """
+        self._all_scalar_oids = []
+        self._use_scalar_oids_cache = False

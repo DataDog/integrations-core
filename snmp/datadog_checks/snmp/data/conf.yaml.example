@@ -374,3 +374,17 @@ instances:
     #    tags:
     #        host: \2
     #        device_type: \1
+
+    ## @param refresh_oids_cache_interval - integer - optional - default: 0
+    ## Number of seconds between each discovering and caching of scalar instance oids using GETNEXT and GETBULK.
+    ## Table oids are fetched once using GETNEXT or GETBULK then cached as scalar instance oids for following
+    ## check runs at each refresh.
+    ## The caching is disabled if the interval is set to `0` (default).
+    ##
+    ## Using scalar instance oids to fetch metrics data is more efficient than using GETNEXT and GETBULK.
+    ## Caveat: If some tables rows are dynamic, new rows will only be fetched at every refresh interval.
+    ##         - This means new OIDs will only be picked up when oids are refreshed according to the refresh interval.
+    ##         - With auto discovery, if the same IP is assigned to a different device with different OIDs,
+    ##         the OIDs will be refreshed only according to the refresh interval.
+    #
+    # refresh_oids_cache_interval: 3600
