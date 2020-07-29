@@ -19,16 +19,16 @@ PASSWORD = 'datadog'
 
 INSTANCE = {
     'url': API_URL,
-    'username': ADMIN_USERNAME,
-    'password': ADMIN_PASSWORD,
+    'username': USERNAME,
+    'password': PASSWORD,
     'auth_type': 'digest',
     'tags': ['foo:bar'],
 }
 
 INSTANCE_FILTERS = {
     'url': API_URL,
-    'username': ADMIN_USERNAME,
-    'password': ADMIN_PASSWORD,
+    'username': USERNAME,
+    'password': PASSWORD,
     'auth_type': 'digest',
     'resource_filters': [
         {'resource_type': 'forest', 'pattern': '^S[a-z]*'},  # Match Security and Schemas

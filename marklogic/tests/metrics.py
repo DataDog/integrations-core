@@ -66,16 +66,16 @@ FOREST_STATUS_SUMMARY_METRICS = [
 
 HOST_STATUS_METRICS = [
     # Part 1
-    # Cluster testing environment only
+    # TODO: needs preprocessing to be available
     # 'marklogic.hosts.memory-process-huge-pages-size',
     # 'marklogic.hosts.memory-process-rss',
-    'marklogic.hosts.memory-size',
     # 'marklogic.hosts.memory-system-free',
     # 'marklogic.hosts.memory-system-total',
     # 'marklogic.hosts.total-cpu-stat-system',
     # 'marklogic.hosts.total-cpu-stat-user',
     'marklogic.hosts.total-hosts',
     'marklogic.hosts.total-hosts-offline',
+    'marklogic.hosts.memory-size',
     # Part 2
     'marklogic.hosts.backup-read-load',
     'marklogic.hosts.backup-read-rate',
