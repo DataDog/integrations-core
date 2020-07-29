@@ -372,7 +372,7 @@ class SnmpCheck(AgentCheck):
         error = results = None
         tags = config.tags
         try:
-            if not (config.oid_config.has_oids()):
+            if not config.oid_config.has_oids():
                 sys_object_oid = self.fetch_sysobject_oid(config)
                 profile = self._profile_for_sysobject_oid(sys_object_oid)
                 config.refresh_with_profile(self.profiles[profile])
