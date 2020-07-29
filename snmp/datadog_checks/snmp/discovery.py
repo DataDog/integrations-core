@@ -45,7 +45,7 @@ def discover_instances(config, interval, check_ref):
             try:
                 profile = check._profile_for_sysobject_oid(sys_object_oid)
             except ConfigurationError:
-                if not (host_config.oid_config.scalar_oids or host_config.oid_config.bulk_oids):
+                if not host_config.oid_config.has_oids():
                     check.log.warning("Host %s didn't match a profile for sysObjectID %s", host, sys_object_oid)
                     del check
                     continue
