@@ -180,10 +180,7 @@ class SnmpCheck(AgentCheck):
         enforce_constraints = config.enforce_constraints
 
         all_binds, error = self.fetch_oids(
-            config,
-            config.oid_config.scalar_oids,
-            config.oid_config.next_oids,
-            enforce_constraints=enforce_constraints,
+            config, config.oid_config.scalar_oids, config.oid_config.next_oids, enforce_constraints=enforce_constraints,
         )
         for oid in config.oid_config.bulk_oids:
             try:
