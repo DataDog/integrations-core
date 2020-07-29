@@ -50,17 +50,55 @@ def chunks(items, n):
         yield items[i:i + n]
 
 
-LOGS_HTTP_INTAKE_ENDPOINT = "https://http-intake.logs.datadoghq.com/v1/input"
+# list of requests sessions and their endpoint urls [(http, url), ...]
+_logs_endpoints = []
 
 
-def init_http():
-    adapter = HTTPAdapter(max_retries=Retry(connect=2, read=2, redirect=2, status=2, method_whitelist=['POST']))
+def _new_logs_session(api_key):
     http = requests.Session()
-    http.mount("https://", adapter)
+    http.mount("https://",
+               HTTPAdapter(max_retries=Retry(connect=2, read=2, redirect=2, status=2, method_whitelist=['POST'])))
+    http.headers.update({'DD-API-KEY': api_key})
     return http
 
 
-http = init_http()
+def _logs_input_url(host):
+    if host.endswith("."):
+        host = host[:-1]
+    if not host.startswith("https://"):
+        host = "https://" + host
+    return host + "/v1/input"
+
+
+def _get_logs_endpoints():
+    """
+    Returns a list of requests sessions and their endpoint urls [(http, url), ...]
+    Requests sessions are initialized the first time this is called and reused thereafter
+    :return: list of (http, url)
+    """
+    global _logs_endpoints
+    if _logs_endpoints:
+        return _logs_endpoints
+
+    # TODO: support other logs endpoint config options use_http, use_compression, compression_level
+
+    url = _logs_input_url(datadog_agent.get_config('logs_config.dd_url') or "http-intake.logs.datadoghq.com")
+    endpoints = [(_new_logs_session(datadog_agent.get_config('api_key')), url)]
+    LOGGER.debug("initializing logs endpoint for sql exec plans. url=%s", url)
+
+    for additional_endpoint in datadog_agent.get_config('logs_config.additional_endpoints') or []:
+        api_key, host = additional_endpoint.get('api_key'), additional_endpoint.get('host')
+        missing_keys = [k for k, v in [('api_key', api_key), ('host', host)] if not v]
+        if missing_keys:
+            LOGGER.warning("invalid endpoint found in logs_config.additional_endpoints. missing required keys %s",
+                           ', '.join(missing_keys))
+            continue
+        url = _logs_input_url(host)
+        endpoints.append((_new_logs_session(api_key), url))
+        LOGGER.debug("initializing additional logs endpoint for sql exec plans. url=%s", url)
+
+    _logs_endpoints = endpoints
+    return _logs_endpoints
 
 
 def submit_exec_plan_events(events, tags, source):
@@ -83,18 +121,16 @@ def submit_exec_plan_events(events, tags, source):
             'timestamp': timestamp
         }
 
-    for chunk in chunks(events, 100):
-        try:
-            r = http.request('post', LOGS_HTTP_INTAKE_ENDPOINT,
-                             data=json.dumps([_to_log_event(e) for e in chunk]),
-                             timeout=5,
-                             headers={
-                                 'DD-API-KEY': datadog_agent.get_config('api_key'),
-                                 'Content-Type': 'application/json'
-                             })
-            r.raise_for_status()
-            LOGGER.debug("submitted %s exec plan events", len(chunk))
-        except requests.HTTPError:
-            LOGGER.exception("failed to submit exec plan events")
-        except Exception:
-            LOGGER.exception("failed to submit exec plan events")
+    for http, url in _get_logs_endpoints():
+        for chunk in chunks(events, 100):
+            try:
+                r = http.request('post', url,
+                                 data=json.dumps([_to_log_event(e) for e in chunk]),
+                                 timeout=5,
+                                 headers={'Content-Type': 'application/json'})
+                r.raise_for_status()
+                LOGGER.debug("submitted %s exec plan events to %s", len(chunk), url)
+            except requests.HTTPError as e:
+                LOGGER.warning("failed to submit exec plan events to %s: %s", url, e)
+            except Exception:
+                LOGGER.exception("failed to submit exec plan events to %s", url)
