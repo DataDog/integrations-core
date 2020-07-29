@@ -9,10 +9,9 @@ from typing import Any, Optional
 
 from pyasn1.codec.ber.decoder import decode as pyasn1_decode
 
-from datadog_checks.snmp.utils import sanitize_varbind_value
-
 from .compat import total_time_to_temporal_percent
 from .pysnmp_inspect import is_counter, is_gauge, is_opaque
+from .pysnmp_types import OctetString
 from .types import MetricDefinition
 
 
@@ -52,7 +51,7 @@ def as_metric_with_forced_type(value, forced_type, options):
         return {'type': 'gauge', 'value': int(str(value)[index])}
 
     # Use float for following types
-    float_value = float(sanitize_varbind_value(value))
+    float_value = _varbind_value_to_float(value)
 
     if forced_type == 'gauge':
         return {'type': 'gauge', 'value': float_value}
@@ -70,3 +69,16 @@ def as_metric_with_forced_type(value, forced_type, options):
         return {'type': 'monotonic_count_and_rate', 'value': float_value}
 
     return None
+
+
+def _varbind_value_to_float(value):
+    # type: (Any) -> float
+
+    # Floats might be represented as OctetString
+    if isinstance(value, OctetString):
+        value = str(value)  # convert OctetString to native string
+        found = value.find('\x00')
+        if found >= 0:
+            value = value[:found]
+        value = value.strip()
+    return float(value)
