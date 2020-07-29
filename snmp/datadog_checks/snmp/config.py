@@ -297,7 +297,7 @@ class InstanceConfig:
             return
         # Reference sysUpTimeInstance directly, see http://oidref.com/1.3.6.1.2.1.1.3.0
         uptime_oid = OID('1.3.6.1.2.1.1.3.0')
-        self.oid_config.add_parsed_oids(scalar_oids=[uptime_oid], next_oids=[], bulk_oids=[])
+        self.oid_config.add_parsed_oids(scalar_oids=[uptime_oid])
         self._resolver.register(uptime_oid, 'sysUpTimeInstance')
 
         parsed_metric = ParsedSymbolMetric('sysUpTimeInstance', forced_type='gauge')
