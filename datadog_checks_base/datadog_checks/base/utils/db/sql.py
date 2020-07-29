@@ -11,12 +11,12 @@ import time
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
-LOGGER = logging.getLogger(__file__)
-
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
+
+LOGGER = logging.getLogger(__file__)
 
 
 def compute_sql_signature(normalized_query):
