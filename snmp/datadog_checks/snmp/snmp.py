@@ -181,11 +181,11 @@ class SnmpCheck(AgentCheck):
 
         all_binds, error = self.fetch_oids(
             config,
-            config.oids_config.scalar_oids,
-            config.oids_config.next_oids,
+            config.oid_config.scalar_oids,
+            config.oid_config.next_oids,
             enforce_constraints=enforce_constraints,
         )
-        for oid in config.oids_config.bulk_oids:
+        for oid in config.oid_config.bulk_oids:
             try:
                 self.log.debug('Running SNMP command getBulk on OID %s', oid)
                 binds = snmp_bulk(
@@ -375,13 +375,13 @@ class SnmpCheck(AgentCheck):
         error = results = None
         tags = config.tags
         try:
-            if not (config.oids_config.has_oids()):
+            if not (config.oid_config.has_oids()):
                 sys_object_oid = self.fetch_sysobject_oid(config)
                 profile = self._profile_for_sysobject_oid(sys_object_oid)
                 config.refresh_with_profile(self.profiles[profile])
                 config.add_profile_tag(profile)
 
-            if config.oids_config.has_oids():
+            if config.oid_config.has_oids():
                 self.log.debug('Querying %s', config.device)
                 config.add_uptime_metric()
                 results, error = self.fetch_results(config)

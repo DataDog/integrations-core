@@ -156,8 +156,8 @@ class InstanceConfig:
         if tag_oids:
             parsed_scalar_oids.extend(tag_oids)
 
-        self.oids_config = OidsConfig()
-        self.oids_config.add_parsed_oids(parsed_scalar_oids, parsed_next_oids, parsed_bulk_oids)
+        self.oid_config = OIDConfig()
+        self.oid_config.add_parsed_oids(parsed_scalar_oids, parsed_next_oids, parsed_bulk_oids)
 
         if profile:
             if profile not in profiles:
@@ -185,7 +185,7 @@ class InstanceConfig:
         # In the future we'll probably want to implement de-duplication.
 
         self.metrics.extend(metrics)
-        self.oids_config.add_parsed_oids(parsed_scalar_oids + tag_oids, parsed_next_oids, parsed_bulk_oids)
+        self.oid_config.add_parsed_oids(parsed_scalar_oids + tag_oids, parsed_next_oids, parsed_bulk_oids)
         self.parsed_metrics.extend(parsed_metrics)
         self.parsed_metric_tags.extend(parsed_metric_tags)
 
@@ -297,7 +297,7 @@ class InstanceConfig:
             return
         # Reference sysUpTimeInstance directly, see http://oidref.com/1.3.6.1.2.1.1.3.0
         uptime_oid = OID('1.3.6.1.2.1.1.3.0')
-        self.oids_config.add_parsed_oids([uptime_oid], [], [])
+        self.oid_config.add_parsed_oids([uptime_oid], [], [])
         self._resolver.register(uptime_oid, 'sysUpTimeInstance')
 
         parsed_metric = ParsedSymbolMetric('sysUpTimeInstance', forced_type='gauge')
@@ -305,7 +305,7 @@ class InstanceConfig:
         self._uptime_metric_added = True
 
 
-class OidsConfig(object):
+class OIDConfig(object):
     """
     Manages scalar/next/bulk oids.
     """
