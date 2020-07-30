@@ -1093,6 +1093,7 @@ def test_oids_cache_metrics_collected_using_scalar_oids(aggregator):
     Test if we still collect all metrics using saved scalar oids.
     """
     instance = common.generate_instance_config(common.TABULAR_OBJECTS)
+    instance['refresh_oids_cache_interval'] = 3600
     check = common.create_check(instance)
 
     def run_check():
@@ -1129,13 +1130,13 @@ def test_oids_cache_metrics_collected_using_scalar_oids(aggregator):
         pytest.param({'refresh_oids_cache_interval': 3600}, False, id='enabled_config_3600'),
     ],
 )
-def test_oids_cache_config_update(configs, has_next_bulk_oids):
+def test_oids_cache_config_update(config, has_next_bulk_oids):
     """
     Check weather config oids are correctly updated when refresh_oids_cache_interval is enabled and not enable.
     """
     instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
     instance['bulk_threshold'] = 10
-    instance.update(configs)
+    instance.update(config)
     check = common.create_check(instance)
 
     assert bool(check._config.oid_config.scalar_oids) is False
