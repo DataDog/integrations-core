@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import datetime
 import decimal
 import json
 from collections import defaultdict
@@ -13,7 +14,7 @@ import time
 from datadog import statsd
 from datadog_checks.base import AgentCheck
 import socket
-from datadog_checks.base.utils.db.sql import compute_sql_signature, compute_exec_plan_signature
+from datadog_checks.base.utils.db.sql import compute_sql_signature, compute_exec_plan_signature, submit_exec_plan_events
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits, is_dbm_enabled
 
 from contextlib import closing
@@ -22,13 +23,6 @@ try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
-
-
-class EventEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, decimal.Decimal):
-            return float(o)
-        return super(EventEncoder, self).default(o)
 
 
 # TODO: As a future optimization, the `query` column should be cached on first request
@@ -272,18 +266,6 @@ class PgStatementsMixin(object):
             return None
         return result[0][0]
 
-    def _submit_log_events(self, events):
-        # TODO: This is a temporary hack to send logs via the Python integrations and requires customers
-        # to configure a TCP log on port 10518. THIS CODE SHOULD NOT BE MERGED TO MASTER
-        try:
-            with closing(socket.create_connection(('localhost', 10518))) as c:
-                for e in events:
-                    c.sendall((json.dumps(e, cls=EventEncoder, default=str) + '\n').encode())
-        except ConnectionRefusedError:
-            self.warning('Unable to connect to the logs agent; please see the '
-                         'documentation on configuring the logs agent.')
-            return
-
     def _explain_new_pg_stat_activity(self, samples, seen_statements, seen_statement_plan_sigs,
                                       instance_tags):
         start_time = time.time()
@@ -341,7 +323,7 @@ class PgStatementsMixin(object):
             events = self._explain_new_pg_stat_activity(samples, seen_statements, seen_statement_plan_sigs,
                                                         instance_tags)
             if events:
-                self._submit_log_events(events)
+                submit_exec_plan_events(events, instance_tags, "postgres")
             time.sleep(self.config.collect_exec_plan_sample_sleep)
 
         statsd.gauge("dd.postgres.collect_execution_plans.total.time", (time.time() - start_time) * 1000,

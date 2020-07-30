@@ -5,6 +5,7 @@ import decimal
 import json
 import logging
 
+import datetime
 import mmh3
 import requests
 import time
@@ -42,6 +43,8 @@ class EventEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, decimal.Decimal):
             return float(o)
+        if isinstance(o, (datetime.date, datetime.datetime)):
+            return o.isoformat()
         return super(EventEncoder, self).default(o)
 
 
