@@ -11,6 +11,7 @@ from datadog_checks.base.utils.common import get_docker_hostname
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
 PORT = 8002
+MARKLOGIC_VERSION = os.environ.get('MARKLOGIC_VERSION')
 API_URL = "http://{}:{}".format(HOST, PORT)
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'admin'

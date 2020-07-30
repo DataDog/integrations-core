@@ -5,12 +5,13 @@ from typing import Any
 
 import mock
 import pytest
+from packaging import version
 from requests.exceptions import HTTPError
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.marklogic import MarklogicCheck
 
-from .common import INSTANCE, INSTANCE_FILTERS
+from .common import INSTANCE, INSTANCE_FILTERS, MARKLOGIC_VERSION
 from .metrics import (
     FOREST_STATUS_SUMMARY_METRICS,
     GLOBAL_METRICS,
@@ -83,6 +84,27 @@ def test_check_with_filters(aggregator):
         aggregator.assert_metric(metric, tags=['server_name:Admin', 'group_name:Default'], count=1)
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_metadata_integration(aggregator, datadog_agent):
+    # type: (AggregatorStub, Any) -> None
+    c = MarklogicCheck('marklogic', {}, [INSTANCE])
+    c.check_id = 'test:123'
+    c.check(INSTANCE)
+
+    parsed_version = version.parse(MARKLOGIC_VERSION)
+    version_metadata = {
+        'version.scheme': 'semver',
+        'version.major': str(parsed_version.major),
+        'version.minor': str(parsed_version.minor),
+        'version.patch': str(parsed_version.post),
+        'version.raw': MARKLOGIC_VERSION,
+    }
+
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(len(version_metadata))
 
 
 @pytest.mark.e2e

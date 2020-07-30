@@ -90,6 +90,7 @@ class MarklogicCheck(AgentCheck):
           - Summary Transaction Metrics
         """
         data = self.api.get_status_data()
+        self.submit_version_metadata(data)
         metrics = parse_summary_status_base_metrics(data, self.config.tags)
         self.submit_metrics(metrics)
 
@@ -169,6 +170,21 @@ class MarklogicCheck(AgentCheck):
         # type: (Generator[Tuple, None, None]) -> None
         for metric_type, metric_name, value_data, tags in metrics:
             getattr(self, metric_type)(metric_name, value_data, tags=tags)
+
+    @AgentCheck.metadata_entrypoint
+    def submit_version_metadata(self, data):
+        # type: (Dict[str, Any]) -> None
+        try:
+            version = data['local-cluster-status']['version']
+            self.set_metadata(
+                'version',
+                version,
+                scheme='regex',
+                final_scheme='semver',
+                pattern=r'(?P<major>\d+)\.(?P<minor>\d+)\-(?P<patch>\d+)',
+            )
+        except Exception:
+            self.log.warning('Error collecting MarkLogic version')
 
     def submit_service_checks(self):
         # type: () -> None
