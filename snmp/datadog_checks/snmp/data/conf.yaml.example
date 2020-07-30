@@ -380,12 +380,11 @@ instances:
     ## the cache is refreshed.
     ## This is useful to improve performance when fetching metrics from large tables.
     ## When OID caching is enabled, table row OIDs are reused. This means that the table can be fetched
-    ## in less batched GET query, as opposed to one GETNEXT query per row in the table.
+    ## using batched GET queries, as opposed to one GETNEXT query per row in the table.
     ## The caching is disabled if the interval is set to `0` (default).
     ##
-    ## Using scalar instance oids to fetch metrics data is more efficient than using GETNEXT and GETBULK.
     ## Caveat: If some tables rows are dynamic, new rows will only be fetched at every refresh interval.
-    ##         - This means new OIDs will only be picked up when oids are refreshed according to the refresh interval.
+    ##         - This means new OIDs will only be picked up when OIDs are refreshed according to the refresh interval.
     ##         - With auto discovery, if the same IP is assigned to a different device with different OIDs,
     ##         the OIDs will be refreshed only according to the refresh interval.
     #

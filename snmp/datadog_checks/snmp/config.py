@@ -384,7 +384,7 @@ class OIDConfig(object):
     def should_reset(self):
         # type: () -> bool
         """
-        Weather we should reset oids to initial parsed oids.
+        Whether we should reset OIDs to initial parsed OIDs.
         """
         if not self._is_cache_enabled():
             return False
