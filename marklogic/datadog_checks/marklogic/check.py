@@ -196,11 +196,14 @@ class MarklogicCheck(AgentCheck):
                 self.service_check(name, status, tags=tags, message=message)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, self.config.tags)
         except Exception as e:
-            # Couldn't access the health endpoint
-            self.log.error("Failed to monitor databases health: {}.".format(e))
+            # Not enough permissions
             if data.get('code') == 'HEALTH-CLUSTER-ERROR':
                 self.log.error("The user needs `manage-admin` permission to monitor databases health.")
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, self.config.tags)
+                self.service_check(self.SERVICE_CHECK_CONNECT, self.UNKNWON, self.config.tags)
+            # Couldn't access the health endpoint
+            else:
+                self.log.error("Failed to monitor databases health: {}.".format(e))
+                self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, self.config.tags)
 
     def _is_resource_included(self, resource):
         # type: (Dict[str, str]) -> bool

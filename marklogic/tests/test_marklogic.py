@@ -174,7 +174,7 @@ def test_submit_service_checks(aggregator, caplog):
     with mock.patch('datadog_checks.marklogic.api.MarkLogicApi.get_health', return_value={'code': 'HEALTH-CLUSTER-ERROR'}):
         check.submit_service_checks()
 
-        aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.CRITICAL, count=1)
+        aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.UNKNOWN, count=1)
         assert "The user needs `manage-admin` permission to monitor databases health." in caplog.text
 
     aggregator.reset()
