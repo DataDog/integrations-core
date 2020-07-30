@@ -372,7 +372,7 @@ class NagiosPerfDataTailer(object):
             perf_data = data.get(self._perfdata_field)
             if not perf_data:
                 self.log.warning(
-                    'Could not find field {} in {}, check your perfdata_format', self._perfdata_field, line
+                    'Could not find field %s in %s, check your perfdata_format', self._perfdata_field, line
                 )
                 return
             for pair in perf_data.split():
