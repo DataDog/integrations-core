@@ -63,6 +63,7 @@ def test_plus_api_no_stream(check, instance, aggregator):
         total += len(aggregator.metrics(m))
     assert total == 883
 
+
 def test_nest_payload(check):
     check = check({})
     keys = ["foo", "bar"]
