@@ -315,12 +315,12 @@ class PgStatementsMixin(object):
         while time.time() - start_time < self.config.collect_exec_plans_time_limit:
             if len(seen_statement_plan_sigs) > self.config.collect_exec_plans_event_limit:
                 break
+            self._activity_sample_rate_limiter.sleep()
             samples = self._get_new_pg_stat_activity(instance_tags=instance_tags)
             events = self._explain_new_pg_stat_activity(samples, seen_statements, seen_statement_plan_sigs,
                                                         instance_tags)
             if events:
                 submit_exec_plan_events(events, instance_tags, "postgres")
-            self._activity_sample_rate_limiter.sleep()
 
         statsd.gauge("dd.postgres.collect_execution_plans.total.time", (time.time() - start_time) * 1000,
                      tags=instance_tags)
