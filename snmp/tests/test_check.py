@@ -1122,7 +1122,7 @@ def test_oids_cache_metrics_collected_using_scalar_oids(aggregator):
 
 
 @pytest.mark.parametrize(
-    "configs, has_next_bulk_oids",
+    "config, has_next_bulk_oids",
     [
         pytest.param({}, True, id='disabled_config_default'),
         pytest.param({'refresh_oids_cache_interval': 0}, True, id='disabled_config_explicit'),
