@@ -4,6 +4,7 @@
 from itertools import chain
 
 import pytz
+import time
 
 # AgentCheck methods to transformer name e.g. set_metadata -> metadata
 SUBMISSION_METHODS = {
@@ -21,11 +22,9 @@ SUBMISSION_METHODS = {
 
 
 def create_submission_transformer(submit_method):
-
     # During the compilation phase every transformer will have access to all the others and may be
     # passed the first arguments (e.g. name) that will be forwarded the actual AgentCheck methods.
     def get_transformer(_transformers, *creation_args, **modifiers):
-
         # The first argument of every transformer is a map of named references to collected values.
         def transformer(_sources, *call_args, **kwargs):
             kwargs.update(modifiers)
@@ -63,3 +62,21 @@ def normalize_datetime(dt):
         dt = dt.replace(tzinfo=pytz.utc)
 
     return dt
+
+
+class ConstantRateLimiter:
+    def __init__(self, rate_limit_s):
+        """
+        :param rate_limit_s: rate limit in seconds
+        """
+        self.period_s = 1 / rate_limit_s if rate_limit_s > 0 else 0
+        self.last_event = 0
+
+    def sleep(self):
+        """
+        Sleeps long enough to enforce the rate limit
+        """
+        elapsed_s = time.time() - self.last_event
+        sleep_amount = max(self.period_s - elapsed_s, 0)
+        time.sleep(sleep_amount)
+        self.last_event = time.time()

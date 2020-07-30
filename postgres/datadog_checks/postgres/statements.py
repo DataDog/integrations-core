@@ -1,29 +1,21 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import datetime
-import decimal
-import json
-from collections import defaultdict
-
-import mmh3
 import itertools
+import json
+
 import psycopg2
 import psycopg2.extras
 import time
 from datadog import statsd
-from datadog_checks.base import AgentCheck
-import socket
 from datadog_checks.base.utils.db.sql import compute_sql_signature, compute_exec_plan_signature, submit_exec_plan_events
-from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits, is_dbm_enabled
-
-from contextlib import closing
+from datadog_checks.base.utils.db.statement_metrics import StatementMetrics, apply_row_limits
+from datadog_checks.base.utils.db.utils import ConstantRateLimiter
 
 try:
     import datadog_agent
 except ImportError:
     from ..stubs import datadog_agent
-
 
 # TODO: As a future optimization, the `query` column should be cached on first request
 # and not requested again until agent restart or pg_stats reset. This is to avoid
@@ -116,6 +108,7 @@ class PgStatementsMixin(object):
         self.__pg_stat_statements_columns = None
         self.__pg_stat_statements_query_columns = None
         self._activity_last_query_start = None
+        self._activity_sample_rate_limiter = None
 
     def _execute_query(self, cursor, query, params=None, log_func=None):
         raise NotImplementedError('Check must implement _execute_query()')
@@ -311,20 +304,23 @@ class PgStatementsMixin(object):
         return events
 
     def _collect_execution_plans(self, instance_tags):
+        if not self._activity_sample_rate_limiter:
+            self._activity_sample_rate_limiter = ConstantRateLimiter(self.config.collect_exec_plans_rate_limit)
+
         start_time = time.time()
         # avoid reprocessing the exact same statement
         seen_statements = set()
         # keep only one sample per unique (query, plan)
         seen_statement_plan_sigs = set()
-        while time.time() - start_time < self.config.collect_exec_plan_time_limit:
-            if len(seen_statement_plan_sigs) > self.config.collect_exec_plan_event_limit:
+        while time.time() - start_time < self.config.collect_exec_plans_time_limit:
+            if len(seen_statement_plan_sigs) > self.config.collect_exec_plans_event_limit:
                 break
             samples = self._get_new_pg_stat_activity(instance_tags=instance_tags)
             events = self._explain_new_pg_stat_activity(samples, seen_statements, seen_statement_plan_sigs,
                                                         instance_tags)
             if events:
                 submit_exec_plan_events(events, instance_tags, "postgres")
-            time.sleep(self.config.collect_exec_plan_sample_sleep)
+            self._activity_sample_rate_limiter.sleep()
 
         statsd.gauge("dd.postgres.collect_execution_plans.total.time", (time.time() - start_time) * 1000,
                      tags=instance_tags)
