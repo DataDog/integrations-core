@@ -99,9 +99,9 @@ class Nginx(AgentCheck):
             # These are all the endpoints we have to call to get the same data as we did with the old API
             # since we can't get everything in one place anymore.
             if use_plus_api_stream:
-               plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS), iteritems(PLUS_API_STREAM_ENDPOINTS))
+                plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS), iteritems(PLUS_API_STREAM_ENDPOINTS))
             else:
-               plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS))
+                plus_api_chain_list = chain(iteritems(PLUS_API_ENDPOINTS))
 
             for endpoint, nest in plus_api_chain_list:
                 response = self._get_plus_api_data(url, plus_api_version, endpoint, nest)
