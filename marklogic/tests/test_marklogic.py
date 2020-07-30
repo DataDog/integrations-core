@@ -85,6 +85,9 @@ def test_check_with_filters(aggregator):
 
     aggregator.assert_all_metrics_covered()
 
+    # Service checks
+    aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=1)
+    aggregator.assert_service_check('marklogic.database.health', MarklogicCheck.OK, count=10)
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
@@ -106,6 +109,10 @@ def test_metadata_integration(aggregator, datadog_agent):
     datadog_agent.assert_metadata('test:123', version_metadata)
     datadog_agent.assert_metadata_count(len(version_metadata))
 
+    # Service checks
+    aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=1)
+    aggregator.assert_service_check('marklogic.database.health', MarklogicCheck.OK, count=10)
+
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
@@ -120,6 +127,10 @@ def test_e2e(dd_agent_check):
         aggregator.assert_metric(metric, count=20)
 
     aggregator.assert_all_metrics_covered()
+
+    # Service checks
+    aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=1)
+    aggregator.assert_service_check('marklogic.database.health', MarklogicCheck.OK, count=10)
 
 
 def test_submit_service_checks(aggregator, caplog):
@@ -160,10 +171,11 @@ def test_submit_service_checks(aggregator, caplog):
     aggregator.reset()
     caplog.clear()
 
-    with mock.patch('datadog_checks.marklogic.api.MarkLogicApi.get_health', side_effect=HTTPError):
+    with mock.patch('datadog_checks.marklogic.api.MarkLogicApi.get_health', return_value={'code': 'HEALTH-CLUSTER-ERROR'}):
         check.submit_service_checks()
 
         aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.CRITICAL, count=1)
+        assert "The user needs `manage-admin` permission to monitor databases health." in caplog.text
 
     aggregator.reset()
     caplog.clear()
@@ -171,6 +183,5 @@ def test_submit_service_checks(aggregator, caplog):
     with mock.patch('datadog_checks.marklogic.api.MarkLogicApi.get_health', side_effect=Exception("exception")):
         check.submit_service_checks()
 
-        assert "Failed to parse the resources health" in caplog.text
-        # Exception log
-        assert "Exception: exception" in caplog.text
+        aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.CRITICAL, count=1)
+        assert "Failed to monitor databases health" in caplog.text

@@ -195,12 +195,12 @@ class MarklogicCheck(AgentCheck):
             for name, status, message, tags in service_checks:
                 self.service_check(name, status, tags=tags, message=message)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, self.config.tags)
-        except HTTPError:
+        except Exception as e:
             # Couldn't access the health endpoint
+            self.log.error("Failed to monitor databases health: {}.".format(e))
+            if data.get('code') == 'HEALTH-CLUSTER-ERROR':
+                self.log.error("The user needs `manage-admin` permission to monitor databases health.")
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, self.config.tags)
-        except Exception:
-            # Couldn't parse the resource health
-            self.log.exception('Failed to parse the resources health')
 
     def _is_resource_included(self, resource):
         # type: (Dict[str, str]) -> bool

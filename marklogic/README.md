@@ -15,13 +15,13 @@ No additional installation is needed on your server.
 
 #### Prepare MarkLogic
 
-Using the API or the Admin interface, create a user for the Datadog Agent with at least the [`manage-user`][3] role.
+Using the API or the Admin interface, create a user for the Datadog Agent with at least the [`manage-admin`][3] role.
 
 ##### Using the API
 
 1. Create the Datadog user with a request like:
     ```shell
-    curl -X POST --anyauth --user <ADMIN_USER>:<ADMIN_PASSWORD> -i -H "Content-Type: application/json" -d '{"user-name": "<USER>", "password": "<PASSWORD>", "roles": {"role": "manage-user"}}' http://localhost:8002/manage/v2/users
+    curl -X POST --anyauth --user <ADMIN_USER>:<ADMIN_PASSWORD> -i -H "Content-Type: application/json" -d '{"user-name": "<USER>", "password": "<PASSWORD>", "roles": {"role": "manage-admin"}}' http://localhost:8002/manage/v2/users
     ```
     Use the correct `<ADMIN_USER>` and `<ADMIN_PASSWORD>`, and replace `<USER>` and `<PASSWORD>` with what the Datadog Agent will use.
     Full documentation about the endpoint [here][4].
@@ -47,7 +47,7 @@ Using the API or the Admin interface, create a user for the Datadog Agent with a
         "<USER>",
         "Datadog Agent user",
         "<PASSWORD>",
-        "manage-user",
+        "manage-admin",
         (xdmp:permission("security", "read")),
         ("http://marklogic.com/dev_modules"))
     
@@ -86,7 +86,7 @@ Need help? Contact [Datadog support][10].
 
 [1]: https://www.marklogic.com
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations
-[3]: https://docs.marklogic.com/guide/admin/pre_def_roles#id_64197
+[3]: https://docs.marklogic.com/guide/admin/pre_def_roles#id_28243
 [4]: https://docs.marklogic.com/REST/POST/manage/v2/users
 [5]: https://docs.marklogic.com/sec:create-user
 [6]: https://github.com/DataDog/integrations-core/blob/master/marklogic/datadog_checks/marklogic/data/conf.yaml.example

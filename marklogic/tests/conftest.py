@@ -49,7 +49,7 @@ def setup_datadog_user():
     r = requests.post(
         '{}/manage/v2/users'.format(API_URL),
         headers={'Content-Type': 'application/json'},
-        data='{"user-name": "datadog", "password": "datadog", "roles": {"role": "manage-user"}}',
+        data='{"user-name": "datadog", "password": "datadog", "roles": {"role": "manage-admin"}}',
         auth=requests.auth.HTTPDigestAuth(ADMIN_USERNAME, ADMIN_PASSWORD),
     )
 
