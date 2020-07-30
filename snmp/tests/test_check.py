@@ -1132,7 +1132,7 @@ def test_oids_cache_metrics_collected_using_scalar_oids(aggregator):
 )
 def test_oids_cache_config_update(config, has_next_bulk_oids):
     """
-    Check weather config oids are correctly updated when refresh_oids_cache_interval is enabled and not enable.
+    Check whether config oids are correctly updated depending on refresh_oids_cache_interval.
     """
     instance = common.generate_instance_config(common.BULK_TABULAR_OBJECTS)
     instance['bulk_threshold'] = 10
