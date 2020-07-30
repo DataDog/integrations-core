@@ -20,11 +20,6 @@ To use the Oracle integration, either install the Oracle Instant Client librarie
 - [Microsoft Visual C++ Runtime 2015][13]
 
 
-##### JDBC Driver
-
-- [Download the JDBC Driver][2] jar file.
-- Add the path to the downloaded file in your `$CLASSPATH` or the check configuration file under `jdbc_driver_path` (see the [sample oracle.yaml][3]).
-
 ##### Oracle Instant Client
 
 The Oracle check requires either access to the `cx_Oracle` Python module, or the Oracle JDBC Driver:
@@ -51,6 +46,11 @@ The Oracle check requires either access to the `cx_Oracle` Python module, or the
    unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip
    unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip
    ```
+
+##### JDBC Driver
+
+- [Download the JDBC Driver][2] jar file.
+- Add the path to the downloaded file in your `$CLASSPATH` or the check configuration file under `jdbc_driver_path` (see the [sample oracle.yaml][3]).
 
 #### Datadog User creation
 
