@@ -39,8 +39,11 @@ class ExecutionPlansMixin(object):
             except pymysql.err.OperationalError as e:
                 if e.args[0] == 1142:
                     self.log.error('Unable to create performance_schema consumers: %s', e.args[1])
-                elif e.args[1] == 1290:
-                    self.log.error('Unable to create performance_schema consumers because the instance is read-only')
+                else:
+                    raise
+            except pymysql.err.InternalError as e:
+                if e.args[0] == 1290:
+                    self.log.warning('Unable to create performance_schema consumers because the instance is read-only')
                     self._auto_enable_eshl = False
                 else:
                     raise
@@ -59,7 +62,7 @@ class ExecutionPlansMixin(object):
                 cursor.execute('SELECT MAX(timer_start) FROM performance_schema.events_statements_history_long')
                 result = cursor.fetchone()
             if not result or not all(result):
-                self.log.warn('Unable to fetch from performance_schema.events_statements_history_long')
+                self.log.debug('Unable to fetch from performance_schema.events_statements_history_long')
                 if self._auto_enable_eshl:
                     self._enable_performance_schema_consumers(db)
                 return False
@@ -99,9 +102,11 @@ class ExecutionPlansMixin(object):
         with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
             cursor.execute(query, ('statement/%', 'EXPLAIN %', self._checkpoint, self.query_limit))
             rows = cursor.fetchall()
+            cursor.execute('SET @@SESSION.sql_notes = 0')
 
         events = []
         num_truncated = 0
+
         for row in rows:
             if not row or not all(row):
                 self.log.debug('Row was unexpectedly truncated or events_statements_history_long table is not enabled')
@@ -122,7 +127,6 @@ class ExecutionPlansMixin(object):
                 continue
 
             with closing(db.cursor()) as cursor:
-                cursor.execute('SET sql_notes = 0')
                 # TODO: run these asynchronously / do some benchmarking to optimize
                 plan = self._run_explain(cursor, sql_text, schema)
                 normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True) if plan else None
@@ -184,10 +188,10 @@ class ExecutionPlansMixin(object):
             if len(e.args) != 2:
                 raise
             if e.args[0] in (1046,):
-                self.log.warning('Failed to collect EXPLAIN due to a permissions error: %s', (e.args,))
+                self.log.warning('Failed to collect EXPLAIN due to a permissions error: %s, Statement: %s', e.args, statement)
                 return None
             elif e.args[0] == 1064:
-                self.log.error('Programming error when collecting EXPLAIN: %s', (e.args,))
+                self.log.warning('Programming error when collecting EXPLAIN: %s, Statement: %s', e.args, statement)
                 return None
             else:
                 raise
