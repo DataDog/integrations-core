@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict, Generator, List, Tuple
 
-from requests.exceptions import HTTPError
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 
 from .api import MarkLogicApi
@@ -50,10 +48,11 @@ class MarklogicCheck(AgentCheck):
             'hosts': [],
             'servers': [],
         }  # type: Dict[str, List[Any]]
+        self.resources = []  # type: List[Dict[str, str]]
 
     def check(self, _):
         # type: (Any) -> None
-
+        self.resources = self.api.get_resources()
         self.resources_to_monitor = self.get_resources_to_monitor()
 
         for collector in self.collectors:
@@ -105,8 +104,6 @@ class MarklogicCheck(AgentCheck):
 
     def get_resources_to_monitor(self):
         # type: () -> Dict[str, List[Any]]
-        resources = self.api.get_resources()
-
         filtered_resources = {
             'forests': [],
             'databases': [],
@@ -114,7 +111,7 @@ class MarklogicCheck(AgentCheck):
             'servers': [],
         }  # type: Dict[str, List[Any]]
 
-        for res in resources:
+        for res in self.resources:
             if self._is_resource_included(res):
                 filtered_resources[res['type']].append(res)
 
@@ -188,21 +185,34 @@ class MarklogicCheck(AgentCheck):
 
     def submit_service_checks(self):
         # type: () -> None
+        data = {}
         try:
             data = self.api.get_health()
-            service_checks = parse_summary_health(data, self.config.tags)
+            # Doesn't report resource with no issue
+            health_report = parse_summary_health(data)
 
-            for name, status, message, tags in service_checks:
-                self.service_check(name, status, tags=tags, message=message)
+            for res in self.resources:
+                if res['type'] == 'databases' or res['type'] == 'forests':
+                    res_type = RESOURCE_SINGULARS[res['type']]
+                    service_check_name = '{}.health'.format(res_type)
+                    res_tags = self.config.tags + ['{}_name:{}'.format(res_type, res['name'])]
+                    res_detailed = health_report[res_type].get(res['name'])
+                    if res_detailed:
+                        self.service_check(
+                            service_check_name, res_detailed['code'], tags=res_tags, message=res_detailed['message']
+                        )
+                    else:
+                        self.service_check(service_check_name, self.OK, res_tags)
+
             self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, self.config.tags)
         except Exception as e:
             # Not enough permissions
             if data.get('code') == 'HEALTH-CLUSTER-ERROR':
                 self.log.error("The user needs `manage-admin` permission to monitor databases health.")
-                self.service_check(self.SERVICE_CHECK_CONNECT, self.UNKNWON, self.config.tags)
+                self.service_check(self.SERVICE_CHECK_CONNECT, self.UNKNOWN, self.config.tags)
             # Couldn't access the health endpoint
             else:
-                self.log.error("Failed to monitor databases health: {}.".format(e))
+                self.log.error("Failed to monitor databases health: %s.", e)
                 self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, self.config.tags)
 
     def _is_resource_included(self, resource):

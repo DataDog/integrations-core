@@ -410,49 +410,58 @@ def test_parse_summary_health():
     summary_health = {
         'cluster-health-report': [
             {
-                'resource-type': 'database',
-                'resource-name': 'Last-Login',
-                'code': 'HEALTH-DATABASE-NO-BACKUP',
-                'message': 'Database has never been backed up.',
+                "state": "critical",
+                "resource-type": "forest",
+                "resource-name": "Documents",
+                "code": "HEALTH-FOREST-UNMOUNTED",
+                "message": "Forest unmounted.",
             },
             {
-                'resource-type': 'database',
-                'resource-name': 'Modules',
-                'code': 'HEALTH-DATABASE-DISABLED',
-                'message': 'Database is intentionally disabled.',
+                "state": "maintenance",
+                "resource-type": "forest",
+                "resource-name": "Documents",
+                "code": "HEALTH-FOREST-DISABLED",
+                "message": "Forest is intentionally disabled.",
             },
             {
-                'resource-type': 'database',
-                'resource-name': 'Security',
-                'code': 'HEALTH-DATABASE-ERROR',
-                'message': 'Database error.',
+                "state": "offline",
+                "resource-type": "database",
+                "resource-name": "Documents",
+                "code": "HEALTH-DATABASE-OFFLINE",
+                "message": "Database is offline.",
+            },
+            {
+                "state": "info",
+                "resource-type": "database",
+                "resource-name": "Security",
+                "code": "HEALTH-DATABASE-NO-BACKUP",
+                "message": "Database has never been backed up.",
             },
             {'resource-type': 'database', 'resource-name': 'Fab', 'code': 'UNKNOWN'},
         ]
     }
 
-    EXPECTED_RESULT = [
-        (
-            'database.health',
-            AgentCheck.OK,
-            'HEALTH-DATABASE-NO-BACKUP: Database has never been backed up.',
-            ['foo:bar', 'database_name:Last-Login'],
-        ),
-        (
-            'database.health',
-            AgentCheck.WARNING,
-            'HEALTH-DATABASE-DISABLED: Database is intentionally disabled.',
-            ['foo:bar', 'database_name:Modules'],
-        ),
-        (
-            'database.health',
-            AgentCheck.CRITICAL,
-            'HEALTH-DATABASE-ERROR: Database error.',
-            ['foo:bar', 'database_name:Security'],
-        ),
-        ('database.health', AgentCheck.UNKNOWN, 'UNKNOWN: No message.', ['foo:bar', 'database_name:Fab']),
-    ]
+    EXPECTED_RESULT = {
+        'database': {
+            'Documents': {
+                'code': AgentCheck.WARNING,
+                'message': 'HEALTH-DATABASE-OFFLINE (offline): Database is offline.',
+            },
+            'Security': {
+                'code': AgentCheck.OK,
+                'message': 'HEALTH-DATABASE-NO-BACKUP (info): Database has never been backed up.',
+            },
+            'Fab': {'code': AgentCheck.UNKNOWN, 'message': 'UNKNOWN (unknown): No message.'},
+        },
+        'forest': {
+            'Documents': {
+                'code': AgentCheck.CRITICAL,
+                'message': 'HEALTH-FOREST-UNMOUNTED (critical): Forest unmounted. '
+                'HEALTH-FOREST-DISABLED (maintenance): Forest is intentionally disabled.',
+            }
+        },
+    }
 
-    result = list(parse_summary_health(summary_health, ['foo:bar']))
+    result = parse_summary_health(summary_health)
 
-    assert sorted(result) == sorted(EXPECTED_RESULT)
+    assert result == EXPECTED_RESULT

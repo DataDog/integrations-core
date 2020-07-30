@@ -6,7 +6,6 @@ from typing import Any
 import mock
 import pytest
 from packaging import version
-from requests.exceptions import HTTPError
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.marklogic import MarklogicCheck
@@ -89,6 +88,7 @@ def test_check_with_filters(aggregator):
     aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=1)
     aggregator.assert_service_check('marklogic.database.health', MarklogicCheck.OK, count=10)
 
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_metadata_integration(aggregator, datadog_agent):
@@ -112,6 +112,7 @@ def test_metadata_integration(aggregator, datadog_agent):
     # Service checks
     aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=1)
     aggregator.assert_service_check('marklogic.database.health', MarklogicCheck.OK, count=10)
+    aggregator.assert_service_check('marklogic.forest.health', MarklogicCheck.OK, count=10)
 
 
 @pytest.mark.e2e
@@ -131,6 +132,7 @@ def test_e2e(dd_agent_check):
     # Service checks
     aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=1)
     aggregator.assert_service_check('marklogic.database.health', MarklogicCheck.OK, count=10)
+    aggregator.assert_service_check('marklogic.forest.health', MarklogicCheck.OK, count=10)
 
 
 def test_submit_service_checks(aggregator, caplog):
@@ -140,14 +142,22 @@ def test_submit_service_checks(aggregator, caplog):
     health_mocked_data = {
         'cluster-health-report': [
             {
-                'resource-type': 'database',
-                'resource-name': 'Last-Login',
-                'code': 'HEALTH-DATABASE-NO-BACKUP',
-                'message': 'Database has never been backed up.',
+                "state": "info",
+                "resource-type": "database",
+                "resource-name": "Security",
+                "code": "HEALTH-DATABASE-NO-BACKUP",
+                "message": "Database has never been backed up.",
             },
             {'resource-type': 'database', 'resource-name': 'Fab', 'code': 'UNKNOWN'},
         ]
     }
+
+    check.resources = [
+        {'id': '255818103205892753', 'type': 'databases', 'name': 'Security', 'uri': "/databases/Security"},
+        {'id': '5004266825873163057', 'type': 'databases', 'name': 'Fab', 'uri': "/databases/Fab"},
+        {'id': '16024526243775340149', 'type': 'forests', 'name': 'Modules', 'uri': "/forests/Modules"},
+        {'id': '17254568917360711355', 'type': 'forests', 'name': 'Extensions', 'uri': "/forests/Extensions"},
+    ]
 
     with mock.patch('datadog_checks.marklogic.api.MarkLogicApi.get_health', return_value=health_mocked_data):
         check.submit_service_checks()
@@ -155,15 +165,25 @@ def test_submit_service_checks(aggregator, caplog):
         aggregator.assert_service_check(
             'marklogic.database.health',
             MarklogicCheck.OK,
-            tags=['foo:bar', 'database_name:Last-Login'],
-            message='HEALTH-DATABASE-NO-BACKUP: Database has never been backed up.',
+            tags=['foo:bar', 'database_name:Security'],
+            message='HEALTH-DATABASE-NO-BACKUP (info): Database has never been backed up.',
             count=1,
         )
         aggregator.assert_service_check(
             'marklogic.database.health',
             MarklogicCheck.UNKNOWN,
             tags=['foo:bar', 'database_name:Fab'],
-            message='UNKNOWN: No message.',
+            message='UNKNOWN (unknown): No message.',
+            count=1,
+        )
+        aggregator.assert_service_check(
+            'marklogic.forest.health', MarklogicCheck.OK, tags=['foo:bar', 'forest_name:Modules'], message=None, count=1
+        )
+        aggregator.assert_service_check(
+            'marklogic.forest.health',
+            MarklogicCheck.OK,
+            tags=['foo:bar', 'forest_name:Extensions'],
+            message=None,
             count=1,
         )
         aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=1)
@@ -171,7 +191,9 @@ def test_submit_service_checks(aggregator, caplog):
     aggregator.reset()
     caplog.clear()
 
-    with mock.patch('datadog_checks.marklogic.api.MarkLogicApi.get_health', return_value={'code': 'HEALTH-CLUSTER-ERROR'}):
+    with mock.patch(
+        'datadog_checks.marklogic.api.MarkLogicApi.get_health', return_value={'code': 'HEALTH-CLUSTER-ERROR'}
+    ):
         check.submit_service_checks()
 
         aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.UNKNOWN, count=1)

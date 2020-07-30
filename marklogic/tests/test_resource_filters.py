@@ -72,6 +72,8 @@ def test_get_resources_to_monitor():
     }  # type: Dict[str, List[Any]]
 
     with mock.patch('datadog_checks.marklogic.api.MarkLogicApi._get_raw_resources', return_value=return_value):
+        # Called in the check function
+        check.resources = check.api.get_resources()
         # Include list + exclude list
         filtered_res = check.get_resources_to_monitor()
         assert filtered_res == {
