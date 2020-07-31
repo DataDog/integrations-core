@@ -6,7 +6,6 @@ import socket
 import unicodedata
 
 import simplejson as json
-from httplib2 import Http, HttpLib2Error
 
 from datadog_checks.base import AgentCheck
 
@@ -209,6 +208,11 @@ class Riak(AgentCheck):
 
     vnodeq_keys = ["riak_kv_vnodeq", "riak_pipe_vnodeq"]
 
+    HTTP_CONFIG_REMAPPER = {
+        'cacert': {'name': 'tls_ca_cert'},
+        'disable_cert_verify': {'name': 'tls_verify', 'invert': True, 'default': False},
+    }
+
     def __init__(self, name, init_config, instances=None):
         super(Riak, self).__init__(name, init_config, instances)
         for k in ["mean", "median", "95", "99", "100"]:
@@ -234,11 +238,9 @@ class Riak(AgentCheck):
 
     def check(self, _):
         try:
-            h = Http(
-                timeout=self.timeout, ca_certs=self.cacert, disable_ssl_certificate_validation=self.disable_cert_verify
-            )
-            resp, content = h.request(self.url, "GET")
-        except (socket.timeout, socket.error, HttpLib2Error) as e:
+            r = self.http.get(self.url)
+            r.raise_for_status()
+        except Exception as e:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -247,15 +249,7 @@ class Riak(AgentCheck):
             )
             raise
 
-        if resp.status != 200:
-            self.service_check(
-                self.SERVICE_CHECK_NAME,
-                AgentCheck.CRITICAL,
-                tags=self.service_check_tags,
-                message="Unexpected status of %s when fetching Riak stats, response: %s" % (resp.status, content),
-            )
-
-        stats = json.loads(content)
+        stats = json.loads(r.content)
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.service_check_tags)
 
         for k in self.keys:
