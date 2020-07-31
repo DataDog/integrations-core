@@ -35,5 +35,5 @@ files:
           include: false
           pattern: Doc*
           group: Default
-
+    - template: instances/http
     - template: instances/default
