@@ -83,10 +83,10 @@ def run_profile_check(recording_name, profile=None):
         prof_def = check.profiles.get(profile)
     if prof_def:
         try:
-            check._config.refresh_with_profile(prof_def)
+            test_check = SnmpCheck('snmp', {}, [common.generate_instance_config([])])
+            test_check._config.refresh_with_profile(prof_def)
         except ConfigurationError as e:
             pytest.fail("Profile `{}` is not configured correctly: {}".format(recording_name, e))
-    check = SnmpCheck('snmp', {}, [instance])
     check.check(instance)
 
 
