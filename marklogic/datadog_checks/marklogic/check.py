@@ -10,6 +10,7 @@ from .config import Config
 from .constants import RESOURCE_METRICS_AVAILABLE, RESOURCE_TYPES
 from .parsers.health import parse_summary_health
 from .parsers.request import parse_summary_request_resource_metrics
+from .parsers.resources import parse_resources
 from .parsers.status import (
     parse_per_resource_status_metrics,
     parse_summary_status_base_metrics,
@@ -52,7 +53,8 @@ class MarklogicCheck(AgentCheck):
 
     def check(self, _):
         # type: (Any) -> None
-        self.resources = self.api.get_resources()
+        raw_resources = self.api.get_resources()
+        self.resources = parse_resources(raw_resources)
         self.resources_to_monitor = self.get_resources_to_monitor()
 
         for collector in self.collectors:
@@ -190,6 +192,7 @@ class MarklogicCheck(AgentCheck):
             # Doesn't report resource with no issue
             health_report = parse_summary_health(data)
 
+            # If a resource doesn't appear in the health endpoint it means no problem was detected
             for res in self.resources:
                 if res['type'] == 'database' or res['type'] == 'forest':
                     service_check_name = '{}.health'.format(res['type'])
@@ -215,6 +218,7 @@ class MarklogicCheck(AgentCheck):
 
     def _is_resource_included(self, resource):
         # type: (Dict[str, str]) -> bool
+        # If the resource is in an include filter and not in an exclude filter, return True, otherwise return False.
         for include_filter in self.config.resource_filters['included']:
             if include_filter.match(resource['type'], resource['name'], resource['id'], resource.get('group')):
                 for exclude_filter in self.config.resource_filters['excluded']:
@@ -223,55 +227,3 @@ class MarklogicCheck(AgentCheck):
                 return True
 
         return False
-
-
-"""
-Design
-
-Metric naming
-
-marklogic.status.<METRIC_NAME> e.g. marklogic.status.backup-read-bytes
-
-tags by object type:
-    - cluster
-    - hosts
-    - database
-    - forest
-    - groups
-
-Query Metrics
-    - http://localhost:8002/dashboard/query
-    - Example queries:
-        - http://localhost:8002/manage/v2/requests?format=json (cluster level)
-        - http://localhost:8002/manage/v2/requests?format=json&server-id=Admin&group-id=Default
-        - http://localhost:8002/manage/v2/requests?format=json&group-id=Default
-        - http://localhost:8002/manage/v2/requests?format=json&host-id=2871b05b4bdc
-    - metric name: marklogic.query_summary.<METRIC_NAME>
-    - metric name: marklogic.query.<METRIC_NAME>
-
-Rates & Loads Metrics aka Status metrics (view=status)
-    - http://localhost:8002/dashboard/load/
-    - Example queries:
-        - http://localhost:8002/manage/v2/hosts?view=status
-        - http://localhost:8002/manage/v2/hosts?view=status&format=json (cluster level)
-        - http://localhost:8002/manage/v2/forests/Security?view=status&format=json
-        - http://localhost:8002/manage/v2/databases/Extensions?view=status&format=json
-        - http://localhost:8002/manage/v2/hosts/2871b05b4bdc?view=status&format=json
-        - http://localhost:8002/manage/v2/transactions?format=json
-            (already in http://localhost:8002/manage/v2/hosts?view=status)
-        - http://localhost:8002/manage/v2/servers?view=status&format=json
-            (already in http://localhost:8002/manage/v2/hosts?view=status)
-    - metric name: marklogic.status_summary.<METRIC_NAME>
-    - metric name: marklogic.status.<METRIC_NAME>
-
-Storage Metrics
-    - http://localhost:8002/dashboard/disk-space/
-    - Example queries:
-        - http://localhost:8002/manage/v2/forests?format=json&view=storage
-        - http://localhost:8002/manage/v2/forests?format=json&view=storage&database-id=Last-Login
-        - http://localhost:8002/manage/v2/forests?format=json&view=storage&forest-id=Last-Login
-        - http://localhost:8002/manage/v2/forests?format=json&view=storage&database-id=Security
-    - metric name: marklogic.storage_summary.<METRIC_NAME>
-    - metric name: marklogic.storage.<METRIC_NAME>
-
-"""

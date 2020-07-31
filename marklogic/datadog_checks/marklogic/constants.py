@@ -3,19 +3,21 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Dict
 
-from six import iteritems
-
 from datadog_checks.base import AgentCheck
 
 RESOURCE_TYPES = {
-    'cluster': {'plural': None},
-    'forest': {'plural': 'forests'},
-    'database': {'plural': 'databases'},
-    'host': {'plural': 'hosts'},
-    'server': {'plural': 'servers'},
+    'cluster': {'plural': None, 'singular': 'cluster'},
+    'forest': {'plural': 'forests', 'singular': 'forest'},
+    'forests': {'plural': 'forests', 'singular': 'forest'},
+    'database': {'plural': 'databases', 'singular': 'database'},
+    'databases': {'plural': 'databases', 'singular': 'database'},
+    'group': {'plural': 'groups', 'singular': 'group'},
+    'groups': {'plural': 'groups', 'singular': 'group'},
+    'host': {'plural': 'hosts', 'singular': 'host'},
+    'hosts': {'plural': 'hosts', 'singular': 'host'},
+    'server': {'plural': 'servers', 'singular': 'server'},
+    'servers': {'plural': 'servers', 'singular': 'server'},
 }  # type: Dict[str, Dict]
-
-RESOURCE_SINGULARS = {plural['plural']: key for key, plural in iteritems(RESOURCE_TYPES) if plural['plural']}
 
 RESOURCE_METRICS_AVAILABLE = {
     'forest': {'status': True, 'storage': True, 'requests': False},

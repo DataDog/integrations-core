@@ -159,6 +159,7 @@ def test_submit_service_checks(aggregator, caplog):
         {'id': '17254568917360711355', 'type': 'forest', 'name': 'Extensions', 'uri': "/forests/Extensions"},
     ]
 
+    # If there is no error
     with mock.patch('datadog_checks.marklogic.api.MarkLogicApi.get_health', return_value=health_mocked_data):
         check.submit_service_checks()
 
@@ -191,6 +192,7 @@ def test_submit_service_checks(aggregator, caplog):
     aggregator.reset()
     caplog.clear()
 
+    # If the user doesn't have enough permissions
     with mock.patch(
         'datadog_checks.marklogic.api.MarkLogicApi.get_health', return_value={'code': 'HEALTH-CLUSTER-ERROR'}
     ):
@@ -202,6 +204,7 @@ def test_submit_service_checks(aggregator, caplog):
     aggregator.reset()
     caplog.clear()
 
+    # If MarkLogic can't be reached
     with mock.patch('datadog_checks.marklogic.api.MarkLogicApi.get_health', side_effect=Exception("exception")):
         check.submit_service_checks()
 

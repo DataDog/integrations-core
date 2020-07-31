@@ -9,6 +9,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.marklogic.parsers.common import MarkLogicParserException, build_metric_to_submit
 from datadog_checks.marklogic.parsers.health import parse_summary_health
 from datadog_checks.marklogic.parsers.request import parse_summary_request_resource_metrics
+from datadog_checks.marklogic.parsers.resources import parse_resources
 from datadog_checks.marklogic.parsers.status import (
     parse_summary_status_base_metrics,
     parse_summary_status_resource_metrics,
@@ -458,3 +459,77 @@ def test_parse_summary_health():
     result = parse_summary_health(summary_health)
 
     assert result == EXPECTED_RESULT
+
+
+def test_parse_resources():
+    # type: () -> None
+    cluster_query_resp = {
+        'cluster-query': {
+            'relations': {
+                'relation-group': [
+                    {
+                        'typeref': 'databases',
+                        'relation-count': {'units': 'quantity', 'value': 2},
+                        'relation': [
+                            {
+                                'uriref': "/manage/v2/databases/App-Services",
+                                'idref': '255818103205892753',
+                                'nameref': 'App-Services',
+                            },
+                            {
+                                'uriref': "/manage/v2/databases/Documents",
+                                'idref': '5004266825873163057',
+                                'nameref': 'Documents',
+                            },
+                        ],
+                    },
+                    {
+                        'typeref': 'forests',
+                        'relation-count': {'units': 'quantity', 'value': 2},
+                        'relation': [
+                            {
+                                'uriref': "/manage/v2/forests/Modules",
+                                'idref': '16024526243775340149',
+                                'nameref': 'Modules',
+                            },
+                            {
+                                'uriref': "/manage/v2/forests/Extensions",
+                                'idref': '17254568917360711355',
+                                'nameref': 'Extensions',
+                            },
+                        ],
+                    },
+                    {
+                        'typeref': 'servers',
+                        'relation-count': {'units': 'quantity', 'value': 1},
+                        'relation': [
+                            {
+                                'qualifiers': {'qualifier': [{'uriref': 'uri', 'nameref': 'Default'}]},
+                                'uriref': "/manage/v2/servers/Admin?group-id=Default",
+                                'idref': '9403936238896063877',
+                                'nameref': 'Admin',
+                            }
+                        ],
+                    },
+                ]
+            }
+        }
+    }
+
+    EXPECTED_RESULT = [
+        {'id': '255818103205892753', 'type': 'database', 'name': 'App-Services', 'uri': "/databases/App-Services"},
+        {'id': '5004266825873163057', 'type': 'database', 'name': 'Documents', 'uri': "/databases/Documents"},
+        {'id': '16024526243775340149', 'type': 'forest', 'name': 'Modules', 'uri': "/forests/Modules"},
+        {'id': '17254568917360711355', 'type': 'forest', 'name': 'Extensions', 'uri': "/forests/Extensions"},
+        {
+            'id': '9403936238896063877',
+            'type': 'server',
+            'name': 'Admin',
+            'uri': '/servers/Admin?group-id=Default',
+            'group': 'Default',
+        },
+    ]
+
+    result = parse_resources(cluster_query_resp)
+
+    assert sorted(result, key=lambda r: r['uri']) == sorted(EXPECTED_RESULT, key=lambda r: r['uri'])

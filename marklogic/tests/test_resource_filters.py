@@ -3,12 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict, List
 
-import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.marklogic import MarklogicCheck
 from datadog_checks.marklogic.config import Config
+from datadog_checks.marklogic.parsers.resources import parse_resources
 
 from .common import INSTANCE_FILTERS, read_fixture_file
 
@@ -50,7 +50,7 @@ def test_build_resource_filters():
 def test_get_resources_to_monitor():
     # type: () -> None
     check = MarklogicCheck('marklogic', {}, [INSTANCE_FILTERS])
-    return_value = read_fixture_file('cluster-query.yaml')
+    response_value = read_fixture_file('cluster-query.yaml')
 
     # Expected output when there is no exclude list
     complete_filtered = {
@@ -71,36 +71,35 @@ def test_get_resources_to_monitor():
         ],
     }  # type: Dict[str, List[Any]]
 
-    with mock.patch('datadog_checks.marklogic.api.MarkLogicApi._get_raw_resources', return_value=return_value):
-        # Called in the check function
-        check.resources = check.api.get_resources()
-        # Include list + exclude list
-        filtered_res = check.get_resources_to_monitor()
-        assert filtered_res == {
-            'forest': [complete_filtered['forest'][0]],
-            'database': [],
-            'host': [],
-            'server': complete_filtered['server'],
-        }
+    # Called in the check function
+    check.resources = parse_resources(response_value)
+    # Include list + exclude list
+    filtered_res = check.get_resources_to_monitor()
+    assert filtered_res == {
+        'forest': [complete_filtered['forest'][0]],
+        'database': [],
+        'host': [],
+        'server': complete_filtered['server'],
+    }
 
-        # No exclude list
-        check.config.resource_filters['excluded'] = []
-        filtered_res = check.get_resources_to_monitor()
-        assert filtered_res == complete_filtered
+    # No exclude list
+    check.config.resource_filters['excluded'] = []
+    filtered_res = check.get_resources_to_monitor()
+    assert filtered_res == complete_filtered
 
-        # Useless exclude list
-        check.config.resource_filters['excluded'] = check.config.build_resource_filters(
-            [{'resource_type': 'forest', 'pattern': 'Security', 'group': 'Default'}]
-        )['excluded']
-        filtered_res = check.get_resources_to_monitor()
-        assert filtered_res == complete_filtered
+    # Useless exclude list
+    check.config.resource_filters['excluded'] = check.config.build_resource_filters(
+        [{'resource_type': 'forest', 'pattern': 'Security', 'group': 'Default'}]
+    )['excluded']
+    filtered_res = check.get_resources_to_monitor()
+    assert filtered_res == complete_filtered
 
-        # No include list
-        check.config.resource_filters['included'] = []
-        filtered_res = check.get_resources_to_monitor()
-        assert filtered_res == {
-            'forest': [],
-            'database': [],
-            'host': [],
-            'server': [],
-        }
+    # No include list
+    check.config.resource_filters['included'] = []
+    filtered_res = check.get_resources_to_monitor()
+    assert filtered_res == {
+        'forest': [],
+        'database': [],
+        'host': [],
+        'server': [],
+    }
