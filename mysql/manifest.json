@@ -41,6 +41,8 @@
       "slow_operations": "assets/saved_views/slow_operations.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "mysql"
+    }
   }
 }
