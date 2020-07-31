@@ -18,17 +18,17 @@ def test_build_resource_filters():
     conf = Config(INSTANCE_FILTERS)
 
     assert len(conf.resource_filters['included']) == 2
-    assert conf.resource_filters['included'][0].resource_type == 'forests'
+    assert conf.resource_filters['included'][0].resource_type == 'forest'
     assert conf.resource_filters['included'][0].regex.pattern == "^S[a-z]*"
     assert conf.resource_filters['included'][0].is_included is True
     assert conf.resource_filters['included'][0].group is None
-    assert conf.resource_filters['included'][1].resource_type == 'servers'
+    assert conf.resource_filters['included'][1].resource_type == 'server'
     assert conf.resource_filters['included'][1].regex.pattern == "Admin"
     assert conf.resource_filters['included'][1].is_included is True
     assert conf.resource_filters['included'][1].group == 'Default'
 
     assert len(conf.resource_filters['excluded']) == 1
-    assert conf.resource_filters['excluded'][0].resource_type == 'forests'
+    assert conf.resource_filters['excluded'][0].resource_type == 'forest'
     assert conf.resource_filters['excluded'][0].regex.pattern == "^Sch*"
     assert conf.resource_filters['excluded'][0].is_included is False
     assert conf.resource_filters['excluded'][0].group is None
@@ -54,17 +54,17 @@ def test_get_resources_to_monitor():
 
     # Expected output when there is no exclude list
     complete_filtered = {
-        'forests': [
-            {'name': 'Security', 'id': '1112331563215633422', 'type': 'forests', 'uri': '/forests/Security'},
-            {'name': 'Schemas', 'id': '5750304059804042419', 'type': 'forests', 'uri': '/forests/Schemas'},
+        'forest': [
+            {'name': 'Security', 'id': '1112331563215633422', 'type': 'forest', 'uri': '/forests/Security'},
+            {'name': 'Schemas', 'id': '5750304059804042419', 'type': 'forest', 'uri': '/forests/Schemas'},
         ],
-        'databases': [],
-        'hosts': [],
-        'servers': [
+        'database': [],
+        'host': [],
+        'server': [
             {
                 'name': 'Admin',
                 'id': '9403936238896063877',
-                'type': 'servers',
+                'type': 'server',
                 'uri': "/servers/Admin?group-id=Default",
                 'group': 'Default',
             }
@@ -77,10 +77,10 @@ def test_get_resources_to_monitor():
         # Include list + exclude list
         filtered_res = check.get_resources_to_monitor()
         assert filtered_res == {
-            'forests': [complete_filtered['forests'][0]],
-            'databases': [],
-            'hosts': [],
-            'servers': complete_filtered['servers'],
+            'forest': [complete_filtered['forest'][0]],
+            'database': [],
+            'host': [],
+            'server': complete_filtered['server'],
         }
 
         # No exclude list
@@ -99,8 +99,8 @@ def test_get_resources_to_monitor():
         check.config.resource_filters['included'] = []
         filtered_res = check.get_resources_to_monitor()
         assert filtered_res == {
-            'forests': [],
-            'databases': [],
-            'hosts': [],
-            'servers': [],
+            'forest': [],
+            'database': [],
+            'host': [],
+            'server': [],
         }

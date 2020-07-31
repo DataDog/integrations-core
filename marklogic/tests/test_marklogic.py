@@ -130,9 +130,9 @@ def test_e2e(dd_agent_check):
     aggregator.assert_all_metrics_covered()
 
     # Service checks
-    aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=1)
-    aggregator.assert_service_check('marklogic.database.health', MarklogicCheck.OK, count=10)
-    aggregator.assert_service_check('marklogic.forest.health', MarklogicCheck.OK, count=10)
+    aggregator.assert_service_check('marklogic.can_connect', MarklogicCheck.OK, count=2)
+    aggregator.assert_service_check('marklogic.database.health', MarklogicCheck.OK, count=20)
+    aggregator.assert_service_check('marklogic.forest.health', MarklogicCheck.OK, count=20)
 
 
 def test_submit_service_checks(aggregator, caplog):
@@ -153,10 +153,10 @@ def test_submit_service_checks(aggregator, caplog):
     }
 
     check.resources = [
-        {'id': '255818103205892753', 'type': 'databases', 'name': 'Security', 'uri': "/databases/Security"},
-        {'id': '5004266825873163057', 'type': 'databases', 'name': 'Fab', 'uri': "/databases/Fab"},
-        {'id': '16024526243775340149', 'type': 'forests', 'name': 'Modules', 'uri': "/forests/Modules"},
-        {'id': '17254568917360711355', 'type': 'forests', 'name': 'Extensions', 'uri': "/forests/Extensions"},
+        {'id': '255818103205892753', 'type': 'database', 'name': 'Security', 'uri': "/databases/Security"},
+        {'id': '5004266825873163057', 'type': 'database', 'name': 'Fab', 'uri': "/databases/Fab"},
+        {'id': '16024526243775340149', 'type': 'forest', 'name': 'Modules', 'uri': "/forests/Modules"},
+        {'id': '17254568917360711355', 'type': 'forest', 'name': 'Extensions', 'uri': "/forests/Extensions"},
     ]
 
     with mock.patch('datadog_checks.marklogic.api.MarkLogicApi.get_health', return_value=health_mocked_data):

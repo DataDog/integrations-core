@@ -221,14 +221,7 @@ def test_parse_summary_status_base_metrics():
     status_base_data = read_fixture_file('status/base_status.yaml')
 
     EXPECTED_RESULT = [
-        # # TODO: ignore forests-status-summary (duplicated)
-        # ('gauge', 'forests.backup-count', 0, ['foo:bar']),
-        # ('gauge', 'forests.max-stands-per-forest', 1, ['foo:bar']),
-        # ('gauge', 'forests.merge-count', 0, ['foo:bar']),
-        # ('gauge', 'forests.restore-count', 0, ['foo:bar']),
-        # ('gauge', 'forests.state-not-open', 0, ['foo:bar']),
-        # ('gauge', 'forests.total-forests', 10, ['foo:bar']),
-        # # TODO: ignore hosts-status-summary (duplicated)
+        # hosts-status-summary
         ('gauge', 'hosts.total-load', 0, ['foo:bar']),
         ('gauge', 'hosts.backup-read-load', 0, ['foo:bar']),
         ('gauge', 'hosts.backup-write-load', 0, ['foo:bar']),
@@ -303,7 +296,7 @@ def test_parse_summary_status_base_metrics():
         ('gauge', 'requests.standard-dev-seconds', 0.0148, ['foo:bar']),
         ('gauge', 'requests.total-requests', 2, ['foo:bar']),
         ('gauge', 'requests.update-count', 2, ['foo:bar']),
-        # # TODO: ignore servers-status-summary (duplicated)
+        # servers-status-summary
         ('gauge', 'servers.expanded-tree-cache-hit-rate', 0, ['foo:bar']),
         ('gauge', 'servers.expanded-tree-cache-miss-rate', 0, ['foo:bar']),
         ('gauge', 'servers.request-count', 2, ['foo:bar']),

@@ -8,9 +8,11 @@
             "critical",
             "unknown"
         ],
-        "groups": ["TODO"],
+        "groups": [
+            "host"
+        ],
         "name": "Can Connect",
-        "description": "Returns `CRITICAL` if the Agent is enabled to reach the health endpoint and `UNKNOWN` if the Datadog Agent user does not have enough permissions. Returns `OK` otherwise"
+        "description": "Returns `CRITICAL` if the Agent is enabled to reach the health endpoint and `UNKNOWN` if the Datadog Agent user does not have enough permissions. Returns `OK` otherwise."
     },
     {
         "agent_version": "7.23.0",
@@ -22,8 +24,28 @@
             "critical",
             "unknown"
         ],
-        "groups": ["TODO"],
+        "groups": [
+            "host",
+            "database_name"
+        ],
         "name": "Database Health",
-        "description": "TODO"
+        "description": "Returns `CRITICAL` if the database state is `critical`, `WARNING` if it is `maintenance`, `offline` or `at-risk` and `OK` otherwise."
+    },
+    {
+        "agent_version": "7.23.0",
+        "integration": "MarkLogic",
+        "check": "marklogic.forest.health",
+        "statuses": [
+            "ok",
+            "warning",
+            "critical",
+            "unknown"
+        ],
+        "groups": [
+            "host",
+            "forest_name"
+        ],
+        "name": "Forest Health",
+        "description": "Returns `CRITICAL` if the forest state is `critical`, `WARNING` if it is `maintenance`, `offline` or `at-risk` and `OK` otherwise."
     }
 ]

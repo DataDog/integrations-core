@@ -17,12 +17,11 @@ RESOURCE_TYPES = {
 
 RESOURCE_SINGULARS = {plural['plural']: key for key, plural in iteritems(RESOURCE_TYPES) if plural['plural']}
 
-# TODO: check again
-RESOURCE_AVAILABLE_METRICS = {
-    'forests': {'status': True, 'storage': True, 'requests': False},
-    'databases': {'status': True, 'storage': True, 'requests': False},
-    'hosts': {'status': True, 'storage': True, 'requests': True},
-    'servers': {'status': False, 'storage': False, 'requests': True},
+RESOURCE_METRICS_AVAILABLE = {
+    'forest': {'status': True, 'storage': True, 'requests': False},
+    'database': {'status': True, 'storage': True, 'requests': False},
+    'host': {'status': True, 'storage': True, 'requests': True},
+    'server': {'status': False, 'storage': False, 'requests': True},
 }
 
 GAUGE_UNITS = [
@@ -38,7 +37,6 @@ GAUGE_UNITS = [
     'sec/sec',
 ]
 
-# TODO: Remap serverity levels
 # The integration only checks the databases and forests health
 STATE_HEALTH_MAPPER = {
     "info": AgentCheck.OK,

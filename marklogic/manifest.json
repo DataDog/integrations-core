@@ -6,7 +6,7 @@
   "metric_prefix": "marklogic.",
   "metric_to_check": "",
   "creates_events": false,
-  "short_description": "TODO",
+  "short_description": "Tracks metrics about MarkLogic databases, forests and hosts.",
   "guid": "0c200415-731f-4b67-9b2c-d6bd1225eee1",
   "support": "core",
   "supported_os": [

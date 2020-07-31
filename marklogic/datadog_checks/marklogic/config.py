@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Pattern
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.config import _is_affirmative
 
-from .constants import RESOURCE_TYPES
+from .constants import RESOURCE_SINGULARS
 
 
 class Config:
@@ -43,7 +43,7 @@ class ResourceFilter:
     def __init__(self, resource_type, regex, is_included=True, group=None):
         # type: (str, Pattern, bool, Optional[str]) -> None
         self.resource_type = (
-            RESOURCE_TYPES[resource_type]['plural'] if RESOURCE_TYPES.get(resource_type) else resource_type
+            RESOURCE_SINGULARS[resource_type] if RESOURCE_SINGULARS.get(resource_type) else resource_type
         )
         self.regex = regex
         self.is_included = is_included
@@ -54,8 +54,3 @@ class ResourceFilter:
         if self.resource_type == resource_type and self.regex.match(name) and self.group == group:
             return True
         return False
-
-    def __str__(self):
-        # type: () -> str
-        # TODO: remove
-        return "{} | {} | {} | {}".format(self.resource_type, self.regex, self.is_included, self.group)

@@ -5,6 +5,8 @@ from typing import Any, Dict, List
 
 from datadog_checks.base.utils.http import RequestsWrapper
 
+from .constants import RESOURCE_SINGULARS
+
 
 class MarkLogicApi(object):
     def __init__(self, http, api_url):
@@ -97,7 +99,7 @@ class MarkLogicApi(object):
             for rel in group['relation']:
                 resource_found = {
                     'id': rel['idref'],
-                    'type': resource_type,
+                    'type': RESOURCE_SINGULARS.get(resource_type, resource_type),
                     'name': rel['nameref'],
                     'uri': rel['uriref'][len('/manage/v2') :],
                 }

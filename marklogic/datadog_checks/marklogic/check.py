@@ -7,7 +7,7 @@ from datadog_checks.base import AgentCheck, ConfigurationError
 
 from .api import MarkLogicApi
 from .config import Config
-from .constants import RESOURCE_AVAILABLE_METRICS, RESOURCE_SINGULARS, RESOURCE_TYPES
+from .constants import RESOURCE_METRICS_AVAILABLE, RESOURCE_TYPES
 from .parsers.health import parse_summary_health
 from .parsers.request import parse_summary_request_resource_metrics
 from .parsers.status import (
@@ -43,10 +43,10 @@ class MarklogicCheck(AgentCheck):
 
         # Refreshed at each check
         self.resources_to_monitor = {
-            'forests': [],
-            'databases': [],
-            'hosts': [],
-            'servers': [],
+            'forest': [],
+            'database': [],
+            'host': [],
+            'server': [],
         }  # type: Dict[str, List[Any]]
         self.resources = []  # type: List[Dict[str, str]]
 
@@ -105,10 +105,10 @@ class MarklogicCheck(AgentCheck):
     def get_resources_to_monitor(self):
         # type: () -> Dict[str, List[Any]]
         filtered_resources = {
-            'forests': [],
-            'databases': [],
-            'hosts': [],
-            'servers': [],
+            'forest': [],
+            'database': [],
+            'host': [],
+            'server': [],
         }  # type: Dict[str, List[Any]]
 
         for res in self.resources:
@@ -126,19 +126,18 @@ class MarklogicCheck(AgentCheck):
         """
         for res_type in self.resources_to_monitor.keys():
             for res in self.resources_to_monitor[res_type]:
-                res_type_singular = RESOURCE_SINGULARS[res_type]
-                tags = ['{}_name:{}'.format(res_type[:-1], res['name'])] + self.config.tags
+                tags = ['{}_name:{}'.format(res_type, res['name'])] + self.config.tags
                 if res.get('group'):
                     tags.append('group_name:{}'.format(res['group']))
 
-                if RESOURCE_AVAILABLE_METRICS[res_type]['status']:
-                    self._collect_resource_status_metrics(res_type_singular, res['uri'], tags)
+                if RESOURCE_METRICS_AVAILABLE[res_type]['status']:
+                    self._collect_resource_status_metrics(res_type, res['uri'], tags)
 
-                if RESOURCE_AVAILABLE_METRICS[res_type]['storage']:
-                    self._collect_resource_storage_metrics(res_type_singular, res['name'], res.get('group'), tags)
+                if RESOURCE_METRICS_AVAILABLE[res_type]['storage']:
+                    self._collect_resource_storage_metrics(res_type, res['name'], res.get('group'), tags)
 
-                if RESOURCE_AVAILABLE_METRICS[res_type]['requests']:
-                    self._collect_resource_request_metrics(res_type_singular, res['name'], res.get('group'), tags)
+                if RESOURCE_METRICS_AVAILABLE[res_type]['requests']:
+                    self._collect_resource_request_metrics(res_type, res['name'], res.get('group'), tags)
 
     def _collect_resource_status_metrics(self, resource_type, uri, tags):
         # type: (str, str, List[str]) -> None
@@ -192,11 +191,10 @@ class MarklogicCheck(AgentCheck):
             health_report = parse_summary_health(data)
 
             for res in self.resources:
-                if res['type'] == 'databases' or res['type'] == 'forests':
-                    res_type = RESOURCE_SINGULARS[res['type']]
-                    service_check_name = '{}.health'.format(res_type)
-                    res_tags = self.config.tags + ['{}_name:{}'.format(res_type, res['name'])]
-                    res_detailed = health_report[res_type].get(res['name'])
+                if res['type'] == 'database' or res['type'] == 'forest':
+                    service_check_name = '{}.health'.format(res['type'])
+                    res_tags = self.config.tags + ['{}_name:{}'.format(res['type'], res['name'])]
+                    res_detailed = health_report[res['type']].get(res['name'])
                     if res_detailed:
                         self.service_check(
                             service_check_name, res_detailed['code'], tags=res_tags, message=res_detailed['message']

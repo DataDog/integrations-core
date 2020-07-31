@@ -11,7 +11,6 @@ from .common import build_metric_to_submit, is_metric
 
 def parse_summary_status_resource_metrics(resource_type, data, tags):
     #  type: (str, Dict, List[str]) -> Generator[Tuple, None, None]
-    # TODO: check tags for different forests
     res_meta = RESOURCE_TYPES[resource_type]
     metrics = data['{}-status-list'.format(resource_type)]['status-list-summary']
     return _parse_status_metrics(res_meta['plural'], metrics, tags)

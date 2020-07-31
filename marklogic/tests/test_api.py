@@ -132,13 +132,13 @@ def test_get_resources():
     api = MarkLogicApi(http, 'http://localhost:8000')
 
     assert api.get_resources() == [
-        {'id': '255818103205892753', 'type': 'databases', 'name': 'App-Services', 'uri': "/databases/App-Services"},
-        {'id': '5004266825873163057', 'type': 'databases', 'name': 'Documents', 'uri': "/databases/Documents"},
-        {'id': '16024526243775340149', 'type': 'forests', 'name': 'Modules', 'uri': "/forests/Modules"},
-        {'id': '17254568917360711355', 'type': 'forests', 'name': 'Extensions', 'uri': "/forests/Extensions"},
+        {'id': '255818103205892753', 'type': 'database', 'name': 'App-Services', 'uri': "/databases/App-Services"},
+        {'id': '5004266825873163057', 'type': 'database', 'name': 'Documents', 'uri': "/databases/Documents"},
+        {'id': '16024526243775340149', 'type': 'forest', 'name': 'Modules', 'uri': "/forests/Modules"},
+        {'id': '17254568917360711355', 'type': 'forest', 'name': 'Extensions', 'uri': "/forests/Extensions"},
         {
             'id': '9403936238896063877',
-            'type': 'servers',
+            'type': 'server',
             'name': 'Admin',
             'uri': '/servers/Admin?group-id=Default',
             'group': 'Default',
