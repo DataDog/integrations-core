@@ -78,9 +78,10 @@ def run_profile_check(recording_name, profile=None):
     check = SnmpCheck('snmp', {}, [instance])
 
     # First, see if recording name is a profile, then use profile as definition.
-    prof_def = check.profiles.get(recording_name)
     if profile:
         prof_def = check.profiles.get(profile)
+    else:
+        prof_def = check.profiles.get(recording_name)
     if prof_def:
         try:
             test_check = SnmpCheck('snmp', {}, [common.generate_instance_config([])])
