@@ -69,7 +69,7 @@ def test_check_with_filters(aggregator):
         aggregator.assert_metric_has_tag(metric, 'forest_name:Security', count=1)
     for metric in STORAGE_FOREST_METRICS:
         # TODO: remove duplication with filters
-        # forests.storage.forest.disk-size is sent twice when using a resource filter.
+        # forests.storage.forest.disk-size is submitted twice when using a resource filter.
         aggregator.assert_metric(metric, count=11)
 
     # Resource filter only

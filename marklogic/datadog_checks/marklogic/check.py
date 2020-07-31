@@ -151,7 +151,7 @@ class MarklogicCheck(AgentCheck):
     def _collect_resource_storage_metrics(self, resource_type, name, group, tags):
         # type: (str, str, str, List[str]) -> None
         # TODO: remove duplication with filters
-        # forests.storage.forest.disk-size is sent twice when using a resource filter.
+        # forests.storage.forest.disk-size is submitted twice when using a resource filter.
         """ Collect storage metrics of a specific resource """
         data = self.api.get_storage_data(resource=resource_type, name=name, group=group)
         metrics = parse_summary_storage_base_metrics(data, tags)
@@ -172,6 +172,7 @@ class MarklogicCheck(AgentCheck):
     @AgentCheck.metadata_entrypoint
     def submit_version_metadata(self, data):
         # type: (Dict[str, Any]) -> None
+        # Example: 9.0-12
         try:
             version = data['local-cluster-status']['version']
             self.set_metadata(
@@ -181,8 +182,8 @@ class MarklogicCheck(AgentCheck):
                 final_scheme='semver',
                 pattern=r'(?P<major>\d+)\.(?P<minor>\d+)\-(?P<patch>\d+)',
             )
-        except Exception:
-            self.log.warning('Error collecting MarkLogic version')
+        except Exception as e:
+            self.log.warning('Error collecting MarkLogic version: %s', str(e))
 
     def submit_service_checks(self):
         # type: () -> None

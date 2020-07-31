@@ -8,8 +8,8 @@ marklogic.forests.compressed_tree_cache_hit_rate,gauge,,hit,second,"The average 
 marklogic.forests.compressed_tree_cache_miss_rate,gauge,,miss,second,"The average number of misses on the compressed cache.",0,marklogic,forest tree cache miss
 marklogic.forests.compressed_tree_cache_ratio,gauge,,percent,,"The compressed cache ratio",0,marklogic,forest tree cache ratio
 marklogic.forests.current_foreign_master_cluster,gauge,,unit,,"A cluster ID.",0,marklogic,forest foreign master cluster
-marklogic.forests.current_foreign_master_fsn,gauge,,unit,,"",0,marklogic,forest foreign master fsn
-marklogic.forests.current_master_fsn,gauge,,unit,,"",0,marklogic,forest master fsn
+marklogic.forests.current_foreign_master_fsn,gauge,,unit,,"Foreign master fsn",0,marklogic,forest foreign master fsn
+marklogic.forests.current_master_fsn,gauge,,unit,,"Current master fsn",0,marklogic,forest master fsn
 marklogic.forests.database_replication_receive_load,gauge,,second,second,"Time threads spent receiving data for database replication, in proportion to the elapsed time.",0,marklogic,forest db replication recv load
 marklogic.forests.database_replication_receive_rate,gauge,,mebibyte,second,"The moving average throughput of receiving data for database replication.",0,marklogic,forest db replication recv rate
 marklogic.forests.database_replication_send_load,gauge,,second,second,"Time threads spent sending data for database replication, in proportion to the elapsed time.",0,marklogic,forest db replication send load
