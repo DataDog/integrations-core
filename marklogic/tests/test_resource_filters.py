@@ -50,7 +50,7 @@ def test_build_resource_filters():
 def test_get_resources_to_monitor():
     # type: () -> None
     check = MarklogicCheck('marklogic', {}, [INSTANCE_FILTERS])
-    return_value = read_fixture_file('query/cluster-query.yaml')
+    return_value = read_fixture_file('cluster-query.yaml')
 
     # Expected output when there is no exclude list
     complete_filtered = {

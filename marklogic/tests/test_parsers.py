@@ -40,7 +40,7 @@ def test_build_metric_to_submit():
 
 def test_parse_summary_storage_base_metrics():
     # type: () -> None
-    forests_storage_data = read_fixture_file('storage/forests_storage.yaml')
+    forests_storage_data = read_fixture_file('forests_storage.yaml')
 
     EXPECTED_RESULT = [
         (
@@ -218,7 +218,7 @@ def test_parse_summary_storage_base_metrics():
 
 def test_parse_summary_status_base_metrics():
     # type: () -> None
-    status_base_data = read_fixture_file('status/base_status.yaml')
+    status_base_data = read_fixture_file('base_status.yaml')
 
     EXPECTED_RESULT = [
         # hosts-status-summary
@@ -318,7 +318,7 @@ def test_parse_summary_status_base_metrics():
 
 def test_parse_summary_status_resource_metrics():
     # type: () -> None
-    status_resource_data = read_fixture_file('status/forests_status.yaml')
+    status_resource_data = read_fixture_file('forests_status.yaml')
 
     EXPECTED_RESULT = [
         ('gauge', 'forests.backup-count', 0, ['foo:bar']),
@@ -385,7 +385,7 @@ def test_parse_summary_status_resource_metrics():
 
 def test_parse_summary_request_resource_metrics():
     # type: () -> None
-    summary_request_data = read_fixture_file('requests/server_Admin_requests.yaml')
+    summary_request_data = read_fixture_file('server_Admin_requests.yaml')
 
     EXPECTED_RESULT = [
         ('gauge', 'requests.query-count', 0, ['foo:bar']),
