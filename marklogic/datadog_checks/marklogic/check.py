@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict, Generator, List, Tuple
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
 
 from .api import MarkLogicApi
 from .config import Config
@@ -27,13 +27,8 @@ class MarklogicCheck(AgentCheck):
         # type: (*Any, **Any) -> None
         super(MarklogicCheck, self).__init__(*args, **kwargs)
 
-        url = self.instance.get('url')
-        if not url:
-            raise ConfigurationError("url is a required configuration.")
-
-        self.api = MarkLogicApi(self.http, url)
-
         self.config = Config(self.instance)
+        self.api = MarkLogicApi(self.http, self.config.url)
 
         self.collectors = [
             self.collect_summary_status_base_metrics,
