@@ -30,8 +30,8 @@ yum install -y kernel-headers-$(uname -r)
 
 ```yaml
 system_probe_config:
-  enabled: true
-  enable_oom_kill: true
+    enabled: true
+    enable_oom_kill: true
 ```
 
 3. [Restart the Agent][2].

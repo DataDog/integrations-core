@@ -78,13 +78,15 @@ def write_description(option, writer, indent, option_type):
     for line in description.splitlines():
         if line:
             line = f'{indent}## {line}'
-            if len(line) > DESCRIPTION_LINE_LENGTH_LIMIT:
+            if len(line) > DESCRIPTION_LINE_LENGTH_LIMIT and ' /noqa' not in line:
                 extra_characters = len(line) - DESCRIPTION_LINE_LENGTH_LIMIT
                 writer.new_error(
                     'Description line length of {} `{}` was over the limit by {} character{}'.format(
                         option_type, option['name'], extra_characters, 's' if extra_characters > 1 else ''
                     )
                 )
+            elif ' /noqa' in line:
+                line = line.replace(' /noqa', '')
             writer.write(line)
         else:
             writer.write(indent, '##')

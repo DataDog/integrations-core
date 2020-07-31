@@ -1,53 +1,5 @@
 # Generic TCP metrics for routers.
+# This profile is deprecated and kept in place for retrocompatibility purposes, please use `_generic-tcp` instead.
 
-metrics:
-- MIB: TCP-MIB
-  forced_type: monotonic_count
-  symbol:
-    OID: 1.3.6.1.2.1.6.5
-    name: tcpActiveOpens
-- MIB: TCP-MIB
-  forced_type: monotonic_count
-  symbol:
-    OID: 1.3.6.1.2.1.6.6
-    name: tcpPassiveOpens
-- MIB: TCP-MIB
-  forced_type: monotonic_count
-  symbol:
-    OID: 1.3.6.1.2.1.6.7
-    name: tcpAttemptFails
-- MIB: TCP-MIB
-  forced_type: monotonic_count
-  symbol:
-    OID: 1.3.6.1.2.1.6.8
-    name: tcpEstabResets
-- MIB: TCP-MIB
-  symbol:
-    OID: 1.3.6.1.2.1.6.9
-    name: tcpCurrEstab
-- MIB: TCP-MIB
-  forced_type: monotonic_count
-  symbol:
-    OID: 1.3.6.1.2.1.6.17
-    name: tcpHCInSegs
-- MIB: TCP-MIB
-  forced_type: monotonic_count
-  symbol:
-    OID: 1.3.6.1.2.1.6.18
-    name: tcpHCOutSegs
-- MIB: TCP-MIB
-  forced_type: monotonic_count
-  symbol:
-    OID: 1.3.6.1.2.1.6.12
-    name: tcpRetransSegs
-- MIB: TCP-MIB
-  forced_type: monotonic_count
-  symbol:
-    OID: 1.3.6.1.2.1.6.14
-    name: tcpInErrs
-- MIB: TCP-MIB
-  forced_type: monotonic_count
-  symbol:
-    OID: 1.3.6.1.2.1.6.15
-    name: tcpOutRsts
-
+extends:
+  - _generic-tcp.yaml

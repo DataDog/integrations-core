@@ -11,7 +11,7 @@ metrics:
     name: cfInterconnectStatus
 
   - MIB: NETAPP-MIB
-    OID: 1.3.6.1.4.1.789.1.2.2.23
+    OID: 1.3.6.1.4.1.789.1.2.2.23.0
     name: miscCacheAge
 
   - MIB: NETAPP-MIB

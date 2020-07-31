@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import ipaddress
+import weakref
 from collections import defaultdict
+from logging import Logger, getLogger
 from typing import Any, DefaultDict, Dict, Iterator, List, Optional, Set, Tuple
 
 from datadog_checks.base import ConfigurationError, is_affirmative
@@ -22,6 +24,8 @@ from .pysnmp_types import (
 from .resolver import OIDResolver
 from .types import OIDMatch
 from .utils import register_device_target
+
+local_logger = getLogger(__name__)
 
 
 class InstanceConfig:
@@ -60,6 +64,7 @@ class InstanceConfig:
         profiles=None,  # type: Dict[str, dict]
         profiles_by_oid=None,  # type: Dict[str, str]
         loader=None,  # type: MIBLoader
+        logger=None,  # type: Logger
     ):
         # type: (...) -> None
         global_metrics = [] if global_metrics is None else global_metrics
@@ -71,6 +76,8 @@ class InstanceConfig:
         for key, value in list(instance.items()):
             if value in (None, ""):
                 instance.pop(key)
+
+        self.logger = weakref.ref(local_logger) if logger is None else weakref.ref(logger)
 
         self.instance = instance
         self.tags = instance.get('tags', [])
@@ -144,10 +151,13 @@ class InstanceConfig:
         if not self.metrics and not profiles_by_oid and not profile:
             raise ConfigurationError('Instance should specify at least one metric or profiles should be defined')
 
-        self.all_oids, self.next_oids, self.bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
+        scalar_oids, next_oids, bulk_oids, self.parsed_metrics = self.parse_metrics(self.metrics)
         tag_oids, self.parsed_metric_tags = self.parse_metric_tags(metric_tags)
         if tag_oids:
-            self.all_oids.extend(tag_oids)
+            scalar_oids.extend(tag_oids)
+
+        self.oid_config = OIDConfig()
+        self.oid_config.add_parsed_oids(scalar_oids=scalar_oids, next_oids=next_oids, bulk_oids=bulk_oids)
 
         if profile:
             if profile not in profiles:
@@ -164,7 +174,7 @@ class InstanceConfig:
     def refresh_with_profile(self, profile):
         # type: (Dict[str, Any]) -> None
         metrics = profile['definition'].get('metrics', [])
-        all_oids, next_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics)
+        scalar_oids, next_oids, bulk_oids, parsed_metrics = self.parse_metrics(metrics)
 
         metric_tags = profile['definition'].get('metric_tags', [])
         tag_oids, parsed_metric_tags = self.parse_metric_tags(metric_tags)
@@ -175,12 +185,9 @@ class InstanceConfig:
         # In the future we'll probably want to implement de-duplication.
 
         self.metrics.extend(metrics)
-        self.all_oids.extend(all_oids)
-        self.next_oids.extend(next_oids)
-        self.bulk_oids.extend(bulk_oids)
+        self.oid_config.add_parsed_oids(scalar_oids=scalar_oids + tag_oids, next_oids=next_oids, bulk_oids=bulk_oids)
         self.parsed_metrics.extend(parsed_metrics)
         self.parsed_metric_tags.extend(parsed_metric_tags)
-        self.all_oids.extend(tag_oids)
 
     def add_profile_tag(self, profile_name):
         # type: (str) -> None
@@ -275,7 +282,7 @@ class InstanceConfig:
         """Parse configuration and returns data to be used for SNMP queries."""
         # Use bulk for SNMP version > 1 only.
         bulk_threshold = self.bulk_threshold if self._auth_data.mpModel else 0
-        result = parse_metrics(metrics, resolver=self._resolver, bulk_threshold=bulk_threshold)
+        result = parse_metrics(metrics, resolver=self._resolver, logger=self.logger(), bulk_threshold=bulk_threshold)
         return result['oids'], result['next_oids'], result['bulk_oids'], result['parsed_metrics']
 
     def parse_metric_tags(self, metric_tags):
@@ -290,9 +297,52 @@ class InstanceConfig:
             return
         # Reference sysUpTimeInstance directly, see http://oidref.com/1.3.6.1.2.1.1.3.0
         uptime_oid = OID('1.3.6.1.2.1.1.3.0')
-        self.all_oids.append(uptime_oid)
+        self.oid_config.add_parsed_oids(scalar_oids=[uptime_oid])
         self._resolver.register(uptime_oid, 'sysUpTimeInstance')
 
         parsed_metric = ParsedSymbolMetric('sysUpTimeInstance', forced_type='gauge')
         self.parsed_metrics.append(parsed_metric)
         self._uptime_metric_added = True
+
+
+class OIDConfig(object):
+    """
+    Manages scalar/next/bulk oids.
+    """
+
+    def __init__(self):
+        # type: () -> None
+        self._scalar_oids = []  # type: List[OID]
+        self._next_oids = []  # type: List[OID]
+        self._bulk_oids = []  # type: List[OID]
+
+    @property
+    def scalar_oids(self):
+        # type: () -> List[OID]
+        return self._scalar_oids
+
+    @property
+    def next_oids(self):
+        # type: () -> List[OID]
+        return self._next_oids
+
+    @property
+    def bulk_oids(self):
+        # type: () -> List[OID]
+        return self._bulk_oids
+
+    def add_parsed_oids(self, scalar_oids=None, next_oids=None, bulk_oids=None):
+        # type: (List[OID], List[OID], List[OID]) -> None
+        if scalar_oids:
+            self._scalar_oids.extend(scalar_oids)
+        if next_oids:
+            self._next_oids.extend(next_oids)
+        if bulk_oids:
+            self._bulk_oids.extend(bulk_oids)
+
+    def has_oids(self):
+        # type: () -> bool
+        """
+        Return whether there are OIDs to fetch.
+        """
+        return bool(self.scalar_oids or self.next_oids or self.bulk_oids)

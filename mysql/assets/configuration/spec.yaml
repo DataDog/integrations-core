@@ -24,47 +24,58 @@ files:
 
       - template: instances
         options:
-          - name: server
-            required: true
+          - name: host
             description: |
-              MySQL server to connect to.
-              NOTE: Even if the server name is "localhost", the agent connects to MySQL using TCP/IP, unless you also
+              MySQL host to connect to.
+              NOTE: Even if the host is "localhost", the agent connects to MySQL using TCP/IP, unless you also
               provide a value for the sock key (below).
+            enabled: true
             value:
               type: string
               example: localhost
+              default: None
 
           - name: user
-            required: true
             description: |
               Username used to connect to MySQL.
+            enabled: true
             value:
               type: string
               example: datadog
+              default: None
 
           - name: pass
-            required: true
             description: |
               Password associated to the MySQL user.
+            enabled: true
             value:
               type: string
 
           - name: port
             description: |
               Port to use when connecting to MySQL.
+            enabled: true
             value:
               type: number
               example: 3306
+              default: None
 
           - name: sock
             description: |
               Path to a Unix Domain Socket to use when connecting to MySQL (instead of a TCP socket).
+              If you specify a socket you dont need to specify a host.
             value:
               type: string
-
+          - name: charset
+            description: Charset you want to use.
+            value:
+              type: string
+              example: utf8
+              default: None
           - name: defaults_file
             description: |
               Path to an alternative configuration mechanism file.
+              If providing this then there is no need to specify host, port, user, pass or socket.
             value:
               type: string
 

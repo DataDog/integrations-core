@@ -108,6 +108,13 @@ instances:
     #
     # auto_discover_queues: false
 
+    ## @param collect_statistics_metrics - boolean - optional - default: false
+    ## Collect metrics from Statistics Messages. Statistics collected are:
+    ##   - channel statistics (MQCMD_STATISTICS_CHANNEL)
+    ##   - queue statistics (MQCMD_STATISTICS_Q)
+    #
+    # collect_statistics_metrics: false
+
     ## @param mqcd_version - number - optional - default: 6
     ## Which channel definition version to use. Supported values are 1 to 9 including.
     ## If you're having connection issues make sure it matches your MQ version

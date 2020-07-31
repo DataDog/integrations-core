@@ -2,18 +2,25 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import datetime as dt
 import logging
 import re
-from typing import Dict, List, Pattern
 
+from dateutil.tz import UTC
 from six import iteritems
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 
 try:
-    import pymqi
+    from typing import Dict, List, Pattern
 except ImportError:
+    pass
+
+try:
+    import pymqi
+except ImportError as e:
+    pymqiException = e
     pymqi = None
 else:
     # Since pymqi is not be available/installed on win/macOS when running e2e,
@@ -83,6 +90,10 @@ class IBMMQConfig:
 
         self.auto_discover_queues = is_affirmative(instance.get('auto_discover_queues', False))  # type: bool
 
+        self.collect_statistics_metrics = is_affirmative(
+            instance.get('collect_statistics_metrics', False)
+        )  # type: bool
+
         if int(self.auto_discover_queues) + int(bool(self.queue_patterns)) + int(bool(self.queue_regex)) > 1:
             log.warning(
                 "Configurations auto_discover_queues, queue_patterns and queue_regex are not intended to be used "
@@ -127,6 +138,8 @@ class IBMMQConfig:
                 "mqcd_version must be a number between 1 and 9. {} found.".format(raw_mqcd_version)
             )
 
+        self.instance_creation_datetime = dt.datetime.now(UTC)
+
     def add_queues(self, new_queues):
         # add queues without duplication
         self.queues = list(set(self.queues + new_queues))
@@ -145,6 +158,8 @@ class IBMMQConfig:
 
     @staticmethod
     def get_channel_status_mapping(channel_status_mapping_raw):
+        if pymqi is None:
+            raise pymqiException
         if channel_status_mapping_raw:
             custom_mapping = {}
             for ibm_mq_status_raw, service_check_status_raw in channel_status_mapping_raw.items():

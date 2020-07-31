@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-import logging
 import subprocess
 from os import environ
 
@@ -138,9 +137,10 @@ def test_connection_failure(aggregator, instance_error):
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_complex_config_replica(aggregator, instance_complex):
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_complex])
     config = copy.deepcopy(instance_complex)
     config['port'] = common.SLAVE_PORT
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[config])
+
     mysql_check.check(config)
 
     # self.assertMetricTag('mysql.replication.seconds_behind_master', 'channel:default')
@@ -219,31 +219,11 @@ def _test_optional_metrics(aggregator, optional_metrics, at_least):
 
 
 @pytest.mark.unit
-def test_innodb_status_unicode_error(caplog):
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{}])
-
-    class MockCursor:
-        def execute(self, command):
-            raise UnicodeDecodeError('encoding', b'object', 0, 1, command)
-
-        def close(self):
-            return MockCursor()
-
-    class MockDatabase:
-        def cursor(self):
-            return MockCursor()
-
-    caplog.at_level(logging.WARNING)
-    assert mysql_check._get_stats_from_innodb_status(MockDatabase()) == {}
-    assert 'Unicode error while getting INNODB status' in caplog.text
-
-
-@pytest.mark.unit
 def test__get_server_pid():
     """
     Test the logic looping through the processes searching for `mysqld`
     """
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{}])
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
     mysql_check._get_pid_file_variable = mock.MagicMock(return_value=None)
     mysql_check.log = mock.MagicMock()
     dummy_proc = subprocess.Popen(["python"])

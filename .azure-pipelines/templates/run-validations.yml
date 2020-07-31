@@ -2,12 +2,17 @@ parameters:
   repo: 'core'
 
 steps:
-- script: ddev validate ci
-  displayName: 'Validate CI configuration'
+- ${{ if in(parameters.repo, 'core', 'extras', 'internal') }}:
+  - script: ddev validate ci
+    displayName: 'Validate CI configuration'
 
 - ${{ if eq(parameters.repo, 'core') }}:
   - script: ddev validate agent-reqs
     displayName: 'Validate Agent requirements'
+
+- ${{ if eq(parameters.repo, 'extras') }}:
+  - script: ddev validate codeowners
+    displayName: 'Validate codeowners'
 
 - script: ddev validate config
   displayName: 'Validate default configuration files'
@@ -24,6 +29,9 @@ steps:
 
 - script: ddev validate metadata
   displayName: 'Validate metric data'
+
+- script: ddev validate readmes
+  displayName: 'Validate README files'
 
 - script: ddev validate saved-views
   displayName: 'Validate saved views data'

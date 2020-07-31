@@ -64,8 +64,8 @@ instances:
     # prometheus_metrics_prefix: <PREFIX>_
 
     ## @param health_service_check - boolean - optional - default: true
-    ## Send a service check reporting about the health of the prometheus endpoint.
-    ## It's named <NAMESPACE>.prometheus.health
+    ## Send a service check reporting about the health of the Prometheus endpoint.
+    ## The service check is named <NAMESPACE>.prometheus.health
     #
     # health_service_check: true
 
@@ -75,7 +75,7 @@ instances:
     # label_to_hostname: <LABEL>
 
     ## @param label_joins - mapping - optional
-    ## The label join allows to target a metric and retrieve it's label via a 1:1 mapping.
+    ## The label join allows to target a metric and retrieve it's label with a 1:1 mapping.
     #
     # label_joins:
     #   target_metric:
@@ -92,9 +92,9 @@ instances:
     #   flavor: origin
 
     ## @param type_overrides - mapping - optional
-    ## Type override allows you to override a type in the prometheus payload
-    ## or type an untyped metrics (they're ignored by default).
-    ## Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, `summary`
+    ## Override a type in the Prometheus payload or type an untyped metric (they're ignored by default).
+    ## Supported <METRIC_TYPE> are `gauge`, `counter`, `histogram`, and `summary`.
+    ## The "*" wildcard can be used to match multiple metric names.
     #
     # type_overrides:
     #   <METRIC_NAME>: <METRIC_TYPE>
@@ -117,13 +117,13 @@ instances:
     # send_monotonic_counter: true
 
     ## @param send_distribution_counts_as_monotonic - boolean - optional - default: false
-    ## Set send_distribution_counts_as_monotonic to true to send histograms & summary
+    ## Set send_distribution_counts_as_monotonic to true to send histograms and summary
     ## counters as monotonic counters (instead of gauges).
     #
     # send_distribution_counts_as_monotonic: false
 
     ## @param send_distribution_sums_as_monotonic - boolean - optional - default: false
-    ## Set send_distribution_sums_as_monotonic to true to send histograms & summary
+    ## Set send_distribution_sums_as_monotonic to true to send histograms and summary
     ## sum as monotonic counters (instead of gauges).
     #
     # send_distribution_sums_as_monotonic: false
@@ -141,7 +141,7 @@ instances:
     # bearer_token_auth: false
 
     ## @param bearer_token_path - string - optional
-    ## The path to a kubernetes service account bearer token file, make sure the file exists and mounted correctly.
+    ## The path to a Kubernetes service account bearer token file. Make sure the file exists and is mounted correctly.
     ## Note: bearer_token_auth should be set to true to enable adding the token to HTTP headers for authentication.
     #
     # bearer_token_path: <TOKEN_PATH>
@@ -162,7 +162,7 @@ instances:
     ## Set HTTP or HTTPS proxies for all instances. Use the `no_proxy` list
     ## to specify hosts that must bypass proxies.
     ##
-    ## The SOCKS protocol is also supported like so:
+    ## The SOCKS protocol is also supported, for example:
     ##
     ##   socks5://user:pass@host:port
     ##
@@ -232,7 +232,7 @@ instances:
     ## a domain that is used in the check. For NTLM Auth, append
     ## the username to domain, not as the `username` parameter.
     #
-    # ntlm_domain: <NTLM_DOMAIN>/<USERNAME>
+    # ntlm_domain: <NTLM_DOMAIN>\<USERNAME>
 
     ## @param kerberos_auth - string - optional - default: disabled
     ## If your services use Kerberos authentication, you can specify the Kerberos
@@ -298,7 +298,7 @@ instances:
     ## @param aws_host - string - optional
     ## If your services require AWS Signature Version 4 signing, set the host.
     ##
-    ## Note that this setting is not necessary for official integrations.
+    ## Note: This setting is not necessary for official integrations.
     ##
     ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
     #
@@ -308,7 +308,7 @@ instances:
     ## If your services require AWS Signature Version 4 signing, set the service code. For a list
     ## of available service codes, see https://docs.aws.amazon.com/general/latest/gr/rande.html
     ##
-    ## Note that this setting is not necessary for official integrations.
+    ## Note: This setting is not necessary for official integrations.
     ##
     ## See https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html
     #
@@ -328,7 +328,7 @@ instances:
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
     ##
-    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration. 
+    ## Note: `tls_ignore_warning` set to true is currently only reliable if used by one instance of one integration.
     ## If enabled for multiple instances, spurious warnings might still appear even if `tls_ignore_warning` is set
     ## to true.
     #

@@ -81,3 +81,10 @@ files:
           example: true
       - template: instances/default
       - template: instances/http
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/spark/*.log
+      source: spark
+      service: <SERVICE_NAME>
+

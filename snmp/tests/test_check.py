@@ -18,7 +18,7 @@ from datadog_checks.snmp import SnmpCheck
 
 from . import common
 
-pytestmark = pytest.mark.usefixtures("dd_environment")
+pytestmark = [pytest.mark.usefixtures("dd_environment"), common.python_autodiscovery_only]
 
 
 def test_command_generator():
@@ -472,13 +472,12 @@ def test_forcedtype_metric(aggregator):
     check = common.create_check(instance)
     check.check(instance)
 
-    for metric in common.FORCED_METRICS:
-        metric_name = "snmp." + (metric.get('name') or metric.get('symbol'))
-        if metric.get('forced_type') == 'counter':
-            # rate will be flushed as a gauge, so count should be 0.
-            aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, count=0, metric_type=aggregator.GAUGE)
-        elif metric.get('forced_type') == 'gauge':
-            aggregator.assert_metric(metric_name, tags=common.CHECK_TAGS, at_least=1, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('snmp.IAmAGauge32', tags=common.CHECK_TAGS, count=1, metric_type=aggregator.RATE)
+    aggregator.assert_metric('snmp.IAmACounter64', tags=common.CHECK_TAGS, count=1, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(
+        'snmp.IAmAOctetStringFloat', tags=common.CHECK_TAGS, value=3.1415, count=1, metric_type=aggregator.GAUGE
+    )
+
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     # Test service check
@@ -488,18 +487,19 @@ def test_forcedtype_metric(aggregator):
     aggregator.all_metrics_asserted()
 
 
-def test_invalid_forcedtype_metric(aggregator):
+def test_invalid_forcedtype_metric(aggregator, caplog):
     """
-    If a forced type is invalid a warning should be issued + a service check
-    should be available
+    If a forced type is invalid a warning should be issued
+    but the check should continue processing the remaining metrics.
     """
     instance = common.generate_instance_config(common.INVALID_FORCED_METRICS)
     check = common.create_check(instance)
 
     check.check(instance)
 
-    # Test service check
-    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.WARNING, tags=common.CHECK_TAGS, at_least=1)
+    aggregator.assert_service_check("snmp.can_check", status=SnmpCheck.OK, tags=common.CHECK_TAGS, at_least=1)
+
+    assert "Unable to submit metric" in caplog.text
 
 
 def test_scalar_with_tags(aggregator):
@@ -615,6 +615,52 @@ def test_profile_sys_object(aggregator):
 
     common.assert_common_metrics(aggregator)
     aggregator.assert_all_metrics_covered()
+
+
+def test_profile_sysoid_list(aggregator, caplog):
+    definition = {
+        'metric_tags': [{'OID': '1.3.6.1.2.1.1.2', 'symbol': 'sysoid', 'tag': 'snmp_oid'}],
+        'metrics': [{'OID': "1.3.6.1.2.1.7.1.0", 'name': "IAmACounter32"}],
+        'sysobjectid': ['1.3.6.1.4.1.232.1.2', '1.3.6.1.4.1.1.2.1.3.4'],
+    }
+    init_config = {'profiles': {'profile1': {'definition': definition}}}
+
+    devices_matched = [
+        {'community_string': 'hpe-proliant', 'sysobjectid': '1.3.6.1.4.1.232.1.2'},
+        {'community_string': 'network', 'sysobjectid': '1.3.6.1.4.1.1.2.1.3.4'},
+    ]
+    common_tags = common.CHECK_TAGS + ['snmp_profile:profile1']
+    for device in devices_matched:
+        instance = common.generate_instance_config([])
+        instance['community_string'] = device['community_string']
+        check = SnmpCheck('snmp', init_config, [instance])
+        check.check(instance)
+
+        tags = common_tags + ['snmp_oid:{}'.format(device['sysobjectid'])]
+        aggregator.assert_metric('snmp.IAmACounter32', tags=tags, count=1)
+        aggregator.assert_metric('snmp.devices_monitored', tags=tags, count=1, value=1)
+
+        aggregator.assert_all_metrics_covered()
+
+        aggregator.reset()
+
+    caplog.at_level(logging.WARNING)
+    devices_not_matched = [
+        {'community_string': '3850', 'sysobjectid': '1.3.6.1.4.1.9.1.1745'},
+    ]
+    for device in devices_not_matched:
+        instance = common.generate_instance_config([])
+        instance['community_string'] = device['community_string']
+        check = SnmpCheck('snmp', init_config, [instance])
+        check.check(instance)
+
+        assert 'No profile matching sysObjectID 1.3.6.1.4.1.9.1.1745' in caplog.text
+        aggregator.assert_metric('snmp.devices_monitored', tags=common.CHECK_TAGS, count=1, value=1)
+
+        aggregator.assert_all_metrics_covered()
+
+        aggregator.reset()
+        caplog.clear()
 
 
 @pytest.mark.parametrize(
@@ -859,7 +905,7 @@ def test_metric_tag_symbol(aggregator):
 def test_metric_tag_oid(aggregator):
     metrics = common.SUPPORTED_METRIC_TYPES
     instance = common.generate_instance_config(metrics)
-    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName', 'tag': 'snmp_host'}]
+    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5.0', 'symbol': 'sysName', 'tag': 'snmp_host'}]
     check = common.create_check(instance)
 
     check.check(instance)
@@ -882,7 +928,7 @@ def test_metric_tag_profile_manual(aggregator):
     instance = common.generate_instance_config([])
     instance['profile'] = 'profile1'
     definition = {
-        'metric_tags': [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName', 'tag': 'snmp_host'}],
+        'metric_tags': [{'OID': '1.3.6.1.2.1.1.5.0', 'symbol': 'sysName', 'tag': 'snmp_host'}],
         'metrics': common.SUPPORTED_METRIC_TYPES,
     }
     init_config = {'profiles': {'profile1': {'definition': definition}}}
@@ -908,7 +954,7 @@ def test_metric_tag_profile_manual(aggregator):
 def test_metric_tag_profile_sysoid(aggregator):
     instance = common.generate_instance_config([])
     definition = {
-        'metric_tags': [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName', 'tag': 'snmp_host'}],
+        'metric_tags': [{'OID': '1.3.6.1.2.1.1.5.0', 'symbol': 'sysName', 'tag': 'snmp_host'}],
         'metrics': common.SUPPORTED_METRIC_TYPES,
         'sysobjectid': '1.3.6.1.4.1.8072.3.2.10',
     }
@@ -936,11 +982,11 @@ def test_metric_tags_misconfiguration():
     metrics = common.SUPPORTED_METRIC_TYPES
     instance = common.generate_instance_config(metrics)
 
-    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5', 'tag': 'snmp_host'}]
+    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5.0', 'tag': 'snmp_host'}]
     with pytest.raises(ConfigurationError):
         common.create_check(instance)
 
-    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5', 'symbol': 'sysName'}]
+    instance['metric_tags'] = [{'OID': '1.3.6.1.2.1.1.5.0', 'symbol': 'sysName'}]
     with pytest.raises(ConfigurationError):
         common.create_check(instance)
 

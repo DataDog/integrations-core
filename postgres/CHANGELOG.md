@@ -1,5 +1,9 @@
 # CHANGELOG - postgres
 
+## 5.0.1 / 2020-07-16
+
+* [Fixed] Avoid aurora pg warnings. See [#7123](https://github.com/DataDog/integrations-core/pull/7123).
+
 ## 5.0.0 / 2020-06-29
 
 * [Added] Add config specs. See [#6547](https://github.com/DataDog/integrations-core/pull/6547).
