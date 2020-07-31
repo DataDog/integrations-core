@@ -38,6 +38,8 @@
       "vault_patern": "assets/saved_views/vault_patern.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "vault"
+    }
   }
 }

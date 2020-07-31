@@ -34,6 +34,8 @@
       "bot_errors": "assets/saved_views/bot_errors.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "gunicorn"
+    }
   }
 }

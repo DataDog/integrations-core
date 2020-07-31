@@ -28,6 +28,8 @@
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "ibm_was"
+    }
   }
 }

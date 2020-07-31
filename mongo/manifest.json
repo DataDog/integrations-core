@@ -42,6 +42,8 @@
       "slow_queries": "assets/saved_views/slow_queries.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "mongodb"
+    }
   }
 }

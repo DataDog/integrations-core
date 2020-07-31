@@ -41,6 +41,8 @@
       "redis_pattern": "assets/saved_views/redis_pattern.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "redis"
+    }
   }
 }
