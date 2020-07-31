@@ -2,7 +2,6 @@
 # (C) Stefan Mees <stefan.mees@wooga.net> 2013
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import socket
 import unicodedata
 
 import simplejson as json
