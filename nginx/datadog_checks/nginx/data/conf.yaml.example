@@ -75,7 +75,7 @@ instances:
     ## When no Stream servers used we can disable this part to remove errors in Nginx Plus API calls.
     ## To use it set `use_plus_api_stream` to true
     #
-    # use_plus_api_stream: false
+    # use_plus_api_stream: true
 
     ## @param plus_api_version - integer - optional - default: 2
     ## Specify the version of the Plus API to use. The check supports versions 1 & 2.
