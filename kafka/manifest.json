@@ -36,6 +36,8 @@
       "logger_overview": "assets/saved_views/logger_overview.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "kafka"
+    }
   }
 }

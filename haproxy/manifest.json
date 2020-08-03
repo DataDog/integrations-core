@@ -40,6 +40,8 @@
       "response_time_overview": "assets/saved_views/response_time.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "haproxy"
+    }
   }
 }

@@ -34,6 +34,8 @@
     "monitors": {},
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "ceph"
+    }
   }
 }
