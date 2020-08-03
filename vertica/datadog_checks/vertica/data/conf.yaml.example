@@ -150,8 +150,9 @@ instances:
 
     ## @param client_lib_log_level - string - optional - default: Agent log level
     ## Vertica library log level.
-    ## This option exists because python-vertica disables logging by default, requiring to enable it with an explicit option.
-    ## Valid values: null (use Agent log level), CRITICAL, FATAL, ERROR, WARN, WARNING, INFO, DEBUG.
+    ## This option exists because vertica-python logging is disabled by default
+    ## and must be enabled it with an explicit option.
+    ## Valid values: null (use Agent log level), CRITICAL, FATAL, ERROR, WARN, WARNING, INFO, DEBUG
     #
     # client_lib_log_level: <CLIENT_LIB_LOG_LEVEL>
 
