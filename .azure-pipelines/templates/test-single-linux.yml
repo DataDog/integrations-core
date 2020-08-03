@@ -8,6 +8,7 @@ parameters:
   latest_metrics: false
   validate: false
   repo: 'core'
+  py2: true  # Whether or not to run python2 tests.
   pip_cache_config: null
   coverage: true
 
@@ -18,6 +19,10 @@ jobs:
   pool:
     vmImage: 'ubuntu-18.04'
 
+  variables:
+    ${{ if not(eq(parameters.py2, 'true')) }}:
+      TOX_SKIP_ENV: py27.*  # Don't run py2 tests
+
   steps:
   - template: './checkout-code.yml'
 
@@ -25,6 +30,7 @@ jobs:
     parameters:
       repo: ${{ parameters.repo }}
       pip_cache_config: ${{ parameters.pip_cache_config }}
+      py2: ${{ parameters.py2 }}
 
   - template: './set-up-integrations.yml'
     parameters:

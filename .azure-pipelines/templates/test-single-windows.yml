@@ -18,6 +18,10 @@ jobs:
   pool:
     vmImage: 'windows-2019'
 
+  variables:
+    ${{ if not(eq(parameters.py2, 'true')) }}:
+      TOX_SKIP_ENV: py27.*  # Don't run py2 tests
+
   steps:
   - template: './checkout-code.yml'
 
