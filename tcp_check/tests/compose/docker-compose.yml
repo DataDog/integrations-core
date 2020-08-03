@@ -3,6 +3,6 @@ version: '3'
 services:
   nginx:
     container_name: nginx
-    image: nginx:alpine
+    image: nginx
     ports:
       - "8000:80"
