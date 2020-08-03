@@ -96,7 +96,7 @@ def test_client_logging_disabled(aggregator, instance):
 @pytest.mark.parametrize(
     'agent_log_level, expected_vertica_log_level', [(logging.DEBUG, logging.DEBUG), (TRACE_LEVEL, logging.DEBUG)]
 )
-def test_client_logging_enabled_debug_if_agent_uses_lower_than_debug(
+def test_client_logging_enabled_debug_if_agent_uses_debug_or_trace(
     aggregator, instance, agent_log_level, expected_vertica_log_level
 ):
     """
