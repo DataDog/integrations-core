@@ -148,10 +148,9 @@ instances:
     #     tags:
     #       - test:vertica
 
-    ## @param client_lib_log_level - string - optional
+    ## @param client_lib_log_level - string - optional - default: DEBUG
     ## Vertica library log level.
-    ## By default the vertica library logging is disabled.
-    ## Valid values: CRITICAL, FATAL, ERROR, WARN, WARNING, INFO, DEBUG
+    ## Valid values: CRITICAL, FATAL, ERROR, WARN, WARNING, INFO, DEBUG, null (disable logging).
     #
     # client_lib_log_level: DEBUG
 
