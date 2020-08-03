@@ -13,8 +13,8 @@ from .constants import RESOURCE_TYPES
 class Config:
     def __init__(self, instance):
         # type: (Dict[str, Any]) -> None
-        self.url = instance.get('url')
-        if not self.url:
+        self.url = instance.get('url', '')  # type: str
+        if self.url == '':
             raise ConfigurationError("url is a required configuration.")
         self.tags = instance.get('tags', [])
         self.resource_filters = self.build_resource_filters(instance.get('resource_filters', []))

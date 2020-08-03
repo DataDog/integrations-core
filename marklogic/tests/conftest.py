@@ -10,7 +10,7 @@ import requests
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 
-from .common import ADMIN_PASSWORD, ADMIN_USERNAME, API_URL, CHECK_CONFIG, HERE
+from .common import ADMIN_PASSWORD, ADMIN_USERNAME, API_URL, CHECK_CONFIG, HERE, PASSWORD, USERNAME
 
 
 @pytest.fixture(scope="session")
@@ -34,7 +34,12 @@ def setup_admin_user():
     # Set admin user password (usefull for cluster setup)
     requests.post(
         'http://localhost:8001/admin/v1/instance-admin',
-        data={"admin-username": ADMIN_USERNAME, "admin-password": ADMIN_PASSWORD},
+        data={
+            "admin-username": ADMIN_USERNAME,
+            "admin-password": ADMIN_PASSWORD,
+            "wallet-password": ADMIN_PASSWORD,
+            "realm": "public",
+        },
         headers={"Content-type": "application/x-www-form-urlencoded"},
     )
 
@@ -49,7 +54,7 @@ def setup_datadog_user():
     r = requests.post(
         '{}/manage/v2/users'.format(API_URL),
         headers={'Content-Type': 'application/json'},
-        data='{"user-name": "datadog", "password": "datadog", "roles": {"role": "manage-admin"}}',
+        data='{{"user-name": "{}", "password": "{}", "roles": {{"role": "manage-admin"}}}}'.format(USERNAME, PASSWORD),
         auth=requests.auth.HTTPDigestAuth(ADMIN_USERNAME, ADMIN_PASSWORD),
     )
 
