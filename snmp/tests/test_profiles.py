@@ -65,7 +65,7 @@ def test_load_profiles(caplog):
         caplog.clear()
 
 
-def run_profile_check(recording_name, profile=None):
+def run_profile_check(recording_name, profile_name=None):
     """
     Run a single check with the provided `recording_name` used as
     `community_string` by the docker SNMP endpoint.
@@ -78,14 +78,14 @@ def run_profile_check(recording_name, profile=None):
     check = SnmpCheck('snmp', {}, [instance])
 
     # First, see if recording name is a profile, then use profile as definition.
-    if profile:
-        prof_def = check.profiles.get(profile)
+    if profile_name is not None:
+        profile = check.profiles.get(profile_name)
     else:
-        prof_def = check.profiles.get(recording_name)
-    if prof_def:
+        profile = check.profiles.get(recording_name)
+    if profile:
         try:
             test_check = SnmpCheck('snmp', {}, [common.generate_instance_config([])])
-            test_check._config.refresh_with_profile(prof_def)
+            test_check._config.refresh_with_profile(profile)
         except ConfigurationError as e:
             pytest.fail("Profile `{}` is not configured correctly: {}".format(recording_name, e))
     check.check(instance)
@@ -207,7 +207,7 @@ def test_cisco_voice(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_f5(aggregator):
     profile = "f5-big-ip"
-    run_profile_check('f5', profile=profile)
+    run_profile_check('f5', profile)
 
     gauges = [
         'sysStatMemoryTotal',
@@ -354,7 +354,7 @@ def test_f5(aggregator):
 @pytest.mark.usefixtures("dd_environment")
 def test_router(aggregator):
     profile = "generic-router"
-    run_profile_check('network', profile=profile)
+    run_profile_check('network', profile)
     common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile]
 
     common.assert_common_metrics(aggregator, common_tags)
