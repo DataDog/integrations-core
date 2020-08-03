@@ -18,8 +18,6 @@ steps:
 - ${{ if and(eq(parameters.test, 'true'), not(eq(parameters.coverage, 'true'))) }}:
     - script: ddev test --junit ${{ parameters.check }}
       displayName: 'Run Unit/Integration tests (no coverage)'
-      env:
-        CODECOV_TOKEN: $(CODECOV_TOKEN)
 
 - ${{ if eq(parameters.test_e2e, 'true') }}:
   - script: |
