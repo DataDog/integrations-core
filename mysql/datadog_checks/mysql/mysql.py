@@ -373,6 +373,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
             ssl,
             connect_timeout,
             max_custom_queries,
+            min_collection_interval
         ) = self._get_config(instance)
 
         self._set_qcache_stats()
@@ -392,7 +393,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
                 self._collect_metrics(db, tags, options, queries, max_custom_queries)
                 self._collect_system_metrics(host, db, tags)
                 self._collect_statement_metrics(db, tags)
-                self._collect_execution_plans(db, tags, options)
+                self._collect_execution_plans(db, tags, options, min_collection_interval)
 
                 # keeping track of these:
                 self._put_qcache_stats()
@@ -419,6 +420,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
         ssl = instance.get('ssl', {})
         connect_timeout = instance.get('connect_timeout', 10)
         max_custom_queries = instance.get('max_custom_queries', self.DEFAULT_MAX_CUSTOM_QUERIES)
+        min_collection_interval = instance.get('min_collection_interval', 15)
 
         if queries or 'max_custom_queries' in instance:
             self.warning(
@@ -439,6 +441,7 @@ class MySql(ExecutionPlansMixin, AgentCheck):
             ssl,
             connect_timeout,
             max_custom_queries,
+            min_collection_interval
         )
 
     def _set_qcache_stats(self):
