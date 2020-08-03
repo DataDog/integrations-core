@@ -102,6 +102,7 @@ tmp
 # Common IDEs & editors
 .idea/
 .vscode/
+*.iml
 
 # wheels
 wheelhouse/
