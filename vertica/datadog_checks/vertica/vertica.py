@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import logging
 import ssl
 from collections import defaultdict
 from datetime import datetime
@@ -44,7 +45,7 @@ class VerticaCheck(AgentCheck):
         self._timeout = float(self.instance.get('timeout', 10))
         self._tags = self.instance.get('tags', [])
 
-        self._client_lib_log_level = self.instance.get('client_lib_log_level', self.log.logger.getEffectiveLevel())
+        self._client_lib_log_level = self.instance.get('client_lib_log_level', self._get_default_client_lib_log_level())
 
         self._tls_verify = is_affirmative(self.instance.get('tls_verify', False))
         self._validate_hostname = is_affirmative(self.instance.get('validate_hostname', True))
@@ -90,6 +91,13 @@ class VerticaCheck(AgentCheck):
 
         # Cache database results for re-use among disparate functions
         self._view = defaultdict(list)
+
+    def _get_default_client_lib_log_level(self):
+        if self.log.logger.getEffectiveLevel() == logging.DEBUG:
+            # Automatically collect library logs for debug flares.
+            return logging.DEBUG
+        # Default to no library logs, since they're too verbose even at the INFO level.
+        return None
 
     def check(self, instance):
         if self._connection is None:
