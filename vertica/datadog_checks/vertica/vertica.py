@@ -93,9 +93,9 @@ class VerticaCheck(AgentCheck):
         self._view = defaultdict(list)
 
     def _get_default_client_lib_log_level(self):
-        if self.log.logger.getEffectiveLevel() == logging.DEBUG:
+        if self.log.logger.getEffectiveLevel() <= logging.DEBUG:
             # Automatically collect library logs for debug flares.
-            return 'DEBUG'
+            return logging.DEBUG
         # Default to no library logs, since they're too verbose even at the INFO level.
         return None
 
