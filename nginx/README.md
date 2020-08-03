@@ -115,7 +115,7 @@ Follow the instructions below to configure this check for an Agent running on a 
     **NGINX Plus**:
 
       - For NGINX Plus releases 13+, set the parameter `use_plus_api` to `true` in your `nginx.d/conf.yaml` configuration file.
-      - If you like to also enable streaam stats api calls set the parameter `use_plus_api_stream` to `true` in your `nginx.d/conf.yaml` configuration file.
+      - Stream stats api calls come included by default for NGINX Plus, if you wish to disable them set the parameter `use_plus_api_stream` to `false` in your `nginx.d/conf.yaml` configuration file.
       - If you are using `http_api_module`, set the parameter `nginx_status_url` to the server's `/api` location in your `nginx.d/conf.yaml` configuration file, for example:
 
           ```yaml
