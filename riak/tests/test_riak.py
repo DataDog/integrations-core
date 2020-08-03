@@ -2,13 +2,13 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import socket
-
 import pytest
+from requests import ConnectionError
 
 from datadog_checks.riak import Riak
-from requests import ConnectionError
+
 from . import common
+
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
