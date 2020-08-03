@@ -153,7 +153,7 @@ class Nginx(AgentCheck):
         url = instance.get('nginx_status_url')
 
         use_plus_api = instance.get("use_plus_api", False)
-        use_plus_api_stream = instance.get("use_plus_api_stream", False)
+        use_plus_api_stream = instance.get("use_plus_api_stream", True)
         plus_api_version = str(instance.get("plus_api_version", 2))
 
         return url, use_plus_api, use_plus_api_stream, plus_api_version
