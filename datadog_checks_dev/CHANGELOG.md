@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.17.0 / 2020-08-03
+
+* [Added] Validate dashboards are using the screen API. See [#7237](https://github.com/DataDog/integrations-core/pull/7237).
+* [Added] Update RC build cards when running `ddev release trello testable`. See [#7082](https://github.com/DataDog/integrations-core/pull/7082).
+* [Added] Add "ddev config edit" subcommand. See [#7217](https://github.com/DataDog/integrations-core/pull/7217).
+
 ## 3.16.0 / 2020-07-24
 
 * [Added] Add validation for readmes. See [#7088](https://github.com/DataDog/integrations-core/pull/7088).
