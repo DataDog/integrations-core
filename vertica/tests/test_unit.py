@@ -113,6 +113,6 @@ def test_client_logging_enabled_debug_if_agent_uses_debug(aggregator, instance):
             backup_server_node=mock.ANY,
             connection_load_balance=mock.ANY,
             connection_timeout=mock.ANY,
-            log_level=logging.DEBUG,
+            log_level='DEBUG',
             log_path='',
         )
