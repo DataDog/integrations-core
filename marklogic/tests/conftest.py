@@ -19,11 +19,7 @@ def dd_environment():
     compose_file = os.path.join(HERE, 'compose', 'docker-compose.yml')
     with docker_run(
         compose_file=compose_file,
-        conditions=[
-            CheckDockerLogs(compose_file, r'Detected quorum', attempts=90),
-            WaitFor(setup_admin_user),
-            WaitFor(setup_datadog_user),
-        ],
+        conditions=[CheckDockerLogs(compose_file, r'Deleted'), WaitFor(setup_admin_user), WaitFor(setup_datadog_user)],
     ):
         yield CHECK_CONFIG
 
