@@ -14,7 +14,7 @@ files:
         value:
           type: string
           example: http://127.0.0.1:8098/stats
-      - template: init_config/http
+      - template: instances/http
       - template: instances/default
   - template: logs
     example:
