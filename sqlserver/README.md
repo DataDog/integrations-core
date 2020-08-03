@@ -34,7 +34,7 @@ Create a read-only login to connect to your server:
 
 #### Host
 
-1. Create a file `sqlserver.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
+1. Edit the `sqlserver.d/conf.yaml` file, in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
    See the [sample sqlserver.d/conf.yaml][5] for all available configuration options:
 
    ```yaml
@@ -56,15 +56,15 @@ Create a read-only login to connect to your server:
       connection_string: "Trusted_Connection=yes"
       ```
 
-2. [Restart the Agent][7] to start sending SQL Server metrics to Datadog.
+2. [Restart the Agent][7].
 
 ##### Linux
 
 Extra configuration steps are required to get the SQL Server integration running on a Linux host:
 
-1. Install an ODBC SQL Server Driver, for example the [Microsoft ODBC Driver][10].
+1. Install an ODBC SQL Server driver, for example the [Microsoft ODBC driver][10].
 2. Copy the `odbc.ini` and `odbcinst.ini` files into the `/opt/datadog-agent/embedded/etc` folder.
-3. Configure the `conf.yaml` file to use the `odbc` connector and specify the proper driver as specified in the `odbcinst.ini file`.
+3. Configure the `conf.yaml` file to use the `odbc` connector and specify the proper driver as indicated in the `odbcinst.ini file`.
 
 ##### Log collection
 
@@ -105,13 +105,13 @@ For containerized environments, see the [Autodiscovery Integration Templates][22
 | `<INIT_CONFIG>`      | blank or `{}`                                                                                                                    |
 | `<INSTANCE_CONFIG>`  | `{"host": "%%host%%,%%port%%", "username": "datadog", "password": "<UNIQUEPASSWORD>", "connector": "odbc", "driver": "FreeTDS"}` |
 
-See the [Autodiscovery template variables documentation][23] to learn how to pass `<UNIQUEPASSWORD>` as an Environment variable instead of a label.
+See [Autodiscovery template variables][23] for details on passing `<UNIQUEPASSWORD>` as an environment variable instead of a label.
 
 ##### Log collection
 
 _Available for Agent versions >6.0_
 
-Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][24].
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection][24].
 
 | Parameter      | Value                                             |
 | -------------- | ------------------------------------------------- |
