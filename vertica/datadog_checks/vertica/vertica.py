@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import logging
 import ssl
 from collections import defaultdict
 from datetime import datetime
@@ -18,12 +19,6 @@ from datadog_checks.base.utils.containers import iter_unique
 
 from . import views
 from .utils import kilobytes_to_bytes, node_state_to_service_check
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 
 # Python 3 only
 PROTOCOL_TLS_CLIENT = getattr(ssl, 'PROTOCOL_TLS_CLIENT', ssl.PROTOCOL_TLS)
@@ -50,7 +45,9 @@ class VerticaCheck(AgentCheck):
         self._timeout = float(self.instance.get('timeout', 10))
         self._tags = self.instance.get('tags', [])
 
-        self._client_lib_log_level = self.instance.get('client_lib_log_level', datadog_agent.get_config('log_level'))
+        self._client_lib_log_level = self.instance.get(
+            'client_lib_log_level', logging.getLevelName(self.log.getEffectiveLevel())
+        )
 
         self._tls_verify = is_affirmative(self.instance.get('tls_verify', False))
         self._validate_hostname = is_affirmative(self.instance.get('validate_hostname', True))
