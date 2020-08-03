@@ -46,7 +46,7 @@ class VerticaCheck(AgentCheck):
         self._tags = self.instance.get('tags', [])
 
         self._client_lib_log_level = self.instance.get(
-            'client_lib_log_level', logging.getLevelName(self.log.getEffectiveLevel())
+            'client_lib_log_level', logging.getLevelName(self.log.logger.getEffectiveLevel())
         )
 
         self._tls_verify = is_affirmative(self.instance.get('tls_verify', False))
