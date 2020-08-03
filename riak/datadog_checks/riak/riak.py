@@ -239,6 +239,7 @@ class Riak(AgentCheck):
         try:
             r = self.http.get(self.url)
             r.raise_for_status()
+            stats = json.loads(r.content)
         except Exception as e:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
@@ -248,7 +249,6 @@ class Riak(AgentCheck):
             )
             raise
 
-        stats = json.loads(r.content)
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=self.service_check_tags)
 
         for k in self.keys:
