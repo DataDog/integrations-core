@@ -19,9 +19,9 @@ The SQL Server check is included in the [Datadog Agent][3] package, so you don't
 Make sure that your SQL Server instance supports SQL Server authentication by enabling "SQL Server and Windows Authentication mode" in the server properties.
 **Server Properties** -> **Security** -> **SQL Server and Windows Authentication mode**
 
-### Configuration
+### Prerequisite
 
-1. Create a read-only login to connect to your server:
+Create a read-only login to connect to your server:
 
    ```text
        CREATE LOGIN datadog WITH PASSWORD = '<PASSWORD>';
@@ -30,7 +30,11 @@ Make sure that your SQL Server instance supports SQL Server authentication by en
        GRANT VIEW SERVER STATE to datadog;
    ```
 
-2. Create a file `sqlserver.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
+### Configuration
+
+#### Host
+
+1. Create a file `sqlserver.d/conf.yaml`, in the `conf.d/` folder at the root of your [Agent's configuration directory][4].
    See the [sample sqlserver.d/conf.yaml][5] for all available configuration options:
 
    ```yaml
@@ -52,7 +56,15 @@ Make sure that your SQL Server instance supports SQL Server authentication by en
       connection_string: "Trusted_Connection=yes"
       ```
 
-3. [Restart the Agent][7] to start sending SQL Server metrics to Datadog.
+2. [Restart the Agent][7] to start sending SQL Server metrics to Datadog.
+
+##### Linux
+
+Extra configuration steps are required to get the SQL Server integration running on a Linux host:
+
+1. Install an ODBC SQL Server Driver, for example the [Microsoft ODBC Driver][10].
+2. Copy the `odbc.ini` and `odbcinst.ini` files into the `/opt/datadog-agent/embedded/etc` folder.
+3. Configure the `conf.yaml` file to use the `odbc` connector and specify the proper driver as specified in the `odbcinst.ini file`.
 
 ##### Log collection
 
@@ -80,13 +92,30 @@ _Available for Agent versions >6.0_
 
 See [Datadog's documentation][9] for additional information on how to configure the Agent for log collection in Kubernetes environments.
 
-#### Linux
 
-Extra configuration steps are required to get the SQL Server integration running on a Linux host:
+#### Containerized
 
-1. Install an ODBC SQL Server Driver, for example the [Microsoft ODBC Driver][10].
-2. Copy the `odbc.ini` and `odbcinst.ini` files into the `/opt/datadog-agent/embedded/etc` folder.
-3. Configure the `conf.yaml` file to use the `odbc` connector and specify the proper driver as specified in the `odbcinst.ini file`.
+For containerized environments, see the [Autodiscovery Integration Templates][22] for guidance on applying the parameters below.
+
+##### Metric collection
+
+| Parameter            | Value                                                                                                                            |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `<INTEGRATION_NAME>` | `sqlserver`                                                                                                                      |
+| `<INIT_CONFIG>`      | blank or `{}`                                                                                                                    |
+| `<INSTANCE_CONFIG>`  | `{"host": "%%host%%,%%port%%", "username": "datadog", "password": "<UNIQUEPASSWORD>", "connector": "odbc", "driver": "FreeTDS"}` |
+
+See the [Autodiscovery template variables documentation][23] to learn how to pass `<UNIQUEPASSWORD>` as an Environment variable instead of a label.
+
+##### Log collection
+
+_Available for Agent versions >6.0_
+
+Collecting logs is disabled by default in the Datadog Agent. To enable it, see [Kubernetes log collection documentation][24].
+
+| Parameter      | Value                                             |
+| -------------- | ------------------------------------------------- |
+| `<LOG_CONFIG>` | `{"source": "sqlserver", "service": "sqlserver"}` |
 
 ### Validation
 
@@ -172,3 +201,6 @@ brew install unixodbc freetds
 [19]: https://www.datadoghq.com/blog/sql-server-monitoring-tools
 [20]: https://www.datadoghq.com/blog/sql-server-performance
 [21]: https://www.datadoghq.com/blog/sql-server-metrics
+[22]: https://docs.datadoghq.com/agent/kubernetes/integrations/
+[23]: https://docs.datadoghq.com/agent/faq/template_variables/
+[24]: https://docs.datadoghq.com/agent/kubernetes/log/
