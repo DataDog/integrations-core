@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  nginx:
+    container_name: nginx
+    image: nginx:alpine
+    ports:
+      - "8000:80"

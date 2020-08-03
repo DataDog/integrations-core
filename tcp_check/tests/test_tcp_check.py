@@ -46,7 +46,7 @@ def test_up(aggregator, check):
     Service expected to be up
     """
     check.check(deepcopy(common.INSTANCE))
-    expected_tags = ["instance:UpService", "target_host:datadoghq.com", "port:80", "foo:bar"]
+    expected_tags = ["instance:UpService", "target_host:127.0.0.1", "port:8000", "foo:bar"]
     aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
     aggregator.assert_all_metrics_covered()
@@ -64,12 +64,12 @@ def test_response_time(aggregator):
     check.check(instance)
 
     # service check
-    expected_tags = ['foo:bar', 'target_host:datadoghq.com', 'port:80', 'instance:instance:response_time']
+    expected_tags = ['foo:bar', 'target_host:127.0.0.1', 'port:8000', 'instance:instance:response_time']
     aggregator.assert_service_check('tcp.can_connect', status=check.OK, tags=expected_tags)
     aggregator.assert_metric('network.tcp.can_connect', value=1, tags=expected_tags)
 
     # response time metric
-    expected_tags = ['url:datadoghq.com:80', 'instance:instance:response_time', 'foo:bar']
+    expected_tags = ['url:127.0.0.1:8000', 'instance:instance:response_time', 'foo:bar']
     aggregator.assert_metric('network.tcp.response_time', tags=expected_tags)
     aggregator.assert_all_metrics_covered()
     assert len(aggregator.service_checks('tcp.can_connect')) == 1
