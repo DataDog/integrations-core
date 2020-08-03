@@ -1,1 +1,2 @@
 -e ../datadog_checks_dev
+memory-profiler==0.57.0
