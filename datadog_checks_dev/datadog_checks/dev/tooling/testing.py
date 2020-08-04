@@ -91,7 +91,7 @@ def get_tox_envs(
                 envs_selected[:] = [e for e in envs_available if 'bench' not in e and 'format_style' not in e]
 
         if tox_env_filter_re:
-            envs_selected[:] = [e for e in envs_available if not tox_env_filter_re.match(e)]
+            envs_selected[:] = [e for e in envs_selected if not tox_env_filter_re.match(e)]
 
         yield check, envs_selected
 
