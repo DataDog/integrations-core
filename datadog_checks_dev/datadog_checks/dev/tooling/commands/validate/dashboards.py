@@ -2,12 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-import os
 
 import click
 
-from ....utils import file_exists, read_file
-from ...utils import get_valid_integrations, get_assets_from_manifest
+from ....utils import read_file
+from ...utils import get_assets_from_manifest, get_valid_integrations
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {"board_title", "description", "template_variables", "widgets"}
