@@ -21,5 +21,8 @@
         "thresholds": {
             "critical": 3000
         }
-    }
+    },
+	"recommended_monitor_metadata": {
+		"description": "Notify your team when replication is behind for your MySQL integration."
+	}
 }
