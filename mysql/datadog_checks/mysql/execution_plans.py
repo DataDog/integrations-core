@@ -383,7 +383,7 @@ class ExecutionPlansMixin(object):
         """
         try:
             cursor.execute('EXPLAIN FORMAT=json {statement}'.format(statement=statement))
-            statsd.timing("dd.mysql.run_explain.time", (time.time() - start_time) * 1000, tags=instance_tags)
+            self.log.debug('Successfully ran explain using EXPLAIN statement: %s', statement)
         except (pymysql.err.InternalError, pymysql.err.ProgrammingError) as e:
             if len(e.args) != 2:
                 raise
@@ -407,6 +407,7 @@ class ExecutionPlansMixin(object):
         """
         try:
             cursor.execute('CALL explain_statement(%s)', statement)
+            self.log.debug('Successfully ran explain using explain_statement procedure: %s', statement)
         except (pymysql.err.InternalError, pymysql.err.ProgrammingError) as e:
             if len(e.args) != 2:
                 raise
