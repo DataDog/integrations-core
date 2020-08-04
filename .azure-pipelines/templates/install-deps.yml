@@ -5,14 +5,14 @@ parameters:
     displayName: 'Pip cache configuration'
     type: object
     default: null
-  - name: py2
+  - name: run_py2_tests
     default: true
 
 steps:
 # Install the Python version with which to use globally last as
 # these tasks prepend to PATH instead of appending to it. See:
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/tool/use-python-version
-- ${{ if eq(parameters.py2, 'true') }}:
+- ${{ if eq(parameters.run_py2_tests, 'true') }}:
     - task: UsePythonVersion@0
       inputs:
         versionSpec: '2.7'
