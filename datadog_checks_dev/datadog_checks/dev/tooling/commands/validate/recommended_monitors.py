@@ -58,14 +58,27 @@ def recommended_monitors():
                     (echo_failure, f"    {monitor_file} does not contain the required fields: {missing_fields}"),
                 )
             else:
-                if decoded.get(decoded.get('recommended_monitor_metadata').get('description')) is not None:
-                    if len(decoded.get(decoded.get('recommended_monitor_metadata').get('description'))) < 300:
+                ## If all required keys exist, validate values
+                if decoded.get('recommended_monitor_metadata').get('description') is not None:
+                    if len(decoded.get('recommended_monitor_metadata').get('description')) > 300:
                         file_failed = True
                         display_queue.append(
                             (echo_failure, f"    {monitor_file} has a description field that is too long, must be <300 chars"),
                         )
 
-                # if decoded.get('tags'):
+                result = [i for i in decoded.get('tags') if i.startswith('integration:')]
+                if len(result) < 1:
+                    file_failed = True
+                    display_queue.append(
+                        (echo_failure,
+                         f"    {monitor_file} must have an integration tag"),
+                    )
+                if check_name not in decoded.get('name').lower():
+                    display_queue.append(
+                        (echo_failure,
+                         f"    {monitor_file} name contain the integration name"),
+                    )
+
 
             if file_failed:
                 failed_checks += 1
@@ -74,6 +87,7 @@ def recommended_monitors():
                 echo_failure(' FAILED')
                 for display_func, message in display_queue:
                     display_func(message)
+                display_queue = []
             else:
                 ok_checks += 1
 
