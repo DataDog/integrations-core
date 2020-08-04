@@ -65,16 +65,29 @@ def test_load_profiles(caplog):
         caplog.clear()
 
 
-def run_profile_check(recording_name):
+def run_profile_check(recording_name, profile_name=None):
     """
     Run a single check with the provided `recording_name` used as
     `community_string` by the docker SNMP endpoint.
     """
+
     instance = common.generate_instance_config([])
 
     instance['community_string'] = recording_name
     instance['enforce_mib_constraints'] = False
     check = SnmpCheck('snmp', {}, [instance])
+
+    # First, see if recording name is a profile, then use profile as definition.
+    if profile_name is not None:
+        profile = check.profiles.get(profile_name)
+    else:
+        profile = check.profiles.get(recording_name)
+    if profile:
+        try:
+            test_check = SnmpCheck('snmp', {}, [common.generate_instance_config([])])
+            test_check._config.refresh_with_profile(profile)
+        except ConfigurationError as e:
+            pytest.fail("Profile `{}` is not configured correctly: {}".format(recording_name, e))
     check.check(instance)
 
 
@@ -192,8 +205,9 @@ def test_cisco_voice(aggregator):
 
 
 @pytest.mark.usefixtures("dd_environment")
-def test_f5_base_case(aggregator):
-    run_profile_check('f5')
+def test_f5(aggregator):
+    profile = "f5-big-ip"
+    run_profile_check('f5', profile)
 
     gauges = [
         'sysStatMemoryTotal',
@@ -237,7 +251,7 @@ def test_f5_base_case(aggregator):
     ]
 
     interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
-    tags = ['snmp_profile:f5-big-ip', 'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal']
+    tags = ['snmp_profile:' + profile, 'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal']
     tags += common.CHECK_TAGS
 
     common.assert_common_metrics(aggregator, tags)
@@ -339,8 +353,9 @@ def test_f5_base_case(aggregator):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_router(aggregator):
-    run_profile_check('network')
-    common_tags = common.CHECK_TAGS + ['snmp_profile:generic-router']
+    profile = "generic-router"
+    run_profile_check('network', profile)
+    common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile]
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -384,7 +399,6 @@ def test_router(aggregator):
 def test_f5_router(aggregator):
     # Use the generic profile against the f5 device
     instance = common.generate_instance_config([])
-
     instance['community_string'] = 'f5'
     instance['enforce_mib_constraints'] = False
 
@@ -421,10 +435,11 @@ def test_f5_router(aggregator):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_cisco_3850(aggregator):
-    run_profile_check('3850')
+    profile = "cisco-3850"
+    run_profile_check('3850', profile)
     # We're not covering all interfaces
     interfaces = ["Gi1/0/{}".format(i) for i in range(1, 48)]
-    common_tags = common.CHECK_TAGS + ['snmp_host:Cat-3850-4th-Floor.companyname.local', 'snmp_profile:cisco-3850']
+    common_tags = common.CHECK_TAGS + ['snmp_host:Cat-3850-4th-Floor.companyname.local', 'snmp_profile:' + profile]
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -661,11 +676,12 @@ def test_idrac(aggregator):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_cisco_nexus(aggregator):
-    run_profile_check('cisco_nexus')
+    profile = "cisco-nexus"
+    run_profile_check('cisco_nexus', profile)
 
     interfaces = ["GigabitEthernet1/0/{}".format(i) for i in range(1, 9)]
 
-    common_tags = common.CHECK_TAGS + ['snmp_host:Nexus-eu1.companyname.managed', 'snmp_profile:cisco-nexus']
+    common_tags = common.CHECK_TAGS + ['snmp_host:Nexus-eu1.companyname.managed', 'snmp_profile:' + profile]
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -859,7 +875,8 @@ def test_dell_poweredge(aggregator):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_hp_ilo4(aggregator):
-    run_profile_check('hp_ilo4')
+    profile = "hp-ilo4"
+    run_profile_check('hp_ilo4', profile)
 
     status_gauges = [
         'cpqHeCritLogCondition',
@@ -920,7 +937,7 @@ def test_hp_ilo4(aggregator):
     temperature_sensors = [1, 13, 28]
     batteries = [1, 3, 4, 5]
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:hp-ilo4']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile]
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1150,9 +1167,10 @@ def test_generic_host_resources(aggregator):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_palo_alto(aggregator):
-    run_profile_check('pan-common')
+    profile = "palo-alto"
+    run_profile_check('pan-common', profile)
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:palo-alto']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile]
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1196,9 +1214,10 @@ def test_palo_alto(aggregator):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_cisco_asa_5525(aggregator):
-    run_profile_check('cisco_asa_5525')
+    profile = "cisco-asa-5525"
+    run_profile_check('cisco_asa_5525', profile)
 
-    common_tags = common.CHECK_TAGS + ['snmp_profile:cisco-asa-5525', 'snmp_host:kept']
+    common_tags = common.CHECK_TAGS + ['snmp_profile:' + profile, 'snmp_host:kept']
 
     common.assert_common_metrics(aggregator, common_tags)
 
@@ -1519,7 +1538,8 @@ def test_aruba(aggregator):
 
 @pytest.mark.usefixtures("dd_environment")
 def test_chatsworth(aggregator):
-    run_profile_check('chatsworth')
+    profile = "chatsworth_pdu"
+    run_profile_check('chatsworth', profile)
 
     # Legacy global tags are applied to all metrics
     legacy_global_tags = [
@@ -1528,7 +1548,7 @@ def test_chatsworth(aggregator):
         'legacy_pdu_name:legacy-name1',
         'legacy_pdu_version:1.2.3',
     ]
-    common_tags = common.CHECK_TAGS + legacy_global_tags + ['snmp_profile:chatsworth_pdu']
+    common_tags = common.CHECK_TAGS + legacy_global_tags + ['snmp_profile:' + profile]
 
     common.assert_common_metrics(aggregator, common_tags)
 
