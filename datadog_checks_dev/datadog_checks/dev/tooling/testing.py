@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 import re
 from fnmatch import fnmatch
 
@@ -50,6 +51,10 @@ def get_tox_envs(
         checks = sorted(testable_checks & changed_checks)
 
     checks_seen = set()
+
+    tox_env_filter = os.environ.get("TOX_SKIP_ENV")
+    tox_env_filter_re = re.compile(tox_env_filter) if tox_env_filter is not None else None
+
     for check in checks:
         check, _, envs_selected = check.partition(':')
 
@@ -84,6 +89,9 @@ def get_tox_envs(
                 envs_selected[:] = selected
             else:
                 envs_selected[:] = [e for e in envs_available if 'bench' not in e and 'format_style' not in e]
+
+        if tox_env_filter_re:
+            envs_selected[:] = [e for e in envs_available if not tox_env_filter_re.match(e)]
 
         yield check, envs_selected
 
