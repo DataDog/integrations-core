@@ -15,7 +15,11 @@ from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_suc
 REQUIRED_ATTRIBUTES = {'name', 'type', 'query', 'message', 'tags', 'options', 'recommended_monitor_metadata'}
 
 
-@click.command('recommended-monitors', context_settings=CONTEXT_SETTINGS, short_help='Validate recommended monitor definition JSON files')
+@click.command(
+    'recommended-monitors',
+    context_settings=CONTEXT_SETTINGS,
+    short_help='Validate recommended monitor definition JSON files',
+)
 def recommended_monitors():
     """Validate all recommended monitors definition files."""
     root = get_root()
@@ -55,27 +59,24 @@ def recommended_monitors():
                     (echo_failure, f"    {monitor_file} does not contain the required fields: {missing_fields}"),
                 )
             else:
-                ## If all required keys exist, validate values
+                # If all required keys exist, validate values
                 if decoded.get('recommended_monitor_metadata').get('description') is not None:
                     if len(decoded.get('recommended_monitor_metadata').get('description')) > 300:
                         file_failed = True
                         display_queue.append(
-                            (echo_failure, f"    {monitor_file} has a description field that is too long, must be <300 chars"),
+                            (
+                                echo_failure,
+                                f"    {monitor_file} has a description field that is too long, must be <300 chars",
+                            ),
                         )
 
                 result = [i for i in decoded.get('tags') if i.startswith('integration:')]
                 if len(result) < 1:
                     file_failed = True
-                    display_queue.append(
-                        (echo_failure,
-                         f"    {monitor_file} must have an integration tag"),
-                    )
+                    display_queue.append((echo_failure, f"    {monitor_file} must have an integration tag"),)
 
                 if check_name not in decoded.get('name').lower():
-                    display_queue.append(
-                        (echo_failure,
-                         f"    {monitor_file} name contain the integration name"),
-                    )
+                    display_queue.append((echo_failure, f"    {monitor_file} name contain the integration name"),)
 
             if file_failed:
                 failed_checks += 1
