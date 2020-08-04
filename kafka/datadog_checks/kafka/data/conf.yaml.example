@@ -59,8 +59,7 @@ instances:
   - host: localhost
 
     ## @param port - integer - required
-    ## Kafka port to connect to.
-    ## This is the JMX port on which Kafka exposes its metrics.
+    ## JMX port to connect to.
     #
     port: 9999
 
@@ -74,19 +73,19 @@ instances:
     #
     # password: <PASSWORD>
 
-    ## @param process_name_regex - string - optional - default: .*process_name.*
+    ## @param process_name_regex - string - optional
     ## Instead of using a host and port, the Agent can connect using the attach API.
     ## This requires the JDK to be installed and the path to tools.jar to be set below.
     ## Note: It needs to be set when process_name_regex parameter is set
     ## e.g. .*process_name.*
     #
-    # process_name_regex: .*process_name.*
+    # process_name_regex: <PROCESS_NAME_REGEX>
 
-    ## @param tools_jar_path - string - optional - default: /usr/lib/jvm/java-8-openjdk-amd64/lib/tools.jar
+    ## @param tools_jar_path - string - optional
     ## The tool.jar path to be used with the `process_name_regex` parameter,
     ## for example: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
     #
-    # tools_jar_path: /usr/lib/jvm/java-8-openjdk-amd64/lib/tools.jar
+    # tools_jar_path: <TOOLS_JAR_PATH>
 
     ## @param name - string - optional
     ## Set the instance name to be used as the `instance` tag.
