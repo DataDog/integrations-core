@@ -4,6 +4,8 @@
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
+
 from .common import KAFKA_E2E_METRICS
 
 
