@@ -192,9 +192,9 @@ class ExecutionPlansMixin(object):
             except pymysql.err.DatabaseError as e:
                 if e.args[0] == 1290:
                     # --read-only mode failure is expected so log at debug level
-                    self.log.debug('failed to enable performance_schema consumer %s: %s', name, str(e))
+                    self.log.debug('failed to enable performance_schema consumer %s: %s', name, e)
                     return False
-                self.log.warning('failed to enable performance_schema consumer %s: %s', name, str(e))
+                self.log.warning('failed to enable performance_schema consumer %s: %s', name, e)
         return False
 
     def _get_plan_collection_strategy(self, db, options, min_collection_interval):
