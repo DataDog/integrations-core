@@ -44,6 +44,7 @@ def dashboards():
             echo_info(f'{check_name}... ', nl=False)
             echo_info(' FAILED')
             echo_failure(f'  {invalid} does not exist')
+            failed_checks += 1
 
         for dashboard_file in dashboard_relative_locations:
             try:
