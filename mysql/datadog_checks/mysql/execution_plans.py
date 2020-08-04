@@ -1,11 +1,11 @@
 import json
+import time
 from contextlib import closing
 
 import pymysql
 
 import datadog_agent
 import pymysql
-import time
 from datadog import statsd
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.statement_metrics import is_dbm_enabled
