@@ -13,6 +13,10 @@ This check has a limit of 350 metrics per instance. The number of returned metri
 
 To collect Kafka consumer metrics, see the [kafka_consumer check][3].
 
+*Note*: This integration attached sample configuration works only for Kafka >= 0.8.2.
+If you are running a version older than that, you can refer to agent 5.2.x released
+sample files, https://raw.githubusercontent.com/DataDog/dd-agent/5.2.1/conf.d/kafka.yaml.example
+
 ## Setup
 
 ### Installation
