@@ -73,11 +73,11 @@ def recommended_monitors():
                 result = [i for i in decoded.get('tags') if i.startswith('integration:')]
                 if len(result) < 1:
                     file_failed = True
-                    display_queue.append((echo_failure, f"    {monitor_file} must have an integration tag"),)
+                    display_queue.append((echo_failure, f"    {monitor_file} must have an `integration` tag"),)
 
                 if check_name not in decoded.get('name').lower():
                     file_failed = True
-                    display_queue.append((echo_failure, f"    {monitor_file} name contain the integration name"),)
+                    display_queue.append((echo_failure, f"    {monitor_file} name must contain the integration name"),)
 
         if file_failed:
             failed_checks += 1
