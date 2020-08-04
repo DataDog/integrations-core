@@ -40,13 +40,7 @@ def snmp_get(config, oids, lookup_mib):
 
     ctx = {}  # type: Dict[str, Any]
 
-    # print("oids", oids)
-    # var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
-    for oid in oids:
-        oid.stClean = 2
-        oid._ObjectType__state |= oid.stClean
-        print("oid._ObjectType__state", oid._ObjectType__state)
-    var_binds = oids
+    var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
 
     cmdgen.GetCommandGenerator().sendVarBinds(
         config._snmp_engine,
