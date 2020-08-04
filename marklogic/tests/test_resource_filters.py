@@ -121,6 +121,7 @@ def test_collect_host_metrics(mock_requests, mock_status, aggregator):
         'forest': [],
         'database': [],
         'host': [
+            # Does not exist
             {'name': '9aea032c882e', 'id': '17797492400840985949', 'type': 'host', 'uri': '/hosts/9aea032c882e'},
             {'name': 'ff0fef449486', 'id': '3428441913043145991', 'type': 'host', 'uri': 'hosts/ff0fef449486'},
         ],
@@ -131,8 +132,8 @@ def test_collect_host_metrics(mock_requests, mock_status, aggregator):
 
     expected_tags = ['host_name:ff0fef449486']
     for m in HOST_STATUS_METRICS_GENERAL:
-        aggregator.assert_metric(m, tags=expected_tags)
+        aggregator.assert_metric(m, tags=expected_tags, count=1)
     for m in ['marklogic.requests.query-count', 'marklogic.requests.total-requests', 'marklogic.requests.update-count']:
-        aggregator.assert_metric(m, tags=expected_tags)
+        aggregator.assert_metric(m, tags=expected_tags, count=1)
 
     aggregator.assert_all_metrics_covered()
