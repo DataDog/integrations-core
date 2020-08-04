@@ -3,13 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
-import os
 
 import click
 
-from ....utils import file_exists, read_file
-from ...constants import get_root
-from ...utils import get_valid_integrations, load_manifest
+from ....utils import read_file
+from ...utils import get_assets_from_manifest, get_valid_integrations, load_manifest
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {'name', 'type', 'query', 'message', 'tags', 'options', 'recommended_monitor_metadata'}
@@ -22,7 +20,6 @@ REQUIRED_ATTRIBUTES = {'name', 'type', 'query', 'message', 'tags', 'options', 'r
 )
 def recommended_monitors():
     """Validate all recommended monitors definition files."""
-    root = get_root()
     echo_info("Validating all recommended monitors...")
     failed_checks = 0
     ok_checks = 0
@@ -31,17 +28,9 @@ def recommended_monitors():
         display_queue = []
         file_failed = False
         manifest = load_manifest(check_name)
-        monitors_relative_locations = manifest.get('assets', {}).get('monitors', {}).values()
-        for monitor_relative_location in monitors_relative_locations:
+        monitors_relative_locations = get_assets_from_manifest(check_name, 'monitors')
 
-            monitor_file = os.path.join(root, check_name, *monitor_relative_location.split('/'))
-            if not file_exists(monitor_file):
-                echo_info(f'{check_name}... ', nl=False)
-                echo_info(' FAILED')
-                echo_failure(f'  {monitor_file} does not exist')
-                failed_checks += 1
-                continue
-
+        for monitor_file in monitors_relative_locations:
             try:
                 decoded = json.loads(read_file(monitor_file).strip())
             except json.JSONDecodeError as e:
@@ -67,7 +56,7 @@ def recommended_monitors():
                         display_queue.append(
                             (
                                 echo_failure,
-                                f"    {monitor_file} has a description field that is too long, must be <300 chars",
+                                f"    {monitor_file} has a description field that is too long, must be < 300 chars",
                             ),
                         )
 
