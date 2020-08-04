@@ -18,44 +18,84 @@ def dd_environment():
     # type: () -> Generator[Dict[str, Any], None, None]
 
     # Standalone
-    compose_file = os.path.join(HERE, 'compose', 'standalone/docker-compose.yml')
-    with docker_run(
-        compose_file=compose_file,
-        conditions=[CheckDockerLogs(compose_file, r'Deleted'), WaitFor(setup_admin_user), WaitFor(setup_datadog_user)],
-    ):
-        yield CHECK_CONFIG
-
-    # Cluster (works locally but not on CI)
-    # compose_file = os.path.join(HERE, 'compose', 'cluster/docker-compose.yml')
+    # compose_file = os.path.join(HERE, 'compose', 'standalone/docker-compose.yml')
     # with docker_run(
     #     compose_file=compose_file,
     #     conditions=[
-    #         CheckDockerLogs(compose_file, r'Detected quorum'),
+    #         CheckDockerLogs(compose_file, r'Deleted'),
     #         WaitFor(setup_admin_user),
     #         WaitFor(setup_datadog_user),
     #     ],
     # ):
     #     yield CHECK_CONFIG
 
+    # Cluster (works locally but not on CI)
+    compose_file = os.path.join(HERE, 'compose', 'cluster/docker-compose.yml')
+    with docker_run(
+        compose_file=compose_file,
+        conditions=[
+            CheckDockerLogs(compose_file, r'Database Fab'),
+            WaitFor(setup_admin_user, attempts=20),
+            WaitFor(setup_datadog_user, attempts=10),
+            WaitFor(joining_cluster, attempts=10),
+            CheckDockerLogs(compose_file, r'Detected quorum'),
+        ],
+    ):
+        yield CHECK_CONFIG
+
+
+def joining_cluster():
+    # type: () -> None
+
+    # See https://www.marklogic.com/blog/docker-marklogic-initialization/
+    # Get the joining node configuration
+    r_joining_config = requests.get(
+        'http://localhost:18001/admin/v1/server-config',
+        headers={'Accept': 'application/xml'},
+        auth=requests.auth.HTTPDigestAuth(ADMIN_USERNAME, ADMIN_PASSWORD),
+    )
+    r_joining_config.raise_for_status()
+
+    # Update the config on the bootstrap side
+    r_bootstrap = requests.post(
+        'http://localhost:8001/admin/v1/cluster-config',
+        headers={'Content-Type': 'application/x-www-form-urlencoded'},
+        auth=requests.auth.HTTPDigestAuth(ADMIN_USERNAME, ADMIN_PASSWORD),
+        params={'server-config': r_joining_config.content, 'group': 'Default'},
+    )
+    r_bootstrap.raise_for_status()
+
+    # Make the node join the cluster
+    r_join = requests.post(
+        'http://localhost:18001/admin/v1/cluster-config',
+        headers={'Content-Type': 'application/zip'},
+        auth=requests.auth.HTTPDigestAuth(ADMIN_USERNAME, ADMIN_PASSWORD),
+        data=r_bootstrap.content,
+    )
+    r_join.raise_for_status()
+
 
 def setup_admin_user():
     # type: () -> None
     # From https://docs.marklogic.com/10.0/guide/admin-api/cluster
     # Reset admin user password (usefull for cluster setup)
-    requests.post(
-        'http://localhost:8001/admin/v1/instance-admin',
-        data={
-            "admin-username": ADMIN_USERNAME,
-            "admin-password": ADMIN_PASSWORD,
-            "wallet-password": ADMIN_PASSWORD,
-            "realm": "public",
-        },
-        headers={"Content-type": "application/x-www-form-urlencoded"},
-    )
 
-    r = requests.get('{}/manage/v2'.format(API_URL), auth=requests.auth.HTTPDigestAuth(ADMIN_USERNAME, ADMIN_PASSWORD))
-
-    r.raise_for_status()
+    try:
+        r = requests.get(
+            '{}/manage/v2'.format(API_URL), auth=requests.auth.HTTPDigestAuth(ADMIN_USERNAME, ADMIN_PASSWORD)
+        )
+        r.raise_for_status()
+    except Exception:
+        requests.post(
+            'http://localhost:8001/admin/v1/instance-admin',
+            data={
+                "admin-username": ADMIN_USERNAME,
+                "admin-password": ADMIN_PASSWORD,
+                "wallet-password": ADMIN_PASSWORD,
+                "realm": "public",
+            },
+            headers={"Content-type": "application/x-www-form-urlencoded"},
+        )
 
 
 def setup_datadog_user():

@@ -13,7 +13,6 @@ services:
     image: store/marklogicdb/marklogic-server:${MARKLOGIC_IMAGE}
     environment:
     - MARKLOGIC_INIT=true
-    - MARKLOGIC_JOIN_CLUSTER=true
     ports:
     - 18000:8000
     - 18001:8001
