@@ -4,7 +4,7 @@
     "query": "avg(last_5m):max:mysql.replication.seconds_behind_master{*} by {host} > 3000",
     "message": "MySQL Replication behind on {{host.name}}\n\nPossible cause: Network lag, MySQL replication broken",
     "tags": [
-        "service:mysql"
+        "integration:mysql"
     ],
     "options": {
         "notify_audit": false,
