@@ -260,7 +260,7 @@ class ExecutionPlansMixin(object):
         )
 
         if chosen_table:
-            # cache only successful plans, 10 minute expiry
+            # cache only successful strategies, 10 minute expiry
             # 10 minutes is short enough that we'll reflect updates "relatively quickly"
             # i.e., an aurora replica becomes a master (or vice versa)
             self.log.debug("found plan collection strategy. chosen_table=%s, time_limit=%s, rate_limit=%s",
