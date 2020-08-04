@@ -5,6 +5,8 @@ services:
     image: store/marklogicdb/marklogic-server:${MARKLOGIC_IMAGE}
     environment:
     - MARKLOGIC_INIT=true
+    - MARKLOGIC_ADMIN_USERNAME=admin
+    - MARKLOGIC_ADMIN_PASSWORD=admin
     ports:
     - 8000:8000
     - 8001:8001
