@@ -7,7 +7,7 @@ import pytest
 from datadog_checks.dev.jmx import JVM_E2E_METRICS
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import GAUGES, MONOTONIC_COUNT
+from .common import GAUGES, MONOTONIC_COUNTS
 
 
 @pytest.mark.e2e
@@ -18,7 +18,7 @@ def test_e2e(dd_agent_check):
     for metric in GAUGES:
         aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
 
-    for metric in MONOTONIC_COUNT:
+    for metric in MONOTONIC_COUNTS:
         aggregator.assert_metric(metric, metric_type=aggregator.RATE)
 
     aggregator.assert_all_metrics_covered()
