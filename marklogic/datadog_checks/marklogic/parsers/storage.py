@@ -1,15 +1,15 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, Dict, Generator, List, Tuple
+from typing import Any, Dict, Generator, List, Optional, Tuple
 
 from six import iteritems
 
 from .common import build_metric_to_submit, is_metric
 
 
-def parse_summary_storage_base_metrics(data, tags):
-    #  type: (Dict[str, Any], List[str]) -> Generator[Tuple, None, None]
+def parse_summary_storage_base_metrics(data, tags, get_location_forest=False):
+    #  type: (Dict[str, Any], List[str], Optional[bool]) -> Generator[Tuple, None, None]
     """
     Collect Base Storage Metrics
     """
@@ -37,13 +37,14 @@ def parse_summary_storage_base_metrics(data, tags):
                             "forest_id:{}".format(forest_data['idref']),
                             "forest_name:{}".format(forest_data['nameref']),
                         ]
-                        for forest_key, forest_value in iteritems(forest_data):
-                            if forest_key == 'disk-size':
-                                metric = build_metric_to_submit(
-                                    "forests.storage.forest.{}".format(forest_key), forest_value, tags=forest_tags
-                                )
-                                if metric is not None:
-                                    yield metric
+                        if get_location_forest:
+                            for forest_key, forest_value in iteritems(forest_data):
+                                if forest_key == 'disk-size':
+                                    metric = build_metric_to_submit(
+                                        "forests.storage.forest.{}".format(forest_key), forest_value, tags=forest_tags
+                                    )
+                                    if metric is not None:
+                                        yield metric
                 elif is_metric(host_value):
                     metric = build_metric_to_submit(
                         "forests.storage.host.{}".format(host_key), host_value, tags=location_tags

@@ -96,7 +96,7 @@ class MarklogicCheck(AgentCheck):
         Collect Base Storage Metrics
         """
         data = self.api.get_storage_data()
-        metrics = parse_summary_storage_base_metrics(data, self.config.tags)
+        metrics = parse_summary_storage_base_metrics(data, self.config.tags, True)
         self.submit_metrics(metrics)
 
     def get_resources_to_monitor(self):
@@ -145,8 +145,6 @@ class MarklogicCheck(AgentCheck):
 
     def _collect_resource_storage_metrics(self, resource_type, name, group, tags):
         # type: (str, str, str, List[str]) -> None
-        # TODO: remove duplication with filters
-        # forests.storage.forest.disk-size is submitted twice when using a resource filter.
         """ Collect storage metrics of a specific resource """
         data = self.api.get_storage_data(resource=resource_type, name=name, group=group)
         metrics = parse_summary_storage_base_metrics(data, tags)

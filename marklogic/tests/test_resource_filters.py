@@ -3,14 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict, List
 
+import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.marklogic import MarklogicCheck
 from datadog_checks.marklogic.config import Config
 from datadog_checks.marklogic.parsers.resources import parse_resources
 
 from .common import INSTANCE_FILTERS, read_fixture_file
+from .metrics import HOST_STATUS_METRICS_GENERAL
 
 
 def test_build_resource_filters():
@@ -103,3 +106,33 @@ def test_get_resources_to_monitor():
         'host': [],
         'server': [],
     }
+
+
+@mock.patch('datadog_checks.marklogic.api.MarkLogicApi.http_get', return_value=read_fixture_file('host_status.yaml'))
+@mock.patch(
+    'datadog_checks.marklogic.api.MarkLogicApi.get_requests_data', return_value=read_fixture_file('host_requests.yaml')
+)
+def test_collect_host_metrics(mock_requests, mock_status, aggregator):
+    # type: (Any, Any, AggregatorStub) -> None
+    check = MarklogicCheck('marklogic', {}, [INSTANCE_FILTERS])
+
+    # Expected output when there is no exclude list
+    check.resources_to_monitor = {
+        'forest': [],
+        'database': [],
+        'host': [
+            {'name': '9aea032c882e', 'id': '17797492400840985949', 'type': 'host', 'uri': '/hosts/9aea032c882e'},
+            {'name': 'ff0fef449486', 'id': '3428441913043145991', 'type': 'host', 'uri': 'hosts/ff0fef449486'},
+        ],
+        'server': [],
+    }
+
+    check.collect_per_resource_metrics()
+
+    expected_tags = ['host_name:ff0fef449486']
+    for m in HOST_STATUS_METRICS_GENERAL:
+        aggregator.assert_metric(m, tags=expected_tags)
+    for m in ['marklogic.requests.query-count', 'marklogic.requests.total-requests', 'marklogic.requests.update-count']:
+        aggregator.assert_metric(m, tags=expected_tags)
+
+    aggregator.assert_all_metrics_covered()

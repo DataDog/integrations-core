@@ -19,10 +19,11 @@ RESOURCE_TYPES = {
     'servers': {'plural': 'servers', 'singular': 'server'},
 }  # type: Dict[str, Dict]
 
+# Storage metrics are duplications
 RESOURCE_METRICS_AVAILABLE = {
     'forest': {'status': True, 'storage': True, 'requests': False},
-    'database': {'status': True, 'storage': True, 'requests': False},
-    'host': {'status': True, 'storage': True, 'requests': True},
+    'database': {'status': True, 'storage': False, 'requests': False},
+    'host': {'status': True, 'storage': False, 'requests': True},
     'server': {'status': False, 'storage': False, 'requests': True},
 }
 

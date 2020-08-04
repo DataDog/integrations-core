@@ -63,9 +63,7 @@ FOREST_STATUS_SUMMARY_METRICS = [
     'marklogic.forests.triple-value-cache-miss-rate',
 ]
 
-
-HOST_STATUS_METRICS = [
-    # Part 1
+HOST_STATUS_METRICS_SPECIFIC = [
     # TODO: needs preprocessing to be available
     # 'marklogic.hosts.memory-process-huge-pages-size',
     # 'marklogic.hosts.memory-process-rss',
@@ -73,10 +71,13 @@ HOST_STATUS_METRICS = [
     # 'marklogic.hosts.memory-system-total',
     # 'marklogic.hosts.total-cpu-stat-system',
     # 'marklogic.hosts.total-cpu-stat-user',
+    'marklogic.hosts.memory-process-swap-rate',
     'marklogic.hosts.total-hosts',
     'marklogic.hosts.total-hosts-offline',
     'marklogic.hosts.memory-size',
-    # Part 2
+]
+
+HOST_STATUS_METRICS_GENERAL = [
     'marklogic.hosts.backup-read-load',
     'marklogic.hosts.backup-read-rate',
     'marklogic.hosts.backup-write-load',
@@ -99,7 +100,6 @@ HOST_STATUS_METRICS = [
     'marklogic.hosts.large-read-rate',
     'marklogic.hosts.large-write-load',
     'marklogic.hosts.large-write-rate',
-    'marklogic.hosts.memory-process-swap-rate',
     'marklogic.hosts.memory-system-pagein-rate',
     'marklogic.hosts.memory-system-pageout-rate',
     'marklogic.hosts.memory-system-swapin-rate',
@@ -198,6 +198,8 @@ RESOURCE_STORAGE_FOREST_METRICS = [
     'marklogic.forests.orphaned-binaries',
 ]
 
+
+HOST_STATUS_METRICS = HOST_STATUS_METRICS_GENERAL + HOST_STATUS_METRICS_SPECIFIC
 
 GLOBAL_METRICS = (
     FOREST_STATUS_SUMMARY_METRICS

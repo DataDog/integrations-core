@@ -212,7 +212,7 @@ def test_parse_summary_storage_base_metrics():
         ),
     ]
 
-    result = list(parse_summary_storage_base_metrics(forests_storage_data, ['foo:bar']))
+    result = list(parse_summary_storage_base_metrics(forests_storage_data, ['foo:bar'], True))
 
     assert sorted(result) == sorted(EXPECTED_RESULT)
 

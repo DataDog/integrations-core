@@ -16,18 +16,32 @@ from .common import ADMIN_PASSWORD, ADMIN_USERNAME, API_URL, CHECK_CONFIG, HERE,
 @pytest.fixture(scope="session")
 def dd_environment():
     # type: () -> Generator[Dict[str, Any], None, None]
-    compose_file = os.path.join(HERE, 'compose', 'docker-compose.yml')
+
+    # Standalone
+    compose_file = os.path.join(HERE, 'compose', 'standalone/docker-compose.yml')
     with docker_run(
         compose_file=compose_file,
         conditions=[CheckDockerLogs(compose_file, r'Deleted'), WaitFor(setup_admin_user), WaitFor(setup_datadog_user)],
     ):
         yield CHECK_CONFIG
 
+    # Cluster (works locally but not on CI)
+    # compose_file = os.path.join(HERE, 'compose', 'cluster/docker-compose.yml')
+    # with docker_run(
+    #     compose_file=compose_file,
+    #     conditions=[
+    #         CheckDockerLogs(compose_file, r'Detected quorum'),
+    #         WaitFor(setup_admin_user),
+    #         WaitFor(setup_datadog_user),
+    #     ],
+    # ):
+    #     yield CHECK_CONFIG
+
 
 def setup_admin_user():
     # type: () -> None
     # From https://docs.marklogic.com/10.0/guide/admin-api/cluster
-    # Set admin user password (usefull for cluster setup)
+    # Reset admin user password (usefull for cluster setup)
     requests.post(
         'http://localhost:8001/admin/v1/instance-admin',
         data={
