@@ -5,8 +5,10 @@ import logging
 import os
 
 import mock
+import pytest
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.log import TRACE_LEVEL
 from datadog_checks.vertica import VerticaCheck
 
 CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
@@ -91,13 +93,18 @@ def test_client_logging_disabled(aggregator, instance):
         )
 
 
-def test_client_logging_enabled_debug_if_agent_uses_debug(aggregator, instance):
+@pytest.mark.parametrize(
+    'agent_log_level, expected_vertica_log_level', [(logging.DEBUG, logging.DEBUG), (TRACE_LEVEL, logging.DEBUG)]
+)
+def test_client_logging_enabled_debug_if_agent_uses_debug_or_trace(
+    aggregator, instance, agent_log_level, expected_vertica_log_level
+):
     """
     Improve collection of debug flares by automatically enabling client DEBUG logs when the Agent uses DEBUG logs.
     """
     instance.pop('client_lib_log_level', None)
     root_logger = logging.getLogger()
-    root_logger.setLevel(logging.DEBUG)
+    root_logger.setLevel(agent_log_level)
 
     check = VerticaCheck('vertica', {}, [instance])
 
@@ -113,7 +120,7 @@ def test_client_logging_enabled_debug_if_agent_uses_debug(aggregator, instance):
             backup_server_node=mock.ANY,
             connection_load_balance=mock.ANY,
             connection_timeout=mock.ANY,
-            log_level='DEBUG',
+            log_level=expected_vertica_log_level,
             log_path='',
         )
 
