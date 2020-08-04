@@ -7,8 +7,7 @@ import os
 import click
 
 from ....utils import file_exists, read_file
-from ...constants import get_root
-from ...utils import get_valid_integrations, load_manifest
+from ...utils import get_valid_integrations, get_assets_from_manifest
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {"board_title", "description", "template_variables", "widgets"}
@@ -32,7 +31,6 @@ def _is_dash_format(payload):
 @click.command('dashboards', context_settings=CONTEXT_SETTINGS, short_help='Validate dashboard definition JSON files')
 def dashboards():
     """Validate all Dashboard definition files."""
-    root = get_root()
     echo_info("Validating all Dashboard definition files...")
     failed_checks = 0
     ok_checks = 0
@@ -40,19 +38,14 @@ def dashboards():
     for check_name in sorted(get_valid_integrations()):
         display_queue = []
         file_failed = False
-        manifest = load_manifest(check_name)
-        dashboard_relative_locations = manifest.get('assets', {}).get('dashboards', {}).values()
 
-        for dashboard_relative_location in dashboard_relative_locations:
+        dashboard_relative_locations, invalid_files = get_assets_from_manifest(check_name, 'dashboards')
+        for invalid in invalid_files:
+            echo_info(f'{check_name}... ', nl=False)
+            echo_info(' FAILED')
+            echo_failure(f'  {invalid} does not exist')
 
-            dashboard_file = os.path.join(root, check_name, *dashboard_relative_location.split('/'))
-            if not file_exists(dashboard_file):
-                echo_info(f'{check_name}... ', nl=False)
-                echo_info(' FAILED')
-                echo_failure(f'  {dashboard_file} does not exist')
-                failed_checks += 1
-                continue
-
+        for dashboard_file in dashboard_relative_locations:
             try:
                 decoded = json.loads(read_file(dashboard_file).strip())
             except json.JSONDecodeError as e:
