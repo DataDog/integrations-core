@@ -19,9 +19,13 @@ location = session.get('sysLocation.0')
 # You may also specify the OID as a tuple (name, index)
 # Note: the index is specified as a string as it can be of other types than
 # just a regular integer
-contact = session.get(('sysContact', '0'))
+contact = session.get([
+    ('.1.3.6.1.4.1.123456789.1.0'),
+] * 100)
 
-print_item(contact)
+for i in range(100):
+    for item in contact:
+        print_item(item)
 
 # # And of course, you may use the numeric OID too
 # description = session.get('.1.3.6.1.2.1.1.1.0')
