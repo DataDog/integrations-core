@@ -1,9 +1,13 @@
-trigger:
+trigger: none
+
+pr:
   branches:
     include:
     - master
+  paths:
+    exclude:
+    - datadog_checks_base/datadog_checks/*
 
-pr: none
 
 variables:
   PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
