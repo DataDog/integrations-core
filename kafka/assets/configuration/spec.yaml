@@ -8,6 +8,16 @@ files:
   - template: instances
     options:
     - template: instances/jmx
+      overrides:
+        host.description: Kafka host to connect to.
+        host.value.example: localhost
+        port.description: |
+          Kafka port to connect to.
+          This is the JMX port on which Kafka exposes its metrics.
+        port.value.example: 9999
+        process_name_regex.value.example: .*process_name.*
+        tools_jar_path.value.example: /usr/lib/jvm/java-8-openjdk-amd64/lib/tools.jar
+
   - template: logs
     example:
     - type: file
