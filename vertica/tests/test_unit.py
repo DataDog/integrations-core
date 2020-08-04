@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
 import os
 
 import mock
@@ -73,6 +74,58 @@ def test_client_logging_enabled(aggregator, instance):
 
 def test_client_logging_disabled(aggregator, instance):
     instance['client_lib_log_level'] = None
+    check = VerticaCheck('vertica', {}, [instance])
+
+    with mock.patch('datadog_checks.vertica.vertica.vertica') as vertica:
+        check.check(instance)
+
+        vertica.connect.assert_called_with(
+            database=mock.ANY,
+            host=mock.ANY,
+            port=mock.ANY,
+            user=mock.ANY,
+            password=mock.ANY,
+            backup_server_node=mock.ANY,
+            connection_load_balance=mock.ANY,
+            connection_timeout=mock.ANY,
+        )
+
+
+def test_client_logging_enabled_debug_if_agent_uses_debug(aggregator, instance):
+    """
+    Improve collection of debug flares by automatically enabling client DEBUG logs when the Agent uses DEBUG logs.
+    """
+    instance.pop('client_lib_log_level', None)
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.DEBUG)
+
+    check = VerticaCheck('vertica', {}, [instance])
+
+    with mock.patch('datadog_checks.vertica.vertica.vertica') as vertica:
+        check.check(instance)
+
+        vertica.connect.assert_called_with(
+            database=mock.ANY,
+            host=mock.ANY,
+            port=mock.ANY,
+            user=mock.ANY,
+            password=mock.ANY,
+            backup_server_node=mock.ANY,
+            connection_load_balance=mock.ANY,
+            connection_timeout=mock.ANY,
+            log_level='DEBUG',
+            log_path='',
+        )
+
+
+def test_client_logging_disabled_if_agent_uses_info(aggregator, instance):
+    """
+    Library logs should be disabled by default, in particular under normal Agent operation (INFO level).
+    """
+    instance.pop('client_lib_log_level', None)
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+
     check = VerticaCheck('vertica', {}, [instance])
 
     with mock.patch('datadog_checks.vertica.vertica.vertica') as vertica:

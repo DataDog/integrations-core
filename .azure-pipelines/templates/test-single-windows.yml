@@ -10,6 +10,7 @@ parameters:
   repo: 'core'
   pip_cache_config: null
   run_py2_tests: true  # Whether or not to run python2 tests
+  coverage: true
 
 jobs:
 - job: '${{ coalesce(parameters.job_name, parameters.check) }}_Windows'
@@ -51,3 +52,4 @@ jobs:
       benchmark: ${{ parameters.benchmark }}
       latest_metrics: ${{ parameters.latest_metrics }}
       repo: ${{ parameters.repo }}
+      coverage: ${{ parameters.coverage }}

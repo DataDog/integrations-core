@@ -1,5 +1,13 @@
 # CHANGELOG - snmp
 
+## 3.7.0 / 2020-08-03
+
+* [Added] Add OID caching. See [#7231](https://github.com/DataDog/integrations-core/pull/7231).
+* [Fixed] Refactor how OIDs are managed. See [#7230](https://github.com/DataDog/integrations-core/pull/7230).
+* [Fixed] Sanitize OctetString. See [#7221](https://github.com/DataDog/integrations-core/pull/7221).
+* [Fixed] Rename all_oids to scalar_oids. See [#7229](https://github.com/DataDog/integrations-core/pull/7229).
+* [Fixed] Better logging for submit_metric. See [#7188](https://github.com/DataDog/integrations-core/pull/7188).
+
 ## 3.6.0 / 2020-07-24
 
 * [Added] Check tag for table metric. See [#6933](https://github.com/DataDog/integrations-core/pull/6933).

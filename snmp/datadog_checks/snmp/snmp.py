@@ -167,7 +167,7 @@ class SnmpCheck(AgentCheck):
     def fetch_results(
         self, config,  # type: InstanceConfig
     ):
-        # type: (...) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], Optional[str]]
+        # type: (...) -> Tuple[Dict[str, Dict[Tuple[str, ...], Any]], List[OID], Optional[str]]
         """
         Perform a snmpwalk on the domain specified by the oids, on the device
         configured in instance.
@@ -200,13 +200,16 @@ class SnmpCheck(AgentCheck):
                     error = message
                 self.warning(message)
 
+        scalar_oids = []
         for result_oid, value in all_binds:
-            match = config.resolve_oid(OID(result_oid))
+            oid = OID(result_oid)
+            scalar_oids.append(oid)
+            match = config.resolve_oid(oid)
             results[match.name][match.indexes] = value
         self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
         # Freeze the result
         results.default_factory = None  # type: ignore
-        return results, error
+        return results, scalar_oids, error
 
     def fetch_oids(self, config, scalar_oids, next_oids, enforce_constraints):
         # type: (InstanceConfig, List[OID], List[OID], bool) -> Tuple[List[Any], Optional[str]]
@@ -371,6 +374,8 @@ class SnmpCheck(AgentCheck):
         instance = config.instance
         error = results = None
         tags = config.tags
+        if config.oid_config.should_reset():
+            config.oid_config.reset()
         try:
             if not config.oid_config.has_oids():
                 sys_object_oid = self.fetch_sysobject_oid(config)
@@ -381,7 +386,8 @@ class SnmpCheck(AgentCheck):
             if config.oid_config.has_oids():
                 self.log.debug('Querying %s', config.device)
                 config.add_uptime_metric()
-                results, error = self.fetch_results(config)
+                results, scalar_oids, error = self.fetch_results(config)
+                config.oid_config.update_scalar_oids(scalar_oids)
                 tags = self.extract_metric_tags(config.parsed_metric_tags, results)
                 tags.extend(config.tags)
                 self.report_metrics(config.parsed_metrics, results, tags)
