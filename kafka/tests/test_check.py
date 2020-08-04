@@ -16,3 +16,4 @@ def test(dd_agent_check):
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
