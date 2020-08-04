@@ -76,6 +76,7 @@ def recommended_monitors():
                     display_queue.append((echo_failure, f"    {monitor_file} must have an integration tag"),)
 
                 if check_name not in decoded.get('name').lower():
+                    file_failed = True
                     display_queue.append((echo_failure, f"    {monitor_file} name contain the integration name"),)
 
             if file_failed:
