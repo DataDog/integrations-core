@@ -79,16 +79,16 @@ def recommended_monitors():
                     file_failed = True
                     display_queue.append((echo_failure, f"    {monitor_file} name contain the integration name"),)
 
-            if file_failed:
-                failed_checks += 1
-                # Display detailed info if file is invalid
-                echo_info(f'{check_name}... ', nl=False)
-                echo_failure(' FAILED')
-                for display_func, message in display_queue:
-                    display_func(message)
-                display_queue = []
-            else:
-                ok_checks += 1
+        if file_failed:
+            failed_checks += 1
+            # Display detailed info if file is invalid
+            echo_info(f'{check_name}... ', nl=False)
+            echo_failure(' FAILED')
+            for display_func, message in display_queue:
+                display_func(message)
+            display_queue = []
+        else:
+            ok_checks += 1
 
     if ok_checks:
         echo_success(f"{ok_checks} valid files")
