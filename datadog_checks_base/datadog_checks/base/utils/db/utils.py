@@ -80,3 +80,26 @@ class ConstantRateLimiter:
         sleep_amount = max(self.period_s - elapsed_s, 0)
         time.sleep(sleep_amount)
         self.last_event = time.time()
+
+
+class ExpiringCache(dict):
+    """
+    Simple expiring key-value cache. Not thread safe.
+    """
+
+    def __init__(self):
+        self.cache = {}
+
+    def set(self, key, val, expire_seconds):
+        """
+        set key=value, expiring after expire_seconds
+        """
+        expire_at = time.time() + expire_seconds
+        self.cache[key] = (val, expire_at)
+
+    def get(self, key):
+        val, expire_at = self.cache.get(key, (None, -1))
+        if 0 < expire_at < time.time():
+            del self.cache[key]
+            return None
+        return val

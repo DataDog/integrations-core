@@ -17,7 +17,7 @@ except ImportError:
     from ..stubs import datadog_agent
 
 from datadog_checks.base.utils.db.statement_metrics import is_dbm_enabled
-from datadog_checks.base.utils.db.utils import ConstantRateLimiter
+from datadog_checks.base.utils.db.utils import ConstantRateLimiter, ExpiringCache
 
 VALID_EXPLAIN_STATEMENTS = frozenset({
     'select',
@@ -28,6 +28,15 @@ VALID_EXPLAIN_STATEMENTS = frozenset({
     'update',
 })
 
+# default sampling settings for events_statements_* tables
+# rate limit is in samples/second
+# {table -> rate-limit}
+DEFAULT_EVENTS_STATEMENTS_RATE_LIMITS = {
+    'events_statements_history_long': 0,
+    'events_statements_history': 1,
+    'events_statements_current': 10,
+}
+
 
 class ExecutionPlansMixin(object):
     """
@@ -37,27 +46,7 @@ class ExecutionPlansMixin(object):
     def __init__(self, *args, **kwargs):
         # checkpoint at zero so we pull the whole history table on the first run
         self._checkpoint = 0
-        self._auto_enable_eshl = None
-
-    def _enable_performance_schema_consumers(self, db):
-        query = """UPDATE performance_schema.setup_consumers SET enabled = 'YES' WHERE name = 
-        'events_statements_history_long'"""
-        with closing(db.cursor()) as cursor:
-            try:
-                cursor.execute(query)
-            except pymysql.err.OperationalError as e:
-                if e.args[0] == 1142:
-                    self.log.error('Unable to create performance_schema consumers: %s', e.args[1])
-                else:
-                    raise
-            except pymysql.err.InternalError as e:
-                if e.args[0] == 1290:
-                    self.log.warning('Unable to create performance_schema consumers because the instance is read-only')
-                    self._auto_enable_eshl = False
-                else:
-                    raise
-            else:
-                self.log.info('Successfully enabled events_statements_history_long consumers')
+        self._expiring_cache = ExpiringCache()
 
     def _get_events_statements_by_digest(self, db, events_statements_table, row_limit):
         start = time.time()
@@ -186,41 +175,127 @@ class ExecutionPlansMixin(object):
 
         return events
 
-    def _collect_execution_plans(self, db, tags, options, min_collection_interval):
-        if self._auto_enable_eshl is None:
-            self._auto_enable_eshl = is_affirmative(options.get('auto_enable_events_statements_history_long', False))
-        if not (is_dbm_enabled() and is_affirmative(options.get('collect_execution_plans', True))):
-            return False
+    def _get_enabled_performance_schema_consumers(self, db):
+        with closing(db.cursor()) as cursor:
+            cursor.execute("SELECT name from performance_schema.setup_consumers WHERE enabled = 'YES'")
+            enabled_consumers = set([r[0] for r in cursor.fetchall()])
+            self.log.debug("loaded enabled consumers: %s", enabled_consumers)
+            return enabled_consumers
 
-        stmt_row_limit = options.get('events_statements_row_limit', 5000)
+    def _performance_schema_enable_consumer(self, db, name):
+        query = """UPDATE performance_schema.setup_consumers SET enabled = 'YES' WHERE name = %s"""
+        with closing(db.cursor()) as cursor:
+            try:
+                cursor.execute(query, name)
+                self.log.debug('successfully enabled performance_schema consumer %s', name)
+                return True
+            except pymysql.err.DatabaseError as e:
+                if e.args[0] == 1290:
+                    # --read-only mode failure is expected so log at debug level
+                    self.log.debug('failed to enable performance_schema consumer %s: %s', name, str(e))
+                    return False
+                self.log.warning('failed to enable performance_schema consumer %s: %s', name, str(e))
+        return False
 
-        events_statements_table = options.get('events_statements_table', 'events_statements_history_long')
-        supported_tables = {'events_statements_history_long', 'events_statements_history', 'events_statements_current'}
-        if events_statements_table not in supported_tables:
-            self.log.warning("invalid 'events_statements_table' config for instance: %s. must be one of %s.",
-                             events_statements_table, ', '.join(sorted(supported_tables)))
-            events_statements_table = 'events_statements_history_long'
-        is_history_long = events_statements_table == 'events_statements_history_long'
+    def _get_plan_collection_strategy(self, db, options, min_collection_interval):
+        """
+        Decides on the plan collection strategy:
+        - which events_statement_history-* table are we using
+        - how long should the rate and time limits be
+        :return: (table, rate_limit, time_limit)
+        """
+        cached_strategy = self._expiring_cache.get("plan_collection_strategy")
+        if cached_strategy:
+            self.log.debug("using cached plan_collection_strategy: %s", cached_strategy)
+            return cached_strategy
 
+        auto_enable = is_affirmative(options.get('auto_enable_events_statements_consumers', False))
+        enabled_consumers = self._get_enabled_performance_schema_consumers(db)
+
+        # unless a specific table is configured, we try all of the events_statements tables in descending order of
+        # preference
+        preferred_tables = ['events_statements_history_long', 'events_statements_history', 'events_statements_current']
+        events_statements_table = options.get('events_statements_table', None)
+        if events_statements_table and events_statements_table not in DEFAULT_EVENTS_STATEMENTS_RATE_LIMITS:
+            self.log.warning("invalid events_statements_table: %s. must be one of %s", events_statements_table,
+                             ', '.join(DEFAULT_EVENTS_STATEMENTS_RATE_LIMITS.keys()))
+            events_statements_table = None
+        if events_statements_table:
+            preferred_tables = [events_statements_table]
+
+        # default time limit is small enough (1ms) so that the check will run only once
+        chosen_table = None
+        collect_exec_plans_time_limit = options.get('collect_exec_plans_time_limit', 1 / 1000)
         collect_exec_plans_rate_limit = options.get('collect_exec_plans_rate_limit', -1)
-        collect_exec_plans_time_limit = options.get('collect_exec_plans_time_limit', -1)
-        if collect_exec_plans_rate_limit < 0:
-            collect_exec_plans_rate_limit = 0 if is_history_long else 1
-        if collect_exec_plans_time_limit < 0:
-            # default time limit for history long is 1ms, meaning it'll run only once
-            collect_exec_plans_time_limit = 1 / 1000 if is_history_long else max(1, min_collection_interval - 1)
-        stmt_sample_rate_limiter = ConstantRateLimiter(collect_exec_plans_rate_limit)
+
+        for table in preferred_tables:
+            if table not in enabled_consumers:
+                if not auto_enable:
+                    self.log.debug("performance_schema consumer for table %s not enabled")
+                    continue
+                success = self._performance_schema_enable_consumer(db, table)
+                if not success:
+                    continue
+                self.log.debug("successfully enabled performance_schema consumer")
+
+            rows = self._get_events_statements_by_digest(db, table, 1)
+            if not rows:
+                self.log.debug("no statements found in %s", table)
+                continue
+
+            if collect_exec_plans_rate_limit < 0:
+                collect_exec_plans_rate_limit = DEFAULT_EVENTS_STATEMENTS_RATE_LIMITS[table]
+            if collect_exec_plans_time_limit < 1 and table != 'events_statements_history_long':
+                # all other tables require sampling multiple times during a single check run, so set the time limit
+                # to run for most of the check run, leaving one second free to ensure it doesn't go over
+                collect_exec_plans_time_limit = max(1, min_collection_interval - 1)
+
+            chosen_table = table
+            break
+
+        strategy = (
+            chosen_table,
+            collect_exec_plans_time_limit,
+            collect_exec_plans_rate_limit
+        )
+
+        if chosen_table:
+            # cache only successful plans, 10 minute expiry
+            # 10 minutes is short enough that we'll reflect updates "relatively quickly"
+            # i.e., an aurora replica becomes a master (or vice versa)
+            self.log.debug("found plan collection strategy. chosen_table=%s, time_limit=%s, rate_limit=%s",
+                           chosen_table, collect_exec_plans_time_limit, collect_exec_plans_rate_limit)
+            self._expiring_cache.set("plan_collection_strategy", strategy, 10 * 60)
+        else:
+            self.log.warning(
+                "no valid performance_schema.events_statements table found. cannot collect execution plans.")
+
+        return strategy
+
+    def _collect_execution_plans(self, db, tags, options, min_collection_interval):
+        if not (is_dbm_enabled() and is_affirmative(options.get('collect_execution_plans', True))):
+            self.log.debug("skipping execution plan collection. not enabled.")
+            return
+        (
+            events_statements_table,
+            collect_exec_plans_time_limit,
+            collect_exec_plans_rate_limit
+        ) = self._get_plan_collection_strategy(db, options, min_collection_interval)
+
+        if not events_statements_table:
+            return
 
         instance_tags = list(set(self.service_check_tags + tags))
-
+        rate_limiter = ConstantRateLimiter(collect_exec_plans_rate_limit)
         start_time = time.time()
         # avoid reprocessing the exact same statements
         seen_digests = set()
-        # ingest only one sample per unique (query, plan)
+        # ingest only one sample per unique (query, plan) per run
         seen_statement_plan_sigs = set()
         while time.time() - start_time < collect_exec_plans_time_limit:
-            stmt_sample_rate_limiter.sleep()
-            rows = self._get_events_statements_by_digest(db, events_statements_table, stmt_row_limit)
+            rate_limiter.sleep()
+            rows = self._get_events_statements_by_digest(db, events_statements_table,
+                                                         options.get('events_statements_row_limit', 5000))
             events = self._collect_plans_for_statements(db, rows, seen_statement_plan_sigs, instance_tags)
             if events:
                 submit_exec_plan_events(events, instance_tags, "mysql")
