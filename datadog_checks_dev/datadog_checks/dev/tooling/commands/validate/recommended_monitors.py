@@ -60,8 +60,9 @@ def recommended_monitors():
                 )
             else:
                 # If all required keys exist, validate values
-                if decoded.get('recommended_monitor_metadata').get('description') is not None:
-                    if len(decoded.get('recommended_monitor_metadata').get('description')) > 300:
+                description = decoded.get('recommended_monitor_metadata').get('description')
+                if description is not None:
+                    if len(description) > 300:
                         file_failed = True
                         display_queue.append(
                             (
@@ -75,7 +76,9 @@ def recommended_monitors():
                     file_failed = True
                     display_queue.append((echo_failure, f"    {monitor_file} must have an `integration` tag"),)
 
-                if check_name not in decoded.get('name').lower():
+                display_name = manifest.get("display_name").lower()
+                monitor_name = decoded.get('name').lower()
+                if not (check_name in monitor_name or display_name in monitor_name):
                     file_failed = True
                     display_queue.append((echo_failure, f"    {monitor_file} name must contain the integration name"),)
 
