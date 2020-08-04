@@ -57,6 +57,15 @@ def recommended_monitors():
                 display_queue.append(
                     (echo_failure, f"    {monitor_file} does not contain the required fields: {missing_fields}"),
                 )
+            else:
+                if decoded.get(decoded.get('recommended_monitor_metadata').get('description')) is not None:
+                    if len(decoded.get(decoded.get('recommended_monitor_metadata').get('description'))) < 300:
+                        file_failed = True
+                        display_queue.append(
+                            (echo_failure, f"    {monitor_file} has a description field that is too long, must be <300 chars"),
+                        )
+
+                # if decoded.get('tags'):
 
             if file_failed:
                 failed_checks += 1
