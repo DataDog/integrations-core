@@ -61,3 +61,4 @@ def test_oids_cache_bench(refresh_oids_cache_interval, oid_batch_size, benchmark
     check = SnmpCheck('snmp', {'oid_batch_size': oid_batch_size}, [instance])
 
     benchmark.pedantic(check.check, args=(instance,), iterations=1, rounds=5, warmup_rounds=1)
+    1/0
