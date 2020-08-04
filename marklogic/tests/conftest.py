@@ -17,20 +17,7 @@ from .common import ADMIN_PASSWORD, ADMIN_USERNAME, API_URL, CHECK_CONFIG, HERE,
 def dd_environment():
     # type: () -> Generator[Dict[str, Any], None, None]
 
-    # Standalone
-    # compose_file = os.path.join(HERE, 'compose', 'standalone/docker-compose.yml')
-    # with docker_run(
-    #     compose_file=compose_file,
-    #     conditions=[
-    #         CheckDockerLogs(compose_file, r'Deleted'),
-    #         WaitFor(setup_admin_user),
-    #         WaitFor(setup_datadog_user),
-    #     ],
-    # ):
-    #     yield CHECK_CONFIG
-
-    # Cluster (works locally but not on CI)
-    compose_file = os.path.join(HERE, 'compose', 'cluster/docker-compose.yml')
+    compose_file = os.path.join(HERE, 'compose', 'docker-compose.yml')
     with docker_run(
         compose_file=compose_file,
         conditions=[
