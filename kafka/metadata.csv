@@ -22,12 +22,12 @@ kafka.request.metadata.time.avg,gauge,10,millisecond,,Average time for metadata 
 kafka.request.metadata.time.99percentile,gauge,10,millisecond,,Time for metadata requests for 99th percentile.,0,kafka,req meta time 99
 kafka.request.offsets.time.avg,gauge,10,millisecond,,Average time for an offset request.,0,kafka,req offset time avg
 kafka.request.offsets.time.99percentile,gauge,10,millisecond,,Time for offset requests for 99th percentile.,0,kafka,req offset time 99
-kafka.replication.active_controller_count,gauge,10,,,Number of active controllers in the cluster.,0,kafka,rep active controller count
+kafka.replication.active_controller_count,gauge,10,node,,Number of active controllers in the cluster.,0,kafka,rep active controller count
 kafka.replication.isr_shrinks.rate,gauge,10,node,second,Rate of replicas leaving the ISR pool.,-1,kafka,rep isr shrinks
 kafka.replication.isr_expands.rate,gauge,10,node,second,Rate of replicas joining the ISR pool.,-1,kafka,rep isr expands
-kafka.replication.leader_count,gauge,10,,,Number of leaders on this broker.,0,kafka,replica leader count
+kafka.replication.leader_count,gauge,10,node,,Number of leaders on this broker.,0,kafka,replica leader count
 kafka.replication.leader_elections.rate,gauge,10,event,second,Leader election rate.,0,kafka,rep leader elect
-kafka.replication.max_lag,gauge,10,,,Maximum lag in messages between the follower and leader replicas.,0,kafka,rep max lag
+kafka.replication.max_lag,gauge,10,offset,,Maximum lag in messages between the follower and leader replicas.,0,kafka,rep max lag
 kafka.replication.partition_count,gauge,10,,,Number of partitions across all topics in the cluster.,0,kafka,rep partition count
 kafka.replication.unclean_leader_elections.rate,gauge,10,event,second,Unclean leader election rate.,-1,kafka,rep leader dirty elect
 kafka.replication.under_replicated_partitions,gauge,10,,,Number of under replicated partitions.,-1,kafka,rep under replicated part
