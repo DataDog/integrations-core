@@ -155,7 +155,7 @@ GAUGES = [
     'ignite.wal.last_rollover',
 ] + JVM_E2E_METRICS
 
-COUNTS = [
+MONOTONIC_COUNT = [
     "ignite.cache.commits",
     "ignite.cache.entry_processor.hits",
     "ignite.cache.entry_processor.invocations",
