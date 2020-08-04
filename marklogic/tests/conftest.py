@@ -21,7 +21,7 @@ def dd_environment():
     with docker_run(
         compose_file=compose_file,
         conditions=[
-            CheckDockerLogs(compose_file, r'Database Fab'),
+            CheckDockerLogs(compose_file, r'Info:'),
             WaitFor(setup_admin_user, attempts=20),
             WaitFor(setup_datadog_user, attempts=10),
             WaitFor(joining_cluster, attempts=10),
