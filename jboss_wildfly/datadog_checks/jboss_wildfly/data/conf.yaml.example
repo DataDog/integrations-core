@@ -89,7 +89,7 @@ instances:
 
     ## @param tools_jar_path - string - optional
     ## The tool.jar path to be used with the `process_name_regex` parameter,
-    ## for example: /usr/lib/jvm/java-7-openjdk-amd64/lib/tools.jar
+    ## for example: /usr/lib/jvm/java-11-openjdk-amd64/lib/tools.jar
     #
     # tools_jar_path: <TOOLS_JAR_PATH>
 
