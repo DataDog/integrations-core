@@ -33,6 +33,9 @@ steps:
 - script: ddev validate readmes
   displayName: 'Validate README files'
 
+- script: ddev validate recommended-monitors
+  displayName: 'Validate monitors files'
+
 - script: ddev validate saved-views
   displayName: 'Validate saved views data'
 
