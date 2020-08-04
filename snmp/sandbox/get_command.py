@@ -3,6 +3,8 @@ from pysnmp.entity.rfc3413 import cmdgen
 from pysnmp.hlapi.asyncore.cmdgen import vbProcessor, ObjectType, ObjectIdentity, UdpTransportTarget, lcd, \
     CommunityData, ContextData
 
+# import cProfile
+
 
 def snmp_get(snmpEngine, target, context_data, oids):
     lookup_mib = False
@@ -45,4 +47,9 @@ auth_data = CommunityData('public', mpModel=1)
 context_data = ContextData(None, '')
 target, _ = lcd.configure(snmpEngine, auth_data, transport, context_data)
 
-snmp_get(snmpEngine, target, context_data, [ObjectType(ObjectIdentity('1.3.6.1.4.1.123456789.1.0'))])
+OIDS = [ObjectType(ObjectIdentity('1.3.6.1.4.1.123456789.1.0'))] * 100
+
+for i in range(100):
+    snmp_get(snmpEngine, target, context_data, OIDS)
+
+# cProfile.run('snmp_get(snmpEngine, target, context_data, OIDS)')
