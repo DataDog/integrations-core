@@ -20,6 +20,7 @@ SKIP_ENVIRONMENT = 'DDEV_SKIP_ENV'
 
 JMX_TO_INAPP_TYPES = {
     'counter': 'gauge',  # JMX counter -> DSD gauge -> in-app gauge
+    'rate': 'gauge',  # JMX rate -> DSD gauge -> in-app gauge
     'monotonic_count': 'rate',  # JMX monotonic_count -> DSD count -> in-app rate
     # TODO: Support JMX histogram
     #       JMX histogram -> DSD histogram -> multiple in-app metrics (max, median, avg, count)
