@@ -10,7 +10,7 @@ files:
       - template: instances
         options:
           - name: url
-            description: Url used to connect to the Mesos instance.
+            description: URL used to connect to the Mesos instance.
             required: True
             value:
               example: http://localhost:5051
