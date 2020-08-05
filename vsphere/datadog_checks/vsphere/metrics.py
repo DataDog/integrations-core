@@ -14,6 +14,8 @@ VM_METRICS = {
     'mem.consumed.average' : None,
     'mem.shared.average' : None,
     'mem.swapped.average' : None,
+    'mem.swapinRate.average' : None,
+    'mem.swapoutRate.average' : None,
     'datastore.numberReadAveraged.average' : "*",
     'datastore.numberWriteAveraged.average' : "*",
     'datastore.read.average' : "*",
