@@ -93,6 +93,7 @@ class InstanceConfig:
 
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
         self._snmp_engine = loader.create_snmp_engine(mibs_path)
+
         mib_view_controller = loader.get_mib_view_controller(mibs_path)
         self._resolver = OIDResolver(mib_view_controller, self.enforce_constraints)
 
@@ -121,6 +122,7 @@ class InstanceConfig:
         if ip_address and network_address:
             raise ConfigurationError('Only one of IP address and network address must be specified')
 
+        port = 161
         if ip_address:
             port = int(instance.get('port', 161))
             target = register_device_target(
@@ -169,6 +171,9 @@ class InstanceConfig:
             self.add_profile_tag(profile)
 
         self._uptime_metric_added = False
+
+        import easysnmp
+        self.session = easysnmp.Session(hostname=ip_address, community=instance['community_string'], version=2, remote_port=port)
 
     def resolve_oid(self, oid):
         # type: (OID) -> OIDMatch

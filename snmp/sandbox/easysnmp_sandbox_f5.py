@@ -15,9 +15,9 @@ def print_item(item):
 
 session = Session(hostname='localhost', community='f5', version=2, remote_port=1161)
 
-varbinds = session.get([
-    ('sysStatMemoryTotal.0'),
-    ('sysStatMemoryUsed.0'),
+varbinds = session.get_next([
+    ("1.3.6.1.2.1.1.2.0"),
+    # ('sysStatMemoryUsed.0'),
 ])
 
 for item in varbinds:

@@ -201,8 +201,8 @@ class SnmpCheck(AgentCheck):
                 self.warning(message)
 
         scalar_oids = []
-        for result_oid, value in all_binds:
-            oid = OID(result_oid)
+        for item in all_binds:
+            oid = item.oid
             scalar_oids.append(oid)
             match = config.resolve_oid(oid)
             results[match.name][match.indexes] = value
@@ -220,7 +220,7 @@ class SnmpCheck(AgentCheck):
         # iso.3.6.1.2.1.25.4.2.1.7.224 = INTEGER: 2
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
         error = None
-        scalar_oids = [oid.as_object_type() for oid in scalar_oids]
+        scalar_oids = [oid.value for oid in scalar_oids]
         next_oids = [oid.as_object_type() for oid in next_oids]
         all_binds = []
 
@@ -234,12 +234,12 @@ class SnmpCheck(AgentCheck):
                 missing_results = []
 
                 for var in var_binds:
-                    result_oid, value = var
-                    if reply_invalid(value):
-                        oid_tuple = result_oid.asTuple()
-                        missing_results.append(ObjectType(ObjectIdentity(oid_tuple)))
-                    else:
-                        all_binds.append(var)
+                    result_oid, value = var.oid, var.value
+                    # if reply_invalid(value):
+                    #     oid_tuple = result_oid.asTuple()
+                    #     missing_results.append(ObjectType(ObjectIdentity(oid_tuple)))
+                    # else:
+                    all_binds.append(var)
 
                 if missing_results:
                     # If we didn't catch the metric using snmpget, try snmpnext
@@ -277,11 +277,11 @@ class SnmpCheck(AgentCheck):
         # type: (InstanceConfig) -> str
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
-        oid = ObjectType(ObjectIdentity((1, 3, 6, 1, 2, 1, 1, 2, 0)))
+        oid = "1.3.6.1.2.1.1.2.0"
         self.log.debug('Running SNMP command on OID: %s', OIDPrinter((oid,), with_values=False))
         var_binds = snmp_get(config, [oid], lookup_mib=False)
         self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
-        return var_binds[0][1].prettyPrint()
+        return var_binds[0].value.lstrip('.')
 
     def _profile_for_sysobject_oid(self, sys_object_oid):
         # type: (str) -> str
@@ -399,6 +399,7 @@ class SnmpCheck(AgentCheck):
                 error = 'Failed to collect metrics for {} - {}'.format(self._get_instance_name(instance), e)
             self.log.debug(error, exc_info=True)
             self.warning(error)
+            raise
         finally:
             # At this point, `tags` might include some extra tags added in try clause
 

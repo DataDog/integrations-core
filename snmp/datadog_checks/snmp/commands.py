@@ -30,33 +30,36 @@ def snmp_get(config, oids, lookup_mib):
     if config.device is None:
         raise RuntimeError('No device set')  # pragma: no cover
 
-    def callback(  # type: ignore
-        snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx
-    ):
-        var_binds = vbProcessor.unmakeVarBinds(snmpEngine, varBinds, lookup_mib)
 
-        cbCtx['error'] = errorIndication
-        cbCtx['var_binds'] = var_binds
+    varbinds = config.session.get(oids)
+    #
+    # def callback(  # type: ignore
+    #     snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx
+    # ):
+    #     var_binds = vbProcessor.unmakeVarBinds(snmpEngine, varBinds, lookup_mib)
+    #
+    #     cbCtx['error'] = errorIndication
+    #     cbCtx['var_binds'] = var_binds
+    #
+    # ctx = {}  # type: Dict[str, Any]
+    #
+    # var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
+    #
+    # cmdgen.GetCommandGenerator().sendVarBinds(
+    #     config._snmp_engine,
+    #     config.device.target,
+    #     config._context_data.contextEngineId,
+    #     config._context_data.contextName,
+    #     var_binds,
+    #     callback,
+    #     ctx,
+    # )
+    #
+    # config._snmp_engine.transportDispatcher.runDispatcher()
+    #
+    # _handle_error(ctx, config)
 
-    ctx = {}  # type: Dict[str, Any]
-
-    var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
-
-    cmdgen.GetCommandGenerator().sendVarBinds(
-        config._snmp_engine,
-        config.device.target,
-        config._context_data.contextEngineId,
-        config._context_data.contextName,
-        var_binds,
-        callback,
-        ctx,
-    )
-
-    config._snmp_engine.transportDispatcher.runDispatcher()
-
-    _handle_error(ctx, config)
-
-    return ctx['var_binds']
+    return varbinds
 
 
 def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):

@@ -25,6 +25,8 @@ class OID(object):
         # type: (Union[Sequence[int], str, ObjectName, ObjectIdentity, ObjectType]) -> None
         parts = None  # type: Optional[Tuple[int, ...]]
 
+        self.value = value
+
         try:
             parts = parse_as_oid_tuple(value)
         except CouldNotDecodeOID:
