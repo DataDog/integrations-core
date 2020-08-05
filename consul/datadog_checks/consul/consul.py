@@ -114,9 +114,11 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
     def _is_dogstatsd_configured(self):
         """ Check if the agent has a consul dogstatsd profile configured """
-        for profile in datadog_agent.get_config('dogstatsd_mapper_profiles'):
-            if profile.get('name') == 'consul':
-                return True
+        dogstatsd_mapper = datadog_agent.get_config('dogstatsd_mapper_profiles')
+        if dogstatsd_mapper:
+            for profile in dogstatsd_mapper:
+                if profile.get('name') == 'consul':
+                    return True
         return False
 
     def consul_request(self, endpoint):
