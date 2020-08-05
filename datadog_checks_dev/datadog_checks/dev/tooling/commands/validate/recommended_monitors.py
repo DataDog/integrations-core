@@ -28,7 +28,12 @@ def recommended_monitors():
         display_queue = []
         file_failed = False
         manifest = load_manifest(check_name)
-        monitors_relative_locations = get_assets_from_manifest(check_name, 'monitors')
+        monitors_relative_locations, invalid_files = get_assets_from_manifest(check_name, 'monitors')
+        for file in invalid_files:
+                echo_info(f'{check_name}... ', nl=False)
+                echo_info(' FAILED')
+                echo_failure(f'  {file} does not exist')
+                failed_checks += 1
 
         for monitor_file in monitors_relative_locations:
             try:
