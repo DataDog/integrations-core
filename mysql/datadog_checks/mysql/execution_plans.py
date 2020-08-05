@@ -121,8 +121,12 @@ class ExecutionPlansMixin(object):
 
             with closing(db.cursor()) as cursor:
                 # TODO: run these asynchronously / do some benchmarking to optimize
-                plan = self._run_explain(cursor, sql_text, schema, instance_tags)
-                if not plan:
+                try:
+                    plan = self._run_explain(cursor, sql_text, schema, instance_tags)
+                    if not plan:
+                        continue
+                except Exception:
+                    self.log.exception("failed to run explain on query %s", sql_text)
                     continue
                 normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True) if plan else None
                 obfuscated_statement = datadog_agent.obfuscate_sql(sql_text)
