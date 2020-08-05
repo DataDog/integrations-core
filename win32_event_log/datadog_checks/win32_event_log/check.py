@@ -96,8 +96,8 @@ class Win32EventLogCheck(AgentCheck):
         )
 
         # These will become compiled regular expressions if any relevant patterns are defined in the config
-        self._message_whitelist = None
-        self._message_blacklist = None
+        self._included_messages = None
+        self._excluded_messages = None
 
         self._event_priority = self.instance.get('event_priority', self.init_config.get('event_priority', 'normal'))
 
@@ -315,7 +315,7 @@ class Win32EventLogCheck(AgentCheck):
         if self._event_priority not in ('normal', 'low'):
             raise ConfigurationError('Option `event_priority` can only be either `normal` or `low`.')
 
-        for option in ('message_whitelist', 'message_blacklist'):
+        for option in ('included_messages', 'excluded_messages'):
             if option not in self.instance:
                 continue
 
@@ -415,19 +415,19 @@ class Win32EventLogCheck(AgentCheck):
         self.log.debug('Error code %d when calling `%s`: %s', exc.winerror, exc.funcname.split(':')[0], exc.strerror)
 
     def message_filtered(self, message):
-        return self._message_blacklisted(message) or not self._message_whitelisted(message)
+        return self._excluded_messages(message) or not self._included_messages(message)
 
-    def _message_whitelisted(self, message):
-        if self._message_whitelist is None:
+    def _included_messages(self, message):
+        if self._included_messages is None:
             return True
 
-        return not not self._message_whitelist.search(message)
+        return not not self._included_messages.search(message)
 
-    def _message_blacklisted(self, message):
-        if self._message_blacklist is None:
+    def _excluded_messages(self, message):
+        if self._excluded_messages is None:
             return False
 
-        return not not self._message_blacklist.search(message)
+        return not not self._excluded_messages.search(message)
 
     @staticmethod
     def _compile_patterns(patterns):

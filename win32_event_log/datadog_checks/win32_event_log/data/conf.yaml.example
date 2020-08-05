@@ -104,21 +104,21 @@ instances:
     #   id:
     #   - 9000
 
-    ## @param message_whitelist - list of strings - optional
+    ## @param included_messages - list of strings - optional
     ## This instructs the check to only capture events with messages that match at least one of the
     ## provided patterns. Every pattern is considered a regular expression.
     #
-    # message_whitelist:
+    # included_messages:
     #   - <PATTERN_1>
     #   - <PATTERN_2>
 
-    ## @param message_blacklist - list of strings - optional
+    ## @param excluded_messages - list of strings - optional
     ## This instructs the check to ignore events with messages that match at least one of the
     ## provided patterns. Every pattern is considered a regular expression.
     ##
     ## This takes precedence over `message_whitelist`.
     #
-    # message_blacklist:
+    # excluded_messages:
     #   - <PATTERN_1>
     #   - <PATTERN_2>
 

@@ -17,8 +17,8 @@ There are 3 ways to select filter criteria rather than collecting all events:
     expression. This approach offloads all filtering to the kernel (like `query`), which increases performance
     and reduces bandwidth usage when connecting to a remote machine.
 
-- `message_whitelist`/`message_blacklist` - These are regular expression patterns used to filter by events' messages
-  specifically (if a message is found), with the blacklist taking precedence. These may be used in place of or
+- `included_messages`/`excluded_messages` - These are regular expression patterns used to filter by events' messages
+  specifically (if a message is found), with the exclude list taking precedence. These may be used in place of or
   with `query`/`filters`, as there exists no query construct by which to select a message attribute.
 
 A [pull subscription model](https://docs.microsoft.com/en-us/windows/win32/wes/subscribing-to-events#pull-subscriptions)

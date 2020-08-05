@@ -62,8 +62,8 @@ def test_event_id(aggregator, dd_run_check, new_check, instance, report_event):
     aggregator.assert_event('foo', tags=['event_id:{}'.format(common.EVENT_ID)])
 
 
-def test_message_whitelist(aggregator, dd_run_check, new_check, instance, report_event):
-    instance['message_whitelist'] = ['bar']
+def test_included_messages(aggregator, dd_run_check, new_check, instance, report_event):
+    instance['included_messages'] = ['bar']
     check = new_check(instance)
     report_event('foo')
     report_event('bar')
@@ -74,8 +74,8 @@ def test_message_whitelist(aggregator, dd_run_check, new_check, instance, report
     aggregator.assert_event('bar')
 
 
-def test_message_blacklist(aggregator, dd_run_check, new_check, instance, report_event):
-    instance['message_blacklist'] = ['bar']
+def test_excluded_messages(aggregator, dd_run_check, new_check, instance, report_event):
+    instance['excluded_messages'] = ['bar']
     check = new_check(instance)
     report_event('foo')
     report_event('bar')
@@ -87,9 +87,9 @@ def test_message_blacklist(aggregator, dd_run_check, new_check, instance, report
     aggregator.assert_event('baz')
 
 
-def test_message_blacklist_override(aggregator, dd_run_check, new_check, instance, report_event):
-    instance['message_whitelist'] = ['bar']
-    instance['message_blacklist'] = ['bar']
+def test_excluded_messages_override(aggregator, dd_run_check, new_check, instance, report_event):
+    instance['included_messages'] = ['bar']
+    instance['excluded_messages'] = ['bar']
     check = new_check(instance)
     report_event('foo')
     report_event('bar')
