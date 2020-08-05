@@ -204,7 +204,7 @@ class SnmpCheck(AgentCheck):
         for item in all_binds:
             oid = item.oid
             value = item.value
-            scalar_oids.append(oid)
+            scalar_oids.append(item)
             match = config.resolve_oid(item)
             results[match.name][match.indexes] = item
         self.log.debug('Raw results: %s', results)
