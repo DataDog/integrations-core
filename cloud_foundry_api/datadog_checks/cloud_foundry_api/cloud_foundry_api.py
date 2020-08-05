@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import time
-from typing import Any, Dict, Generator, List, Tuple
+from typing import Any, Dict, Generator, Tuple
 
 import semver
 from requests.exceptions import HTTPError, RequestException
@@ -179,6 +179,7 @@ class CloudFoundryApiCheck(AgentCheck):
                 res = self.http.get(url, headers=headers)
                 res.raise_for_status()
                 payload = res.json()
+                org_name = ""
                 if self._api_version == "v2":
                     org_name = payload["entity"]["name"]
                 elif self._api_version == "v3":
@@ -234,6 +235,7 @@ class CloudFoundryApiCheck(AgentCheck):
                 res = self.http.get(url, headers=headers)
                 res.raise_for_status()
                 payload = res.json()
+                space_name = ""
                 if self._api_version == "v2":
                     space_name = payload["entity"]["name"]
                 elif self._api_version == "v3":
@@ -434,7 +436,7 @@ class CloudFoundryApiCheck(AgentCheck):
     def check(self, _):
         # type: (Dict[str, Any]) -> None
         tags = ["api_url:{}".format(urlparse(self._api_url)[1])] + self._tags
-        events = self.get_events(tags)
+        events = self.get_events()
         self.count("events.count", len(events), tags=tags)
         for event in events.values():
             self.event(event)
