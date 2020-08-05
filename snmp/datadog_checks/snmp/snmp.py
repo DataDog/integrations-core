@@ -206,7 +206,7 @@ class SnmpCheck(AgentCheck):
             value = item.value
             scalar_oids.append(oid)
             match = config.resolve_oid(item)
-            results[match.name][match.indexes] = value
+            results[match.name][match.indexes] = item
         self.log.debug('Raw results: %s', results)
         # Freeze the result
         results.default_factory = None  # type: ignore
@@ -424,7 +424,7 @@ class SnmpCheck(AgentCheck):
             if tag.symbol not in results:
                 self.log.debug('Ignoring tag %s', tag.symbol)
                 continue
-            tag_values = list(results[tag.symbol].values())
+            tag_values = [item.value for item in results[tag.symbol].values()]
             if len(tag_values) > 1:
                 raise CheckException(
                     'You are trying to use a table column (OID `{}`) as a metric tag. This is not supported as '
@@ -455,9 +455,9 @@ class SnmpCheck(AgentCheck):
                 self.log.debug('Ignoring metric %s', name)
                 continue
             if isinstance(metric, ParsedTableMetric):
-                for index, val in iteritems(results[name]):
+                for index, item in iteritems(results[name]):
                     metric_tags = tags + self.get_index_tags(index, results, metric.index_tags, metric.column_tags)
-                    self.submit_metric(name, val, metric.forced_type, metric_tags, metric.options)
+                    self.submit_metric(name, item, metric.forced_type, metric_tags, metric.options)
             else:
                 result = list(results[name].items())
                 if len(result) > 1:
@@ -465,9 +465,9 @@ class SnmpCheck(AgentCheck):
                     if metric.enforce_scalar:
                         # For backward compatibility reason, we publish the first value for OID.
                         continue
-                val = result[0][1]
+                item = result[0][1]
                 metric_tags = tags + metric.tags
-                self.submit_metric(name, val, metric.forced_type, metric_tags, metric.options)
+                self.submit_metric(name, item, metric.forced_type, metric_tags, metric.options)
 
     def get_index_tags(
         self,
@@ -502,7 +502,7 @@ class SnmpCheck(AgentCheck):
         for column_tag in column_tags:
             raw_column_value = column_tag.column
             try:
-                column_value = results[raw_column_value][index]
+                column_value = results[raw_column_value][index].value
             except KeyError:
                 self.log.warning('Column %s not present in the table, skipping this tag', raw_column_value)
                 continue
@@ -537,10 +537,10 @@ class SnmpCheck(AgentCheck):
             self.log.warning(msg)
             self.log.debug(msg, exc_info=True)
 
-    def _do_submit_metric(self, name, snmp_value, forced_type, tags, options):
+    def _do_submit_metric(self, name, snmp_item, forced_type, tags, options):
         # type: (str, Any, Optional[str], List[str], dict) -> None
 
-        if reply_invalid(snmp_value):
+        if reply_invalid(snmp_item.value):
             # Metrics not present in the queried object
             self.log.warning('No such Mib available: %s', name)
             return
@@ -551,12 +551,12 @@ class SnmpCheck(AgentCheck):
             metric_name = self.normalize(name, prefix='snmp')
 
         if forced_type is not None:
-            metric = as_metric_with_forced_type(snmp_value, forced_type, options)
+            metric = as_metric_with_forced_type(snmp_item, forced_type, options)
         else:
-            metric = as_metric_with_inferred_type(snmp_value)
+            metric = as_metric_with_inferred_type(snmp_item)
 
         if metric is None:
-            raise RuntimeError('Unsupported metric type {} for {}'.format(type(snmp_value), metric_name))
+            raise RuntimeError('Unsupported metric type {} for {}'.format(type(snmp_item), metric_name))
 
         submit_func = getattr(self, metric['type'])
         submit_func(metric_name, metric['value'], tags=tags)

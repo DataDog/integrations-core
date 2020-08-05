@@ -32,32 +32,32 @@ def object_identity_from_object_type(object_type):
 # For example, `CounterBasedGauge64` would be interpreted as a `Counter64` instead of a gauge.
 
 SNMP_COUNTER_CLASSES = {
-    'Counter32',
-    'Counter64',
-    # Additional types that are not part of the SNMP protocol (see RFC 2856).
-    'ZeroBasedCounter64',
+    'COUNTER32',
+    'COUNTER64',
+    # ADDITIONAL TYPES THAT ARE NOT PART OF THE SNMP PROTOCOL (SEE RFC 2856).
+    'ZEROBASEDCOUNTER64',
 }
 
 SNMP_GAUGE_CLASSES = {
-    'Gauge32',
-    'Integer',
-    'Integer32',
-    'Unsigned32',
-    # Additional types that are not part of the SNMP protocol (see RFC 2856).
-    'CounterBasedGauge64',
+    'GAUGE32',
+    'INTEGER',
+    'INTEGER32',
+    'UNSIGNED32',
+    # ADDITIONAL TYPES THAT ARE NOT PART OF THE SNMP PROTOCOL (SEE RFC 2856).
+    'COUNTERBASEDGAUGE64',
 }
 
 
-def is_counter(obj):
+def is_counter(snmp_type):
     # type: (Any) -> bool
-    return obj.__class__.__name__ in SNMP_COUNTER_CLASSES
+    return snmp_type in SNMP_COUNTER_CLASSES
 
 
-def is_gauge(obj):
+def is_gauge(snmp_type):
     # type: (Any) -> bool
-    return obj.__class__.__name__ in SNMP_GAUGE_CLASSES
+    return snmp_type in SNMP_GAUGE_CLASSES
 
 
-def is_opaque(obj):
+def is_opaque(snmp_type):
     # type: (Any) -> bool
-    return obj.__class__.__name__ == 'Opaque'
+    return snmp_type == 'OPAQUE'  ## ?

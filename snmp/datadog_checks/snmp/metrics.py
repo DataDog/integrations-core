@@ -15,43 +15,43 @@ from .pysnmp_types import OctetString
 from .types import MetricDefinition
 
 
-def as_metric_with_inferred_type(value):
+def as_metric_with_inferred_type(snmp_item):
     # type: (Any) -> Optional[MetricDefinition]
-    if is_counter(value):
-        return {'type': 'rate', 'value': int(value)}
+    if is_counter(snmp_item.snmp_type):
+        return {'type': 'rate', 'value': int(snmp_item.value)}
 
-    if is_gauge(value):
-        return {'type': 'gauge', 'value': int(value)}
+    if is_gauge(snmp_item.snmp_type):
+        return {'type': 'gauge', 'value': int(snmp_item.value)}
 
-    if is_opaque(value):
-        # Arbitrary ASN.1 syntax encoded as an octet string. Let's try to decode it as a float.
-        # See: http://snmplabs.com/pysnmp/docs/api-reference.html#opaque-type
-        try:
-            decoded, _ = pyasn1_decode(bytes(value))
-            value = float(decoded)
-        except Exception:
-            pass
-        else:
-            return {'type': 'gauge', 'value': value}
+    # if is_opaque(snmp_item):
+    #     # Arbitrary ASN.1 syntax encoded as an octet string. Let's try to decode it as a float.
+    #     # See: http://snmplabs.com/pysnmp/docs/api-reference.html#opaque-type
+    #     try:
+    #         decoded, _ = pyasn1_decode(bytes(snmp_item))
+    #         snmp_item = float(decoded)
+    #     except Exception:
+    #         pass
+    #     else:
+    #         return {'type': 'gauge', 'value': snmp_item}
 
     # Fallback for unknown SNMP types.
     try:
-        number = float(value)
+        number = float(snmp_item.value)
     except ValueError:
         return None
     else:
         return {'type': 'gauge', 'value': number}
 
 
-def as_metric_with_forced_type(value, forced_type, options):
+def as_metric_with_forced_type(snmp_item, forced_type, options):
     # type: (Any, str, dict) -> Optional[MetricDefinition]
 
     if forced_type == 'flag_stream':
         index = int(options['placement']) - 1
-        return {'type': 'gauge', 'value': int(str(value)[index])}
+        return {'type': 'gauge', 'value': int(str(snmp_item.value)[index])}
 
     # Use float for following types
-    float_value = _varbind_value_to_float(value)
+    float_value = _varbind_value_to_float(snmp_item.value)
 
     if forced_type == 'gauge':
         return {'type': 'gauge', 'value': float_value}
