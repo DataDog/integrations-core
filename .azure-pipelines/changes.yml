@@ -15,20 +15,229 @@ variables:
 jobs:
 - template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed
-    display: Linux
-    validate: true
+    job_name: Test_gunicorn_py2_py3_1
+    display: Test_gunicorn_py2_py3_1
+    check: 'gunicorn'
+    test: true
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
       restoreKeys: |
         pip | $(Agent.OS)
       path: $(PIP_CACHE_DIR)
-
-- template: './templates/test-single-windows.yml'
+- template: './templates/test-single-linux.yml'
   parameters:
-    job_name: Changed
-    check: '--changed datadog_checks_base datadog_checks_dev active_directory aspdotnet disk dns_check dotnetclr exchange_server iis pdh_check sqlserver tcp_check win32_event_log windows_service wmi_check'
-    display: Windows
+    job_name: Test_gunicorn_py2_py3_2
+    display: Test_gunicorn_py2_py3_2
+    check: 'gunicorn'
+    test: true
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py2_py3_3
+    display: Test_gunicorn_py2_py3_3
+    check: 'gunicorn'
+    test: true
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py2_py3_4
+    display: Test_gunicorn_py2_py3_4
+    check: 'gunicorn'
+    test: true
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py2_py3_5
+    display: Test_gunicorn_py2_py3_5
+    check: 'gunicorn'
+    test: true
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py2_py3_6
+    display: Test_gunicorn_py2_py3_6
+    check: 'gunicorn'
+    test: true
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py2_py3_7
+    display: Test_gunicorn_py2_py3_7
+    check: 'gunicorn'
+    test: true
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py2_py3_8
+    display: Test_gunicorn_py2_py3_8
+    check: 'gunicorn'
+    test: true
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py2_py3_9
+    display: Test_gunicorn_py2_py3_9
+    check: 'gunicorn'
+    test: true
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py2_py3_10
+    display: Test_gunicorn_py2_py3_10
+    check: 'gunicorn'
+    test: true
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py3_1
+    display: Test_gunicorn_py3_1
+    check: 'gunicorn'
+    test: true
+    run_py2_tests: false
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py3_2
+    display: Test_gunicorn_py3_2
+    check: 'gunicorn'
+    test: true
+    run_py2_tests: false
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py3_3
+    display: Test_gunicorn_py3_3
+    check: 'gunicorn'
+    test: true
+    run_py2_tests: false
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py3_4
+    display: Test_gunicorn_py3_4
+    check: 'gunicorn'
+    test: true
+    run_py2_tests: false
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py3_5
+    display: Test_gunicorn_py3_5
+    check: 'gunicorn'
+    test: true
+    run_py2_tests: false
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py3_6
+    display: Test_gunicorn_py3_6
+    check: 'gunicorn'
+    test: true
+    run_py2_tests: false
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py3_7
+    display: Test_gunicorn_py3_7
+    check: 'gunicorn'
+    test: true
+    run_py2_tests: false
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py3_8
+    display: Test_gunicorn_py3_8
+    check: 'gunicorn'
+    test: true
+    run_py2_tests: false
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py3_9
+    display: Test_gunicorn_py3_9
+    check: 'gunicorn'
+    test: true
+    run_py2_tests: false
+    pip_cache_config:
+      key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
+      restoreKeys: |
+        pip | $(Agent.OS)
+      path: $(PIP_CACHE_DIR)
+- template: './templates/test-single-linux.yml'
+  parameters:
+    job_name: Test_gunicorn_py3_10
+    display: Test_gunicorn_py3_10
+    check: 'gunicorn'
+    test: true
+    run_py2_tests: false
     pip_cache_config:
       key: 'pip | $(Agent.OS) | datadog_checks_base/datadog_checks/base/data/agent_requirements.in'
       restoreKeys: |
