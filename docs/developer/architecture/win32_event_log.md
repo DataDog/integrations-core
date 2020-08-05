@@ -13,8 +13,8 @@ There are 3 ways to select filter criteria rather than collecting all events:
 - `filters` - A mapping of properties to allowed values. Every filter (equivalent to the `and` operator) must match
   any value (equivalent to the `or` operator). This option is a convenience for a `query` that is relatively basic.
 
-    Rather than collect all events and perform filtering within the Check, the filters are converted to an XPath
-    expression. This approach offloads all filtering to the Kernel (like `query`), which increases performance
+    Rather than collect all events and perform filtering within the check, the filters are converted to an XPath
+    expression. This approach offloads all filtering to the kernel (like `query`), which increases performance
     and reduces bandwidth usage when connecting to a remote machine.
 
 - `message_whitelist`/`message_blacklist` - These are regular expression patterns used to filter by events' messages
@@ -33,7 +33,7 @@ duplicate events being sent as a consequence of Agent restarts, especially when 
 Events may alternatively be configured to be submitted as logs. The code for that resides
 [here](https://github.com/DataDog/datadog-agent/tree/master/pkg/logs/input/windowsevent).
 
-Only a subset of the Check's functionality is available. Namely, each log configuration
+Only a subset of the check's functionality is available. Namely, each log configuration
 will collect all events of the given channel without filtering, tagging, nor remote
 connection options.
 
@@ -43,7 +43,7 @@ callback that ultimately sends the log to the backend.
 
 ## Legacy mode
 
-Setting `legacy_mode` to `true` in the Check will use WMI to collect events, which is significantly
+Setting `legacy_mode` to `true` in the check will use WMI to collect events, which is significantly
 more resource intensive. This mode has entirely different configuration options and will
 be removed in a future release.
 
