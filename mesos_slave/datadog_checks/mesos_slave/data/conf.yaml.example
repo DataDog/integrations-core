@@ -46,7 +46,7 @@ init_config:
 instances:
 
     ## @param url - string - required
-    ## Url used to connect to the Mesos instance.
+    ## URL used to connect to the Mesos instance.
     #
   - url: http://localhost:5051
 
