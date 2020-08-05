@@ -1,0 +1,33 @@
+name: Mesos Slave
+
+files:
+  - name: mesos_slave.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/default
+          - template: init_config/http
+      - template: instances
+        options:
+          - name: url
+            description: Url used to connect to the Mesos instance.
+            required: True
+            value:
+              example: http://localhost:5051
+              type: string
+          - name: master_port
+            description: Port of your Mesos Master instance.
+            value:
+              default: 5050
+              example: 5050
+              type: integer
+          - name: tasks
+            description: Specify the tasks from which you want to send metrics to Datadog.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - <TASK_NAME>
+          - template: instances/default
+          - template: instances/http
