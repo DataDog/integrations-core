@@ -80,7 +80,6 @@ def setup_admin_user():
             data={
                 "admin-username": ADMIN_USERNAME,
                 "admin-password": ADMIN_PASSWORD,
-                "wallet-password": ADMIN_PASSWORD,
                 "realm": "public",
             },
             headers={"Content-type": "application/x-www-form-urlencoded"},
@@ -98,7 +97,6 @@ def setup_admin_user():
             data={
                 "admin-username": ADMIN_USERNAME,
                 "admin-password": ADMIN_PASSWORD,
-                "wallet-password": ADMIN_PASSWORD,
                 "realm": "public",
             },
             headers={"Content-type": "application/x-www-form-urlencoded"},
