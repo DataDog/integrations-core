@@ -67,6 +67,8 @@ def setup_admin_user():
     # From https://docs.marklogic.com/10.0/guide/admin-api/cluster
     # Reset admin user password (usefull for cluster setup)
 
+    ret = True
+
     try:
         r = requests.get(
             '{}/manage/v2'.format(API_URL), auth=requests.auth.HTTPDigestAuth(ADMIN_USERNAME, ADMIN_PASSWORD)
@@ -83,6 +85,26 @@ def setup_admin_user():
             },
             headers={"Content-type": "application/x-www-form-urlencoded"},
         )
+        ret = False
+
+    try:
+        r = requests.get(
+            'http://localhost:18002/manage/v2', auth=requests.auth.HTTPDigestAuth(ADMIN_USERNAME, ADMIN_PASSWORD)
+        )
+        r.raise_for_status()
+    except Exception:
+        requests.post(
+            'http://localhost:18001/admin/v1/instance-admin',
+            data={
+                "admin-username": ADMIN_USERNAME,
+                "admin-password": ADMIN_PASSWORD,
+                "wallet-password": ADMIN_PASSWORD,
+                "realm": "public",
+            },
+            headers={"Content-type": "application/x-www-form-urlencoded"},
+        )
+        ret = False
+    return ret
 
 
 def setup_datadog_user():
