@@ -260,12 +260,13 @@ class ExecutionPlansMixin(object):
         )
 
         if chosen_table:
-            # cache only successful strategies, 10 minute expiry
-            # 10 minutes is short enough that we'll reflect updates "relatively quickly"
-            # i.e., an aurora replica becomes a master (or vice versa)
+            # cache only successful strategies
+            # should be short enough that we'll reflect updates "relatively quickly"
+            # i.e., an aurora replica becomes a master (or vice versa).
             self.log.debug("found plan collection strategy. chosen_table=%s, time_limit=%s, rate_limit=%s",
                            chosen_table, collect_exec_plans_time_limit, collect_exec_plans_rate_limit)
-            self._expiring_cache.set("plan_collection_strategy", strategy, 10 * 60)
+            self._expiring_cache.set("plan_collection_strategy", strategy,
+                                     options.get('plan_collection_strategy_cache_time', 10 * 60))
         else:
             self.log.warning(
                 "no valid performance_schema.events_statements table found. cannot collect execution plans.")
