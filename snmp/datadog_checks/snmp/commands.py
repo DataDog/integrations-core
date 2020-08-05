@@ -90,10 +90,7 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
     varbinds = oids
 
     while True:
-        print("varbinds 2", varbinds)
         varbinds = config.session.get_next(varbinds)
-        print("initial_vars", initial_vars)
-        print("varbinds", [item.oid for item in varbinds])
         # gen.sendVarBinds(
         #     config._snmp_engine,
         #     config.device.target,
@@ -113,8 +110,6 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
         new_initial_vars = []
         for col, item in enumerate(varbinds):
             oid = ".".join([item.oid.lstrip('.'), item.oid_index])
-            # print("col", col)
-            # print("initial_vars", initial_vars)
             initial = initial_vars[col]
             if not isinstance(item.value, Null) and oid.startswith(initial):
                 var_binds.append(oid)

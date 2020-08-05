@@ -229,7 +229,6 @@ class SnmpCheck(AgentCheck):
             try:
                 self.log.debug('Running SNMP command get on OIDS: %s', oids_batch)
 
-                print("oids_batch", oids_batch)
                 var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
                 self.log.debug('Returned vars: %s', var_binds)
 
