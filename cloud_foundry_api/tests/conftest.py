@@ -37,6 +37,15 @@ def instance_defaults():
 
 
 @pytest.fixture()
+def events_v3_p0():
+    """
+    Returns raw events from API v3
+    """
+    with open(os.path.join(HERE, 'fixtures', 'events_v3_p0.json')) as f:
+        return json.loads(f.read())
+
+
+@pytest.fixture()
 def events_v3_p1():
     """
     Returns raw events from API v3
