@@ -1,5 +1,16 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.18.0 / 2020-08-05
+
+* [Added] Add validation for recommended monitors. See [#7280](https://github.com/DataDog/integrations-core/pull/7280).
+* [Added] Refactor logic for getting assets. See [#7282](https://github.com/DataDog/integrations-core/pull/7282).
+* [Added] Convert jmx to in-app types for replay_check_run. See [#7275](https://github.com/DataDog/integrations-core/pull/7275).
+* [Added] Add minimum length to required strings in manifest validation. See [#7281](https://github.com/DataDog/integrations-core/pull/7281).
+* [Added] Add self.instance comment to check template. See [#7256](https://github.com/DataDog/integrations-core/pull/7256).
+* [Fixed] Make logs attribute optional in manifest. See [#7287](https://github.com/DataDog/integrations-core/pull/7287).
+* [Fixed] Fix TOX_SKIP_ENV filtering. See [#7274](https://github.com/DataDog/integrations-core/pull/7274).
+* [Fixed] Support TOX_SKIP_ENV var in e2e tests. See [#7269](https://github.com/DataDog/integrations-core/pull/7269).
+
 ## 3.17.0 / 2020-08-03
 
 * [Added] Validate dashboards are using the screen API. See [#7237](https://github.com/DataDog/integrations-core/pull/7237).
