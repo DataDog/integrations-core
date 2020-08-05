@@ -142,7 +142,7 @@ class OIDResolver(object):
 
         return tuple(tags)
 
-    def resolve_oid(self, oid):
+    def resolve_oid(self, item):
         # type: (OID) -> OIDMatch
         """Resolve an OID to a name and its indexes.
 
@@ -155,11 +155,13 @@ class OIDResolver(object):
         name: the name of the metric associated to `oid`.
         tag_index: a sequence of tag values. k-th item in the sequence corresponds to the k-th entry in `metric_tags`.
         """
-        parts = oid.as_tuple()
+        print("item.oid", item.oid)
+        oid = ".".join([item.oid.lstrip('.'), item.oid_index])
+        parts = tuple(int(i) for i in oid.split('.'))
         prefix, name = self._resolver.match(parts)
 
         if name is None:
-            return self._resolve_from_mibs(oid)
+            prefix, name = self._resolver.match(parts[:-1])
 
         # Example: parts: (1, 3, 6, 1, 2, 1, 1), prefix: (1, 3, 6, 1) -> tail: (2, 1, 1)
         tail = parts[len(prefix) :]

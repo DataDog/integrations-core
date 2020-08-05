@@ -173,11 +173,11 @@ class InstanceConfig:
         self._uptime_metric_added = False
 
         import easysnmp
-        self.session = easysnmp.Session(hostname=ip_address, community=instance['community_string'], version=2, remote_port=port)
+        self.session = easysnmp.Session(hostname=ip_address, community=instance['community_string'], version=2, remote_port=port, use_numeric=True)
 
-    def resolve_oid(self, oid):
+    def resolve_oid(self, item):
         # type: (OID) -> OIDMatch
-        return self._resolver.resolve_oid(oid)
+        return self._resolver.resolve_oid(item)
 
     def refresh_with_profile(self, profile):
         # type: (Dict[str, Any]) -> None

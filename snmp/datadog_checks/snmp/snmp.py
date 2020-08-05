@@ -42,7 +42,7 @@ DEFAULT_OID_BATCH_SIZE = 10
 
 def reply_invalid(oid):
     # type: (Any) -> bool
-    return noSuchInstance.isSameTypeWith(oid) or noSuchObject.isSameTypeWith(oid)
+    return oid == 'NOSUCHINSTANCE'
 
 
 class SnmpCheck(AgentCheck):
@@ -203,10 +203,11 @@ class SnmpCheck(AgentCheck):
         scalar_oids = []
         for item in all_binds:
             oid = item.oid
+            value = item.value
             scalar_oids.append(oid)
-            match = config.resolve_oid(oid)
+            match = config.resolve_oid(item)
             results[match.name][match.indexes] = value
-        self.log.debug('Raw results: %s', OIDPrinter(results, with_values=False))
+        self.log.debug('Raw results: %s', results)
         # Freeze the result
         results.default_factory = None  # type: ignore
         return results, scalar_oids, error
@@ -221,15 +222,15 @@ class SnmpCheck(AgentCheck):
         # SOLUTION: perform a snmpget command and fallback with snmpgetnext if not found
         error = None
         scalar_oids = [oid.value for oid in scalar_oids]
-        next_oids = [oid.as_object_type() for oid in next_oids]
+        next_oids = [oid.value for oid in next_oids]
         all_binds = []
 
         for oids_batch in batches(scalar_oids, size=self.oid_batch_size):
             try:
-                self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
+                self.log.debug('Running SNMP command get on OIDS: %s', oids_batch)
 
                 var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
-                self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
+                self.log.debug('Returned vars: %s', var_binds)
 
                 missing_results = []
 
@@ -253,7 +254,7 @@ class SnmpCheck(AgentCheck):
 
         for oids_batch in batches(next_oids, size=self.oid_batch_size):
             try:
-                self.log.debug('Running SNMP command getNext on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
+                self.log.debug('Running SNMP command getNext on OIDS: %s', oids_batch)
                 binds = list(
                     snmp_getnext(
                         config,
@@ -262,7 +263,7 @@ class SnmpCheck(AgentCheck):
                         ignore_nonincreasing_oid=self.ignore_nonincreasing_oid,
                     )
                 )
-                self.log.debug('Returned vars: %s', OIDPrinter(binds, with_values=True))
+                self.log.debug('Returned vars: %s', binds)
                 all_binds.extend(binds)
 
             except (PySnmpError, CheckException) as e:
@@ -278,9 +279,9 @@ class SnmpCheck(AgentCheck):
         """Return the sysObjectID of the instance."""
         # Reference sysObjectID directly, see http://oidref.com/1.3.6.1.2.1.1.2
         oid = "1.3.6.1.2.1.1.2.0"
-        self.log.debug('Running SNMP command on OID: %s', OIDPrinter((oid,), with_values=False))
+        self.log.debug('Running SNMP command on OID: %s', oid)
         var_binds = snmp_get(config, [oid], lookup_mib=False)
-        self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
+        self.log.debug('Returned vars: %s', var_binds)
         return var_binds[0].value.lstrip('.')
 
     def _profile_for_sysobject_oid(self, sys_object_oid):
@@ -508,7 +509,7 @@ class SnmpCheck(AgentCheck):
             if reply_invalid(column_value):
                 self.log.warning("Can't deduct tag from column %s", column_tag.column)
                 continue
-            value = column_value.prettyPrint()
+            value = column_value
             tags.extend(column_tag.parsed_metric_tag.matched_tags(value))
         return tags
 

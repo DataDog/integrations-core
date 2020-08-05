@@ -10,10 +10,12 @@ def print_item(item):
         oid=item.oid,
         oid_index=item.oid_index,
         snmp_type=item.snmp_type,
-        value=item.value
+        value=item.value,
     ))
 
-session = Session(hostname='localhost', community='f5', version=2, remote_port=1161)
+session = Session(hostname='localhost', community='f5', version=2, remote_port=1161,
+                  use_numeric=True
+                  )
 
 varbinds = session.get_next([
     ("1.3.6.1.2.1.1.2.0"),

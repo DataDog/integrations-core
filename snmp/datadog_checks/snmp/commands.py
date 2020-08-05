@@ -69,50 +69,61 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
     if config.device is None:
         raise RuntimeError('No device set')  # pragma: no cover
 
-    def callback(  # type: ignore
-        snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx
-    ):
-        var_bind_table = [vbProcessor.unmakeVarBinds(snmpEngine, row, lookup_mib) for row in varBindTable]
-        if ignore_nonincreasing_oid and errorIndication and isinstance(errorIndication, errind.OidNotIncreasing):
-            errorIndication = None
-        cbCtx['error'] = errorIndication
-        cbCtx['var_bind_table'] = var_bind_table[0] if var_bind_table else []
+    # def callback(  # type: ignore
+    #     snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx
+    # ):
+    #     var_bind_table = [vbProcessor.unmakeVarBinds(snmpEngine, row, lookup_mib) for row in varBindTable]
+    #     if ignore_nonincreasing_oid and errorIndication and isinstance(errorIndication, errind.OidNotIncreasing):
+    #         errorIndication = None
+    #     cbCtx['error'] = errorIndication
+    #     cbCtx['var_bind_table'] = var_bind_table[0] if var_bind_table else []
+    #
+    # ctx = {}  # type: Dict[str, Any]
+    #
+    # initial_vars = [x[0] for x in vbProcessor.makeVarBinds(config._snmp_engine, oids)]
+    #
+    # var_binds = oids
+    #
+    # gen = cmdgen.NextCommandGenerator()
 
-    ctx = {}  # type: Dict[str, Any]
-
-    initial_vars = [x[0] for x in vbProcessor.makeVarBinds(config._snmp_engine, oids)]
-
-    var_binds = oids
-
-    gen = cmdgen.NextCommandGenerator()
+    initial_vars = oids
+    varbinds = oids
 
     while True:
-        gen.sendVarBinds(
-            config._snmp_engine,
-            config.device.target,
-            config._context_data.contextEngineId,
-            config._context_data.contextName,
-            var_binds,
-            callback,
-            ctx,
-        )
+        print("varbinds 2", varbinds)
+        varbinds = config.session.get_next(varbinds)
+        print("initial_vars", initial_vars)
+        print("varbinds", [item.oid for item in varbinds])
+        # gen.sendVarBinds(
+        #     config._snmp_engine,
+        #     config.device.target,
+        #     config._context_data.contextEngineId,
+        #     config._context_data.contextName,
+        #     var_binds,
+        #     callback,
+        #     ctx,
+        # )
+        #
+        # config._snmp_engine.transportDispatcher.runDispatcher()
 
-        config._snmp_engine.transportDispatcher.runDispatcher()
-
-        _handle_error(ctx, config)
+        # _handle_error(ctx, config)
 
         var_binds = []
 
         new_initial_vars = []
-        for col, var_bind in enumerate(ctx['var_bind_table']):
-            name, val = var_bind
-            if not isinstance(val, Null) and initial_vars[col].isPrefixOf(name):
-                var_binds.append(var_bind)
-                new_initial_vars.append(initial_vars[col])
-                yield var_bind
+        for col, item in enumerate(varbinds):
+            oid = ".".join([item.oid.lstrip('.'), item.oid_index])
+            # print("col", col)
+            # print("initial_vars", initial_vars)
+            initial = initial_vars[col]
+            if not isinstance(item.value, Null) and oid.startswith(initial):
+                var_binds.append(oid)
+                new_initial_vars.append(initial)
+                yield item
         if not var_binds:
             return
         initial_vars = new_initial_vars
+        varbinds = var_binds
 
 
 def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_nonincreasing_oid):
