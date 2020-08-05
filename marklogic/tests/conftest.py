@@ -7,7 +7,7 @@ from typing import Any, Dict, Generator
 import pytest
 import requests
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, run_command
 from datadog_checks.dev.conditions import CheckDockerLogs, WaitFor
 
 from .common import ADMIN_PASSWORD, ADMIN_USERNAME, API_URL, CHECK_CONFIG, HERE, PASSWORD, USERNAME
@@ -21,6 +21,8 @@ def dd_environment():
     with docker_run(
         compose_file=compose_file,
         conditions=[
+            CheckDockerLogs(compose_file, r'MARKLOGIC_INIT'),
+            WaitFor(init_node, attempts=3),
             CheckDockerLogs(compose_file, r'Info:'),
             WaitFor(setup_admin_user, attempts=20),
             WaitFor(setup_datadog_user, attempts=10),
@@ -29,6 +31,19 @@ def dd_environment():
         ],
     ):
         yield CHECK_CONFIG
+
+
+def init_node():
+    # type: () -> None
+    # r = requests.post('http://localhost:18001/admin/v1/init', data="")
+    # headers = {'Content-type': 'application/xml'}
+    # r = requests.post(
+    #     'http://localhost:18001/admin/v1/init',
+    #     # auth=requests.auth.HTTPDigestAuth(ADMIN_USERNAME, ADMIN_PASSWORD),
+    #     data={},
+    # )
+    # r.raise_for_status()
+    run_command(['curl', '--anyauth', '-X', 'POST', '-d', '""', '-i', 'http://localhost:18001/admin/v1/init'], check=True)
 
 
 def joining_cluster():
@@ -67,8 +82,6 @@ def setup_admin_user():
     # From https://docs.marklogic.com/10.0/guide/admin-api/cluster
     # Reset admin user password (usefull for cluster setup)
 
-    ret = True
-
     try:
         r = requests.get(
             '{}/manage/v2'.format(API_URL), auth=requests.auth.HTTPDigestAuth(ADMIN_USERNAME, ADMIN_PASSWORD)
@@ -77,14 +90,9 @@ def setup_admin_user():
     except Exception:
         requests.post(
             'http://localhost:8001/admin/v1/instance-admin',
-            data={
-                "admin-username": ADMIN_USERNAME,
-                "admin-password": ADMIN_PASSWORD,
-                "realm": "public",
-            },
+            data={"admin-username": ADMIN_USERNAME, "admin-password": ADMIN_PASSWORD, "realm": "public"},
             headers={"Content-type": "application/x-www-form-urlencoded"},
         )
-        ret = False
 
     try:
         r = requests.get(
@@ -94,15 +102,9 @@ def setup_admin_user():
     except Exception:
         requests.post(
             'http://localhost:18001/admin/v1/instance-admin',
-            data={
-                "admin-username": ADMIN_USERNAME,
-                "admin-password": ADMIN_PASSWORD,
-                "realm": "public",
-            },
+            data={"admin-username": ADMIN_USERNAME, "admin-password": ADMIN_PASSWORD, "realm": "public"},
             headers={"Content-type": "application/x-www-form-urlencoded"},
         )
-        ret = False
-    return ret
 
 
 def setup_datadog_user():
