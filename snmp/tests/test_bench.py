@@ -5,6 +5,7 @@
 import pytest
 
 from datadog_checks.snmp import SnmpCheck
+from . import common
 
 from .common import BULK_TABULAR_OBJECTS, TABULAR_OBJECTS, create_check, generate_instance_config
 
@@ -54,10 +55,53 @@ def test_profile_f5_with_oids_cache(oid_batch_size, benchmark):
 
 
 @pytest.mark.parametrize('refresh_oids_cache_interval,oid_batch_size', [(0, 10), (0, 256), (3600, 10), (3600, 256)])
-def test_oids_cache_bench(refresh_oids_cache_interval, oid_batch_size, benchmark):
+def test_oids_cache_bench(aggregator, refresh_oids_cache_interval, oid_batch_size, benchmark):
     instance = generate_instance_config([])
     instance['community_string'] = 'f5'
     instance['refresh_oids_cache_interval'] = refresh_oids_cache_interval
     check = SnmpCheck('snmp', {'oid_batch_size': oid_batch_size}, [instance])
 
     benchmark.pedantic(check.check, args=(instance,), iterations=1, rounds=5, warmup_rounds=1)
+    gauges = [
+        'sysStatMemoryTotal',
+        'sysStatMemoryUsed',
+        'sysGlobalTmmStatMemoryTotal',
+        'sysGlobalTmmStatMemoryUsed',
+        'sysGlobalHostOtherMemoryTotal',
+        'sysGlobalHostOtherMemoryUsed',
+        'sysGlobalHostSwapTotal',
+        'sysGlobalHostSwapUsed',
+        'sysTcpStatOpen',
+        'sysTcpStatCloseWait',
+        'sysTcpStatFinWait',
+        'sysTcpStatTimeWait',
+        'sysUdpStatOpen',
+        'sysClientsslStatCurConns',
+    ]
+    counts = [
+        'sysTcpStatAccepts',
+        'sysTcpStatAcceptfails',
+        'sysTcpStatConnects',
+        'sysTcpStatConnfails',
+        'sysUdpStatAccepts',
+        'sysUdpStatAcceptfails',
+        'sysUdpStatConnects',
+        'sysUdpStatConnfails',
+        'sysClientsslStatEncryptedBytesIn',
+        'sysClientsslStatEncryptedBytesOut',
+        'sysClientsslStatDecryptedBytesIn',
+        'sysClientsslStatDecryptedBytesOut',
+        'sysClientsslStatHandshakeFailures',
+    ]
+    cpu_rates = [
+        'sysMultiHostCpuUser',
+        'sysMultiHostCpuNice',
+        'sysMultiHostCpuSystem',
+        'sysMultiHostCpuIdle',
+        'sysMultiHostCpuIrq',
+        'sysMultiHostCpuSoftirq',
+        'sysMultiHostCpuIowait',
+    ]
+
+    for m in gauges + counts + cpu_rates:
+        aggregator.assert_metric('snmp.{}'.format(m))

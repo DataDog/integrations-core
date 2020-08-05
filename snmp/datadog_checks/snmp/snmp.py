@@ -204,7 +204,7 @@ class SnmpCheck(AgentCheck):
         for item in all_binds:
             oid = item.oid
             value = item.value
-            scalar_oids.append(item)
+            scalar_oids.append(OID(oid))
             match = config.resolve_oid(item)
             results[match.name][match.indexes] = item
         self.log.debug('Raw results: %s', results)
@@ -229,6 +229,7 @@ class SnmpCheck(AgentCheck):
             try:
                 self.log.debug('Running SNMP command get on OIDS: %s', oids_batch)
 
+                print("oids_batch", oids_batch)
                 var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
                 self.log.debug('Returned vars: %s', var_binds)
 
