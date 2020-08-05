@@ -97,9 +97,9 @@ class ExpiringCache(dict):
         expire_at = time.time() + expire_seconds
         self.cache[key] = (val, expire_at)
 
-    def get(self, key):
-        val, expire_at = self.cache.get(key, (None, -1))
+    def get(self, key, default=None):
+        val, expire_at = self.cache.get(key, (default, -1))
         if 0 < expire_at < time.time():
             del self.cache[key]
-            return None
+            return default
         return val
