@@ -159,6 +159,9 @@ class CloudFoundryApiCheck(AgentCheck):
                 self.service_check(API_SERVICE_CHECK_NAME, CloudFoundryApiCheck.CRITICAL, tags=sc_tags)
                 return events
 
+            # Memorize the last event guid at which we stopped in the previous check run
+            # before we update it during this run
+            last_event_guid = self._last_event_guid
             for cf_event in payload.get("resources", []):
                 try:
                     dd_event, event_guid, event_ts = parse_event(cf_event, self._api_version, additional_tags)
@@ -166,7 +169,7 @@ class CloudFoundryApiCheck(AgentCheck):
                     self.log.exception("Could not parse event %s", cf_event)
                     continue
                 # Stop going through events if we've reached one we've already fetched or if we went back in time enough
-                if event_guid == self._last_event_guid or int(time.time()) - event_ts > MAX_LOOKBACK_SECONDS:
+                if event_guid == last_event_guid or int(time.time()) - event_ts > MAX_LOOKBACK_SECONDS:
                     scroll = False
                     break
                 # Store the event at which we want to stop on the next check run: the most recent of the current run
