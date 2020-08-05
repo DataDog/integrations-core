@@ -6,7 +6,7 @@ from datadog_checks.base import is_affirmative
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from ....stubs import datadog_agent
 
 
 def is_dbm_enabled():

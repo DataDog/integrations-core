@@ -3,11 +3,14 @@ from contextlib import closing
 
 import pymysql
 
-import datadog_agent
 from datadog_checks.base import is_affirmative
-
 from datadog_checks.base.utils.db.statement_metrics import is_dbm_enabled
 from datadog_checks.base.utils.db.sql import compute_sql_signature, compute_exec_plan_signature, submit_exec_plan_events
+
+try:
+    import datadog_agent
+except ImportError:
+    from ..stubs import datadog_agent
 
 
 VALID_EXPLAIN_STATEMENTS = frozenset({

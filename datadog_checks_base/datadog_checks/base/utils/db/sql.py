@@ -15,7 +15,7 @@ from urllib3 import Retry
 try:
     import datadog_agent
 except ImportError:
-    from ..stubs import datadog_agent
+    from ....stubs import datadog_agent
 
 LOGGER = logging.getLogger(__file__)
 

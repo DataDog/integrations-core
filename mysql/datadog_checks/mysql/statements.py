@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
@@ -34,7 +35,7 @@ METRICS = {
 DEFAULT_METRIC_LIMITS = {k: (100000, 100000) for k in METRICS.keys()}
 
 
-class MySQLStatementMetrics:
+class MySQLStatementMetrics(object):
     """
     MySQLStatementMetrics collects database metrics per normalized MySQL statement
     """
