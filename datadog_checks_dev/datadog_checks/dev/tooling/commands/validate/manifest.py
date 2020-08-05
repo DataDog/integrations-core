@@ -105,7 +105,7 @@ def get_manifest_schema():
                             },
                         },
                     },
-                    "required": ["monitors", "dashboards", "service_checks", "logs"],
+                    "required": ["monitors", "dashboards", "service_checks"],
                 },
             },
             "allOf": [
