@@ -1,0 +1,19 @@
+name: Mesos Master
+
+files:
+  - name: mesos_master.yaml
+    options:
+      - template: init_config
+        options:
+          - template: init_config/http
+          - template: init_config/default
+      - template: instances
+        options:
+          - name: url
+            description: Url used to connect to the Mesos master instance.
+            required: true
+            value:
+              type: string
+              example: http://localhost:5050
+          - template: instances/http
+          - template: instances/default
