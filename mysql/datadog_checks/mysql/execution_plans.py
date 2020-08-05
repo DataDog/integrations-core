@@ -3,12 +3,8 @@ import time
 from contextlib import closing
 
 import pymysql
-
-import datadog_agent
-import pymysql
 from datadog import statsd
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.utils.db.statement_metrics import is_dbm_enabled
 from datadog_checks.base.utils.db.sql import compute_sql_signature, compute_exec_plan_signature, submit_exec_plan_events
 
 try:
