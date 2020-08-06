@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from logging import Logger
 from typing import Any, Dict, Generator, Iterator, List, cast
 
 from pyasn1.type.univ import Null
@@ -9,7 +10,6 @@ from pysnmp.entity.rfc3413 import cmdgen
 from pysnmp.hlapi.asyncore.cmdgen import vbProcessor
 from pysnmp.proto import errind
 from pysnmp.proto.rfc1905 import endOfMibView
-from twisted.python.log import Logger
 
 from datadog_checks.base.errors import CheckException
 from datadog_checks.snmp.utils import OIDPrinter
