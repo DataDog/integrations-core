@@ -55,7 +55,7 @@ def test_profile_f5_with_oids_cache(oid_batch_size, benchmark):
 
 
 @pytest.mark.parametrize(
-    'refresh_oids_cache_interval,oid_batch_size', [itertools.product([0, 3600], [10, 32, 64, 128, 256])],
+    'refresh_oids_cache_interval,oid_batch_size', itertools.product([0, 3600], [10, 32, 64, 128, 256]),
 )
 def test_oids_cache_bench(refresh_oids_cache_interval, oid_batch_size, benchmark):
     instance = generate_instance_config([])
