@@ -62,46 +62,5 @@ def test_oids_cache_bench(aggregator, refresh_oids_cache_interval, oid_batch_siz
     check = SnmpCheck('snmp', {'oid_batch_size': oid_batch_size}, [instance])
 
     benchmark.pedantic(check.check, args=(instance,), iterations=1, rounds=1, warmup_rounds=1)
-    gauges = [
-        'sysStatMemoryTotal',
-        'sysStatMemoryUsed',
-        'sysGlobalTmmStatMemoryTotal',
-        'sysGlobalTmmStatMemoryUsed',
-        'sysGlobalHostOtherMemoryTotal',
-        'sysGlobalHostOtherMemoryUsed',
-        'sysGlobalHostSwapTotal',
-        'sysGlobalHostSwapUsed',
-        'sysTcpStatOpen',
-        'sysTcpStatCloseWait',
-        'sysTcpStatFinWait',
-        'sysTcpStatTimeWait',
-        'sysUdpStatOpen',
-        'sysClientsslStatCurConns',
-    ]
-    counts = [
-        'sysTcpStatAccepts',
-        'sysTcpStatAcceptfails',
-        'sysTcpStatConnects',
-        'sysTcpStatConnfails',
-        'sysUdpStatAccepts',
-        'sysUdpStatAcceptfails',
-        'sysUdpStatConnects',
-        'sysUdpStatConnfails',
-        'sysClientsslStatEncryptedBytesIn',
-        'sysClientsslStatEncryptedBytesOut',
-        'sysClientsslStatDecryptedBytesIn',
-        'sysClientsslStatDecryptedBytesOut',
-        'sysClientsslStatHandshakeFailures',
-    ]
-    cpu_rates = [
-        'sysMultiHostCpuUser',
-        'sysMultiHostCpuNice',
-        'sysMultiHostCpuSystem',
-        'sysMultiHostCpuIdle',
-        'sysMultiHostCpuIrq',
-        'sysMultiHostCpuSoftirq',
-        'sysMultiHostCpuIowait',
-    ]
 
-    for m in gauges + counts + cpu_rates:
-        aggregator.assert_metric('snmp.{}'.format(m))
+    common.assert_f5_profile(aggregator)

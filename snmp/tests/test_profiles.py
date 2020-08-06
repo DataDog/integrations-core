@@ -209,7 +209,7 @@ def test_f5_base_case(aggregator):
     profile = "f5-big-ip"
     run_profile_check('f5', profile)
 
-    common.assert_f5(aggregator)
+    common.assert_f5_profile(aggregator, count=1)
 
 
 # @pytest.mark.usefixtures("dd_environment")

@@ -237,9 +237,7 @@ def assert_common_metrics(aggregator, tags=None):
     aggregator.assert_metric('snmp.devices_monitored', metric_type=aggregator.GAUGE, tags=tags)
 
 
-
-
-def assert_f5(aggregator):
+def assert_f5_profile(aggregator, count=None):
     gauges = [
         'sysStatMemoryTotal',
         'sysStatMemoryUsed',
@@ -285,21 +283,21 @@ def assert_f5(aggregator):
     tags += CHECK_TAGS
     assert_common_metrics(aggregator, tags)
     for metric in gauges:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=count)
     for metric in counts:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=count)
     for metric in cpu_rates:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:0'] + tags, count=1)
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:1'] + tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:0'] + tags, count=count)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:1'] + tags, count=count)
     for interface in interfaces:
         interface_tags = ['interface:{}'.format(interface)] + tags
         for metric in IF_COUNTS:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=interface_tags, count=1,
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=interface_tags, count=count,
             )
         for metric in IF_RATES:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=interface_tags, count=1
+                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=interface_tags, count=count
             )
     for metric in IF_GAUGES:
         for interface in interfaces:
@@ -307,67 +305,67 @@ def assert_f5(aggregator):
                 'snmp.{}'.format(metric),
                 metric_type=aggregator.GAUGE,
                 tags=['interface:{}'.format(interface)] + tags,
-                count=1,
+                count=count,
             )
     for version in ['ipv4', 'ipv6']:
         ip_tags = ['ipversion:{}'.format(version)] + tags
         for metric in IP_COUNTS:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=ip_tags, count=1
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=ip_tags, count=count
             )
     for metric in LTM_GAUGES:
-        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=count)
     servers = ['server1', 'server2', 'server3']
     for server in servers:
         server_tags = tags + ['server:{}'.format(server)]
         for metric in LTM_VIRTUAL_SERVER_GAUGES:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=server_tags, count=1,
+                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=server_tags, count=count,
             )
         for metric in LTM_VIRTUAL_SERVER_COUNTS:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=server_tags, count=1,
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=server_tags, count=count,
             )
         for metric in LTM_VIRTUAL_SERVER_RATES:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=server_tags, count=1,
+                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=server_tags, count=count,
             )
     nodes = ['node1', 'node2', 'node3']
     for node in nodes:
         node_tags = tags + ['node:{}'.format(node)]
         for metric in LTM_NODES_GAUGES:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=node_tags, count=1)
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=node_tags, count=count)
         for metric in LTM_NODES_COUNTS:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=node_tags, count=1
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=node_tags, count=count
             )
         for metric in LTM_NODES_RATES:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=node_tags, count=1)
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=node_tags, count=count)
     pools = ['pool1', 'pool2']
     for pool in pools:
         pool_tags = tags + ['pool:{}'.format(pool)]
         for metric in LTM_POOL_GAUGES:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=pool_tags, count=1)
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=pool_tags, count=count)
         for metric in LTM_POOL_COUNTS:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=pool_tags, count=1
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=pool_tags, count=count
             )
         for metric in LTM_POOL_RATES:
-            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=pool_tags, count=1)
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=pool_tags, count=count)
     pool_members = [('pool1', 'node1'), ('pool1', 'node2'), ('pool2', 'node3')]
     for pool, node in pool_members:
         pool_member_tags = tags + ['pool:{}'.format(pool), 'node:{}'.format(node)]
         for metric in LTM_POOL_MEMBER_GAUGES:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=pool_member_tags, count=1
+                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=pool_member_tags, count=count
             )
         for metric in LTM_POOL_MEMBER_COUNTS:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=pool_member_tags, count=1
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=pool_member_tags, count=count
             )
         for metric in LTM_POOL_MEMBER_RATES:
             aggregator.assert_metric(
-                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=pool_member_tags, count=1
+                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=pool_member_tags, count=count
             )
-    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=count)
     aggregator.assert_all_metrics_covered()
