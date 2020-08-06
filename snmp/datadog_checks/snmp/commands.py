@@ -11,6 +11,7 @@ from pysnmp.proto import errind
 from pysnmp.proto.rfc1905 import endOfMibView
 
 from datadog_checks.base.errors import CheckException
+from datadog_checks.snmp.utils import OIDPrinter
 
 from .config import InstanceConfig
 
@@ -45,10 +46,12 @@ def snmp_get_async(config, oids_batches, lookup_mib):
 
         cbCtx['error'] = errorIndication
         res_var_binds.extend(var_binds)
+        config.logger.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
 
     ctx = {}  # type: Dict[str, Any]
 
     for oids in oids_batches:
+        config.logger.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids, with_values=False))
         var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
 
         cmdgen.GetCommandGenerator().sendVarBinds(

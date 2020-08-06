@@ -225,12 +225,9 @@ class SnmpCheck(AgentCheck):
         all_binds = []
 
         try:
-            # self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
-
             var_binds = snmp_get_async(
                 config, batches(scalar_oids, size=self.oid_batch_size), lookup_mib=enforce_constraints
             )
-            self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
 
             missing_results = []
 
