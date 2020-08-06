@@ -1,0 +1,30 @@
+name: Cassandra
+files:
+- name: cassandra.yaml
+  options:
+  - template: init_config
+    options:
+      - template: init_config/jmx
+  - template: instances
+    options:
+    - template: instances/jmx
+      overrides:
+        host.value.example: localhost
+        port.value.example: 7199
+    - name: cassandra_aliasing
+      description: |
+        Must be set to true to comply with CASSANDRA-4009.
+        Learn more: https://issues.apache.org/jira/browse/CASSANDRA-4009
+      required: true
+      value:
+        type: boolean
+        example: true
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/cassandra/*.log
+      source: cassandra
+      log_processing_rules:
+      - type: multi_line
+        name: log_start_with_date
+        pattern: "[A-Z]+ +\\[[^\\]]+\\] +\\d{4}-\\d{2}-\\d{2}"
