@@ -37,7 +37,7 @@ def snmp_get_async(config, oids_batches, lookup_mib):
     if config.device is None:
         raise RuntimeError('No device set')  # pragma: no cover
 
-    res_var_binds = []
+    cum_var_binds = []
 
     def callback(  # type: ignore
         snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx
@@ -45,7 +45,7 @@ def snmp_get_async(config, oids_batches, lookup_mib):
         var_binds = vbProcessor.unmakeVarBinds(snmpEngine, varBinds, lookup_mib)
 
         cbCtx['error'] = errorIndication
-        res_var_binds.extend(var_binds)
+        cum_var_binds.extend(var_binds)
         config.logger.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
 
     ctx = {}  # type: Dict[str, Any]
@@ -68,7 +68,7 @@ def snmp_get_async(config, oids_batches, lookup_mib):
 
     _handle_error(ctx, config)
 
-    return res_var_binds
+    return cum_var_binds
 
 
 def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
