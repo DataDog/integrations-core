@@ -201,9 +201,9 @@ def check_duplicate_values(current_check, line, row, header_name, duplicates, fa
 @click.option(
     '--check-duplicates', is_flag=True, help='Output warnings if there are duplicate short names and descriptions'
 )
-@click.option('--hide-warnings', '-h', is_flag=True, help='Hide warnings and only show failures')
+@click.option('--show-warnings', '-w', is_flag=True, help='Show warnings in addition to failures')
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
-def metadata(check, check_duplicates, hide_warnings):
+def metadata(check, check_duplicates, show_warnings):
     """Validates metadata.csv files
 
     If `check` is specified, only the check will be validated,
@@ -345,7 +345,7 @@ def metadata(check, check_duplicates, hide_warnings):
             errors = True
             echo_failure(f'{current_check}: {header} is empty in {count} rows.')
 
-        if not hide_warnings:
+        if show_warnings:
             for header, count in empty_warning_count.items():
                 echo_warning(f'{current_check}: {header} is empty in {count} rows.')
 

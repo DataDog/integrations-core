@@ -27,7 +27,7 @@ steps:
 - script: ddev validate manifest -i
   displayName: 'Validate manifest files'
 
-- script: ddev validate metadata
+- script: ddev validate metadata -w
   displayName: 'Validate metric data'
 
 - script: ddev validate readmes
