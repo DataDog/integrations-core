@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import Any, Dict, Generator
+from typing import Any, Dict, Generator, List
 
 from pyasn1.type.univ import Null
 from pysnmp import hlapi
@@ -26,47 +26,17 @@ def _handle_error(ctx, config):
 def snmp_get(config, oids, lookup_mib):
     # type: (InstanceConfig, list, bool) -> list
     """Call SNMP GET on a list of oids."""
-
-    if config.device is None:
-        raise RuntimeError('No device set')  # pragma: no cover
-
-    def callback(  # type: ignore
-        snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx
-    ):
-        var_binds = vbProcessor.unmakeVarBinds(snmpEngine, varBinds, lookup_mib)
-
-        cbCtx['error'] = errorIndication
-        cbCtx['var_binds'] = var_binds
-
-    ctx = {}  # type: Dict[str, Any]
-
-    var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
-
-    cmdgen.GetCommandGenerator().sendVarBinds(
-        config._snmp_engine,
-        config.device.target,
-        config._context_data.contextEngineId,
-        config._context_data.contextName,
-        var_binds,
-        callback,
-        ctx,
-    )
-
-    config._snmp_engine.transportDispatcher.runDispatcher()
-
-    _handle_error(ctx, config)
-
-    return ctx['var_binds']
+    return snmp_get_async(config, [oids], lookup_mib)
 
 
 def snmp_get_async(config, oids_batches, lookup_mib):
-    # type: (InstanceConfig, list[list], bool) -> list
-    """Call SNMP GET on a list of oids."""
+    # type: (InstanceConfig, List[list], bool) -> list
+    """Call SNMP GET on batches of oids concurrently."""
 
     if config.device is None:
         raise RuntimeError('No device set')  # pragma: no cover
 
-    res = []
+    res_var_binds = []
 
     def callback(  # type: ignore
         snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx
@@ -74,7 +44,7 @@ def snmp_get_async(config, oids_batches, lookup_mib):
         var_binds = vbProcessor.unmakeVarBinds(snmpEngine, varBinds, lookup_mib)
 
         cbCtx['error'] = errorIndication
-        res.extend(var_binds)
+        res_var_binds.extend(var_binds)
 
     ctx = {}  # type: Dict[str, Any]
 
@@ -95,7 +65,7 @@ def snmp_get_async(config, oids_batches, lookup_mib):
 
     _handle_error(ctx, config)
 
-    return res
+    return res_var_binds
 
 
 def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
