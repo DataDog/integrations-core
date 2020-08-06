@@ -12,7 +12,6 @@ from pysnmp.proto.rfc1905 import endOfMibView
 from twisted.python.log import Logger
 
 from datadog_checks.base.errors import CheckException
-from datadog_checks.snmp.models import OID
 from datadog_checks.snmp.utils import OIDPrinter
 
 from .config import InstanceConfig
@@ -27,13 +26,13 @@ def _handle_error(ctx, config):
 
 
 def snmp_get(config, oids, lookup_mib):
-    # type: (InstanceConfig, List[OID], bool) -> list
+    # type: (InstanceConfig, List[Any], bool) -> list
     """Call SNMP GET on a list of oids."""
-    return snmp_get_async(config, iter(list(oids)), lookup_mib)
+    return snmp_get_async(config, iter([oids]), lookup_mib)
 
 
 def snmp_get_async(config, oids_batches, lookup_mib):
-    # type: (InstanceConfig, Iterator[List[OID]], bool) -> list
+    # type: (InstanceConfig, Iterator[List[Any]], bool) -> list
     """Call SNMP GET on batches of oids concurrently."""
 
     if config.device is None:
@@ -76,7 +75,7 @@ def snmp_get_async(config, oids_batches, lookup_mib):
 
 
 def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
-    # type: (InstanceConfig, list, bool, bool) -> Generator
+    # type: (InstanceConfig, List[Any], bool, bool) -> Generator
     """Call SNMP GETNEXT on a list of oids. It will iterate on the results if it happens to be under the same prefix."""
 
     if config.device is None:
