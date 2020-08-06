@@ -1,6 +1,10 @@
 - name: is_jmx
   required: true
-  description: Whether or not this file is a configuration for a JMX integration.
+  description: |
+    Whether or not this file is a configuration for a JMX integration.
+
+    NOTE: To run more than one JMX check, create configuration files with the format jmx_<INDEX>.d/conf.yaml. Each
+    folder should be stored in the conf.d directory. Include this option set to true in each configuration file.
   value:
     example: true
     type: boolean

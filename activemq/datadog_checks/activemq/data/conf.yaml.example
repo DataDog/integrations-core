@@ -4,6 +4,9 @@ init_config:
 
     ## @param is_jmx - boolean - required
     ## Whether or not this file is a configuration for a JMX integration.
+    ##
+    ## NOTE: To run more than one JMX check, create configuration files with the format jmx_<INDEX>.d/conf.yaml. Each
+    ## folder should be stored in the conf.d directory. Include this option set to true in each configuration file.
     #
     is_jmx: true
 
