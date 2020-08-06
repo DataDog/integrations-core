@@ -201,8 +201,11 @@ def check_duplicate_values(current_check, line, row, header_name, duplicates, fa
 @click.option(
     '--check-duplicates', is_flag=True, help='Output warnings if there are duplicate short names and descriptions'
 )
+@click.option(
+    '--hide-warnings', '-h', is_flag=True, help='Hide warnings and only show failures'
+)
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
-def metadata(check, check_duplicates):
+def metadata(check, check_duplicates, hide_warnings):
     """Validates metadata.csv files
 
     If `check` is specified, only the check will be validated,
@@ -344,16 +347,17 @@ def metadata(check, check_duplicates):
             errors = True
             echo_failure(f'{current_check}: {header} is empty in {count} rows.')
 
-        for header, count in empty_warning_count.items():
-            echo_warning(f'{current_check}: {header} is empty in {count} rows.')
+        if not hide_warnings:
+            for header, count in empty_warning_count.items():
+                echo_warning(f'{current_check}: {header} is empty in {count} rows.')
 
-        for prefix, count in metric_prefix_count.items():
-            # Don't spam this warning when we're validating everything
-            if check:
-                echo_warning(
-                    f"{current_check}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
-                    "defined in the manifest."
-                )
+            for prefix, count in metric_prefix_count.items():
+                # Don't spam this warning when we're validating everything
+                if check:
+                    echo_warning(
+                        f"{current_check}: `{prefix}` appears {count} time(s) and does not match metric_prefix "
+                        "defined in the manifest."
+                    )
 
     if errors:
         abort()
