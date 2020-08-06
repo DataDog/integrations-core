@@ -134,14 +134,17 @@ class CloudFoundryApiCheck(AgentCheck):
         self._token_expiration = int(time.time()) + payload["expires_in"]
         self.service_check(UAA_SERVICE_CHECK_NAME, CloudFoundryApiCheck.OK, tags=sc_tags)
 
+    def get_auth_header(self):
+        self.get_oauth_token()
+        return {"Authorization": "Bearer {}".format(self._oauth_token)}
+
     def get_orgs(self):
         orgs = {}
-        self.get_oauth_token()
+        headers = self.get_auth_header()
         if self._api_version == "v2":
             params = {
                 "results-per-page": MAX_PAGE_SIZE_V2,
             }
-            headers = {"Authorization": "Bearer {}".format(self._oauth_token)}
             url = join_url(self._api_url, "v2/organizations")
             for orgs_page in self.scroll_api_pages(url, params, headers):
                 for org in orgs_page.get("resources", []):
@@ -154,7 +157,6 @@ class CloudFoundryApiCheck(AgentCheck):
             params = {
                 "per_page": MAX_PAGE_SIZE_V3,
             }
-            headers = {"Authorization": "Bearer {}".format(self._oauth_token)}
             url = join_url(self._api_url, "v3/organizations")
             for orgs_page in self.scroll_api_pages(url, params, headers):
                 for org in orgs_page.get("resources", []):
@@ -172,8 +174,7 @@ class CloudFoundryApiCheck(AgentCheck):
             return self._orgs[org_guid]
         else:
             self.log.debug("Orgs cache miss for %s, fetching from CC API...", org_guid)
-            self.get_oauth_token()
-            headers = {"Authorization": "Bearer {}".format(self._oauth_token)}
+            headers = self.get_auth_header()
             url = join_url(self._api_url, "{}/organizations/{}".format(self._api_version, org_guid))
             try:
                 res = self.http.get(url, headers=headers)
@@ -191,12 +192,11 @@ class CloudFoundryApiCheck(AgentCheck):
 
     def get_spaces(self):
         spaces = {}
-        self.get_oauth_token()
+        headers = self.get_auth_header()
         if self._api_version == "v2":
             params = {
                 "results-per-page": MAX_PAGE_SIZE_V2,
             }
-            headers = {"Authorization": "Bearer {}".format(self._oauth_token)}
             # Make sure to have at least one trailing slash to avoid surprises with urljoin
             url = join_url(self._api_url, "v2/spaces")
             for spaces_page in self.scroll_api_pages(url, params, headers):
@@ -210,7 +210,6 @@ class CloudFoundryApiCheck(AgentCheck):
             params = {
                 "per_page": MAX_PAGE_SIZE_V3,
             }
-            headers = {"Authorization": "Bearer {}".format(self._oauth_token)}
             url = join_url(self._api_url, "v3/spaces")
             for spaces_page in self.scroll_api_pages(url, params, headers):
                 for space in spaces_page.get("resources", []):
@@ -228,8 +227,7 @@ class CloudFoundryApiCheck(AgentCheck):
             return self._spaces[space_guid]
         else:
             self.log.debug("Spaces cache miss for %s, fetching from CC API...", space_guid)
-            self.get_oauth_token()
-            headers = {"Authorization": "Bearer {}".format(self._oauth_token)}
+            headers = self.get_auth_header()
             url = join_url(self._api_url, "{}/spaces/{}".format(self._api_version, space_guid))
             try:
                 res = self.http.get(url, headers=headers)
@@ -321,7 +319,7 @@ class CloudFoundryApiCheck(AgentCheck):
 
     def get_events(self):
         # type: () -> Dict[str, Event]
-        self.get_oauth_token()
+        headers = self.get_auth_header()
         if self._api_version == "v2":
             params = {
                 "q": "type IN {}".format(self._event_filter),
@@ -329,7 +327,6 @@ class CloudFoundryApiCheck(AgentCheck):
                 "order-direction": "desc",
                 "order-by": "timestamp",
             }
-            headers = {"Authorization": "Bearer {}".format(self._oauth_token)}
             url = join_url(self._api_url, "v2/events")
             return self.scroll_events(url, params, headers)
         elif self._api_version == "v3":
@@ -338,7 +335,6 @@ class CloudFoundryApiCheck(AgentCheck):
                 "per_page": min(self._per_page, MAX_PAGE_SIZE_V3),
                 "order_by": "-created_at",
             }
-            headers = {"Authorization": "Bearer {}".format(self._oauth_token)}
             url = join_url(self._api_url, "v3/audit_events")
             return self.scroll_events(url, params, headers)
 

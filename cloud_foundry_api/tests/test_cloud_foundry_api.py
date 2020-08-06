@@ -721,3 +721,13 @@ def test_get_space_name(http_mock, _, __, ___, instance, space_v2, space_v3):
         http_mock.get.side_effect = RequestException
         assert check.get_space_name("id_error") is None
         log_mock.exception.assert_called_once()
+
+
+@mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url"))
+@mock.patch.object(CloudFoundryApiCheck, "get_orgs", return_value={"org_guid": "org_name"})
+@mock.patch.object(CloudFoundryApiCheck, "get_spaces", return_value={"space_guid": "space_name"})
+@mock.patch.object(CloudFoundryApiCheck, "get_oauth_token")
+def test_get_auth_headers(_, __, ___, ____, instance):
+    check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
+    check._oauth_token = "oauth_token"
+    assert check.get_auth_header() == {"Authorization": "Bearer oauth_token"}
