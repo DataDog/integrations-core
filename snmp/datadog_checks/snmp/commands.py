@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-from typing import Any, Dict, Generator, List
+from typing import Any, Dict, Generator, Iterator, List, cast
 
 from pyasn1.type.univ import Null
 from pysnmp import hlapi
@@ -9,8 +9,10 @@ from pysnmp.entity.rfc3413 import cmdgen
 from pysnmp.hlapi.asyncore.cmdgen import vbProcessor
 from pysnmp.proto import errind
 from pysnmp.proto.rfc1905 import endOfMibView
+from twisted.python.log import Logger
 
 from datadog_checks.base.errors import CheckException
+from datadog_checks.snmp.models import OID
 from datadog_checks.snmp.utils import OIDPrinter
 
 from .config import InstanceConfig
@@ -25,17 +27,19 @@ def _handle_error(ctx, config):
 
 
 def snmp_get(config, oids, lookup_mib):
-    # type: (InstanceConfig, list, bool) -> list
+    # type: (InstanceConfig, List[OID], bool) -> list
     """Call SNMP GET on a list of oids."""
-    return snmp_get_async(config, [oids], lookup_mib)
+    return snmp_get_async(config, iter(list(oids)), lookup_mib)
 
 
 def snmp_get_async(config, oids_batches, lookup_mib):
-    # type: (InstanceConfig, List[list], bool) -> list
+    # type: (InstanceConfig, Iterator[List[OID]], bool) -> list
     """Call SNMP GET on batches of oids concurrently."""
 
     if config.device is None:
         raise RuntimeError('No device set')  # pragma: no cover
+
+    log = cast(Logger, config.logger_ref())
 
     cum_var_binds = []
 
@@ -46,12 +50,12 @@ def snmp_get_async(config, oids_batches, lookup_mib):
 
         cbCtx['error'] = errorIndication
         cum_var_binds.extend(var_binds)
-        config.logger_ref().debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
+        log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
 
     ctx = {}  # type: Dict[str, Any]
 
     for oids in oids_batches:
-        config.logger_ref().debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids, with_values=False))
+        log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids, with_values=False))
         var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
 
         cmdgen.GetCommandGenerator().sendVarBinds(
