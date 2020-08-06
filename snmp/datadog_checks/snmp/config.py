@@ -285,7 +285,9 @@ class InstanceConfig:
         """Parse configuration and returns data to be used for SNMP queries."""
         # Use bulk for SNMP version > 1 only.
         bulk_threshold = self.bulk_threshold if self._auth_data.mpModel else 0
-        result = parse_metrics(metrics, resolver=self._resolver, logger=self.logger_ref(), bulk_threshold=bulk_threshold)
+        result = parse_metrics(
+            metrics, resolver=self._resolver, logger=self.logger_ref(), bulk_threshold=bulk_threshold
+        )
         return result['oids'], result['next_oids'], result['bulk_oids'], result['parsed_metrics']
 
     def parse_metric_tags(self, metric_tags):
