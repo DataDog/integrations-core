@@ -201,9 +201,7 @@ def check_duplicate_values(current_check, line, row, header_name, duplicates, fa
 @click.option(
     '--check-duplicates', is_flag=True, help='Output warnings if there are duplicate short names and descriptions'
 )
-@click.option(
-    '--hide-warnings', '-h', is_flag=True, help='Hide warnings and only show failures'
-)
+@click.option('--hide-warnings', '-h', is_flag=True, help='Hide warnings and only show failures')
 @click.argument('check', autocompletion=complete_valid_checks, required=False)
 def metadata(check, check_duplicates, hide_warnings):
     """Validates metadata.csv files
