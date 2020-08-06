@@ -53,9 +53,7 @@ class ExecutionPlansMixin(object):
         # checkpoint at zero so we pull the whole history table on the first run
         self._checkpoint = 0
         self._expiring_cache = ExpiringCache()
-        # For each schema, keep track of which methods work to collect execution plans
-        self._explain_functions_by_schema = {}
-    
+
     def _get_events_statements_by_digest(self, db, events_statements_table, row_limit):
         start = time.time()
 
@@ -93,7 +91,7 @@ class ExecutionPlansMixin(object):
 
         with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
             params = ('statement/%', 'EXPLAIN %', self._checkpoint, row_limit)
-            self.log.debug("running query. " + query, *params)
+            self.log.debug("running query: " + query, *params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
             if not rows:
@@ -130,9 +128,11 @@ class ExecutionPlansMixin(object):
             with closing(db.cursor()) as cursor:
                 # TODO: run these asynchronously / do some benchmarking to optimize
                 try:
-                    plan = self._attempt_explain(cursor, sql_text, schema, instance_tags)
+                    start_time = time.time()
+                    plan = self._attempt_explain(cursor, sql_text, schema)
                     if not plan:
                         continue
+                    statsd.timing("dd.mysql.run_explain.time", (time.time() - start_time) * 1000, tags=instance_tags)
                 except Exception:
                     self.log.exception("failed to run explain on query %s", sql_text)
                     continue
@@ -326,34 +326,48 @@ class ExecutionPlansMixin(object):
         error occurs (such as a permissions error), then statements executed under the schema will be
         disallowed in future attempts.
         """
+        explain_strategy_none = 'none'
+        explain_strategy_procedure = 'procedure'
+        explain_strategy_statement = 'statement'
+
+        fns_by_strategy = {
+            explain_strategy_procedure: self._run_explain_procedure,
+            explain_strategy_statement: self._run_explain,
+        }
+
         plan = None
+        strategy_cache_key = 'explain_strategy:%s' % schema
+        strategy_cache_ttl = 60 * 10
 
         if not self._can_explain(statement):
             return None
 
-        if self._explain_functions_by_schema.get(schema) is False:
-            # Schema has no available functions to try
+        if self._expiring_cache.get(strategy_cache_key) == explain_strategy_none:
             return None
 
         # Switch to the right schema
         try:
             self._use_schema(cursor, schema)
         except NonRetryableError:
-            self._explain_functions_by_schema[schema] = False
+            self._expiring_cache.set(strategy_cache_key, explain_strategy_none, strategy_cache_ttl)
             return None
         except RetryableError:
             return None
 
-        if schema in self._explain_functions_by_schema:
-            plan = self._explain_functions_by_schema[schema](cursor, statement)
+        # Use a cached strategy for the schema, if any, or try each strategy to collect
+        strategy = self._expiring_cache.get(strategy_cache_key)
+        fn = fns_by_strategy.get(strategy)
+        if fn:
+            plan = fn(cursor, statement)
         else:
-            for explain_function in (self._run_explain_procedure, self._run_explain):
+            for strategy in (explain_strategy_procedure, explain_strategy_statement):
                 try:
-                    plan = explain_function(cursor, statement)
-                    self._explain_functions_by_schema[schema] = explain_function
+                    fn = fns_by_strategy.get(strategy)
+                    plan = fn(cursor, statement)
+                    self._expiring_cache.set(strategy_cache_key, strategy, strategy_cache_ttl)
                     break
                 except NonRetryableError:
-                    self._explain_functions_by_schema[schema] = False
+                    self._expiring_cache.set(strategy_cache_key, explain_strategy_none, strategy_cache_ttl)
                     continue
                 except RetryableError:
                     continue
@@ -403,7 +417,7 @@ class ExecutionPlansMixin(object):
 
     def _run_explain_procedure(self, cursor, statement):
         """
-        Run the explain by calling the stored procedure `explain_statement`.
+        Run the explain by calling the stored procedure `explain_statement` if available.
         """
         try:
             cursor.execute('CALL explain_statement(%s)', statement)
@@ -416,6 +430,9 @@ class ExecutionPlansMixin(object):
                 raise NonRetryableError(*e.args)
             elif e.args[0] == 1305:
                 # Procedure does not exist
+                raise NonRetryableError(*e.args)
+            elif e.args[0] == 1046:
+                # No permission on statement (definer cannot explain it)
                 raise NonRetryableError(*e.args)
             else:
                 raise RetryableError(*e.args) from e
