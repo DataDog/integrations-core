@@ -116,7 +116,7 @@ instances:
     ## This instructs the check to ignore events with messages that match at least one of the
     ## provided patterns. Every pattern is considered a regular expression.
     ##
-    ## This takes precedence over `message_whitelist`.
+    ## This takes precedence over `included_messages`.
     #
     # excluded_messages:
     #   - <PATTERN_1>
