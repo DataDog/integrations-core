@@ -74,6 +74,8 @@ class SnmpCheck(AgentCheck):
 
         self._config = self._build_config(self.instance)
 
+        self._snmp_call_executor = futures.ThreadPoolExecutor(max_workers=10)
+
     def _load_profiles(self):
         # type: () -> Dict[str, Dict[str, Any]]
         """
@@ -224,11 +226,15 @@ class SnmpCheck(AgentCheck):
         next_oids = [oid.as_object_type() for oid in next_oids]
         all_binds = []
 
-        for oids_batch in batches(scalar_oids, size=self.oid_batch_size):
-            try:
-                self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
+        def do_snmp_get(oids_batch):
+            self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
+            return snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
 
-                var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
+        def snmp_get_callback(future):
+            nonlocal error
+
+            var_binds = future.result()
+            try:
                 self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
 
                 missing_results = []
@@ -250,6 +256,13 @@ class SnmpCheck(AgentCheck):
                 if not error:
                     error = message
                 self.warning(message)
+
+        sent = []
+        for oids_batch in batches(scalar_oids, size=self.oid_batch_size):
+            future = self._snmp_call_executor.submit(do_snmp_get, oids_batch)
+            sent.append(future)
+            future.add_done_callback(snmp_get_callback)
+        futures.wait(sent)
 
         for oids_batch in batches(next_oids, size=self.oid_batch_size):
             try:
