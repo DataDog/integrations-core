@@ -415,15 +415,15 @@ class Win32EventLogCheck(AgentCheck):
         self.log.debug('Error code %d when calling `%s`: %s', exc.winerror, exc.funcname.split(':')[0], exc.strerror)
 
     def message_filtered(self, message):
-        return self._excluded_messages(message) or not self._included_messages(message)
+        return self._message_excluded(message) or not self._message_included(message)
 
-    def _included_messages(self, message):
+    def _message_included(self, message):
         if self._included_messages is None:
             return True
 
         return not not self._included_messages.search(message)
 
-    def _excluded_messages(self, message):
+    def _message_excluded(self, message):
         if self._excluded_messages is None:
             return False
 
