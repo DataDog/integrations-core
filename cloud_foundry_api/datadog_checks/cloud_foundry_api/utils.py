@@ -24,5 +24,5 @@ def date_to_ts(iso_string):
 
 
 def join_url(domain, path):
-    # Make sure to have a trailing slash in domain, and do leading slash in path to avoid surprises with urljoin
-    return urljoin(domain + "/", path.lstrip("/"))
+    # Make sure to have a trailing slash in domain, and no leading slash in path to avoid surprises with urljoin
+    return urljoin(domain.rstrip("/") + "/", path.lstrip("/"))
