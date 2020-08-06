@@ -59,6 +59,45 @@ def snmp_get(config, oids, lookup_mib):
     return ctx['var_binds']
 
 
+def snmp_get_async(config, oids_batches, lookup_mib):
+    # type: (InstanceConfig, list[list], bool) -> list
+    """Call SNMP GET on a list of oids."""
+
+    if config.device is None:
+        raise RuntimeError('No device set')  # pragma: no cover
+
+    res = []
+
+    def callback(  # type: ignore
+        snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx
+    ):
+        var_binds = vbProcessor.unmakeVarBinds(snmpEngine, varBinds, lookup_mib)
+
+        cbCtx['error'] = errorIndication
+        res.extend(var_binds)
+
+    ctx = {}  # type: Dict[str, Any]
+
+    for oids in oids_batches:
+        var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
+
+        cmdgen.GetCommandGenerator().sendVarBinds(
+            config._snmp_engine,
+            config.device.target,
+            config._context_data.contextEngineId,
+            config._context_data.contextName,
+            var_binds,
+            callback,
+            ctx,
+        )
+
+    config._snmp_engine.transportDispatcher.runDispatcher()
+
+    _handle_error(ctx, config)
+
+    return res
+
+
 def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
     # type: (InstanceConfig, list, bool, bool) -> Generator
     """Call SNMP GETNEXT on a list of oids. It will iterate on the results if it happens to be under the same prefix."""

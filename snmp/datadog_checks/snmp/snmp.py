@@ -18,7 +18,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
 
-from .commands import snmp_bulk, snmp_get, snmp_getnext
+from .commands import snmp_bulk, snmp_get, snmp_getnext, snmp_get_async
 from .compat import read_persistent_cache, write_persistent_cache
 from .config import InstanceConfig
 from .discovery import discover_instances
@@ -224,11 +224,11 @@ class SnmpCheck(AgentCheck):
         next_oids = [oid.as_object_type() for oid in next_oids]
         all_binds = []
 
-        for oids_batch in batches(scalar_oids, size=self.oid_batch_size):
+        if config.use_async:
             try:
-                self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
+                # self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
 
-                var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
+                var_binds = snmp_get_async(config, batches(scalar_oids, size=self.oid_batch_size), lookup_mib=enforce_constraints)
                 self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
 
                 missing_results = []
@@ -250,6 +250,33 @@ class SnmpCheck(AgentCheck):
                 if not error:
                     error = message
                 self.warning(message)
+        else:
+            for oids_batch in batches(scalar_oids, size=self.oid_batch_size):
+                try:
+                    self.log.debug('Running SNMP command get on OIDS: %s', OIDPrinter(oids_batch, with_values=False))
+
+                    var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
+                    self.log.debug('Returned vars: %s', OIDPrinter(var_binds, with_values=True))
+
+                    missing_results = []
+
+                    for var in var_binds:
+                        result_oid, value = var
+                        if reply_invalid(value):
+                            oid_tuple = result_oid.asTuple()
+                            missing_results.append(ObjectType(ObjectIdentity(oid_tuple)))
+                        else:
+                            all_binds.append(var)
+
+                    if missing_results:
+                        # If we didn't catch the metric using snmpget, try snmpnext
+                        next_oids.extend(missing_results)
+
+                except (PySnmpError, CheckException) as e:
+                    message = 'Failed to collect some metrics: {}'.format(e)
+                    if not error:
+                        error = message
+                    self.warning(message)
 
         for oids_batch in batches(next_oids, size=self.oid_batch_size):
             try:
