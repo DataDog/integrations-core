@@ -92,7 +92,6 @@ class InstanceConfig:
             self.metrics.extend(global_metrics)
 
         self.enforce_constraints = is_affirmative(instance.get('enforce_mib_constraints', True))
-        self.use_async = is_affirmative(instance.get('use_async', False))
         self._snmp_engine = loader.create_snmp_engine(mibs_path)
         mib_view_controller = loader.get_mib_view_controller(mibs_path)
         self._resolver = OIDResolver(mib_view_controller, self.enforce_constraints)

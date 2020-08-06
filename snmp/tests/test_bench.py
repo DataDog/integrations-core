@@ -53,33 +53,14 @@ def test_profile_f5_with_oids_cache(oid_batch_size, benchmark):
     benchmark.pedantic(check.check, args=(instance,), iterations=1, rounds=5, warmup_rounds=1)
 
 
-@pytest.mark.parametrize('refresh_oids_cache_interval,oid_batch_size,use_async', [
-    (0, 10, False),
-    (0, 32, False),
-    (0, 64, False),
-    (0, 128, False),
-    (0, 256, False),
-    (3600, 10, False),
-    (3600, 32, False),
-    (3600, 64, False),
-    (3600, 128, False),
-    (3600, 256, False),
-    (0, 10, True),
-    (0, 32, True),
-    (0, 64, True),
-    (0, 128, True),
-    (0, 256, True),
-    (3600, 10, True),
-    (3600, 32, True),
-    (3600, 64, True),
-    (3600, 128, True),
-    (3600, 256, True),
-])
-def test_oids_cache_bench(refresh_oids_cache_interval, oid_batch_size, benchmark, use_async):
+@pytest.mark.parametrize(
+    'refresh_oids_cache_interval,oid_batch_size',
+    [(0, 10), (0, 32), (0, 64), (0, 128), (0, 256), (3600, 10), (3600, 32), (3600, 64), (3600, 128), (3600, 256)],
+)
+def test_oids_cache_bench(refresh_oids_cache_interval, oid_batch_size, benchmark):
     instance = generate_instance_config([])
     instance['community_string'] = 'f5'
     instance['refresh_oids_cache_interval'] = refresh_oids_cache_interval
-    instance['use_async'] = use_async
     check = SnmpCheck('snmp', {'oid_batch_size': oid_batch_size}, [instance])
 
     benchmark.pedantic(check.check, args=(instance,), iterations=1, rounds=5, warmup_rounds=1)
