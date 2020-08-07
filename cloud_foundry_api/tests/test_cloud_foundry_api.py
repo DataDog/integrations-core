@@ -128,9 +128,11 @@ def test_get_events(_, instance, dd_events):
 @mock.patch("datadog_checks.cloud_foundry_api.cloud_foundry_api.time.time", return_value=FREEZE_TIME)
 @mock.patch.object(CloudFoundryApiCheck, "discover_api", return_value=("v3", "uaa_url"))
 @mock.patch.object(CloudFoundryApiCheck, "http")
-def test_scroll_pages(http_mock, _, __, aggregator, instance, events_v3_p1, events_v3_p2):
+def test_scroll_pages(http_mock, _, __, aggregator, instance, events_v3_p0, events_v3_p1, events_v3_p2):
+    events_res_p0 = mock.MagicMock()
     events_res_p1 = mock.MagicMock()
     events_res_p2 = mock.MagicMock()
+    events_res_p0.json.return_value = events_v3_p0
     events_res_p1.json.return_value = events_v3_p1
     events_res_p2.json.return_value = events_v3_p2
     http_mock.get.side_effect = (events_res_p1, events_res_p2)
@@ -151,15 +153,15 @@ def test_scroll_pages(http_mock, _, __, aggregator, instance, events_v3_p1, even
     log_mock.exception.assert_called_once()
     assert "Could not parse event" in log_mock.exception.call_args[0][0]
 
-    # On second call, we don't collect any event, and don't go to the second page
+    # On second call, we collect only new events from page 0, and don't go to the second page
     http_mock.reset_mock()
     # reset_mock doesn't reset side_effect or return_value, so manually reassign it
-    http_mock.get.side_effect = (events_res_p1, events_res_p2)
+    http_mock.get.side_effect = (events_res_p0, events_res_p1)
     dd_events = check.scroll_pages("url", {"param": "foo"}, {"header": "bar"}, [])
 
     expected_calls = [(("url",), ({"params": {"param": "foo", "page": 1}, "headers": {"header": "bar"}}))]
     assert http_mock.get.call_args_list == expected_calls
-    assert dd_events == {}
+    assert len(dd_events) == 1
 
     aggregator.assert_service_check(
         name="cloud_foundry_api.api.can_connect",

@@ -272,8 +272,8 @@ instances:
     ##     |__ aws_host
     ##     |__ aws_service
     ##
-    ## The `aws` auth type relies on boto3 to automatically gather AWS credentials (e.g. from `.aws/credentials`).
-    ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
+    ## The `aws` auth type relies on boto3 to automatically gather AWS credentials, for example: from `.aws/credentials`. 
+    ## Details: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials  
     #
     # auth_type: basic
 
@@ -288,8 +288,8 @@ instances:
     # password: <PASSWORD>
 
     ## @param ntlm_domain - string - optional
-    ## If your services use NTLM authentication, you can specify
-    ## a domain that is used in the check. For NTLM Auth, append
+    ## If your services use NTLM authentication, specify
+    ## the domain used in the check. For NTLM Auth, append
     ## the username to domain, not as the `username` parameter.
     #
     # ntlm_domain: <NTLM_DOMAIN>\<USERNAME>
@@ -329,7 +329,7 @@ instances:
 
     ## @param kerberos_hostname - string - optional
     ## Override the hostname used for the Kerberos GSS exchange if its DNS name doesn't
-    ## match its Kerberos hostname (e.g. behind a content switch or load balancer).
+    ## match its Kerberos hostname, for example: behind a content switch or load balancer.
     ##
     ## See https://github.com/requests/requests-kerberos#hostname-override
     #

@@ -284,7 +284,7 @@ For this example, those files would have the following form:
 The `awesome/assets/configuration/spec.yaml` used to generate `awesome/datadog_checks/awesome/data/conf.yaml.example`:
 
 ```yaml
-name: awesome
+name: Awesome
 files:
 - name: awesome.yaml
   options:
