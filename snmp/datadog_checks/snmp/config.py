@@ -175,12 +175,13 @@ class InstanceConfig:
 
         import netsnmp
         sess_config = {
-            'Version':    1,
+            'Version':   int(instance.get('snmp_version', 2)),
             'DestHost':   '{}:{}'.format(ip_address, port),
-             'Community':  instance['community_string'],
-             'UseNumeric':  True,
+            'Community':  instance['community_string'],
+            'UseNumeric':  True,
         }
         self.session = netsnmp.Session(**sess_config)
+        self.session.RetryNoSuch = 1
 
     def resolve_oid(self, item):
         # type: (OID) -> OIDMatch

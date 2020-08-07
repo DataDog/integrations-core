@@ -42,7 +42,7 @@ DEFAULT_OID_BATCH_SIZE = 10
 
 def reply_invalid(oid):
     # type: (Any) -> bool
-    return oid == 'NOSUCHINSTANCE'
+    return oid is None or str(oid) == ''
 
 
 class SnmpCheck(AgentCheck):
@@ -202,7 +202,15 @@ class SnmpCheck(AgentCheck):
 
         scalar_oids = []
         for item in all_binds:
-            oid = item.tag.lstrip('.')
+            tag = [item.tag.lstrip('.')]
+            print("item.iid", type(item.iid))
+            print("fetch_results tag", tag)
+            if str(item.iid) != '':
+                tag.append(str(item.iid))
+            else:
+                continue
+            oid = '.'.join(tag)
+            print("fetch_results oid", oid)
             value = item.val
             scalar_oids.append(OID(oid))
             match = config.resolve_oid(item)
@@ -230,7 +238,7 @@ class SnmpCheck(AgentCheck):
                 self.log.debug('Running SNMP command get on OIDS: %s', oids_batch)
 
                 var_binds = snmp_get(config, oids_batch, lookup_mib=enforce_constraints)
-                self.log.debug('Returned vars: %s', var_binds)
+                self.log.debug('Returned vars: %s', [(o.tag, o.val) for o in var_binds])
 
                 missing_results = []
 
@@ -424,10 +432,13 @@ class SnmpCheck(AgentCheck):
         # type: (List[SymbolTag], Dict[str, dict]) -> List[str]
         extracted_tags = []  # type: List[str]
         for tag in metric_tags:
+            print("extract_metric_tags tag.symbol", tag.symbol)
+            print("extract_metric_tags results", results.keys())
             if tag.symbol not in results:
                 self.log.debug('Ignoring tag %s', tag.symbol)
                 continue
-            tag_values = [item.val for item in results[tag.symbol].values()]
+            tag_values = [to_native_string(item.val) for item in results[tag.symbol].values()]
+            print("results[tag.symbol]", results[tag.symbol])
             print("tag_values", tag_values)
             if len(tag_values) > 1:
                 raise CheckException(
@@ -507,6 +518,7 @@ class SnmpCheck(AgentCheck):
             raw_column_value = column_tag.column
             try:
                 column_value = results[raw_column_value][index].val
+                column_value = to_native_string(column_value)
             except KeyError:
                 self.log.warning('Column %s not present in the table, skipping this tag', raw_column_value)
                 continue

@@ -31,12 +31,13 @@ def snmp_get(config, oids, lookup_mib):
         raise RuntimeError('No device set')  # pragma: no cover
 
     import netsnmp
-    print("oids", oids)
+    print("snmp_get oids", oids)
     varlist = netsnmp.VarList(*[netsnmp.Varbind(".{}".format(o)) for o in oids])
 
-    print("varlist", varlist)
+    print("varlist", [o.tag for o in varlist])
     varbinds = config.session.get(varlist)
-    print("varlist", varlist)
+    print("varlist 1", varlist)
+    print("varlist 2", [(o.tag, o.val) for o in varlist])
     print("res varbinds", varbinds)
 
     return varlist

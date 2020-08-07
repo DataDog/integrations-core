@@ -157,6 +157,8 @@ class OIDResolver(object):
         """
         oid = item.tag.lstrip('.')
         parts = tuple(int(i) for i in oid.split('.'))
+        parts += (int(item.iid),)
+        print("resolve_oid parts", parts)
         prefix, name = self._resolver.match(parts)
 
         if name is None:
