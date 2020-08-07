@@ -10,7 +10,7 @@ files:
     - name: host
       description: |
         ASP .NET host to connect to.
-        "." means the current host, any other value will have the Agent attempt to connect to a remote host.
+        Using "." means the current host. Using any other value, the Agent attempts to connect to a remote host.
         Note: Remote access requires additional permissions
       required: true
       value:
