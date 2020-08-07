@@ -34,14 +34,6 @@ DEFAULT_EVENTS_STATEMENTS_RATE_LIMITS = {
 }
 
 
-class RetryableError(Exception):
-    """Error to raise when a retryable error occurs"""
-
-
-class NonRetryableError(Exception):
-    """Error to raise when a non-retryable error occurs"""
-
-
 class ExecutionPlansMixin(object):
     """
     Mixin for collecting execution plans from query samples. Where defined, the user will attempt
@@ -326,9 +318,9 @@ class ExecutionPlansMixin(object):
         error occurs (such as a permissions error), then statements executed under the schema will be
         disallowed in future attempts.
         """
-        explain_strategy_none = 'none'
-        explain_strategy_procedure = 'procedure'
-        explain_strategy_statement = 'statement'
+        explain_strategy_none = 'NONE'
+        explain_strategy_procedure = 'PROCEDURE'
+        explain_strategy_statement = 'STATEMENT'
 
         fns_by_strategy = {
             explain_strategy_procedure: self._run_explain_procedure,
@@ -340,102 +332,79 @@ class ExecutionPlansMixin(object):
         strategy_cache_ttl = 60 * 10
 
         if not self._can_explain(statement):
+            self.log.debug('Skipping statement which cannot be explained: %s', statement)
             return None
 
         if self._expiring_cache.get(strategy_cache_key) == explain_strategy_none:
+            self.log.debug('Skipping statement due to cached collection failure: %s', statement)
             return None
 
-        # Switch to the right schema
+        exceptions = (pymysql.err.InternalError, pymysql.err.ProgrammingError)
+        non_retryable_errors = frozenset({
+            1044,  # access denied on database
+            1046,  # no permission on statement
+            1049,  # unknown database
+            1305,  # procedure does not exist
+            1370,  # no execute on procedure
+        })
+
         try:
+            # Switch to the right schema; this is necessary when the statement uses non-fully qualified tables
+            # e.g. `select * from mytable` instead of `select * from myschema.mytable`
             self._use_schema(cursor, schema)
-        except NonRetryableError:
-            self._expiring_cache.set(strategy_cache_key, explain_strategy_none, strategy_cache_ttl)
-            return None
-        except RetryableError:
+        except exceptions as e:
+            if len(e.args) != 2:
+                raise
+            if e.args[0] in non_retryable_errors:
+                self._expiring_cache.set(strategy_cache_key, explain_strategy_none, strategy_cache_ttl)
+            self.log.debug('Cannot collect execution plan because %s schema could not be accessed: %s, statement: %s', schema, e.args, statement)
             return None
 
-        # Use a cached strategy for the schema, if any, or try each strategy to collect
-        strategy = self._expiring_cache.get(strategy_cache_key)
-        fn = fns_by_strategy.get(strategy)
-        if fn:
-            plan = fn(cursor, statement)
-        else:
-            for strategy in (explain_strategy_procedure, explain_strategy_statement):
-                try:
-                    fn = fns_by_strategy.get(strategy)
-                    plan = fn(cursor, statement)
-                    self._expiring_cache.set(strategy_cache_key, strategy, strategy_cache_ttl)
-                    break
-                except NonRetryableError:
+        # Use a cached strategy for the schema, if any, or try each strategy to collect plans
+        strategies = list(fns_by_strategy.keys())
+        cached = self._expiring_cache.get(strategy_cache_key)
+        if cached is not None:
+            strategies.remove(cached)
+            strategies.insert(0, cached)
+
+        for strategy in strategies:
+            fn = fns_by_strategy[strategy]
+
+            try:
+                plan = fn(cursor, statement)
+            except exceptions as e:
+                if len(e.args) != 2:
+                    raise
+                if e.args[0] in non_retryable_errors:
                     self._expiring_cache.set(strategy_cache_key, explain_strategy_none, strategy_cache_ttl)
-                    continue
-                except RetryableError:
-                    continue
+                continue
+
+            if plan:
+                self._expiring_cache.set(strategy_cache_key, strategy, strategy_cache_ttl)
+                self.log.debug('Successfully collected plan using strategy: %s', strategy)
+                break
+
+        if not plan:
+            self.log.debug('Cannot collect execution plan because all strategies failed: %s', statement)
 
         return plan
 
     def _use_schema(self, cursor, schema):
-        try:
-            start_time = time.time()
-            if schema is not None:
-                cursor.execute('USE `{}`'.format(schema))
-        except (pymysql.err.InternalError, pymysql.err.ProgrammingError) as e:
-            if len(e.args) != 2:
-                raise
-            if e.args[0] == 1049:
-                # Unknown database
-                raise NonRetryableError(*e.args)
-            elif e.args[0] == 1044:
-                # Access denied on database
-                raise NonRetryableError(*e.args)
-            else:
-                raise RetryableError(*e.args) from e
+        if schema is not None:
+            cursor.execute('USE `{}`'.format(schema))
 
     def _run_explain(self, cursor, statement):
         """
         Run the explain using the EXPLAIN statement
         """
-        try:
-            cursor.execute('EXPLAIN FORMAT=json {statement}'.format(statement=statement))
-            self.log.debug('Successfully ran explain using EXPLAIN statement: %s', statement)
-        except (pymysql.err.InternalError, pymysql.err.ProgrammingError) as e:
-            if len(e.args) != 2:
-                raise
-
-            if e.args[0] == 1046:
-                # No permission on statement
-                self.log.warning('Failed to collect EXPLAIN due to a permissions error: %s, Statement: %s', e.args, statement)
-                raise NonRetryableError(*e.args)
-            elif e.args[0] == 1064:
-                # Programming error; retryable because it may be due to the statement being explained
-                self.log.warning('Programming error when collecting EXPLAIN: %s, Statement: %s', e.args, statement)
-                raise RetryableError(*e.args)
-            else:
-                raise RetryableError(*e.args) from e
-
+        cursor.execute('EXPLAIN FORMAT=json {statement}'.format(statement=statement))
         return cursor.fetchone()[0]
 
     def _run_explain_procedure(self, cursor, statement):
         """
         Run the explain by calling the stored procedure `explain_statement` if available.
         """
-        try:
-            cursor.execute('CALL explain_statement(%s)', statement)
-            self.log.debug('Successfully ran explain using explain_statement procedure: %s', statement)
-        except (pymysql.err.InternalError, pymysql.err.ProgrammingError) as e:
-            if len(e.args) != 2:
-                raise
-            if e.args[0] == 1370:
-                # No execute
-                raise NonRetryableError(*e.args)
-            elif e.args[0] == 1305:
-                # Procedure does not exist
-                raise NonRetryableError(*e.args)
-            elif e.args[0] == 1046:
-                # No permission on statement (definer cannot explain it)
-                raise NonRetryableError(*e.args)
-            else:
-                raise RetryableError(*e.args) from e
+        cursor.execute('CALL explain_statement(%s)', statement)
         return cursor.fetchone()[0]
 
     @staticmethod
