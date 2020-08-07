@@ -11,8 +11,7 @@ files:
       description: |
         ASP .NET host to connect to.
         "." means the current host, any other value will have the Agent attempt to connect to a remote host.
-        Note: Remote access requires additional permissions -
-        https://support.microsoft.com/en-us/help/922775/how-to-troubleshoot-monitoring-and-logging-issues-for-performance-coun  /noqa
+        Note: Remote access requires additional permissions
       required: true
       value:
         type: string
