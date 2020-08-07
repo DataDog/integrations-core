@@ -260,7 +260,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.container.waiting{$cluster,$namespace,$deployment,reason:crashloopbackoff,$scope,$statefulset,$daemonset,$job} by {pod_name}",
+                        "q": "sum:kubernetes.containers.state.waiting{$cluster,$namespace,$deployment,reason:crashloopbackoff,$scope,$statefulset,$daemonset,$job} by {pod_name}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
@@ -295,7 +295,7 @@
             "tile_def": {
                 "requests": [
                     {
-                        "q": "sum:kubernetes_state.container.terminated{$cluster,$namespace,$deployment,reason:OOMKilled,$statefulset,$daemonset,$job} by {pod_name}",
+                        "q": "sum:kubernetes.containers.state.terminated{$cluster,$namespace,$deployment,reason:oomkilled,$statefulset,$daemonset,$job} by {pod_name}",
                         "style": {
                             "palette": "dog_classic",
                             "type": "solid",
