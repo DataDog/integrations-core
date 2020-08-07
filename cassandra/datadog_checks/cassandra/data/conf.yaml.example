@@ -63,6 +63,12 @@ instances:
     #
     port: 7199
 
+    ## @param cassandra_aliasing - boolean - required
+    ## Must be set to true to comply with CASSANDRA-4009.
+    ## Learn more: https://issues.apache.org/jira/browse/CASSANDRA-4009
+    #
+    cassandra_aliasing: true
+
     ## @param user - string - optional
     ## User to use when connecting to JMX.
     #
@@ -171,12 +177,6 @@ instances:
     ## This is useful for cluster-level checks.
     #
     # empty_default_hostname: false
-
-    ## @param cassandra_aliasing - boolean - required
-    ## Must be set to true to comply with CASSANDRA-4009.
-    ## Learn more: https://issues.apache.org/jira/browse/CASSANDRA-4009
-    #
-    cassandra_aliasing: true
 
 ## Log Section
 ##

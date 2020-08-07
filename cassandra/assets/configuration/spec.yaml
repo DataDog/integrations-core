@@ -7,10 +7,6 @@ files:
       - template: init_config/jmx
   - template: instances
     options:
-    - template: instances/jmx
-      overrides:
-        host.value.example: localhost
-        port.value.example: 7199
     - name: cassandra_aliasing
       description: |
         Must be set to true to comply with CASSANDRA-4009.
@@ -19,6 +15,12 @@ files:
       value:
         type: boolean
         example: true
+    - template: instances/jmx
+      overrides:
+        host.value.example: localhost
+        host.display_priority: 1
+        port.value.example: 7199
+        port.display_priority: 1
   - template: logs
     example:
     - type: file
