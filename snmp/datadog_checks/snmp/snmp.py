@@ -15,7 +15,7 @@ from typing import Any, DefaultDict, Dict, List, Optional, Tuple
 
 from six import iteritems
 
-from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative, to_native_string
 from datadog_checks.base.errors import CheckException
 
 from .commands import snmp_bulk, snmp_get, snmp_getnext
@@ -235,7 +235,7 @@ class SnmpCheck(AgentCheck):
                 missing_results = []
 
                 for var in var_binds:
-                    result_oid, value = var.oid, var.value
+                    # result_oid, value = var.tag, var.value
                     # if reply_invalid(value):
                     #     oid_tuple = result_oid.asTuple()
                     #     missing_results.append(ObjectType(ObjectIdentity(oid_tuple)))
@@ -283,7 +283,7 @@ class SnmpCheck(AgentCheck):
         self.log.debug('Running SNMP command on OID: %s', oid)
         var_binds = snmp_get(config, [oid], lookup_mib=False)
         self.log.debug('Returned vars: %s', var_binds)
-        return var_binds[0].value.lstrip('.')
+        return to_native_string(var_binds[0].val).lstrip('.')
 
     def _profile_for_sysobject_oid(self, sys_object_oid):
         # type: (str) -> str

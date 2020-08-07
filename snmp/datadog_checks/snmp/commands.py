@@ -30,9 +30,14 @@ def snmp_get(config, oids, lookup_mib):
     if config.device is None:
         raise RuntimeError('No device set')  # pragma: no cover
 
-    varbinds = config.session.get(oids)
+    import netsnmp
+    varlist = netsnmp.VarList(*[netsnmp.Varbind(o) for o in oids])
 
-    return varbinds
+    varbinds = config.session.get(varlist)
+    print("varlist", varlist)
+    print("res varbinds", varbinds)
+
+    return varlist
 
 
 def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
@@ -46,11 +51,12 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
     varbinds = oids
 
     while True:
-        varbinds = config.session.get_next(varbinds)
+        res = config.session.getnext(varbinds)
 
         var_binds = []
 
         new_initial_vars = []
+        print("varbinds", varbinds)
         for col, item in enumerate(varbinds):
             oid = ".".join([item.oid.lstrip('.'), item.oid_index])
             initial = initial_vars[col]
