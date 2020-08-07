@@ -24,6 +24,9 @@
   "is_public": true,
   "integration_id": "cilium",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "dashboards": {
       "Cilium Overview": "assets/dashboards/overview.json"
     },
