@@ -391,6 +391,8 @@ class SnmpCheck(AgentCheck):
                 results, scalar_oids, error = self.fetch_results(config)
                 config.oid_config.update_scalar_oids(scalar_oids)
                 tags = self.extract_metric_tags(config.parsed_metric_tags, results)
+                print("===> results", results)
+                print("===> tags", tags)
                 tags.extend(config.tags)
                 self.report_metrics(config.parsed_metrics, results, tags)
         except CheckException as e:
@@ -425,7 +427,8 @@ class SnmpCheck(AgentCheck):
             if tag.symbol not in results:
                 self.log.debug('Ignoring tag %s', tag.symbol)
                 continue
-            tag_values = [item.value for item in results[tag.symbol].values()]
+            tag_values = [item.val for item in results[tag.symbol].values()]
+            print("tag_values", tag_values)
             if len(tag_values) > 1:
                 raise CheckException(
                     'You are trying to use a table column (OID `{}`) as a metric tag. This is not supported as '
