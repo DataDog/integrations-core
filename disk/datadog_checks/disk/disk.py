@@ -223,7 +223,7 @@ class Disk(AgentCheck):
             # For legacy reasons,  the standard unit it kB
             metrics[self.METRIC_DISK.format(name)] = getattr(usage, name) / 1024
 
-        # FIXME: 6.x, use percent, a lot more logical than in_use
+        # FIXME: 8.x, use percent, a lot more logical than in_use
         metrics[self.METRIC_DISK.format('in_use')] = usage.percent / 100
 
         if Platform.is_unix():
@@ -255,7 +255,7 @@ class Disk(AgentCheck):
             metrics[self.METRIC_INODE.format('total')] = total
             metrics[self.METRIC_INODE.format('free')] = free
             metrics[self.METRIC_INODE.format('used')] = total - free
-            # FIXME: 6.x, use percent, a lot more logical than in_use
+            # FIXME: 8.x, use percent, a lot more logical than in_use
             metrics[self.METRIC_INODE.format('in_use')] = (total - free) / total
 
         return metrics
@@ -286,7 +286,7 @@ class Disk(AgentCheck):
         device_blacklist_extras = []
         mount_point_blacklist_extras = []
 
-        deprecation_message = '`%s` is deprecated and will be removed in 6.9. Please use `%s` instead.'
+        deprecation_message = '`%s` is deprecated and will be removed in a future release. Please use `%s` instead.'
 
         if 'excluded_filesystems' in instance:
             file_system_blacklist_extras.extend(
