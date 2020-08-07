@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from logging import Logger
-from typing import Any, Dict, Generator, List, cast
+from typing import Any, Dict, Generator, cast
 
 from pyasn1.type.univ import Null
 from pysnmp import hlapi
