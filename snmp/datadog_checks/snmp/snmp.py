@@ -503,7 +503,7 @@ class SnmpCheck(AgentCheck):
         for column_tag in column_tags:
             raw_column_value = column_tag.column
             try:
-                column_value = results[raw_column_value][index].value
+                column_value = results[raw_column_value][index].val
             except KeyError:
                 self.log.warning('Column %s not present in the table, skipping this tag', raw_column_value)
                 continue
@@ -541,7 +541,7 @@ class SnmpCheck(AgentCheck):
     def _do_submit_metric(self, name, snmp_item, forced_type, tags, options):
         # type: (str, Any, Optional[str], List[str], dict) -> None
 
-        if reply_invalid(snmp_item.value):
+        if reply_invalid(snmp_item.val):
             # Metrics not present in the queried object
             self.log.warning('No such Mib available: %s', name)
             return

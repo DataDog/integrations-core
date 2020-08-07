@@ -32,17 +32,17 @@ def object_identity_from_object_type(object_type):
 # For example, `CounterBasedGauge64` would be interpreted as a `Counter64` instead of a gauge.
 
 SNMP_COUNTER_CLASSES = {
-    'COUNTER32',
+    'COUNTER',
     'COUNTER64',
     # ADDITIONAL TYPES THAT ARE NOT PART OF THE SNMP PROTOCOL (SEE RFC 2856).
     'ZEROBASEDCOUNTER64',
 }
 
 SNMP_GAUGE_CLASSES = {
-    'GAUGE32',
+    'GAUGE',
     'INTEGER',
     'INTEGER32',
-    'UNSIGNED32',
+    'UINTEGER',
     # ADDITIONAL TYPES THAT ARE NOT PART OF THE SNMP PROTOCOL (SEE RFC 2856).
     'COUNTERBASEDGAUGE64',
 }

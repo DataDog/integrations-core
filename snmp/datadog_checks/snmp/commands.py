@@ -56,8 +56,11 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
 
     while True:
         print('--------------------------')
+        print("initial_vars", initial_vars)
+        print("varbinds 1", [o.tag for o in varbinds])
         res = config.session.getnext(varbinds)
-        print("varbinds", varbinds)
+        print("varbinds 2", [o.tag for o in varbinds])
+        print("res", res)
 
         var_binds = []
 
@@ -67,8 +70,9 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
             print("====")
             print("item.tag", item.tag)
             print("item.val", item.val)
+            print("item.iid", item.iid)
             print("item", item)
-            oid = item.tag.lstrip('.')
+            oid = ".".join([item.tag.lstrip('.'), str(item.iid)])
             initial = initial_vars[col]
             print("oid", oid)
             print("initial", initial)

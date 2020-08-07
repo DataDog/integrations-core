@@ -17,11 +17,11 @@ from .types import MetricDefinition
 
 def as_metric_with_inferred_type(snmp_item):
     # type: (Any) -> Optional[MetricDefinition]
-    if is_counter(snmp_item.snmp_type):
-        return {'type': 'rate', 'value': int(snmp_item.value)}
+    if is_counter(snmp_item.type):
+        return {'type': 'rate', 'value': int(snmp_item.val)}
 
-    if is_gauge(snmp_item.snmp_type):
-        return {'type': 'gauge', 'value': int(snmp_item.value)}
+    if is_gauge(snmp_item.type):
+        return {'type': 'gauge', 'value': int(snmp_item.val)}
 
     # if is_opaque(snmp_item):
     #     # Arbitrary ASN.1 syntax encoded as an octet string. Let's try to decode it as a float.
@@ -36,7 +36,7 @@ def as_metric_with_inferred_type(snmp_item):
 
     # Fallback for unknown SNMP types.
     try:
-        number = float(snmp_item.value)
+        number = float(snmp_item.val)
     except ValueError:
         return None
     else:
@@ -48,10 +48,10 @@ def as_metric_with_forced_type(snmp_item, forced_type, options):
 
     if forced_type == 'flag_stream':
         index = int(options['placement']) - 1
-        return {'type': 'gauge', 'value': int(str(snmp_item.value)[index])}
+        return {'type': 'gauge', 'value': int(str(snmp_item.val)[index])}
 
     # Use float for following types
-    float_value = _varbind_value_to_float(snmp_item.value)
+    float_value = _varbind_value_to_float(snmp_item.val)
 
     if forced_type == 'gauge':
         return {'type': 'gauge', 'value': float_value}
