@@ -160,7 +160,6 @@ def parse_as_oid_tuple(value):
     """
     if isinstance(value, (list, tuple)):
         # Eg: `(1, 3, 6, 1, 2, 1, 1, 1, 0)`
-        print("parse_as_oid_tuple value", value)
         try:
             return tuple(int(digit) for digit in value)
         except (TypeError, ValueError) as exc:

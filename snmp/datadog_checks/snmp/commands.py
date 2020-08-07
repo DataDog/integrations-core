@@ -31,15 +31,8 @@ def snmp_get(config, oids, lookup_mib):
         raise RuntimeError('No device set')  # pragma: no cover
 
     import netsnmp
-    print("snmp_get oids", oids)
     varlist = netsnmp.VarList(*[netsnmp.Varbind(".{}".format(o)) for o in oids])
-
-    print("varlist", [o.tag for o in varlist])
     varbinds = config.session.get(varlist)
-    print("varlist 1", varlist)
-    print("varlist 2", [(o.tag, o.val) for o in varlist])
-    print("res varbinds", varbinds)
-
     return varlist
 
 
@@ -56,27 +49,12 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
     varbinds = netsnmp.VarList(*[netsnmp.Varbind(".{}".format(o)) for o in oids])
 
     while True:
-        print('--------------------------')
-        print("initial_vars", initial_vars)
-        print("varbinds 1", [o.tag for o in varbinds])
         res = config.session.getnext(varbinds)
-        print("varbinds 2", [o.tag for o in varbinds])
-        print("res", res)
-
         var_binds = []
-
         new_initial_vars = []
-        print("snmp_getnext varbinds", varbinds)
         for col, item in enumerate(varbinds):
-            print("====")
-            print("item.tag", item.tag)
-            print("item.val", item.val)
-            print("item.iid", item.iid)
-            print("item", item)
             oid = ".".join([item.tag.lstrip('.'), str(item.iid)])
             initial = initial_vars[col]
-            print("oid", oid)
-            print("initial", initial)
             if not isinstance(item.val, Null) and oid.startswith(initial):
                 var_binds.append(oid)
                 new_initial_vars.append(initial)
@@ -84,7 +62,6 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
         if not var_binds:
             return
         initial_vars = new_initial_vars
-        print("var_binds", var_binds)
         varbinds = netsnmp.VarList(*[netsnmp.Varbind(".{}".format(o)) for o in var_binds])
 
 

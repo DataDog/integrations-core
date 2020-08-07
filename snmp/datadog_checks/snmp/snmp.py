@@ -203,15 +203,11 @@ class SnmpCheck(AgentCheck):
         scalar_oids = []
         for item in all_binds:
             tag = [item.tag.lstrip('.')]
-            print("item.iid", type(item.iid))
-            print("fetch_results tag", tag)
             if str(item.iid) != '':
                 tag.append(str(item.iid))
             else:
                 continue
             oid = '.'.join(tag)
-            print("fetch_results oid", oid)
-            value = item.val
             scalar_oids.append(OID(oid))
             match = config.resolve_oid(item)
             results[match.name][match.indexes] = item
@@ -399,8 +395,6 @@ class SnmpCheck(AgentCheck):
                 results, scalar_oids, error = self.fetch_results(config)
                 config.oid_config.update_scalar_oids(scalar_oids)
                 tags = self.extract_metric_tags(config.parsed_metric_tags, results)
-                print("===> results", results)
-                print("===> tags", tags)
                 tags.extend(config.tags)
                 self.report_metrics(config.parsed_metrics, results, tags)
         except CheckException as e:
@@ -432,14 +426,10 @@ class SnmpCheck(AgentCheck):
         # type: (List[SymbolTag], Dict[str, dict]) -> List[str]
         extracted_tags = []  # type: List[str]
         for tag in metric_tags:
-            print("extract_metric_tags tag.symbol", tag.symbol)
-            print("extract_metric_tags results", results.keys())
             if tag.symbol not in results:
                 self.log.debug('Ignoring tag %s', tag.symbol)
                 continue
             tag_values = [to_native_string(item.val) for item in results[tag.symbol].values()]
-            print("results[tag.symbol]", results[tag.symbol])
-            print("tag_values", tag_values)
             if len(tag_values) > 1:
                 raise CheckException(
                     'You are trying to use a table column (OID `{}`) as a metric tag. This is not supported as '
