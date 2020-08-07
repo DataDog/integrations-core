@@ -1,5 +1,10 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.19.0 / 2020-08-07
+
+* [Added] Add show warnings option to validate metadata. See [#7310](https://github.com/DataDog/integrations-core/pull/7310).
+* [Added] Enable histogram for pytest-benchmark. See [#7301](https://github.com/DataDog/integrations-core/pull/7301).
+
 ## 3.18.1 / 2020-08-05
 
 * [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
