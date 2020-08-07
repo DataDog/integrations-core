@@ -64,16 +64,40 @@ def test_default(aggregator, gauge_metrics, rate_metrics):
             tags = []
 
         for name, value in iteritems(gauge_metrics):
-            aggregator.assert_metric(name, value=value, tags=tags)
+            aggregator.assert_metric(name, value=value, count=1, metric_type=aggregator.GAUGE, tags=tags)
 
         for name, value in iteritems(rate_metrics):
             aggregator.assert_metric(
                 name,
                 value=value,
+                count=1,
+                metric_type=aggregator.RATE,
                 tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME)],
             )
 
-    aggregator.assert_all_metrics_covered()
+        # Diskstats counters won't be there on the first run
+        for name in ['system.disk.read_time', 'system.disk.write_time']:
+            aggregator.assert_metric(
+                name,
+                count=0,
+                metric_type=aggregator.COUNT,
+                tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME)],
+            )
+
+        # We need a second run to get Diskstats
+        c.check(instance)
+
+        for name in ['system.disk.read_time', 'system.disk.write_time']:
+            aggregator.assert_metric(
+                name,
+                value=0,  # Mocked value hasn't changed between runs, so the difference is 0
+                count=1,
+                metric_type=aggregator.COUNT,
+                tags=['device:{}'.format(DEFAULT_DEVICE_NAME), 'device_name:{}'.format(DEFAULT_DEVICE_BASE_NAME)],
+            )
+
+        aggregator.assert_all_metrics_covered()
+        aggregator.reset()
 
 
 @pytest.mark.usefixtures('psutil_mocks')

@@ -62,7 +62,8 @@ class Disk(AgentCheck):
         self._compile_pattern_filters(instance)
         self._compile_tag_re()
         self._blkid_label_re = re.compile('LABEL=\"(.*?)\"', re.I)
-
+        self._last_read_time_by_disk = {}
+        self._last_write_time_by_disk = {}
         self.devices_label = {}
 
     def check(self, instance):
@@ -264,17 +265,21 @@ class Disk(AgentCheck):
         for disk_name, disk in iteritems(psutil.disk_io_counters(True)):
             self.log.debug('IO Counters: %s -> %s', disk_name, disk)
             try:
-                # x100 to have it as a percentage,
-                # /1000 as psutil returns the value in ms
-                read_time_pct = disk.read_time * 100 / 1000
-                write_time_pct = disk.write_time * 100 / 1000
                 metric_tags = [] if self._custom_tags is None else self._custom_tags[:]
                 metric_tags.append('device:{}'.format(disk_name))
                 metric_tags.append('device_name:{}'.format(_base_device_name(disk_name)))
                 if self.devices_label.get(disk_name):
                     metric_tags.append(self.devices_label.get(disk_name))
-                self.rate(self.METRIC_DISK.format('read_time_pct'), read_time_pct, tags=metric_tags)
-                self.rate(self.METRIC_DISK.format('write_time_pct'), write_time_pct, tags=metric_tags)
+                if disk_name in self._last_read_time_by_disk:
+                    read_time_since_last_run = disk.read_time - self._last_read_time_by_disk[disk_name]
+                    write_time_since_last_run = disk.write_time - self._last_write_time_by_disk[disk_name]
+                    self.count(self.METRIC_DISK.format('read_time'), read_time_since_last_run, tags=metric_tags)
+                    self.count(self.METRIC_DISK.format('write_time'), write_time_since_last_run, tags=metric_tags)
+                self._last_read_time_by_disk[disk_name] = disk.read_time
+                self._last_write_time_by_disk[disk_name] = disk.write_time
+                # FIXME: 8.x, metrics kept for backwards compatibility but are incorrect: the value is not a percentage
+                self.rate(self.METRIC_DISK.format('read_time_pct'), disk.read_time * 100 / 1000, tags=metric_tags)
+                self.rate(self.METRIC_DISK.format('write_time_pct'), disk.write_time * 100 / 1000, tags=metric_tags)
             except AttributeError as e:
                 # Some OS don't return read_time/write_time fields
                 # http://psutil.readthedocs.io/en/latest/#psutil.disk_io_counters
