@@ -30,34 +30,7 @@ def snmp_get(config, oids, lookup_mib):
     if config.device is None:
         raise RuntimeError('No device set')  # pragma: no cover
 
-
     varbinds = config.session.get(oids)
-    #
-    # def callback(  # type: ignore
-    #     snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx
-    # ):
-    #     var_binds = vbProcessor.unmakeVarBinds(snmpEngine, varBinds, lookup_mib)
-    #
-    #     cbCtx['error'] = errorIndication
-    #     cbCtx['var_binds'] = var_binds
-    #
-    # ctx = {}  # type: Dict[str, Any]
-    #
-    # var_binds = vbProcessor.makeVarBinds(config._snmp_engine, oids)
-    #
-    # cmdgen.GetCommandGenerator().sendVarBinds(
-    #     config._snmp_engine,
-    #     config.device.target,
-    #     config._context_data.contextEngineId,
-    #     config._context_data.contextName,
-    #     var_binds,
-    #     callback,
-    #     ctx,
-    # )
-    #
-    # config._snmp_engine.transportDispatcher.runDispatcher()
-    #
-    # _handle_error(ctx, config)
 
     return varbinds
 
@@ -69,41 +42,11 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
     if config.device is None:
         raise RuntimeError('No device set')  # pragma: no cover
 
-    # def callback(  # type: ignore
-    #     snmpEngine, sendRequestHandle, errorIndication, errorStatus, errorIndex, varBindTable, cbCtx
-    # ):
-    #     var_bind_table = [vbProcessor.unmakeVarBinds(snmpEngine, row, lookup_mib) for row in varBindTable]
-    #     if ignore_nonincreasing_oid and errorIndication and isinstance(errorIndication, errind.OidNotIncreasing):
-    #         errorIndication = None
-    #     cbCtx['error'] = errorIndication
-    #     cbCtx['var_bind_table'] = var_bind_table[0] if var_bind_table else []
-    #
-    # ctx = {}  # type: Dict[str, Any]
-    #
-    # initial_vars = [x[0] for x in vbProcessor.makeVarBinds(config._snmp_engine, oids)]
-    #
-    # var_binds = oids
-    #
-    # gen = cmdgen.NextCommandGenerator()
-
     initial_vars = oids
     varbinds = oids
 
     while True:
         varbinds = config.session.get_next(varbinds)
-        # gen.sendVarBinds(
-        #     config._snmp_engine,
-        #     config.device.target,
-        #     config._context_data.contextEngineId,
-        #     config._context_data.contextName,
-        #     var_binds,
-        #     callback,
-        #     ctx,
-        # )
-        #
-        # config._snmp_engine.transportDispatcher.runDispatcher()
-
-        # _handle_error(ctx, config)
 
         var_binds = []
 
