@@ -74,7 +74,7 @@ def snmp_get(config, oids, lookup_mib, oid_batch_size=None):
 
 
 def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
-    # type: (InstanceConfig, List[Any], bool, bool) -> Generator
+    # type: (InstanceConfig, list, bool, bool) -> Generator
     """Call SNMP GETNEXT on a list of oids. It will iterate on the results if it happens to be under the same prefix."""
 
     if config.device is None:
