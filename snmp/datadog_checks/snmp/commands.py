@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 from logging import Logger
-from typing import Any, Dict, Generator, Iterator, List, cast
+from typing import Any, Dict, Generator, List, cast
 
 from pyasn1.type.univ import Null
 from pysnmp import hlapi
@@ -12,7 +12,7 @@ from pysnmp.proto import errind
 from pysnmp.proto.rfc1905 import endOfMibView
 
 from datadog_checks.base.errors import CheckException
-from datadog_checks.snmp.utils import OIDPrinter
+from datadog_checks.snmp.utils import OIDPrinter, batches
 
 from .config import InstanceConfig
 
@@ -25,18 +25,17 @@ def _handle_error(ctx, config):
         raise CheckException(message)
 
 
-def snmp_get(config, oids, lookup_mib):
-    # type: (InstanceConfig, List[Any], bool) -> list
+def snmp_get(config, oids, lookup_mib, oid_batch_size=None):
+    # type: (InstanceConfig, list, bool, int) -> list
     """Call SNMP GET on a list of oids."""
-    return snmp_get_async(config, iter([oids]), lookup_mib)
-
-
-def snmp_get_async(config, oids_batches, lookup_mib):
-    # type: (InstanceConfig, Iterator[List[Any]], bool) -> list
-    """Call SNMP GET on batches of oids concurrently."""
 
     if config.device is None:
         raise RuntimeError('No device set')  # pragma: no cover
+
+    if oid_batch_size is None:
+        oids_batches = [oids]
+    else:
+        oids_batches = list(batches(oids, size=oid_batch_size))
 
     log = cast(Logger, config.logger_ref())
 

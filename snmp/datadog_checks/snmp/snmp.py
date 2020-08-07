@@ -18,7 +18,7 @@ from six import iteritems
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
 from datadog_checks.base.errors import CheckException
 
-from .commands import snmp_bulk, snmp_get, snmp_get_async, snmp_getnext
+from .commands import snmp_bulk, snmp_get, snmp_getnext
 from .compat import read_persistent_cache, write_persistent_cache
 from .config import InstanceConfig
 from .discovery import discover_instances
@@ -225,8 +225,8 @@ class SnmpCheck(AgentCheck):
         all_binds = []
 
         try:
-            var_binds = snmp_get_async(
-                config, batches(scalar_oids, size=self.oid_batch_size), lookup_mib=enforce_constraints
+            var_binds = snmp_get(
+                config, scalar_oids, lookup_mib=enforce_constraints, oid_batch_size=self.oid_batch_size
             )
 
             missing_results = []
