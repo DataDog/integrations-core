@@ -173,8 +173,13 @@ class InstanceConfig:
 
         self._uptime_metric_added = False
 
-        import easysnmp
-        self.session = easysnmp.Session(hostname=ip_address, community=instance['community_string'], version=2, remote_port=port, use_numeric=True)
+        import netsnmp
+        sess_config = {
+            'Version':    1,
+            'DestHost':   '{}:{}'.format(ip_address, port),
+             'Community':  instance['community_string'],
+        }
+        self.session = netsnmp.Session(**sess_config)
 
     def resolve_oid(self, item):
         # type: (OID) -> OIDMatch
