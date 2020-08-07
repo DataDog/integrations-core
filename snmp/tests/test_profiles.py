@@ -118,7 +118,7 @@ def test_compat_cisco_base_profiles(definition_file, equivalent_definition):
     assert definition == equivalent_definition
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_cisco_voice(aggregator):
     run_profile_check('cisco_icm')
 
@@ -204,15 +204,154 @@ def test_cisco_voice(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
-def test_f5_base_case(aggregator):
+@pytest.mark.usefixtures("dd_environment")
+def test_f5(aggregator):
     profile = "f5-big-ip"
     run_profile_check('f5', profile)
 
-    common.assert_f5_profile(aggregator, count=1)
+    gauges = [
+        'sysStatMemoryTotal',
+        'sysStatMemoryUsed',
+        'sysGlobalTmmStatMemoryTotal',
+        'sysGlobalTmmStatMemoryUsed',
+        'sysGlobalHostOtherMemoryTotal',
+        'sysGlobalHostOtherMemoryUsed',
+        'sysGlobalHostSwapTotal',
+        'sysGlobalHostSwapUsed',
+        'sysTcpStatOpen',
+        'sysTcpStatCloseWait',
+        'sysTcpStatFinWait',
+        'sysTcpStatTimeWait',
+        'sysUdpStatOpen',
+        'sysClientsslStatCurConns',
+    ]
+    counts = [
+        'sysTcpStatAccepts',
+        'sysTcpStatAcceptfails',
+        'sysTcpStatConnects',
+        'sysTcpStatConnfails',
+        'sysUdpStatAccepts',
+        'sysUdpStatAcceptfails',
+        'sysUdpStatConnects',
+        'sysUdpStatConnfails',
+        'sysClientsslStatEncryptedBytesIn',
+        'sysClientsslStatEncryptedBytesOut',
+        'sysClientsslStatDecryptedBytesIn',
+        'sysClientsslStatDecryptedBytesOut',
+        'sysClientsslStatHandshakeFailures',
+    ]
+    cpu_rates = [
+        'sysMultiHostCpuUser',
+        'sysMultiHostCpuNice',
+        'sysMultiHostCpuSystem',
+        'sysMultiHostCpuIdle',
+        'sysMultiHostCpuIrq',
+        'sysMultiHostCpuSoftirq',
+        'sysMultiHostCpuIowait',
+    ]
+
+    interfaces = ['1.0', 'mgmt', '/Common/internal', '/Common/http-tunnel', '/Common/socks-tunnel']
+    tags = ['snmp_profile:' + profile, 'snmp_host:f5-big-ip-adc-good-byol-1-vm.c.datadog-integrations-lab.internal']
+    tags += common.CHECK_TAGS
+
+    common.assert_common_metrics(aggregator, tags)
+
+    for metric in gauges:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+    for metric in counts:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=tags, count=1)
+    for metric in cpu_rates:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:0'] + tags, count=1)
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=['cpu:1'] + tags, count=1)
+    for interface in interfaces:
+        interface_tags = ['interface:{}'.format(interface)] + tags
+        for metric in IF_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=interface_tags, count=1,
+            )
+        for metric in IF_RATES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=interface_tags, count=1
+            )
+    for metric in IF_GAUGES:
+        for interface in interfaces:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric),
+                metric_type=aggregator.GAUGE,
+                tags=['interface:{}'.format(interface)] + tags,
+                count=1,
+            )
+    for version in ['ipv4', 'ipv6']:
+        ip_tags = ['ipversion:{}'.format(version)] + tags
+        for metric in IP_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=ip_tags, count=1
+            )
+
+    for metric in LTM_GAUGES:
+        aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=tags, count=1)
+
+    servers = ['server1', 'server2', 'server3']
+    for server in servers:
+        server_tags = tags + ['server:{}'.format(server)]
+        for metric in LTM_VIRTUAL_SERVER_GAUGES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=server_tags, count=1,
+            )
+        for metric in LTM_VIRTUAL_SERVER_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=server_tags, count=1,
+            )
+        for metric in LTM_VIRTUAL_SERVER_RATES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=server_tags, count=1,
+            )
+
+    nodes = ['node1', 'node2', 'node3']
+    for node in nodes:
+        node_tags = tags + ['node:{}'.format(node)]
+        for metric in LTM_NODES_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=node_tags, count=1)
+        for metric in LTM_NODES_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=node_tags, count=1
+            )
+        for metric in LTM_NODES_RATES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=node_tags, count=1)
+
+    pools = ['pool1', 'pool2']
+    for pool in pools:
+        pool_tags = tags + ['pool:{}'.format(pool)]
+        for metric in LTM_POOL_GAUGES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=pool_tags, count=1)
+        for metric in LTM_POOL_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=pool_tags, count=1
+            )
+        for metric in LTM_POOL_RATES:
+            aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=pool_tags, count=1)
+
+    pool_members = [('pool1', 'node1'), ('pool1', 'node2'), ('pool2', 'node3')]
+    for pool, node in pool_members:
+        pool_member_tags = tags + ['pool:{}'.format(pool), 'node:{}'.format(node)]
+        for metric in LTM_POOL_MEMBER_GAUGES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=pool_member_tags, count=1
+            )
+        for metric in LTM_POOL_MEMBER_COUNTS:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.MONOTONIC_COUNT, tags=pool_member_tags, count=1
+            )
+        for metric in LTM_POOL_MEMBER_RATES:
+            aggregator.assert_metric(
+                'snmp.{}'.format(metric), metric_type=aggregator.RATE, tags=pool_member_tags, count=1
+            )
+
+    aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
+    aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_router(aggregator):
     profile = "generic-router"
     run_profile_check('network', profile)
@@ -256,7 +395,7 @@ def test_router(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_f5_router(aggregator):
     # Use the generic profile against the f5 device
     instance = common.generate_instance_config([])
@@ -294,7 +433,7 @@ def test_f5_router(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_cisco_3850(aggregator):
     profile = "cisco-3850"
     run_profile_check('3850', profile)
@@ -402,7 +541,7 @@ def test_cisco_3850(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_meraki_cloud_controller(aggregator):
     run_profile_check('meraki-cloud-controller')
 
@@ -437,7 +576,7 @@ def test_meraki_cloud_controller(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_idrac(aggregator):
     run_profile_check('idrac')
 
@@ -535,7 +674,7 @@ def test_idrac(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_cisco_nexus(aggregator):
     profile = "cisco-nexus"
     run_profile_check('cisco_nexus', profile)
@@ -625,7 +764,7 @@ def test_cisco_nexus(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_dell_poweredge(aggregator):
     run_profile_check('dell-poweredge')
 
@@ -734,7 +873,7 @@ def test_dell_poweredge(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_hp_ilo4(aggregator):
     profile = "hp-ilo4"
     run_profile_check('hp_ilo4', profile)
@@ -845,7 +984,7 @@ def test_hp_ilo4(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_proliant(aggregator):
     run_profile_check('hpe-proliant')
 
@@ -991,7 +1130,7 @@ def test_proliant(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_generic_host_resources(aggregator):
     instance = common.generate_instance_config([])
 
@@ -1026,7 +1165,7 @@ def test_generic_host_resources(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_palo_alto(aggregator):
     profile = "palo-alto"
     run_profile_check('pan-common', profile)
@@ -1073,7 +1212,7 @@ def test_palo_alto(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_cisco_asa_5525(aggregator):
     profile = "cisco-asa-5525"
     run_profile_check('cisco_asa_5525', profile)
@@ -1212,7 +1351,7 @@ def test_cisco_asa_5525(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_cisco_csr(aggregator):
     run_profile_check('cisco-csr1000v')
 
@@ -1231,7 +1370,7 @@ def test_cisco_csr(aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_checkpoint_firewall(aggregator):
     run_profile_check('checkpoint-firewall')
 
@@ -1294,7 +1433,7 @@ def test_checkpoint_firewall(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_arista(aggregator):
     run_profile_check('arista')
 
@@ -1335,7 +1474,7 @@ def test_arista(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_aruba(aggregator):
     run_profile_check('aruba')
 
@@ -1397,7 +1536,7 @@ def test_aruba(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_chatsworth(aggregator):
     profile = "chatsworth_pdu"
     run_profile_check('chatsworth', profile)
@@ -1506,7 +1645,7 @@ def test_chatsworth(aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_isilon(aggregator):
     run_profile_check('isilon')
 
@@ -1581,7 +1720,7 @@ def test_isilon(aggregator):
     aggregator.assert_metric('snmp.ifsTotalBytes', metric_type=aggregator.RATE, tags=common_tags, count=1)
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_apc_ups(aggregator):
     run_profile_check('apc_ups')
     profile_tags = [
@@ -1638,7 +1777,7 @@ def test_apc_ups(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_fortinet_fortigate(aggregator):
     run_profile_check('fortinet-fortigate')
 
@@ -1728,7 +1867,7 @@ def test_fortinet_fortigate(aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_metric_type=False)
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_netapp(aggregator):
     run_profile_check('netapp')
 
@@ -1836,7 +1975,7 @@ def test_netapp(aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-# @pytest.mark.usefixtures("dd_environment")
+@pytest.mark.usefixtures("dd_environment")
 def test_cisco_catalyst(aggregator):
     run_profile_check('cisco-catalyst')
     common_tags = common.CHECK_TAGS + ['snmp_host:catalyst-6000.example', 'snmp_profile:cisco-catalyst']

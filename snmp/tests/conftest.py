@@ -34,8 +34,6 @@ E2E_METADATA = {
         # Ensure the Agent has access to profile definition files and auto_conf.
         'cp -r /home/snmp/datadog_checks/snmp/data/profiles /etc/datadog-agent/conf.d/snmp.d/',
         'cp -r /home/snmp/datadog_checks/snmp/data/auto_conf.yaml /etc/datadog-agent/conf.d/snmp.d/auto_conf.yaml',
-        'apt-get update',
-        'apt-get install -y --no-install-recommends gcc g++ snmpd snmp libsnmp-dev',
     ],
 }
 
