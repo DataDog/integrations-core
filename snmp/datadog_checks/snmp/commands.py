@@ -31,8 +31,10 @@ def snmp_get(config, oids, lookup_mib):
         raise RuntimeError('No device set')  # pragma: no cover
 
     import netsnmp
-    varlist = netsnmp.VarList(*[netsnmp.Varbind(o) for o in oids])
+    print("oids", oids)
+    varlist = netsnmp.VarList(*[netsnmp.Varbind(".{}".format(o)) for o in oids])
 
+    print("varlist", varlist)
     varbinds = config.session.get(varlist)
     print("varlist", varlist)
     print("res varbinds", varbinds)
@@ -48,26 +50,37 @@ def snmp_getnext(config, oids, lookup_mib, ignore_nonincreasing_oid):
         raise RuntimeError('No device set')  # pragma: no cover
 
     initial_vars = oids
-    varbinds = oids
+    # varbinds = oids
+    import netsnmp
+    varbinds = netsnmp.VarList(*[netsnmp.Varbind(".{}".format(o)) for o in oids])
 
     while True:
+        print('--------------------------')
         res = config.session.getnext(varbinds)
+        print("varbinds", varbinds)
 
         var_binds = []
 
         new_initial_vars = []
-        print("varbinds", varbinds)
+        print("snmp_getnext varbinds", varbinds)
         for col, item in enumerate(varbinds):
-            oid = ".".join([item.oid.lstrip('.'), item.oid_index])
+            print("====")
+            print("item.tag", item.tag)
+            print("item.val", item.val)
+            print("item", item)
+            oid = item.tag.lstrip('.')
             initial = initial_vars[col]
-            if not isinstance(item.value, Null) and oid.startswith(initial):
+            print("oid", oid)
+            print("initial", initial)
+            if not isinstance(item.val, Null) and oid.startswith(initial):
                 var_binds.append(oid)
                 new_initial_vars.append(initial)
                 yield item
         if not var_binds:
             return
         initial_vars = new_initial_vars
-        varbinds = var_binds
+        print("var_binds", var_binds)
+        varbinds = netsnmp.VarList(*[netsnmp.Varbind(".{}".format(o)) for o in var_binds])
 
 
 def snmp_bulk(config, oid, non_repeaters, max_repetitions, lookup_mib, ignore_nonincreasing_oid):

@@ -155,7 +155,7 @@ class OIDResolver(object):
         name: the name of the metric associated to `oid`.
         tag_index: a sequence of tag values. k-th item in the sequence corresponds to the k-th entry in `metric_tags`.
         """
-        oid = ".".join([item.oid.lstrip('.'), item.oid_index])
+        oid = item.tag.lstrip('.')
         parts = tuple(int(i) for i in oid.split('.'))
         prefix, name = self._resolver.match(parts)
 

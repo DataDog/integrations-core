@@ -178,6 +178,7 @@ class InstanceConfig:
             'Version':    1,
             'DestHost':   '{}:{}'.format(ip_address, port),
              'Community':  instance['community_string'],
+             'UseNumeric':  True,
         }
         self.session = netsnmp.Session(**sess_config)
 

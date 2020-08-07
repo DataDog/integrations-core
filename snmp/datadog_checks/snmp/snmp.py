@@ -202,8 +202,8 @@ class SnmpCheck(AgentCheck):
 
         scalar_oids = []
         for item in all_binds:
-            oid = item.oid
-            value = item.value
+            oid = item.tag.lstrip('.')
+            value = item.val
             scalar_oids.append(OID(oid))
             match = config.resolve_oid(item)
             results[match.name][match.indexes] = item
