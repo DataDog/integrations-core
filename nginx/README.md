@@ -64,6 +64,9 @@ server {
 
     # available only with NGINX Plus
     # status;
+
+    # ensures the version information can be retrieved by DataDog
+    server_tokens on;
   }
 }
 ```
