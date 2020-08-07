@@ -251,6 +251,7 @@ class SnmpCheck(AgentCheck):
                 if not error:
                     error = message
                 self.warning(message)
+                self.log.debug(message, exc_info=True)
 
         for oids_batch in batches(next_oids, size=self.oid_batch_size):
             try:

@@ -162,6 +162,7 @@ class InstanceConfig:
 
         refresh_interval_sec = instance.get('refresh_oids_cache_interval', self.DEFAULT_REFRESH_OIDS_CACHE_INTERVAL)
         self.oid_config = OIDConfig(refresh_interval_sec)
+        self.logger().debug("scalar_oids: %s", scalar_oids)
         self.oid_config.add_parsed_oids(scalar_oids=scalar_oids, next_oids=next_oids, bulk_oids=bulk_oids)
 
         if profile:
@@ -193,6 +194,8 @@ class InstanceConfig:
         # In the future we'll probably want to implement de-duplication.
 
         self.metrics.extend(metrics)
+        self.logger().debug("scalar_oids: %s", scalar_oids)
+        self.logger().debug("tag_oids: %s", tag_oids)
         self.oid_config.add_parsed_oids(scalar_oids=scalar_oids + tag_oids, next_oids=next_oids, bulk_oids=bulk_oids)
         self.parsed_metrics.extend(parsed_metrics)
         self.parsed_metric_tags.extend(parsed_metric_tags)
