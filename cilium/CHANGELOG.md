@@ -1,5 +1,9 @@
 # CHANGELOG - Cilium
 
+## 1.3.0 / 2020-08-09
+
+* [Added] Add config specs. See [#7319](https://github.com/DataDog/integrations-core/pull/7319).
+
 ## 1.2.0 / 2020-05-17
 
 * [Added] Add environment runner for Kubernetes' `kind`. See [#6522](https://github.com/DataDog/integrations-core/pull/6522).
