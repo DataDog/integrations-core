@@ -1,5 +1,9 @@
 # CHANGELOG - vsphere
 
+## 5.4.0 / 2020-08-09
+
+* [Added] Collect and submit vSphere attributes. See [#7180](https://github.com/DataDog/integrations-core/pull/7180).
+
 ## 5.3.0 / 2020-06-29
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
