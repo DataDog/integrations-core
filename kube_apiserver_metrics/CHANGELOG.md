@@ -1,5 +1,11 @@
 # CHANGELOG - Kube_apiserver_metrics
 
+## 1.5.0 / 2020-08-09
+
+* [Added] Support "*" wildcard in type_overrides configuration. See [#7071](https://github.com/DataDog/integrations-core/pull/7071).
+* [Fixed] DOCS-838 Template wording. See [#7038](https://github.com/DataDog/integrations-core/pull/7038).
+* [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
+
 ## 1.4.1 / 2020-07-02
 
 * [Fixed] Fix default value in example configuration file. See [#7034](https://github.com/DataDog/integrations-core/pull/7034).
