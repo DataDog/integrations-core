@@ -1,5 +1,12 @@
 # CHANGELOG - redisdb
 
+## 3.1.0 / 2020-08-09
+
+* [Added] Add auto_conf.yaml spec for redisdb. See [#7161](https://github.com/DataDog/integrations-core/pull/7161).
+* [Added] Add redis config spec. See [#7091](https://github.com/DataDog/integrations-core/pull/7091).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+* [Fixed] Refactor instance argument. See [#7018](https://github.com/DataDog/integrations-core/pull/7018).
+
 ## 3.0.0 / 2020-06-29
 
 * [Added] Upgrade redis dependency to support `username` in connection strings. See [#6708](https://github.com/DataDog/integrations-core/pull/6708).
