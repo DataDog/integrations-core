@@ -1,5 +1,9 @@
 # CHANGELOG - nagios
 
+## 1.6.1 / 2020-08-09
+
+* [Fixed] Fix logging. See [#7239](https://github.com/DataDog/integrations-core/pull/7239).
+
 ## 1.6.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
