@@ -1,5 +1,9 @@
 # CHANGELOG - cisco_aci
 
+## 1.10.1 / 2020-08-09
+
+* [Fixed] DOCS-838 Template wording. See [#7038](https://github.com/DataDog/integrations-core/pull/7038).
+
 ## 1.10.0 / 2020-06-29
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).
