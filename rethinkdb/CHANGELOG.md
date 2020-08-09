@@ -1,5 +1,9 @@
 # CHANGELOG - RethinkDB
 
+## 1.2.1 / 2020-08-09
+
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+
 ## 1.2.0 / 2020-06-29
 
 * [Added] Add an out-of-the-box dashboard for RethinkDB. See [#6837](https://github.com/DataDog/integrations-core/pull/6837). Thanks [ptgott](https://github.com/ptgott).
