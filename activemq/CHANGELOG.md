@@ -1,5 +1,11 @@
 # CHANGELOG - activemq
 
+## 1.6.0 / 2020-08-09
+
+* [Added] Convert jmx to in-app types for replay_check_run. See [#7275](https://github.com/DataDog/integrations-core/pull/7275).
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+* [Fixed] Add domain to metrics.yaml. See [#7163](https://github.com/DataDog/integrations-core/pull/7163).
+
 ## 1.5.2 / 2020-07-15
 
 * [Fixed] Add new_gc_metrics to all jmx integrations. See [#7073](https://github.com/DataDog/integrations-core/pull/7073).
