@@ -1,5 +1,9 @@
 # CHANGELOG - linux_proc_extras
 
+## 1.4.0 / 2020-08-09
+
+* [Added] Adding interrupts stats. See [#7166](https://github.com/DataDog/integrations-core/pull/7166).
+
 ## 1.3.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
