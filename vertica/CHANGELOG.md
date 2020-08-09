@@ -1,5 +1,10 @@
 # CHANGELOG - Vertica
 
+## 1.6.0 / 2020-08-09
+
+* [Added] Improve collection of library logs for debug flares. See [#7252](https://github.com/DataDog/integrations-core/pull/7252).
+* [Fixed] Use DEBUG log level for Vertica when Agent log level is DEBUG or TRACE. See [#7264](https://github.com/DataDog/integrations-core/pull/7264).
+
 ## 1.5.0 / 2020-05-17
 
 * [Added] Allow optional dependency installation for all checks. See [#6589](https://github.com/DataDog/integrations-core/pull/6589).
