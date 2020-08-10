@@ -56,7 +56,10 @@ def recommended_monitors():
             elif any([item for item in all_keys if item in EXTRA_NOT_ALLOWED_FIELDS]):
                 file_failed = True
                 display_queue.append(
-                    (echo_failure, f"    {monitor_file} contains extra unallowed field, one of: {EXTRA_NOT_ALLOWED_FIELDS}"),
+                    (
+                        echo_failure,
+                        f"    {monitor_file} contains extra unallowed field, one of: {EXTRA_NOT_ALLOWED_FIELDS}",
+                    ),
                 )
             else:
                 # If all required keys exist, validate values
