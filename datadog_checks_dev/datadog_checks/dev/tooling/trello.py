@@ -37,7 +37,7 @@ class TrelloClient:
             'team/container-app': 'Container App',
             'team/integrations': 'Integrations',
             'team/logs': 'Logs',
-            'team/tools-and-libraries': 'Tools and Libraries',
+            'team/intg-tools-libs': 'Tools and Libraries',
         }
         self.label_map = {
             'Containers': '5e7910856f8e4363e3b51708',
@@ -49,7 +49,7 @@ class TrelloClient:
             'Networks': '5e79109821620a60014fc016',
             'Processes': '5e7910789f92a918152b700d',
             'Trace': '5c050640ecb34f0915ec589a',
-            'Tools and Libs': '5ab12740841642c2a8829053',
+            'Tools and Libraries': '5ab12740841642c2a8829053',
         }
         self.progress_columns = {
             '55d1fe4cd3192ab85fa0f7ea': 'In Progress',  # INPROGRESS
