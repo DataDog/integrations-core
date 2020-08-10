@@ -53,3 +53,14 @@ java.lang:type=Runtime
 java.lang:type=Threading
 [...]
 ```
+
+### List JMX beans using JMXTerm with extra jars
+
+In the example below, the extra jar is `jboss-cli-client.jar`.
+
+```
+curl -L https://github.com/jiaqi/jmxterm/releases/download/v1.0.1/jmxterm-1.0.1-uber.jar -o /tmp/jmxterm-1.0.1-uber.jar
+java -cp /tmp/wildfly-17.0.1.Final/bin/client/jboss-cli-client.jar:/tmp/jmxterm-1.0.1-uber.jar org.cyclopsgroup.jmxterm.boot.CliMain --url service:jmx:remote+http://localhost:9990 -u datadog -p pa$$word
+domains
+beans
+```
