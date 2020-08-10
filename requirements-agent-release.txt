@@ -80,7 +80,7 @@ datadog-marathon==1.15.0; sys_platform != 'win32'
 datadog-mcache==1.10.0; sys_platform != 'win32'
 datadog-mesos-master==1.9.1; sys_platform != 'win32'
 datadog-mesos-slave==2.4.0; sys_platform != 'win32'
-datadog-mongo==1.16.2
+datadog-mongo==1.16.3
 datadog-mysql==1.15.0
 datadog-nagios==1.6.0
 datadog-network==1.17.0
