@@ -27,8 +27,12 @@
       "Scylla Overview": "assets/dashboards/overview.json"
     },
     "saved_views": {},
-    "monitors": {},
+    "monitors": {
+      "[Scylla] Server is shutting down": "assets/monitors/instance_down.json"
+    },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "scylla"
+    }
   }
 }

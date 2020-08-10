@@ -319,7 +319,7 @@ def test_section_example_indent():
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
         ## source  - required - Attribute that defines which Integration sent the logs.
-        ## service - required - The name of the service that generates the log.
+        ## service - optional - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
         ## tags - optional - Add tags to the collected logs.
         ##
@@ -381,7 +381,7 @@ def test_section_example_indent_required():
         ##                                         Set path if type is file.
         ##                                         Set channel_path if type is windows_event.
         ## source  - required - Attribute that defines which Integration sent the logs.
-        ## service - required - The name of the service that generates the log.
+        ## service - optional - The name of the service that generates the log.
         ##                      Overrides any `service` defined in the `init_config` section.
         ## tags - optional - Add tags to the collected logs.
         ##

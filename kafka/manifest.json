@@ -28,6 +28,9 @@
   "type": "check",
   "integration_id": "kafka",
   "assets": {
+    "configuration": {
+      "spec": "assets/configuration/spec.yaml"
+    },
     "monitors": {},
     "dashboards": {},
     "saved_views": {
@@ -36,6 +39,8 @@
       "logger_overview": "assets/saved_views/logger_overview.json"
     },
     "service_checks": "assets/service_checks.json",
-    "logs": {}
+    "logs": {
+      "source": "kafka"
+    }
   }
 }

@@ -30,14 +30,18 @@ def get_manifest_schema():
             "description": "Defines the various components of an integration",
             "type": "object",
             "properties": {
-                "display_name": {"description": "The human readable name of this integration", "type": "string"},
+                "display_name": {
+                    "description": "The human readable name of this integration",
+                    "type": "string",
+                    "minLength": 1,
+                },
                 "maintainer": {
                     "description": "The email address for the maintainer of this integration",
                     "type": "string",
                     "format": "email",
                 },
                 "manifest_version": {"description": "The schema version of this manifest", "type": "string"},
-                "name": {"description": "The name of this integration", "type": "string"},
+                "name": {"description": "The name of this integration", "type": "string", "minLength": 1},
                 "metric_prefix": {
                     "description": "The prefix for metrics being emitted from this integration",
                     "type": "string",
@@ -50,9 +54,10 @@ def get_manifest_schema():
                 "short_description": {
                     "description": "Brief description of this integration",
                     "type": "string",
+                    "minLength": 1,
                     "maxLength": 80,
                 },
-                "guid": {"description": "A GUID for this integration", "type": "string"},
+                "guid": {"description": "A GUID for this integration", "type": "string", "minLength": 1},
                 "support": {
                     "description": "The support type for this integration, one of `core`, `contrib`, or `partner`",
                     "type": "string",
@@ -63,7 +68,11 @@ def get_manifest_schema():
                     "type": "array",
                     "items": {"type": "string", "enum": ["linux", "mac_os", "windows"]},
                 },
-                "public_title": {"description": "A human readable public title of this integration", "type": "string"},
+                "public_title": {
+                    "description": "A human readable public title of this integration",
+                    "type": "string",
+                    "minLength": 1,
+                },
                 "categories": {
                     "description": "The categories of this integration",
                     "type": "array",
@@ -96,7 +105,7 @@ def get_manifest_schema():
                             },
                         },
                     },
-                    "required": ["monitors", "dashboards", "service_checks", "logs"],
+                    "required": ["monitors", "dashboards", "service_checks"],
                 },
             },
             "allOf": [
@@ -204,6 +213,7 @@ def get_manifest_schema():
                                         "description": "Email of the partner company to use for subscription purposes",
                                         "type": "string",
                                         "format": "email",
+                                        "minLength": 1,
                                     },
                                 },
                                 "required": ["eula", "legal_email"],

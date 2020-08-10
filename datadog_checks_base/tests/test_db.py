@@ -1501,7 +1501,7 @@ class TestColumnTransformers:
         assert len(aggregator._metrics['test.foo']) == 1
         m = aggregator._metrics['test.foo'][0]
 
-        assert 3599 < m.value < 3601
+        assert abs(m.value - 3600) < 2
         assert m.type == aggregator.GAUGE
         assert m.tags == ['test:foo', 'test:bar', 'test:tag1']
 

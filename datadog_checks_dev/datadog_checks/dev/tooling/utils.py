@@ -240,13 +240,19 @@ def get_metadata_file(check_name):
     return os.path.join(get_root(), check_name, 'metadata.csv')
 
 
-def get_saved_views(check_name):
-    paths = load_manifest(check_name).get('assets', {}).get('saved_views', {})
-    views = []
+def get_assets_from_manifest(check_name, asset_type):
+    paths = load_manifest(check_name).get('assets', {}).get(asset_type, {})
+    assets = []
+    nonexistent_assets = []
     for path in paths.values():
-        view = os.path.join(get_root(), check_name, *path.split('/'))
-        views.append(view)
-    return sorted(views)
+        asset = os.path.join(get_root(), check_name, *path.split('/'))
+
+        if not file_exists(asset):
+            nonexistent_assets.append(path)
+            continue
+        else:
+            assets.append(asset)
+    return sorted(assets), nonexistent_assets
 
 
 def get_config_file(check_name):

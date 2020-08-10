@@ -1,5 +1,9 @@
 # CHANGELOG - IBM MQ
 
+## 3.8.1 / 2020-08-10
+
+* [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
+
 ## 3.8.0 / 2020-07-23
 
 * [Added] IBM MQ metadata. See [#6979](https://github.com/DataDog/integrations-core/pull/6979).

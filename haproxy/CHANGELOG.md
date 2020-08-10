@@ -1,5 +1,9 @@
 # CHANGELOG - haproxy
 
+## 2.10.1 / 2020-08-10
+
+* [Fixed] Update ntlm_domain example. See [#7118](https://github.com/DataDog/integrations-core/pull/7118).
+
 ## 2.10.0 / 2020-06-29
 
 * [Added] Add note about warning concurrency. See [#6967](https://github.com/DataDog/integrations-core/pull/6967).

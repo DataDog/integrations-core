@@ -30,6 +30,8 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "logs": {}
+    "logs": {
+      "source": "ibm_mq"
+    }
   }
 }

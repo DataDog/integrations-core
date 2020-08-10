@@ -723,7 +723,7 @@ class MongoDb(AgentCheck):
 
                 # Submit the metric
                 metrics_tags = tags + [
-                    u"cluster:db:{0}".format(st),  # FIXME 6.0 - keep for backward compatibility
+                    u"cluster:db:{0}".format(st),  # FIXME: 8.x, was kept for backward compatibility
                     u"db:{0}".format(st),
                 ]
 

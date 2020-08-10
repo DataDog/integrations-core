@@ -2,8 +2,9 @@ parameters:
   repo: 'core'
 
 steps:
-- script: ddev validate ci
-  displayName: 'Validate CI configuration'
+- ${{ if in(parameters.repo, 'core', 'extras', 'internal') }}:
+  - script: ddev validate ci
+    displayName: 'Validate CI configuration'
 
 - ${{ if eq(parameters.repo, 'core') }}:
   - script: ddev validate agent-reqs
@@ -31,6 +32,9 @@ steps:
 
 - script: ddev validate readmes
   displayName: 'Validate README files'
+
+- script: ddev validate recommended-monitors
+  displayName: 'Validate monitors files'
 
 - script: ddev validate saved-views
   displayName: 'Validate saved views data'
