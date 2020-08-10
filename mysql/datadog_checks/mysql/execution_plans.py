@@ -401,6 +401,11 @@ class ExecutionPlansMixin(object):
         return plan
 
     def _use_schema(self, cursor, schema):
+        """
+        Switch to the schema, if specified. Schema may not always be required for a session as long
+        as fully-qualified schema and tables are used in the query. These should always be valid for
+        running an explain.
+        """
         if schema is not None:
             cursor.execute('USE `{}`'.format(schema))
 
