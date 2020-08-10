@@ -149,6 +149,7 @@ instances:
     #
     # auth_type: basic
 
+
     ## @param username - string - optional
     ## The username to use if services are behind basic or digest auth.
     #
