@@ -331,12 +331,15 @@ class ExecutionPlansMixin(object):
         strategy_cache_key = 'explain_strategy:%s' % schema
         strategy_cache_ttl = 60 * 10
 
+        # Obfuscate the statement for logging
+        obfuscated_statement = datadog_agent.obfuscate_sql(statement)
+
         if not self._can_explain(statement):
-            self.log.debug('Skipping statement which cannot be explained: %s', statement)
+            self.log.debug('Skipping statement which cannot be explained: %s', obfuscated_statement)
             return None
 
         if self._expiring_cache.get(strategy_cache_key) == explain_strategy_none:
-            self.log.debug('Skipping statement due to cached collection failure: %s', statement)
+            self.log.debug('Skipping statement due to cached collection failure: %s', obfuscated_statement)
             return None
 
         exceptions = (pymysql.err.InternalError, pymysql.err.ProgrammingError)
@@ -357,7 +360,10 @@ class ExecutionPlansMixin(object):
                 raise
             if e.args[0] in non_retryable_errors:
                 self._expiring_cache.set(strategy_cache_key, explain_strategy_none, strategy_cache_ttl)
-            self.log.debug('Cannot collect execution plan because %s schema could not be accessed: %s, statement: %s', schema, e.args, statement)
+            self.log.warning('Cannot collect execution plan because %s schema could not be accessed: %s, statement: %s',
+                             schema,
+                             e.args,
+                             obfuscated_statement)
             return None
 
         # Use a cached strategy for the schema, if any, or try each strategy to collect plans
@@ -377,6 +383,10 @@ class ExecutionPlansMixin(object):
                     raise
                 if e.args[0] in non_retryable_errors:
                     self._expiring_cache.set(strategy_cache_key, explain_strategy_none, strategy_cache_ttl)
+                self.log.debug('Failed to collect statement with strategy %s, error: %s, statement: %s',
+                               strategy,
+                               e.args,
+                               obfuscated_statement)
                 continue
 
             if plan:
@@ -385,7 +395,8 @@ class ExecutionPlansMixin(object):
                 break
 
         if not plan:
-            self.log.debug('Cannot collect execution plan because all strategies failed: %s', statement)
+            self.log.warning('Cannot collect execution plan for statement (enable debug logs to log attempts): %s',
+                             obfuscated_statement)
 
         return plan
 
