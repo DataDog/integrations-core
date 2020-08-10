@@ -41,7 +41,7 @@ datadog-fluentd==1.9.1
 datadog-gearmand==1.6.0; sys_platform != 'win32'
 datadog-gitlab-runner==2.9.1
 datadog-gitlab==4.2.0
-datadog-go-expvar==1.10.0
+datadog-go-expvar==1.10.1
 datadog-gunicorn==1.11.0; sys_platform != 'win32'
 datadog-haproxy==2.10.0
 datadog-harbor==1.6.0
