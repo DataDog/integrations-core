@@ -22,7 +22,7 @@ jobs:
     - id: files
       run: |
         git fetch origin master
-        FILES=$(git --no-pager diff --name-only master .in-toto | xargs echo)
+        FILES=$(git --no-pager diff --name-only origin/master -- .in-toto | xargs echo)
         echo "::set-output name=all::$FILES"
 
     - run: python .github/workflows/release-hash-check.py ${{ steps.files.outputs.all }}
