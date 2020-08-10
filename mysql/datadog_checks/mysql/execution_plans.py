@@ -36,7 +36,9 @@ DEFAULT_EVENTS_STATEMENTS_RATE_LIMITS = {
 
 class ExecutionPlansMixin(object):
     """
-    Mixin for collecting execution plans from query samples.
+    Mixin for collecting execution plans from query samples. Where defined, the user will attempt
+    to use the stored procedure `explain_statement` which allows collection of execution plans
+    using the permissions of the procedure definer.
     """
 
     def __init__(self, *args, **kwargs):
@@ -81,7 +83,7 @@ class ExecutionPlansMixin(object):
 
         with closing(db.cursor(pymysql.cursors.DictCursor)) as cursor:
             params = ('statement/%', 'EXPLAIN %', self._checkpoint, row_limit)
-            self.log.debug("running query. " + query, *params)
+            self.log.debug("running query: " + query, *params)
             cursor.execute(query, params)
             rows = cursor.fetchall()
             if not rows:
@@ -118,12 +120,15 @@ class ExecutionPlansMixin(object):
             with closing(db.cursor()) as cursor:
                 # TODO: run these asynchronously / do some benchmarking to optimize
                 try:
-                    plan = self._run_explain(cursor, sql_text, schema, instance_tags)
+                    start_time = time.time()
+                    plan = self._attempt_explain(cursor, sql_text, schema)
                     if not plan:
                         continue
+                    statsd.timing("dd.mysql.run_explain.time", (time.time() - start_time) * 1000, tags=instance_tags)
                 except Exception:
                     self.log.exception("failed to run explain on query %s", sql_text)
                     continue
+
                 normalized_plan = datadog_agent.obfuscate_sql_exec_plan(plan, normalize=True) if plan else None
                 obfuscated_statement = datadog_agent.obfuscate_sql(sql_text)
                 query_signature = compute_sql_signature(obfuscated_statement)
@@ -307,31 +312,121 @@ class ExecutionPlansMixin(object):
         statsd.gauge("dd.mysql.collect_execution_plans.seen_statement_plan_sigs", len(seen_statement_plan_sigs),
                      tags=instance_tags)
 
-    def _run_explain(self, cursor, statement, schema, instance_tags):
-        # TODO: cleaner query cleaning to strip comments, etc.
-        if statement.strip().split(' ', 1)[0].lower() not in VALID_EXPLAIN_STATEMENTS:
-            return
+    def _attempt_explain(self, cursor, statement, schema):
+        """
+        Tries the available methods used to explain a statement for the given schema. If a non-retryable
+        error occurs (such as a permissions error), then statements executed under the schema will be
+        disallowed in future attempts.
+        """
+        explain_strategy_none = 'NONE'
+        explain_strategy_procedure = 'PROCEDURE'
+        explain_strategy_statement = 'STATEMENT'
+
+        fns_by_strategy = {
+            explain_strategy_procedure: self._run_explain_procedure,
+            explain_strategy_statement: self._run_explain,
+        }
+
+        plan = None
+        strategy_cache_key = 'explain_strategy:%s' % schema
+        strategy_cache_ttl = 60 * 10
+
+        # Obfuscate the statement for logging
+        obfuscated_statement = datadog_agent.obfuscate_sql(statement)
+
+        if not self._can_explain(statement):
+            self.log.debug('Skipping statement which cannot be explained: %s', obfuscated_statement)
+            return None
+
+        if self._expiring_cache.get(strategy_cache_key) == explain_strategy_none:
+            self.log.debug('Skipping statement due to cached collection failure: %s', obfuscated_statement)
+            return None
+
+        exceptions = (pymysql.err.InternalError, pymysql.err.ProgrammingError)
+        non_retryable_errors = frozenset({
+            1044,  # access denied on database
+            1046,  # no permission on statement
+            1049,  # unknown database
+            1305,  # procedure does not exist
+            1370,  # no execute on procedure
+        })
 
         try:
-            start_time = time.time()
-            if schema is not None:
-                cursor.execute('USE `{}`'.format(schema))
-            cursor.execute('EXPLAIN FORMAT=json {statement}'.format(statement=statement))
-            statsd.timing("dd.mysql.run_explain.time", (time.time() - start_time) * 1000, tags=instance_tags)
-        except (pymysql.err.InternalError, pymysql.err.ProgrammingError) as e:
+            # Switch to the right schema; this is necessary when the statement uses non-fully qualified tables
+            # e.g. `select * from mytable` instead of `select * from myschema.mytable`
+            self._use_schema(cursor, schema)
+        except exceptions as e:
             if len(e.args) != 2:
                 raise
-            if e.args[0] in (1046,):
-                self.log.warning('Failed to collect EXPLAIN due to a permissions error: %s, Statement: %s', e.args,
-                                 statement)
-                return None
-            elif e.args[0] == 1064:
-                self.log.warning('Programming error when collecting EXPLAIN: %s, Statement: %s', e.args, statement)
-                return None
-            else:
-                raise
+            if e.args[0] in non_retryable_errors:
+                self._expiring_cache.set(strategy_cache_key, explain_strategy_none, strategy_cache_ttl)
+            self.log.warning('Cannot collect execution plan because %s schema could not be accessed: %s, statement: %s',
+                             schema,
+                             e.args,
+                             obfuscated_statement)
+            return None
 
+        # Use a cached strategy for the schema, if any, or try each strategy to collect plans
+        strategies = list(fns_by_strategy.keys())
+        cached = self._expiring_cache.get(strategy_cache_key)
+        if cached is not None:
+            strategies.remove(cached)
+            strategies.insert(0, cached)
+
+        for strategy in strategies:
+            fn = fns_by_strategy[strategy]
+
+            try:
+                plan = fn(cursor, statement)
+            except exceptions as e:
+                if len(e.args) != 2:
+                    raise
+                if e.args[0] in non_retryable_errors:
+                    self._expiring_cache.set(strategy_cache_key, explain_strategy_none, strategy_cache_ttl)
+                self.log.debug('Failed to collect statement with strategy %s, error: %s, statement: %s',
+                               strategy,
+                               e.args,
+                               obfuscated_statement)
+                continue
+
+            if plan:
+                self._expiring_cache.set(strategy_cache_key, strategy, strategy_cache_ttl)
+                self.log.debug('Successfully collected plan using strategy: %s', strategy)
+                break
+
+        if not plan:
+            self.log.warning('Cannot collect execution plan for statement (enable debug logs to log attempts): %s',
+                             obfuscated_statement)
+
+        return plan
+
+    def _use_schema(self, cursor, schema):
+        """
+        Switch to the schema, if specified. Schema may not always be required for a session as long
+        as fully-qualified schema and tables are used in the query. These should always be valid for
+        running an explain.
+        """
+        if schema is not None:
+            cursor.execute('USE `{}`'.format(schema))
+
+    def _run_explain(self, cursor, statement):
+        """
+        Run the explain using the EXPLAIN statement
+        """
+        cursor.execute('EXPLAIN FORMAT=json {statement}'.format(statement=statement))
         return cursor.fetchone()[0]
+
+    def _run_explain_procedure(self, cursor, statement):
+        """
+        Run the explain by calling the stored procedure `explain_statement` if available.
+        """
+        cursor.execute('CALL explain_statement(%s)', statement)
+        return cursor.fetchone()[0]
+
+    @staticmethod
+    def _can_explain(statement):
+        # TODO: cleaner query cleaning to strip comments, etc.
+        return statement.strip().split(' ', 1)[0].lower() in VALID_EXPLAIN_STATEMENTS
 
     @staticmethod
     def _parse_execution_plan_cost(execution_plan):
