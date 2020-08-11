@@ -1,5 +1,11 @@
 # CHANGELOG - Datadog Checks Dev
 
+## 3.20.0 / 2020-08-11
+
+* [Added] Validate the monitor id isn't in the payload. See [#7341](https://github.com/DataDog/integrations-core/pull/7341).
+* [Fixed] ddev for extras must not rewrite line endings. See [#7344](https://github.com/DataDog/integrations-core/pull/7344).
+* [Fixed] Clean http config whitespaces. See [#7339](https://github.com/DataDog/integrations-core/pull/7339).
+
 ## 3.19.0 / 2020-08-07
 
 * [Added] Add show warnings option to validate metadata. See [#7310](https://github.com/DataDog/integrations-core/pull/7310).
