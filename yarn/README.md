@@ -69,7 +69,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-    ```yaml
+  ```yaml
     logs_enabled: true
   ```
 
