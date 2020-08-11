@@ -11,6 +11,7 @@ from ...utils import get_assets_from_manifest, get_valid_integrations, load_mani
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 REQUIRED_ATTRIBUTES = {'name', 'type', 'query', 'message', 'tags', 'options', 'recommended_monitor_metadata'}
+EXTRA_NOT_ALLOWED_FIELDS = ['id']
 
 
 @click.command(
@@ -51,6 +52,14 @@ def recommended_monitors():
                 file_failed = True
                 display_queue.append(
                     (echo_failure, f"    {monitor_file} does not contain the required fields: {missing_fields}"),
+                )
+            elif any([item for item in all_keys if item in EXTRA_NOT_ALLOWED_FIELDS]):
+                file_failed = True
+                display_queue.append(
+                    (
+                        echo_failure,
+                        f"    {monitor_file} contains extra unallowed field, one of: {EXTRA_NOT_ALLOWED_FIELDS}",
+                    ),
                 )
             else:
                 # If all required keys exist, validate values
