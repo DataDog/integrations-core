@@ -4,6 +4,8 @@
 import os
 import sys
 
+import pytest
+
 from datadog_checks.dev import EnvVars, run_command
 from datadog_checks.dev._env import E2E_PREFIX, TESTING_PLUGIN
 from datadog_checks.dev.utils import chdir, remove_path
@@ -12,12 +14,24 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CORE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(HERE))))
 
 
-def test_new_check_test():
+@pytest.mark.parametrize('integration_type', ['check', 'jmx'])
+def test_new_check_test(integration_type):
     check_path = os.path.join(CORE_ROOT, 'my_check')
 
     try:
         run_command(
-            [sys.executable, '-m', 'datadog_checks.dev', 'create', '-q', '-l', CORE_ROOT, 'My Check'],
+            [
+                sys.executable,
+                '-m',
+                'datadog_checks.dev',
+                'create',
+                '--type',
+                integration_type,
+                '--quiet',
+                '--location',
+                CORE_ROOT,
+                'My Check',
+            ],
             capture=True,
             check=True,
         )
