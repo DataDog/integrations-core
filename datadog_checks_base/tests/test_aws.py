@@ -20,5 +20,5 @@ class TestRDS:
         ('dd-metrics.cluster-ro-cfxdfe8cpixl.ap-east-1.rds.amazonaws.com', ['dbclusteridentifier:dd-metrics', 'region:ap-east-1']),
         ('dd-metrics.cluster-cfxdfe8cpixl.ap-east-1.rds.amazonaws.com', ['dbclusteridentifier:dd-metrics', 'region:ap-east-1']),
     ])
-    def test_parse_tags_from_endpoint_instance(self, test_case, expected):
+    def test_parse_tags_from_endpoint(self, test_case, expected):
         assert rds_parse_tags_from_endpoint(test_case) == expected
