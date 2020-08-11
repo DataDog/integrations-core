@@ -69,13 +69,13 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 1. Collecting logs is disabled by default in the Datadog Agent, enable it in your `datadog.yaml` file:
 
-  ```yaml
+    ```yaml
     logs_enabled: true
-  ```
+    ```
 
 2. Uncomment and edit the logs configuration block in your `yarn.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample yarn.d/conf.yaml][5] for all available configuration options.
 
-  ```yaml
+    ```yaml
     logs:
       - type: file
         path: <LOG_FILE_PATH>
@@ -86,7 +86,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
         #   - type: multi_line
         #     pattern: \d{4}\-\d{2}\-\d{2} \d{2}:\d{2}:\d{2},\d{3}
         #     name: new_log_start_with_date
-  ```
+    ```
 
 3. [Restart the Agent][6].
 
