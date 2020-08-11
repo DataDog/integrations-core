@@ -9,8 +9,8 @@ import click
 
 from .....subprocess import SubprocessError, run_command
 from .....utils import basepath, chdir, get_next
-from ....constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
 from ....config import APP_DIR
+from ....constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
 from ....github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
 from ....trello import TrelloClient
 from ....utils import format_commit_id
