@@ -34,10 +34,6 @@ def rds_parse_tags_from_endpoint(endpoint):
     
     identifier, cluster, region, _ = parts
     if cluster.startswith('cluster-'):
-        # Provided URI is an aurora cluster endpoint, not an instance.
-        # This is the case when the agent is configured to connect to the
-        # reader/writer endpoint in an aurora cluster or if the cluster is
-        # a serverless Aurora cluster.
         tags.append('dbclusteridentifier:' + identifier)
     else:
         tags.append('dbinstanceidentifier:' + identifier)
