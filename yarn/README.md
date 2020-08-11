@@ -75,7 +75,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 2. Uncomment and edit the logs configuration block in your `yarn.d/conf.yaml` file. Change the `type`, `path`, and `service` parameter values based on your environment. See the [sample yarn.d/conf.yaml][5] for all available configuration options.
 
-    ```yaml
+  ```yaml
     logs:
       - type: file
         path: <LOG_FILE_PATH>
