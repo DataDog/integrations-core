@@ -2,23 +2,18 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import json
-import os
 import string
 import unicodedata
-from collections import namedtuple
-from dataclasses import dataclass
-from typing import Dict, NamedTuple, Optional
+from typing import Dict, Optional
 
-from ....console import echo_info
-from .trello_users import TrelloUsers, TrelloUser
+from .trello_users import TrelloUser, TrelloUsers
 
 
 class GithubTrelloUserMatcher:
     """
     Find the Trello user from a Github user using heuristics
 
-    See `__normalize_github_name` for Github name normalization and     
+    See `__normalize_github_name` for Github name normalization and
     `__normalize_trello_name` for Trello name normalization
     """
 
@@ -51,16 +46,14 @@ class GithubTrelloUserMatcher:
         return name
 
     def __strip_accents(self, text: str):
-        text = unicodedata.normalize('NFD', text).encode(
-            'ascii', 'ignore').decode("utf-8")
+        text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore').decode("utf-8")
         return str(text)
 
     def __normalize_trello_name(self, name: str):
         """
         Remove space, `@datadoghq.com`, `.`, postfix digits and convert the result to lower case
         """
-        name = name.replace(" ", "").replace(
-            "@datadoghq.com", "").replace(".", "")
+        name = name.replace(" ", "").replace("@datadoghq.com", "").replace(".", "")
         name = name.lower().rstrip(string.digits)
         return name
 
@@ -71,5 +64,4 @@ class GithubTrelloUserMatcher:
         else:
             existing_user = self.__normalized_trello_users[normalize_name]
             if existing_user != user:
-                raise Exception(
-                    f'Normalized name is the same for {existing_user} and {user}')
+                raise Exception(f'Normalized name is the same for {existing_user} and {user}')

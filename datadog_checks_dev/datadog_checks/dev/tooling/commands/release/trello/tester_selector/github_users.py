@@ -2,11 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import json
-import os
 import time
 from datetime import datetime
-from typing import cast, Dict, List, Optional
+from typing import Dict, List, Optional, cast
 
 from .....github import Github
 from ....console import echo_info
@@ -28,14 +26,14 @@ class GithubUsers:
     """
     Store a collection of Github users
     """
+
     def __init__(self, github: Github, app_dir: str, cache_expiration: datetime):
         self.__github = github
         # Use a cache to avoid API Rate Limits
         self.__user_cache = Cache(app_dir, 'github_user', cache_expiration)
 
     def get_users(self, teams: List[str]) -> List[GithubUser]:
-        github_users = cast(Dict[str, Dict[str, object]],
-                            self.__user_cache.get_value())
+        github_users = cast(Dict[str, Dict[str, object]], self.__user_cache.get_value())
         if not github_users:
             github_users = {}
         for team in teams:
@@ -45,8 +43,7 @@ class GithubUsers:
                 if login not in github_users:
                     user = self.__github.get_user(login)
                     date = self.get_last_pr_date(login)
-                    github_users[login] = {
-                        'login': login, 'name': user['name'], 'last_pr_date_str': date, 'team': team}
+                    github_users[login] = {'login': login, 'name': user['name'], 'last_pr_date_str': date, 'team': team}
                     time.sleep(1)  # to avoid timeout
 
         self.__user_cache.set_value(github_users)

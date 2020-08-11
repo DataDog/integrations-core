@@ -2,13 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import json
-import os
-import time
 from datetime import datetime
-from typing import cast, Dict, List, Optional
+from typing import Dict, List, cast
 
-from .....github import Github
 from .....trello import TrelloClient
 from ....console import echo_info
 from .cache import Cache
@@ -25,14 +21,14 @@ class TrelloUsers:
     """
     Store a collection of Trello users
     """
+
     def __init__(self, trello: TrelloClient, app_dir: str, cache_expiration: datetime):
         self.__trello = trello
         # Use a cache to avoid API Rate Limits
         self.__user_cache = Cache(app_dir, 'trello_user', cache_expiration)
 
     def get_users(self) -> List[TrelloUser]:
-        trello_users = cast(Dict[str, Dict[str, object]],
-                            self.__user_cache.get_value())
+        trello_users = cast(Dict[str, Dict[str, object]], self.__user_cache.get_value())
         if not trello_users:
             trello_users = {}
         membership = self.__trello.get_membership()

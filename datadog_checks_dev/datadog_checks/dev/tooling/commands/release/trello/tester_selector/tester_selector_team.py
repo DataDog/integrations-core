@@ -3,8 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import random
+from typing import Dict, List, Optional, Set
+
 from .....github import Github
-from typing import List, Set, Dict, Optional
+
 
 class TesterSelectorTeam:
     """
@@ -12,13 +14,14 @@ class TesterSelectorTeam:
 
     The algorithm is the following:
         1 Consider teammates who are neither the author of the PR nor a reviewer.
-        2 Select the teammate with the least number of assigned cards. If several 
+        2 Select the teammate with the least number of assigned cards. If several
           teammates meet these criterion, select one randomly.
-        
-        If a tester cannot be find, use 2 but consider teammates that review the PR. 
+
+        If a tester cannot be find, use 2 but consider teammates that review the PR.
 
         Note: If someone review all the PRs of her team, the algorithm never select her.
     """
+
     def __init__(self, github: Github, team_name: str):
         self.__prs_by_tester: Dict[str, List[int]] = {}
         self.__name = team_name
@@ -38,7 +41,7 @@ class TesterSelectorTeam:
             tester = self.__select_testers(lambda t: t != author)
 
         if tester is not None:
-            self.__prs_by_tester[tester].append(pr_num)        
+            self.__prs_by_tester[tester].append(pr_num)
         return tester
 
     def get_stats(self):
@@ -53,7 +56,7 @@ class TesterSelectorTeam:
         for user, prs in self.__prs_by_tester.items():
             if not user_excluded_fct(user):
                 if len(candidates) == 0 or len(prs) <= minAssignedCards:
-                    # if a user has less reviews than minAssignedCards, then 
+                    # if a user has less reviews than minAssignedCards, then
                     # she becomes the current best candidate.
                     if len(prs) < minAssignedCards:
                         candidates.clear()

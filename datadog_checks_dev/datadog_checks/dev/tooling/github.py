@@ -170,12 +170,12 @@ class Github:
         return self.__get_request_retry(f'{API_URL}/orgs/{self.__org}/teams/{team}/members')
 
     def get_reviews(self, pr_num):
-        return self.__get_request_retry(
-            f'{API_URL}/repos/{self.__org}/{self.__repo}/pulls/{pr_num}/reviews')
+        return self.__get_request_retry(f'{API_URL}/repos/{self.__org}/{self.__repo}/pulls/{pr_num}/reviews')
 
     def get_last_prs(self, user):
         return self.__get_request_retry(
-            f'{API_URL}/search/issues?q=repo:{self.__org}/{self.__repo}+author:{user}+is:pr+sort:created')
+            f'{API_URL}/search/issues?q=repo:{self.__org}/{self.__repo}+author:{user}+is:pr+sort:created'
+        )
 
     def __get_request_retry(self, url):
         wait = 3
@@ -191,7 +191,6 @@ class Github:
         raise Exception(f'Error: {url}')
 
     def __get_request(self, url):
-        repo = basepath(get_root())
         response = requests.get(url, auth=self.__auth)
 
         response.raise_for_status()

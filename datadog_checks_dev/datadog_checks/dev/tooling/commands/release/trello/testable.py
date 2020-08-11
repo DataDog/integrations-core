@@ -10,13 +10,13 @@ import click
 from .....subprocess import SubprocessError, run_command
 from .....utils import basepath, chdir, get_next
 from ....constants import CHANGELOG_LABEL_PREFIX, CHANGELOG_TYPE_NONE, get_root
+from ....config import APP_DIR
 from ....github import get_pr, get_pr_from_hash, get_pr_labels, get_pr_milestone, parse_pr_number
 from ....trello import TrelloClient
 from ....utils import format_commit_id
 from ...console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success, echo_waiting, echo_warning
-from ....config import APP_DIR
 from .rc_build_cards_updater import RCBuildCardsUpdater
-from .tester_selector.tester_selector import TesterSelector, create_tester_selector, TrelloUser
+from .tester_selector.tester_selector import TesterSelector, TrelloUser, create_tester_selector
 
 
 def create_trello_card(
@@ -452,6 +452,7 @@ def testable(
 
     if dry_run:
         show_card_assigments(testerSelector)
+
 
 def show_card_assigments(testerSelector: TesterSelector):
     echo_info('Cards assignments')

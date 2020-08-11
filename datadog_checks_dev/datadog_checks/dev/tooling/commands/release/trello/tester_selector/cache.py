@@ -4,16 +4,15 @@
 
 import json
 import os
-import time
-from typing import Dict, List, Optional
 from datetime import datetime
+from typing import Optional
 
 from ....console import echo_info
 
 
 class Cache:
     """
-    Cache data expensive to compute. Use JSON format.
+    Cache data that is expensive to compute. Use JSON format.
     """
 
     def __init__(self, app_dir: str, cache_name: str, expiration: datetime):
@@ -24,8 +23,7 @@ class Cache:
         except FileExistsError:
             pass
         try:
-            creation_time = datetime.utcfromtimestamp(
-                os.path.getctime(self.__path))
+            creation_time = datetime.utcfromtimestamp(os.path.getctime(self.__path))
             if creation_time < expiration:
                 echo_info(f'Cache expired. Removing cache {self.__path}')
                 os.remove(self.__path)
@@ -42,13 +40,12 @@ class Cache:
         except FileNotFoundError:
             return None
         except Exception as e:
-            raise Exception(
-                f'Invalid cache object in {self.__path} {type(e)}') from e
+            raise Exception(f'Invalid cache object in {self.__path} {type(e)}') from e
 
     def set_value(self, value: object):
         value_json = json.dumps(value)
         stat = None
-        
+
         try:
             stat = os.stat(self.__path)
         except FileNotFoundError:
