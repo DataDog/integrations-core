@@ -15,12 +15,11 @@
 		"new_host_delay": 300,
 		"notify_no_data": true,
 		"thresholds": {
-            "critical": 3,
-            "warning": 2
+			"critical": 3,
+			"warning": 2
 		}
 	},
 	"recommended_monitor_metadata": {
 		"description": "Notify your team if you cannot connect to your Elasticsearch cluster."
 	}
 }
-
