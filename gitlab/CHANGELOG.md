@@ -1,5 +1,9 @@
 # CHANGELOG - gitlab
 
+## 4.2.1 / 2020-08-12
+
+* [Fixed] Clean http config whitespaces. See [#7339](https://github.com/DataDog/integrations-core/pull/7339).
+
 ## 4.2.0 / 2020-08-10
 
 * [Added] Support "*" wildcard in type_overrides configuration. See [#7071](https://github.com/DataDog/integrations-core/pull/7071).
