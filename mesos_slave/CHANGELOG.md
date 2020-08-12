@@ -1,5 +1,9 @@
 # CHANGELOG - mesos_slave
 
+## 2.4.1 / 2020-08-12
+
+* [Fixed] Clean http config whitespaces. See [#7339](https://github.com/DataDog/integrations-core/pull/7339).
+
 ## 2.4.0 / 2020-08-10
 
 * [Added] Add config specs. See [#7292](https://github.com/DataDog/integrations-core/pull/7292).
