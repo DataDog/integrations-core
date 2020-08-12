@@ -1,5 +1,9 @@
 # CHANGELOG - activemq_xml
 
+## 1.8.2 / 2020-08-12
+
+* [Fixed] Clean http config whitespaces. See [#7339](https://github.com/DataDog/integrations-core/pull/7339).
+
 ## 1.8.1 / 2020-08-10
 
 * [Fixed] DOCS-838 Template wording. See [#7038](https://github.com/DataDog/integrations-core/pull/7038).
