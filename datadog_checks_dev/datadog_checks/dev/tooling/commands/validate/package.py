@@ -9,11 +9,7 @@ from ...utils import get_valid_checks, read_setup_file
 from ..console import CONTEXT_SETTINGS, abort, echo_failure, echo_info, echo_success
 
 # Some integrations aren't installable via the integration install command, so exclude them from the name requirements
-EXCLUDE_CHECKS = [
-    "datadog_checks_downloader",
-    "datadog_checks_dev",
-    "datadog_checks_base"
-]
+EXCLUDE_CHECKS = ["datadog_checks_downloader", "datadog_checks_dev", "datadog_checks_base"]
 
 
 @click.command('package', context_settings=CONTEXT_SETTINGS, short_help='Validate `setup.py` files')
@@ -43,10 +39,7 @@ def package():
                 if group != f"datadog-{check_name}":
                     file_failed = True
                     display_queue.append(
-                        (
-                            echo_failure,
-                            f"    The name in setup.py: {group} must be: `datadog-{check_name}`"
-                        )
+                        (echo_failure, f"    The name in setup.py: {group} must be: `datadog-{check_name}`")
                     )
 
         if file_failed:
