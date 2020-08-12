@@ -135,6 +135,7 @@ def test_e2e_agent_autodiscovery(dd_agent_check, container_ip, autodiscovery_rea
         'snmp.upsBasicStateOutputState.BatteriesDischarged',
         'snmp.upsBasicStateOutputState.LowBatteryOnBattery',
         'snmp.upsBasicStateOutputState.NoBatteriesAttached',
+        'snmp.upsBasicStateOutputState.On',
         'snmp.upsBasicStateOutputState.OnLine',
         'snmp.upsBasicStateOutputState.ReplaceBattery',
     ]
