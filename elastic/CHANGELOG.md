@@ -1,5 +1,9 @@
 # CHANGELOG - elastic
 
+## 1.19.1 / 2020-08-12
+
+* [Fixed] Clean http config whitespaces. See [#7339](https://github.com/DataDog/integrations-core/pull/7339).
+
 ## 1.19.0 / 2020-08-10
 
 * [Added] Include Node system stats. See [#6590](https://github.com/DataDog/integrations-core/pull/6590).
