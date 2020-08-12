@@ -1,5 +1,9 @@
 # CHANGELOG - yarn
 
+## 1.15.1 / 2020-08-12
+
+* [Fixed] Clean http config whitespaces. See [#7339](https://github.com/DataDog/integrations-core/pull/7339).
+
 ## 1.15.0 / 2020-08-10
 
 * [Added] Add config specs for YARN integration. See [#7167](https://github.com/DataDog/integrations-core/pull/7167).
