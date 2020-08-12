@@ -30,9 +30,6 @@ steps:
 - script: ddev validate metadata
   displayName: 'Validate metric data'
 
-- script: ddev validate package
-  displayName: 'Validate Setup.py files'
-
 - script: ddev validate readmes
   displayName: 'Validate README files'
 
