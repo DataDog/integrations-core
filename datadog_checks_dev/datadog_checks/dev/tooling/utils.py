@@ -141,6 +141,10 @@ def get_readme_file(check_name):
     return os.path.join(get_root(), check_name, 'README.md')
 
 
+def get_setup_file(check_name):
+    return os.path.join(get_root(), check_name, 'setup.py')
+
+
 def check_root():
     """Check if root has already been set."""
     existing_root = get_root()
@@ -381,6 +385,11 @@ def read_metadata_rows(metadata_file):
 
 def read_readme_file(check_name):
     for line_no, line in enumerate(read_file_lines(get_readme_file(check_name))):
+        yield line_no, line
+
+
+def read_setup_file(check_name):
+    for line_no, line in enumerate(read_file_lines(get_setup_file(check_name))):
         yield line_no, line
 
 
