@@ -1,0 +1,27 @@
+{
+	"name": "[http_check] Cannot connect to URL: {{ url.name }} on Host: {{ host.name }}",
+	"type": "service check",
+	"query": "\"http.can_connect\".over(\"\").by(\"url\").last(3).count_by_status()",
+	"message": "Cannot connect to URL: {{ url.name }} on Host: {{ host.name }}\n\nFollow these steps to troubleshoot:",
+	"tags": [
+		"integration:http_check"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"include_tags": true,
+		"no_data_timeframe": 10,
+		"new_host_delay": 300,
+		"notify_no_data": true,
+		"renotify_interval": 0,
+		"escalation_message": "",
+		"thresholds": {
+			"critical": 2,
+			"warning": 2
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Notify your team when an endpoint is unreachable."
+	}
+}
