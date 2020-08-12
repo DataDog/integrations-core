@@ -1,5 +1,9 @@
 # CHANGELOG - http_check
 
+## 4.10.1 / 2020-08-12
+
+* [Fixed] Clean http config whitespaces. See [#7339](https://github.com/DataDog/integrations-core/pull/7339).
+
 ## 4.10.0 / 2020-08-10
 
 * [Added] Add config specs to http check. See [#7245](https://github.com/DataDog/integrations-core/pull/7245).
