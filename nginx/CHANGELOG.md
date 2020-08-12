@@ -1,5 +1,9 @@
 # CHANGELOG - nginx
 
+## 3.8.2 / 2020-08-12
+
+* [Fixed] Clean http config whitespaces. See [#7339](https://github.com/DataDog/integrations-core/pull/7339).
+
 ## 3.8.1 / 2020-08-10
 
 * [Fixed] Update logs config service field to optional. See [#7209](https://github.com/DataDog/integrations-core/pull/7209).
