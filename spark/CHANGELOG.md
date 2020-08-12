@@ -1,5 +1,9 @@
 # CHANGELOG - spark
 
+## 1.14.1 / 2020-08-12
+
+* [Fixed] Clean http config whitespaces. See [#7339](https://github.com/DataDog/integrations-core/pull/7339).
+
 ## 1.14.0 / 2020-08-10
 
 * [Added] Add documentation for spark logs. See [#7109](https://github.com/DataDog/integrations-core/pull/7109).
