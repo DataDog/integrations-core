@@ -1,5 +1,9 @@
 # CHANGELOG - Envoy
 
+## 1.17.1 / 2020-08-12
+
+* [Fixed] Clean http config whitespaces. See [#7339](https://github.com/DataDog/integrations-core/pull/7339).
+
 ## 1.17.0 / 2020-08-10
 
 * [Added] envoy config specs. See [#7157](https://github.com/DataDog/integrations-core/pull/7157).
