@@ -1,7 +1,7 @@
 {
 	"name": "[http_check] Cannot connect to URL: {{ url.name }} on Host: {{ host.name }}",
 	"type": "service check",
-	"query": "\"http.can_connect\".over(\"\").by(\"url\").last(3).count_by_status()",
+	"query": "\"http.can_connect\".over(\"\").by(\"url\").last(4).count_by_status()",
 	"message": "Cannot connect to URL: {{ url.name }} on Host: {{ host.name }}\n\nFollow these steps to troubleshoot:",
 	"tags": [
 		"integration:http_check"
@@ -17,7 +17,7 @@
 		"renotify_interval": 0,
 		"escalation_message": "",
 		"thresholds": {
-			"critical": 2,
+			"critical": 3,
 			"warning": 2
 		}
 	},

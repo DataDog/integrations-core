@@ -1,0 +1,26 @@
+{
+	"name": "[elasticsearch] Unable to connect to Elasticsearch on {{ host.name }}:{{port.name}}",
+	"type": "service check",
+	"query": "\"elasticsearch.can_connect\".over(\"*\").by(\"host\",\"port\").last(4).count_by_status()",
+	"message": "The agent cannot connect to Elasticsearch on {{ host.name }}:{{port.name}}\n\nFollow these steps to troubleshoot:",
+	"tags": [
+		"integration:elasticsearch"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"include_tags": true,
+		"no_data_timeframe": 10,
+		"new_host_delay": 300,
+		"notify_no_data": true,
+		"thresholds": {
+            "critical": 3,
+            "warning": 2
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Notify your team if you cannot connect to your Elasticsearch cluster."
+	}
+}
+

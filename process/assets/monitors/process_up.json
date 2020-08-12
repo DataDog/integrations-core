@@ -1,0 +1,26 @@
+{
+	"name": "[process_check] Process {{ process.name }} is down on Host: {{ host.name }}",
+	"type": "service check",
+	"query": "\"process.up\".over(\"\").last(4).count_by_status()",
+	"message": "Process {{ process.name }} is down on Host: {{ host.name }}\n\nFollow these steps to troubleshoot:",
+	"tags": [
+		"integration:process_check"
+	],
+	"options": {
+		"notify_audit": false,
+		"locked": false,
+		"timeout_h": 0,
+		"include_tags": true,
+		"no_data_timeframe": 10,
+		"new_host_delay": 300,
+		"notify_no_data": true,
+		"thresholds": {
+			"critical": 3,
+			"warning": 2
+		}
+	},
+	"recommended_monitor_metadata": {
+		"description": "Notify your team when a process is down."
+	}
+}
+

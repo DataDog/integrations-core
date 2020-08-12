@@ -25,7 +25,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "[process_check] Process {{ process.name }} is down on Host: {{ host.name }}": "assets/monitors/process_up.json"
+    },
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
     "logs": {}

@@ -29,7 +29,9 @@
     "configuration": {
       "spec": "assets/configuration/spec.yaml"
     },
-    "monitors": {},
+    "monitors": {
+      "[http_check] Cannot connect to URL: {{ url.name }} on Host: {{ host.name }}": "assets/monitors/http_can_connect.json"
+    },
     "dashboards": {},
     "service_checks": "assets/service_checks.json",
     "logs": {}
