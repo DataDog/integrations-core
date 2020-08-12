@@ -1,5 +1,9 @@
 # CHANGELOG - Airflow
 
+## 1.5.1 / 2020-08-12
+
+* [Fixed] Clean http config whitespaces. See [#7339](https://github.com/DataDog/integrations-core/pull/7339).
+
 ## 1.5.0 / 2020-08-10
 
 * [Added] airflow new metrics. See [#7112](https://github.com/DataDog/integrations-core/pull/7112).
