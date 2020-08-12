@@ -1,5 +1,9 @@
 # CHANGELOG - couch
 
+## 3.11.1 / 2020-08-12
+
+* [Fixed] Clean http config whitespaces. See [#7339](https://github.com/DataDog/integrations-core/pull/7339).
+
 ## 3.11.0 / 2020-08-10
 
 * [Added] couch config specs. See [#7160](https://github.com/DataDog/integrations-core/pull/7160).
