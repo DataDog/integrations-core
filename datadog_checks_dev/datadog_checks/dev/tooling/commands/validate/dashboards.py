@@ -69,10 +69,7 @@ def dashboards():
             if not _is_dashboard_format(decoded):
                 file_old_format = True
                 display_queue.append(
-                    (
-                        echo_warning,
-                        f'    {dashboard_file} is not using the new /dashboard payload format.'
-                    ),
+                    (echo_warning, f'    {dashboard_file} is not using the new /dashboard payload format.'),
                 )
 
             if file_failed:
