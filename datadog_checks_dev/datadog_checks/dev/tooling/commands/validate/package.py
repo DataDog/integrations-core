@@ -27,7 +27,7 @@ def package():
             continue
 
         lines = read_setup_file(check_name)
-        for line_no, line in lines:
+        for _, line in lines:
             # The name field must match the pattern: `datadog-<folder_name>`
             match = re.search("name=['\"](.*)['\"]", line)
             if match:
