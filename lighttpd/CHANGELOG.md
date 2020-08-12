@@ -1,5 +1,9 @@
 # CHANGELOG - lighttpd
 
+## 1.11.1 / 2020-08-12
+
+* [Fixed] Clean http config whitespaces. See [#7339](https://github.com/DataDog/integrations-core/pull/7339).
+
 ## 1.11.0 / 2020-08-10
 
 * [Added] Add config specs. See [#7057](https://github.com/DataDog/integrations-core/pull/7057).
