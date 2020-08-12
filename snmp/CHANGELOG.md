@@ -1,5 +1,10 @@
 # CHANGELOG - snmp
 
+## 3.7.1 / 2020-08-12
+
+* [Fixed] Fix apc ups profile. See [#7351](https://github.com/DataDog/integrations-core/pull/7351).
+* [Fixed] Revert Fix wrong indentation of `table` key in column metric tags #7024. See [#7349](https://github.com/DataDog/integrations-core/pull/7349).
+
 ## 3.7.0 / 2020-08-03
 
 * [Added] Add OID caching. See [#7231](https://github.com/DataDog/integrations-core/pull/7231).
