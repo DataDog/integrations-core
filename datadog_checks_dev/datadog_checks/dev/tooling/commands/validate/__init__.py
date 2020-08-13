@@ -31,11 +31,11 @@ ALL_COMMANDS = (
     imports,
     manifest,
     metadata,
+    package,
     readmes,
     recommended_monitors,
     saved_views,
     service_checks,
-    package,
 )
 
 
