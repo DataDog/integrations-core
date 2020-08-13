@@ -205,7 +205,7 @@ class PgStatementsMixin(object):
                     # convert milliseconds to nanoseconds
                     value = value * 1000000
                 self.log.debug("AgentCheck.count(%s, %s, tags=%s)", metric_name, value, tags)
-                self.count(metric_name, row[column], tags=tags)
+                self.count(metric_name, value, tags=tags)
 
     def _get_new_pg_stat_activity(self, instance_tags=None):
         start_time = time.time()
