@@ -159,6 +159,7 @@ class PostgreSql(PgStatementsMixin, AgentCheck):
 
         results = None
         try:
+            self.log.debug("executing query: %s (%s)", query, params)
             cursor.execute(query, params)
             results = cursor.fetchall()
         except psycopg2.errors.FeatureNotSupported as e:

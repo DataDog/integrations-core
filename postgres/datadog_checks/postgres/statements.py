@@ -38,38 +38,38 @@ ORDER BY (pg_stat_statements.total_time / NULLIF(pg_stat_statements.calls, 0)) D
 PG_STAT_STATEMENTS_REQUIRED_COLUMNS = frozenset({
     'calls',
     'query',
-    'queryid',
     'total_time',
     'rows',
 })
 
+PG_STAT_STATEMENTS_OPTIONAL_COLUMNS = frozenset({
+    'queryid',
+})
 
 # Monotonically increasing count columns to be converted to metrics
 PG_STAT_STATEMENTS_METRIC_COLUMNS = {
-    'calls': ('pg_stat_statements.calls', 'postgresql.queries.count'),
-    'total_time': ('pg_stat_statements.total_time * 1000000', 'postgresql.queries.time'),
-    'rows': ('pg_stat_statements.rows', 'postgresql.queries.rows'),
-    'shared_blks_hit': ('pg_stat_statements.shared_blks_hit', 'postgresql.queries.shared_blks_hit'),
-    'shared_blks_read': ('pg_stat_statements.shared_blks_read', 'postgresql.queries.shared_blks_read'),
-    'shared_blks_dirtied': ('pg_stat_statements.shared_blks_dirtied', 'postgresql.queries.shared_blks_dirtied'),
-    'shared_blks_written': ('pg_stat_statements.shared_blks_written', 'postgresql.queries.shared_blks_written'),
-    'local_blks_hit': ('pg_stat_statements.local_blks_hit', 'postgresql.queries.local_blks_hit'),
-    'local_blks_read': ('pg_stat_statements.local_blks_read', 'postgresql.queries.local_blks_read'),
-    'local_blks_dirtied': ('pg_stat_statements.local_blks_dirtied', 'postgresql.queries.local_blks_dirtied'),
-    'local_blks_written': ('pg_stat_statements.local_blks_written', 'postgresql.queries.local_blks_written'),
-    'temp_blks_read': ('pg_stat_statements.temp_blks_read', 'postgresql.queries.temp_blks_read'),
-    'temp_blks_written': ('pg_stat_statements.temp_blks_written', 'postgresql.queries.temp_blks_written'),
+    'calls': 'postgresql.queries.count',
+    'total_time': 'postgresql.queries.time',
+    'rows': 'postgresql.queries.rows',
+    'shared_blks_hit': 'postgresql.queries.shared_blks_hit',
+    'shared_blks_read': 'postgresql.queries.shared_blks_read',
+    'shared_blks_dirtied': 'postgresql.queries.shared_blks_dirtied',
+    'shared_blks_written': 'postgresql.queries.shared_blks_written',
+    'local_blks_hit': 'postgresql.queries.local_blks_hit',
+    'local_blks_read': 'postgresql.queries.local_blks_read',
+    'local_blks_dirtied': 'postgresql.queries.local_blks_dirtied',
+    'local_blks_written': 'postgresql.queries.local_blks_written',
+    'temp_blks_read': 'postgresql.queries.temp_blks_read',
+    'temp_blks_written': 'postgresql.queries.temp_blks_written',
 }
 
 DEFAULT_METRIC_LIMITS = {k: (100000, 100000) for k in PG_STAT_STATEMENTS_METRIC_COLUMNS.keys()}
 
 # Columns to apply as tags
 PG_STAT_STATEMENTS_TAG_COLUMNS = {
-    'datname': ('pg_database.datname', 'db'),
-    'rolname': ('pg_roles.rolname', 'user'),
-    'query': ('pg_stat_statements.query', 'query'),
-    # we don't need the queryid as a tag
-    'queryid': ('pg_stat_statements.queryid', None),
+    'datname': 'db',
+    'rolname': 'user',
+    'query': 'query',
 }
 
 VALID_EXPLAIN_STATEMENTS = frozenset({
@@ -144,23 +144,23 @@ class PgStatementsMixin(object):
         """
         if self.__pg_stat_statements_query_columns is not None:
             return self.__pg_stat_statements_query_columns
-        self.__pg_stat_statements_query_columns = []
-        for alias, (column, *_) in itertools.chain(PG_STAT_STATEMENTS_METRIC_COLUMNS.items(),
-                                                   PG_STAT_STATEMENTS_TAG_COLUMNS.items()):
-            if alias in self._pg_stat_statements_columns or alias in PG_STAT_STATEMENTS_TAG_COLUMNS:
-                self.__pg_stat_statements_query_columns.append(
-                    '{column} AS {alias}'.format(column=column, alias=alias)
-                )
+        all_columns = list(PG_STAT_STATEMENTS_METRIC_COLUMNS.keys()) + list(PG_STAT_STATEMENTS_OPTIONAL_COLUMNS)
+        self.__pg_stat_statements_query_columns = sorted(
+            list(set(all_columns) & self._pg_stat_statements_columns) +
+            list(PG_STAT_STATEMENTS_TAG_COLUMNS.keys())
+        )
         return self.__pg_stat_statements_query_columns
 
     def _collect_statement_metrics(self, instance_tags):
         # Sanity checks
         missing_columns = PG_STAT_STATEMENTS_REQUIRED_COLUMNS - self._pg_stat_statements_columns
         if len(missing_columns) > 0:
-            self.log.warning('Unable to collect statement metrics because required fields are unavailable: {}'.format(missing_columns))
+            self.log.warning('Unable to collect statement metrics because required fields are unavailable: {}'.format(
+                ', '.join(list(missing_columns))))
             return
 
         cursor = self.db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
         rows = self._execute_query(cursor, STATEMENTS_QUERY.format(
             cols=', '.join(self._pg_stat_statements_query_columns),
             pg_stat_statements_function=self.config.pg_stat_statements_function
@@ -168,7 +168,12 @@ class PgStatementsMixin(object):
         statsd.gauge("dd.postgres.collect_statement_metrics.rows", len(rows), tags=instance_tags)
         if not rows:
             return
-        row_keyfunc = lambda row: (row['queryid'], row['datname'], row['rolname'])
+
+        def row_keyfunc(row):
+            # old versions of pg_stat_statements don't have a query ID so fall back to the query string itself
+            queryid = row['queryid'] if 'queryid' in row else row['query']
+            return (queryid, row['datname'], row['rolname'])
+
         rows = self._state.compute_derivative_rows(rows, PG_STAT_STATEMENTS_METRIC_COLUMNS.keys(), key=row_keyfunc)
         metric_limits = self.config.query_metric_limits if self.config.query_metric_limits else DEFAULT_METRIC_LIMITS
         rows = apply_row_limits(rows, metric_limits, 'calls', True, key=row_keyfunc)
@@ -181,22 +186,22 @@ class PgStatementsMixin(object):
                 continue
 
             tags = ['query_signature:' + compute_sql_signature(obfuscated_query)] + instance_tags
-            for tag_column, (_, alias) in PG_STAT_STATEMENTS_TAG_COLUMNS.items():
-                if tag_column not in row or alias is None:
+            for column, tag_name in PG_STAT_STATEMENTS_TAG_COLUMNS.items():
+                if column not in row:
                     continue
-                value = row[tag_column]
-                if tag_column == 'query':
+                value = row[column]
+                if column == 'query':
                     # truncate to metrics tag limit
                     obfuscated_query = obfuscated_query[:200]
-                    if self.config.escape_query_commas_hack and tag_column == 'query':
+                    if self.config.escape_query_commas_hack and column == 'query':
                         value = value.replace(', ', '，').replace(',', '，')
-                tags.append('{alias}:{value}'.format(alias=alias, value=value))
+                tags.append('{tag_name}:{value}'.format(tag_name=tag_name, value=value))
 
-            for alias, (_, name) in PG_STAT_STATEMENTS_METRIC_COLUMNS.items():
-                if alias not in row:
+            for column, metric_name in PG_STAT_STATEMENTS_METRIC_COLUMNS.items():
+                if column not in row:
                     continue
-                self.log.debug("AgentCheck.count(%s, %s, tags=%s)", name, row[alias], tags)
-                self.count(name, row[alias], tags=tags)
+                self.log.debug("AgentCheck.count(%s, %s, tags=%s)", metric_name, row[column], tags)
+                self.count(metric_name, row[column], tags=tags)
 
     def _get_new_pg_stat_activity(self, instance_tags=None):
         start_time = time.time()
