@@ -42,7 +42,7 @@ instances:
     #
     pass: <PASS>
 
-    ## @param port - number - optional - default: 0
+    ## @param port - number - optional - default: 3306
     ## Port to use when connecting to MySQL.
     #
     port: 3306

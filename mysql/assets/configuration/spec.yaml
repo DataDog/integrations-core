@@ -58,7 +58,6 @@ files:
             value:
               type: number
               example: 3306
-              default: 0
 
           - name: sock
             description: |
